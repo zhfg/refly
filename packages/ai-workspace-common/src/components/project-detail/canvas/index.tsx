@@ -49,111 +49,15 @@ import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
 import { zhMissingContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-missing';
 import { zhLsfContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-lsf';
 import { enInvestMemoContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/en-invest-memo';
-
-const processStreamContent = (editor: EditorInstance, content: string) => {
-  // Handle code blocks (```code```)
-  if (content.startsWith('```')) {
-    const language = content.split('\n')[0].slice(3) || 'plain';
-    const code = content.split('\n').slice(1, -1).join('\n');
-    editor.chain().setNode('codeBlock', { language }).insertContent(code).run();
-    return;
-  }
-
-  // Handle blockquotes (> text)
-  if (content.startsWith('>')) {
-    editor.chain().setBlockquote().insertContent(content.substring(1).trim()).run();
-    return;
-  }
-
-  // Handle horizontal rule (---, ___, ***)
-  if (/^(-{3,}|_{3,}|\*{3,})$/.test(content)) {
-    editor.chain().setHorizontalRule().run();
-    return;
-  }
-
-  // Handle text marks
-  const markPatterns = [
-    // Bold: **text** or __text__
-    { regex: /\*\*(.*?)\*\*|__(.*?)__/g, mark: 'bold', transform: (match) => match.slice(2, -2) },
-    // Italic: *text* or _text_
-    { regex: /\*(.*?)\*|_(.*?)_/g, mark: 'italic', transform: (match) => match.slice(1, -1) },
-    // Strike: ~~text~~
-    { regex: /~~(.*?)~~/g, mark: 'strike', transform: (match) => match.slice(2, -2) },
-    // Inline code: `text`
-    { regex: /`([^`]+)`/g, mark: 'code', transform: (match) => match.slice(1, -1) },
-    // Link: [text](url)
-    {
-      regex: /\[([^\]]+)\]\(([^)]+)\)/g,
-      mark: 'link',
-      transform: (match, text, url) => ({ text, href: url }),
-    },
-  ];
-
-  let processedContent = content;
-  let hasMarks = false;
-
-  for (const pattern of markPatterns) {
-    if (pattern.regex.test(content)) {
-      hasMarks = true;
-      processedContent = processedContent.replace(pattern.regex, (match, ...args) => {
-        const transformed = pattern.transform(match, ...args);
-        if (pattern.mark === 'link') {
-          editor
-            .chain()
-            .insertContent({
-              type: 'text',
-              text: transformed.text,
-              marks: [{ type: 'link', attrs: { href: transformed.href } }],
-            })
-            .run();
-          return '';
-        } else {
-          editor.chain().setMark(pattern.mark).insertContent(transformed).unsetMark(pattern.mark).run();
-          return '';
-        }
-      });
-    }
-  }
-
-  if (!hasMarks) {
-    // Handle existing patterns
-    if (content.startsWith('#')) {
-      // Heading
-      const level = content.split(' ')[0].length;
-      editor
-        .chain()
-        .setNode('heading', { level })
-        .insertContent(content.substring(level + 1))
-        .run();
-    } else if (content.startsWith('-') || content.startsWith('*')) {
-      // List item
-      editor.chain().toggleBulletList().insertContent(content.substring(1).trim()).run();
-    } else if (content.startsWith('1.')) {
-      // Ordered list item
-      editor.chain().toggleOrderedList().insertContent(content.substring(2).trim()).run();
-    } else if (content.includes('\n')) {
-      // Multiple lines
-      const lines = content.split('\n');
-      lines.forEach((line, index) => {
-        if (line) {
-          editor.commands.insertContent(line);
-        }
-        if (index < lines.length - 1) {
-          editor.commands.enter();
-        }
-      });
-    } else {
-      // Single word or inline content
-      editor.commands.insertContent(content);
-    }
-  }
-};
+import { zhReactContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-react';
 
 class TokenStreamProcessor {
   private editor: EditorInstance;
   private chunk: string;
   private isLineStart: boolean;
+  private isCodeBlockStart: boolean;
   private isInList: boolean;
+  private currentListDepth: number = 0;
 
   markPatterns = [
     { pattern: '**', mark: 'bold' },
@@ -167,6 +71,7 @@ class TokenStreamProcessor {
   constructor() {
     this.chunk = '';
     this.isLineStart = true;
+    this.isCodeBlockStart = false;
     this.isInList = false;
   }
 
@@ -174,13 +79,78 @@ class TokenStreamProcessor {
     this.editor = editor;
   }
 
+  isCodeBlockActive() {
+    return this.editor.isActive('codeBlock');
+  }
+
+  enterNewLine() {
+    // Handle code block
+    if (this.isCodeBlockActive()) {
+      // Only enter newlines if not at the start of code block
+      if (!this.isCodeBlockStart) {
+        this.editor.commands.enter();
+        this.isLineStart = true;
+      }
+      return;
+    }
+
+    // Don't allow new lines at line start
+    // since we don't want empty paragraphs
+    if (this.isLineStart) {
+      return;
+    }
+
+    console.log('enter new line');
+    this.editor.commands.enter();
+    this.isLineStart = true;
+  }
+
+  insertContent(content: string) {
+    // Handle line breaks
+    if (content.includes('\n')) {
+      // If not in a code block, replace all new lines with a single new line
+      // to avoid creating empty paragraphs
+      if (!this.isCodeBlockActive()) {
+        content = content.replace(/\n+/g, '\n');
+      }
+
+      const lines = content.split('\n');
+      console.log(`lines:`, lines);
+      lines.forEach((line, index) => {
+        console.log(`line: ${JSON.stringify({ line })}, index: ${index}`);
+        if (line) {
+          this.insertContent(line); // check this recursive call
+        }
+        if (index < lines.length - 1) {
+          this.enterNewLine();
+        }
+      });
+      this.chunk = '';
+      return;
+    }
+
+    console.log('insertContent', JSON.stringify({ content }));
+
+    if (this.isLineStart && !this.isCodeBlockActive()) {
+      // Directly call insertContent to trigger block activation
+      // such as headings, blockquotes, etc.
+      this.editor.commands.insertContent(content);
+    } else {
+      // If not at line start or within a code block, insert text as a regular text node
+      this.editor.commands.insertContent({ type: 'text', text: content });
+    }
+
+    this.chunk = '';
+    this.isLineStart = false;
+    this.isCodeBlockStart = false;
+  }
+
   processMark(pattern: string, mark: string) {
     console.log('processMark', JSON.stringify({ pattern, mark }));
     const lines = this.chunk.split(pattern);
     lines.forEach((line, index) => {
       if (line) {
-        console.log('insertContent', JSON.stringify({ line }));
-        this.editor.commands.insertContent(line);
+        this.insertContent(line);
       }
       if (index < lines.length - 1) {
         console.log('toggleMark', mark);
@@ -188,6 +158,99 @@ class TokenStreamProcessor {
       }
     });
     this.chunk = '';
+  }
+
+  processCodeFence() {
+    console.log('isCodeBlock', JSON.stringify({ chunk: this.chunk }));
+    console.log('isCodeBlockActive', this.editor.isActive('codeBlock'));
+
+    if (this.editor.isActive('codeBlock')) {
+      console.log('exit code block');
+      this.editor.commands.deleteRange({
+        from: this.editor.state.selection.from - 1,
+        to: this.editor.state.selection.from,
+      });
+      this.editor.commands.insertContent('```');
+      this.editor.commands.toggleCodeBlock();
+    } else {
+      console.log('start code block');
+      this.editor.commands.insertContent(this.chunk);
+      this.isCodeBlockStart = true;
+    }
+
+    this.chunk = '';
+  }
+
+  activateList(listType: 'bulletList' | 'orderedList') {
+    const listDepth = Math.round(this.chunk.match(/^\s*/)[0].length / 3);
+    console.log(`process ${listType} with list depth:`, listDepth);
+    console.log(`isActive ${listType}`, this.editor.isActive(listType));
+
+    // Adjust current list depth to match the list depth of the chunk
+    if (listDepth > this.currentListDepth) {
+      for (let i = 0; i < listDepth - this.currentListDepth; i++) {
+        console.log('sinkListItem');
+        this.editor.commands.sinkListItem('listItem');
+      }
+    } else if (listDepth < this.currentListDepth) {
+      for (let i = 0; i < this.currentListDepth - listDepth; i++) {
+        console.log('liftListItem');
+        this.editor.commands.liftListItem('listItem');
+      }
+    }
+
+    this.currentListDepth = listDepth;
+    this.isLineStart = false;
+    this.chunk = this.chunk.replace(/^\s*[-*\d]+\.?\s/, '');
+
+    // Start a new list if not in a list
+    if (!this.isInList) {
+      this.isInList = true;
+      console.log('set isInList to true');
+
+      // insert a list item with a random character and then delete it to toggle list
+      // this is a workaround to make the entire editing process revertible within a single undo step
+      if (listType === 'bulletList') {
+        // console.log('toggleBulletList');
+        // this.editor.commands.toggleBulletList();
+        this.editor.commands.insertContent('- a');
+      } else {
+        // console.log('toggleOrderedList');
+        // this.editor.commands.toggleOrderedList();
+        this.editor.commands.insertContent('1. a');
+      }
+      this.editor.commands.deleteRange({
+        from: this.editor.state.selection.from - 1,
+        to: this.editor.state.selection.from,
+      });
+      return;
+    }
+
+    // Already in a list, make sure the list type matches
+    if (!this.editor.isActive(listType)) {
+      if (listType === 'bulletList') {
+        this.editor.commands.toggleBulletList();
+      } else {
+        this.editor.commands.toggleOrderedList();
+      }
+    }
+  }
+
+  deactivateList() {
+    if (!this.isInList) {
+      return;
+    }
+
+    // Reset list depth to 0
+    for (let i = 0; i < this.currentListDepth; i++) {
+      console.log('liftListItem');
+      this.editor.commands.liftListItem('listItem');
+    }
+    this.currentListDepth = 0;
+
+    this.isInList = false;
+    this.editor.commands.enter();
+    console.log('set isInList to false, enter to exit list');
   }
 
   process(token: string) {
@@ -206,73 +269,9 @@ class TokenStreamProcessor {
       }),
     );
 
-    // Wait for the next token if the current chunk is a single space or part of
+    // Wait for the next token if the current chunk only contains whitespace or
     // markdown syntax element (list, heading, marks, etc.)
-    if (this.chunk.match(/^[-*_#`>~ ]$/)) {
-      return;
-    }
-
-    if (this.isLineStart) {
-      // If the chunk is a number string with an optional dot, it could be a ordered list item
-      if (/^\d+\.?$/.test(this.chunk)) {
-        return;
-      }
-
-      const isBulletList = /^[-*]\s/.test(this.chunk);
-      const isOrderedList = /^\d+\.\s/.test(this.chunk);
-
-      if (isBulletList || isOrderedList) {
-        this.isLineStart = false;
-        this.chunk = this.chunk.replace(/^[-*\d]+\.?\s/, '');
-
-        if (!this.isInList) {
-          this.isInList = true;
-          console.log('set isInList to true');
-
-          // insert a list item with a random character and then delete it to toggle list
-          // this is a workaround to make the entire editing process revertible within a single undo step
-          if (isBulletList) {
-            this.editor.commands.insertContent('- a');
-          } else {
-            this.editor.commands.insertContent('1. a');
-          }
-          this.editor.commands.deleteRange({
-            from: this.editor.state.selection.from - 1,
-            to: this.editor.state.selection.from,
-          });
-        }
-      } else {
-        if (this.isInList) {
-          console.log('set isInList to false, enter to exit list');
-          this.isInList = false;
-          this.editor.commands.enter();
-        }
-      }
-    }
-
-    // Check if the chunk contains any mark pattern
-    for (const pattern of this.markPatterns) {
-      if (this.chunk.includes(pattern.pattern)) {
-        this.processMark(pattern.pattern, pattern.mark);
-        return;
-      }
-    }
-
-    // Handle line breaks
-    if (this.chunk.includes('\n')) {
-      const lines = this.chunk.replace(/\n+/g, '\n').split('\n');
-      lines.forEach((line, index) => {
-        if (line) {
-          console.log('insertContent', JSON.stringify({ line }));
-          this.editor.commands.insertContent(line);
-        }
-        if (index < lines.length - 1) {
-          console.log('enter new line');
-          this.editor.commands.enter();
-          this.isLineStart = true;
-        }
-      });
-      this.chunk = '';
+    if (this.chunk.match(/^[-*_#`>~ ]+$/)) {
       return;
     }
 
@@ -282,10 +281,41 @@ class TokenStreamProcessor {
       return;
     }
 
-    console.log('insertChunk', JSON.stringify({ chunk: this.chunk }));
-    this.editor.commands.insertContent(this.chunk);
-    this.chunk = '';
-    this.isLineStart = false;
+    if (this.isLineStart) {
+      // If the chunk is a number string with an optional dot, it could be a ordered list item
+      if (/^\d+\.?$/.test(this.chunk)) {
+        return;
+      }
+
+      const isBulletList = /^\s*[-*]\s/.test(this.chunk);
+      const isOrderedList = /^\s*\d+\.\s/.test(this.chunk);
+      const isCodeFence = /^\s*```/.test(this.chunk);
+
+      if (isBulletList || isOrderedList) {
+        this.activateList(isBulletList ? 'bulletList' : 'orderedList');
+      } else {
+        if (this.isInList) {
+          this.deactivateList();
+        }
+      }
+
+      if (isCodeFence) {
+        this.processCodeFence();
+        return;
+      }
+    }
+
+    // Check if the chunk contains any mark pattern outside of code block
+    if (!this.isCodeBlockActive()) {
+      for (const pattern of this.markPatterns) {
+        if (this.chunk.includes(pattern.pattern)) {
+          this.processMark(pattern.pattern, pattern.mark);
+          return;
+        }
+      }
+    }
+
+    this.insertContent(this.chunk);
   }
 }
 
@@ -484,43 +514,48 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
 
   const insertShortTestContent = () => {
     const editor = editorRef.current;
-    editor.commands.insertContent('normal');
-    editor.commands.insertContent(':\n');
-    editor.commands.insertContent('1. a');
+    // Start a new history event
+    editor.view.dispatch(editor.state.tr.setMeta('addToHistory', false));
+
+    editor.commands.insertContent('first paragraph');
+    editor.commands.enter();
+    editor.commands.insertContent('```bash');
+    editor.commands.insertContent('echo hello');
+    editor.commands.insertContent('echo world');
+    editor.commands.enter();
     editor.commands.deleteRange({
       from: editor.state.selection.from - 1,
       to: editor.state.selection.from,
     });
-    editor.commands.insertContent('hello');
-    editor.commands.enter();
-    editor.commands.insertContent('world');
+    editor.commands.insertContent('```');
+    editor.commands.toggleCodeBlock();
+    editor.commands.insertContent('another paragraph');
+
+    // End the history event
+    editor.view.dispatch(editor.state.tr.setMeta('addToHistory', true));
+
     return;
   };
 
   const insertLongTestContent = async () => {
     if (editorRef.current) {
       processor.setEditor(editorRef.current);
+      const editor = editorRef.current;
 
-      const content = [
-        { content: 'are' },
-        { content: ':\n' },
-        { content: '1' },
-        { content: '.' },
-        { content: ' ' },
-        { content: 'hello' },
-        // { content: ' **' },
-        // { content: 'Market' },
-        // { content: '**' },
-      ];
+      // Start a new history event
+      editor.view.dispatch(editor.state.tr.setMeta('addToHistory', false));
 
-      for (const item of enInvestMemoContent) {
+      for (const item of zhReactContent) {
         try {
+          // editor.view.dispatch(editor.state.tr.insertText(item.content, editor.state.selection.to));
           processor.process(item.content);
-          await new Promise((resolve) => setTimeout(resolve, 50));
+          await new Promise((resolve) => setTimeout(resolve, 20));
         } catch (error) {
           console.error('insertLongTestContent error', error);
         }
       }
+
+      editor.view.dispatch(editor.state.tr.setMeta('addToHistory', true));
     }
   };
 
