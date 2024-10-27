@@ -46,7 +46,7 @@ export const useHandleAICanvas = () => {
           await updateExistingCanvas(intent);
         }
         break;
-      case CanvasIntentType.QnA:
+      case CanvasIntentType.Other:
         // 保持现有QA流程
         break;
     }

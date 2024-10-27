@@ -32,7 +32,16 @@ import { ChatMode } from './types';
 import { CanvasIntentType } from '@refly-packages/common-types';
 
 // prompts
-import { generateCanvasPrompt } from './prompt/generateCanvas';
+import {
+  generateCanvasPrompt,
+  rewriteCanvasSystemPrompt,
+  rewriteCanvasUserPrompt,
+  rewriteCanvasContext,
+  editCanvasPrompt,
+  canvasIntentMatcherPrompt,
+  prepareIntentMatcherTypeDomain,
+} from './prompt';
+
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
 
@@ -329,7 +338,6 @@ Please generate the summary based on these requirements and offer suggestions fo
     const { chatHistory = [], currentSkill, spanId } = config.configurable;
     const { user } = config;
 
-    this.emitEvent({ event: 'start' }, this.configSnapshot);
     this.emitEvent({ event: 'log', content: `Start to generate canvas...` }, config);
 
     const { convId, projectId = '' } = this.configSnapshot.configurable;
@@ -370,9 +378,175 @@ Please generate the summary based on these requirements and offer suggestions fo
     this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
 
     this.emitEvent({ event: 'log', content: `Generated canvas successfully!` }, config);
-    this.emitEvent({ event: 'end' }, config);
 
     return { messages: [responseMessage], skillCalls: [] };
+  };
+
+  callRewriteCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+    const { messages = [], query: originalQuery } = state;
+
+    // 确保在使用 configSnapshot 之前初始化它
+    this.configSnapshot ??= config;
+
+    const { chatHistory = [], currentSkill, spanId, projectId, convId, canvases } = config.configurable;
+
+    this.emitEvent({ event: 'log', content: `Start to rewrite canvas...` }, config);
+
+    const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
+
+    // send intent matcher event
+    this.emitEvent(
+      {
+        event: 'structured_data',
+        structuredDataKey: 'intentMatcher',
+        content: JSON.stringify({
+          type: CanvasIntentType.RewriteCanvas,
+          projectId: projectId,
+          canvasId: currentCanvas?.canvasId || '',
+          convId,
+        }),
+      },
+      config,
+    );
+
+    const model = this.engine.chatModel({ temperature: 0.1 });
+
+    const requestMessages = [
+      new SystemMessage(rewriteCanvasSystemPrompt),
+      ...chatHistory,
+      new HumanMessage(originalQuery),
+    ];
+
+    const responseMessage = await model.invoke(requestMessages, {
+      ...config,
+      metadata: {
+        ...config.metadata,
+        ...currentSkill,
+        spanId,
+      },
+    });
+
+    this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
+
+    this.emitEvent({ event: 'log', content: `Rewrite canvas successfully!` }, config);
+
+    return { messages: [responseMessage], skillCalls: [] };
+  };
+
+  callEditCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+    const { messages = [], query: originalQuery } = state;
+
+    // 确保在使用 configSnapshot 之前初始化它
+    this.configSnapshot ??= config;
+
+    const { chatHistory = [], currentSkill, spanId } = config.configurable;
+    const { user } = config;
+
+    this.emitEvent({ event: 'log', content: `Start to update canvas...` }, config);
+
+    const { convId, projectId = '' } = this.configSnapshot.configurable;
+    const res = await this.engine.service.createCanvas(user, {
+      title: '',
+      initialContent: '',
+      projectId,
+    });
+
+    // send intent matcher event
+    this.emitEvent(
+      {
+        event: 'structured_data',
+        structuredDataKey: 'intentMatcher',
+        content: JSON.stringify({
+          type: CanvasIntentType.UpdateCanvas,
+          projectId: res.data?.projectId || projectId,
+          canvasId: res.data?.canvasId || '',
+          convId,
+        }),
+      },
+      config,
+    );
+
+    const model = this.engine.chatModel({ temperature: 0.1 });
+
+    const requestMessages = [new SystemMessage(editCanvasPrompt), ...chatHistory, new HumanMessage(originalQuery)];
+
+    const responseMessage = await model.invoke(requestMessages, {
+      ...config,
+      metadata: {
+        ...config.metadata,
+        ...currentSkill,
+        spanId,
+      },
+    });
+
+    this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
+
+    this.emitEvent({ event: 'log', content: `Update canvas successfully!` }, config);
+
+    return { messages: [responseMessage], skillCalls: [] };
+  };
+
+  callCanvasIntentMatcher = async (state: GraphState, config: SkillRunnableConfig): Promise<CanvasIntentType> => {
+    const { query: originalQuery } = state;
+
+    this.configSnapshot ??= config;
+
+    const { chatHistory = [], projectId, canvases = [] } = config.configurable;
+
+    this.emitEvent({ event: 'start' }, this.configSnapshot);
+
+    const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
+    const intentMatcherTypeDomain = prepareIntentMatcherTypeDomain(currentCanvas, projectId);
+
+    const model = this.engine.chatModel({ temperature: 0.1 });
+
+    const runnable = model.withStructuredOutput(
+      z
+        .object({
+          intent_type: z
+            .enum(intentMatcherTypeDomain as [CanvasIntentType, ...CanvasIntentType[]])
+            .describe('The detected intent type based on user query and context'),
+          confidence: z.number().min(0).max(1).describe('Confidence score of the intent detection (0-1)'),
+          reasoning: z.string().describe('Brief explanation of why this intent was chosen'),
+        })
+        .describe('Detect the user intent for canvas operations based on the query and context'),
+    );
+
+    try {
+      const result = await runnable.invoke(
+        [new SystemMessage(canvasIntentMatcherPrompt), ...chatHistory, new HumanMessage(originalQuery)],
+        config,
+      );
+
+      // Log the intent detection result
+      this.engine.logger.log(
+        `Intent detection result: ${JSON.stringify({
+          type: result.intent_type,
+          confidence: result.confidence,
+          reasoning: result.reasoning,
+        })}`,
+      );
+
+      // Emit the structured data event
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify({
+            type: result.intent_type,
+            confidence: result.confidence,
+            reasoning: result.reasoning,
+          }),
+          structuredDataKey: 'intentMatcher',
+        },
+        config,
+      );
+
+      return result.intent_type;
+    } catch (error) {
+      // Log error and fallback to default intent
+      this.engine.logger.error(`Error detecting intent: ${error.stack}`);
+      return CanvasIntentType.Other;
+    }
   };
 
   callScheduler = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
@@ -663,13 +837,20 @@ Generated question example:
       // .addNode('direct', this.directCallSkill)
       // .addNode('scheduler', this.callScheduler)
       .addNode('generateCanvas', this.callGenerateCanvas)
+      .addNode('rewriteCanvas', this.callRewriteCanvas)
+      .addNode('editCanvas', this.callEditCanvas)
+      .addNode('other', this.callScheduler)
       .addNode('relatedQuestions', this.genRelatedQuestions);
 
     // workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
     // workflow.addConditionalEdges('direct', this.onDirectSkillCallFinish);
     // workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
+    workflow.addConditionalEdges(START, this.callCanvasIntentMatcher);
     workflow.addEdge(START, 'generateCanvas');
     workflow.addEdge('generateCanvas', 'relatedQuestions');
+    workflow.addEdge('rewriteCanvas', 'relatedQuestions');
+    workflow.addEdge('editCanvas', 'relatedQuestions');
+    workflow.addEdge('other', 'relatedQuestions');
     workflow.addEdge('relatedQuestions', END);
 
     return workflow.compile();

@@ -24,6 +24,7 @@ export const useBuildSkillContext = () => {
             domain: item?.type,
             url: item?.url || '',
             title: item?.title || '',
+            isCurrentContext: item?.isCurrentContext,
           },
         }))
         .filter((item) => {
