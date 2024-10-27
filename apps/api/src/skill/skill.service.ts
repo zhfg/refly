@@ -415,6 +415,17 @@ export class SkillService {
       data.conversation = omit(conversation, ['pk']);
     }
 
+    // If project is specified, find the project
+    if (data.projectId) {
+      const project = await this.prisma.project.findUnique({
+        where: { projectId: data.projectId, uid: user.uid, deletedAt: null },
+      });
+      if (!project) {
+        throw new BadRequestException(`project not found: ${data.projectId}`);
+      }
+      data.project = projectPO2DTO(project);
+    }
+
     // If job is specified, find the job and add to job data
     let job: SkillJobModel | null = null;
     if (data.jobId) {
@@ -584,6 +595,7 @@ export class SkillService {
         installedSkills,
         convId,
         projectId: data?.projectId ?? '',
+        project: data?.project,
         tplConfig,
       },
       user: pick(user, ['uid', 'uiLocale', 'outputLocale']),
