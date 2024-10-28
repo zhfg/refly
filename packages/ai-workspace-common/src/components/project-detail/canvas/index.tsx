@@ -492,28 +492,22 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
         const { isFirst, content } = event;
         if (editorRef.current && currentCanvas) {
           const { selectedRange } = currentCanvas.metadata;
+          processor.setEditor(editorRef.current);
 
           if (isFirst) {
-            // 1. Select the content range
+            // 1. Select and delete the content range
             editorRef.current.commands.setTextSelection({
               from: selectedRange.startIndex,
               to: selectedRange.endIndex,
             });
-
-            // 2. Delete selected content
             editorRef.current.commands.deleteSelection();
 
-            // 3. Insert new content at startIndex
-            editorRef.current.commands.insertContentAt(selectedRange.startIndex, content, {
-              updateSelection: true,
-            });
-          } else {
-            // For subsequent content, insert at current cursor position
-            const currentPos = editorRef.current.state.selection.$head.pos;
-            editorRef.current.commands.insertContentAt(currentPos, content, {
-              updateSelection: true,
-            });
+            // 2. Move cursor to start position
+            editorRef.current.commands.setTextSelection(selectedRange.startIndex);
           }
+
+          // Process content using the same logic as regular streaming
+          processor.process(content);
         }
       } catch (error) {
         console.error('handleStreamEditCanvasContent error', error);

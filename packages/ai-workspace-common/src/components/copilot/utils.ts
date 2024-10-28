@@ -78,35 +78,7 @@ export const processWithCanvas = (input: string = '') => {
 };
 
 export const getCanvasContent = (content: string) => {
-  if (typeof content !== 'string') {
-    console.warn('Content is not a string:', content);
-    return '';
-  }
+  const result = content.match(CANVAS_TAG_REGEX);
 
-  try {
-    // First safely process any code blocks
-    const safeContent = content.replace(/```[\s\S]*?```/g, (codeBlock) => {
-      return codeBlock.replace(
-        /[<>&'"]/g,
-        (char) =>
-          ({
-            '<': '&lt;',
-            '>': '&gt;',
-            '&': '&amp;',
-            "'": '&apos;',
-            '"': '&quot;',
-          })[char] || char,
-      );
-    });
-
-    const result = safeContent.match(CANVAS_TAG_REGEX);
-    if (!result?.groups?.content) {
-      return '';
-    }
-
-    return result.groups.content;
-  } catch (error) {
-    console.warn('Error getting canvas content:', error);
-    return '';
-  }
+  return result?.groups?.content || '';
 };
