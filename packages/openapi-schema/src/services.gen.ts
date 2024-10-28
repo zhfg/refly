@@ -68,6 +68,15 @@ import type {
   DeleteProjectData,
   DeleteProjectError,
   DeleteProjectResponse,
+  CreateShareData,
+  CreateShareError,
+  CreateShareResponse2,
+  DeleteShareData,
+  DeleteShareError,
+  DeleteShareResponse,
+  GetShareDetailData,
+  GetShareDetailError,
+  GetShareDetailResponse2,
   ListLabelClassesData,
   ListLabelClassesError,
   ListLabelClassesResponse2,
@@ -414,6 +423,39 @@ export const deleteProject = (options: Options<DeleteProjectData>) => {
   return (options?.client ?? client).post<DeleteProjectResponse, DeleteProjectError>({
     ...options,
     url: '/knowledge/project/delete',
+  });
+};
+
+/**
+ * Create share
+ * Create new share for project or canvas
+ */
+export const createShare = (options: Options<CreateShareData>) => {
+  return (options?.client ?? client).post<CreateShareResponse2, CreateShareError>({
+    ...options,
+    url: '/share/new',
+  });
+};
+
+/**
+ * Delete share
+ * Delete an existing share
+ */
+export const deleteShare = (options: Options<DeleteShareData>) => {
+  return (options?.client ?? client).post<DeleteShareResponse, DeleteShareError>({
+    ...options,
+    url: '/share/delete',
+  });
+};
+
+/**
+ * Get share detail
+ * Get share detail by share code
+ */
+export const getShareDetail = (options: Options<GetShareDetailData>) => {
+  return (options?.client ?? client).get<GetShareDetailResponse2, GetShareDetailError>({
+    ...options,
+    url: '/share/detail',
   });
 };
 

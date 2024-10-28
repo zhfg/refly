@@ -1481,6 +1481,64 @@ export type GetProjectDetailResponse = BaseResponse & {
   data?: Project;
 };
 
+export type CreateShareRequest = {
+  entityType: EntityType;
+  /**
+   * Entity ID
+   */
+  entityId: string;
+};
+
+export type CreateShareResult = {
+  /**
+   * Share code
+   */
+  shareCode: string;
+};
+
+export type CreateShareResponse = BaseResponse & {
+  data?: CreateShareResult;
+};
+
+export type DeleteShareRequest = {
+  /**
+   * Share code
+   */
+  shareCode: string;
+};
+
+export type SharedProject = {
+  /**
+   * Project ID
+   */
+  projectId?: string;
+};
+
+export type SharedCanvas = {
+  /**
+   * Canvas ID
+   */
+  canvasId?: string;
+};
+
+export type ShareDetail = {
+  /**
+   * Shared project data
+   */
+  project?: SharedProject;
+  /**
+   * Shared canvas data
+   */
+  canvas?: SharedCanvas;
+};
+
+export type GetShareDetailResponse = BaseResponse & {
+  /**
+   * Share data
+   */
+  data?: ShareDetail;
+};
+
 export type ListLabelClassesResponse = BaseResponse & {
   /**
    * Label class list
@@ -2686,6 +2744,35 @@ export type DeleteProjectResponse = BaseResponse;
 
 export type DeleteProjectError = unknown;
 
+export type CreateShareData = {
+  body: CreateShareRequest;
+};
+
+export type CreateShareResponse2 = CreateShareResponse;
+
+export type CreateShareError = unknown;
+
+export type DeleteShareData = {
+  body: DeleteShareRequest;
+};
+
+export type DeleteShareResponse = BaseResponse;
+
+export type DeleteShareError = unknown;
+
+export type GetShareDetailData = {
+  query: {
+    /**
+     * Share code
+     */
+    shareCode: string;
+  };
+};
+
+export type GetShareDetailResponse2 = GetShareDetailResponse;
+
+export type GetShareDetailError = unknown;
+
 export type ListLabelClassesData = {
   query?: {
     /**
@@ -3348,6 +3435,39 @@ export type $OpenApiTs = {
          * Successful operation
          */
         '200': BaseResponse;
+      };
+    };
+  };
+  '/share/new': {
+    post: {
+      req: CreateShareData;
+      res: {
+        /**
+         * Successful operation
+         */
+        '200': CreateShareResponse;
+      };
+    };
+  };
+  '/share/delete': {
+    post: {
+      req: DeleteShareData;
+      res: {
+        /**
+         * Successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
+  '/share/detail': {
+    get: {
+      req: GetShareDetailData;
+      res: {
+        /**
+         * Successful operation
+         */
+        '200': GetShareDetailResponse;
       };
     };
   };

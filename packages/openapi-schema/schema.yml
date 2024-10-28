@@ -13,6 +13,8 @@ servers:
 tags:
   - name: knowledge
     description: Knowledge base management endpoints
+  - name: share
+    description: Share management endpoints
   - name: label
     description: Label management endpoints
   - name: skill
@@ -567,6 +569,67 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
+  /share/new:
+    post:
+      tags:
+        - share
+      summary: Create share
+      description: Create new share for project or canvas
+      operationId: createShare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShareRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateShareResponse'
+  /share/delete:
+    post:
+      tags:
+        - share
+      summary: Delete share
+      description: Delete an existing share
+      operationId: deleteShare
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteShareRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /share/detail:
+    get:
+      tags:
+        - share
+      summary: Get share detail
+      description: Get share detail by share code
+      operationId: getShareDetail
+      parameters:
+        - name: shareCode
+          in: query
+          description: Share code
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetShareDetailResponse'
   /label/class/list:
     get:
       tags:
@@ -2982,6 +3045,70 @@ components:
               type: object
               description: Project data
               $ref: '#/components/schemas/Project'
+    CreateShareRequest:
+      type: object
+      required:
+        - entityType
+        - entityId
+      properties:
+        entityType:
+          $ref: '#/components/schemas/EntityType'
+        entityId:
+          type: string
+          description: Entity ID
+    CreateShareResult:
+      type: object
+      required:
+        - shareCode
+      properties:
+        shareCode:
+          type: string
+          description: Share code
+    CreateShareResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CreateShareResult'
+    DeleteShareRequest:
+      type: object
+      required:
+        - shareCode
+      properties:
+        shareCode:
+          type: string
+          description: Share code
+    SharedProject:
+      type: object
+      properties:
+        projectId:
+          type: string
+          description: Project ID
+    SharedCanvas:
+      type: object
+      properties:
+        canvasId:
+          type: string
+          description: Canvas ID
+    ShareDetail:
+      type: object
+      properties:
+        project:
+          description: Shared project data
+          $ref: '#/components/schemas/SharedProject'
+        canvas:
+          description: Shared canvas data
+          $ref: '#/components/schemas/SharedCanvas'
+    GetShareDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Share data
+              $ref: '#/components/schemas/ShareDetail'
     ListLabelClassesResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

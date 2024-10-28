@@ -70,6 +70,14 @@ export function genContentSelectorID(): string {
   return 'cs-' + createId();
 }
 
+export function genProjectShareCode(): string {
+  return 'proj' + createId();
+}
+
+export function genCanvasShareCode(): string {
+  return 'canv' + createId();
+}
+
 export const genUniqueId = () => {
   const uuid = UUIDV4();
   const timestamp = new Date().getTime();

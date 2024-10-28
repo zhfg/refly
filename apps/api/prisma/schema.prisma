@@ -274,8 +274,8 @@ model Canvas {
   vectorSize      BigInt    @default(0) @map("vector_size")
   /// Yjs state storage key
   stateStorageKey String    @default("") @map("state_storage_key")
-  /// Whether this canvas is publicly accessible
-  isPublic        Boolean   @default(false) @map("is_public")
+  /// Share code
+  shareCode       String?   @map("share_code")
   /// Whether this canvas is readonly
   readOnly        Boolean   @default(false) @map("read_only")
   /// Create timestamp
@@ -300,6 +300,8 @@ model Project {
   description   String?        @map("description")
   /// UID
   uid           String         @map("uid")
+  /// Share code
+  shareCode     String?        @map("share_code")
   /// Create timestamp
   createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp

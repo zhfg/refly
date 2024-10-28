@@ -2041,6 +2041,110 @@ export const $GetProjectDetailResponse = {
   ],
 } as const;
 
+export const $CreateShareRequest = {
+  type: 'object',
+  required: ['entityType', 'entityId'],
+  properties: {
+    entityType: {
+      $ref: '#/components/schemas/EntityType',
+    },
+    entityId: {
+      type: 'string',
+      description: 'Entity ID',
+    },
+  },
+} as const;
+
+export const $CreateShareResult = {
+  type: 'object',
+  required: ['shareCode'],
+  properties: {
+    shareCode: {
+      type: 'string',
+      description: 'Share code',
+    },
+  },
+} as const;
+
+export const $CreateShareResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/CreateShareResult',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $DeleteShareRequest = {
+  type: 'object',
+  required: ['shareCode'],
+  properties: {
+    shareCode: {
+      type: 'string',
+      description: 'Share code',
+    },
+  },
+} as const;
+
+export const $SharedProject = {
+  type: 'object',
+  properties: {
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+    },
+  },
+} as const;
+
+export const $SharedCanvas = {
+  type: 'object',
+  properties: {
+    canvasId: {
+      type: 'string',
+      description: 'Canvas ID',
+    },
+  },
+} as const;
+
+export const $ShareDetail = {
+  type: 'object',
+  properties: {
+    project: {
+      description: 'Shared project data',
+      $ref: '#/components/schemas/SharedProject',
+    },
+    canvas: {
+      description: 'Shared canvas data',
+      $ref: '#/components/schemas/SharedCanvas',
+    },
+  },
+} as const;
+
+export const $GetShareDetailResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Share data',
+          $ref: '#/components/schemas/ShareDetail',
+        },
+      },
+    },
+  ],
+} as const;
+
 export const $ListLabelClassesResponse = {
   allOf: [
     {
