@@ -73,57 +73,62 @@ export const AISelector = memo(({ onOpenChange }: AISelectorProps) => {
               autoFocus
               placeholder={hasCompletion ? 'Tell AI what to do next' : 'Ask AI to edit or generate...'}
               onFocus={() => {
-                // addAIHighlight(editor)
+                addAIHighlight(editor);
               }}
             />
             <Button
               size="icon"
+              disabled={!inputValue}
               className="absolute right-2 top-1/2 w-6 h-6 bg-purple-500 rounded-full -translate-y-1/2 hover:bg-purple-900"
               onClick={() => {
-                const slice = editor.state.selection.content();
-                const text = editor.storage.markdown.serializer.serialize(slice.content);
+                const selection = editor.state.selection;
+                const startIndex = selection.from;
+                const endIndex = selection.to;
 
-                chat({
-                  userPrompt: inputValue,
-                  context: {
-                    type: 'text',
-                    content: text,
-                  },
-                  config: {
-                    locale: 'en' as LOCALE,
-                  },
-                }).then(() => setInputValue(''));
+                // const text = editor.storage.markdown.serializer.serialize(slice.content);
+
+                // chat({
+                //   userPrompt: inputValue,
+                //   context: {
+                //     type: 'text',
+                //     content: text,
+                //   },
+                //   config: {
+                //     locale: 'en' as LOCALE,
+                //   },
+                // }).then(() => setInputValue(''));
               }}
             >
               <ArrowUp className="w-4 h-4" />
             </Button>
           </div>
-          {hasCompletion ? (
-            <AICompletionCommands
-              onDiscard={() => {
-                editor.chain().unsetHighlight().focus().run();
-                onOpenChange(false);
-                editorEmitter.emit('activeAskAI', false);
-              }}
-              onOpenChange={onOpenChange}
-              completion={completion}
-            />
-          ) : (
-            <AISelectorCommands
-              onSelect={(value, option) =>
-                chat({
-                  userPrompt: option,
-                  context: {
-                    type: 'text',
-                    content: value,
-                  },
-                  config: {
-                    locale: 'en' as LOCALE,
-                  },
-                })
-              }
-            />
-          )}
+          {
+            hasCompletion ? (
+              <AICompletionCommands
+                onDiscard={() => {
+                  editor.chain().unsetHighlight().focus().run();
+                  onOpenChange(false);
+                  editorEmitter.emit('activeAskAI', false);
+                }}
+                onOpenChange={onOpenChange}
+                completion={completion}
+              />
+            ) : null
+            // <AISelectorCommands
+            //   onSelect={(value, option) =>
+            //     chat({
+            //       userPrompt: option,
+            //       context: {
+            //         type: 'text',
+            //         content: value,
+            //       },
+            //       config: {
+            //         locale: 'en' as LOCALE,
+            //       },
+            //     })
+            //   }
+            // />
+          }
         </>
       )}
     </Command>

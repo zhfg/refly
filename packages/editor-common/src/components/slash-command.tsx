@@ -13,9 +13,21 @@ import {
 import { createSuggestionItems } from '@refly-packages/editor-core/extensions';
 import { Command, renderItems } from '@refly-packages/editor-core/extensions';
 import { createUploadFn } from './image-upload';
+import Magic from '@refly-packages/editor-component/ui/icons/magic';
+import { editorEmitter } from '@refly-packages/editor-core/utils/event';
 
 export const configureSuggestionItems = (param: { entityId: string; entityType: string }) => {
   return createSuggestionItems([
+    {
+      title: 'Ask AI',
+      description: 'Ask AI to help you write.',
+      searchTerms: ['ai', 'assistant'],
+      icon: <Magic className="w-5 h-5" />,
+      command: ({ editor, range }) => {
+        editor.chain().focus().deleteRange(range).run();
+        editorEmitter.emit('activeAskAI', true);
+      },
+    },
     {
       title: 'Text',
       description: 'Just start typing with plain text.',

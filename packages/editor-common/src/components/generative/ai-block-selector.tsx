@@ -73,7 +73,7 @@ export const AISelector = memo(({ onOpenChange }: AISelectorProps) => {
               autoFocus
               placeholder={hasCompletion ? 'Tell AI what to do next' : 'Ask AI to edit or generate...'}
               onFocus={() => {
-                // addAIHighlight(editor)
+                // addAIHighlight(editor);
               }}
             />
             <Button
@@ -98,32 +98,33 @@ export const AISelector = memo(({ onOpenChange }: AISelectorProps) => {
               <ArrowUp className="w-4 h-4" />
             </Button>
           </div>
-          {hasCompletion ? (
-            <AICompletionCommands
-              onDiscard={() => {
-                editor.chain().unsetHighlight().focus().run();
-                onOpenChange(false);
-                editorEmitter.emit('activeAskAI', false);
-              }}
-              onOpenChange={onOpenChange}
-              completion={completion}
-            />
-          ) : (
-            <AISelectorCommands
-              onSelect={(value, option) =>
-                chat({
-                  userPrompt: option,
-                  context: {
-                    type: 'text',
-                    content: value,
-                  },
-                  config: {
-                    locale: 'en' as LOCALE,
-                  },
-                })
-              }
-            />
-          )}
+          {
+            hasCompletion ? (
+              <AICompletionCommands
+                onDiscard={() => {
+                  editor.chain().unsetHighlight().focus().run();
+                  onOpenChange(false);
+                  editorEmitter.emit('activeAskAI', false);
+                }}
+                onOpenChange={onOpenChange}
+                completion={completion}
+              />
+            ) : null
+            // <AISelectorCommands
+            //   onSelect={(value, option) =>
+            //     chat({
+            //       userPrompt: option,
+            //       context: {
+            //         type: 'text',
+            //         content: value,
+            //       },
+            //       config: {
+            //         locale: 'en' as LOCALE,
+            //       },
+            //     })
+            //   }
+            // />
+          }
         </>
       )}
     </Command>
