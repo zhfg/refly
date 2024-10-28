@@ -31,22 +31,21 @@ export const projectPO2DTO = (project: ProjectModel): Project => {
 export const resourcePO2DTO = (
   resource: ResourceModel & {
     content?: string;
-    projects?: ProjectModel[];
   },
 ): Resource => {
   if (!resource) {
     return null;
   }
-  const res: Resource = {
+  return {
     ...pick(resource, ['resourceId', 'title', 'readOnly', 'content', 'contentPreview']),
     resourceType: resource.resourceType as ResourceType,
     indexStatus: resource.indexStatus as IndexStatus,
+    storageSize: resource.storageSize.toString(),
+    vectorSize: resource.vectorSize.toString(),
     data: JSON.parse(resource.meta),
     createdAt: resource.createdAt.toJSON(),
     updatedAt: resource.updatedAt.toJSON(),
-    projects: resource.projects?.map((project) => projectPO2DTO(project)),
   };
-  return res;
 };
 
 export const canvasPO2DTO = (

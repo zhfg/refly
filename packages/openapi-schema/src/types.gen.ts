@@ -118,6 +118,14 @@ export type Resource = {
    */
   indexStatus?: IndexStatus;
   /**
+   * Resource storage size (in bytes)
+   */
+  storageSize?: string;
+  /**
+   * Resource vector storage size (in bytes)
+   */
+  vectorSize?: string;
+  /**
    * Resource creation time
    */
   createdAt: string;
@@ -133,10 +141,6 @@ export type Resource = {
    * Document content for this resource (only returned in getResourceDetail API)
    */
   content?: string;
-  /**
-   * Projects this resource belongs to (only returned in getResourceDetail API)
-   */
-  projects?: Array<Project>;
 };
 
 /**
@@ -2616,6 +2620,14 @@ export type ListProjectsData = {
      * Page size
      */
     pageSize?: number;
+    /**
+     * Project ID
+     */
+    projectId?: string;
+    /**
+     * Resource ID
+     */
+    resourceId?: string;
   };
 };
 

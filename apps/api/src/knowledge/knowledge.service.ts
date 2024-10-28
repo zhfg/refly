@@ -68,13 +68,37 @@ export class KnowledgeService {
   ) {}
 
   async listProjects(user: User, params: ListProjectsData['query']) {
-    const { page, pageSize } = params;
-    return this.prisma.project.findMany({
-      where: { uid: user.uid, deletedAt: null },
+    const { projectId, resourceId, page, pageSize } = params;
+
+    const projectIdFilter: Prisma.StringFilter<'Project'> = { equals: projectId };
+    let projectOrder: string[] = [];
+    if (resourceId) {
+      const relations = await this.prisma.projectResourceRelation.findMany({
+        select: { projectId: true },
+        where: { resourceId },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' },
+      });
+      projectIdFilter.in = relations.map((r) => r.projectId);
+      projectOrder = projectIdFilter.in;
+    }
+
+    const projects = await this.prisma.project.findMany({
+      where: { projectId: projectIdFilter, uid: user.uid, deletedAt: null },
       orderBy: { updatedAt: 'desc' },
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
+
+    if (projectOrder.length > 0) {
+      // Sort according to the order in projectOrder
+      projects.sort(
+        (a, b) => projectOrder.indexOf(a.projectId) - projectOrder.indexOf(b.projectId),
+      );
+    }
+
+    return projects;
   }
 
   async getProjectDetail(user: User, param: { projectId: string }) {
@@ -136,15 +160,20 @@ export class KnowledgeService {
       throw new NotFoundException('Project not found');
     }
 
+    const resources = await this.prisma.resource.findMany({
+      where: { resourceId: { in: resourceIds }, uid, deletedAt: null },
+    });
+    if (resources.length !== resourceIds.length) {
+      throw new NotFoundException('Some of the resources cannot be found');
+    }
+
     if (operation === 'bind') {
-      return this.prisma.project.update({
-        where: { projectId },
-        data: { resources: { connect: resourceIds.map((resourceId) => ({ resourceId })) } },
+      return this.prisma.projectResourceRelation.createMany({
+        data: resourceIds.map((resourceId) => ({ projectId, resourceId })),
       });
     } else if (operation === 'unbind') {
-      return this.prisma.project.update({
-        where: { projectId },
-        data: { resources: { disconnect: resourceIds.map((resourceId) => ({ resourceId })) } },
+      return this.prisma.projectResourceRelation.deleteMany({
+        where: { projectId, resourceId: { in: resourceIds } },
       });
     } else {
       throw new BadRequestException('Invalid operation');
@@ -177,31 +206,35 @@ export class KnowledgeService {
   async listResources(user: User, param: ListResourcesData['query']) {
     const { resourceId, projectId, resourceType, page = 1, pageSize = 10 } = param;
 
+    const resourceIdFilter: Prisma.StringFilter<'Resource'> = { equals: resourceId };
+    let resourceOrder: string[] = [];
     if (projectId) {
-      const project = await this.prisma.project.findFirst({
-        where: { projectId, uid: user.uid, deletedAt: null },
-        include: {
-          resources: {
-            where: { deletedAt: null },
-            take: pageSize,
-            skip: (page - 1) * pageSize,
-          },
-        },
+      const relations = await this.prisma.projectResourceRelation.findMany({
+        select: { resourceId: true },
+        where: { projectId },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' },
       });
-      return project?.resources;
+      resourceIdFilter.in = relations.map((r) => r.resourceId);
+      resourceOrder = resourceIdFilter.in;
     }
 
     const resources = await this.prisma.resource.findMany({
-      where: { resourceId, resourceType, uid: user.uid, deletedAt: null },
+      where: { resourceId: resourceIdFilter, resourceType, uid: user.uid, deletedAt: null },
       skip: (page - 1) * pageSize,
       take: pageSize,
       orderBy: { updatedAt: 'desc' },
     });
 
-    return resources.map((r) => ({
-      ...r,
-      data: JSON.parse(r.meta),
-    }));
+    if (resourceOrder.length > 0) {
+      // Sort according to the order in resourceOrder
+      resources.sort((a, b) => {
+        return resourceOrder.indexOf(a.resourceId) - resourceOrder.indexOf(b.resourceId);
+      });
+    }
+
+    return resources;
   }
 
   async getResourceDetail(user: User, param: GetResourceDetailData['query']) {
@@ -210,10 +243,6 @@ export class KnowledgeService {
 
     const resource = await this.prisma.resource.findFirst({
       where: { resourceId, uid, deletedAt: null },
-      include: {
-        projects: { where: { deletedAt: null } },
-        canvases: { where: { deletedAt: null } },
-      },
     });
 
     if (!resource) {
