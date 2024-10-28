@@ -1,12 +1,12 @@
 'use client';
 
-import { Command, CommandInput } from '../../ui/command';
+import { Command } from 'cmdk';
 
 import { useChat } from '@refly/ai-sdk';
 import { ArrowUp } from 'lucide-react';
 import { useEditor } from '@refly-packages/editor-core/components';
 import { addAIHighlight } from '@refly-packages/editor-core/extensions';
-import { memo, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
 import { Button } from '../../ui/button';
@@ -17,6 +17,8 @@ import AICompletionCommands from './ai-completion-command';
 import AISelectorCommands from './ai-selector-commands';
 import { LOCALE } from '@refly/common-types';
 import { editorEmitter } from '@refly-packages/editor-core/utils/event';
+import { Input } from '@arco-design/web-react';
+import { cn } from '@refly-packages/editor-component/utils';
 //TODO: I think it makes more sense to create a custom Tiptap extension for this functionality https://tiptap.dev/docs/editor/ai/introduction
 
 interface AISelectorProps {
@@ -27,34 +29,27 @@ interface AISelectorProps {
 export const AISelector = memo(({ onOpenChange }: AISelectorProps) => {
   const { editor } = useEditor();
   const [inputValue, setInputValue] = useState('');
+  const [activeValue, setActiveValue] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  // const { completion, completionMsg, chat, isLoading } = useChat({
+  //   // id: @refly-packages/editor-core,
+  //   onResponse: (response) => {
+  //     if (response.status === 429) {
+  //       toast.error('You have reached your request limit for the day.');
+  //       return;
+  //     }
+  //   },
+  //   onError: (e) => {
+  //     toast.error(e.message);
+  //   },
+  // });
 
-  const { completion, completionMsg, chat, isLoading } = useChat({
-    // id: @refly-packages/editor-core,
-    onResponse: (response) => {
-      if (response.status === 429) {
-        toast.error('You have reached your request limit for the day.');
-        return;
-      }
-    },
-    onError: (e) => {
-      toast.error(e.message);
-    },
-  });
-
-  const hasCompletion = completion.length > 0;
+  // const hasCompletion = completion.length > 0;
 
   return (
-    <Command className="w-[350px]">
-      {hasCompletion && (
-        <div className="flex max-h-[400px]">
-          <ScrollArea>
-            <div className="p-2 px-4 prose-sm prose">
-              <Markdown>{completion}</Markdown>
-            </div>
-          </ScrollArea>
-        </div>
-      )}
-
+    <div className="w-[350px]" ref={ref}>
       {isLoading && (
         <div className="flex items-center px-4 w-full h-12 text-sm font-medium text-purple-500 text-muted-foreground">
           <Magic className="mr-2 w-4 h-4 shrink-0" />
@@ -66,16 +61,25 @@ export const AISelector = memo(({ onOpenChange }: AISelectorProps) => {
       )}
       {!isLoading && (
         <>
-          <div className="relative">
-            <CommandInput
-              value={inputValue}
-              onValueChange={setInputValue}
-              autoFocus
-              placeholder={hasCompletion ? 'Tell AI what to do next' : 'Ask AI to edit or generate...'}
-              onFocus={() => {
-                addAIHighlight(editor);
-              }}
-            />
+          <div className="relative" cmdk-input-wrapper="">
+            <div className="flex items-center px-4 border-b" cmdk-input-wrapper="">
+              <Magic className="mr-2 w-4 h-4 text-purple-500 shrink-0" />
+              <Input
+                value={inputValue}
+                onChange={(val) => {
+                  console.log('val', val);
+                  setInputValue(val);
+                }}
+                autoFocus
+                className={cn(
+                  'flex py-3 w-full h-11 text-sm bg-transparent rounded-md border-none outline-none calc-width-50px important-outline-none important-box-shadow-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+                )}
+                placeholder={'Ask AI to edit or generate...'}
+                onFocus={() => {
+                  addAIHighlight(editor);
+                }}
+              />
+            </div>
             <Button
               size="icon"
               disabled={!inputValue}
@@ -90,17 +94,6 @@ export const AISelector = memo(({ onOpenChange }: AISelectorProps) => {
             </Button>
           </div>
           {
-            hasCompletion ? (
-              <AICompletionCommands
-                onDiscard={() => {
-                  editor.chain().unsetHighlight().focus().run();
-                  onOpenChange(false);
-                  editorEmitter.emit('activeAskAI', false);
-                }}
-                onOpenChange={onOpenChange}
-                completion={completion}
-              />
-            ) : null
             // <AISelectorCommands
             //   onSelect={(value, option) =>
             //     chat({
@@ -118,6 +111,6 @@ export const AISelector = memo(({ onOpenChange }: AISelectorProps) => {
           }
         </>
       )}
-    </Command>
+    </div>
   );
 });

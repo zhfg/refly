@@ -25,8 +25,8 @@ export const CollabEditorCommand = (props: { entityId: string; entityType: strin
 
   return (
     <EditorCommand className="z-50 h-auto max-h-[330px] overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
-      <EditorCommandEmpty className="px-2 text-muted-foreground">No results</EditorCommandEmpty>
       <EditorCommandList>
+        <EditorCommandEmpty className="px-2 text-muted-foreground">No results</EditorCommandEmpty>
         {suggestionItems.map((item) => (
           <EditorCommandItem
             value={item.title}

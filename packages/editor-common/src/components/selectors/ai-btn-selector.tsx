@@ -39,7 +39,13 @@ export const AIBtnSelector = ({ open, onOpenChange }: AIBtnSelectorProps) => {
         </Button>
       </PopoverTrigger>
       {open && (
-        <PopoverContent align="start" className="p-0 w-[350px]" sideOffset={10}>
+        <PopoverContent
+          align="start"
+          className="p-0 w-[350px]"
+          sideOffset={10}
+          onFocusOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
           <AISelector open={open} onOpenChange={onOpenChange} />
         </PopoverContent>
       )}
