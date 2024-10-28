@@ -46,7 +46,7 @@ export const ContentArea = (props: { projectId: string }) => {
   };
 
   return (
-    <div className="knowledge-base-detail-container">
+    <div className="knowledge-base-detail-container flex flex-col">
       <Tabs
         className="knowledge-base-detail-tab-container"
         animated
@@ -70,11 +70,13 @@ export const ContentArea = (props: { projectId: string }) => {
           </Tooltip>
         }
       />
-      {activeTab?.type === 'canvas' ? (
-        <CanvasEditor projectId={projectId} canvasId={activeTab?.key} />
-      ) : (
-        <ResourceView projectId={projectId} resourceId={activeTab?.key} />
-      )}
+      <div className="flex-grow overflow-auto">
+        {activeTab?.type === 'canvas' ? (
+          <CanvasEditor projectId={projectId} canvasId={activeTab?.key} />
+        ) : (
+          <ResourceView projectId={projectId} resourceId={activeTab?.key} />
+        )}
+      </div>
     </div>
   );
 };

@@ -3,12 +3,15 @@ import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/store
 import { useParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useTranslation } from 'react-i18next';
 
-import { Splitter } from 'antd';
+import { Splitter, Button } from 'antd';
 import { ContentArea } from '@refly-packages/ai-workspace-common/components/resource-detail/content-area';
 import { ResourceProvider } from './context-provider';
 import { AICopilot } from '@refly-packages/ai-workspace-common/components/copilot';
 import { useResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/resource';
 import { ResourceDirectory } from './directory';
+
+import { MdOutlineArrowBackIos } from 'react-icons/md';
+import { HiOutlineSearch } from 'react-icons/hi';
 
 import './index.scss';
 
@@ -22,11 +25,38 @@ export const ResourceDetail2 = () => {
     fetchResource: state.fetchResource,
   }));
 
+  const searchStore = useSearchStoreShallow((state) => ({
+    pages: state.pages,
+    isSearchOpen: state.isSearchOpen,
+    setPages: state.setPages,
+    setIsSearchOpen: state.setIsSearchOpen,
+  }));
+
   const ContentTop = () => {
     return (
-      <div className="w-full h-[40px] relative flex justify-center items-center resource-detail-top">
-        <div className="absolute left-0">所有资源</div>
-        <div>{resourceStore.resource?.title}</div>
+      <div className="w-full h-11 relative flex justify-center items-center resource-detail-top text-[16px] text-[#6F6F6F]">
+        <div
+          className="absolute left-0 flex items-center cursor-pointer"
+          onClick={() => {
+            history.back();
+          }}
+        >
+          {' '}
+          <MdOutlineArrowBackIos style={{ marginRight: 10, fontSize: 18 }} /> 所有资源
+        </div>
+        <div className="flex items-center">
+          {resourceStore.resource?.title}
+          <Button
+            className="ml-1"
+            type="text"
+            shape="circle"
+            icon={<HiOutlineSearch />}
+            onClick={() => {
+              searchStore.setPages(searchStore.pages.concat('readResources'));
+              searchStore.setIsSearchOpen(true);
+            }}
+          ></Button>
+        </div>
       </div>
     );
   };
