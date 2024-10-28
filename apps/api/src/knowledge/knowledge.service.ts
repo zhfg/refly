@@ -305,26 +305,30 @@ export class KnowledgeService {
       indexStatus = 'wait_index';
     }
 
-    const resource = await this.prisma.resource.create({
-      data: {
-        resourceId: param.resourceId,
-        resourceType: param.resourceType,
-        meta: JSON.stringify(param.data || {}),
-        contentPreview: cleanedContent?.slice(0, 500),
-        storageKey,
-        storageSize,
-        uid: user.uid,
-        readOnly: !!param.readOnly,
-        title: param.title || 'Untitled',
-        indexStatus,
-        ...(param.projectId
-          ? {
-              projects: {
-                connect: { projectId: param.projectId },
-              },
-            }
-          : {}),
-      },
+    const resource = await this.prisma.$transaction(async (tx) => {
+      const resource = await tx.resource.create({
+        data: {
+          resourceId: param.resourceId,
+          resourceType: param.resourceType,
+          meta: JSON.stringify(param.data || {}),
+          contentPreview: cleanedContent?.slice(0, 500),
+          storageKey,
+          storageSize,
+          uid: user.uid,
+          readOnly: !!param.readOnly,
+          title: param.title || 'Untitled',
+          indexStatus,
+        },
+      });
+
+      // Add to project if specified
+      if (param.projectId) {
+        await tx.projectResourceRelation.create({
+          data: { projectId: param.projectId, resourceId: param.resourceId },
+        });
+      }
+
+      return resource;
     });
 
     // Add to queue to be processed by worker
