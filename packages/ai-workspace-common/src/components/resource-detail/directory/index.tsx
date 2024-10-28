@@ -111,13 +111,15 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
       },
     ];
     return (
-      <div className="pl-4 pr-4">
+      <div className="px-6 pt-2">
         <div className="mb-4">
           <div className="text-sm font-medium text-gray-500 mb-1">{t('resourceDetail.directory.baseInfo')}</div>
           {baseInfoList.map((item) => (
             <div className="flex gap-2 mb-1">
-              <div className="text-xs font-medium text-gray-500">{t(`resourceDetail.directory.${item.label}`)}</div>
-              <div className="text-xs font-medium text-gray-500">{item.value}</div>
+              <div className="text-xs font-normal w-20 text-gray-500">
+                {t(`resourceDetail.directory.${item.label}`)}
+              </div>
+              <div className="text-xs font-normal w-30 text-gray-500">{item.value}</div>
             </div>
           ))}
         </div>
@@ -126,8 +128,10 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
           <div className="text-sm font-medium text-gray-500 mb-1">{t('resourceDetail.directory.techInfo')}</div>
           {techInfoList.map((item) => (
             <div className="flex gap-2 mb-1">
-              <div className="text-xs font-medium text-gray-500">{t(`resourceDetail.directory.${item.label}`)}</div>
-              <div className="text-xs font-medium text-gray-500">{item.value}</div>
+              <div className="text-xs font-normal w-20 text-gray-500">
+                {t(`resourceDetail.directory.${item.label}`)}
+              </div>
+              <div className="text-xs font-normal w-30 text-gray-500">{item.value}</div>
             </div>
           ))}
         </div>
@@ -190,27 +194,28 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
               });
             }}
           >
-            <Skeleton title={false} loading={item.loading} active>
-              <div className="w-full flex justify-between gap-2 p-2 rounded-md hover:bg-gray-100">
-                <div>{item.title}</div>
-                <div onClick={(e) => e.stopPropagation()}>
-                  <Popconfirm
-                    title={t('workspace.resourceProjectList.removeConfirmText')}
-                    onConfirm={() => handleDeleteClick({ collectionId: item.projectId, resourceId })}
-                    onCancel={() => {}}
-                    okText={t('common.confirm')}
-                    cancelText={t('common.cancel')}
-                  >
-                    <div
-                      className="text-[#00968F] cursor-pointer hover:font-medium whitespace-nowrap"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {t('common.remove')}
-                    </div>
-                  </Popconfirm>
-                </div>
+            <div className="w-full flex justify-between gap-2 p-2 rounded-md cursor-pointer hover:bg-gray-100">
+              <div>
+                <IconProject className="mr-2" />
+                {item.title}
               </div>
-            </Skeleton>
+              <div onClick={(e) => e.stopPropagation()}>
+                <Popconfirm
+                  title={t('workspace.resourceProjectList.removeConfirmText')}
+                  onConfirm={() => handleDeleteClick({ collectionId: item.projectId, resourceId })}
+                  onCancel={() => {}}
+                  okText={t('common.confirm')}
+                  cancelText={t('common.cancel')}
+                >
+                  <div
+                    className="text-[#00968F] cursor-pointer hover:font-medium whitespace-nowrap"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {t('common.remove')}
+                  </div>
+                </Popconfirm>
+              </div>
+            </div>
           </List.Item>
         )}
       />

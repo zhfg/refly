@@ -43,7 +43,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
     <>
       <div ref={ref} className="ai-copilot-operation-container">
         <div className="ai-copilot-operation-body">
-          <SkillDisplay source={source} />
+          {/* <SkillDisplay source={source} /> */}
           <div className="ai-copilot-chat-container">
             <div className="chat-input-container">
               <SelectedSkillHeader />

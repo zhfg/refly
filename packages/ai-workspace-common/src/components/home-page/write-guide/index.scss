@@ -57,7 +57,7 @@
       .guide-text {
         font-size: 46px;
         font-weight: 600;
-        margin: 10px 0;
+        margin-bottom: 16px;
         white-space: nowrap;
       }
     }
@@ -65,7 +65,7 @@
     .ai-copilot {
       position: relative;
       width: 100%;
-      background-color: #fcfcf9;
+      background-color: transparent;
       z-index: 1;
 
       .ai-copilot-operation-container {
@@ -85,6 +85,7 @@
           border-radius: 8px;
           border: 1px solid rgba(0, 0, 0, 0.11);
           color: rgba(0, 0, 0, 0.7);
+          background-color: #fcfcf9;
           cursor: pointer;
           &:hover {
             background-color: #f1f1f0;
