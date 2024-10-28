@@ -29,7 +29,7 @@ import { handleImageDrop, handleImagePaste } from '@refly-packages/editor-core/p
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
 
-import { AiOutlineWarning, AiOutlineFileWord, AiOutlineDisconnect } from 'react-icons/ai';
+import { AiOutlineWarning, AiOutlineFileWord } from 'react-icons/ai';
 import { getClientOrigin, getWsServerOrigin } from '@refly-packages/utils/url';
 import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
@@ -50,6 +50,7 @@ import { zhMissingContent } from '@refly-packages/ai-workspace-common/components
 import { zhLsfContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-lsf';
 import { enInvestMemoContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/en-invest-memo';
 import { zhReactContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-react';
+import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 
 class TokenStreamProcessor {
   private editor: EditorInstance;
@@ -100,7 +101,6 @@ class TokenStreamProcessor {
       return;
     }
 
-    console.log('enter new line');
     this.editor.commands.enter();
     this.isLineStart = true;
   }
@@ -115,11 +115,9 @@ class TokenStreamProcessor {
       }
 
       const lines = content.split('\n');
-      console.log(`lines:`, lines);
       lines.forEach((line, index) => {
-        console.log(`line: ${JSON.stringify({ line })}, index: ${index}`);
         if (line) {
-          this.insertContent(line); // check this recursive call
+          this.insertContent(line);
         }
         if (index < lines.length - 1) {
           this.enterNewLine();
@@ -128,8 +126,6 @@ class TokenStreamProcessor {
       this.chunk = '';
       return;
     }
-
-    console.log('insertContent', JSON.stringify({ content }));
 
     if (this.isLineStart && !this.isCodeBlockActive()) {
       // Directly call insertContent to trigger block activation
@@ -146,14 +142,12 @@ class TokenStreamProcessor {
   }
 
   processMark(pattern: string, mark: string) {
-    console.log('processMark', JSON.stringify({ pattern, mark }));
     const lines = this.chunk.split(pattern);
     lines.forEach((line, index) => {
       if (line) {
         this.insertContent(line);
       }
       if (index < lines.length - 1) {
-        console.log('toggleMark', mark);
         this.editor.commands.toggleMark(mark);
       }
     });
@@ -161,11 +155,7 @@ class TokenStreamProcessor {
   }
 
   processCodeFence() {
-    console.log('isCodeBlock', JSON.stringify({ chunk: this.chunk }));
-    console.log('isCodeBlockActive', this.editor.isActive('codeBlock'));
-
-    if (this.editor.isActive('codeBlock')) {
-      console.log('exit code block');
+    if (this.isCodeBlockActive()) {
       this.editor.commands.deleteRange({
         from: this.editor.state.selection.from - 1,
         to: this.editor.state.selection.from,
@@ -173,7 +163,6 @@ class TokenStreamProcessor {
       this.editor.commands.insertContent('```');
       this.editor.commands.toggleCodeBlock();
     } else {
-      console.log('start code block');
       this.editor.commands.insertContent(this.chunk);
       this.isCodeBlockStart = true;
     }
@@ -183,18 +172,14 @@ class TokenStreamProcessor {
 
   activateList(listType: 'bulletList' | 'orderedList') {
     const listDepth = Math.round(this.chunk.match(/^\s*/)[0].length / 3);
-    console.log(`process ${listType} with list depth:`, listDepth);
-    console.log(`isActive ${listType}`, this.editor.isActive(listType));
 
     // Adjust current list depth to match the list depth of the chunk
     if (listDepth > this.currentListDepth) {
       for (let i = 0; i < listDepth - this.currentListDepth; i++) {
-        console.log('sinkListItem');
         this.editor.commands.sinkListItem('listItem');
       }
     } else if (listDepth < this.currentListDepth) {
       for (let i = 0; i < this.currentListDepth - listDepth; i++) {
-        console.log('liftListItem');
         this.editor.commands.liftListItem('listItem');
       }
     }
@@ -206,17 +191,12 @@ class TokenStreamProcessor {
     // Start a new list if not in a list
     if (!this.isInList) {
       this.isInList = true;
-      console.log('set isInList to true');
 
       // insert a list item with a random character and then delete it to toggle list
       // this is a workaround to make the entire editing process revertible within a single undo step
       if (listType === 'bulletList') {
-        // console.log('toggleBulletList');
-        // this.editor.commands.toggleBulletList();
         this.editor.commands.insertContent('- a');
       } else {
-        // console.log('toggleOrderedList');
-        // this.editor.commands.toggleOrderedList();
         this.editor.commands.insertContent('1. a');
       }
       this.editor.commands.deleteRange({
@@ -243,14 +223,12 @@ class TokenStreamProcessor {
 
     // Reset list depth to 0
     for (let i = 0; i < this.currentListDepth; i++) {
-      console.log('liftListItem');
       this.editor.commands.liftListItem('listItem');
     }
     this.currentListDepth = 0;
 
     this.isInList = false;
     this.editor.commands.enter();
-    console.log('set isInList to false, enter to exit list');
   }
 
   process(token: string) {
@@ -259,15 +237,15 @@ class TokenStreamProcessor {
     }
 
     this.chunk += token;
-    console.log(
-      'process',
-      JSON.stringify({
-        content: token,
-        chunk: this.chunk,
-        isLineStart: this.isLineStart,
-        isInList: this.isInList,
-      }),
-    );
+    // console.log(
+    //   'process',
+    //   JSON.stringify({
+    //     content: token,
+    //     chunk: this.chunk,
+    //     isLineStart: this.isLineStart,
+    //     isInList: this.isInList,
+    //   }),
+    // );
 
     // Wait for the next token if the current chunk only contains whitespace or
     // markdown syntax element (list, heading, marks, etc.)
@@ -277,7 +255,6 @@ class TokenStreamProcessor {
 
     // Check if the chunk has a common string prefix with '</reflyCanvas>'
     if ('</reflyCanvas>'.startsWith(this.chunk)) {
-      console.log('chunk could be prefix of </reflyCanvas>', this.chunk);
       return;
     }
 
@@ -493,7 +470,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
       if (editorRef.current) {
         processor.setEditor(editorRef.current);
         try {
-          console.log('streamCanvasContent', JSON.stringify({ content }));
+          // console.log('streamCanvasContent', JSON.stringify({ content }));
           processor.process(content);
           // setTimeout(() => {
           //   scrollToBottom();
@@ -511,53 +488,6 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
       editorEmitter.off('streamCanvasContent', handleStreamContent);
     };
   }, []);
-
-  const insertShortTestContent = () => {
-    const editor = editorRef.current;
-    // Start a new history event
-    editor.view.dispatch(editor.state.tr.setMeta('addToHistory', false));
-
-    editor.commands.insertContent('first paragraph');
-    editor.commands.enter();
-    editor.commands.insertContent('```bash');
-    editor.commands.insertContent('echo hello');
-    editor.commands.insertContent('echo world');
-    editor.commands.enter();
-    editor.commands.deleteRange({
-      from: editor.state.selection.from - 1,
-      to: editor.state.selection.from,
-    });
-    editor.commands.insertContent('```');
-    editor.commands.toggleCodeBlock();
-    editor.commands.insertContent('another paragraph');
-
-    // End the history event
-    editor.view.dispatch(editor.state.tr.setMeta('addToHistory', true));
-
-    return;
-  };
-
-  const insertLongTestContent = async () => {
-    if (editorRef.current) {
-      processor.setEditor(editorRef.current);
-      const editor = editorRef.current;
-
-      // Start a new history event
-      editor.view.dispatch(editor.state.tr.setMeta('addToHistory', false));
-
-      for (const item of zhReactContent) {
-        try {
-          // editor.view.dispatch(editor.state.tr.insertText(item.content, editor.state.selection.to));
-          processor.process(item.content);
-          await new Promise((resolve) => setTimeout(resolve, 20));
-        } catch (error) {
-          console.error('insertLongTestContent error', error);
-        }
-      }
-
-      editor.view.dispatch(editor.state.tr.setMeta('addToHistory', true));
-    }
-  };
 
   useEffect(() => {
     if (editorRef.current) {
@@ -579,8 +509,6 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
     >
       {initContentSelectorElem()}
       <div className="w-full h-full">
-        <Button onClick={insertShortTestContent}>short test</Button>
-        <Button onClick={insertLongTestContent}>long test</Button>
         <EditorRoot>
           <EditorContent
             extensions={extensions}
@@ -712,11 +640,16 @@ export const CanvasEditorHeader = (props: { projectId: string; canvasId: string 
     currentCanvas: state.currentCanvas,
     updateCurrentCanvas: state.updateCurrentCanvas,
   }));
+  const { updateProjectCanvas } = useProjectStoreShallow((state) => ({
+    fetchProjectCanvases: state.fetchProjectCanvases,
+    updateProjectCanvas: state.updateProjectCanvas,
+  }));
   const { tabsMap, handleUpdateTab } = useProjectTabs();
   const tab = tabsMap[projectId]?.find((tab) => tab.key === canvasId);
 
   const onTitleChange = (newTitle: string) => {
-    updateCurrentCanvas({ ...currentCanvas, title: newTitle });
+    updateCurrentCanvas({ ...useCanvasStore.getState().currentCanvas, title: newTitle });
+    updateProjectCanvas(projectId, canvasId, { title: newTitle });
 
     if (tab) {
       handleUpdateTab(projectId, canvasId, {
@@ -805,7 +738,7 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
     };
   }, [canvasId]);
 
-  const debouncedUpdateNote = useDebouncedCallback(async (canvas: Canvas) => {
+  const debouncedUpdateCanvas = useDebouncedCallback(async (canvas: Canvas) => {
     const res = await getClient().updateCanvas({
       body: {
         canvasId: canvas.canvasId,
@@ -821,10 +754,10 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
 
   useEffect(() => {
     if (canvas && prevNote.current?.canvasId === canvas.canvasId) {
-      debouncedUpdateNote(canvas);
+      debouncedUpdateCanvas(canvas);
     }
     prevNote.current = canvas;
-  }, [canvas, debouncedUpdateNote]);
+  }, [canvas, debouncedUpdateCanvas]);
 
   return (
     <div className="ai-note-container">
