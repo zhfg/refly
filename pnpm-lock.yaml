@@ -1066,55 +1066,6 @@ importers:
         specifier: ^5.1.4
         version: 5.4.8(@types/node@20.14.8)(less@4.2.0)(sass@1.71.1)(terser@5.34.1)
 
-  packages/ai-sdk:
-    dependencies:
-      '@refly/common-types':
-        specifier: workspace:*
-        version: link:../common-types
-      '@refly/openapi-schema':
-        specifier: workspace:*
-        version: link:../openapi-schema
-      '@refly/utils':
-        specifier: workspace:*
-        version: link:../utils
-      clsx:
-        specifier: ^2.1.0
-        version: 2.1.1
-      dayjs:
-        specifier: ~1.11.7
-        version: 1.11.13
-      js-cookie:
-        specifier: ^3.0.5
-        version: 3.0.5
-      md5:
-        specifier: ^2.3.0
-        version: 2.3.0
-      react:
-        specifier: ^18.2.0
-        version: 18.3.1
-      react-dom:
-        specifier: ^18.2.0
-        version: 18.3.1(react@18.3.1)
-      tailwind-merge:
-        specifier: ^2.2.2
-        version: 2.5.2
-      uuid:
-        specifier: ^9.0.0
-        version: 9.0.1
-      zustand:
-        specifier: ^4.5.1
-        version: 4.5.5(@types/react@18.3.10)(immer@10.1.1)(react@18.3.1)
-    devDependencies:
-      '@types/chrome':
-        specifier: 0.0.227
-        version: 0.0.227
-      '@types/react':
-        specifier: ^18.2.56
-        version: 18.3.10
-      '@types/react-dom':
-        specifier: ^18.2.19
-        version: 18.3.0
-
   packages/ai-workspace-common:
     dependencies:
       '@arco-design/web-react':
@@ -1488,9 +1439,6 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.0.2
         version: 1.1.0(@types/react@18.3.10)(react@18.3.1)
-      '@refly/ai-sdk':
-        specifier: workspace:*
-        version: link:../ai-sdk
       '@refly/common-types':
         specifier: workspace:*
         version: link:../common-types
