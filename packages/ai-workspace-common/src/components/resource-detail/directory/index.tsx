@@ -81,51 +81,51 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
     const metaInfo = resourceData;
     const baseInfoList = [
       {
-        label: '文件大小',
+        label: 'fileSize',
         value: metaInfo?.fileSize,
       },
       {
-        label: '添加时间',
+        label: 'addTime',
         value: time(metaInfo?.createdAt as string, LOCALE.EN)
           .utc()
           .fromNow(),
       },
       {
-        label: '更新时间',
+        label: 'updateTime',
         value: time(metaInfo?.updatedAt as string, LOCALE.EN)
           .utc()
           .fromNow(),
       },
       {
-        label: '来源',
+        label: 'source',
         value: metaInfo?.resourceType,
       },
     ];
 
     const techInfoList = [
       {
-        label: 'Token 占用',
+        label: 'tokenUsage',
         value: metaInfo?.token,
       },
       {
-        label: '索引状态',
+        label: 'indexStatus',
         value: t(`resource.${metaInfo?.indexStatus}`),
       },
     ];
     return (
       <div className="pl-4 pr-4">
         <div className="mb-4">
-          <div className="text-sm font-medium text-gray-500 mb-1">基础信息</div>
+          <div className="text-sm font-medium text-gray-500 mb-1">{t('resourceDetail.directory.baseInfo')}</div>
           {baseInfoList.map((item) => (
             <div className="flex gap-2 mb-1">
-              <div className="text-xs font-medium text-gray-500">{item.label}</div>
+              <div className="text-xs font-medium text-gray-500">{t(`resourceDetail.directory.${item.label}`)}</div>
               <div className="text-xs font-medium text-gray-500">{item.value}</div>
             </div>
           ))}
         </div>
 
         <div className="mb-4">
-          <div className="text-sm font-medium text-gray-500 mb-1">技术参数</div>
+          <div className="text-sm font-medium text-gray-500 mb-1">{t('resourceDetail.directory.techInfo')}</div>
           {techInfoList.map((item) => (
             <div className="flex gap-2 mb-1">
               <div className="text-xs font-medium text-gray-500">{item.label}</div>
@@ -167,7 +167,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
             lineHeight: '32px',
           }}
         >
-          <Button onClick={loadMore}>loading more</Button>
+          <Button onClick={loadMore}>{t('common.loadMore')}</Button>
         </div>
       ) : null;
 
@@ -183,7 +183,6 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
           <List.Item
             className="project-list-item"
             onClick={() => {
-              console.log('item', item);
               jumpToResource({ projectId: item.projectId, resId: resourceId });
               handleAddTab({
                 projectId: item.projectId,
@@ -205,10 +204,10 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
                     cancelText={t('common.cancel')}
                   >
                     <div
-                      className="text-[#00968F] cursor-pointer hover:font-medium"
+                      className="text-[#00968F] cursor-pointer hover:font-medium whitespace-nowrap"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      remove
+                      {t('common.remove')}
                     </div>
                   </Popconfirm>
                 </div>
@@ -244,7 +243,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
                   .fromNow()}
               </span>
               {' · '}
-              <span>x被引用</span>
+              <span>{t('resourceDetail.directory.referenced', { count: 9 })}</span>
             </div>
           </div>
         </div>
@@ -253,7 +252,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
 
       <div className="p-4 w-full flex gap-3">
         <Button className="w-[50%]" icon={<HiOutlinePlus />} onClick={handleToProject}>
-          添加
+          {t('common.add')}
         </Button>
         <Button className="w-[50%]" icon={<HiOutlineSparkles />}>
           AI
