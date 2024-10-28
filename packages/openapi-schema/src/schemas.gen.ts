@@ -143,6 +143,14 @@ export const $Resource = {
       description: 'Resource index status',
       $ref: '#/components/schemas/IndexStatus',
     },
+    storageSize: {
+      type: 'string',
+      description: 'Resource storage size (in bytes)',
+    },
+    vectorSize: {
+      type: 'string',
+      description: 'Resource vector storage size (in bytes)',
+    },
     createdAt: {
       type: 'string',
       format: 'date-time',
@@ -160,13 +168,6 @@ export const $Resource = {
     content: {
       type: 'string',
       description: 'Document content for this resource (only returned in getResourceDetail API)',
-    },
-    projects: {
-      type: 'array',
-      description: 'Projects this resource belongs to (only returned in getResourceDetail API)',
-      items: {
-        $ref: '#/components/schemas/Project',
-      },
     },
   },
 } as const;
