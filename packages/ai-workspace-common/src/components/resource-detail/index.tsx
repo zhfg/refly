@@ -4,7 +4,7 @@ import { useParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { Splitter, Button, Typography } from 'antd';
+import { Splitter, Button } from 'antd';
 import { ContentArea } from '@refly-packages/ai-workspace-common/components/resource-detail/content-area';
 import { ResourceProvider } from './context-provider';
 import { AICopilot } from '@refly-packages/ai-workspace-common/components/copilot';
@@ -23,8 +23,7 @@ export const ResourceDetail2 = () => {
 
   const resourceStore = useResourceStoreShallow((state) => ({
     resource: state.resource.data,
-    setCurrentResourceId: state.setCurrentResourceId,
-    fetchResource: state.fetchResource,
+    fetchReferences: state.fetchReferences,
   }));
 
   const searchStore = useSearchStoreShallow((state) => ({
@@ -36,9 +35,9 @@ export const ResourceDetail2 = () => {
 
   const ContentTop = () => {
     return (
-      <div className="w-full h-11 relative flex items-center resource-detail-top text-[#6F6F6F]">
+      <div className="w-full pt-2 relative flex items-center resource-detail-top text-[#6F6F6F]">
         <div
-          className="h-full pl-3 flex items-center whitespace-nowrap cursor-pointer"
+          className="pl-3 flex items-center whitespace-nowrap cursor-pointer"
           onClick={() => {
             navigate('/library?tab=resource');
           }}
@@ -66,8 +65,7 @@ export const ResourceDetail2 = () => {
 
   useEffect(() => {
     if (resourceId) {
-      resourceStore.setCurrentResourceId(resourceId);
-      resourceStore.fetchResource(resourceId);
+      resourceStore.fetchReferences(resourceId);
     }
   }, [resourceId]);
 
@@ -75,26 +73,12 @@ export const ResourceDetail2 = () => {
     <ResourceProvider context={{ resourceId }}>
       <div className="h-full">
         <Splitter layout="horizontal" className="workspace-panel-container">
-          <Splitter.Panel
-            defaultSize={600}
-            min={500}
-            className="workspace-left-assist-panel flex flex-col h-full"
-            key="workspace-left-assist-panel"
-          >
-            <ContentTop />
-            <Splitter layout="horizontal" className="flex-grow overflow-auto">
-              <Splitter.Panel min={300} collapsible>
-                <ResourceDirectory resourceId={resourceId} />
-              </Splitter.Panel>
-              <Splitter.Panel
-                defaultSize={400}
-                min={400}
-                className="workspace-content-panel"
-                key="workspace-content-panel-content"
-              >
-                <ContentArea resourceId={resourceId} />
-              </Splitter.Panel>
-            </Splitter>
+          <Splitter.Panel className="workspace-content-panel" defaultSize={300} min={300} collapsible>
+            <ResourceDirectory resourceId={resourceId} />
+          </Splitter.Panel>
+
+          <Splitter.Panel min={400} className="workspace-content-panel" key="workspace-content-panel-content">
+            <ContentArea resourceId={resourceId} />
           </Splitter.Panel>
 
           <Splitter.Panel

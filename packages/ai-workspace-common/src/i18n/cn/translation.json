@@ -330,11 +330,11 @@
     "directory": {
       "baseInfo": "基础信息",
       "techInfo": "技术信息",
-      "fileSize": "文件大小",
       "addTime": "添加时间",
       "updateTime": "更新时间",
       "source": "来源",
-      "tokenUsage": "Token 占用",
+      "storageSize": "存储存储",
+      "vectorSize": "向量存储",
       "indexStatus": "索引状态",
       "referenced": "{{count}} 被引用"
     }

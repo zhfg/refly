@@ -3,7 +3,7 @@ import { LOCALE } from '@refly/common-types';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 import './index.scss';
-import { Segmented, Button, Divider, Skeleton, List, message, Popconfirm } from 'antd';
+import { Segmented, Button, Divider, Skeleton, List, message, Popconfirm, Tooltip } from 'antd';
 import type { PopconfirmProps } from 'antd';
 
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
@@ -19,6 +19,7 @@ import { IconCanvas, IconProject, IconThread } from '@refly-packages/ai-workspac
 import { Favicon } from '@refly-packages/ai-workspace-common/components/common/favicon';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
+import { formatStorage } from '@refly-packages/ai-workspace-common/modules/entity-selector/utils';
 
 type DirectoryItemType = 'meta' | 'project';
 
@@ -43,8 +44,9 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
     pageSize: 12,
   });
 
-  const { resource } = useResourceStoreShallow((state) => ({
+  const { resource, fetchResource } = useResourceStoreShallow((state) => ({
     resource: state.resource,
+    fetchResource: state.fetchResource,
   }));
   const resourceData = resource.data;
 
@@ -81,20 +83,12 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
     const metaInfo = resourceData;
     const baseInfoList = [
       {
-        label: 'fileSize',
-        value: metaInfo?.fileSize,
-      },
-      {
         label: 'addTime',
-        value: time(metaInfo?.createdAt as string, LOCALE.EN)
-          .utc()
-          .fromNow(),
+        value: time(metaInfo?.createdAt).format('YYYY-MM-DD HH:mm:ss'),
       },
       {
         label: 'updateTime',
-        value: time(metaInfo?.updatedAt as string, LOCALE.EN)
-          .utc()
-          .fromNow(),
+        value: time(metaInfo?.createdAt).format('YYYY-MM-DD HH:mm:ss'),
       },
       {
         label: 'source',
@@ -104,12 +98,16 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
 
     const techInfoList = [
       {
-        label: 'tokenUsage',
-        value: metaInfo?.token,
+        label: 'storageSize',
+        value: formatStorage(resourceData?.storageSize || 0),
+      },
+      {
+        label: 'vectorSize',
+        value: formatStorage(resourceData?.vectorSize || 0),
       },
       {
         label: 'indexStatus',
-        value: t(`resource.${metaInfo?.indexStatus}`),
+        value: resourceData?.indexStatus ? t(`resource.${resourceData?.indexStatus}`) : '',
       },
     ];
     return (
@@ -128,7 +126,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
           <div className="text-sm font-medium text-gray-500 mb-1">{t('resourceDetail.directory.techInfo')}</div>
           {techInfoList.map((item) => (
             <div className="flex gap-2 mb-1">
-              <div className="text-xs font-medium text-gray-500">{item.label}</div>
+              <div className="text-xs font-medium text-gray-500">{t(`resourceDetail.directory.${item.label}`)}</div>
               <div className="text-xs font-medium text-gray-500">{item.value}</div>
             </div>
           ))}
@@ -167,11 +165,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
             lineHeight: '32px',
           }}
         >
-<<<<<<< HEAD
-          <Button onClick={loadMore}>{t('common.loadMore')}</Button>
-=======
           <Button onClick={() => loadMore()}>{t('common.loadMore')}</Button>
->>>>>>> 86dce242fd7f959340a51ed36a095df3f93bf1c7
         </div>
       ) : null;
 
@@ -289,7 +283,6 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
         visible={bindResourceModalVisible}
         setVisible={setBindResourceModalVisible}
         postConfirmCallback={() => {
-          console.log('kkk');
           reloadProjects();
           setSelectedTab('project');
         }}

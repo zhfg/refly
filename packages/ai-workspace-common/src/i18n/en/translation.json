@@ -331,11 +331,11 @@
     "directory": {
       "baseInfo": "Basic Information",
       "techInfo": "Technical Information",
-      "fileSize": "File Size",
       "addTime": "Add Time",
       "updateTime": "Update Time",
       "source": "Source",
-      "tokenUsage": "Token Usage",
+      "storageSize": "Storage Size",
+      "vectorSize": "Vector Size",
       "indexStatus": "Index Status",
       "referenced": "{{count}} Referenced"
     }

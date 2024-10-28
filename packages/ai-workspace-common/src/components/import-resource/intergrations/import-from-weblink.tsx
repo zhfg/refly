@@ -129,7 +129,7 @@ export const ImportFromWeblink = () => {
       importResourceStore.setScrapeLinks([]);
       importResourceStore.setImportResourceModalVisible(false);
       if (!kbId || (kbId && selectedCollectionId === kbId)) {
-        reloadListState.setReloadKnowledgeBaseList(true);
+        reloadListState.setReloadProjectList(true);
         reloadListState.setReloadResourceList(true);
       }
       setLinkStr('');

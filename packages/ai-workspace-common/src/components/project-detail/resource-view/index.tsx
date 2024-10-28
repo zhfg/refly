@@ -4,14 +4,13 @@ import { IconCloseCircle, IconLoading, IconRefresh } from '@arco-design/web-reac
 // 自定义样式
 import './index.scss';
 import { Skeleton, Message as message, Empty, Alert, Button } from '@arco-design/web-react';
-import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/resource';
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { Resource } from '@refly/openapi-schema';
 import { memo, useEffect, useState } from 'react';
 import { getClientOrigin, safeParseURL } from '@refly/utils/url';
-import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
 // content selector
@@ -27,27 +26,23 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
   const { resourceId, projectId } = props;
 
   const { t } = useTranslation();
-  const [isFetching, setIsFetching] = useState(false);
 
-  const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
-    currentResource: state.currentResource,
-    updateResource: state.updateResource,
-    resetTabs: state.resetTabs,
+  const resourceStore = useResourceStoreShallow((state) => ({
+    resource: state.resource,
+    fetchResource: state.fetchResource,
+    setCurrentResourceId: state.setCurrentResourceId,
+    setResource: state.setResource,
   }));
-  const { activeTab, handleAddTab } = useKnowledgeBaseTabs();
 
-  const resource = knowledgeBaseStore.currentResource;
+  const resource = resourceStore.resource;
+  const resourceDetail = resourceStore.resource?.data;
 
   useEffect(() => {
-    if (resource && activeTab !== resourceId && activeTab !== resource.resourceId) {
-      handleAddTab({
-        title: resource.title,
-        key: resource.resourceId,
-        content: resource.contentPreview,
-        resourceId: resource.resourceId,
-      });
+    if (resourceId) {
+      resourceStore.setCurrentResourceId(resourceId);
+      resourceStore.fetchResource(resourceId);
     }
-  }, [resourceId, activeTab, resource]);
+  }, [resourceId]);
 
   const { showContentSelector, scope } = useContentSelectorStoreShallow((state) => ({
     showContentSelector: state.showContentSelector,
@@ -64,40 +59,14 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
   );
 
   const reloadKnowledgeBaseState = useReloadListState();
-  const [resourceDetail, setResourceDetail] = useState(knowledgeBaseStore?.currentResource);
-
-  const handleGetDetail = async (resourceId: string, setFetch: boolean = true) => {
-    setFetch && setIsFetching(true);
-    try {
-      const { data: newRes, error } = await getClient().getResourceDetail({
-        query: {
-          resourceId,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-      if (!newRes?.success) {
-        throw new Error(newRes?.errMsg);
-      }
-
-      const resource = newRes?.data as Resource;
-      knowledgeBaseStore.updateResource(resource);
-    } catch (err) {
-      message.error(t('contentDetail.list.fetchErr'));
-    }
-
-    setFetch && setIsFetching(false);
-  };
 
   const [isReindexing, setIsReindexing] = useState(false);
+
   const handleReindexResource = async (resourceId: string) => {
     if (!resourceId || isReindexing) return;
 
     try {
       setIsReindexing(true);
-      setResourceDetail({ ...resourceDetail, indexStatus: 'wait_index' });
       const { data, error } = await getClient().reindexResource({
         body: {
           resourceIds: [resourceId],
@@ -113,7 +82,7 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
 
       if (data.data?.length) {
         const resource = data.data[0];
-        knowledgeBaseStore.updateResource({ ...resourceDetail, indexStatus: resource.indexStatus });
+        resourceStore.setResource({ ...resourceDetail, indexStatus: resource.indexStatus });
       }
     } catch (error) {
       message.error(t('common.putErr'));
@@ -123,29 +92,16 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
 
   useEffect(() => {
     if (resourceId && reloadKnowledgeBaseState.reloadResourceDetail) {
-      handleGetDetail(resourceId as string);
+      resourceStore.fetchResource(resourceId as string, true);
     }
     reloadKnowledgeBaseState.setReloadResourceDetail(false);
   }, [reloadKnowledgeBaseState.reloadResourceDetail]);
-
-  useEffect(() => {
-    if (resourceId) {
-      console.log('params resId', resourceId);
-      handleGetDetail(resourceId as string);
-    }
-  }, [resourceId]);
-
-  useEffect(() => {
-    if (projectId && !resourceId) {
-      knowledgeBaseStore.resetTabs();
-    }
-  }, [projectId]);
 
   const { handleInitContentSelectorListener } = useSelectedMark();
 
   // 初始化块选择
   useEffect(() => {
-    if (isFetching) {
+    if (resource.loading) {
       return;
     }
     const remove = initMessageListener();
@@ -153,19 +109,15 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
     return () => {
       remove();
     };
-  }, [resourceId, isFetching]);
-
-  useEffect(() => {
-    setResourceDetail(knowledgeBaseStore?.currentResource as Resource);
-  }, [knowledgeBaseStore?.currentResource]);
+  }, [resourceId, resource.loading]);
 
   // refresh every 2 seconds if resource is waiting to be parsed or indexed
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
-    if (['wait_parse', 'wait_index'].includes(knowledgeBaseStore?.currentResource?.indexStatus)) {
+    if (['wait_parse', 'wait_index'].includes(resourceDetail?.indexStatus)) {
       intervalId = setInterval(() => {
-        const setFetch = false;
-        handleGetDetail(resourceId as string, setFetch);
+        const reFetch = true;
+        resourceStore.fetchResource(resourceId as string, reFetch);
       }, 2000);
     }
     return () => {
@@ -173,13 +125,13 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
         clearInterval(intervalId);
       }
     };
-  }, [knowledgeBaseStore?.currentResource?.indexStatus]);
+  }, [resourceDetail?.indexStatus]);
 
   return (
     <div className="knowledge-base-resource-detail-container">
       {resourceId ? (
         <div className="knowledge-base-resource-detail-body">
-          {isFetching ? (
+          {resource.loading ? (
             <div className="knowledge-base-resource-skeleton">
               <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
             </div>
@@ -236,7 +188,7 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
               {/* {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />} */}
             </div>
           )}
-          {isFetching ? (
+          {resource.loading ? (
             <div className="knowledge-base-resource-skeleton">
               <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
               <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
