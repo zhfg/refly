@@ -392,6 +392,7 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     const { chatHistory = [], currentSkill, spanId, projectId, convId, canvases } = config.configurable;
 
+    this.emitEvent({ event: 'start' }, this.configSnapshot);
     this.emitEvent({ event: 'log', content: `Start to rewrite canvas...` }, config);
 
     const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
@@ -917,20 +918,20 @@ Generated question example:
       // .addNode('direct', this.directCallSkill)
       // .addNode('scheduler', this.callScheduler)
       .addNode('generateCanvas', this.callGenerateCanvas)
-      .addNode('rewriteCanvas', this.callRewriteCanvas)
-      .addNode('editCanvas', this.callEditCanvas)
-      .addNode('other', this.callScheduler)
+      // .addNode('rewriteCanvas', this.callRewriteCanvas)
+      // .addNode('editCanvas', this.callEditCanvas)
+      // .addNode('other', this.callScheduler)
       .addNode('relatedQuestions', this.genRelatedQuestions);
 
     // workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
     // workflow.addConditionalEdges('direct', this.onDirectSkillCallFinish);
     // workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
-    workflow.addConditionalEdges(START, this.callCanvasIntentMatcher);
+    // workflow.addConditionalEdges(START, this.callCanvasIntentMatcher);
     workflow.addEdge(START, 'generateCanvas');
     workflow.addEdge('generateCanvas', 'relatedQuestions');
-    workflow.addEdge('rewriteCanvas', 'relatedQuestions');
-    workflow.addEdge('editCanvas', 'relatedQuestions');
-    workflow.addEdge('other', 'relatedQuestions');
+    // workflow.addEdge('rewriteCanvas', 'relatedQuestions');
+    // workflow.addEdge('editCanvas', 'relatedQuestions');
+    // workflow.addEdge('other', 'relatedQuestions');
     workflow.addEdge('relatedQuestions', END);
 
     return workflow.compile();
