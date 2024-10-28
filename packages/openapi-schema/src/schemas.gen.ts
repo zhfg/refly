@@ -2093,41 +2093,33 @@ export const $DeleteShareRequest = {
   },
 } as const;
 
-export const $SharedProject = {
+export const $SharedContent = {
   type: 'object',
-  properties: {
-    projectId: {
-      type: 'string',
-      description: 'Project ID',
-    },
-  },
-} as const;
-
-export const $SharedCanvas = {
-  type: 'object',
-  properties: {
-    canvasId: {
-      type: 'string',
-      description: 'Canvas ID',
-    },
-  },
-} as const;
-
-export const $ShareDetail = {
-  type: 'object',
+  required: ['selectedCanvasId', 'selectedCanvasContent'],
   properties: {
     project: {
       description: 'Shared project data',
-      $ref: '#/components/schemas/SharedProject',
+      $ref: '#/components/schemas/Project',
     },
-    canvas: {
-      description: 'Shared canvas data',
-      $ref: '#/components/schemas/SharedCanvas',
+    canvasList: {
+      type: 'array',
+      description: 'Shared canvas list',
+      items: {
+        $ref: '#/components/schemas/Canvas',
+      },
+    },
+    selectedCanvasId: {
+      type: 'string',
+      description: 'Selected canvas ID',
+    },
+    selectedCanvasContent: {
+      type: 'string',
+      description: 'Selected canvas content',
     },
   },
 } as const;
 
-export const $GetShareDetailResponse = {
+export const $GetShareContentResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -2137,8 +2129,8 @@ export const $GetShareDetailResponse = {
       properties: {
         data: {
           type: 'object',
-          description: 'Share data',
-          $ref: '#/components/schemas/ShareDetail',
+          description: 'Shared content data',
+          $ref: '#/components/schemas/SharedContent',
         },
       },
     },

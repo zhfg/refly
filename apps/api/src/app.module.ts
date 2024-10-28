@@ -19,6 +19,7 @@ import { EventModule } from './event/event.module';
 import { MiscModule } from './misc/misc.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { StripeModule } from '@golevelup/nestjs-stripe';
+import { ShareModule } from './share/share.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { StripeModule } from '@golevelup/nestjs-stripe';
     EventModule,
     MiscModule,
     SubscriptionModule,
+    ShareModule,
   ],
   controllers: [AppController],
 })

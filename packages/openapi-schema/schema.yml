@@ -609,18 +609,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-  /share/detail:
+  /share/content:
     get:
       tags:
         - share
-      summary: Get share detail
-      description: Get share detail by share code
-      operationId: getShareDetail
+      summary: Get share content
+      description: Get share content by share code
+      operationId: getShareContent
       parameters:
         - name: shareCode
           in: query
           description: Share code
           required: true
+          schema:
+            type: string
+        - name: canvasId
+          in: query
+          description: Canvas ID, by default the first canvas will be selected
+          required: false
           schema:
             type: string
       responses:
@@ -629,7 +635,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetShareDetailResponse'
+                $ref: '#/components/schemas/GetShareContentResponse'
   /label/class/list:
     get:
       tags:
@@ -3079,36 +3085,35 @@ components:
         shareCode:
           type: string
           description: Share code
-    SharedProject:
+    SharedContent:
       type: object
-      properties:
-        projectId:
-          type: string
-          description: Project ID
-    SharedCanvas:
-      type: object
-      properties:
-        canvasId:
-          type: string
-          description: Canvas ID
-    ShareDetail:
-      type: object
+      required:
+        - selectedCanvasId
+        - selectedCanvasContent
       properties:
         project:
           description: Shared project data
-          $ref: '#/components/schemas/SharedProject'
-        canvas:
-          description: Shared canvas data
-          $ref: '#/components/schemas/SharedCanvas'
-    GetShareDetailResponse:
+          $ref: '#/components/schemas/Project'
+        canvasList:
+          type: array
+          description: Shared canvas list
+          items:
+            $ref: '#/components/schemas/Canvas'
+        selectedCanvasId:
+          type: string
+          description: Selected canvas ID
+        selectedCanvasContent:
+          type: string
+          description: Selected canvas content
+    GetShareContentResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
               type: object
-              description: Share data
-              $ref: '#/components/schemas/ShareDetail'
+              description: Shared content data
+              $ref: '#/components/schemas/SharedContent'
     ListLabelClassesResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

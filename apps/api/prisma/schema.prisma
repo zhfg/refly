@@ -286,6 +286,7 @@ model Canvas {
   deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([uid, deletedAt, updatedAt])
+  @@index([shareCode])
   @@map("canvases")
 }
 
@@ -314,6 +315,7 @@ model Project {
   conversations Conversation[]
 
   @@index([uid, updatedAt])
+  @@index([shareCode])
   @@map("projects")
 }
 

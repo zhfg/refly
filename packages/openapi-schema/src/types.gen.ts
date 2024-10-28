@@ -1507,36 +1507,30 @@ export type DeleteShareRequest = {
   shareCode: string;
 };
 
-export type SharedProject = {
-  /**
-   * Project ID
-   */
-  projectId?: string;
-};
-
-export type SharedCanvas = {
-  /**
-   * Canvas ID
-   */
-  canvasId?: string;
-};
-
-export type ShareDetail = {
+export type SharedContent = {
   /**
    * Shared project data
    */
-  project?: SharedProject;
+  project?: Project;
   /**
-   * Shared canvas data
+   * Shared canvas list
    */
-  canvas?: SharedCanvas;
+  canvasList?: Array<Canvas>;
+  /**
+   * Selected canvas ID
+   */
+  selectedCanvasId: string;
+  /**
+   * Selected canvas content
+   */
+  selectedCanvasContent: string;
 };
 
-export type GetShareDetailResponse = BaseResponse & {
+export type GetShareContentResponse = BaseResponse & {
   /**
-   * Share data
+   * Shared content data
    */
-  data?: ShareDetail;
+  data?: SharedContent;
 };
 
 export type ListLabelClassesResponse = BaseResponse & {
@@ -2760,8 +2754,12 @@ export type DeleteShareResponse = BaseResponse;
 
 export type DeleteShareError = unknown;
 
-export type GetShareDetailData = {
+export type GetShareContentData = {
   query: {
+    /**
+     * Canvas ID, by default the first canvas will be selected
+     */
+    canvasId?: string;
     /**
      * Share code
      */
@@ -2769,9 +2767,9 @@ export type GetShareDetailData = {
   };
 };
 
-export type GetShareDetailResponse2 = GetShareDetailResponse;
+export type GetShareContentResponse2 = GetShareContentResponse;
 
-export type GetShareDetailError = unknown;
+export type GetShareContentError = unknown;
 
 export type ListLabelClassesData = {
   query?: {
@@ -3460,14 +3458,14 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/share/detail': {
+  '/share/content': {
     get: {
-      req: GetShareDetailData;
+      req: GetShareContentData;
       res: {
         /**
          * Successful operation
          */
-        '200': GetShareDetailResponse;
+        '200': GetShareContentResponse;
       };
     };
   };

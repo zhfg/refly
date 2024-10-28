@@ -74,9 +74,9 @@ import type {
   DeleteShareData,
   DeleteShareError,
   DeleteShareResponse,
-  GetShareDetailData,
-  GetShareDetailError,
-  GetShareDetailResponse2,
+  GetShareContentData,
+  GetShareContentError,
+  GetShareContentResponse2,
   ListLabelClassesData,
   ListLabelClassesError,
   ListLabelClassesResponse2,
@@ -449,13 +449,13 @@ export const deleteShare = (options: Options<DeleteShareData>) => {
 };
 
 /**
- * Get share detail
- * Get share detail by share code
+ * Get share content
+ * Get share content by share code
  */
-export const getShareDetail = (options: Options<GetShareDetailData>) => {
-  return (options?.client ?? client).get<GetShareDetailResponse2, GetShareDetailError>({
+export const getShareContent = (options: Options<GetShareContentData>) => {
+  return (options?.client ?? client).get<GetShareContentResponse2, GetShareContentError>({
     ...options,
-    url: '/share/detail',
+    url: '/share/content',
   });
 };
 

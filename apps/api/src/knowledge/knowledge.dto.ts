@@ -57,15 +57,7 @@ export const canvasPO2DTO = (
     return null;
   }
   const res: Canvas = {
-    ...pick(canvas, [
-      'canvasId',
-      'projectId',
-      'title',
-      'content',
-      'contentPreview',
-      'isPublic',
-      'readOnly',
-    ]),
+    ...pick(canvas, ['canvasId', 'projectId', 'title', 'content', 'contentPreview', 'readOnly']),
     createdAt: canvas.createdAt.toJSON(),
     updatedAt: canvas.updatedAt.toJSON(),
   };

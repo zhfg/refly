@@ -596,7 +596,7 @@ export class KnowledgeService {
             where: { deletedAt: null },
             skip: (page - 1) * pageSize,
             take: pageSize,
-            orderBy: { updatedAt: 'desc' },
+            orderBy: { createdAt: 'asc' },
           },
         },
       });
@@ -610,7 +610,7 @@ export class KnowledgeService {
       },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { createdAt: 'asc' },
     });
   }
 
