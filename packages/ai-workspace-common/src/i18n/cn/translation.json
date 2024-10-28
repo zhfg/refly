@@ -8,6 +8,7 @@
     "edit": "编辑",
     "save": "保存",
     "add": "添加",
+    "remove": "移除",
     "loading": "加载中...",
     "loadMore": "加载更多",
     "more": "更多",
@@ -31,6 +32,8 @@
     "canvas": "稿布",
     "resource": "资源",
     "thread": "会话",
+    "meta": "元信息",
+    "project": "项目",
     "copy": {
       "title": "复制",
       "success": "内容已复制到剪切板！"
@@ -143,9 +146,9 @@
         "project": "新项目"
       }
     },
-    "resourceCollectionList": {
-      "addToCollection": "添加到知识库",
-      "removeConfirmText": "确认要从此知识库移除吗?"
+    "resourceProjectList": {
+      "addToCollection": "添加到项目",
+      "removeConfirmText": "确认要从此项目移除吗?"
     },
     "labelGroup": {
       "addLabel": "点击添加标签",
@@ -319,7 +322,22 @@
     "wait_index": "模型记忆中",
     "wait_index_tip": "该资源暂时不支持 AI 搜索，需等待模型记忆完成",
     "index_failed": "模型记忆失败",
-    "index_failed_tip": "点击重试"
+    "index_failed_tip": "点击重试",
+    "finish": "已索引"
+  },
+  "resourceDetail": {
+    "back": "所有资源",
+    "directory": {
+      "baseInfo": "基础信息",
+      "techInfo": "技术信息",
+      "addTime": "添加时间",
+      "updateTime": "更新时间",
+      "source": "来源",
+      "storageSize": "存储存储",
+      "vectorSize": "向量存储",
+      "indexStatus": "索引状态",
+      "referenced": "{{count}} 被引用"
+    }
   },
   "loggedHomePage": {
     "searchEverything": "搜索任何内容",

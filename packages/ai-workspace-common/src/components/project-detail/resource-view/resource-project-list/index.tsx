@@ -7,18 +7,18 @@ import { HiOutlineFolder, HiFolderPlus } from 'react-icons/hi2';
 
 import { Project } from '@refly/openapi-schema';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { BindResourceModal } from '@refly-packages/ai-workspace-common/components/project-detail/resource-detail/resource-collection-associative-modal';
+import { BindResourceModal } from '@refly-packages/ai-workspace-common/components/project-detail/resource-view/resource-collection-associative-modal';
 
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import './index.scss';
 
-interface ResourceCollectionListProps {
-  collections: Project[];
+interface ResourceProjectListProps {
+  projects: Project[];
   updateCallback?: (collectionId: string) => void;
 }
 
-const ResourceCollectionList = ({ collections = [], updateCallback }: ResourceCollectionListProps) => {
+const ResourceProjectList = ({ projects = [], updateCallback }: ResourceProjectListProps) => {
   const { t } = useTranslation();
   const { jumpToProject } = useJumpNewPath();
   const [searchParams] = useSearchParams();
@@ -66,7 +66,7 @@ const ResourceCollectionList = ({ collections = [], updateCallback }: ResourceCo
       <>
         <Popconfirm
           position="bottom"
-          title={t('workspace.resourceCollectionList.removeConfirmText')}
+          title={t('workspace.resourceProjectList.removeConfirmText')}
           okText={t('common.confirm')}
           cancelText={t('common.cancel')}
           popupVisible={popconfirmVisible}
@@ -97,7 +97,7 @@ const ResourceCollectionList = ({ collections = [], updateCallback }: ResourceCo
 
   return (
     <div className="resource-collection-list">
-      {collections.map((coll) => (
+      {projects.map((coll) => (
         <div className="tag-wrap" key={coll.projectId}>
           <TagItem coll={coll} />
         </div>
@@ -106,12 +106,12 @@ const ResourceCollectionList = ({ collections = [], updateCallback }: ResourceCo
       <Button
         size="mini"
         className="bg-transparent"
-        title={collections?.length > 0 ? t('workspace.resourceCollectionList.addToCollection') : ''}
+        title={projects?.length > 0 ? t('workspace.resourceProjectList.addToCollection') : ''}
         style={{ borderRadius: '999px' }}
         icon={<HiFolderPlus size={13} />}
         onClick={() => setVisible(true)}
       >
-        {collections?.length === 0 && t('workspace.resourceCollectionList.addToCollection')}
+        {projects?.length === 0 && t('workspace.resourceProjectList.addToCollection')}
       </Button>
 
       <BindResourceModal
@@ -124,4 +124,4 @@ const ResourceCollectionList = ({ collections = [], updateCallback }: ResourceCo
   );
 };
 
-export default ResourceCollectionList;
+export default ResourceProjectList;

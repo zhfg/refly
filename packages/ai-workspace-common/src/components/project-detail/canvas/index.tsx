@@ -471,19 +471,21 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
   }, [canvas, debouncedUpdateNote]);
 
   return (
-    <div className="ai-note-container">
-      <Spin
-        tip={t('knowledgeBase.note.connecting')}
-        loading={!canvas || isRequesting || canvasServerStatus !== 'connected'}
-        style={{ height: '100%', width: '100%' }}
-      >
-        <div className="ai-note-editor">
-          <div className="ai-note-editor-container">
-            <CanvasEditorHeader projectId={projectId} canvasId={canvasId} />
-            <CollaborativeEditor projectId={projectId} canvasId={canvasId} />
+    <div className="ai-note-container flex flex-col">
+      <div className="flex-grow overflow-auto">
+        <Spin
+          tip={t('knowledgeBase.note.connecting')}
+          loading={!canvas || isRequesting || canvasServerStatus !== 'connected'}
+          style={{ height: '100%', width: '100%' }}
+        >
+          <div className="ai-note-editor">
+            <div className="ai-note-editor-container">
+              <CanvasEditorHeader projectId={projectId} canvasId={canvasId} />
+              <CollaborativeEditor projectId={projectId} canvasId={canvasId} />
+            </div>
           </div>
-        </div>
-      </Spin>
+        </Spin>
+      </div>
       <CanvasStatusBar />
     </div>
   );

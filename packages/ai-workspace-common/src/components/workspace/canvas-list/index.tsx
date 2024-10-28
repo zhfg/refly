@@ -45,7 +45,7 @@ export const CanvasList = (props: CanvasListProps) => {
   }, []);
 
   const { jumpToCanvas } = useJumpNewPath();
-  const { handleAddTab: handleAddCanvasTab } = useCanvasTabs();
+  const { handleAddTabWithNote } = useCanvasTabs();
 
   if (dataList.length === 0 && !isRequesting) {
     return <Empty />;
@@ -53,13 +53,7 @@ export const CanvasList = (props: CanvasListProps) => {
 
   const handleClickCanvas = (canvas: Canvas) => {
     jumpToCanvas({ canvasId: canvas.canvasId, projectId: canvas.projectId });
-    handleAddCanvasTab({
-      title: canvas.title,
-      key: canvas.canvasId,
-      content: canvas.contentPreview || '',
-      canvasId: canvas.canvasId,
-      projectId: canvas.projectId,
-    });
+    handleAddTabWithNote(canvas);
   };
 
   return (
