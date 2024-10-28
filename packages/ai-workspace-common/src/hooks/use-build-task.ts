@@ -102,6 +102,10 @@ export const useBuildTask = () => {
       });
 
       chatStore.setMessages(messages.concat(replyMsg));
+
+      // reset last stream state
+      chatStore.setNowStreamCanvasContent('');
+      chatStore.setIsFirstStreamEditCanvasContent(true);
     }
   };
 

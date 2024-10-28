@@ -238,24 +238,25 @@ class TokenStreamProcessor {
     }
 
     this.chunk += token;
-    // console.log(
-    //   'process',
-    //   JSON.stringify({
-    //     content: token,
-    //     chunk: this.chunk,
-    //     isLineStart: this.isLineStart,
-    //     isInList: this.isInList,
-    //   }),
-    // );
+
+    // Skip processing if the chunk is part of the closing canvas tag
+    if (this.chunk === '<' || '</reflyCanvas>'.startsWith(this.chunk)) {
+      return;
+    }
+
+    // If the chunk contains the closing tag, only process content before it
+    if (this.chunk.includes('</reflyCanvas>')) {
+      const content = this.chunk.split('</reflyCanvas>')[0];
+      if (content) {
+        this.chunk = content;
+      } else {
+        return;
+      }
+    }
 
     // Wait for the next token if the current chunk only contains whitespace or
     // markdown syntax element (list, heading, marks, etc.)
     if (this.chunk.match(/^[-*_#`>~ ]+$/)) {
-      return;
-    }
-
-    // Check if the chunk has a common string prefix with '</reflyCanvas>'
-    if ('</reflyCanvas>'.startsWith(this.chunk)) {
       return;
     }
 
