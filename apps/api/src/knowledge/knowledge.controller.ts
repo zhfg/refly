@@ -50,10 +50,17 @@ export class KnowledgeController {
   @Get('project/list')
   async listProjects(
     @User() user: UserModel,
+    @Query('projectId') projectId: string,
+    @Query('resourceId') resourceId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListProjectResponse> {
-    const projects = await this.knowledgeService.listProjects(user, { page, pageSize });
+    const projects = await this.knowledgeService.listProjects(user, {
+      projectId,
+      resourceId,
+      page,
+      pageSize,
+    });
     return buildSuccessResponse(projects.map(projectPO2DTO));
   }
 

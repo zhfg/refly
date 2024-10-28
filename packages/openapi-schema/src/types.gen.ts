@@ -2616,6 +2616,14 @@ export type ListProjectsData = {
      * Page size
      */
     pageSize?: number;
+    /**
+     * Project ID
+     */
+    projectId?: string;
+    /**
+     * Resource ID
+     */
+    resourceId?: string;
   };
 };
 

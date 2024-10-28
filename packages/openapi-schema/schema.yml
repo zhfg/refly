@@ -418,6 +418,18 @@ paths:
       description: List all projects for a user
       operationId: listProjects
       parameters:
+        - name: projectId
+          in: query
+          description: Project ID
+          required: false
+          schema:
+            type: string
+        - name: resourceId
+          in: query
+          description: Resource ID
+          required: false
+          schema:
+            type: string
         - name: page
           in: query
           description: Page number

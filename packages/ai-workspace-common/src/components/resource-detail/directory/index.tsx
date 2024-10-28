@@ -34,9 +34,9 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
     isRequesting,
     reload: reloadProjects,
   } = useFetchDataList({
-    fetchData: async (resourceId) => {
+    fetchData: async (queryPayload) => {
       const res = await getClient().listProjects({
-        query: { resourceId },
+        query: { ...queryPayload, resourceId },
       });
       return res?.data;
     },
@@ -167,7 +167,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
             lineHeight: '32px',
           }}
         >
-          <Button onClick={loadMore}>loading more</Button>
+          <Button onClick={() => loadMore()}>{t('common.loadMore')}</Button>
         </div>
       ) : null;
 

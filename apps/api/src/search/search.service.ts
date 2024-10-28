@@ -61,16 +61,14 @@ export class SearchService {
         .filter((entity) => entity.entityType === 'project')
         .map((entity) => entity.entityId);
       if (projectIds.length > 0) {
-        const projects = await this.prisma.project.findMany({
-          where: { projectId: { in: projectIds }, uid: user.uid, deletedAt: null },
-          include: { resources: true },
+        const relations = await this.prisma.projectResourceRelation.findMany({
+          select: { resourceId: true },
+          where: { projectId: { in: projectIds } },
         });
-        projects.forEach((project) => {
-          project.resources.forEach((resource) => {
-            entities.push({
-              entityType: 'resource',
-              entityId: resource.resourceId,
-            });
+        relations.forEach((relation) => {
+          entities.push({
+            entityType: 'resource',
+            entityId: relation.resourceId,
           });
         });
       }
