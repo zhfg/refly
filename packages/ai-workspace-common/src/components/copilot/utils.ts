@@ -2,29 +2,111 @@ import { CANVAS_THINKING_TAG_REGEX, CANVAS_TAG_REGEX } from '@refly-packages/ai-
 
 /**
  * Replace all line breaks in the matched `reflyCanvas` tag with an empty string
+ * Handle content with code examples safely
  */
 export const processWithCanvas = (input: string = '') => {
+  if (typeof input !== 'string') {
+    console.warn('Input is not a string:', input);
+    return '';
+  }
+
   let output = input;
-  const thinkMatch = CANVAS_THINKING_TAG_REGEX.exec(input);
 
-  // If the input contains the `reflyThinking` tag, replace all line breaks with an empty string
-  if (thinkMatch) output = input.replace(CANVAS_THINKING_TAG_REGEX, (match) => match.replaceAll(/\r?\n|\r/g, ''));
+  // Helper function to safely process content
+  const safelyProcessContent = (content: string) => {
+    try {
+      // First protect code blocks content
+      return content.replace(/```[\s\S]*?```/g, (codeBlock) => {
+        // Escape all potentially problematic characters in code blocks
+        return codeBlock.replace(
+          /[<>&'"]/g,
+          (char) =>
+            ({
+              '<': '&lt;',
+              '>': '&gt;',
+              '&': '&amp;',
+              "'": '&apos;',
+              '"': '&quot;',
+            })[char] || char,
+        );
+      });
+    } catch (error) {
+      console.warn('Error processing code blocks:', error);
+      return content;
+    }
+  };
 
-  const match = CANVAS_TAG_REGEX.exec(input);
-  // If the input contains the `reflyCanvas` tag, replace all line breaks with an empty string
-  if (match) return output.replace(CANVAS_TAG_REGEX, (match) => match.replaceAll(/\r?\n|\r/g, ''));
+  // Helper function to process tags
+  const processTag = (content: string, regex: RegExp) => {
+    try {
+      return content.replace(regex, (match) => {
+        // Process the content safely
+        const processedMatch = safelyProcessContent(match);
+        // Remove line breaks
+        return processedMatch.replaceAll(/\r?\n|\r/g, '');
+      });
+    } catch (error) {
+      console.warn('Error processing tag:', error);
+      return content;
+    }
+  };
 
-  // if not match, check if it's start with <reflyCanvas but not closed
-  const regex = /<reflyCanvas\b(?:(?!\/?>)[\S\s])*$/;
-  if (regex.test(output)) {
-    return output.replace(regex, '<reflyCanvas>');
+  // Process thinking tag first
+  const thinkMatch = CANVAS_THINKING_TAG_REGEX.exec(output);
+  if (thinkMatch) {
+    output = processTag(output, CANVAS_THINKING_TAG_REGEX);
+  }
+
+  // Process canvas tag
+  const match = CANVAS_TAG_REGEX.exec(output);
+  if (match) {
+    return processTag(output, CANVAS_TAG_REGEX);
+  }
+
+  // Check for unclosed canvas tag
+  const unclosedRegex = /<reflyCanvas\b(?:(?!\/?>)[\S\s])*$/;
+  if (unclosedRegex.test(output)) {
+    try {
+      return output.replace(unclosedRegex, '<reflyCanvas>');
+    } catch (error) {
+      console.warn('Error processing unclosed canvas tag:', error);
+      return output;
+    }
   }
 
   return output;
 };
 
 export const getCanvasContent = (content: string) => {
-  const result = content.match(CANVAS_TAG_REGEX);
+  if (typeof content !== 'string') {
+    console.warn('Content is not a string:', content);
+    return '';
+  }
 
-  return result?.groups?.content || '';
+  try {
+    // First safely process any code blocks
+    const safeContent = content.replace(/```[\s\S]*?```/g, (codeBlock) => {
+      return codeBlock.replace(
+        /[<>&'"]/g,
+        (char) =>
+          ({
+            '<': '&lt;',
+            '>': '&gt;',
+            '&': '&amp;',
+            "'": '&apos;',
+            '"': '&quot;',
+          })[char] || char,
+      );
+    });
+
+    const result = safeContent.match(CANVAS_TAG_REGEX);
+    if (!result?.groups?.content) {
+      return '';
+    }
+
+    return result.groups.content;
+  } catch (error) {
+    console.warn('Error getting canvas content:', error);
+    return '';
+  }
 };

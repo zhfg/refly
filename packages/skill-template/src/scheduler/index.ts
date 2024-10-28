@@ -38,7 +38,7 @@ import * as rewriteCanvas from './module/rewriteCanvas';
 import * as editCanvas from './module/editCanvas';
 
 // types
-import { SelectedRange } from './module/editCanvas/types';
+import { HighlightSelection, SelectedRange } from './module/editCanvas/types';
 
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
@@ -459,6 +459,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       throw new Error('No current canvas found for editing');
     }
 
+    this.emitEvent({ event: 'start' }, this.configSnapshot);
     this.emitEvent(
       {
         event: 'log',
@@ -471,9 +472,10 @@ Please generate the summary based on these requirements and offer suggestions fo
     const selectedRange = currentCanvas?.metadata?.selectedRange as SelectedRange;
 
     // Extract content context if selection exists
-    const selectedContent = selectedRange
-      ? editCanvas.extractContentAroundSelection(currentCanvas.canvas.content || '', selectedRange)
-      : undefined;
+    // const selectedContent = selectedRange
+    //   ? editCanvas.extractContentAroundSelection(currentCanvas.canvas.content || '', selectedRange)
+    //   : undefined;
+    const highlightSelection = currentCanvas?.metadata?.selection as HighlightSelection;
 
     // Emit intent matcher event
     this.emitEvent(
@@ -481,7 +483,7 @@ Please generate the summary based on these requirements and offer suggestions fo
         event: 'structured_data',
         structuredDataKey: 'intentMatcher',
         content: JSON.stringify({
-          type: CanvasIntentType.UpdateCanvas,
+          type: CanvasIntentType.EditCanvas,
           projectId,
           canvasId: currentCanvas.canvasId,
           convId,
@@ -497,8 +499,8 @@ Please generate the summary based on these requirements and offer suggestions fo
     });
 
     // Prepare prompts with selected content context
-    const editCanvasUserPrompt = editCanvas.editCanvasUserPrompt(originalQuery, selectedContent);
-    const editCanvasContext = editCanvas.editCanvasContext(currentCanvas.canvas, selectedContent);
+    const editCanvasUserPrompt = editCanvas.editCanvasUserPrompt(originalQuery, highlightSelection);
+    const editCanvasContext = editCanvas.editCanvasContext(currentCanvas.canvas, highlightSelection);
 
     const requestMessages = [
       new SystemMessage(editCanvas.editCanvasSystemPrompt),
@@ -521,24 +523,24 @@ Please generate the summary based on these requirements and offer suggestions fo
       });
 
       // Extract edit sections from response, passing selectedContent if it exists
-      const editSections = editCanvas.extractEditSections(responseMessage.content as string, selectedContent);
+      // const editSections = editCanvas.extractEditSections(responseMessage.content as string, selectedContent);
 
       // Extract thinking process for logging/debugging
-      const thinking = editCanvas.extractThinking(responseMessage.content as string);
+      // const thinking = editCanvas.extractThinking(responseMessage.content as string);
 
       // Emit edit sections
-      this.emitEvent(
-        {
-          event: 'structured_data',
-          structuredDataKey: 'editSections',
-          content: JSON.stringify({
-            sections: editSections,
-            thinking,
-            mode: selectedContent ? 'selection' : 'verbal',
-          }),
-        },
-        config,
-      );
+      // this.emitEvent(
+      //   {
+      //     event: 'structured_data',
+      //     structuredDataKey: 'editSections',
+      //     content: JSON.stringify({
+      //       sections: editSections,
+      //       thinking,
+      //       mode: selectedContent ? 'selection' : 'verbal',
+      //     }),
+      //   },
+      //   config,
+      // );
 
       this.emitEvent(
         {
@@ -918,9 +920,9 @@ Generated question example:
     })
       // .addNode('direct', this.directCallSkill)
       // .addNode('scheduler', this.callScheduler)
-      .addNode('generateCanvas', this.callGenerateCanvas)
+      // .addNode('generateCanvas', this.callGenerateCanvas)
       // .addNode('rewriteCanvas', this.callRewriteCanvas)
-      // .addNode('editCanvas', this.callEditCanvas)
+      .addNode('editCanvas', this.callEditCanvas)
       // .addNode('other', this.callScheduler)
       .addNode('relatedQuestions', this.genRelatedQuestions);
 
@@ -928,10 +930,10 @@ Generated question example:
     // workflow.addConditionalEdges('direct', this.onDirectSkillCallFinish);
     // workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
     // workflow.addConditionalEdges(START, this.callCanvasIntentMatcher);
-    workflow.addEdge(START, 'generateCanvas');
-    workflow.addEdge('generateCanvas', 'relatedQuestions');
+    workflow.addEdge(START, 'editCanvas');
+    // workflow.addEdge('generateCanvas', 'relatedQuestions');
     // workflow.addEdge('rewriteCanvas', 'relatedQuestions');
-    // workflow.addEdge('editCanvas', 'relatedQuestions');
+    workflow.addEdge('editCanvas', 'relatedQuestions');
     // workflow.addEdge('other', 'relatedQuestions');
     workflow.addEdge('relatedQuestions', END);
 

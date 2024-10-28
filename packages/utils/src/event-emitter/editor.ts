@@ -1,12 +1,13 @@
 import mitt from 'mitt';
 
 export interface InPlaceSendMessagePayload {
-    type: 'inline' | 'block',
-    userInput: string,
-    selection: {
-    startIndex: number,
-    endIndex: number,
-    },
+  type: 'inline' | 'block';
+  userInput: string;
+  selection: {
+    startIndex: number;
+    endIndex: number;
+    selectedMdText: string;
+  };
 }
 
 export type Events = {
@@ -15,9 +16,13 @@ export type Events = {
   contineInChat: string;
   createNewNote: string;
   streamCanvasContent: string;
+  streamEditCanvasContent: {
+    isFirst: boolean;
+    content: string;
+  };
   updateCanvasTitle: string;
-  activeAskAI: boolean
-  inPlaceSendMessage: InPlaceSendMessagePayload
+  activeAskAI: boolean;
+  inPlaceSendMessage: InPlaceSendMessagePayload;
 };
 
 export type EditorOperation =
@@ -26,6 +31,7 @@ export type EditorOperation =
   | 'contineInChat'
   | 'createNewNote'
   | 'streamCanvasContent'
+  | 'streamEditCanvasContent'
   | 'updateCanvasTitle'
   | 'inPlaceSendMessage'
   | 'activeAskAI';

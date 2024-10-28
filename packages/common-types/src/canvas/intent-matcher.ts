@@ -1,6 +1,6 @@
 export enum CanvasIntentType {
   GenerateCanvas = 'generateCanvas',
-  UpdateCanvas = 'updateCanvas',
+  EditCanvas = 'editCanvas',
   RewriteCanvas = 'rewriteCanvas',
   Other = 'other',
 }

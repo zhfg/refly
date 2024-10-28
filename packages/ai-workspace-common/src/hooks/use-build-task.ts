@@ -41,6 +41,8 @@ export const useBuildTask = () => {
   const chatStore = useChatStoreShallow((state) => ({
     setMessages: state.setMessages,
     setIntentMatcher: state.setIntentMatcher,
+    setNowStreamCanvasContent: state.setNowStreamCanvasContent,
+    setIsFirstStreamEditCanvasContent: state.setIsFirstStreamEditCanvasContent,
   }));
   const messageStateStore = useMessageStateStoreShallow((state) => ({
     setMessageState: state.setMessageState,
@@ -142,7 +144,11 @@ export const useBuildTask = () => {
   };
 
   const onSkillStream = (skillEvent: SkillEvent) => {
-    const { messages = [] } = useChatStore.getState();
+    const {
+      messages = [],
+      nowStreamCanvasContent = '',
+      isFirstStreamEditCanvasContent = true,
+    } = useChatStore.getState();
     const { pendingFirstToken } = useMessageStateStore.getState();
     const lastRelatedMessage = findLastRelatedMessage(messages, skillEvent);
     const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
@@ -153,6 +159,7 @@ export const useBuildTask = () => {
 
     if (!lastRelatedMessage.content) {
       lastRelatedMessage.content = '';
+      chatStore.setNowStreamCanvasContent('');
     }
 
     // 获取更新前的 canvas 内容
@@ -169,9 +176,11 @@ export const useBuildTask = () => {
 
     // 处理 Citation 的序列号
     lastRelatedMessage.content = markdownCitationParse(lastRelatedMessage.content);
+    const newNowStreamCanvasContent = nowStreamCanvasContent + incrementalContent;
 
     messages[lastRelatedMessageIndex] = lastRelatedMessage;
     chatStore.setMessages(messages);
+    chatStore.setNowStreamCanvasContent(newNowStreamCanvasContent);
 
     if (pendingFirstToken && lastRelatedMessage.content.trim()) {
       messageStateStore.setMessageState({ pendingFirstToken: false });
@@ -182,6 +191,16 @@ export const useBuildTask = () => {
     if (intentMatcher?.type === CanvasIntentType.GenerateCanvas && incrementalContent) {
       // TODO: 不应该流式的插入内容，而是应该类似事务一样处理，能够看到内容，但是可以一键 undo，以及能够自动处理 markdown 到 tiptap 编辑器转换的渲染，目前没有处理
       editorEmitter.emit('streamCanvasContent', incrementalContent);
+    } else if (intentMatcher?.type === CanvasIntentType.EditCanvas && incrementalContent) {
+      editorEmitter.emit('streamEditCanvasContent', {
+        isFirst: isFirstStreamEditCanvasContent,
+        content: incrementalContent,
+      });
+
+      if (isFirstStreamEditCanvasContent) {
+        const newIsFirstStreamEditCanvasContent = !isFirstStreamEditCanvasContent;
+        chatStore.setIsFirstStreamEditCanvasContent(newIsFirstStreamEditCanvasContent);
+      }
     }
   };
 

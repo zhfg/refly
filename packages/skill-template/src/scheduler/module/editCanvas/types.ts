@@ -61,3 +61,9 @@ export interface EditSection {
   updated: ContentSelection;
   summary?: string;
 }
+
+export interface HighlightSelection {
+  beforeHighlight: string;
+  highlightedText: string;
+  afterHighlight: string;
+}

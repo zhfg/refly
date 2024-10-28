@@ -21,6 +21,7 @@ export const useBuildSkillContext = () => {
         .map((item) => ({
           [`${type}Id`]: item?.entityId || item?.id,
           metadata: {
+            ...(item?.metadata || {}),
             domain: item?.type,
             url: item?.url || '',
             title: item?.title || '',

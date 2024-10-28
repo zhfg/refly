@@ -9,7 +9,7 @@ export const prepareIntentMatcherTypeDomain = (currentCanvas?: any, projectId?: 
   if (projectId && currentCanvas) {
     return [
       CanvasIntentType.RewriteCanvas,
-      CanvasIntentType.UpdateCanvas,
+      CanvasIntentType.EditCanvas,
       CanvasIntentType.GenerateCanvas,
       CanvasIntentType.Other,
     ];

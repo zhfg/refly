@@ -24,7 +24,7 @@ const Render = memo((props: { children: React.ReactNode; id: string }) => {
   return (
     isThinking && (
       <div>
-        <Button loading={isThinking}>Thinking to create canvas...</Button>
+        <Button loading={isThinking}>Thinking to operate canvas...</Button>
       </div>
     )
   );

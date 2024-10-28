@@ -29,6 +29,7 @@ interface InvokeParams {
   intentResult?: IntentResult; // 新增意图识别结果
   skipIntentDetection?: boolean; // 是否跳过意图识别
   forceNewConv?: boolean; // 是否是新会话
+  userInput?: string; // 用户输入
 }
 
 export const useBuildThreadAndRun = () => {
@@ -183,7 +184,7 @@ export const useBuildThreadAndRun = () => {
     const { newQAText } = useChatStore.getState();
 
     setIsSearchOpen(false);
-    runSkill(newQAText, params); // jump extra handler in useHandleAICanvas
+    runSkill(params.userInput || newQAText, params); // jump extra handler in useHandleAICanvas
   };
 
   return {

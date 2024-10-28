@@ -25,6 +25,8 @@ import { useProjectContext } from '@refly-packages/ai-workspace-common/component
 
 // types
 import { CopilotSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { editorEmitter, InPlaceSendMessagePayload } from '@refly-packages/utils/event-emitter/editor';
+import { MarkType } from '@refly/common-types';
 
 interface CopilotInputModuleProps {
   source?: CopilotSource;
@@ -33,6 +35,9 @@ interface CopilotInputModuleProps {
 const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, CopilotInputModuleProps> = (props, ref) => {
   const { source } = props;
   const { t } = useTranslation();
+  const { updateCurrentSelectedMarks } = useContextPanelStore((state) => ({
+    updateCurrentSelectedMarks: state.updateCurrentSelectedMarks,
+  }));
 
   // stores
   const skillStore = useSkillStoreShallow((state) => ({
@@ -49,7 +54,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
     setFormErrors: state.setFormErrors,
   }));
 
-  const handleSendMessage = (chatMode: ChatMode) => {
+  const handleSendMessage = (chatMode: ChatMode, userInput?: string) => {
     const tplConfig = form?.getFieldValue('tplConfig');
     // TODO: later may add more source
     const forceNewConv = [CopilotSource.HomePage].includes(source);
@@ -59,6 +64,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       projectId,
       tplConfig,
       forceNewConv,
+      userInput,
     });
   };
 
@@ -66,6 +72,38 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
     buildShutdownTaskAndGenResponse();
   };
 
+  const handleInPlaceSendMessage = (data: InPlaceSendMessagePayload) => {
+    const { type, userInput, selection } = data;
+    let { currentSelectedMarks = [] } = useContextPanelStore.getState();
+    const currentCanvas = currentSelectedMarks.find(
+      (item) => item.isCurrentContext && (item.type as MarkType) === 'canvas',
+    );
+
+    currentCanvas.metadata = {
+      ...(currentCanvas.metadata || {}),
+      selection: {
+        beforeHighlight: '',
+        highlightedText: selection.selectedMdText,
+        afterHighlight: '',
+      },
+      selectedRange: {
+        startIndex: selection.startIndex,
+        endIndex: selection.endIndex,
+      },
+      inPlaceEditType: type,
+    };
+
+    updateCurrentSelectedMarks(currentSelectedMarks);
+    handleSendMessage('normal', userInput);
+  };
+
+  useEffect(() => {
+    editorEmitter.on('inPlaceSendMessage', handleInPlaceSendMessage);
+
+    return () => {
+      editorEmitter.off('inPlaceSendMessage', handleInPlaceSendMessage);
+    };
+  }, []);
   useEffect(() => {
     if (!skillStore.selectedSkill?.tplConfigSchema?.items?.length) {
       form.setFieldValue('tplConfig', undefined);

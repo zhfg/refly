@@ -51,6 +51,7 @@ import { zhLsfContent } from '@refly-packages/ai-workspace-common/components/pro
 import { enInvestMemoContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/en-invest-memo';
 import { zhReactContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-react';
 import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
+import { MarkType } from '@refly/common-types';
 
 class TokenStreamProcessor {
   private editor: EditorInstance;
@@ -481,11 +482,51 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
       }
     };
 
+    const handleStreamEditCanvasContent = (event: { isFirst: boolean; content: string }) => {
+      try {
+        let { currentSelectedMarks = [] } = useContextPanelStore.getState();
+        const currentCanvas = currentSelectedMarks.find(
+          (item) => item.isCurrentContext && (item.type as MarkType) === 'canvas',
+        );
+
+        const { isFirst, content } = event;
+        if (editorRef.current && currentCanvas) {
+          const { selectedRange } = currentCanvas.metadata;
+
+          if (isFirst) {
+            // 1. Select the content range
+            editorRef.current.commands.setTextSelection({
+              from: selectedRange.startIndex,
+              to: selectedRange.endIndex,
+            });
+
+            // 2. Delete selected content
+            editorRef.current.commands.deleteSelection();
+
+            // 3. Insert new content at startIndex
+            editorRef.current.commands.insertContentAt(selectedRange.startIndex, content, {
+              updateSelection: true,
+            });
+          } else {
+            // For subsequent content, insert at current cursor position
+            const currentPos = editorRef.current.state.selection.$head.pos;
+            editorRef.current.commands.insertContentAt(currentPos, content, {
+              updateSelection: true,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('handleStreamEditCanvasContent error', error);
+      }
+    };
+
     // Listen for stream content events
     editorEmitter.on('streamCanvasContent', handleStreamContent);
+    editorEmitter.on('streamEditCanvasContent', handleStreamEditCanvasContent);
 
     return () => {
       editorEmitter.off('streamCanvasContent', handleStreamContent);
+      editorEmitter.off('streamEditCanvasContent', handleStreamEditCanvasContent);
     };
   }, []);
 

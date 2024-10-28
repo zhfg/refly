@@ -15,6 +15,8 @@ export interface ChatState {
   sessions: SessionItem[];
   newQAText: string;
   isGenTitle: boolean;
+  nowStreamCanvasContent: string;
+  isFirstStreamEditCanvasContent: boolean;
 
   // context
   invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }; // for selected skill instance from copilot
@@ -29,6 +31,8 @@ export interface ChatState {
   setMessages: (val: ClientChatMessage[]) => void;
   setIsGenTitle: (val: boolean) => void;
   setNewQAText: (val: string) => void;
+  setNowStreamCanvasContent: (val: string) => void;
+  setIsFirstStreamEditCanvasContent: (val: boolean) => void;
   setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) => void;
   setSelectedModel: (val: ModelInfo) => void;
   setModelList: (val: ModelInfo[]) => void;
@@ -59,6 +63,8 @@ const defaultConfigurableState = {
 export const defaultExtraState = {
   // messages: fakeMessages as any,
   messages: [],
+  nowStreamCanvasContent: '',
+  isFirstStreamEditCanvasContent: true,
   sessions: [],
   newQAText: '',
   isGenTitle: false,
@@ -84,6 +90,8 @@ export const useChatStore = create<ChatState>()(
         setNewQAText: (val: string) => {
           return set({ newQAText: val });
         },
+        setNowStreamCanvasContent: (val: string) => set({ nowStreamCanvasContent: val }),
+        setIsFirstStreamEditCanvasContent: (val: boolean) => set({ isFirstStreamEditCanvasContent: val }),
         setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) =>
           set({ invokeParams: val }),
         setSelectedModel: (val: ModelInfo) => set({ selectedModel: val }),

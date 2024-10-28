@@ -40,7 +40,7 @@ export const useHandleAICanvas = () => {
       case CanvasIntentType.GenerateCanvas:
         await jumpToNewProject(intent);
         break;
-      case CanvasIntentType.UpdateCanvas:
+      case CanvasIntentType.EditCanvas:
       case CanvasIntentType.RewriteCanvas:
         if (intent.canvasId) {
           await updateExistingCanvas(intent);

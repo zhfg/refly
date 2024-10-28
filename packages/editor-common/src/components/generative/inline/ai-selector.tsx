@@ -86,12 +86,16 @@ export const AISelector = memo(({ onOpenChange }: AISelectorProps) => {
                 const startIndex = selection.from;
                 const endIndex = selection.to;
 
+                const slice = editor.state.selection.content();
+                const selectedMdText = editor.storage.markdown.serializer.serialize(slice.content);
+
                 editorEmitter.emit('inPlaceSendMessage', {
                   type: 'inline',
                   userInput: inputValue,
                   selection: {
                     startIndex,
                     endIndex,
+                    selectedMdText,
                   },
                 });
               }}
