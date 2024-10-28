@@ -1,8 +1,5 @@
 'use client';
 
-import { Command } from 'cmdk';
-
-import { useChat } from '@refly/ai-sdk';
 import { ArrowUp } from 'lucide-react';
 import { useEditor } from '@refly-packages/editor-core/components';
 import { addAIHighlight } from '@refly-packages/editor-core/extensions';
@@ -16,7 +13,7 @@ import { ScrollArea } from '../../ui/scroll-area';
 import AICompletionCommands from './ai-completion-command';
 import AISelectorCommands from './ai-selector-commands';
 import { LOCALE } from '@refly/common-types';
-import { editorEmitter } from '@refly-packages/editor-core/utils/event';
+import { editorEmitter } from '@refly/utils/event-emitter/editor';
 import { Input } from '@arco-design/web-react';
 import { cn } from '@refly-packages/editor-component/utils';
 //TODO: I think it makes more sense to create a custom Tiptap extension for this functionality https://tiptap.dev/docs/editor/ai/introduction
@@ -88,6 +85,15 @@ export const AISelector = memo(({ onOpenChange }: AISelectorProps) => {
                 const selection = editor.state.selection;
                 const startIndex = selection.from;
                 const endIndex = selection.to;
+
+                editorEmitter.emit('inPlaceSendMessage', {
+                  type: 'inline',
+                  userInput: inputValue,
+                  selection: {
+                    startIndex,
+                    endIndex,
+                  },
+                });
               }}
             >
               <ArrowUp className="w-4 h-4" />

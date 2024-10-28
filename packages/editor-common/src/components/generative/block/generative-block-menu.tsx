@@ -2,7 +2,7 @@ import { EditorBubble, useEditor } from '@refly-packages/editor-core/components'
 import { removeAIHighlight } from '@refly-packages/editor-core/extensions';
 import { useEffect, useState } from 'react';
 import { AIBlockSelector } from './ai-block-selector';
-import { editorEmitter } from '@refly-packages/editor-core/utils/event';
+import { editorEmitter } from '@refly/utils/event-emitter/editor';
 
 interface GenerativeBlockMenuSwitchProps {
   open: boolean;

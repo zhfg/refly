@@ -12,7 +12,7 @@ import { CANVAS_TAG_CLOSED_REGEX } from '@refly-packages/ai-workspace-common/con
 import { getCanvasContent } from '@refly-packages/ai-workspace-common/components/copilot/utils';
 import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
 
-import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
+import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { CanvasIntentType } from '@refly/common-types';
 import './render.scss';
 

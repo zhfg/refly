@@ -26,7 +26,7 @@ import { getAuthTokenFromCookie } from '@refly-packages/utils/request';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { markdownCitationParse } from '@refly-packages/utils/parse';
 
-import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
+import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { getCanvasContent } from '@refly-packages/ai-workspace-common/components/copilot/utils';
 
 // hooks

@@ -8,7 +8,7 @@ import { useCookie } from 'react-use';
 import { Divider, Input, Popover, Spin, Switch } from '@arco-design/web-react';
 import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
-import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
+import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 
 import {
   CollabEditorCommand,

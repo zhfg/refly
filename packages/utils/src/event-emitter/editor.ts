@@ -1,12 +1,23 @@
 import mitt from 'mitt';
 
-type Events = {
+export interface InPlaceSendMessagePayload {
+    type: 'inline' | 'block',
+    userInput: string,
+    selection: {
+    startIndex: number,
+    endIndex: number,
+    },
+}
+
+export type Events = {
   insertBlow: string;
   replaceSelection: string;
   contineInChat: string;
   createNewNote: string;
   streamCanvasContent: string;
   updateCanvasTitle: string;
+  activeAskAI: boolean
+  inPlaceSendMessage: InPlaceSendMessagePayload
 };
 
 export type EditorOperation =
@@ -15,6 +26,8 @@ export type EditorOperation =
   | 'contineInChat'
   | 'createNewNote'
   | 'streamCanvasContent'
-  | 'updateCanvasTitle';
+  | 'updateCanvasTitle'
+  | 'inPlaceSendMessage'
+  | 'activeAskAI';
 
 export const editorEmitter = mitt<Events>();

@@ -1,6 +1,6 @@
 import { CommandGroup, CommandItem, CommandList, CommandSeparator } from '../../ui/command';
 import { useEditor } from '@refly-packages/editor-core/components';
-import { editorEmitter } from '@refly-packages/editor-core/utils/event';
+import { editorEmitter } from '@refly/utils/event-emitter/editor';
 import { Check, TextQuote, TrashIcon } from 'lucide-react';
 import { useEffect } from 'react';
 

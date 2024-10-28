@@ -32,14 +32,32 @@ export interface SelectedRange {
   endIndex: number;
 }
 
-export interface EditSection {
-  startIndex: number;
-  endIndex: number;
-  originalContent: string;
-  updatedContent: string;
-}
-
 export interface EditResult {
   sections: EditSection[];
   summary: string;
+}
+
+export interface Position {
+  tiptap: {
+    startIndex: number;
+    endIndex: number;
+    path?: number[];
+    nodeType?: string;
+  };
+  markdown: {
+    startIndex: number;
+    endIndex: number;
+    lineNumber?: number;
+  };
+}
+
+export interface ContentSelection {
+  content: string;
+  position: Position;
+}
+
+export interface EditSection {
+  original: ContentSelection;
+  updated: ContentSelection;
+  summary?: string;
 }

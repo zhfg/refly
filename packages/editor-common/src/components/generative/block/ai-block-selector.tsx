@@ -2,7 +2,6 @@
 
 import { Command, CommandInput } from '../../ui/command';
 
-import { useChat } from '@refly/ai-sdk';
 import { ArrowUp } from 'lucide-react';
 import { useEditor } from '@refly-packages/editor-core/components';
 import { addAIHighlight } from '@refly-packages/editor-core/extensions';
@@ -18,7 +17,7 @@ import AICompletionCommands from './ai-completion-block-command';
 import AISelectorCommands from './ai-block-commands';
 import { LOCALE } from '@refly/common-types';
 import { cn } from '@refly-packages/editor-component/utils';
-import { editorEmitter } from '@refly-packages/editor-core/utils/event';
+import { editorEmitter } from '@refly/utils/event-emitter/editor';
 //TODO: I think it makes more sense to create a custom Tiptap extension for this functionality https://tiptap.dev/docs/editor/ai/introduction
 
 interface AIBlockSelectorProps {
@@ -29,19 +28,8 @@ interface AIBlockSelectorProps {
 export const AIBlockSelector = memo(({ onOpenChange }: AIBlockSelectorProps) => {
   const { editor } = useEditor();
   const [inputValue, setInputValue] = useState('');
-
-  const { completion, completionMsg, chat, isLoading } = useChat({
-    // id: @refly-packages/editor-core,
-    onResponse: (response) => {
-      if (response.status === 429) {
-        toast.error('You have reached your request limit for the day.');
-        return;
-      }
-    },
-    onError: (e) => {
-      toast.error(e.message);
-    },
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const completion = '';
 
   const hasCompletion = completion.length > 0;
 

@@ -14,7 +14,7 @@ import { createSuggestionItems } from '@refly-packages/editor-core/extensions';
 import { Command, renderItems } from '@refly-packages/editor-core/extensions';
 import { createUploadFn } from './image-upload';
 import Magic from '@refly-packages/editor-component/ui/icons/magic';
-import { editorEmitter } from '@refly-packages/editor-core/utils/event';
+import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 
 export const configureSuggestionItems = (param: { entityId: string; entityType: string }) => {
   return createSuggestionItems([

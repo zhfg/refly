@@ -5,7 +5,7 @@ import { Message } from '@arco-design/web-react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
+import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';

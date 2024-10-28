@@ -20,7 +20,7 @@ import { IconCanvas, IconProject, IconThread } from '@refly-packages/ai-workspac
 import { Favicon } from '@refly-packages/ai-workspace-common/components/common/favicon';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 
-import { editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
+import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 type DirectoryItemType = 'canvas' | 'resource' | 'thread';

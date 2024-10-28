@@ -1,6 +1,7 @@
 import { EditSection, EditResult } from './types';
 
 // Helper function to extract content around selection
+// TODO:  should handled in frontend
 export const extractContentAroundSelection = (
   content: string,
   selection: { startIndex: number; endIndex: number },
@@ -43,7 +44,7 @@ export const extractEditSections = (
         endIndex: selectedContent.originalPositions.selectionEnd,
         originalContent: selectedContent.highlightedText,
         // Keep the updated content as is
-        updatedContent: section.updatedContent,
+        updatedContent: section.updated.content,
       }));
     }
 
