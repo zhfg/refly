@@ -150,7 +150,7 @@ export const useBuildThreadAndRun = () => {
     taskStore.setTask(task);
     // 开始提问
     buildTaskAndGenReponse(task as InvokeSkillRequest);
-    chatStore.setNewQAText('');
+    // chatStore.setNewQAText('');
   };
 
   const sendChatMessage = (params: InvokeParams) => {
