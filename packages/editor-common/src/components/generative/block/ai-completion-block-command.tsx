@@ -1,10 +1,10 @@
-import { CommandGroup, CommandItem, CommandSeparator } from '../ui/command';
+import { CommandGroup, CommandItem, CommandSeparator } from '../../ui/command';
 import { useEditor } from '@refly-packages/editor-core/components';
 import { editorEmitter } from '@refly-packages/editor-core/utils/event';
 import { Check, TextQuote, TrashIcon } from 'lucide-react';
 import { useEffect } from 'react';
 
-const AICompletionCommands = ({
+const AIBlockCompletionCommands = ({
   completion,
   onDiscard,
   onOpenChange,
@@ -43,7 +43,7 @@ const AICompletionCommands = ({
             }
           }}
         >
-          <Check className="h-4 w-4 text-muted-foreground" />
+          <Check className="w-4 h-4 text-muted-foreground" />
           Insert
         </CommandItem>
         <CommandItem
@@ -67,7 +67,7 @@ const AICompletionCommands = ({
             }
           }}
         >
-          <TextQuote className="h-4 w-4 text-muted-foreground" />
+          <TextQuote className="w-4 h-4 text-muted-foreground" />
           Insert below
         </CommandItem>
       </CommandGroup>
@@ -75,7 +75,7 @@ const AICompletionCommands = ({
 
       <CommandGroup>
         <CommandItem onSelect={onDiscard} value="thrash" className="gap-2 px-4">
-          <TrashIcon className="h-4 w-4 text-muted-foreground" />
+          <TrashIcon className="w-4 h-4 text-muted-foreground" />
           Discard
         </CommandItem>
       </CommandGroup>
@@ -83,4 +83,4 @@ const AICompletionCommands = ({
   );
 };
 
-export default AICompletionCommands;
+export default AIBlockCompletionCommands;

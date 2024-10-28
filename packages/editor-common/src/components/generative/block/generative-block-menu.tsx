@@ -1,14 +1,14 @@
 import { EditorBubble, useEditor } from '@refly-packages/editor-core/components';
 import { removeAIHighlight } from '@refly-packages/editor-core/extensions';
 import { useEffect, useState } from 'react';
-import { AISelector } from '@refly-packages/editor-component/generative/ai-block-selector';
+import { AIBlockSelector } from './ai-block-selector';
 import { editorEmitter } from '@refly-packages/editor-core/utils/event';
 
-interface GenerativeMenuSwitchProps {
+interface GenerativeBlockMenuSwitchProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-const GenerativeMenuSwitch = ({ open, onOpenChange }: GenerativeMenuSwitchProps) => {
+const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSwitchProps) => {
   const { editor } = useEditor();
   const [askAIShow, setAskAIShow] = useState(false);
 
@@ -38,9 +38,9 @@ const GenerativeMenuSwitch = ({ open, onOpenChange }: GenerativeMenuSwitchProps)
       askAIShow={askAIShow}
       className="z-50 flex w-fit max-w-[90vw] overflow-hidden rounded-md border border-muted bg-background shadow-xl"
     >
-      {open && askAIShow && <AISelector open={open} onOpenChange={onOpenChange} />}
+      {open && askAIShow && <AIBlockSelector open={open} onOpenChange={onOpenChange} />}
     </EditorBubble>
   );
 };
 
-export default GenerativeMenuSwitch;
+export default GenerativeBlockMenuSwitch;

@@ -1,6 +1,6 @@
 'use client';
 
-import { Command, CommandInput } from '../ui/command';
+import { Command, CommandInput } from '../../ui/command';
 
 import { useChat } from '@refly/ai-sdk';
 import { ArrowUp } from 'lucide-react';
@@ -9,22 +9,22 @@ import { addAIHighlight } from '@refly-packages/editor-core/extensions';
 import { memo, useState } from 'react';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
-import { Button } from '../ui/button';
-import CrazySpinner from '../ui/icons/crazy-spinner';
-import Magic from '../ui/icons/magic';
-import { ScrollArea } from '../ui/scroll-area';
+import { Button } from '../../ui/button';
+import CrazySpinner from '../../ui/icons/crazy-spinner';
+import Magic from '../../ui/icons/magic';
+import { ScrollArea } from '../../ui/scroll-area';
 import AICompletionCommands from './ai-completion-block-command';
 import AISelectorCommands from './ai-block-commands';
 import { LOCALE } from '@refly/common-types';
 import { editorEmitter } from '@refly-packages/editor-core/utils/event';
 //TODO: I think it makes more sense to create a custom Tiptap extension for this functionality https://tiptap.dev/docs/editor/ai/introduction
 
-interface AISelectorProps {
+interface AIBlockSelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export const AISelector = memo(({ onOpenChange }: AISelectorProps) => {
+export const AIBlockSelector = memo(({ onOpenChange }: AIBlockSelectorProps) => {
   const { editor } = useEditor();
   const [inputValue, setInputValue] = useState('');
 

@@ -1,7 +1,7 @@
 import { EditorBubble, useEditor } from '@refly-packages/editor-core/components';
 import { removeAIHighlight } from '@refly-packages/editor-core/extensions';
 import { Fragment, type ReactNode, useEffect, useRef } from 'react';
-import { AISelector } from '@refly-packages/editor-component/generative/ai-selector';
+import { AISelector } from './ai-selector';
 
 interface GenerativeMenuSwitchProps {
   children: ReactNode;
@@ -29,7 +29,7 @@ const GenerativeMenuSwitch = ({ children, open, onOpenChange }: GenerativeMenuSw
           maxWidth: '90vw',
           appendTo: containerRef.current || 'parent',
         }}
-        className="z-50 flex w-fit max-w-full overflow-hidden rounded-md border border-muted bg-background shadow-xl"
+        className="flex overflow-hidden z-50 max-w-full rounded-md border shadow-xl w-fit border-muted bg-background"
       >
         {open && <AISelector open={open} onOpenChange={onOpenChange} />}
         {!open && <Fragment>{children}</Fragment>}

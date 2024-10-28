@@ -1,6 +1,6 @@
 'use client';
 
-import { Command, CommandInput } from '../ui/command';
+import { Command, CommandInput } from '../../ui/command';
 
 import { useChat } from '@refly/ai-sdk';
 import { ArrowUp } from 'lucide-react';
@@ -9,10 +9,10 @@ import { addAIHighlight } from '@refly-packages/editor-core/extensions';
 import { memo, useState } from 'react';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
-import { Button } from '../ui/button';
-import CrazySpinner from '../ui/icons/crazy-spinner';
-import Magic from '../ui/icons/magic';
-import { ScrollArea } from '../ui/scroll-area';
+import { Button } from '../../ui/button';
+import CrazySpinner from '../../ui/icons/crazy-spinner';
+import Magic from '../../ui/icons/magic';
+import { ScrollArea } from '../../ui/scroll-area';
 import AICompletionCommands from './ai-completion-command';
 import AISelectorCommands from './ai-selector-commands';
 import { LOCALE } from '@refly/common-types';
@@ -84,19 +84,6 @@ export const AISelector = memo(({ onOpenChange }: AISelectorProps) => {
                 const selection = editor.state.selection;
                 const startIndex = selection.from;
                 const endIndex = selection.to;
-
-                // const text = editor.storage.markdown.serializer.serialize(slice.content);
-
-                // chat({
-                //   userPrompt: inputValue,
-                //   context: {
-                //     type: 'text',
-                //     content: text,
-                //   },
-                //   config: {
-                //     locale: 'en' as LOCALE,
-                //   },
-                // }).then(() => setInputValue(''));
               }}
             >
               <ArrowUp className="w-4 h-4" />

@@ -12,8 +12,8 @@ import { ContentSelectorButtons } from './selectors/content-selector-buttons';
 import { AIBtnSelector } from './selectors/ai-btn-selector';
 import { Separator } from './ui/separator';
 
-import GenerativeMenuSwitch from './generative/generative-menu-switch';
-import GenerativeBlockMenu from './generative/generative-block-menu';
+import GenerativeMenuSwitch from './generative/inline/generative-menu-switch';
+import GenerativeBlockMenu from './generative/block/generative-block-menu';
 import { TextButtons } from './selectors/text-buttons';
 import { configureSuggestionItems } from './slash-command';
 
