@@ -133,7 +133,7 @@ export class KnowledgeController {
       page,
       pageSize,
     });
-    return buildSuccessResponse(resources.map(resourcePO2DTO));
+    return buildSuccessResponse(resources?.map(resourcePO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -217,7 +217,7 @@ export class KnowledgeController {
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListCanvasResponse> {
     const canvases = await this.knowledgeService.listCanvases(user, { projectId, page, pageSize });
-    return buildSuccessResponse(canvases.map(canvasPO2DTO));
+    return buildSuccessResponse(canvases?.map(canvasPO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
