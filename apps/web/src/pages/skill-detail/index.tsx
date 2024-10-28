@@ -11,6 +11,9 @@ import { AICopilot } from "@refly-packages/ai-workspace-common/components/copilo
 
 import { useSkillJobForCopilot } from "@refly-packages/ai-workspace-common/stores/skill-job-for-copilot"
 
+// types
+import { CopilotSource } from "@refly-packages/ai-workspace-common/types/copilot"
+
 import "./index.scss"
 
 const SkillDetailPage = () => {
@@ -57,7 +60,7 @@ const SkillDetailPage = () => {
                 id="skill-detail-page__copilot">
                 <AICopilot
                   disable={true}
-                  source="skillJob"
+                  source={CopilotSource.SkillJob}
                   jobId={skillJobForCopilot.jobId}
                 />
               </Panel>

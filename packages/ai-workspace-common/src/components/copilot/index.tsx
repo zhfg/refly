@@ -23,11 +23,14 @@ import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-co
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
+// types
+import { CopilotSource } from '@refly-packages/ai-workspace-common/types/copilot';
+
 import './index.scss';
 
 interface AICopilotProps {
   disable?: boolean;
-  source?: string;
+  source?: CopilotSource;
   jobId?: string;
 }
 
@@ -66,7 +69,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
   }));
 
   const conversationStore = useConversationStore((state) => ({
-    isNewConversation: state.isNewConversation,
     currentConversation: state.currentConversation,
     resetState: state.resetState,
     setCurrentConversation: state.setCurrentConversation,
@@ -173,7 +175,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
 
   useEffect(() => {
     if (convId && !isFromSkillJob()) {
-      handleConvTask(convId);
+      // handleConvTask(convId);
     }
 
     if (jobId && isFromSkillJob()) {

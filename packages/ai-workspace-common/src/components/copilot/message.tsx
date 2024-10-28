@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 import { SourceList } from '@refly-packages/ai-workspace-common/components/source-list';
 import { safeParseJSON } from '../../utils/parse';
-import { EditorOperation, editorEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/editor';
+import { EditorOperation, editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { ContextItem } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/context-item';
 import { ContextPreview } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/context-preview';

@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 import Magic from '../ui/icons/magic';
 import { Button } from '../ui/button';
 
-import { AISelector } from '../generative/ai-selector';
+import { AISelector } from '../generative/inline/ai-selector';
 
 interface AIBtnSelectorProps {
   open: boolean;
@@ -18,26 +18,37 @@ export const AIBtnSelector = ({ open, onOpenChange }: AIBtnSelectorProps) => {
 
   // Autofocus on input by default
   useEffect(() => {
-    inputRef.current?.focus();
-  });
+    if (open) {
+      inputRef.current?.focus();
+    }
+  }, [open]);
+
   if (!editor) return null;
 
   return (
     <Popover modal={true} open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
         <Button
-          className="gap-1 rounded-none text-purple-500"
+          className="gap-1 text-purple-500 rounded-none"
           variant="ghost"
-          onClick={() => onOpenChange(true)}
           size="sm"
+          onClick={() => onOpenChange(true)}
         >
-          <Magic className="h-5 w-5" />
+          <Magic className="w-5 h-5" />
           Ask AI
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-60 p-0" sideOffset={10}>
-        <AISelector open={open} onOpenChange={onOpenChange} />
-      </PopoverContent>
+      {open && (
+        <PopoverContent
+          align="start"
+          className="p-0 w-[350px]"
+          sideOffset={10}
+          onFocusOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+          <AISelector open={open} onOpenChange={onOpenChange} />
+        </PopoverContent>
+      )}
     </Popover>
   );
 };

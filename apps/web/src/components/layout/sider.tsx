@@ -12,18 +12,15 @@ import {
   useLocation,
   useNavigate,
 } from "@refly-packages/ai-workspace-common/utils/router"
-import {
-  HiOutlineHome,
-  HiOutlineDocumentAdd,
-  HiOutlineBookOpen,
-} from "react-icons/hi"
+import { HiOutlineBookOpen } from "react-icons/hi"
 import { LuMoreHorizontal } from "react-icons/lu"
-import { RiRobot2Line, RiHistoryLine } from "react-icons/ri"
+import { RiHistoryLine } from "react-icons/ri"
 import {
   AiOutlineMenuFold,
   AiOutlineMenuUnfold,
   AiFillChrome,
 } from "react-icons/ai"
+import { IconCanvas } from "@refly-packages/ai-workspace-common/components/common/icon"
 
 import {
   IconLanguage,
@@ -283,20 +280,20 @@ export const SiderLayout = () => {
 
   const siderSections: SiderCenterProps[][] = [
     [
-      {
-        key: "NewDraft",
-        name: "newDraft",
-        icon: (
-          <HiOutlineDocumentAdd
-            className="arco-icon"
-            style={{ fontSize: 20 }}
-          />
-        ),
-        showDivider: true,
-        onClick: () => {
-          newCanvasModalStore.setNewCanvasModalVisible(true)
-        },
-      },
+      // {
+      //   key: "NewDraft",
+      //   name: "newDraft",
+      //   icon: (
+      //     <HiOutlineDocumentAdd
+      //       className="arco-icon"
+      //       style={{ fontSize: 20 }}
+      //     />
+      //   ),
+      //   showDivider: true,
+      //   onClick: () => {
+      //     newCanvasModalStore.setNewCanvasModalVisible(true)
+      //   },
+      // },
       {
         key: "Import",
         name: "newResource",
@@ -312,7 +309,7 @@ export const SiderLayout = () => {
       {
         key: "Home",
         name: "homePage",
-        icon: <HiOutlineHome className="arco-icon" style={{ fontSize: 20 }} />,
+        icon: <IconCanvas className="arco-icon" style={{ fontSize: 20 }} />,
       },
       {
         key: "Library",
@@ -321,11 +318,11 @@ export const SiderLayout = () => {
           <HiOutlineBookOpen className="arco-icon" style={{ fontSize: 20 }} />
         ),
       },
-      {
-        key: "Skill",
-        name: "skill",
-        icon: <RiRobot2Line className="arco-icon" style={{ fontSize: 20 }} />,
-      },
+      // {
+      //   key: "Skill",
+      //   name: "skill",
+      //   icon: <RiRobot2Line className="arco-icon" style={{ fontSize: 20 }} />,
+      // },
       {
         key: "ThreadLibrary",
         name: "threadLibrary",

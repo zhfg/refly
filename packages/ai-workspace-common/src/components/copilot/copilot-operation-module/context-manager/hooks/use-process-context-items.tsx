@@ -37,7 +37,7 @@ export const useProcessContextItems = () => {
       case 'resource':
         return t('knowledgeBase.context.resource');
       case 'canvas':
-        return t('knowledgeBase.context.note');
+        return t('knowledgeBase.context.canvas');
       case 'project':
         return t('knowledgeBase.context.collection');
       case 'extensionWeblink':
@@ -45,7 +45,7 @@ export const useProcessContextItems = () => {
       case 'extensionWeblinkSelection':
         return t('knowledgeBase.context.extensionWeblinkSelection');
       case 'canvasSelection':
-        return t('knowledgeBase.context.noteSelection');
+        return t('knowledgeBase.context.canvasSelection');
       case 'resourceSelection':
         return t('knowledgeBase.context.resourceSelection');
     }

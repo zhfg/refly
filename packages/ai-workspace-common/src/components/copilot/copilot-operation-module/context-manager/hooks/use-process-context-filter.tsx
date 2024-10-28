@@ -172,7 +172,6 @@ export const useProcessContextFilter = (filterNow = false) => {
       }
     });
 
-    console.log('filteredIds', filteredIds);
     setFilterErrorInfo(config, initialConfigRule);
 
     updateFilterIdsOfCurrentSelectedMarks(filteredIds);

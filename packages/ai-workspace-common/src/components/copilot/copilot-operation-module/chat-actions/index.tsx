@@ -3,7 +3,6 @@ import { Button, Dropdown, Menu, FormInstance, Checkbox } from '@arco-design/web
 import { ChatMode, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { IconDown, IconPause, IconSend } from '@arco-design/web-react/icon';
 import { useMessageStateStoreShallow } from '@refly-packages/ai-workspace-common/stores/message-state';
-import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useTranslation } from 'react-i18next';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
@@ -16,15 +15,15 @@ import './index.scss';
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
-import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
 
 interface ChatActionsProps {
   form?: FormInstance;
+  handleSendMessage: (chatMode: ChatMode) => void;
+  handleAbort: () => void;
 }
 
 export const ChatActions = (props: ChatActionsProps) => {
-  const { form } = props;
-  const { projectId } = useProjectContext();
+  const { handleSendMessage, handleAbort } = props;
 
   const { t } = useTranslation();
 
@@ -49,8 +48,6 @@ export const ChatActions = (props: ChatActionsProps) => {
   const tokenAvailable =
     tokenUsage?.t1TokenQuota > tokenUsage?.t1TokenUsed || tokenUsage?.t2TokenQuota > tokenUsage?.t2TokenUsed;
 
-  const { sendChatMessage, buildShutdownTaskAndGenResponse } = useBuildThreadAndRun();
-
   // hooks
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
@@ -59,15 +56,6 @@ export const ChatActions = (props: ChatActionsProps) => {
     isLogin: state.isLogin,
     setLoginModalVisible: state.setLoginModalVisible,
   }));
-
-  const handleSendMessage = (chatMode: ChatMode) => {
-    const tplConfig = form?.getFieldValue('tplConfig');
-    sendChatMessage({ chatMode, projectId, tplConfig });
-  };
-
-  const handleAbort = () => {
-    buildShutdownTaskAndGenResponse();
-  };
 
   const canSendEmptyMessage = skillStore?.selectedSkill || (!skillStore?.selectedSkill && chatStore.newQAText?.trim());
   const canSendMessage = !userStore.isLogin || (!messageStateStore?.pending && tokenAvailable && canSendEmptyMessage);
@@ -120,15 +108,19 @@ export const ChatActions = (props: ChatActionsProps) => {
               <Menu>
                 <Menu.Item
                   key="noContext"
-                  className="text-xs h-8 leading-8"
-                  onClick={() => handleSendMessage('noContext')}
+                  className="h-8 text-xs leading-8"
+                  onClick={() => {
+                    handleSendMessage('noContext');
+                  }}
                 >
                   {t('copilot.chatMode.noContext')}
                 </Menu.Item>
                 <Menu.Item
                   key="wholeSpace"
-                  className="text-xs h-8 leading-8"
-                  onClick={() => handleSendMessage('wholeSpace')}
+                  className="h-8 text-xs leading-8"
+                  onClick={() => {
+                    handleSendMessage('wholeSpace');
+                  }}
                 >
                   {t('copilot.chatMode.wholeSpace')}
                 </Menu.Item>

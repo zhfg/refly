@@ -12,6 +12,9 @@ import { getClientOrigin } from '@refly/utils/url';
 import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
 import { GridPattern } from './grid-pattern';
 
+// types
+import { CopilotSource } from '@refly-packages/ai-workspace-common/types/copilot';
+
 const quickStartList = [
   {
     title: '写一篇投资 Memo',
@@ -85,7 +88,7 @@ export const WriteGuide = (props: WriteGuideProps) => {
           </div>
 
           <div className="ai-copilot">
-            <CopilotOperationModule />
+            <CopilotOperationModule source={CopilotSource.HomePage} />
             <List
               grid={{
                 sm: 48,

@@ -15,6 +15,7 @@ import {
   User,
   SkillTemplateConfig,
   Icon,
+  Project,
 } from '@refly-packages/openapi-schema';
 import { EventEmitter } from 'node:stream';
 import { randomUUID } from 'node:crypto';
@@ -146,6 +147,8 @@ export interface SkillRunnableConfig extends RunnableConfig {
   configurable?: SkillContext & {
     spanId?: string;
     convId?: string;
+    projectId?: string;
+    project?: Project;
     locale?: string;
     modelName?: string;
     selectedSkill?: SkillMeta;

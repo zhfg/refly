@@ -1,25 +1,23 @@
 import { Input, FormInstance } from '@arco-design/web-react';
 import { useRef } from 'react';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
-import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { ChatMode, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 
 // styles
 import './index.scss';
-import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 
-import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
 const TextArea = Input.TextArea;
 
 interface ChatInputProps {
   placeholder: string;
   autoSize: { minRows: number; maxRows: number };
   form?: FormInstance;
+  handleSendMessage: (chatMode: ChatMode) => void;
 }
 
 export const ChatInput = (props: ChatInputProps) => {
-  const { form } = props;
-  const { projectId } = useProjectContext();
+  const { handleSendMessage } = props;
 
   const inputRef = useRef<RefTextAreaType>(null);
 
@@ -31,11 +29,6 @@ export const ChatInput = (props: ChatInputProps) => {
   const searchStore = useSearchStoreShallow((state) => ({
     setIsSearchOpen: state.setIsSearchOpen,
   }));
-  const { sendChatMessage, buildShutdownTaskAndGenResponse } = useBuildThreadAndRun();
-
-  const handleAbort = () => {
-    buildShutdownTaskAndGenResponse();
-  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (!chatStore?.newQAText) {
@@ -58,11 +51,7 @@ export const ChatInput = (props: ChatInputProps) => {
 
     if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
       e.preventDefault();
-      sendChatMessage({
-        chatMode: 'normal',
-        projectId,
-        tplConfig: form?.getFieldValue('tplConfig'),
-      });
+      handleSendMessage('normal');
     }
 
     if (e.keyCode === 75 && (e.metaKey || e.ctrlKey)) {

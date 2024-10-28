@@ -1,5 +1,6 @@
 import {
   InvokeSkillRequest,
+  Project,
   SimpleEventName,
   SkillInstance,
   SkillJob,
@@ -21,6 +22,7 @@ export interface InvokeSkillJobData extends InvokeSkillRequest {
   uid: string;
   rawParam: string;
   skill?: SkillInstance;
+  project?: Project;
   job?: Omit<SkillJobModel, 'pk'>;
   conversation?: Omit<ConversationModel, 'pk'>;
 }

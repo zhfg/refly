@@ -33,6 +33,7 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
         const isEmptyNode = selectedNode?.content?.size === 0;
 
         // Block AI Editor 的情况
+        console.log('askAIShowRef.current', askAIShowRef.current, selectedNode);
         if (isEmptyNode && askAIShowRef.current) {
           return true;
         }

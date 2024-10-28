@@ -81,7 +81,6 @@ const SkillDetail = () => {
       });
 
       if (data?.data) {
-        console.log('skill instances', data?.data);
         setSkillDetail(data?.data[0]);
       } else {
         console.log('get skill instances error', error);

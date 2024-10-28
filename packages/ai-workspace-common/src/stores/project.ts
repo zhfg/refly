@@ -34,6 +34,8 @@ export interface ProjectState {
   setProjectActiveTab: (projectId: string, tab: string) => void;
   setProjectTabs: (projectId: string, tabs: ProjectTab[]) => void;
 
+  updateProjectCanvas: (projectId: string, canvasId: string, updates: Partial<Canvas>) => void;
+
   fetchProjectDetail: (projectId: string) => Promise<void>;
   fetchProjectCanvases: (projectId: string) => Promise<void>;
   fetchProjectResources: (projectId: string) => Promise<void>;
@@ -76,6 +78,16 @@ export const useProjectStore = create<ProjectState>()(
       setProjectTabs: (projectId, tabs) =>
         set((state) => {
           state.projectTabs[projectId] = tabs;
+        }),
+      updateProjectCanvas: (projectId, canvasId, updates) =>
+        set((state) => {
+          if (projectId !== state.currentProjectId) {
+            return;
+          }
+          const canvasIndex = state.canvases?.data?.findIndex((c) => c.canvasId === canvasId);
+          if (canvasIndex !== -1) {
+            state.canvases.data[canvasIndex] = { ...state.canvases.data[canvasIndex], ...updates };
+          }
         }),
       fetchProjectDetail: async (projectId) => {
         if (projectId !== get().currentProjectId) {

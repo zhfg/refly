@@ -29,9 +29,17 @@ import {
   checkHasContext,
 } from './utils/token';
 import { ChatMode } from './types';
+import { CanvasIntentType } from '@refly-packages/common-types';
 
 // prompts
-import { generateCanvasPrompt } from './prompt/generateCanvas';
+import * as canvasIntentMatcher from './module/canvasIntentMatcher';
+import * as generateCanvas from './module/generateCanvas';
+import * as rewriteCanvas from './module/rewriteCanvas';
+import * as editCanvas from './module/editCanvas';
+
+// types
+import { HighlightSelection, SelectedRange } from './module/editCanvas/types';
+
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
 
@@ -326,13 +334,40 @@ Please generate the summary based on these requirements and offer suggestions fo
     this.configSnapshot ??= config;
 
     const { chatHistory = [], currentSkill, spanId } = config.configurable;
+    const { user } = config;
 
     this.emitEvent({ event: 'start' }, this.configSnapshot);
     this.emitEvent({ event: 'log', content: `Start to generate canvas...` }, config);
 
+    const { convId, projectId = '' } = this.configSnapshot.configurable;
+    const res = await this.engine.service.createCanvas(user, {
+      title: '',
+      initialContent: '',
+      projectId,
+    });
+
+    // send intent matcher event
+    this.emitEvent(
+      {
+        event: 'structured_data',
+        structuredDataKey: 'intentMatcher',
+        content: JSON.stringify({
+          type: CanvasIntentType.GenerateCanvas,
+          projectId: res.data?.projectId || projectId,
+          canvasId: res.data?.canvasId || '',
+          convId,
+        }),
+      },
+      config,
+    );
+
     const model = this.engine.chatModel({ temperature: 0.1 });
 
-    const requestMessages = [new SystemMessage(generateCanvasPrompt), ...chatHistory, new HumanMessage(originalQuery)];
+    const requestMessages = [
+      new SystemMessage(generateCanvas.generateCanvasPrompt),
+      ...chatHistory,
+      new HumanMessage(originalQuery),
+    ];
 
     const responseMessage = await model.invoke(requestMessages, {
       ...config,
@@ -346,9 +381,256 @@ Please generate the summary based on these requirements and offer suggestions fo
     this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
 
     this.emitEvent({ event: 'log', content: `Generated canvas successfully!` }, config);
-    this.emitEvent({ event: 'end' }, config);
 
     return { messages: [responseMessage], skillCalls: [] };
+  };
+
+  callRewriteCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+    const { messages = [], query: originalQuery } = state;
+
+    // 确保在使用 configSnapshot 之前初始化它
+    this.configSnapshot ??= config;
+
+    const { chatHistory = [], currentSkill, spanId, projectId, convId, canvases } = config.configurable;
+
+    this.emitEvent({ event: 'start' }, this.configSnapshot);
+    this.emitEvent({ event: 'log', content: `Start to rewrite canvas...` }, config);
+
+    const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
+
+    // send intent matcher event
+    this.emitEvent(
+      {
+        event: 'structured_data',
+        structuredDataKey: 'intentMatcher',
+        content: JSON.stringify({
+          type: CanvasIntentType.RewriteCanvas,
+          projectId: projectId,
+          canvasId: currentCanvas?.canvasId || '',
+          convId,
+        }),
+      },
+      config,
+    );
+
+    const model = this.engine.chatModel({ temperature: 0.1 });
+
+    const rewriteCanvasUserPrompt = rewriteCanvas.rewriteCanvasUserPrompt(originalQuery);
+    const rewriteCanvasContext = rewriteCanvas.rewriteCanvasContext(currentCanvas?.canvas);
+
+    const requestMessages = [
+      new SystemMessage(rewriteCanvas.rewriteCanvasSystemPrompt),
+      ...chatHistory,
+      new HumanMessage(rewriteCanvasContext),
+      new HumanMessage(rewriteCanvasUserPrompt),
+    ];
+
+    const responseMessage = await model.invoke(requestMessages, {
+      ...config,
+      metadata: {
+        ...config.metadata,
+        ...currentSkill,
+        spanId,
+      },
+    });
+
+    this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
+
+    this.emitEvent({ event: 'log', content: `Rewrite canvas successfully!` }, config);
+
+    return { messages: [responseMessage], skillCalls: [] };
+  };
+
+  // TODO: 将实际的 canvas 的内容发送给模型，拼接为 prompt 处理
+  /**
+   * Update canvas：更新的形态
+   * 1. 口头模糊指明（可能涉及处理多个）：直接口头指明模糊更新的内容（需要模型扫描并给出待操作的模块和对应的 startIndex 和 endIndex），则只需要优化这些内容，其他保持原样，并且发送给前端流式写入
+   * 2. 前端明确选中（目前只支持一个）：明确具备选中的 startIndex 和 endIndex（使用的是 tiptap editor），则只需要优化这块内容，其他保持原样，并且发送给前端流式写入
+   */
+  callEditCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+    const { messages = [], query: originalQuery } = state;
+    this.configSnapshot ??= config;
+
+    const { chatHistory = [], currentSkill, spanId, projectId, convId, canvases } = config.configurable;
+
+    const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
+
+    if (!currentCanvas?.canvas) {
+      throw new Error('No current canvas found for editing');
+    }
+
+    this.emitEvent({ event: 'start' }, this.configSnapshot);
+    this.emitEvent(
+      {
+        event: 'log',
+        content: `Starting canvas edit operation for canvas: ${currentCanvas.canvas.title}`,
+      },
+      config,
+    );
+
+    // Get selected range from metadata
+    const selectedRange = currentCanvas?.metadata?.selectedRange as SelectedRange;
+
+    // Extract content context if selection exists
+    // const selectedContent = selectedRange
+    //   ? editCanvas.extractContentAroundSelection(currentCanvas.canvas.content || '', selectedRange)
+    //   : undefined;
+    const highlightSelection = currentCanvas?.metadata?.selection as HighlightSelection;
+
+    // Emit intent matcher event
+    this.emitEvent(
+      {
+        event: 'structured_data',
+        structuredDataKey: 'intentMatcher',
+        content: JSON.stringify({
+          type: CanvasIntentType.EditCanvas,
+          projectId,
+          canvasId: currentCanvas.canvasId,
+          convId,
+          selectedRange,
+        }),
+      },
+      config,
+    );
+
+    const model = this.engine.chatModel({
+      temperature: 0.1,
+      maxTokens: 4096,
+    });
+
+    // Prepare prompts with selected content context
+    const editCanvasUserPrompt = editCanvas.editCanvasUserPrompt(originalQuery, highlightSelection);
+    const editCanvasContext = editCanvas.editCanvasContext(currentCanvas.canvas, highlightSelection);
+
+    const requestMessages = [
+      new SystemMessage(editCanvas.editCanvasSystemPrompt),
+      ...chatHistory,
+      new HumanMessage(editCanvasContext),
+      new HumanMessage(editCanvasUserPrompt),
+    ];
+
+    try {
+      const responseMessage = await model.invoke(requestMessages, {
+        ...config,
+        metadata: {
+          ...config.metadata,
+          ...currentSkill,
+          spanId,
+          canvasId: currentCanvas.canvasId,
+          projectId,
+          selectedRange,
+        },
+      });
+
+      // Extract edit sections from response, passing selectedContent if it exists
+      // const editSections = editCanvas.extractEditSections(responseMessage.content as string, selectedContent);
+
+      // Extract thinking process for logging/debugging
+      // const thinking = editCanvas.extractThinking(responseMessage.content as string);
+
+      // Emit edit sections
+      // this.emitEvent(
+      //   {
+      //     event: 'structured_data',
+      //     structuredDataKey: 'editSections',
+      //     content: JSON.stringify({
+      //       sections: editSections,
+      //       thinking,
+      //       mode: selectedContent ? 'selection' : 'verbal',
+      //     }),
+      //   },
+      //   config,
+      // );
+
+      this.emitEvent(
+        {
+          event: 'log',
+          content: 'Canvas edit completed successfully',
+        },
+        config,
+      );
+
+      return {
+        messages: [responseMessage],
+        skillCalls: [],
+      };
+    } catch (error) {
+      this.emitEvent(
+        {
+          event: 'error',
+          content: `Canvas edit failed: ${error.message}`,
+        },
+        config,
+      );
+      throw error;
+    }
+  };
+
+  callCanvasIntentMatcher = async (state: GraphState, config: SkillRunnableConfig): Promise<CanvasIntentType> => {
+    const { query: originalQuery } = state;
+
+    this.configSnapshot ??= config;
+
+    const { chatHistory = [], projectId, canvases = [] } = config.configurable;
+
+    this.emitEvent({ event: 'start' }, this.configSnapshot);
+
+    const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
+    const intentMatcherTypeDomain = canvasIntentMatcher.prepareIntentMatcherTypeDomain(currentCanvas, projectId);
+
+    const model = this.engine.chatModel({ temperature: 0.1 });
+
+    const runnable = model.withStructuredOutput(
+      z
+        .object({
+          intent_type: z
+            .enum(intentMatcherTypeDomain as [CanvasIntentType, ...CanvasIntentType[]])
+            .describe('The detected intent type based on user query and context'),
+          confidence: z.number().min(0).max(1).describe('Confidence score of the intent detection (0-1)'),
+          reasoning: z.string().describe('Brief explanation of why this intent was chosen'),
+        })
+        .describe('Detect the user intent for canvas operations based on the query and context'),
+    );
+
+    try {
+      const result = await runnable.invoke(
+        [
+          new SystemMessage(canvasIntentMatcher.canvasIntentMatcherPrompt),
+          ...chatHistory,
+          new HumanMessage(originalQuery),
+        ],
+        config,
+      );
+
+      // Log the intent detection result
+      this.engine.logger.log(
+        `Intent detection result: ${JSON.stringify({
+          type: result.intent_type,
+          confidence: result.confidence,
+          reasoning: result.reasoning,
+        })}`,
+      );
+
+      // Emit the structured data event
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify({
+            type: result.intent_type,
+            confidence: result.confidence,
+            reasoning: result.reasoning,
+          }),
+          structuredDataKey: 'intentMatcher',
+        },
+        config,
+      );
+
+      return result.intent_type;
+    } catch (error) {
+      // Log error and fallback to default intent
+      this.engine.logger.error(`Error detecting intent: ${error.stack}`);
+      return CanvasIntentType.Other;
+    }
   };
 
   callScheduler = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
@@ -638,14 +920,21 @@ Generated question example:
     })
       // .addNode('direct', this.directCallSkill)
       // .addNode('scheduler', this.callScheduler)
-      .addNode('generateCanvas', this.callGenerateCanvas)
+      // .addNode('generateCanvas', this.callGenerateCanvas)
+      // .addNode('rewriteCanvas', this.callRewriteCanvas)
+      .addNode('editCanvas', this.callEditCanvas)
+      // .addNode('other', this.callScheduler)
       .addNode('relatedQuestions', this.genRelatedQuestions);
 
     // workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
     // workflow.addConditionalEdges('direct', this.onDirectSkillCallFinish);
     // workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
-    workflow.addEdge(START, 'generateCanvas');
-    workflow.addEdge('generateCanvas', 'relatedQuestions');
+    // workflow.addConditionalEdges(START, this.callCanvasIntentMatcher);
+    workflow.addEdge(START, 'editCanvas');
+    // workflow.addEdge('generateCanvas', 'relatedQuestions');
+    // workflow.addEdge('rewriteCanvas', 'relatedQuestions');
+    workflow.addEdge('editCanvas', 'relatedQuestions');
+    // workflow.addEdge('other', 'relatedQuestions');
     workflow.addEdge('relatedQuestions', END);
 
     return workflow.compile();
