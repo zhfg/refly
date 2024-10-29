@@ -27,7 +27,7 @@ interface CanvasListProps {
 
 export const CanvasList = (props: CanvasListProps) => {
   const { listGrid } = props;
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
   const { dataList, setDataList, loadMore, hasMore, isRequesting } = useFetchDataList({
@@ -88,6 +88,10 @@ export const CanvasList = (props: CanvasListProps) => {
                   {time(item.updatedAt, language as LOCALE)
                     .utc()
                     .fromNow()}
+
+                  {item?.shareCode && (
+                    <span className="ml-1 text-xs text-[#00968F]">{t('projectDetail.share.sharing')}</span>
+                  )}
                 </div>
                 <div className="flex items-center">
                   <DeleteDropdownMenu

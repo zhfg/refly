@@ -31,14 +31,14 @@ export const ProjectDetail = () => {
         <Splitter layout="horizontal" className="workspace-panel-container">
           <Splitter.Panel
             collapsible
-            defaultSize={400}
+            defaultSize={300}
             min={300}
             className="workspace-left-assist-panel"
             key="workspace-left-assist-panel"
           >
             <ProjectDirectory projectId={projectId} />
           </Splitter.Panel>
-          <Splitter.Panel min={40} className="workspace-content-panel" key="workspace-content-panel-content">
+          <Splitter.Panel min={450} className="workspace-content-panel" key="workspace-content-panel-content">
             <ContentArea projectId={projectId} />
           </Splitter.Panel>
           <Splitter.Panel

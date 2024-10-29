@@ -121,7 +121,7 @@ export const DeleteDropdownMenu = (props: CanvasPros | ProjectProps | ResourcePr
   const { t } = useTranslation();
 
   const importProjectModal = useImportProjectModal();
-  const { deleteRecentProject, editRecentProject } = useHandleRecents();
+  const { deleteRecentProject } = useHandleRecents();
 
   const handleDeleteClick = async (e: MouseEvent) => {
     e.stopPropagation();

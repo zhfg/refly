@@ -3,7 +3,7 @@ import { LOCALE } from '@refly/common-types';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 import './index.scss';
-import { Segmented, Skeleton } from 'antd';
+import { Segmented, Skeleton, Button, Divider } from 'antd';
 import { Input } from '@arco-design/web-react';
 
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
@@ -15,10 +15,11 @@ import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-ju
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
 import { useTranslation } from 'react-i18next';
 import { HiOutlineSearch } from 'react-icons/hi';
-import { HiOutlinePlus } from 'react-icons/hi2';
+import { HiOutlinePlus, HiOutlineShare, HiOutlineSparkles } from 'react-icons/hi2';
 import { IconCanvas, IconProject, IconThread } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Favicon } from '@refly-packages/ai-workspace-common/components/common/favicon';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
+import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -72,6 +73,18 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
       });
     }
   }, [activeTab]);
+
+  const { createShare } = useHandleShare();
+  const [shareLoading, setShareLoading] = useState(false);
+  const handleShare = async () => {
+    setShareLoading(true);
+    await createShare({
+      entityType: 'project',
+      entityId: projectId,
+      shareCode: currentProject?.shareCode || undefined,
+    });
+    setShareLoading(false);
+  };
 
   const [searchParams] = useSearchParams();
   const resId = searchParams.get('resId');
@@ -235,49 +248,52 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
   return (
     <div className="project-directory-container" style={small ? { width: 72, minWidth: 72 } : {}}>
       <div className="project-directory-intro">
-        {small ? (
-          <div className="project-directory-intro-small">
+        <div className="flex w-full">
+          <div className="intro-icon">
             <IconProject style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)', strokeWidth: 3 }} />
           </div>
-        ) : (
-          <>
-            <div className="flex w-full">
-              <div className="intro-icon">
-                <IconProject style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)', strokeWidth: 3 }} />
-              </div>
-              <div className="ml-2 grow">
-                {project?.loading ? (
-                  <>
-                    <Skeleton active className="w-full" paragraph={{ rows: 2 }} />
-                  </>
-                ) : (
-                  <>
-                    <div className="text-sm">{currentProject?.title}</div>
-                    <div className="overflow-auto my-1 max-h-10 text-xs text-gray-500">
-                      {currentProject?.description}
-                    </div>
-                    <div className="mt-1 text-xs text-gray-500">
-                      <span>
-                        {time(currentProject?.updatedAt as string, LOCALE.EN)
-                          .utc()
-                          .fromNow()}
-                      </span>
-                      {' · '}
-                      <span>
-                        {t('knowledgeBase.directory.resourceCount', {
-                          count: resources?.data?.length || 0,
-                        })}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-            {currentProject && (
-              <DeleteDropdownMenu type="project" data={currentProject} postDeleteList={handleDeleteKnowledgeBase} />
+          <div className="ml-2 grow">
+            {project?.loading ? (
+              <>
+                <Skeleton active className="w-full" paragraph={{ rows: 2 }} />
+              </>
+            ) : (
+              <>
+                <div className="text-sm">{currentProject?.title}</div>
+                <div className="overflow-auto my-1 max-h-10 text-xs text-gray-500">{currentProject?.description}</div>
+                <div className="mt-1 text-xs text-gray-500">
+                  <span>
+                    {time(currentProject?.updatedAt as string, LOCALE.EN)
+                      .utc()
+                      .fromNow()}
+                  </span>
+                  {' · '}
+                  <span>
+                    {t('knowledgeBase.directory.resourceCount', {
+                      count: resources?.data?.length || 0,
+                    })}
+                  </span>
+                </div>
+              </>
             )}
-          </>
+          </div>
+        </div>
+        {currentProject && (
+          <DeleteDropdownMenu type="project" data={currentProject} postDeleteList={handleDeleteKnowledgeBase} />
         )}
+      </div>
+
+      <div className="p-4 w-full flex gap-3">
+        <Button loading={shareLoading} className="w-[50%]" icon={<HiOutlineShare />} onClick={handleShare}>
+          {currentProject?.shareCode ? t('projectDetail.share.sharing') : t('common.share')}
+        </Button>
+        <Button className="w-[50%]" icon={<HiOutlineSparkles />}>
+          AI
+        </Button>
+      </div>
+
+      <div className="w-full pl-4 pr-4">
+        <Divider className="m-0" />
       </div>
 
       <div className="p-4 w-full">

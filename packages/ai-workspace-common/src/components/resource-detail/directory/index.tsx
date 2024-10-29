@@ -44,9 +44,8 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
     pageSize: 12,
   });
 
-  const { resource, fetchResource } = useResourceStoreShallow((state) => ({
+  const { resource } = useResourceStoreShallow((state) => ({
     resource: state.resource,
-    fetchResource: state.fetchResource,
   }));
   const resourceData = resource.data;
 

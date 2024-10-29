@@ -33,6 +33,7 @@ export interface ProjectState {
   setCurrentProjectId: (projectId: string) => void;
   setProjectActiveTab: (projectId: string, tab: string) => void;
   setProjectTabs: (projectId: string, tabs: ProjectTab[]) => void;
+  setProject: (project: Project) => void;
 
   updateProjectCanvas: (projectId: string, canvasId: string, updates: Partial<Canvas>) => void;
 
@@ -78,6 +79,10 @@ export const useProjectStore = create<ProjectState>()(
       setProjectTabs: (projectId, tabs) =>
         set((state) => {
           state.projectTabs[projectId] = tabs;
+        }),
+      setProject: (project) =>
+        set((state) => {
+          state.project.data = project;
         }),
       updateProjectCanvas: (projectId, canvasId, updates) =>
         set((state) => {

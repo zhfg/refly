@@ -36,9 +36,11 @@
     "project": "项目",
     "copy": {
       "title": "复制",
-      "success": "内容已复制到剪切板！"
+      "success": "内容已复制到剪切板！",
+      "failed": "复制失败，请重试！"
     },
-    "login": "登录"
+    "login": "登录",
+    "share": "分享"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
@@ -121,6 +123,18 @@
       "newCanvas": "新稿布",
       "importResource": "导入资源",
       "chat": "Chat"
+    },
+    "share": {
+      "createShareFailed": "创建分享失败，请重试！",
+      "project": "项目",
+      "canvas": "稿布",
+      "title": "分享{{entityType}}",
+      "description": "你的{{entityType}}正在分享中",
+      "copyLink": "复制链接",
+      "cancel": "取消分享",
+      "cancelShareFailed": "取消分享失败，请重试！",
+      "cancelShareSuccess": "取消分享成功！",
+      "sharing": "分享中"
     }
   },
   "workspace": {
