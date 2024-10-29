@@ -21,9 +21,10 @@ import { cn } from '@refly-packages/editor-component/utils';
 interface AISelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  handleBubbleClose: () => void;
 }
 
-export const AISelector = memo(({ onOpenChange }: AISelectorProps) => {
+export const AISelector = memo(({ onOpenChange, handleBubbleClose }: AISelectorProps) => {
   const { editor } = useEditor();
   const [inputValue, setInputValue] = useState('');
   const [activeValue, setActiveValue] = useState('');
@@ -98,6 +99,8 @@ export const AISelector = memo(({ onOpenChange }: AISelectorProps) => {
                     selectedMdText,
                   },
                 });
+
+                handleBubbleClose();
               }}
             >
               <ArrowUp className="w-4 h-4" />

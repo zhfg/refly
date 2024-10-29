@@ -33,7 +33,7 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
         const isEmptyNode = selectedNode?.content?.size === 0;
 
         // Block AI Editor 的情况
-        console.log('askAIShowRef.current', askAIShowRef.current, selectedNode);
+        // console.log('askAIShowRef.current', askAIShowRef.current, selectedNode);
         if (isEmptyNode && askAIShowRef.current) {
           return true;
         }
@@ -51,14 +51,17 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
         return true;
       };
 
+      const { onCreate, ...restTippyOptions } = tippyOptions;
+
       return {
         shouldShow,
         tippyOptions: {
           onCreate: (val) => {
             instanceRef.current = val;
+            onCreate?.(val);
           },
           moveTransition: 'transform 0.15s ease-out',
-          ...tippyOptions,
+          ...restTippyOptions,
         },
         ...rest,
       };

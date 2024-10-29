@@ -239,14 +239,28 @@ class TokenStreamProcessor {
 
     this.chunk += token;
 
-    // Skip processing if the chunk is part of the closing canvas tag
-    if (this.chunk === '<' || '</reflyCanvas>'.startsWith(this.chunk)) {
+    // Skip processing if the chunk is part of the closing canvas tag (including HTML entities)
+    if (
+      this.chunk === '<' ||
+      '</reflyCanvas>'.startsWith(this.chunk) ||
+      this.chunk === '&' ||
+      '&lt;/reflyCanvas'.startsWith(this.chunk) ||
+      '&lt;/reflyCanvas&gt;'.startsWith(this.chunk)
+    ) {
       return;
     }
 
-    // If the chunk contains the closing tag, only process content before it
-    if (this.chunk.includes('</reflyCanvas>')) {
-      const content = this.chunk.split('</reflyCanvas>')[0];
+    // If the chunk contains the closing tag (including HTML entities), only process content before it
+    if (
+      this.chunk.includes('</reflyCanvas>') ||
+      this.chunk.includes('&lt;/reflyCanvas') ||
+      this.chunk.includes('&lt;/reflyCanvas&gt;')
+    ) {
+      const content = this.chunk
+        .split('</reflyCanvas>')[0]
+        .split('&lt;/reflyCanvas')[0]
+        .split('&lt;/reflyCanvas&gt;')[0];
+
       if (content) {
         this.chunk = content;
       } else {
@@ -796,8 +810,8 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
   }, [canvas, debouncedUpdateCanvas]);
 
   return (
-    <div className="ai-note-container flex flex-col">
-      <div className="flex-grow overflow-auto">
+    <div className="flex flex-col ai-note-container">
+      <div className="overflow-auto flex-grow">
         <Spin
           tip={t('knowledgeBase.note.connecting')}
           loading={!canvas || isRequesting || canvasServerStatus !== 'connected'}
