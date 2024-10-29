@@ -146,7 +146,7 @@ export class SkillService {
         return buildSuccessResponse(canvasPO2DTO(canvas));
       },
       createCanvas: async (user, req) => {
-        const canvas = await this.knowledge.upsertCanvas(user, req);
+        const canvas = await this.knowledge.createCanvas(user, req);
         return buildSuccessResponse(canvasPO2DTO(canvas));
       },
       listCanvas: async (user, param) => {

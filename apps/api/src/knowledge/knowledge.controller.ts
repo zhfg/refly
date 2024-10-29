@@ -30,10 +30,11 @@ import {
   BatchCreateResourceResponse,
   ReindexResourceRequest,
   ReindexResourceResponse,
-  BindProjectResourcesRequest,
+  BindProjectResourceRequest,
   QueryReferencesRequest,
   AddReferencesRequest,
   DeleteReferencesRequest,
+  ListOrder,
 } from '@refly-packages/openapi-schema';
 import { User as UserModel } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
@@ -54,12 +55,14 @@ export class KnowledgeController {
     @Query('resourceId') resourceId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+    @Query('order', new DefaultValuePipe('creationDesc')) order: ListOrder,
   ): Promise<ListProjectResponse> {
     const projects = await this.knowledgeService.listProjects(user, {
       projectId,
       resourceId,
       page,
       pageSize,
+      order,
     });
     return buildSuccessResponse(projects.map(projectPO2DTO));
   }
@@ -118,7 +121,7 @@ export class KnowledgeController {
 
   @UseGuards(JwtAuthGuard)
   @Post('project/bindRes')
-  async bindProjectResources(@User() user: UserModel, @Body() body: BindProjectResourcesRequest) {
+  async bindProjectResources(@User() user: UserModel, @Body() body: BindProjectResourceRequest[]) {
     await this.knowledgeService.bindProjectResources(user, body);
     return buildSuccessResponse({});
   }
@@ -132,6 +135,7 @@ export class KnowledgeController {
     @Query('resourceType') resourceType: ResourceType,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+    @Query('order', new DefaultValuePipe('creationDesc')) order: ListOrder,
   ): Promise<ListResourceResponse> {
     const resources = await this.knowledgeService.listResources(user, {
       projectId,
@@ -139,6 +143,7 @@ export class KnowledgeController {
       resourceType,
       page,
       pageSize,
+      order,
     });
     return buildSuccessResponse(resources?.map(resourcePO2DTO));
   }
@@ -222,8 +227,14 @@ export class KnowledgeController {
     @Query('projectId') projectId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+    @Query('order', new DefaultValuePipe('creationDesc')) order: ListOrder,
   ): Promise<ListCanvasResponse> {
-    const canvases = await this.knowledgeService.listCanvases(user, { projectId, page, pageSize });
+    const canvases = await this.knowledgeService.listCanvases(user, {
+      projectId,
+      page,
+      pageSize,
+      order,
+    });
     return buildSuccessResponse(canvases?.map(canvasPO2DTO));
   }
 
@@ -243,18 +254,28 @@ export class KnowledgeController {
     @User() user: UserModel,
     @Body() body: UpsertCanvasRequest,
   ): Promise<UpsertCanvasResponse> {
-    const canvas = await this.knowledgeService.upsertCanvas(user, body);
+    const canvas = await this.knowledgeService.createCanvas(user, body);
     return buildSuccessResponse(canvasPO2DTO(canvas));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('canvas/update')
-  async updateCanvas(@User() user: UserModel, @Body() body: UpsertCanvasRequest) {
+  async updateCanvas(
+    @User() user: UserModel,
+    @Body() body: UpsertCanvasRequest,
+  ): Promise<UpsertCanvasResponse> {
     if (!body.canvasId) {
       throw new BadRequestException('Canvas ID is required');
     }
-    const canvas = await this.knowledgeService.upsertCanvas(user, body);
-    return buildSuccessResponse(canvasPO2DTO(canvas));
+    const canvases = await this.knowledgeService.batchUpdateCanvas(user, [body]);
+    return buildSuccessResponse(canvasPO2DTO(canvases?.[0]));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('canvas/batchUpdate')
+  async batchUpdateCanvas(@User() user: UserModel, @Body() body: UpsertCanvasRequest[]) {
+    const canvases = await this.knowledgeService.batchUpdateCanvas(user, body);
+    return buildSuccessResponse(canvases.map(canvasPO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)

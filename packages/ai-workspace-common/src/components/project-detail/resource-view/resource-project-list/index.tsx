@@ -34,7 +34,13 @@ const ResourceProjectList = ({ projects = [], updateCallback }: ResourceProjectL
       let resultError: unknown;
       try {
         const { error } = await getClient().bindProjectResources({
-          body: { projectId: collectionId, resourceIds: [resourceId], operation: 'unbind' },
+          body: [
+            {
+              projectId: collectionId,
+              resourceId,
+              operation: 'unbind',
+            },
+          ],
         });
         resultError = error;
       } catch (error) {

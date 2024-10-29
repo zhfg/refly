@@ -138,11 +138,17 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
     );
   };
 
-  const handleDeleteClick = async ({ collectionId, resourceId }) => {
+  const handleDeleteClick = async ({ projectId, resourceId }) => {
     let resultError: unknown;
     try {
       const { error } = await getClient().bindProjectResources({
-        body: { projectId: collectionId, resourceIds: [resourceId], operation: 'unbind' },
+        body: [
+          {
+            projectId,
+            resourceId,
+            operation: 'unbind',
+          },
+        ],
       });
       resultError = error;
     } catch (error) {
@@ -201,7 +207,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
               <div onClick={(e) => e.stopPropagation()}>
                 <Popconfirm
                   title={t('workspace.resourceProjectList.removeConfirmText')}
-                  onConfirm={() => handleDeleteClick({ collectionId: item.projectId, resourceId })}
+                  onConfirm={() => handleDeleteClick({ projectId: item.projectId, resourceId })}
                   onCancel={() => {}}
                   okText={t('common.confirm')}
                   cancelText={t('common.cancel')}

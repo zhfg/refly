@@ -284,6 +284,8 @@ model Canvas {
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   /// Soft delete timestamp
   deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
+  /// Display order within project
+  order           Int       @default(0) @map("order")
 
   @@index([uid, deletedAt, updatedAt])
   @@index([shareCode])
@@ -328,9 +330,12 @@ model ProjectResourceRelation {
   resourceId String   @map("resource_id")
   /// Create timestamp
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// Display order within project
+  order      Int      @default(0) @map("order")
 
   @@unique([projectId, resourceId])
   @@index([resourceId])
+  @@index([projectId, order])
   @@map("project_resource_relations")
 }
 

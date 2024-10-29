@@ -120,7 +120,11 @@ export class ConversationService {
   }
 
   async listConversations(user: User, param: ListConversationsData['query']) {
-    const { projectId, page = 1, pageSize = 10 } = param;
+    const { projectId, page = 1, pageSize = 10, order = 'creationDesc' } = param;
+
+    const orderBy: Prisma.ConversationOrderByWithRelationInput = {
+      createdAt: order === 'creationAsc' ? 'asc' : 'desc',
+    };
 
     if (projectId) {
       const project = await this.prisma.project.findFirst({
@@ -129,7 +133,7 @@ export class ConversationService {
           conversations: {
             skip: (page - 1) * pageSize,
             take: pageSize,
-            orderBy: { updatedAt: 'desc' },
+            orderBy,
           },
         },
       });
@@ -140,7 +144,7 @@ export class ConversationService {
       where: { uid: user.uid },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      orderBy: { updatedAt: 'desc' },
+      orderBy,
     });
   }
 }

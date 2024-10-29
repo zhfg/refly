@@ -30,6 +30,7 @@ export const projectPO2DTO = (project: ProjectModel): Project => {
 
 export const resourcePO2DTO = (
   resource: ResourceModel & {
+    order?: number;
     content?: string;
   },
 ): Resource => {
@@ -37,7 +38,7 @@ export const resourcePO2DTO = (
     return null;
   }
   return {
-    ...pick(resource, ['resourceId', 'title', 'readOnly', 'content', 'contentPreview']),
+    ...pick(resource, ['resourceId', 'title', 'readOnly', 'content', 'contentPreview', 'order']),
     resourceType: resource.resourceType as ResourceType,
     indexStatus: resource.indexStatus as IndexStatus,
     storageSize: resource.storageSize.toString(),

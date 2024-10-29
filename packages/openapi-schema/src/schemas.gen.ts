@@ -24,6 +24,12 @@ export const $User = {
   },
 } as const;
 
+export const $ListOrder = {
+  type: 'string',
+  description: 'List order',
+  enum: ['creationAsc', 'creationDesc'],
+} as const;
+
 export const $ReferenceMeta = {
   type: 'object',
   description: 'Reference metadata',
@@ -130,6 +136,10 @@ export const $Resource = {
       description: 'Resource type',
       $ref: '#/components/schemas/ResourceType',
     },
+    order: {
+      type: 'number',
+      description: 'Resource order in project',
+    },
     title: {
       type: 'string',
       description: 'Resource title',
@@ -191,6 +201,10 @@ export const $Canvas = {
       type: 'string',
       description: 'Project ID',
       example: 'p-g30e1b80b5g1itbemc0g5jj3',
+    },
+    order: {
+      type: 'number',
+      description: 'Canvas order in project',
     },
     title: {
       type: 'string',
@@ -1126,169 +1140,6 @@ export const $Conversation = {
   },
 } as const;
 
-export const $ChatTaskType = {
-  type: 'string',
-  description: 'Chat task type',
-  enum: ['chat', 'genTitle', 'quickAction', 'searchEnhanceKeyword', 'searchEnhanceSummarize', 'searchEnhanceAsk'],
-} as const;
-
-export const $RetrieveFilter = {
-  type: 'object',
-  description: 'Content retrieval filter',
-  properties: {
-    weblinkList: {
-      type: 'array',
-      description: 'List of web links',
-      items: {
-        $ref: '#/components/schemas/Source',
-      },
-      deprecated: true,
-    },
-    urls: {
-      type: 'array',
-      description: 'List of URLs to retrieve',
-      items: {
-        type: 'string',
-        example: 'https://refly.ai',
-      },
-    },
-    resourceIds: {
-      type: 'array',
-      description: 'List of resource IDs to retrieve',
-      items: {
-        type: 'string',
-        example: 'r-g30e1b80b5g1itbemc0g5jj3',
-      },
-    },
-    projectIds: {
-      type: 'array',
-      description: 'List of project IDs to retrieve',
-      items: {
-        type: 'string',
-        example: 'p-g30e1b80b5g1itbemc0g5jj3',
-      },
-    },
-  },
-} as const;
-
-export const $ChatPayload = {
-  type: 'object',
-  description: 'Chat payload',
-  required: ['question'],
-  properties: {
-    question: {
-      type: 'string',
-      description: 'Question',
-    },
-    filter: {
-      type: 'object',
-      description: 'Content retrieval filter',
-      $ref: '#/components/schemas/RetrieveFilter',
-    },
-  },
-} as const;
-
-export const $QuickActionType = {
-  type: 'string',
-  description: 'Quick action type',
-  enum: ['selection', 'summary'],
-} as const;
-
-export const $QuickActionTaskPayload = {
-  type: 'object',
-  description: 'Quick action task payload',
-  properties: {
-    question: {
-      type: 'string',
-      description: 'Question',
-    },
-    actionType: {
-      description: 'Quick action type',
-      $ref: '#/components/schemas/QuickActionType',
-    },
-    actionPrompt: {
-      type: 'string',
-      description: 'Prompt for this action',
-    },
-    reference: {
-      type: 'string',
-      description: 'Reference for this action',
-    },
-    filter: {
-      description: 'Content retrieval filter',
-      $ref: '#/components/schemas/RetrieveFilter',
-    },
-  },
-} as const;
-
-export const $ChatTask = {
-  type: 'object',
-  description: 'Chat task',
-  required: ['taskType'],
-  properties: {
-    taskType: {
-      description: 'Task type',
-      $ref: '#/components/schemas/ChatTaskType',
-    },
-    dryRun: {
-      description: 'Whether to dry run the task',
-      type: 'boolean',
-      default: false,
-    },
-    convId: {
-      description: 'Conversation ID, a new conversation will be created if empty or non-existent',
-      type: 'string',
-      example: 'cv-g30e1b80b5g1itbemc0g5jj3',
-    },
-    createConvParam: {
-      description: 'Create conversation parameters',
-      $ref: '#/components/schemas/CreateConversationRequest',
-    },
-    locale: {
-      description: 'Chat locale',
-      type: 'string',
-      example: 'en',
-    },
-    data: {
-      description: 'Chat data',
-      oneOf: [
-        {
-          $ref: '#/components/schemas/ChatPayload',
-        },
-        {
-          $ref: '#/components/schemas/QuickActionTaskPayload',
-        },
-      ],
-    },
-  },
-} as const;
-
-export const $ChatTaskResponse = {
-  type: 'object',
-  description: 'Chat task response',
-  required: ['sources', 'answer'],
-  properties: {
-    sources: {
-      type: 'array',
-      description: 'List of web links',
-      items: {
-        $ref: '#/components/schemas/Source',
-      },
-    },
-    answer: {
-      type: 'string',
-      description: 'Chat Answer',
-    },
-    relatedQuestions: {
-      type: 'array',
-      description: 'Related questions',
-      items: {
-        type: 'string',
-      },
-    },
-  },
-} as const;
-
 export const $IndexStatus = {
   type: 'string',
   description: 'Resource index status',
@@ -1763,6 +1614,10 @@ export const $UpsertCanvasRequest = {
       description: 'Canvas ID (only used for update)',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
     },
+    order: {
+      type: 'number',
+      description: 'Canvas order in project',
+    },
     projectId: {
       type: 'string',
       description: 'Project ID (will add to the project if given)',
@@ -1804,47 +1659,6 @@ export const $DeleteCanvasRequest = {
       type: 'string',
       description: 'Canvas ID to delete',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
-    },
-  },
-} as const;
-
-export const $ReferCanvasRequest = {
-  type: 'object',
-  required: ['canvasId', 'referenceId', 'referenceType', 'operation'],
-  properties: {
-    canvasId: {
-      type: 'string',
-      description: 'Canvas ID to refer',
-    },
-    operation: {
-      type: 'string',
-      description: 'Operation type',
-      enum: ['add', 'remove'],
-    },
-    references: {
-      type: 'array',
-      description: 'Reference list',
-      items: {
-        $ref: '#/components/schemas/Reference',
-      },
-    },
-  },
-} as const;
-
-export const $BatchMoveCanvasRequest = {
-  type: 'object',
-  required: ['canvasIds', 'projectId'],
-  properties: {
-    canvasIds: {
-      type: 'array',
-      description: 'Canvas ID list to move',
-      items: {
-        type: 'string',
-      },
-    },
-    projectId: {
-      type: 'string',
-      description: 'Project ID to move to',
     },
   },
 } as const;
@@ -1976,20 +1790,21 @@ export const $UpsertProjectResponse = {
   ],
 } as const;
 
-export const $BindProjectResourcesRequest = {
+export const $BindProjectResourceRequest = {
   type: 'object',
-  required: ['projectId', 'resourceIds', 'operation'],
+  required: ['projectId', 'resourceId', 'operation'],
   properties: {
     projectId: {
       type: 'string',
       description: 'Project ID',
     },
-    resourceIds: {
-      type: 'array',
-      description: 'Resource ID list',
-      items: {
-        type: 'string',
-      },
+    resourceId: {
+      type: 'string',
+      description: 'Resource ID',
+    },
+    order: {
+      type: 'number',
+      description: 'Resource order in project',
     },
     operation: {
       type: 'string',
@@ -3091,16 +2906,6 @@ export const $ListConversationResponse = {
       },
     },
   ],
-} as const;
-
-export const $ChatRequest = {
-  type: 'object',
-  properties: {
-    task: {
-      description: 'chat task config',
-      $ref: '#/components/schemas/ChatTask',
-    },
-  },
 } as const;
 
 export const $GetConversationDetailResponse = {

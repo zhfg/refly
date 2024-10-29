@@ -21,7 +21,7 @@ import {
   ResourceType,
   ListProjectsData,
   UpsertProjectRequest,
-  BindProjectResourcesRequest,
+  BindProjectResourceRequest,
   QueryReferencesRequest,
   ReferenceType,
   BaseReference,
@@ -68,7 +68,7 @@ export class KnowledgeService {
   ) {}
 
   async listProjects(user: User, params: ListProjectsData['query']) {
-    const { projectId, resourceId, page, pageSize } = params;
+    const { projectId, resourceId, page, pageSize, order } = params;
 
     const projectIdFilter: Prisma.StringFilter<'Project'> = { equals: projectId };
     let projectOrder: string[] = [];
@@ -86,9 +86,13 @@ export class KnowledgeService {
 
     const projects = await this.prisma.project.findMany({
       where: { projectId: projectIdFilter, uid: user.uid, deletedAt: null },
-      orderBy: { updatedAt: 'desc' },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
+      ...(!resourceId
+        ? {
+            orderBy: { createdAt: order === 'creationAsc' ? 'asc' : 'desc' },
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+          }
+        : {}),
     });
 
     if (projectOrder.length > 0) {
@@ -141,43 +145,68 @@ export class KnowledgeService {
     return project;
   }
 
-  async bindProjectResources(user: User, param: BindProjectResourcesRequest) {
+  async bindProjectResources(user: User, params: BindProjectResourceRequest[]) {
     const { uid } = user;
-    const { resourceIds = [], projectId, operation } = param;
 
-    if (resourceIds.length === 0) {
-      throw new BadRequestException('resourceIds is required');
+    if (params?.length === 0) {
+      return;
     }
 
-    if (!projectId) {
-      throw new BadRequestException('projectId is required');
-    }
-
-    const project = await this.prisma.project.findFirst({
-      where: { projectId, uid, deletedAt: null },
+    params.forEach((param) => {
+      if (!param.resourceId || !param.projectId) {
+        throw new BadRequestException('resourceId and projectId are required');
+      }
+      if (param.operation !== 'bind' && param.operation !== 'unbind') {
+        throw new BadRequestException('Invalid operation');
+      }
     });
-    if (!project) {
-      throw new NotFoundException('Project not found');
+
+    const projectIds = new Set(params.map((p) => p.projectId));
+    const resourceIds = new Set(params.map((p) => p.resourceId));
+
+    const [projectCnt, resourceCnt] = await this.prisma.$transaction([
+      this.prisma.project.count({
+        where: { projectId: { in: Array.from(projectIds) }, uid, deletedAt: null },
+      }),
+      this.prisma.resource.count({
+        where: { resourceId: { in: Array.from(resourceIds) }, uid, deletedAt: null },
+      }),
+    ]);
+
+    if (projectCnt !== projectIds.size) {
+      throw new BadRequestException('Some of the projects cannot be found');
+    }
+    if (resourceCnt !== resourceIds.size) {
+      throw new BadRequestException('Some of the resources cannot be found');
     }
 
-    const resources = await this.prisma.resource.findMany({
-      where: { resourceId: { in: resourceIds }, uid, deletedAt: null },
+    await this.prisma.$transaction(async (tx) => {
+      for (const param of params) {
+        const { projectId, resourceId, order, operation } = param;
+
+        if (operation === 'bind') {
+          // Get max order for this project if order not specified
+          let finalOrder = order;
+          if (finalOrder === undefined) {
+            const maxOrder = await tx.projectResourceRelation.aggregate({
+              where: { projectId },
+              _max: { order: true },
+            });
+            finalOrder = (maxOrder._max.order ?? -1) + 1;
+          }
+
+          await tx.projectResourceRelation.upsert({
+            where: { projectId_resourceId: { projectId, resourceId } },
+            create: { projectId, resourceId, order: finalOrder },
+            update: { order: finalOrder },
+          });
+        } else if (operation === 'unbind') {
+          await tx.projectResourceRelation.deleteMany({
+            where: { projectId, resourceId },
+          });
+        }
+      }
     });
-    if (resources.length !== resourceIds.length) {
-      throw new NotFoundException('Some of the resources cannot be found');
-    }
-
-    if (operation === 'bind') {
-      return this.prisma.projectResourceRelation.createMany({
-        data: resourceIds.map((resourceId) => ({ projectId, resourceId })),
-      });
-    } else if (operation === 'unbind') {
-      return this.prisma.projectResourceRelation.deleteMany({
-        where: { projectId, resourceId: { in: resourceIds } },
-      });
-    } else {
-      throw new BadRequestException('Invalid operation');
-    }
   }
 
   async deleteProject(user: User, projectId: string) {
@@ -204,7 +233,14 @@ export class KnowledgeService {
   }
 
   async listResources(user: User, param: ListResourcesData['query']) {
-    const { resourceId, projectId, resourceType, page = 1, pageSize = 10 } = param;
+    const {
+      resourceId,
+      projectId,
+      resourceType,
+      page = 1,
+      pageSize = 10,
+      order = 'creationDesc',
+    } = param;
 
     const resourceIdFilter: Prisma.StringFilter<'Resource'> = { equals: resourceId };
     let resourceOrder: string[] = [];
@@ -214,24 +250,30 @@ export class KnowledgeService {
         where: { projectId },
         skip: (page - 1) * pageSize,
         take: pageSize,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { order: 'asc' },
       });
       resourceIdFilter.in = relations.map((r) => r.resourceId);
       resourceOrder = resourceIdFilter.in;
     }
 
-    const resources = await this.prisma.resource.findMany({
+    let resources = await this.prisma.resource.findMany({
       where: { resourceId: resourceIdFilter, resourceType, uid: user.uid, deletedAt: null },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      orderBy: { updatedAt: 'desc' },
+      ...(!projectId
+        ? {
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            orderBy: { createdAt: order === 'creationAsc' ? 'asc' : 'desc' },
+          }
+        : {}),
     });
 
     if (resourceOrder.length > 0) {
-      // Sort according to the order in resourceOrder
-      resources.sort((a, b) => {
-        return resourceOrder.indexOf(a.resourceId) - resourceOrder.indexOf(b.resourceId);
-      });
+      // Sort according to the order in resourceOrder and add order field
+      resources = resources
+        .sort((a, b) => {
+          return resourceOrder.indexOf(a.resourceId) - resourceOrder.indexOf(b.resourceId);
+        })
+        .map((res, index) => ({ ...res, order: index }));
     }
 
     return resources;
@@ -586,7 +628,16 @@ export class KnowledgeService {
   }
 
   async listCanvases(user: User, param: ListCanvasData['query']) {
-    const { projectId, page = 1, pageSize = 10 } = param;
+    const { projectId, page = 1, pageSize = 10, order = 'creationDesc' } = param;
+
+    const orderBy: Prisma.CanvasOrderByWithRelationInput = {};
+    if (projectId) {
+      orderBy.order = 'asc';
+    } else if (order === 'creationAsc') {
+      orderBy.createdAt = 'asc';
+    } else {
+      orderBy.createdAt = 'desc';
+    }
 
     if (projectId) {
       const project = await this.prisma.project.findFirst({
@@ -596,7 +647,7 @@ export class KnowledgeService {
             where: { deletedAt: null },
             skip: (page - 1) * pageSize,
             take: pageSize,
-            orderBy: { createdAt: 'asc' },
+            orderBy,
           },
         },
       });
@@ -610,7 +661,7 @@ export class KnowledgeService {
       },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      orderBy: { createdAt: 'asc' },
+      orderBy,
     });
   }
 
@@ -633,15 +684,13 @@ export class KnowledgeService {
     return { ...canvas, content };
   }
 
-  async upsertCanvas(user: User, param: UpsertCanvasRequest) {
+  async createCanvas(user: User, param: UpsertCanvasRequest) {
     const usageResult = await this.subscriptionService.checkStorageUsage(user);
     if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
       throw new BadRequestException('Storage quota exceeded');
     }
 
-    const isNewCanvas = !param.canvasId;
-
-    param.canvasId ||= genCanvasID();
+    param.canvasId = genCanvasID();
     param.projectId ||= genProjectID();
     param.title ||= 'Untitled';
 
@@ -652,6 +701,7 @@ export class KnowledgeService {
       readOnly: param.readOnly ?? false,
       content: param.initialContent,
       contentPreview: param.initialContent?.slice(0, 500),
+      order: param.order,
       project: {
         connectOrCreate: {
           where: { projectId: param.projectId },
@@ -664,7 +714,7 @@ export class KnowledgeService {
       },
     };
 
-    if (isNewCanvas && param.initialContent) {
+    if (param.initialContent) {
       createInput.storageKey = `canvas/${param.canvasId}.txt`;
       createInput.stateStorageKey = `state/${param.canvasId}`;
 
@@ -695,12 +745,27 @@ export class KnowledgeService {
       createInput.vectorSize = size;
     }
 
-    const canvas = await this.prisma.canvas.upsert({
-      where: { canvasId: param.canvasId },
-      create: createInput,
-      update: {
-        ...pick(param, ['title', 'readOnly']),
-      },
+    // Handle order in a transaction to ensure consistency
+    const canvas = await this.prisma.$transaction(async (tx) => {
+      // Get max order if not specified for new canvas
+      if (param.order === undefined) {
+        const maxOrder = await tx.canvas.aggregate({
+          where: { projectId: param.projectId, deletedAt: null },
+          _max: { order: true },
+        });
+        createInput.order = (maxOrder._max.order ?? -1) + 1;
+      }
+
+      const canvas = await tx.canvas.upsert({
+        where: { canvasId: param.canvasId },
+        create: createInput,
+        update: {
+          ...pick(param, ['title', 'readOnly']),
+          ...(param.order !== undefined && { order: param.order }),
+        },
+      });
+
+      return canvas;
     });
 
     await this.elasticsearch.upsertCanvas({
@@ -717,6 +782,30 @@ export class KnowledgeService {
     });
 
     return canvas;
+  }
+
+  async batchUpdateCanvas(user: User, param: UpsertCanvasRequest[]) {
+    const canvasIds = param.map((p) => p.canvasId);
+    if (canvasIds.length !== new Set(canvasIds).size) {
+      throw new BadRequestException('Duplicate canvas IDs');
+    }
+
+    const count = await this.prisma.canvas.count({
+      where: { canvasId: { in: canvasIds }, uid: user.uid, deletedAt: null },
+    });
+
+    if (count !== canvasIds.length) {
+      throw new BadRequestException('Some of the canvases cannot be found');
+    }
+
+    return this.prisma.$transaction(
+      param.map((p) =>
+        this.prisma.canvas.update({
+          where: { canvasId: p.canvasId },
+          data: pick(p, ['title', 'readOnly', 'order']),
+        }),
+      ),
+    );
   }
 
   async deleteCanvas(user: User, canvasId: string) {

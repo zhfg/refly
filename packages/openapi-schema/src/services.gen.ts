@@ -38,9 +38,9 @@ import type {
   DeleteCanvasData,
   DeleteCanvasError,
   DeleteCanvasResponse,
-  BatchMoveCanvasData,
-  BatchMoveCanvasError,
-  BatchMoveCanvasResponse,
+  BatchUpdateCanvasData,
+  BatchUpdateCanvasError,
+  BatchUpdateCanvasResponse,
   QueryReferencesData,
   QueryReferencesError,
   QueryReferencesResponse2,
@@ -317,13 +317,13 @@ export const deleteCanvas = (options: Options<DeleteCanvasData>) => {
 };
 
 /**
- * Batch move canvases
- * Batch move existing canvases to another project
+ * Batch update canvases
+ * Batch update existing canvases
  */
-export const batchMoveCanvas = (options: Options<BatchMoveCanvasData>) => {
-  return (options?.client ?? client).post<BatchMoveCanvasResponse, BatchMoveCanvasError>({
+export const batchUpdateCanvas = (options: Options<BatchUpdateCanvasData>) => {
+  return (options?.client ?? client).post<BatchUpdateCanvasResponse, BatchUpdateCanvasError>({
     ...options,
-    url: '/knowledge/canvas/batchMove',
+    url: '/knowledge/canvas/batchUpdate',
   });
 };
 

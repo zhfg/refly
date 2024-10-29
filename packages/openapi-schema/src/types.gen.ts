@@ -23,6 +23,11 @@ export type User = {
 };
 
 /**
+ * List order
+ */
+export type ListOrder = 'creationAsc' | 'creationDesc';
+
+/**
  * Reference metadata
  */
 export type ReferenceMeta = {
@@ -106,6 +111,10 @@ export type Resource = {
    */
   resourceType: ResourceType;
   /**
+   * Resource order in project
+   */
+  order?: number;
+  /**
    * Resource title
    */
   title: string;
@@ -157,6 +166,10 @@ export type Canvas = {
    * Project ID
    */
   projectId: string;
+  /**
+   * Canvas order in project
+   */
+  order?: number;
   /**
    * Canvas title
    */
@@ -900,133 +913,6 @@ export type Conversation = {
 };
 
 /**
- * Chat task type
- */
-export type ChatTaskType =
-  | 'chat'
-  | 'genTitle'
-  | 'quickAction'
-  | 'searchEnhanceKeyword'
-  | 'searchEnhanceSummarize'
-  | 'searchEnhanceAsk';
-
-/**
- * Content retrieval filter
- */
-export type RetrieveFilter = {
-  /**
-   * List of web links
-   * @deprecated
-   */
-  weblinkList?: Array<Source>;
-  /**
-   * List of URLs to retrieve
-   */
-  urls?: Array<string>;
-  /**
-   * List of resource IDs to retrieve
-   */
-  resourceIds?: Array<string>;
-  /**
-   * List of project IDs to retrieve
-   */
-  projectIds?: Array<string>;
-};
-
-/**
- * Chat payload
- */
-export type ChatPayload = {
-  /**
-   * Question
-   */
-  question: string;
-  /**
-   * Content retrieval filter
-   */
-  filter?: RetrieveFilter;
-};
-
-/**
- * Quick action type
- */
-export type QuickActionType = 'selection' | 'summary';
-
-/**
- * Quick action task payload
- */
-export type QuickActionTaskPayload = {
-  /**
-   * Question
-   */
-  question?: string;
-  /**
-   * Quick action type
-   */
-  actionType?: QuickActionType;
-  /**
-   * Prompt for this action
-   */
-  actionPrompt?: string;
-  /**
-   * Reference for this action
-   */
-  reference?: string;
-  /**
-   * Content retrieval filter
-   */
-  filter?: RetrieveFilter;
-};
-
-/**
- * Chat task
- */
-export type ChatTask = {
-  /**
-   * Task type
-   */
-  taskType: ChatTaskType;
-  /**
-   * Whether to dry run the task
-   */
-  dryRun?: boolean;
-  /**
-   * Conversation ID, a new conversation will be created if empty or non-existent
-   */
-  convId?: string;
-  /**
-   * Create conversation parameters
-   */
-  createConvParam?: CreateConversationRequest;
-  /**
-   * Chat locale
-   */
-  locale?: string;
-  /**
-   * Chat data
-   */
-  data?: ChatPayload | QuickActionTaskPayload;
-};
-
-/**
- * Chat task response
- */
-export type ChatTaskResponse = {
-  /**
-   * List of web links
-   */
-  sources: Array<Source>;
-  /**
-   * Chat Answer
-   */
-  answer: string;
-  /**
-   * Related questions
-   */
-  relatedQuestions?: Array<string>;
-};
-
-/**
  * Resource index status
  */
 export type IndexStatus = 'init' | 'wait_parse' | 'wait_index' | 'finish' | 'parse_failed' | 'index_failed';
@@ -1327,6 +1213,10 @@ export type UpsertCanvasRequest = {
    */
   canvasId?: string;
   /**
+   * Canvas order in project
+   */
+  order?: number;
+  /**
    * Project ID (will add to the project if given)
    */
   projectId?: string;
@@ -1349,37 +1239,6 @@ export type DeleteCanvasRequest = {
    * Canvas ID to delete
    */
   canvasId: string;
-};
-
-export type ReferCanvasRequest = {
-  /**
-   * Canvas ID to refer
-   */
-  canvasId: string;
-  /**
-   * Operation type
-   */
-  operation: 'add' | 'remove';
-  /**
-   * Reference list
-   */
-  references?: Array<Reference>;
-};
-
-/**
- * Operation type
- */
-export type operation = 'add' | 'remove';
-
-export type BatchMoveCanvasRequest = {
-  /**
-   * Canvas ID list to move
-   */
-  canvasIds: Array<string>;
-  /**
-   * Project ID to move to
-   */
-  projectId: string;
 };
 
 export type QueryReferencesRequest = {
@@ -1448,15 +1307,19 @@ export type UpsertProjectResponse = BaseResponse & {
   data?: Project;
 };
 
-export type BindProjectResourcesRequest = {
+export type BindProjectResourceRequest = {
   /**
    * Project ID
    */
   projectId: string;
   /**
-   * Resource ID list
+   * Resource ID
    */
-  resourceIds: Array<string>;
+  resourceId: string;
+  /**
+   * Resource order in project
+   */
+  order?: number;
   /**
    * Operation type
    */
@@ -1466,7 +1329,7 @@ export type BindProjectResourcesRequest = {
 /**
  * Operation type
  */
-export type operation2 = 'bind' | 'unbind';
+export type operation = 'bind' | 'unbind';
 
 export type DeleteProjectRequest = {
   /**
@@ -2141,13 +2004,6 @@ export type ListConversationResponse = BaseResponse & {
   data?: Array<Conversation>;
 };
 
-export type ChatRequest = {
-  /**
-   * chat task config
-   */
-  task?: ChatTask;
-};
-
 export type GetConversationDetailResponse = BaseResponse & {
   /**
    * Conversation data
@@ -2482,6 +2338,10 @@ export type InMemorySearchResponse = BaseResponse & {
 export type ListResourcesData = {
   query?: {
     /**
+     * Order
+     */
+    order?: ListOrder;
+    /**
      * Page number
      */
     page?: number;
@@ -2573,6 +2433,10 @@ export type DeleteResourceError = unknown;
 export type ListCanvasData = {
   query?: {
     /**
+     * Order by
+     */
+    order?: ListOrder;
+    /**
      * Page number
      */
     page?: number;
@@ -2634,13 +2498,13 @@ export type DeleteCanvasResponse = BaseResponse;
 
 export type DeleteCanvasError = unknown;
 
-export type BatchMoveCanvasData = {
-  body: BatchMoveCanvasRequest;
+export type BatchUpdateCanvasData = {
+  body: Array<UpsertCanvasRequest>;
 };
 
-export type BatchMoveCanvasResponse = BaseResponse;
+export type BatchUpdateCanvasResponse = BaseResponse;
 
-export type BatchMoveCanvasError = unknown;
+export type BatchUpdateCanvasError = unknown;
 
 export type QueryReferencesData = {
   body: QueryReferencesRequest;
@@ -2668,6 +2532,10 @@ export type DeleteReferencesError = unknown;
 
 export type ListProjectsData = {
   query?: {
+    /**
+     * Order
+     */
+    order?: ListOrder;
     /**
      * Page number
      */
@@ -2727,7 +2595,7 @@ export type CreateProjectResponse = UpsertProjectResponse;
 export type CreateProjectError = unknown;
 
 export type BindProjectResourcesData = {
-  body: BindProjectResourcesRequest;
+  body: Array<BindProjectResourceRequest>;
 };
 
 export type BindProjectResourcesResponse = BaseResponse;
@@ -3087,6 +2955,10 @@ export type GetSkillJobDetailError = unknown;
 export type ListConversationsData = {
   query?: {
     /**
+     * Order
+     */
+    order?: ListOrder;
+    /**
      * Page number
      */
     page?: number;
@@ -3330,9 +3202,9 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/canvas/batchMove': {
+  '/knowledge/canvas/batchUpdate': {
     post: {
-      req: BatchMoveCanvasData;
+      req: BatchUpdateCanvasData;
       res: {
         /**
          * Successful operation

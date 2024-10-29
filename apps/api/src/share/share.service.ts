@@ -91,7 +91,7 @@ export class ShareService {
 
     const projects = await this.prisma.project.findMany({
       where: { shareCode },
-      include: { canvases: { orderBy: { createdAt: 'asc' } } },
+      include: { canvases: { orderBy: { order: 'asc' } } },
       take: 1,
     });
 

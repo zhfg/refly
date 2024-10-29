@@ -16,6 +16,7 @@ import {
   CreateConversationResponse,
   ListConversationResponse,
   GetConversationDetailResponse,
+  ListOrder,
 } from '@refly-packages/openapi-schema';
 import { User as UserModel } from '@prisma/client';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
@@ -47,11 +48,13 @@ export class ConversationController {
     @Query('projectId') projectId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+    @Query('order', new DefaultValuePipe('updatedDesc')) order: ListOrder,
   ): Promise<ListConversationResponse> {
     const conversationList = await this.conversationService.listConversations(user, {
       projectId,
       page,
       pageSize,
+      order,
     });
 
     return buildSuccessResponse(conversationList?.map(conversationPO2DTO));
