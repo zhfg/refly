@@ -140,6 +140,10 @@ class TokenStreamProcessor {
     this.chunk = '';
     this.isLineStart = false;
     this.isCodeBlockStart = false;
+
+    // Focus with scroll options
+    const currentPos = this.editor.state.selection.from;
+    this.editor.commands.focus(currentPos, { scrollIntoView: true });
   }
 
   processMark(pattern: string, mark: string) {

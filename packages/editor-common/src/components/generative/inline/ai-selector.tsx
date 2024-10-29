@@ -117,6 +117,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose }: AISelectorP
                   },
                 });
 
+                setIsLoading(true);
                 handleBubbleClose();
               }}
             >

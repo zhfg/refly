@@ -73,6 +73,8 @@ export const AIBlockSelector = memo(({ onOpenChange }: AIBlockSelectorProps) => 
         selectedMdText: '',
       },
     });
+
+    setIsLoading(true);
   };
 
   return (
