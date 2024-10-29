@@ -28,20 +28,24 @@ export const AIBlockSelector = memo(({ onOpenChange }: AIBlockSelectorProps) => 
   const { editor } = useEditor();
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onOpenChange(false);
         editorEmitter.emit('activeAskAI', false);
+        // Focus editor after closing AI selector
+        setTimeout(() => {
+          editor?.commands.focus();
+        }, 0);
       }
     };
 
     document.addEventListener('keydown', handleEsc);
     return () => {
       document.removeEventListener('keydown', handleEsc);
-      editorEmitter.emit('activeAskAI', false);
     };
-  }, [onOpenChange]);
+  }, [onOpenChange, editor]);
 
   const completion = '';
 

@@ -50,6 +50,10 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose }: AISelectorP
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onOpenChange(false);
+        // Focus editor after closing AI selector
+        setTimeout(() => {
+          editor?.commands.focus();
+        }, 0);
       }
     };
 
@@ -57,7 +61,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose }: AISelectorP
     return () => {
       document.removeEventListener('keydown', handleEsc);
     };
-  }, [onOpenChange]);
+  }, [onOpenChange, editor]);
 
   return (
     <div className="w-[350px]" ref={ref}>
