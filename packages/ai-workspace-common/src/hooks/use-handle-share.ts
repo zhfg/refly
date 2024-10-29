@@ -89,7 +89,7 @@ export const useHandleShare = () => {
 
     setShareCode(entityType, shareCode);
 
-    const shareUrl = `${window.location.origin}/share/${shareCode}`;
+    const shareUrl = `${window.location.origin}/full-page/share/${shareCode}?entityType=${entityType}&entityId=${entityId}`;
 
     const modal = Modal.success({
       closable: true,

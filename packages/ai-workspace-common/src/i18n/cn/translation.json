@@ -137,6 +137,9 @@
       "sharing": "分享中"
     }
   },
+  "shareContent": {
+    "title": "分享"
+  },
   "workspace": {
     "leftPanel": {
       "welcomeTitle": "你好， ",

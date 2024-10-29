@@ -137,6 +137,9 @@
       "sharing": "Sharing"
     }
   },
+  "shareContent": {
+    "title": "Share"
+  },
   "workspace": {
     "leftPanel": {
       "welcomeTitle": "Hello, ",

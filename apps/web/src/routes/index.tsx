@@ -23,6 +23,7 @@ const Skill = lazy(() => import("@/pages/skill"))
 const SkillDetailPage = lazy(() => import("@/pages/skill-detail"))
 const Settings = lazy(() => import("@/pages/settings"))
 const Login = lazy(() => import("@/pages/login"))
+const ShareContent = lazy(() => import("@/pages/share-content"))
 
 // Loading component
 const LoadingFallback = () => (
@@ -50,6 +51,7 @@ const prefetchRoutes = () => {
   import("@/pages/skill")
   import("@/pages/skill-detail")
   import("@/pages/settings")
+  import("@/pages/share-content")
   import("@refly-packages/ai-workspace-common/components/request-access/index")
 }
 
@@ -95,15 +97,19 @@ export const AppRouter = (props: { layout?: any }) => {
 
   const routeLogin = useMatch("/")
 
-  if (
-    userStore.isCheckingLoginStatus === undefined ||
-    userStore.isCheckingLoginStatus
-  ) {
-    return <LoadingFallback />
-  }
+  const isShareContent = useMatch("/full-page/share/:shareCode")
 
-  if (!notShowLoginBtn && !routeLogin) {
-    return <LoadingFallback />
+  if (!isShareContent) {
+    if (
+      !userStore.isCheckingLoginStatus === undefined ||
+      userStore.isCheckingLoginStatus
+    ) {
+      return <LoadingFallback />
+    }
+
+    if (!notShowLoginBtn && !routeLogin) {
+      return <LoadingFallback />
+    }
   }
 
   const hasBetaAccess = userStore?.isLogin
@@ -199,6 +205,10 @@ export const AppRouter = (props: { layout?: any }) => {
           <Route
             path="/request-access"
             element={<RequestAccessRoute hasBetaAccess={hasBetaAccess} />}
+          />
+          <Route
+            path="/full-page/share/:shareCode"
+            element={<ShareContent />}
           />
         </Routes>
       </Layout>
