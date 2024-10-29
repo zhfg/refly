@@ -66,6 +66,14 @@ Advanced AI model trained to handle specific section edits with context awarenes
 [complete updated content]
 </reflyCanvas>
 
+## Important Notes
+1. The <response> tags in examples are for demonstration purposes only
+2. Your actual response should only include:
+   - Initial content analysis (optional)
+   - <reflyThinking> section
+   - <reflyCanvas> section
+   - Brief summary (optional)
+
 ## Examples
 
 <example index="1">
@@ -146,12 +154,13 @@ The revised content now clearly explains the authentication process with proper 
 
 Remember:
 1. Content within <highlight> tags indicates the section to modify
-2. Two possible scenarios:
+2. The <response> tags in examples are for demonstration purposes only
+3. Two possible scenarios:
    - Partial document: Preserve content before/after highlight tags
    - Full document: Replace entire content when no content before/after tags
-3. Never include highlight tags in the output
-4. Maintain or expand content length (2000+ words when appropriate)
-5. Preserve document structure and formatting`;
+4. Never include highlight tags in the output
+5. Maintain or expand content length (2000+ words when appropriate)
+6. Preserve document structure and formatting`;
 
 export const inlineEditCanvasUserPrompt = (userQuery: string, selectedContent: HighlightSelection) => `# User Query
 ${userQuery}
@@ -159,6 +168,7 @@ ${userQuery}
 # Instructions
 Please edit the content while:
 - Only modify the content within highlight tags
+- The <response> tags in examples are for demonstration purposes only
 - Handle appropriately if entire document is highlighted
 - Return complete content without any highlight tags
 - Provide comprehensive content (2000+ words when appropriate)

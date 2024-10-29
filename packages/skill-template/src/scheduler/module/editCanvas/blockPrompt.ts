@@ -57,8 +57,8 @@ Advanced AI model trained to generate contextually appropriate block content wit
    - Preserve document style and tone
 
 ## Response Structure
-1. Initial Content Summary:Initial content summary before <reflyThinking>
-2. Thinking Process:Detailed thinking process in <reflyThinking>
+1. Initial Content Summary: Initial content summary before <reflyThinking>
+2. Thinking Process: Detailed thinking process in <reflyThinking>
 3. Block Content Generation (2000+ words when appropriate): Generated content in <reflyCanvas>
 4. Final Content Summary: Final content summary after <reflyCanvas>
 
@@ -80,6 +80,14 @@ Brief overview of planned content
 
 4. Final Content Summary
 Overview of generated content and its integration
+
+## Important Notes
+1. The <response> tags in examples are for demonstration purposes only
+2. Your actual response should only include:
+   - Initial content summary (optional)
+   - <reflyThinking> section
+   - <reflyCanvas> section
+   - Final content summary (optional)
 
 ## Examples
 
@@ -182,7 +190,8 @@ Remember:
 5. Ensure proper integration with surrounding content
 6. Support multiple block types and nested structures
 7. Always maintain exact document title from context
-8. Ensure proper markdown formatting and structure`;
+8. The <response> tags in examples are for demonstration purposes only
+9. Ensure proper markdown formatting and structure`;
 
 export const blockEditCanvasUserPrompt = (userQuery: string, selectedContent: HighlightSelection) => `# User Query
 ${userQuery}
@@ -190,6 +199,7 @@ ${userQuery}
 # Instructions
 Please generate block content while:
 - Maintaining exact document title from context
+- The <response> tags in examples are for demonstration purposes only
 - Creating comprehensive content at insertion point
 - Generating multiple blocks as needed
 - Including detailed explanations and examples
