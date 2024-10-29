@@ -90,7 +90,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
         startIndex: selection.startIndex,
         endIndex: selection.endIndex,
       },
-      inPlaceEditType: type,
+      inPlaceEditType: type, // inline for base selection optimize write, block for empty selection optimize write
     };
 
     updateCurrentSelectedMarks(currentSelectedMarks);

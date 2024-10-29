@@ -1,7 +1,9 @@
 import mitt from 'mitt';
 
+export type InPlaceEditType = 'inline' | 'block';
+
 export interface InPlaceSendMessagePayload {
-  type: 'inline' | 'block';
+  type: InPlaceEditType;
   userInput: string;
   selection: {
     startIndex: number;

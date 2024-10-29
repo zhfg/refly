@@ -40,6 +40,8 @@ import * as editCanvas from './module/editCanvas';
 // types
 import { HighlightSelection, SelectedRange } from './module/editCanvas/types';
 
+import { InPlaceEditType } from '@refly-packages/utils';
+
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
 
@@ -470,6 +472,7 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     // Get selected range from metadata
     const selectedRange = currentCanvas?.metadata?.selectedRange as SelectedRange;
+    const inPlaceEditType = currentCanvas?.metadata?.inPlaceEditType as InPlaceEditType;
 
     // Extract content context if selection exists
     // const selectedContent = selectedRange
@@ -488,6 +491,7 @@ Please generate the summary based on these requirements and offer suggestions fo
           canvasId: currentCanvas.canvasId,
           convId,
           selectedRange,
+          inPlaceEditType,
         }),
       },
       config,
@@ -498,12 +502,12 @@ Please generate the summary based on these requirements and offer suggestions fo
       maxTokens: 4096,
     });
 
-    // Prepare prompts with selected content context
-    const editCanvasUserPrompt = editCanvas.editCanvasUserPrompt(originalQuery, highlightSelection);
-    const editCanvasContext = editCanvas.editCanvasContext(currentCanvas.canvas, highlightSelection);
+    // Prepare prompts with selected content context based on edit type
+    const editCanvasUserPrompt = editCanvas.editCanvasUserPrompt(inPlaceEditType, originalQuery, highlightSelection);
+    const editCanvasContext = editCanvas.editCanvasContext(inPlaceEditType, currentCanvas.canvas, highlightSelection);
 
     const requestMessages = [
-      new SystemMessage(editCanvas.editCanvasSystemPrompt),
+      new SystemMessage(editCanvas.editCanvasSystemPrompt(inPlaceEditType)),
       ...chatHistory,
       new HumanMessage(editCanvasContext),
       new HumanMessage(editCanvasUserPrompt),
@@ -519,6 +523,7 @@ Please generate the summary based on these requirements and offer suggestions fo
           canvasId: currentCanvas.canvasId,
           projectId,
           selectedRange,
+          inPlaceEditType,
         },
       });
 

@@ -82,7 +82,16 @@ export const AIBlockSelector = memo(({ onOpenChange }: AIBlockSelectorProps) => 
               onClick={() => {
                 const selection = editor.state.selection;
                 const startIndex = selection.from;
-                const endIndex = selection.to;
+
+                editorEmitter.emit('inPlaceSendMessage', {
+                  type: 'block',
+                  userInput: inputValue,
+                  selection: {
+                    startIndex,
+                    endIndex: startIndex,
+                    selectedMdText: '',
+                  },
+                });
               }}
             >
               <ArrowUp className="w-4 h-4" />

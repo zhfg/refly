@@ -12,9 +12,9 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
   const { editor } = useEditor();
   const [askAIShow, setAskAIShow] = useState(false);
 
-  useEffect(() => {
-    if (!open) removeAIHighlight(editor);
-  }, [open]);
+  // useEffect(() => {
+  //   if (!open) removeAIHighlight(editor);
+  // }, [open]);
 
   useEffect(() => {
     editorEmitter.on('activeAskAI', (value: boolean) => {
@@ -33,6 +33,7 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
         onHidden: () => {
           onOpenChange(false);
           editor.chain().unsetHighlight().run();
+          removeAIHighlight(editor);
         },
       }}
       askAIShow={askAIShow}
