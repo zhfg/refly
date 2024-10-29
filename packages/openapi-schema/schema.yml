@@ -1646,6 +1646,9 @@ components:
         content:
           type: string
           description: Full canvas content (only returned in detail api)
+        shareCode:
+          type: string
+          description: Share code
         readOnly:
           type: boolean
           description: Whether this canvas is read-only
@@ -1677,6 +1680,9 @@ components:
           type: string
           description: Project description
           example: Project description
+        shareCode:
+          type: string
+          description: Share code
         createdAt:
           type: string
           format: date-time
@@ -3088,8 +3094,7 @@ components:
     SharedContent:
       type: object
       required:
-        - selectedCanvasId
-        - selectedCanvasContent
+        - selectedCanvas
       properties:
         project:
           description: Shared project data
@@ -3099,12 +3104,9 @@ components:
           description: Shared canvas list
           items:
             $ref: '#/components/schemas/Canvas'
-        selectedCanvasId:
-          type: string
-          description: Selected canvas ID
-        selectedCanvasContent:
-          type: string
-          description: Selected canvas content
+        canvas:
+          description: Selected canvas detail
+          $ref: '#/components/schemas/Canvas'
     GetShareContentResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

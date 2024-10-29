@@ -87,10 +87,7 @@ export class ShareService {
     shareCode: string,
     canvasId?: string,
   ): Promise<SharedContent> {
-    const result: SharedContent = {
-      selectedCanvasId: canvasId || '',
-      selectedCanvasContent: '',
-    };
+    const result: SharedContent = {};
 
     const projects = await this.prisma.project.findMany({
       where: { shareCode },
@@ -105,17 +102,19 @@ export class ShareService {
     const project = projects[0];
     result.project = projectPO2DTO(project);
     result.canvasList = project.canvases.map((c) => canvasPO2DTO(c));
-    result.selectedCanvasId = canvasId || project.canvases[0].canvasId;
 
-    const canvas = project.canvases.find((c) => c.canvasId === result.selectedCanvasId);
+    const selectedCanvasId = canvasId || project.canvases[0].canvasId;
+
+    const canvas = project.canvases.find((c) => c.canvasId === selectedCanvasId);
 
     if (!canvas) {
       throw new NotFoundException('Shared canvas not found');
     }
 
-    result.selectedCanvasContent = await streamToString(
-      await this.minio.client.getObject(canvas.storageKey),
-    );
+    result.canvas = canvasPO2DTO({
+      ...canvas,
+      content: await streamToString(await this.minio.client.getObject(canvas.storageKey)),
+    });
 
     return result;
   }
@@ -124,10 +123,7 @@ export class ShareService {
     shareCode: string,
     canvasId?: string,
   ): Promise<SharedContent> {
-    const result: SharedContent = {
-      selectedCanvasId: canvasId || '',
-      selectedCanvasContent: '',
-    };
+    const result: SharedContent = {};
 
     const canvases = await this.prisma.canvas.findMany({
       where: { shareCode, canvasId },
@@ -139,9 +135,11 @@ export class ShareService {
     }
 
     const canvas = canvases[0];
-    result.selectedCanvasContent = await streamToString(
-      await this.minio.client.getObject(canvas.storageKey),
-    );
+
+    result.canvas = canvasPO2DTO({
+      ...canvas,
+      content: await streamToString(await this.minio.client.getObject(canvas.storageKey)),
+    });
 
     return result;
   }

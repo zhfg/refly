@@ -22,7 +22,7 @@ export type FinalizeResourceParam = {
 
 export const projectPO2DTO = (project: ProjectModel): Project => {
   return {
-    ...pick(project, ['projectId', 'title', 'description']),
+    ...pick(project, ['projectId', 'title', 'description', 'shareCode']),
     createdAt: project.createdAt.toJSON(),
     updatedAt: project.updatedAt.toJSON(),
   };
@@ -57,7 +57,15 @@ export const canvasPO2DTO = (
     return null;
   }
   const res: Canvas = {
-    ...pick(canvas, ['canvasId', 'projectId', 'title', 'content', 'contentPreview', 'readOnly']),
+    ...pick(canvas, [
+      'canvasId',
+      'projectId',
+      'title',
+      'content',
+      'contentPreview',
+      'shareCode',
+      'readOnly',
+    ]),
     createdAt: canvas.createdAt.toJSON(),
     updatedAt: canvas.updatedAt.toJSON(),
   };

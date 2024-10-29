@@ -205,6 +205,10 @@ export const $Canvas = {
       type: 'string',
       description: 'Full canvas content (only returned in detail api)',
     },
+    shareCode: {
+      type: 'string',
+      description: 'Share code',
+    },
     readOnly: {
       type: 'boolean',
       description: 'Whether this canvas is read-only',
@@ -240,6 +244,10 @@ export const $Project = {
       type: 'string',
       description: 'Project description',
       example: 'Project description',
+    },
+    shareCode: {
+      type: 'string',
+      description: 'Share code',
     },
     createdAt: {
       type: 'string',
@@ -2095,7 +2103,7 @@ export const $DeleteShareRequest = {
 
 export const $SharedContent = {
   type: 'object',
-  required: ['selectedCanvasId', 'selectedCanvasContent'],
+  required: ['selectedCanvas'],
   properties: {
     project: {
       description: 'Shared project data',
@@ -2108,13 +2116,9 @@ export const $SharedContent = {
         $ref: '#/components/schemas/Canvas',
       },
     },
-    selectedCanvasId: {
-      type: 'string',
-      description: 'Selected canvas ID',
-    },
-    selectedCanvasContent: {
-      type: 'string',
-      description: 'Selected canvas content',
+    canvas: {
+      description: 'Selected canvas detail',
+      $ref: '#/components/schemas/Canvas',
     },
   },
 } as const;

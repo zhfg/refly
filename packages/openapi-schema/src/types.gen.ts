@@ -170,6 +170,10 @@ export type Canvas = {
    */
   content?: string;
   /**
+   * Share code
+   */
+  shareCode?: string;
+  /**
    * Whether this canvas is read-only
    */
   readOnly: boolean;
@@ -196,6 +200,10 @@ export type Project = {
    * Project description
    */
   description?: string;
+  /**
+   * Share code
+   */
+  shareCode?: string;
   /**
    * Project creation time
    */
@@ -1517,13 +1525,9 @@ export type SharedContent = {
    */
   canvasList?: Array<Canvas>;
   /**
-   * Selected canvas ID
+   * Selected canvas detail
    */
-  selectedCanvasId: string;
-  /**
-   * Selected canvas content
-   */
-  selectedCanvasContent: string;
+  canvas?: Canvas;
 };
 
 export type GetShareContentResponse = BaseResponse & {
