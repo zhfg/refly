@@ -39,22 +39,15 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
     const selection = editor.state.selection;
     const startIndex = selection.from;
     const endIndex = selection.to;
-    const currentNode = selection.$anchor.node();
 
     if (inPlaceEditType === 'block') {
       // Handle block type message
-      const shouldInsertNewLine = !currentNode.isTextblock || currentNode.textContent.length > 0;
-
-      if (shouldInsertNewLine) {
-        editor.chain().focus().insertContentAt(startIndex, '\n').run();
-      }
-
       editorEmitter.emit('inPlaceSendMessage', {
         type: 'block',
         userInput: inputValue,
         selection: {
-          startIndex: shouldInsertNewLine ? startIndex + 1 : startIndex,
-          endIndex: shouldInsertNewLine ? startIndex + 1 : startIndex,
+          startIndex: startIndex,
+          endIndex: startIndex,
           selectedMdText: '',
         },
       });
