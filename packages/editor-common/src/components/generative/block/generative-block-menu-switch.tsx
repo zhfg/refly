@@ -1,7 +1,7 @@
 import { Editor, useEditor, EditorBubble } from '@refly-packages/editor-core/components';
 import { removeAIHighlight } from '@refly-packages/editor-core/extensions';
 import { useEffect, useRef } from 'react';
-import { AIBlockSelector } from './ai-block-selector';
+import { AISelector } from '../common/ai-selector';
 import { editorEmitter } from '@refly/utils/event-emitter/editor';
 import type { Instance } from 'tippy.js';
 
@@ -67,6 +67,24 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
   }, []);
 
   useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onOpenChange(false);
+        editorEmitter.emit('activeAskAI', false);
+        // Focus editor after closing AI selector
+        setTimeout(() => {
+          editor?.commands.focus();
+        }, 0);
+      }
+    };
+
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [onOpenChange, editor]);
+
+  useEffect(() => {
     if (editor) {
       editorRef.current = editor;
     }
@@ -83,7 +101,7 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
       }}
       className="z-50 flex w-fit max-w-[90vw] overflow-hidden rounded-md border border-muted bg-background shadow-xl"
     >
-      {open && <AIBlockSelector open={open} onOpenChange={onOpenChange} />}
+      {open && <AISelector open={open} onOpenChange={onOpenChange} inPlaceEditType="block" />}
     </EditorBubble>
   );
 };

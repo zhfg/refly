@@ -3,7 +3,7 @@ import { removeAIHighlight } from '@refly-packages/editor-core/extensions';
 import { Fragment, type ReactNode, useEffect, useRef } from 'react';
 import type { Instance } from 'tippy.js';
 
-import { AISelector } from './ai-selector';
+import { AISelector } from '../common/ai-selector';
 
 interface GenerativeMenuSwitchProps {
   children: ReactNode;
@@ -49,7 +49,14 @@ const GenerativeMenuSwitch = ({ children, open, onOpenChange }: GenerativeMenuSw
         }}
         className="flex overflow-hidden z-50 max-w-full rounded-md border shadow-xl w-fit border-muted bg-background"
       >
-        {open && <AISelector open={open} onOpenChange={onOpenChange} handleBubbleClose={handleBubbleClose} />}
+        {open && (
+          <AISelector
+            open={open}
+            onOpenChange={onOpenChange}
+            handleBubbleClose={handleBubbleClose}
+            inPlaceEditType="inline"
+          />
+        )}
         {!open && <Fragment>{children}</Fragment>}
       </EditorBubble>
     </div>
