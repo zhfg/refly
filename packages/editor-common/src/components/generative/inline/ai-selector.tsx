@@ -3,7 +3,7 @@
 import { ArrowUp } from 'lucide-react';
 import { useEditor } from '@refly-packages/editor-core/components';
 import { addAIHighlight } from '@refly-packages/editor-core/extensions';
-import { memo, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
 import { Button } from '../../ui/button';
@@ -45,6 +45,19 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose }: AISelectorP
   // });
 
   // const hasCompletion = completion.length > 0;
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onOpenChange(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [onOpenChange]);
 
   return (
     <div className="w-[350px]" ref={ref}>

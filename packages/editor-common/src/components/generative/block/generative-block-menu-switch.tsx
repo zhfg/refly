@@ -28,6 +28,8 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
 
   useEffect(() => {
     editorEmitter.on('activeAskAI', (value: boolean) => {
+      onOpenChange(value);
+
       if (!value) {
         bubbleRef.current?.hide();
       } else {
@@ -58,8 +60,6 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
           }
         });
       }
-
-      onOpenChange(value);
     });
     return () => {
       editorEmitter.off('activeAskAI');

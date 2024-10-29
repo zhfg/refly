@@ -1,11 +1,10 @@
 'use client';
 
 import { Command, CommandInput } from '../../ui/command';
-
 import { ArrowUp } from 'lucide-react';
 import { useEditor } from '@refly-packages/editor-core/components';
 import { addAIHighlight } from '@refly-packages/editor-core/extensions';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
 import { Button } from '../../ui/button';
@@ -29,7 +28,6 @@ export const AIBlockSelector = memo(({ onOpenChange }: AIBlockSelectorProps) => 
   const { editor } = useEditor();
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -75,16 +73,6 @@ export const AIBlockSelector = memo(({ onOpenChange }: AIBlockSelectorProps) => 
 
   return (
     <Command className="w-[350px]">
-      {hasCompletion && (
-        <div className="flex max-h-[400px]">
-          <ScrollArea>
-            <div className="p-2 px-4 prose prose-sm">
-              <Markdown>{completion}</Markdown>
-            </div>
-          </ScrollArea>
-        </div>
-      )}
-
       {isLoading && (
         <div className="flex items-center px-4 w-full h-12 text-sm font-medium text-purple-500 text-muted-foreground">
           <Magic className="mr-2 w-4 h-4 shrink-0" />
@@ -100,6 +88,13 @@ export const AIBlockSelector = memo(({ onOpenChange }: AIBlockSelectorProps) => 
             <div className="flex items-center px-4 border-b" cmdk-input-wrapper="">
               <Magic className="mr-2 w-4 h-4 text-purple-500 shrink-0" />
               <Input
+                ref={(input) => {
+                  if (input?.dom) {
+                    setTimeout(() => {
+                      input.dom.focus();
+                    }, 0);
+                  }
+                }}
                 value={inputValue}
                 onChange={(val) => {
                   console.log('val', val);
