@@ -13,7 +13,6 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
   ({ children, tippyOptions, ...rest }, ref) => {
     const { editor: currentEditor } = useCurrentEditor();
     const instanceRef = useRef<Instance<Props> | null>(null);
-    const askAIShowRef = useRef<boolean>(rest?.askAIShow ?? false);
 
     useEffect(() => {
       if (!instanceRef.current || !tippyOptions?.placement) return;
@@ -21,24 +20,11 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
       instanceRef.current.setProps({ placement: tippyOptions.placement });
       instanceRef.current.popperInstance?.update();
     }, [tippyOptions?.placement]);
-    useEffect(() => {
-      askAIShowRef.current = rest?.askAIShow ?? false;
-    }, [rest?.askAIShow]);
 
     const bubbleMenuProps: Omit<BubbleMenuProps, 'children' | 'editor'> = useMemo(() => {
       const shouldShow: BubbleMenuProps['shouldShow'] = ({ editor, state }) => {
         const { selection } = state;
         const { empty } = selection;
-        const selectedNode = selection.$anchor.node();
-        const isEmptyNode = selectedNode?.content?.size === 0;
-
-        // Block AI Editor 的情况
-        // console.log('askAIShowRef.current', askAIShowRef.current, selectedNode);
-        if (isEmptyNode && askAIShowRef.current) {
-          return true;
-        }
-
-        // 其他情况
 
         // don't show bubble menu if:
         // - the editor is not editable
@@ -51,21 +37,24 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
         return true;
       };
 
-      const { onCreate, ...restTippyOptions } = tippyOptions;
+      const { onCreate, onHidden, ...restTippyOptions } = tippyOptions;
 
       return {
         shouldShow,
         tippyOptions: {
-          onCreate: (val) => {
-            instanceRef.current = val;
-            onCreate?.(val);
+          onCreate: (instance) => {
+            instanceRef.current = instance;
+            onCreate?.(instance);
+          },
+          onHidden: (...args) => {
+            onHidden?.(...args);
           },
           moveTransition: 'transform 0.15s ease-out',
           ...restTippyOptions,
         },
         ...rest,
       };
-    }, [rest, rest.askAIShow, tippyOptions]);
+    }, [rest, tippyOptions]);
 
     if (!currentEditor) return null;
 

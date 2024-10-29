@@ -5,7 +5,7 @@ import { Command, CommandInput } from '../../ui/command';
 import { ArrowUp } from 'lucide-react';
 import { useEditor } from '@refly-packages/editor-core/components';
 import { addAIHighlight } from '@refly-packages/editor-core/extensions';
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
 import { Button } from '../../ui/button';
@@ -29,9 +29,49 @@ export const AIBlockSelector = memo(({ onOpenChange }: AIBlockSelectorProps) => 
   const { editor } = useEditor();
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onOpenChange(false);
+        editorEmitter.emit('activeAskAI', false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      editorEmitter.emit('activeAskAI', false);
+    };
+  }, [onOpenChange]);
+
   const completion = '';
 
   const hasCompletion = completion.length > 0;
+
+  const handleSendMessage = () => {
+    const selection = editor.state.selection;
+    const startIndex = selection.from;
+    const currentNode = selection.$anchor.node();
+
+    // 如果在已有内容的行中，可以选择在当前位置插入或者新起一行
+    const shouldInsertNewLine = !currentNode.isTextblock || currentNode.textContent.length > 0;
+
+    if (shouldInsertNewLine) {
+      // 在当前位置后插入新行
+      editor.chain().focus().insertContentAt(startIndex, '\n').run();
+    }
+
+    editorEmitter.emit('inPlaceSendMessage', {
+      type: 'block',
+      userInput: inputValue,
+      selection: {
+        startIndex: shouldInsertNewLine ? startIndex + 1 : startIndex,
+        endIndex: shouldInsertNewLine ? startIndex + 1 : startIndex,
+        selectedMdText: '',
+      },
+    });
+  };
 
   return (
     <Command className="w-[350px]">
@@ -79,20 +119,7 @@ export const AIBlockSelector = memo(({ onOpenChange }: AIBlockSelectorProps) => 
               size="icon"
               disabled={!inputValue}
               className="absolute right-2 top-1/2 w-6 h-6 bg-purple-500 rounded-full -translate-y-1/2 hover:bg-purple-900"
-              onClick={() => {
-                const selection = editor.state.selection;
-                const startIndex = selection.from;
-
-                editorEmitter.emit('inPlaceSendMessage', {
-                  type: 'block',
-                  userInput: inputValue,
-                  selection: {
-                    startIndex,
-                    endIndex: startIndex,
-                    selectedMdText: '',
-                  },
-                });
-              }}
+              onClick={handleSendMessage}
             >
               <ArrowUp className="w-4 h-4" />
             </Button>

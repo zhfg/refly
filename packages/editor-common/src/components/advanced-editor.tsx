@@ -13,7 +13,7 @@ import { AIBtnSelector } from './selectors/ai-btn-selector';
 import { Separator } from './ui/separator';
 
 import GenerativeMenuSwitch from './generative/inline/generative-menu-switch';
-import GenerativeBlockMenu from './generative/block/generative-block-menu';
+import GenerativeBlockMenuSwitch from './generative/block/generative-block-menu-switch';
 import { TextButtons } from './selectors/text-buttons';
 import { configureSuggestionItems } from './slash-command';
 
@@ -79,5 +79,5 @@ export const CollabGenAIMenuSwitch: React.FC<CollabGenAIMenuSwitchProps> = (prop
 export const CollabGenAIBlockMenu = () => {
   const [openAI, setOpenAI] = useState(false);
 
-  return <GenerativeBlockMenu open={openAI} onOpenChange={setOpenAI}></GenerativeBlockMenu>;
+  return <GenerativeBlockMenuSwitch open={openAI} onOpenChange={setOpenAI}></GenerativeBlockMenuSwitch>;
 };

@@ -24,8 +24,14 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       searchTerms: ['ai', 'assistant'],
       icon: <Magic className="w-5 h-5" />,
       command: ({ editor, range }) => {
+        editor.view.focus();
+        editor.commands.setTextSelection(range.from);
         editor.chain().focus().deleteRange(range).run();
-        editorEmitter.emit('activeAskAI', true);
+
+        // Ensure the editor is focused and selection is set
+        setTimeout(() => {
+          editorEmitter.emit('activeAskAI', true);
+        }, 0);
       },
     },
     {
