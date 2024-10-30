@@ -8,9 +8,23 @@ import { IntentResult } from '@refly-packages/ai-workspace-common/hooks/use-hand
 
 // types
 import type { CanvasEditConfig } from '@refly/utils';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 export type ChatMode = 'normal' | 'noContext' | 'wholeSpace';
 export type ChatBehavior = 'askIntentMatch' | 'askFollowUp' | 'askNew';
+
+export interface MessageIntentContext {
+  source: MessageIntentSource;
+  isNewConversation: boolean;
+  canvasEditConfig?: CanvasEditConfig;
+  projectContext?: {
+    projectId: string;
+    canvasId?: string;
+  };
+  convId?: string;
+  chatMode?: ChatMode;
+  enableWebSearch?: boolean;
+}
 
 export interface ChatState {
   // state
@@ -19,7 +33,8 @@ export interface ChatState {
   newQAText: string;
   isGenTitle: boolean;
   isFirstStreamContent: boolean;
-  canvasEditConfig?: CanvasEditConfig;
+
+  messageIntentContext: MessageIntentContext | undefined;
 
   // context
   invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }; // for selected skill instance from copilot
@@ -35,8 +50,8 @@ export interface ChatState {
   setIsGenTitle: (val: boolean) => void;
   setNewQAText: (val: string) => void;
   setIsFirstStreamContent: (val: boolean) => void;
-  setCanvasEditConfig: (val: CanvasEditConfig) => void;
   setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) => void;
+  setMessageIntentContext: (val: MessageIntentContext) => void;
   setSelectedModel: (val: ModelInfo) => void;
   setModelList: (val: ModelInfo[]) => void;
   setEnableWebSearch: (val: boolean) => void;
@@ -66,8 +81,10 @@ const defaultConfigurableState = {
 export const defaultExtraState = {
   // messages: fakeMessages as any,
   messages: [],
+
   isFirstStreamContent: true,
-  canvasEditConfig: undefined,
+  messageIntentContext: undefined,
+
   sessions: [],
   newQAText: '',
   isGenTitle: false,
@@ -94,7 +111,7 @@ export const useChatStore = create<ChatState>()(
           return set({ newQAText: val });
         },
         setIsFirstStreamContent: (val: boolean) => set({ isFirstStreamContent: val }),
-        setCanvasEditConfig: (val: CanvasEditConfig) => set({ canvasEditConfig: val }),
+        setMessageIntentContext: (val: MessageIntentContext) => set({ messageIntentContext: val }),
         setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) =>
           set({ invokeParams: val }),
         setSelectedModel: (val: ModelInfo) => set({ selectedModel: val }),

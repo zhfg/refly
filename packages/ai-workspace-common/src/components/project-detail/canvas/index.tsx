@@ -516,7 +516,8 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
 
     const handleStreamEditCanvasContent = (event: { isFirst: boolean; content: string }) => {
       try {
-        const { canvasEditConfig } = useChatStore.getState();
+        const { messageIntentContext } = useChatStore.getState();
+        const canvasEditConfig = messageIntentContext?.canvasEditConfig;
 
         const { isFirst, content } = event;
         if (editorRef.current && canvasEditConfig?.selectedRange) {

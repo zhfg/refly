@@ -43,16 +43,18 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
     if (inPlaceEditType === 'block') {
       // Handle block type message
       editorEmitter.emit('inPlaceSendMessage', {
-        inPlaceEditType: 'block',
         userInput: inputValue,
-        selectedRange: {
-          startIndex: startIndex,
-          endIndex: startIndex,
-        },
-        selection: {
-          beforeHighlight: '',
-          highlightedText: '',
-          afterHighlight: '',
+        canvasEditConfig: {
+          inPlaceEditType: 'block',
+          selectedRange: {
+            startIndex: startIndex,
+            endIndex: startIndex,
+          },
+          selection: {
+            beforeHighlight: '',
+            highlightedText: '',
+            afterHighlight: '',
+          },
         },
       });
     } else {
@@ -61,16 +63,18 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       const selectedMdText = editor.storage.markdown.serializer.serialize(slice.content);
 
       editorEmitter.emit('inPlaceSendMessage', {
-        inPlaceEditType: 'inline',
         userInput: inputValue,
-        selectedRange: {
-          startIndex,
-          endIndex,
-        },
-        selection: {
-          beforeHighlight: '',
-          highlightedText: selectedMdText,
-          afterHighlight: '',
+        canvasEditConfig: {
+          inPlaceEditType: 'inline',
+          selectedRange: {
+            startIndex,
+            endIndex,
+          },
+          selection: {
+            beforeHighlight: '',
+            highlightedText: selectedMdText,
+            afterHighlight: '',
+          },
         },
       });
     }

@@ -13,7 +13,7 @@ import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-
 import { GridPattern } from './grid-pattern';
 
 // types
-import { CopilotSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 const quickStartList = [
   {
@@ -88,7 +88,7 @@ export const WriteGuide = (props: WriteGuideProps) => {
           </div>
 
           <div className="ai-copilot">
-            <CopilotOperationModule source={CopilotSource.HomePage} />
+            <CopilotOperationModule source={MessageIntentSource.HomePage} />
             <List
               grid={{
                 sm: 48,

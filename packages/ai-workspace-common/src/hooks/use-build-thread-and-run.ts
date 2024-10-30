@@ -1,4 +1,9 @@
-import { ChatMode, useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import {
+  ChatMode,
+  MessageIntentContext,
+  useChatStore,
+  useChatStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/chat';
 import { useConversationStoreShallow } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { buildConversation, getConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
 import { Notification } from '@arco-design/web-react';
@@ -23,12 +28,9 @@ import { IntentResult } from './use-handle-ai-canvas';
 
 interface InvokeParams {
   chatMode?: ChatMode;
-  projectId?: string;
   skillContext?: SkillContext;
   tplConfig?: SkillTemplateConfig;
-  intentResult?: IntentResult; // 新增意图识别结果
-  skipIntentDetection?: boolean; // 是否跳过意图识别
-  forceNewConv?: boolean; // 是否是新会话
+  messageIntentContext?: MessageIntentContext;
   userInput?: string; // 用户输入
 }
 
@@ -39,6 +41,7 @@ export const useBuildThreadAndRun = () => {
     setChatMode: state.setChatMode,
     setNewQAText: state.setNewQAText,
     setInvokeParams: state.setInvokeParams,
+    setMessageIntentContext: state.setMessageIntentContext,
   }));
   const setLoginModalVisible = useUserStoreShallow((state) => state.setLoginModalVisible);
   const conversationStore = useConversationStoreShallow((state) => ({
@@ -100,15 +103,26 @@ export const useBuildThreadAndRun = () => {
 
   const runSkill = (comingQuestion: string, invokeParams?: InvokeParams) => {
     // support ask follow up question
-    const { messages = [], selectedModel, enableWebSearch, chatMode, canvasEditConfig } = useChatStore.getState();
+    const { messages = [], selectedModel, enableWebSearch, messageIntentContext } = useChatStore.getState();
     const { selectedSkill } = useSkillStore.getState();
     const { localSettings } = useUserStore.getState();
 
     let question = comingQuestion.trim();
+    const canvasEditConfig = messageIntentContext?.canvasEditConfig;
+    const projectId = messageIntentContext?.projectContext?.projectId;
+    const forceNewConv = messageIntentContext?.isNewConversation;
 
     // 创建新会话并跳转
-    const conv = ensureConversationExist(invokeParams?.projectId, invokeParams?.forceNewConv);
+    const conv = ensureConversationExist(projectId, forceNewConv);
     const skillContext = invokeParams?.skillContext || buildSkillContext();
+    const chatMode = messageIntentContext?.chatMode;
+
+    // set convId info to messageIntentContext
+    const newMessageIntentContext: Partial<MessageIntentContext> = {
+      ...(messageIntentContext || {}),
+      convId: conv?.convId,
+    };
+    chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
 
     // TODO: temp make scheduler support
     const tplConfig = !!selectedSkill?.skillId
@@ -147,7 +161,7 @@ export const useBuildThreadAndRun = () => {
     // 设置当前的任务类型及会话 id
     const task: InvokeSkillRequest = {
       skillId: selectedSkill?.skillId,
-      projectId: invokeParams?.projectId,
+      projectId,
       input: {
         query: question,
       },

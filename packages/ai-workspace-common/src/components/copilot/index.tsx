@@ -24,13 +24,13 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 // types
-import { CopilotSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 import './index.scss';
 
 interface AICopilotProps {
   disable?: boolean;
-  source?: CopilotSource;
+  source: MessageIntentSource;
   jobId?: string;
 }
 
@@ -104,7 +104,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
   }, [updateOperationModuleHeight]);
 
   const isFromSkillJob = () => {
-    return source === 'skillJob';
+    return source === MessageIntentSource.SkillJob;
   };
 
   // ai-note handler

@@ -10,6 +10,7 @@ import { Markdown } from '../../../components/markdown';
 import { useCountDown } from '../hooks/use-countdown';
 import { useQuickActionStore } from '../stores/quick-action';
 import { CopilotOperationModule } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 const TextArea = Input.TextArea;
 const Option = Select.Option;
@@ -68,7 +69,7 @@ const PopupWindow: FC<PopupWindowProps> = (props) => {
           </div>
         </header>
 
-        <CopilotOperationModule />
+        <CopilotOperationModule source={MessageIntentSource.ResourceQuickAction} />
       </div>
     </Draggable>
   );

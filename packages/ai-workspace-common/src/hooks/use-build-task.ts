@@ -41,8 +41,8 @@ export const useBuildTask = () => {
   const chatStore = useChatStoreShallow((state) => ({
     setMessages: state.setMessages,
     setIntentMatcher: state.setIntentMatcher,
-    setCanvasEditConfig: state.setCanvasEditConfig,
     setIsFirstStreamContent: state.setIsFirstStreamContent,
+    setMessageIntentContext: state.setMessageIntentContext,
   }));
   const messageStateStore = useMessageStateStoreShallow((state) => ({
     setMessageState: state.setMessageState,
@@ -276,7 +276,7 @@ export const useBuildTask = () => {
     lastRelatedMessage.pending = false;
     messages[lastRelatedMessageIndex] = lastRelatedMessage;
     chatStore.setMessages(messages);
-    chatStore.setCanvasEditConfig(undefined); // reset canvas edit config
+    chatStore.setMessageIntentContext(undefined); // reset message intent context
   };
 
   const buildErrMsgAndAppendToChat = (msg: string) => {

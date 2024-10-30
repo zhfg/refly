@@ -6,6 +6,7 @@ import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skil
 import { memo, useEffect, useRef } from 'react';
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { useTranslation } from 'react-i18next';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 export const SkillDisplay = memo(({ source }: { source: string }) => {
   const skillStore = useSkillStore((state) => ({
@@ -29,7 +30,7 @@ export const SkillDisplay = memo(({ source }: { source: string }) => {
   const { handleGetSkillInstances, handleGetSkillTemplates } = useSkillManagement();
 
   const isFromSkillJob = () => {
-    return source === 'skillJob';
+    return source === MessageIntentSource.SkillJob;
   };
 
   useEffect(() => {

@@ -15,8 +15,9 @@ export interface CanvasEditConfig {
   inPlaceEditType?: InPlaceEditType;
 }
 
-export interface InPlaceSendMessagePayload extends CanvasEditConfig {
+export interface InPlaceSendMessagePayload {
   userInput: string;
+  canvasEditConfig?: CanvasEditConfig;
 }
 
 export type Events = {

@@ -12,7 +12,7 @@ import { AICopilot } from "@refly-packages/ai-workspace-common/components/copilo
 import { useSkillJobForCopilot } from "@refly-packages/ai-workspace-common/stores/skill-job-for-copilot"
 
 // types
-import { CopilotSource } from "@refly-packages/ai-workspace-common/types/copilot"
+import { MessageIntentSource } from "@refly-packages/ai-workspace-common/types/copilot"
 
 import "./index.scss"
 
@@ -60,7 +60,7 @@ const SkillDetailPage = () => {
                 id="skill-detail-page__copilot">
                 <AICopilot
                   disable={true}
-                  source={CopilotSource.SkillJob}
+                  source={MessageIntentSource.SkillJob}
                   jobId={skillJobForCopilot.jobId}
                 />
               </Panel>
