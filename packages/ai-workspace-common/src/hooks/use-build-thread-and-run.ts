@@ -40,7 +40,11 @@ export const useBuildThreadAndRun = () => {
     setNewQAText: state.setNewQAText,
     setInvokeParams: state.setInvokeParams,
   }));
-  const setLoginModalVisible = useUserStoreShallow((state) => state.setLoginModalVisible);
+  const { setLoginModalVisible, isLogin } = useUserStoreShallow((state) => ({
+    setLoginModalVisible: state.setLoginModalVisible,
+    isLogin: state.isLogin,
+  }));
+
   const conversationStore = useConversationStoreShallow((state) => ({
     currentConversation: state.currentConversation,
     setCurrentConversation: state.setCurrentConversation,
@@ -155,9 +159,7 @@ export const useBuildThreadAndRun = () => {
   };
 
   const sendChatMessage = (params: InvokeParams) => {
-    const { localSettings } = useUserStore.getState();
-
-    if (!localSettings) {
+    if (!isLogin) {
       setLoginModalVisible(true);
       return;
     }

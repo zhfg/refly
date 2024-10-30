@@ -138,7 +138,8 @@
     }
   },
   "shareContent": {
-    "title": "Share"
+    "title": "Share",
+    "login": "Start Writing with Refly"
   },
   "workspace": {
     "leftPanel": {
@@ -256,8 +257,9 @@
       "resource": "Resource",
       "resources": "Resource",
       "canvas": "Canvas",
-      "collection": "Knowledge Base",
-      "collections": "Knowledge Base",
+      "canvases": "Canvas",
+      "projects": "Project",
+      "project": "Project",
       "contentList": "Content List",
       "extensionWeblink": "Web Link",
       "extensionWeblinkSelection": "Web Link Selection",

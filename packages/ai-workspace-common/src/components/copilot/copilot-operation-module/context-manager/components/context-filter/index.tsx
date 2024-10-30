@@ -45,10 +45,10 @@ interface FilterConfig {
   type: string[];
 }
 
-const defaultTypeList = ['resources', 'notes', 'projects', 'contentList'];
+const defaultTypeList = ['resources', 'canvases', 'projects', 'contentList'];
 const typeMap = {
   resource: 'resources',
-  note: 'notes',
+  canvas: 'canvases',
   project: 'projects',
 };
 

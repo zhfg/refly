@@ -5,6 +5,7 @@ import { IconCloseCircle, IconLoading, IconRefresh } from '@arco-design/web-reac
 import './index.scss';
 import { Skeleton, Message as message, Empty, Alert, Button } from '@arco-design/web-react';
 import { useResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/resource';
+import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
@@ -34,6 +35,10 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
     setResource: state.setResource,
   }));
 
+  const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
+    updateResource: state.updateResource,
+  }));
+
   const resource = resourceStore.resource;
   const resourceDetail = resourceStore.resource?.data;
 
@@ -54,7 +59,7 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
     'knowledge-base-resource-content',
     'resourceSelection',
     {
-      url: `${baseUrl}/knowledge-base?resId=${resourceId}`,
+      url: `${baseUrl}/resource/${resourceId}`,
     },
   );
 
@@ -126,6 +131,12 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
       }
     };
   }, [resourceDetail?.indexStatus]);
+
+  useEffect(() => {
+    if (resourceDetail) {
+      knowledgeBaseStore.updateResource(resourceDetail as Resource);
+    }
+  }, [resourceDetail]);
 
   return (
     <div className="knowledge-base-resource-detail-container">

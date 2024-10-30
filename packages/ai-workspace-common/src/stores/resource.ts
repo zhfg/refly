@@ -103,8 +103,6 @@ export const useResourceStore = create<ResourceState>()(
           body: { sourceId: resourceId, sourceType: 'resource' },
         });
 
-        console.log('data====', data);
-
         set((state) => {
           state.references.loading = false;
         });
