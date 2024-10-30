@@ -6,6 +6,9 @@ import type { ClientChatMessage, SessionItem } from '@refly/common-types';
 import { ModelInfo, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
 import { IntentResult } from '@refly-packages/ai-workspace-common/hooks/use-handle-ai-canvas';
 
+// types
+import type { CanvasEditConfig } from '@refly/utils';
+
 export type ChatMode = 'normal' | 'noContext' | 'wholeSpace';
 export type ChatBehavior = 'askIntentMatch' | 'askFollowUp' | 'askNew';
 
@@ -16,6 +19,7 @@ export interface ChatState {
   newQAText: string;
   isGenTitle: boolean;
   isFirstStreamEditCanvasContent: boolean;
+  canvasEditConfig?: CanvasEditConfig;
 
   // context
   invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }; // for selected skill instance from copilot
@@ -31,6 +35,7 @@ export interface ChatState {
   setIsGenTitle: (val: boolean) => void;
   setNewQAText: (val: string) => void;
   setIsFirstStreamEditCanvasContent: (val: boolean) => void;
+  setCanvasEditConfig: (val: CanvasEditConfig) => void;
   setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) => void;
   setSelectedModel: (val: ModelInfo) => void;
   setModelList: (val: ModelInfo[]) => void;
@@ -62,6 +67,7 @@ export const defaultExtraState = {
   // messages: fakeMessages as any,
   messages: [],
   isFirstStreamEditCanvasContent: true,
+  canvasEditConfig: undefined,
   sessions: [],
   newQAText: '',
   isGenTitle: false,
@@ -88,6 +94,7 @@ export const useChatStore = create<ChatState>()(
           return set({ newQAText: val });
         },
         setIsFirstStreamEditCanvasContent: (val: boolean) => set({ isFirstStreamEditCanvasContent: val }),
+        setCanvasEditConfig: (val: CanvasEditConfig) => set({ canvasEditConfig: val }),
         setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) =>
           set({ invokeParams: val }),
         setSelectedModel: (val: ModelInfo) => set({ selectedModel: val }),

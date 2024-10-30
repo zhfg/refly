@@ -9,7 +9,7 @@ import { HumanMessage, ChatMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
-import { pick, safeParseJSON, safeStringifyJSON } from '@refly-packages/utils';
+import { CanvasEditConfig, pick, safeParseJSON, safeStringifyJSON } from '@refly-packages/utils';
 import { Icon, SkillInvocationConfig, SkillMeta, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
@@ -453,9 +453,11 @@ Please generate the summary based on these requirements and offer suggestions fo
     const { messages = [], query: originalQuery } = state;
     this.configSnapshot ??= config;
 
-    const { chatHistory = [], currentSkill, spanId, projectId, convId, canvases } = config.configurable;
+    const { chatHistory = [], currentSkill, spanId, projectId, convId, canvases, tplConfig } = config.configurable;
 
     const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
+
+    const canvasEditConfig = tplConfig?.canvasEditConfig?.value as CanvasEditConfig;
 
     if (!currentCanvas?.canvas) {
       throw new Error('No current canvas found for editing');
@@ -471,14 +473,14 @@ Please generate the summary based on these requirements and offer suggestions fo
     );
 
     // Get selected range from metadata
-    const selectedRange = currentCanvas?.metadata?.selectedRange as SelectedRange;
-    const inPlaceEditType = currentCanvas?.metadata?.inPlaceEditType as InPlaceEditType;
+    const selectedRange = canvasEditConfig.selectedRange as SelectedRange;
+    const inPlaceEditType = canvasEditConfig.inPlaceEditType as InPlaceEditType;
 
     // Extract content context if selection exists
     // const selectedContent = selectedRange
     //   ? editCanvas.extractContentAroundSelection(currentCanvas.canvas.content || '', selectedRange)
     //   : undefined;
-    const highlightSelection = currentCanvas?.metadata?.selection as HighlightSelection;
+    const highlightSelection = canvasEditConfig?.selection as HighlightSelection;
 
     // Emit intent matcher event
     this.emitEvent(

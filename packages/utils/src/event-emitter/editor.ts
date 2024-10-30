@@ -2,14 +2,21 @@ import mitt from 'mitt';
 
 export type InPlaceEditType = 'inline' | 'block';
 
-export interface InPlaceSendMessagePayload {
-  type: InPlaceEditType;
-  userInput: string;
-  selection: {
+export interface CanvasEditConfig {
+  selection?: {
+    beforeHighlight: string;
+    highlightedText: string;
+    afterHighlight: string;
+  };
+  selectedRange?: {
     startIndex: number;
     endIndex: number;
-    selectedMdText: string;
   };
+  inPlaceEditType?: InPlaceEditType;
+}
+
+export interface InPlaceSendMessagePayload extends CanvasEditConfig {
+  userInput: string;
 }
 
 export type Events = {

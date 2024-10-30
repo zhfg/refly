@@ -52,6 +52,7 @@ import { enInvestMemoContent } from '@refly-packages/ai-workspace-common/compone
 import { zhReactContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-react';
 import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 import { MarkType } from '@refly/common-types';
+import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 
 class TokenStreamProcessor {
   private editor: EditorInstance;
@@ -503,14 +504,11 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
 
     const handleStreamEditCanvasContent = (event: { isFirst: boolean; content: string }) => {
       try {
-        let { currentSelectedMarks = [] } = useContextPanelStore.getState();
-        const currentCanvas = currentSelectedMarks.find(
-          (item) => item.isCurrentContext && (item.type as MarkType) === 'canvas',
-        );
+        const { canvasEditConfig } = useChatStore.getState();
 
         const { isFirst, content } = event;
-        if (editorRef.current && currentCanvas) {
-          const { selectedRange } = currentCanvas.metadata;
+        if (editorRef.current && canvasEditConfig?.selectedRange) {
+          const { selectedRange } = canvasEditConfig;
           processor.setEditor(editorRef.current);
 
           if (isFirst) {

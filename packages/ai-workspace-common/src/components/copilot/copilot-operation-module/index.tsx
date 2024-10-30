@@ -35,9 +35,6 @@ interface CopilotInputModuleProps {
 const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, CopilotInputModuleProps> = (props, ref) => {
   const { source } = props;
   const { t } = useTranslation();
-  const { updateCurrentSelectedMarks } = useContextPanelStore((state) => ({
-    updateCurrentSelectedMarks: state.updateCurrentSelectedMarks,
-  }));
 
   // stores
   const skillStore = useSkillStoreShallow((state) => ({
@@ -52,6 +49,9 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
   const { formErrors, setFormErrors } = useContextPanelStore((state) => ({
     formErrors: state.formErrors,
     setFormErrors: state.setFormErrors,
+  }));
+  const { setCanvasEditConfig } = useChatStore((state) => ({
+    setCanvasEditConfig: state.setCanvasEditConfig,
   }));
 
   const handleSendMessage = (chatMode: ChatMode, userInput?: string) => {
@@ -73,27 +73,14 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
   };
 
   const handleInPlaceSendMessage = (data: InPlaceSendMessagePayload) => {
-    const { type, userInput, selection } = data;
-    let { currentSelectedMarks = [] } = useContextPanelStore.getState();
-    const currentCanvas = currentSelectedMarks.find(
-      (item) => item.isCurrentContext && (item.type as MarkType) === 'canvas',
-    );
+    const { inPlaceEditType, userInput, selectedRange, selection } = data;
 
-    currentCanvas.metadata = {
-      ...(currentCanvas.metadata || {}),
-      selection: {
-        beforeHighlight: '',
-        highlightedText: selection.selectedMdText,
-        afterHighlight: '',
-      },
-      selectedRange: {
-        startIndex: selection.startIndex,
-        endIndex: selection.endIndex,
-      },
-      inPlaceEditType: type, // inline for base selection optimize write, block for empty selection optimize write
-    };
+    setCanvasEditConfig({
+      selection,
+      selectedRange,
+      inPlaceEditType,
+    });
 
-    updateCurrentSelectedMarks(currentSelectedMarks);
     handleSendMessage('normal', userInput);
   };
 

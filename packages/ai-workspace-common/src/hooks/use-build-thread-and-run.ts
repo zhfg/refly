@@ -5,7 +5,7 @@ import { Notification } from '@arco-design/web-react';
 import { useResetState } from './use-reset-state';
 import { useTaskStoreShallow } from '@refly-packages/ai-workspace-common/stores/task';
 
-import { InvokeSkillRequest, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
+import { ConfigScope, InvokeSkillRequest, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
 // request
 import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
@@ -100,7 +100,7 @@ export const useBuildThreadAndRun = () => {
 
   const runSkill = (comingQuestion: string, invokeParams?: InvokeParams) => {
     // support ask follow up question
-    const { messages = [], selectedModel, enableWebSearch, chatMode } = useChatStore.getState();
+    const { messages = [], selectedModel, enableWebSearch, chatMode, canvasEditConfig } = useChatStore.getState();
     const { selectedSkill } = useSkillStore.getState();
     const { localSettings } = useUserStore.getState();
 
@@ -116,16 +116,26 @@ export const useBuildThreadAndRun = () => {
       : {
           enableWebSearch: {
             value: enableWebSearch,
-            configScope: ['runtime'],
+            configScope: 'runtime' as unknown as ConfigScope,
             displayValue: localSettings?.uiLocale === 'zh-CN' ? '联网搜索' : 'Web Search',
             label: localSettings?.uiLocale === 'zh-CN' ? '联网搜索' : 'Web Search',
           },
           chatMode: {
             value: chatMode,
-            configScope: ['runtime'],
+            configScope: 'runtime' as unknown as ConfigScope,
             displayValue: localSettings?.uiLocale === 'zh-CN' ? '提问模式' : 'Normal Chat',
             label: localSettings?.uiLocale === 'zh-CN' ? '直接提问' : 'Normal Chat',
           },
+          ...(canvasEditConfig
+            ? {
+                canvasEditConfig: {
+                  value: canvasEditConfig as { [key: string]: unknown },
+                  configScope: 'runtime' as unknown as ConfigScope,
+                  displayValue: localSettings?.uiLocale === 'zh-CN' ? '编辑稿布配置' : 'Edit Canvas Config',
+                  label: localSettings?.uiLocale === 'zh-CN' ? '编辑稿布配置' : 'Edit Canvas Config',
+                },
+              }
+            : {}),
         };
 
     question =
