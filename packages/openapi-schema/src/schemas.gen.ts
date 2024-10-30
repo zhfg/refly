@@ -1413,6 +1413,10 @@ export const $BaseResponse = {
       description: 'Error message',
       example: 'Operation failed',
     },
+    stack: {
+      type: 'string',
+      description: 'Error stack (only returned in development environment)',
+    },
   },
 } as const;
 

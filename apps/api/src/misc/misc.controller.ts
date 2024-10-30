@@ -10,7 +10,6 @@ import {
   Res,
   UseInterceptors,
   UploadedFile,
-  BadRequestException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { MiscService } from '@/misc/misc.service';
@@ -25,6 +24,7 @@ import { User as UserModel } from '@prisma/client';
 import { User } from '@/utils/decorators/user.decorator';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ParamsError } from '@refly-packages/errors';
 
 @Controller('misc')
 export class MiscController {
@@ -46,7 +46,7 @@ export class MiscController {
     @Body() body: UploadRequest,
   ): Promise<UploadResponse> {
     if (!file) {
-      throw new BadRequestException('No file uploaded.');
+      throw new ParamsError('No file uploaded');
     }
     const result = await this.miscService.uploadFile(
       user,

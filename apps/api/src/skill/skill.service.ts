@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'node:events';
 import pLimit from 'p-limit';
 import { Queue } from 'bull';
@@ -78,6 +78,14 @@ import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
 import { SyncTokenUsageJobData } from '@/subscription/subscription.dto';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
+import {
+  ConversationNotFoundError,
+  ModelNotSupportedError,
+  ModelUsageQuotaExceeded,
+  ParamsError,
+  ProjectNotFoundError,
+  SkillNotFoundError,
+} from '@refly-packages/errors';
 
 export function createLangchainMessage(message: ChatMessageModel): BaseMessage {
   const messageData = {
@@ -105,11 +113,11 @@ export function createLangchainMessage(message: ChatMessageModel): BaseMessage {
 function validateSkillTriggerCreateParam(param: SkillTriggerCreateParam) {
   if (param.triggerType === 'simpleEvent') {
     if (!param.simpleEventName) {
-      throw new BadRequestException('invalid event trigger config');
+      throw new ParamsError('invalid event trigger config');
     }
   } else if (param.triggerType === 'timer') {
     if (!param.timerConfig) {
-      throw new BadRequestException('invalid timer trigger config');
+      throw new ParamsError('invalid timer trigger config');
     }
   }
 }
@@ -141,8 +149,8 @@ export class SkillService {
 
   buildReflyService = (): ReflyService => {
     return {
-      getCanvasDetail: async (user, canvasId) => {
-        const canvas = await this.knowledge.getCanvasDetail(user, canvasId);
+      getCanvasDetail: async (user, param) => {
+        const canvas = await this.knowledge.getCanvasDetail(user, param);
         return buildSuccessResponse(canvasPO2DTO(canvas));
       },
       createCanvas: async (user, req) => {
@@ -171,6 +179,10 @@ export class SkillService {
       },
       updateProject: async (user, req) => {
         const project = await this.knowledge.upsertProject(user, req);
+        return buildSuccessResponse(projectPO2DTO(project));
+      },
+      getProjectDetail: async (user, req) => {
+        const project = await this.knowledge.getProjectDetail(user, req);
         return buildSuccessResponse(projectPO2DTO(project));
       },
       createLabelClass: async (user, req) => {
@@ -241,11 +253,11 @@ export class SkillService {
 
     instanceList.forEach((instance) => {
       if (!instance.displayName) {
-        throw new BadRequestException('skill display name is required');
+        throw new ParamsError('skill display name is required');
       }
       const tpl = this.skillInventory.find((tpl) => tpl.name === instance.tplName);
       if (!tpl) {
-        throw new BadRequestException(`skill ${instance.tplName} not found`);
+        throw new ParamsError(`skill ${instance.tplName} not found`);
       }
       tplConfigMap.set(instance.tplName, tpl);
     });
@@ -287,7 +299,7 @@ export class SkillService {
     const { skillId } = param;
 
     if (!skillId) {
-      throw new BadRequestException('skill id is required');
+      throw new ParamsError('skill id is required');
     }
 
     return this.prisma.skillInstance.update({
@@ -304,7 +316,7 @@ export class SkillService {
     const { skillId } = param;
 
     if (!skillId) {
-      throw new BadRequestException('skill id is required');
+      throw new ParamsError('skill id is required');
     }
 
     return this.prisma.skillInstance.update({
@@ -318,7 +330,7 @@ export class SkillService {
     const { skillId } = param;
 
     if (!skillId) {
-      throw new BadRequestException('skill id is required');
+      throw new ParamsError('skill id is required');
     }
 
     return this.prisma.skillInstance.update({
@@ -330,13 +342,13 @@ export class SkillService {
   async deleteSkillInstance(user: User, param: DeleteSkillInstanceRequest) {
     const { skillId } = param;
     if (!skillId) {
-      throw new BadRequestException('skill id is required');
+      throw new ParamsError('skill id is required');
     }
     const skill = await this.prisma.skillInstance.findUnique({
-      where: { skillId, deletedAt: null },
+      where: { skillId, uid: user.uid, deletedAt: null },
     });
-    if (!skill || skill.uid !== user.uid) {
-      throw new BadRequestException('skill not found');
+    if (!skill) {
+      throw new SkillNotFoundError('skill not found');
     }
 
     // delete skill and triggers
@@ -366,11 +378,11 @@ export class SkillService {
     const modelInfo = await this.prisma.modelInfo.findUnique({ where: { name: data.modelName } });
 
     if (!modelInfo) {
-      throw new BadRequestException(`model ${data.modelName} not supported`);
+      throw new ModelNotSupportedError(`model ${data.modelName} not supported`);
     }
 
     if (!usageResult[modelInfo.tier]) {
-      throw new BadRequestException(
+      throw new ModelUsageQuotaExceeded(
         `model ${data.modelName} (${modelInfo.tier}) not available for current plan`,
       );
     }
@@ -385,7 +397,7 @@ export class SkillService {
         where: { skillId: data.skillId, uid: user.uid, deletedAt: null },
       });
       if (!skillInstance) {
-        throw new BadRequestException(`skill not found: ${data.skillId}`);
+        throw new SkillNotFoundError(`skill not found: ${data.skillId}`);
       }
 
       const skill = skillInstancePO2DTO(skillInstance);
@@ -408,7 +420,7 @@ export class SkillService {
         where: { uid: user.uid, convId: data.convId },
       });
       if (!data.conversation) {
-        throw new BadRequestException(`conversation not found: ${data.convId}`);
+        throw new ConversationNotFoundError(`conversation not found: ${data.convId}`);
       }
     }
     if (conversation) {
@@ -421,7 +433,7 @@ export class SkillService {
         where: { projectId: data.projectId, uid: user.uid, deletedAt: null },
       });
       if (!project) {
-        throw new BadRequestException(`project not found: ${data.projectId}`);
+        throw new ProjectNotFoundError();
       }
       data.project = projectPO2DTO(project);
     }
@@ -509,7 +521,7 @@ export class SkillService {
       ];
       const limit = pLimit(5);
       const canvases = await Promise.all(
-        canvasIds.map((id) => limit(() => this.knowledge.getCanvasDetail(user, id))),
+        canvasIds.map((id) => limit(() => this.knowledge.getCanvasDetail(user, { canvasId: id }))),
       );
       const canvasMap = new Map<string, Canvas>();
       canvases.forEach((c) => canvasMap.set(c.canvasId, canvasPO2DTO(c)));
@@ -865,7 +877,7 @@ export class SkillService {
     const { uid } = user;
 
     if (param.triggerList.length === 0) {
-      throw new BadRequestException('trigger list is empty');
+      throw new ParamsError('trigger list is empty');
     }
 
     param.triggerList.forEach((trigger) => validateSkillTriggerCreateParam(trigger));
@@ -899,7 +911,7 @@ export class SkillService {
     const { uid } = user;
     const { triggerId } = param;
     if (!triggerId) {
-      throw new BadRequestException('trigger id is required');
+      throw new ParamsError('trigger id is required');
     }
 
     const trigger = await this.prisma.skillTrigger.update({
@@ -930,13 +942,13 @@ export class SkillService {
     const { uid } = user;
     const { triggerId } = param;
     if (!triggerId) {
-      throw new BadRequestException('skill id and trigger id are required');
+      throw new ParamsError('skill id and trigger id are required');
     }
     const trigger = await this.prisma.skillTrigger.findFirst({
       where: { triggerId, uid, deletedAt: null },
     });
-    if (!trigger || trigger.uid !== uid) {
-      throw new BadRequestException('trigger not found');
+    if (!trigger) {
+      throw new ParamsError('trigger not found');
     }
 
     if (trigger.bullJobId) {
@@ -982,7 +994,7 @@ export class SkillService {
 
   async getSkillJobDetail(user: User, jobId: string) {
     if (!jobId) {
-      throw new BadRequestException('job id is required');
+      throw new ParamsError('job id is required');
     }
 
     const { uid } = user;

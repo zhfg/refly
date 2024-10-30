@@ -2665,6 +2665,9 @@ components:
           type: string
           description: Error message
           example: Operation failed
+        stack:
+          type: string
+          description: Error stack (only returned in development environment)
     UpsertResourceRequest:
       type: object
       required:

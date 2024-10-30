@@ -1125,6 +1125,10 @@ export type BaseResponse = {
    * Error message
    */
   errMsg?: string;
+  /**
+   * Error stack (only returned in development environment)
+   */
+  stack?: string;
 };
 
 export type UpsertResourceRequest = {

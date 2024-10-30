@@ -7,7 +7,6 @@ import {
   UseGuards,
   ParseIntPipe,
   DefaultValuePipe,
-  BadRequestException,
 } from '@nestjs/common';
 import {
   UpsertProjectRequest,
@@ -42,6 +41,7 @@ import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { buildSuccessResponse } from '@/utils';
 import { User } from '@/utils/decorators/user.decorator';
 import { canvasPO2DTO, resourcePO2DTO, projectPO2DTO, referencePO2DTO } from './knowledge.dto';
+import { ParamsError, ProjectNotFoundError } from '@refly-packages/errors';
 
 @Controller('knowledge')
 export class KnowledgeController {
@@ -85,11 +85,11 @@ export class KnowledgeController {
   ): Promise<UpsertProjectResponse> {
     const { projectId } = body;
     if (!projectId) {
-      throw new BadRequestException('projectId is required');
+      throw new ParamsError('projectId is required');
     }
     const project = await this.knowledgeService.getProjectDetail(user, { projectId });
     if (!project) {
-      throw new BadRequestException('Project not found');
+      throw new ProjectNotFoundError();
     }
 
     const upserted = await this.knowledgeService.upsertProject(user, body);
@@ -103,7 +103,7 @@ export class KnowledgeController {
     @Body() body: UpsertProjectRequest,
   ): Promise<UpsertProjectResponse> {
     if (body.projectId) {
-      throw new BadRequestException('projectId is not allowed');
+      throw new ParamsError('projectId is not allowed');
     }
     const project = await this.knowledgeService.upsertProject(user, body);
     return buildSuccessResponse(projectPO2DTO(project));
@@ -113,7 +113,7 @@ export class KnowledgeController {
   @Post('project/delete')
   async deleteProject(@User() user: UserModel, @Body() body: DeleteProjectRequest) {
     if (!body.projectId) {
-      throw new BadRequestException('projectId is required');
+      throw new ParamsError('projectId is required');
     }
     await this.knowledgeService.deleteProject(user, body.projectId);
     return { data: body };
@@ -188,7 +188,7 @@ export class KnowledgeController {
   ): Promise<UpsertResourceResponse> {
     const { resourceId } = body;
     if (!resourceId) {
-      throw new BadRequestException('Resource ID is required');
+      throw new ParamsError('Resource ID is required');
     }
 
     // Check if the resource exists
@@ -215,7 +215,7 @@ export class KnowledgeController {
     @Body() body: DeleteResourceRequest,
   ): Promise<DeleteResourceResponse> {
     if (!body.resourceId) {
-      throw new BadRequestException('Resource ID is required');
+      throw new ParamsError('Resource ID is required');
     }
     await this.knowledgeService.deleteResource(user, body.resourceId);
     return buildSuccessResponse(null);
@@ -245,7 +245,7 @@ export class KnowledgeController {
     @User() user: UserModel,
     @Query('canvasId') canvasId: string,
   ): Promise<GetCanvasDetailResponse> {
-    const canvas = await this.knowledgeService.getCanvasDetail(user, canvasId);
+    const canvas = await this.knowledgeService.getCanvasDetail(user, { canvasId });
     return buildSuccessResponse(canvasPO2DTO(canvas));
   }
 
@@ -266,7 +266,7 @@ export class KnowledgeController {
     @Body() body: UpsertCanvasRequest,
   ): Promise<UpsertCanvasResponse> {
     if (!body.canvasId) {
-      throw new BadRequestException('Canvas ID is required');
+      throw new ParamsError('Canvas ID is required');
     }
     const canvases = await this.knowledgeService.batchUpdateCanvas(user, [body]);
     return buildSuccessResponse(canvasPO2DTO(canvases?.[0]));
@@ -283,7 +283,7 @@ export class KnowledgeController {
   @Post('canvas/delete')
   async deleteCanvas(@User() user: UserModel, @Body() body: DeleteCanvasRequest) {
     if (!body.canvasId) {
-      throw new BadRequestException('Canvas ID is required');
+      throw new ParamsError('Canvas ID is required');
     }
     await this.knowledgeService.deleteCanvas(user, body.canvasId);
     return buildSuccessResponse({});

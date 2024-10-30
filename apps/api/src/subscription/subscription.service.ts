@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import Stripe from 'stripe';
 import { InjectStripeClient, StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { PrismaService } from '@/common/prisma.service';
@@ -26,6 +26,7 @@ import {
   Prisma,
 } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
+import { ParamsError } from '@refly-packages/errors';
 
 @Injectable()
 export class SubscriptionService implements OnModuleInit {
@@ -96,7 +97,7 @@ export class SubscriptionService implements OnModuleInit {
       expand: ['data.product'],
     });
     if (prices.data.length === 0) {
-      throw new BadRequestException(`No prices found for lookup key: ${lookupKey}`);
+      throw new ParamsError(`No prices found for lookup key: ${lookupKey}`);
     }
 
     const price = prices.data[0];

@@ -1,13 +1,8 @@
-import {
-  ExceptionFilter,
-  HttpException,
-  HttpStatus,
-  Catch,
-  ArgumentsHost,
-  Logger,
-} from '@nestjs/common';
+import { ExceptionFilter, HttpStatus, Catch, ArgumentsHost, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import * as Sentry from '@sentry/node';
+import { BaseError, UnknownError } from '@refly-packages/errors';
+import { BaseResponse } from '@refly-packages/openapi-schema';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -18,25 +13,29 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    let err: BaseError;
+
     // Log the error for unknown exception
-    if (!(exception instanceof HttpException)) {
+    if (!(exception instanceof BaseError)) {
+      err = new UnknownError(exception);
       Sentry.captureException(exception);
-      this.logger.error(`Request: ${request.method} ${request.url} err: ${exception.stack}`);
+      this.logger.error(
+        `Request: ${request.method} ${request.url} unknown err: ${exception.stack}`,
+      );
     } else {
-      this.logger.warn(`Request: ${request.method} ${request.url} err: ${exception.stack}`);
+      err = exception;
+      this.logger.warn(
+        `Request: ${request.method} ${request.url} biz err: ${err.toString()}, stack: ${err.stack}`,
+      );
     }
 
-    const httpStatus =
-      exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+    const resp: BaseResponse = {
+      success: false,
+      errCode: err.code,
+      errMsg: err.messageDict['en'],
+      stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
+    };
 
-    // You can also customize the response sent back to the client
-    response.status(httpStatus).json({
-      statusCode: httpStatus,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-      message:
-        process.env.NODE_ENV === 'production' ? 'An unexpected error occurred' : exception.message,
-      stack: process.env.NODE_ENV === 'production' ? undefined : exception.stack,
-    });
+    response.status(HttpStatus.OK).json(resp);
   }
 }
