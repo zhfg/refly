@@ -33,7 +33,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   const inputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSendMessage = () => {
+  const handleEmitInPlaceSendMessage = () => {
     if (!inputValue.trim()) return;
 
     const selection = editor.state.selection;
@@ -103,7 +103,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
 
     if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
       e.preventDefault();
-      handleSendMessage();
+      handleEmitInPlaceSendMessage();
     }
   };
 
@@ -173,7 +173,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
               disabled={!inputValue}
               className="absolute right-2 top-1/2 w-6 h-6 bg-purple-500 rounded-full -translate-y-1/2 hover:bg-purple-900"
               onClick={() => {
-                handleSendMessage();
+                handleEmitInPlaceSendMessage();
               }}
             >
               <ArrowUp className="w-4 h-4" />
