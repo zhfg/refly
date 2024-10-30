@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react';
 import { LOCALE } from '@refly/common-types';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
-import './index.scss';
-import { Segmented, Skeleton, Button, Divider } from 'antd';
-import { Input } from '@arco-design/web-react';
+import { Segmented, Skeleton, Button, Divider, Input } from 'antd';
 
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import {
@@ -155,7 +153,6 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
   ];
 
   const [selectedTab, setSelectedTab] = useState<ProjectDirListItemType>(resId ? 'resources' : 'canvases');
-  console.log('selectedTab', selectedTab);
 
   const navigate = useNavigate();
 
@@ -165,8 +162,6 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
 
   const dataListLoading = projectStore[selectedTab].loading;
   const dataList = projectStore[selectedTab].data || [];
-
-  console.log('dataList', dataList);
 
   const handleListItemClick = (item: ProjectDirListItem) => {
     if (item.type === 'canvases') {
@@ -200,10 +195,6 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
   };
 
   const [searchVal, setSearchVal] = useState('');
-
-  const handleSearchValChange = (val: string) => {
-    setSearchVal(val);
-  };
 
   const [bindResourceModalVisible, setBindResourceModalVisible] = useState(false);
 
@@ -336,8 +327,8 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
   };
 
   return (
-    <div className="project-directory-container" style={small ? { width: 72, minWidth: 72 } : {}}>
-      <div className="project-directory-intro">
+    <>
+      <div className="flex flex-row items-center justify-between p-4 pb-0">
         <div className="flex w-full">
           <div className="intro-icon">
             <IconProject style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)', strokeWidth: 3 }} />
@@ -404,8 +395,8 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
             allowClear
             className="w-full h-8"
             value={searchVal}
-            prefix={<HiOutlineSearch />}
-            onChange={handleSearchValChange}
+            prefix={<HiOutlineSearch className="mr-1" />}
+            onChange={(e) => setSearchVal(e.target.value)}
           />
 
           <div
@@ -417,19 +408,17 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
         </div>
       </div>
 
-      <div className="project-directory-list-container">
-        {dataListLoading ? (
-          <Skeleton active className="p-6 w-full" title={false} paragraph={{ rows: 5 }} />
-        ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={dataList.map((item) => item.id)} strategy={verticalListSortingStrategy}>
-              {dataList.map((item) => (
-                <SortableItem key={item.id} item={item} onItemClick={() => handleListItemClick(item)} />
-              ))}
-            </SortableContext>
-          </DndContext>
-        )}
-      </div>
+      {dataListLoading ? (
+        <Skeleton active className="p-6 w-full" title={false} paragraph={{ rows: 5 }} />
+      ) : (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={dataList.map((item) => item.id)} strategy={verticalListSortingStrategy}>
+            {dataList.map((item) => (
+              <SortableItem key={item.id} item={item} onItemClick={() => handleListItemClick(item)} />
+            ))}
+          </SortableContext>
+        </DndContext>
+      )}
 
       <BindResourceModal
         domain="resource"
@@ -441,6 +430,6 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
           projectStore.fetchProjectDetail(projectId);
         }}
       />
-    </div>
+    </>
   );
 };

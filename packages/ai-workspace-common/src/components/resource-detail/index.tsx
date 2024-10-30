@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { Splitter, Button } from 'antd';
-import { ContentArea } from '@refly-packages/ai-workspace-common/components/resource-detail/content-area';
+import { ResourceView } from '@refly-packages/ai-workspace-common/components/project-detail/resource-view';
 import { ResourceProvider } from './context-provider';
 import { AICopilot } from '@refly-packages/ai-workspace-common/components/copilot';
 import { useResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/resource';
@@ -78,7 +78,9 @@ export const ResourceDetail2 = () => {
           </Splitter.Panel>
 
           <Splitter.Panel min={400} className="workspace-content-panel" key="workspace-content-panel-content">
-            <ContentArea resourceId={resourceId} />
+            <div className="h-full pt-[10px]">
+              <ResourceView resourceId={resourceId} />
+            </div>
           </Splitter.Panel>
 
           <Splitter.Panel
