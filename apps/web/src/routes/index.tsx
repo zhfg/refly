@@ -97,7 +97,7 @@ export const AppRouter = (props: { layout?: any }) => {
 
   const routeLogin = useMatch("/")
 
-  const isShareContent = useMatch("/full-page/share/:shareCode")
+  const isShareContent = useMatch("/share/:shareCode")
 
   if (!isShareContent) {
     if (
@@ -206,10 +206,7 @@ export const AppRouter = (props: { layout?: any }) => {
             path="/request-access"
             element={<RequestAccessRoute hasBetaAccess={hasBetaAccess} />}
           />
-          <Route
-            path="/full-page/share/:shareCode"
-            element={<ShareContent />}
-          />
+          <Route path="/share/:shareCode" element={<ShareContent />} />
         </Routes>
       </Layout>
     </Suspense>

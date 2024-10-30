@@ -39,7 +39,7 @@ export const useGetUserSettings = () => {
   const routeAIGCContentDetailPageMatch = useMatch('/content/:digestId');
   const routeThreadDetailPageMatch = useMatch('/thread/:threadId');
   const isWebLogin = useMatch('/login');
-  const isShareContent = useMatch('/full-page/share/:shareCode');
+  const isShareContent = useMatch('/share/:shareCode');
 
   const getLoginStatus = async () => {
     let error: any;

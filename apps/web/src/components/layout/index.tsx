@@ -1,5 +1,5 @@
 import { Layout } from "@arco-design/web-react"
-import { useLocation } from "react-router-dom"
+import { useMatch } from "react-router-dom"
 import { SiderLayout } from "./sider"
 import { useBindCommands } from "@refly-packages/ai-workspace-common/hooks/use-bind-commands"
 import { useImportResourceStoreShallow } from "@refly-packages/ai-workspace-common/stores/import-resource"
@@ -23,8 +23,7 @@ interface AppLayoutProps {
 }
 
 export const AppLayout = (props: AppLayoutProps) => {
-  const location = useLocation()
-  const showSider = !location.pathname.includes("/full-page")
+  const showSider = !useMatch("/share/:shareCode")
   // stores
   const userStore = useUserStoreShallow(state => ({
     loginModalVisible: state.loginModalVisible,
