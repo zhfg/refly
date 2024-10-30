@@ -1378,6 +1378,21 @@ export type DeleteShareRequest = {
   shareCode: string;
 };
 
+export type ShareUser = {
+  /**
+   * User name
+   */
+  username?: string;
+  /**
+   * User nickname
+   */
+  nickname?: string;
+  /**
+   * User avatar
+   */
+  avatar?: string;
+};
+
 export type SharedContent = {
   /**
    * Shared project data
@@ -1391,6 +1406,10 @@ export type SharedContent = {
    * Selected canvas detail
    */
   canvas?: Canvas;
+  /**
+   * Share users
+   */
+  users?: Array<ShareUser>;
 };
 
 export type GetShareContentResponse = BaseResponse & {

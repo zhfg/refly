@@ -103,8 +103,13 @@ export class ShareService {
     result.project = projectPO2DTO(project);
     result.canvasList = project.canvases.map((c) => canvasPO2DTO(c));
 
-    const selectedCanvasId = canvasId || project.canvases[0].canvasId;
+    const user = await this.prisma.user.findUnique({
+      select: { name: true, nickname: true, avatar: true },
+      where: { uid: project.uid },
+    });
+    result.users = [user];
 
+    const selectedCanvasId = canvasId || project.canvases[0].canvasId;
     const canvas = project.canvases.find((c) => c.canvasId === selectedCanvasId);
 
     if (!canvas) {
@@ -135,6 +140,12 @@ export class ShareService {
     }
 
     const canvas = canvases[0];
+
+    const user = await this.prisma.user.findUnique({
+      select: { name: true, nickname: true, avatar: true },
+      where: { uid: canvas.uid },
+    });
+    result.users = [user];
 
     result.canvas = canvasPO2DTO({
       ...canvas,

@@ -1916,6 +1916,24 @@ export const $DeleteShareRequest = {
   },
 } as const;
 
+export const $ShareUser = {
+  type: 'object',
+  properties: {
+    username: {
+      type: 'string',
+      description: 'User name',
+    },
+    nickname: {
+      type: 'string',
+      description: 'User nickname',
+    },
+    avatar: {
+      type: 'string',
+      description: 'User avatar',
+    },
+  },
+} as const;
+
 export const $SharedContent = {
   type: 'object',
   required: ['selectedCanvas'],
@@ -1934,6 +1952,13 @@ export const $SharedContent = {
     canvas: {
       description: 'Selected canvas detail',
       $ref: '#/components/schemas/Canvas',
+    },
+    users: {
+      type: 'array',
+      description: 'Share users',
+      items: {
+        $ref: '#/components/schemas/ShareUser',
+      },
     },
   },
 } as const;

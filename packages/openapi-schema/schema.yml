@@ -2974,6 +2974,18 @@ components:
         shareCode:
           type: string
           description: Share code
+    ShareUser:
+      type: object
+      properties:
+        username:
+          type: string
+          description: User name
+        nickname:
+          type: string
+          description: User nickname
+        avatar:
+          type: string
+          description: User avatar
     SharedContent:
       type: object
       required:
@@ -2990,6 +3002,11 @@ components:
         canvas:
           description: Selected canvas detail
           $ref: '#/components/schemas/Canvas'
+        users:
+          type: array
+          description: Share users
+          items:
+            $ref: '#/components/schemas/ShareUser'
     GetShareContentResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
