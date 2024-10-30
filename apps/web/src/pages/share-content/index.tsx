@@ -36,16 +36,14 @@ const ShareContent = () => {
       setLoginModalVisible: state.setLoginModalVisible,
     }),
   )
-  const [searchParams] = useSearchParams()
-  const entityId = searchParams.get("entityId") as string
-  const entityType = searchParams.get("entityType") as string
+  const [searchParams, setSearchParams] = useSearchParams()
+  const canvasId = searchParams.get("canvasId") as string
+
   const { shareCode } = useParams()
 
   const [loading, setLoading] = useState(false)
   const [canvasList, setCanvasList] = useState<Canvas[]>([])
-  const [currentCanvasId, setCurrentCanvasId] = useState<string>(
-    entityType === "canvas" ? entityId : "",
-  )
+  const [currentCanvasId, setCurrentCanvasId] = useState<string>(canvasId)
   const [currentCanvas, setCurrentCanvas] = useState<Canvas>()
   const [project, setProject] = useState<Project>()
   const [breadItems, setBreadItems] = useState<any[]>([])
@@ -76,7 +74,7 @@ const ShareContent = () => {
     const { data } = await getClient().getShareContent({
       query: {
         shareCode: shareCode || "",
-        canvasId: currentCanvasId,
+        ...(currentCanvasId && { canvasId: currentCanvasId }),
       },
     })
     if (!data?.success) {
@@ -85,7 +83,6 @@ const ShareContent = () => {
       return
     }
     const result = data.data
-    console.log("=======", result)
 
     setCurrentCanvas(result?.canvas)
     if (!canvasList?.length) {
@@ -112,11 +109,23 @@ const ShareContent = () => {
     ])
   }, [currentCanvas?.title, project?.title])
 
+  useEffect(() => {
+    if (currentCanvasId && canvasId !== currentCanvasId) {
+      setSearchParams({
+        canvasId: currentCanvasId,
+      })
+    }
+  }, [canvasId, currentCanvasId])
+
+  const title = project
+    ? `${project.title} · ${currentCanvas?.title}`
+    : currentCanvas?.title
+
   return (
     <ErrorBoundary>
       <Helmet>
         <title>
-          {t("productName")} | {t("shareContent.title")}
+          {title || t("shareContent.title")} · {t("productName")}
         </title>
       </Helmet>
       <div className="share-content flex h-full flex-col">

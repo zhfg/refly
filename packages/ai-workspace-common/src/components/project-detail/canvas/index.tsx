@@ -677,16 +677,15 @@ export const CanvasEditorHeader = (props: { projectId: string; canvasId: string 
     currentCanvas: state.currentCanvas,
     updateCurrentCanvas: state.updateCurrentCanvas,
   }));
-  const { updateProjectCanvas } = useProjectStoreShallow((state) => ({
-    fetchProjectCanvases: state.fetchProjectCanvases,
-    updateProjectCanvas: state.updateProjectCanvas,
+  const { updateProjectDirItem } = useProjectStoreShallow((state) => ({
+    updateProjectDirItem: state.updateProjectDirItem,
   }));
   const { tabsMap, handleUpdateTab } = useProjectTabs();
   const tab = tabsMap[projectId]?.find((tab) => tab.key === canvasId);
 
   const onTitleChange = (newTitle: string) => {
     updateCurrentCanvas({ ...useCanvasStore.getState().currentCanvas, title: newTitle });
-    updateProjectCanvas(projectId, canvasId, { title: newTitle });
+    updateProjectDirItem(projectId, 'canvases', canvasId, { title: newTitle });
 
     if (tab) {
       handleUpdateTab(projectId, canvasId, {
