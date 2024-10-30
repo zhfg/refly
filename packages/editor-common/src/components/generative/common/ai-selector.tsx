@@ -147,7 +147,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                   maxRows: 5,
                 }}
                 ref={(input) => {
-                  if (input?.dom) {
+                  if (input?.dom && inPlaceEditType === 'block') {
                     setTimeout(() => {
                       input.dom.focus();
                     }, 0);
