@@ -315,6 +315,14 @@ class TokenStreamProcessor {
 
     this.insertContent(this.chunk);
   }
+
+  reset() {
+    this.chunk = '';
+    this.isLineStart = true;
+    this.isCodeBlockStart = false;
+    this.isInList = false;
+    this.currentListDepth = 0;
+  }
 }
 
 const MemorizedToC = memo(ToC);
@@ -323,6 +331,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
   const { t } = useTranslation();
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
+  const processorRef = useRef<TokenStreamProcessor>();
 
   const canvasStore = useCanvasStore((state) => ({
     currentCanvas: state.currentCanvas,
@@ -484,15 +493,18 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
     });
   }, []);
 
-  const processor = new TokenStreamProcessor();
-
   useEffect(() => {
-    const handleStreamContent = (content: string) => {
+    const handleStreamContent = (event: { isFirst: boolean; content: string }) => {
+      const { isFirst, content } = event || {};
       if (editorRef.current) {
-        processor.setEditor(editorRef.current);
+        if (isFirst || !processorRef.current) {
+          processorRef.current = new TokenStreamProcessor();
+        }
+
+        processorRef.current.setEditor(editorRef.current);
         try {
           // console.log('streamCanvasContent', JSON.stringify({ content }));
-          processor.process(content);
+          processorRef.current.process(content);
           // setTimeout(() => {
           //   scrollToBottom();
           // });
@@ -508,8 +520,11 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
 
         const { isFirst, content } = event;
         if (editorRef.current && canvasEditConfig?.selectedRange) {
+          if (!processorRef.current || isFirst) {
+            processorRef.current = new TokenStreamProcessor();
+          }
           const { selectedRange } = canvasEditConfig;
-          processor.setEditor(editorRef.current);
+          processorRef.current.setEditor(editorRef.current);
 
           if (isFirst) {
             // 1. Select and delete the content range
@@ -524,7 +539,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
           }
 
           // Process content using the same logic as regular streaming
-          processor.process(content);
+          processorRef.current.process(content);
         }
       } catch (error) {
         console.error('handleStreamEditCanvasContent error', error);

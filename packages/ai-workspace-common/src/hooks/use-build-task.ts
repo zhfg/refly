@@ -41,8 +41,8 @@ export const useBuildTask = () => {
   const chatStore = useChatStoreShallow((state) => ({
     setMessages: state.setMessages,
     setIntentMatcher: state.setIntentMatcher,
-    setIsFirstStreamEditCanvasContent: state.setIsFirstStreamEditCanvasContent,
     setCanvasEditConfig: state.setCanvasEditConfig,
+    setIsFirstStreamContent: state.setIsFirstStreamContent,
   }));
   const messageStateStore = useMessageStateStoreShallow((state) => ({
     setMessageState: state.setMessageState,
@@ -102,10 +102,10 @@ export const useBuildTask = () => {
       });
 
       chatStore.setMessages(messages.concat(replyMsg));
-
-      // reset last stream state
-      chatStore.setIsFirstStreamEditCanvasContent(true);
     }
+
+    // reset last stream state
+    chatStore.setIsFirstStreamContent(true);
   };
 
   const onSkillThoughout = (skillEvent: SkillEvent) => {
@@ -147,7 +147,7 @@ export const useBuildTask = () => {
   };
 
   const onSkillStream = (skillEvent: SkillEvent) => {
-    const { messages = [], isFirstStreamEditCanvasContent = true } = useChatStore.getState();
+    const { messages = [], isFirstStreamContent = true } = useChatStore.getState();
     const { pendingFirstToken } = useMessageStateStore.getState();
     const lastRelatedMessage = findLastRelatedMessage(messages, skillEvent);
     const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
@@ -191,17 +191,25 @@ export const useBuildTask = () => {
 
     // 如果是画布内容且有增量内容，发送到编辑器
     const intentMatcher = lastRelatedMessage?.structuredData?.intentMatcher as IntentResult;
-    if (intentMatcher?.type === CanvasIntentType.GenerateCanvas && incrementalContent) {
-      editorEmitter.emit('streamCanvasContent', incrementalContent);
-    } else if (intentMatcher?.type === CanvasIntentType.EditCanvas && incrementalContent) {
-      editorEmitter.emit('streamEditCanvasContent', {
-        isFirst: isFirstStreamEditCanvasContent,
-        content: incrementalContent,
-      });
+    if (
+      [CanvasIntentType.GenerateCanvas, CanvasIntentType.EditCanvas].includes(intentMatcher?.type) &&
+      incrementalContent
+    ) {
+      if (intentMatcher?.type === CanvasIntentType.GenerateCanvas && incrementalContent) {
+        editorEmitter.emit('streamCanvasContent', {
+          isFirst: isFirstStreamContent,
+          content: incrementalContent,
+        });
+      } else if (intentMatcher?.type === CanvasIntentType.EditCanvas && incrementalContent) {
+        editorEmitter.emit('streamEditCanvasContent', {
+          isFirst: isFirstStreamContent,
+          content: incrementalContent,
+        });
+      }
 
-      if (isFirstStreamEditCanvasContent) {
-        const newIsFirstStreamEditCanvasContent = !isFirstStreamEditCanvasContent;
-        chatStore.setIsFirstStreamEditCanvasContent(newIsFirstStreamEditCanvasContent);
+      if (isFirstStreamContent) {
+        const newIsFirstStreamContent = !isFirstStreamContent;
+        chatStore.setIsFirstStreamContent(newIsFirstStreamContent);
       }
     }
   };

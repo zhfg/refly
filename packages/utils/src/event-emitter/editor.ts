@@ -24,7 +24,10 @@ export type Events = {
   replaceSelection: string;
   contineInChat: string;
   createNewNote: string;
-  streamCanvasContent: string;
+  streamCanvasContent: {
+    isFirst: boolean;
+    content: string;
+  };
   streamEditCanvasContent: {
     isFirst: boolean;
     content: string;

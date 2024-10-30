@@ -18,7 +18,7 @@ export interface ChatState {
   sessions: SessionItem[];
   newQAText: string;
   isGenTitle: boolean;
-  isFirstStreamEditCanvasContent: boolean;
+  isFirstStreamContent: boolean;
   canvasEditConfig?: CanvasEditConfig;
 
   // context
@@ -34,7 +34,7 @@ export interface ChatState {
   setMessages: (val: ClientChatMessage[]) => void;
   setIsGenTitle: (val: boolean) => void;
   setNewQAText: (val: string) => void;
-  setIsFirstStreamEditCanvasContent: (val: boolean) => void;
+  setIsFirstStreamContent: (val: boolean) => void;
   setCanvasEditConfig: (val: CanvasEditConfig) => void;
   setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) => void;
   setSelectedModel: (val: ModelInfo) => void;
@@ -66,7 +66,7 @@ const defaultConfigurableState = {
 export const defaultExtraState = {
   // messages: fakeMessages as any,
   messages: [],
-  isFirstStreamEditCanvasContent: true,
+  isFirstStreamContent: true,
   canvasEditConfig: undefined,
   sessions: [],
   newQAText: '',
@@ -93,7 +93,7 @@ export const useChatStore = create<ChatState>()(
         setNewQAText: (val: string) => {
           return set({ newQAText: val });
         },
-        setIsFirstStreamEditCanvasContent: (val: boolean) => set({ isFirstStreamEditCanvasContent: val }),
+        setIsFirstStreamContent: (val: boolean) => set({ isFirstStreamContent: val }),
         setCanvasEditConfig: (val: CanvasEditConfig) => set({ canvasEditConfig: val }),
         setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) =>
           set({ invokeParams: val }),
