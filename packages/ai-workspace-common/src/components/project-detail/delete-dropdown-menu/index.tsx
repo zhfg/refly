@@ -3,7 +3,7 @@ import { RiDeleteBinLine, RiMoreFill } from 'react-icons/ri';
 import { TbEdit } from 'react-icons/tb';
 import { Dropdown, Menu, Button, Popconfirm, Message } from '@arco-design/web-react';
 
-import { Canvas, Project, Resource, BindProjectResourcesRequest } from '@refly/openapi-schema';
+import { Canvas, Project, Resource, BindProjectResourceRequest } from '@refly/openapi-schema';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { useTranslation } from 'react-i18next';
@@ -88,40 +88,39 @@ const DropList = (props: DropListProps) => {
   );
 };
 
-interface DeleteDropdownMenuProps {
-  postDeleteList?: (canvas: Canvas | Project | Resource | BindProjectResourcesRequest) => void;
+// Base interface for common props
+interface BaseDropdownMenuProps {
+  postDeleteList?: (canvas: Canvas | Project | Resource | BindProjectResourceRequest[]) => void;
   getPopupContainer?: () => HTMLElement;
   deleteConfirmPosition?: positionType;
   canCopy?: boolean;
 }
 
-interface CanvasPros extends DeleteDropdownMenuProps {
-  type: 'canvas';
-  data: Canvas;
-}
+type DeleteDropdownMenuProps =
+  | (BaseDropdownMenuProps & {
+      type: 'canvas';
+      data: Canvas;
+    })
+  | (BaseDropdownMenuProps & {
+      type: 'project';
+      data: Project;
+    })
+  | (BaseDropdownMenuProps & {
+      type: 'resource';
+      data: Resource;
+    })
+  | (BaseDropdownMenuProps & {
+      type: 'resourceCollection';
+      data: BindProjectResourceRequest[];
+    });
 
-interface ProjectProps extends DeleteDropdownMenuProps {
-  type: 'project';
-  data: Project;
-}
-
-interface ResourcePros extends DeleteDropdownMenuProps {
-  type: 'resource';
-  data: Resource;
-}
-
-interface ResourceCollectionPros extends DeleteDropdownMenuProps {
-  type: 'resourceCollection';
-  data?: BindProjectResourcesRequest;
-}
-
-export const DeleteDropdownMenu = (props: CanvasPros | ProjectProps | ResourcePros | ResourceCollectionPros) => {
+export const DeleteDropdownMenu = (props: DeleteDropdownMenuProps) => {
   const { type, data, postDeleteList, getPopupContainer, deleteConfirmPosition, canCopy } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
 
   const importProjectModal = useImportProjectModal();
-  const { deleteRecentProject, editRecentProject } = useHandleRecents();
+  const { deleteRecentProject } = useHandleRecents();
 
   const handleDeleteClick = async (e: MouseEvent) => {
     e.stopPropagation();
@@ -142,7 +141,7 @@ export const DeleteDropdownMenu = (props: CanvasPros | ProjectProps | ResourcePr
       resultError = error;
     }
     if (type === 'resourceCollection') {
-      const { error } = await getClient().bindProjectResources({ body: { ...data, operation: 'unbind' } });
+      const { error } = await getClient().bindProjectResources({ body: data });
       resultError = error;
     }
 

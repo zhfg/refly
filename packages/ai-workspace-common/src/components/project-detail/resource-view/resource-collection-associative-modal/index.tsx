@@ -31,11 +31,13 @@ export const BindResourceModal = (props: BindResourceModalProps) => {
     form.validate().then(async (res) => {
       setConfirmLoading(true);
       const { error } = await getClient().bindProjectResources({
-        body: {
-          projectId: projectId || res.selectedValue,
-          resourceIds: resourceId ? [resourceId] : res.selectedValue,
-          operation: 'bind',
-        },
+        body: [
+          {
+            projectId: projectId || res.selectedValue,
+            resourceId: resourceId || res.selectedValue,
+            operation: 'bind',
+          },
+        ],
       });
       setConfirmLoading(false);
 

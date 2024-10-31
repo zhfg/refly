@@ -107,6 +107,9 @@ export const ProjectList = (props: ProjectListProps) => {
                   {time(item.updatedAt, language as LOCALE)
                     .utc()
                     .fromNow()}
+                  {item?.shareCode && (
+                    <span className="ml-1 text-xs text-[#00968F]">{t('projectDetail.share.sharing')}</span>
+                  )}
                 </div>
                 <div className="flex items-center">
                   <IconTip text={t('knowledgeLibrary.archive.item.copy')}>

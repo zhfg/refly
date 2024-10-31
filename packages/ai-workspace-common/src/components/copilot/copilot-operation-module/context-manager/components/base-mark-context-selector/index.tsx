@@ -1,9 +1,5 @@
 import React from 'react';
 import './index.scss';
-
-import {} from '@heroicons/react/24/outline';
-
-import './index.scss';
 import { BaseSearchAndSelector } from '../base-search-and-selector';
 import classNames from 'classnames';
 import { SearchResult } from '@refly/openapi-schema';

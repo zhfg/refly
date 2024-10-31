@@ -39,6 +39,7 @@ export const useGetUserSettings = () => {
   const routeAIGCContentDetailPageMatch = useMatch('/content/:digestId');
   const routeThreadDetailPageMatch = useMatch('/thread/:threadId');
   const isWebLogin = useMatch('/login');
+  const isShareContent = useMatch('/share/:shareCode');
 
   const getLoginStatus = async () => {
     let error: any;
@@ -66,7 +67,10 @@ export const useGetUserSettings = () => {
       // } else {
       //   navigate('/'); // Extension should navigate to home
       // }
-      navigate('/'); // Extension should navigate to home
+      if (!isShareContent) {
+        navigate('/'); // Extension should navigate to home
+      }
+
       return;
     }
 
@@ -143,7 +147,8 @@ export const useGetUserSettings = () => {
         routeFeedDetailPageMatch ||
         routeAIGCContentDetailPageMatch ||
         routeThreadDetailPageMatch ||
-        isWebLogin
+        isWebLogin ||
+        isShareContent
       ) {
         console.log("Matched a page that doesn't require authentication, display directly");
       } else {

@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react';
 import { LOCALE } from '@refly/common-types';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
-import './index.scss';
-import { Segmented, Skeleton } from 'antd';
-import { Input } from '@arco-design/web-react';
+import { Segmented, Skeleton, Button, Divider, Input } from 'antd';
 
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { useProjectStore, useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
+import {
+  ProjectDirListItem,
+  ProjectDirListItemType,
+  useProjectStore,
+  useProjectStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/project';
 import { useNewCanvasModalStoreShallow } from '@refly-packages/ai-workspace-common/stores/new-canvas-modal';
 
 import { BindResourceModal } from '../resource-view/resource-collection-associative-modal';
@@ -15,39 +18,54 @@ import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-ju
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
 import { useTranslation } from 'react-i18next';
 import { HiOutlineSearch } from 'react-icons/hi';
-import { HiOutlinePlus } from 'react-icons/hi2';
+import { HiOutlinePlus, HiOutlineShare, HiOutlineSparkles } from 'react-icons/hi2';
 import { IconCanvas, IconProject, IconThread } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Favicon } from '@refly-packages/ai-workspace-common/components/common/favicon';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
+import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
-type DirectoryItemType = 'canvas' | 'resource' | 'thread';
-
-interface DirectoryListItem {
-  id: string;
-  title: string;
-  type: DirectoryItemType;
-  url?: string;
-}
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { LuGripVertical } from 'react-icons/lu';
+import { useDebouncedCallback } from 'use-debounce';
 
 export const ProjectDirectory = (props: { projectId: string; small?: boolean }) => {
   const { projectId, small } = props;
 
   const { t } = useTranslation();
 
-  const { project, resources, canvases, conversations, fetchProjectResources, fetchProjectDetail } =
-    useProjectStoreShallow((state) => ({
-      project: state.project,
-      resources: state.resources,
-      canvases: state.canvases,
-      conversations: state.conversations,
-      fetchProjectResources: state.fetchProjectResources,
-      fetchProjectDetail: state.fetchProjectDetail,
-    }));
-  const currentProject = project.data;
+  const projectStore = useProjectStoreShallow((state) => ({
+    project: state.project,
+    resources: state.resources,
+    canvases: state.canvases,
+    conversations: state.conversations,
+    setProjectDirItems: state.setProjectDirItems,
+    updateProjectDirItem: state.updateProjectDirItem,
+    fetchProjectDetail: state.fetchProjectDetail,
+  }));
+
+  const currentProject = projectStore.project?.data;
+  const canvases = projectStore.canvases;
+  const resources = projectStore.resources;
 
   const newCanvasModalStore = useNewCanvasModalStoreShallow((state) => ({
     setNewCanvasModalVisible: state.setNewCanvasModalVisible,
@@ -74,6 +92,18 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
     }
   }, [activeTab]);
 
+  const { createShare } = useHandleShare();
+  const [shareLoading, setShareLoading] = useState(false);
+  const handleShare = async () => {
+    setShareLoading(true);
+    await createShare({
+      entityType: 'project',
+      entityId: projectId,
+      shareCode: currentProject?.shareCode || undefined,
+    });
+    setShareLoading(false);
+  };
+
   const [searchParams] = useSearchParams();
   const resId = searchParams.get('resId');
   const canvasId = searchParams.get('canvasId');
@@ -81,7 +111,7 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
   // Watch for canvasId change
   useEffect(() => {
     if (canvasId) {
-      const canvas = canvases.data?.find((item) => item.canvasId === canvasId);
+      const canvas = canvases?.data?.find((item) => item.id === canvasId);
       if (canvas) {
         handleAddTab({
           projectId,
@@ -96,7 +126,7 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
   // Watch for resId change
   useEffect(() => {
     if (resId) {
-      const resource = resources.data?.find((item) => item.resourceId === resId);
+      const resource = resources?.data?.find((item) => item.id === resId);
       if (resource) {
         handleAddTab({
           projectId,
@@ -108,61 +138,34 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
     }
   }, [resId, resources]);
 
-  const segmentOptions = [
+  const segmentOptions: { label: string; value: ProjectDirListItemType }[] = [
     {
       label: t('common.canvas'),
-      value: 'canvas',
+      value: 'canvases',
     },
     {
       label: t('common.resource'),
-      value: 'resource',
+      value: 'resources',
     },
     {
       label: t('common.thread'),
-      value: 'thread',
+      value: 'conversations',
     },
   ];
 
-  const [selectedTab, setSelectedTab] = useState<DirectoryItemType>(resId ? 'resource' : 'canvas');
+  const [selectedTab, setSelectedTab] = useState<ProjectDirListItemType>(resId ? 'resources' : 'canvases');
 
   const navigate = useNavigate();
 
-  const handleDeleteKnowledgeBase = () => {
-    let url = '/knowledge-base';
-    if (resId) {
-      url = `/knowledge-base?resId=${resId}`;
-    }
-    navigate(url, { replace: true });
+  const handleDeleteProject = () => {
+    navigate('/library?tab=project', { replace: true });
   };
 
-  let dataListLoading = false;
-  let dataList: DirectoryListItem[] = [];
-  if (selectedTab === 'canvas') {
-    dataListLoading = canvases.loading;
-    dataList = (canvases.data || []).map((item) => ({
-      id: item.canvasId,
-      title: item.title,
-      type: 'canvas',
-    }));
-  } else if (selectedTab === 'resource') {
-    dataListLoading = resources.loading;
-    dataList = (resources.data || []).map((item) => ({
-      id: item.resourceId,
-      title: item.title,
-      type: 'resource',
-      url: item.data?.url,
-    }));
-  } else if (selectedTab === 'thread') {
-    dataListLoading = conversations.loading;
-    dataList = (conversations.data || []).map((item) => ({
-      id: item.convId,
-      title: item.title,
-      type: 'thread',
-    }));
-  }
+  const dataListLoading = projectStore[selectedTab].loading;
+  const dataList = projectStore[selectedTab].data || [];
 
-  const handleListItemClick = (item: DirectoryListItem) => {
-    if (item.type === 'canvas') {
+  const handleListItemClick = (item: ProjectDirListItem) => {
+    if (item.type === 'canvases') {
       jumpToCanvas({
         canvasId: item.id,
         projectId: projectId,
@@ -173,7 +176,7 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
         title: item.title,
         type: 'canvas',
       });
-    } else if (item.type === 'resource') {
+    } else if (item.type === 'resources') {
       jumpToResource({
         resId: item.id,
         projectId: projectId,
@@ -184,7 +187,7 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
         title: item.title,
         type: 'resource',
       });
-    } else if (item.type === 'thread') {
+    } else if (item.type === 'conversations') {
       jumpToConv({
         convId: item.id,
         projectId: projectId,
@@ -200,17 +203,13 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
 
   const [searchVal, setSearchVal] = useState('');
 
-  const handleSearchValChange = (val: string) => {
-    setSearchVal(val);
-  };
-
   const [bindResourceModalVisible, setBindResourceModalVisible] = useState(false);
 
   const handleAddNewButtonClick = () => {
-    if (selectedTab === 'canvas') {
+    if (selectedTab === 'canvases') {
       newCanvasModalStore.setSelectedProjectId(projectId);
       newCanvasModalStore.setNewCanvasModalVisible(true);
-    } else if (selectedTab === 'resource') {
+    } else if (selectedTab === 'resources') {
       setBindResourceModalVisible(true);
     }
   };
@@ -227,7 +226,7 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
           title: newTitle,
         },
       });
-      fetchProjectDetail(currentProject.projectId); // re-fetch project detail
+      projectStore.fetchProjectDetail(currentProject.projectId); // re-fetch project detail
     }
   };
 
@@ -239,52 +238,150 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
     };
   }, [currentProject]);
 
+  const SortableItem = ({ item, onItemClick }: { item: ProjectDirListItem; onItemClick: () => void }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id });
+
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className="flex items-center p-1 m-2 text-sm cursor-pointer hover:bg-gray-100 group"
+      >
+        <div className="flex items-center grow" onClick={onItemClick}>
+          <div className="flex items-center mx-2">
+            {item.type === 'canvases' ? (
+              <IconCanvas />
+            ) : item.type === 'resources' ? (
+              <Favicon url={item.url} />
+            ) : item.type === 'conversations' ? (
+              <IconThread />
+            ) : null}
+          </div>
+          <div>{item.title}</div>
+        </div>
+        {item.type !== 'conversations' && (
+          <div
+            className="flex items-center invisible group-hover:visible cursor-grab text-gray-400 hover:text-gray-600"
+            {...attributes}
+            {...listeners}
+          >
+            <LuGripVertical />
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const remoteUpdateDirListItemOrder = useDebouncedCallback(async (newList: ProjectDirListItem[]) => {
+    const needUpdateItems = newList
+      .map((item, index) => ({
+        ...item,
+        order: index,
+        needUpdate: item.order !== index,
+      }))
+      .filter((item) => item.needUpdate);
+
+    if (selectedTab === 'canvases') {
+      await getClient().batchUpdateCanvas({
+        body: needUpdateItems.map((item) => ({
+          canvasId: item.id,
+          order: item.order,
+        })),
+      });
+    } else if (selectedTab === 'resources') {
+      await getClient().bindProjectResources({
+        body: needUpdateItems.map((item) => ({
+          projectId,
+          operation: 'bind',
+          resourceId: item.id,
+          order: item.order,
+        })),
+      });
+    }
+
+    // Reset the order in the store
+    projectStore.setProjectDirItems(
+      projectId,
+      selectedTab,
+      newList.map((item, index) => ({ ...item, order: index })),
+    );
+  }, 1000);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = dataList.findIndex((item) => item.id === active.id);
+      const newIndex = dataList.findIndex((item) => item.id === over.id);
+
+      const newOrder = arrayMove(dataList, oldIndex, newIndex);
+
+      projectStore.setProjectDirItems(projectId, selectedTab, newOrder);
+      remoteUpdateDirListItemOrder(newOrder);
+    }
+  };
+
   return (
-    <div className="project-directory-container" style={small ? { width: 72, minWidth: 72 } : {}}>
-      <div className="project-directory-intro">
-        {small ? (
-          <div className="project-directory-intro-small">
+    <>
+      <div className="flex flex-row items-center justify-between p-4 pb-0">
+        <div className="flex w-full">
+          <div className="intro-icon">
             <IconProject style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)', strokeWidth: 3 }} />
           </div>
-        ) : (
-          <>
-            <div className="flex w-full">
-              <div className="intro-icon">
-                <IconProject style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)', strokeWidth: 3 }} />
-              </div>
-              <div className="ml-2 grow">
-                {project?.loading ? (
-                  <>
-                    <Skeleton active className="w-full" paragraph={{ rows: 2 }} />
-                  </>
-                ) : (
-                  <>
-                    <div className="text-sm">{currentProject?.title}</div>
-                    <div className="overflow-auto my-1 max-h-10 text-xs text-gray-500">
-                      {currentProject?.description}
-                    </div>
-                    <div className="mt-1 text-xs text-gray-500">
-                      <span>
-                        {time(currentProject?.updatedAt as string, LOCALE.EN)
-                          .utc()
-                          .fromNow()}
-                      </span>
-                      {' · '}
-                      <span>
-                        {t('knowledgeBase.directory.resourceCount', {
-                          count: resources?.data?.length || 0,
-                        })}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-            {currentProject && (
-              <DeleteDropdownMenu type="project" data={currentProject} postDeleteList={handleDeleteKnowledgeBase} />
+          <div className="ml-2 grow">
+            {projectStore.project?.loading ? (
+              <>
+                <Skeleton active className="w-full" paragraph={{ rows: 2 }} />
+              </>
+            ) : (
+              <>
+                <div className="text-sm">{currentProject?.title}</div>
+                <div className="overflow-auto my-1 max-h-10 text-xs text-gray-500">{currentProject?.description}</div>
+                <div className="mt-1 text-xs text-gray-500">
+                  <span>
+                    {time(currentProject?.updatedAt as string, LOCALE.EN)
+                      .utc()
+                      .fromNow()}
+                  </span>
+                  {' · '}
+                  <span>
+                    {t('knowledgeBase.directory.resourceCount', {
+                      count: resources?.data?.length || 0,
+                    })}
+                  </span>
+                </div>
+              </>
             )}
-          </>
+          </div>
+        </div>
+        {currentProject && (
+          <DeleteDropdownMenu type="project" data={currentProject} postDeleteList={handleDeleteProject} />
         )}
+      </div>
+
+      <div className="p-4 w-full flex gap-3">
+        <Button loading={shareLoading} className="w-[50%]" icon={<HiOutlineShare />} onClick={handleShare}>
+          {currentProject?.shareCode ? t('projectDetail.share.sharing') : t('common.share')}
+        </Button>
+        <Button className="w-[50%]" icon={<HiOutlineSparkles />}>
+          AI
+        </Button>
+      </div>
+
+      <div className="w-full pl-4 pr-4">
+        <Divider className="m-0" />
       </div>
 
       <div className="p-4 w-full">
@@ -293,7 +390,7 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
           options={segmentOptions}
           value={selectedTab}
           onChange={(value) => {
-            setSelectedTab(value as DirectoryItemType);
+            setSelectedTab(value as ProjectDirListItemType);
           }}
         />
       </div>
@@ -305,8 +402,8 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
             allowClear
             className="w-full h-8"
             value={searchVal}
-            prefix={<HiOutlineSearch />}
-            onChange={handleSearchValChange}
+            prefix={<HiOutlineSearch className="mr-1" />}
+            onChange={(e) => setSearchVal(e.target.value)}
           />
 
           <div
@@ -318,30 +415,17 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
         </div>
       </div>
 
-      <div className="project-directory-list-container">
-        {dataListLoading ? (
-          <Skeleton active className="p-6 w-full" title={false} paragraph={{ rows: 5 }} />
-        ) : (
-          dataList.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center p-1 m-2 text-sm cursor-pointer hover:bg-gray-100"
-              onClick={() => handleListItemClick(item)}
-            >
-              <div className="flex items-center mx-2 align-center">
-                {item.type === 'canvas' ? (
-                  <IconCanvas />
-                ) : item.type === 'resource' ? (
-                  <Favicon url={item.url} />
-                ) : item.type === 'thread' ? (
-                  <IconThread />
-                ) : null}
-              </div>
-              <div>{item.title}</div>
-            </div>
-          ))
-        )}
-      </div>
+      {dataListLoading ? (
+        <Skeleton active className="p-6 w-full" title={false} paragraph={{ rows: 5 }} />
+      ) : (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={dataList.map((item) => item.id)} strategy={verticalListSortingStrategy}>
+            {dataList.map((item) => (
+              <SortableItem key={item.id} item={item} onItemClick={() => handleListItemClick(item)} />
+            ))}
+          </SortableContext>
+        </DndContext>
+      )}
 
       <BindResourceModal
         domain="resource"
@@ -350,9 +434,9 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
         visible={bindResourceModalVisible}
         setVisible={setBindResourceModalVisible}
         postConfirmCallback={() => {
-          fetchProjectResources(projectId);
+          projectStore.fetchProjectDetail(projectId);
         }}
       />
-    </div>
+    </>
   );
 };

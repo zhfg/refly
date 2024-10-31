@@ -45,10 +45,13 @@ export const useProjectTabs = () => {
     projectStore.setProjectActiveTab(projectId, key);
   };
 
+  const setProjectTabs = projectStore.setProjectTabs;
+
   return {
     tabsMap,
     activeTabMap,
     setActiveTab,
+    setProjectTabs,
     handleAddTab,
     handleDeleteTab,
     handleUpdateTab,

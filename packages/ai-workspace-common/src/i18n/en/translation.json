@@ -36,9 +36,11 @@
     "project": "Project",
     "copy": {
       "title": "Copy",
-      "success": "Content has been copied to the clipboard!"
+      "success": "Content has been copied to the clipboard!",
+      "failed": "Copy failed, please try again!"
     },
-    "login": "Login"
+    "login": "Login",
+    "share": "Share"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -121,7 +123,23 @@
       "newCanvas": "New Canvas",
       "importResource": "Import Resource",
       "chat": "Chat"
+    },
+    "share": {
+      "createShareFailed": "Failed to create share, please try again!",
+      "project": "project",
+      "canvas": "canvas",
+      "title": "Share {{entityType}}",
+      "description": "Your {{entityType}} is being shared",
+      "copyLink": "Copy Link",
+      "cancel": "Cancel Share",
+      "cancelShareFailed": "Failed to cancel share, please try again!",
+      "cancelShareSuccess": "Cancel share successfully!",
+      "sharing": "Sharing"
     }
+  },
+  "shareContent": {
+    "title": "Share",
+    "login": "Start Writing with Refly"
   },
   "workspace": {
     "leftPanel": {
@@ -239,8 +257,9 @@
       "resource": "Resource",
       "resources": "Resource",
       "canvas": "Canvas",
-      "collection": "Knowledge Base",
-      "collections": "Knowledge Base",
+      "canvases": "Canvas",
+      "projects": "Project",
+      "project": "Project",
       "contentList": "Content List",
       "extensionWeblink": "Web Link",
       "extensionWeblinkSelection": "Web Link Selection",

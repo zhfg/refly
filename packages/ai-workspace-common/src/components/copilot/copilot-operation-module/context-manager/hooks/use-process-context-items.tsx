@@ -74,7 +74,7 @@ export const useProcessContextItems = () => {
           });
         };
       } else {
-        return `${baseUrl}/knowledge-base?noteId=${mark.id}`;
+        return `${baseUrl}/project/${mark.metadata?.projectId}?canvasId=${mark.id}`;
       }
     }
 
@@ -91,7 +91,7 @@ export const useProcessContextItems = () => {
           });
         };
       } else {
-        return `${baseUrl}/knowledge-base?resId=${mark.id}`;
+        return `${baseUrl}/resource/${mark.id}`;
       }
     }
 

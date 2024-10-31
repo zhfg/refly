@@ -410,7 +410,8 @@ export const WelcomeMessage = () => {
   }));
 
   const { skillInstances = [] } = skillStore;
-  const needInstallSkillInstance = skillInstances?.length === 0 && !skillStore?.isFetchingSkillInstances;
+  // const needInstallSkillInstance = skillInstances?.length === 0 && !skillStore?.isFetchingSkillInstances;
+  const needInstallSkillInstance = false; // hide skill install hint
 
   const { t } = useTranslation();
 

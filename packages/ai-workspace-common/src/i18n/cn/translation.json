@@ -36,9 +36,11 @@
     "project": "项目",
     "copy": {
       "title": "复制",
-      "success": "内容已复制到剪切板！"
+      "success": "内容已复制到剪切板！",
+      "failed": "复制失败，请重试！"
     },
-    "login": "登录"
+    "login": "登录",
+    "share": "分享"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
@@ -121,7 +123,23 @@
       "newCanvas": "新稿布",
       "importResource": "导入资源",
       "chat": "Chat"
+    },
+    "share": {
+      "createShareFailed": "创建分享失败，请重试！",
+      "project": "项目",
+      "canvas": "稿布",
+      "title": "分享{{entityType}}",
+      "description": "你的{{entityType}}正在分享中",
+      "copyLink": "复制链接",
+      "cancel": "取消分享",
+      "cancelShareFailed": "取消分享失败，请重试！",
+      "cancelShareSuccess": "取消分享成功！",
+      "sharing": "分享中"
     }
+  },
+  "shareContent": {
+    "title": "分享",
+    "login": "开始用 Refly 写作"
   },
   "workspace": {
     "leftPanel": {
@@ -238,8 +256,9 @@
       "resource": "资源",
       "resources": "资源",
       "canvas": "稿布",
-      "collections": "知识库",
-      "collection": "知识库",
+      "canvases": "稿布",
+      "projects": "知识库",
+      "project": "知识库",
       "contentList": "内容列表",
       "extensionWeblink": "网页",
       "extensionWeblinkSelection": "网页选中",

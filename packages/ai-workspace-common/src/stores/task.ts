@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
-import { Conversation, InvokeSkillRequest, ChatTask as Task } from '@refly/openapi-schema';
+import { Conversation, InvokeSkillRequest } from '@refly/openapi-schema';
 import { ConversationOperation } from '@refly/common-types';
 
 interface TaskState {

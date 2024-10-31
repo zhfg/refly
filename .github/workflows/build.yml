@@ -36,6 +36,7 @@ jobs:
       - name: Build
         run: pnpm build
         env:
+          NODE_OPTIONS: '--max_old_space_size=8192'
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}

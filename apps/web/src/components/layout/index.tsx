@@ -1,5 +1,5 @@
 import { Layout } from "@arco-design/web-react"
-
+import { useMatch } from "react-router-dom"
 import { SiderLayout } from "./sider"
 import { useBindCommands } from "@refly-packages/ai-workspace-common/hooks/use-bind-commands"
 import { useImportResourceStoreShallow } from "@refly-packages/ai-workspace-common/stores/import-resource"
@@ -23,6 +23,7 @@ interface AppLayoutProps {
 }
 
 export const AppLayout = (props: AppLayoutProps) => {
+  const showSider = !useMatch("/share/:shareCode")
   // stores
   const userStore = useUserStoreShallow(state => ({
     loginModalVisible: state.loginModalVisible,
@@ -42,14 +43,14 @@ export const AppLayout = (props: AppLayoutProps) => {
 
   return (
     <Layout className="app-layout main">
-      <SiderLayout />
+      {showSider ? <SiderLayout /> : null}
       <Layout
         className="content-layout"
         style={{
           height: "calc(100vh - 16px)",
           flexGrow: 1,
           overflowY: "auto",
-          width: `calc(100% - 200px - 16px)`,
+          width: showSider ? `calc(100% - 200px - 16px)` : `calc(100% - 16px)`,
         }}>
         <Content>{props.children}</Content>
       </Layout>

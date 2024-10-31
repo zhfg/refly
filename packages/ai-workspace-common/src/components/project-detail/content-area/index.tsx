@@ -1,26 +1,48 @@
-import { Tabs } from 'antd';
-import { Button, Tooltip } from '@arco-design/web-react';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Button, Tabs, Tooltip } from 'antd';
 
 import { ResourceView } from '../resource-view';
-
+import { CanvasEditor } from '../canvas';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
-
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
-import { IconSearch } from '@arco-design/web-react/icon';
-import { useTranslation } from 'react-i18next';
+import { HiMagnifyingGlass } from 'react-icons/hi2';
 
-import './index.scss';
-import { CanvasEditor } from '@refly-packages/ai-workspace-common/components/project-detail/canvas';
+import { closestCenter, DndContext } from '@dnd-kit/core';
+import { DragEndEvent, PointerSensor, useSensor } from '@dnd-kit/core';
+import { arrayMove, horizontalListSortingStrategy, SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+interface DraggableTabPaneProps extends React.HTMLAttributes<HTMLDivElement> {
+  'data-node-key': string;
+}
+
+const DraggableTabNode = ({ className, children, ...props }: DraggableTabPaneProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id: props['data-node-key'],
+  });
+
+  const style: React.CSSProperties = {
+    ...props.style,
+    transform: CSS.Translate.toString(transform),
+    transition,
+    display: 'inline-flex',
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+};
 
 export const ContentArea = (props: { projectId: string }) => {
   const { projectId } = props;
   const { t } = useTranslation();
 
-  const { tabsMap, activeTabMap, setActiveTab, handleDeleteTab } = useProjectTabs();
+  const { tabsMap, activeTabMap, setProjectTabs, setActiveTab, handleDeleteTab } = useProjectTabs();
   const tabs = tabsMap[projectId] || [];
-  console.log('tabs', tabs);
   const activeTab = tabs.find((x) => x.key === activeTabMap[projectId]);
-  console.log('activeTab', activeTab);
 
   const searchStore = useSearchStoreShallow((state) => ({
     pages: state.pages,
@@ -47,10 +69,20 @@ export const ContentArea = (props: { projectId: string }) => {
     }
   };
 
+  const sensor = useSensor(PointerSensor, { activationConstraint: { distance: 0 } });
+
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (over && active.id !== over.id) {
+      const oldIndex = tabs.findIndex((item) => item.key === active.id);
+      const newIndex = tabs.findIndex((item) => item.key === over.id);
+
+      setProjectTabs(projectId, arrayMove(tabs, oldIndex, newIndex));
+    }
+  };
+
   return (
-    <div className="knowledge-base-detail-container flex flex-col">
+    <div className="h-full relative flex flex-col">
       <Tabs
-        className="knowledge-base-detail-tab-container"
         animated
         type="editable-card"
         size="middle"
@@ -58,12 +90,24 @@ export const ContentArea = (props: { projectId: string }) => {
         activeKey={activeTab?.key}
         onChange={onChange}
         onEdit={onEdit}
+        renderTabBar={(tabBarProps, DefaultTabBar) => (
+          <DndContext sensors={[sensor]} onDragEnd={onDragEnd} collisionDetection={closestCenter}>
+            <SortableContext items={tabs.map((tab) => tab.key)} strategy={horizontalListSortingStrategy}>
+              <DefaultTabBar {...tabBarProps}>
+                {(node) => (
+                  <DraggableTabNode {...node.props} key={node.key}>
+                    {node}
+                  </DraggableTabNode>
+                )}
+              </DefaultTabBar>
+            </SortableContext>
+          </DndContext>
+        )}
         tabBarExtraContent={
-          <Tooltip content={t('knowledgeBase.header.searchAndOpenResourceOrCollection')}>
+          <Tooltip title={t('knowledgeBase.header.searchAndOpenResourceOrCollection')}>
             <Button
-              icon={<IconSearch />}
+              icon={<HiMagnifyingGlass />}
               type="text"
-              className="assist-action-item-header"
               onClick={() => {
                 searchStore.setPages(searchStore.pages.concat('readResources'));
                 searchStore.setIsSearchOpen(true);

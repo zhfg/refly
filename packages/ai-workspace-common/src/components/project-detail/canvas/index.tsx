@@ -1,12 +1,12 @@
-import { memo, useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import wordsCount from 'words-count';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { Canvas } from '@refly/openapi-schema';
 
 import './index.scss';
 import { useCookie } from 'react-use';
-import { Divider, Input, Popover, Spin, Switch } from '@arco-design/web-react';
-import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock } from 'react-icons/hi2';
+import { Input, Popover, Spin, Switch } from '@arco-design/web-react';
+import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock, HiOutlineShare } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 
@@ -44,7 +44,7 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 import { ToC } from './ToC';
 import { IconBook } from '@arco-design/web-react/icon';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
-import { Button } from 'antd';
+import { Button, Divider } from 'antd';
 import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
 import { zhMissingContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-missing';
 import { zhLsfContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-lsf';
@@ -52,6 +52,7 @@ import { enInvestMemoContent } from '@refly-packages/ai-workspace-common/compone
 import { zhReactContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-react';
 import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 import { MarkType } from '@refly/common-types';
+import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 
 class TokenStreamProcessor {
@@ -708,16 +709,15 @@ export const CanvasEditorHeader = (props: { projectId: string; canvasId: string 
     currentCanvas: state.currentCanvas,
     updateCurrentCanvas: state.updateCurrentCanvas,
   }));
-  const { updateProjectCanvas } = useProjectStoreShallow((state) => ({
-    fetchProjectCanvases: state.fetchProjectCanvases,
-    updateProjectCanvas: state.updateProjectCanvas,
+  const { updateProjectDirItem } = useProjectStoreShallow((state) => ({
+    updateProjectDirItem: state.updateProjectDirItem,
   }));
   const { tabsMap, handleUpdateTab } = useProjectTabs();
   const tab = tabsMap[projectId]?.find((tab) => tab.key === canvasId);
 
   const onTitleChange = (newTitle: string) => {
     updateCurrentCanvas({ ...useCanvasStore.getState().currentCanvas, title: newTitle });
-    updateProjectCanvas(projectId, canvasId, { title: newTitle });
+    updateProjectDirItem(projectId, 'canvases', canvasId, { title: newTitle });
 
     if (tab) {
       handleUpdateTab(projectId, canvasId, {
@@ -777,6 +777,18 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
   }));
   const prevNote = useRef<Canvas>();
 
+  const { createShare } = useHandleShare();
+  const [shareLoading, setShareLoading] = useState(false);
+  const handleShare = async () => {
+    setShareLoading(true);
+    await createShare({
+      entityType: 'canvas',
+      entityId: canvasId,
+      shareCode: canvas?.shareCode || undefined,
+    });
+    setShareLoading(false);
+  };
+
   useEffect(() => {
     return () => {
       resetState();
@@ -828,8 +840,13 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
   }, [canvas, debouncedUpdateCanvas]);
 
   return (
-    <div className="flex flex-col ai-note-container">
-      <div className="overflow-auto flex-grow">
+    <div className="ai-note-container flex flex-col">
+      <div className="w-[90%] mx-auto flex justify-end">
+        <Button type="text" size="small" loading={shareLoading} icon={<HiOutlineShare />} onClick={handleShare}>
+          {canvas?.shareCode ? t('projectDetail.share.sharing') : t('common.share')}
+        </Button>
+      </div>
+      <div className="flex-grow overflow-auto">
         <Spin
           tip={t('knowledgeBase.note.connecting')}
           loading={!canvas || isRequesting || canvasServerStatus !== 'connected'}

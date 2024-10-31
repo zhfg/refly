@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import {} from '@heroicons/react/24/outline';
 import { IconMessage, IconFile, IconBook, IconEdit, IconRobot } from '@arco-design/web-react/icon';
 import { useDebouncedCallback } from 'use-debounce';
 import { defaultFilter } from './cmdk/filter';

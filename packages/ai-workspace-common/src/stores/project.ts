@@ -3,8 +3,18 @@ import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-import { Canvas, Conversation, Project, Resource } from '@refly/openapi-schema';
+import { Project } from '@refly/openapi-schema';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+
+export type ProjectDirListItemType = 'canvases' | 'resources' | 'conversations';
+
+export interface ProjectDirListItem {
+  id: string;
+  title: string;
+  type: ProjectDirListItemType;
+  url?: string;
+  order?: number;
+}
 
 export interface ProjectTab {
   key: string;
@@ -23,9 +33,9 @@ export interface ProjectState {
   currentProjectId: string;
 
   project: StateField<Project | null>;
-  canvases: StateField<Canvas[]>;
-  resources: StateField<Resource[]>;
-  conversations: StateField<Conversation[]>;
+  canvases: StateField<ProjectDirListItem[]>;
+  resources: StateField<ProjectDirListItem[]>;
+  conversations: StateField<ProjectDirListItem[]>;
 
   projectActiveTab: Record<string, string>;
   projectTabs: Record<string, ProjectTab[]>;
@@ -33,15 +43,31 @@ export interface ProjectState {
   setCurrentProjectId: (projectId: string) => void;
   setProjectActiveTab: (projectId: string, tab: string) => void;
   setProjectTabs: (projectId: string, tabs: ProjectTab[]) => void;
-
-  updateProjectCanvas: (projectId: string, canvasId: string, updates: Partial<Canvas>) => void;
+  setProject: (project: Project) => void;
+  setProjectDirItems: (projectId: string, itemType: ProjectDirListItemType, items: ProjectDirListItem[]) => void;
+  updateProjectDirItem: (
+    projectId: string,
+    itemType: ProjectDirListItemType,
+    itemId: string,
+    updates: Partial<ProjectDirListItem>,
+  ) => void;
 
   fetchProjectDetail: (projectId: string) => Promise<void>;
-  fetchProjectCanvases: (projectId: string) => Promise<void>;
-  fetchProjectResources: (projectId: string) => Promise<void>;
-  fetchProjectConversations: (projectId: string) => Promise<void>;
+  fetchProjectDirItems: (projectId: string, itemType: ProjectDirListItemType) => Promise<void>;
   fetchProjectAll: (projectId: string) => Promise<void>;
 }
+
+interface FetchConfig {
+  listMethod: 'listCanvas' | 'listResources' | 'listConversations';
+  stateKey: ProjectDirListItemType;
+  idField: string;
+}
+
+const FETCH_CONFIGS: Record<ProjectDirListItemType, FetchConfig> = {
+  canvases: { listMethod: 'listCanvas', stateKey: 'canvases', idField: 'canvasId' },
+  resources: { listMethod: 'listResources', stateKey: 'resources', idField: 'resourceId' },
+  conversations: { listMethod: 'listConversations', stateKey: 'conversations', idField: 'convId' },
+};
 
 export const useProjectStore = create<ProjectState>()(
   persist(
@@ -79,20 +105,25 @@ export const useProjectStore = create<ProjectState>()(
         set((state) => {
           state.projectTabs[projectId] = tabs;
         }),
-      updateProjectCanvas: (projectId, canvasId, updates) =>
+      setProject: (project) =>
         set((state) => {
-          if (projectId !== state.currentProjectId) {
-            return;
-          }
-          const canvasIndex = state.canvases?.data?.findIndex((c) => c.canvasId === canvasId);
-          if (canvasIndex !== -1) {
-            state.canvases.data[canvasIndex] = { ...state.canvases.data[canvasIndex], ...updates };
+          state.project.data = project;
+        }),
+      setProjectDirItems: (projectId, itemType, items) =>
+        set((state) => {
+          if (projectId !== state.currentProjectId) return;
+          state[itemType].data = items;
+        }),
+      updateProjectDirItem: (projectId, itemType, itemId, updates) =>
+        set((state) => {
+          if (projectId !== state.currentProjectId) return;
+          const itemIndex = state[itemType].data?.findIndex((c) => c.id === itemId);
+          if (itemIndex !== -1) {
+            state[itemType].data[itemIndex] = { ...state[itemType].data[itemIndex], ...updates };
           }
         }),
       fetchProjectDetail: async (projectId) => {
-        if (projectId !== get().currentProjectId) {
-          return;
-        }
+        if (projectId !== get().currentProjectId) return;
 
         set((state) => {
           state.project.loading = true;
@@ -109,66 +140,30 @@ export const useProjectStore = create<ProjectState>()(
           }
         });
       },
-      fetchProjectCanvases: async (projectId) => {
-        if (projectId !== get().currentProjectId) {
-          return;
-        }
+      fetchProjectDirItems: async (projectId: string, itemType: ProjectDirListItemType) => {
+        if (projectId !== get().currentProjectId) return;
+
+        const config = FETCH_CONFIGS[itemType];
 
         set((state) => {
-          state.canvases.loading = true;
+          state[config.stateKey].loading = true;
         });
 
-        const { data, error } = await getClient().listCanvas({
+        const { data, error } = await getClient()[config.listMethod]({
           query: { projectId, pageSize: 50 },
         });
 
         set((state) => {
-          state.canvases.loading = false;
-          state.canvases.data = data?.data || [];
+          state[config.stateKey].loading = false;
+          state[config.stateKey].data = (data?.data || []).map((item) => ({
+            id: item[config.idField],
+            title: item.title,
+            type: itemType,
+            order: item.order,
+            url: item.data?.url,
+          }));
           if (error || !data?.success) {
-            state.canvases.error = String(error) || 'request not success';
-          }
-        });
-      },
-      fetchProjectResources: async (projectId) => {
-        if (projectId !== get().currentProjectId) {
-          return;
-        }
-
-        set((state) => {
-          state.resources.loading = true;
-        });
-
-        const { data, error } = await getClient().listResources({
-          query: { projectId, pageSize: 50 },
-        });
-
-        set((state) => {
-          state.resources.loading = false;
-          state.resources.data = data?.data || [];
-          if (error || !data?.success) {
-            state.resources.error = String(error) || 'request not success';
-          }
-        });
-      },
-      fetchProjectConversations: async (projectId) => {
-        if (projectId !== get().currentProjectId) {
-          return;
-        }
-
-        set((state) => {
-          state.conversations.loading = true;
-        });
-
-        const { data, error } = await getClient().listConversations({
-          query: { projectId, pageSize: 50 },
-        });
-
-        set((state) => {
-          state.conversations.loading = false;
-          state.conversations.data = data?.data || [];
-          if (error || !data?.success) {
-            state.conversations.error = String(error) || 'request not success';
+            state[config.stateKey].error = String(error) || 'request not success';
           }
         });
       },
@@ -179,9 +174,9 @@ export const useProjectStore = create<ProjectState>()(
 
         await Promise.all([
           get().fetchProjectDetail(projectId),
-          get().fetchProjectCanvases(projectId),
-          get().fetchProjectResources(projectId),
-          get().fetchProjectConversations(projectId),
+          get().fetchProjectDirItems(projectId, 'canvases'),
+          get().fetchProjectDirItems(projectId, 'resources'),
+          get().fetchProjectDirItems(projectId, 'conversations'),
         ]);
       },
     })),
