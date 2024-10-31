@@ -13,11 +13,9 @@ export const useCreateTrigger = () => {
       body: { ...trigger, enabled: val },
     });
     if (error) {
-      Message.error({ content: t('common.putErr') });
-    } else {
-      Message.success({ content: t('common.putSuccess') });
+      return;
     }
-    return error;
+    Message.success({ content: t('common.putSuccess') });
   };
 
   const updateTrigger = async (trigger: SkillTrigger) => {
@@ -37,18 +35,16 @@ export const useCreateTrigger = () => {
   };
 
   const deleteTrigger = async (trigger: SkillTrigger) => {
-    const { error } = await getClient().deleteSkillTrigger({
+    const { error, data } = await getClient().deleteSkillTrigger({
       body: {
         triggerId: trigger.triggerId,
       },
     });
-    if (error) {
-      Message.error({ content: t('common.putErr') });
-    } else {
+    if (!error && data?.success) {
       Message.success({ content: t('common.putSuccess') });
     }
-    return error;
   };
+
   return {
     updateTriggerStatus,
     updateTrigger,

@@ -8,8 +8,8 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/utils/request';
 import { getServerOrigin } from '@refly/utils/url';
 import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
-import { MessageName } from '@refly/common-types';
-import { getErrorMessage } from '@refly/errors';
+import { LOCALE, MessageName } from '@refly/common-types';
+import { getErrorMessage, UnknownError } from '@refly/errors';
 import { safeParseJSON, safeStringifyJSON } from '@refly-packages/utils/parse';
 import { BaseResponse } from '@refly/openapi-schema';
 
@@ -28,64 +28,79 @@ const errTitle = {
   'zh-CN': '哎呀，出错了',
 };
 
+export interface CheckResponseResult {
+  isError: boolean;
+  baseResponse?: BaseResponse;
+}
+
+export const extractBaseResp = async (response: Response): Promise<BaseResponse> => {
+  if (!response.ok) {
+    return {
+      success: false,
+      errCode: new UnknownError().code,
+    };
+  }
+
+  if (response.headers.get('Content-Type')?.includes('application/json')) {
+    const clonedResponse = response.clone();
+    return await clonedResponse.json();
+  }
+
+  return { success: true };
+};
+
+export const showErrorNotification = (res: BaseResponse, locale: LOCALE) => {
+  const { errCode, traceId } = res;
+  const errMsg = getErrorMessage(errCode || new UnknownError().code, locale);
+
+  const description = React.createElement(
+    'div',
+    null,
+    React.createElement('div', null, errMsg),
+    traceId &&
+      React.createElement(
+        'div',
+        {
+          style: {
+            marginTop: 8,
+            fontSize: 11,
+            color: '#666',
+            display: 'flex',
+            alignItems: 'center',
+          },
+        },
+        React.createElement('div', null, `Trace ID: ${traceId}`),
+        React.createElement(
+          Button,
+          {
+            type: 'link',
+            size: 'small',
+            onClick: () => {
+              navigator.clipboard.writeText(traceId);
+              notification.success({
+                message: locale === 'zh-CN' ? '已复制' : 'Copied',
+                duration: 2,
+              });
+            },
+          },
+          React.createElement(IconCopy, { style: { fontSize: 14, color: '#666' } }),
+        ),
+      ),
+  );
+
+  notification.error({
+    message: errTitle[locale],
+    description,
+  });
+};
+
 client.interceptors.response.use(async (response) => {
   const settings = safeParseJSON(localStorage.getItem('refly-local-settings'));
   const locale = settings?.uiLocale || 'en';
 
-  let errMsg = '';
-  let traceId = '';
-
-  if (!response.ok) {
-    errMsg = getErrorMessage('E0000', locale);
-  } else {
-    const clonedResponse = response.clone();
-    const data: BaseResponse = await clonedResponse.json();
-    if (!data.success) {
-      errMsg = getErrorMessage(data.errCode, locale);
-      traceId = data.traceId;
-    }
-  }
-
-  if (errMsg) {
-    const description = React.createElement(
-      'div',
-      null,
-      React.createElement('div', null, errMsg),
-      traceId &&
-        React.createElement(
-          'div',
-          {
-            style: {
-              marginTop: 8,
-              fontSize: 11,
-              color: '#666',
-              display: 'flex',
-              alignItems: 'center',
-            },
-          },
-          React.createElement('div', null, `Trace ID: ${traceId}`),
-          React.createElement(
-            Button,
-            {
-              type: 'link',
-              size: 'small',
-              onClick: () => {
-                navigator.clipboard.writeText(traceId);
-                notification.success({
-                  message: locale === 'zh-CN' ? '已复制' : 'Copied',
-                  duration: 2,
-                });
-              },
-            },
-            React.createElement(IconCopy, { style: { fontSize: 14, color: '#666' } }),
-          ),
-        ),
-    );
-
-    notification.error({
-      message: errTitle[locale],
-      description,
-    });
+  const error = await extractBaseResp(response);
+  if (!error.success) {
+    showErrorNotification(error, locale);
   }
 
   return response;

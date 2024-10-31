@@ -1,7 +1,8 @@
 import { getServerOrigin } from '@refly/utils/url';
-import { InvokeSkillRequest } from '@refly/openapi-schema';
+import { BaseResponse, InvokeSkillRequest } from '@refly/openapi-schema';
 import { SkillEvent } from '@refly/common-types';
 import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
+import { extractBaseResp } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 export const ssePost = async ({
   controller,
@@ -26,7 +27,7 @@ export const ssePost = async ({
   onSkillStream: (event: SkillEvent) => void;
   onSkillEnd: (event: SkillEvent) => void;
   onSkillStructedData: (event: SkillEvent) => void;
-  onError?: (status: any) => void;
+  onError?: (error: BaseResponse) => void;
   onCompleted?: (val?: boolean) => void;
   onSkillUsage?: (event: SkillEvent) => void;
 }) => {
@@ -42,10 +43,10 @@ export const ssePost = async ({
       signal: controller.signal,
       body: JSON.stringify(payload),
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Server error:', response.status, errorText);
-      onError?.(errorText || `HTTP error! status: ${response.status}`);
+
+    const baseResp = await extractBaseResp(response);
+    if (!baseResp.success) {
+      onError?.(baseResp);
       return;
     }
 
@@ -79,8 +80,6 @@ export const ssePost = async ({
                 return;
               }
 
-              // TODO 后续增加 skillEvent 可以处理错误的情况
-
               if (skillEvent?.event === 'start') {
                 if (isSkillFirstMessage) {
                   onSkillStart(skillEvent);
@@ -96,6 +95,8 @@ export const ssePost = async ({
                 onSkillStructedData(skillEvent);
               } else if (skillEvent?.event === 'usage') {
                 onSkillUsage(skillEvent);
+              } else if (skillEvent?.event === 'error') {
+                onError?.(JSON.parse(skillEvent.content));
               }
               setTimeout(() => {
                 // 滑动到底部
@@ -119,8 +120,6 @@ export const ssePost = async ({
       } catch (err) {
         if (err.name === 'AbortError') {
           console.log('Read operation aborted');
-          onError?.('Request was aborted');
-          hasError = true;
           return;
         }
       }
@@ -130,10 +129,12 @@ export const ssePost = async ({
   } catch (error) {
     if (error.name === 'AbortError') {
       console.log('Fetch aborted');
-      onError?.('Request was aborted');
     } else {
       console.error('Fetch error:', error);
-      onError?.(error.message);
+      onError?.({
+        success: false,
+        errMsg: error.message,
+      });
     }
   } finally {
     // 清理资源

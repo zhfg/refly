@@ -1,9 +1,9 @@
 import { ExceptionFilter, HttpStatus, Catch, ArgumentsHost, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
-import api from '@opentelemetry/api';
+
 import * as Sentry from '@sentry/node';
-import { BaseError, UnknownError } from '@refly-packages/errors';
-import { BaseResponse } from '@refly-packages/openapi-schema';
+import { UnknownError } from '@refly-packages/errors';
+import { genBaseRespDataFromError } from '@/utils/exception';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -13,32 +13,21 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const activeSpan = api.trace.getSpan(api.context.active());
 
-    let err: BaseError;
+    const baseRespData = genBaseRespDataFromError(exception);
 
-    // Log the error for unknown exception
-    if (!(exception instanceof BaseError)) {
-      err = new UnknownError(exception);
+    if (baseRespData.errCode === new UnknownError().code) {
       Sentry.captureException(exception);
       this.logger.error(
         `Request: ${request.method} ${request.url} unknown err: ${exception.stack}`,
       );
     } else {
-      err = exception;
       this.logger.warn(
-        `Request: ${request.method} ${request.url} biz err: ${err.toString()}, stack: ${err.stack}`,
+        `Request: ${request.method} ${request.url} biz err: ${baseRespData.errMsg}, ` +
+          `stack: ${baseRespData.stack}`,
       );
     }
 
-    const resp: BaseResponse = {
-      success: false,
-      errCode: err.code,
-      errMsg: err.messageDict['en'],
-      traceId: activeSpan?.spanContext().traceId,
-      stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
-    };
-
-    response.status(HttpStatus.OK).json(resp);
+    response.status(HttpStatus.OK).json(baseRespData);
   }
 }

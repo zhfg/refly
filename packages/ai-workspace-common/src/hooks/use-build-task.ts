@@ -1,14 +1,14 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import type { MessageState, ClientChatMessage, OutputLocale, SkillEvent } from '@refly/common-types';
+import type { MessageState, ClientChatMessage, OutputLocale, SkillEvent, LOCALE } from '@refly/common-types';
 import {
   useMessageStateStore,
   useMessageStateStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useConversationStoreShallow } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { CanvasIntentType, TASK_STATUS } from '@refly/common-types';
-import { InvokeSkillRequest, SkillMeta } from '@refly/openapi-schema';
+import { BaseResponse, InvokeSkillRequest, SkillMeta } from '@refly/openapi-schema';
 import { buildQuestionMessage, buildReplyMessage } from '@refly-packages/ai-workspace-common/utils/message';
 
 import { buildErrorMessage } from '@refly-packages/ai-workspace-common/utils/message';
@@ -31,6 +31,7 @@ import { getCanvasContent } from '@refly-packages/ai-workspace-common/components
 
 // hooks
 import { IntentResult, useHandleAICanvas } from './use-handle-ai-canvas';
+import { showErrorNotification } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 const globalStreamingChatPortRef = { current: null as Runtime.Port | null };
 const globalAbortControllerRef = { current: null as AbortController | null };
@@ -343,8 +344,14 @@ export const useBuildTask = () => {
     }, 1000);
   };
 
-  const onError = (msg: string) => {
+  const onError = (error?: BaseResponse) => {
+    console.log('onError', error);
     const runtime = getRuntime();
+    const { localSettings } = useUserStore.getState();
+    const locale = localSettings?.uiLocale as LOCALE;
+
+    error ??= { success: false };
+    showErrorNotification(error, locale);
 
     if (runtime?.includes('extension')) {
       if (globalIsAbortedRef.current) {
@@ -357,7 +364,7 @@ export const useBuildTask = () => {
       }
     }
 
-    buildShutdownTaskAndGenResponse(msg);
+    buildShutdownTaskAndGenResponse(error?.errMsg);
   };
 
   const onCompleted = () => {

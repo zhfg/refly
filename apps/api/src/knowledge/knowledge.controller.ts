@@ -57,7 +57,6 @@ export class KnowledgeController {
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
     @Query('order', new DefaultValuePipe('creationDesc')) order: ListOrder,
   ): Promise<ListProjectResponse> {
-    throw new Error('test');
     const projects = await this.knowledgeService.listProjects(user, {
       projectId,
       resourceId,

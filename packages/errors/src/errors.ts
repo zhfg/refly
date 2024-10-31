@@ -139,7 +139,7 @@ const errorMap = {
   E2003: ModelNotSupportedError,
 };
 
-export function getErrorMessage(code: string, locale: 'en' | 'zh' = 'en'): string {
+export function getErrorMessage(code: string, locale: string): string {
   const ErrorClass = errorMap[code];
   if (!ErrorClass) {
     return new UnknownError().getMessage(locale);

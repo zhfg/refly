@@ -86,6 +86,7 @@ import {
   ProjectNotFoundError,
   SkillNotFoundError,
 } from '@refly-packages/errors';
+import { genBaseRespDataFromError } from '@/utils/exception';
 
 export function createLangchainMessage(message: ChatMessageModel): BaseMessage {
   const messageData = {
@@ -643,6 +644,13 @@ export class SkillService {
   }
 
   async streamInvokeSkill(user: User, data: InvokeSkillJobData, res?: Response) {
+    if (res) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.status(200);
+    }
+
     try {
       await this._invokeSkill(user, data, res);
       await this.prisma.skillJob.update({
@@ -650,6 +658,10 @@ export class SkillService {
         data: { status: 'finish' },
       });
     } catch (err) {
+      writeSSEResponse(res, {
+        event: 'error',
+        content: JSON.stringify(genBaseRespDataFromError(err)),
+      });
       this.logger.error(`invoke skill error: ${err.stack}`);
 
       await this.prisma.skillJob.update({

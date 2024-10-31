@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 import { SkillInstance } from '@refly/openapi-schema';
 
-import { Collapse, Modal, Form, Input, Message, Select, DatePicker } from '@arco-design/web-react';
+import { Collapse, Modal, Form, Message, Select } from '@arco-design/web-react';
 import { TemplateConfigFormItems } from '@refly-packages/ai-workspace-common/components/skill/template-config-form-items';
 import { TriggerConfigFormItems } from '@refly-packages/ai-workspace-common/components/skill/trigger-config-form-items';
 
@@ -73,11 +73,10 @@ export const NewTriggersModal = (props: NewTriggersModalProps) => {
       importNewTriggerModal.setShowtriggerModall(false);
       if (resultError) {
         console.error(resultError);
-        Message.error({ content: t('common.putErr') });
-      } else {
-        Message.success({ content: t('common.putSuccess') });
-        importNewTriggerModal.setReloadTriggerList(true);
+        return;
       }
+      Message.success({ content: t('common.putSuccess') });
+      importNewTriggerModal.setReloadTriggerList(true);
     });
   };
 

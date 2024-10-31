@@ -89,13 +89,10 @@ export const SubscribeModal = () => {
         lookupKey: `refly_pro_${lookupKey}`,
       },
     });
-    console.log('data', data);
+    setLoading(false);
     if (data?.data?.url) {
       window.location.href = data.data.url;
-    } else {
-      message.error(t('common.putErr'));
     }
-    setLoading(false);
   };
 
   const PlanItem = (props: {

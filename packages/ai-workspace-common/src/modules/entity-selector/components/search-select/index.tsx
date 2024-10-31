@@ -85,7 +85,6 @@ export const SearchSelect = (props: SearchSelectProps) => {
     setCreateLoading(false);
 
     if (!data || error) {
-      Message.error(t('common.putErr'));
       return;
     }
 
