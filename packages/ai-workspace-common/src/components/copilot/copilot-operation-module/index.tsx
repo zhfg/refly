@@ -58,10 +58,17 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
   const handleSendMessage = (chatMode: ChatMode, userInput?: string) => {
     const tplConfig = form?.getFieldValue('tplConfig');
     const { messageIntentContext, messages = [], enableWebSearch } = useChatStore.getState();
-    const { currentCanvas } = useCanvasStore.getState(); // need check canvasId
+    const { currentSelectedMarks } = useContextPanelStore.getState();
+
+    const currentCanvas = currentSelectedMarks?.find(
+      (mark) => (mark.type as MarkType) === 'canvas' && mark.isCurrentContext,
+    );
+    const currentResource = currentSelectedMarks?.find(
+      (mark) => (mark.type as MarkType) === 'resource' && mark.isCurrentContext,
+    );
 
     // TODO: later may add more source
-    const forceNewConv = [MessageIntentSource.HomePage].includes(source) || messages.length === 0;
+    const forceNewConv = [MessageIntentSource.HomePage, MessageIntentSource.Search].includes(source);
 
     const newMessageIntentContext: Partial<MessageIntentContext> = {
       ...(messageIntentContext || {}),
@@ -69,7 +76,10 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       isNewConversation: messageIntentContext?.isNewConversation || forceNewConv,
       projectContext: {
         projectId,
-        canvasId: currentCanvas?.canvasId,
+        canvasId: currentCanvas?.entityId || currentCanvas?.id,
+      },
+      resourceContext: {
+        resourceId: currentResource?.entityId || currentResource?.id,
       },
       chatMode,
       enableWebSearch,

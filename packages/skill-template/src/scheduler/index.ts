@@ -394,7 +394,6 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     const { chatHistory = [], currentSkill, spanId, projectId, convId, canvases } = config.configurable;
 
-    this.emitEvent({ event: 'start' }, this.configSnapshot);
     this.emitEvent({ event: 'log', content: `Start to rewrite canvas...` }, config);
 
     const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
@@ -461,7 +460,6 @@ Please generate the summary based on these requirements and offer suggestions fo
       throw new Error('No current canvas found for editing');
     }
 
-    this.emitEvent({ event: 'start' }, this.configSnapshot);
     this.emitEvent(
       {
         event: 'log',
@@ -490,8 +488,11 @@ Please generate the summary based on these requirements and offer suggestions fo
           projectId,
           canvasId: currentCanvas.canvasId,
           convId,
-          selectedRange,
-          inPlaceEditType,
+          metadata: {
+            selectedRange,
+            inPlaceEditType,
+            highlightSelection,
+          },
         }),
       },
       config,
@@ -641,14 +642,13 @@ Please generate the summary based on these requirements and offer suggestions fo
     }
   };
 
-  callScheduler = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+  callCommonQnA = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     /**
      * 1. 基于聊天历史，当前意图识别结果，上下文，以及整体优化之后的 query，调用 scheduler 模型，得到一个最优的技能调用序列
      * 2. 基于得到的技能调用序列，调用相应的技能
      */
 
     this.configSnapshot ??= config;
-    this.emitEvent({ event: 'start' }, this.configSnapshot);
     this.emitEvent({ event: 'log', content: `Start to call scheduler...` }, this.configSnapshot);
 
     const { messages = [], query: originalQuery } = state;
@@ -663,11 +663,47 @@ Please generate the summary based on these requirements and offer suggestions fo
       canvases,
       contentList,
       projects,
+      projectId,
+      convId,
     } = this.configSnapshot.configurable;
 
     const { tplConfig } = config?.configurable || {};
     const chatMode = tplConfig?.chatMode?.value as ChatMode;
     const enableWebSearch = tplConfig?.enableWebSearch?.value as boolean;
+
+    const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext); // ensure current canvas exists
+    const currentResource = resources?.find((resource) => resource?.metadata?.isCurrentContext);
+    const canvasEditConfig = (tplConfig?.canvasEditConfig?.value as CanvasEditConfig) || {};
+
+    // Get selected range from metadata
+    const selectedRange = canvasEditConfig?.selectedRange as SelectedRange;
+    const inPlaceEditType = canvasEditConfig?.inPlaceEditType as InPlaceEditType;
+
+    // Extract content context if selection exists
+    // const selectedContent = selectedRange
+    //   ? editCanvas.extractContentAroundSelection(currentCanvas.canvas.content || '', selectedRange)
+    //   : undefined;
+    const highlightSelection = canvasEditConfig?.selection as HighlightSelection; // for qna
+
+    this.emitEvent(
+      {
+        event: 'structured_data',
+        structuredDataKey: 'intentMatcher',
+        content: JSON.stringify({
+          type: CanvasIntentType.Other,
+          projectId,
+          canvasId: currentCanvas?.canvasId,
+          convId,
+          resourceId: currentResource?.resourceId,
+          metadata: {
+            selectedRange,
+            inPlaceEditType,
+            highlightSelection,
+          },
+        }),
+      },
+      config,
+    );
 
     this.engine.logger.log(`config: ${safeStringifyJSON(this.configSnapshot.configurable)}`);
 
@@ -927,11 +963,10 @@ Generated question example:
       channels: this.graphState,
     })
       // .addNode('direct', this.directCallSkill)
-      // .addNode('scheduler', this.callScheduler)
       .addNode('generateCanvas', this.callGenerateCanvas)
       .addNode('rewriteCanvas', this.callRewriteCanvas)
       .addNode('editCanvas', this.callEditCanvas)
-      .addNode('other', this.callScheduler)
+      .addNode('other', this.callCommonQnA)
       .addNode('relatedQuestions', this.genRelatedQuestions);
 
     // workflow.addConditionalEdges(START, this.shouldDirectCallSkill);

@@ -21,6 +21,9 @@ export interface MessageIntentContext {
     projectId: string;
     canvasId?: string;
   };
+  resourceContext?: {
+    resourceId?: string; // may sendMessage from resource's copilot
+  };
   convId?: string;
   chatMode?: ChatMode;
   enableWebSearch?: boolean;

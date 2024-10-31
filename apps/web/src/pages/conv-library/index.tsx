@@ -6,10 +6,11 @@ import { ConvList } from "@refly-packages/ai-workspace-common/components/conv-li
 import { useTranslation } from "react-i18next"
 import { useJumpNewPath } from "@refly-packages/ai-workspace-common/hooks/use-jump-new-path"
 import { Typography } from "@arco-design/web-react"
+import { MessageIntentSource } from "@refly-packages/ai-workspace-common/types/copilot"
 
 const ConvLibrary = () => {
   const { t } = useTranslation()
-  const { jumpToSoloConv } = useJumpNewPath()
+  const { jumpToConv } = useJumpNewPath()
 
   return (
     <div>
@@ -29,8 +30,14 @@ const ConvLibrary = () => {
       <ConvList
         classNames=""
         handleConvItemClick={convId => {
-          jumpToSoloConv({
+          jumpToConv({
             convId,
+            state: {
+              navigationContext: {
+                shouldFetchDetail: true,
+                source: MessageIntentSource.ConversationList,
+              },
+            },
           })
         }}
       />

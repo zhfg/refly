@@ -23,6 +23,7 @@ import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { Message, Spin } from '@arco-design/web-react';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 export interface SearchProps extends React.ComponentProps<'div'> {
   showList?: boolean;
@@ -290,6 +291,12 @@ export const Search = (props: SearchProps) => {
           // TODO: 需要后端返回 projectId
           // @ts-ignore
           projectId: item?.metadata?.projectId,
+          state: {
+            navigationContext: {
+              shouldFetchDetail: true,
+              source: MessageIntentSource.Search,
+            },
+          },
         });
         searchStore.setIsSearchOpen(false);
       },

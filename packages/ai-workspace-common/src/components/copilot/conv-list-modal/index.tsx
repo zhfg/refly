@@ -24,7 +24,7 @@ export const ConvListModal = (props: ConvListModalProps) => {
   const { source } = props;
   const knowledgeBaseStore = useKnowledgeBaseStore();
   const params = useParams();
-  const { jumpToProjectConv, jumpToResourceConv, jumpToSoloConv } = useJumpNewPath();
+  const { jumpToConv } = useJumpNewPath();
 
   return (
     <div style={{ width: '100%' }} className="conv-list-modal-container">
@@ -60,18 +60,36 @@ export const ConvListModal = (props: ConvListModalProps) => {
           handleConvItemClick={(convId) => {
             if (source === MessageIntentSource.Project) {
               const projectId = params.projectId;
-              jumpToProjectConv({
+              jumpToConv({
                 convId,
                 projectId,
+                state: {
+                  navigationContext: {
+                    shouldFetchDetail: true,
+                    source,
+                  },
+                },
               });
             } else if (source === MessageIntentSource.Resource) {
-              jumpToResourceConv({
+              jumpToConv({
                 resourceId: params.resId,
                 convId,
+                state: {
+                  navigationContext: {
+                    shouldFetchDetail: true,
+                    source,
+                  },
+                },
               });
             } else if (source === MessageIntentSource.ConversationDetail) {
-              jumpToSoloConv({
+              jumpToConv({
                 convId,
+                state: {
+                  navigationContext: {
+                    shouldFetchDetail: true,
+                    source,
+                  },
+                },
               });
             }
             knowledgeBaseStore.updateConvModalVisible(false);

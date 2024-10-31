@@ -1,8 +1,13 @@
+import { useNavigationContextStoreShallow } from '@refly-packages/ai-workspace-common/stores/navigation-context';
+import { NavigationContext } from '@refly-packages/ai-workspace-common/types/copilot';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 export const useJumpNewPath = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { setNavigationContext } = useNavigationContextStoreShallow((state) => ({
+    setNavigationContext: state.setNavigationContext,
+  }));
 
   const jumpToCanvas = ({
     canvasId,
@@ -32,10 +37,12 @@ export const useJumpNewPath = () => {
       projectId,
       baseUrl = '',
       openNewTab = false,
+      onlySetParams = false,
     }: {
       projectId: string;
       baseUrl?: string;
       openNewTab?: boolean;
+      onlySetParams?: boolean;
     },
     extraQuery?: Record<string, string>,
   ) => {
@@ -50,6 +57,10 @@ export const useJumpNewPath = () => {
     }
 
     setSearchParams(searchParams);
+
+    if (onlySetParams) {
+      return;
+    }
 
     const url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
 
@@ -138,81 +149,42 @@ export const useJumpNewPath = () => {
   const jumpToConv = ({
     convId,
     projectId,
+    canvasId,
+    resourceId,
     baseUrl = '',
     openNewTab = false,
+    state,
   }: {
     convId: string;
     projectId?: string;
+    canvasId?: string;
+    resourceId?: string;
     baseUrl?: string;
     openNewTab?: boolean;
+    state: { navigationContext?: NavigationContext };
   }) => {
-    console.log('jumpToConv projectId', projectId);
+    let url: string;
+
     if (projectId) {
-      jumpToProjectConv({ projectId, convId, baseUrl, openNewTab });
+      searchParams.set('convId', convId);
+      if (canvasId) {
+        searchParams.set('canvasId', canvasId);
+      }
+      setSearchParams(searchParams);
+      url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
+    } else if (resourceId) {
+      searchParams.set('convId', convId);
+      setSearchParams(searchParams);
+      url = `${baseUrl}/resource/${resourceId}?${searchParams.toString()}`;
     } else {
-      jumpToSoloConv({ convId, baseUrl, openNewTab });
+      url = `${baseUrl}/thread/${convId}`;
     }
-  };
-
-  const jumpToProjectConv = ({
-    projectId,
-    convId,
-    baseUrl = '',
-    openNewTab = false,
-  }: {
-    projectId: string;
-    convId: string;
-    baseUrl?: string;
-    openNewTab?: boolean;
-  }) => {
-    searchParams.set('convId', convId);
-    setSearchParams(searchParams);
-    const url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
 
     if (openNewTab) {
       window.open(url, '_blank');
     } else {
       navigate(url);
-    }
-  };
-
-  const jumpToResourceConv = ({
-    resourceId,
-    convId,
-    baseUrl = '',
-    openNewTab = false,
-  }: {
-    resourceId: string;
-    convId: string;
-    baseUrl?: string;
-    openNewTab?: boolean;
-  }) => {
-    searchParams.set('convId', convId);
-    setSearchParams(searchParams);
-    const url = `${baseUrl}/resource/${resourceId}?${searchParams.toString()}`;
-
-    if (openNewTab) {
-      window.open(url, '_blank');
-    } else {
-      navigate(url);
-    }
-  };
-
-  const jumpToSoloConv = ({
-    convId,
-    baseUrl = '',
-    openNewTab = false,
-  }: {
-    convId: string;
-    baseUrl?: string;
-    openNewTab?: boolean;
-  }) => {
-    const url = `${baseUrl}/thread/${convId}`;
-
-    if (openNewTab) {
-      window.open(url, '_blank');
-    } else {
-      navigate(url);
+      setNavigationContext(state.navigationContext);
     }
   };
 
@@ -221,9 +193,6 @@ export const useJumpNewPath = () => {
     jumpToProject,
     jumpToResource,
     jumpToConv,
-    jumpToProjectConv,
-    jumpToResourceConv,
-    jumpToSoloConv,
     removeKbAndResId,
     removeNoteId,
   };

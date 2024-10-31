@@ -1,5 +1,8 @@
+import { CanvasIntentType } from '@refly/common-types';
+
 export enum MessageIntentSource {
   HomePage = 'homePage', // for qa and generateCanvas
+  Sider = 'sider', // for jump to conversation detail
   SkillJob = 'skillJob', // for qa
   ConversationList = 'conversationList', // for qa, generateCanvas
   ConversationDetail = 'conversationDetail', // for qa, generateCanvas
@@ -9,4 +12,10 @@ export enum MessageIntentSource {
   Share = 'share', // for qa and generateCanvas
   Canvas = 'canvas', // for edit and qa
   Search = 'search', // for qa
+}
+
+export interface NavigationContext {
+  source: MessageIntentSource;
+  shouldFetchDetail: boolean;
+  intentType?: CanvasIntentType;
 }
