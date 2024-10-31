@@ -9,4 +9,8 @@ export abstract class BaseError extends Error {
   toString() {
     return `[${this.code}] ${this.messageDict['en']}`;
   }
+
+  getMessage(locale: string) {
+    return this.messageDict[locale] || this.messageDict['en'];
+  }
 }

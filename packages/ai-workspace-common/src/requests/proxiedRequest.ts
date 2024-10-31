@@ -1,29 +1,21 @@
+import React from 'react';
 import { createClient, client } from '@hey-api/client-fetch';
 import * as requestModule from '@refly/openapi-schema';
+import { Button, notification } from 'antd';
+import { IconCopy } from '@arco-design/web-react/icon';
 
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/utils/request';
 import { getServerOrigin } from '@refly/utils/url';
 import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { MessageName } from '@refly/common-types';
-import { safeStringifyJSON } from '@refly-packages/utils/parse';
-
-// 添加一个全局loading状态管理函数
-let loadingCount = 0;
-const setGlobalLoading = (isLoading: boolean) => {
-  if (isLoading) {
-    loadingCount++;
-  } else {
-    loadingCount = Math.max(0, loadingCount - 1);
-  }
-  // 这里可以触发UI更新,例如:
-  dispatchEvent(new CustomEvent('globalLoadingChange', { detail: { isLoading: loadingCount > 0 } }));
-};
+import { getErrorMessage } from '@refly/errors';
+import { safeParseJSON, safeStringifyJSON } from '@refly-packages/utils/parse';
+import { BaseResponse } from '@refly/openapi-schema';
 
 createClient({ baseUrl: getServerOrigin() + '/v1' });
 
 client.interceptors.request.use((request) => {
-  // setGlobalLoading(true);
   const token = getAuthTokenFromCookie();
   if (token) {
     request.headers.set('Authorization', `Bearer ${token}`);
@@ -31,8 +23,71 @@ client.interceptors.request.use((request) => {
   return request;
 });
 
-client.interceptors.response.use((response) => {
-  // setGlobalLoading(false);
+const errTitle = {
+  en: 'Oops, something went wrong',
+  'zh-CN': '哎呀，出错了',
+};
+
+client.interceptors.response.use(async (response) => {
+  const settings = safeParseJSON(localStorage.getItem('refly-local-settings'));
+  const locale = settings?.uiLocale || 'en';
+
+  let errMsg = '';
+  let traceId = '';
+
+  if (!response.ok) {
+    errMsg = getErrorMessage('E0000', locale);
+  } else {
+    const clonedResponse = response.clone();
+    const data: BaseResponse = await clonedResponse.json();
+    if (!data.success) {
+      errMsg = getErrorMessage(data.errCode, locale);
+      traceId = data.traceId;
+    }
+  }
+
+  if (errMsg) {
+    const description = React.createElement(
+      'div',
+      null,
+      React.createElement('div', null, errMsg),
+      traceId &&
+        React.createElement(
+          'div',
+          {
+            style: {
+              marginTop: 8,
+              fontSize: 11,
+              color: '#666',
+              display: 'flex',
+              alignItems: 'center',
+            },
+          },
+          React.createElement('div', null, `Trace ID: ${traceId}`),
+          React.createElement(
+            Button,
+            {
+              type: 'link',
+              size: 'small',
+              onClick: () => {
+                navigator.clipboard.writeText(traceId);
+                notification.success({
+                  message: locale === 'zh-CN' ? '已复制' : 'Copied',
+                  duration: 2,
+                });
+              },
+            },
+            React.createElement(IconCopy, { style: { fontSize: 14, color: '#666' } }),
+          ),
+        ),
+    );
+
+    notification.error({
+      message: errTitle[locale],
+      description,
+    });
+  }
+
   return response;
 });
 

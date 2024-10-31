@@ -1,5 +1,6 @@
 import { ExceptionFilter, HttpStatus, Catch, ArgumentsHost, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
+import api from '@opentelemetry/api';
 import * as Sentry from '@sentry/node';
 import { BaseError, UnknownError } from '@refly-packages/errors';
 import { BaseResponse } from '@refly-packages/openapi-schema';
@@ -12,6 +13,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+    const activeSpan = api.trace.getSpan(api.context.active());
 
     let err: BaseError;
 
@@ -33,6 +35,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       success: false,
       errCode: err.code,
       errMsg: err.messageDict['en'],
+      traceId: activeSpan?.spanContext().traceId,
       stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
     };
 

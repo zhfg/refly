@@ -1126,6 +1126,10 @@ export type BaseResponse = {
    */
   errMsg?: string;
   /**
+   * Trace ID
+   */
+  traceId?: string;
+  /**
    * Error stack (only returned in development environment)
    */
   stack?: string;
