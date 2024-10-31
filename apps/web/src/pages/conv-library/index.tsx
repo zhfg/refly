@@ -5,7 +5,8 @@ import "./index.scss"
 import { ConvList } from "@refly-packages/ai-workspace-common/components/conv-list"
 import { useTranslation } from "react-i18next"
 import { useJumpNewPath } from "@refly-packages/ai-workspace-common/hooks/use-jump-new-path"
-import { Button, Typography } from "@arco-design/web-react"
+import { Typography } from "@arco-design/web-react"
+import { MessageIntentSource } from "@refly-packages/ai-workspace-common/types/copilot"
 
 const ConvLibrary = () => {
   const { t } = useTranslation()
@@ -23,24 +24,20 @@ const ConvLibrary = () => {
           <Typography.Title heading={4}>
             {t("tabMeta.threadLibrary.title")}
           </Typography.Title>
-          <Button
-            type="primary"
-            style={{ width: 120, borderRadius: 8 }}
-            onClick={() =>
-              jumpToConv({
-                convId: "",
-              })
-            }>
-            {t("threadLibrary.newThread")}
-          </Button>
+          <span></span>
         </div>
       </div>
       <ConvList
         classNames=""
-        handleConvItemClick={(convId, projectId) => {
+        handleConvItemClick={convId => {
           jumpToConv({
             convId,
-            projectId,
+            state: {
+              navigationContext: {
+                shouldFetchDetail: true,
+                source: MessageIntentSource.ConversationList,
+              },
+            },
           })
         }}
       />

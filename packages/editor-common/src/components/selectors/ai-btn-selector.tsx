@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 import Magic from '../ui/icons/magic';
 import { Button } from '../ui/button';
 
-import { AISelector } from '../generative/inline/ai-selector';
+import { AISelector } from '../generative/common/ai-selector';
 
 interface AIBtnSelectorProps {
   open: boolean;

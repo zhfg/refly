@@ -6,20 +6,24 @@ import './index.scss';
 
 // 自定义组件
 import { ConvList } from '@refly-packages/ai-workspace-common/components/conv-list';
-import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
+import { useNavigate, useParams, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 interface ConvListModalProps {
   title: string;
   classNames: string;
   placement?: 'bottom' | 'left' | 'right' | 'top';
+  source: MessageIntentSource;
 }
 
 export const ConvListModal = (props: ConvListModalProps) => {
   const { t } = useTranslation();
+  const { source } = props;
   const knowledgeBaseStore = useKnowledgeBaseStore();
+  const params = useParams();
   const { jumpToConv } = useJumpNewPath();
 
   return (
@@ -53,11 +57,41 @@ export const ConvListModal = (props: ConvListModalProps) => {
       >
         <ConvList
           classNames={props.classNames}
-          handleConvItemClick={(convId, projectId) => {
-            jumpToConv({
-              convId,
-              projectId,
-            });
+          handleConvItemClick={(convId) => {
+            if (source === MessageIntentSource.Project) {
+              const projectId = params.projectId;
+              jumpToConv({
+                convId,
+                projectId,
+                state: {
+                  navigationContext: {
+                    shouldFetchDetail: true,
+                    source,
+                  },
+                },
+              });
+            } else if (source === MessageIntentSource.Resource) {
+              jumpToConv({
+                resourceId: params.resId,
+                convId,
+                state: {
+                  navigationContext: {
+                    shouldFetchDetail: true,
+                    source,
+                  },
+                },
+              });
+            } else if (source === MessageIntentSource.ConversationDetail) {
+              jumpToConv({
+                convId,
+                state: {
+                  navigationContext: {
+                    shouldFetchDetail: true,
+                    source,
+                  },
+                },
+              });
+            }
             knowledgeBaseStore.updateConvModalVisible(false);
           }}
         />

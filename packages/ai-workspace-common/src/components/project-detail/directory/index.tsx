@@ -22,6 +22,7 @@ import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-pr
 
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 type DirectoryItemType = 'canvas' | 'resource' | 'thread';
 
@@ -187,6 +188,12 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
       jumpToConv({
         convId: item.id,
         projectId: projectId,
+        state: {
+          navigationContext: {
+            shouldFetchDetail: true,
+            source: MessageIntentSource.Project,
+          },
+        },
       });
     }
   };

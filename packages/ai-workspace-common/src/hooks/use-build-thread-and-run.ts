@@ -1,11 +1,19 @@
-import { ChatMode, useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useConversationStoreShallow } from '@refly-packages/ai-workspace-common/stores/conversation';
+import {
+  ChatMode,
+  MessageIntentContext,
+  useChatStore,
+  useChatStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/chat';
+import {
+  useConversationStore,
+  useConversationStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/conversation';
 import { buildConversation, getConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
 import { Notification } from '@arco-design/web-react';
 import { useResetState } from './use-reset-state';
 import { useTaskStoreShallow } from '@refly-packages/ai-workspace-common/stores/task';
 
-import { InvokeSkillRequest, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
+import { ConfigScope, InvokeSkillRequest, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
 // request
 import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
@@ -19,16 +27,12 @@ import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
-import { IntentResult } from './use-handle-ai-canvas';
 
 interface InvokeParams {
   chatMode?: ChatMode;
-  projectId?: string;
   skillContext?: SkillContext;
   tplConfig?: SkillTemplateConfig;
-  intentResult?: IntentResult; // 新增意图识别结果
-  skipIntentDetection?: boolean; // 是否跳过意图识别
-  forceNewConv?: boolean; // 是否是新会话
+  messageIntentContext?: MessageIntentContext;
   userInput?: string; // 用户输入
 }
 
@@ -39,12 +43,12 @@ export const useBuildThreadAndRun = () => {
     setChatMode: state.setChatMode,
     setNewQAText: state.setNewQAText,
     setInvokeParams: state.setInvokeParams,
+    setMessageIntentContext: state.setMessageIntentContext,
   }));
   const setLoginModalVisible = useUserStoreShallow((state) => state.setLoginModalVisible);
   const conversationStore = useConversationStoreShallow((state) => ({
     currentConversation: state.currentConversation,
     setCurrentConversation: state.setCurrentConversation,
-    setIsNewConversation: state.setIsNewConversation,
   }));
   const setIsSearchOpen = useSearchStoreShallow((state) => state.setIsSearchOpen);
   const { resetState } = useResetState();
@@ -66,15 +70,22 @@ export const useBuildThreadAndRun = () => {
       resetState();
     }
 
+    const { messageIntentContext } = useChatStore.getState();
+
     const newConv = ensureConversationExist(invokeParams?.projectId, forceNewConv);
     conversationStore.setCurrentConversation(newConv);
-    conversationStore.setIsNewConversation(true);
     chatStore.setNewQAText(question);
     chatStore.setInvokeParams(invokeParams);
 
     jumpToConv({
       convId: newConv?.convId,
       projectId: newConv?.projectId,
+      state: {
+        navigationContext: {
+          shouldFetchDetail: false,
+          source: messageIntentContext?.source,
+        },
+      },
     });
 
     addRecentConversation(newConv);
@@ -82,7 +93,7 @@ export const useBuildThreadAndRun = () => {
 
   // TODO: 这里考虑针对 homePage 来的会话请求，需要清除 conv，重新处理
   const ensureConversationExist = (projectId?: string, forceNewConv = false) => {
-    const { currentConversation } = conversationStore;
+    const { currentConversation } = useConversationStore.getState();
     const { localSettings } = useUserStore.getState();
 
     if (!currentConversation?.convId || forceNewConv) {
@@ -100,15 +111,30 @@ export const useBuildThreadAndRun = () => {
 
   const runSkill = (comingQuestion: string, invokeParams?: InvokeParams) => {
     // support ask follow up question
-    const { messages = [], selectedModel, enableWebSearch, chatMode } = useChatStore.getState();
+    const { messages = [], selectedModel, enableWebSearch, messageIntentContext } = useChatStore.getState();
     const { selectedSkill } = useSkillStore.getState();
     const { localSettings } = useUserStore.getState();
 
     let question = comingQuestion.trim();
+    const canvasEditConfig = messageIntentContext?.canvasEditConfig;
+    const projectId = messageIntentContext?.projectContext?.projectId;
+    const forceNewConv = messageIntentContext?.isNewConversation;
 
     // 创建新会话并跳转
-    const conv = ensureConversationExist(invokeParams?.projectId, invokeParams?.forceNewConv);
+    const conv = ensureConversationExist(projectId, forceNewConv);
     const skillContext = invokeParams?.skillContext || buildSkillContext();
+    const chatMode = messageIntentContext?.chatMode;
+
+    // set convId info to messageIntentContext
+    const newMessageIntentContext: Partial<MessageIntentContext> = {
+      ...(messageIntentContext || {}),
+      convId: conv?.convId,
+    };
+
+    if (forceNewConv) {
+      resetState();
+    }
+    chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
 
     // TODO: temp make scheduler support
     const tplConfig = !!selectedSkill?.skillId
@@ -116,16 +142,26 @@ export const useBuildThreadAndRun = () => {
       : {
           enableWebSearch: {
             value: enableWebSearch,
-            configScope: ['runtime'],
+            configScope: 'runtime' as unknown as ConfigScope,
             displayValue: localSettings?.uiLocale === 'zh-CN' ? '联网搜索' : 'Web Search',
             label: localSettings?.uiLocale === 'zh-CN' ? '联网搜索' : 'Web Search',
           },
           chatMode: {
             value: chatMode,
-            configScope: ['runtime'],
+            configScope: 'runtime' as unknown as ConfigScope,
             displayValue: localSettings?.uiLocale === 'zh-CN' ? '提问模式' : 'Normal Chat',
             label: localSettings?.uiLocale === 'zh-CN' ? '直接提问' : 'Normal Chat',
           },
+          ...(canvasEditConfig
+            ? {
+                canvasEditConfig: {
+                  value: canvasEditConfig as { [key: string]: unknown },
+                  configScope: 'runtime' as unknown as ConfigScope,
+                  displayValue: localSettings?.uiLocale === 'zh-CN' ? '编辑稿布配置' : 'Edit Canvas Config',
+                  label: localSettings?.uiLocale === 'zh-CN' ? '编辑稿布配置' : 'Edit Canvas Config',
+                },
+              }
+            : {}),
         };
 
     question =
@@ -137,7 +173,7 @@ export const useBuildThreadAndRun = () => {
     // 设置当前的任务类型及会话 id
     const task: InvokeSkillRequest = {
       skillId: selectedSkill?.skillId,
-      projectId: invokeParams?.projectId,
+      projectId,
       input: {
         query: question,
       },

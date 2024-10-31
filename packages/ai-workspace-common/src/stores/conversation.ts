@@ -8,14 +8,12 @@ interface ConversationState {
   // state
   currentConversation: Conversation | null;
   conversationList: Conversation[];
-  isNewConversation: boolean;
   isAskFollowUpNewConversation: boolean;
 
   // method
   setConversationList: (conversationList: Conversation[]) => void;
   setCurrentConversation: (val: Conversation) => void;
   updateConversation: (operationType: ConversationOperation, payload: Partial<Conversation>) => void;
-  setIsNewConversation: (val: boolean) => void;
   setIsAskFollowUpNewConversation: (val: boolean) => void;
   resetState: () => void;
 }
@@ -23,7 +21,6 @@ interface ConversationState {
 const defaultState = {
   currentConversation: null,
   conversationList: [],
-  isNewConversation: false, // 标识是否是新创建的会话，还是老会话
   isAskFollowUpNewConversation: false, // 标识是基于 AIGCContent 创建的新会话
 };
 
@@ -82,7 +79,6 @@ export const useConversationStore = create<ConversationState>()(
           conversationList: newConversationList,
         };
       }),
-    setIsNewConversation: (val: boolean) => set({ isNewConversation: val }),
     setIsAskFollowUpNewConversation: (val: boolean) => set({ isAskFollowUpNewConversation: val }),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
   })),

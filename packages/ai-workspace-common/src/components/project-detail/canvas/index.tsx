@@ -52,6 +52,7 @@ import { enInvestMemoContent } from '@refly-packages/ai-workspace-common/compone
 import { zhReactContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-react';
 import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 import { MarkType } from '@refly/common-types';
+import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 
 class TokenStreamProcessor {
   private editor: EditorInstance;
@@ -140,6 +141,10 @@ class TokenStreamProcessor {
     this.chunk = '';
     this.isLineStart = false;
     this.isCodeBlockStart = false;
+
+    // Focus with scroll options
+    const currentPos = this.editor.state.selection.from;
+    this.editor.commands.focus(currentPos, { scrollIntoView: true });
   }
 
   processMark(pattern: string, mark: string) {
@@ -239,14 +244,28 @@ class TokenStreamProcessor {
 
     this.chunk += token;
 
-    // Skip processing if the chunk is part of the closing canvas tag
-    if (this.chunk === '<' || '</reflyCanvas>'.startsWith(this.chunk)) {
+    // Skip processing if the chunk is part of the closing canvas tag (including HTML entities)
+    if (
+      this.chunk === '<' ||
+      '</reflyCanvas>'.startsWith(this.chunk) ||
+      this.chunk === '&' ||
+      '&lt;/reflyCanvas'.startsWith(this.chunk) ||
+      '&lt;/reflyCanvas&gt;'.startsWith(this.chunk)
+    ) {
       return;
     }
 
-    // If the chunk contains the closing tag, only process content before it
-    if (this.chunk.includes('</reflyCanvas>')) {
-      const content = this.chunk.split('</reflyCanvas>')[0];
+    // If the chunk contains the closing tag (including HTML entities), only process content before it
+    if (
+      this.chunk.includes('</reflyCanvas>') ||
+      this.chunk.includes('&lt;/reflyCanvas') ||
+      this.chunk.includes('&lt;/reflyCanvas&gt;')
+    ) {
+      const content = this.chunk
+        .split('</reflyCanvas>')[0]
+        .split('&lt;/reflyCanvas')[0]
+        .split('&lt;/reflyCanvas&gt;')[0];
+
       if (content) {
         this.chunk = content;
       } else {
@@ -296,6 +315,14 @@ class TokenStreamProcessor {
 
     this.insertContent(this.chunk);
   }
+
+  reset() {
+    this.chunk = '';
+    this.isLineStart = true;
+    this.isCodeBlockStart = false;
+    this.isInList = false;
+    this.currentListDepth = 0;
+  }
 }
 
 const MemorizedToC = memo(ToC);
@@ -304,6 +331,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
   const { t } = useTranslation();
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
+  const processorRef = useRef<TokenStreamProcessor>();
 
   const canvasStore = useCanvasStore((state) => ({
     currentCanvas: state.currentCanvas,
@@ -465,15 +493,18 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
     });
   }, []);
 
-  const processor = new TokenStreamProcessor();
-
   useEffect(() => {
-    const handleStreamContent = (content: string) => {
+    const handleStreamContent = (event: { isFirst: boolean; content: string }) => {
+      const { isFirst, content } = event || {};
       if (editorRef.current) {
-        processor.setEditor(editorRef.current);
+        if (isFirst || !processorRef.current) {
+          processorRef.current = new TokenStreamProcessor();
+        }
+
+        processorRef.current.setEditor(editorRef.current);
         try {
           // console.log('streamCanvasContent', JSON.stringify({ content }));
-          processor.process(content);
+          processorRef.current.process(content);
           // setTimeout(() => {
           //   scrollToBottom();
           // });
@@ -485,15 +516,16 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
 
     const handleStreamEditCanvasContent = (event: { isFirst: boolean; content: string }) => {
       try {
-        let { currentSelectedMarks = [] } = useContextPanelStore.getState();
-        const currentCanvas = currentSelectedMarks.find(
-          (item) => item.isCurrentContext && (item.type as MarkType) === 'canvas',
-        );
+        const { messageIntentContext } = useChatStore.getState();
+        const canvasEditConfig = messageIntentContext?.canvasEditConfig;
 
         const { isFirst, content } = event;
-        if (editorRef.current && currentCanvas) {
-          const { selectedRange } = currentCanvas.metadata;
-          processor.setEditor(editorRef.current);
+        if (editorRef.current && canvasEditConfig?.selectedRange) {
+          if (!processorRef.current || isFirst) {
+            processorRef.current = new TokenStreamProcessor();
+          }
+          const { selectedRange } = canvasEditConfig;
+          processorRef.current.setEditor(editorRef.current);
 
           if (isFirst) {
             // 1. Select and delete the content range
@@ -508,7 +540,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
           }
 
           // Process content using the same logic as regular streaming
-          processor.process(content);
+          processorRef.current.process(content);
         }
       } catch (error) {
         console.error('handleStreamEditCanvasContent error', error);
@@ -796,8 +828,8 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
   }, [canvas, debouncedUpdateCanvas]);
 
   return (
-    <div className="ai-note-container flex flex-col">
-      <div className="flex-grow overflow-auto">
+    <div className="flex flex-col ai-note-container">
+      <div className="overflow-auto flex-grow">
         <Spin
           tip={t('knowledgeBase.note.connecting')}
           loading={!canvas || isRequesting || canvasServerStatus !== 'connected'}

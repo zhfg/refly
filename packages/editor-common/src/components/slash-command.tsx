@@ -15,8 +15,39 @@ import { Command, renderItems } from '@refly-packages/editor-core/extensions';
 import { createUploadFn } from './image-upload';
 import Magic from '@refly-packages/editor-component/ui/icons/magic';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
+import { Editor, Range } from '@tiptap/core';
 
 export const configureSuggestionItems = (param: { entityId: string; entityType: string }) => {
+  const createBlockAfterCurrent = (editor: Editor, range: Range, createNodeType: () => void) => {
+    const { $from } = editor.state.selection;
+    const currentNode = $from.node();
+    const isEmptyParagraph = currentNode.type.name === 'paragraph' && currentNode.content.size === 1;
+
+    // 1. 删除 slash command
+    editor.chain().focus().deleteRange(range).run();
+
+    if (isEmptyParagraph) {
+      createNodeType();
+    } else {
+      // 2. 在当前 block 后插入新的空 paragraph
+      const endPos = $from.end();
+      editor
+        .chain()
+        .focus()
+        .insertContentAt(endPos, {
+          type: 'paragraph',
+          content: [{ type: 'text', text: '\u200B' }], // 使用零宽空格
+        })
+        .setTextSelection(endPos + 2) // +2 是因为需要跳过新插入的 paragraph 开始位置和零宽空格
+        .run();
+
+      // 3. 在新行应用格式
+      setTimeout(() => {
+        createNodeType();
+      }, 0);
+    }
+  };
+
   return createSuggestionItems([
     {
       title: 'Ask AI',
@@ -24,8 +55,11 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       searchTerms: ['ai', 'assistant'],
       icon: <Magic className="w-5 h-5" />,
       command: ({ editor, range }) => {
-        editor.chain().focus().deleteRange(range).run();
-        editorEmitter.emit('activeAskAI', true);
+        createBlockAfterCurrent(editor, range, () => {
+          setTimeout(() => {
+            editorEmitter.emit('activeAskAI', true);
+          }, 0);
+        });
       },
     },
     {
@@ -34,16 +68,9 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       searchTerms: ['p', 'paragraph'],
       icon: <Text size={18} />,
       command: ({ editor, range }) => {
-        editor.chain().focus().deleteRange(range).toggleNode('paragraph', 'paragraph').run();
-      },
-    },
-    {
-      title: 'To-do List',
-      description: 'Track tasks with a to-do list.',
-      searchTerms: ['todo', 'task', 'list', 'check', 'checkbox'],
-      icon: <CheckSquare size={18} />,
-      command: ({ editor, range }) => {
-        editor.chain().focus().deleteRange(range).toggleTaskList().run();
+        createBlockAfterCurrent(editor, range, () => {
+          editor.chain().focus().setNode('paragraph').run();
+        });
       },
     },
     {
@@ -52,25 +79,20 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       searchTerms: ['title', 'big', 'large'],
       icon: <Heading1 size={18} />,
       command: ({ editor, range }) => {
-        editor.chain().focus().deleteRange(range).setNode('heading', { level: 1 }).run();
+        createBlockAfterCurrent(editor, range, () => {
+          editor.chain().focus().setNode('heading', { level: 1 }).run();
+        });
       },
     },
     {
-      title: 'Heading 2',
-      description: 'Medium section heading.',
-      searchTerms: ['subtitle', 'medium'],
-      icon: <Heading2 size={18} />,
+      title: 'To-do List',
+      description: 'Track tasks with a to-do list.',
+      searchTerms: ['todo', 'task', 'list', 'check', 'checkbox'],
+      icon: <CheckSquare size={18} />,
       command: ({ editor, range }) => {
-        editor.chain().focus().deleteRange(range).setNode('heading', { level: 2 }).run();
-      },
-    },
-    {
-      title: 'Heading 3',
-      description: 'Small section heading.',
-      searchTerms: ['subtitle', 'small'],
-      icon: <Heading3 size={18} />,
-      command: ({ editor, range }) => {
-        editor.chain().focus().deleteRange(range).setNode('heading', { level: 3 }).run();
+        createBlockAfterCurrent(editor, range, () => {
+          editor.chain().focus().toggleTaskList().run();
+        });
       },
     },
     {
@@ -79,16 +101,9 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       searchTerms: ['unordered', 'point'],
       icon: <List size={18} />,
       command: ({ editor, range }) => {
-        editor.chain().focus().deleteRange(range).toggleBulletList().run();
-      },
-    },
-    {
-      title: 'Numbered List',
-      description: 'Create a list with numbering.',
-      searchTerms: ['ordered'],
-      icon: <ListOrdered size={18} />,
-      command: ({ editor, range }) => {
-        editor.chain().focus().deleteRange(range).toggleOrderedList().run();
+        createBlockAfterCurrent(editor, range, () => {
+          editor.chain().focus().toggleBulletList().run();
+        });
       },
     },
     {
@@ -96,15 +111,22 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       description: 'Capture a quote.',
       searchTerms: ['blockquote'],
       icon: <TextQuote size={18} />,
-      command: ({ editor, range }) =>
-        editor.chain().focus().deleteRange(range).toggleNode('paragraph', 'paragraph').toggleBlockquote().run(),
+      command: ({ editor, range }) => {
+        createBlockAfterCurrent(editor, range, () => {
+          editor.chain().focus().toggleBlockquote().run();
+        });
+      },
     },
     {
       title: 'Code',
       description: 'Capture a code snippet.',
       searchTerms: ['codeblock'],
       icon: <Code size={18} />,
-      command: ({ editor, range }) => editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
+      command: ({ editor, range }) => {
+        createBlockAfterCurrent(editor, range, () => {
+          editor.chain().focus().toggleCodeBlock().run();
+        });
+      },
     },
     {
       title: 'Image',
@@ -114,24 +136,25 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       command: ({ editor, range }) => {
         if (!editor) return;
 
-        editor.chain().focus().deleteRange(range).run();
-        // upload image
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
+        createBlockAfterCurrent(editor, range, () => {
+          // upload image
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'image/*';
 
-        const uploadFn = createUploadFn(param);
+          const uploadFn = createUploadFn(param);
 
-        input.onchange = async () => {
-          if (input.files?.length) {
-            const file = input.files[0];
-            const pos = editor.view?.state?.selection?.from;
-            if (pos) {
-              uploadFn(file, editor.view, pos);
+          input.onchange = async () => {
+            if (input.files?.length) {
+              const file = input.files[0];
+              const pos = editor.view?.state?.selection?.from;
+              if (pos) {
+                uploadFn(file, editor.view, pos);
+              }
             }
-          }
-        };
-        input.click();
+          };
+          input.click();
+        });
       },
     },
   ]);
