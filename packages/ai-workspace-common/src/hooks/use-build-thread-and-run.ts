@@ -43,7 +43,6 @@ export const useBuildThreadAndRun = () => {
     setChatMode: state.setChatMode,
     setNewQAText: state.setNewQAText,
     setInvokeParams: state.setInvokeParams,
-    setMessages: state.setMessages,
     setMessageIntentContext: state.setMessageIntentContext,
   }));
   const setLoginModalVisible = useUserStoreShallow((state) => state.setLoginModalVisible);
@@ -133,7 +132,7 @@ export const useBuildThreadAndRun = () => {
     };
 
     if (forceNewConv) {
-      chatStore.setMessages([]);
+      resetState();
     }
     chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
 
