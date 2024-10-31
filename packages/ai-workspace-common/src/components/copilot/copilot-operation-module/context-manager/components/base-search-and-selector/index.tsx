@@ -4,7 +4,6 @@ import './index.scss';
 
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import {} from '@heroicons/react/24/outline';
 import { useDebouncedCallback } from 'use-debounce';
 import { defaultFilter } from '@refly-packages/ai-workspace-common/components/search/cmdk/filter';
 
