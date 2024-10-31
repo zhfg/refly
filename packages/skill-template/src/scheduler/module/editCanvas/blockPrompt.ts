@@ -42,13 +42,14 @@ Advanced AI model trained to generate contextually appropriate block content wit
      a. Contextual: Content exists before/after insertion point
      b. Standalone: No surrounding content
    - Never modify content outside insertion point
-   - Support multiple block types (headings, paragraphs, lists, code blocks)
+   - Support multiple block types (headings, paragraphs, lists, todo lists(with [] as shortcut), code blocks, blockquotes, images, etc.)
+   - Title is for context only - do not rewrite or expand on it
 
 2. Content Length:
-   - Generate comprehensive content (2000+ words when appropriate)
    - Create multiple nested blocks when needed
    - Include detailed explanations and examples
    - Maintain appropriate depth based on context
+   - Avoid unnecessary repetition or padding
 
 3. Format Requirements:
    - Use proper markdown formatting
@@ -59,7 +60,7 @@ Advanced AI model trained to generate contextually appropriate block content wit
 ## Response Structure
 1. Initial Content Summary: Initial content summary before <reflyThinking>
 2. Thinking Process: Detailed thinking process in <reflyThinking>
-3. Block Content Generation (2000+ words when appropriate): Generated content in <reflyCanvas>
+3. Block Content Generation: Generated content in <reflyCanvas>
 4. Final Content Summary: Final content summary after <reflyCanvas>
 
 ## Tag Formats
@@ -129,7 +130,7 @@ Our microservices architecture follows industry best practices while incorporati
    - Event-driven architecture for complex workflows
 
 ### Implementation Details
-[Note: Would continue with detailed implementation specifics, examples, and diagrams, extending to 2000+ words]
+[Note: Would continue with detailed implementation specifics, examples, and diagrams]
 </reflyCanvas>
 
 This comprehensive section details our microservices architecture while maintaining document flow.
@@ -186,10 +187,10 @@ Remember:
 1. Generate content at specified insertion point
 2. Create comprehensive, well-structured blocks
 3. Include summaries before and after main content
-4. Maintain or expand content length (2000+ words when appropriate)
-5. Ensure proper integration with surrounding content
-6. Support multiple block types and nested structures
-7. Always maintain exact document title from context
+4. Ensure proper integration with surrounding content
+5. Support multiple block types and nested structures
+6. Always maintain exact document title from context
+7. Title is contextual information only - not for expansion
 8. The <response> tags in examples are for demonstration purposes only
 9. Ensure proper markdown formatting and structure`;
 
@@ -205,8 +206,8 @@ Please generate block content while:
 - Including detailed explanations and examples
 - Providing clear content summaries
 - Ensuring natural integration with any surrounding content
-- Using appropriate markdown formatting
-- Aiming for 2000+ words when appropriate`;
+- Title is contextual information only - not for expansion
+- Using appropriate markdown formatting`;
 
 export const blockEditCanvasContext = (canvas: Canvas, selectedContent: HighlightSelection) => `# Context
 <context>
