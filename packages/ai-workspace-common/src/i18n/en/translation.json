@@ -1153,5 +1153,9 @@
       "terms": "Terms",
       "privacy": "Privacy"
     }
+  },
+  "deck": {
+    "references": "References",
+    "referencedBy": "Referenced By"
   }
 }

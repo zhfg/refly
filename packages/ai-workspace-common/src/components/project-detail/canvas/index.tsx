@@ -7,6 +7,7 @@ import './index.scss';
 import { useCookie } from 'react-use';
 import { Input, Popover, Spin, Switch } from '@arco-design/web-react';
 import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock, HiOutlineShare } from 'react-icons/hi2';
+import { IconQuote } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useTranslation } from 'react-i18next';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 
@@ -54,6 +55,7 @@ import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stor
 import { MarkType } from '@refly/common-types';
 import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
 
 class TokenStreamProcessor {
   private editor: EditorInstance;
@@ -839,13 +841,41 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
     prevNote.current = canvas;
   }, [canvas, debouncedUpdateCanvas]);
 
-  return (
-    <div className="ai-note-container flex flex-col">
-      <div className="w-[90%] mx-auto flex justify-end">
-        <Button type="text" size="small" loading={shareLoading} icon={<HiOutlineShare />} onClick={handleShare}>
+  const { deckSize, setDeckSize } = useReferencesStoreShallow((state) => ({
+    deckSize: state.deckSize,
+    setDeckSize: state.setDeckSize,
+  }));
+
+  const TopBar = () => {
+    return (
+      <div className="w-[90%] pt-2 pb-2 mx-auto flex justify-end items-center">
+        <Button
+          type="text"
+          size="small"
+          style={{ color: deckSize ? '#00968F' : '' }}
+          icon={<IconQuote />}
+          onClick={() => {
+            setDeckSize(deckSize ? 0 : 300);
+          }}
+        ></Button>
+        <Divider type="vertical" />
+        <Button
+          type="text"
+          size="small"
+          style={{ color: canvas?.shareCode ? '#00968F' : '' }}
+          loading={shareLoading}
+          icon={<HiOutlineShare />}
+          onClick={handleShare}
+        >
           {canvas?.shareCode ? t('projectDetail.share.sharing') : t('common.share')}
         </Button>
       </div>
+    );
+  };
+
+  return (
+    <div className="ai-note-container flex flex-col">
+      <TopBar />
       <div className="flex-grow overflow-auto">
         <Spin
           tip={t('knowledgeBase.note.connecting')}

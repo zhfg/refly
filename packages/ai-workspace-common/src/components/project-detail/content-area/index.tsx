@@ -1,17 +1,19 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Tabs, Tooltip } from 'antd';
+import { Button, Tabs, Tooltip, Splitter } from 'antd';
 
 import { ResourceView } from '../resource-view';
 import { CanvasEditor } from '../canvas';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
+import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
 
 import { closestCenter, DndContext } from '@dnd-kit/core';
 import { DragEndEvent, PointerSensor, useSensor } from '@dnd-kit/core';
 import { arrayMove, horizontalListSortingStrategy, SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import ResourceDeck from '@refly-packages/ai-workspace-common/components/project-detail/resource-view/resource-deck';
 
 interface DraggableTabPaneProps extends React.HTMLAttributes<HTMLDivElement> {
   'data-node-key': string;
@@ -80,9 +82,19 @@ export const ContentArea = (props: { projectId: string }) => {
     }
   };
 
+  const { deckSize, setDeckSize } = useReferencesStoreShallow((state) => ({
+    deckSize: state.deckSize,
+    setDeckSize: state.setDeckSize,
+  }));
+
+  useEffect(() => {
+    setDeckSize(0);
+  }, [activeTab]);
+
   return (
     <div className="h-full relative flex flex-col">
       <Tabs
+        tabBarStyle={{ marginBottom: 0 }}
         animated
         type="editable-card"
         size="middle"
@@ -117,11 +129,23 @@ export const ContentArea = (props: { projectId: string }) => {
         }
       />
       <div className="flex-grow overflow-auto">
-        {activeTab?.type === 'canvas' ? (
-          <CanvasEditor projectId={projectId} canvasId={activeTab?.key} />
-        ) : (
-          <ResourceView projectId={projectId} resourceId={activeTab?.key} />
-        )}
+        <Splitter
+          layout="vertical"
+          onResize={(sizes) => {
+            setDeckSize(sizes[1]);
+          }}
+        >
+          <Splitter.Panel>
+            {activeTab?.type === 'canvas' ? (
+              <CanvasEditor projectId={projectId} canvasId={activeTab?.key} />
+            ) : (
+              <ResourceView projectId={projectId} resourceId={activeTab?.key} />
+            )}
+          </Splitter.Panel>
+          <Splitter.Panel size={deckSize} max={'80%'} collapsible>
+            <ResourceDeck domain={activeTab?.type} id={activeTab?.key} />
+          </Splitter.Panel>
+        </Splitter>
       </div>
     </div>
   );

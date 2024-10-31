@@ -1149,5 +1149,9 @@
       "terms": "条款",
       "privacy": "隐私"
     }
+  },
+  "deck": {
+    "references": "引用",
+    "referencedBy": "被引用"
   }
 }
