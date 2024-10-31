@@ -59,11 +59,11 @@ export class Scheduler extends BaseSkill {
         inputMode: 'radio',
         labelDict: {
           en: 'Web Search',
-          'zh-CN': '联网搜索',
+          'zh-CN': '全网搜索',
         },
         descriptionDict: {
           en: 'Enable web search',
-          'zh-CN': '启用联网搜索',
+          'zh-CN': '启用全网搜索',
         },
         defaultValue: true,
       },

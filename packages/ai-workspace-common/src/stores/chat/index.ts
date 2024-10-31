@@ -78,7 +78,7 @@ const defaultConfigurableState = {
       tier: 't2',
     },
   ] as ModelInfo[],
-  enableWebSearch: false,
+  enableWebSearch: true,
 };
 
 export const defaultExtraState = {

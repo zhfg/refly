@@ -96,7 +96,7 @@ export const translation = {
           current: '当前网页',
           all: '全部知识库',
           history: '历史已阅读',
-          internet: '联网搜索',
+          internet: '全网搜索',
         },
         status: {
           emptyNotify: '提问内容不能为空',

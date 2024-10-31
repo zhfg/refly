@@ -147,8 +147,8 @@ export const useBuildThreadAndRun = () => {
           enableWebSearch: {
             value: enableWebSearch,
             configScope: 'runtime' as unknown as ConfigScope,
-            displayValue: localSettings?.uiLocale === 'zh-CN' ? '联网搜索' : 'Web Search',
-            label: localSettings?.uiLocale === 'zh-CN' ? '联网搜索' : 'Web Search',
+            displayValue: localSettings?.uiLocale === 'zh-CN' ? '全网搜索' : 'Web Search',
+            label: localSettings?.uiLocale === 'zh-CN' ? '全网搜索' : 'Web Search',
           },
           chatMode: {
             value: chatMode,
