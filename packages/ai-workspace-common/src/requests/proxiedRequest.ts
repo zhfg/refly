@@ -9,7 +9,7 @@ import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/util
 import { getServerOrigin } from '@refly/utils/url';
 import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { LOCALE, MessageName } from '@refly/common-types';
-import { getErrorMessage, UnknownError } from '@refly/errors';
+import { ConnectionError, getErrorMessage, UnknownError } from '@refly/errors';
 import { safeParseJSON, safeStringifyJSON } from '@refly-packages/utils/parse';
 import { BaseResponse } from '@refly/openapi-schema';
 
@@ -26,6 +26,11 @@ client.interceptors.request.use((request) => {
 const errTitle = {
   en: 'Oops, something went wrong',
   'zh-CN': '哎呀，出错了',
+};
+
+const getLocale = () => {
+  const settings = safeParseJSON(localStorage.getItem('refly-local-settings'));
+  return settings?.uiLocale || 'en';
 };
 
 export interface CheckResponseResult {
@@ -95,14 +100,10 @@ export const showErrorNotification = (res: BaseResponse, locale: LOCALE) => {
 };
 
 client.interceptors.response.use(async (response) => {
-  const settings = safeParseJSON(localStorage.getItem('refly-local-settings'));
-  const locale = settings?.uiLocale || 'en';
-
   const error = await extractBaseResp(response);
   if (!error.success) {
-    showErrorNotification(error, locale);
+    showErrorNotification(error, getLocale());
   }
-
   return response;
 });
 
@@ -118,24 +119,35 @@ const wrapFunctions = (module: any) => {
         console.log(`Calling function ${String(key)} with arguments: ${safeStringifyJSON(args)}`);
 
         try {
-          const res = await sendToBackground({
+          return await sendToBackground({
             name: String(key) as MessageName,
             type: 'apiRequest',
             source: getRuntime(),
             target: module,
             args,
           });
-
-          return res;
         } catch (err) {
-          return {
+          const errResp = {
             success: false,
-            errMsg: err,
+            errCode: new ConnectionError(err).code,
           };
+          showErrorNotification(errResp, getLocale());
+          return errResp;
         }
       };
     } else {
-      wrappedModule[key] = origMethod;
+      wrappedModule[key] = async (...args: unknown[]) => {
+        try {
+          return await origMethod(...args);
+        } catch (err) {
+          const errResp = {
+            success: false,
+            errCode: new ConnectionError(err).code,
+          };
+          showErrorNotification(errResp, getLocale());
+          return errResp;
+        }
+      };
     }
   }
 

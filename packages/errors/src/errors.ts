@@ -8,6 +8,14 @@ export class UnknownError extends BaseError {
   };
 }
 
+export class ConnectionError extends BaseError {
+  code = 'E0001';
+  messageDict = {
+    en: 'Cannot connect to the Refly server, please try again later.',
+    'zh-CN': '无法连接到 Refly 服务器，请稍后重试。',
+  };
+}
+
 export class ParamsError extends BaseError {
   code = 'E1001';
   messageDict = {
@@ -123,6 +131,7 @@ export class ModelNotSupportedError extends BaseError {
 // Create a mapping of error codes to error classes
 const errorMap = {
   E0000: UnknownError,
+  E0001: ConnectionError,
   E1000: ProjectNotFoundError,
   E1001: ParamsError,
   E1002: ResourceNotFoundError,

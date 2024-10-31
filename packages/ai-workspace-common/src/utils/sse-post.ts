@@ -3,6 +3,7 @@ import { BaseResponse, InvokeSkillRequest } from '@refly/openapi-schema';
 import { SkillEvent } from '@refly/common-types';
 import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
 import { extractBaseResp } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { ConnectionError } from '@refly/errors';
 
 export const ssePost = async ({
   controller,
@@ -133,7 +134,7 @@ export const ssePost = async ({
       console.error('Fetch error:', error);
       onError?.({
         success: false,
-        errMsg: error.message,
+        errCode: new ConnectionError(error).code,
       });
     }
   } finally {

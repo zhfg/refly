@@ -5,14 +5,10 @@ import { Message as message } from '@arco-design/web-react';
 export const useFetchDataList = <T = any>({
   fetchData,
   pageSize = 10,
-  showErrMsg = true,
 }: {
   fetchData: (payload: { pageSize: number; page: number }) => Promise<{ success: boolean; data?: T[] }>;
   pageSize?: number;
-  showErrMsg?: boolean;
 }) => {
-  const { t } = useTranslation();
-
   // fetch
   const [dataList, setDataList] = useState<T[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -52,9 +48,6 @@ export const useFetchDataList = <T = any>({
       }
     } catch (err) {
       console.error('fetch data list error', err);
-      if (showErrMsg) {
-        message.error(t('knowledgeLibrary.archive.list.fetchErr'));
-      }
     } finally {
       setIsRequesting(false);
     }
