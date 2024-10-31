@@ -67,6 +67,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
     setMessages: state.setMessages,
     setInvokeParams: state.setInvokeParams,
   }));
+  const messageIntentContext = useChatStore((state) => state.messageIntentContext); // from sendMessage interaction or route jump interaction
 
   const conversationStore = useConversationStore((state) => ({
     currentConversation: state.currentConversation,
@@ -174,8 +175,8 @@ export const AICopilot = memo((props: AICopilotProps) => {
   };
 
   useEffect(() => {
-    if (convId && !isFromSkillJob()) {
-      // handleConvTask(convId);
+    if (convId && !isFromSkillJob() && !messageIntentContext) {
+      handleConvTask(convId);
     }
 
     if (jobId && isFromSkillJob()) {
@@ -185,7 +186,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
     return () => {
       chatStore.setMessages([]);
     };
-  }, [convId, jobId]);
+  }, [convId, jobId, messageIntentContext]);
 
   useResizeCopilot({ containerSelector: 'ai-copilot-container' });
   useDynamicInitContextPanelState(); // 动态根据页面状态更新上下文面板状态
@@ -200,7 +201,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
 
   return (
     <div className="ai-copilot-container">
-      <CopilotChatHeader />
+      <CopilotChatHeader source={source} />
       <div className="ai-copilot-body-container">
         <div
           className="ai-copilot-message-container"
@@ -212,7 +213,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
       </div>
 
       {knowledgeBaseStore?.convModalVisible ? (
-        <ConvListModal title={t('copilot.convListModal.title')} classNames="conv-list-modal" />
+        <ConvListModal source={source} title={t('copilot.convListModal.title')} classNames="conv-list-modal" />
       ) : null}
       {knowledgeBaseStore?.sourceListModalVisible ? (
         <SourceListModal

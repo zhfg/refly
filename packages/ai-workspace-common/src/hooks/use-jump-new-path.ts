@@ -176,6 +176,28 @@ export const useJumpNewPath = () => {
     }
   };
 
+  const jumpToResourceConv = ({
+    resourceId,
+    convId,
+    baseUrl = '',
+    openNewTab = false,
+  }: {
+    resourceId: string;
+    convId: string;
+    baseUrl?: string;
+    openNewTab?: boolean;
+  }) => {
+    searchParams.set('convId', convId);
+    setSearchParams(searchParams);
+    const url = `${baseUrl}/resource/${resourceId}?${searchParams.toString()}`;
+
+    if (openNewTab) {
+      window.open(url, '_blank');
+    } else {
+      navigate(url);
+    }
+  };
+
   const jumpToSoloConv = ({
     convId,
     baseUrl = '',
@@ -199,6 +221,9 @@ export const useJumpNewPath = () => {
     jumpToProject,
     jumpToResource,
     jumpToConv,
+    jumpToProjectConv,
+    jumpToResourceConv,
+    jumpToSoloConv,
     removeKbAndResId,
     removeNoteId,
   };

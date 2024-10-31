@@ -34,7 +34,7 @@ export interface ChatState {
   isGenTitle: boolean;
   isFirstStreamContent: boolean;
 
-  messageIntentContext: MessageIntentContext | undefined;
+  messageIntentContext: MessageIntentContext | undefined; // has messageIntentContext means sendMessage interaction, otherwise means route jump interaction
 
   // context
   invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }; // for selected skill instance from copilot

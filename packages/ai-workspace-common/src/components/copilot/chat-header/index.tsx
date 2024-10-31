@@ -24,13 +24,17 @@ import Logo from '@/assets/logo.svg';
 import './index.scss';
 import { useTranslation } from 'react-i18next';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 interface CopilotChatHeaderProps {
+  source: MessageIntentSource;
   disable?: boolean;
 }
 
 export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
-  const { disable } = props;
+  const { disable, source } = props;
+  const { jumpToConv } = useJumpNewPath();
 
   const { t } = useTranslation();
 
@@ -82,8 +86,14 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
   }));
 
   const handleNewTempConv = () => {
-    searchParams.delete('convId');
-    setSearchParams(searchParams);
+    if ([MessageIntentSource.ConversationList, MessageIntentSource.ConversationDetail].includes(source)) {
+      jumpToConv({
+        convId: 'new',
+      });
+    } else {
+      searchParams.delete('convId');
+      setSearchParams(searchParams);
+    }
 
     conversationStore.resetState();
     chatStore.resetState();

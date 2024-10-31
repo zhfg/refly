@@ -6,21 +6,25 @@ import './index.scss';
 
 // 自定义组件
 import { ConvList } from '@refly-packages/ai-workspace-common/components/conv-list';
-import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
+import { useNavigate, useParams, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 interface ConvListModalProps {
   title: string;
   classNames: string;
   placement?: 'bottom' | 'left' | 'right' | 'top';
+  source: MessageIntentSource;
 }
 
 export const ConvListModal = (props: ConvListModalProps) => {
   const { t } = useTranslation();
+  const { source } = props;
   const knowledgeBaseStore = useKnowledgeBaseStore();
-  const { jumpToConv } = useJumpNewPath();
+  const params = useParams();
+  const { jumpToProjectConv, jumpToResourceConv, jumpToSoloConv } = useJumpNewPath();
 
   return (
     <div style={{ width: '100%' }} className="conv-list-modal-container">
@@ -53,11 +57,23 @@ export const ConvListModal = (props: ConvListModalProps) => {
       >
         <ConvList
           classNames={props.classNames}
-          handleConvItemClick={(convId, projectId) => {
-            jumpToConv({
-              convId,
-              projectId,
-            });
+          handleConvItemClick={(convId) => {
+            if (source === MessageIntentSource.Project) {
+              const projectId = params.projectId;
+              jumpToProjectConv({
+                convId,
+                projectId,
+              });
+            } else if (source === MessageIntentSource.Resource) {
+              jumpToResourceConv({
+                resourceId: params.resId,
+                convId,
+              });
+            } else if (source === MessageIntentSource.ConversationDetail) {
+              jumpToSoloConv({
+                convId,
+              });
+            }
             knowledgeBaseStore.updateConvModalVisible(false);
           }}
         />

@@ -2,7 +2,7 @@ import { AICopilot } from "@refly-packages/ai-workspace-common/components/copilo
 import { MessageIntentSource } from "@refly-packages/ai-workspace-common/types/copilot"
 
 const ConvItem = () => {
-  return <AICopilot source={MessageIntentSource.Conversation} />
+  return <AICopilot source={MessageIntentSource.ConversationDetail} />
 }
 
 export default ConvItem

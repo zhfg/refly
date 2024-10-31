@@ -57,7 +57,7 @@ const KnowledgeLibraryLayout = () => {
         <div className="workspace-inner-container">
           <div className="workspace-panel-container">
             <div className="workspace-content-panel">
-              <AICopilot source={MessageIntentSource.Conversation} />
+              <AICopilot source={MessageIntentSource.Project} />
             </div>
           </div>
         </div>

@@ -15,6 +15,8 @@ import { IconCanvas } from '@refly-packages/ai-workspace-common/components/commo
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { CanvasIntentType } from '@refly/common-types';
 import './render.scss';
+import { safeParseJSON } from '@refly-packages/utils/parse';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 interface CanvasProps extends MarkdownElementProps {
   identifier: string;
@@ -31,20 +33,26 @@ const Render = memo<CanvasProps>(({ identifier, title, type, children, id }) => 
   const str = ((children as string) || '').toString?.();
 
   const [isGenerating] = useMessageStateStore((state) => [state.pending]);
+  const { jumpToProject } = useJumpNewPath();
 
   // canvasContent for render
-  const [isCanvasTagClosed, canvasContent] = useChatStore((s) => {
+  const [isCanvasTagClosed, intentMatcherResult] = useChatStore((s) => {
     const message = chatSelectors.getMessageById(id)(s);
-    const canvasContent = getCanvasContent(message?.content as string);
+    const intentMatcherResult = safeParseJSON(message?.structuredData?.intentMatcher);
 
-    return [isReflyCanvasClosed(message?.content), canvasContent];
+    return [isReflyCanvasClosed(message?.content), intentMatcherResult];
   });
 
-  // TODO: 需要处理单独的 message id，只打开对应的 model，而且只会有一个
   const openCanvas = () => {
-    // 这里直接打开 canvas
-    // openArtifact({ id, identifier, title, type });
-    // setOpen(true);
+    jumpToProject(
+      {
+        projectId: intentMatcherResult?.projectId,
+      },
+      {
+        convId: intentMatcherResult?.convId,
+        canvasId: intentMatcherResult?.canvasId,
+      },
+    );
   };
 
   const saveMetadata = () => {
