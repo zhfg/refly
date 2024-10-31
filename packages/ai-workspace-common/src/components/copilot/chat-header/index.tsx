@@ -24,13 +24,21 @@ import Logo from '@/assets/logo.svg';
 import './index.scss';
 import { useTranslation } from 'react-i18next';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
+import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
 
 interface CopilotChatHeaderProps {
+  source: MessageIntentSource;
   disable?: boolean;
 }
 
 export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
-  const { disable } = props;
+  const { disable, source } = props;
+  const { jumpToConv } = useJumpNewPath();
+  const { ensureConversationExist } = useBuildThreadAndRun();
+  const { projectId } = useProjectContext();
 
   const { t } = useTranslation();
 
@@ -82,12 +90,24 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
   }));
 
   const handleNewTempConv = () => {
-    searchParams.delete('convId');
-    setSearchParams(searchParams);
-
     conversationStore.resetState();
     chatStore.resetState();
     messageStateStore.resetState();
+
+    if ([MessageIntentSource.ConversationList, MessageIntentSource.ConversationDetail].includes(source)) {
+      jumpToConv({
+        convId: 'new',
+        state: {
+          navigationContext: {
+            shouldFetchDetail: false,
+            source,
+          },
+        },
+      });
+    } else {
+      searchParams.delete('convId');
+      setSearchParams(searchParams);
+    }
   };
 
   const handleNewOpenConvList = () => {

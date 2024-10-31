@@ -41,8 +41,8 @@ export const useBuildTask = () => {
   const chatStore = useChatStoreShallow((state) => ({
     setMessages: state.setMessages,
     setIntentMatcher: state.setIntentMatcher,
-    setNowStreamCanvasContent: state.setNowStreamCanvasContent,
-    setIsFirstStreamEditCanvasContent: state.setIsFirstStreamEditCanvasContent,
+    setIsFirstStreamContent: state.setIsFirstStreamContent,
+    setMessageIntentContext: state.setMessageIntentContext,
   }));
   const messageStateStore = useMessageStateStoreShallow((state) => ({
     setMessageState: state.setMessageState,
@@ -102,11 +102,10 @@ export const useBuildTask = () => {
       });
 
       chatStore.setMessages(messages.concat(replyMsg));
-
-      // reset last stream state
-      chatStore.setNowStreamCanvasContent('');
-      chatStore.setIsFirstStreamEditCanvasContent(true);
     }
+
+    // reset last stream state
+    chatStore.setIsFirstStreamContent(true);
   };
 
   const onSkillThoughout = (skillEvent: SkillEvent) => {
@@ -148,11 +147,7 @@ export const useBuildTask = () => {
   };
 
   const onSkillStream = (skillEvent: SkillEvent) => {
-    const {
-      messages = [],
-      nowStreamCanvasContent = '',
-      isFirstStreamEditCanvasContent = true,
-    } = useChatStore.getState();
+    const { messages = [], isFirstStreamContent = true } = useChatStore.getState();
     const { pendingFirstToken } = useMessageStateStore.getState();
     const lastRelatedMessage = findLastRelatedMessage(messages, skillEvent);
     const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
@@ -163,7 +158,6 @@ export const useBuildTask = () => {
 
     if (!lastRelatedMessage.content) {
       lastRelatedMessage.content = '';
-      chatStore.setNowStreamCanvasContent('');
     }
 
     // 获取更新前的 canvas 内容
@@ -176,15 +170,20 @@ export const useBuildTask = () => {
     const currentCanvasContent = getCanvasContent(lastRelatedMessage.content);
 
     // 计算增量内容
-    const incrementalContent = currentCanvasContent.slice(prevCanvasContent.length);
+    let incrementalContent = currentCanvasContent.slice(prevCanvasContent.length);
+    if (incrementalContent?.length > 0) {
+      incrementalContent = incrementalContent
+        .replace(/<\/?reflyCanvas[^>]*>/g, '')
+        .replace(/&lt;\/reflyCanvas/g, '')
+        .replace(/&lt;reflyCanvas&gt;/g, '')
+        .replace(/&lt;\/reflyCanvas&gt;/g, '');
+    }
 
     // 处理 Citation 的序列号
     lastRelatedMessage.content = markdownCitationParse(lastRelatedMessage.content);
-    const newNowStreamCanvasContent = nowStreamCanvasContent + incrementalContent;
 
     messages[lastRelatedMessageIndex] = lastRelatedMessage;
     chatStore.setMessages(messages);
-    chatStore.setNowStreamCanvasContent(newNowStreamCanvasContent);
 
     if (pendingFirstToken && lastRelatedMessage.content.trim()) {
       messageStateStore.setMessageState({ pendingFirstToken: false });
@@ -192,18 +191,25 @@ export const useBuildTask = () => {
 
     // 如果是画布内容且有增量内容，发送到编辑器
     const intentMatcher = lastRelatedMessage?.structuredData?.intentMatcher as IntentResult;
-    if (intentMatcher?.type === CanvasIntentType.GenerateCanvas && incrementalContent) {
-      // TODO: 不应该流式的插入内容，而是应该类似事务一样处理，能够看到内容，但是可以一键 undo，以及能够自动处理 markdown 到 tiptap 编辑器转换的渲染，目前没有处理
-      editorEmitter.emit('streamCanvasContent', incrementalContent);
-    } else if (intentMatcher?.type === CanvasIntentType.EditCanvas && incrementalContent) {
-      editorEmitter.emit('streamEditCanvasContent', {
-        isFirst: isFirstStreamEditCanvasContent,
-        content: incrementalContent,
-      });
+    if (
+      [CanvasIntentType.GenerateCanvas, CanvasIntentType.EditCanvas].includes(intentMatcher?.type) &&
+      incrementalContent
+    ) {
+      if (intentMatcher?.type === CanvasIntentType.GenerateCanvas && incrementalContent) {
+        editorEmitter.emit('streamCanvasContent', {
+          isFirst: isFirstStreamContent,
+          content: incrementalContent,
+        });
+      } else if (intentMatcher?.type === CanvasIntentType.EditCanvas && incrementalContent) {
+        editorEmitter.emit('streamEditCanvasContent', {
+          isFirst: isFirstStreamContent,
+          content: incrementalContent,
+        });
+      }
 
-      if (isFirstStreamEditCanvasContent) {
-        const newIsFirstStreamEditCanvasContent = !isFirstStreamEditCanvasContent;
-        chatStore.setIsFirstStreamEditCanvasContent(newIsFirstStreamEditCanvasContent);
+      if (isFirstStreamContent) {
+        const newIsFirstStreamContent = !isFirstStreamContent;
+        chatStore.setIsFirstStreamContent(newIsFirstStreamContent);
       }
     }
   };
@@ -270,6 +276,7 @@ export const useBuildTask = () => {
     lastRelatedMessage.pending = false;
     messages[lastRelatedMessageIndex] = lastRelatedMessage;
     chatStore.setMessages(messages);
+    chatStore.setMessageIntentContext(undefined); // reset message intent context
   };
 
   const buildErrMsgAndAppendToChat = (msg: string) => {

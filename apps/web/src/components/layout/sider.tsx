@@ -45,6 +45,7 @@ import { SiderMenuMoreList } from "@refly-packages/ai-workspace-common/component
 import { useJumpNewPath } from "@refly-packages/ai-workspace-common/hooks/use-jump-new-path"
 import { useRecentsStoreShallow } from "@refly-packages/ai-workspace-common/stores/recents"
 import { useHandleRecents } from "@refly-packages/ai-workspace-common/hooks/use-handle-rencents"
+import { MessageIntentSource } from "@refly-packages/ai-workspace-common/types/copilot"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -458,9 +459,23 @@ export const SiderLayout = () => {
                           jumpToConv({
                             projectId: chat.projectId,
                             convId: chat.convId,
+                            state: {
+                              navigationContext: {
+                                shouldFetchDetail: true,
+                                source: MessageIntentSource.Sider,
+                              },
+                            },
                           })
                         } else if (chat.convId) {
-                          jumpToConv({ convId: chat.convId })
+                          jumpToConv({
+                            convId: chat.convId,
+                            state: {
+                              navigationContext: {
+                                shouldFetchDetail: true,
+                                source: MessageIntentSource.Sider,
+                              },
+                            },
+                          })
                         }
                       }}>
                       {chat.title}

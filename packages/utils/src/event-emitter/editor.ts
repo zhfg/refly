@@ -1,13 +1,23 @@
 import mitt from 'mitt';
 
-export interface InPlaceSendMessagePayload {
-  type: 'inline' | 'block';
-  userInput: string;
-  selection: {
+export type InPlaceEditType = 'inline' | 'block';
+
+export interface CanvasEditConfig {
+  selection?: {
+    beforeHighlight: string;
+    highlightedText: string;
+    afterHighlight: string;
+  };
+  selectedRange?: {
     startIndex: number;
     endIndex: number;
-    selectedMdText: string;
   };
+  inPlaceEditType?: InPlaceEditType;
+}
+
+export interface InPlaceSendMessagePayload {
+  userInput: string;
+  canvasEditConfig?: CanvasEditConfig;
 }
 
 export type Events = {
@@ -15,7 +25,10 @@ export type Events = {
   replaceSelection: string;
   contineInChat: string;
   createNewNote: string;
-  streamCanvasContent: string;
+  streamCanvasContent: {
+    isFirst: boolean;
+    content: string;
+  };
   streamEditCanvasContent: {
     isFirst: boolean;
     content: string;

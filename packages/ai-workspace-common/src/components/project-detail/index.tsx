@@ -9,6 +9,7 @@ import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stor
 
 import './index.scss';
 import { useEffect } from 'react';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 export const ProjectDetail = () => {
   const { projectId } = useParams();
@@ -48,7 +49,7 @@ export const ProjectDetail = () => {
             min={400}
             key="workspace-content-panel-copilot"
           >
-            <AICopilot />
+            <AICopilot source={MessageIntentSource.Project} />
           </Splitter.Panel>
         </Splitter>
       </div>

@@ -6,8 +6,28 @@ import type { ClientChatMessage, SessionItem } from '@refly/common-types';
 import { ModelInfo, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
 import { IntentResult } from '@refly-packages/ai-workspace-common/hooks/use-handle-ai-canvas';
 
+// types
+import type { CanvasEditConfig } from '@refly/utils';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+
 export type ChatMode = 'normal' | 'noContext' | 'wholeSpace';
 export type ChatBehavior = 'askIntentMatch' | 'askFollowUp' | 'askNew';
+
+export interface MessageIntentContext {
+  source: MessageIntentSource;
+  isNewConversation: boolean;
+  canvasEditConfig?: CanvasEditConfig;
+  projectContext?: {
+    projectId: string;
+    canvasId?: string;
+  };
+  resourceContext?: {
+    resourceId?: string; // may sendMessage from resource's copilot
+  };
+  convId?: string;
+  chatMode?: ChatMode;
+  enableWebSearch?: boolean;
+}
 
 export interface ChatState {
   // state
@@ -15,8 +35,9 @@ export interface ChatState {
   sessions: SessionItem[];
   newQAText: string;
   isGenTitle: boolean;
-  nowStreamCanvasContent: string;
-  isFirstStreamEditCanvasContent: boolean;
+  isFirstStreamContent: boolean;
+
+  messageIntentContext: MessageIntentContext | undefined; // has messageIntentContext means sendMessage interaction, otherwise means route jump interaction
 
   // context
   invokeParams?: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }; // for selected skill instance from copilot
@@ -31,9 +52,9 @@ export interface ChatState {
   setMessages: (val: ClientChatMessage[]) => void;
   setIsGenTitle: (val: boolean) => void;
   setNewQAText: (val: string) => void;
-  setNowStreamCanvasContent: (val: string) => void;
-  setIsFirstStreamEditCanvasContent: (val: boolean) => void;
+  setIsFirstStreamContent: (val: boolean) => void;
   setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) => void;
+  setMessageIntentContext: (val: MessageIntentContext) => void;
   setSelectedModel: (val: ModelInfo) => void;
   setModelList: (val: ModelInfo[]) => void;
   setEnableWebSearch: (val: boolean) => void;
@@ -63,8 +84,10 @@ const defaultConfigurableState = {
 export const defaultExtraState = {
   // messages: fakeMessages as any,
   messages: [],
-  nowStreamCanvasContent: '',
-  isFirstStreamEditCanvasContent: true,
+
+  isFirstStreamContent: true,
+  messageIntentContext: undefined,
+
   sessions: [],
   newQAText: '',
   isGenTitle: false,
@@ -90,8 +113,8 @@ export const useChatStore = create<ChatState>()(
         setNewQAText: (val: string) => {
           return set({ newQAText: val });
         },
-        setNowStreamCanvasContent: (val: string) => set({ nowStreamCanvasContent: val }),
-        setIsFirstStreamEditCanvasContent: (val: boolean) => set({ isFirstStreamEditCanvasContent: val }),
+        setIsFirstStreamContent: (val: boolean) => set({ isFirstStreamContent: val }),
+        setMessageIntentContext: (val: MessageIntentContext) => set({ messageIntentContext: val }),
         setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) =>
           set({ invokeParams: val }),
         setSelectedModel: (val: ModelInfo) => set({ selectedModel: val }),

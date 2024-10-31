@@ -1,11 +1,11 @@
-import { memo, useEffect, useState, useRef, useCallback } from 'react';
+import { memo, useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChatMessages } from './chat-messages';
 import { ConvListModal } from './conv-list-modal';
 import { SkillManagementModal } from '@refly-packages/ai-workspace-common/components/skill/skill-management-modal';
 import { CopilotOperationModule } from './copilot-operation-module';
 import { CopilotChatHeader } from './chat-header';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 
 // state
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -22,28 +22,34 @@ import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note
 import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-common/hooks/use-init-context-panel-state';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-
+import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
 // types
-import { CopilotSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { MessageIntentSource, NavigationContext } from '@refly-packages/ai-workspace-common/types/copilot';
 
 import './index.scss';
+import {
+  useNavigationContextStore,
+  useNavigationContextStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/navigation-context';
 
 interface AICopilotProps {
   disable?: boolean;
-  source?: CopilotSource;
+  source: MessageIntentSource;
   jobId?: string;
 }
 
 export const AICopilot = memo((props: AICopilotProps) => {
   const { t } = useTranslation();
   const { disable, jobId, source } = props;
+  const navigate = useNavigate();
+  const setNavigationContext = useNavigationContextStoreShallow((state) => state.setNavigationContext);
 
   const [searchParams] = useSearchParams();
   const queryConvId = searchParams.get('convId');
-
   const { convId: pathConvId } = useParams();
-
   const convId = queryConvId || pathConvId;
+
+  const location = useLocation();
 
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     resourcePanelVisible: state.resourcePanelVisible,
@@ -67,12 +73,14 @@ export const AICopilot = memo((props: AICopilotProps) => {
     setMessages: state.setMessages,
     setInvokeParams: state.setInvokeParams,
   }));
+  const messageStateStore = useMessageStateStore((state) => ({
+    resetState: state.resetState,
+  }));
 
   const conversationStore = useConversationStore((state) => ({
     currentConversation: state.currentConversation,
     resetState: state.resetState,
     setCurrentConversation: state.setCurrentConversation,
-    setIsNewConversation: state.setIsNewConversation,
   }));
 
   const [isFetching, setIsFetching] = useState(false);
@@ -102,10 +110,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
       resizeObserver.disconnect();
     };
   }, [updateOperationModuleHeight]);
-
-  const isFromSkillJob = () => {
-    return source === 'skillJob';
-  };
 
   // ai-note handler
   useAINote(true);
@@ -149,18 +153,32 @@ export const AICopilot = memo((props: AICopilotProps) => {
     chatStore.setMessages(res?.data?.messages || []);
   };
 
-  const handleConvTask = async (convId: string) => {
+  const clearNavigationState = useCallback(() => {
+    // 只清空 state，保持当前 URL 不变
+    navigate(location.pathname + location.search, {
+      replace: true, // 替换当前历史记录
+      state: {}, // 清空 state
+    });
+  }, [location]);
+
+  const handleConvTask = async (convId: string, jobId?: string) => {
+    const navigationContext = useNavigationContextStore.getState().navigationContext;
+    const { shouldFetchDetail } = navigationContext || {};
+    if (navigationContext && !shouldFetchDetail) {
+      setNavigationContext(undefined);
+      return;
+    }
+
     try {
       setIsFetching(true);
-      const { newQAText, invokeParams } = useChatStore.getState();
-      const { isNewConversation } = useConversationStore.getState();
-
-      // 新会话，需要手动构建第一条消息
-      if (isNewConversation && convId) {
-        // 更换成基于 task 的消息模式，核心是基于 task 来处理
-        runSkill(newQAText, invokeParams);
-      } else if (convId) {
+      if (convId && convId !== 'new' && source !== MessageIntentSource.SkillJob) {
         await handleGetThreadMessages(convId);
+      } else if (jobId && convId !== 'new' && source === MessageIntentSource.SkillJob) {
+        await getThreadMessagesByJobId(jobId);
+      } else if (!convId && !jobId) {
+        conversationStore.resetState();
+        chatStore.resetState();
+        messageStateStore.resetState();
       }
     } catch (err) {
       console.log('thread error');
@@ -168,22 +186,15 @@ export const AICopilot = memo((props: AICopilotProps) => {
 
     setIsFetching(false);
 
-    // reset state
-    conversationStore.setIsNewConversation(false);
     chatStore.setInvokeParams({});
+    setNavigationContext(undefined);
   };
 
   useEffect(() => {
-    if (convId && !isFromSkillJob()) {
-      // handleConvTask(convId);
-    }
-
-    if (jobId && isFromSkillJob()) {
-      getThreadMessagesByJobId(jobId);
-    }
+    handleConvTask(convId, jobId);
 
     return () => {
-      chatStore.setMessages([]);
+      // chatStore.setMessages([]);
     };
   }, [convId, jobId]);
 
@@ -200,7 +211,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
 
   return (
     <div className="ai-copilot-container">
-      <CopilotChatHeader />
+      <CopilotChatHeader source={source} />
       <div className="ai-copilot-body-container">
         <div
           className="ai-copilot-message-container"
@@ -212,7 +223,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
       </div>
 
       {knowledgeBaseStore?.convModalVisible ? (
-        <ConvListModal title={t('copilot.convListModal.title')} classNames="conv-list-modal" />
+        <ConvListModal source={source} title={t('copilot.convListModal.title')} classNames="conv-list-modal" />
       ) : null}
       {knowledgeBaseStore?.sourceListModalVisible ? (
         <SourceListModal

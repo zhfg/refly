@@ -15,6 +15,7 @@ import { MdOutlineArrowBackIos } from 'react-icons/md';
 import { HiOutlineSearch } from 'react-icons/hi';
 
 import './index.scss';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 export const ResourceDetail2 = () => {
   const { t } = useTranslation();
@@ -37,7 +38,7 @@ export const ResourceDetail2 = () => {
     return (
       <div className="w-full pt-2 relative flex items-center resource-detail-top text-[#6F6F6F]">
         <div
-          className="pl-3 flex items-center whitespace-nowrap cursor-pointer"
+          className="flex items-center pl-3 whitespace-nowrap cursor-pointer"
           onClick={() => {
             navigate('/library?tab=resource');
           }}
@@ -90,7 +91,7 @@ export const ResourceDetail2 = () => {
             min={400}
             key="workspace-content-panel-copilot"
           >
-            <AICopilot />
+            <AICopilot source={MessageIntentSource.Resource} />
           </Splitter.Panel>
         </Splitter>
       </div>

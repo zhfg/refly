@@ -390,11 +390,22 @@ export type DynamicConfigValue = {
   /**
    * Config value
    */
-  value: string | number | boolean | Array<string>;
+  value:
+    | string
+    | number
+    | boolean
+    | Array<string>
+    | {
+        [key: string]: unknown;
+      };
   /**
    * Config display value
    */
   displayValue: string;
+  /**
+   * The contexts in which the requirement applies
+   */
+  configScope?: ConfigScope;
 };
 
 /**

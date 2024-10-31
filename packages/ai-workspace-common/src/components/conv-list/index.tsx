@@ -18,10 +18,11 @@ import './index.scss';
 // components
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 interface ConvListProps {
   classNames: string;
-  handleConvItemClick: (convId: string, projectId?: string) => void;
+  handleConvItemClick: (convId: string) => void;
 }
 
 export const ConvList = (props: ConvListProps) => {
@@ -118,7 +119,7 @@ export const ConvList = (props: ConvListProps) => {
           className="thread-library-list-item"
           actionLayout="vertical"
           onClick={() => {
-            props.handleConvItemClick(item?.convId, item?.projectId);
+            props.handleConvItemClick(item?.convId);
           }}
           actions={[
             <span key={2} className="flex items-center conv-action-list-item">

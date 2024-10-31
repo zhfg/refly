@@ -507,12 +507,20 @@ export const $DynamicConfigValue = {
             type: 'string',
           },
         },
+        {
+          type: 'object',
+          additionalProperties: true,
+        },
       ],
       description: 'Config value',
     },
     displayValue: {
       type: 'string',
       description: 'Config display value',
+    },
+    configScope: {
+      description: 'The contexts in which the requirement applies',
+      $ref: '#/components/schemas/ConfigScope',
     },
   },
 } as const;

@@ -16,7 +16,7 @@ import { ConfigManager } from './config-manager';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
-import { ChatMode, useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { ChatMode, useChatStore, MessageIntentContext } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 // hooks
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
@@ -24,24 +24,25 @@ import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/co
 import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
 
 // types
-import { CopilotSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { editorEmitter, InPlaceSendMessagePayload } from '@refly-packages/utils/event-emitter/editor';
 import { MarkType } from '@refly/common-types';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 interface CopilotInputModuleProps {
-  source?: CopilotSource;
+  source: MessageIntentSource;
 }
 
 const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, CopilotInputModuleProps> = (props, ref) => {
   const { source } = props;
   const { t } = useTranslation();
-  const { updateCurrentSelectedMarks } = useContextPanelStore((state) => ({
-    updateCurrentSelectedMarks: state.updateCurrentSelectedMarks,
-  }));
 
   // stores
   const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
+  }));
+  const chatStore = useChatStore((state) => ({
+    setMessageIntentContext: state.setMessageIntentContext,
   }));
 
   // hooks
@@ -56,15 +57,40 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
 
   const handleSendMessage = (chatMode: ChatMode, userInput?: string) => {
     const tplConfig = form?.getFieldValue('tplConfig');
+    const { messageIntentContext, messages = [], enableWebSearch } = useChatStore.getState();
+    const { currentSelectedMarks } = useContextPanelStore.getState();
+
+    const currentCanvas = currentSelectedMarks?.find(
+      (mark) => (mark.type as MarkType) === 'canvas' && mark.isCurrentContext,
+    );
+    const currentResource = currentSelectedMarks?.find(
+      (mark) => (mark.type as MarkType) === 'resource' && mark.isCurrentContext,
+    );
+
     // TODO: later may add more source
-    const forceNewConv = [CopilotSource.HomePage].includes(source);
+    const forceNewConv = [MessageIntentSource.HomePage, MessageIntentSource.Search].includes(source);
+
+    const newMessageIntentContext: Partial<MessageIntentContext> = {
+      ...(messageIntentContext || {}),
+      source: messageIntentContext?.source || source, // may edit from other side
+      isNewConversation: messageIntentContext?.isNewConversation || forceNewConv,
+      projectContext: {
+        projectId,
+        canvasId: currentCanvas?.entityId || currentCanvas?.id,
+      },
+      resourceContext: {
+        resourceId: currentResource?.entityId || currentResource?.id,
+      },
+      chatMode,
+      enableWebSearch,
+    };
+
+    chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
 
     sendChatMessage({
-      chatMode,
-      projectId,
       tplConfig,
-      forceNewConv,
       userInput,
+      messageIntentContext: newMessageIntentContext as MessageIntentContext,
     });
   };
 
@@ -72,36 +98,25 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
     buildShutdownTaskAndGenResponse();
   };
 
-  const handleInPlaceSendMessage = (data: InPlaceSendMessagePayload) => {
-    const { type, userInput, selection } = data;
-    let { currentSelectedMarks = [] } = useContextPanelStore.getState();
-    const currentCanvas = currentSelectedMarks.find(
-      (item) => item.isCurrentContext && (item.type as MarkType) === 'canvas',
-    );
+  const handleInPlaceEditSendMessage = (data: InPlaceSendMessagePayload) => {
+    const { canvasEditConfig, userInput } = data;
+    const { messageIntentContext } = useChatStore.getState();
 
-    currentCanvas.metadata = {
-      ...(currentCanvas.metadata || {}),
-      selection: {
-        beforeHighlight: '',
-        highlightedText: selection.selectedMdText,
-        afterHighlight: '',
-      },
-      selectedRange: {
-        startIndex: selection.startIndex,
-        endIndex: selection.endIndex,
-      },
-      inPlaceEditType: type,
+    const newMessageIntentContext: Partial<MessageIntentContext> = {
+      ...(messageIntentContext || {}),
+      canvasEditConfig,
     };
 
-    updateCurrentSelectedMarks(currentSelectedMarks);
+    chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
+
     handleSendMessage('normal', userInput);
   };
 
   useEffect(() => {
-    editorEmitter.on('inPlaceSendMessage', handleInPlaceSendMessage);
+    editorEmitter.on('inPlaceSendMessage', handleInPlaceEditSendMessage);
 
     return () => {
-      editorEmitter.off('inPlaceSendMessage', handleInPlaceSendMessage);
+      editorEmitter.off('inPlaceSendMessage', handleInPlaceEditSendMessage);
     };
   }, []);
   useEffect(() => {
