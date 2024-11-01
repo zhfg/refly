@@ -57,7 +57,7 @@ export const concatMergedContextToStr = (mergedContext: {
   }
 
   if (contextStr?.length > 0) {
-    contextStr = `<Context>${contextStr}</Context>`;
+    contextStr = `<context>${contextStr}</context>`;
   }
 
   return contextStr;

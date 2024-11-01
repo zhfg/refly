@@ -1,5 +1,3 @@
-import { HumanMessage, SystemMessage, BaseMessage } from '@langchain/core/messages';
-
 export const buildNoContextCommonQnASystemPrompt = (locale: string) => {
   return `You are an AI assistant developed by Refly. Your task is to provide helpful, accurate, and concise information to users' queries.
 
@@ -134,38 +132,4 @@ ${originalQuery}
 ## Rewritten User Query
 ${rewrittenQuery}
 `;
-};
-
-export const buildFinalRequestMessages = ({
-  locale,
-  chatHistory,
-  messages,
-  needPrepareContext,
-  context,
-  originalQuery,
-  rewrittenQuery,
-}: {
-  locale: string;
-  chatHistory: BaseMessage[];
-  messages: BaseMessage[];
-  needPrepareContext: boolean;
-  context: string;
-  originalQuery: string;
-  rewrittenQuery: string;
-}) => {
-  const systemPrompt = buildCommonQnASystemPrompt(locale, needPrepareContext);
-  const contextPrompt = needPrepareContext ? `## Context \n ${context}` : '';
-  const userPrompt = buildCommonQnAUserPrompt({ originalQuery, rewrittenQuery });
-
-  // TODO: last check for token limit
-
-  const requestMessages = [
-    new SystemMessage(systemPrompt),
-    ...chatHistory,
-    ...messages, // TODO: for refractor scheduler to agent use case
-    ...(needPrepareContext ? [new HumanMessage(contextPrompt)] : []),
-    new HumanMessage(userPrompt),
-  ];
-
-  return requestMessages;
 };
