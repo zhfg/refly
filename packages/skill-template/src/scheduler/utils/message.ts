@@ -2,7 +2,16 @@ import { HumanMessage, SystemMessage, BaseMessage } from '@langchain/core/messag
 
 export interface SkillPromptModule {
   buildSystemPrompt: (locale: string, needPrepareContext: boolean) => string;
-  buildUserPrompt: ({ originalQuery, rewrittenQuery }: { originalQuery: string; rewrittenQuery: string }) => string;
+  buildContextUserPrompt: (context: string, needPrepareContext: boolean) => string;
+  buildUserPrompt: ({
+    originalQuery,
+    rewrittenQuery,
+    locale,
+  }: {
+    originalQuery: string;
+    rewrittenQuery: string;
+    locale: string;
+  }) => string;
 }
 
 export const buildFinalRequestMessages = ({
@@ -25,8 +34,8 @@ export const buildFinalRequestMessages = ({
   rewrittenQuery: string;
 }) => {
   const systemPrompt = module.buildSystemPrompt(locale, needPrepareContext);
-  const contextPrompt = needPrepareContext ? `## Context \n ${context}` : '';
-  const userPrompt = module.buildUserPrompt({ originalQuery, rewrittenQuery });
+  const contextUserPrompt = needPrepareContext ? module.buildContextUserPrompt(context, needPrepareContext) : '';
+  const userPrompt = module.buildUserPrompt({ originalQuery, rewrittenQuery, locale });
 
   // TODO: last check for token limit
 
@@ -34,7 +43,7 @@ export const buildFinalRequestMessages = ({
     new SystemMessage(systemPrompt),
     ...chatHistory,
     ...messages, // TODO: for refractor scheduler to agent use case
-    ...(needPrepareContext ? [new HumanMessage(contextPrompt)] : []),
+    ...(needPrepareContext ? [new HumanMessage(contextUserPrompt)] : []),
     new HumanMessage(userPrompt),
   ];
 

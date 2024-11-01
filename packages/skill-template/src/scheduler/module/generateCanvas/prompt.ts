@@ -169,7 +169,7 @@ This technical overview successfully demonstrates how the XR-5000's cutting-edge
 </example>
 `;
 
-export const buildGenerateCanvasCommonPrompt = (example: string) => `
+export const buildGenerateCanvasCommonPrompt = (example: string, locale: string) => `
 ## Core Capabilities
 - Long-form content generation
 - Document structure optimization
@@ -218,10 +218,10 @@ The thinking process should be wrapped in reflyThinking tags:
 ## Important Notes
 1. The <response> tags in examples are for demonstration purposes only
 2. Your actual response should only include:
-   - Initial content analysis (optional)
+   - Initial content analysis 
    - <reflyThinking> section
    - <reflyCanvas> section
-   - Brief summary (optional)
+   - Brief summary
 
 2. Content Generation:
 
@@ -243,6 +243,7 @@ ${example}
 5. Ensure minimum content length of 2000 words
 6. Keep XML blocks properly formatted
 7. Ensure XML blocks are properly separated in the markdown structure
+8. Remember to generate all content in ${locale} while preserving technical terms, including initial analysis, thinking process, content modification, and brief summary
 `;
 
 export const buildNoContextGenerateCanvasPrompt = (locale: string) => `
@@ -268,7 +269,7 @@ Professional content creation assistant focused on generating high-quality, deta
 5. Include relevant examples and explanations
 6. Structure content logically with clear sections
 
-${buildGenerateCanvasCommonPrompt(noContextExamples)}
+${buildGenerateCanvasCommonPrompt(noContextExamples, locale)}
 `;
 
 const buildContextualGenerateCanvasPrompt = (locale: string) => `
@@ -347,7 +348,7 @@ Important Citation Rules:
 4. Maintain natural flow while incorporating citations
 5. Ensure all factual claims are properly cited
 
-${buildGenerateCanvasCommonPrompt(contextualExamples)}
+${buildGenerateCanvasCommonPrompt(contextualExamples, locale)}
 
 ## Additional Guidelines
 1. Use provided context to enrich your content generation
@@ -370,13 +371,17 @@ export const buildGenerateCanvasSystemPrompt = (locale: string, needPrepareConte
 export const buildGenerateCanvasUserPrompt = ({
   originalQuery,
   rewrittenQuery,
+  locale,
 }: {
   originalQuery: string;
   rewrittenQuery: string;
+  locale: string;
 }) => {
   if (originalQuery === rewrittenQuery) {
     return `## User Query
      ${originalQuery}
+
+     Remember to generate all content in ${locale} while preserving technical terms
      `;
   }
 
@@ -389,12 +394,19 @@ export const buildGenerateCanvasUserPrompt = ({
  ## Important Notes
  1. The <response> tags in examples are for demonstration purposes only
  2. Your actual response should only include:
-    - Initial content analysis (optional)
+    - Initial content analysis
     - <reflyThinking> section
     - <reflyCanvas> section
-    - Brief summary (optional)
+    - Brief summary
  3. Use the citation format [citation:x] at the end of each sentence or paragraph that references information from the context, where x is the citation index provided in the context.
  4. If a sentence or paragraph draws from multiple sources, list all applicable citations, like [citation:3][citation:5].
  5. Keep minimum content length of 2000 words
+ 6. Remember to generate all content in ${locale} while preserving technical terms
  `;
 };
+
+export const buildGenerateCanvasContextUserPrompt = (context: string) => `
+<context>
+${context}
+</context>
+`;

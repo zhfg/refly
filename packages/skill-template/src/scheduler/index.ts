@@ -477,6 +477,7 @@ Please generate the summary based on these requirements and offer suggestions fo
     const module = {
       buildSystemPrompt: generateCanvas.buildGenerateCanvasSystemPrompt,
       buildUserPrompt: generateCanvas.buildGenerateCanvasUserPrompt,
+      buildContextUserPrompt: generateCanvas.buildGenerateCanvasContextUserPrompt,
     };
     const { requestMessages } = await this.commonPreprocess(state, config, module);
 
@@ -614,16 +615,14 @@ Please generate the summary based on these requirements and offer suggestions fo
       maxTokens: 4096,
     });
 
-    // Prepare prompts with selected content context based on edit type
-    const editCanvasUserPrompt = editCanvas.editCanvasUserPrompt(inPlaceEditType, originalQuery, highlightSelection);
-    const editCanvasContext = editCanvas.editCanvasContext(inPlaceEditType, currentCanvas.canvas, highlightSelection);
+    // Get module based on edit type
+    const module: SkillPromptModule = editCanvas.getEditCanvasModule(inPlaceEditType, {
+      canvas: currentCanvas.canvas,
+      selectedContent: highlightSelection,
+    });
 
-    const requestMessages = [
-      new SystemMessage(editCanvas.editCanvasSystemPrompt(inPlaceEditType)),
-      ...chatHistory,
-      new HumanMessage(editCanvasContext),
-      new HumanMessage(editCanvasUserPrompt),
-    ];
+    // Prepare prompts using module functions
+    const { requestMessages } = await this.commonPreprocess(state, config, module);
 
     try {
       const responseMessage = await model.invoke(requestMessages, {
@@ -734,6 +733,7 @@ Please generate the summary based on these requirements and offer suggestions fo
     // common preprocess
     const module = {
       buildSystemPrompt: commonQnA.buildCommonQnASystemPrompt,
+      buildContextUserPrompt: commonQnA.buildCommonQnAContextUserPrompt,
       buildUserPrompt: commonQnA.buildCommonQnAUserPrompt,
     };
     const { requestMessages } = await this.commonPreprocess(state, config, module);

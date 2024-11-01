@@ -39,25 +39,22 @@ export const concatMergedContextToStr = (mergedContext: {
 }) => {
   const { mentionedContext, lowerPriorityContext, webSearchSources } = mergedContext || {};
   let contextStr = '';
+  let currentIndex = 1; // Start index
 
-  const webSearchContextStr = concatContextToStr({ webSearchSources });
-  const mentionedContextStr = concatContextToStr(mentionedContext);
-  const lowerPriorityContextStr = concatContextToStr(lowerPriorityContext);
+  const webSearchContexConcatRes = concatContextToStr({ webSearchSources }, currentIndex);
+  const mentionedContextConcatRes = concatContextToStr(mentionedContext, webSearchContexConcatRes.nextIndex);
+  const lowerPriorityContextConcatRes = concatContextToStr(lowerPriorityContext, mentionedContextConcatRes.nextIndex);
 
-  if (webSearchContextStr?.length > 0) {
-    contextStr += `\n\n<WebSearchContext>${webSearchContextStr}</WebSearchContext>\n\n`;
+  if (webSearchContexConcatRes.contextStr?.length > 0) {
+    contextStr += `\n\n<WebSearchContext>\n${webSearchContexConcatRes.contextStr}\n</WebSearchContext>\n\n`;
   }
 
-  if (mentionedContextStr?.length > 0) {
-    contextStr += `\n\n<MentionedContext>${mentionedContextStr}</MentionedContext>\n\n`;
+  if (mentionedContextConcatRes.contextStr?.length > 0) {
+    contextStr += `\n\n<MentionedContext>\n${mentionedContextConcatRes.contextStr}\n</MentionedContext>\n\n`;
   }
 
-  if (lowerPriorityContextStr?.length > 0) {
-    contextStr += `\n\n<OtherContext>${lowerPriorityContextStr}</OtherContext>\n\n`;
-  }
-
-  if (contextStr?.length > 0) {
-    contextStr = `<context>${contextStr}</context>`;
+  if (lowerPriorityContextConcatRes.contextStr?.length > 0) {
+    contextStr += `\n\n<OtherContext>\n${lowerPriorityContextConcatRes.contextStr}\n</OtherContext>\n\n`;
   }
 
   return contextStr;
@@ -90,11 +87,11 @@ export const flattenMergedContextToSources = (mergedContext: {
 
 // TODO: should replace id with `type-index` for better llm extraction
 // citationIndex for each context item is used for LLM to cite the context item in the final answer
-export const concatContextToStr = (context: Partial<IContext>) => {
+export const concatContextToStr = (context: Partial<IContext>, startIndex: number = 1) => {
   const { contentList = [], resources = [], canvases = [], webSearchSources = [] } = context || {};
 
   let contextStr = '';
-  let index = 1; // start from 1 to avoid 0 index issue in citation
+  let index = startIndex; // Use passed in startIndex
 
   if (webSearchSources.length > 0) {
     // contextStr += 'Following are the web search results: \n';
@@ -125,7 +122,7 @@ export const concatContextToStr = (context: Partial<IContext>) => {
       })
       .join('\n\n');
 
-    contextStr += `\n\n<UserSelectedContent>${contentStr}</UserSelectedContent>\n\n`;
+    contextStr += `\n\n<UserSelectedContent>\n${contentStr}\n</UserSelectedContent>\n\n`;
   }
 
   if (canvases.length > 0) {
@@ -138,7 +135,7 @@ export const concatContextToStr = (context: Partial<IContext>) => {
       .map((n) => concatCanvas(n.canvas?.canvasId!, n.canvas?.title!, n.canvas?.content!))
       .join('\n\n');
 
-    contextStr += `\n\n<KnowledgeBaseCanvases>${canvasStr}</KnowledgeBaseCanvases>\n\n`;
+    contextStr += `\n\n<KnowledgeBaseCanvases>\n${canvasStr}\n</KnowledgeBaseCanvases>\n\n`;
   }
 
   if (resources.length > 0) {
@@ -153,10 +150,10 @@ export const concatContextToStr = (context: Partial<IContext>) => {
       )
       .join('\n');
 
-    contextStr += `\n\n<KnowledgeBaseResources>${resourceStr}</KnowledgeBaseResources>\n\n`;
+    contextStr += `\n\n<KnowledgeBaseResources>\n${resourceStr}\n</KnowledgeBaseResources>\n\n`;
   }
 
-  return contextStr;
+  return { contextStr, nextIndex: index };
 };
 
 export const summarizeContext = (context: IContext, maxContextTokens: number): string => {
@@ -175,9 +172,9 @@ export const summarizeContext = (context: IContext, maxContextTokens: number): s
   const truncatedContext = truncateContext(previewedContext, maxContextTokens);
 
   // contentPreview just about 100~150 tokens, cannot overflow
-  const contextStr = concatContextToStr(truncatedContext);
+  const contextConcatRes = concatContextToStr(truncatedContext, 1);
 
-  return contextStr || 'no available context';
+  return contextConcatRes.contextStr || 'no available context';
 };
 
 export const summarizeChatHistory = (messages: BaseMessage[]): string => {

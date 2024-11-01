@@ -116,13 +116,17 @@ export const buildCommonQnASystemPrompt = (locale: string, needPrepareContext: b
 export const buildCommonQnAUserPrompt = ({
   originalQuery,
   rewrittenQuery,
+  locale,
 }: {
   originalQuery: string;
   rewrittenQuery: string;
+  locale: string;
 }) => {
   if (originalQuery === rewrittenQuery) {
     return `## User Query
     ${originalQuery}
+
+    Remember to generate all content in ${locale} while preserving technical terms
     `;
   }
 
@@ -131,5 +135,13 @@ ${originalQuery}
 
 ## Rewritten User Query
 ${rewrittenQuery}
+
+Remember to generate all content in ${locale} while preserving technical terms
 `;
 };
+
+export const buildCommonQnAContextUserPrompt = (context: string) => `
+<context>
+${context}
+</context>
+`;
