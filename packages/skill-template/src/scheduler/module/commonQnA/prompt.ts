@@ -1,6 +1,6 @@
 import { HumanMessage, SystemMessage, BaseMessage } from '@langchain/core/messages';
 
-export const buildNoContextSchedulerSystemPrompt = (locale: string) => {
+export const buildNoContextCommonQnASystemPrompt = (locale: string) => {
   return `You are an AI assistant developed by Refly. Your task is to provide helpful, accurate, and concise information to users' queries.
 
 Guidelines:
@@ -19,7 +19,7 @@ When appropriate, inform users about your main capabilities:
 Your goal is to provide clear, accurate, and helpful responses to the user's questions, while also guiding them on how to best utilize your capabilities.`;
 };
 
-export const buildContextualSchedulerSystemPrompt = (locale: string) => {
+export const buildContextualCommonQnASystemPrompt = (locale: string) => {
   const systemPrompt = `You are an advanced AI assistant developed by Refly, specializing in knowledge management, reading comprehension, and answering questions based on context. Your core mission is to help users effectively understand and utilize information.
 
   ## Role and Capabilities:
@@ -108,14 +108,14 @@ export const buildContextualSchedulerSystemPrompt = (locale: string) => {
   return systemPrompt;
 };
 
-export const buildSchedulerSystemPrompt = (locale: string, needPrepareContext: boolean) => {
+export const buildCommonQnASystemPrompt = (locale: string, needPrepareContext: boolean) => {
   if (!needPrepareContext) {
-    return buildNoContextSchedulerSystemPrompt(locale);
+    return buildNoContextCommonQnASystemPrompt(locale);
   }
-  return buildContextualSchedulerSystemPrompt(locale);
+  return buildContextualCommonQnASystemPrompt(locale);
 };
 
-export const buildSchedulerUserPrompt = ({
+export const buildCommonQnAUserPrompt = ({
   originalQuery,
   rewrittenQuery,
 }: {
@@ -153,9 +153,9 @@ export const buildFinalRequestMessages = ({
   originalQuery: string;
   rewrittenQuery: string;
 }) => {
-  const systemPrompt = buildSchedulerSystemPrompt(locale, needPrepareContext);
+  const systemPrompt = buildCommonQnASystemPrompt(locale, needPrepareContext);
   const contextPrompt = needPrepareContext ? `## Context \n ${context}` : '';
-  const userPrompt = buildSchedulerUserPrompt({ originalQuery, rewrittenQuery });
+  const userPrompt = buildCommonQnAUserPrompt({ originalQuery, rewrittenQuery });
 
   // TODO: last check for token limit
 

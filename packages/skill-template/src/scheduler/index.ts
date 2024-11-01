@@ -18,7 +18,6 @@ import { createSkillInventory } from '../inventory';
 import { GraphState, QueryAnalysis, IContext } from './types';
 // utils
 import { prepareContext } from './utils/context';
-import { buildFinalRequestMessages } from './utils/prompt';
 import { analyzeQueryAndContext, preprocessQuery } from './utils/queryRewrite';
 import { truncateMessages } from './utils/truncator';
 import {
@@ -36,6 +35,7 @@ import * as canvasIntentMatcher from './module/canvasIntentMatcher';
 import * as generateCanvas from './module/generateCanvas';
 import * as rewriteCanvas from './module/rewriteCanvas';
 import * as editCanvas from './module/editCanvas';
+import * as commonQnA from './module/commonQnA';
 
 // types
 import { HighlightSelection, SelectedRange } from './module/editCanvas/types';
@@ -572,7 +572,7 @@ Please generate the summary based on these requirements and offer suggestions fo
     }
   };
 
-  callCanvasIntentMatcher = async (state: GraphState, config: SkillRunnableConfig): Promise<CanvasIntentType> => {
+  callScheduler = async (state: GraphState, config: SkillRunnableConfig): Promise<CanvasIntentType> => {
     try {
       const { query: originalQuery } = state;
 
@@ -784,7 +784,7 @@ Please generate the summary based on these requirements and offer suggestions fo
     this.emitEvent({ event: 'log', content: `Start to generate an answer...` }, this.configSnapshot);
     const model = this.engine.chatModel({ temperature: 0.1 });
 
-    const requestMessages = buildFinalRequestMessages({
+    const requestMessages = commonQnA.buildFinalRequestMessages({
       locale,
       chatHistory: usedChatHistory,
       messages,
@@ -972,7 +972,7 @@ Generated question example:
     // workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
     // workflow.addConditionalEdges('direct', this.onDirectSkillCallFinish);
     // workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
-    workflow.addConditionalEdges(START, this.callCanvasIntentMatcher);
+    workflow.addConditionalEdges(START, this.callScheduler);
     // workflow.addEdge(START, 'editCanvas');
     workflow.addEdge('generateCanvas', 'relatedQuestions');
     workflow.addEdge('rewriteCanvas', 'relatedQuestions');
