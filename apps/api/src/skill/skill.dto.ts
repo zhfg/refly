@@ -16,7 +16,7 @@ import {
   ChatMessage as ChatMessageModel,
 } from '@prisma/client';
 import { pick } from '@/utils';
-import { toChatMessageDTO, conversationPO2DTO } from '@/conversation/conversation.dto';
+import { chatMessagePO2DTO, conversationPO2DTO } from '@/conversation/conversation.dto';
 
 export interface InvokeSkillJobData extends InvokeSkillRequest {
   uid: string;
@@ -64,7 +64,7 @@ export function skillJobPO2DTO(
     ...pick(job, ['jobId', 'skillId', 'skillDisplayName', 'triggerId', 'convId']),
     trigger: job.trigger ? skillTriggerPO2DTO(job.trigger) : undefined,
     conversation: job.conversation ? conversationPO2DTO(job.conversation) : undefined,
-    messages: job.messages?.map(toChatMessageDTO) ?? [],
+    messages: job.messages?.map(chatMessagePO2DTO) ?? [],
     tplConfig: JSON.parse(job.tplConfig),
     jobStatus: job.status as SkillJobStatus,
     input: JSON.parse(job.input),
