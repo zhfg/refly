@@ -61,7 +61,7 @@ export const ConvList = (props: ConvListProps) => {
         },
       });
       if (error) {
-        throw error;
+        return;
       }
 
       threadStore.updateCurrentPage(currentPage);
@@ -75,8 +75,6 @@ export const ConvList = (props: ConvListProps) => {
 
       console.log('newRes', newRes);
       threadStore.updateThreadList(newRes?.data || []);
-    } catch (err) {
-      message.error(t('threadLibrary.list.fetchErr'));
     } finally {
       const { threads, pageSize } = useThreadStore.getState();
 

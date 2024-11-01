@@ -139,28 +139,22 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
   };
 
   const handleDeleteClick = async ({ projectId, resourceId }) => {
-    let resultError: unknown;
-    try {
-      const { error } = await getClient().bindProjectResources({
-        body: [
-          {
-            projectId,
-            resourceId,
-            operation: 'unbind',
-          },
-        ],
-      });
-      resultError = error;
-    } catch (error) {
-      resultError = error;
+    const { error, data } = await getClient().bindProjectResources({
+      body: [
+        {
+          projectId,
+          resourceId,
+          operation: 'unbind',
+        },
+      ],
+    });
+
+    if (error || !data?.success) {
+      return;
     }
 
-    if (resultError) {
-      message.error({ content: t('common.putErr') });
-    } else {
-      message.success({ content: t('common.putSuccess') });
-      reloadProjects();
-    }
+    message.success({ content: t('common.putSuccess') });
+    reloadProjects();
   };
 
   const ProjectList = () => {

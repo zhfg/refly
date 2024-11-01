@@ -65,15 +65,15 @@ export const InstanceItem = (props: InstanceItemProps) => {
     const { error } = await getClient()[data.pinnedAt ? 'unpinSkillInstance' : 'pinSkillInstance']({
       body: { skillId: data.skillId },
     });
-    if (error) {
-      message.error(t('common.putErr'));
-    } else {
-      message.success(t('common.putSuccess'));
-      if (refreshList) {
-        refreshList();
-      }
-    }
     setIsRequesting(false);
+
+    if (error) {
+      return;
+    }
+    message.success(t('common.putSuccess'));
+    if (refreshList) {
+      refreshList();
+    }
   };
 
   const handleTopSkill = (e) => {

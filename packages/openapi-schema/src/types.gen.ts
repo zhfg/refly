@@ -1118,9 +1118,21 @@ export type BaseResponse = {
    */
   success: boolean;
   /**
+   * Error code
+   */
+  errCode?: string;
+  /**
    * Error message
    */
   errMsg?: string;
+  /**
+   * Trace ID
+   */
+  traceId?: string;
+  /**
+   * Error stack (only returned in development environment)
+   */
+  stack?: string;
 };
 
 export type UpsertResourceRequest = {

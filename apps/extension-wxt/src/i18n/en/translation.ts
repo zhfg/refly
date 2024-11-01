@@ -52,9 +52,6 @@ export const translation = {
             read: 'Read',
             unread: 'Unread',
           },
-          list: {
-            fetchErr: 'Failed to retrieve content from the Knowledge Base!',
-          },
         },
         recommendQuickAction: {
           title: 'Recommended Quick Actions:',

@@ -1404,10 +1404,22 @@ export const $BaseResponse = {
       description: 'Whether the operation was successful',
       example: true,
     },
+    errCode: {
+      type: 'string',
+      description: 'Error code',
+    },
     errMsg: {
       type: 'string',
       description: 'Error message',
       example: 'Operation failed',
+    },
+    traceId: {
+      type: 'string',
+      description: 'Trace ID',
+    },
+    stack: {
+      type: 'string',
+      description: 'Error stack (only returned in development environment)',
     },
   },
 } as const;

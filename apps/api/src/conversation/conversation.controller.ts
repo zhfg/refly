@@ -9,7 +9,6 @@ import {
   Param,
   ParseIntPipe,
   DefaultValuePipe,
-  NotFoundException,
 } from '@nestjs/common';
 import {
   CreateConversationRequest,
@@ -24,6 +23,7 @@ import { ConversationService } from './conversation.service';
 import { buildSuccessResponse } from '@/utils';
 import { User } from '@/utils/decorators/user.decorator';
 import { conversationPO2DTO } from '@/conversation/conversation.dto';
+import { ConversationNotFoundError } from '@refly-packages/errors';
 
 @Controller('conversation')
 export class ConversationController {
@@ -68,7 +68,7 @@ export class ConversationController {
   ): Promise<GetConversationDetailResponse> {
     const data = await this.conversationService.getConversationDetail(user, convId);
     if (!data?.convId) {
-      throw new NotFoundException('conversation not found');
+      throw new ConversationNotFoundError();
     }
     return buildSuccessResponse(conversationPO2DTO(data));
   }

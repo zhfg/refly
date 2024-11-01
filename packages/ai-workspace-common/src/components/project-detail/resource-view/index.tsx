@@ -70,27 +70,20 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
   const handleReindexResource = async (resourceId: string) => {
     if (!resourceId || isReindexing) return;
 
-    try {
-      setIsReindexing(true);
-      const { data, error } = await getClient().reindexResource({
-        body: {
-          resourceIds: [resourceId],
-        },
-      });
+    setIsReindexing(true);
+    const { data, error } = await getClient().reindexResource({
+      body: {
+        resourceIds: [resourceId],
+      },
+    });
 
-      if (error) {
-        throw error;
-      }
-      if (!data?.success) {
-        throw new Error(data?.errMsg);
-      }
+    if (error || !data?.success) {
+      return;
+    }
 
-      if (data.data?.length) {
-        const resource = data.data[0];
-        resourceStore.setResource({ ...resourceDetail, indexStatus: resource.indexStatus });
-      }
-    } catch (error) {
-      message.error(t('common.putErr'));
+    if (data.data?.length) {
+      const resource = data.data[0];
+      resourceStore.setResource({ ...resourceDetail, indexStatus: resource.indexStatus });
     }
     setIsReindexing(false);
   };

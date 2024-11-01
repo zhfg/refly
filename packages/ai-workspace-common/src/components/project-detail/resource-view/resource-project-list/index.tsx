@@ -31,25 +31,17 @@ const ResourceProjectList = ({ projects = [], updateCallback }: ResourceProjectL
     const [popconfirmVisible, setPopconfirmVisible] = useState(false);
 
     const handleDeleteClick = async ({ collectionId, resourceId }) => {
-      let resultError: unknown;
-      try {
-        const { error } = await getClient().bindProjectResources({
-          body: [
-            {
-              projectId: collectionId,
-              resourceId,
-              operation: 'unbind',
-            },
-          ],
-        });
-        resultError = error;
-      } catch (error) {
-        resultError = error;
-      }
+      const { error, data } = await getClient().bindProjectResources({
+        body: [
+          {
+            projectId: collectionId,
+            resourceId,
+            operation: 'unbind',
+          },
+        ],
+      });
 
-      if (resultError) {
-        Message.error({ content: t('common.putErr') });
-      } else {
+      if (!error && data?.success) {
         Message.success({ content: t('common.putSuccess') });
         updateCallback && updateCallback(coll.projectId);
       }

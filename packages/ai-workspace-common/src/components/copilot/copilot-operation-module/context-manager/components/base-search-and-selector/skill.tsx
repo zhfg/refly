@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import {} from '@heroicons/react/24/outline';
 import { IconMessage } from '@arco-design/web-react/icon';
 
 import './index.scss';

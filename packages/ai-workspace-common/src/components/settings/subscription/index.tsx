@@ -58,12 +58,10 @@ export const Subscription = () => {
     if (loading) return;
     setLoading(true);
     const { data } = await getClient().createPortalSession();
+    setLoading(false);
     if (data?.data?.url) {
       window.location.href = data.data.url;
-    } else {
-      message.error(t('common.putErr'));
     }
-    setLoading(false);
   };
 
   const UsageItem = ({ title, used, quota, description, type, endAt = null }) => {

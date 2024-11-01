@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, StreamableFile, Logger } from '@nestjs/common';
+import { Inject, Injectable, StreamableFile, Logger } from '@nestjs/common';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import {
@@ -17,6 +17,13 @@ import { ConfigService } from '@nestjs/config';
 import { scrapeWeblink } from '@refly-packages/utils';
 import { pick, QUEUE_SYNC_STORAGE_USAGE } from '@/utils';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
+import {
+  CanvasNotFoundError,
+  StorageQuotaExceeded,
+  ParamsError,
+  ProjectNotFoundError,
+  ResourceNotFoundError,
+} from '@refly-packages/errors';
 
 @Injectable()
 export class MiscService {
@@ -55,7 +62,7 @@ export class MiscService {
 
   async checkEntity(user: User, entityId: string, entityType: EntityType): Promise<void> {
     if (!entityId || !entityType) {
-      throw new BadRequestException('Entity ID and type are required');
+      throw new ParamsError('Entity ID and type are required');
     }
 
     if (entityType === 'resource') {
@@ -67,7 +74,7 @@ export class MiscService {
         },
       });
       if (!resource) {
-        throw new BadRequestException('Resource not found');
+        throw new ResourceNotFoundError();
       }
     } else if (entityType === 'project') {
       const project = await this.prisma.project.findUnique({
@@ -78,7 +85,7 @@ export class MiscService {
         },
       });
       if (!project) {
-        throw new BadRequestException('Project not found');
+        throw new ProjectNotFoundError();
       }
     } else if (entityType === 'canvas') {
       const canvas = await this.prisma.canvas.findUnique({
@@ -89,10 +96,10 @@ export class MiscService {
         },
       });
       if (!canvas) {
-        throw new BadRequestException('Canvas not found');
+        throw new CanvasNotFoundError();
       }
     } else {
-      throw new BadRequestException('Invalid entity type');
+      throw new ParamsError(`Invalid entity type: ${entityType}`);
     }
   }
 
@@ -114,7 +121,7 @@ export class MiscService {
     if (options?.checkStorageQuota) {
       const usageResult = await this.subscription.checkStorageUsage(user);
       if (!usageResult.objectStorageAvailable) {
-        throw new BadRequestException('Storage quota exceeded');
+        throw new StorageQuotaExceeded();
       }
     }
 

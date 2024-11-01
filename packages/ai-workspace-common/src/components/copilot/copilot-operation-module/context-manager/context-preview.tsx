@@ -29,12 +29,13 @@ export const ContextPreview = ({
     const { data, error } = await getClient().getCanvasDetail({
       query: { canvasId },
     });
+    setIsLoading(false);
+
     if (error) {
-      message.error(t('contentDetail.list.fetchErr'));
+      return;
     }
 
     setContent(data?.data?.content);
-    setIsLoading(false);
   };
 
   const getResourceDetail = async (resourceId: string) => {
@@ -44,13 +45,13 @@ export const ContextPreview = ({
         resourceId,
       },
     });
+    setIsLoading(false);
 
     if (error) {
-      message.error(t('contentDetail.list.fetchErr'));
+      return;
     }
 
     setContent(newRes?.data?.content);
-    setIsLoading(false);
   };
 
   useEffect(() => {

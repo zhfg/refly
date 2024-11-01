@@ -30,6 +30,10 @@ import {
   AddReferencesResponse,
   DeleteReferencesRequest,
   DeleteReferencesResponse,
+  GetCanvasDetailData,
+  GetResourceDetailData,
+  GetProjectDetailData,
+  GetProjectDetailResponse,
 } from '@refly-packages/openapi-schema';
 
 // TODO: unify with frontend
@@ -46,14 +50,15 @@ export interface NodeMeta {
 }
 
 export interface ReflyService {
-  getCanvasDetail: (user: User, canvasId: string) => Promise<GetCanvasDetailResponse>;
+  getCanvasDetail: (user: User, req: GetCanvasDetailData['query']) => Promise<GetCanvasDetailResponse>;
   createCanvas: (user: User, req: UpsertCanvasRequest) => Promise<CreateCanvasResponse>;
   listCanvas: (user: User, param: ListCanvasData['query']) => Promise<ListCanvasResponse>;
-  getResourceDetail: (user: User, req: { resourceId: string }) => Promise<GetResourceDetailResponse>;
+  getResourceDetail: (user: User, req: GetResourceDetailData['query']) => Promise<GetResourceDetailResponse>;
   createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
   updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;
   createProject: (user: User, req: UpsertProjectRequest) => Promise<CreateProjectResponse>;
   updateProject: (user: User, req: UpsertProjectRequest) => Promise<UpdateProjectResponse>;
+  getProjectDetail: (user: User, req: GetProjectDetailData['query']) => Promise<GetProjectDetailResponse>;
   createLabelClass: (user: User, req: CreateLabelClassRequest) => Promise<CreateLabelClassResponse>;
   createLabelInstance: (user: User, req: CreateLabelInstanceRequest) => Promise<CreateLabelInstanceResponse>;
   webSearch: (user: User, req: WebSearchRequest) => Promise<WebSearchResponse>;

@@ -42,7 +42,6 @@ export const BindResourceModal = (props: BindResourceModalProps) => {
       setConfirmLoading(false);
 
       if (error) {
-        Message.error(t('common.putErr'));
         return;
       }
 

@@ -52,9 +52,6 @@
         "item": {
           "read": "Read",
           "unread": "Unread"
-        },
-        "list": {
-          "fetchErr": "Failed to retrieve content from the Knowledge Base!"
         }
       },
       "recommendQuickAction": {
@@ -126,9 +123,6 @@
     },
     "archive": {
       "title": "Explore the Content Archive",
-      "list": {
-        "fetchErr": "Failed to retrieve the archive content. Please try refreshing the page."
-      },
       "item": {
         "askFollow": "Ask Follow-Up",
         "share": "Share",
@@ -139,10 +133,7 @@
       }
     },
     "timeline": {
-      "title": "Knowledge from {{year}}/{{month}}/{{day}}",
-      "list": {
-        "fetchErr": "Failed to retrieve the archive content. Please try refreshing the page."
-      }
+      "title": "Knowledge from {{year}}/{{month}}/{{day}}"
     },
     "empty": {
       "timelineTitle": "No new content read on {{year}}/{{month}}/{{day}}. Download the plugin to start exploring new content.",
@@ -160,9 +151,6 @@
     "description": "Topic categories derived from your browsing and session history, representing your reading and learning trends",
     "footer": {
       "noMoreText": "You've reached the end of the list!"
-    },
-    "list": {
-      "fetchErr": "Failed to retrieve the topic list. Please try refreshing the page."
     },
     "empty": {
       "title": "No categories available at the moment. Download the plugin to access new content!",
@@ -186,9 +174,6 @@
       "noMoreText": "You've reached the end of the list!",
       "linkMore": "{{count}} more"
     },
-    "list": {
-      "fetchErr": "Failed to retrieve the session list. Please try refreshing the page."
-    },
     "empty": {
       "title": "No content available in this category at the moment. Download the plugin to access new content!",
       "download": "Download Plugin"
@@ -198,9 +183,6 @@
     "title": "Threads",
     "footer": {
       "noMoreText": "You've reached the end of the list."
-    },
-    "list": {
-      "fetchErr": "Failed to retrieve the conversation list. Please try refreshing the page."
     },
     "item": {
       "askFollow": "Ask Follow-Up",
@@ -215,9 +197,6 @@
     "title": "Threads",
     "footer": {
       "noMoreText": "You've reached the end of the list."
-    },
-    "list": {
-      "fetchErr": "Failed to retrieve the conversation list. Please try refreshing the page."
     },
     "item": {
       "askFollow": "Ask Follow-Up",
@@ -253,9 +232,6 @@
   "contentDetail": {
     "breadcrumb": {
       "homePage": "Home"
-    },
-    "list": {
-      "fetchErr": "Failed to retrieve content details. Please try refreshing the page."
     },
     "item": {
       "share": "Share",
