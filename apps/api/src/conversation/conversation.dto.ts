@@ -9,7 +9,7 @@ export interface Mode {
   prompt: string;
 }
 
-export function toChatMessageDTO(message: ChatMessageModel): ChatMessage {
+export function chatMessagePO2DTO(message: ChatMessageModel): ChatMessage {
   const dto: ChatMessage = {
     ...pick(message, ['msgId', 'type', 'content']),
     createdAt: message.createdAt.toJSON(),
@@ -34,6 +34,7 @@ export function conversationPO2DTO(
   const dto: Conversation = {
     ...pick(conversation, [
       'convId',
+      'projectId',
       'title',
       'lastMessage',
       'messageCount',
@@ -45,7 +46,7 @@ export function conversationPO2DTO(
     updatedAt: conversation.updatedAt.toJSON(),
   };
   if (conversation.messages) {
-    dto.messages = conversation.messages.map(toChatMessageDTO);
+    dto.messages = conversation.messages.map(chatMessagePO2DTO);
   }
   return dto;
 }

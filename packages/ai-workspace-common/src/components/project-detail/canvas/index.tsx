@@ -7,6 +7,7 @@ import './index.scss';
 import { useCookie } from 'react-use';
 import { Input, Popover, Spin, Switch } from '@arco-design/web-react';
 import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock, HiOutlineShare } from 'react-icons/hi2';
+import { IconQuote } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useTranslation } from 'react-i18next';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 
@@ -44,7 +45,7 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 import { ToC } from './ToC';
 import { IconBook } from '@arco-design/web-react/icon';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
-import { Button, Divider } from 'antd';
+import { Button, Divider, message } from 'antd';
 import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
 import { zhMissingContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-missing';
 import { zhLsfContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-lsf';
@@ -54,6 +55,7 @@ import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stor
 import { MarkType } from '@refly/common-types';
 import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
 
 class TokenStreamProcessor {
   private editor: EditorInstance;
@@ -631,34 +633,51 @@ export const CanvasStatusBar = () => {
     }));
   const { handleDeleteTab } = useCanvasTabs();
   const { t } = useTranslation();
+  const { deckSize, setDeckSize } = useReferencesStoreShallow((state) => ({
+    deckSize: state.deckSize,
+    setDeckSize: state.setDeckSize,
+  }));
+
+  const { createShare } = useHandleShare();
+  const [shareLoading, setShareLoading] = useState(false);
+  const handleShare = async () => {
+    setShareLoading(true);
+    await createShare({
+      entityType: 'canvas',
+      entityId: currentCanvas?.canvasId,
+      shareCode: currentCanvas?.shareCode || undefined,
+    });
+    setShareLoading(false);
+  };
 
   return (
     <div className="note-status-bar">
       <div className="note-status-bar-menu">
-        {canvasServerStatus === 'connected' ? (
+        {/* {canvasServerStatus === 'connected' ? (
           <div className="note-status-bar-item">
             <AiOutlineFileWord />
             <p className="conv-title">{t('knowledgeBase.note.noteCharsCount', { count: noteCharsCount })}</p>
           </div>
-        ) : null}
-        {canvasServerStatus === 'disconnected' ? (
-          <div className="note-status-bar-item">
-            <AiOutlineWarning />
-            <p className="conv-title">{t('knowledgeBase.note.serviceDisconnected')}</p>
-          </div>
-        ) : null}
+        ) : null} */}
         {canvasServerStatus === 'connected' ? (
           <div className="note-status-bar-item">
-            <Divider type="vertical" />
             <HiOutlineClock />
             <p className="conv-title">
               {noteSaveStatus === 'Saved' ? t('knowledgeBase.note.autoSaved') : t('knowledgeBase.note.saving')}
             </p>
           </div>
         ) : null}
+
+        {canvasServerStatus === 'disconnected' ? (
+          <div className="note-status-bar-item">
+            <AiOutlineWarning />
+            <p className="conv-title">{t('knowledgeBase.note.serviceDisconnected')}</p>
+          </div>
+        ) : null}
       </div>
+
       <div className="note-status-bar-menu">
-        <div className="note-status-bar-item" style={{ display: 'flex', alignItems: 'center', marginRight: 10 }}>
+        <div className="note-status-bar-item" style={{ display: 'flex', alignItems: 'center' }}>
           <Popover
             content={
               <div className="sidebar">
@@ -671,21 +690,48 @@ export const CanvasStatusBar = () => {
               </div>
             }
           >
-            <IconBook style={{ fontSize: 16 }} />
+            <Button type="text" style={{ width: 32, height: 32 }} icon={<IconBook style={{ fontSize: 16 }} />} />
           </Popover>
           <Divider type="vertical" />
         </div>
+        <Button
+          type="text"
+          size="small"
+          style={{ color: deckSize ? '#00968F' : '' }}
+          icon={<IconQuote />}
+          onClick={() => {
+            setDeckSize(deckSize ? 0 : 300);
+          }}
+        ></Button>
+        <Divider type="vertical" />
+        <Button
+          type="text"
+          size="small"
+          style={{ color: currentCanvas?.shareCode ? '#00968F' : '' }}
+          loading={shareLoading}
+          icon={<HiOutlineShare />}
+          onClick={handleShare}
+        >
+          {currentCanvas?.shareCode ? t('projectDetail.share.sharing') : t('common.share')}
+        </Button>
+        <Divider type="vertical" />
+
         {currentCanvas && canvasServerStatus === 'connected' ? (
-          <div className="note-status-bar-item">
-            {currentCanvas?.readOnly ? <HiOutlineLockClosed /> : <HiOutlineLockOpen />}
-            <p className="mr-2 conv-title">
-              {currentCanvas?.readOnly ? t('knowledgeBase.note.readOnly') : t('knowledgeBase.note.edit')}
-            </p>
-            <Switch
-              type="round"
-              size="small"
-              checked={currentCanvas?.readOnly}
-              onChange={(readOnly) => updateCurrentCanvas({ ...currentCanvas, readOnly })}
+          <div
+            className="note-status-bar-item"
+            onClick={() => {
+              updateCurrentCanvas({ ...currentCanvas, readOnly: !currentCanvas?.readOnly });
+              currentCanvas?.readOnly
+                ? message.success(t('knowledgeBase.note.edit'))
+                : message.warning(t('knowledgeBase.note.readOnly'));
+            }}
+          >
+            <Button
+              type="text"
+              style={{ width: 32, height: 32 }}
+              icon={
+                currentCanvas?.readOnly ? <HiOutlineLockClosed style={{ color: '#00968F' }} /> : <HiOutlineLockOpen />
+              }
             />
           </div>
         ) : null}
@@ -777,18 +823,6 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
   }));
   const prevNote = useRef<Canvas>();
 
-  const { createShare } = useHandleShare();
-  const [shareLoading, setShareLoading] = useState(false);
-  const handleShare = async () => {
-    setShareLoading(true);
-    await createShare({
-      entityType: 'canvas',
-      entityId: canvasId,
-      shareCode: canvas?.shareCode || undefined,
-    });
-    setShareLoading(false);
-  };
-
   useEffect(() => {
     return () => {
       resetState();
@@ -841,11 +875,7 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
 
   return (
     <div className="ai-note-container flex flex-col">
-      <div className="w-[90%] mx-auto flex justify-end">
-        <Button type="text" size="small" loading={shareLoading} icon={<HiOutlineShare />} onClick={handleShare}>
-          {canvas?.shareCode ? t('projectDetail.share.sharing') : t('common.share')}
-        </Button>
-      </div>
+      <CanvasStatusBar />
       <div className="flex-grow overflow-auto">
         <Spin
           tip={t('knowledgeBase.note.connecting')}
@@ -860,7 +890,6 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
           </div>
         </Spin>
       </div>
-      <CanvasStatusBar />
     </div>
   );
 };

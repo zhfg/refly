@@ -333,6 +333,17 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
     }
   };
 
+  useEffect(() => {
+    if (canvasId) {
+      setSelectedTab('canvases');
+      return;
+    }
+    if (resId) {
+      setSelectedTab('resources');
+      return;
+    }
+  }, [resId, canvasId]);
+
   return (
     <>
       <div className="flex flex-row items-center justify-between p-4 pb-0">
@@ -372,7 +383,13 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
       </div>
 
       <div className="p-4 w-full flex gap-3">
-        <Button loading={shareLoading} className="w-[50%]" icon={<HiOutlineShare />} onClick={handleShare}>
+        <Button
+          loading={shareLoading}
+          className="w-[50%]"
+          style={{ color: currentProject?.shareCode ? '#00968F' : '' }}
+          icon={<HiOutlineShare />}
+          onClick={handleShare}
+        >
           {currentProject?.shareCode ? t('projectDetail.share.sharing') : t('common.share')}
         </Button>
         <Button className="w-[50%]" icon={<HiOutlineSparkles />}>

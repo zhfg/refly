@@ -394,9 +394,9 @@ paths:
     post:
       tags:
         - knowledge
-      summary: Operate references
-      description: Operate references between source and target entities
-      operationId: operateReferences
+      summary: Add references
+      description: Add references between source and target entities
+      operationId: addReferences
       requestBody:
         required: true
         content:
@@ -1533,6 +1533,12 @@ components:
       type: object
       description: Reference metadata
       properties:
+        title:
+          type: string
+          description: Reference title
+        projectId:
+          type: string
+          description: Reference project ID
         url:
           type: string
           description: Reference URL
@@ -1564,21 +1570,13 @@ components:
           description: Reference extra data
           required:
             - referenceId
-            - sourceTitle
-            - targetTitle
           properties:
             referenceId:
               type: string
               description: Reference ID
-            sourceTitle:
-              type: string
-              description: Source entity title
             sourceMeta:
               $ref: '#/components/schemas/ReferenceMeta'
               description: Source entity metadata
-            targetTitle:
-              type: string
-              description: Target entity title
             targetMeta:
               $ref: '#/components/schemas/ReferenceMeta'
               description: Target entity metadata
@@ -1921,8 +1919,8 @@ components:
           type: string
           description: Config display value
         configScope:
-              description: The contexts in which the requirement applies
-              $ref: '#/components/schemas/ConfigScope'
+          description: The contexts in which the requirement applies
+          $ref: '#/components/schemas/ConfigScope'
     SkillTemplateConfigSchema:
       type: object
       description: Skill template config schema

@@ -29,9 +29,10 @@ const ConvLibrary = () => {
       </div>
       <ConvList
         classNames=""
-        handleConvItemClick={convId => {
+        handleConvItemClick={(convId, projectId) => {
           jumpToConv({
             convId,
+            projectId,
             state: {
               navigationContext: {
                 shouldFetchDetail: true,

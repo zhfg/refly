@@ -12,6 +12,7 @@ import {
   Project,
   Reference,
   ReferenceType,
+  ReferenceMeta,
 } from '@refly-packages/openapi-schema';
 import { pick } from '@/utils';
 
@@ -73,12 +74,15 @@ export const canvasPO2DTO = (
   return res;
 };
 
-export const referencePO2DTO = (reference: ReferenceModel): Reference => {
+export interface ExtendedReferenceModel extends ReferenceModel {
+  sourceMeta?: ReferenceMeta;
+  targetMeta?: ReferenceMeta;
+}
+
+export const referencePO2DTO = (reference: ExtendedReferenceModel): Reference => {
   return {
-    ...pick(reference, ['referenceId', 'sourceId', 'sourceTitle', 'targetId', 'targetTitle']),
+    ...pick(reference, ['referenceId', 'sourceId', 'targetId', 'sourceMeta', 'targetMeta']),
     sourceType: reference.sourceType as ReferenceType,
     targetType: reference.targetType as ReferenceType,
-    sourceMeta: JSON.parse(reference.sourceMeta),
-    targetMeta: JSON.parse(reference.targetMeta),
   };
 };
