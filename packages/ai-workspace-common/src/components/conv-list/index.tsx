@@ -22,7 +22,7 @@ import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/c
 
 interface ConvListProps {
   classNames: string;
-  handleConvItemClick: (convId: string) => void;
+  handleConvItemClick: (convId: string, projectId?: string) => void;
 }
 
 export const ConvList = (props: ConvListProps) => {
@@ -119,7 +119,7 @@ export const ConvList = (props: ConvListProps) => {
           className="thread-library-list-item"
           actionLayout="vertical"
           onClick={() => {
-            props.handleConvItemClick(item?.convId);
+            props.handleConvItemClick(item?.convId, item?.projectId);
           }}
           actions={[
             <span key={2} className="flex items-center conv-action-list-item">
