@@ -348,18 +348,10 @@ model Reference {
   sourceType  String    @map("source_type")
   /// Source entity ID
   sourceId    String    @map("source_id")
-  /// Source entity title
-  sourceTitle String    @map("source_title")
-  /// Source entity metadata
-  sourceMeta  String    @map("source_meta")
   /// Target entity type (e.g., "canvas" or "resource")
   targetType  String    @map("target_type")
   /// Target entity ID
   targetId    String    @map("target_id")
-  /// Target entity title
-  targetTitle String    @map("target_title")
-  /// Target entity metadata
-  targetMeta  String    @map("target_meta")
   /// UID of the user who created the reference
   uid         String    @map("uid")
   /// Create timestamp
@@ -369,7 +361,7 @@ model Reference {
   /// Soft delete timestamp
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
 
-  @@unique([sourceType, sourceId, targetType, targetId, deletedAt])
+  @@unique([sourceType, sourceId, targetType, targetId])
   @@index([sourceType, sourceId])
   @@index([targetType, targetId])
   @@map("references")

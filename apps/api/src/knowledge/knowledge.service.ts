@@ -3,7 +3,7 @@ import { Queue } from 'bull';
 import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
 import { readingTime } from 'reading-time-estimator';
-import { Prisma, Resource as ResourceModel } from '@prisma/client';
+import { Canvas, Prisma, Resource as ResourceModel } from '@prisma/client';
 import { RAGService } from '@/rag/rag.service';
 import { PrismaService } from '@/common/prisma.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
@@ -44,7 +44,7 @@ import {
   genProjectID,
   genReferenceID,
 } from '@refly-packages/utils';
-import { FinalizeResourceParam } from './knowledge.dto';
+import { ExtendedReferenceModel, FinalizeResourceParam } from './knowledge.dto';
 import { pick } from '../utils';
 import { SimpleEventData } from '@/event/event.dto';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
@@ -854,7 +854,10 @@ export class KnowledgeService {
     });
   }
 
-  async queryReferences(user: User, param: QueryReferencesRequest) {
+  async queryReferences(
+    user: User,
+    param: QueryReferencesRequest,
+  ): Promise<ExtendedReferenceModel[]> {
     const { sourceType, sourceId, targetType, targetId } = param;
 
     // Check if the source and target entities exist for this user
@@ -880,7 +883,64 @@ export class KnowledgeService {
       throw new BadRequestException('Either source or target condition is required');
     }
 
-    return this.prisma.reference.findMany({ where });
+    const references = await this.prisma.reference.findMany({ where });
+
+    // Collect all canvas IDs and resource IDs from both source and target
+    const canvasIds = new Set<string>();
+    const resourceIds = new Set<string>();
+    references.forEach((ref) => {
+      if (ref.sourceType === 'canvas') canvasIds.add(ref.sourceId);
+      if (ref.targetType === 'canvas') canvasIds.add(ref.targetId);
+      if (ref.sourceType === 'resource') resourceIds.add(ref.sourceId);
+      if (ref.targetType === 'resource') resourceIds.add(ref.targetId);
+    });
+
+    // Fetch canvas mappings if there are any canvases
+    const canvasMap: Record<string, Canvas> = {};
+    if (canvasIds.size > 0) {
+      const canvases = await this.prisma.canvas.findMany({
+        where: { canvasId: { in: Array.from(canvasIds) }, deletedAt: null },
+      });
+      canvases.forEach((canvas) => {
+        canvasMap[canvas.canvasId] = canvas;
+      });
+    }
+
+    // Fetch resource mappings if there are any resources
+    const resourceMap: Record<string, ResourceModel> = {};
+    if (resourceIds.size > 0) {
+      const resources = await this.prisma.resource.findMany({
+        where: { resourceId: { in: Array.from(resourceIds) }, deletedAt: null },
+      });
+      resources.forEach((resource) => {
+        resourceMap[resource.resourceId] = resource;
+      });
+    }
+
+    const genReferenceMeta = (sourceType: string, sourceId: string) => {
+      let refMeta: ReferenceMeta;
+      if (sourceType === 'resource') {
+        refMeta = {
+          title: resourceMap[sourceId]?.title,
+          url: JSON.parse(resourceMap[sourceId]?.meta || '{}')?.url,
+        };
+      } else if (sourceType === 'canvas') {
+        refMeta = {
+          title: canvasMap[sourceId]?.title,
+          projectId: canvasMap[sourceId]?.projectId,
+        };
+      }
+      return refMeta;
+    };
+
+    // Attach metadata to references
+    return references.map((ref) => {
+      return {
+        ...ref,
+        sourceMeta: genReferenceMeta(ref.sourceType, ref.sourceId),
+        targetMeta: genReferenceMeta(ref.targetType, ref.targetId),
+      };
+    });
   }
 
   private async prepareReferenceInputs(
@@ -889,12 +949,23 @@ export class KnowledgeService {
   ): Promise<Prisma.ReferenceCreateManyInput[]> {
     const validRefTypes: ReferenceType[] = ['resource', 'canvas'];
 
+    // Deduplicate references using a Set with stringified unique properties
+    const uniqueRefs = new Set(
+      references.map((ref) =>
+        JSON.stringify({
+          sourceType: ref.sourceType,
+          sourceId: ref.sourceId,
+          targetType: ref.targetType,
+          targetId: ref.targetId,
+        }),
+      ),
+    );
+    const deduplicatedRefs: BaseReference[] = Array.from(uniqueRefs).map((ref) => JSON.parse(ref));
+
     const resourceIds: Set<string> = new Set();
     const canvasIds: Set<string> = new Set();
 
-    // TODO: Deduplicate references
-
-    references.forEach((ref) => {
+    deduplicatedRefs.forEach((ref) => {
       if (!validRefTypes.includes(ref.sourceType)) {
         throw new BadRequestException(`Invalid source type: ${ref.sourceType}`);
       }
@@ -923,7 +994,7 @@ export class KnowledgeService {
 
     const [resources, canvases] = await Promise.all([
       this.prisma.resource.findMany({
-        select: { title: true, resourceId: true, meta: true },
+        select: { resourceId: true },
         where: {
           resourceId: { in: Array.from(resourceIds) },
           uid: user.uid,
@@ -931,7 +1002,7 @@ export class KnowledgeService {
         },
       }),
       this.prisma.canvas.findMany({
-        select: { title: true, canvasId: true },
+        select: { canvasId: true },
         where: {
           canvasId: { in: Array.from(canvasIds) },
           uid: user.uid,
@@ -945,7 +1016,7 @@ export class KnowledgeService {
       ...resources.map((r) => r.resourceId),
       ...canvases.map((c) => c.canvasId),
     ]);
-    const missingEntities = references.filter(
+    const missingEntities = deduplicatedRefs.filter(
       (e) => !foundIds.has(e.sourceId) || !foundIds.has(e.targetId),
     );
     if (missingEntities.length > 0) {
@@ -953,35 +1024,33 @@ export class KnowledgeService {
       throw new BadRequestException(`Some of the entities cannot be found`);
     }
 
-    // Create a map for quick lookup
-    const entityMap: Record<string, { title: string; url?: string }> = Object.fromEntries([
-      ...resources.map((r) => [
-        r.resourceId,
-        { title: r.title, url: JSON.parse(r.meta || '{}').url },
-      ]),
-      ...canvases.map((c) => [c.canvasId, { title: c.title }]),
-    ]);
-
-    return references.map((ref) => {
-      const source = entityMap[ref.sourceId];
-      const target = entityMap[ref.targetId];
-
-      return {
-        ...ref,
-        referenceId: genReferenceID(),
-        sourceTitle: source?.title,
-        targetTitle: target?.title,
-        sourceMeta: JSON.stringify({ url: source?.url } as ReferenceMeta),
-        targetMeta: JSON.stringify({ url: target?.url } as ReferenceMeta),
-        uid: user.uid,
-      };
-    });
+    return deduplicatedRefs.map((ref) => ({
+      ...ref,
+      referenceId: genReferenceID(),
+      uid: user.uid,
+    }));
   }
 
   async addReferences(user: User, param: AddReferencesRequest) {
     const { references } = param;
     const referenceInputs = await this.prepareReferenceInputs(user, references);
-    return this.prisma.reference.createManyAndReturn({ data: referenceInputs });
+
+    return this.prisma.$transaction(
+      referenceInputs.map((input) =>
+        this.prisma.reference.upsert({
+          where: {
+            sourceType_sourceId_targetType_targetId: {
+              sourceType: input.sourceType,
+              sourceId: input.sourceId,
+              targetType: input.targetType,
+              targetId: input.targetId,
+            },
+          },
+          create: input,
+          update: { deletedAt: null },
+        }),
+      ),
+    );
   }
 
   async deleteReferences(user: User, param: DeleteReferencesRequest) {

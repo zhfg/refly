@@ -34,6 +34,14 @@ export const $ReferenceMeta = {
   type: 'object',
   description: 'Reference metadata',
   properties: {
+    title: {
+      type: 'string',
+      description: 'Reference title',
+    },
+    projectId: {
+      type: 'string',
+      description: 'Reference project ID',
+    },
     url: {
       type: 'string',
       description: 'Reference URL',
@@ -73,23 +81,15 @@ export const $Reference = {
     {
       type: 'object',
       description: 'Reference extra data',
-      required: ['referenceId', 'sourceTitle', 'targetTitle'],
+      required: ['referenceId', 'sourceMeta', 'targetMeta'],
       properties: {
         referenceId: {
           type: 'string',
           description: 'Reference ID',
         },
-        sourceTitle: {
-          type: 'string',
-          description: 'Source entity title',
-        },
         sourceMeta: {
           $ref: '#/components/schemas/ReferenceMeta',
           description: 'Source entity metadata',
-        },
-        targetTitle: {
-          type: 'string',
-          description: 'Target entity title',
         },
         targetMeta: {
           $ref: '#/components/schemas/ReferenceMeta',
