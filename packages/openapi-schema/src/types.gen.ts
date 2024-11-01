@@ -75,11 +75,11 @@ export type Reference = BaseReference & {
   /**
    * Source entity metadata
    */
-  sourceMeta: ReferenceMeta;
+  sourceMeta?: ReferenceMeta;
   /**
    * Target entity metadata
    */
-  targetMeta: ReferenceMeta;
+  targetMeta?: ReferenceMeta;
 };
 
 /**

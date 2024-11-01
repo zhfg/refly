@@ -81,7 +81,7 @@ export const $Reference = {
     {
       type: 'object',
       description: 'Reference extra data',
-      required: ['referenceId', 'sourceMeta', 'targetMeta'],
+      required: ['referenceId'],
       properties: {
         referenceId: {
           type: 'string',

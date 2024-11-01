@@ -1570,8 +1570,6 @@ components:
           description: Reference extra data
           required:
             - referenceId
-            - sourceMeta
-            - targetMeta
           properties:
             referenceId:
               type: string
