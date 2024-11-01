@@ -26,8 +26,8 @@ const ResourceDeck = (props: ResourceDeckProps) => {
     }),
   );
 
-  const ReferenceList = (props: { list: Reference[]; type: 'source' | 'target' }) => {
-    const { list, type } = props;
+  const ReferenceList = (props: { list: Reference[]; type: 'source' | 'target'; loading: boolean }) => {
+    const { list, type, loading } = props;
 
     const handleClick = (reference: Reference) => {
       if (type === 'target') {
@@ -51,7 +51,7 @@ const ResourceDeck = (props: ResourceDeckProps) => {
 
     return (
       <div>
-        {references.loading ? (
+        {loading ? (
           <Skeleton />
         ) : list.length ? (
           list.map((reference) => {
@@ -65,7 +65,7 @@ const ResourceDeck = (props: ResourceDeckProps) => {
               >
                 <div className="flex items-center justify-center gap-2">
                   {reference[`${type}Type`] === 'resource' ? <IconResource /> : <IconCanvas />}
-                  <div>{reference[`${type}Title`]}</div>
+                  <div>{reference[`${type}Meta`]['title']}</div>
                 </div>
               </div>
             );
@@ -81,12 +81,12 @@ const ResourceDeck = (props: ResourceDeckProps) => {
     {
       key: 'references',
       label: t('deck.references'),
-      children: <ReferenceList list={references.data} type="target" />,
+      children: <ReferenceList list={references.data} type="target" loading={references.loading} />,
     },
     {
       key: 'referencedBy',
       label: t('deck.referencedBy'),
-      children: <ReferenceList list={referencedBy.data} type="source" />,
+      children: <ReferenceList list={referencedBy.data} type="source" loading={referencedBy.loading} />,
     },
   ];
 

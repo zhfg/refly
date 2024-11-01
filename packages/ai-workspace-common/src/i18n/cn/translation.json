@@ -241,8 +241,8 @@
       "noteCharsCount": "共 {{count}} 字",
       "autoSaved": "已自动保存",
       "saving": "保存中...",
-      "readOnly": "只读",
-      "edit": "编辑",
+      "readOnly": "稿布已设为只读状态",
+      "edit": "稿布已设为可编辑状态",
       "serviceDisconnected": "服务已断开",
       "createNoteFailed": "创建笔记失败，请重试！",
       "defaultTitle": "未命名"

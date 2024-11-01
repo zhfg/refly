@@ -69,10 +69,6 @@ export const useReferencesStore = create<ReferencesState>()(
       },
 
       fetchReferences: async ({ sourceId, sourceType }) => {
-        if (get().references.loading) {
-          return;
-        }
-
         if (sourceId !== get().id || sourceType !== get().domain) {
           return;
         }
@@ -99,10 +95,6 @@ export const useReferencesStore = create<ReferencesState>()(
       },
 
       fetchReferencedBy: async ({ targetId, targetType }) => {
-        if (get().referencedBy.loading) {
-          return;
-        }
-
         if (targetId !== get().id || targetType !== get().domain) {
           return;
         }
