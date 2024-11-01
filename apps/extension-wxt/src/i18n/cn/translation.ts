@@ -52,9 +52,6 @@ export const translation = {
             read: '已处理',
             unread: '未处理',
           },
-          list: {
-            fetchErr: '获取知识库内容失败！',
-          },
         },
         recommendQuickAction: {
           title: '推荐快捷操作：',

@@ -8,7 +8,7 @@ export interface SkillEvent {
   /**
    * The event span, which can be used to separate events into message groups
    */
-  spanId: string;
+  spanId?: string;
   /**
    * Event content.
    *
@@ -16,13 +16,13 @@ export interface SkillEvent {
    * - For `stream` events, `content` will typically be a single token chunk.
    * - For `log` events, `content` will be the log message.
    * - For `structured_data` events, `content` will be serialized JSON data.
-   * - For `error` events, `content` will be the error message.
+   * - For `error` events, `content` will be the serialized BaseResponse object.
    */
   content?: string;
   /**
    * Skill metadata
    */
-  skillMeta: SkillMeta;
+  skillMeta?: SkillMeta;
   /**
    * Key for structured data, such as `relatedQuestions` and `sources`.
    * Only present when `event` is `structured_data`.

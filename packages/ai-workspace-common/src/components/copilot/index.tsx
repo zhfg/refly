@@ -17,7 +17,6 @@ import { useKnowledgeBaseStore } from '../../stores/knowledge-base';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useResizeCopilot } from '@refly-packages/ai-workspace-common/hooks/use-resize-copilot';
-import { RegisterSkillComponent } from '@refly-packages/ai-workspace-common/skills/main-logic/register-skill-component';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-common/hooks/use-init-context-panel-state';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
@@ -233,8 +232,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
         />
       ) : null}
 
-      {/** 注册 Skill 相关内容，目前先收敛在 Copilot 内部，后续允许挂在在其他扩展点，比如笔记、reading */}
-      <RegisterSkillComponent />
       <SkillManagementModal />
     </div>
   );

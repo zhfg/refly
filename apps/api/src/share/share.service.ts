@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { createId } from '@paralleldrive/cuid2';
 import { PrismaService } from '@/common/prisma.service';
 import { MiscService } from '@/misc/misc.service';
@@ -14,6 +14,7 @@ import {
 import { canvasPO2DTO, projectPO2DTO } from '@/knowledge/knowledge.dto';
 import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
 import { streamToString } from '@/utils';
+import { ParamsError, ShareNotFoundError } from '@refly-packages/errors';
 
 const SHARE_CODE_PREFIX = {
   PROJECT: 'proj',
@@ -30,6 +31,8 @@ function genCanvasShareCode(): string {
 
 @Injectable()
 export class ShareService {
+  private logger = new Logger(ShareService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly miscService: MiscService,
@@ -40,7 +43,7 @@ export class ShareService {
     const { entityType, entityId } = body;
 
     if (entityType !== 'project' && entityType !== 'canvas') {
-      throw new BadRequestException('Unsupported entity type for sharing');
+      throw new ParamsError('Unsupported entity type for sharing');
     }
 
     await this.miscService.checkEntity(user, entityId, entityType);
@@ -79,7 +82,7 @@ export class ShareService {
     }
 
     if (updateResult.count === 0) {
-      throw new NotFoundException('Share not found');
+      throw new ShareNotFoundError();
     }
   }
 
@@ -96,7 +99,7 @@ export class ShareService {
     });
 
     if (projects.length === 0) {
-      throw new NotFoundException('Share not found');
+      throw new ShareNotFoundError();
     }
 
     const project = projects[0];
@@ -113,7 +116,7 @@ export class ShareService {
     const canvas = project.canvases.find((c) => c.canvasId === selectedCanvasId);
 
     if (!canvas) {
-      throw new NotFoundException('Shared canvas not found');
+      throw new ShareNotFoundError();
     }
 
     result.canvas = canvasPO2DTO({
@@ -136,7 +139,8 @@ export class ShareService {
     });
 
     if (canvases.length === 0) {
-      throw new NotFoundException('Share not found');
+      this.logger.warn(`canvas not found for share code: ${shareCode}`);
+      throw new ShareNotFoundError();
     }
 
     const canvas = canvases[0];
@@ -165,6 +169,6 @@ export class ShareService {
       return this.getSharedContentForCanvas(shareCode, canvasId);
     }
 
-    throw new BadRequestException('Invalid share code');
+    throw new ShareNotFoundError();
   }
 }

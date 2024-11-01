@@ -2,7 +2,6 @@ import React from 'react';
 import './index.scss';
 import { BaseSearchAndSelector } from '../base-search-and-selector';
 import classNames from 'classnames';
-import { SearchResult } from '@refly/openapi-schema';
 import { Mark } from '@refly/common-types';
 
 interface CustomProps {

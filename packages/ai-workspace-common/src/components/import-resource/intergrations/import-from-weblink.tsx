@@ -114,28 +114,23 @@ export const ImportFromWeblink = () => {
       };
     });
 
-    try {
-      const res = await getClient().batchCreateResource({
-        body: batchCreateResourceData,
-      });
+    const res = await getClient().batchCreateResource({
+      body: batchCreateResourceData,
+    });
 
-      if (!res?.data?.success) {
-        setSaveLoading(false);
-        message.error(t('common.putErr'));
-        return;
-      }
-
-      message.success(t('common.putSuccess'));
-      importResourceStore.setScrapeLinks([]);
-      importResourceStore.setImportResourceModalVisible(false);
-      if (!kbId || (kbId && selectedProjectId === kbId)) {
-        reloadListState.setReloadProjectList(true);
-        reloadListState.setReloadResourceList(true);
-      }
-      setLinkStr('');
-    } catch (err) {
-      message.error(t('common.putErr'));
+    if (!res?.data?.success) {
+      setSaveLoading(false);
+      return;
     }
+
+    message.success(t('common.putSuccess'));
+    importResourceStore.setScrapeLinks([]);
+    importResourceStore.setImportResourceModalVisible(false);
+    if (!kbId || (kbId && selectedProjectId === kbId)) {
+      reloadListState.setReloadProjectList(true);
+      reloadListState.setReloadResourceList(true);
+    }
+    setLinkStr('');
 
     setSaveLoading(false);
   };

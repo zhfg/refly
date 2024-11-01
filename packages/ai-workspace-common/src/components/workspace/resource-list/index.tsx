@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-import { List, Empty, Message as message } from '@arco-design/web-react';
+import { List, Empty } from '@arco-design/web-react';
 
 import { Resource } from '@refly/openapi-schema';
 
@@ -53,12 +53,11 @@ export const ResourceList = () => {
       },
     });
     if (error) {
-      message.error(t('common.putErr'));
-    } else {
-      if (data.data?.length) {
-        const resource = data.data[0];
-        setDataList(dataList.map((n) => (n.resourceId === resource.resourceId ? resource : n)));
-      }
+      return;
+    }
+    if (data.data?.length) {
+      const resource = data.data[0];
+      setDataList(dataList.map((n) => (n.resourceId === resource.resourceId ? resource : n)));
     }
   };
 

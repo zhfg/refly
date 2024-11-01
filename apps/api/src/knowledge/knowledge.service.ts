@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bull';
 import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
@@ -28,6 +28,7 @@ import {
   AddReferencesRequest,
   DeleteReferencesRequest,
   ReferenceMeta,
+  GetCanvasDetailData,
 } from '@refly-packages/openapi-schema';
 import {
   CHANNEL_FINALIZE_RESOURCE,
@@ -50,6 +51,15 @@ import { SimpleEventData } from '@/event/event.dto';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { MiscService } from '@/misc/misc.service';
+import {
+  ProjectNotFoundError,
+  CanvasNotFoundError,
+  StorageQuotaExceeded,
+  ResourceNotFoundError,
+  ParamsError,
+  ReferenceNotFoundError,
+  ReferenceObjectMissingError,
+} from '@refly-packages/errors';
 
 @Injectable()
 export class KnowledgeService {
@@ -109,11 +119,15 @@ export class KnowledgeService {
     const { uid } = user;
     const { projectId } = param;
 
+    if (!projectId) {
+      throw new ParamsError('Project ID is required');
+    }
+
     const project = await this.prisma.project.findFirst({
       where: { projectId, uid, deletedAt: null },
     });
     if (!project) {
-      throw new NotFoundException('Project not found');
+      throw new ProjectNotFoundError();
     }
 
     return project;
@@ -154,10 +168,10 @@ export class KnowledgeService {
 
     params.forEach((param) => {
       if (!param.resourceId || !param.projectId) {
-        throw new BadRequestException('resourceId and projectId are required');
+        throw new ParamsError('resourceId and projectId are required');
       }
       if (param.operation !== 'bind' && param.operation !== 'unbind') {
-        throw new BadRequestException('Invalid operation');
+        throw new ParamsError(`Invalid operation: ${param.operation}`);
       }
     });
 
@@ -174,10 +188,10 @@ export class KnowledgeService {
     ]);
 
     if (projectCnt !== projectIds.size) {
-      throw new BadRequestException('Some of the projects cannot be found');
+      throw new ProjectNotFoundError('Some of the projects cannot be found');
     }
     if (resourceCnt !== resourceIds.size) {
-      throw new BadRequestException('Some of the resources cannot be found');
+      throw new ResourceNotFoundError('Some of the resources cannot be found');
     }
 
     await this.prisma.$transaction(async (tx) => {
@@ -215,7 +229,7 @@ export class KnowledgeService {
       where: { projectId, uid, deletedAt: null },
     });
     if (!project) {
-      throw new BadRequestException('Project not found');
+      throw new ProjectNotFoundError();
     }
 
     await this.prisma.$transaction([
@@ -283,12 +297,16 @@ export class KnowledgeService {
     const { uid } = user;
     const { resourceId } = param;
 
+    if (!resourceId) {
+      throw new ParamsError('Resource ID is required');
+    }
+
     const resource = await this.prisma.resource.findFirst({
       where: { resourceId, uid, deletedAt: null },
     });
 
     if (!resource) {
-      throw new NotFoundException('Resource not found');
+      throw new ResourceNotFoundError(`resource ${resourceId} not found`);
     }
 
     let content: string;
@@ -308,7 +326,7 @@ export class KnowledgeService {
     if (options?.checkStorageQuota) {
       const usageResult = await this.subscriptionService.checkStorageUsage(user);
       if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
-        throw new BadRequestException('Storage quota exceeded');
+        throw new StorageQuotaExceeded();
       }
     }
 
@@ -320,19 +338,19 @@ export class KnowledgeService {
 
     if (param.resourceType === 'weblink') {
       if (!param.data) {
-        throw new BadRequestException('data is required');
+        throw new ParamsError('data is required');
       }
       const { url, title } = param.data;
       if (!url) {
-        throw new BadRequestException('url is required');
+        throw new ParamsError('url is required');
       }
       param.title ||= title;
     } else if (param.resourceType === 'text') {
       if (!param.content) {
-        throw new BadRequestException('content is required for text resource');
+        throw new ParamsError('content is required for text resource');
       }
     } else {
-      throw new BadRequestException('Invalid resource type');
+      throw new ParamsError('Invalid resource type');
     }
 
     const cleanedContent = param.content?.replace(/x00/g, '') ?? '';
@@ -385,7 +403,7 @@ export class KnowledgeService {
   async batchCreateResource(user: User, params: UpsertResourceRequest[]) {
     const usageResult = await this.subscriptionService.checkStorageUsage(user);
     if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
-      throw new BadRequestException('Storage quota exceeded');
+      throw new StorageQuotaExceeded();
     }
 
     const limit = pLimit(5);
@@ -553,7 +571,7 @@ export class KnowledgeService {
       where: { resourceId: param.resourceId, uid: user.uid },
     });
     if (!resource) {
-      throw new BadRequestException('Resource not found');
+      throw new ResourceNotFoundError(`resource ${param.resourceId} not found`);
     }
 
     const updates: Prisma.ResourceUpdateInput = pick(param, ['title', 'readOnly']);
@@ -602,7 +620,7 @@ export class KnowledgeService {
       where: { resourceId, uid, deletedAt: null },
     });
     if (!resource) {
-      throw new BadRequestException('Resource not found');
+      throw new ResourceNotFoundError(`resource ${resourceId} not found`);
     }
 
     await this.prisma.$transaction([
@@ -665,14 +683,20 @@ export class KnowledgeService {
     });
   }
 
-  async getCanvasDetail(user: User, canvasId: string) {
+  async getCanvasDetail(user: User, params: GetCanvasDetailData['query']) {
     const { uid } = user;
+    const { canvasId } = params;
+
+    if (!canvasId) {
+      throw new ParamsError('Canvas ID is required');
+    }
+
     const canvas = await this.prisma.canvas.findFirst({
       where: { canvasId, uid, deletedAt: null },
     });
 
     if (!canvas) {
-      throw new BadRequestException('Canvas not found');
+      throw new CanvasNotFoundError('Canvas not found');
     }
 
     let content: string;
@@ -687,7 +711,7 @@ export class KnowledgeService {
   async createCanvas(user: User, param: UpsertCanvasRequest) {
     const usageResult = await this.subscriptionService.checkStorageUsage(user);
     if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
-      throw new BadRequestException('Storage quota exceeded');
+      throw new StorageQuotaExceeded();
     }
 
     param.canvasId = genCanvasID();
@@ -787,7 +811,7 @@ export class KnowledgeService {
   async batchUpdateCanvas(user: User, param: UpsertCanvasRequest[]) {
     const canvasIds = param.map((p) => p.canvasId);
     if (canvasIds.length !== new Set(canvasIds).size) {
-      throw new BadRequestException('Duplicate canvas IDs');
+      throw new ParamsError('Duplicate canvas IDs');
     }
 
     const count = await this.prisma.canvas.count({
@@ -795,7 +819,7 @@ export class KnowledgeService {
     });
 
     if (count !== canvasIds.length) {
-      throw new BadRequestException('Some of the canvases cannot be found');
+      throw new CanvasNotFoundError('Some of the canvases cannot be found');
     }
 
     return this.prisma.$transaction(
@@ -814,7 +838,7 @@ export class KnowledgeService {
       where: { canvasId, uid, deletedAt: null },
     });
     if (!canvas) {
-      throw new BadRequestException('Canvas not found');
+      throw new CanvasNotFoundError('Canvas not found');
     }
 
     await this.prisma.$transaction([
@@ -877,7 +901,7 @@ export class KnowledgeService {
       where.targetId = targetId;
     }
     if (Object.keys(where).length === 0) {
-      throw new BadRequestException('Either source or target condition is required');
+      throw new ParamsError('Either source or target condition is required');
     }
 
     return this.prisma.reference.findMany({ where });
@@ -896,16 +920,16 @@ export class KnowledgeService {
 
     references.forEach((ref) => {
       if (!validRefTypes.includes(ref.sourceType)) {
-        throw new BadRequestException(`Invalid source type: ${ref.sourceType}`);
+        throw new ParamsError(`Invalid source type: ${ref.sourceType}`);
       }
       if (!validRefTypes.includes(ref.targetType)) {
-        throw new BadRequestException(`Invalid target type: ${ref.targetType}`);
+        throw new ParamsError(`Invalid target type: ${ref.targetType}`);
       }
       if (ref.sourceType === 'resource' && ref.targetType === 'canvas') {
-        throw new BadRequestException('Resource to canvas reference is not allowed');
+        throw new ParamsError('Resource to canvas reference is not allowed');
       }
       if (ref.sourceType === ref.targetType && ref.sourceId === ref.targetId) {
-        throw new BadRequestException('Source and target cannot be the same');
+        throw new ParamsError('Source and target cannot be the same');
       }
 
       if (ref.sourceType === 'resource') {
@@ -950,7 +974,7 @@ export class KnowledgeService {
     );
     if (missingEntities.length > 0) {
       this.logger.warn(`Entities not found: ${JSON.stringify(missingEntities)}`);
-      throw new BadRequestException(`Some of the entities cannot be found`);
+      throw new ReferenceObjectMissingError();
     }
 
     // Create a map for quick lookup
@@ -996,7 +1020,7 @@ export class KnowledgeService {
     });
 
     if (references.length !== referenceIds.length) {
-      throw new BadRequestException('Some of the references cannot be found');
+      throw new ReferenceNotFoundError('Some of the references cannot be found');
     }
 
     await this.prisma.reference.updateMany({

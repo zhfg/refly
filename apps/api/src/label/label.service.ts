@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma.service';
 import {
   CreateLabelClassRequest,
@@ -13,6 +13,11 @@ import {
 } from '@refly-packages/openapi-schema';
 import { genLabelClassID, genLabelInstanceID } from '@refly-packages/utils';
 import { pick } from '@/utils';
+import {
+  LabelClassNotFoundError,
+  LabelInstanceNotFoundError,
+  ParamsError,
+} from '@refly-packages/errors';
 
 @Injectable()
 export class LabelService {
@@ -58,7 +63,7 @@ export class LabelService {
       where: { labelClassId, uid, deletedAt: null },
     });
     if (!lc) {
-      throw new BadRequestException(`label class not found: ${labelClassId}`);
+      throw new LabelClassNotFoundError(`label class not found: ${labelClassId}`);
     }
     return this.prisma.labelClass.update({
       where: { labelClassId: param.labelClassId, uid: user.uid },
@@ -76,7 +81,7 @@ export class LabelService {
       where: { labelClassId, uid, deletedAt: null },
     });
     if (!lc) {
-      throw new BadRequestException(`label class not found: ${labelClassId}`);
+      throw new LabelClassNotFoundError(`label class not found: ${labelClassId}`);
     }
     await this.prisma.labelClass.update({
       where: { labelClassId: param.labelClassId, uid: user.uid },
@@ -113,7 +118,7 @@ export class LabelService {
 
   async createLabelInstance(user: User, param: CreateLabelInstanceRequest) {
     if (param.valueList?.length === 0) {
-      throw new BadRequestException('valueList is required');
+      throw new ParamsError('valueList is required');
     }
 
     return this.prisma.labelInstance.createManyAndReturn({
@@ -134,7 +139,7 @@ export class LabelService {
       where: { labelId, uid, deletedAt: null },
     });
     if (!label) {
-      throw new BadRequestException('label not found');
+      throw new LabelInstanceNotFoundError('label not found');
     }
     return this.prisma.labelInstance.update({
       where: { labelId: label.labelId, uid: user.uid },
@@ -147,13 +152,13 @@ export class LabelService {
     const { uid } = user;
     const { labelId } = param;
     if (!labelId) {
-      throw new BadRequestException('label id are required');
+      throw new ParamsError('label id are required');
     }
     const label = await this.prisma.labelInstance.findUnique({
       where: { labelId, uid, deletedAt: null },
     });
     if (!label) {
-      throw new BadRequestException('label not found');
+      throw new LabelInstanceNotFoundError('label not found');
     }
     await this.prisma.labelInstance.update({
       where: { labelId, uid },

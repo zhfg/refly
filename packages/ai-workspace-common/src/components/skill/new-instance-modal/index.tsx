@@ -35,31 +35,27 @@ export const NewSkillInstanceModal = (props: NewSkillInstanceModalProps) => {
   const onOk = () => {
     form.validate().then(async (res) => {
       setConfirmLoading(true);
+
       let resultError: unknown;
-      try {
-        if (type === 'new' && template) {
-          const { error } = await getClient().createSkillInstance({
-            body: { instanceList: [{ ...res, tplName: template.name }] },
-          });
-          resultError = error;
-        }
-        if (type === 'update' && instance) {
-          const { error } = await getClient().updateSkillInstance({
-            body: { ...res, skillId: instance.skillId },
-          });
-          resultError = error;
-        }
-      } catch (error) {
-        console.log(error);
+      if (type === 'new' && template) {
+        const { error } = await getClient().createSkillInstance({
+          body: { instanceList: [{ ...res, tplName: template.name }] },
+        });
+        resultError = error;
+      }
+      if (type === 'update' && instance) {
+        const { error } = await getClient().updateSkillInstance({
+          body: { ...res, skillId: instance.skillId },
+        });
+        resultError = error;
       }
       setConfirmLoading(false);
       setVisible(false);
       if (resultError) {
-        console.error(resultError);
-        Message.error({ content: t('common.putErr') });
-      } else {
-        Message.success({ content: t('common.putSuccess') });
+        return;
       }
+
+      Message.success({ content: t('common.putSuccess') });
       if (postConfirmCallback) {
         postConfirmCallback();
       }

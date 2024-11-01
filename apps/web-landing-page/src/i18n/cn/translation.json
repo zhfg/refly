@@ -52,9 +52,6 @@
         "item": {
           "read": "已处理",
           "unread": "未处理"
-        },
-        "list": {
-          "fetchErr": "获取知识库内容失败！"
         }
       },
       "recommendQuickAction": {
@@ -123,9 +120,6 @@
     },
     "archive": {
       "title": "浏览内容归档",
-      "list": {
-        "fetchErr": "获取归档内容失败，请重新刷新试试"
-      },
       "item": {
         "askFollow": "追问阅读",
         "share": "分享",
@@ -136,10 +130,7 @@
       }
     },
     "timeline": {
-      "title": "{{year}} 年 {{month}} 月 {{day}} 日浏览内容",
-      "list": {
-        "fetchErr": "获取归档内容失败，请重新刷新试试"
-      }
+      "title": "{{year}} 年 {{month}} 月 {{day}} 日浏览内容"
     },
     "empty": {
       "timelineTitle": "{{year}} 年 {{month}} 月 {{day}} 日还未阅读新内容，赶快下载插件去阅读新内容吧",
@@ -158,9 +149,6 @@
     "description": "基于您的浏览历史、会话历史分析提取出来的主题分类，代表您的阅读和学习趋势",
     "footer": {
       "noMoreText": "已经到底啦~"
-    },
-    "list": {
-      "fetchErr": "获取主题列表失败，请重新刷新试试"
     },
     "empty": {
       "title": "暂无分类，赶快下载插件去阅读新内容吧~",
@@ -185,9 +173,6 @@
       "noMoreText": "已经到底啦~",
       "linkMore": "{{count}} 条更多"
     },
-    "list": {
-      "fetchErr": "获取会话列表失败，请重新刷新试试"
-    },
     "empty": {
       "title": "暂无此分类下的内容，赶快下载插件去阅读新内容吧~",
       "download": "下载插件"
@@ -201,9 +186,6 @@
     "title": "会话库",
     "footer": {
       "noMoreText": "已经到底啦~"
-    },
-    "list": {
-      "fetchErr": "获取会话列表失败，请重新刷新试试"
     },
     "item": {
       "askFollow": "继续提问",
@@ -238,9 +220,6 @@
   "contentDetail": {
     "breadcrumb": {
       "homePage": "Home"
-    },
-    "list": {
-      "fetchErr": "获取内容详情失败，请重新刷新试试"
     },
     "item": {
       "share": "分享",

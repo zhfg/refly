@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/common/prisma.service';
 import {
@@ -16,6 +16,7 @@ import {
 import { RAGService } from '@/rag/rag.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { LOCALE } from '@refly-packages/common-types';
+import { ParamsError } from '@refly-packages/errors';
 
 interface ProcessedSearchRequest extends SearchRequest {}
 
@@ -194,7 +195,7 @@ export class SearchService {
       case 'vector':
         return this.searchResourcesByVector(user, req);
       case 'hybrid':
-        throw new BadRequestException('Not implemented');
+        throw new ParamsError('Not implemented');
       default:
         return this.searchResourcesByKeywords(user, req);
     }
@@ -278,7 +279,7 @@ export class SearchService {
       case 'vector':
         return this.searchCanvasesByVector(user, req);
       case 'hybrid':
-        throw new BadRequestException('Not implemented');
+        throw new ParamsError('Not implemented');
       default:
         return this.searchCanvasesByKeywords(user, req);
     }
