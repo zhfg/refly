@@ -333,6 +333,17 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
     }
   };
 
+  useEffect(() => {
+    if (canvasId) {
+      setSelectedTab('canvases');
+      return;
+    }
+    if (resId) {
+      setSelectedTab('resources');
+      return;
+    }
+  }, [resId, canvasId]);
+
   return (
     <>
       <div className="flex flex-row items-center justify-between p-4 pb-0">

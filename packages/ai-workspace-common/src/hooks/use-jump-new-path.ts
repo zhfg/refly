@@ -20,8 +20,10 @@ export const useJumpNewPath = () => {
     baseUrl?: string;
     openNewTab?: boolean;
   }) => {
+    for (const key of Array.from(searchParams.keys())) {
+      searchParams.delete(key);
+    }
     searchParams.set('canvasId', canvasId);
-    searchParams.delete('resId'); // either canvasId or resId can be displayed
     setSearchParams(searchParams);
     const url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
 
@@ -46,12 +48,15 @@ export const useJumpNewPath = () => {
     },
     extraQuery?: Record<string, string>,
   ) => {
+    for (const key of Array.from(searchParams.keys())) {
+      searchParams.delete(key);
+    }
+
     if (extraQuery) {
       Object.entries(extraQuery).forEach(([key, value]) => {
         if (!['canvasId', 'resId', 'convId'].includes(key)) {
           return;
         }
-
         searchParams.set(key, value);
       });
     }
@@ -109,9 +114,6 @@ export const useJumpNewPath = () => {
       window.open(url, '_blank');
     } else {
       navigate(url);
-      // if (!knowledgeBaseStore.resourcePanelVisible) {
-      //   knowledgeBaseStore.updateResourcePanelVisible(true);
-      // }
     }
   };
 

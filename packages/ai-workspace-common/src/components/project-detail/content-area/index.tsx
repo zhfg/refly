@@ -142,9 +142,11 @@ export const ContentArea = (props: { projectId: string }) => {
               <ResourceView projectId={projectId} resourceId={activeTab?.key} />
             )}
           </Splitter.Panel>
-          <Splitter.Panel size={deckSize} max={'80%'} collapsible>
-            <ResourceDeck domain={activeTab?.type} id={activeTab?.key} />
-          </Splitter.Panel>
+          {activeTab && (
+            <Splitter.Panel size={deckSize} max={'80%'} collapsible>
+              <ResourceDeck domain={activeTab?.type} id={activeTab?.key} />
+            </Splitter.Panel>
+          )}
         </Splitter>
       </div>
     </div>
