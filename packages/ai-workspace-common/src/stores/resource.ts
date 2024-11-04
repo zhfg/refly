@@ -3,7 +3,7 @@ import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-import { Resource, Reference } from '@refly/openapi-schema';
+import { Resource } from '@refly/openapi-schema';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 export interface ResourceTab {
@@ -22,14 +22,11 @@ export interface ResourceState {
   currentResourceId: string;
 
   resource: StateField<Resource | null>;
-  references: StateField<Reference[]>;
-  referencedBy: StateField<Reference[]>;
 
   setCurrentResourceId: (resourceId: string) => void;
   setResource: (resource: Resource) => void;
 
   fetchResource: (resourceId: string, reindex?: boolean) => Promise<void>;
-  fetchReferences: (resourceId: string) => Promise<void>;
 }
 
 export const useResourceStore = create<ResourceState>()(
@@ -40,14 +37,6 @@ export const useResourceStore = create<ResourceState>()(
         data: null,
         loading: false,
       },
-      references: {
-        data: [],
-        loading: false,
-      },
-      referencedBy: {
-        data: [],
-        loading: false,
-      },
 
       setCurrentResourceId: (resourceId) =>
         set((state) => {
@@ -55,9 +44,12 @@ export const useResourceStore = create<ResourceState>()(
         }),
 
       setResource: (resource) =>
-        set((state) => {
-          state.resource.data = resource;
-        }),
+        set((state) => ({
+          resource: {
+            ...state.resource,
+            data: resource,
+          },
+        })),
 
       fetchResource: async (resourceId, reindex = false) => {
         if (resourceId !== get().currentResourceId) {
@@ -87,24 +79,6 @@ export const useResourceStore = create<ResourceState>()(
           if (error || !data?.success) {
             state.resource.error = String(error) || 'request not success';
           }
-        });
-      },
-
-      fetchReferences: async (resourceId) => {
-        if (resourceId !== get().currentResourceId) {
-          return;
-        }
-
-        set((state) => {
-          state.references.loading = true;
-        });
-
-        const { data, error } = await getClient().queryReferences({
-          body: { sourceId: resourceId, sourceType: 'resource' },
-        });
-
-        set((state) => {
-          state.references.loading = false;
         });
       },
     })),

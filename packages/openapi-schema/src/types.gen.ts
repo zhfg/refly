@@ -32,6 +32,14 @@ export type ListOrder = 'creationAsc' | 'creationDesc';
  */
 export type ReferenceMeta = {
   /**
+   * Reference title
+   */
+  title?: string;
+  /**
+   * Reference project ID
+   */
+  projectId?: string;
+  /**
    * Reference URL
    */
   url?: string;
@@ -65,17 +73,9 @@ export type Reference = BaseReference & {
    */
   referenceId: string;
   /**
-   * Source entity title
-   */
-  sourceTitle: string;
-  /**
    * Source entity metadata
    */
   sourceMeta?: ReferenceMeta;
-  /**
-   * Target entity title
-   */
-  targetTitle: string;
   /**
    * Target entity metadata
    */
@@ -2556,13 +2556,13 @@ export type QueryReferencesResponse2 = unknown;
 
 export type QueryReferencesError = unknown;
 
-export type OperateReferencesData = {
+export type AddReferencesData = {
   body: AddReferencesRequest;
 };
 
-export type OperateReferencesResponse = BaseResponse;
+export type AddReferencesResponse2 = BaseResponse;
 
-export type OperateReferencesError = unknown;
+export type AddReferencesError = unknown;
 
 export type DeleteReferencesData = {
   body: DeleteReferencesRequest;
@@ -3268,7 +3268,7 @@ export type $OpenApiTs = {
   };
   '/knowledge/reference/add': {
     post: {
-      req: OperateReferencesData;
+      req: AddReferencesData;
       res: {
         /**
          * Successful operation

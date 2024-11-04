@@ -5,25 +5,71 @@ import { ContentArea } from './content-area';
 import { ProjectDirectory } from './directory';
 import { ProjectProvider } from './context-provider';
 import { AICopilot } from '@refly-packages/ai-workspace-common/components/copilot';
-import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
+import { useProjectStore, useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 
 import './index.scss';
 import { useEffect } from 'react';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 
 export const ProjectDetail = () => {
   const { projectId } = useParams();
 
-  const projectStore = useProjectStoreShallow((state) => ({
+  const { setCurrentProjectId, fetchProjectAll } = useProjectStoreShallow((state) => ({
     setCurrentProjectId: state.setCurrentProjectId,
     fetchProjectAll: state.fetchProjectAll,
   }));
 
-  useEffect(() => {
-    if (projectId) {
-      projectStore.setCurrentProjectId(projectId);
-      projectStore.fetchProjectAll(projectId);
+  const { jumpToCanvas, jumpToResource } = useJumpNewPath();
+  const { tabsMap, activeTabMap, handleAddTab } = useProjectTabs();
+  const tabs = tabsMap[projectId] || [];
+  const activeTab = tabs.find((x) => x.key === activeTabMap[projectId]);
+
+  const setInitialTab = async () => {
+    const currentCanvases = useProjectStore.getState().canvases.data;
+    const currentResources = useProjectStore.getState().resources.data;
+
+    if (currentCanvases?.length) {
+      const item = currentCanvases[0];
+      jumpToCanvas({
+        canvasId: item.id,
+        projectId: projectId,
+      });
+      handleAddTab({
+        projectId: projectId,
+        key: item.id,
+        title: item.title,
+        type: 'canvas',
+      });
+    } else if (currentResources?.length) {
+      const item = currentResources[0];
+      jumpToResource({
+        resId: item.id,
+        projectId: projectId,
+      });
+      handleAddTab({
+        projectId: projectId,
+        key: item.id,
+        title: item.title,
+        type: 'resource',
+      });
     }
+  };
+
+  useEffect(() => {
+    const initProject = async () => {
+      if (projectId) {
+        setCurrentProjectId(projectId);
+        await fetchProjectAll(projectId);
+
+        if (!activeTab || activeTab?.projectId !== projectId) {
+          setInitialTab();
+        }
+      }
+    };
+
+    initProject();
   }, [projectId]);
 
   return (

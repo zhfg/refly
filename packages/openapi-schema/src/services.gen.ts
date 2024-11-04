@@ -44,9 +44,9 @@ import type {
   QueryReferencesData,
   QueryReferencesError,
   QueryReferencesResponse2,
-  OperateReferencesData,
-  OperateReferencesError,
-  OperateReferencesResponse,
+  AddReferencesData,
+  AddReferencesError,
+  AddReferencesResponse2,
   DeleteReferencesData,
   DeleteReferencesError,
   DeleteReferencesResponse,
@@ -339,11 +339,11 @@ export const queryReferences = (options: Options<QueryReferencesData>) => {
 };
 
 /**
- * Operate references
- * Operate references between source and target entities
+ * Add references
+ * Add references between source and target entities
  */
-export const operateReferences = (options: Options<OperateReferencesData>) => {
-  return (options?.client ?? client).post<OperateReferencesResponse, OperateReferencesError>({
+export const addReferences = (options: Options<AddReferencesData>) => {
+  return (options?.client ?? client).post<AddReferencesResponse2, AddReferencesError>({
     ...options,
     url: '/knowledge/reference/add',
   });
