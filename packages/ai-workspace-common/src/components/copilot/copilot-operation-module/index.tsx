@@ -15,7 +15,7 @@ import { ConfigManager } from './config-manager';
 // stores
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useChatStore, MessageIntentContext } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 // hooks
@@ -26,7 +26,7 @@ import { useProjectContext } from '@refly-packages/ai-workspace-common/component
 // types
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { editorEmitter, InPlaceSendMessagePayload } from '@refly-packages/utils/event-emitter/editor';
-import { MarkType } from '@refly/common-types';
+import { LOCALE, MarkType } from '@refly/common-types';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 interface CopilotInputModuleProps {
@@ -100,16 +100,35 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
 
   const handleInPlaceEditSendMessage = (data: InPlaceSendMessagePayload) => {
     const { canvasEditConfig, userInput, inPlaceActionType } = data;
+    const { localSettings } = useUserStore.getState();
+    const locale = localSettings?.uiLocale || LOCALE.EN;
+
     const { messageIntentContext } = useChatStore.getState();
+    let newUserInput = userInput;
 
-    const newMessageIntentContext: Partial<MessageIntentContext> = {
-      ...(messageIntentContext || {}),
-      canvasEditConfig,
-    };
+    // TODO: temp handle in frontend: 1) edit need set canvasEditConfig 2) chat for normal chat
+    const isEditAction = inPlaceActionType === 'edit';
 
-    chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
+    if (isEditAction) {
+      const newMessageIntentContext: Partial<MessageIntentContext> = {
+        ...(messageIntentContext || {}),
+        canvasEditConfig,
+      };
 
-    handleSendMessage(userInput);
+      chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
+    } else {
+      const { selection } = canvasEditConfig || {};
+      const selectedText = selection?.highlightedText || '';
+
+      if (selectedText) {
+        newUserInput =
+          `> ${locale === LOCALE.EN ? '**User Selected Text:** ' : '**用户选中的文本:** '} ${selectedText}` +
+          `\n\n` +
+          `${locale === LOCALE.EN ? '**Please answer question based on the user selected text:** ' : '**请根据用户选中的文本回答问题:** '} ${userInput}`;
+      }
+    }
+
+    handleSendMessage(newUserInput);
   };
 
   useEffect(() => {
