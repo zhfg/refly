@@ -15,7 +15,7 @@ export const useHandleRecents = (getRecents: boolean = false) => {
 
   const getRecentProjects = async () => {
     const { data: res, error } = await getClient().listProjects({
-      query: { page: 1, pageSize: 5 },
+      query: { page: 1, pageSize: 10 },
     });
     if (error) {
       console.error('getRecentProjects error', error);
@@ -68,7 +68,6 @@ export const useHandleRecents = (getRecents: boolean = false) => {
   useEffect(() => {
     if (getRecents) {
       getRecentProjects();
-      getRecentConversations();
     }
   }, [getRecents]);
 

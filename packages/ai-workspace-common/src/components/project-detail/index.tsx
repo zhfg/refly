@@ -1,5 +1,5 @@
-import { Splitter, notification } from 'antd';
-import { useParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { Splitter } from 'antd';
+import { useParams, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 import { ContentArea } from './content-area';
 import { ProjectDirectory } from './directory';
@@ -8,23 +8,31 @@ import { AICopilot } from '@refly-packages/ai-workspace-common/components/copilo
 import { useProjectStore, useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 
 import './index.scss';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
+import { BindResourceModal } from '@refly-packages/ai-workspace-common/components/project-detail/resource-view/resource-collection-associative-modal';
 
 export const ProjectDetail = () => {
   const { projectId } = useParams();
-
-  const { setCurrentProjectId, fetchProjectAll } = useProjectStoreShallow((state) => ({
-    setCurrentProjectId: state.setCurrentProjectId,
-    fetchProjectAll: state.fetchProjectAll,
-  }));
+  const [searchParams] = useSearchParams();
+  const convId = searchParams.get('convId');
+  const { setCurrentProjectId, fetchProjectAll, copilotSize, setCopilotSize, fetchProjectDetail } =
+    useProjectStoreShallow((state) => ({
+      copilotSize: state.copilotSize,
+      setCurrentProjectId: state.setCurrentProjectId,
+      fetchProjectAll: state.fetchProjectAll,
+      setCopilotSize: state.setCopilotSize,
+      fetchProjectDetail: state.fetchProjectDetail,
+    }));
 
   const { jumpToCanvas, jumpToResource } = useJumpNewPath();
   const { tabsMap, activeTabMap, handleAddTab } = useProjectTabs();
   const tabs = tabsMap[projectId] || [];
   const activeTab = tabs.find((x) => x.key === activeTabMap[projectId]);
+
+  const [bindResourceModalVisible, setBindResourceModalVisible] = useState(false);
 
   const setInitialTab = async () => {
     const currentCanvases = useProjectStore.getState().canvases.data;
@@ -70,12 +78,26 @@ export const ProjectDetail = () => {
     };
 
     initProject();
+
+    return () => {
+      setCopilotSize(0);
+    };
   }, [projectId]);
+
+  useEffect(() => {
+    if (convId) {
+      setCopilotSize(500);
+    }
+  }, [convId]);
 
   return (
     <ProjectProvider context={{ projectId }}>
       <div className="project-detail-container">
-        <Splitter layout="horizontal" className="workspace-panel-container">
+        <Splitter
+          layout="horizontal"
+          className="workspace-panel-container"
+          onResize={(size) => setCopilotSize(size[2])}
+        >
           <Splitter.Panel
             collapsible
             defaultSize={300}
@@ -83,15 +105,15 @@ export const ProjectDetail = () => {
             className="workspace-left-assist-panel"
             key="workspace-left-assist-panel"
           >
-            <ProjectDirectory projectId={projectId} />
+            <ProjectDirectory projectId={projectId} setBindResourceModalVisible={setBindResourceModalVisible} />
           </Splitter.Panel>
           <Splitter.Panel min={450} className="workspace-content-panel" key="workspace-content-panel-content">
-            <ContentArea projectId={projectId} />
+            <ContentArea projectId={projectId} setBindResourceModalVisible={setBindResourceModalVisible} />
           </Splitter.Panel>
           <Splitter.Panel
             collapsible
             className="workspace-content-panel"
-            defaultSize={500}
+            size={copilotSize}
             min={400}
             key="workspace-content-panel-copilot"
           >
@@ -99,6 +121,17 @@ export const ProjectDetail = () => {
           </Splitter.Panel>
         </Splitter>
       </div>
+
+      <BindResourceModal
+        domain="resource"
+        mode="multiple"
+        projectId={projectId}
+        visible={bindResourceModalVisible}
+        setVisible={setBindResourceModalVisible}
+        postConfirmCallback={() => {
+          fetchProjectAll(projectId);
+        }}
+      />
     </ProjectProvider>
   );
 };

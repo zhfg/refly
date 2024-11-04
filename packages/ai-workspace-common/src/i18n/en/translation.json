@@ -122,7 +122,8 @@
     "directory": {
       "newCanvas": "New Canvas",
       "importResource": "Import Resource",
-      "chat": "Chat"
+      "chat": "Chat",
+      "empty": "No Data"
     },
     "share": {
       "createShareFailed": "Failed to create share, please try again!",
@@ -135,6 +136,10 @@
       "cancelShareFailed": "Failed to cancel share, please try again!",
       "cancelShareSuccess": "Cancel share successfully!",
       "sharing": "Sharing"
+    },
+    "contentArea": {
+      "addCanvas": "New Canvas",
+      "addResource": "New Resource"
     }
   },
   "shareContent": {
@@ -229,7 +234,9 @@
     },
     "directory": {
       "resourceCount": "{{count}} contents",
-      "searchPlaceholder": "Search resource..."
+      "resourcesSearchPlaceholder": "Search Resources...",
+      "canvasesSearchPlaceholder": "Search Canvases...",
+      "conversationsSearchPlaceholder": "Search Conversations..."
     },
     "quickSearch": {
       "suggest": "Suggestions",
@@ -355,7 +362,9 @@
       "storageSize": "Storage Size",
       "vectorSize": "Vector Size",
       "indexStatus": "Index Status",
-      "referenced": "{{count}} Referenced"
+      "referenced": "{{count}} Referenced",
+      "weblink": "Web Link",
+      "text": "Text"
     }
   },
   "loggedHomePage": {

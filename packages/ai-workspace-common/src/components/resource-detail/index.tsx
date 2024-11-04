@@ -24,8 +24,10 @@ export const ResourceDetail2 = () => {
   const navigate = useNavigate();
   const { resId: resourceId } = useParams();
 
-  const resourceStore = useResourceStoreShallow((state) => ({
+  const { copilotSize, resource, setCopilotSize } = useResourceStoreShallow((state) => ({
+    copilotSize: state.copilotSize,
     resource: state.resource.data,
+    setCopilotSize: state.setCopilotSize,
   }));
 
   const searchStore = useSearchStoreShallow((state) => ({
@@ -40,40 +42,14 @@ export const ResourceDetail2 = () => {
     setDeckSize: state.setDeckSize,
   }));
 
-  const ContentTop = () => {
-    return (
-      <div className="w-full pt-2 relative flex items-center resource-detail-top text-[#6F6F6F]">
-        <div
-          className="flex items-center pl-3 whitespace-nowrap cursor-pointer"
-          onClick={() => {
-            navigate('/library?tab=resource');
-          }}
-        >
-          {' '}
-          <MdOutlineArrowBackIos style={{ marginRight: 6, fontSize: 18 }} /> {t('resourceDetail.back')}
-        </div>
-
-        <div className="flex flex-grow justify-center items-center text-[16px]">
-          {resourceStore.resource?.title}
-          <Button
-            className="ml-1"
-            type="text"
-            shape="circle"
-            icon={<HiOutlineSearch />}
-            onClick={() => {
-              searchStore.setPages(searchStore.pages.concat('readResources'));
-              searchStore.setIsSearchOpen(true);
-            }}
-          ></Button>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <ResourceProvider context={{ resourceId }}>
       <div className="h-full">
-        <Splitter layout="horizontal" className="workspace-panel-container">
+        <Splitter
+          layout="horizontal"
+          className="workspace-panel-container"
+          onResize={(sizes) => setCopilotSize(sizes[2])}
+        >
           <Splitter.Panel className="workspace-content-panel" defaultSize={300} min={300} collapsible>
             <ResourceDirectory resourceId={resourceId} />
           </Splitter.Panel>
@@ -92,7 +68,7 @@ export const ResourceDetail2 = () => {
           <Splitter.Panel
             collapsible
             className="workspace-content-panel"
-            defaultSize={400}
+            size={copilotSize}
             min={400}
             key="workspace-content-panel-copilot"
           >

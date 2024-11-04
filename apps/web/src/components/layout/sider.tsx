@@ -209,12 +209,10 @@ export const SiderLayout = () => {
     setImportResourceModalVisible: state.setImportResourceModalVisible,
     setSelectedMenuItem: state.setSelectedMenuItem,
   }))
-  const newCanvasModalStore = useNewCanvasModalStoreShallow(state => ({
-    setNewCanvasModalVisible: state.setNewCanvasModalVisible,
-  }))
+
   const isGuideDetail = location.pathname.includes("guide/")
 
-  const { jumpToProject, jumpToConv } = useJumpNewPath()
+  const { jumpToProject } = useJumpNewPath()
 
   const { t } = useTranslation()
 
@@ -332,12 +330,9 @@ export const SiderLayout = () => {
     ],
   ]
 
-  const { recentProjects, recentConversations } = useRecentsStoreShallow(
-    state => ({
-      recentProjects: state.recentProjects,
-      recentConversations: state.recentConversations,
-    }),
-  )
+  const { recentProjects } = useRecentsStoreShallow(state => ({
+    recentProjects: state.recentProjects,
+  }))
 
   useHandleRecents(true)
 
@@ -392,7 +387,7 @@ export const SiderLayout = () => {
               </div>
             ))}
 
-            {(recentProjects.length > 0 || recentConversations.length > 0) && (
+            {recentProjects.length > 0 && (
               <Divider style={{ margin: "8px 0" }} />
             )}
 

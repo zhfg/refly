@@ -29,8 +29,6 @@ export const useHandleAICanvas = () => {
   const { convId: pathConvId } = useParams();
   const convId = queryConvId || pathConvId;
 
-  console.log('convId', convId);
-
   const handleGenerateCanvas = async (intent: IntentResult) => {
     const { messageIntentContext } = useChatStore.getState();
     jumpToConv({
