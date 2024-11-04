@@ -122,7 +122,8 @@
     "directory": {
       "newCanvas": "新稿布",
       "importResource": "导入资源",
-      "chat": "Chat"
+      "chat": "Chat",
+      "empty": "空空如也"
     },
     "share": {
       "createShareFailed": "创建分享失败，请重试！",
@@ -135,6 +136,10 @@
       "cancelShareFailed": "取消分享失败，请重试！",
       "cancelShareSuccess": "取消分享成功！",
       "sharing": "分享中"
+    },
+    "contentArea": {
+      "addCanvas": "新稿布",
+      "addResource": "新资源"
     }
   },
   "shareContent": {
@@ -229,7 +234,9 @@
     },
     "directory": {
       "resourceCount": "{{count}} 个内容",
-      "searchPlaceholder": "搜索资源..."
+      "resourcesSearchPlaceholder": "搜索资源...",
+      "canvasesSearchPlaceholder": "搜索稿布...",
+      "conversationsSearchPlaceholder": "搜索会话..."
     },
     "quickSearch": {
       "suggest": "建议",
@@ -354,7 +361,9 @@
       "storageSize": "存储存储",
       "vectorSize": "向量存储",
       "indexStatus": "索引状态",
-      "referenced": "{{count}} 被引用"
+      "referenced": "{{count}} 被引用",
+      "weblink": "网页链接",
+      "text": "文本"
     }
   },
   "loggedHomePage": {

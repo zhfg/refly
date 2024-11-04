@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Tabs, Tooltip, Splitter } from 'antd';
+import { Button, Tabs, Tooltip, Splitter, Dropdown, MenuProps } from 'antd';
 
 import { ResourceView } from '../resource-view';
 import { CanvasEditor } from '../canvas';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
+import { useNewCanvasModalStoreShallow } from '@refly-packages/ai-workspace-common/stores/new-canvas-modal';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
+import { PiPlusBold } from 'react-icons/pi';
 
 import { closestCenter, DndContext } from '@dnd-kit/core';
 import { DragEndEvent, PointerSensor, useSensor } from '@dnd-kit/core';
@@ -38,8 +40,8 @@ const DraggableTabNode = ({ className, children, ...props }: DraggableTabPanePro
   );
 };
 
-export const ContentArea = (props: { projectId: string }) => {
-  const { projectId } = props;
+export const ContentArea = (props: { projectId: string; setBindResourceModalVisible: (visible: boolean) => void }) => {
+  const { projectId, setBindResourceModalVisible } = props;
   const { t } = useTranslation();
 
   const { tabsMap, activeTabMap, setProjectTabs, setActiveTab, handleDeleteTab } = useProjectTabs();
@@ -50,6 +52,11 @@ export const ContentArea = (props: { projectId: string }) => {
     pages: state.pages,
     setPages: state.setPages,
     setIsSearchOpen: state.setIsSearchOpen,
+  }));
+
+  const newCanvasModalStore = useNewCanvasModalStoreShallow((state) => ({
+    setNewCanvasModalVisible: state.setNewCanvasModalVisible,
+    setSelectedProjectId: state.setSelectedProjectId,
   }));
 
   const tabItems = tabs.map((item) => ({
@@ -91,6 +98,34 @@ export const ContentArea = (props: { projectId: string }) => {
     setDeckSize(0);
   }, [activeTab]);
 
+  const handleAddNewCanvas = () => {
+    newCanvasModalStore.setSelectedProjectId(projectId);
+    newCanvasModalStore.setNewCanvasModalVisible(true);
+  };
+
+  const handleAddNewResource = () => {
+    setBindResourceModalVisible(true);
+  };
+
+  const items: MenuProps['items'] = [
+    {
+      key: 'addCanvas',
+      label: (
+        <div className="flex items-center" onClick={handleAddNewCanvas}>
+          {t('projectDetail.contentArea.addCanvas')}
+        </div>
+      ),
+    },
+    {
+      key: 'addResource',
+      label: (
+        <div className="flex items-center" onClick={handleAddNewResource}>
+          {t('projectDetail.contentArea.addResource')}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="h-full relative flex flex-col">
       <Tabs
@@ -102,6 +137,13 @@ export const ContentArea = (props: { projectId: string }) => {
         activeKey={activeTab?.key}
         onChange={onChange}
         onEdit={onEdit}
+        addIcon={
+          <Dropdown menu={{ items }} placement="bottomLeft">
+            <div className="h-[40px] w-[24px] flex items-center justify-center">
+              <PiPlusBold />
+            </div>
+          </Dropdown>
+        }
         renderTabBar={(tabBarProps, DefaultTabBar) => (
           <DndContext sensors={[sensor]} onDragEnd={onDragEnd} collisionDetection={closestCenter}>
             <SortableContext items={tabs.map((tab) => tab.key)} strategy={horizontalListSortingStrategy}>

@@ -19,10 +19,11 @@ export type StateField<T> = {
 };
 
 export interface ResourceState {
+  copilotSize: number;
   currentResourceId: string;
 
   resource: StateField<Resource | null>;
-
+  setCopilotSize: (size: number) => void;
   setCurrentResourceId: (resourceId: string) => void;
   setResource: (resource: Resource) => void;
 
@@ -32,11 +33,17 @@ export interface ResourceState {
 export const useResourceStore = create<ResourceState>()(
   persist(
     immer((set, get) => ({
+      copilotSize: 0,
       currentResourceId: '',
       resource: {
         data: null,
         loading: false,
       },
+
+      setCopilotSize: (size) =>
+        set((state) => {
+          state.copilotSize = size;
+        }),
 
       setCurrentResourceId: (resourceId) =>
         set((state) => {

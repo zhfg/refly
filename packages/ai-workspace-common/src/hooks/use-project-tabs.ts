@@ -1,4 +1,8 @@
-import { ProjectTab, useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
+import {
+  ProjectTab,
+  useProjectStore,
+  useProjectStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/project';
 
 export const useProjectTabs = () => {
   const projectStore = useProjectStoreShallow((state) => ({
@@ -8,8 +12,8 @@ export const useProjectTabs = () => {
     setProjectActiveTab: state.setProjectActiveTab,
   }));
 
-  const tabsMap = projectStore.tabs;
-  const activeTabMap = projectStore.activeTab;
+  const tabsMap = useProjectStore.getState().projectTabs;
+  const activeTabMap = useProjectStore.getState().projectActiveTab;
 
   const handleAddTab = (newTab: ProjectTab) => {
     const tabs = tabsMap[newTab.projectId] || [];
