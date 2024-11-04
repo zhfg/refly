@@ -1033,12 +1033,6 @@
       "errorTipTitle": "Send Failed",
       "errorTip": "Please adjust the skill configuration and try again"
     },
-    "chatMode": {
-      "title": "Chat Mode",
-      "normal": "Normal Chat",
-      "noContext": "No Context Chat",
-      "wholeSpace": "Whole Space Chat"
-    },
     "webSearch": {
       "title": "Web Search",
       "enable": "Enable",

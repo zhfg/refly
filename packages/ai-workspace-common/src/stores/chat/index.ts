@@ -7,16 +7,16 @@ import { ModelInfo, SkillContext, SkillTemplateConfig } from '@refly/openapi-sch
 import { IntentResult } from '@refly-packages/ai-workspace-common/hooks/use-handle-ai-canvas';
 
 // types
-import type { CanvasEditConfig } from '@refly/utils';
+import type { CanvasEditConfig, InPlaceActionType } from '@refly/utils';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
-export type ChatMode = 'normal' | 'noContext' | 'wholeSpace';
 export type ChatBehavior = 'askIntentMatch' | 'askFollowUp' | 'askNew';
 
 export interface MessageIntentContext {
   source: MessageIntentSource;
   isNewConversation: boolean;
   canvasEditConfig?: CanvasEditConfig;
+  inPlaceActionType?: InPlaceActionType;
   projectContext?: {
     projectId: string;
     canvasId?: string;
@@ -25,8 +25,8 @@ export interface MessageIntentContext {
     resourceId?: string; // may sendMessage from resource's copilot
   };
   convId?: string;
-  chatMode?: ChatMode;
   enableWebSearch?: boolean;
+  enableKnowledgeBaseSearch?: boolean;
 }
 
 export interface ChatState {
@@ -45,7 +45,7 @@ export interface ChatState {
   modelList: ModelInfo[];
   selectedModel: ModelInfo;
   enableWebSearch: boolean;
-  chatMode: ChatMode;
+  enableKnowledgeBaseSearch: boolean;
   intentMatcher: IntentResult | undefined;
 
   // method
@@ -58,7 +58,7 @@ export interface ChatState {
   setSelectedModel: (val: ModelInfo) => void;
   setModelList: (val: ModelInfo[]) => void;
   setEnableWebSearch: (val: boolean) => void;
-  setChatMode: (val: ChatMode) => void;
+  setEnableKnowledgeBaseSearch: (val: boolean) => void;
   setIntentMatcher: (val: IntentResult | undefined) => void;
   resetState: () => void;
 }
@@ -79,6 +79,7 @@ const defaultConfigurableState = {
     },
   ] as ModelInfo[],
   enableWebSearch: true,
+  enableKnowledgeBaseSearch: true,
 };
 
 export const defaultExtraState = {
@@ -92,7 +93,6 @@ export const defaultExtraState = {
   newQAText: '',
   isGenTitle: false,
   invokeParams: undefined,
-  chatMode: 'normal' as ChatMode, // future support memory config
   intentMatcher: undefined,
 };
 
@@ -120,7 +120,7 @@ export const useChatStore = create<ChatState>()(
         setSelectedModel: (val: ModelInfo) => set({ selectedModel: val }),
         setModelList: (val: ModelInfo[]) => set({ modelList: val }),
         setEnableWebSearch: (val: boolean) => set({ enableWebSearch: val }),
-        setChatMode: (val: ChatMode) => set({ chatMode: val }),
+        setEnableKnowledgeBaseSearch: (val: boolean) => set({ enableKnowledgeBaseSearch: val }),
         setIntentMatcher: (val: IntentResult | undefined) => set({ intentMatcher: val }),
         resetState: () => {
           console.log('trigger resetState');

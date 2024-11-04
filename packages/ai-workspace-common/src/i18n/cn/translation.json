@@ -1045,14 +1045,13 @@
       "errorTipTitle": "发送失败",
       "errorTip": "请调整技能配置后再重试"
     },
-    "chatMode": {
-      "title": "聊天模式",
-      "normal": "直接提问",
-      "noContext": "不带上下文提问",
-      "wholeSpace": "在整个空间提问"
-    },
     "webSearch": {
       "title": "全网搜索",
+      "enable": "启用",
+      "disable": "禁用"
+    },
+    "knowledgeBaseSearch": {
+      "title": "知识库搜索",
       "enable": "启用",
       "disable": "禁用"
     },

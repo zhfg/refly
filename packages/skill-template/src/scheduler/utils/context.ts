@@ -1,4 +1,4 @@
-import { ChatMode, GraphState, IContext, SkillContextContentItemMetadata } from '../types';
+import { GraphState, IContext, SkillContextContentItemMetadata } from '../types';
 import {
   countContentTokens,
   countContextTokens,
@@ -47,8 +47,9 @@ export async function prepareContext(
   ctx.ctxThis.emitEvent({ event: 'log', content: `Start to prepare context...` }, ctx.configSnapshot);
 
   const enableWebSearch = ctx.tplConfig?.enableWebSearch?.value;
-  const chatMode = ctx.tplConfig?.chatMode?.value as ChatMode;
+  const enableKnowledgeBaseSearch = ctx.tplConfig?.enableKnowledgeBaseSearch?.value;
   ctx.ctxThis.engine.logger.log(`Enable Web Search: ${enableWebSearch}`);
+  ctx.ctxThis.engine.logger.log(`Enable Knowledge Base Search: ${enableKnowledgeBaseSearch}`);
 
   const maxContextTokens = Math.floor(maxTokens * MAX_CONTEXT_RATIO);
   // TODO: think remainingTokens may out of range
@@ -102,7 +103,7 @@ export async function prepareContext(
     canvases: [],
     projects: [],
   };
-  if (remainingTokens > 0 && (hasContext || chatMode === ChatMode.WHOLE_SPACE_SEARCH)) {
+  if (remainingTokens > 0 && (hasContext || enableKnowledgeBaseSearch)) {
     const { contentList = [], resources = [], canvases = [], projects = [] } = ctx.configSnapshot.configurable;
     // prev remove overlapping items in mentioned context
     ctx.ctxThis.engine.logger.log(
@@ -385,8 +386,8 @@ export async function prepareContainerLevelContext(
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<IContext> {
-  const chatMode = ctx.tplConfig?.chatMode?.value as ChatMode;
-  const enableSearchWholeSpace = chatMode === ChatMode.WHOLE_SPACE_SEARCH;
+  const enableKnowledgeBaseSearch = ctx.tplConfig?.enableKnowledgeBaseSearch?.value;
+  const enableSearchWholeSpace = enableKnowledgeBaseSearch;
 
   const processedContext: IContext = {
     contentList: [],
@@ -400,7 +401,7 @@ export async function prepareContainerLevelContext(
   ctx.ctxThis.engine.logger.log(
     `Prepare Container Level Context..., 
      - context: ${safeStringifyJSON(context)}
-     - chatMode: ${chatMode}
+     - enableKnowledgeBaseSearch: ${enableKnowledgeBaseSearch}
      - enableSearchWholeSpace: ${enableSearchWholeSpace}
      - processedContext: ${safeStringifyJSON(processedContext)}`,
   );

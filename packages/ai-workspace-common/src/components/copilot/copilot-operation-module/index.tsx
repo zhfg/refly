@@ -16,7 +16,7 @@ import { ConfigManager } from './config-manager';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
-import { ChatMode, useChatStore, MessageIntentContext } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useChatStore, MessageIntentContext } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 // hooks
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
@@ -55,9 +55,9 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
     setFormErrors: state.setFormErrors,
   }));
 
-  const handleSendMessage = (chatMode: ChatMode, userInput?: string) => {
+  const handleSendMessage = (userInput?: string) => {
     const tplConfig = form?.getFieldValue('tplConfig');
-    const { messageIntentContext, messages = [], enableWebSearch } = useChatStore.getState();
+    const { messageIntentContext, messages = [], enableWebSearch, enableKnowledgeBaseSearch } = useChatStore.getState();
     const { currentSelectedMarks } = useContextPanelStore.getState();
 
     const currentCanvas = currentSelectedMarks?.find(
@@ -81,8 +81,8 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       resourceContext: {
         resourceId: currentResource?.entityId || currentResource?.id,
       },
-      chatMode,
       enableWebSearch,
+      enableKnowledgeBaseSearch,
     };
 
     chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
@@ -99,7 +99,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
   };
 
   const handleInPlaceEditSendMessage = (data: InPlaceSendMessagePayload) => {
-    const { canvasEditConfig, userInput } = data;
+    const { canvasEditConfig, userInput, inPlaceActionType } = data;
     const { messageIntentContext } = useChatStore.getState();
 
     const newMessageIntentContext: Partial<MessageIntentContext> = {
@@ -109,7 +109,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
 
     chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
 
-    handleSendMessage('normal', userInput);
+    handleSendMessage(userInput);
   };
 
   useEffect(() => {
