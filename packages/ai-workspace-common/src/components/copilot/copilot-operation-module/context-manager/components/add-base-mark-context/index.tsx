@@ -61,7 +61,7 @@ export const AddBaseMarkContext = () => {
   };
 
   return (
-    <Badge count={(selectedItems || []).length} size="small" color="#00968F">
+    <Badge count={(selectedItems || []).length} size="small" color="#00968F" style={{ zIndex: 1000 }}>
       <div className="add-base-mark-context">
         <Popover
           position="bottom"
