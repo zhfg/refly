@@ -6,15 +6,14 @@ import { addAIHighlight } from '@refly-packages/editor-core/extensions';
 import { memo, useEffect, useRef, useState } from 'react';
 import Markdown from 'react-markdown';
 import { toast } from 'sonner';
-import { Button } from '../../ui/button';
 import CrazySpinner from '../../ui/icons/crazy-spinner';
 import Magic from '../../ui/icons/magic';
 import { ScrollArea } from '../../ui/scroll-area';
 import AICompletionCommands from '../inline/ai-completion-command';
 import AISelectorCommands from '../inline/ai-selector-commands';
 import { LOCALE } from '@refly/common-types';
-import { editorEmitter, InPlaceEditType } from '@refly/utils/event-emitter/editor';
-import { Input } from '@arco-design/web-react';
+import { editorEmitter, InPlaceEditType, InPlaceActionType } from '@refly/utils/event-emitter/editor';
+import { Input, Button } from '@arco-design/web-react';
 import { cn } from '@refly-packages/editor-component/utils';
 //TODO: I think it makes more sense to create a custom Tiptap extension for this functionality https://tiptap.dev/docs/editor/ai/introduction
 
@@ -33,7 +32,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   const inputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleEmitInPlaceSendMessage = () => {
+  const handleEmitInPlaceSendMessage = (actionType: InPlaceActionType) => {
     if (!inputValue.trim()) return;
 
     const selection = editor.state.selection;
@@ -44,6 +43,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       // Handle block type message
       editorEmitter.emit('inPlaceSendMessage', {
         userInput: inputValue,
+        inPlaceActionType: actionType,
         canvasEditConfig: {
           inPlaceEditType: 'block',
           selectedRange: {
@@ -64,6 +64,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
 
       editorEmitter.emit('inPlaceSendMessage', {
         userInput: inputValue,
+        inPlaceActionType: actionType,
         canvasEditConfig: {
           inPlaceEditType: 'inline',
           selectedRange: {
@@ -84,7 +85,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.keyCode === 13 && (e.ctrlKey || e.shiftKey || e.metaKey)) {
+    if (e.keyCode === 13 && e.shiftKey) {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         e.preventDefault();
 
@@ -105,9 +106,14 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       }
     }
 
+    if (e.keyCode === 13 && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      handleEmitInPlaceSendMessage('edit');
+    }
+
     if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
       e.preventDefault();
-      handleEmitInPlaceSendMessage();
+      handleEmitInPlaceSendMessage('edit');
     }
   };
 
@@ -129,7 +135,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   }, [onOpenChange, editor]);
 
   return (
-    <div className="w-[350px]" ref={ref}>
+    <div className="w-[460px]" ref={ref}>
       {isLoading && (
         <div className="flex items-center px-4 w-full h-12 text-sm font-medium text-purple-500 text-muted-foreground">
           <Magic className="mr-2 w-4 h-4 shrink-0" />
@@ -141,8 +147,8 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       )}
       {!isLoading && (
         <>
-          <div className="relative" cmdk-input-wrapper="">
-            <div className="flex items-center px-4 border-b" cmdk-input-wrapper="">
+          <div className="flex relative flex-row items-center" cmdk-input-wrapper="">
+            <div className="flex flex-1 items-center px-4 border-b" cmdk-input-wrapper="">
               <Magic className="mr-2 w-4 h-4 text-purple-500 shrink-0" />
               <Input.TextArea
                 value={inputValue}
@@ -172,16 +178,27 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                 }}
               />
             </div>
-            <Button
-              size="icon"
-              disabled={!inputValue}
-              className="absolute right-2 top-1/2 w-6 h-6 bg-purple-500 rounded-full -translate-y-1/2 hover:bg-purple-900"
-              onClick={() => {
-                handleEmitInPlaceSendMessage();
-              }}
-            >
-              <ArrowUp className="w-4 h-4" />
-            </Button>
+            <div className="flex flex-row gap-1 mr-2">
+              <Button
+                size="mini"
+                disabled={!inputValue}
+                onClick={() => {
+                  handleEmitInPlaceSendMessage('chat');
+                }}
+              >
+                Chat
+              </Button>
+              <Button
+                type="primary"
+                size="mini"
+                disabled={!inputValue}
+                onClick={() => {
+                  handleEmitInPlaceSendMessage('edit');
+                }}
+              >
+                Edit
+              </Button>
+            </div>
           </div>
           {
             // <AISelectorCommands

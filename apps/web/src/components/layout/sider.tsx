@@ -430,59 +430,6 @@ export const SiderLayout = () => {
                   ))}
                 </div>
               )}
-
-              {recentConversations.length > 0 && (
-                <div className="recent-chats">
-                  {!collapse && (
-                    <div className="recent-section-title">
-                      <div>{t("loggedHomePage.siderMenu.recentChats")}</div>
-                      <div
-                        className="recent-section-title-more"
-                        onClick={() => {
-                          navigate(`/thread`)
-                        }}>
-                        {t("loggedHomePage.siderMenu.viewMore")}
-                        <IconRight
-                          className="arco-icon"
-                          style={{ fontSize: 12 }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {recentConversations.map((chat, index) => (
-                    <MenuItem
-                      className="custom-menu-item"
-                      key={chat?.convId || `chat-${index}`}
-                      onClick={() => {
-                        if (chat.projectId && chat.convId) {
-                          jumpToConv({
-                            projectId: chat.projectId,
-                            convId: chat.convId,
-                            state: {
-                              navigationContext: {
-                                shouldFetchDetail: true,
-                                source: MessageIntentSource.Sider,
-                              },
-                            },
-                          })
-                        } else if (chat.convId) {
-                          jumpToConv({
-                            convId: chat.convId,
-                            state: {
-                              navigationContext: {
-                                shouldFetchDetail: true,
-                                source: MessageIntentSource.Sider,
-                              },
-                            },
-                          })
-                        }
-                      }}>
-                      {chat.title}
-                    </MenuItem>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 

@@ -20,8 +20,10 @@ import { Editor, Range } from '@tiptap/core';
 export const configureSuggestionItems = (param: { entityId: string; entityType: string }) => {
   const createBlockAfterCurrent = (editor: Editor, range: Range, createNodeType: () => void) => {
     const { $from } = editor.state.selection;
+    let endPos = $from.end();
     const currentNode = $from.node();
-    const isEmptyParagraph = currentNode.type.name === 'paragraph' && currentNode.content.size === 1;
+    const isEmptyParagraph =
+      currentNode.type.name === 'paragraph' && currentNode.content.size === range.to - range.from;
 
     // 1. 删除 slash command
     editor.chain().focus().deleteRange(range).run();
@@ -30,7 +32,7 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       createNodeType();
     } else {
       // 2. 在当前 block 后插入新的空 paragraph
-      const endPos = $from.end();
+      endPos -= range.to - range.from;
       editor
         .chain()
         .focus()

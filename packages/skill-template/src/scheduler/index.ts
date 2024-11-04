@@ -14,11 +14,12 @@ import { Icon, SkillInvocationConfig, SkillMeta, SkillTemplateConfigSchema } fro
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
+import { ChatMode } from './types';
+import { CanvasIntentType } from '@refly-packages/common-types';
 // types
 import { GraphState, QueryAnalysis, IContext } from './types';
 // utils
 import { prepareContext } from './utils/context';
-import { buildFinalRequestMessages } from './utils/prompt';
 import { analyzeQueryAndContext, preprocessQuery } from './utils/queryRewrite';
 import { truncateMessages } from './utils/truncator';
 import {
@@ -28,14 +29,14 @@ import {
   ModelContextLimitMap,
   checkHasContext,
 } from './utils/token';
-import { ChatMode } from './types';
-import { CanvasIntentType } from '@refly-packages/common-types';
+import { buildFinalRequestMessages, SkillPromptModule } from './utils/message';
 
 // prompts
 import * as canvasIntentMatcher from './module/canvasIntentMatcher';
 import * as generateCanvas from './module/generateCanvas';
 import * as rewriteCanvas from './module/rewriteCanvas';
 import * as editCanvas from './module/editCanvas';
+import * as commonQnA from './module/commonQnA';
 
 // types
 import { HighlightSelection, SelectedRange } from './module/editCanvas/types';
@@ -47,7 +48,7 @@ export class Scheduler extends BaseSkill {
 
   displayName = {
     en: 'Knowledge Curator',
-    'zh-CN': '知识管家',
+    'zh-CN': 'Refly AI 知识管家',
   };
 
   icon: Icon = { type: 'emoji', value: '🧙‍♂️' };
@@ -59,11 +60,11 @@ export class Scheduler extends BaseSkill {
         inputMode: 'radio',
         labelDict: {
           en: 'Web Search',
-          'zh-CN': '联网搜索',
+          'zh-CN': '全网搜索',
         },
         descriptionDict: {
           en: 'Enable web search',
-          'zh-CN': '启用联网搜索',
+          'zh-CN': '启用全网搜索',
         },
         defaultValue: true,
       },
@@ -329,25 +330,134 @@ Please generate the summary based on these requirements and offer suggestions fo
     return result;
   };
 
-  callGenerateCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { messages = [], query: originalQuery } = state;
-
-    // 确保在使用 configSnapshot 之前初始化它
+  commonPreprocess = async (state: GraphState, config: SkillRunnableConfig, module: SkillPromptModule) => {
     this.configSnapshot ??= config;
+    this.engine.logger.log(`config: ${safeStringifyJSON(this.configSnapshot.configurable)}`);
 
-    const { chatHistory = [], currentSkill, spanId } = config.configurable;
+    const { messages = [], query: originalQuery } = state;
+    const {
+      locale = 'en',
+      chatHistory = [],
+      installedSkills,
+      currentSkill,
+      spanId,
+      modelName,
+      resources,
+      canvases,
+      contentList,
+      projects,
+      projectId,
+      convId,
+    } = this.configSnapshot.configurable;
+
+    const { tplConfig } = config?.configurable || {};
+    const chatMode = tplConfig?.chatMode?.value as ChatMode;
+    const enableWebSearch = tplConfig?.enableWebSearch?.value as boolean;
+
+    let optimizedQuery = '';
+    let mentionedContext: IContext;
+    let context: string = '';
+
+    // preprocess query, ensure query is not too long
+    const query = preprocessQuery(originalQuery, {
+      configSnapshot: this.configSnapshot,
+      ctxThis: this,
+      state: state,
+      tplConfig,
+    });
+    optimizedQuery = query;
+    this.engine.logger.log(`preprocess query: ${query}`);
+
+    // preprocess chat history, ensure chat history is not too long
+    const usedChatHistory = truncateMessages(chatHistory);
+
+    // check if there is any context
+    const hasContext = checkHasContext({
+      contentList,
+      resources,
+      canvases,
+      projects: projects,
+    });
+    this.engine.logger.log(`checkHasContext: ${hasContext}`);
+
+    const maxTokens = ModelContextLimitMap[modelName];
+    const queryTokens = countToken(query);
+    const chatHistoryTokens = countMessagesTokens(usedChatHistory);
+    const remainingTokens = maxTokens - queryTokens - chatHistoryTokens;
+    this.engine.logger.log(
+      `maxTokens: ${maxTokens}, queryTokens: ${queryTokens}, chatHistoryTokens: ${chatHistoryTokens}, remainingTokens: ${remainingTokens}`,
+    );
+
+    const needRewriteQuery = chatMode !== ChatMode.NO_CONTEXT_CHAT && (hasContext || chatHistoryTokens > 0);
+    const needPrepareContext =
+      (chatMode !== ChatMode.NO_CONTEXT_CHAT && hasContext && remainingTokens > 0) ||
+      enableWebSearch ||
+      chatMode === ChatMode.WHOLE_SPACE_SEARCH;
+    this.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`);
+
+    if (needRewriteQuery) {
+      const analyedRes = await analyzeQueryAndContext(query, {
+        configSnapshot: this.configSnapshot,
+        ctxThis: this,
+        state: state,
+        tplConfig,
+      });
+      optimizedQuery = analyedRes.optimizedQuery;
+      mentionedContext = analyedRes.mentionedContext;
+    }
+
+    this.engine.logger.log(`optimizedQuery: ${optimizedQuery}`);
+    this.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
+
+    if (needPrepareContext) {
+      context = await prepareContext(
+        {
+          query: optimizedQuery,
+          mentionedContext,
+          maxTokens: remainingTokens,
+          hasContext,
+        },
+        {
+          configSnapshot: this.configSnapshot,
+          ctxThis: this,
+          state: state,
+          tplConfig,
+        },
+      );
+    }
+
+    this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
+
+    const requestMessages = buildFinalRequestMessages({
+      module,
+      locale,
+      chatHistory: usedChatHistory,
+      messages,
+      needPrepareContext,
+      context,
+      originalQuery: query,
+      rewrittenQuery: optimizedQuery,
+    });
+
+    this.engine.logger.log(`requestMessages: ${safeStringifyJSON(requestMessages)}`);
+
+    return { requestMessages };
+  };
+
+  callGenerateCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+    this.emitEvent({ event: 'log', content: `Start to call generate canvas...` }, config);
+
+    const { projectId, convId, currentSkill, spanId } = config?.configurable || {};
     const { user } = config;
 
-    this.emitEvent({ event: 'log', content: `Start to generate canvas...` }, config);
-
-    const { convId, projectId = '' } = this.configSnapshot.configurable;
+    // Create canvas first
     const res = await this.engine.service.createCanvas(user, {
       title: '',
       initialContent: '',
       projectId,
     });
 
-    // send intent matcher event
+    // Emit intent matcher event
     this.emitEvent(
       {
         event: 'structured_data',
@@ -364,11 +474,14 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     const model = this.engine.chatModel({ temperature: 0.1 });
 
-    const requestMessages = [
-      new SystemMessage(generateCanvas.generateCanvasPrompt),
-      ...chatHistory,
-      new HumanMessage(originalQuery),
-    ];
+    const module = {
+      buildSystemPrompt: generateCanvas.buildGenerateCanvasSystemPrompt,
+      buildUserPrompt: generateCanvas.buildGenerateCanvasUserPrompt,
+      buildContextUserPrompt: generateCanvas.buildGenerateCanvasContextUserPrompt,
+    };
+    const { requestMessages } = await this.commonPreprocess(state, config, module);
+
+    this.emitEvent({ event: 'log', content: `Start to generate canvas...` }, this.configSnapshot);
 
     const responseMessage = await model.invoke(requestMessages, {
       ...config,
@@ -380,7 +493,6 @@ Please generate the summary based on these requirements and offer suggestions fo
     });
 
     this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
-
     this.emitEvent({ event: 'log', content: `Generated canvas successfully!` }, config);
 
     return { messages: [responseMessage], skillCalls: [] };
@@ -503,16 +615,14 @@ Please generate the summary based on these requirements and offer suggestions fo
       maxTokens: 4096,
     });
 
-    // Prepare prompts with selected content context based on edit type
-    const editCanvasUserPrompt = editCanvas.editCanvasUserPrompt(inPlaceEditType, originalQuery, highlightSelection);
-    const editCanvasContext = editCanvas.editCanvasContext(inPlaceEditType, currentCanvas.canvas, highlightSelection);
+    // Get module based on edit type
+    const module: SkillPromptModule = editCanvas.getEditCanvasModule(inPlaceEditType, {
+      canvas: currentCanvas.canvas,
+      selectedContent: highlightSelection,
+    });
 
-    const requestMessages = [
-      new SystemMessage(editCanvas.editCanvasSystemPrompt(inPlaceEditType)),
-      ...chatHistory,
-      new HumanMessage(editCanvasContext),
-      new HumanMessage(editCanvasUserPrompt),
-    ];
+    // Prepare prompts using module functions
+    const { requestMessages } = await this.commonPreprocess(state, config, module);
 
     try {
       const responseMessage = await model.invoke(requestMessages, {
@@ -572,7 +682,82 @@ Please generate the summary based on these requirements and offer suggestions fo
     }
   };
 
-  callCanvasIntentMatcher = async (state: GraphState, config: SkillRunnableConfig): Promise<CanvasIntentType> => {
+  callCommonQnA = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+    this.emitEvent({ event: 'log', content: `Start to call common qna...` }, this.configSnapshot);
+    /**
+     * 1. 基于聊天历史，当前意图识别结果，上下文，以及整体优化之后的 query，调用 scheduler 模型，得到一个最优的技能调用序列
+     * 2. 基于得到的技能调用序列，调用相应的技能
+     */
+
+    this.configSnapshot ??= config;
+
+    const { currentSkill, spanId, resources, canvases, contentList, projects, projectId, convId } =
+      this.configSnapshot.configurable;
+
+    const { tplConfig } = config?.configurable || {};
+
+    const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext); // ensure current canvas exists
+    const currentResource = resources?.find((resource) => resource?.metadata?.isCurrentContext);
+    const canvasEditConfig = (tplConfig?.canvasEditConfig?.value as CanvasEditConfig) || {};
+
+    // Get selected range from metadata
+    const selectedRange = canvasEditConfig?.selectedRange as SelectedRange;
+    const inPlaceEditType = canvasEditConfig?.inPlaceEditType as InPlaceEditType;
+
+    // Extract content context if selection exists
+    // const selectedContent = selectedRange
+    //   ? editCanvas.extractContentAroundSelection(currentCanvas.canvas.content || '', selectedRange)
+    //   : undefined;
+    const highlightSelection = canvasEditConfig?.selection as HighlightSelection; // for qna
+
+    this.emitEvent(
+      {
+        event: 'structured_data',
+        structuredDataKey: 'intentMatcher',
+        content: JSON.stringify({
+          type: CanvasIntentType.Other,
+          projectId,
+          canvasId: currentCanvas?.canvasId,
+          convId,
+          resourceId: currentResource?.resourceId,
+          metadata: {
+            selectedRange,
+            inPlaceEditType,
+            highlightSelection,
+          },
+        }),
+      },
+      config,
+    );
+
+    // common preprocess
+    const module = {
+      buildSystemPrompt: commonQnA.buildCommonQnASystemPrompt,
+      buildContextUserPrompt: commonQnA.buildCommonQnAContextUserPrompt,
+      buildUserPrompt: commonQnA.buildCommonQnAUserPrompt,
+    };
+    const { requestMessages } = await this.commonPreprocess(state, config, module);
+
+    this.emitEvent({ event: 'log', content: `Start to generate an answer...` }, this.configSnapshot);
+
+    const model = this.engine.chatModel({ temperature: 0.1 });
+    const responseMessage = await model.invoke(requestMessages, {
+      ...this.configSnapshot,
+      metadata: {
+        ...this.configSnapshot.metadata,
+        ...currentSkill,
+        spanId,
+      },
+    });
+
+    this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
+
+    this.emitEvent({ event: 'log', content: `Generated an answer successfully!` }, this.configSnapshot);
+
+    return { messages: [responseMessage], skillCalls: [] };
+  };
+
+  callScheduler = async (state: GraphState, config: SkillRunnableConfig): Promise<CanvasIntentType> => {
     try {
       const { query: originalQuery } = state;
 
@@ -640,177 +825,6 @@ Please generate the summary based on these requirements and offer suggestions fo
       this.engine.logger.error(`Error detecting intent: ${err.stack}`);
       return CanvasIntentType.Other;
     }
-  };
-
-  callCommonQnA = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    /**
-     * 1. 基于聊天历史，当前意图识别结果，上下文，以及整体优化之后的 query，调用 scheduler 模型，得到一个最优的技能调用序列
-     * 2. 基于得到的技能调用序列，调用相应的技能
-     */
-
-    this.configSnapshot ??= config;
-    this.emitEvent({ event: 'log', content: `Start to call scheduler...` }, this.configSnapshot);
-
-    const { messages = [], query: originalQuery } = state;
-    const {
-      locale = 'en',
-      chatHistory = [],
-      installedSkills,
-      currentSkill,
-      spanId,
-      modelName,
-      resources,
-      canvases,
-      contentList,
-      projects,
-      projectId,
-      convId,
-    } = this.configSnapshot.configurable;
-
-    const { tplConfig } = config?.configurable || {};
-    const chatMode = tplConfig?.chatMode?.value as ChatMode;
-    const enableWebSearch = tplConfig?.enableWebSearch?.value as boolean;
-
-    const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext); // ensure current canvas exists
-    const currentResource = resources?.find((resource) => resource?.metadata?.isCurrentContext);
-    const canvasEditConfig = (tplConfig?.canvasEditConfig?.value as CanvasEditConfig) || {};
-
-    // Get selected range from metadata
-    const selectedRange = canvasEditConfig?.selectedRange as SelectedRange;
-    const inPlaceEditType = canvasEditConfig?.inPlaceEditType as InPlaceEditType;
-
-    // Extract content context if selection exists
-    // const selectedContent = selectedRange
-    //   ? editCanvas.extractContentAroundSelection(currentCanvas.canvas.content || '', selectedRange)
-    //   : undefined;
-    const highlightSelection = canvasEditConfig?.selection as HighlightSelection; // for qna
-
-    this.emitEvent(
-      {
-        event: 'structured_data',
-        structuredDataKey: 'intentMatcher',
-        content: JSON.stringify({
-          type: CanvasIntentType.Other,
-          projectId,
-          canvasId: currentCanvas?.canvasId,
-          convId,
-          resourceId: currentResource?.resourceId,
-          metadata: {
-            selectedRange,
-            inPlaceEditType,
-            highlightSelection,
-          },
-        }),
-      },
-      config,
-    );
-
-    this.engine.logger.log(`config: ${safeStringifyJSON(this.configSnapshot.configurable)}`);
-
-    let optimizedQuery = '';
-    let mentionedContext: IContext;
-    let context: string = '';
-
-    // preprocess query, ensure query is not too long
-    const query = preprocessQuery(originalQuery, {
-      configSnapshot: this.configSnapshot,
-      ctxThis: this,
-      state: state,
-      tplConfig,
-    });
-    optimizedQuery = query;
-    this.engine.logger.log(`preprocess query: ${query}`);
-
-    // preprocess chat history, ensure chat history is not too long
-    const usedChatHistory = truncateMessages(chatHistory);
-
-    // check if there is any context
-    const hasContext = checkHasContext({
-      contentList,
-      resources,
-      canvases,
-      projects: projects,
-    });
-    this.engine.logger.log(`checkHasContext: ${hasContext}`);
-
-    const maxTokens = ModelContextLimitMap[modelName];
-    const queryTokens = countToken(query);
-    const chatHistoryTokens = countMessagesTokens(usedChatHistory);
-    const remainingTokens = maxTokens - queryTokens - chatHistoryTokens;
-    this.engine.logger.log(
-      `maxTokens: ${maxTokens}, queryTokens: ${queryTokens}, chatHistoryTokens: ${chatHistoryTokens}, remainingTokens: ${remainingTokens}`,
-    );
-
-    const needRewriteQuery = chatMode !== ChatMode.NO_CONTEXT_CHAT && (hasContext || chatHistoryTokens > 0);
-    const needPrepareContext =
-      (chatMode !== ChatMode.NO_CONTEXT_CHAT && hasContext && remainingTokens > 0) ||
-      enableWebSearch ||
-      chatMode === ChatMode.WHOLE_SPACE_SEARCH;
-    this.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`);
-
-    if (needRewriteQuery) {
-      const analyedRes = await analyzeQueryAndContext(query, {
-        configSnapshot: this.configSnapshot,
-        ctxThis: this,
-        state: state,
-        tplConfig,
-      });
-      optimizedQuery = analyedRes.optimizedQuery;
-      mentionedContext = analyedRes.mentionedContext;
-    }
-
-    this.engine.logger.log(`optimizedQuery: ${optimizedQuery}`);
-    this.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
-
-    if (needPrepareContext) {
-      context = await prepareContext(
-        {
-          query: optimizedQuery,
-          mentionedContext,
-          maxTokens: remainingTokens,
-          hasContext,
-        },
-        {
-          configSnapshot: this.configSnapshot,
-          ctxThis: this,
-          state: state,
-          tplConfig,
-        },
-      );
-    }
-
-    this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
-
-    this.emitEvent({ event: 'log', content: `Start to generate an answer...` }, this.configSnapshot);
-    const model = this.engine.chatModel({ temperature: 0.1 });
-
-    const requestMessages = buildFinalRequestMessages({
-      locale,
-      chatHistory: usedChatHistory,
-      messages,
-      needPrepareContext,
-      context,
-      originalQuery: query,
-      rewrittenQuery: optimizedQuery,
-    });
-
-    this.engine.logger.log(`requestMessages: ${safeStringifyJSON(requestMessages)}`);
-
-    const responseMessage = await model.invoke(requestMessages, {
-      ...this.configSnapshot,
-      metadata: {
-        ...this.configSnapshot.metadata,
-        ...currentSkill,
-        spanId,
-      },
-    });
-
-    this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
-
-    this.emitEvent({ event: 'log', content: `Generated an answer successfully!` }, this.configSnapshot);
-    this.emitEvent({ event: 'end' }, this.configSnapshot);
-
-    return { messages: [responseMessage], skillCalls: [] };
   };
 
   genRelatedQuestions = async (state: GraphState, config: SkillRunnableConfig) => {
@@ -972,7 +986,7 @@ Generated question example:
     // workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
     // workflow.addConditionalEdges('direct', this.onDirectSkillCallFinish);
     // workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
-    workflow.addConditionalEdges(START, this.callCanvasIntentMatcher);
+    workflow.addConditionalEdges(START, this.callScheduler);
     // workflow.addEdge(START, 'editCanvas');
     workflow.addEdge('generateCanvas', 'relatedQuestions');
     workflow.addEdge('rewriteCanvas', 'relatedQuestions');

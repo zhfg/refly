@@ -252,7 +252,7 @@
       "contentSelectorIsEmpty": "请选择文本",
       "contentSelector": "内容划线选择器",
       "clearContext": "清空上下文",
-      "addToContext": "添加到聊天",
+      "addToContext": "引用",
       "resource": "资源",
       "resources": "资源",
       "canvas": "稿布",
@@ -375,7 +375,7 @@
       "home": {
         "heading": "建议",
         "askAI": "问问知识管家",
-        "onlineSearch": "AI 联网搜索",
+        "onlineSearch": "AI 全网搜索",
         "collectionSearch": "AI 知识库搜索",
         "showAll": "查看所有{{heading}}"
       },
@@ -436,7 +436,7 @@
         "currentKnowledgeBase": "当前知识库",
         "all": "全部知识库",
         "history": "历史已阅读",
-        "internet": "联网搜索"
+        "internet": "全网搜索"
       },
       "seeKnowledgeLibrary": "查看知识库",
       "status": {
@@ -856,7 +856,7 @@
           "current": "当前网页",
           "all": "全部知识库",
           "selected": "选中网页",
-          "internet": "联网搜索"
+          "internet": "全网搜索"
         },
         "selectedWeblink": {
           "title": "基于选中网页提问："
@@ -1052,7 +1052,7 @@
       "wholeSpace": "在整个空间提问"
     },
     "webSearch": {
-      "title": "联网搜索",
+      "title": "全网搜索",
       "enable": "启用",
       "disable": "禁用"
     },
