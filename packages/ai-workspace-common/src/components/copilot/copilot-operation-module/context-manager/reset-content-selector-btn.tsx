@@ -38,7 +38,8 @@ export const ResetContentSelectorBtn = () => {
       <Button
         size="mini"
         type="outline"
-        style={{ fontSize: 10, height: 18, borderRadius: 4, borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
+        className="text-xs h-6 rounded border border-gray-300"
+        style={{ borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
         icon={<IconRefresh />}
         onClick={() => {
           contextPanelStore.resetSelectedTextCardState();

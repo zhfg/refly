@@ -279,8 +279,8 @@
       "contextRequiredTip": "Please select at least 1 {{type}}",
       "contextLimitTip": "{{type}} is limit to {{limit}} , and you have selected {{currentCount}}.",
       "popoverSelector": {
-        "webPlaceholder": "Search notes, resources, or knowledge bases...",
-        "extensionPlaceholder": "Search web pages, notes, resources, or knowledge bases...",
+        "webPlaceholder": "Search canvases, resources, or projects...",
+        "extensionPlaceholder": "Search web pages, canvases, resources, or projects...",
         "footer": {
           "navigate": "Navigate",
           "toggle": "Toggle",
@@ -1041,6 +1041,10 @@
       "title": "Skill Configuration",
       "errorTipTitle": "Send Failed",
       "errorTip": "Please adjust the skill configuration and try again"
+    },
+    "projectSelector": {
+      "title": "Select Project",
+      "tip": "Selected project will be used to save the canvas. If no project is selected, a new one will be created automatically."
     },
     "chatMode": {
       "title": "Chat Mode",

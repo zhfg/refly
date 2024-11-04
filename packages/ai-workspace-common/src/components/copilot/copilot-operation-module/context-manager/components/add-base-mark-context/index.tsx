@@ -39,10 +39,11 @@ export const AddBaseMarkContext = ({
         }
       >
         <Button
-          icon={<IconPlus style={{ fontSize: 10 }} />}
+          icon={<IconPlus />}
           size="mini"
           type="outline"
-          style={{ fontSize: 10, height: 18, borderRadius: 4, borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
+          className="text-xs h-6 rounded border border-gray-300"
+          style={{ borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
         />
       </Popover>
     </div>

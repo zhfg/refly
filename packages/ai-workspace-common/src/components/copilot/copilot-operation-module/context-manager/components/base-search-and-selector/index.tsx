@@ -199,7 +199,7 @@ export const BaseSearchAndSelector = ({
     heading: item.title,
     data: item,
     type: item.type,
-    icon: getTypeIcon(item.type, { fontSize: 10, width: 10, height: 10 }),
+    icon: getTypeIcon(item.type, { width: 12, height: 12 }),
     onItemClick: (item: Mark) => {
       onSelect(item);
     },

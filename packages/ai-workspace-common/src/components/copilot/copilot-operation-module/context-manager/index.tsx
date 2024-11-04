@@ -220,7 +220,7 @@ export const ContextManager = () => {
 
           <ResetContentSelectorBtn />
 
-          <ContextFilter processContextFilterProps={processContextFilterProps} />
+          {/* <ContextFilter processContextFilterProps={processContextFilterProps} /> */}
 
           {!isWeb && currentSelectedContentList?.length > 0 && <SaveToKnowledgeBase />}
 

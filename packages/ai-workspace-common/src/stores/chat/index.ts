@@ -29,6 +29,11 @@ export interface MessageIntentContext {
   enableWebSearch?: boolean;
 }
 
+export interface ProjectInfo {
+  projectId: string;
+  title: string;
+}
+
 export interface ChatState {
   // state
   messages: ClientChatMessage[];
@@ -44,6 +49,7 @@ export interface ChatState {
   // modelName?: string;
   modelList: ModelInfo[];
   selectedModel: ModelInfo;
+  selectedProject?: ProjectInfo;
   enableWebSearch: boolean;
   chatMode: ChatMode;
   intentMatcher: IntentResult | undefined;
@@ -56,6 +62,7 @@ export interface ChatState {
   setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) => void;
   setMessageIntentContext: (val: MessageIntentContext) => void;
   setSelectedModel: (val: ModelInfo) => void;
+  setSelectedProject: (val: ProjectInfo) => void;
   setModelList: (val: ModelInfo[]) => void;
   setEnableWebSearch: (val: boolean) => void;
   setChatMode: (val: ChatMode) => void;
@@ -94,6 +101,8 @@ export const defaultExtraState = {
   invokeParams: undefined,
   chatMode: 'normal' as ChatMode, // future support memory config
   intentMatcher: undefined,
+
+  selectedProject: null,
 };
 
 export const defaultState = {
@@ -118,6 +127,7 @@ export const useChatStore = create<ChatState>()(
         setInvokeParams: (val: { skillContext?: SkillContext; tplConfig?: SkillTemplateConfig }) =>
           set({ invokeParams: val }),
         setSelectedModel: (val: ModelInfo) => set({ selectedModel: val }),
+        setSelectedProject: (val: ProjectInfo) => set({ selectedProject: val }),
         setModelList: (val: ModelInfo[]) => set({ modelList: val }),
         setEnableWebSearch: (val: boolean) => set({ enableWebSearch: val }),
         setChatMode: (val: ChatMode) => set({ chatMode: val }),
@@ -129,7 +139,7 @@ export const useChatStore = create<ChatState>()(
       }),
       {
         name: 'chat-storage',
-        partialize: (state) => ({ selectedModel: state.selectedModel }),
+        partialize: (state) => ({ selectedModel: state.selectedModel, selectedProject: state.selectedProject }),
       },
     ),
   ),

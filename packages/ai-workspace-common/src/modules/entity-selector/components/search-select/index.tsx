@@ -1,13 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import { Button, Divider, Input, Message, Select, Tooltip } from '@arco-design/web-react';
+import { useEffect, useState } from 'react';
+import { Button, Divider, Input, message, Select, SelectProps, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { SearchDomain } from '@refly/openapi-schema';
-import { SelectProps } from '@arco-design/web-react/es/Select/interface';
 import { DataFetcher } from '@refly-packages/ai-workspace-common/modules/entity-selector/utils';
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/hooks';
 import { HiOutlinePlus } from 'react-icons/hi2';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
-import { useDebouncedCallback } from 'use-debounce';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
@@ -22,45 +20,24 @@ export const SearchSelect = (props: SearchSelectProps) => {
   const { t } = useTranslation();
   const { domain, fetchData, allowCreateNewEntity = false, defaultValue, onChange, onSelect, ...selectProps } = props;
 
-  const { loadMore, dataList, setDataList, isRequesting, handleValueChange, resetState, mode } = useFetchOrSearchList({
+  const { loadMore, dataList, setDataList, isRequesting, handleValueChange, resetState } = useFetchOrSearchList({
     domain,
     fetchData,
   });
-  const refCanTriggerLoadMore = useRef(true);
 
   const [newEntityName, setNewEntityName] = useState('');
 
   const options = dataList?.map((item) => ({
-    label: <span dangerouslySetInnerHTML={{ __html: item?.title }}></span>,
+    label: item?.title,
     value: item?.id,
   }));
 
   useEffect(() => {
-    console.log('defaultValue', defaultValue);
     loadMore();
     return () => {
       resetState();
     };
   }, []);
-
-  const popupScrollHandler = useDebouncedCallback((element: HTMLDivElement) => {
-    // Don't trigger loadMore when in search mode
-    if (mode === 'search') {
-      return;
-    }
-
-    const { scrollTop, scrollHeight, clientHeight } = element;
-    const scrollBottom = scrollHeight - (scrollTop + clientHeight);
-
-    if (scrollBottom < 10) {
-      if (!isRequesting && refCanTriggerLoadMore.current) {
-        loadMore();
-        refCanTriggerLoadMore.current = false;
-      }
-    } else {
-      refCanTriggerLoadMore.current = true;
-    }
-  }, 100);
 
   const [value, setValue] = useState<any>(defaultValue);
   const [popupVisible, setPopupVisible] = useState(false);
@@ -72,7 +49,7 @@ export const SearchSelect = (props: SearchSelectProps) => {
     }
 
     if (!newEntityName) {
-      Message.warning(t('entitySelector.createEntity.newProjectNameIsEmpty'));
+      message.warning(t('entitySelector.createEntity.newProjectNameIsEmpty'));
       return;
     }
 
@@ -98,17 +75,17 @@ export const SearchSelect = (props: SearchSelectProps) => {
 
   return (
     <Select
-      size="large"
+      size="middle"
       getPopupContainer={getPopupContainer}
       allowClear
       showSearch
       placeholder={t(`entitySelector.placeholder.${domain}`)}
       defaultValue={defaultValue}
       filterOption={false}
-      popupVisible={popupVisible}
+      // popupVisible={popupVisible}
       options={options}
       loading={isRequesting}
-      onInputValueChange={(value) => {
+      onSearch={(value) => {
         handleValueChange(value, [domain]);
       }}
       onClick={() => {
@@ -117,6 +94,8 @@ export const SearchSelect = (props: SearchSelectProps) => {
       }}
       value={value}
       onChange={(value, option) => {
+        console.log('onChange value', value);
+        console.log('onChange option', option);
         setValue(value);
         if (props.mode !== 'multiple') {
           setPopupVisible(false);
@@ -125,8 +104,7 @@ export const SearchSelect = (props: SearchSelectProps) => {
           onChange(value, option);
         }
       }}
-      onPopupScroll={popupScrollHandler}
-      triggerProps={{ onClickOutside: () => setPopupVisible(false) }}
+      onPopupScroll={() => loadMore()}
       dropdownRender={(menu) => (
         <div>
           {menu}
@@ -145,23 +123,17 @@ export const SearchSelect = (props: SearchSelectProps) => {
                   size="small"
                   style={{ marginRight: 8 }}
                   value={newEntityName}
-                  onChange={(value) => setNewEntityName(value)}
+                  onChange={(e) => setNewEntityName(e.target.value)}
                   onPressEnter={handleCreateNewEntity}
                 />
-                <Button
-                  style={{ fontSize: 14, padding: '0 2px' }}
-                  type="text"
-                  size="mini"
-                  onClick={handleCreateNewEntity}
-                >
+                <Button className="text-sm py-1" type="text" size="small" onClick={handleCreateNewEntity}>
                   {createLoading ? (
                     <AiOutlineLoading3Quarters />
                   ) : (
                     <Tooltip
                       getPopupContainer={getPopupContainer}
-                      position="right"
-                      mini
-                      content={t(`entitySelector.createEntity.${domain}`)}
+                      placement="right"
+                      title={t(`entitySelector.createEntity.${domain}`)}
                     >
                       <HiOutlinePlus />
                     </Tooltip>

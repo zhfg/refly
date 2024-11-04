@@ -19,6 +19,8 @@ export const useProjectTabs = () => {
     const tabs = tabsMap[newTab.projectId] || [];
     if (!tabs?.some((tab) => tab.key === newTab.key)) {
       projectStore.setProjectTabs(newTab.projectId, [...tabs, newTab]);
+    } else {
+      handleUpdateTab(newTab.projectId, newTab.key, newTab);
     }
     projectStore.setProjectActiveTab(newTab.projectId, newTab.key);
   };

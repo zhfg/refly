@@ -28,8 +28,9 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 
-interface InvokeParams {
+export interface InvokeParams {
   chatMode?: ChatMode;
+  projectId?: string;
   skillContext?: SkillContext;
   tplConfig?: SkillTemplateConfig;
   messageIntentContext?: MessageIntentContext;

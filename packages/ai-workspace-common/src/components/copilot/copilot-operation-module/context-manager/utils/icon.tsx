@@ -1,18 +1,19 @@
-import { IconFile, IconBook, IconFolder, IconLink } from '@arco-design/web-react/icon';
+import { IconLink } from '@arco-design/web-react/icon';
+import { IconCanvas, IconProject, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { MarkType } from '@refly/common-types';
 
 export const getTypeIcon = (markType: MarkType, style?: any) => {
   switch (markType) {
     case 'resource':
-      return <IconFile style={style} />;
+      return <IconResource style={style} />;
     case 'resourceSelection':
-      return <IconFile style={style} />;
+      return <IconResource style={style} />;
     case 'canvas':
-      return <IconBook style={style} />;
+      return <IconCanvas style={style} />;
     case 'canvasSelection':
-      return <IconBook style={style} />;
+      return <IconCanvas style={style} />;
     case 'project':
-      return <IconFolder style={style} />;
+      return <IconProject style={style} />;
     case 'extensionWeblink':
       return <IconLink style={style} />;
     case 'extensionWeblinkSelection':

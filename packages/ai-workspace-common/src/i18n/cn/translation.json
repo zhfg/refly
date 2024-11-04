@@ -1054,6 +1054,10 @@
       "errorTipTitle": "发送失败",
       "errorTip": "请调整技能配置后再重试"
     },
+    "projectSelector": {
+      "title": "选择项目",
+      "tip": "所选项目将用于保存稿布，若未选择将自动新建项目。"
+    },
     "chatMode": {
       "title": "聊天模式",
       "normal": "直接提问",
