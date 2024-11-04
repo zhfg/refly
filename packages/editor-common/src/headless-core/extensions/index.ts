@@ -20,26 +20,6 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import Youtube from '@tiptap/extension-youtube';
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 
-const PlaceholderExtension = Placeholder.configure({
-  placeholder: ({ node, editor, pos }) => {
-    const defaultPlaceholder = "Write something, or press 'space' for AI, '/' for commands";
-
-    console.log('node', node.type.name);
-    if (node.type.name === 'heading') {
-      return `Heading ${node.attrs.level}`;
-    } else if (node.type.name === 'paragraph') {
-      return defaultPlaceholder;
-    } else if (node.type.name === 'task_item') {
-      return 'Task item';
-    } else if (node.type.name === 'codeBlock') {
-      return '';
-    } else {
-      return defaultPlaceholder;
-    }
-  },
-  includeChildren: true,
-});
-
 const simpleExtensions = [
   TiptapUnderline,
   TextStyle,
@@ -76,13 +56,15 @@ const Horizontal = HorizontalRule.extend({
 
 export * from './ai-highlight';
 export * from './slash-command';
+export * from './space-ai-command';
+export * from './double-plus-ai-command';
 export * from './hljs';
 export {
   CodeBlockLowlight,
   Horizontal as HorizontalRule,
   ImageResizer,
   InputRule,
-  PlaceholderExtension as Placeholder,
+  Placeholder,
   StarterKit,
   TaskItem,
   TaskList,

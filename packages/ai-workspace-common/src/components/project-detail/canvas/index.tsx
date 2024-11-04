@@ -20,7 +20,7 @@ import { EditorRoot } from '@refly-packages/editor-core/components';
 import { EditorContent, EditorInstance } from '@refly-packages/editor-core/components';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
 import { configureHighlightJs, ImageResizer, handleCommandNavigation } from '@refly-packages/editor-core/extensions';
-import { defaultExtensions } from '@refly-packages/editor-component/extensions';
+import { defaultExtensions, Placeholder } from '@refly-packages/editor-component/extensions';
 import { createUploadFn } from '@refly-packages/editor-component/image-upload';
 import { configureSlashCommand } from '@refly-packages/editor-component/slash-command';
 import { HocuspocusProvider } from '@hocuspocus/provider';
@@ -360,6 +360,31 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
     scope: state.scope,
   }));
 
+  const createPlaceholderExtension = () => {
+    return Placeholder.configure({
+      placeholder: ({ node }) => {
+        const defaultPlaceholder = t('knowledgeBase.canvas.editor.placeholder.default', {
+          defaultValue: "Write something, or press 'space' for AI, '/' for commands",
+        });
+
+        switch (node.type.name) {
+          case 'heading':
+            return t('editor.placeholder.heading', {
+              level: node.attrs.level,
+              defaultValue: `Heading ${node.attrs.level}`,
+            });
+          case 'paragraph':
+            return defaultPlaceholder;
+          case 'codeBlock':
+            return '';
+          default:
+            return defaultPlaceholder;
+        }
+      },
+      includeChildren: true,
+    });
+  };
+
   // initial block selection
   const baseUrl = getClientOrigin();
   const { initContentSelectorElem, addInlineMarkForNote } = useContentSelector(
@@ -400,6 +425,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
   const extensions = [
     ...defaultExtensions,
     slashCommand,
+    createPlaceholderExtension(),
     Collaboration.configure({
       document: websocketProvider.document,
     }),

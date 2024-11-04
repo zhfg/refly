@@ -4,7 +4,6 @@ import {
   CodeBlockLowlight,
   GlobalDragHandle,
   HorizontalRule,
-  Placeholder,
   StarterKit,
   TaskItem,
   TaskList,
@@ -12,6 +11,9 @@ import {
   TiptapLink,
   UpdatedImage,
   Youtube,
+  SpaceAICommand,
+  DoublePlusAICommand,
+  Placeholder,
 } from '@refly-packages/editor-core/extensions';
 import { UploadImagesPlugin } from '@refly-packages/editor-core/plugins';
 
@@ -21,7 +23,6 @@ import { common, createLowlight } from 'lowlight';
 //TODO I am using cx here to get tailwind autocomplete working, idk if someone else can write a regex to just capture the class key in objects
 const aiHighlight = AIHighlight;
 //You can overwrite the placeholder with your own configuration
-const placeholder = Placeholder;
 const tiptapLink = TiptapLink.configure({
   HTMLAttributes: {
     class: cx(
@@ -126,7 +127,6 @@ const characterCount = CharacterCount.configure();
 
 export const defaultExtensions = [
   starterKit,
-  placeholder,
   tiptapLink,
   tiptapImage,
   // updatedImage,
@@ -137,5 +137,9 @@ export const defaultExtensions = [
   // codeBlockLowlight,
   youtube,
   characterCount,
+  SpaceAICommand,
+  DoublePlusAICommand,
   GlobalDragHandle,
 ];
+
+export { Placeholder };

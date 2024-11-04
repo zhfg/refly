@@ -247,6 +247,14 @@
       "createNoteFailed": "创建笔记失败，请重试！",
       "defaultTitle": "未命名"
     },
+    "canvas": {
+      "editor": {
+        "placeholder": {
+          "default": "写点什么，或按空格键激活 AI，或按 '/' 键激活命令",
+          "heading": "标题 {{level}}"
+        }
+      }
+    },
     "context": {
       "contentSelectorAddSuccess": "添加成功",
       "contentSelectorIsEmpty": "请选择文本",
