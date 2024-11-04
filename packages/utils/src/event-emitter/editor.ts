@@ -1,6 +1,7 @@
 import mitt from 'mitt';
 
 export type InPlaceEditType = 'inline' | 'block';
+export type InPlaceActionType = 'chat' | 'edit';
 
 export interface CanvasEditConfig {
   selection?: {
@@ -17,6 +18,7 @@ export interface CanvasEditConfig {
 
 export interface InPlaceSendMessagePayload {
   userInput: string;
+  inPlaceActionType?: InPlaceActionType;
   canvasEditConfig?: CanvasEditConfig;
 }
 
