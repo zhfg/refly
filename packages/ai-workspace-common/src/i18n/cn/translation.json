@@ -251,6 +251,7 @@
       "contentSelectorAddSuccess": "添加成功",
       "contentSelectorIsEmpty": "请选择文本",
       "contentSelector": "内容划线选择器",
+      "addContext": "添加上下文",
       "clearContext": "清空上下文",
       "addToContext": "引用",
       "resource": "资源",
@@ -1070,7 +1071,8 @@
       "brainstormIdeas": "脑暴写作灵感",
       "writeTwitterArticle": "写一篇 Twitter 原创文章",
       "installSkillHint": "你还未添加任何助手，点我添加",
-      "installSkillHintTitle": "添加助手"
+      "installSkillHintTitle": "添加助手",
+      "openCanvas": "打开稿布"
     },
     "contextItem": {
       "current": "当前"

@@ -252,6 +252,7 @@
       "contentSelectorAddSuccess": "Add Success",
       "contentSelectorIsEmpty": "Please select text",
       "clearSelector": "Clear Selection",
+      "addContext": "Add Context",
       "clearContext": "Clear Context",
       "addToContext": "Quote",
       "resource": "Resource",
@@ -1053,7 +1054,8 @@
       "brainstormIdeas": "Brainstorm Ideas",
       "writeTwitterArticle": "Write a Twitter Original Article",
       "installSkillHint": "You haven't added any assistants, click me to add",
-      "installSkillHintTitle": "Add Assistant"
+      "installSkillHintTitle": "Add Assistant",
+      "openCanvas": "Open Canvas"
     },
     "contextItem": {
       "current": "Current "

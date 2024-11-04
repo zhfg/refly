@@ -15,6 +15,7 @@ import { LOCALE } from '@refly/common-types';
 import { editorEmitter, InPlaceEditType, InPlaceActionType } from '@refly/utils/event-emitter/editor';
 import { Input, Button } from '@arco-design/web-react';
 import { cn } from '@refly-packages/editor-component/utils';
+import { getOsType } from '@refly-packages/utils/env';
 //TODO: I think it makes more sense to create a custom Tiptap extension for this functionality https://tiptap.dev/docs/editor/ai/introduction
 
 interface AISelectorProps {
@@ -24,6 +25,19 @@ interface AISelectorProps {
   inPlaceEditType: InPlaceEditType;
 }
 
+const getShortcutSymbols = (osType: string) => {
+  if (osType === 'OSX') {
+    return {
+      edit: '↵', // Enter symbol
+      chat: '⌘↵', // Command + Enter symbols
+    };
+  }
+  return {
+    edit: 'Enter',
+    chat: 'Ctrl+Enter',
+  };
+};
+
 export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditType }: AISelectorProps) => {
   const { editor } = useEditor();
   const [inputValue, setInputValue] = useState('');
@@ -31,6 +45,9 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   const ref = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const osType = getOsType();
+  const shortcutSymbols = getShortcutSymbols(osType);
 
   const handleEmitInPlaceSendMessage = (actionType: InPlaceActionType) => {
     if (!inputValue.trim()) return;
@@ -81,7 +98,6 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
     }
 
     setIsLoading(true);
-    handleBubbleClose?.();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -108,13 +124,20 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
 
     if (e.keyCode === 13 && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
-      handleEmitInPlaceSendMessage('edit');
+      handleEmitInPlaceSendMessage('chat');
     }
 
     if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
       e.preventDefault();
       handleEmitInPlaceSendMessage('edit');
     }
+  };
+
+  // payload: Omit<InPlaceSendMessagePayload, 'userInput'>
+  const handleAskAIResponse = () => {
+    handleBubbleClose?.();
+    // onOpenChange(false);
+    // editorEmitter.emit('bubbleClose');
   };
 
   useEffect(() => {
@@ -134,6 +157,14 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
     };
   }, [onOpenChange, editor]);
 
+  useEffect(() => {
+    editorEmitter.on('askAIResponse', handleAskAIResponse);
+
+    return () => {
+      editorEmitter.off('askAIResponse', handleAskAIResponse);
+    };
+  }, []);
+
   return (
     <div className="w-[460px]" ref={ref}>
       {isLoading && (
@@ -148,7 +179,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       {!isLoading && (
         <>
           <div className="flex relative flex-row items-center" cmdk-input-wrapper="">
-            <div className="flex flex-1 items-center px-4 border-b" cmdk-input-wrapper="">
+            <div className="flex flex-1 items-center pl-4 border-b" cmdk-input-wrapper="">
               <Magic className="mr-2 w-4 h-4 text-purple-500 shrink-0" />
               <Input.TextArea
                 value={inputValue}
@@ -186,7 +217,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                   handleEmitInPlaceSendMessage('chat');
                 }}
               >
-                Chat
+                <span>Chat</span> <span>{shortcutSymbols.chat}</span>
               </Button>
               <Button
                 type="primary"
@@ -196,7 +227,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                   handleEmitInPlaceSendMessage('edit');
                 }}
               >
-                Edit
+                <span>Edit</span> <span>{shortcutSymbols.edit}</span>
               </Button>
             </div>
           </div>

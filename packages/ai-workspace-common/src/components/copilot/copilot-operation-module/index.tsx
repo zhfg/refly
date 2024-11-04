@@ -108,14 +108,16 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
 
     // TODO: temp handle in frontend: 1) edit need set canvasEditConfig 2) chat for normal chat
     const isEditAction = inPlaceActionType === 'edit';
+    let newMessageIntentContext: Partial<MessageIntentContext> = {
+      ...(messageIntentContext || {}),
+      inPlaceActionType,
+    };
 
     if (isEditAction) {
-      const newMessageIntentContext: Partial<MessageIntentContext> = {
-        ...(messageIntentContext || {}),
+      newMessageIntentContext = {
+        ...(newMessageIntentContext || {}),
         canvasEditConfig,
       };
-
-      chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
     } else {
       const { selection } = canvasEditConfig || {};
       const selectedText = selection?.highlightedText || '';
@@ -128,6 +130,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       }
     }
 
+    chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
     handleSendMessage(newUserInput);
   };
 

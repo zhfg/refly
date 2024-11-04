@@ -1,5 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import { Spin } from 'antd';
+import { Tooltip } from '@arco-design/web-react';
 
 import { chatSelectors } from '@refly-packages/ai-workspace-common/stores/chat/selectors';
 
@@ -17,6 +18,8 @@ import { CanvasIntentType } from '@refly/common-types';
 import './render.scss';
 import { safeParseJSON } from '@refly-packages/utils/parse';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useTranslation } from 'react-i18next';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface CanvasProps extends MarkdownElementProps {
   identifier: string;
@@ -31,6 +34,7 @@ const isReflyCanvasClosed = (content: string) => {
 const Render = memo<CanvasProps>(({ identifier, title, type, children, id }) => {
   const hasChildren = !!children;
   const str = ((children as string) || '').toString?.();
+  const { t } = useTranslation();
 
   const [isGenerating] = useMessageStateStore((state) => [state.pending]);
   const { jumpToProject } = useJumpNewPath();
@@ -77,31 +81,33 @@ const Render = memo<CanvasProps>(({ identifier, title, type, children, id }) => 
   // }, [isGenerating, hasChildren, str, identifier, title, type, id]);
 
   return (
-    <div className="refly-canvas-render-container">
-      <div
-        onClick={() => {
-          // copilot as a assist role, so we need to open the canvas when click the canvas tag
-          openCanvas();
-        }}
-      >
-        <div className="refly-canvas-render-content">
-          <IconCanvas style={{ fontSize: 18 }} />
-          <div className="refly-canvas-render-content-right">
-            {!title && isGenerating ? (
-              <span>canvas is generating...</span>
-            ) : (
-              <span className="refly-canvas-render-title">{title || 'unknownTitle'}</span>
-            )}
-            {hasChildren && (
-              <span className="refly-canvas-render-content-description">
-                {!isCanvasTagClosed && <Spin size="small" />}
-                <span>共 {str?.length} 字</span>
-              </span>
-            )}
+    <Tooltip content={t('copilot.message.openCanvas')} getPopupContainer={getPopupContainer}>
+      <div className="refly-canvas-render-container">
+        <div
+          onClick={() => {
+            // copilot as a assist role, so we need to open the canvas when click the canvas tag
+            openCanvas();
+          }}
+        >
+          <div className="refly-canvas-render-content">
+            <IconCanvas style={{ fontSize: 18 }} />
+            <div className="refly-canvas-render-content-right">
+              {!title && isGenerating ? (
+                <span>canvas is generating...</span>
+              ) : (
+                <span className="refly-canvas-render-title">{title || 'unknownTitle'}</span>
+              )}
+              {hasChildren && (
+                <span className="refly-canvas-render-content-description">
+                  {!isCanvasTagClosed && <Spin size="small" />}
+                  <span>共 {str?.length} 字</span>
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Tooltip>
   );
 });
 

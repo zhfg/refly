@@ -379,6 +379,11 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
     provider.on('status', (event) => {
       canvasStore.updateCanvasServerStatus(event.status);
     });
+
+    // Add synced event listener
+    provider.on('synced', () => {
+      editorEmitter.emit('editorSynced');
+    });
     return provider;
   }, [canvasId]);
 
@@ -874,9 +879,9 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
   }, [canvas, debouncedUpdateCanvas]);
 
   return (
-    <div className="ai-note-container flex flex-col">
+    <div className="flex flex-col ai-note-container">
       <CanvasStatusBar />
-      <div className="flex-grow overflow-auto">
+      <div className="overflow-auto flex-grow">
         <Spin
           tip={t('knowledgeBase.note.connecting')}
           loading={!canvas || isRequesting || canvasServerStatus !== 'connected'}

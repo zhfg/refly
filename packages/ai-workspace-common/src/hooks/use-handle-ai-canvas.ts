@@ -10,6 +10,7 @@ import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { useParams } from 'react-router-dom';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 
 export interface IntentResult {
   type: CanvasIntentType;
@@ -154,7 +155,20 @@ export const useHandleAICanvas = () => {
     [convId],
   );
 
+  const handleAICanvasBeforeStreamHook = useCallback(() => {
+    const { messageIntentContext } = useChatStore.getState();
+    const { inPlaceActionType, canvasEditConfig } = messageIntentContext || {};
+
+    if (inPlaceActionType || canvasEditConfig) {
+      editorEmitter.emit('askAIResponse', {
+        inPlaceActionType,
+        canvasEditConfig,
+      });
+    }
+  }, [convId]);
+
   return {
     handleStructuredDataChange,
+    handleAICanvasBeforeStreamHook,
   };
 };
