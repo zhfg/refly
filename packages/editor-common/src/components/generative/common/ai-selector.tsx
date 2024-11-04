@@ -203,7 +203,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                 onKeyDown={handleKeyDown}
                 autoFocus
                 className={cn(
-                  'flex py-3 mx-0.5 w-full h-11 text-sm bg-transparent rounded-md border-none outline-none calc-width-64px important-outline-none important-box-shadow-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+                  'flex py-3 mx-0.5 w-full h-11 text-sm border-none outline-none calc-width-64px important-outline-none important-box-shadow-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 !bg-transparent',
                 )}
                 placeholder={'Ask AI to edit or generate...'}
                 onFocus={() => {
