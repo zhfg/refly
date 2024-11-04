@@ -35,7 +35,7 @@ const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
 
 const CommandInput = ({ className, onValueChange, ...props }) => (
   <div className="flex items-center px-4 border-b" cmdk-input-wrapper="">
-    <Magic className="mr-2 w-4 h-4 text-purple-500 shrink-0" />
+    <Magic className="mr-2 w-4 h-4 text-primary-600 shrink-0" />
     <CommandPrimitive.Input
       // ref={ref}
       className={cn(

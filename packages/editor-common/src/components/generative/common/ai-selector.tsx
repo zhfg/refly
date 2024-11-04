@@ -16,6 +16,7 @@ import { editorEmitter, InPlaceEditType, InPlaceActionType } from '@refly/utils/
 import { Input, Button } from '@arco-design/web-react';
 import { cn } from '@refly-packages/editor-component/utils';
 import { getOsType } from '@refly-packages/utils/env';
+import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/components/add-base-mark-context';
 //TODO: I think it makes more sense to create a custom Tiptap extension for this functionality https://tiptap.dev/docs/editor/ai/introduction
 
 interface AISelectorProps {
@@ -168,7 +169,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   return (
     <div className="w-[460px]" ref={ref}>
       {isLoading && (
-        <div className="flex items-center px-4 w-full h-12 text-sm font-medium text-purple-500 text-muted-foreground">
+        <div className="flex items-center px-4 w-full h-12 text-sm font-medium text-primary-600 text-muted-foreground">
           <Magic className="mr-2 w-4 h-4 shrink-0" />
           AI is thinking
           <div className="mt-1 ml-2">
@@ -180,7 +181,8 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
         <>
           <div className="flex relative flex-row items-center" cmdk-input-wrapper="">
             <div className="flex flex-1 items-center pl-4 border-b" cmdk-input-wrapper="">
-              <Magic className="mr-2 w-4 h-4 text-purple-500 shrink-0" />
+              <Magic className="mr-2 w-4 h-4 text-primary-600 shrink-0" />
+              <AddBaseMarkContext />
               <Input.TextArea
                 value={inputValue}
                 autoSize={{
@@ -201,7 +203,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                 onKeyDown={handleKeyDown}
                 autoFocus
                 className={cn(
-                  'flex py-3 w-full h-11 text-sm bg-transparent rounded-md border-none outline-none calc-width-50px important-outline-none important-box-shadow-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+                  'flex py-3 mx-0.5 w-full h-11 text-sm bg-transparent rounded-md border-none outline-none calc-width-64px important-outline-none important-box-shadow-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
                 )}
                 placeholder={'Ask AI to edit or generate...'}
                 onFocus={() => {

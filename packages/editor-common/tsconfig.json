@@ -29,6 +29,7 @@
       "@refly-packages/editor-core/*": ["./src/headless-core/*"],
       "@refly-packages/editor-component/*": ["./src/components/*"],
       "@refly-packages/utils/*": ["../utils/src/*"],
+      "@refly-packages/ai-workspace-common/*": ["../ai-workspace-common/src/*"],
       "@refly/utils/*": ["../utils/src/*"]
     },
     "composite": true,

@@ -252,6 +252,9 @@
         "placeholder": {
           "default": "Write something, or press 'space' for AI, '/' for commands",
           "heading": "Heading {{level}}"
+        },
+        "toolbar": {
+          "quote": "Quote Content to Ask"
         }
       }
     },

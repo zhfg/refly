@@ -38,7 +38,7 @@
     "@tiptap/extension-youtube": "2.7.4",
     "@tiptap/pm": "2.7.4",
     "@tiptap/react": "2.7.4",
-    "@tiptap/starter-kit": "2.9.1",
+    "@tiptap/starter-kit": "2.7.4",
     "@tiptap/suggestion": "2.7.4",
     "autoprefixer": "^10.4.17",
     "class-variance-authority": "^0.7.0",
@@ -76,7 +76,8 @@
     "use-debounce": "^10.0.3",
     "y-prosemirror": "~1.2.6",
     "y-protocols": "~1.0.6",
-    "yjs": "13.6.16"
+    "yjs": "13.6.16",
+    "react-i18next": "^14.1.0"
   },
   "devDependencies": {
     "@types/markdown-it": "~14.1.1",

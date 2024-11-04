@@ -252,6 +252,9 @@
         "placeholder": {
           "default": "写点什么，或按空格键激活 AI，或按 '/' 键激活命令",
           "heading": "标题 {{level}}"
+        },
+        "toolbar": {
+          "quote": "引用内容提问"
         }
       }
     },
@@ -267,7 +270,7 @@
       "canvas": "稿布",
       "canvases": "稿布",
       "projects": "知识库",
-      "project": "知识库",
+      "project": "项目",
       "contentList": "内容列表",
       "extensionWeblink": "网页",
       "extensionWeblinkSelection": "网页选中",
