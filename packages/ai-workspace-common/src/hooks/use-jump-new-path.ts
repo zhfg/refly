@@ -21,7 +21,9 @@ export const useJumpNewPath = () => {
     openNewTab?: boolean;
   }) => {
     for (const key of Array.from(searchParams.keys())) {
-      searchParams.delete(key);
+      if (['resId', 'canvasId'].includes(key)) {
+        searchParams.delete(key);
+      }
     }
     searchParams.set('canvasId', canvasId);
     setSearchParams(searchParams);
@@ -49,7 +51,9 @@ export const useJumpNewPath = () => {
     extraQuery?: Record<string, string>,
   ) => {
     for (const key of Array.from(searchParams.keys())) {
-      searchParams.delete(key);
+      if (['resId', 'canvasId'].includes(key)) {
+        searchParams.delete(key);
+      }
     }
 
     if (extraQuery) {
@@ -108,7 +112,7 @@ export const useJumpNewPath = () => {
     baseUrl?: string;
     openNewTab?: boolean;
   }) => {
-    const url = `${baseUrl}/resource/${resId}`;
+    const url = `${baseUrl}/resource/${resId}?${searchParams.toString()}`;
 
     if (openNewTab) {
       window.open(url, '_blank');
