@@ -25,6 +25,23 @@ export default {
               height: "auto",
             },
           },
+          // 添加 blockquote 样式覆盖
+          blockquote: {
+            quotes: "none",
+            "&::before": {
+              content: "none",
+            },
+            "&::after": {
+              content: "none",
+            },
+            // 重要：覆盖 blockquote 内 p 元素的样式
+            "p::before": {
+              content: "none",
+            },
+            "p::after": {
+              content: "none",
+            },
+          },
         },
       },
       colors: {

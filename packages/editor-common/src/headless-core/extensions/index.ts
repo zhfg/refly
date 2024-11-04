@@ -21,11 +21,21 @@ import Youtube from '@tiptap/extension-youtube';
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle';
 
 const PlaceholderExtension = Placeholder.configure({
-  placeholder: ({ node }) => {
+  placeholder: ({ node, editor, pos }) => {
+    const defaultPlaceholder = "Write something, or press 'space' for AI, '/' for commands";
+
+    console.log('node', node.type.name);
     if (node.type.name === 'heading') {
       return `Heading ${node.attrs.level}`;
+    } else if (node.type.name === 'paragraph') {
+      return defaultPlaceholder;
+    } else if (node.type.name === 'task_item') {
+      return 'Task item';
+    } else if (node.type.name === 'codeBlock') {
+      return '';
+    } else {
+      return defaultPlaceholder;
     }
-    return "Press '/' for commands";
   },
   includeChildren: true,
 });
