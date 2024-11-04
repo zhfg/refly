@@ -310,7 +310,7 @@ export class RAGService {
   async rerank(query: string, results: SearchResult[]): Promise<SearchResult[]> {
     const contentMap = new Map<string, SearchResult>();
     results.forEach((r) => {
-      contentMap.set(r.content.join('\n\n'), r);
+      contentMap.set(r.snippets.map((s) => s.text).join('\n\n'), r);
     });
 
     const payload = JSON.stringify({
