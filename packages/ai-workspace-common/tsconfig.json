@@ -34,9 +34,5 @@
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../editor-common/tsconfig.json" },
-    { "path": "../utils/tsconfig.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "references": [{ "path": "../editor-common/tsconfig.json" }, { "path": "../utils/tsconfig.json" }]
 }

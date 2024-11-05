@@ -3258,6 +3258,20 @@ export const $SearchResultMeta = {
   },
 } as const;
 
+export const $SearchResultSnippet = {
+  type: 'object',
+  properties: {
+    text: {
+      type: 'string',
+      description: 'Search result content text',
+    },
+    highlightedText: {
+      type: 'string',
+      description: 'Search result highlighted content text with em html tags',
+    },
+  },
+} as const;
+
 export const $SearchResult = {
   type: 'object',
   required: ['id', 'domain', 'title'],
@@ -3274,11 +3288,15 @@ export const $SearchResult = {
       type: 'string',
       description: 'Search result title',
     },
-    content: {
+    highlightedTitle: {
+      type: 'string',
+      description: 'Search result highlighted title with em html tags',
+    },
+    snippets: {
       type: 'array',
       description: 'Search result content list with highlight marks',
       items: {
-        type: 'string',
+        $ref: '#/components/schemas/SearchResultSnippet',
       },
     },
     metadata: {

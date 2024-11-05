@@ -1,7 +1,6 @@
 import { forwardRef, ForwardRefRenderFunction, memo, useEffect } from 'react';
 import { Form } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
-import { Notification } from '@arco-design/web-react';
 
 import './index.scss';
 
@@ -15,19 +14,17 @@ import { ConfigManager } from './config-manager';
 // stores
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useChatStore, MessageIntentContext } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 // hooks
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
 import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
 
 // types
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { editorEmitter, InPlaceSendMessagePayload } from '@refly-packages/utils/event-emitter/editor';
 import { LOCALE, MarkType } from '@refly/common-types';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 interface CopilotInputModuleProps {
   source: MessageIntentSource;
@@ -57,7 +54,9 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
 
   const handleSendMessage = (userInput?: string) => {
     const tplConfig = form?.getFieldValue('tplConfig');
-    const { messageIntentContext, messages = [], enableWebSearch, enableKnowledgeBaseSearch } = useChatStore.getState();
+    const { messageIntentContext, selectedProject, enableWebSearch, enableKnowledgeBaseSearch } =
+      useChatStore.getState();
+    const finalProjectId = selectedProject?.projectId || projectId;
     const { currentSelectedMarks } = useContextPanelStore.getState();
 
     const currentCanvas = currentSelectedMarks?.find(
@@ -75,7 +74,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       source: messageIntentContext?.source || source, // may edit from other side
       isNewConversation: messageIntentContext?.isNewConversation || forceNewConv,
       projectContext: {
-        projectId,
+        projectId: finalProjectId,
         canvasId: currentCanvas?.entityId || currentCanvas?.id,
       },
       resourceContext: {

@@ -197,9 +197,9 @@ export const ContextManager = () => {
         <div className="context-items-container">
           <AddBaseMarkContext />
 
-          <ResetContentSelectorBtn />
+          {selectedItems?.length > 0 && <ResetContentSelectorBtn />}
 
-          <ContextFilter processContextFilterProps={processContextFilterProps} />
+          {/* <ContextFilter processContextFilterProps={processContextFilterProps} /> */}
 
           {!isWeb && currentSelectedContentList?.length > 0 && <SaveToKnowledgeBase />}
 

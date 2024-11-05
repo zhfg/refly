@@ -1,21 +1,19 @@
-import { Button, Checkbox, Tooltip } from '@arco-design/web-react';
+import { Button, Checkbox, Tooltip } from 'antd';
 
-import { IconClose, IconEdit, IconFile, IconHistory, IconPlus, IconSearch } from '@arco-design/web-react/icon';
+import { IconClose, IconEdit, IconFile, IconHistory, IconPlus } from '@arco-design/web-react/icon';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 // state
-import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
-import { useKnowledgeBaseStore } from '../../../stores/knowledge-base';
+import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useConversationStoreShallow } from '@refly-packages/ai-workspace-common/stores/conversation';
+import { useKnowledgeBaseStoreShallow } from '../../../stores/knowledge-base';
 // utils
-import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
+import { useMessageStateStoreShallow } from '@refly-packages/ai-workspace-common/stores/message-state';
 import classNames from 'classnames';
 
-import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
-import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
+import { useCopilotStore, useCopilotStoreShallow } from '@refly-packages/ai-workspace-common/stores/copilot';
 import { getClientOrigin } from '@refly-packages/utils/url';
 
 import Logo from '@/assets/logo.svg';
@@ -26,8 +24,9 @@ import { useTranslation } from 'react-i18next';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
+import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
+import { IconProject } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 interface CopilotChatHeaderProps {
   source: MessageIntentSource;
@@ -37,56 +36,40 @@ interface CopilotChatHeaderProps {
 export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
   const { disable, source } = props;
   const { jumpToConv } = useJumpNewPath();
-  const { ensureConversationExist } = useBuildThreadAndRun();
-  const { projectId } = useProjectContext();
 
   const { t } = useTranslation();
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const resId = searchParams.get('resId');
 
   // 所属的环境
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
 
-  const copilotStore = useCopilotStore();
-
-  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
-    resourcePanelVisible: state.resourcePanelVisible,
-    kbModalVisible: state.kbModalVisible,
-    actionSource: state.actionSource,
-    tempConvResources: state.tempConvResources,
-    updateConvModalVisible: state.updateConvModalVisible,
-    updateResourcePanelVisible: state.updateResourcePanelVisible,
-    currentKnowledgeBase: state.currentKnowledgeBase,
-    convModalVisible: state.convModalVisible,
-    sourceListModalVisible: state.sourceListModalVisible,
+  const copilotStore = useCopilotStoreShallow((state) => ({
+    setIsCopilotOpen: state.setIsCopilotOpen,
   }));
-  const conversationStore = useConversationStore((state) => ({
+
+  const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
+    updateConvModalVisible: state.updateConvModalVisible,
+  }));
+  const conversationStore = useConversationStoreShallow((state) => ({
     currentConversation: state.currentConversation,
     resetState: state.resetState,
     setCurrentConversation: state.setCurrentConversation,
   }));
-  const messageStateStore = useMessageStateStore((state) => ({
+  const messageStateStore = useMessageStateStoreShallow((state) => ({
     pending: state.pending,
     pendingFirstToken: state.pendingFirstToken,
     resetState: state.resetState,
   }));
-  const canvasStore = useCanvasStoreShallow((state) => ({
-    notePanelVisible: state.canvasPanelVisible,
-    updateNotePanelVisible: state.updateCanvasPanelVisible,
-  }));
-  const searchStore = useSearchStoreShallow((state) => ({
-    pages: state.pages,
-    isSearchOpen: state.isSearchOpen,
-    setPages: state.setPages,
-    setIsSearchOpen: state.setIsSearchOpen,
-  }));
-  const chatStore = useChatStore((state) => ({
+  const chatStore = useChatStoreShallow((state) => ({
     messages: state.messages,
     resetState: state.resetState,
     setMessages: state.setMessages,
     setInvokeParams: state.setInvokeParams,
+  }));
+  const projectStore = useProjectStoreShallow((state) => ({
+    project: state.project,
   }));
 
   const handleNewTempConv = () => {
@@ -119,74 +102,12 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
       {!disable && (
         <>
           <div className="knowledge-base-detail-navigation-bar">
-            {isWeb
-              ? [
-                  <Checkbox
-                    key={'knowledge-base-resource-panel'}
-                    checked={knowledgeBaseStore.resourcePanelVisible && resId ? true : false}
-                  >
-                    {({ checked }) => {
-                      return (
-                        <Tooltip
-                          key="resourcePanel"
-                          content={t('knowledgeBase.header.searchAndOpenResourceOrCollection')}
-                          getPopupContainer={getPopupContainer}
-                        >
-                          <Button
-                            icon={<IconFile />}
-                            type="text"
-                            onClick={() => {
-                              if (!resId) {
-                                searchStore.setPages(searchStore.pages.concat('knowledgeBases'));
-                                searchStore.setIsSearchOpen(true);
-                              } else {
-                                knowledgeBaseStore.updateResourcePanelVisible(!knowledgeBaseStore.resourcePanelVisible);
-                              }
-                            }}
-                            className={classNames('assist-action-item-header', { active: checked })}
-                          ></Button>
-                        </Tooltip>
-                      );
-                    }}
-                  </Checkbox>,
-                  <Checkbox key={'knowledge-base-note-panel'} checked={canvasStore.notePanelVisible}>
-                    {({ checked }) => {
-                      return (
-                        <Tooltip
-                          key="notePanel"
-                          content={t('knowledgeBase.header.searchOrOpenNote')}
-                          getPopupContainer={getPopupContainer}
-                        >
-                          <Button
-                            icon={<IconEdit />}
-                            type="text"
-                            onClick={() => {
-                              canvasStore.updateNotePanelVisible(!canvasStore.notePanelVisible);
-                            }}
-                            className={classNames('assist-action-item-header', { active: checked })}
-                          ></Button>
-                        </Tooltip>
-                      );
-                    }}
-                  </Checkbox>,
-                  <Tooltip
-                    key="searchOrOpenThread"
-                    content={t('knowledgeBase.header.searchOrOpenThread')}
-                    getPopupContainer={getPopupContainer}
-                  >
-                    <Button
-                      icon={<IconSearch />}
-                      type="text"
-                      onClick={() => {
-                        searchStore.setPages(searchStore.pages.concat('convs'));
-                        searchStore.setIsSearchOpen(true);
-                      }}
-                      style={{ marginLeft: '5px' }}
-                      className={classNames('assist-action-item-header')}
-                    ></Button>
-                  </Tooltip>,
-                ]
-              : null}
+            {isWeb ? (
+              <div className="text-gray-500 font-normal flex items-center gap-2 ml-3 max-w-[300px]">
+                <IconProject className="text-gray-500 h-4 w-4" />
+                <div className="truncate">{projectStore.project.data?.title}</div>
+              </div>
+            ) : null}
             {!isWeb ? (
               <div
                 className="chat-header__brand"
@@ -204,35 +125,26 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
           <div className="knowledge-base-detail-navigation-bar">
             <Tooltip
               key="threadHistory"
-              content={t('knowledgeBase.header.openThreadHistory')}
+              title={t('knowledgeBase.header.openThreadHistory')}
               getPopupContainer={getPopupContainer}
             >
               <Button
-                icon={<IconHistory />}
+                icon={<IconHistory className="text-green-600" />}
                 type="text"
                 onClick={() => {
                   handleNewOpenConvList();
                 }}
-                className={classNames('assist-action-item-header')}
-              >
-                {/* 会话历史 */}
-              </Button>
+              ></Button>
             </Tooltip>
-            <Tooltip
-              key="newThread"
-              content={t('knowledgeBase.header.newThread')}
-              getPopupContainer={getPopupContainer}
-            >
+            <Tooltip key="newThread" title={t('knowledgeBase.header.newThread')} getPopupContainer={getPopupContainer}>
               <Button
-                icon={<IconPlus />}
+                icon={<IconPlus className="text-green-600" />}
                 type="text"
                 onClick={() => {
                   handleNewTempConv();
                 }}
-                className={classNames('assist-action-item-header', 'mr-1')}
-              >
-                {/* 新会话 */}
-              </Button>
+                className="mr-1"
+              ></Button>
             </Tooltip>
             {runtime === 'extension-csui' ? (
               <Button
@@ -243,7 +155,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
                     copilotStore.setIsCopilotOpen(false);
                   }
                 }}
-                className={classNames('assist-action-item-header', 'mr-1')}
+                className="mr-1"
               ></Button>
             ) : null}
           </div>

@@ -72,7 +72,7 @@ export function DataList({
         return {
           id: item?.canvasId,
           title: item?.title,
-          content: [item?.content?.slice(0, 30) + '...'],
+          snippets: [{ text: item?.content?.slice(0, 30) + '...' }],
           metadata: {},
         } as SearchResult;
       });
@@ -90,7 +90,7 @@ export function DataList({
         return {
           id: item?.resourceId,
           title: item?.title,
-          content: [item?.content?.slice(0, 30) + '...'],
+          snippets: [{ text: item?.content?.slice(0, 30) + '...' }],
           metadata: {
             resourceType: 'weblink',
           },
@@ -110,7 +110,7 @@ export function DataList({
         return {
           id: item?.projectId,
           title: item?.title,
-          content: [item?.description?.slice(0, 30) + '...'],
+          snippets: [{ text: item?.description?.slice(0, 30) + '...' }],
         } as SearchResult;
       });
 
@@ -127,7 +127,7 @@ export function DataList({
         return {
           id: item?.convId,
           title: item?.title,
-          content: [item?.lastMessage?.slice(0, 30) + '...'],
+          snippets: [{ text: item?.lastMessage?.slice(0, 30) + '...' }],
         } as SearchResult;
       });
 
@@ -190,7 +190,7 @@ export function DataList({
         {stateDataList?.map((item, index) => (
           <Item
             key={index}
-            value={`${domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
+            value={`${domain}-${index}-${item?.title}-${item?.snippets?.[0]?.text || ''}`}
             activeValue={activeValue}
             onSelect={() => {
               onItemClick(item);
@@ -199,9 +199,12 @@ export function DataList({
           >
             {icon}
             <div className="search-res-container">
-              <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.title }}></p>
-              {item?.content?.length > 0 && (
-                <p className="search-res-desc" dangerouslySetInnerHTML={{ __html: item?.content?.[0] || '' }}></p>
+              <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.highlightedTitle }}></p>
+              {item?.snippets?.length > 0 && (
+                <p
+                  className="search-res-desc"
+                  dangerouslySetInnerHTML={{ __html: item?.snippets?.[0]?.highlightedText || '' }}
+                ></p>
               )}
             </div>
           </Item>
