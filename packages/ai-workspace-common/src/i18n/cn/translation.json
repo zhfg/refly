@@ -1131,6 +1131,12 @@
     "copyEmail": "复制邮箱 "
   },
   "homePage": {
+    "suggestion": {
+      "investment": "写一篇投资 Memo",
+      "productSearch": "撰写竞品调研",
+      "academicArticle": "写一篇关于 Scaling law 的学术文章",
+      "socialTweet": "基于 Founder mode 撰写社交推文"
+    },
     "footer": {
       "pricing": "定价",
       "contact": "联系我们",
