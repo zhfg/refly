@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Button, Dropdown, Menu, FormInstance, Checkbox } from '@arco-design/web-react';
+import { Button, Switch } from 'antd';
+import { FormInstance, Checkbox } from '@arco-design/web-react';
 
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { IconDown, IconPause, IconSend } from '@arco-design/web-react/icon';
+import { IconPause, IconSend } from '@arco-design/web-react/icon';
 import { useMessageStateStoreShallow } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,6 @@ import { ProjectSelector } from './project-selector';
 
 // styles
 import './index.scss';
-import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
@@ -71,7 +70,7 @@ export const ChatActions = (props: ChatActionsProps) => {
         {/* <OutputLocaleList /> */}
         {!skillStore?.selectedSkill?.skillId ? (
           <div className="chat-action-item" onClick={() => chatStore.setEnableWebSearch(!chatStore.enableWebSearch)}>
-            <Checkbox checked={chatStore.enableWebSearch} />
+            <Switch size="small" checked={chatStore.enableWebSearch} />
             <span className="chat-action-item-text">{t('copilot.webSearch.title')}</span>
           </div>
         ) : null}
@@ -80,7 +79,7 @@ export const ChatActions = (props: ChatActionsProps) => {
             className="chat-action-item"
             onClick={() => chatStore.setEnableKnowledgeBaseSearch(!chatStore.enableKnowledgeBaseSearch)}
           >
-            <Checkbox checked={chatStore.enableKnowledgeBaseSearch} />
+            <Switch size="small" checked={chatStore.enableKnowledgeBaseSearch} />
             <span className="chat-action-item-text">{t('copilot.knowledgeBaseSearch.title')}</span>
           </div>
         ) : null}
@@ -89,10 +88,8 @@ export const ChatActions = (props: ChatActionsProps) => {
       <div className="right-actions">
         {messageStateStore?.pending ? (
           <Button
-            size="mini"
+            size="small"
             icon={<IconPause />}
-            className="search-btn"
-            style={{ color: '#FFF', background: '#000', height: '24px' }}
             onClick={() => {
               handleAbort();
             }}
@@ -100,12 +97,12 @@ export const ChatActions = (props: ChatActionsProps) => {
         ) : null}
         {messageStateStore?.pending && !isWeb ? null : (
           <Button
-            size="mini"
+            size="small"
+            type="primary"
             icon={<IconSend />}
             loading={messageStateStore?.pending}
             disabled={messageStateStore?.pending}
-            className="search-btn"
-            style={{ color: '#FFF', background: '#00968F' }}
+            className="text-xs gap-1"
             onClick={() => {
               handleSendMessage();
             }}

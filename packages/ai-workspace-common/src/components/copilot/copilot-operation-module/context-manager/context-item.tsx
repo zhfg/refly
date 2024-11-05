@@ -1,3 +1,4 @@
+import { Button } from 'antd';
 import { IconClose } from '@arco-design/web-react/icon';
 import { Mark } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +22,7 @@ export const ContextItem = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div
+    <Button
       className={`context-item ${isActive ? 'active' : isLimit ? 'limit' : disabled ? 'disabled' : ''}`}
       onClick={() => onToggle(item.id)}
     >
@@ -44,6 +45,6 @@ export const ContextItem = ({
           />
         )}
       </div>
-    </div>
+    </Button>
   );
 };

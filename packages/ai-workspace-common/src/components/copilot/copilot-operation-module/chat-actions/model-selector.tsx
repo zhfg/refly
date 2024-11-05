@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Dropdown, MenuProps, Tag, Tooltip } from 'antd';
-import {} from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import { IconDown } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
