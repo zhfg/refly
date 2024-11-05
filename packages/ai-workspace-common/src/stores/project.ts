@@ -75,7 +75,7 @@ export const useProjectStore = create<ProjectState>()(
   persist(
     immer((set, get) => ({
       currentProjectId: '',
-      copilotSize: 0,
+      copilotSize: 500,
       project: {
         data: null,
         loading: false,

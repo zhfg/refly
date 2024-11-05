@@ -80,15 +80,9 @@ export const ProjectDetail = () => {
     initProject();
 
     return () => {
-      setCopilotSize(0);
+      setCopilotSize(500);
     };
   }, [projectId]);
-
-  useEffect(() => {
-    if (convId) {
-      setCopilotSize(500);
-    }
-  }, [convId]);
 
   return (
     <ProjectProvider context={{ projectId }}>
@@ -128,8 +122,20 @@ export const ProjectDetail = () => {
         projectId={projectId}
         visible={bindResourceModalVisible}
         setVisible={setBindResourceModalVisible}
-        postConfirmCallback={() => {
-          fetchProjectAll(projectId);
+        postConfirmCallback={async (value) => {
+          await fetchProjectAll(projectId);
+          const currentResources = useProjectStore.getState().resources.data;
+          const openResource = currentResources.find((res) => res.id === value[0]);
+          jumpToResource({
+            resId: openResource.id,
+            projectId: projectId,
+          });
+          handleAddTab({
+            projectId: projectId,
+            key: openResource.id,
+            title: openResource.title,
+            type: 'resource',
+          });
         }}
       />
     </ProjectProvider>

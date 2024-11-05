@@ -42,15 +42,21 @@ export const ResourceDetail2 = () => {
     setDeckSize: state.setDeckSize,
   }));
 
+  useEffect(() => {
+    return () => {
+      setCopilotSize(400);
+    };
+  }, []);
+
   return (
     <ResourceProvider context={{ resourceId }}>
-      <div className="h-full">
+      <div className="h-full w-full overflow-hidden">
         <Splitter
           layout="horizontal"
           className="workspace-panel-container"
           onResize={(sizes) => setCopilotSize(sizes[2])}
         >
-          <Splitter.Panel className="workspace-content-panel" defaultSize={300} min={300} collapsible>
+          <Splitter.Panel className="workspace-content-panel" defaultSize={300} min={300} max={400} collapsible>
             <ResourceDirectory resourceId={resourceId} />
           </Splitter.Panel>
 

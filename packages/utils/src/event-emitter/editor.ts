@@ -38,6 +38,8 @@ export type Events = {
   updateCanvasTitle: string;
   activeAskAI: boolean;
   inPlaceSendMessage: InPlaceSendMessagePayload;
+  askAIResponse: Omit<InPlaceSendMessagePayload, 'userInput'>;
+  editorSynced: void;
 };
 
 export type EditorOperation =
@@ -49,6 +51,8 @@ export type EditorOperation =
   | 'streamEditCanvasContent'
   | 'updateCanvasTitle'
   | 'inPlaceSendMessage'
-  | 'activeAskAI';
+  | 'activeAskAI'
+  | 'askAIResponse'
+  | 'editorSynced';
 
 export const editorEmitter = mitt<Events>();

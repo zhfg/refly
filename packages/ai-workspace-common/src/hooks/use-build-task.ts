@@ -55,7 +55,7 @@ export const useBuildTask = () => {
   }));
 
   // hooks
-  const { handleStructuredDataChange } = useHandleAICanvas();
+  const { handleStructuredDataChange, handleAICanvasBeforeStreamHook } = useHandleAICanvas();
 
   const { t } = useTranslation();
   const schedulerMeta: SkillMeta = {
@@ -211,6 +211,15 @@ export const useBuildTask = () => {
       if (isFirstStreamContent) {
         const newIsFirstStreamContent = !isFirstStreamContent;
         chatStore.setIsFirstStreamContent(newIsFirstStreamContent);
+
+        handleAICanvasBeforeStreamHook();
+      }
+    } else if ([CanvasIntentType.Other].includes(intentMatcher?.type)) {
+      if (isFirstStreamContent) {
+        const newIsFirstStreamContent = !isFirstStreamContent;
+        chatStore.setIsFirstStreamContent(newIsFirstStreamContent);
+
+        handleAICanvasBeforeStreamHook();
       }
     }
   };

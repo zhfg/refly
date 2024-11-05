@@ -1,5 +1,4 @@
 import {
-  ChatMode,
   MessageIntentContext,
   useChatStore,
   useChatStoreShallow,
@@ -28,9 +27,7 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 
-export interface InvokeParams {
-  chatMode?: ChatMode;
-  projectId?: string;
+interface InvokeParams {
   skillContext?: SkillContext;
   tplConfig?: SkillTemplateConfig;
   messageIntentContext?: MessageIntentContext;
@@ -41,7 +38,6 @@ export const useBuildThreadAndRun = () => {
   const { t } = useTranslation();
   const { buildSkillContext } = useBuildSkillContext();
   const chatStore = useChatStoreShallow((state) => ({
-    setChatMode: state.setChatMode,
     setNewQAText: state.setNewQAText,
     setInvokeParams: state.setInvokeParams,
     setMessageIntentContext: state.setMessageIntentContext,
@@ -116,7 +112,7 @@ export const useBuildThreadAndRun = () => {
 
   const runSkill = (comingQuestion: string, invokeParams?: InvokeParams) => {
     // support ask follow up question
-    const { messages = [], selectedModel, enableWebSearch, messageIntentContext } = useChatStore.getState();
+    const { messages = [], selectedModel, messageIntentContext } = useChatStore.getState();
     const { selectedSkill } = useSkillStore.getState();
     const { localSettings } = useUserStore.getState();
 
@@ -124,11 +120,12 @@ export const useBuildThreadAndRun = () => {
     const canvasEditConfig = messageIntentContext?.canvasEditConfig;
     const projectId = messageIntentContext?.projectContext?.projectId;
     const forceNewConv = messageIntentContext?.isNewConversation;
+    const enableWebSearch = messageIntentContext?.enableWebSearch;
+    const enableKnowledgeBaseSearch = messageIntentContext?.enableKnowledgeBaseSearch;
 
     // 创建新会话并跳转
     const conv = ensureConversationExist(projectId, forceNewConv);
     const skillContext = invokeParams?.skillContext || buildSkillContext();
-    const chatMode = messageIntentContext?.chatMode;
 
     // set convId info to messageIntentContext
     const newMessageIntentContext: Partial<MessageIntentContext> = {
@@ -151,11 +148,11 @@ export const useBuildThreadAndRun = () => {
             displayValue: localSettings?.uiLocale === 'zh-CN' ? '全网搜索' : 'Web Search',
             label: localSettings?.uiLocale === 'zh-CN' ? '全网搜索' : 'Web Search',
           },
-          chatMode: {
-            value: chatMode,
+          enableKnowledgeBaseSearch: {
+            value: enableKnowledgeBaseSearch,
             configScope: 'runtime' as unknown as ConfigScope,
-            displayValue: localSettings?.uiLocale === 'zh-CN' ? '提问模式' : 'Normal Chat',
-            label: localSettings?.uiLocale === 'zh-CN' ? '直接提问' : 'Normal Chat',
+            displayValue: localSettings?.uiLocale === 'zh-CN' ? '知识库搜索' : 'Knowledge Base Search',
+            label: localSettings?.uiLocale === 'zh-CN' ? '知识库搜索' : 'Knowledge Base Search',
           },
           ...(canvasEditConfig
             ? {
@@ -214,10 +211,6 @@ export const useBuildThreadAndRun = () => {
         content: t('copilot.configManager.errorTip'),
       });
       return;
-    }
-
-    if (params.chatMode) {
-      chatStore.setChatMode(params.chatMode);
     }
 
     const { newQAText } = useChatStore.getState();

@@ -14,7 +14,9 @@ import { ConfigManager } from './config-manager';
 // stores
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { ChatMode, useChatStore, MessageIntentContext } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useChatStore, MessageIntentContext } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 // hooks
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
@@ -22,7 +24,7 @@ import { useProjectContext } from '@refly-packages/ai-workspace-common/component
 // types
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { editorEmitter, InPlaceSendMessagePayload } from '@refly-packages/utils/event-emitter/editor';
-import { MarkType } from '@refly/common-types';
+import { LOCALE, MarkType } from '@refly/common-types';
 
 interface CopilotInputModuleProps {
   source: MessageIntentSource;
@@ -50,9 +52,10 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
     setFormErrors: state.setFormErrors,
   }));
 
-  const handleSendMessage = (chatMode: ChatMode, userInput?: string) => {
+  const handleSendMessage = (userInput?: string) => {
     const tplConfig = form?.getFieldValue('tplConfig');
-    const { messageIntentContext, selectedProject, enableWebSearch } = useChatStore.getState();
+    const { messageIntentContext, selectedProject, enableWebSearch, enableKnowledgeBaseSearch } =
+      useChatStore.getState();
     const finalProjectId = selectedProject?.projectId || projectId;
     const { currentSelectedMarks } = useContextPanelStore.getState();
 
@@ -77,8 +80,8 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       resourceContext: {
         resourceId: currentResource?.entityId || currentResource?.id,
       },
-      chatMode,
       enableWebSearch,
+      enableKnowledgeBaseSearch,
     };
 
     chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
@@ -95,17 +98,39 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
   };
 
   const handleInPlaceEditSendMessage = (data: InPlaceSendMessagePayload) => {
-    const { canvasEditConfig, userInput } = data;
-    const { messageIntentContext } = useChatStore.getState();
+    const { canvasEditConfig, userInput, inPlaceActionType } = data;
+    const { localSettings } = useUserStore.getState();
+    const locale = localSettings?.uiLocale || LOCALE.EN;
 
-    const newMessageIntentContext: Partial<MessageIntentContext> = {
+    const { messageIntentContext } = useChatStore.getState();
+    let newUserInput = userInput;
+
+    // TODO: temp handle in frontend: 1) edit need set canvasEditConfig 2) chat for normal chat
+    const isEditAction = inPlaceActionType === 'edit';
+    let newMessageIntentContext: Partial<MessageIntentContext> = {
       ...(messageIntentContext || {}),
-      canvasEditConfig,
+      inPlaceActionType,
     };
 
-    chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
+    if (isEditAction) {
+      newMessageIntentContext = {
+        ...(newMessageIntentContext || {}),
+        canvasEditConfig,
+      };
+    } else {
+      const { selection } = canvasEditConfig || {};
+      const selectedText = selection?.highlightedText || '';
 
-    handleSendMessage('normal', userInput);
+      if (selectedText) {
+        newUserInput =
+          `> ${locale === LOCALE.EN ? '**User Selected Text:** ' : '**用户选中的文本:** '} ${selectedText}` +
+          `\n\n` +
+          `${locale === LOCALE.EN ? '**Please answer question based on the user selected text:** ' : '**请根据用户选中的文本回答问题:** '} ${userInput}`;
+      }
+    }
+
+    chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
+    handleSendMessage(newUserInput);
   };
 
   useEffect(() => {

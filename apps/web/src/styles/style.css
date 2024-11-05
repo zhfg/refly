@@ -49,3 +49,17 @@ select:focus {
   --tw-ring-shadow: none;
   box-shadow: none;
 }
+
+.prose
+  :where(blockquote p:first-of-type):not(
+    :where([class~="not-prose"], [class~="not-prose"] *)
+  )::before {
+  content: none !important;
+}
+
+.prose
+  :where(blockquote p:last-of-type):not(
+    :where([class~="not-prose"], [class~="not-prose"] *)
+  )::after {
+  content: none !important;
+}

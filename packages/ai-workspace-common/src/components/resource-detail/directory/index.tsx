@@ -116,7 +116,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
         <div className="mb-4">
           <div className="text-sm font-medium text-gray-500 mb-1">{t('resourceDetail.directory.baseInfo')}</div>
           {baseInfoList.map((item) => (
-            <div className="flex gap-2 mb-1">
+            <div className="flex gap-2 mb-1" key={item.label}>
               <div className="text-xs font-normal w-20 text-gray-500">
                 {t(`resourceDetail.directory.${item.label}`)}
               </div>
@@ -128,7 +128,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
         <div className="mb-4">
           <div className="text-sm font-medium text-gray-500 mb-1">{t('resourceDetail.directory.techInfo')}</div>
           {techInfoList.map((item) => (
-            <div className="flex gap-2 mb-1">
+            <div className="flex gap-2 mb-1" key={item.label}>
               <div className="text-xs font-normal w-20 text-gray-500">
                 {t(`resourceDetail.directory.${item.label}`)}
               </div>

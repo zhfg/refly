@@ -56,6 +56,10 @@ export const CanvasList = (props: CanvasListProps) => {
     handleAddTabWithNote(canvas);
   };
 
+  const handleDeleteCanvas = (canvas: Canvas) => {
+    setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId));
+  };
+
   return (
     <List
       grid={
@@ -97,9 +101,7 @@ export const CanvasList = (props: CanvasListProps) => {
                   <DeleteDropdownMenu
                     type="canvas"
                     data={item}
-                    postDeleteList={(canvas: Canvas) =>
-                      setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId))
-                    }
+                    postDeleteList={(canvas: Canvas) => handleDeleteCanvas(canvas)}
                     getPopupContainer={() => document.getElementById(`canvas-${key}`) as HTMLElement}
                   />
                 </div>

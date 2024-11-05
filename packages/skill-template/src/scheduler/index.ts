@@ -14,7 +14,6 @@ import { Icon, SkillInvocationConfig, SkillMeta, SkillTemplateConfigSchema } fro
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
-import { ChatMode } from './types';
 import { CanvasIntentType } from '@refly-packages/common-types';
 // types
 import { GraphState, QueryAnalysis, IContext } from './types';
@@ -69,40 +68,17 @@ export class Scheduler extends BaseSkill {
         defaultValue: true,
       },
       {
-        key: 'chatMode',
-        inputMode: 'select',
+        key: 'enableKnowledgeBaseSearch',
+        inputMode: 'radio',
         labelDict: {
-          en: 'Chat Mode',
-          'zh-CN': '聊天模式',
+          en: 'Knowledge Base Search',
+          'zh-CN': '知识库搜索',
         },
         descriptionDict: {
-          en: 'Select chat mode',
-          'zh-CN': '选择聊天模式',
+          en: 'Enable knowledge base search',
+          'zh-CN': '启用知识库搜索',
         },
-        defaultValue: 'normal',
-        options: [
-          {
-            value: 'normal',
-            labelDict: {
-              en: 'Normal',
-              'zh-CN': '直接提问',
-            },
-          },
-          {
-            value: 'noContext',
-            labelDict: {
-              en: 'No Context',
-              'zh-CN': '不带上下文提问',
-            },
-          },
-          {
-            value: 'wholeSpace',
-            labelDict: {
-              en: 'Whole Space',
-              'zh-CN': '在整个空间提问',
-            },
-          },
-        ],
+        defaultValue: true,
       },
     ],
   };
@@ -351,8 +327,8 @@ Please generate the summary based on these requirements and offer suggestions fo
     } = this.configSnapshot.configurable;
 
     const { tplConfig } = config?.configurable || {};
-    const chatMode = tplConfig?.chatMode?.value as ChatMode;
     const enableWebSearch = tplConfig?.enableWebSearch?.value as boolean;
+    const enableKnowledgeBaseSearch = tplConfig?.enableKnowledgeBaseSearch?.value as boolean;
 
     let optimizedQuery = '';
     let mentionedContext: IContext;
@@ -388,11 +364,8 @@ Please generate the summary based on these requirements and offer suggestions fo
       `maxTokens: ${maxTokens}, queryTokens: ${queryTokens}, chatHistoryTokens: ${chatHistoryTokens}, remainingTokens: ${remainingTokens}`,
     );
 
-    const needRewriteQuery = chatMode !== ChatMode.NO_CONTEXT_CHAT && (hasContext || chatHistoryTokens > 0);
-    const needPrepareContext =
-      (chatMode !== ChatMode.NO_CONTEXT_CHAT && hasContext && remainingTokens > 0) ||
-      enableWebSearch ||
-      chatMode === ChatMode.WHOLE_SPACE_SEARCH;
+    const needRewriteQuery = hasContext || chatHistoryTokens > 0;
+    const needPrepareContext = (hasContext && remainingTokens > 0) || enableWebSearch || enableKnowledgeBaseSearch;
     this.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`);
 
     if (needRewriteQuery) {

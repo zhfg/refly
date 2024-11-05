@@ -1,4 +1,7 @@
+import { Tooltip } from '@arco-design/web-react';
 import { Button } from '../ui/button';
+import { BsChatLeftQuote } from 'react-icons/bs';
+import { useTranslation } from 'react-i18next';
 
 interface ContentSelectorButtonsProps {
   text: string;
@@ -7,14 +10,15 @@ interface ContentSelectorButtonsProps {
 
 export const ContentSelectorButtons: React.FC<ContentSelectorButtonsProps> = (props) => {
   const { text, handleClick } = props;
+  const { t } = useTranslation();
 
   return (
-    <div className="flex">
-      <Button size="sm" variant="ghost" className="rounded-none" onClick={handleClick}>
-        <span className="text-xs font-medium" style={{ color: '#00968F' }}>
-          {text}
-        </span>
-      </Button>
-    </div>
+    <Tooltip content={t('knowledgeBase.canvas.editor.toolbar.quote')}>
+      <div className="flex">
+        <Button size="sm" variant="ghost" className="rounded-none" onClick={handleClick}>
+          <BsChatLeftQuote style={{ color: '#00968F' }} />
+        </Button>
+      </div>
+    </Tooltip>
   );
 };

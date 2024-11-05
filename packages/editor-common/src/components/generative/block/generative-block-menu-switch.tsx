@@ -16,53 +16,68 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
   const bubbleRef = useRef<Instance | null>(null);
   const editorRef = useRef<Editor | null>(null);
 
-  // useEffect(() => {
-  //   if (!open) removeAIHighlight(editor);
-  // }, [open]);
+  useEffect(() => {
+    if (!open) removeAIHighlight(editor);
+  }, [open]);
 
-  const handleHideBubble = () => {
+  const handleBubbleClose = () => {
+    if (bubbleRef.current) {
+      // bubbleRef.current?.hide();
+      // bubbleRef.current.popperInstance?.update();
+
+      handleBubbleHide();
+
+      requestAnimationFrame(() => {
+        editor.chain().setTextSelection(editor.state.selection.from).run();
+      });
+    }
+  };
+
+  const handleBubbleHide = () => {
     onOpenChange(false);
     editor.chain().unsetHighlight().run();
     removeAIHighlight(editor);
   };
 
+  const handleAskAI = (value: boolean) => {
+    onOpenChange(value);
+
+    if (!value) {
+      bubbleRef.current?.hide();
+    } else {
+      const editor = editorRef.current;
+      const pos = editor.state.selection.from;
+
+      // 2. 设置选区并等待 DOM 更新
+      editor.commands.setTextSelection(pos);
+
+      // 3. 等待 DOM 更新后再显示气泡
+      requestAnimationFrame(() => {
+        if (bubbleRef.current) {
+          // 强制更新参考元素位置
+          const { state } = editor;
+          const { view } = editor;
+          const { selection } = state;
+          const { from, to } = selection;
+
+          bubbleRef.current.setProps({
+            getReferenceClientRect: () => posToDOMRect(view, from, to),
+          });
+
+          // 更新位置后再显示
+          bubbleRef.current.show();
+
+          // 强制更新弹出位置
+          bubbleRef.current.popperInstance?.update();
+        }
+      });
+    }
+  };
+
   useEffect(() => {
-    editorEmitter.on('activeAskAI', (value: boolean) => {
-      onOpenChange(value);
-
-      if (!value) {
-        bubbleRef.current?.hide();
-      } else {
-        const editor = editorRef.current;
-        const pos = editor.state.selection.from;
-
-        // 2. 设置选区并等待 DOM 更新
-        editor.commands.setTextSelection(pos);
-
-        // 3. 等待 DOM 更新后再显示气泡
-        requestAnimationFrame(() => {
-          if (bubbleRef.current) {
-            // 强制更新参考元素位置
-            const { state } = editor;
-            const { view } = editor;
-            const { selection } = state;
-            const { from, to } = selection;
-
-            bubbleRef.current.setProps({
-              getReferenceClientRect: () => posToDOMRect(view, from, to),
-            });
-
-            // 更新位置后再显示
-            bubbleRef.current.show();
-
-            // 强制更新弹出位置
-            bubbleRef.current.popperInstance?.update();
-          }
-        });
-      }
-    });
+    editorEmitter.on('activeAskAI', handleAskAI);
     return () => {
-      editorEmitter.off('activeAskAI');
+      editorEmitter.off('activeAskAI', handleAskAI);
     };
   }, []);
 
@@ -88,20 +103,33 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
     if (editor) {
       editorRef.current = editor;
     }
+
+    return () => {
+      handleBubbleHide();
+    };
   }, [editor]);
 
   return (
     <EditorBubble
       tippyOptions={{
         placement: open ? 'bottom-start' : 'top',
-        onHidden: handleHideBubble,
+        onHidden: () => {
+          handleBubbleHide();
+        },
         onCreate: (instance) => {
           bubbleRef.current = instance;
         },
       }}
       className="z-50 flex w-fit max-w-[90vw] overflow-hidden rounded-md border border-muted bg-background shadow-xl"
     >
-      {open && <AISelector open={open} onOpenChange={onOpenChange} inPlaceEditType="block" />}
+      {open && (
+        <AISelector
+          open={open}
+          onOpenChange={onOpenChange}
+          inPlaceEditType="block"
+          handleBubbleClose={handleBubbleClose}
+        />
+      )}
     </EditorBubble>
   );
 };
