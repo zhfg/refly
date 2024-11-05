@@ -25,6 +25,8 @@ import { Markdown } from "@refly-packages/ai-workspace-common/components/markdow
 import { Project, Canvas } from "@refly/openapi-schema"
 import getClient from "@refly-packages/ai-workspace-common/requests/proxiedRequest"
 import { AICopilot } from "@refly-packages/ai-workspace-common/components/copilot"
+import { MessageIntentSource } from "@refly-packages/ai-workspace-common/types/copilot"
+import { useShareStoreShallow } from "@refly-packages/ai-workspace-common/stores/share"
 
 const ShareContent = () => {
   const { t } = useTranslation()
@@ -36,14 +38,18 @@ const ShareContent = () => {
       setLoginModalVisible: state.setLoginModalVisible,
     }),
   )
+  const canvasList = useShareStoreShallow(state => state.canvasList)
+  const currentCanvasId = useShareStoreShallow(state => state.currentCanvasId)
+  const setCanvasList = useShareStoreShallow(state => state.setCanvasList)
+  const setCurrentCanvasId = useShareStoreShallow(
+    state => state.setCurrentCanvasId,
+  )
   const [searchParams, setSearchParams] = useSearchParams()
   const canvasId = searchParams.get("canvasId") as string
 
   const { shareCode } = useParams()
 
   const [loading, setLoading] = useState(false)
-  const [canvasList, setCanvasList] = useState<Canvas[]>([])
-  const [currentCanvasId, setCurrentCanvasId] = useState<string>(canvasId)
   const [currentCanvas, setCurrentCanvas] = useState<Canvas>()
   const [project, setProject] = useState<Project>()
   const [breadItems, setBreadItems] = useState<any[]>([])
@@ -72,7 +78,9 @@ const ShareContent = () => {
 
     setCurrentCanvas(result?.canvas)
     if (!canvasList?.length) {
-      setCanvasList(result?.canvasList || [])
+      const canvasList =
+        result?.canvasList || (result?.canvas ? [result.canvas] : [])
+      setCanvasList(canvasList)
     }
     if (!project) {
       setProject(result?.project)
@@ -97,6 +105,7 @@ const ShareContent = () => {
 
   useEffect(() => {
     if (currentCanvasId && canvasId !== currentCanvasId) {
+      setCurrentCanvasId(canvasId)
       setSearchParams({
         canvasId: currentCanvasId,
       })
@@ -191,7 +200,7 @@ const ShareContent = () => {
             </Splitter.Panel>
 
             <Splitter.Panel collapsible defaultSize={400} max={500} min={400}>
-              <AICopilot />
+              <AICopilot source={MessageIntentSource.Share} />
             </Splitter.Panel>
           </Splitter>
         </div>

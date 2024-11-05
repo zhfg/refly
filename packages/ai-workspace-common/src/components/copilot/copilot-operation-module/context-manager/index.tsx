@@ -33,6 +33,7 @@ import {
 
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
   let searchResults: SearchResult[] = [];
@@ -49,7 +50,7 @@ const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
   return searchResults;
 };
 
-export const ContextManager = () => {
+export const ContextManager = (props: { source: MessageIntentSource }) => {
   const [activeItemId, setActiveItemId] = useState(null);
   const { processedContextItems } = useProcessContextItems();
   const {
@@ -195,7 +196,7 @@ export const ContextManager = () => {
     <div className="context-manager">
       <div className="context-content">
         <div className="context-items-container">
-          <AddBaseMarkContext />
+          <AddBaseMarkContext source={props.source} />
 
           {processedContextItems?.length > 0 && <ResetContentSelectorBtn />}
 

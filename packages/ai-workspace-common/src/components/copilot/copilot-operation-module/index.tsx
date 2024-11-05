@@ -154,7 +154,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
           <div className="ai-copilot-chat-container">
             <div className="chat-input-container">
               <SelectedSkillHeader />
-              <ContextManager />
+              <ContextManager source={source} />
               <div className="chat-input-body">
                 <ChatInput
                   form={form}

@@ -17,6 +17,7 @@ import { Input, Button } from '@arco-design/web-react';
 import { cn } from '@refly-packages/editor-component/utils';
 import { getOsType } from '@refly-packages/utils/env';
 import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/components/add-base-mark-context';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 //TODO: I think it makes more sense to create a custom Tiptap extension for this functionality https://tiptap.dev/docs/editor/ai/introduction
 
 interface AISelectorProps {
@@ -182,7 +183,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
           <div className="flex relative flex-row items-center" cmdk-input-wrapper="">
             <div className="flex flex-1 items-center pl-4 border-b" cmdk-input-wrapper="">
               <Magic className="mr-2 w-4 h-4 text-primary-600 shrink-0" />
-              <AddBaseMarkContext />
+              <AddBaseMarkContext source={MessageIntentSource.AISelector} />
               <Input.TextArea
                 value={inputValue}
                 autoSize={{
