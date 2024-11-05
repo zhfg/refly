@@ -76,6 +76,7 @@ export const SearchSelect = (props: SearchSelectProps) => {
   return (
     <Select
       size="middle"
+      className="w-full"
       getPopupContainer={getPopupContainer}
       allowClear
       showSearch

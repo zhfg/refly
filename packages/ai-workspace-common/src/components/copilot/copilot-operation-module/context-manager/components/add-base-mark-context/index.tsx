@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button, Popover } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { BaseMarkContextSelector } from '../base-mark-context-selector';
@@ -12,6 +13,7 @@ export const AddBaseMarkContext = ({
   handleAddItem: (newMark: Mark) => void;
   selectedItems: Mark[];
 }) => {
+  const { t } = useTranslation();
   const [popoverVisible, setPopoverVisible] = useState(false);
 
   const handleVisibleChange = (visible) => {
@@ -44,7 +46,9 @@ export const AddBaseMarkContext = ({
           type="outline"
           className="text-xs h-6 rounded border border-gray-300"
           style={{ borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
-        />
+        >
+          {selectedItems?.length === 0 ? t('copilot.addContext') : null}
+        </Button>
       </Popover>
     </div>
   );

@@ -927,6 +927,7 @@
     "selectedSkillHeader": {
       "title": "和 {{name}} 聊聊"
     },
+    "addContext": "添加上下文",
     "baseContextCard": {
       "title": "环境上下文快捷操作",
       "filterTitle": "过滤环境上下文",

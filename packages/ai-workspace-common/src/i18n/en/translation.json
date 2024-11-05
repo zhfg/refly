@@ -915,6 +915,7 @@
     "selectedSkillHeader": {
       "title": "Chat with {{name}}"
     },
+    "addContext": "Add Context",
     "baseContextCard": {
       "title": "Environment Context Quick Actions",
       "filterTitle": "Filter Environment Context",

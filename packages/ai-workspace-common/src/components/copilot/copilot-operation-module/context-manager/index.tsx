@@ -218,7 +218,7 @@ export const ContextManager = () => {
         <div className="context-items-container">
           <AddBaseMarkContext handleAddItem={handleAddItem} selectedItems={selectedItems} />
 
-          <ResetContentSelectorBtn />
+          {selectedItems?.length > 0 && <ResetContentSelectorBtn />}
 
           {/* <ContextFilter processContextFilterProps={processContextFilterProps} /> */}
 
