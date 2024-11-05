@@ -15,6 +15,8 @@ export const ProjectSelector = () => {
     setSelectedProject: state.setSelectedProject,
   }));
 
+  const title = project?.title?.length > 32 ? `${project.title.slice(0, 32)}...` : project?.title;
+
   return (
     <>
       <Button
@@ -24,7 +26,7 @@ export const ProjectSelector = () => {
         icon={project?.projectId ? <IconProject /> : <IconPlus />}
         onClick={() => setOpen(true)}
       >
-        {project?.projectId ? project.title : t('common.project')}
+        {project?.projectId ? title : t('common.project')}
       </Button>
       <Modal
         title={t('copilot.projectSelector.title')}
