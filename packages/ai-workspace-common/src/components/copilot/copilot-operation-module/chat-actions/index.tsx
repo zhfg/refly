@@ -75,7 +75,6 @@ export const ChatActions = (props: ChatActionsProps) => {
             <span className="chat-action-item-text">{t('copilot.webSearch.title')}</span>
           </div>
         ) : null}
-        {!envProjectId ? <ProjectSelector /> : null}
         {!skillStore?.selectedSkill?.skillId ? (
           <div
             className="chat-action-item"
@@ -85,6 +84,7 @@ export const ChatActions = (props: ChatActionsProps) => {
             <span className="chat-action-item-text">{t('copilot.knowledgeBaseSearch.title')}</span>
           </div>
         ) : null}
+        {!envProjectId ? <ProjectSelector /> : null}
       </div>
       <div className="right-actions">
         {messageStateStore?.pending ? (

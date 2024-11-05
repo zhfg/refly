@@ -1064,6 +1064,11 @@
       "enable": "Enable",
       "disable": "Disable"
     },
+    "knowledgeBaseSearch": {
+      "title": "Library Search",
+      "enable": "Enable",
+      "disable": "Disable"
+    },
     "tokenUsage": "Input {{inputCount}}, Output {{outputCount}}",
     "reflyAssistant": "Knowledge Curator",
     "message": {
