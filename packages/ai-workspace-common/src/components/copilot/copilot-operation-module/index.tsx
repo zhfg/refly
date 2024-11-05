@@ -179,7 +179,12 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
                 />
               )}
 
-              <ChatActions form={form} handleSendMessage={handleSendMessage} handleAbort={handleAbort} />
+              <ChatActions
+                form={form}
+                handleSendMessage={handleSendMessage}
+                handleAbort={handleAbort}
+                source={source}
+              />
             </div>
           </div>
         </div>

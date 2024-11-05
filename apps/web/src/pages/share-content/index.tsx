@@ -27,6 +27,10 @@ import getClient from "@refly-packages/ai-workspace-common/requests/proxiedReque
 import { AICopilot } from "@refly-packages/ai-workspace-common/components/copilot"
 import { MessageIntentSource } from "@refly-packages/ai-workspace-common/types/copilot"
 import { useShareStoreShallow } from "@refly-packages/ai-workspace-common/stores/share"
+import {
+  useProjectStore,
+  useProjectStoreShallow,
+} from "@refly-packages/ai-workspace-common/stores/project"
 
 const ShareContent = () => {
   const { t } = useTranslation()
@@ -44,6 +48,10 @@ const ShareContent = () => {
   const setCurrentCanvasId = useShareStoreShallow(
     state => state.setCurrentCanvasId,
   )
+  const { project, setProject } = useProjectStoreShallow(state => ({
+    project: state?.project?.data,
+    setProject: state.setProject,
+  }))
   const [searchParams, setSearchParams] = useSearchParams()
   const canvasId = searchParams.get("canvasId") as string
 
@@ -51,7 +59,6 @@ const ShareContent = () => {
 
   const [loading, setLoading] = useState(false)
   const [currentCanvas, setCurrentCanvas] = useState<Canvas>()
-  const [project, setProject] = useState<Project>()
   const [breadItems, setBreadItems] = useState<any[]>([])
 
   const items = [
@@ -62,6 +69,8 @@ const ShareContent = () => {
   ]
 
   const getCanvas = async () => {
+    const { project: projectState } = useProjectStore.getState()
+
     setLoading(true)
     const { data } = await getClient().getShareContent({
       query: {
@@ -82,8 +91,8 @@ const ShareContent = () => {
         result?.canvasList || (result?.canvas ? [result.canvas] : [])
       setCanvasList(canvasList)
     }
-    if (!project) {
-      setProject(result?.project)
+    if (!projectState?.data) {
+      setProject(result?.project as Project)
     }
     setLoading(false)
   }
