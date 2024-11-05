@@ -11,7 +11,7 @@ import { Markdown } from '../markdown';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { mapSourceToResource } from '@refly-packages/ai-workspace-common/utils/resource';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 interface SourceListProps {
@@ -93,7 +93,7 @@ const ViewMoreItem = ({ sources = [], extraCnt = 0 }: { sources: Source[]; extra
 export const EntityItem = (props: { item: Source; index: number; showUtil?: boolean; showDesc?: boolean }) => {
   const { item, index, showDesc = false } = props;
   const { t } = useTranslation();
-  const { jumpToReadResource, jumpToCanvas } = useKnowledgeBaseJumpNewPath();
+  const { jumpToResource, jumpToCanvas } = useJumpNewPath();
 
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
@@ -124,13 +124,15 @@ export const EntityItem = (props: { item: Source; index: number; showUtil?: bool
                 const extraParams = !isWeb ? { openNewTab: true, baseUrl: getClientOrigin() } : {};
 
                 if (item?.metadata?.entityType === 'resource') {
-                  jumpToReadResource({
+                  jumpToResource({
                     resId: item?.metadata?.entityId,
                     ...extraParams,
                   });
                 } else if (item?.metadata?.entityType === 'canvas') {
                   jumpToCanvas({
                     canvasId: item?.metadata?.entityId,
+                    // @ts-ignore
+                    projectId: item?.metadata?.projectId, // TODO: 这里需要补充 canvas 的 projectId
                     ...extraParams,
                   });
                 }

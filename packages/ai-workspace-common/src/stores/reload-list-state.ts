@@ -5,27 +5,27 @@ import type {} from '@redux-devtools/extension';
 interface ReloadListState {
   // state
   reloadResourceList: boolean;
-  reloadKnowledgeBaseList: boolean;
-  reloadNoteList: boolean;
+  reloadProjectList: boolean;
+  reloadCanvasList: boolean;
   reloadResourceDetail: boolean;
 
   // method
   setReloadResourceList: (val: boolean) => void;
-  setReloadKnowledgeBaseList: (val: boolean) => void;
-  setReloadNoteList: (val: boolean) => void;
+  setReloadProjectList: (val: boolean) => void;
+  setReloadCanvasList: (val: boolean) => void;
   setReloadResourceDetail: (val: boolean) => void;
 }
 
 export const useReloadListState = create<ReloadListState>()(
   devtools((set) => ({
     reloadResourceList: false,
-    reloadKnowledgeBaseList: false,
-    reloadNoteList: false,
+    reloadProjectList: false,
+    reloadCanvasList: false,
     reloadResourceDetail: false,
 
     setReloadResourceList: (val: boolean) => set({ reloadResourceList: val }),
-    setReloadKnowledgeBaseList: (val: boolean) => set({ reloadKnowledgeBaseList: val }),
-    setReloadNoteList: (val: boolean) => set({ reloadNoteList: val }),
+    setReloadProjectList: (val: boolean) => set({ reloadProjectList: val }),
+    setReloadCanvasList: (val: boolean) => set({ reloadCanvasList: val }),
     setReloadResourceDetail: (val: boolean) => set({ reloadResourceDetail: val }),
   })),
 );

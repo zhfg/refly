@@ -23,13 +23,13 @@ interface ImportResourceState {
   scrapeLinks: LinkMeta[];
   copiedTextPayload: { content: string; title: string; url?: string };
 
-  // save to collection
-  selectedCollectionId: string;
+  // save to project
+  selectedProjectId: string;
 
   setImportResourceModalVisible: (visible: boolean) => void;
   setScrapeLinks: (links: LinkMeta[]) => void;
   setCopiedTextPayload: (payload: Partial<{ content: string; title: string; url?: string }>) => void;
-  setSelectedCollectionId: (id: string) => void;
+  setSelectedProjectId: (id: string) => void;
   resetState: () => void;
   setSelectedMenuItem: (menuItem: ImportResourceMenuItem) => void;
 }
@@ -37,7 +37,7 @@ interface ImportResourceState {
 export const defaultState = {
   copiedTextPayload: { content: '', title: '', url: '' },
   scrapeLinks: [],
-  selectedCollectionId: '',
+  selectedProjectId: '',
   importResourceModalVisible: false,
   selectedMenuItem: 'import-from-weblink' as ImportResourceMenuItem,
 };
@@ -51,7 +51,7 @@ export const useImportResourceStore = create<ImportResourceState>()(
     setScrapeLinks: (links: LinkMeta[]) => set((state) => ({ ...state, scrapeLinks: links })),
     setCopiedTextPayload: (payload: Partial<{ content: string; title: string; url?: string }>) =>
       set((state) => ({ ...state, copiedTextPayload: { ...state.copiedTextPayload, ...payload } })),
-    setSelectedCollectionId: (id: string) => set((state) => ({ ...state, selectedCollectionId: id })),
+    setSelectedProjectId: (id: string) => set((state) => ({ ...state, selectedProjectId: id })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
     setSelectedMenuItem: (menuItem: ImportResourceMenuItem) =>
       set((state) => ({ ...state, selectedMenuItem: menuItem })),

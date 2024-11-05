@@ -25,11 +25,28 @@ export default {
               height: "auto",
             },
           },
+          // 添加 blockquote 样式覆盖
+          blockquote: {
+            quotes: "none",
+            "&::before": {
+              content: "none",
+            },
+            "&::after": {
+              content: "none",
+            },
+            // 重要：覆盖 blockquote 内 p 元素的样式
+            "p::before": {
+              content: "none",
+            },
+            "p::after": {
+              content: "none",
+            },
+          },
         },
       },
       colors: {
         gray: {
-          100: "#EBF1F5",
+          100: "#F1F1F0",
           200: "#D9E3EA",
           300: "#C5D2DC",
           400: "#9BA9B4",
@@ -54,6 +71,7 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
+          600: "#00968F",
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },

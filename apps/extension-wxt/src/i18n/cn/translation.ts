@@ -52,9 +52,6 @@ export const translation = {
             read: '已处理',
             unread: '未处理',
           },
-          list: {
-            fetchErr: '获取知识库内容失败！',
-          },
         },
         recommendQuickAction: {
           title: '推荐快捷操作：',
@@ -96,7 +93,7 @@ export const translation = {
           current: '当前网页',
           all: '全部知识库',
           history: '历史已阅读',
-          internet: '联网搜索',
+          internet: '全网搜索',
         },
         status: {
           emptyNotify: '提问内容不能为空',

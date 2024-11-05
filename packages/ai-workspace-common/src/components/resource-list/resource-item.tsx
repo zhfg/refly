@@ -3,19 +3,17 @@ import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 // styles
 import './index.scss';
-import { IconCompass } from '@arco-design/web-react/icon';
 import { Tag, Tooltip } from '@arco-design/web-react';
 
-import { Resource, RemoveResourceFromCollectionRequest } from '@refly/openapi-schema';
+import { Resource, BindProjectResourcesRequest } from '@refly/openapi-schema';
 // 类型
 import { IndexStatus } from '@refly/openapi-schema';
 // 请求
 import { safeParseURL } from '@refly/utils/url';
 import { Markdown } from '../markdown';
-import classNames from 'classnames';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
-import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/knowledge-base/delete-dropdown-menu';
+import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
 import { memo, useState, useEffect } from 'react';
 
 export const ResourceItem = memo(
@@ -30,7 +28,7 @@ export const ResourceItem = memo(
     small?: boolean;
     btnProps?: { defaultActiveKeys: string[] };
     handleItemClick: (resource: Resource) => void;
-    handleItemDelete?: (resource: RemoveResourceFromCollectionRequest) => void;
+    handleItemDelete?: (resource: BindProjectResourcesRequest) => void;
   }) => {
     const {
       item,
@@ -118,9 +116,9 @@ export const ResourceItem = memo(
 
               {canDelete && (
                 <DeleteDropdownMenu
-                  data={{ resourceIds: [item?.resourceId], collectionId: collectionId }}
+                  data={{ resourceIds: [item?.resourceId], projectId: collectionId, operation: 'unbind' }}
                   type="resourceCollection"
-                  postDeleteList={(item: RemoveResourceFromCollectionRequest) => props.handleItemDelete(item)}
+                  postDeleteList={(item: BindProjectResourcesRequest) => props.handleItemDelete(item)}
                   getPopupContainer={() => document.getElementById(`directory-resource-item-${item?.resourceId}`)}
                 />
               )}

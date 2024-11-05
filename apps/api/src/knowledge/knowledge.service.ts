@@ -1,28 +1,34 @@
-import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bull';
 import pLimit from 'p-limit';
 import { InjectQueue } from '@nestjs/bull';
 import { readingTime } from 'reading-time-estimator';
-import { Prisma, Resource as ResourceModel } from '@prisma/client';
+import { Canvas, Prisma, Resource as ResourceModel } from '@prisma/client';
 import { RAGService } from '@/rag/rag.service';
 import { PrismaService } from '@/common/prisma.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
 import {
-  UpsertCollectionRequest,
   UpsertResourceRequest,
   ResourceMeta,
   ListResourcesData,
-  ListCollectionsData,
   ListCanvasData,
   UpsertCanvasRequest,
   User,
   GetResourceDetailData,
-  AddResourceToCollectionRequest,
-  RemoveResourceFromCollectionRequest,
   IndexStatus,
   ReindexResourceRequest,
   ResourceType,
+  ListProjectsData,
+  UpsertProjectRequest,
+  BindProjectResourceRequest,
+  QueryReferencesRequest,
+  ReferenceType,
+  BaseReference,
+  AddReferencesRequest,
+  DeleteReferencesRequest,
+  ReferenceMeta,
+  GetCanvasDetailData,
 } from '@refly-packages/openapi-schema';
 import {
   CHANNEL_FINALIZE_RESOURCE,
@@ -32,18 +38,28 @@ import {
   QUEUE_SYNC_STORAGE_USAGE,
 } from '@/utils';
 import {
-  genCollectionID,
   genResourceID,
   genCanvasID,
   cleanMarkdownForIngest,
   markdown2StateUpdate,
+  genProjectID,
+  genReferenceID,
 } from '@refly-packages/utils';
-import { FinalizeResourceParam } from './knowledge.dto';
-import { pick, omit } from '../utils';
+import { ExtendedReferenceModel, FinalizeResourceParam } from './knowledge.dto';
+import { pick } from '../utils';
 import { SimpleEventData } from '@/event/event.dto';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { MiscService } from '@/misc/misc.service';
+import {
+  ProjectNotFoundError,
+  CanvasNotFoundError,
+  StorageQuotaExceeded,
+  ResourceNotFoundError,
+  ParamsError,
+  ReferenceNotFoundError,
+  ReferenceObjectMissingError,
+} from '@refly-packages/errors';
 
 @Injectable()
 export class KnowledgeService {
@@ -61,150 +77,236 @@ export class KnowledgeService {
     @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
   ) {}
 
-  async listCollections(user: User, params: ListCollectionsData['query']) {
-    const { page, pageSize } = params;
-    return this.prisma.collection.findMany({
-      where: { uid: user.uid, deletedAt: null },
-      orderBy: { updatedAt: 'desc' },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
+  async listProjects(user: User, params: ListProjectsData['query']) {
+    const { projectId, resourceId, page, pageSize, order } = params;
+
+    const projectIdFilter: Prisma.StringFilter<'Project'> = { equals: projectId };
+    let projectOrder: string[] = [];
+    if (resourceId) {
+      const relations = await this.prisma.projectResourceRelation.findMany({
+        select: { projectId: true },
+        where: { resourceId },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: { createdAt: 'desc' },
+      });
+      projectIdFilter.in = relations.map((r) => r.projectId);
+      projectOrder = projectIdFilter.in;
+    }
+
+    const projects = await this.prisma.project.findMany({
+      where: { projectId: projectIdFilter, uid: user.uid, deletedAt: null },
+      ...(!resourceId
+        ? {
+            orderBy: { createdAt: order === 'creationAsc' ? 'asc' : 'desc' },
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+          }
+        : {}),
     });
+
+    if (projectOrder.length > 0) {
+      // Sort according to the order in projectOrder
+      projects.sort(
+        (a, b) => projectOrder.indexOf(a.projectId) - projectOrder.indexOf(b.projectId),
+      );
+    }
+
+    return projects;
   }
 
-  async getCollectionDetail(user: User, param: { collectionId: string }) {
-    const { collectionId } = param;
+  async getProjectDetail(user: User, param: { projectId: string }) {
+    const { uid } = user;
+    const { projectId } = param;
 
-    const coll = await this.prisma.collection.findFirst({
-      where: { collectionId, deletedAt: null },
-      include: {
-        resources: {
-          where: {
-            deletedAt: null,
-            OR: [{ isPublic: true }, { uid: user.uid }],
-          },
-          orderBy: { updatedAt: 'desc' },
-        },
-      },
+    if (!projectId) {
+      throw new ParamsError('Project ID is required');
+    }
+
+    const project = await this.prisma.project.findFirst({
+      where: { projectId, uid, deletedAt: null },
     });
-    if (!coll) {
-      throw new NotFoundException('Collection not found');
+    if (!project) {
+      throw new ProjectNotFoundError();
     }
 
-    // Permission check
-    if (!coll.isPublic && coll.uid !== user.uid) {
-      return null;
-    }
-
-    return coll;
+    return project;
   }
 
-  async upsertCollection(user: User, param: UpsertCollectionRequest) {
-    if (!param.collectionId) {
-      param.collectionId = genCollectionID();
+  async upsertProject(user: User, param: UpsertProjectRequest) {
+    if (!param.projectId) {
+      param.projectId = genProjectID();
     }
 
-    const collection = await this.prisma.collection.upsert({
-      where: { collectionId: param.collectionId },
+    const project = await this.prisma.project.upsert({
+      where: { projectId: param.projectId },
       create: {
-        collectionId: param.collectionId,
+        projectId: param.projectId,
         title: param.title,
         description: param.description,
         uid: user.uid,
       },
-      update: { ...omit(param, ['collectionId']) },
+      update: { ...pick(param, ['title', 'description']) },
     });
 
-    await this.elasticsearch.upsertCollection({
-      id: collection.collectionId,
-      createdAt: collection.createdAt.toJSON(),
-      updatedAt: collection.updatedAt.toJSON(),
-      ...pick(collection, ['title', 'description', 'uid']),
+    await this.elasticsearch.upsertProject({
+      id: project.projectId,
+      createdAt: project.createdAt.toJSON(),
+      updatedAt: project.updatedAt.toJSON(),
+      ...pick(project, ['title', 'description', 'uid']),
     });
 
-    return collection;
+    return project;
   }
 
-  async addResourceToCollection(user: User, param: AddResourceToCollectionRequest) {
-    const { resourceIds = [], collectionId } = param;
-
-    if (resourceIds.length === 0) {
-      throw new BadRequestException('resourceIds is required');
-    }
-
-    return this.prisma.collection.update({
-      where: { collectionId, uid: user.uid, deletedAt: null },
-      data: {
-        resources: {
-          connect: resourceIds.map((resourceId) => ({ resourceId })),
-        },
-      },
-    });
-  }
-
-  async removeResourceFromCollection(user: User, param: RemoveResourceFromCollectionRequest) {
-    const { resourceIds = [], collectionId } = param;
-
-    if (resourceIds.length === 0) {
-      throw new BadRequestException('resourceIds is required');
-    }
-
-    return this.prisma.collection.update({
-      where: { collectionId, uid: user.uid, deletedAt: null },
-      data: {
-        resources: {
-          disconnect: resourceIds.map((resourceId) => ({ resourceId })),
-        },
-      },
-    });
-  }
-
-  async deleteCollection(user: User, collectionId: string) {
+  async bindProjectResources(user: User, params: BindProjectResourceRequest[]) {
     const { uid } = user;
-    const coll = await this.prisma.collection.findFirst({
-      where: { collectionId, uid, deletedAt: null },
+
+    if (params?.length === 0) {
+      return;
+    }
+
+    params.forEach((param) => {
+      if (!param.resourceId || !param.projectId) {
+        throw new ParamsError('resourceId and projectId are required');
+      }
+      if (param.operation !== 'bind' && param.operation !== 'unbind') {
+        throw new ParamsError(`Invalid operation: ${param.operation}`);
+      }
     });
-    if (!coll) {
-      throw new BadRequestException('Collection not found');
+
+    const projectIds = new Set(params.map((p) => p.projectId));
+    const resourceIds = new Set(params.map((p) => p.resourceId));
+
+    const [projectCnt, resourceCnt] = await this.prisma.$transaction([
+      this.prisma.project.count({
+        where: { projectId: { in: Array.from(projectIds) }, uid, deletedAt: null },
+      }),
+      this.prisma.resource.count({
+        where: { resourceId: { in: Array.from(resourceIds) }, uid, deletedAt: null },
+      }),
+    ]);
+
+    if (projectCnt !== projectIds.size) {
+      throw new ProjectNotFoundError('Some of the projects cannot be found');
+    }
+    if (resourceCnt !== resourceIds.size) {
+      throw new ResourceNotFoundError('Some of the resources cannot be found');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      for (const param of params) {
+        const { projectId, resourceId, order, operation } = param;
+
+        if (operation === 'bind') {
+          // Get max order for this project if order not specified
+          let finalOrder = order;
+          if (finalOrder === undefined) {
+            const maxOrder = await tx.projectResourceRelation.aggregate({
+              where: { projectId },
+              _max: { order: true },
+            });
+            finalOrder = (maxOrder._max.order ?? -1) + 1;
+          }
+
+          await tx.projectResourceRelation.upsert({
+            where: { projectId_resourceId: { projectId, resourceId } },
+            create: { projectId, resourceId, order: finalOrder },
+            update: { order: finalOrder },
+          });
+        } else if (operation === 'unbind') {
+          await tx.projectResourceRelation.deleteMany({
+            where: { projectId, resourceId },
+          });
+        }
+      }
+    });
+  }
+
+  async deleteProject(user: User, projectId: string) {
+    const { uid } = user;
+    const project = await this.prisma.project.findFirst({
+      where: { projectId, uid, deletedAt: null },
+    });
+    if (!project) {
+      throw new ProjectNotFoundError();
     }
 
     await this.prisma.$transaction([
-      this.prisma.collection.update({
-        where: { collectionId, uid, deletedAt: null },
+      this.prisma.project.update({
+        where: { projectId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
       }),
       this.prisma.labelInstance.updateMany({
-        where: { entityType: 'collection', entityId: collectionId, uid, deletedAt: null },
+        where: { entityType: 'project', entityId: projectId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
       }),
     ]);
+
+    await this.elasticsearch.deleteProject(projectId);
   }
 
   async listResources(user: User, param: ListResourcesData['query']) {
-    const { resourceId, resourceType, page = 1, pageSize = 10 } = param;
+    const {
+      resourceId,
+      projectId,
+      resourceType,
+      page = 1,
+      pageSize = 10,
+      order = 'creationDesc',
+    } = param;
 
-    const resources = await this.prisma.resource.findMany({
-      where: { resourceId, resourceType, uid: user.uid, deletedAt: null },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      orderBy: { updatedAt: 'desc' },
+    const resourceIdFilter: Prisma.StringFilter<'Resource'> = { equals: resourceId };
+    let resourceOrder: string[] = [];
+    if (projectId) {
+      const relations = await this.prisma.projectResourceRelation.findMany({
+        select: { resourceId: true },
+        where: { projectId },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        orderBy: { order: 'asc' },
+      });
+      resourceIdFilter.in = relations.map((r) => r.resourceId);
+      resourceOrder = resourceIdFilter.in;
+    }
+
+    let resources = await this.prisma.resource.findMany({
+      where: { resourceId: resourceIdFilter, resourceType, uid: user.uid, deletedAt: null },
+      ...(!projectId
+        ? {
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            orderBy: { createdAt: order === 'creationAsc' ? 'asc' : 'desc' },
+          }
+        : {}),
     });
 
-    return resources.map((r) => ({
-      ...r,
-      data: JSON.parse(r.meta),
-    }));
+    if (resourceOrder.length > 0) {
+      // Sort according to the order in resourceOrder and add order field
+      resources = resources
+        .sort((a, b) => {
+          return resourceOrder.indexOf(a.resourceId) - resourceOrder.indexOf(b.resourceId);
+        })
+        .map((res, index) => ({ ...res, order: index }));
+    }
+
+    return resources;
   }
 
   async getResourceDetail(user: User, param: GetResourceDetailData['query']) {
+    const { uid } = user;
     const { resourceId } = param;
 
+    if (!resourceId) {
+      throw new ParamsError('Resource ID is required');
+    }
+
     const resource = await this.prisma.resource.findFirst({
-      where: { resourceId, deletedAt: null },
-      include: { collections: { where: { deletedAt: null } } },
+      where: { resourceId, uid, deletedAt: null },
     });
 
-    if (!resource || (!resource.isPublic && resource.uid !== user.uid)) {
-      throw new NotFoundException('Resource not found');
+    if (!resource) {
+      throw new ResourceNotFoundError(`resource ${resourceId} not found`);
     }
 
     let content: string;
@@ -224,7 +326,7 @@ export class KnowledgeService {
     if (options?.checkStorageQuota) {
       const usageResult = await this.subscriptionService.checkStorageUsage(user);
       if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
-        throw new BadRequestException('Storage quota exceeded');
+        throw new StorageQuotaExceeded();
       }
     }
 
@@ -236,19 +338,19 @@ export class KnowledgeService {
 
     if (param.resourceType === 'weblink') {
       if (!param.data) {
-        throw new BadRequestException('data is required');
+        throw new ParamsError('data is required');
       }
       const { url, title } = param.data;
       if (!url) {
-        throw new BadRequestException('url is required');
+        throw new ParamsError('url is required');
       }
       param.title ||= title;
     } else if (param.resourceType === 'text') {
       if (!param.content) {
-        throw new BadRequestException('content is required for text resource');
+        throw new ParamsError('content is required for text resource');
       }
     } else {
-      throw new BadRequestException('Invalid resource type');
+      throw new ParamsError('Invalid resource type');
     }
 
     const cleanedContent = param.content?.replace(/x00/g, '') ?? '';
@@ -263,26 +365,30 @@ export class KnowledgeService {
       indexStatus = 'wait_index';
     }
 
-    const resource = await this.prisma.resource.create({
-      data: {
-        resourceId: param.resourceId,
-        resourceType: param.resourceType,
-        meta: JSON.stringify(param.data || {}),
-        contentPreview: cleanedContent?.slice(0, 500),
-        storageKey,
-        storageSize,
-        uid: user.uid,
-        readOnly: !!param.readOnly,
-        title: param.title || 'Untitled',
-        indexStatus,
-        ...(param.collectionId
-          ? {
-              collections: {
-                connect: { collectionId: param.collectionId },
-              },
-            }
-          : {}),
-      },
+    const resource = await this.prisma.$transaction(async (tx) => {
+      const resource = await tx.resource.create({
+        data: {
+          resourceId: param.resourceId,
+          resourceType: param.resourceType,
+          meta: JSON.stringify(param.data || {}),
+          contentPreview: cleanedContent?.slice(0, 500),
+          storageKey,
+          storageSize,
+          uid: user.uid,
+          readOnly: !!param.readOnly,
+          title: param.title || 'Untitled',
+          indexStatus,
+        },
+      });
+
+      // Add to project if specified
+      if (param.projectId) {
+        await tx.projectResourceRelation.create({
+          data: { projectId: param.projectId, resourceId: param.resourceId },
+        });
+      }
+
+      return resource;
     });
 
     // Add to queue to be processed by worker
@@ -297,7 +403,7 @@ export class KnowledgeService {
   async batchCreateResource(user: User, params: UpsertResourceRequest[]) {
     const usageResult = await this.subscriptionService.checkStorageUsage(user);
     if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
-      throw new BadRequestException('Storage quota exceeded');
+      throw new StorageQuotaExceeded();
     }
 
     const limit = pLimit(5);
@@ -379,7 +485,7 @@ export class KnowledgeService {
       const contentStream = await this.minio.client.getObject(storageKey);
       const content = await streamToString(contentStream);
 
-      const { size } = await this.ragService.indexContent(user, {
+      const { size } = await this.ragService.indexDocument(user, {
         pageContent: cleanMarkdownForIngest(content),
         metadata: {
           nodeType: 'resource',
@@ -465,7 +571,7 @@ export class KnowledgeService {
       where: { resourceId: param.resourceId, uid: user.uid },
     });
     if (!resource) {
-      throw new BadRequestException('Resource not found');
+      throw new ResourceNotFoundError(`resource ${param.resourceId} not found`);
     }
 
     const updates: Prisma.ResourceUpdateInput = pick(param, ['title', 'readOnly']);
@@ -514,7 +620,7 @@ export class KnowledgeService {
       where: { resourceId, uid, deletedAt: null },
     });
     if (!resource) {
-      throw new BadRequestException('Resource not found');
+      throw new ResourceNotFoundError(`resource ${resourceId} not found`);
     }
 
     await this.prisma.$transaction([
@@ -539,8 +645,33 @@ export class KnowledgeService {
     ]);
   }
 
-  async listCanvas(user: User, param: ListCanvasData['query']) {
-    const { page = 1, pageSize = 10 } = param;
+  async listCanvases(user: User, param: ListCanvasData['query']) {
+    const { projectId, page = 1, pageSize = 10, order = 'creationDesc' } = param;
+
+    const orderBy: Prisma.CanvasOrderByWithRelationInput = {};
+    if (projectId) {
+      orderBy.order = 'asc';
+    } else if (order === 'creationAsc') {
+      orderBy.createdAt = 'asc';
+    } else {
+      orderBy.createdAt = 'desc';
+    }
+
+    if (projectId) {
+      const project = await this.prisma.project.findFirst({
+        where: { projectId, uid: user.uid, deletedAt: null },
+        include: {
+          canvases: {
+            where: { deletedAt: null },
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            orderBy,
+          },
+        },
+      });
+      return project?.canvases;
+    }
+
     return this.prisma.canvas.findMany({
       where: {
         uid: user.uid,
@@ -548,16 +679,24 @@ export class KnowledgeService {
       },
       skip: (page - 1) * pageSize,
       take: pageSize,
-      orderBy: { updatedAt: 'desc' },
+      orderBy,
     });
   }
 
-  async getCanvasDetail(user: User, canvasId: string) {
+  async getCanvasDetail(user: User, params: GetCanvasDetailData['query']) {
+    const { uid } = user;
+    const { canvasId } = params;
+
+    if (!canvasId) {
+      throw new ParamsError('Canvas ID is required');
+    }
+
     const canvas = await this.prisma.canvas.findFirst({
-      where: { canvasId, uid: user.uid, deletedAt: null },
+      where: { canvasId, uid, deletedAt: null },
     });
+
     if (!canvas) {
-      throw new BadRequestException('Canvas not found');
+      throw new CanvasNotFoundError('Canvas not found');
     }
 
     let content: string;
@@ -569,15 +708,14 @@ export class KnowledgeService {
     return { ...canvas, content };
   }
 
-  async upsertCanvas(user: User, param: UpsertCanvasRequest) {
+  async createCanvas(user: User, param: UpsertCanvasRequest) {
     const usageResult = await this.subscriptionService.checkStorageUsage(user);
     if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
-      throw new BadRequestException('Storage quota exceeded');
+      throw new StorageQuotaExceeded();
     }
 
-    const isNewCanvas = !param.canvasId;
-
-    param.canvasId ||= genCanvasID();
+    param.canvasId = genCanvasID();
+    param.projectId ||= genProjectID();
     param.title ||= 'Untitled';
 
     const createInput: Prisma.CanvasCreateInput = {
@@ -587,9 +725,20 @@ export class KnowledgeService {
       readOnly: param.readOnly ?? false,
       content: param.initialContent,
       contentPreview: param.initialContent?.slice(0, 500),
+      order: param.order,
+      project: {
+        connectOrCreate: {
+          where: { projectId: param.projectId },
+          create: {
+            title: param.title || 'Untitled',
+            projectId: param.projectId,
+            uid: user.uid,
+          },
+        },
+      },
     };
 
-    if (isNewCanvas && param.initialContent) {
+    if (param.initialContent) {
       createInput.storageKey = `canvas/${param.canvasId}.txt`;
       createInput.stateStorageKey = `state/${param.canvasId}`;
 
@@ -608,28 +757,44 @@ export class KnowledgeService {
       createInput.storageSize = storageStat.size + stateStorageStat.size;
 
       // Add to vector store
-      const { size } = await this.ragService.indexContent(user, {
+      const { size } = await this.ragService.indexDocument(user, {
         pageContent: param.initialContent,
         metadata: {
           nodeType: 'canvas',
           canvasId: param.canvasId,
+          projectId: param.projectId,
           title: param.title,
         },
       });
       createInput.vectorSize = size;
     }
 
-    const canvas = await this.prisma.canvas.upsert({
-      where: { canvasId: param.canvasId },
-      create: createInput,
-      update: {
-        ...pick(param, ['title', 'readOnly']),
-      },
+    // Handle order in a transaction to ensure consistency
+    const canvas = await this.prisma.$transaction(async (tx) => {
+      // Get max order if not specified for new canvas
+      if (param.order === undefined) {
+        const maxOrder = await tx.canvas.aggregate({
+          where: { projectId: param.projectId, deletedAt: null },
+          _max: { order: true },
+        });
+        createInput.order = (maxOrder._max.order ?? -1) + 1;
+      }
+
+      const canvas = await tx.canvas.upsert({
+        where: { canvasId: param.canvasId },
+        create: createInput,
+        update: {
+          ...pick(param, ['title', 'readOnly']),
+          ...(param.order !== undefined && { order: param.order }),
+        },
+      });
+
+      return canvas;
     });
 
     await this.elasticsearch.upsertCanvas({
       id: param.canvasId,
-      ...pick(canvas, ['title', 'uid']),
+      ...pick(canvas, ['projectId', 'title', 'uid']),
       content: param.initialContent,
       createdAt: canvas.createdAt.toJSON(),
       updatedAt: canvas.updatedAt.toJSON(),
@@ -643,13 +808,37 @@ export class KnowledgeService {
     return canvas;
   }
 
+  async batchUpdateCanvas(user: User, param: UpsertCanvasRequest[]) {
+    const canvasIds = param.map((p) => p.canvasId);
+    if (canvasIds.length !== new Set(canvasIds).size) {
+      throw new ParamsError('Duplicate canvas IDs');
+    }
+
+    const count = await this.prisma.canvas.count({
+      where: { canvasId: { in: canvasIds }, uid: user.uid, deletedAt: null },
+    });
+
+    if (count !== canvasIds.length) {
+      throw new CanvasNotFoundError('Some of the canvases cannot be found');
+    }
+
+    return this.prisma.$transaction(
+      param.map((p) =>
+        this.prisma.canvas.update({
+          where: { canvasId: p.canvasId },
+          data: pick(p, ['title', 'readOnly', 'order']),
+        }),
+      ),
+    );
+  }
+
   async deleteCanvas(user: User, canvasId: string) {
     const { uid } = user;
     const canvas = await this.prisma.canvas.findFirst({
       where: { canvasId, uid, deletedAt: null },
     });
     if (!canvas) {
-      throw new BadRequestException('Canvas not found');
+      throw new CanvasNotFoundError('Canvas not found');
     }
 
     await this.prisma.$transaction([
@@ -686,6 +875,230 @@ export class KnowledgeService {
     await this.ssuQueue.add({
       uid: user.uid,
       timestamp: new Date(),
+    });
+  }
+
+  async queryReferences(
+    user: User,
+    param: QueryReferencesRequest,
+  ): Promise<ExtendedReferenceModel[]> {
+    const { sourceType, sourceId, targetType, targetId } = param;
+
+    // Check if the source and target entities exist for this user
+    const entityChecks: Promise<void>[] = [];
+    if (sourceType && sourceId) {
+      entityChecks.push(this.miscService.checkEntity(user, sourceId, sourceType));
+    }
+    if (targetType && targetId) {
+      entityChecks.push(this.miscService.checkEntity(user, targetId, targetType));
+    }
+    await Promise.all(entityChecks);
+
+    const where: Prisma.ReferenceWhereInput = {};
+    if (sourceType && sourceId) {
+      where.sourceType = sourceType;
+      where.sourceId = sourceId;
+    }
+    if (targetType && targetId) {
+      where.targetType = targetType;
+      where.targetId = targetId;
+    }
+    if (Object.keys(where).length === 0) {
+      throw new ParamsError('Either source or target condition is required');
+    }
+
+    const references = await this.prisma.reference.findMany({ where });
+
+    // Collect all canvas IDs and resource IDs from both source and target
+    const canvasIds = new Set<string>();
+    const resourceIds = new Set<string>();
+    references.forEach((ref) => {
+      if (ref.sourceType === 'canvas') canvasIds.add(ref.sourceId);
+      if (ref.targetType === 'canvas') canvasIds.add(ref.targetId);
+      if (ref.sourceType === 'resource') resourceIds.add(ref.sourceId);
+      if (ref.targetType === 'resource') resourceIds.add(ref.targetId);
+    });
+
+    // Fetch canvas mappings if there are any canvases
+    const canvasMap: Record<string, Canvas> = {};
+    if (canvasIds.size > 0) {
+      const canvases = await this.prisma.canvas.findMany({
+        where: { canvasId: { in: Array.from(canvasIds) }, deletedAt: null },
+      });
+      canvases.forEach((canvas) => {
+        canvasMap[canvas.canvasId] = canvas;
+      });
+    }
+
+    // Fetch resource mappings if there are any resources
+    const resourceMap: Record<string, ResourceModel> = {};
+    if (resourceIds.size > 0) {
+      const resources = await this.prisma.resource.findMany({
+        where: { resourceId: { in: Array.from(resourceIds) }, deletedAt: null },
+      });
+      resources.forEach((resource) => {
+        resourceMap[resource.resourceId] = resource;
+      });
+    }
+
+    const genReferenceMeta = (sourceType: string, sourceId: string) => {
+      let refMeta: ReferenceMeta;
+      if (sourceType === 'resource') {
+        refMeta = {
+          title: resourceMap[sourceId]?.title,
+          url: JSON.parse(resourceMap[sourceId]?.meta || '{}')?.url,
+        };
+      } else if (sourceType === 'canvas') {
+        refMeta = {
+          title: canvasMap[sourceId]?.title,
+          projectId: canvasMap[sourceId]?.projectId,
+        };
+      }
+      return refMeta;
+    };
+
+    // Attach metadata to references
+    return references.map((ref) => {
+      return {
+        ...ref,
+        sourceMeta: genReferenceMeta(ref.sourceType, ref.sourceId),
+        targetMeta: genReferenceMeta(ref.targetType, ref.targetId),
+      };
+    });
+  }
+
+  private async prepareReferenceInputs(
+    user: User,
+    references: BaseReference[],
+  ): Promise<Prisma.ReferenceCreateManyInput[]> {
+    const validRefTypes: ReferenceType[] = ['resource', 'canvas'];
+
+    // Deduplicate references using a Set with stringified unique properties
+    const uniqueRefs = new Set(
+      references.map((ref) =>
+        JSON.stringify({
+          sourceType: ref.sourceType,
+          sourceId: ref.sourceId,
+          targetType: ref.targetType,
+          targetId: ref.targetId,
+        }),
+      ),
+    );
+    const deduplicatedRefs: BaseReference[] = Array.from(uniqueRefs).map((ref) => JSON.parse(ref));
+
+    const resourceIds: Set<string> = new Set();
+    const canvasIds: Set<string> = new Set();
+
+    deduplicatedRefs.forEach((ref) => {
+      if (!validRefTypes.includes(ref.sourceType)) {
+        throw new ParamsError(`Invalid source type: ${ref.sourceType}`);
+      }
+      if (!validRefTypes.includes(ref.targetType)) {
+        throw new ParamsError(`Invalid target type: ${ref.targetType}`);
+      }
+      if (ref.sourceType === 'resource' && ref.targetType === 'canvas') {
+        throw new ParamsError('Resource to canvas reference is not allowed');
+      }
+      if (ref.sourceType === ref.targetType && ref.sourceId === ref.targetId) {
+        throw new ParamsError('Source and target cannot be the same');
+      }
+
+      if (ref.sourceType === 'resource') {
+        resourceIds.add(ref.sourceId);
+      } else if (ref.sourceType === 'canvas') {
+        canvasIds.add(ref.sourceId);
+      }
+
+      if (ref.targetType === 'resource') {
+        resourceIds.add(ref.targetId);
+      } else if (ref.targetType === 'canvas') {
+        canvasIds.add(ref.targetId);
+      }
+    });
+
+    const [resources, canvases] = await Promise.all([
+      this.prisma.resource.findMany({
+        select: { resourceId: true },
+        where: {
+          resourceId: { in: Array.from(resourceIds) },
+          uid: user.uid,
+          deletedAt: null,
+        },
+      }),
+      this.prisma.canvas.findMany({
+        select: { canvasId: true },
+        where: {
+          canvasId: { in: Array.from(canvasIds) },
+          uid: user.uid,
+          deletedAt: null,
+        },
+      }),
+    ]);
+
+    // Check if all the entities exist
+    const foundIds = new Set([
+      ...resources.map((r) => r.resourceId),
+      ...canvases.map((c) => c.canvasId),
+    ]);
+    const missingEntities = deduplicatedRefs.filter(
+      (e) => !foundIds.has(e.sourceId) || !foundIds.has(e.targetId),
+    );
+    if (missingEntities.length > 0) {
+      this.logger.warn(`Entities not found: ${JSON.stringify(missingEntities)}`);
+      throw new ReferenceObjectMissingError();
+    }
+
+    return deduplicatedRefs.map((ref) => ({
+      ...ref,
+      referenceId: genReferenceID(),
+      uid: user.uid,
+    }));
+  }
+
+  async addReferences(user: User, param: AddReferencesRequest) {
+    const { references } = param;
+    const referenceInputs = await this.prepareReferenceInputs(user, references);
+
+    return this.prisma.$transaction(
+      referenceInputs.map((input) =>
+        this.prisma.reference.upsert({
+          where: {
+            sourceType_sourceId_targetType_targetId: {
+              sourceType: input.sourceType,
+              sourceId: input.sourceId,
+              targetType: input.targetType,
+              targetId: input.targetId,
+            },
+          },
+          create: input,
+          update: { deletedAt: null },
+        }),
+      ),
+    );
+  }
+
+  async deleteReferences(user: User, param: DeleteReferencesRequest) {
+    const { referenceIds } = param;
+
+    const references = await this.prisma.reference.findMany({
+      where: {
+        referenceId: { in: referenceIds },
+        uid: user.uid,
+        deletedAt: null,
+      },
+    });
+
+    if (references.length !== referenceIds.length) {
+      throw new ReferenceNotFoundError('Some of the references cannot be found');
+    }
+
+    await this.prisma.reference.updateMany({
+      data: { deletedAt: new Date() },
+      where: {
+        referenceId: { in: referenceIds },
+        uid: user.uid,
+        deletedAt: null,
+      },
     });
   }
 }

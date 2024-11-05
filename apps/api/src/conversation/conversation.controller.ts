@@ -9,20 +9,21 @@ import {
   Param,
   ParseIntPipe,
   DefaultValuePipe,
-  NotFoundException,
 } from '@nestjs/common';
 import {
   CreateConversationRequest,
   CreateConversationResponse,
   ListConversationResponse,
   GetConversationDetailResponse,
+  ListOrder,
 } from '@refly-packages/openapi-schema';
 import { User as UserModel } from '@prisma/client';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { ConversationService } from './conversation.service';
 import { buildSuccessResponse } from '@/utils';
 import { User } from '@/utils/decorators/user.decorator';
-import { toConversationDTO } from '@/conversation/conversation.dto';
+import { conversationPO2DTO } from '@/conversation/conversation.dto';
+import { ConversationNotFoundError } from '@refly-packages/errors';
 
 @Controller('conversation')
 export class ConversationController {
@@ -37,24 +38,26 @@ export class ConversationController {
     @Body() body: CreateConversationRequest,
   ): Promise<CreateConversationResponse> {
     const conversation = await this.conversationService.upsertConversation(user, body);
-    return buildSuccessResponse(toConversationDTO(conversation));
+    return buildSuccessResponse(conversationPO2DTO(conversation));
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('list')
   async listConversation(
     @User() user: UserModel,
+    @Query('projectId') projectId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
+    @Query('order', new DefaultValuePipe('updatedDesc')) order: ListOrder,
   ): Promise<ListConversationResponse> {
-    const conversationList = await this.conversationService.getConversations({
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      where: { uid: user.uid },
-      orderBy: { createdAt: 'desc' },
+    const conversationList = await this.conversationService.listConversations(user, {
+      projectId,
+      page,
+      pageSize,
+      order,
     });
 
-    return buildSuccessResponse(conversationList.map(toConversationDTO));
+    return buildSuccessResponse(conversationList?.map(conversationPO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -65,8 +68,8 @@ export class ConversationController {
   ): Promise<GetConversationDetailResponse> {
     const data = await this.conversationService.getConversationDetail(user, convId);
     if (!data?.convId) {
-      throw new NotFoundException('conversation not found');
+      throw new ConversationNotFoundError();
     }
-    return buildSuccessResponse(toConversationDTO(data));
+    return buildSuccessResponse(conversationPO2DTO(data));
   }
 }

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/common/prisma.service';
 import {
@@ -16,6 +16,7 @@ import {
 import { RAGService } from '@/rag/rag.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { LOCALE } from '@refly-packages/common-types';
+import { ParamsError } from '@refly-packages/errors';
 
 interface ProcessedSearchRequest extends SearchRequest {}
 
@@ -45,7 +46,7 @@ export class SearchService {
       // Currently only resource and canvas are supported for vector search
       req.domains ??= ['resource', 'canvas'];
     } else {
-      req.domains ??= ['resource', 'canvas', 'collection', 'conversation', 'skill'];
+      req.domains ??= ['resource', 'canvas', 'project', 'conversation', 'skill'];
     }
 
     const reqList: SearchRequest[] = [];
@@ -56,21 +57,19 @@ export class SearchService {
         return [];
       }
 
-      // Add collection resources to entities
-      const collectionIds = entities
-        .filter((entity) => entity.entityType === 'collection')
+      // Add project resources to entities
+      const projectIds = entities
+        .filter((entity) => entity.entityType === 'project')
         .map((entity) => entity.entityId);
-      if (collectionIds.length > 0) {
-        const collections = await this.prisma.collection.findMany({
-          where: { collectionId: { in: collectionIds }, uid: user.uid, deletedAt: null },
-          include: { resources: true },
+      if (projectIds.length > 0) {
+        const relations = await this.prisma.projectResourceRelation.findMany({
+          select: { resourceId: true },
+          where: { projectId: { in: projectIds } },
         });
-        collections.forEach((collection) => {
-          collection.resources.forEach((resource) => {
-            entities.push({
-              entityType: 'resource',
-              entityId: resource.resourceId,
-            });
+        relations.forEach((relation) => {
+          entities.push({
+            entityType: 'resource',
+            entityId: relation.resourceId,
           });
         });
       }
@@ -121,7 +120,8 @@ export class SearchService {
       id: result.resourceId,
       domain: 'resource',
       title: result.title,
-      content: [result.contentPreview],
+      highlightedTitle: result.title,
+      snippets: [{ text: result.contentPreview, highlightedText: result.contentPreview }],
       metadata: {
         resourceType: result.resourceType as ResourceType,
       },
@@ -139,8 +139,14 @@ export class SearchService {
     return hits.map((hit) => ({
       id: hit._id,
       domain: 'resource',
-      title: hit.highlight?.title?.[0] || hit._source.title,
-      content: hit.highlight?.content || [hit._source.content],
+      title: hit._source.title,
+      highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
+      snippets: [
+        {
+          text: hit._source.content,
+          highlightedText: hit.highlight?.content?.[0] || hit._source.content,
+        },
+      ],
       metadata: {
         // TODO: confirm if metadata is used
       },
@@ -177,7 +183,8 @@ export class SearchService {
       id: node.resourceId,
       domain: 'resource',
       title: node.title,
-      content: [node.content],
+      highlightedTitle: node.title,
+      snippets: [{ text: node.content, highlightedText: node.content }],
       metadata: {
         resourceMeta: resourceMap.get(node.resourceId),
         resourceType: node.resourceType,
@@ -196,7 +203,7 @@ export class SearchService {
       case 'vector':
         return this.searchResourcesByVector(user, req);
       case 'hybrid':
-        throw new BadRequestException('Not implemented');
+        throw new ParamsError('Not implemented');
       default:
         return this.searchResourcesByKeywords(user, req);
     }
@@ -206,6 +213,7 @@ export class SearchService {
     const canvases = await this.prisma.canvas.findMany({
       select: {
         canvasId: true,
+        projectId: true,
         title: true,
         content: true,
         createdAt: true,
@@ -219,9 +227,15 @@ export class SearchService {
       id: canvas.canvasId,
       domain: 'canvas',
       title: canvas.title,
-      content: [canvas.content ? canvas.content.slice(0, 250) + '...' : ''],
+      highlightedTitle: canvas.title,
+      snippets: [
+        { text: canvas.content ? canvas.content.slice(0, 250) + '...' : '', highlightedText: '' },
+      ],
       createdAt: canvas.createdAt.toJSON(),
       updatedAt: canvas.updatedAt.toJSON(),
+      metadata: {
+        projectId: canvas.projectId,
+      },
     }));
   }
 
@@ -231,10 +245,19 @@ export class SearchService {
     return hits.map((hit) => ({
       id: hit._id,
       domain: 'canvas',
-      title: hit.highlight?.title?.[0] || hit._source.title,
-      content: hit.highlight?.content || [hit._source.content],
+      title: hit._source.title,
+      highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
+      snippets: [
+        {
+          text: hit._source.content,
+          highlightedText: hit.highlight?.content?.[0] || hit._source.content,
+        },
+      ],
       createdAt: hit._source.createdAt,
       updatedAt: hit._source.updatedAt,
+      metadata: {
+        projectId: hit._source.projectId,
+      },
     }));
   }
 
@@ -255,7 +278,11 @@ export class SearchService {
       id: node.canvasId,
       domain: 'canvas',
       title: node.title,
-      content: [node.content],
+      highlightedTitle: node.title,
+      snippets: [{ text: node.content, highlightedText: node.content }],
+      metadata: {
+        projectId: node.projectId,
+      },
     }));
   }
 
@@ -270,16 +297,16 @@ export class SearchService {
       case 'vector':
         return this.searchCanvasesByVector(user, req);
       case 'hybrid':
-        throw new BadRequestException('Not implemented');
+        throw new ParamsError('Not implemented');
       default:
         return this.searchCanvasesByKeywords(user, req);
     }
   }
 
-  async emptySearchCollections(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const collections = await this.prisma.collection.findMany({
+  async emptySearchProjects(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const projects = await this.prisma.project.findMany({
       select: {
-        collectionId: true,
+        projectId: true,
         title: true,
         description: true,
         createdAt: true,
@@ -289,27 +316,35 @@ export class SearchService {
       orderBy: { updatedAt: 'desc' },
       take: req.limit || 5,
     });
-    return collections.map((collection) => ({
-      id: collection.collectionId,
-      domain: 'collection',
-      title: collection.title,
-      createdAt: collection.createdAt.toJSON(),
-      updatedAt: collection.updatedAt.toJSON(),
+    return projects.map((project) => ({
+      id: project.projectId,
+      domain: 'project',
+      title: project.title,
+      highlightedTitle: project.title,
+      snippets: [{ text: project.description, highlightedText: project.description }],
+      createdAt: project.createdAt.toJSON(),
+      updatedAt: project.updatedAt.toJSON(),
     }));
   }
 
-  async searchCollections(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+  async searchProjects(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
     if (req.query.length === 0) {
-      return this.emptySearchCollections(user, req);
+      return this.emptySearchProjects(user, req);
     }
 
-    const hits = await this.elasticsearch.searchCollections(user, req);
+    const hits = await this.elasticsearch.searchProjects(user, req);
 
     return hits.map((hit) => ({
       id: hit._id,
-      domain: 'collection',
-      title: hit.highlight?.title?.[0] || hit._source.title,
-      content: hit.highlight?.description || [hit._source.description],
+      domain: 'project',
+      title: hit._source.title,
+      highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
+      snippets: [
+        {
+          text: hit._source.description,
+          highlightedText: hit.highlight?.description?.[0] || hit._source.description,
+        },
+      ],
       createdAt: hit._source.createdAt,
       updatedAt: hit._source.updatedAt,
     }));
@@ -332,7 +367,8 @@ export class SearchService {
       id: conversation.convId,
       domain: 'conversation',
       title: conversation.title,
-      content: [conversation.lastMessage],
+      highlightedTitle: conversation.title,
+      snippets: [{ text: conversation.lastMessage, highlightedText: conversation.lastMessage }],
       createdAt: conversation.createdAt.toJSON(),
       updatedAt: conversation.updatedAt.toJSON(),
     }));
@@ -348,8 +384,14 @@ export class SearchService {
     return hits.map((hit) => ({
       id: hit._source.convId,
       domain: 'conversation',
-      title: hit.highlight?.convTitle?.[0] || hit._source.convTitle,
-      content: hit.highlight?.content || [hit._source.content],
+      title: hit._source.convTitle,
+      highlightedTitle: hit.highlight?.convTitle?.[0] || hit._source.convTitle,
+      snippets: [
+        {
+          text: hit._source.content,
+          highlightedText: hit.highlight?.content?.[0] || hit._source.content,
+        },
+      ],
       createdAt: hit._source.createdAt,
       updatedAt: hit._source.updatedAt,
     }));
@@ -365,6 +407,8 @@ export class SearchService {
       id: skill.skillId,
       domain: 'skill',
       title: skill.displayName,
+      highlightedTitle: skill.displayName,
+      snippets: [{ text: skill.description, highlightedText: skill.description }],
       createdAt: skill.createdAt.toJSON(),
       updatedAt: skill.updatedAt.toJSON(),
     }));
@@ -380,8 +424,14 @@ export class SearchService {
     return hits.map((hit) => ({
       id: hit._id,
       domain: 'skill',
-      title: hit.highlight?.displayName?.[0] || hit._source.displayName,
-      content: hit.highlight?.description || [hit._source.description],
+      title: hit._source.displayName,
+      highlightedTitle: hit.highlight?.displayName?.[0] || hit._source.displayName,
+      snippets: [
+        {
+          text: hit._source.description,
+          highlightedText: hit.highlight?.description?.[0] || hit._source.description,
+        },
+      ],
       createdAt: hit._source.createdAt,
       updatedAt: hit._source.updatedAt,
     }));
@@ -461,8 +511,8 @@ export class SearchService {
             return this.searchResources(user, req);
           case 'canvas':
             return this.searchCanvases(user, req);
-          case 'collection':
-            return this.searchCollections(user, req);
+          case 'project':
+            return this.searchProjects(user, req);
           case 'conversation':
             return this.searchConversations(user, req);
           case 'skill':

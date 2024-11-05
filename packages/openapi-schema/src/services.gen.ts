@@ -38,27 +38,45 @@ import type {
   DeleteCanvasData,
   DeleteCanvasError,
   DeleteCanvasResponse,
-  ListCollectionsData,
-  ListCollectionsError,
-  ListCollectionsResponse,
-  GetCollectionDetailData,
-  GetCollectionDetailError,
-  GetCollectionDetailResponse2,
-  UpdateCollectionData,
-  UpdateCollectionError,
-  UpdateCollectionResponse,
-  CreateCollectionData,
-  CreateCollectionError,
-  CreateCollectionResponse,
-  AddResourceToCollectionData,
-  AddResourceToCollectionError,
-  AddResourceToCollectionResponse,
-  RemoveResourceFromCollectionData,
-  RemoveResourceFromCollectionError,
-  RemoveResourceFromCollectionResponse,
-  DeleteCollectionData,
-  DeleteCollectionError,
-  DeleteCollectionResponse,
+  BatchUpdateCanvasData,
+  BatchUpdateCanvasError,
+  BatchUpdateCanvasResponse,
+  QueryReferencesData,
+  QueryReferencesError,
+  QueryReferencesResponse2,
+  AddReferencesData,
+  AddReferencesError,
+  AddReferencesResponse2,
+  DeleteReferencesData,
+  DeleteReferencesError,
+  DeleteReferencesResponse,
+  ListProjectsData,
+  ListProjectsError,
+  ListProjectsResponse,
+  GetProjectDetailData,
+  GetProjectDetailError,
+  GetProjectDetailResponse2,
+  UpdateProjectData,
+  UpdateProjectError,
+  UpdateProjectResponse,
+  CreateProjectData,
+  CreateProjectError,
+  CreateProjectResponse,
+  BindProjectResourcesData,
+  BindProjectResourcesError,
+  BindProjectResourcesResponse,
+  DeleteProjectData,
+  DeleteProjectError,
+  DeleteProjectResponse,
+  CreateShareData,
+  CreateShareError,
+  CreateShareResponse2,
+  DeleteShareData,
+  DeleteShareError,
+  DeleteShareResponse,
+  GetShareContentData,
+  GetShareContentError,
+  GetShareContentResponse2,
   ListLabelClassesData,
   ListLabelClassesError,
   ListLabelClassesResponse2,
@@ -128,6 +146,7 @@ import type {
   GetSkillJobDetailData,
   GetSkillJobDetailError,
   GetSkillJobDetailResponse2,
+  ListConversationsData,
   ListConversationsError,
   ListConversationsResponse,
   GetConversationDetailData,
@@ -298,79 +317,145 @@ export const deleteCanvas = (options: Options<DeleteCanvasData>) => {
 };
 
 /**
- * List user collections
- * List all collections for a user
+ * Batch update canvases
+ * Batch update existing canvases
  */
-export const listCollections = (options?: Options<ListCollectionsData>) => {
-  return (options?.client ?? client).get<ListCollectionsResponse, ListCollectionsError>({
+export const batchUpdateCanvas = (options: Options<BatchUpdateCanvasData>) => {
+  return (options?.client ?? client).post<BatchUpdateCanvasResponse, BatchUpdateCanvasError>({
     ...options,
-    url: '/knowledge/collection/list',
+    url: '/knowledge/canvas/batchUpdate',
   });
 };
 
 /**
- * Get collection detail
- * Return collection details along with its resources
+ * Query references
+ * Query references by source or target entity
  */
-export const getCollectionDetail = (options: Options<GetCollectionDetailData>) => {
-  return (options?.client ?? client).get<GetCollectionDetailResponse2, GetCollectionDetailError>({
+export const queryReferences = (options: Options<QueryReferencesData>) => {
+  return (options?.client ?? client).post<QueryReferencesResponse2, QueryReferencesError>({
     ...options,
-    url: '/knowledge/collection/detail',
+    url: '/knowledge/reference/query',
   });
 };
 
 /**
- * Update collection
- * Update an existing collection
+ * Add references
+ * Add references between source and target entities
  */
-export const updateCollection = (options: Options<UpdateCollectionData>) => {
-  return (options?.client ?? client).post<UpdateCollectionResponse, UpdateCollectionError>({
+export const addReferences = (options: Options<AddReferencesData>) => {
+  return (options?.client ?? client).post<AddReferencesResponse2, AddReferencesError>({
     ...options,
-    url: '/knowledge/collection/update',
+    url: '/knowledge/reference/add',
   });
 };
 
 /**
- * Create new collection
- * Create a new collection
+ * Delete references
+ * Delete references between source and target entities
  */
-export const createCollection = (options: Options<CreateCollectionData>) => {
-  return (options?.client ?? client).post<CreateCollectionResponse, CreateCollectionError>({
+export const deleteReferences = (options: Options<DeleteReferencesData>) => {
+  return (options?.client ?? client).post<DeleteReferencesResponse, DeleteReferencesError>({
     ...options,
-    url: '/knowledge/collection/new',
+    url: '/knowledge/reference/delete',
   });
 };
 
 /**
- * Add resource to collection
- * Add an existing resource to a collection
+ * List user projects
+ * List all projects for a user
  */
-export const addResourceToCollection = (options: Options<AddResourceToCollectionData>) => {
-  return (options?.client ?? client).post<AddResourceToCollectionResponse, AddResourceToCollectionError>({
+export const listProjects = (options?: Options<ListProjectsData>) => {
+  return (options?.client ?? client).get<ListProjectsResponse, ListProjectsError>({
     ...options,
-    url: '/knowledge/collection/addResource',
+    url: '/knowledge/project/list',
   });
 };
 
 /**
- * Remove resource from collection
- * Remove an existing resource from a collection
+ * Get project detail
+ * Return project details along with its canvases
  */
-export const removeResourceFromCollection = (options: Options<RemoveResourceFromCollectionData>) => {
-  return (options?.client ?? client).post<RemoveResourceFromCollectionResponse, RemoveResourceFromCollectionError>({
+export const getProjectDetail = (options: Options<GetProjectDetailData>) => {
+  return (options?.client ?? client).get<GetProjectDetailResponse2, GetProjectDetailError>({
     ...options,
-    url: '/knowledge/collection/removeResource',
+    url: '/knowledge/project/detail',
   });
 };
 
 /**
- * Delete collection
- * Delete an existing collection
+ * Update project
+ * Update an existing project
  */
-export const deleteCollection = (options: Options<DeleteCollectionData>) => {
-  return (options?.client ?? client).post<DeleteCollectionResponse, DeleteCollectionError>({
+export const updateProject = (options: Options<UpdateProjectData>) => {
+  return (options?.client ?? client).post<UpdateProjectResponse, UpdateProjectError>({
     ...options,
-    url: '/knowledge/collection/delete',
+    url: '/knowledge/project/update',
+  });
+};
+
+/**
+ * Create new project
+ * Create a new project
+ */
+export const createProject = (options: Options<CreateProjectData>) => {
+  return (options?.client ?? client).post<CreateProjectResponse, CreateProjectError>({
+    ...options,
+    url: '/knowledge/project/new',
+  });
+};
+
+/**
+ * Bind resources to project
+ * Bind existing resources to a project
+ */
+export const bindProjectResources = (options: Options<BindProjectResourcesData>) => {
+  return (options?.client ?? client).post<BindProjectResourcesResponse, BindProjectResourcesError>({
+    ...options,
+    url: '/knowledge/project/bindRes',
+  });
+};
+
+/**
+ * Delete project
+ * Delete an existing project
+ */
+export const deleteProject = (options: Options<DeleteProjectData>) => {
+  return (options?.client ?? client).post<DeleteProjectResponse, DeleteProjectError>({
+    ...options,
+    url: '/knowledge/project/delete',
+  });
+};
+
+/**
+ * Create share
+ * Create new share for project or canvas
+ */
+export const createShare = (options: Options<CreateShareData>) => {
+  return (options?.client ?? client).post<CreateShareResponse2, CreateShareError>({
+    ...options,
+    url: '/share/new',
+  });
+};
+
+/**
+ * Delete share
+ * Delete an existing share
+ */
+export const deleteShare = (options: Options<DeleteShareData>) => {
+  return (options?.client ?? client).post<DeleteShareResponse, DeleteShareError>({
+    ...options,
+    url: '/share/delete',
+  });
+};
+
+/**
+ * Get share content
+ * Get share content by share code
+ */
+export const getShareContent = (options: Options<GetShareContentData>) => {
+  return (options?.client ?? client).get<GetShareContentResponse2, GetShareContentError>({
+    ...options,
+    url: '/share/content',
   });
 };
 
@@ -631,7 +716,7 @@ export const getSkillJobDetail = (options?: Options<GetSkillJobDetailData>) => {
  * List conversations
  * List all conversations
  */
-export const listConversations = (options?: Options) => {
+export const listConversations = (options?: Options<ListConversationsData>) => {
   return (options?.client ?? client).get<ListConversationsResponse, ListConversationsError>({
     ...options,
     url: '/conversation/list',
@@ -739,7 +824,7 @@ export const createPortalSession = (options?: Options) => {
 
 /**
  * Search
- * Search for canvases, resources, collections, etc.
+ * Search for canvases, resources, projects, etc.
  */
 export const search = (options: Options<SearchData>) => {
   return (options?.client ?? client).post<SearchResponse2, SearchError>({

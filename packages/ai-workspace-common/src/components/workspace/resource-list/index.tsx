@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-import { List, Empty, Message as message } from '@arco-design/web-react';
+import { List, Empty } from '@arco-design/web-react';
 
 import { Resource } from '@refly/openapi-schema';
 
@@ -11,7 +11,7 @@ import { ResourceCard } from '@refly-packages/ai-workspace-common/components/wor
 
 import { ScrollLoading } from '../scroll-loading';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
@@ -53,12 +53,11 @@ export const ResourceList = () => {
       },
     });
     if (error) {
-      message.error(t('common.putErr'));
-    } else {
-      if (data.data?.length) {
-        const resource = data.data[0];
-        setDataList(dataList.map((n) => (n.resourceId === resource.resourceId ? resource : n)));
-      }
+      return;
+    }
+    if (data.data?.length) {
+      const resource = data.data[0];
+      setDataList(dataList.map((n) => (n.resourceId === resource.resourceId ? resource : n)));
     }
   };
 
@@ -73,7 +72,7 @@ export const ResourceList = () => {
     }
   }, [reloadListState.reloadResourceList]);
 
-  const { jumpToReadResource } = useKnowledgeBaseJumpNewPath();
+  const { jumpToResource } = useJumpNewPath();
 
   if (dataList.length === 0 && !isRequesting) {
     return <Empty />;
@@ -117,7 +116,7 @@ export const ResourceList = () => {
                 if (['wait_parse', 'parse_failed'].includes(item.indexStatus)) {
                   return;
                 } else {
-                  jumpToReadResource({ resId: item?.resourceId });
+                  jumpToResource({ resId: item?.resourceId });
                 }
               }}
               deleteData={(resource: Resource) =>

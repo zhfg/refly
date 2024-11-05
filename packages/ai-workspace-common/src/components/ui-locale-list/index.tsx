@@ -36,8 +36,6 @@ export const UILocaleList = (props: { children: React.ReactNode; width?: number 
     }
   };
 
-  console.log('用户当前的界面语言', i18n.languages?.[0]);
-
   const dropList = (
     <Menu
       className={'ui-locale-list-menu'}

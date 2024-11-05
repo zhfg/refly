@@ -43,9 +43,9 @@ export const countWebSearchContextTokens = (webSearchSources: Source[] = []) => 
   return webSearchSources.reduce((sum, source) => sum + countToken(source?.pageContent), 0);
 };
 
-// TODO: collections 搜索和在整个知识库搜索一起实现
-// export const countCollectionTokens = (collections: SkillContextCollectionItem[]) => {
-//   return collections.reduce((sum, collection) => sum + countToken(collection?.collection?.content), 0);
+// TODO: projects 搜索和在整个知识库搜索一起实现
+// export const countProjectTokens = (projects: SkillContextProjectItem[]) => {
+//   return projects.reduce((sum, project) => sum + countToken(project?.project?.content), 0);
 // };
 
 export const countContextTokens = (context: IContext) => {
@@ -61,7 +61,7 @@ export const checkHasContext = (context: IContext) => {
     context?.contentList?.length > 0 ||
     context?.resources?.length > 0 ||
     context?.canvases?.length > 0 ||
-    context?.collections?.length > 0
+    context?.projects?.length > 0
   );
 };
 

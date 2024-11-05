@@ -210,7 +210,7 @@ export class RAGService {
     return tempMemoryVectorStore.similaritySearch(query, k, wrapperFilter);
   }
 
-  async indexContent(user: User, doc: Document<NodeMeta>): Promise<{ size: number }> {
+  async indexDocument(user: User, doc: Document<NodeMeta>): Promise<{ size: number }> {
     const { uid } = user;
     const { pageContent, metadata } = doc;
     const { nodeType, canvasId, resourceId } = metadata;
@@ -293,10 +293,10 @@ export class RAGService {
         match: { any: param.filter?.resourceIds },
       });
     }
-    if (param.filter?.collectionIds?.length > 0) {
+    if (param.filter?.projectIds?.length > 0) {
       conditions.push({
-        key: 'collectionId',
-        match: { any: param.filter?.collectionIds },
+        key: 'projectId',
+        match: { any: param.filter?.projectIds },
       });
     }
 
@@ -310,7 +310,7 @@ export class RAGService {
   async rerank(query: string, results: SearchResult[]): Promise<SearchResult[]> {
     const contentMap = new Map<string, SearchResult>();
     results.forEach((r) => {
-      contentMap.set(r.content.join('\n\n'), r);
+      contentMap.set(r.snippets.map((s) => s.text).join('\n\n'), r);
     });
 
     const payload = JSON.stringify({

@@ -13,13 +13,17 @@ import {
 } from "@refly-packages/ai-workspace-common/components/request-access/protected-route"
 
 // Lazy load components
-const Workspace = lazy(() => import("@/pages/workspace"))
+const Home = lazy(() => import("@/pages/home"))
+const Library = lazy(() => import("@/pages/library"))
+const Resource = lazy(() => import("@/pages/resource"))
 const ConvLibrary = lazy(() => import("@/pages/conv-library"))
-const KnowledgeBase = lazy(() => import("@/pages/knowledge-base"))
+const ConvItem = lazy(() => import("@/pages/conv-item"))
+const Project = lazy(() => import("@/pages/project"))
 const Skill = lazy(() => import("@/pages/skill"))
 const SkillDetailPage = lazy(() => import("@/pages/skill-detail"))
 const Settings = lazy(() => import("@/pages/settings"))
 const Login = lazy(() => import("@/pages/login"))
+const ShareContent = lazy(() => import("@/pages/share-content"))
 
 // Loading component
 const LoadingFallback = () => (
@@ -38,18 +42,23 @@ const LoadingFallback = () => (
 const prefetchRoutes = () => {
   // Prefetch common routes
   import("@/pages/login")
-  import("@/pages/workspace")
-  import("@/pages/knowledge-base")
+  import("@/pages/home")
+  import("@/pages/library")
+  import("@/pages/resource")
+  import("@/pages/project")
   import("@/pages/conv-library")
+  import("@/pages/conv-item")
   import("@/pages/skill")
   import("@/pages/skill-detail")
   import("@/pages/settings")
+  import("@/pages/share-content")
   import("@refly-packages/ai-workspace-common/components/request-access/index")
 }
 
 export const AppRouter = (props: { layout?: any }) => {
   const { layout: Layout } = props
   const userStore = useUserStoreShallow(state => ({
+    isLogin: state.isLogin,
     userProfile: state.userProfile,
     localSettings: state.localSettings,
     isCheckingLoginStatus: state.isCheckingLoginStatus,
@@ -65,6 +74,7 @@ export const AppRouter = (props: { layout?: any }) => {
   const storageLocalSettings = safeParseJSON(
     localStorage.getItem("refly-local-settings"),
   )
+
   const locale =
     storageLocalSettings?.uiLocale ||
     userStore?.localSettings?.uiLocale ||
@@ -85,20 +95,26 @@ export const AppRouter = (props: { layout?: any }) => {
     }
   }, [i18n, locale])
 
-  const routeLogin = useMatch("/login")
+  const routeLogin = useMatch("/")
 
-  if (
-    userStore.isCheckingLoginStatus === undefined ||
-    userStore.isCheckingLoginStatus
-  ) {
-    return <LoadingFallback />
+  const isShareContent = useMatch("/share/:shareCode")
+
+  if (!isShareContent) {
+    if (
+      !userStore.isCheckingLoginStatus === undefined ||
+      userStore.isCheckingLoginStatus
+    ) {
+      return <LoadingFallback />
+    }
+
+    if (!notShowLoginBtn && !routeLogin) {
+      return <LoadingFallback />
+    }
   }
 
-  if (!notShowLoginBtn && !routeLogin) {
-    return <LoadingFallback />
-  }
-
-  const hasBetaAccess = userStore?.userProfile?.hasBetaAccess || false
+  const hasBetaAccess = userStore?.isLogin
+    ? userStore?.userProfile?.hasBetaAccess || false
+    : true
 
   return (
     <Suspense fallback={<LoadingFallback />}>
@@ -108,26 +124,53 @@ export const AppRouter = (props: { layout?: any }) => {
             path="/"
             element={
               <BetaProtectedRoute
-                component={Workspace}
+                component={Home}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
+
+          <Route
+            path="/library"
+            element={
+              <BetaProtectedRoute
+                component={Library}
                 hasBetaAccess={hasBetaAccess}
               />
             }
           />
           <Route
-            path="/knowledge-base"
+            path="/resource/:resId"
             element={
               <BetaProtectedRoute
-                component={KnowledgeBase}
+                component={Resource}
                 hasBetaAccess={hasBetaAccess}
               />
             }
           />
-          <Route path="/login" element={<Login />} />
+          <Route
+            path="/project/:projectId"
+            element={
+              <BetaProtectedRoute
+                component={Project}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
           <Route
             path="/thread"
             element={
               <BetaProtectedRoute
                 component={ConvLibrary}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
+          <Route
+            path="/thread/:convId"
+            element={
+              <BetaProtectedRoute
+                component={ConvItem}
                 hasBetaAccess={hasBetaAccess}
               />
             }
@@ -163,6 +206,7 @@ export const AppRouter = (props: { layout?: any }) => {
             path="/request-access"
             element={<RequestAccessRoute hasBetaAccess={hasBetaAccess} />}
           />
+          <Route path="/share/:shareCode" element={<ShareContent />} />
         </Routes>
       </Layout>
     </Suspense>

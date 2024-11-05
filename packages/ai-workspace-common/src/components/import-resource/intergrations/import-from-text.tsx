@@ -31,7 +31,7 @@ export const ImportFromText = () => {
 
   const handleSave = async () => {
     setSaveLoading(true);
-    const { copiedTextPayload, selectedCollectionId } = useImportResourceStore.getState();
+    const { copiedTextPayload, selectedProjectId } = useImportResourceStore.getState();
     if (!copiedTextPayload?.content || !copiedTextPayload?.title) {
       message.warning(t('resource.import.emptyText'));
       return;
@@ -41,7 +41,7 @@ export const ImportFromText = () => {
       resourceType: 'text',
       title: copiedTextPayload?.title,
       content: copiedTextPayload?.content,
-      collectionId: selectedCollectionId,
+      projectId: selectedProjectId,
       data: {
         url: copiedTextPayload?.url,
         title: copiedTextPayload?.title,
@@ -60,8 +60,8 @@ export const ImportFromText = () => {
 
       importResourceStore.setCopiedTextPayload({ title: '', content: '' });
       importResourceStore.setImportResourceModalVisible(false);
-      if (!kbId || (kbId && selectedCollectionId === kbId)) {
-        reloadListState.setReloadKnowledgeBaseList(true);
+      if (!kbId || (kbId && selectedProjectId === kbId)) {
+        reloadListState.setReloadProjectList(true);
         reloadListState.setReloadResourceList(true);
       }
 
@@ -76,7 +76,7 @@ export const ImportFromText = () => {
   };
 
   useEffect(() => {
-    importResourceStore.setSelectedCollectionId(kbId);
+    importResourceStore.setSelectedProjectId(kbId);
 
     // 使用 copiedTextPayload 中的值初始化表单
     const { title, content, url } = importResourceStore.copiedTextPayload;
@@ -86,7 +86,7 @@ export const ImportFromText = () => {
 
     return () => {
       /* reset selectedCollectionId and copiedTextPayload after modal hide */
-      importResourceStore.setSelectedCollectionId('');
+      importResourceStore.setSelectedProjectId('');
       importResourceStore.setCopiedTextPayload({ title: '', content: '', url: '' });
     };
   }, []);
@@ -145,12 +145,12 @@ export const ImportFromText = () => {
             <div className="save-container">
               <p className="text-item">{t('resource.import.saveTo')} </p>
               <SearchSelect
-                domain="collection"
+                domain="project"
                 className="kg-selector"
                 allowCreateNewEntity
                 onChange={(value) => {
                   if (!value) return;
-                  importResourceStore.setSelectedCollectionId(value);
+                  importResourceStore.setSelectedProjectId(value);
                 }}
               />
             </div>

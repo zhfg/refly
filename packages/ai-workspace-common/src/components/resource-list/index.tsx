@@ -3,13 +3,13 @@ import './index.scss';
 import { HiOutlineSearch, HiOutlinePlus } from 'react-icons/hi';
 import { Divider, Input, Skeleton } from '@arco-design/web-react';
 import { useSearchableList } from '@refly-packages/ai-workspace-common/components/use-searchable-list';
-import { memo, useEffect, useState } from 'react';
-import { Resource, RemoveResourceFromCollectionRequest } from '@refly/openapi-schema';
+import { useEffect, useState } from 'react';
+import { Resource, BindProjectResourcesRequest } from '@refly/openapi-schema';
 import { useSearchParams } from 'react-router-dom';
 
 // 组件
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
-import { ResourceCollectionAssociativeModal } from '@refly-packages/ai-workspace-common/components/knowledge-base/resource-detail/resource-collection-associative-modal';
+import { BindResourceModal } from '@refly-packages/ai-workspace-common/components/project-detail/resource-view/resource-collection-associative-modal';
 import { ResourceItem } from './resource-item';
 import classNames from 'classnames';
 
@@ -28,7 +28,7 @@ interface ResourceListProps {
   showAdd?: boolean;
   small?: boolean;
   handleItemClick: (resource: Resource) => void;
-  handleItemDelete?: (resource: RemoveResourceFromCollectionRequest) => void;
+  handleItemDelete?: (resource: BindProjectResourcesRequest) => void;
 }
 
 export const ResourceList = (props: ResourceListProps) => {
@@ -116,7 +116,7 @@ export const ResourceList = (props: ResourceListProps) => {
           ))
         )}
       </div>
-      <ResourceCollectionAssociativeModal
+      <BindResourceModal
         domain="resource"
         mode="multiple"
         visible={visible}
@@ -125,7 +125,7 @@ export const ResourceList = (props: ResourceListProps) => {
           if (value.length > 0 && value.includes(resId)) {
             reloadKnowledgeBaseState.setReloadResourceDetail(true);
           }
-          reloadKnowledgeBaseState.setReloadKnowledgeBaseList(true);
+          reloadKnowledgeBaseState.setReloadProjectList(true);
         }}
       />
     </div>

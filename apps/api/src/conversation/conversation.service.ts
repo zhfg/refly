@@ -1,7 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 
 import { Prisma, Conversation } from '@prisma/client';
-import { CreateConversationRequest, User } from '@refly-packages/openapi-schema';
+import {
+  CreateConversationRequest,
+  ListConversationsData,
+  User,
+} from '@refly-packages/openapi-schema';
 
 import { PrismaService } from '@/common/prisma.service';
 import { genChatMessageID, genConvID } from '@refly-packages/utils';
@@ -20,6 +24,7 @@ export class ConversationService {
   ): Promise<Conversation> {
     const upsertParam = {
       convId: convId || genConvID(),
+      projectId: param.projectId,
       title: param.title,
       origin: param.origin,
       originPageUrl: param.originPageUrl,
@@ -114,15 +119,32 @@ export class ConversationService {
     return { ...conversation, messages };
   }
 
-  async getConversations(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.ConversationWhereUniqueInput;
-    where?: Prisma.ConversationWhereInput;
-    orderBy?: Prisma.ConversationOrderByWithRelationInput;
-  }) {
+  async listConversations(user: User, param: ListConversationsData['query']) {
+    const { projectId, page = 1, pageSize = 10, order = 'creationDesc' } = param;
+
+    const orderBy: Prisma.ConversationOrderByWithRelationInput = {
+      createdAt: order === 'creationAsc' ? 'asc' : 'desc',
+    };
+
+    if (projectId) {
+      const project = await this.prisma.project.findFirst({
+        where: { projectId, uid: user.uid, deletedAt: null },
+        include: {
+          conversations: {
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            orderBy,
+          },
+        },
+      });
+      return project?.conversations;
+    }
+
     return this.prisma.conversation.findMany({
-      ...params,
+      where: { uid: user.uid },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy,
     });
   }
 }

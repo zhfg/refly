@@ -26,9 +26,9 @@ export const ImportFromWeblink = () => {
   const [queryParams] = useSearchParams();
   const kbId = queryParams.get('kbId');
 
-  const { selectedCollectionId, scrapeLinks = [] } = importResourceStore;
+  const { selectedProjectId, scrapeLinks = [] } = importResourceStore;
 
-  console.log('select collection id', selectedCollectionId);
+  console.log('select project id', selectedProjectId);
 
   const [saveLoading, setSaveLoading] = useState(false);
 
@@ -95,7 +95,7 @@ export const ImportFromWeblink = () => {
 
   const handleSave = async () => {
     setSaveLoading(true);
-    const { scrapeLinks, selectedCollectionId } = useImportResourceStore.getState();
+    const { scrapeLinks, selectedProjectId } = useImportResourceStore.getState();
 
     if (scrapeLinks?.length === 0) {
       message.warning(t('resource.import.emptyLink'));
@@ -110,41 +110,36 @@ export const ImportFromWeblink = () => {
           url: link?.url,
           title: link?.title,
         },
-        collectionId: selectedCollectionId,
+        projectId: selectedProjectId,
       };
     });
 
-    try {
-      const res = await getClient().batchCreateResource({
-        body: batchCreateResourceData,
-      });
+    const res = await getClient().batchCreateResource({
+      body: batchCreateResourceData,
+    });
 
-      if (!res?.data?.success) {
-        setSaveLoading(false);
-        message.error(t('common.putErr'));
-        return;
-      }
-
-      message.success(t('common.putSuccess'));
-      importResourceStore.setScrapeLinks([]);
-      importResourceStore.setImportResourceModalVisible(false);
-      if (!kbId || (kbId && selectedCollectionId === kbId)) {
-        reloadListState.setReloadKnowledgeBaseList(true);
-        reloadListState.setReloadResourceList(true);
-      }
-      setLinkStr('');
-    } catch (err) {
-      message.error(t('common.putErr'));
+    if (!res?.data?.success) {
+      setSaveLoading(false);
+      return;
     }
+
+    message.success(t('common.putSuccess'));
+    importResourceStore.setScrapeLinks([]);
+    importResourceStore.setImportResourceModalVisible(false);
+    if (!kbId || (kbId && selectedProjectId === kbId)) {
+      reloadListState.setReloadProjectList(true);
+      reloadListState.setReloadResourceList(true);
+    }
+    setLinkStr('');
 
     setSaveLoading(false);
   };
 
   useEffect(() => {
-    importResourceStore.setSelectedCollectionId(kbId);
+    importResourceStore.setSelectedProjectId(kbId);
     return () => {
-      /* reset selectedCollectionId after modal hide */
-      importResourceStore.setSelectedCollectionId('');
+      /* reset selectedProjectId after modal hide */
+      importResourceStore.setSelectedProjectId('');
     };
   }, []);
 
@@ -209,12 +204,12 @@ export const ImportFromWeblink = () => {
             <div className="save-container">
               <p className="text-item save-text-item">{t('resource.import.saveTo')}</p>
               <SearchSelect
-                domain="collection"
+                domain="project"
                 className="kg-selector"
                 allowCreateNewEntity
                 onChange={(value) => {
                   if (!value) return;
-                  importResourceStore.setSelectedCollectionId(value);
+                  importResourceStore.setSelectedProjectId(value);
                 }}
               />
             </div>

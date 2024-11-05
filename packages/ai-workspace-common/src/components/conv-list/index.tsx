@@ -18,10 +18,11 @@ import './index.scss';
 // components
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 interface ConvListProps {
   classNames: string;
-  handleConvItemClick: (convId: string) => void;
+  handleConvItemClick: (convId: string, projectId?: string) => void;
 }
 
 export const ConvList = (props: ConvListProps) => {
@@ -60,7 +61,7 @@ export const ConvList = (props: ConvListProps) => {
         },
       });
       if (error) {
-        throw error;
+        return;
       }
 
       threadStore.updateCurrentPage(currentPage);
@@ -74,8 +75,6 @@ export const ConvList = (props: ConvListProps) => {
 
       console.log('newRes', newRes);
       threadStore.updateThreadList(newRes?.data || []);
-    } catch (err) {
-      message.error(t('threadLibrary.list.fetchErr'));
     } finally {
       const { threads, pageSize } = useThreadStore.getState();
 
@@ -118,7 +117,7 @@ export const ConvList = (props: ConvListProps) => {
           className="thread-library-list-item"
           actionLayout="vertical"
           onClick={() => {
-            props.handleConvItemClick(item?.convId);
+            props.handleConvItemClick(item?.convId, item?.projectId);
           }}
           actions={[
             <span key={2} className="flex items-center conv-action-list-item">

@@ -8,6 +8,7 @@
     "edit": "Edit",
     "save": "Save",
     "add": "Add",
+    "remove": "Remove",
     "loading": "Loading...",
     "loadMore": "Load More",
     "more": "More",
@@ -28,10 +29,18 @@
     "collapse": "Collapse",
     "open": "Open",
     "close": "Close",
+    "canvas": "Canvas",
+    "resource": "Resource",
+    "thread": "Thread",
+    "meta": "Meta",
+    "project": "Project",
     "copy": {
       "title": "Copy",
-      "success": "Content has been copied to the clipboard!"
-    }
+      "success": "Content has been copied to the clipboard!",
+      "failed": "Copy failed, please try again!"
+    },
+    "login": "Login",
+    "share": "Share"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -109,6 +118,34 @@
       "terms": "Terms of Service"
     }
   },
+  "projectDetail": {
+    "directory": {
+      "newCanvas": "New Canvas",
+      "importResource": "Import Resource",
+      "chat": "Chat",
+      "empty": "No Data"
+    },
+    "share": {
+      "createShareFailed": "Failed to create share, please try again!",
+      "project": "project",
+      "canvas": "canvas",
+      "title": "Share {{entityType}}",
+      "description": "Your {{entityType}} is being shared",
+      "copyLink": "Copy Link",
+      "cancel": "Cancel Share",
+      "cancelShareFailed": "Failed to cancel share, please try again!",
+      "cancelShareSuccess": "Cancel share successfully!",
+      "sharing": "Sharing"
+    },
+    "contentArea": {
+      "addCanvas": "New Canvas",
+      "addResource": "New Resource"
+    }
+  },
+  "shareContent": {
+    "title": "Share",
+    "login": "Start Writing with Refly"
+  },
   "workspace": {
     "leftPanel": {
       "welcomeTitle": "Hello, ",
@@ -122,19 +159,19 @@
     "contentPanel": {
       "tabPanel": {
         "resource": "Resources",
-        "note": "Notes",
-        "collection": "Collections",
+        "canvas": "Canvas",
+        "project": "Projects",
         "thread": "Threads"
       },
       "newButton": {
         "resource": "New Resource",
-        "note": "New Note",
-        "collection": "New Collection"
+        "canvas": "New Canvas",
+        "project": "New Project"
       }
     },
-    "resourceCollectionList": {
-      "addToCollection": "Add to Collection",
-      "removeConfirmText": "Are you sure to remove this resource from the collection?"
+    "resourceProjectList": {
+      "addToCollection": "Add to Project",
+      "removeConfirmText": "Are you sure to remove this resource from the project?"
     },
     "labelGroup": {
       "addLabel": "Click to add labels",
@@ -144,13 +181,13 @@
       "deleteFailed": "Failed to delete label",
       "deleteSuccessful": "Label deleted successfully"
     },
-    "newKnowledgeModal": {
-      "modalTitle": "Create New Knowledge Base",
-      "editModalTitle": "Edit the Knowledge Base",
-      "titlePlaceholder": "Enter a title for your knowledge base",
+    "newProjectModal": {
+      "modalTitle": "Create New Project",
+      "editModalTitle": "Edit the Project",
+      "titlePlaceholder": "Enter a title for your project",
       "title": "Title",
       "description": "Description",
-      "descriptionPlaceholder": "Enter a description for your knowledge base",
+      "descriptionPlaceholder": "Enter a description for your project",
       "cancel": "Cancel",
       "confirm": "Confirm",
       "successful": "Created successfully",
@@ -189,15 +226,17 @@
     "keepOneWindow": "Keep at least one window",
     "resourceCollectionAssociativeModal": {
       "resourceTitle": "Add Resources",
-      "collectionTitle": "Add To Collection",
+      "projectTitle": "Add To Project",
       "resource": "Resource",
-      "collection": "Collection",
+      "project": "Project",
       "resourcePlaceholder": "Please select resources",
-      "collectionPlaceholder": "Please select Collection"
+      "projectPlaceholder": "Please select project"
     },
     "directory": {
       "resourceCount": "{{count}} contents",
-      "searchPlaceholder": "Search resource..."
+      "resourcesSearchPlaceholder": "Search Resources...",
+      "canvasesSearchPlaceholder": "Search Canvases...",
+      "conversationsSearchPlaceholder": "Search Conversations..."
     },
     "quickSearch": {
       "suggest": "Suggestions",
@@ -209,29 +248,41 @@
       "noteCharsCount": "{{count}} characters",
       "autoSaved": "Saved",
       "saving": "Saving...",
-      "readOnly": "Read Only",
-      "edit": "Edit",
+      "readOnly": "Canvas is set to read-only mode",
+      "edit": "Canvas is set to edit mode",
       "serviceDisconnected": "Service Disconnected",
       "createNoteFailed": "Failed to create note, please try again!",
       "defaultTitle": "Untitled"
+    },
+    "canvas": {
+      "editor": {
+        "placeholder": {
+          "default": "Write something, or press 'space' for AI, '/' for commands",
+          "heading": "Heading {{level}}"
+        },
+        "toolbar": {
+          "quote": "Quote Content to Ask"
+        }
+      }
     },
     "context": {
       "contentSelector": "Content Selector",
       "contentSelectorAddSuccess": "Add Success",
       "contentSelectorIsEmpty": "Please select text",
       "clearSelector": "Clear Selection",
+      "addContext": "Add Context",
       "clearContext": "Clear Context",
-      "addToContext": "Add to Chat",
+      "addToContext": "Quote",
       "resource": "Resource",
       "resources": "Resource",
-      "note": "Note",
-      "notes": "Note",
-      "collection": "Knowledge Base",
-      "collections": "Knowledge Base",
+      "canvas": "Canvas",
+      "canvases": "Canvas",
+      "projects": "Project",
+      "project": "Project",
       "contentList": "Content List",
       "extensionWeblink": "Web Link",
       "extensionWeblinkSelection": "Web Link Selection",
-      "noteSelection": "Note Selection",
+      "canvasSelection": "Canvas Selection",
       "resourceSelection": "Resource Selection",
       "canvasCursorSelection": "Canvas Cursor Selection",
       "canvasBeforeCursorSelection": "Canvas Before Cursor Selection",
@@ -240,8 +291,8 @@
       "contextRequiredTip": "Please select at least 1 {{type}}",
       "contextLimitTip": "{{type}} is limit to {{limit}} , and you have selected {{currentCount}}.",
       "popoverSelector": {
-        "webPlaceholder": "Search notes, resources, or knowledge bases...",
-        "extensionPlaceholder": "Search web pages, notes, resources, or knowledge bases...",
+        "webPlaceholder": "Search canvases, resources, or projects...",
+        "extensionPlaceholder": "Search web pages, canvases, resources, or projects...",
         "footer": {
           "navigate": "Navigate",
           "toggle": "Toggle",
@@ -270,6 +321,13 @@
       "searchOrOpenThread": "Search or open thread",
       "openThreadHistory": "Open Thread History",
       "newThread": "New Thread"
+    }
+  },
+  "canvas": {
+    "newCanvas": {
+      "modalTitle": "New Canvas",
+      "titlePlaceholder": "Please enter the title of the canvas",
+      "descriptionPlaceholder": "Please enter the description of the canvas"
     }
   },
   "resource": {
@@ -302,21 +360,38 @@
     "wait_index": "Memorizing",
     "wait_index_tip": "The resource is temporarily not ready for AI search and needs to wait for memorization to complete",
     "index_failed": "Memorization Failed",
-    "index_failed_tip": "Click to retry"
+    "index_failed_tip": "Click to retry",
+    "finish": "Finished"
+  },
+  "resourceDetail": {
+    "back": "All Resources",
+    "directory": {
+      "baseInfo": "Basic Information",
+      "techInfo": "Technical Information",
+      "addTime": "Add Time",
+      "updateTime": "Update Time",
+      "source": "Source",
+      "storageSize": "Storage Size",
+      "vectorSize": "Vector Size",
+      "indexStatus": "Index Status",
+      "referenced": "{{count}} Referenced",
+      "weblink": "Web Link",
+      "text": "Text"
+    }
   },
   "loggedHomePage": {
     "searchEverything": "Search",
     "quickSearch": {
       "skills": "Skills",
-      "note": "Notes",
-      "newNote": "Create New Note",
-      "readResource": "Read Resources",
-      "newReadResource": "Add Read Resource",
-      "collection": "Collections",
-      "newCollection": "Create New Collection",
+      "canvas": "Canvases",
+      "newCanvas": "Create New Canvas",
+      "resource": "Resources",
+      "newResource": "Add Resource",
+      "project": "Projects",
+      "newProject": "Create New Project",
       "thread": "Threads",
-      "newThread": "Create New Thread",
-      "placeholderForHome": "Ask a question or search for skills, notes, resources, collections, and threads...",
+      "newThread": "New Thread",
+      "placeholderForHome": "Ask a question or search for canvases, resources, projects, and threads...",
       "placeholderForSkillExecute": "Enter the question you want to ask and execute the skill based on this question",
       "placeholderForWeblink": "Search {{domain}}...",
       "home": {
@@ -346,9 +421,6 @@
         "item": {
           "read": "Read",
           "unread": "Unread"
-        },
-        "list": {
-          "fetchErr": "Failed to retrieve content from the Knowledge Base!"
         }
       },
       "recommendQuickAction": {
@@ -384,7 +456,7 @@
       }
     },
     "siderMenu": {
-      "homePage": "Workspace",
+      "homePage": "New Writing",
       "news": "What's new?",
       "threadLibrary": "Threads",
       "explore": "Explore",
@@ -396,7 +468,12 @@
       "skill": "Skills",
       "collapse": "Collapse",
       "expand": "Expand",
-      "logout": "Log Out"
+      "logout": "Log Out",
+      "newDraft": "New Draft",
+      "library": "Library",
+      "recentProjects": "Recent Projects",
+      "recentChats": "Recent Chats",
+      "viewMore": "More"
     }
   },
   "knowledgeLibrary": {
@@ -408,9 +485,6 @@
     },
     "archive": {
       "title": "Explore the Content Archive",
-      "list": {
-        "fetchErr": "Failed to retrieve the archive content. Please try refreshing the page."
-      },
       "item": {
         "askFollow": "Ask",
         "share": "Share",
@@ -421,10 +495,7 @@
       }
     },
     "timeline": {
-      "title": "Knowledge from {{year}}/{{month}}/{{day}}",
-      "list": {
-        "fetchErr": "Failed to retrieve the archive content. Please try refreshing the page."
-      }
+      "title": "Knowledge from {{year}}/{{month}}/{{day}}"
     },
     "empty": {
       "timelineTitle": "No new content read on {{year}}/{{month}}/{{day}}. Download the plugin to start exploring new content.",
@@ -442,9 +513,6 @@
     "description": "Topic categories derived from your browsing and session history, representing your reading and learning trends",
     "footer": {
       "noMoreText": "You've reached the end of the list!"
-    },
-    "list": {
-      "fetchErr": "Failed to retrieve the topic list. Please try refreshing the page."
     },
     "empty": {
       "title": "No categories available at the moment. Download the plugin to access new content!",
@@ -468,9 +536,6 @@
       "noMoreText": "You've reached the end of the list!",
       "linkMore": "{{count}} more"
     },
-    "list": {
-      "fetchErr": "Failed to retrieve the session list. Please try refreshing the page."
-    },
     "empty": {
       "title": "No content available in this category at the moment. Download the plugin to access new content!",
       "download": "Download Plugin"
@@ -481,9 +546,6 @@
     "newThread": "New Thread",
     "footer": {
       "noMoreText": "You've reached the end of the list."
-    },
-    "list": {
-      "fetchErr": "Failed to retrieve the conversation list. Please try refreshing the page."
     },
     "item": {
       "askFollow": "Ask ",
@@ -603,9 +665,6 @@
     "title": "Threads",
     "footer": {
       "noMoreText": "You've reached the end of the list."
-    },
-    "list": {
-      "fetchErr": "Failed to retrieve the conversation list. Please try refreshing the page."
     },
     "item": {
       "askFollow": "Ask",
@@ -741,9 +800,6 @@
     "breadcrumb": {
       "homePage": "Home"
     },
-    "list": {
-      "fetchErr": "Failed to retrieve content details. Please try refreshing the page."
-    },
     "item": {
       "share": "Share",
       "copy": "Copy Link",
@@ -846,18 +902,19 @@
   },
   "entitySelector": {
     "placeholder": {
-      "collection": "Select Collection",
+      "project": "Select Project",
       "resource": "Select Resource",
       "note": "Select Note",
       "skill": "Select Skill",
       "conversation": "Select Conversation"
     },
     "createEntity": {
-      "collection": "New Collection",
+      "project": "New Project",
       "resource": "New Resource",
       "note": "New Note",
       "skill": "New Skill",
-      "conversation": "New Conversation"
+      "conversation": "New Conversation",
+      "newProjectNameIsEmpty": "Please enter the name of the project"
     }
   },
   "components": {
@@ -870,6 +927,7 @@
     "selectedSkillHeader": {
       "title": "Chat with {{name}}"
     },
+    "addContext": "Add Context",
     "baseContextCard": {
       "title": "Environment Context Quick Actions",
       "filterTitle": "Filter Environment Context",
@@ -882,13 +940,6 @@
         "relatedResource": {
           "prompt": "Similar Resources",
           "title": "Similar Resources"
-        }
-      },
-      "knowledgeBaseContextCard": {
-        "title": "Quick Actions for Current Knowledge Base",
-        "relatedCollection": {
-          "prompt": "Similar Knowledge Base",
-          "title": "Similar Knowledge Base"
         }
       },
       "noteContextCard": {
@@ -1004,14 +1055,17 @@
       "errorTipTitle": "Send Failed",
       "errorTip": "Please adjust the skill configuration and try again"
     },
-    "chatMode": {
-      "title": "Chat Mode",
-      "normal": "Normal Chat",
-      "noContext": "No Context Chat",
-      "wholeSpace": "Whole Space Chat"
+    "projectSelector": {
+      "title": "Select Project",
+      "tip": "Selected project will be used to save the canvas. If no project is selected, a new one will be created automatically."
     },
     "webSearch": {
       "title": "Web Search",
+      "enable": "Enable",
+      "disable": "Disable"
+    },
+    "knowledgeBaseSearch": {
+      "title": "Library Search",
       "enable": "Enable",
       "disable": "Disable"
     },
@@ -1030,7 +1084,8 @@
       "brainstormIdeas": "Brainstorm Ideas",
       "writeTwitterArticle": "Write a Twitter Original Article",
       "installSkillHint": "You haven't added any assistants, click me to add",
-      "installSkillHintTitle": "Add Assistant"
+      "installSkillHintTitle": "Add Assistant",
+      "openCanvas": "Open Canvas"
     },
     "contextItem": {
       "current": "Current "
@@ -1092,5 +1147,23 @@
     "description": "Oops, your account does not have access to the beta testing.",
     "apply": "Apply for early access",
     "copyEmail": "Copy email "
+  },
+  "homePage": {
+    "suggestion": {
+      "investment": "Write an Investment Memo",
+      "productSearch": "Write a Competitive Analysis",
+      "academicArticle": "Write an Academic Article about Scaling Law",
+      "socialTweet": "Write Social Media Posts in Founder Mode"
+    },
+    "footer": {
+      "pricing": "Pricing",
+      "contact": "Contact",
+      "terms": "Terms",
+      "privacy": "Privacy"
+    }
+  },
+  "deck": {
+    "references": "References",
+    "referencedBy": "Referenced By"
   }
 }

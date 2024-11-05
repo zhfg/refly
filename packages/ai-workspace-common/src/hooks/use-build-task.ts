@@ -1,14 +1,14 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import type { MessageState, ClientChatMessage, OutputLocale, SkillEvent } from '@refly/common-types';
+import type { MessageState, ClientChatMessage, OutputLocale, SkillEvent, LOCALE } from '@refly/common-types';
 import {
   useMessageStateStore,
   useMessageStateStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useConversationStoreShallow } from '@refly-packages/ai-workspace-common/stores/conversation';
-import { TASK_STATUS } from '@refly/common-types';
-import { InvokeSkillRequest, SkillMeta } from '@refly/openapi-schema';
+import { CanvasIntentType, TASK_STATUS } from '@refly/common-types';
+import { BaseResponse, InvokeSkillRequest, SkillMeta } from '@refly/openapi-schema';
 import { buildQuestionMessage, buildReplyMessage } from '@refly-packages/ai-workspace-common/utils/message';
 
 import { buildErrorMessage } from '@refly-packages/ai-workspace-common/utils/message';
@@ -26,6 +26,13 @@ import { getAuthTokenFromCookie } from '@refly-packages/utils/request';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { markdownCitationParse } from '@refly-packages/utils/parse';
 
+import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
+import { getCanvasContent } from '@refly-packages/ai-workspace-common/components/copilot/utils';
+
+// hooks
+import { IntentResult, useHandleAICanvas } from './use-handle-ai-canvas';
+import { showErrorNotification } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+
 const globalStreamingChatPortRef = { current: null as Runtime.Port | null };
 const globalAbortControllerRef = { current: null as AbortController | null };
 const globalIsAbortedRef = { current: false as boolean };
@@ -34,6 +41,9 @@ let uniqueId = genUniqueId();
 export const useBuildTask = () => {
   const chatStore = useChatStoreShallow((state) => ({
     setMessages: state.setMessages,
+    setIntentMatcher: state.setIntentMatcher,
+    setIsFirstStreamContent: state.setIsFirstStreamContent,
+    setMessageIntentContext: state.setMessageIntentContext,
   }));
   const messageStateStore = useMessageStateStoreShallow((state) => ({
     setMessageState: state.setMessageState,
@@ -41,9 +51,11 @@ export const useBuildTask = () => {
   }));
   const conversationStore = useConversationStoreShallow((state) => ({
     setCurrentConversation: state.setCurrentConversation,
-    setIsNewConversation: state.setIsNewConversation,
     currentConversation: state.currentConversation,
   }));
+
+  // hooks
+  const { handleStructuredDataChange, handleAICanvasBeforeStreamHook } = useHandleAICanvas();
 
   const { t } = useTranslation();
   const schedulerMeta: SkillMeta = {
@@ -51,77 +63,6 @@ export const useBuildTask = () => {
     displayName: t('copilot.reflyAssistant'),
     icon: { type: 'emoji', value: '🧙‍♂️' },
   };
-
-  const buildTaskAndGenReponse = (task: InvokeSkillRequest) => {
-    const question = task?.input?.query;
-    const context = task?.context || {};
-    const { messages = [] } = useChatStore.getState();
-    const { skillInstances = [] } = useSkillStore.getState();
-
-    const selectedSkillInstance = skillInstances.find((item) => item.skillId === task.skillId);
-    const questionMsg = buildQuestionMessage({
-      content: question,
-      invokeParam: {
-        context,
-      },
-      ...(selectedSkillInstance
-        ? {
-            skillMeta: {
-              tplName: selectedSkillInstance.tplName,
-              skillId: selectedSkillInstance.skillId,
-              displayName: selectedSkillInstance.displayName,
-            },
-          }
-        : {}),
-    });
-    messageStateStore.setMessageState({
-      nowInvokeSkillId: task?.skillId,
-    });
-
-    // Immediately build a reply message after the question message
-    // for better user experience
-    const replyMsg = buildReplyMessage({
-      content: '',
-      skillMeta: selectedSkillInstance ?? schedulerMeta,
-      spanId: '',
-      pending: true,
-    });
-    messageStateStore.setMessageState({
-      pendingReplyMsg: replyMsg,
-      pending: true,
-      pendingFirstToken: true,
-      nowInvokeSkillId: selectedSkillInstance?.skillId,
-    });
-
-    chatStore.setMessages(messages.concat(questionMsg, replyMsg));
-
-    handleGenResponse(task);
-
-    setTimeout(() => {
-      scrollToBottom();
-    });
-  };
-
-  const handleGenResponse = useCallback(
-    (task: InvokeSkillRequest) => {
-      // 发起一个 gen 请求，开始接收
-      messageStateStore.setMessageState({
-        pending: true,
-        pendingFirstToken: true,
-        nowInvokeSkillId: task.skillId,
-        error: false,
-      });
-
-      // 直接发送 task
-      handleSendMessage({
-        body: {
-          type: TASK_STATUS.START,
-          payload: task,
-        },
-      });
-    },
-    [conversationStore.currentConversation?.convId],
-  );
 
   const findLastRelatedMessage = (messages: ClientChatMessage[], skillEvent: SkillEvent) => {
     const lastRelatedMessage = [...messages]
@@ -163,6 +104,9 @@ export const useBuildTask = () => {
 
       chatStore.setMessages(messages.concat(replyMsg));
     }
+
+    // reset last stream state
+    chatStore.setIsFirstStreamContent(true);
   };
 
   const onSkillThoughout = (skillEvent: SkillEvent) => {
@@ -204,7 +148,7 @@ export const useBuildTask = () => {
   };
 
   const onSkillStream = (skillEvent: SkillEvent) => {
-    const { messages = [] } = useChatStore.getState();
+    const { messages = [], isFirstStreamContent = true } = useChatStore.getState();
     const { pendingFirstToken } = useMessageStateStore.getState();
     const lastRelatedMessage = findLastRelatedMessage(messages, skillEvent);
     const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
@@ -217,7 +161,24 @@ export const useBuildTask = () => {
       lastRelatedMessage.content = '';
     }
 
+    // 获取更新前的 canvas 内容
+    const prevCanvasContent = getCanvasContent(lastRelatedMessage.content);
+
+    // 更新消息内容
     lastRelatedMessage.content += skillEvent.content;
+
+    // 获取更新后的 canvas 内容
+    const currentCanvasContent = getCanvasContent(lastRelatedMessage.content);
+
+    // 计算增量内容
+    let incrementalContent = currentCanvasContent.slice(prevCanvasContent.length);
+    if (incrementalContent?.length > 0) {
+      incrementalContent = incrementalContent
+        .replace(/<\/?reflyCanvas[^>]*>/g, '')
+        .replace(/&lt;\/reflyCanvas/g, '')
+        .replace(/&lt;reflyCanvas&gt;/g, '')
+        .replace(/&lt;\/reflyCanvas&gt;/g, '');
+    }
 
     // 处理 Citation 的序列号
     lastRelatedMessage.content = markdownCitationParse(lastRelatedMessage.content);
@@ -227,6 +188,39 @@ export const useBuildTask = () => {
 
     if (pendingFirstToken && lastRelatedMessage.content.trim()) {
       messageStateStore.setMessageState({ pendingFirstToken: false });
+    }
+
+    // 如果是画布内容且有增量内容，发送到编辑器
+    const intentMatcher = lastRelatedMessage?.structuredData?.intentMatcher as IntentResult;
+    if (
+      [CanvasIntentType.GenerateCanvas, CanvasIntentType.EditCanvas].includes(intentMatcher?.type) &&
+      incrementalContent
+    ) {
+      if (intentMatcher?.type === CanvasIntentType.GenerateCanvas && incrementalContent) {
+        editorEmitter.emit('streamCanvasContent', {
+          isFirst: isFirstStreamContent,
+          content: incrementalContent,
+        });
+      } else if (intentMatcher?.type === CanvasIntentType.EditCanvas && incrementalContent) {
+        editorEmitter.emit('streamEditCanvasContent', {
+          isFirst: isFirstStreamContent,
+          content: incrementalContent,
+        });
+      }
+
+      if (isFirstStreamContent) {
+        const newIsFirstStreamContent = !isFirstStreamContent;
+        chatStore.setIsFirstStreamContent(newIsFirstStreamContent);
+
+        handleAICanvasBeforeStreamHook();
+      }
+    } else if ([CanvasIntentType.Other].includes(intentMatcher?.type)) {
+      if (isFirstStreamContent) {
+        const newIsFirstStreamContent = !isFirstStreamContent;
+        chatStore.setIsFirstStreamContent(newIsFirstStreamContent);
+
+        handleAICanvasBeforeStreamHook();
+      }
     }
   };
 
@@ -248,13 +242,24 @@ export const useBuildTask = () => {
       return;
     }
 
-    if (['sources', 'relatedQuestions'].includes(skillEvent?.structuredDataKey)) {
-      if (!lastRelatedMessage.structuredData[skillEvent.structuredDataKey]) {
-        lastRelatedMessage.structuredData[skillEvent.structuredDataKey] = [...(structuredData || [])];
+    if (['sources', 'relatedQuestions', 'intentMatcher'].includes(skillEvent?.structuredDataKey)) {
+      let existingData = lastRelatedMessage.structuredData[skillEvent.structuredDataKey];
+      const isObject = (val: unknown): val is Record<string, unknown> =>
+        typeof val === 'object' && val !== null && !Array.isArray(val);
+
+      if (!existingData) {
+        lastRelatedMessage.structuredData[skillEvent.structuredDataKey] = Array.isArray(structuredData)
+          ? [...structuredData]
+          : isObject(structuredData)
+            ? { ...structuredData }
+            : structuredData;
       } else {
-        lastRelatedMessage.structuredData[skillEvent.structuredDataKey] = (
-          lastRelatedMessage.structuredData[skillEvent.structuredDataKey] as Array<any>
-        )?.concat(...structuredData);
+        lastRelatedMessage.structuredData[skillEvent.structuredDataKey] =
+          Array.isArray(existingData) && Array.isArray(structuredData)
+            ? [...existingData, ...structuredData]
+            : isObject(existingData) && isObject(structuredData)
+              ? { ...existingData, ...structuredData }
+              : structuredData;
       }
     } else if (skillEvent?.structuredDataKey === 'AskUserForm') {
       // TODO: 未来实现
@@ -262,6 +267,11 @@ export const useBuildTask = () => {
 
     messages[lastRelatedMessageIndex] = lastRelatedMessage;
     chatStore.setMessages(messages);
+
+    if (skillEvent?.structuredDataKey === 'intentMatcher') {
+      handleStructuredDataChange(lastRelatedMessage);
+      chatStore.setIntentMatcher(structuredData);
+    }
   };
 
   const onSkillEnd = (skillEvent: SkillEvent) => {
@@ -276,6 +286,7 @@ export const useBuildTask = () => {
     lastRelatedMessage.pending = false;
     messages[lastRelatedMessageIndex] = lastRelatedMessage;
     chatStore.setMessages(messages);
+    chatStore.setMessageIntentContext(undefined); // reset message intent context
   };
 
   const buildErrMsgAndAppendToChat = (msg: string) => {
@@ -342,8 +353,14 @@ export const useBuildTask = () => {
     }, 1000);
   };
 
-  const onError = (msg: string) => {
+  const onError = (error?: BaseResponse) => {
+    console.log('onError', error);
     const runtime = getRuntime();
+    const { localSettings } = useUserStore.getState();
+    const locale = localSettings?.uiLocale as LOCALE;
+
+    error ??= { success: false };
+    showErrorNotification(error, locale);
 
     if (runtime?.includes('extension')) {
       if (globalIsAbortedRef.current) {
@@ -356,7 +373,7 @@ export const useBuildTask = () => {
       }
     }
 
-    buildShutdownTaskAndGenResponse(msg);
+    buildShutdownTaskAndGenResponse(error?.errMsg);
   };
 
   const onCompleted = () => {
@@ -371,7 +388,7 @@ export const useBuildTask = () => {
     });
   };
 
-  const handleSendMessage = (payload: {
+  const handleSendSSERequest = (payload: {
     body: {
       type: TASK_STATUS;
       payload?: InvokeSkillRequest;
@@ -379,13 +396,13 @@ export const useBuildTask = () => {
   }) => {
     const runtime = getRuntime();
     if (runtime?.includes('extension')) {
-      return handleSendMessageFromExtension(payload);
+      return handleSendSSERequestFromExtension(payload);
     } else {
-      return handleSendMessageFromWeb(payload);
+      return handleSendSSERequestFromWeb(payload);
     }
   };
 
-  const handleSendMessageFromWeb = (payload: {
+  const handleSendSSERequestFromWeb = (payload: {
     body: {
       type: TASK_STATUS;
       payload?: InvokeSkillRequest;
@@ -453,7 +470,7 @@ export const useBuildTask = () => {
     globalStreamingChatPortRef.current = null;
   };
 
-  const handleSendMessageFromExtension = async (payload: { body: any }) => {
+  const handleSendSSERequestFromExtension = async (payload: { body: any }) => {
     await unbindExtensionPorts();
     await bindExtensionPorts();
 
@@ -467,6 +484,77 @@ export const useBuildTask = () => {
       uniqueId,
     });
   };
+
+  const buildTaskAndGenReponse = (task: InvokeSkillRequest) => {
+    const question = task?.input?.query;
+    const context = task?.context || {};
+    const { messages = [] } = useChatStore.getState();
+    const { skillInstances = [] } = useSkillStore.getState();
+
+    const selectedSkillInstance = skillInstances.find((item) => item.skillId === task.skillId);
+    const questionMsg = buildQuestionMessage({
+      content: question,
+      invokeParam: {
+        context,
+      },
+      ...(selectedSkillInstance
+        ? {
+            skillMeta: {
+              tplName: selectedSkillInstance.tplName,
+              skillId: selectedSkillInstance.skillId,
+              displayName: selectedSkillInstance.displayName,
+            },
+          }
+        : {}),
+    });
+    messageStateStore.setMessageState({
+      nowInvokeSkillId: task?.skillId,
+    });
+
+    // Immediately build a reply message after the question message
+    // for better user experience
+    const replyMsg = buildReplyMessage({
+      content: '',
+      skillMeta: selectedSkillInstance ?? schedulerMeta,
+      spanId: '',
+      pending: true,
+    });
+    messageStateStore.setMessageState({
+      pendingReplyMsg: replyMsg,
+      pending: true,
+      pendingFirstToken: true,
+      nowInvokeSkillId: selectedSkillInstance?.skillId,
+    });
+
+    chatStore.setMessages(messages.concat(questionMsg, replyMsg));
+
+    handleGenResponse(task);
+
+    setTimeout(() => {
+      scrollToBottom();
+    });
+  };
+
+  const handleGenResponse = useCallback(
+    (task: InvokeSkillRequest) => {
+      // 发起一个 gen 请求，开始接收
+      messageStateStore.setMessageState({
+        pending: true,
+        pendingFirstToken: true,
+        nowInvokeSkillId: task.skillId,
+        error: false,
+      });
+
+      // 直接发送 task
+      handleSendSSERequest({
+        body: {
+          type: TASK_STATUS.START,
+          payload: task,
+        },
+      });
+    },
+    [conversationStore.currentConversation?.convId],
+  );
 
   return {
     buildTaskAndGenReponse,

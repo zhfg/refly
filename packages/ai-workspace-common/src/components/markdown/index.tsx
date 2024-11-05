@@ -1,8 +1,8 @@
 import { IconLoading } from '@arco-design/web-react/icon';
-import { memo, useEffect, useRef, useState, lazy, Suspense } from 'react';
+import { memo, useEffect, useRef, useState, lazy, Suspense, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Message as message } from '@arco-design/web-react';
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { Popover, PopoverContent, PopoverTrigger } from './plugins/link/popover';
 
 import copyToClipboard from 'copy-to-clipboard';
 import RemarkBreaks from 'remark-breaks';
@@ -10,93 +10,18 @@ import RemarkGfm from 'remark-gfm';
 
 import { markdownCitationParse } from '@refly/utils';
 
+// plugins
+import { markdownElements } from './plugins';
+import LinkElement from './plugins/link';
+import CodeElement from './plugins/code';
+
 // styles
 import './styles/markdown.scss';
 import './styles/highlight.scss';
 import { Source } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 
-export function PreCode(props: { children: any }) {
-  const ref = useRef<HTMLPreElement>(null);
-  const { t } = useTranslation();
-
-  return (
-    <pre ref={ref}>
-      <span
-        className="copy-code-button"
-        onClick={() => {
-          if (ref.current) {
-            const code = ref.current.innerText;
-            copyToClipboard(code);
-            message.success(t('components.markdown.copySuccess'));
-          }
-        }}
-      >
-        {t('copilot.message.copy')}
-      </span>
-      {props.children}
-    </pre>
-  );
-}
-
-export function ATag({ ...props }, sources: Source[]) {
-  if (!props.href) return <></>;
-  const source = sources[+props.href - 1];
-  if (!source) {
-    try {
-      const num = Number(props.href);
-      if (!Number.isNaN(num) && num > sources.length) {
-        console.log('source not found', props);
-        return <></>;
-      }
-    } catch (err) {}
-
-    return <a href={props.href}>{props.children}</a>;
-  }
-  return (
-    <span className="inline-block w-4">
-      <Popover>
-        <PopoverTrigger asChild>
-          <span
-            title={source.metadata?.title}
-            className="inline-block h-6 !w-6 origin-top-left scale-[60%] transform cursor-pointer rounded-full bg-zinc-300 text-center font-medium no-underline hover:bg-zinc-400"
-          >
-            {props.href}
-          </span>
-        </PopoverTrigger>
-        <PopoverContent
-          align={'start'}
-          style={{ backgroundColor: '#fcfcf9' }}
-          className="flex flex-col gap-2 max-w-screen-md text-xs ring-4 shadow-transparent ring-zinc-50"
-        >
-          <div className="overflow-hidden font-medium whitespace-nowrap text-ellipsis">{source.title}</div>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <div className="break-words line-clamp-4 text-zinc-500">{source.pageContent}</div>
-            </div>
-          </div>
-
-          <div className="flex gap-2 items-center">
-            <div className="overflow-hidden flex-1">
-              <div className="overflow-hidden text-blue-500 whitespace-nowrap text-ellipsis">
-                <a title={source?.title} href={source?.url} target="_blank">
-                  {source?.url}
-                </a>
-              </div>
-            </div>
-            <div className="flex relative flex-none items-center">
-              <img
-                className="w-3 h-3"
-                alt={source?.url}
-                src={`https://www.google.com/s2/favicons?domain=${source?.url}&sz=${16}`}
-              />
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-    </span>
-  );
-}
+const rehypePlugins = markdownElements.map((element) => element.rehypePlugin);
 
 export const Markdown = memo(
   (
@@ -105,8 +30,10 @@ export const Markdown = memo(
       loading?: boolean;
       fontSize?: number;
       sources?: Source[];
+      msgId?: string;
     } & React.DOMAttributes<HTMLDivElement>,
   ) => {
+    const { msgId } = props;
     const mdRef = useRef<HTMLDivElement>(null);
     const { t } = useTranslation();
     const [isKatexLoaded, setIsKatexLoaded] = useState(false);
@@ -139,6 +66,18 @@ export const Markdown = memo(
     const shouldLoading = props.loading;
     const parsedContent = markdownCitationParse(props?.content || '');
 
+    const canvasComponents = useMemo(
+      () =>
+        Object.fromEntries(
+          markdownElements.map((element) => {
+            const Component = element.Component;
+
+            return [element.tag, (props: any) => <Component {...props} id={msgId} />];
+          }),
+        ),
+      [msgId],
+    );
+
     return (
       <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 15}px` }} ref={mdRef}>
         {shouldLoading ? (
@@ -149,6 +88,7 @@ export const Markdown = memo(
               <ReactMarkdown
                 remarkPlugins={[RemarkGfm, RemarkBreaks, plugins.RemarkMath]}
                 rehypePlugins={[
+                  ...rehypePlugins,
                   plugins.RehypeKatex,
                   [
                     plugins.RehypeHighlight,
@@ -159,8 +99,9 @@ export const Markdown = memo(
                   ],
                 ]}
                 components={{
-                  pre: PreCode,
-                  a: (args) => ATag(args, props?.sources || []),
+                  ...canvasComponents,
+                  pre: CodeElement.Component,
+                  a: (args) => LinkElement.Component(args, props?.sources || []),
                 }}
                 linkTarget={'_blank'}
               >

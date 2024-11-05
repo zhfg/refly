@@ -32,8 +32,8 @@ export class EventService {
 
     if (triggers.length > 0) {
       const skillContext: SkillContext = {};
-      if (entityType === 'collection') {
-        skillContext.collections = [{ collectionId: entityId }];
+      if (entityType === 'project') {
+        skillContext.projects = [{ projectId: entityId }];
       } else if (entityType === 'resource') {
         skillContext.resources = [{ resourceId: entityId }];
       } else if (entityType === 'canvas') {

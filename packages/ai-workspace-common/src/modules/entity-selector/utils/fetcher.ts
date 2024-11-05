@@ -7,14 +7,14 @@ export type DataFetcher = (queryPayload: {
 }) => Promise<{ success: boolean; data?: SearchResult[] }>;
 
 export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
-  collection: async (queryPayload) => {
-    const res = await getClient().listCollections({
+  project: async (queryPayload) => {
+    const res = await getClient().listProjects({
       query: queryPayload,
     });
     const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
-      id: item?.collectionId,
+      id: item?.projectId,
       title: item?.title,
-      domain: 'collection',
+      domain: 'project',
     }));
     return { success: res?.data?.success, data };
   },

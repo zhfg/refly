@@ -1,7 +1,7 @@
 import {
   SkillContextContentItem,
   SkillContextResourceItem,
-  SkillContextCollectionItem,
+  SkillContextProjectItem,
   Source,
   SkillContextCanvasItem,
 } from '@refly-packages/openapi-schema';
@@ -48,7 +48,7 @@ export interface IContext {
   contentList: SkillContextContentItem[];
   resources: SkillContextResourceItem[];
   canvases: SkillContextCanvasItem[];
-  collections?: SkillContextCollectionItem[];
+  projects?: SkillContextProjectItem[];
   messages?: BaseMessage[];
   webSearchSources?: Source[];
   locale?: string | LOCALE;
@@ -64,10 +64,4 @@ export interface GraphState extends BaseSkillState {
    */
   skillCalls: ToolCall[];
   contextualUserQuery: string; // 基于上下文改写 userQuery
-}
-
-export const enum ChatMode {
-  NORMAL_CHAT = 'normal',
-  NO_CONTEXT_CHAT = 'noContext',
-  WHOLE_SPACE_SEARCH = 'wholeSpace',
 }

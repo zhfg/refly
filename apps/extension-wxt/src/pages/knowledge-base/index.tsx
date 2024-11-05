@@ -1,5 +1,5 @@
 // 自定义组件
-import { AICopilot } from '@refly-packages/ai-workspace-common/components/knowledge-base/copilot';
+import { AICopilot } from '@refly-packages/ai-workspace-common/components/copilot';
 // utils
 // 自定义方法
 // stores
@@ -12,6 +12,7 @@ import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/route
 import { useResizePanel } from '@refly-packages/ai-workspace-common/hooks/use-resize-panel';
 import { ErrorBoundary } from '@sentry/react';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 // 用于快速选择
 export const quickActionList = ['summary'];
@@ -56,7 +57,7 @@ const KnowledgeLibraryLayout = () => {
         <div className="workspace-inner-container">
           <div className="workspace-panel-container">
             <div className="workspace-content-panel">
-              <AICopilot />
+              <AICopilot source={MessageIntentSource.Project} />
             </div>
           </div>
         </div>

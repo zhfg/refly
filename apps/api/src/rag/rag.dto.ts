@@ -7,6 +7,7 @@ export interface NodeMeta {
   nodeType: ContentNodeType;
   url?: string;
   canvasId?: string;
+  projectId?: string;
   resourceId?: string;
   resourceType?: ResourceType;
   [key: string]: any; // any other fields
@@ -28,7 +29,7 @@ export interface RetrieveFilter {
   urls?: string[];
   canvasIds?: string[];
   resourceIds?: string[];
-  collectionIds?: string[];
+  projectIds?: string[];
 }
 
 export interface HybridSearchParam {

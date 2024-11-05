@@ -91,10 +91,9 @@ export const InstanceDropdownMenu = (props: InstanceDropdownMenuProps) => {
 
     if (error) {
       console.error(error);
-      Message.error({ content: t('common.putError') });
-    } else {
-      Message.success({ content: t('common.putSuccess') });
+      return;
     }
+    Message.success({ content: t('common.putSuccess') });
 
     if (postDeleteList) {
       postDeleteList(data);

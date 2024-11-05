@@ -7,9 +7,12 @@ import { useSearchParams } from "@refly-packages/ai-workspace-common/utils/route
 
 // components
 import SkillDetail from "@refly-packages/ai-workspace-common/components/skill/skill-detail"
-import { AICopilot } from "@refly-packages/ai-workspace-common/components/knowledge-base/copilot"
+import { AICopilot } from "@refly-packages/ai-workspace-common/components/copilot"
 
 import { useSkillJobForCopilot } from "@refly-packages/ai-workspace-common/stores/skill-job-for-copilot"
+
+// types
+import { MessageIntentSource } from "@refly-packages/ai-workspace-common/types/copilot"
 
 import "./index.scss"
 
@@ -57,7 +60,7 @@ const SkillDetailPage = () => {
                 id="skill-detail-page__copilot">
                 <AICopilot
                   disable={true}
-                  source="skillJob"
+                  source={MessageIntentSource.SkillJob}
                   jobId={skillJobForCopilot.jobId}
                 />
               </Panel>

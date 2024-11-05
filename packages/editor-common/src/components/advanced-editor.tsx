@@ -9,10 +9,11 @@ import { ColorSelector } from './selectors/color-selector';
 import { LinkSelector } from './selectors/link-selector';
 import { NodeSelector } from './selectors/node-selector';
 import { ContentSelectorButtons } from './selectors/content-selector-buttons';
+import { AIBtnSelector } from './selectors/ai-btn-selector';
 import { Separator } from './ui/separator';
 
-import GenerativeMenuSwitch from './generative/generative-menu-switch';
-import GenerativeBlockMenu from './generative/generative-block-menu';
+import GenerativeMenuSwitch from './generative/inline/generative-menu-switch';
+import GenerativeBlockMenuSwitch from './generative/block/generative-block-menu-switch';
 import { TextButtons } from './selectors/text-buttons';
 import { configureSuggestionItems } from './slash-command';
 
@@ -24,16 +25,16 @@ export const CollabEditorCommand = (props: { entityId: string; entityType: strin
 
   return (
     <EditorCommand className="z-50 h-auto max-h-[330px] overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
-      <EditorCommandEmpty className="px-2 text-muted-foreground">No results</EditorCommandEmpty>
       <EditorCommandList>
+        <EditorCommandEmpty className="px-2 text-muted-foreground">No results</EditorCommandEmpty>
         {suggestionItems.map((item) => (
           <EditorCommandItem
             value={item.title}
             onCommand={(val) => item.command(val)}
-            className="flex items-center w-full px-2 py-1 space-x-2 text-sm text-left rounded-md hover:bg-accent aria-selected:bg-accent"
+            className="flex items-center px-2 py-1 space-x-2 w-full text-sm text-left rounded-md hover:bg-accent aria-selected:bg-accent"
             key={item.title}
           >
-            <div className="flex items-center justify-center w-10 h-10 border rounded-md border-muted bg-background">
+            <div className="flex justify-center items-center w-10 h-10 rounded-md border border-muted bg-background">
               {item.icon}
             </div>
             <div>
@@ -62,6 +63,7 @@ export const CollabGenAIMenuSwitch: React.FC<CollabGenAIMenuSwitchProps> = (prop
 
   return (
     <GenerativeMenuSwitch open={openAI} onOpenChange={setOpenAI}>
+      <AIBtnSelector open={openAI} onOpenChange={setOpenAI} />
       <ContentSelectorButtons text={contentSelector?.text} handleClick={contentSelector?.handleClick} />
       <Separator orientation="vertical" />
       <NodeSelector open={openNode} onOpenChange={setOpenNode} />
@@ -77,5 +79,5 @@ export const CollabGenAIMenuSwitch: React.FC<CollabGenAIMenuSwitchProps> = (prop
 export const CollabGenAIBlockMenu = () => {
   const [openAI, setOpenAI] = useState(false);
 
-  return <GenerativeBlockMenu open={openAI} onOpenChange={setOpenAI}></GenerativeBlockMenu>;
+  return <GenerativeBlockMenuSwitch open={openAI} onOpenChange={setOpenAI}></GenerativeBlockMenuSwitch>;
 };

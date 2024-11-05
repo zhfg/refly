@@ -1,4 +1,5 @@
 import React, { Suspense, useEffect, lazy } from "react"
+import { ConfigProvider } from "antd"
 import ReactDOM from "react-dom/client"
 import {
   BrowserRouter,
@@ -90,7 +91,15 @@ export const App = () => {
     <Suspense fallback={<Spin style={{ margin: "200px auto" }} />}>
       <BrowserRouter>
         <Suspense fallback={<Spin style={{ margin: "200px auto" }} />}>
-          <AppRouter layout={AppLayout} />
+          <ConfigProvider
+            theme={{
+              token: {
+                colorPrimary: "#00968F",
+                borderRadius: 6,
+              },
+            }}>
+            <AppRouter layout={AppLayout} />
+          </ConfigProvider>
         </Suspense>
       </BrowserRouter>
     </Suspense>

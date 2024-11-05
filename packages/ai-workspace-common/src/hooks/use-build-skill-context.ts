@@ -12,7 +12,7 @@ export const useBuildSkillContext = () => {
     const contextPanelStore = useContextPanelStore.getState();
     const { currentSelectedMarks, filterIdsOfCurrentSelectedMarks } = contextPanelStore;
 
-    // collections
+    // projects
     const getDatabaseEntities = (type: MarkType) => {
       const set = new Set();
       const databaseEntities = currentSelectedMarks
@@ -21,9 +21,11 @@ export const useBuildSkillContext = () => {
         .map((item) => ({
           [`${type}Id`]: item?.entityId || item?.id,
           metadata: {
+            ...(item?.metadata || {}),
             domain: item?.type,
             url: item?.url || '',
             title: item?.title || '',
+            isCurrentContext: item?.isCurrentContext,
           },
         }))
         .filter((item) => {
@@ -72,7 +74,6 @@ export const useBuildSkillContext = () => {
       const set = new Set();
       let contentList: SkillContextContentItem[] = [];
       // TODO: 这里需要处理技能执行时的 context filter
-      console.log('currentSelectedMarks', currentSelectedMarks);
 
       contentList = currentSelectedMarks
         ?.filter(
@@ -104,7 +105,7 @@ export const useBuildSkillContext = () => {
 
     let context: SkillContext = {
       contentList: getContentList(),
-      collections: getDatabaseEntities('collection'),
+      projects: getDatabaseEntities('project'),
       resources: getDatabaseEntities('resource'),
       canvases: getDatabaseEntities('canvas'),
       urls: getUrls(),

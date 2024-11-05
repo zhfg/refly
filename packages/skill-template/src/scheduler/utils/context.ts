@@ -1,4 +1,4 @@
-import { ChatMode, GraphState, IContext, SkillContextContentItemMetadata } from '../types';
+import { GraphState, IContext, SkillContextContentItemMetadata } from '../types';
 import {
   countContentTokens,
   countContextTokens,
@@ -12,7 +12,7 @@ import {
   processSelectedContentWithSimilarity,
   processCanvasesWithSimilarity,
   processResourcesWithSimilarity,
-  processCollectionsWithSimilarity,
+  processProjectsWithSimilarity,
   processWholeSpaceWithSimilarity,
   processMentionedContextWithSimilarity,
 } from './semanticSearch';
@@ -47,8 +47,9 @@ export async function prepareContext(
   ctx.ctxThis.emitEvent({ event: 'log', content: `Start to prepare context...` }, ctx.configSnapshot);
 
   const enableWebSearch = ctx.tplConfig?.enableWebSearch?.value;
-  const chatMode = ctx.tplConfig?.chatMode?.value as ChatMode;
+  const enableKnowledgeBaseSearch = ctx.tplConfig?.enableKnowledgeBaseSearch?.value;
   ctx.ctxThis.engine.logger.log(`Enable Web Search: ${enableWebSearch}`);
+  ctx.ctxThis.engine.logger.log(`Enable Knowledge Base Search: ${enableKnowledgeBaseSearch}`);
 
   const maxContextTokens = Math.floor(maxTokens * MAX_CONTEXT_RATIO);
   // TODO: think remainingTokens may out of range
@@ -79,7 +80,7 @@ export async function prepareContext(
     contentList: [],
     resources: [],
     canvases: [],
-    collections: [],
+    projects: [],
   };
   if (hasContext) {
     const mentionContextRes = await prepareMentionedContext(
@@ -100,10 +101,10 @@ export async function prepareContext(
     contentList: [],
     resources: [],
     canvases: [],
-    collections: [],
+    projects: [],
   };
-  if (remainingTokens > 0 && (hasContext || chatMode === ChatMode.WHOLE_SPACE_SEARCH)) {
-    const { contentList = [], resources = [], canvases = [], collections = [] } = ctx.configSnapshot.configurable;
+  if (remainingTokens > 0 && (hasContext || enableKnowledgeBaseSearch)) {
+    const { contentList = [], resources = [], canvases = [], projects = [] } = ctx.configSnapshot.configurable;
     // prev remove overlapping items in mentioned context
     ctx.ctxThis.engine.logger.log(
       `Remove Overlapping Items In Mentioned Context...
@@ -112,7 +113,7 @@ export async function prepareContext(
         contentList,
         resources,
         canvases,
-        collections,
+        projects,
       })}
       `,
     );
@@ -121,7 +122,7 @@ export async function prepareContext(
       contentList,
       resources,
       canvases,
-      collections,
+      projects: projects,
     });
 
     lowerPriorityContext = await prepareLowerPriorityContext(
@@ -233,7 +234,7 @@ export async function prepareMentionedContext(
     contentList: [],
     resources: [],
     canvases: [],
-    collections: [],
+    projects: [],
     ...mentionedContext,
   };
 
@@ -385,28 +386,28 @@ export async function prepareContainerLevelContext(
   },
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<IContext> {
-  const chatMode = ctx.tplConfig?.chatMode?.value as ChatMode;
-  const enableSearchWholeSpace = chatMode === ChatMode.WHOLE_SPACE_SEARCH;
+  const enableKnowledgeBaseSearch = ctx.tplConfig?.enableKnowledgeBaseSearch?.value;
+  const enableSearchWholeSpace = enableKnowledgeBaseSearch;
 
   const processedContext: IContext = {
     contentList: [],
     resources: [],
     canvases: [],
-    collections: [],
+    projects: [],
   };
 
-  const { collections } = context;
+  const { projects } = context;
 
   ctx.ctxThis.engine.logger.log(
     `Prepare Container Level Context..., 
      - context: ${safeStringifyJSON(context)}
-     - chatMode: ${chatMode}
+     - enableKnowledgeBaseSearch: ${enableKnowledgeBaseSearch}
      - enableSearchWholeSpace: ${enableSearchWholeSpace}
      - processedContext: ${safeStringifyJSON(processedContext)}`,
   );
 
-  // 1. collections context, mainly for knowledge base search meat filter
-  const relevantResourcesOrCanvasesFromCollections = await processCollectionsWithSimilarity(query, collections, ctx);
+  // 1. projects context, mainly for knowledge base search meat filter
+  const relevantResourcesOrCanvasesFromProjects = await processProjectsWithSimilarity(query, projects, ctx);
 
   // 2. whole space search context
   const relevantResourcesOrCanvasesFromWholeSpace = enableSearchWholeSpace
@@ -433,14 +434,14 @@ export async function prepareContainerLevelContext(
     }
   };
 
-  // 优先添加来自 collections 的项目
-  relevantResourcesOrCanvasesFromCollections.forEach(addUniqueItem);
+  // Add items from projects first
+  relevantResourcesOrCanvasesFromProjects.forEach(addUniqueItem);
 
-  // 然后添加来自 whole space 的项目
+  // Then add items from whole space
   relevantResourcesOrCanvasesFromWholeSpace.forEach(addUniqueItem);
 
-  // 保留原始的 collections
-  processedContext.collections = collections;
+  // Keep original projects
+  processedContext.projects = projects;
 
   ctx.ctxThis.engine.logger.log(
     `Prepared Container Level Context successfully! ${safeStringifyJSON(processedContext)}`,
@@ -463,7 +464,7 @@ export function removeOverlappingContextItems(context: IContext, originalContext
     contentList: [],
     resources: [],
     canvases: [],
-    collections: [],
+    projects: [],
   };
 
   // Helper function to check if an item exists in the context
@@ -496,9 +497,9 @@ export function removeOverlappingContextItems(context: IContext, originalContext
       ),
   );
 
-  // Deduplicate collections
-  deduplicatedContext.collections = (originalContext?.collections || []).filter(
-    (item) => !itemExistsInContext(item, context?.collections || [], 'collectionId'),
+  // Deduplicate projects
+  deduplicatedContext.projects = (originalContext?.projects || []).filter(
+    (item) => !itemExistsInContext(item, context?.projects || [], 'projectId'),
   );
 
   return deduplicatedContext;

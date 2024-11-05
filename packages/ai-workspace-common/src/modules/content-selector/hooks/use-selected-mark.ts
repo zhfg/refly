@@ -68,6 +68,7 @@ export const useSelectedMark = () => {
         }
 
         const newMark = { ...mark, id: genUniqueId(), title, parentId };
+        console.log('newMark===', newMark);
 
         // check if the content selection mark is already exists
         const isDuplicate = marks.some(

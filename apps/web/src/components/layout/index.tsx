@@ -1,16 +1,18 @@
 import { Layout } from "@arco-design/web-react"
-
+import { useMatch } from "react-router-dom"
 import { SiderLayout } from "./sider"
-
-import { LoginModal } from "@/components/login-modal"
-import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
-import { BigSearchModal } from "@refly-packages/ai-workspace-common/components/search/modal"
-import { ImportResourceModal } from "@refly-packages/ai-workspace-common/components/import-resource"
-import { NewKnowledgeModal } from "@refly-packages/ai-workspace-common/components/knowledge-base/new-knowledge-modal"
 import { useBindCommands } from "@refly-packages/ai-workspace-common/hooks/use-bind-commands"
 import { useImportResourceStoreShallow } from "@refly-packages/ai-workspace-common/stores/import-resource"
-import { useImportKnowledgeModalShallow } from "@refly-packages/ai-workspace-common/stores/import-knowledge-modal"
+import { useImportProjectModalShallow } from "@refly-packages/ai-workspace-common/stores/import-project-modal"
+import { useNewCanvasModalStoreShallow } from "@refly-packages/ai-workspace-common/stores/new-canvas-modal"
+import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
+
+import { LoginModal } from "@/components/login-modal"
+import { BigSearchModal } from "@refly-packages/ai-workspace-common/components/search/modal"
+import { ImportResourceModal } from "@refly-packages/ai-workspace-common/components/import-resource"
+import { NewProjectModal } from "@refly-packages/ai-workspace-common/components/project-detail/new-project-modal"
 import { SubscribeModal } from "@refly-packages/ai-workspace-common/components/settings/subscribe-modal"
+import { NewCanvasModal } from "@/components/new-canvas-modal"
 
 import "./index.scss"
 
@@ -21,6 +23,7 @@ interface AppLayoutProps {
 }
 
 export const AppLayout = (props: AppLayoutProps) => {
+  const showSider = !useMatch("/share/:shareCode")
   // stores
   const userStore = useUserStoreShallow(state => ({
     loginModalVisible: state.loginModalVisible,
@@ -28,8 +31,11 @@ export const AppLayout = (props: AppLayoutProps) => {
   const importResourceStore = useImportResourceStoreShallow(state => ({
     importResourceModalVisible: state.importResourceModalVisible,
   }))
-  const importKnowledgeModal = useImportKnowledgeModalShallow(state => ({
-    showNewKnowledgeModal: state.showNewKnowledgeModal,
+  const newCanvasModalStore = useNewCanvasModalStoreShallow(state => ({
+    newCanvasModalVisible: state.newCanvasModalVisible,
+  }))
+  const importProjectModal = useImportProjectModalShallow(state => ({
+    showNewProjectModal: state.showNewProjectModal,
   }))
 
   // 绑定快捷键
@@ -37,14 +43,14 @@ export const AppLayout = (props: AppLayoutProps) => {
 
   return (
     <Layout className="app-layout main">
-      <SiderLayout />
+      {showSider ? <SiderLayout /> : null}
       <Layout
         className="content-layout"
         style={{
           height: "calc(100vh - 16px)",
           flexGrow: 1,
           overflowY: "auto",
-          width: `calc(100% - 200px - 16px)`,
+          width: showSider ? `calc(100% - 200px - 16px)` : `calc(100% - 16px)`,
         }}>
         <Content>{props.children}</Content>
       </Layout>
@@ -53,7 +59,8 @@ export const AppLayout = (props: AppLayoutProps) => {
       {importResourceStore.importResourceModalVisible ? (
         <ImportResourceModal />
       ) : null}
-      {importKnowledgeModal.showNewKnowledgeModal && <NewKnowledgeModal />}
+      {newCanvasModalStore.newCanvasModalVisible ? <NewCanvasModal /> : null}
+      {importProjectModal.showNewProjectModal && <NewProjectModal />}
       <SubscribeModal />
     </Layout>
   )

@@ -34,12 +34,16 @@ export function genResourceID(): string {
   return 'r-' + createId();
 }
 
+export function genProjectID(): string {
+  return 'p-' + createId();
+}
+
 export function genCanvasID(): string {
   return 'c-' + createId();
 }
 
-export function genCollectionID(): string {
-  return 'cl-' + createId();
+export function genReferenceID(): string {
+  return 'rf-' + createId();
 }
 
 export function genTokenUsageMeterID(): string {

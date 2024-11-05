@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import {} from '@heroicons/react/24/outline';
-import { IconMessage, IconFile, IconBook, IconEdit, IconRobot } from '@arco-design/web-react/icon';
+import { IconMessage, IconRobot } from '@arco-design/web-react/icon';
 import { useDebouncedCallback } from 'use-debounce';
-import { defaultFilter } from './cmdk/filter';
 
 import './index.scss';
 import { Home } from './home';
@@ -14,15 +12,17 @@ import { Skill } from './skill';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchDomain, SearchResult, SkillMeta } from '@refly/openapi-schema';
-import { useKnowledgeBaseJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
-import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-note-tabs';
+import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
 import classNames from 'classnames';
 
 import { useTranslation } from 'react-i18next';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { Message, Spin } from '@arco-design/web-react';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { IconCanvas, IconProject, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 export interface SearchProps extends React.ComponentProps<'div'> {
   showList?: boolean;
@@ -49,7 +49,7 @@ export const Search = (props: SearchProps) => {
   const { handleAddTab: handleAddNoteTab } = useCanvasTabs();
   const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
 
-  const { jumpToKnowledgeBase, jumpToCanvas, jumpToReadResource, jumpToConv } = useKnowledgeBaseJumpNewPath();
+  const { jumpToProject, jumpToCanvas, jumpToResource, jumpToConv } = useJumpNewPath();
 
   const pages = searchStore.pages;
   const setPages = searchStore.setPages;
@@ -99,7 +99,7 @@ export const Search = (props: SearchProps) => {
       case 'readSesources':
         return 'resource';
       case 'knowledgeBases':
-        return 'collection';
+        return 'project';
       case 'convs':
         return 'conversation';
       case 'skills':
@@ -143,24 +143,22 @@ export const Search = (props: SearchProps) => {
       });
       setLoading(false);
 
-      if (error) {
-        Message.error(String(error));
+      if (error || !data.success) {
         return;
       }
 
       const resData = data?.data || [];
 
-      // notes
-      const notes = resData.filter((item) => item?.domain === 'canvas') || [];
+      const canvases = resData.filter((item) => item?.domain === 'canvas') || [];
       const readResources = resData.filter((item) => item?.domain === 'resource') || [];
-      const knowledgeBases = resData.filter((item) => item?.domain === 'collection') || [];
+      const projects = resData.filter((item) => item?.domain === 'project') || [];
       const convs = resData.filter((item) => item?.domain === 'conversation') || [];
       const skills = resData.filter((item) => item?.domain === 'skill') || [];
 
       searchStore.setSearchedRes({
-        notes,
+        canvases,
         readResources,
-        knowledgeBases,
+        projects,
         convs,
         skills,
       });
@@ -192,7 +190,7 @@ export const Search = (props: SearchProps) => {
     {
       domain: 'skill',
       heading: t('loggedHomePage.quickSearch.skills'),
-      action: false, // 是否开启 action
+      action: false,
       data: searchStore.searchedSkills || [],
       icon: <IconRobot style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
@@ -207,41 +205,43 @@ export const Search = (props: SearchProps) => {
     },
     {
       domain: 'note',
-      heading: t('loggedHomePage.quickSearch.note'),
+      heading: t('loggedHomePage.quickSearch.canvas'),
       action: true,
       actionHeading: {
-        create: t('loggedHomePage.quickSearch.newNote'),
+        create: t('loggedHomePage.quickSearch.newCanvas'),
       },
-      data: searchStore.searchedNotes || [],
-      icon: <IconEdit style={{ fontSize: 12 }} />,
+      data: searchStore.searchedCanvases || [],
+      icon: <IconCanvas style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
         jumpToCanvas({
           canvasId: item?.id,
+          projectId: item?.metadata?.projectId,
         });
         handleAddNoteTab({
           title: item?.title,
           key: item?.id,
           content: '',
           canvasId: item?.id,
+          projectId: item?.metadata?.projectId,
         });
         searchStore.setIsSearchOpen(false);
       },
       onCreateClick: async () => {
-        await handleInitEmptyNote('');
+        await handleInitEmptyNote({ content: '' });
         searchStore.setIsSearchOpen(false);
       },
     },
     {
       domain: 'readResources',
-      heading: t('loggedHomePage.quickSearch.readResource'),
+      heading: t('loggedHomePage.quickSearch.resource'),
       action: true,
       actionHeading: {
-        create: t('loggedHomePage.quickSearch.newReadResource'),
+        create: t('loggedHomePage.quickSearch.newResource'),
       },
       data: searchStore.searchedReadResources || [],
-      icon: <IconBook style={{ fontSize: 12 }} />,
+      icon: <IconResource style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
-        jumpToReadResource({
+        jumpToResource({
           resId: item?.id,
         });
         handleAddResourceTab({
@@ -256,16 +256,16 @@ export const Search = (props: SearchProps) => {
     },
     {
       domain: 'knowledgeBases',
-      heading: t('loggedHomePage.quickSearch.collection'),
+      heading: t('loggedHomePage.quickSearch.project'),
       action: true,
       actionHeading: {
-        create: t('loggedHomePage.quickSearch.newCollection'),
+        create: t('loggedHomePage.quickSearch.newProject'),
       },
-      data: searchStore.searchedKnowledgeBases || [],
-      icon: <IconFile style={{ fontSize: 12 }} />,
+      data: searchStore.searchedProjects || [],
+      icon: <IconProject style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
-        jumpToKnowledgeBase({
-          kbId: item?.id,
+        jumpToProject({
+          projectId: item?.id,
         });
         searchStore.setIsSearchOpen(false);
       },
@@ -283,12 +283,20 @@ export const Search = (props: SearchProps) => {
       onItemClick: (item: SearchResult) => {
         jumpToConv({
           convId: item?.id,
+          projectId: item?.metadata?.projectId,
+          state: {
+            navigationContext: {
+              shouldFetchDetail: true,
+              source: MessageIntentSource.Search,
+            },
+          },
         });
         searchStore.setIsSearchOpen(false);
       },
       onCreateClick: async () => {},
     },
   ];
+
   const getRenderData = (domain: string) => {
     return renderData?.find((item) => item.domain === domain);
   };
@@ -310,20 +318,12 @@ export const Search = (props: SearchProps) => {
         value={value}
         onValueChange={setValue}
         ref={ref}
-        filter={(value, search, keywords) => {
-          if (value?.startsWith('refly-built-in')) {
-            return 1;
-          }
-
-          return defaultFilter(value, search, keywords);
+        filter={() => {
+          return 1; // we can safely rely on the server filter
         }}
         className={classNames(showList ? 'search-active' : '')}
-        onCompositionStart={(e) => console.log('composition start')}
-        onCompositionUpdate={(e) => console.log('composition update')}
-        onCompositionEnd={(e) => console.log('composition end')}
         onKeyDownCapture={(e: React.KeyboardEvent) => {
           if (e.key === 'Enter' && !isComposing) {
-            console.log('keydown', searchValue);
             bounce();
           }
 
@@ -350,13 +350,9 @@ export const Search = (props: SearchProps) => {
           ref={inputRef}
           value={searchValue}
           placeholder={getInputPlaceholder(activePage)}
-          onCompositionStart={(e) => {
-            setIsComposing(true);
-          }}
-          onCompositionUpdate={(e) => console.log('composition update')}
-          onCompositionEnd={(e) => {
-            setIsComposing(false);
-          }}
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionUpdate={() => {}}
+          onCompositionEnd={() => setIsComposing(false)}
           onValueChange={(val) => {
             if (onSearchValueChange) {
               onSearchValueChange(val);

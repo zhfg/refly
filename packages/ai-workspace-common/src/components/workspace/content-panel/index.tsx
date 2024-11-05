@@ -4,14 +4,12 @@ import { HiOutlineChevronDown } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { WorkSpaceSearch } from '../work-space-search';
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/workspace/resource-list';
-import { NoteList } from '@refly-packages/ai-workspace-common/components/workspace/note-list';
-import { KnowledgeBaseList } from '@refly-packages/ai-workspace-common/components/knowledge-base-list';
-import { SearchQuickOpenBtn } from '@refly-packages/ai-workspace-common/components/search-quick-open-btn';
+import { CanvasList } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list';
+import { ProjectList } from '@refly-packages/ai-workspace-common/components/project-list';
 import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
-import { useImportKnowledgeModal } from '@refly-packages/ai-workspace-common/stores/import-knowledge-modal';
-import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
+import { useImportProjectModal } from '@refly-packages/ai-workspace-common/stores/import-project-modal';
+import { useNewCanvasModalStoreShallow } from '@refly-packages/ai-workspace-common/stores/new-canvas-modal';
 
 import './index.scss';
 import classNames from 'classnames';
@@ -24,10 +22,10 @@ const Content = (props: { val: string }) => {
   switch (props.val) {
     case 'resource':
       return <ResourceList />;
-    case 'note':
-      return <NoteList />;
-    case 'collection':
-      return <KnowledgeBaseList />;
+    case 'canvas':
+      return <CanvasList />;
+    case 'project':
+      return <ProjectList />;
     default:
       return <ResourceList />;
   }
@@ -43,7 +41,7 @@ const NewFileDropList = (props: { handleCreateButtonClick: (type: string) => voi
         borderRadius: '8px',
       }}
     >
-      {['resource', 'note', 'collection'].map((item) => {
+      {['canvas', 'resource', 'project'].map((item) => {
         return (
           <Menu.Item key={item} onClick={() => props.handleCreateButtonClick(item)}>
             {t(`workspace.contentPanel.newButton.${item}`)}
@@ -57,22 +55,24 @@ const NewFileDropList = (props: { handleCreateButtonClick: (type: string) => voi
 const NewFileButton = (props: { val: string }) => {
   const { t } = useTranslation();
   const importResourceStore = useImportResourceStore();
-  const importKnowledgeModal = useImportKnowledgeModal();
-  const { handleInitEmptyNote } = useAINote();
+  const importProjectModal = useImportProjectModal();
   const { newNoteCreating } = useCanvasStore((state) => ({
     newNoteCreating: state.newCanvasCreating,
   }));
+  const newCanvasModalStore = useNewCanvasModalStoreShallow((state) => ({
+    setNewCanvasModalVisible: state.setNewCanvasModalVisible,
+  }));
 
   const handleCreateButtonClick = (type: string) => {
-    if (type === 'note' && !newNoteCreating) {
-      handleInitEmptyNote('');
+    if (type === 'canvas' && !newNoteCreating) {
+      newCanvasModalStore.setNewCanvasModalVisible(true);
     }
     if (type === 'resource') {
       importResourceStore.setImportResourceModalVisible(true);
     }
-    if (type === 'collection') {
-      importKnowledgeModal.setShowNewKnowledgeModal(true);
-      importKnowledgeModal.setEditCollection(null);
+    if (type === 'project') {
+      importProjectModal.setShowNewProjectModal(true);
+      importProjectModal.setEditProject(null);
     }
   };
 
@@ -102,7 +102,7 @@ const ContentHeader = (props: { setVal: (val: string) => void; hitTop: boolean; 
       className={classNames(
         'content-panel-header',
         { 'content-panel-header-hit-top': hitTop },
-        'h-16 pt-3 pb-3 flex justify-between items-center',
+        'flex justify-between items-center pt-3 pb-3 h-16',
       )}
     >
       <div className="flex items-center">
@@ -115,16 +115,10 @@ const ContentHeader = (props: { setVal: (val: string) => void; hitTop: boolean; 
           onChange={(val) => handleTabChange(val)}
           style={{ borderRadius: 8 }}
         >
+          <Radio value="canvas">{t('workspace.contentPanel.tabPanel.canvas')}</Radio>
           <Radio value="resource">{t('workspace.contentPanel.tabPanel.resource')}</Radio>
-          <Radio value="note">{t('workspace.contentPanel.tabPanel.note')}</Radio>
-          <Radio value="collection">{t('workspace.contentPanel.tabPanel.collection')}</Radio>
+          <Radio value="project">{t('workspace.contentPanel.tabPanel.project')}</Radio>
         </RadioGroup>
-        {hitTop && (
-          <SearchQuickOpenBtn
-            className="work-space-top-search"
-            placeholder="loggedHomePage.quickSearch.placeholderForHome"
-          />
-        )}
       </div>
 
       <NewFileButton val={props.val}></NewFileButton>
@@ -134,7 +128,7 @@ const ContentHeader = (props: { setVal: (val: string) => void; hitTop: boolean; 
 
 export const ContentPanel = () => {
   const ref = useRef();
-  const [val, setVal] = useState('resource');
+  const [val, setVal] = useState('canvas');
   const [hitTop, setHitTop] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -142,7 +136,7 @@ export const ContentPanel = () => {
 
   useEffect(() => {
     const tab = searchParams.get('tab') as string;
-    setVal(tab || 'resource');
+    setVal(tab || 'canvas');
   }, [searchParams]);
 
   useEffect(() => {
@@ -172,7 +166,6 @@ export const ContentPanel = () => {
 
   return (
     <div className="content-panel-container" ref={ref}>
-      <WorkSpaceSearch />
       <Affix offsetTop={0} target={() => ref.current} onChange={setHitTop}>
         <ContentHeader val={val} setVal={setVal} hitTop={hitTop} />
       </Affix>

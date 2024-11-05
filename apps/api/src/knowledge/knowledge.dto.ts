@@ -1,15 +1,18 @@
 import {
-  Collection as CollectionModel,
   Resource as ResourceModel,
   Canvas as CanvasModel,
-  LabelInstance,
+  Project as ProjectModel,
+  Reference as ReferenceModel,
 } from '@prisma/client';
 import {
-  Collection,
   Resource,
   Canvas,
   ResourceType,
   IndexStatus,
+  Project,
+  Reference,
+  ReferenceType,
+  ReferenceMeta,
 } from '@refly-packages/openapi-schema';
 import { pick } from '@/utils';
 
@@ -18,49 +21,68 @@ export type FinalizeResourceParam = {
   uid: string;
 };
 
-export const collectionPO2DTO = (
-  coll: CollectionModel & { resources?: ResourceModel[]; labels?: LabelInstance[] },
-): Collection => {
-  if (!coll) {
-    return null;
-  }
+export const projectPO2DTO = (project: ProjectModel): Project => {
   return {
-    ...pick(coll, ['collectionId', 'title', 'description', 'isPublic']),
-    createdAt: coll.createdAt.toJSON(),
-    updatedAt: coll.updatedAt.toJSON(),
-    resources: coll.resources?.map((resource) => resourcePO2DTO(resource)),
+    ...pick(project, ['projectId', 'title', 'description', 'shareCode']),
+    createdAt: project.createdAt.toJSON(),
+    updatedAt: project.updatedAt.toJSON(),
   };
 };
 
 export const resourcePO2DTO = (
   resource: ResourceModel & {
+    order?: number;
     content?: string;
-    collections?: CollectionModel[];
   },
 ): Resource => {
   if (!resource) {
     return null;
   }
-  const res: Resource = {
-    ...pick(resource, ['resourceId', 'title', 'isPublic', 'readOnly', 'content', 'contentPreview']),
+  return {
+    ...pick(resource, ['resourceId', 'title', 'readOnly', 'content', 'contentPreview', 'order']),
     resourceType: resource.resourceType as ResourceType,
     indexStatus: resource.indexStatus as IndexStatus,
-    collections: resource.collections?.map((coll) => collectionPO2DTO(coll)),
+    storageSize: resource.storageSize.toString(),
+    vectorSize: resource.vectorSize.toString(),
     data: JSON.parse(resource.meta),
     createdAt: resource.createdAt.toJSON(),
     updatedAt: resource.updatedAt.toJSON(),
   };
-  return res;
 };
 
-export const canvasPO2DTO = (canvas: CanvasModel & { content?: string }): Canvas => {
+export const canvasPO2DTO = (
+  canvas: CanvasModel & {
+    content?: string;
+  },
+): Canvas => {
   if (!canvas) {
     return null;
   }
   const res: Canvas = {
-    ...pick(canvas, ['canvasId', 'title', 'content', 'contentPreview', 'isPublic', 'readOnly']),
+    ...pick(canvas, [
+      'canvasId',
+      'projectId',
+      'title',
+      'content',
+      'contentPreview',
+      'shareCode',
+      'readOnly',
+    ]),
     createdAt: canvas.createdAt.toJSON(),
     updatedAt: canvas.updatedAt.toJSON(),
   };
   return res;
+};
+
+export interface ExtendedReferenceModel extends ReferenceModel {
+  sourceMeta?: ReferenceMeta;
+  targetMeta?: ReferenceMeta;
+}
+
+export const referencePO2DTO = (reference: ExtendedReferenceModel): Reference => {
+  return {
+    ...pick(reference, ['referenceId', 'sourceId', 'targetId', 'sourceMeta', 'targetMeta']),
+    sourceType: reference.sourceType as ReferenceType,
+    targetType: reference.targetType as ReferenceType,
+  };
 };

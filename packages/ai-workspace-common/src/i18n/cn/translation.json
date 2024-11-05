@@ -8,6 +8,7 @@
     "edit": "编辑",
     "save": "保存",
     "add": "添加",
+    "remove": "移除",
     "loading": "加载中...",
     "loadMore": "加载更多",
     "more": "更多",
@@ -28,10 +29,18 @@
     "collapse": "折叠",
     "open": "打开",
     "close": "关闭",
+    "canvas": "稿布",
+    "resource": "资源",
+    "thread": "会话",
+    "meta": "元信息",
+    "project": "项目",
     "copy": {
       "title": "复制",
-      "success": "内容已复制到剪切板！"
-    }
+      "success": "内容已复制到剪切板！",
+      "failed": "复制失败，请重试！"
+    },
+    "login": "登录",
+    "share": "分享"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
@@ -109,6 +118,34 @@
       "terms": "服务条款"
     }
   },
+  "projectDetail": {
+    "directory": {
+      "newCanvas": "新稿布",
+      "importResource": "导入资源",
+      "chat": "Chat",
+      "empty": "空空如也"
+    },
+    "share": {
+      "createShareFailed": "创建分享失败，请重试！",
+      "project": "项目",
+      "canvas": "稿布",
+      "title": "分享{{entityType}}",
+      "description": "你的{{entityType}}正在分享中",
+      "copyLink": "复制链接",
+      "cancel": "取消分享",
+      "cancelShareFailed": "取消分享失败，请重试！",
+      "cancelShareSuccess": "取消分享成功！",
+      "sharing": "分享中"
+    },
+    "contentArea": {
+      "addCanvas": "新稿布",
+      "addResource": "新资源"
+    }
+  },
+  "shareContent": {
+    "title": "分享",
+    "login": "开始用 Refly 写作"
+  },
   "workspace": {
     "leftPanel": {
       "welcomeTitle": "你好， ",
@@ -122,19 +159,19 @@
     "contentPanel": {
       "tabPanel": {
         "resource": "资源",
-        "note": "笔记",
-        "collection": "知识库",
+        "canvas": "稿布",
+        "project": "项目",
         "thread": "会话"
       },
       "newButton": {
         "resource": "新资源",
-        "note": "新笔记",
-        "collection": "新知识库"
+        "canvas": "新稿布",
+        "project": "新项目"
       }
     },
-    "resourceCollectionList": {
-      "addToCollection": "添加到知识库",
-      "removeConfirmText": "确认要从此知识库移除吗?"
+    "resourceProjectList": {
+      "addToCollection": "添加到项目",
+      "removeConfirmText": "确认要从此项目移除吗?"
     },
     "labelGroup": {
       "addLabel": "点击添加标签",
@@ -144,13 +181,13 @@
       "deleteFailed": "标签删除失败",
       "deleteSuccessful": "标签删除成功"
     },
-    "newKnowledgeModal": {
-      "modalTitle": "新增知识库",
-      "editModalTitle": "编辑知识库",
-      "titlePlaceholder": "请输入知识库标题",
+    "newProjectModal": {
+      "modalTitle": "新增项目",
+      "editModalTitle": "编辑项目",
+      "titlePlaceholder": "请输入项目标题",
       "title": "标题",
       "description": "描述",
-      "descriptionPlaceholder": "请输入知识库描述",
+      "descriptionPlaceholder": "请输入项目描述",
       "cancel": "取消",
       "confirm": "确认",
       "successful": "创建成功",
@@ -189,15 +226,17 @@
     "keepOneWindow": "至少保留一个窗口",
     "resourceCollectionAssociativeModal": {
       "resourceTitle": "添加资源",
-      "collectionTitle": "添加到知识库",
+      "projectTitle": "添加到项目",
       "resource": "资源",
-      "collection": "知识库",
+      "project": "项目",
       "resourcePlaceholder": "请选择资源",
-      "collectionPlaceholder": "请选择知识库"
+      "projectPlaceholder": "请选择项目"
     },
     "directory": {
       "resourceCount": "{{count}} 个内容",
-      "searchPlaceholder": "搜索资源..."
+      "resourcesSearchPlaceholder": "搜索资源...",
+      "canvasesSearchPlaceholder": "搜索稿布...",
+      "conversationsSearchPlaceholder": "搜索会话..."
     },
     "quickSearch": {
       "suggest": "建议",
@@ -207,30 +246,42 @@
       "connecting": "连接中...",
       "newNote": "创建新笔记",
       "noteCharsCount": "共 {{count}} 字",
-      "autoSaved": "笔记已自动保存",
-      "saving": "笔记保存中...",
-      "readOnly": "只读",
-      "edit": "编辑",
+      "autoSaved": "已自动保存",
+      "saving": "保存中...",
+      "readOnly": "稿布已设为只读状态",
+      "edit": "稿布已设为可编辑状态",
       "serviceDisconnected": "服务已断开",
       "createNoteFailed": "创建笔记失败，请重试！",
       "defaultTitle": "未命名"
+    },
+    "canvas": {
+      "editor": {
+        "placeholder": {
+          "default": "写点什么，或按空格键激活 AI，或按 '/' 键激活命令",
+          "heading": "标题 {{level}}"
+        },
+        "toolbar": {
+          "quote": "引用内容提问"
+        }
+      }
     },
     "context": {
       "contentSelectorAddSuccess": "添加成功",
       "contentSelectorIsEmpty": "请选择文本",
       "contentSelector": "内容划线选择器",
+      "addContext": "添加上下文",
       "clearContext": "清空上下文",
-      "addToContext": "添加到聊天",
+      "addToContext": "引用",
       "resource": "资源",
       "resources": "资源",
-      "note": "笔记",
-      "notes": "笔记",
-      "collections": "知识库",
-      "collection": "知识库",
+      "canvas": "稿布",
+      "canvases": "稿布",
+      "projects": "知识库",
+      "project": "项目",
       "contentList": "内容列表",
       "extensionWeblink": "网页",
       "extensionWeblinkSelection": "网页选中",
-      "noteSelection": "笔记选中",
+      "canvasSelection": "稿布选中",
       "resourceSelection": "资源选中",
       "noteCursorSelection": "笔记光标选中内容",
       "noteBeforeCursorSelection": "笔记光标前内容",
@@ -271,6 +322,13 @@
       "newThread": "新建会话"
     }
   },
+  "canvas": {
+    "newCanvas": {
+      "modalTitle": "新稿布",
+      "titlePlaceholder": "请输入写作标题",
+      "descriptionPlaceholder": "请输入稿布描述"
+    }
+  },
   "resource": {
     "import": {
       "title": "资源集成",
@@ -301,27 +359,44 @@
     "wait_index": "模型记忆中",
     "wait_index_tip": "该资源暂时不支持 AI 搜索，需等待模型记忆完成",
     "index_failed": "模型记忆失败",
-    "index_failed_tip": "点击重试"
+    "index_failed_tip": "点击重试",
+    "finish": "已索引"
+  },
+  "resourceDetail": {
+    "back": "所有资源",
+    "directory": {
+      "baseInfo": "基础信息",
+      "techInfo": "技术信息",
+      "addTime": "添加时间",
+      "updateTime": "更新时间",
+      "source": "来源",
+      "storageSize": "存储存储",
+      "vectorSize": "向量存储",
+      "indexStatus": "索引状态",
+      "referenced": "{{count}} 被引用",
+      "weblink": "网页链接",
+      "text": "文本"
+    }
   },
   "loggedHomePage": {
     "searchEverything": "搜索任何内容",
     "quickSearch": {
       "skills": "技能",
-      "note": "笔记",
-      "newNote": "创建新笔记",
-      "readResource": "阅读资源",
-      "newReadResource": "添加阅读资源",
-      "collection": "知识库",
-      "newCollection": "创建新知识库",
+      "canvas": "稿布",
+      "newCanvas": "创建新稿布",
+      "resource": "资源",
+      "newResource": "添加资源",
+      "project": "项目",
+      "newProject": "创建新项目",
       "thread": "会话",
       "newThread": "创建新会话",
-      "placeholderForHome": "直接提问或搜索技能，笔记，资源，知识库，会话...",
+      "placeholderForHome": "直接提问或搜索稿布，资源，项目，会话...",
       "placeholderForSkillExecute": "输入你想要提问的问题，并基于此问题执行技能",
       "placeholderForWeblink": "搜索 {{domain}}...",
       "home": {
         "heading": "建议",
         "askAI": "问问知识管家",
-        "onlineSearch": "AI 联网搜索",
+        "onlineSearch": "AI 全网搜索",
         "collectionSearch": "AI 知识库搜索",
         "showAll": "查看所有{{heading}}"
       },
@@ -373,9 +448,6 @@
         "item": {
           "read": "已处理",
           "unread": "未处理"
-        },
-        "list": {
-          "fetchErr": "获取知识库内容失败！"
         }
       },
       "searchScope": {
@@ -385,7 +457,7 @@
         "currentKnowledgeBase": "当前知识库",
         "all": "全部知识库",
         "history": "历史已阅读",
-        "internet": "联网搜索"
+        "internet": "全网搜索"
       },
       "seeKnowledgeLibrary": "查看知识库",
       "status": {
@@ -393,7 +465,7 @@
       }
     },
     "siderMenu": {
-      "homePage": "工作台",
+      "homePage": "新写作",
       "news": "新特性",
       "explore": "探索",
       "threadLibrary": "会话",
@@ -405,7 +477,12 @@
       "skill": "技能",
       "collapse": "折叠",
       "expand": "展开",
-      "logout": "登出"
+      "logout": "登出",
+      "newDraft": "新建稿布",
+      "library": "知识库",
+      "recentProjects": "最近项目",
+      "recentChats": "最近会话",
+      "viewMore": "更多"
     }
   },
   "knowledgeLibrary": {
@@ -417,9 +494,6 @@
     },
     "archive": {
       "title": "浏览内容归档",
-      "list": {
-        "fetchErr": "获取归档内容失败，请重新刷新试试"
-      },
       "item": {
         "askFollow": "追问阅读",
         "share": "分享",
@@ -430,10 +504,7 @@
       }
     },
     "timeline": {
-      "title": "{{year}} 年 {{month}} 月 {{day}} 日浏览内容",
-      "list": {
-        "fetchErr": "获取归档内容失败，请重新刷新试试"
-      }
+      "title": "{{year}} 年 {{month}} 月 {{day}} 日浏览内容"
     },
     "empty": {
       "timelineTitle": "{{year}} 年 {{month}} 月 {{day}} 日还未阅读新内容，赶快下载插件去阅读新内容吧",
@@ -452,9 +523,6 @@
     "description": "基于您的浏览历史、会话历史分析提取出来的主题分类，代表您的阅读和学习趋势",
     "footer": {
       "noMoreText": "已经到底啦~"
-    },
-    "list": {
-      "fetchErr": "获取主题列表失败，请重新刷新试试"
     },
     "empty": {
       "title": "暂无分类，赶快下载插件去阅读新内容吧~",
@@ -479,9 +547,6 @@
       "noMoreText": "已经到底啦~",
       "linkMore": "{{count}} 条更多"
     },
-    "list": {
-      "fetchErr": "获取会话列表失败，请重新刷新试试"
-    },
     "empty": {
       "title": "暂无此分类下的内容，赶快下载插件去阅读新内容吧~",
       "download": "下载插件"
@@ -496,9 +561,6 @@
     "newThread": "新会话",
     "footer": {
       "noMoreText": "已经到底啦~"
-    },
-    "list": {
-      "fetchErr": "获取会话列表失败，请重新刷新试试"
     },
     "item": {
       "askFollow": "继续提问",
@@ -737,9 +799,6 @@
     "breadcrumb": {
       "homePage": "Home"
     },
-    "list": {
-      "fetchErr": "获取内容详情失败，请重新刷新试试"
-    },
     "item": {
       "share": "分享",
       "copy": "复制链接",
@@ -818,7 +877,7 @@
           "current": "当前网页",
           "all": "全部知识库",
           "selected": "选中网页",
-          "internet": "联网搜索"
+          "internet": "全网搜索"
         },
         "selectedWeblink": {
           "title": "基于选中网页提问："
@@ -842,18 +901,19 @@
   },
   "entitySelector": {
     "placeholder": {
-      "collection": "选择知识库",
+      "project": "选择知识库",
       "resource": "选择资源",
       "note": "选择笔记",
       "skill": "选择技能",
       "conversation": "选择会话"
     },
     "createEntity": {
-      "collection": "新建知识库",
+      "project": "新建知识库",
       "resource": "新建资源",
       "note": "新建笔记",
       "skill": "新建技能",
-      "conversation": "新建会话"
+      "conversation": "新建会话",
+      "newProjectNameIsEmpty": "请输入知识库名称"
     }
   },
   "hooks": {
@@ -879,6 +939,7 @@
     "selectedSkillHeader": {
       "title": "和 {{name}} 聊聊"
     },
+    "addContext": "添加上下文",
     "baseContextCard": {
       "title": "环境上下文快捷操作",
       "filterTitle": "过滤环境上下文",
@@ -891,13 +952,6 @@
         "relatedResource": {
           "prompt": "相似资源",
           "title": "相似资源"
-        }
-      },
-      "knowledgeBaseContextCard": {
-        "title": "当前知识库快捷操作",
-        "relatedCollection": {
-          "prompt": "相似知识库",
-          "title": "相似知识库"
         }
       },
       "noteContextCard": {
@@ -1013,14 +1067,17 @@
       "errorTipTitle": "发送失败",
       "errorTip": "请调整技能配置后再重试"
     },
-    "chatMode": {
-      "title": "聊天模式",
-      "normal": "直接提问",
-      "noContext": "不带上下文提问",
-      "wholeSpace": "在整个空间提问"
+    "projectSelector": {
+      "title": "选择项目",
+      "tip": "所选项目将用于保存稿布，若未选择将自动新建项目。"
     },
     "webSearch": {
-      "title": "联网搜索",
+      "title": "全网搜索",
+      "enable": "启用",
+      "disable": "禁用"
+    },
+    "knowledgeBaseSearch": {
+      "title": "知识库搜索",
       "enable": "启用",
       "disable": "禁用"
     },
@@ -1039,7 +1096,8 @@
       "brainstormIdeas": "脑暴写作灵感",
       "writeTwitterArticle": "写一篇 Twitter 原创文章",
       "installSkillHint": "你还未添加任何助手，点我添加",
-      "installSkillHintTitle": "添加助手"
+      "installSkillHintTitle": "添加助手",
+      "openCanvas": "打开稿布"
     },
     "contextItem": {
       "current": "当前"
@@ -1088,5 +1146,23 @@
     "description": "哎呀，当前账号还没有内测资格",
     "apply": "申请试用资格",
     "copyEmail": "复制邮箱 "
+  },
+  "homePage": {
+    "suggestion": {
+      "investment": "写一篇投资 Memo",
+      "productSearch": "撰写竞品调研",
+      "academicArticle": "写一篇关于 Scaling law 的学术文章",
+      "socialTweet": "基于 Founder mode 撰写社交推文"
+    },
+    "footer": {
+      "pricing": "定价",
+      "contact": "联系我们",
+      "terms": "条款",
+      "privacy": "隐私"
+    }
+  },
+  "deck": {
+    "references": "引用",
+    "referencedBy": "被引用"
   }
 }

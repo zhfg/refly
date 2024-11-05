@@ -2,7 +2,6 @@ import React, { type Dispatch, useEffect, useRef, useState } from 'react';
 import { reflyEnv } from '@/utils/env';
 import hotKeys from 'hotkeys-js';
 import { useBuildTask } from '@refly-packages/ai-workspace-common/hooks/use-build-task';
-import { useChatStore } from '@/stores/chat';
 import { Source } from '@refly/openapi-schema';
 import { useWeblinkStore } from '@/stores/weblink';
 import { useUserStore } from '@/stores/user';

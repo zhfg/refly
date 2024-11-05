@@ -12,15 +12,15 @@ import { safeStringifyJSON } from '@refly-packages/utils';
 
 // simplify context entityId for better extraction
 export const preprocessContext = (context: IContext): IContext => {
-  const { resources, canvases, contentList, collections } = context;
+  const { resources, canvases, contentList, projects } = context;
 
   const preprocessedContext = {
     resources: resources.map((r, index) => ({ ...r, resource: { ...r.resource, resourceId: `resource-${index}` } })),
     canvases: canvases.map((c, index) => ({ ...c, canvas: { ...c.canvas, canvasId: `canvas-${index}` } })),
     contentList: contentList.map((c, index) => ({ ...c, metadata: { ...c.metadata, entityId: `content-${index}` } })),
-    collections: collections.map((c, index) => ({
+    projects: projects.map((c, index) => ({
       ...c,
-      collection: { ...c.collection, collectionId: `collection-${index}` },
+      project: { ...c.project, projectId: `project-${index}` },
     })),
   };
 
@@ -35,7 +35,7 @@ export const postprocessContext = (
     resources: [],
     canvases: [],
     contentList: [],
-    collections: [],
+    projects: [],
   };
 
   mentionedContextList.forEach((item) => {
@@ -194,12 +194,12 @@ export async function analyzeQueryAndContext(
   query: string,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<QueryAnalysis> {
-  const { chatHistory, resources, canvases, contentList, collections, modelName } = ctx.configSnapshot.configurable;
+  const { chatHistory, resources, canvases, contentList, projects, modelName } = ctx.configSnapshot.configurable;
   const context: IContext = {
     resources,
     canvases,
     contentList,
-    collections,
+    projects,
   };
 
   ctx.ctxThis.emitEvent({ event: 'log', content: 'Analyzing query and context...' }, ctx.configSnapshot);

@@ -3,8 +3,7 @@ import {
   SkillContextResourceItem,
   SkillContextCanvasItem,
   SearchDomain,
-  EntityType,
-  SkillContextCollectionItem,
+  SkillContextProjectItem,
   Entity,
 } from '@refly-packages/openapi-schema';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
@@ -464,25 +463,25 @@ export async function processMentionedContextWithSimilarity(
 }
 
 // lower priority, if out of maxTokens, prior to cut off
-export async function processCollectionsWithSimilarity(
+export async function processProjectsWithSimilarity(
   query: string,
-  collections: SkillContextCollectionItem[] = [],
+  projects: SkillContextProjectItem[] = [],
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<(SkillContextResourceItem | SkillContextCanvasItem)[]> {
-  if (collections?.length === 0) {
+  if (projects?.length === 0) {
     return [];
   }
 
-  // 1. scope collections for get relevant chunks
-  const entities: Entity[] = collections.map((collection) => ({
-    entityId: collection?.collection?.collectionId,
-    entityType: 'collection',
+  // 1. scope projects for get relevant chunks
+  const entities: Entity[] = projects.map((project) => ({
+    entityId: project?.project?.projectId,
+    entityType: 'project',
   }));
   const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
     query,
     {
       entities,
-      domains: ['collection'],
+      domains: ['project'],
       limit: 10,
     },
     ctx,
@@ -533,7 +532,7 @@ export async function processWholeSpaceWithSimilarity(
   query: string,
   ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<(SkillContextResourceItem | SkillContextCanvasItem)[]> {
-  // 1. scope collections for get relevant chunks
+  // 1. scope projects for get relevant chunks
   const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
     query,
     {
@@ -605,11 +604,11 @@ export async function knowledgeBaseSearchGetRelevantChunks(
   );
   const relevantChunks = res?.data?.map((item) => ({
     id: item.id,
-    pageContent: item?.content?.[0] || '',
+    pageContent: item?.snippets?.map((s) => s.text).join('\n\n') || '',
     metadata: {
       ...item.metadata,
       title: item.title,
-      domain: item.domain, // collection, resource, canvas
+      domain: item.domain, // project, resource, canvas
     },
   }));
 

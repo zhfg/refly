@@ -24,6 +24,82 @@ export const $User = {
   },
 } as const;
 
+export const $ListOrder = {
+  type: 'string',
+  description: 'List order',
+  enum: ['creationAsc', 'creationDesc'],
+} as const;
+
+export const $ReferenceMeta = {
+  type: 'object',
+  description: 'Reference metadata',
+  properties: {
+    title: {
+      type: 'string',
+      description: 'Reference title',
+    },
+    projectId: {
+      type: 'string',
+      description: 'Reference project ID',
+    },
+    url: {
+      type: 'string',
+      description: 'Reference URL',
+    },
+  },
+} as const;
+
+export const $BaseReference = {
+  type: 'object',
+  description: 'Basic reference info',
+  required: ['sourceType', 'sourceId', 'targetType', 'targetId'],
+  properties: {
+    sourceType: {
+      $ref: '#/components/schemas/ReferenceType',
+      description: 'Source entity type',
+    },
+    sourceId: {
+      type: 'string',
+      description: 'Source entity ID',
+    },
+    targetType: {
+      $ref: '#/components/schemas/ReferenceType',
+      description: 'Target entity type',
+    },
+    targetId: {
+      type: 'string',
+      description: 'Target entity ID',
+    },
+  },
+} as const;
+
+export const $Reference = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseReference',
+    },
+    {
+      type: 'object',
+      description: 'Reference extra data',
+      required: ['referenceId'],
+      properties: {
+        referenceId: {
+          type: 'string',
+          description: 'Reference ID',
+        },
+        sourceMeta: {
+          $ref: '#/components/schemas/ReferenceMeta',
+          description: 'Source entity metadata',
+        },
+        targetMeta: {
+          $ref: '#/components/schemas/ReferenceMeta',
+          description: 'Target entity metadata',
+        },
+      },
+    },
+  ],
+} as const;
+
 export const $ResourceMeta = {
   type: 'object',
   description: 'Resource metadata',
@@ -60,6 +136,10 @@ export const $Resource = {
       description: 'Resource type',
       $ref: '#/components/schemas/ResourceType',
     },
+    order: {
+      type: 'number',
+      description: 'Resource order in project',
+    },
     title: {
       type: 'string',
       description: 'Resource title',
@@ -73,15 +153,23 @@ export const $Resource = {
       description: 'Resource index status',
       $ref: '#/components/schemas/IndexStatus',
     },
+    storageSize: {
+      type: 'string',
+      description: 'Resource storage size (in bytes)',
+    },
+    vectorSize: {
+      type: 'string',
+      description: 'Resource vector storage size (in bytes)',
+    },
     createdAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection creation time',
+      description: 'Resource creation time',
     },
     updatedAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection update time',
+      description: 'Resource update time',
     },
     contentPreview: {
       type: 'string',
@@ -91,24 +179,32 @@ export const $Resource = {
       type: 'string',
       description: 'Document content for this resource (only returned in getResourceDetail API)',
     },
-    collections: {
-      type: 'array',
-      description: 'Collections this resource belongs to (only returned in getResourceDetail API)',
-      items: {
-        $ref: '#/components/schemas/Collection',
-      },
-    },
   },
+} as const;
+
+export const $ReferenceType = {
+  type: 'string',
+  description: 'Reference type',
+  enum: ['canvas', 'resource'],
 } as const;
 
 export const $Canvas = {
   type: 'object',
-  required: ['canvasId', 'title', 'readOnly', 'createdAt', 'updatedAt'],
+  required: ['canvasId', 'projectId', 'title', 'readOnly', 'createdAt', 'updatedAt'],
   properties: {
     canvasId: {
       type: 'string',
       description: 'Canvas ID',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
+    },
+    order: {
+      type: 'number',
+      description: 'Canvas order in project',
     },
     title: {
       type: 'string',
@@ -122,6 +218,10 @@ export const $Canvas = {
     content: {
       type: 'string',
       description: 'Full canvas content (only returned in detail api)',
+    },
+    shareCode: {
+      type: 'string',
+      description: 'Share code',
     },
     readOnly: {
       type: 'boolean',
@@ -140,41 +240,38 @@ export const $Canvas = {
   },
 } as const;
 
-export const $Collection = {
+export const $Project = {
   type: 'object',
-  required: ['collectionId', 'title', 'createdAt', 'updatedAt'],
+  required: ['projectId', 'title', 'createdAt', 'updatedAt'],
   properties: {
-    collectionId: {
+    projectId: {
       type: 'string',
-      description: 'Collection ID',
-      example: 'cl-g30e1b80b5g1itbemc0g5jj3',
+      description: 'Project ID',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
     },
     title: {
       type: 'string',
-      description: 'Collection title',
-      example: 'Default Collection',
+      description: 'Project title',
+      example: 'Default Project',
     },
     description: {
       type: 'string',
-      description: 'Collection description',
-      example: 'Collection description',
+      description: 'Project description',
+      example: 'Project description',
+    },
+    shareCode: {
+      type: 'string',
+      description: 'Share code',
     },
     createdAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection creation time',
+      description: 'Project creation time',
     },
     updatedAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection update time',
-    },
-    resources: {
-      type: 'array',
-      description: 'Collection resources (only returned in detail API)',
-      items: {
-        $ref: '#/components/schemas/Resource',
-      },
+      description: 'Project update time',
     },
   },
 } as const;
@@ -182,7 +279,7 @@ export const $Collection = {
 export const $EntityType = {
   type: 'string',
   description: 'Entity type',
-  enum: ['canvas', 'resource', 'collection'],
+  enum: ['canvas', 'resource', 'project'],
 } as const;
 
 export const $Entity = {
@@ -244,7 +341,7 @@ export const $LabelClass = {
 
 export const $LabelInstance = {
   type: 'object',
-  description: 'Label instances related to resources, collections, etc.',
+  description: 'Label instances related to resources, projects, etc.',
   required: ['labelId', 'labelClassId', 'value'],
   properties: {
     labelId: {
@@ -410,12 +507,20 @@ export const $DynamicConfigValue = {
             type: 'string',
           },
         },
+        {
+          type: 'object',
+          additionalProperties: true,
+        },
       ],
       description: 'Config value',
     },
     displayValue: {
       type: 'string',
       description: 'Config display value',
+    },
+    configScope: {
+      description: 'The contexts in which the requirement applies',
+      $ref: '#/components/schemas/ConfigScope',
     },
   },
 } as const;
@@ -983,6 +1088,11 @@ export const $Conversation = {
       description: 'Conversation ID',
       example: 'cv-g30e1b80b5g1itbemc0g5jj3',
     },
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
+    },
     title: {
       type: 'string',
       description: 'Conversation title',
@@ -1033,169 +1143,6 @@ export const $Conversation = {
       description: 'Conversation messages (only returned for getConversationDetail api)',
       items: {
         $ref: '#/components/schemas/ChatMessage',
-      },
-    },
-  },
-} as const;
-
-export const $ChatTaskType = {
-  type: 'string',
-  description: 'Chat task type',
-  enum: ['chat', 'genTitle', 'quickAction', 'searchEnhanceKeyword', 'searchEnhanceSummarize', 'searchEnhanceAsk'],
-} as const;
-
-export const $RetrieveFilter = {
-  type: 'object',
-  description: 'Content retrieval filter',
-  properties: {
-    weblinkList: {
-      type: 'array',
-      description: 'List of web links',
-      items: {
-        $ref: '#/components/schemas/Source',
-      },
-      deprecated: true,
-    },
-    urls: {
-      type: 'array',
-      description: 'List of URLs to retrieve',
-      items: {
-        type: 'string',
-        example: 'https://refly.ai',
-      },
-    },
-    resourceIds: {
-      type: 'array',
-      description: 'List of resource IDs to retrieve',
-      items: {
-        type: 'string',
-        example: 'r-g30e1b80b5g1itbemc0g5jj3',
-      },
-    },
-    collectionIds: {
-      type: 'array',
-      description: 'List of collection IDs to retrieve',
-      items: {
-        type: 'string',
-        example: 'cl-g30e1b80b5g1itbemc0g5jj3',
-      },
-    },
-  },
-} as const;
-
-export const $ChatPayload = {
-  type: 'object',
-  description: 'Chat payload',
-  required: ['question'],
-  properties: {
-    question: {
-      type: 'string',
-      description: 'Question',
-    },
-    filter: {
-      type: 'object',
-      description: 'Content retrieval filter',
-      $ref: '#/components/schemas/RetrieveFilter',
-    },
-  },
-} as const;
-
-export const $QuickActionType = {
-  type: 'string',
-  description: 'Quick action type',
-  enum: ['selection', 'summary'],
-} as const;
-
-export const $QuickActionTaskPayload = {
-  type: 'object',
-  description: 'Quick action task payload',
-  properties: {
-    question: {
-      type: 'string',
-      description: 'Question',
-    },
-    actionType: {
-      description: 'Quick action type',
-      $ref: '#/components/schemas/QuickActionType',
-    },
-    actionPrompt: {
-      type: 'string',
-      description: 'Prompt for this action',
-    },
-    reference: {
-      type: 'string',
-      description: 'Reference for this action',
-    },
-    filter: {
-      description: 'Content retrieval filter',
-      $ref: '#/components/schemas/RetrieveFilter',
-    },
-  },
-} as const;
-
-export const $ChatTask = {
-  type: 'object',
-  description: 'Chat task',
-  required: ['taskType'],
-  properties: {
-    taskType: {
-      description: 'Task type',
-      $ref: '#/components/schemas/ChatTaskType',
-    },
-    dryRun: {
-      description: 'Whether to dry run the task',
-      type: 'boolean',
-      default: false,
-    },
-    convId: {
-      description: 'Conversation ID, a new conversation will be created if empty or non-existent',
-      type: 'string',
-      example: 'cv-g30e1b80b5g1itbemc0g5jj3',
-    },
-    createConvParam: {
-      description: 'Create conversation parameters',
-      $ref: '#/components/schemas/CreateConversationRequest',
-    },
-    locale: {
-      description: 'Chat locale',
-      type: 'string',
-      example: 'en',
-    },
-    data: {
-      description: 'Chat data',
-      oneOf: [
-        {
-          $ref: '#/components/schemas/ChatPayload',
-        },
-        {
-          $ref: '#/components/schemas/QuickActionTaskPayload',
-        },
-      ],
-    },
-  },
-} as const;
-
-export const $ChatTaskResponse = {
-  type: 'object',
-  description: 'Chat task response',
-  required: ['sources', 'answer'],
-  properties: {
-    sources: {
-      type: 'array',
-      description: 'List of web links',
-      items: {
-        $ref: '#/components/schemas/Source',
-      },
-    },
-    answer: {
-      type: 'string',
-      description: 'Chat Answer',
-    },
-    relatedQuestions: {
-      type: 'array',
-      description: 'Related questions',
-      items: {
-        type: 'string',
       },
     },
   },
@@ -1457,10 +1404,22 @@ export const $BaseResponse = {
       description: 'Whether the operation was successful',
       example: true,
     },
+    errCode: {
+      type: 'string',
+      description: 'Error code',
+    },
     errMsg: {
       type: 'string',
       description: 'Error message',
       example: 'Operation failed',
+    },
+    traceId: {
+      type: 'string',
+      description: 'Trace ID',
+    },
+    stack: {
+      type: 'string',
+      description: 'Error stack (only returned in development environment)',
     },
   },
 } as const;
@@ -1483,10 +1442,10 @@ export const $UpsertResourceRequest = {
       description: 'Resource ID (only used for update)',
       example: 'r-g30e1b80b5g1itbemc0g5jj3',
     },
-    collectionId: {
+    projectId: {
       type: 'string',
-      description: 'Collection ID (will add to the collection if given)',
-      example: 'cl-g30e1b80b5g1itbemc0g5jj3',
+      description: 'Project ID (will add to the project if given)',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
     },
     data: {
       description: 'Resource metadata',
@@ -1675,6 +1634,15 @@ export const $UpsertCanvasRequest = {
       description: 'Canvas ID (only used for update)',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
     },
+    order: {
+      type: 'number',
+      description: 'Canvas order in project',
+    },
+    projectId: {
+      type: 'string',
+      description: 'Project ID (will add to the project if given)',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
+    },
     readOnly: {
       type: 'boolean',
       description: 'Whether this canvas is read-only',
@@ -1715,92 +1683,29 @@ export const $DeleteCanvasRequest = {
   },
 } as const;
 
-export const $UpsertCollectionRequest = {
+export const $QueryReferencesRequest = {
   type: 'object',
   properties: {
-    collectionId: {
-      type: 'string',
-      description: 'Collection ID (only used for update)',
-      example: 'cl-g30e1b80b5g1itbemc0g5jj3',
+    sourceType: {
+      description: 'Source entity type',
+      $ref: '#/components/schemas/EntityType',
     },
-    title: {
+    sourceId: {
       type: 'string',
-      description: 'Collection title',
-      example: 'My Collection',
+      description: 'Source entity ID',
     },
-    description: {
+    targetType: {
+      description: 'Target entity type',
+      $ref: '#/components/schemas/EntityType',
+    },
+    targetId: {
       type: 'string',
-      description: 'Collection description',
-      example: 'Collection description',
+      description: 'Target entity ID',
     },
   },
 } as const;
 
-export const $UpsertCollectionResponse = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          $ref: '#/components/schemas/Collection',
-        },
-      },
-    },
-  ],
-} as const;
-
-export const $AddResourceToCollectionRequest = {
-  type: 'object',
-  required: ['collectionId', 'resourceIds'],
-  properties: {
-    collectionId: {
-      type: 'string',
-      description: 'Collection ID',
-    },
-    resourceIds: {
-      type: 'array',
-      description: 'Resource ID list',
-      items: {
-        type: 'string',
-      },
-    },
-  },
-} as const;
-
-export const $RemoveResourceFromCollectionRequest = {
-  type: 'object',
-  required: ['collectionId', 'resourceIds'],
-  properties: {
-    collectionId: {
-      type: 'string',
-      description: 'Collection ID',
-    },
-    resourceIds: {
-      type: 'array',
-      description: 'Resource ID list',
-      items: {
-        type: 'string',
-      },
-    },
-  },
-} as const;
-
-export const $DeleteCollectionRequest = {
-  type: 'object',
-  required: ['collectionId'],
-  properties: {
-    collectionId: {
-      type: 'string',
-      description: 'Collection ID to delete',
-      example: 'cl-g30e1b80b5g1itbemc0g5jj3',
-    },
-  },
-} as const;
-
-export const $ListCollectionResponse = {
+export const $QueryReferencesResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -1810,9 +1715,9 @@ export const $ListCollectionResponse = {
       properties: {
         data: {
           type: 'array',
-          description: 'Collection list',
+          description: 'Reference list',
           items: {
-            $ref: '#/components/schemas/Collection',
+            $ref: '#/components/schemas/Reference',
           },
         },
       },
@@ -1820,7 +1725,148 @@ export const $ListCollectionResponse = {
   ],
 } as const;
 
-export const $GetCollectionDetailResponse = {
+export const $AddReferencesRequest = {
+  type: 'object',
+  required: ['references'],
+  properties: {
+    references: {
+      type: 'array',
+      description: 'Reference operation list',
+      items: {
+        $ref: '#/components/schemas/BaseReference',
+      },
+    },
+  },
+} as const;
+
+export const $AddReferencesResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Reference list',
+          items: {
+            $ref: '#/components/schemas/Reference',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $DeleteReferencesRequest = {
+  type: 'object',
+  required: ['referenceIds'],
+  properties: {
+    referenceIds: {
+      type: 'array',
+      description: 'Reference ID list',
+      items: {
+        type: 'string',
+      },
+    },
+  },
+} as const;
+
+export const $UpsertProjectRequest = {
+  type: 'object',
+  properties: {
+    projectId: {
+      type: 'string',
+      description: 'Project ID (only used for update)',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
+    },
+    title: {
+      type: 'string',
+      description: 'Project title',
+      example: 'My Project',
+    },
+    description: {
+      type: 'string',
+      description: 'Project description',
+      example: 'Project description',
+    },
+  },
+} as const;
+
+export const $UpsertProjectResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/Project',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $BindProjectResourceRequest = {
+  type: 'object',
+  required: ['projectId', 'resourceId', 'operation'],
+  properties: {
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+    },
+    resourceId: {
+      type: 'string',
+      description: 'Resource ID',
+    },
+    order: {
+      type: 'number',
+      description: 'Resource order in project',
+    },
+    operation: {
+      type: 'string',
+      description: 'Operation type',
+      enum: ['bind', 'unbind'],
+    },
+  },
+} as const;
+
+export const $DeleteProjectRequest = {
+  type: 'object',
+  required: ['projectId'],
+  properties: {
+    projectId: {
+      type: 'string',
+      description: 'Project ID to delete',
+      example: 'p-g30e1b80b5g1itbemc0g5jj3',
+    },
+  },
+} as const;
+
+export const $ListProjectResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Project list',
+          items: {
+            $ref: '#/components/schemas/Project',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $GetProjectDetailResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -1830,8 +1876,125 @@ export const $GetCollectionDetailResponse = {
       properties: {
         data: {
           type: 'object',
-          description: 'Collection data',
-          $ref: '#/components/schemas/Collection',
+          description: 'Project data',
+          $ref: '#/components/schemas/Project',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $CreateShareRequest = {
+  type: 'object',
+  required: ['entityType', 'entityId'],
+  properties: {
+    entityType: {
+      $ref: '#/components/schemas/EntityType',
+    },
+    entityId: {
+      type: 'string',
+      description: 'Entity ID',
+    },
+  },
+} as const;
+
+export const $CreateShareResult = {
+  type: 'object',
+  required: ['shareCode'],
+  properties: {
+    shareCode: {
+      type: 'string',
+      description: 'Share code',
+    },
+  },
+} as const;
+
+export const $CreateShareResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/CreateShareResult',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $DeleteShareRequest = {
+  type: 'object',
+  required: ['shareCode'],
+  properties: {
+    shareCode: {
+      type: 'string',
+      description: 'Share code',
+    },
+  },
+} as const;
+
+export const $ShareUser = {
+  type: 'object',
+  properties: {
+    username: {
+      type: 'string',
+      description: 'User name',
+    },
+    nickname: {
+      type: 'string',
+      description: 'User nickname',
+    },
+    avatar: {
+      type: 'string',
+      description: 'User avatar',
+    },
+  },
+} as const;
+
+export const $SharedContent = {
+  type: 'object',
+  required: ['selectedCanvas'],
+  properties: {
+    project: {
+      description: 'Shared project data',
+      $ref: '#/components/schemas/Project',
+    },
+    canvasList: {
+      type: 'array',
+      description: 'Shared canvas list',
+      items: {
+        $ref: '#/components/schemas/Canvas',
+      },
+    },
+    canvas: {
+      description: 'Selected canvas detail',
+      $ref: '#/components/schemas/Canvas',
+    },
+    users: {
+      type: 'array',
+      description: 'Share users',
+      items: {
+        $ref: '#/components/schemas/ShareUser',
+      },
+    },
+  },
+} as const;
+
+export const $GetShareContentResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Shared content data',
+          $ref: '#/components/schemas/SharedContent',
         },
       },
     },
@@ -2242,6 +2405,10 @@ export const $SkillContextResourceItem = {
       description: 'Resource',
       $ref: '#/components/schemas/Resource',
     },
+    isCurrent: {
+      type: 'boolean',
+      description: 'Whether this resource is current',
+    },
     metadata: {
       type: 'object',
       description: 'Resource context metadata',
@@ -2249,21 +2416,25 @@ export const $SkillContextResourceItem = {
   },
 } as const;
 
-export const $SkillContextCollectionItem = {
+export const $SkillContextProjectItem = {
   type: 'object',
-  description: 'Skill context collection item',
+  description: 'Skill context project item',
   properties: {
-    collectionId: {
+    projectId: {
       type: 'string',
-      description: 'Collection ID',
+      description: 'Project ID',
     },
-    collection: {
-      description: 'Collection',
-      $ref: '#/components/schemas/Collection',
+    project: {
+      description: 'Project',
+      $ref: '#/components/schemas/Project',
+    },
+    isCurrent: {
+      type: 'boolean',
+      description: 'Whether this project is current',
     },
     metadata: {
       type: 'object',
-      description: 'Collection context metadata',
+      description: 'Project context metadata',
     },
   },
 } as const;
@@ -2279,6 +2450,10 @@ export const $SkillContextCanvasItem = {
     canvas: {
       description: 'Canvas',
       $ref: '#/components/schemas/Canvas',
+    },
+    isCurrent: {
+      type: 'boolean',
+      description: 'Whether this canvas is current',
     },
     metadata: {
       type: 'object',
@@ -2330,11 +2505,11 @@ export const $SkillContext = {
         $ref: '#/components/schemas/SkillContextResourceItem',
       },
     },
-    collections: {
+    projects: {
       type: 'array',
-      description: 'Context collections',
+      description: 'Context projects',
       items: {
-        $ref: '#/components/schemas/SkillContextCollectionItem',
+        $ref: '#/components/schemas/SkillContextProjectItem',
       },
     },
     canvases: {
@@ -2363,7 +2538,7 @@ export const $SkillContext = {
 
 export const $SkillContextKey = {
   type: 'string',
-  enum: ['resources', 'collections', 'canvases', 'contentList', 'urls'],
+  enum: ['resources', 'projects', 'canvases', 'contentList', 'urls'],
 } as const;
 
 export const $SelectionKey = {
@@ -2469,6 +2644,10 @@ export const $InvokeSkillRequest = {
     tplConfig: {
       description: 'Skill template config',
       $ref: '#/components/schemas/SkillTemplateConfig',
+    },
+    projectId: {
+      type: 'string',
+      description: 'Project ID (if not provided, new project will be created)',
     },
     skillId: {
       type: 'string',
@@ -2709,6 +2888,10 @@ export const $CreateConversationRequest = {
       description: 'Conversation title',
       example: 'My Conversation',
     },
+    projectId: {
+      type: 'string',
+      description: 'Project ID',
+    },
     locale: {
       type: 'string',
       description: 'Conversation locale',
@@ -2768,16 +2951,6 @@ export const $ListConversationResponse = {
       },
     },
   ],
-} as const;
-
-export const $ChatRequest = {
-  type: 'object',
-  properties: {
-    task: {
-      description: 'chat task config',
-      $ref: '#/components/schemas/ChatTask',
-    },
-  },
 } as const;
 
 export const $GetConversationDetailResponse = {
@@ -3021,7 +3194,7 @@ export const $SearchOptions = {
 
 export const $SearchDomain = {
   type: 'string',
-  enum: ['resource', 'canvas', 'collection', 'conversation', 'skill'],
+  enum: ['resource', 'canvas', 'project', 'conversation', 'skill'],
 } as const;
 
 export const $SearchMode = {
@@ -3078,9 +3251,23 @@ export const $SearchResultMeta = {
       description: 'Resource metadata',
       $ref: '#/components/schemas/ResourceMeta',
     },
-    collectionId: {
+    projectId: {
       type: 'string',
-      description: 'Collection ID',
+      description: 'Project ID',
+    },
+  },
+} as const;
+
+export const $SearchResultSnippet = {
+  type: 'object',
+  properties: {
+    text: {
+      type: 'string',
+      description: 'Search result content text',
+    },
+    highlightedText: {
+      type: 'string',
+      description: 'Search result highlighted content text with em html tags',
     },
   },
 } as const;
@@ -3101,11 +3288,15 @@ export const $SearchResult = {
       type: 'string',
       description: 'Search result title',
     },
-    content: {
+    highlightedTitle: {
+      type: 'string',
+      description: 'Search result highlighted title with em html tags',
+    },
+    snippets: {
       type: 'array',
       description: 'Search result content list with highlight marks',
       items: {
-        type: 'string',
+        $ref: '#/components/schemas/SearchResultSnippet',
       },
     },
     metadata: {
@@ -3120,7 +3311,7 @@ export const $SearchResult = {
     updatedAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Collection creation time',
+      description: 'Data update time',
     },
   },
 } as const;

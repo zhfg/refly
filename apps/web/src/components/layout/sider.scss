@@ -8,7 +8,6 @@
     height: 100%;
     box-sizing: border-box;
     .logo-box {
-      height: 78px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -55,12 +54,59 @@
   }
 
   .sider-menu-nav {
-    height: calc(100% - 78px - 55px - 8px);
+    height: calc(100% - 66px - 47px);
+    position: relative;
 
     .arco-menu-inner {
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+    }
+
+    .arco-menu-item {
+      height: 32px; // 设置每个元素高度为 32px
+      line-height: 32px;
+      font-size: 14px; // 设置字体大小为 14px
+    }
+
+    .recent-section {
+      color: rgba(0, 0, 0, 0.5);
+      font-size: 13px;
+
+      .arco-menu-item {
+        margin-bottom: 0;
+        font-size: 13px;
+        height: 28px;
+      }
+
+      .recent-section-title {
+        padding-left: 12px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        height: 28px;
+        box-sizing: border-box;
+
+        .recent-section-title-text {
+          font-weight: 500;
+        }
+
+        .recent-section-title-more {
+          font-size: 12px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: #00968f;
+          cursor: pointer;
+          &:hover {
+            font-weight: 600;
+          }
+        }
+      }
+
+      .arco-menu-item {
+        padding-left: 12px; // 调整缩进
+      }
     }
   }
 
@@ -71,7 +117,7 @@
   }
 
   .sider-menu-title {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   &.fixed {
@@ -81,7 +127,7 @@
 
   .logo-box {
     position: relative;
-    padding: 16px 12px 24px 12px;
+    padding: 16px 12px 12px 12px;
   }
 
   .logo {
@@ -124,9 +170,11 @@
     }
   }
 
-  .custom-menu-item:hover {
-    background-color: rgba(232, 232, 227) !important;
-    border-radius: 4px;
+  .custom-menu-item {
+    &:hover {
+      background-color: rgba(232, 232, 227) !important;
+      border-radius: 4px;
+    }
   }
 
   .setting-menu-item {
@@ -252,7 +300,24 @@
     background-color: transparent;
   }
 
+  .sider-menu-inner {
+    height: calc(100% - 118px);
+    overflow-y: auto;
+  }
+
+  .sider-menu-inner-collapse {
+    height: calc(100% - 118px - 36px);
+    overflow-y: auto;
+  }
+
   .sider-footer {
+    position: absolute;
+    bottom: 0;
+    width: calc(100% - 16px); // 根据 sider 宽度调整
+    background-color: #f3f3ee;
+    padding: 8px 0;
+    border-top: 1px solid #e8e8e2;
+
     .invite-member {
       margin-bottom: 36px;
       padding: 4px 0;

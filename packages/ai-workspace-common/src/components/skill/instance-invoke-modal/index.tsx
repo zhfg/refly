@@ -1,9 +1,5 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// components
-import { InstanceInvokeForm } from '@refly-packages/ai-workspace-common/components/skill/instance-invoke-form';
-// store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { SkillInstance } from '@refly/openapi-schema';
@@ -25,41 +21,33 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
   const [form] = Form.useForm();
 
   const onOk = async () => {
-    try {
-      const res = await form.validate();
+    const res = await form.validate();
 
-      const { input, context, tplConfig } = res;
-      const { contentList, urls } = context || {};
+    const { input, context, tplConfig } = res;
+    const { contentList, urls } = context || {};
 
-      try {
-        const { error: resultError } = await getClient().invokeSkill({
-          body: {
-            skillId: data.skillId,
-            input,
-            context: {
-              ...context,
-              contentList: contentList?.split(/\n\s*\n/),
-              urls: urls?.split(/\n\s*\n/),
-            },
-            tplConfig,
-          },
-        });
-        if (resultError) {
-          Message.error({ content: t('common.putErr') });
-        } else {
-          Message.success({ content: t('common.putSuccess') });
-        }
-      } catch (error) {
-        console.log(error);
-        Message.error({ content: t('common.putErr') });
-      }
-      setVisible(false);
+    const { error: resultError } = await getClient().invokeSkill({
+      body: {
+        skillId: data.skillId,
+        input,
+        context: {
+          ...context,
+          contentList: contentList?.split(/\n\s*\n/),
+          urls: urls?.split(/\n\s*\n/),
+        },
+        tplConfig,
+      },
+    });
+    setVisible(false);
 
-      if (postConfirmCallback) {
-        postConfirmCallback();
-      }
-    } catch (err) {
-      Message.error({ content: t('common.putErr') });
+    if (resultError) {
+      return;
+    }
+
+    Message.success({ content: t('common.putSuccess') });
+
+    if (postConfirmCallback) {
+      postConfirmCallback();
     }
   };
 
@@ -73,13 +61,13 @@ export const InstanceInvokeModal = (props: InstanceInvokeModalProps) => {
       onCancel={() => setVisible(false)}
     >
       <div className="instance-invoke-modal-content">
-        <InstanceInvokeForm
+        {/* <InstanceInvokeForm
           onOk={onOk}
           form={form}
           data={data}
           setVisible={setVisible}
           postConfirmCallback={postConfirmCallback}
-        />
+        /> */}
       </div>
     </Modal>
   );
