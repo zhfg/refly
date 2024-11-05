@@ -80,15 +80,9 @@ export const ProjectDetail = () => {
     initProject();
 
     return () => {
-      setCopilotSize(0);
+      setCopilotSize(500);
     };
   }, [projectId]);
-
-  useEffect(() => {
-    if (convId) {
-      setCopilotSize(500);
-    }
-  }, [convId]);
 
   return (
     <ProjectProvider context={{ projectId }}>
