@@ -391,41 +391,42 @@ export const SiderLayout = () => {
               <Divider style={{ margin: "8px 0" }} />
             )}
 
-            <div className="recent-section">
-              {recentProjects.length > 0 && (
-                <div className="recent-projects">
-                  {!collapse && (
-                    <div className="recent-section-title">
-                      <div className="recent-section-title-text">
-                        {t("loggedHomePage.siderMenu.recentProjects")}
+            {!collapse ? (
+              <div className="recent-section">
+                {recentProjects.length > 0 && (
+                  <div className="recent-projects">
+                    {!collapse && (
+                      <div className="recent-section-title">
+                        <div className="recent-section-title-text">
+                          {t("loggedHomePage.siderMenu.recentProjects")}
+                        </div>
                       </div>
-                      <div
-                        className="recent-section-title-more"
-                        onClick={() => {
-                          navigate(`/library?tab=project`)
-                        }}>
-                        {t("loggedHomePage.siderMenu.viewMore")}
-                        <IconRight
-                          className="arco-icon"
-                          style={{ fontSize: 12 }}
-                        />
-                      </div>
-                    </div>
-                  )}
+                    )}
 
-                  {recentProjects.map(project => (
-                    <MenuItem
-                      className="custom-menu-item"
-                      key={project.projectId}
-                      onClick={() => {
-                        jumpToProject({ projectId: project.projectId })
-                      }}>
-                      {project.title}
-                    </MenuItem>
-                  ))}
-                </div>
-              )}
-            </div>
+                    {recentProjects.map(project => (
+                      <MenuItem
+                        className="custom-menu-item"
+                        key={project.projectId}
+                        onClick={() => {
+                          jumpToProject({ projectId: project.projectId })
+                        }}>
+                        {project.title}
+                      </MenuItem>
+                    ))}
+                  </div>
+                )}
+                {recentProjects.length > 0 && (
+                  <div
+                    className="recent-section-title-more"
+                    onClick={() => {
+                      navigate(`/library?tab=project`)
+                    }}>
+                    {t("loggedHomePage.siderMenu.viewMore")}
+                    <IconRight className="arco-icon" style={{ fontSize: 12 }} />
+                  </div>
+                )}
+              </div>
+            ) : null}
           </div>
 
           <div className="sider-footer">

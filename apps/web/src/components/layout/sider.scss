@@ -75,7 +75,8 @@
       .arco-menu-item {
         margin-bottom: 0;
         font-size: 13px;
-        height: 28px;
+        height: 32px;
+        line-height: 32px;
       }
 
       .recent-section-title {
@@ -90,22 +91,23 @@
         .recent-section-title-text {
           font-weight: 500;
         }
-
-        .recent-section-title-more {
-          font-size: 12px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          color: #00968f;
-          cursor: pointer;
-          &:hover {
-            font-weight: 600;
-          }
-        }
       }
 
       .arco-menu-item {
         padding-left: 12px; // 调整缩进
+      }
+
+      .recent-section-title-more {
+        font-size: 12px;
+        display: flex;
+        height: 32px;
+        align-items: center;
+        // color: #00968f;
+        cursor: pointer;
+        padding-left: 12px;
+        &:hover {
+          font-weight: 600;
+        }
       }
     }
   }
