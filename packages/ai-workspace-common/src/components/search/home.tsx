@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Command } from 'cmdk';
-import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { useSearchStore, useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 import { IconMessage, IconApps, IconFolderAdd } from '@arco-design/web-react/icon';
 
 import './index.scss';
@@ -28,7 +28,7 @@ export function Home({
   searchValue: string;
   setValue: (val: string) => void;
 }) {
-  const searchStore = useSearchStore();
+  const setIsSearchOpen = useSearchStoreShallow((state) => state.setIsSearchOpen);
   const { triggerSkillQuickAction } = useBigSearchQuickAction();
   const skillStore = useSkillStore();
   const { t } = useTranslation();
@@ -46,7 +46,7 @@ export function Home({
           activeValue={activeValue}
           onSelect={() => {
             triggerSkillQuickAction(searchValue);
-            searchStore.setIsSearchOpen(false);
+            setIsSearchOpen(false);
             skillStore.setSelectedSkillInstance(null);
           }}
         >

@@ -220,9 +220,7 @@ export const BaseSearchAndSelector = ({
       value={activeValue}
       onValueChange={setActiveValue}
       ref={ref}
-      filter={(value, search, keywords) => {
-        return defaultFilter(value, search, keywords);
-      }}
+      filter={() => 1}
       className={classNames(showList ? 'search-active' : '')}
       onCompositionStart={(e) => console.log('composition start')}
       onCompositionUpdate={(e) => console.log('composition update')}

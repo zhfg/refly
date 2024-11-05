@@ -3,7 +3,6 @@ import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 import { IconMessage, IconRobot } from '@arco-design/web-react/icon';
 import { useDebouncedCallback } from 'use-debounce';
-import { defaultFilter } from './cmdk/filter';
 
 import './index.scss';
 import { Home } from './home';
@@ -191,7 +190,7 @@ export const Search = (props: SearchProps) => {
     {
       domain: 'skill',
       heading: t('loggedHomePage.quickSearch.skills'),
-      action: false, // 是否开启 action
+      action: false,
       data: searchStore.searchedSkills || [],
       icon: <IconRobot style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
@@ -206,10 +205,10 @@ export const Search = (props: SearchProps) => {
     },
     {
       domain: 'note',
-      heading: t('loggedHomePage.quickSearch.note'),
+      heading: t('loggedHomePage.quickSearch.canvas'),
       action: true,
       actionHeading: {
-        create: t('loggedHomePage.quickSearch.newNote'),
+        create: t('loggedHomePage.quickSearch.newCanvas'),
       },
       data: searchStore.searchedCanvases || [],
       icon: <IconCanvas style={{ fontSize: 12 }} />,
@@ -234,10 +233,10 @@ export const Search = (props: SearchProps) => {
     },
     {
       domain: 'readResources',
-      heading: t('loggedHomePage.quickSearch.readResource'),
+      heading: t('loggedHomePage.quickSearch.resource'),
       action: true,
       actionHeading: {
-        create: t('loggedHomePage.quickSearch.newReadResource'),
+        create: t('loggedHomePage.quickSearch.newResource'),
       },
       data: searchStore.searchedReadResources || [],
       icon: <IconResource style={{ fontSize: 12 }} />,
@@ -257,10 +256,10 @@ export const Search = (props: SearchProps) => {
     },
     {
       domain: 'knowledgeBases',
-      heading: t('loggedHomePage.quickSearch.collection'),
+      heading: t('loggedHomePage.quickSearch.project'),
       action: true,
       actionHeading: {
-        create: t('loggedHomePage.quickSearch.newCollection'),
+        create: t('loggedHomePage.quickSearch.newProject'),
       },
       data: searchStore.searchedProjects || [],
       icon: <IconProject style={{ fontSize: 12 }} />,
@@ -319,17 +318,10 @@ export const Search = (props: SearchProps) => {
         value={value}
         onValueChange={setValue}
         ref={ref}
-        filter={(value, search, keywords) => {
-          if (value?.startsWith('refly-built-in')) {
-            return 1;
-          }
-
-          return defaultFilter(value, search, keywords);
+        filter={() => {
+          return 1; // we can safely rely on the server filter
         }}
         className={classNames(showList ? 'search-active' : '')}
-        // onCompositionStart={() => setIsComposing(true)}
-        // onCompositionUpdate={() => {}}
-        // onCompositionEnd={() => setIsComposing(false)}
         onKeyDownCapture={(e: React.KeyboardEvent) => {
           if (e.key === 'Enter' && !isComposing) {
             bounce();
@@ -366,9 +358,7 @@ export const Search = (props: SearchProps) => {
               onSearchValueChange(val);
             }
             setSearchValue(val);
-            if (!isComposing) {
-              handleBigSearchValueChange(val, activePage);
-            }
+            handleBigSearchValueChange(val, activePage);
           }}
         />
         {showList && (
