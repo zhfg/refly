@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { LOCALE } from '@refly/common-types';
+import cn from 'classnames';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 import { Segmented, Skeleton, Button, Divider, Input, Empty } from 'antd';
@@ -257,14 +258,16 @@ export const ProjectDirectory = (props: {
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
-      backgroundColor: activeTab?.key === item.id ? '#f0f5ff' : '',
     };
 
     return (
       <div
         ref={setNodeRef}
         style={style}
-        className="flex items-center p-1 m-2 text-sm cursor-pointer hover:bg-gray-100 group"
+        className={cn(
+          'flex items-center p-1 m-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 group',
+          activeTab?.key === item.id && 'bg-gray-100',
+        )}
       >
         <div className="flex items-center grow" onClick={onItemClick}>
           <div className="flex items-center mx-2">

@@ -382,15 +382,15 @@
     "searchEverything": "搜索任何内容",
     "quickSearch": {
       "skills": "技能",
-      "note": "笔记",
-      "newNote": "创建新笔记",
-      "readResource": "阅读资源",
-      "newReadResource": "添加阅读资源",
-      "collection": "知识库",
-      "newCollection": "创建新知识库",
+      "canvas": "稿布",
+      "newCanvas": "创建新稿布",
+      "resource": "资源",
+      "newResource": "添加资源",
+      "project": "项目",
+      "newProject": "创建新项目",
       "thread": "会话",
       "newThread": "创建新会话",
-      "placeholderForHome": "直接提问或搜索技能，笔记，资源，知识库，会话...",
+      "placeholderForHome": "直接提问或搜索稿布，资源，项目，会话...",
       "placeholderForSkillExecute": "输入你想要提问的问题，并基于此问题执行技能",
       "placeholderForWeblink": "搜索 {{domain}}...",
       "home": {
@@ -939,6 +939,7 @@
     "selectedSkillHeader": {
       "title": "和 {{name}} 聊聊"
     },
+    "addContext": "添加上下文",
     "baseContextCard": {
       "title": "环境上下文快捷操作",
       "filterTitle": "过滤环境上下文",
@@ -1065,6 +1066,10 @@
       "title": "技能配置",
       "errorTipTitle": "发送失败",
       "errorTip": "请调整技能配置后再重试"
+    },
+    "projectSelector": {
+      "title": "选择项目",
+      "tip": "所选项目将用于保存稿布，若未选择将自动新建项目。"
     },
     "webSearch": {
       "title": "全网搜索",

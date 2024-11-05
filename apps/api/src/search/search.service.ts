@@ -120,7 +120,8 @@ export class SearchService {
       id: result.resourceId,
       domain: 'resource',
       title: result.title,
-      content: [result.contentPreview],
+      highlightedTitle: result.title,
+      snippets: [{ text: result.contentPreview, highlightedText: result.contentPreview }],
       metadata: {
         resourceType: result.resourceType as ResourceType,
       },
@@ -138,8 +139,14 @@ export class SearchService {
     return hits.map((hit) => ({
       id: hit._id,
       domain: 'resource',
-      title: hit.highlight?.title?.[0] || hit._source.title,
-      content: hit.highlight?.content || [hit._source.content],
+      title: hit._source.title,
+      highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
+      snippets: [
+        {
+          text: hit._source.content,
+          highlightedText: hit.highlight?.content?.[0] || hit._source.content,
+        },
+      ],
       metadata: {
         // TODO: confirm if metadata is used
       },
@@ -176,7 +183,8 @@ export class SearchService {
       id: node.resourceId,
       domain: 'resource',
       title: node.title,
-      content: [node.content],
+      highlightedTitle: node.title,
+      snippets: [{ text: node.content, highlightedText: node.content }],
       metadata: {
         resourceMeta: resourceMap.get(node.resourceId),
         resourceType: node.resourceType,
@@ -219,7 +227,10 @@ export class SearchService {
       id: canvas.canvasId,
       domain: 'canvas',
       title: canvas.title,
-      content: [canvas.content ? canvas.content.slice(0, 250) + '...' : ''],
+      highlightedTitle: canvas.title,
+      snippets: [
+        { text: canvas.content ? canvas.content.slice(0, 250) + '...' : '', highlightedText: '' },
+      ],
       createdAt: canvas.createdAt.toJSON(),
       updatedAt: canvas.updatedAt.toJSON(),
       metadata: {
@@ -234,8 +245,14 @@ export class SearchService {
     return hits.map((hit) => ({
       id: hit._id,
       domain: 'canvas',
-      title: hit.highlight?.title?.[0] || hit._source.title,
-      content: hit.highlight?.content || [hit._source.content],
+      title: hit._source.title,
+      highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
+      snippets: [
+        {
+          text: hit._source.content,
+          highlightedText: hit.highlight?.content?.[0] || hit._source.content,
+        },
+      ],
       createdAt: hit._source.createdAt,
       updatedAt: hit._source.updatedAt,
       metadata: {
@@ -261,7 +278,8 @@ export class SearchService {
       id: node.canvasId,
       domain: 'canvas',
       title: node.title,
-      content: [node.content],
+      highlightedTitle: node.title,
+      snippets: [{ text: node.content, highlightedText: node.content }],
       metadata: {
         projectId: node.projectId,
       },
@@ -302,6 +320,8 @@ export class SearchService {
       id: project.projectId,
       domain: 'project',
       title: project.title,
+      highlightedTitle: project.title,
+      snippets: [{ text: project.description, highlightedText: project.description }],
       createdAt: project.createdAt.toJSON(),
       updatedAt: project.updatedAt.toJSON(),
     }));
@@ -317,8 +337,14 @@ export class SearchService {
     return hits.map((hit) => ({
       id: hit._id,
       domain: 'project',
-      title: hit.highlight?.title?.[0] || hit._source.title,
-      content: hit.highlight?.description || [hit._source.description],
+      title: hit._source.title,
+      highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
+      snippets: [
+        {
+          text: hit._source.description,
+          highlightedText: hit.highlight?.description?.[0] || hit._source.description,
+        },
+      ],
       createdAt: hit._source.createdAt,
       updatedAt: hit._source.updatedAt,
     }));
@@ -341,7 +367,8 @@ export class SearchService {
       id: conversation.convId,
       domain: 'conversation',
       title: conversation.title,
-      content: [conversation.lastMessage],
+      highlightedTitle: conversation.title,
+      snippets: [{ text: conversation.lastMessage, highlightedText: conversation.lastMessage }],
       createdAt: conversation.createdAt.toJSON(),
       updatedAt: conversation.updatedAt.toJSON(),
     }));
@@ -357,8 +384,14 @@ export class SearchService {
     return hits.map((hit) => ({
       id: hit._source.convId,
       domain: 'conversation',
-      title: hit.highlight?.convTitle?.[0] || hit._source.convTitle,
-      content: hit.highlight?.content || [hit._source.content],
+      title: hit._source.convTitle,
+      highlightedTitle: hit.highlight?.convTitle?.[0] || hit._source.convTitle,
+      snippets: [
+        {
+          text: hit._source.content,
+          highlightedText: hit.highlight?.content?.[0] || hit._source.content,
+        },
+      ],
       createdAt: hit._source.createdAt,
       updatedAt: hit._source.updatedAt,
     }));
@@ -374,6 +407,8 @@ export class SearchService {
       id: skill.skillId,
       domain: 'skill',
       title: skill.displayName,
+      highlightedTitle: skill.displayName,
+      snippets: [{ text: skill.description, highlightedText: skill.description }],
       createdAt: skill.createdAt.toJSON(),
       updatedAt: skill.updatedAt.toJSON(),
     }));
@@ -389,8 +424,14 @@ export class SearchService {
     return hits.map((hit) => ({
       id: hit._id,
       domain: 'skill',
-      title: hit.highlight?.displayName?.[0] || hit._source.displayName,
-      content: hit.highlight?.description || [hit._source.description],
+      title: hit._source.displayName,
+      highlightedTitle: hit.highlight?.displayName?.[0] || hit._source.displayName,
+      snippets: [
+        {
+          text: hit._source.description,
+          highlightedText: hit.highlight?.description?.[0] || hit._source.description,
+        },
+      ],
       createdAt: hit._source.createdAt,
       updatedAt: hit._source.updatedAt,
     }));

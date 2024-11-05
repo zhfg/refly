@@ -69,7 +69,7 @@ import {
 } from '@/knowledge/knowledge.dto';
 import { ConversationService } from '@/conversation/conversation.service';
 import { MessageAggregator } from '@/utils/message';
-import { SkillEvent } from '@refly-packages/common-types';
+import { CanvasIntentType, SkillEvent } from '@refly-packages/common-types';
 import { ConfigService } from '@nestjs/config';
 import { SearchService } from '@/search/search.service';
 import { RAGService } from '@/rag/rag.service';
@@ -698,11 +698,26 @@ export class SkillService {
     const msgAggregator = new MessageAggregator();
     const config = await this.buildInvokeConfig(user, {
       ...data,
-      eventListener: (data: SkillEvent) => {
+      eventListener: async (data: SkillEvent) => {
         if (aborted) {
           this.logger.warn(`skill invocation aborted, ignore event: ${JSON.stringify(data)}`);
           return;
         }
+
+        // Update conversation projectId if intentMatcher result is generateCanvas
+        if (data.event === 'structured_data' && data.structuredDataKey === 'intentMatcher') {
+          const content = JSON.parse(data.content || '{}');
+          const intentType = content.type;
+          const projectId = content.projectId;
+
+          if (intentType === CanvasIntentType.GenerateCanvas && projectId && conversation?.convId) {
+            await this.prisma.conversation.update({
+              where: { convId: conversation?.convId },
+              data: { projectId },
+            });
+          }
+        }
+
         if (res) {
           writeSSEResponse(res, data);
         }

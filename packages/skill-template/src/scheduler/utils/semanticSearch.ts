@@ -604,7 +604,7 @@ export async function knowledgeBaseSearchGetRelevantChunks(
   );
   const relevantChunks = res?.data?.map((item) => ({
     id: item.id,
-    pageContent: item?.content?.[0] || '',
+    pageContent: item?.snippets?.map((s) => s.text).join('\n\n') || '',
     metadata: {
       ...item.metadata,
       title: item.title,

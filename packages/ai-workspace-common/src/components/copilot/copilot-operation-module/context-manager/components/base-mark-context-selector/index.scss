@@ -169,9 +169,9 @@
     font-family: var(--font-sans);
     border: none;
     width: 100%;
-    font-size: 10px;
+    font-size: 12px;
     padding-left: 4px;
-    height: 24px;
+    height: 32px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-color: rgba(0, 0, 0, 0.1) !important;
     border-radius: 4px;
@@ -209,8 +209,8 @@
     content-visibility: auto;
 
     cursor: pointer;
-    height: 24px;
-    font-size: 10px;
+    height: 32px;
+    font-size: 12px;
     display: flex;
     gap: 8px;
 
@@ -260,6 +260,7 @@
 
   [cmdk-vercel-shortcuts] {
     display: flex;
+    align-items: center;
     margin-left: auto;
     gap: 8px;
 
@@ -280,14 +281,14 @@
   }
 
   [cmdk-footer] {
-    height: 24px;
+    height: 32px;
     width: 100%;
     position: absolute;
     background: #fcfcf9;
     bottom: 0;
     border-top: 1px solid var(--gray6);
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
     .cmdk-footer-inner {
       height: 100%;
       width: 100%;
@@ -300,7 +301,7 @@
     .cmdk-footer-hint {
       display: flex;
       align-items: center;
-      font-size: 10px;
+      font-size: 12px;
 
       [cmdk-vercel-shortcuts] {
         display: flex;
@@ -313,7 +314,7 @@
           width: 12px;
           height: 12px;
           line-height: 12px;
-          font-size: 10px;
+          font-size: 12px;
 
           &:not(:first-child) {
             margin-left: 2px;
@@ -328,8 +329,8 @@
       align-items: center;
 
       button {
-        font-size: 10px;
-        height: 18px;
+        font-size: 12px;
+        height: 22px;
         border-radius: 4px;
       }
     }
@@ -573,14 +574,14 @@
   border-left: 2px solid transparent;
 
   .search-res-icon {
-    font-size: 10px;
+    font-size: 12px;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
 
     svg {
-      font-size: 10px;
+      font-size: 12px;
     }
   }
 
@@ -590,13 +591,13 @@
     .search-res-title {
       word-wrap: normal;
       height: 100%;
-      line-height: 24px;
+      line-height: 32px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       color: rgba(0, 0, 0, 0.8);
-      font-weight: 500;
-      font-size: 10px;
+      font-weight: 400;
+      font-size: 12px;
       cursor: default;
 
       &:hover {

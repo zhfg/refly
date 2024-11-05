@@ -5,11 +5,11 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import { BaseMarkContextSelector } from '../base-mark-context-selector';
 import './index.scss';
 import { Mark } from '@refly/common-types';
-import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useTranslation } from 'react-i18next';
 import { useProcessContextItems } from '../../hooks/use-process-context-items';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { backendBaseMarkTypes, BaseMarkType, frontendBaseMarkTypes } from '@refly/common-types';
+import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 export const AddBaseMarkContext = () => {
   const [popoverVisible, setPopoverVisible] = useState(false);
@@ -75,11 +75,14 @@ export const AddBaseMarkContext = () => {
         >
           <Tooltip content={t('knowledgeBase.context.addContext')} getPopupContainer={getPopupContainer}>
             <Button
-              icon={<IconPlus style={{ fontSize: 10 }} />}
+              icon={<IconPlus />}
               size="mini"
               type="outline"
-              style={{ fontSize: 10, height: 18, borderRadius: 4, borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
-            />
+              className="text-xs h-6 rounded border border-gray-300"
+              style={{ borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
+            >
+              {selectedItems?.length === 0 ? t('copilot.addContext') : null}
+            </Button>
           </Tooltip>
         </Popover>
       </div>

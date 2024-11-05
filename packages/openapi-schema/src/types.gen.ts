@@ -2232,6 +2232,17 @@ export type SearchResultMeta = {
   projectId?: string;
 };
 
+export type SearchResultSnippet = {
+  /**
+   * Search result content text
+   */
+  text?: string;
+  /**
+   * Search result highlighted content text with em html tags
+   */
+  highlightedText?: string;
+};
+
 export type SearchResult = {
   /**
    * Search result ID to navigate to
@@ -2246,9 +2257,13 @@ export type SearchResult = {
    */
   title: string;
   /**
+   * Search result highlighted title with em html tags
+   */
+  highlightedTitle?: string;
+  /**
    * Search result content list with highlight marks
    */
-  content?: Array<string>;
+  snippets?: Array<SearchResultSnippet>;
   /**
    * Search result metadata
    */

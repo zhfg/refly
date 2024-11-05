@@ -3865,6 +3865,15 @@ components:
         projectId:
           type: string
           description: Project ID
+    SearchResultSnippet:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Search result content text
+        highlightedText:
+          type: string
+          description: Search result highlighted content text with em html tags
     SearchResult:
       type: object
       required:
@@ -3881,11 +3890,14 @@ components:
         title:
           type: string
           description: Search result title
-        content:
+        highlightedTitle:
+          type: string
+          description: Search result highlighted title with em html tags
+        snippets:
           type: array
           description: Search result content list with highlight marks
           items:
-            type: string
+            $ref: '#/components/schemas/SearchResultSnippet'
         metadata:
           description: Search result metadata
           $ref: '#/components/schemas/SearchResultMeta'

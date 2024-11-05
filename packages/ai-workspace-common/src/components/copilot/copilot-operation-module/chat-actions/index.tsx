@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button, Dropdown, Menu, FormInstance, Checkbox } from '@arco-design/web-react';
 
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
@@ -9,12 +10,14 @@ import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/
 
 // components
 import { ModelSelector } from './model-selector';
+import { ProjectSelector } from './project-selector';
 
 // styles
 import './index.scss';
 import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
+import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
 
 interface ChatActionsProps {
   form?: FormInstance;
@@ -26,6 +29,7 @@ export const ChatActions = (props: ChatActionsProps) => {
   const { handleSendMessage, handleAbort } = props;
 
   const { t } = useTranslation();
+  const { projectId: envProjectId } = useProjectContext();
 
   // stores
   const chatStore = useChatStoreShallow((state) => ({
@@ -80,6 +84,7 @@ export const ChatActions = (props: ChatActionsProps) => {
             <span className="chat-action-item-text">{t('copilot.knowledgeBaseSearch.title')}</span>
           </div>
         ) : null}
+        {!envProjectId ? <ProjectSelector /> : null}
       </div>
       <div className="right-actions">
         {messageStateStore?.pending ? (

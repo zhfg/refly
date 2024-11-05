@@ -45,7 +45,7 @@ const mapSearchResultToMark = (searchResult: SearchResult): Mark => {
     id: searchResult.id,
     entityId: searchResult.id,
     type: searchResult.domain,
-    data: (searchResult?.content || []).join('\n'),
+    data: (searchResult?.snippets?.map((snippet) => snippet.text) || []).join('\n'),
     title: searchResult.title,
   };
 
@@ -199,7 +199,7 @@ export const BaseSearchAndSelector = ({
     heading: item.title,
     data: item,
     type: item.type,
-    icon: getTypeIcon(item.type, { fontSize: 10, width: 10, height: 10 }),
+    icon: getTypeIcon(item.type, { width: 12, height: 12 }),
     onItemClick: (item: Mark) => {
       onSelect(item);
     },
@@ -220,9 +220,7 @@ export const BaseSearchAndSelector = ({
       value={activeValue}
       onValueChange={setActiveValue}
       ref={ref}
-      filter={(value, search, keywords) => {
-        return defaultFilter(value, search, keywords);
-      }}
+      filter={() => 1}
       className={classNames(showList ? 'search-active' : '')}
       onCompositionStart={(e) => console.log('composition start')}
       onCompositionUpdate={(e) => console.log('composition update')}

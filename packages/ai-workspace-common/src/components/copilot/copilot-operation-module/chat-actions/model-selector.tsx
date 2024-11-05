@@ -1,6 +1,7 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Dropdown, Menu, Tag, Tooltip } from '@arco-design/web-react';
+import { Button, Dropdown, MenuProps, Tag, Tooltip } from 'antd';
+import {} from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import { IconDown } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
@@ -23,6 +24,7 @@ const providerIcons = {
 export const ModelSelector = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const { userProfile } = useUserStoreShallow((state) => ({
     userProfile: state.userProfile,
@@ -51,55 +53,66 @@ export const ModelSelector = () => {
   };
   const planTier = userProfile?.subscription?.planType || 'free';
 
-  const droplist = useMemo(() => {
-    return (
-      <Menu
-        onClickMenuItem={(key) => {
-          const model = modelList.find((model) => model.name === key);
-          if (model) {
-            setSelectedModel(model);
-          }
-        }}
-      >
-        {modelList.map((model) => {
-          const disabled = isModelDisabled(tokenUsage, model);
-          const hintText = disabled ? t(`copilot.modelSelector.quotaExceeded.${model.tier}.${planTier}`) : '';
-          const hoverContent =
-            planTier === 'free' ? (
-              <Button type="primary" size="mini" onClick={() => setSubscribeModalVisible(true)}>
-                {hintText}
-              </Button>
-            ) : (
-              <Button size="mini" onClick={() => navigate('/settings?tab=subscription')}>
-                {hintText}
-              </Button>
-            );
-
-          return (
-            <Menu.Item key={model.name} disabled={disabled} className="text-xs h-8 leading-8">
-              <Tooltip position="right" disabled={!disabled} content={hoverContent} color="white">
-                <div className="flex items-center">
-                  <img className="w-4 h-4 mr-2" src={providerIcons[model.provider]} alt={model.provider} />
-                  {model.label + ' '}
-                  {model.tier === 't1' && planTier === 'free' && (
-                    <Tag
-                      color="orange"
-                      size="small"
-                      className="ml-1 cursor-pointer"
-                      style={{ fontSize: '10px' }}
-                      onClick={() => setSubscribeModalVisible(true)}
-                    >
-                      PRO
-                    </Tag>
-                  )}
-                </div>
-              </Tooltip>
-            </Menu.Item>
-          );
-        })}
-      </Menu>
+  const droplist: MenuProps['items'] = modelList.map((model) => {
+    const disabled = isModelDisabled(tokenUsage, model);
+    const hintText = disabled ? t(`copilot.modelSelector.quotaExceeded.${model.tier}.${planTier}`) : '';
+    const hintBtn =
+      planTier === 'free' ? (
+        <Button
+          type="text"
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            setDropdownOpen(false);
+            setSubscribeModalVisible(true);
+          }}
+        >
+          {hintText}
+        </Button>
+      ) : (
+        <Button
+          type="text"
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            setDropdownOpen(false);
+            navigate('/settings?tab=subscription');
+          }}
+        >
+          {hintText}
+        </Button>
+      );
+    const modelItem = (
+      <div className="w-full">
+        <div className="flex items-center text-xs">
+          <img className="w-4 h-4 mr-2" src={providerIcons[model.provider]} alt={model.provider} />
+          {model.label + ' '}
+          {model.tier === 't1' && planTier === 'free' && (
+            <Tag
+              color="orange"
+              className="ml-1 cursor-pointer"
+              style={{ fontSize: '10px' }}
+              onClick={() => setSubscribeModalVisible(true)}
+            >
+              PRO
+            </Tag>
+          )}
+        </div>
+      </div>
     );
-  }, [modelList, tokenUsage]);
+
+    return {
+      key: model.name,
+      label: disabled ? (
+        <Tooltip placement="right" title={hintBtn} color="white">
+          {modelItem}
+        </Tooltip>
+      ) : (
+        modelItem
+      ),
+      disabled,
+    };
+  });
 
   const fetchModelList = async () => {
     try {
@@ -155,7 +168,21 @@ export const ModelSelector = () => {
   }, [selectedModel, tokenUsage]);
 
   return (
-    <Dropdown droplist={droplist} trigger="click" getPopupContainer={getPopupContainer}>
+    <Dropdown
+      menu={{
+        items: droplist,
+        onClick: ({ key }) => {
+          const model = modelList.find((model) => model.name === key);
+          if (model) {
+            setSelectedModel(model);
+          }
+        },
+      }}
+      trigger={['click']}
+      open={dropdownOpen}
+      onOpenChange={setDropdownOpen}
+      getPopupContainer={getPopupContainer}
+    >
       <span className={classNames('model-selector', 'chat-action-item')}>
         <IconDown />
         {selectedModel ? (

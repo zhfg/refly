@@ -5,7 +5,7 @@ import { Canvas } from '@refly/openapi-schema';
 
 import './index.scss';
 import { useCookie } from 'react-use';
-import { Input, Popover, Spin, Switch } from '@arco-design/web-react';
+import { Input, Popover, Spin } from '@arco-design/web-react';
 import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock, HiOutlineShare } from 'react-icons/hi2';
 import { IconQuote } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useTranslation } from 'react-i18next';
@@ -46,13 +46,7 @@ import { ToC } from './ToC';
 import { IconBook } from '@arco-design/web-react/icon';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 import { Button, Divider, message } from 'antd';
-import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
-import { zhMissingContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-missing';
-import { zhLsfContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-lsf';
-import { enInvestMemoContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/en-invest-memo';
-import { zhReactContent } from '@refly-packages/ai-workspace-common/components/project-detail/canvas/fixtures/zh-react';
-import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
-import { MarkType } from '@refly/common-types';
+import { useProjectStore, useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
@@ -336,7 +330,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
   const [token] = useCookie('_refly_ai_sid');
   const processorRef = useRef<TokenStreamProcessor>();
 
-  const canvasStore = useCanvasStore((state) => ({
+  const canvasStore = useCanvasStoreShallow((state) => ({
     currentCanvas: state.currentCanvas,
     canvasServerStatus: state.canvasServerStatus,
     updateCurrentCanvas: state.updateCurrentCanvas,
@@ -544,11 +538,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
 
         processorRef.current.setEditor(editorRef.current);
         try {
-          // console.log('streamCanvasContent', JSON.stringify({ content }));
           processorRef.current.process(content);
-          // setTimeout(() => {
-          //   scrollToBottom();
-          // });
         } catch (error) {
           console.error('streamCanvasContent error', error);
         }
@@ -660,7 +650,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
 
 export const CanvasStatusBar = () => {
   const { currentCanvas, updateCurrentCanvas, canvasServerStatus, noteCharsCount, noteSaveStatus, editor, tocItems } =
-    useCanvasStore((state) => ({
+    useCanvasStoreShallow((state) => ({
       currentCanvas: state.currentCanvas,
       updateCurrentCanvas: state.updateCurrentCanvas,
       canvasServerStatus: state.canvasServerStatus,
@@ -800,11 +790,20 @@ export const CanvasEditorHeader = (props: { projectId: string; canvasId: string 
   const tab = tabsMap[projectId]?.find((tab) => tab.key === canvasId);
 
   const onTitleChange = (newTitle: string) => {
-    updateCurrentCanvas({ ...useCanvasStore.getState().currentCanvas, title: newTitle });
-    updateProjectDirItem(projectId, 'canvases', canvasId, { title: newTitle });
+    const currentCanvas = useCanvasStore.getState().currentCanvas;
+    const tabsMap = useProjectStore.getState().projectTabs;
+
+    if (!currentCanvas) {
+      return;
+    }
+
+    updateCurrentCanvas({ ...currentCanvas, title: newTitle });
+    updateProjectDirItem(projectId, 'canvases', currentCanvas.canvasId, { title: newTitle });
+
+    const tab = tabsMap[projectId]?.find((tab) => tab.key === currentCanvas.canvasId);
 
     if (tab) {
-      handleUpdateTab(projectId, canvasId, {
+      handleUpdateTab(projectId, currentCanvas.canvasId, {
         ...tab,
         title: newTitle,
       });
@@ -819,7 +818,7 @@ export const CanvasEditorHeader = (props: { projectId: string; canvasId: string 
     };
   }, []);
 
-  const title = tab?.title || currentCanvas?.title;
+  const title = currentCanvas?.title || tab?.title;
 
   return (
     <div className="w-full">
@@ -843,13 +842,12 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
   const {
     currentCanvas: canvas,
     isRequesting,
-    newNoteCreating,
     canvasServerStatus,
     updateCurrentCanvas,
     updateIsRequesting,
     updateCanvasServerStatus,
     resetState,
-  } = useCanvasStore((state) => ({
+  } = useCanvasStoreShallow((state) => ({
     currentCanvas: state.currentCanvas,
     isRequesting: state.isRequesting,
     newNoteCreating: state.newCanvasCreating,
@@ -868,7 +866,7 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
   }, []);
 
   useEffect(() => {
-    updateCurrentCanvas(null);
+    // updateCurrentCanvas(null);
 
     const fetchData = async () => {
       updateIsRequesting(true);
@@ -881,14 +879,14 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
         updateIsRequesting(false);
       }
     };
-    if (canvasId) {
+    if (canvasId && canvas?.canvasId !== canvasId) {
       fetchData();
     }
 
     return () => {
       updateIsRequesting(false);
     };
-  }, [canvasId]);
+  }, [canvasId, canvas?.canvasId]);
 
   const debouncedUpdateCanvas = useDebouncedCallback(async (canvas: Canvas) => {
     const res = await getClient().updateCanvas({

@@ -291,8 +291,8 @@
       "contextRequiredTip": "Please select at least 1 {{type}}",
       "contextLimitTip": "{{type}} is limit to {{limit}} , and you have selected {{currentCount}}.",
       "popoverSelector": {
-        "webPlaceholder": "Search notes, resources, or knowledge bases...",
-        "extensionPlaceholder": "Search web pages, notes, resources, or knowledge bases...",
+        "webPlaceholder": "Search canvases, resources, or projects...",
+        "extensionPlaceholder": "Search web pages, canvases, resources, or projects...",
         "footer": {
           "navigate": "Navigate",
           "toggle": "Toggle",
@@ -383,15 +383,15 @@
     "searchEverything": "Search",
     "quickSearch": {
       "skills": "Skills",
-      "note": "Notes",
-      "newNote": "Create New Note",
-      "readResource": "Read Resources",
-      "newReadResource": "Add Read Resource",
-      "collection": "Collections",
-      "newCollection": "Create New Collection",
+      "canvas": "Canvases",
+      "newCanvas": "Create New Canvas",
+      "resource": "Resources",
+      "newResource": "Add Resource",
+      "project": "Projects",
+      "newProject": "Create New Project",
       "thread": "Threads",
-      "newThread": "Create New Thread",
-      "placeholderForHome": "Ask a question or search for skills, notes, resources, collections, and threads...",
+      "newThread": "New Thread",
+      "placeholderForHome": "Ask a question or search for canvases, resources, projects, and threads...",
       "placeholderForSkillExecute": "Enter the question you want to ask and execute the skill based on this question",
       "placeholderForWeblink": "Search {{domain}}...",
       "home": {
@@ -927,6 +927,7 @@
     "selectedSkillHeader": {
       "title": "Chat with {{name}}"
     },
+    "addContext": "Add Context",
     "baseContextCard": {
       "title": "Environment Context Quick Actions",
       "filterTitle": "Filter Environment Context",
@@ -1054,13 +1055,17 @@
       "errorTipTitle": "Send Failed",
       "errorTip": "Please adjust the skill configuration and try again"
     },
+    "projectSelector": {
+      "title": "Select Project",
+      "tip": "Selected project will be used to save the canvas. If no project is selected, a new one will be created automatically."
+    },
     "webSearch": {
       "title": "Web Search",
       "enable": "Enable",
       "disable": "Disable"
     },
     "knowledgeBaseSearch": {
-      "title": "Knowledge Base Search",
+      "title": "Library Search",
       "enable": "Enable",
       "disable": "Disable"
     },
