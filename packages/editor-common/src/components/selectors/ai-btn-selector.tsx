@@ -29,16 +29,16 @@ export const AIBtnSelector = ({ open, onOpenChange }: AIBtnSelectorProps) => {
     <Popover modal={true} open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
         <Button
-          className="gap-1 text-purple-500 rounded-none"
+          className="gap-1 rounded-none text-primary text-primary-600"
           variant="ghost"
           size="sm"
           onClick={() => onOpenChange(true)}
         >
-          <Magic className="w-5 h-5" />
+          <Magic className="w-4 h-4" />
           Ask AI
         </Button>
       </PopoverTrigger>
-      {open && (
+      {/* {open && (
         <PopoverContent
           align="start"
           className="p-0 w-[350px]"
@@ -48,7 +48,7 @@ export const AIBtnSelector = ({ open, onOpenChange }: AIBtnSelectorProps) => {
         >
           <AISelector open={open} onOpenChange={onOpenChange} />
         </PopoverContent>
-      )}
+      )} */}
     </Popover>
   );
 };

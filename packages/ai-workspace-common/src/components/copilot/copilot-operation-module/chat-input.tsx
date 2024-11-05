@@ -1,7 +1,7 @@
 import { Input, FormInstance } from '@arco-design/web-react';
 import { useRef } from 'react';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
-import { ChatMode, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 
 // styles
 import './index.scss';
@@ -13,7 +13,7 @@ interface ChatInputProps {
   placeholder: string;
   autoSize: { minRows: number; maxRows: number };
   form?: FormInstance;
-  handleSendMessage: (chatMode: ChatMode) => void;
+  handleSendMessage: () => void;
 }
 
 export const ChatInput = (props: ChatInputProps) => {
@@ -24,7 +24,6 @@ export const ChatInput = (props: ChatInputProps) => {
   const chatStore = useChatStoreShallow((state) => ({
     newQAText: state.newQAText,
     setNewQAText: state.setNewQAText,
-    setChatMode: state.setChatMode,
   }));
   const searchStore = useSearchStoreShallow((state) => ({
     setIsSearchOpen: state.setIsSearchOpen,
@@ -59,7 +58,7 @@ export const ChatInput = (props: ChatInputProps) => {
 
     if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
       e.preventDefault();
-      handleSendMessage('normal');
+      handleSendMessage();
     }
 
     if (e.keyCode === 75 && (e.metaKey || e.ctrlKey)) {

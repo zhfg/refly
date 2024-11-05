@@ -95,27 +95,6 @@ export const ContextManager = () => {
     // setExpandedItems(prev => [...prev, id]);
   };
 
-  const handleAddItem = (newMark: Mark) => {
-    console.log('newMark', newMark);
-    // 检查项目是否已经存在于 store 中
-    const existingMark = currentSelectedMarks.find((mark) => mark.id === newMark.id && mark.type === newMark.type);
-
-    if (!existingMark) {
-      // 如果项目不存在，添加到 store
-
-      addMark(newMark);
-    } else {
-      removeMark(existingMark.id);
-      // 如果项目已存在，可以选择更新它或者不做任何操作
-      // 这里我们选择不做任何操作，但您可以根据需求进行调整
-      console.log('Item already exists in the store');
-    }
-  };
-
-  const selectedItems = processedContextItems?.filter((item) =>
-    [...backendBaseMarkTypes, ...frontendBaseMarkTypes].includes(item?.type as BaseMarkType),
-  );
-
   const processContextFilterProps = useProcessContextFilter(true);
 
   const currentKnowledgeBase = useKnowledgeBaseStoreShallow((state) => state.currentKnowledgeBase);
@@ -216,7 +195,7 @@ export const ContextManager = () => {
     <div className="context-manager">
       <div className="context-content">
         <div className="context-items-container">
-          <AddBaseMarkContext handleAddItem={handleAddItem} selectedItems={selectedItems} />
+          <AddBaseMarkContext />
 
           <ResetContentSelectorBtn />
 

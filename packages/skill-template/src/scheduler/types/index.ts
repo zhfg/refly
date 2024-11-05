@@ -65,9 +65,3 @@ export interface GraphState extends BaseSkillState {
   skillCalls: ToolCall[];
   contextualUserQuery: string; // 基于上下文改写 userQuery
 }
-
-export const enum ChatMode {
-  NORMAL_CHAT = 'normal',
-  NO_CONTEXT_CHAT = 'noContext',
-  WHOLE_SPACE_SEARCH = 'wholeSpace',
-}

@@ -254,10 +254,22 @@
       "createNoteFailed": "创建笔记失败，请重试！",
       "defaultTitle": "未命名"
     },
+    "canvas": {
+      "editor": {
+        "placeholder": {
+          "default": "写点什么，或按空格键激活 AI，或按 '/' 键激活命令",
+          "heading": "标题 {{level}}"
+        },
+        "toolbar": {
+          "quote": "引用内容提问"
+        }
+      }
+    },
     "context": {
       "contentSelectorAddSuccess": "添加成功",
       "contentSelectorIsEmpty": "请选择文本",
       "contentSelector": "内容划线选择器",
+      "addContext": "添加上下文",
       "clearContext": "清空上下文",
       "addToContext": "引用",
       "resource": "资源",
@@ -265,7 +277,7 @@
       "canvas": "稿布",
       "canvases": "稿布",
       "projects": "知识库",
-      "project": "知识库",
+      "project": "项目",
       "contentList": "内容列表",
       "extensionWeblink": "网页",
       "extensionWeblinkSelection": "网页选中",
@@ -1054,14 +1066,13 @@
       "errorTipTitle": "发送失败",
       "errorTip": "请调整技能配置后再重试"
     },
-    "chatMode": {
-      "title": "聊天模式",
-      "normal": "直接提问",
-      "noContext": "不带上下文提问",
-      "wholeSpace": "在整个空间提问"
-    },
     "webSearch": {
       "title": "全网搜索",
+      "enable": "启用",
+      "disable": "禁用"
+    },
+    "knowledgeBaseSearch": {
+      "title": "知识库搜索",
       "enable": "启用",
       "disable": "禁用"
     },
@@ -1080,7 +1091,8 @@
       "brainstormIdeas": "脑暴写作灵感",
       "writeTwitterArticle": "写一篇 Twitter 原创文章",
       "installSkillHint": "你还未添加任何助手，点我添加",
-      "installSkillHintTitle": "添加助手"
+      "installSkillHintTitle": "添加助手",
+      "openCanvas": "打开稿布"
     },
     "contextItem": {
       "current": "当前"

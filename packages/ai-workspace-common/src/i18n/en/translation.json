@@ -254,11 +254,23 @@
       "createNoteFailed": "Failed to create note, please try again!",
       "defaultTitle": "Untitled"
     },
+    "canvas": {
+      "editor": {
+        "placeholder": {
+          "default": "Write something, or press 'space' for AI, '/' for commands",
+          "heading": "Heading {{level}}"
+        },
+        "toolbar": {
+          "quote": "Quote Content to Ask"
+        }
+      }
+    },
     "context": {
       "contentSelector": "Content Selector",
       "contentSelectorAddSuccess": "Add Success",
       "contentSelectorIsEmpty": "Please select text",
       "clearSelector": "Clear Selection",
+      "addContext": "Add Context",
       "clearContext": "Clear Context",
       "addToContext": "Quote",
       "resource": "Resource",
@@ -1042,12 +1054,6 @@
       "errorTipTitle": "Send Failed",
       "errorTip": "Please adjust the skill configuration and try again"
     },
-    "chatMode": {
-      "title": "Chat Mode",
-      "normal": "Normal Chat",
-      "noContext": "No Context Chat",
-      "wholeSpace": "Whole Space Chat"
-    },
     "webSearch": {
       "title": "Web Search",
       "enable": "Enable",
@@ -1068,7 +1074,8 @@
       "brainstormIdeas": "Brainstorm Ideas",
       "writeTwitterArticle": "Write a Twitter Original Article",
       "installSkillHint": "You haven't added any assistants, click me to add",
-      "installSkillHintTitle": "Add Assistant"
+      "installSkillHintTitle": "Add Assistant",
+      "openCanvas": "Open Canvas"
     },
     "contextItem": {
       "current": "Current "

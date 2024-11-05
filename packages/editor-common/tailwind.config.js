@@ -6,6 +6,39 @@ export default {
   content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}', './src/components/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      typography: {
+        DEFAULT: {
+          css: {
+            img: {
+              // 移除所有图片样式
+              margin: '0',
+              padding: '0',
+              border: 'none',
+              boxShadow: 'none',
+              display: 'inline',
+              width: 'auto',
+              height: 'auto',
+            },
+          },
+          // 添加 blockquote 样式覆盖
+          blockquote: {
+            quotes: 'none',
+            '&::before': {
+              content: 'none',
+            },
+            '&::after': {
+              content: 'none',
+            },
+            // 重要：覆盖 blockquote 内 p 元素的样式
+            'p::before': {
+              content: 'none',
+            },
+            'p::after': {
+              content: 'none',
+            },
+          },
+        },
+      },
       colors: {
         gray: {
           100: '#EBF1F5',

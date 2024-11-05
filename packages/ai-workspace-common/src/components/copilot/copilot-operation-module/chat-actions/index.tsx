@@ -1,6 +1,6 @@
 import { Button, Dropdown, Menu, FormInstance, Checkbox } from '@arco-design/web-react';
 
-import { ChatMode, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { IconDown, IconPause, IconSend } from '@arco-design/web-react/icon';
 import { useMessageStateStoreShallow } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
@@ -18,7 +18,7 @@ import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common
 
 interface ChatActionsProps {
   form?: FormInstance;
-  handleSendMessage: (chatMode: ChatMode) => void;
+  handleSendMessage: () => void;
   handleAbort: () => void;
 }
 
@@ -30,10 +30,10 @@ export const ChatActions = (props: ChatActionsProps) => {
   // stores
   const chatStore = useChatStoreShallow((state) => ({
     newQAText: state.newQAText,
-    chatMode: state.chatMode,
-    setChatMode: state.setChatMode,
     enableWebSearch: state.enableWebSearch,
     setEnableWebSearch: state.setEnableWebSearch,
+    enableKnowledgeBaseSearch: state.enableKnowledgeBaseSearch,
+    setEnableKnowledgeBaseSearch: state.setEnableKnowledgeBaseSearch,
   }));
   const messageStateStore = useMessageStateStoreShallow((state) => ({
     pending: state.pending,
@@ -64,11 +64,20 @@ export const ChatActions = (props: ChatActionsProps) => {
     <div className="chat-actions">
       <div className="left-actions">
         <ModelSelector />
-        <OutputLocaleList />
+        {/* <OutputLocaleList /> */}
         {!skillStore?.selectedSkill?.skillId ? (
           <div className="chat-action-item" onClick={() => chatStore.setEnableWebSearch(!chatStore.enableWebSearch)}>
             <Checkbox checked={chatStore.enableWebSearch} />
             <span className="chat-action-item-text">{t('copilot.webSearch.title')}</span>
+          </div>
+        ) : null}
+        {!skillStore?.selectedSkill?.skillId ? (
+          <div
+            className="chat-action-item"
+            onClick={() => chatStore.setEnableKnowledgeBaseSearch(!chatStore.enableKnowledgeBaseSearch)}
+          >
+            <Checkbox checked={chatStore.enableKnowledgeBaseSearch} />
+            <span className="chat-action-item-text">{t('copilot.knowledgeBaseSearch.title')}</span>
           </div>
         ) : null}
       </div>
@@ -84,64 +93,20 @@ export const ChatActions = (props: ChatActionsProps) => {
             }}
           ></Button>
         ) : null}
-        {skillStore?.selectedSkill?.skillId || messageStateStore?.pending ? (
-          isWeb ? (
-            <Button
-              size="mini"
-              icon={<IconSend />}
-              loading={messageStateStore?.pending}
-              disabled={messageStateStore?.pending}
-              className="search-btn"
-              style={{ color: '#FFF', background: '#00968F' }}
-              onClick={() => {
-                handleSendMessage('normal');
-              }}
-            >
-              {t('copilot.chatActions.send')}
-            </Button>
-          ) : null
-        ) : (
-          <Dropdown
-            position="tr"
-            disabled={!canSendMessage}
-            droplist={
-              <Menu>
-                <Menu.Item
-                  key="noContext"
-                  className="h-8 text-xs leading-8"
-                  onClick={() => {
-                    handleSendMessage('noContext');
-                  }}
-                >
-                  {t('copilot.chatMode.noContext')}
-                </Menu.Item>
-                <Menu.Item
-                  key="wholeSpace"
-                  className="h-8 text-xs leading-8"
-                  onClick={() => {
-                    handleSendMessage('wholeSpace');
-                  }}
-                >
-                  {t('copilot.chatMode.wholeSpace')}
-                </Menu.Item>
-              </Menu>
-            }
+        {messageStateStore?.pending && !isWeb ? null : (
+          <Button
+            size="mini"
+            icon={<IconSend />}
+            loading={messageStateStore?.pending}
+            disabled={messageStateStore?.pending}
+            className="search-btn"
+            style={{ color: '#FFF', background: '#00968F' }}
+            onClick={() => {
+              handleSendMessage();
+            }}
           >
-            <Button
-              size="mini"
-              type="primary"
-              icon={<IconSend />}
-              loading={messageStateStore?.pending}
-              disabled={!canSendMessage}
-              className="search-btn"
-              onClick={() => {
-                handleSendMessage('normal');
-              }}
-            >
-              {t('copilot.chatActions.send')}
-              <IconDown />
-            </Button>
-          </Dropdown>
+            {t('copilot.chatActions.send')}
+          </Button>
         )}
       </div>
     </div>

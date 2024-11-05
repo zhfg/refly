@@ -43,7 +43,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@tiptap/extension-code-block-lowlight": "2.7.4",
     "@tiptap/extension-horizontal-rule": "2.7.4",
-    "@tiptap/extension-placeholder": "2.7.4",
+    "@tiptap/extension-placeholder": "2.0.3",
     "@tiptap/extension-underline": "2.7.4",
     "@tiptap/extension-youtube": "2.7.4",
     "@tiptap/suggestion": "2.7.4",
