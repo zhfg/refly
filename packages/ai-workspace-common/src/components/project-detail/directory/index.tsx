@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { LOCALE } from '@refly/common-types';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
-import { Segmented, Skeleton, Button, Divider, Input } from 'antd';
+import { Segmented, Skeleton, Button, Divider, Input, Empty } from 'antd';
 
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import {
@@ -47,9 +47,13 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { LuGripVertical } from 'react-icons/lu';
 import { useDebouncedCallback } from 'use-debounce';
+import { useDebounce } from 'react-use';
 
-export const ProjectDirectory = (props: { projectId: string; small?: boolean }) => {
-  const { projectId, small } = props;
+export const ProjectDirectory = (props: {
+  projectId: string;
+  setBindResourceModalVisible: (visible: boolean) => void;
+}) => {
+  const { projectId, setBindResourceModalVisible } = props;
 
   const { t } = useTranslation();
 
@@ -58,6 +62,8 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
     resources: state.resources,
     canvases: state.canvases,
     conversations: state.conversations,
+    copilotSize: state.copilotSize,
+    setCopilotSize: state.setCopilotSize,
     setProjectDirItems: state.setProjectDirItems,
     updateProjectDirItem: state.updateProjectDirItem,
     fetchProjectDetail: state.fetchProjectDetail,
@@ -77,20 +83,24 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
   const tabs = tabsMap[projectId] || [];
   const activeTab = tabs.find((x) => x.key === activeTabMap[projectId]);
 
+  const [searchParams] = useSearchParams();
+  const resId = searchParams.get('resId');
+  const canvasId = searchParams.get('canvasId');
+
   useEffect(() => {
-    if (activeTab?.type === 'canvas') {
+    if (activeTab?.type === 'canvas' && !canvasId) {
       jumpToCanvas({
         canvasId: activeTab.key,
         projectId,
       });
     }
-    if (activeTab?.type === 'resource') {
+    if (activeTab?.type === 'resource' && !resId) {
       jumpToResource({
         resId: activeTab.key,
         projectId,
       });
     }
-  }, [activeTab]);
+  }, [activeTab, canvasId, resId]);
 
   const { createShare } = useHandleShare();
   const [shareLoading, setShareLoading] = useState(false);
@@ -104,39 +114,43 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
     setShareLoading(false);
   };
 
-  const [searchParams] = useSearchParams();
-  const resId = searchParams.get('resId');
-  const canvasId = searchParams.get('canvasId');
-
   // Watch for canvasId change
-  useEffect(() => {
-    if (canvasId) {
-      const canvas = canvases?.data?.find((item) => item.id === canvasId);
-      if (canvas) {
-        handleAddTab({
-          projectId,
-          key: canvasId,
-          title: canvas.title,
-          type: 'canvas',
-        });
+  useDebounce(
+    () => {
+      if (canvasId) {
+        const canvas = canvases?.data?.find((item) => item.id === canvasId);
+        if (canvas) {
+          handleAddTab({
+            projectId,
+            key: canvasId,
+            title: canvas.title,
+            type: 'canvas',
+          });
+        }
       }
-    }
-  }, [canvasId, canvases]);
+    },
+    100,
+    [canvasId, canvases],
+  );
 
   // Watch for resId change
-  useEffect(() => {
-    if (resId) {
-      const resource = resources?.data?.find((item) => item.id === resId);
-      if (resource) {
-        handleAddTab({
-          projectId,
-          key: resId,
-          title: resource.title,
-          type: 'resource',
-        });
+  useDebounce(
+    () => {
+      if (resId) {
+        const resource = resources?.data?.find((item) => item.id === resId);
+        if (resource) {
+          handleAddTab({
+            projectId,
+            key: resId,
+            title: resource.title,
+            type: 'resource',
+          });
+        }
       }
-    }
-  }, [resId, resources]);
+    },
+    100,
+    [resId, resources],
+  );
 
   const segmentOptions: { label: string; value: ProjectDirListItemType }[] = [
     {
@@ -163,6 +177,7 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
 
   const dataListLoading = projectStore[selectedTab].loading;
   const dataList = projectStore[selectedTab].data || [];
+  const [filteredDataList, setFilteredDataList] = useState(dataList);
 
   const handleListItemClick = (item: ProjectDirListItem) => {
     if (item.type === 'canvases') {
@@ -203,8 +218,6 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
 
   const [searchVal, setSearchVal] = useState('');
 
-  const [bindResourceModalVisible, setBindResourceModalVisible] = useState(false);
-
   const handleAddNewButtonClick = () => {
     if (selectedTab === 'canvases') {
       newCanvasModalStore.setSelectedProjectId(projectId);
@@ -244,6 +257,7 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
+      backgroundColor: activeTab?.key === item.id ? '#f0f5ff' : '',
     };
 
     return (
@@ -333,6 +347,14 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
     }
   };
 
+  const onSearchValChange = (value: string) => {
+    setSearchVal(value);
+  };
+
+  useEffect(() => {
+    setFilteredDataList(dataList.filter((item) => item.title.includes(searchVal)));
+  }, [searchVal, dataList]);
+
   useEffect(() => {
     if (canvasId) {
       setSelectedTab('canvases');
@@ -345,7 +367,7 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
   }, [resId, canvasId]);
 
   return (
-    <>
+    <div className="h-full flex flex-col">
       <div className="flex flex-row items-center justify-between p-4 pb-0">
         <div className="flex w-full">
           <div className="intro-icon">
@@ -392,8 +414,15 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
         >
           {currentProject?.shareCode ? t('projectDetail.share.sharing') : t('common.share')}
         </Button>
-        <Button className="w-[50%]" icon={<HiOutlineSparkles />}>
-          AI
+        <Button
+          className="w-[50%]"
+          icon={<HiOutlineSparkles />}
+          style={{ color: projectStore.copilotSize === 0 ? '' : '#00968F' }}
+          onClick={() => {
+            projectStore.setCopilotSize(projectStore.copilotSize === 0 ? 500 : 0);
+          }}
+        >
+          Copilot
         </Button>
       </div>
 
@@ -415,45 +444,40 @@ export const ProjectDirectory = (props: { projectId: string; small?: boolean }) 
       <div className="box-border px-4 pb-2">
         <div className="flex items-center">
           <Input
-            placeholder={t('knowledgeBase.directory.searchPlaceholder')}
+            placeholder={t(`knowledgeBase.directory.${selectedTab}SearchPlaceholder`)}
             allowClear
             className="w-full h-8"
             value={searchVal}
             prefix={<HiOutlineSearch className="mr-1" />}
-            onChange={(e) => setSearchVal(e.target.value)}
+            onChange={(e) => onSearchValChange(e.target.value)}
           />
 
-          <div
-            className="flex justify-center items-center ml-2 w-8 h-8 rounded-md border border-gray-200 border-solid cursor-pointer hover:bg-slate-200"
-            onClick={handleAddNewButtonClick}
-          >
-            <HiOutlinePlus />
-          </div>
+          {selectedTab !== 'conversations' && (
+            <div
+              className="flex flex-shrink-0 justify-center items-center ml-2 w-8 h-8 rounded-md border border-gray-200 border-solid cursor-pointer hover:bg-slate-200"
+              onClick={handleAddNewButtonClick}
+            >
+              <HiOutlinePlus />
+            </div>
+          )}
         </div>
       </div>
 
-      {dataListLoading ? (
-        <Skeleton active className="p-6 w-full" title={false} paragraph={{ rows: 5 }} />
-      ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={dataList.map((item) => item.id)} strategy={verticalListSortingStrategy}>
-            {dataList.map((item) => (
-              <SortableItem key={item.id} item={item} onItemClick={() => handleListItemClick(item)} />
-            ))}
-          </SortableContext>
-        </DndContext>
-      )}
-
-      <BindResourceModal
-        domain="resource"
-        mode="multiple"
-        projectId={projectId}
-        visible={bindResourceModalVisible}
-        setVisible={setBindResourceModalVisible}
-        postConfirmCallback={() => {
-          projectStore.fetchProjectDetail(projectId);
-        }}
-      />
-    </>
+      <div className="flex-1 min-h-10 overflow-auto">
+        {dataListLoading ? (
+          <Skeleton active className="p-6 w-full" title={false} paragraph={{ rows: 5 }} />
+        ) : filteredDataList.length > 0 ? (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={filteredDataList.map((item) => item.id)} strategy={verticalListSortingStrategy}>
+              {filteredDataList.map((item) => (
+                <SortableItem key={item.id} item={item} onItemClick={() => handleListItemClick(item)} />
+              ))}
+            </SortableContext>
+          </DndContext>
+        ) : (
+          <Empty className="mt-8" description={t(`projectDetail.directory.empty`)} />
+        )}
+      </div>
+    </div>
   );
 };

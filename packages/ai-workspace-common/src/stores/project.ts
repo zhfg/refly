@@ -39,7 +39,9 @@ export interface ProjectState {
 
   projectActiveTab: Record<string, string>;
   projectTabs: Record<string, ProjectTab[]>;
+  copilotSize: number;
 
+  setCopilotSize: (size: number) => void;
   setCurrentProjectId: (projectId: string) => void;
   setProjectActiveTab: (projectId: string, tab: string) => void;
   setProjectTabs: (projectId: string, tabs: ProjectTab[]) => void;
@@ -73,6 +75,7 @@ export const useProjectStore = create<ProjectState>()(
   persist(
     immer((set, get) => ({
       currentProjectId: '',
+      copilotSize: 500,
       project: {
         data: null,
         loading: false,
@@ -93,6 +96,10 @@ export const useProjectStore = create<ProjectState>()(
       projectActiveTab: {},
       projectTabs: {},
 
+      setCopilotSize: (size) =>
+        set((state) => {
+          state.copilotSize = size;
+        }),
       setCurrentProjectId: (projectId) =>
         set((state) => {
           state.currentProjectId = projectId;
@@ -150,7 +157,7 @@ export const useProjectStore = create<ProjectState>()(
         });
 
         const { data, error } = await getClient()[config.listMethod]({
-          query: { projectId, pageSize: 50 },
+          query: { projectId, pageSize: 1000 },
         });
 
         set((state) => {

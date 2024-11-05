@@ -29,8 +29,8 @@ export const NewCanvasModal = () => {
     setContent: state.setContent,
     setSelectedProjectId: state.setSelectedProjectId,
   }))
-  const { fetchProjectCanvases } = useProjectStoreShallow(state => ({
-    fetchProjectCanvases: state.fetchProjectCanvases,
+  const { fetchProjectDirItems } = useProjectStoreShallow(state => ({
+    fetchProjectDirItems: state.fetchProjectDirItems,
   }))
 
   const { handleInitEmptyNote } = useAINote()
@@ -45,7 +45,7 @@ export const NewCanvasModal = () => {
         content: newCanvasModalStore.content,
       })
 
-      fetchProjectCanvases(newCanvasModalStore.selectedProjectId)
+      fetchProjectDirItems(newCanvasModalStore.selectedProjectId, "canvases")
 
       newCanvasModalStore.setNewCanvasModalVisible(false)
     } catch (error) {

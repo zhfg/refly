@@ -44,8 +44,10 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
     pageSize: 12,
   });
 
-  const { resource } = useResourceStoreShallow((state) => ({
+  const { resource, copilotSize, setCopilotSize } = useResourceStoreShallow((state) => ({
+    copilotSize: state.copilotSize,
     resource: state.resource,
+    setCopilotSize: state.setCopilotSize,
   }));
   const resourceData = resource.data;
 
@@ -91,7 +93,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
       },
       {
         label: 'source',
-        value: metaInfo?.resourceType,
+        value: t(`resourceDetail.directory.${metaInfo?.resourceType}`),
       },
     ];
 
@@ -114,7 +116,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
         <div className="mb-4">
           <div className="text-sm font-medium text-gray-500 mb-1">{t('resourceDetail.directory.baseInfo')}</div>
           {baseInfoList.map((item) => (
-            <div className="flex gap-2 mb-1">
+            <div className="flex gap-2 mb-1" key={item.label}>
               <div className="text-xs font-normal w-20 text-gray-500">
                 {t(`resourceDetail.directory.${item.label}`)}
               </div>
@@ -126,7 +128,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
         <div className="mb-4">
           <div className="text-sm font-medium text-gray-500 mb-1">{t('resourceDetail.directory.techInfo')}</div>
           {techInfoList.map((item) => (
-            <div className="flex gap-2 mb-1">
+            <div className="flex gap-2 mb-1" key={item.label}>
               <div className="text-xs font-normal w-20 text-gray-500">
                 {t(`resourceDetail.directory.${item.label}`)}
               </div>
@@ -256,8 +258,13 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
         <Button className="w-[50%]" icon={<HiOutlinePlus />} onClick={handleToProject}>
           {t('common.add')}
         </Button>
-        <Button className="w-[50%]" icon={<HiOutlineSparkles />}>
-          AI
+        <Button
+          className="w-[50%]"
+          icon={<HiOutlineSparkles />}
+          onClick={() => setCopilotSize(copilotSize === 0 ? 400 : 0)}
+          style={{ color: copilotSize === 0 ? '' : '#00968F' }}
+        >
+          Copilot
         </Button>
       </div>
 
