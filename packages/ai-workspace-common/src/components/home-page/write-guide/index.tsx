@@ -8,6 +8,7 @@ import './index.scss';
 
 import { CopilotOperationModule } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
+import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { getClientOrigin } from '@refly/utils/url';
 import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
 import { GridPattern } from './grid-pattern';
@@ -17,19 +18,19 @@ import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/c
 
 const quickStartList = [
   {
-    title: '写一篇投资 Memo',
+    title: 'investment',
     emoji: '🗓️',
   },
   {
-    title: '撰写竞品调研',
+    title: 'productSearch',
     emoji: '🗓️',
   },
   {
-    title: '写一篇关于 Scaling law 的学术文章',
+    title: 'academicArticle',
     emoji: '📋',
   },
   {
-    title: '基于 Founder mode 撰写社交推文',
+    title: 'socialTweet',
     emoji: '📋',
   },
 ];
@@ -42,6 +43,10 @@ export const WriteGuide = (props: WriteGuideProps) => {
   const { t } = useTranslation();
   const { setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
     setSubscribeModalVisible: state.setSubscribeModalVisible,
+  }));
+
+  const chatStore = useChatStoreShallow((state) => ({
+    setNewQAText: state.setNewQAText,
   }));
 
   const footerList = [
@@ -79,11 +84,6 @@ export const WriteGuide = (props: WriteGuideProps) => {
       <div className="write-guide">
         <div className="write-guide-inner">
           <div className="write-guide-header">
-            {/* <div className="recent">
-            <div className="recent-button">New</div>
-            Introducing Refly Enterprise and Team plans
-            <IconRight style={{ fontSize: '12px', marginLeft: '8px', transform: 'translateY(1px)' }} />
-          </div> */}
             <div className="guide-text">What Can I Help You Write?</div>
           </div>
 
@@ -103,9 +103,14 @@ export const WriteGuide = (props: WriteGuideProps) => {
               dataSource={quickStartList}
               render={(item, key) => (
                 <List.Item key={key} className="quick-start-item-container" actionLayout="vertical">
-                  <div className="quick-start-item">
+                  <div
+                    className="quick-start-item"
+                    onClick={() => {
+                      chatStore.setNewQAText(t(`homePage.suggestion.${item.title}`));
+                    }}
+                  >
                     <div className="quick-start-item-emoji">{item.emoji}</div>
-                    <div className="quick-start-item-title">{item.title}</div>
+                    <div className="quick-start-item-title">{t(`homePage.suggestion.${item.title}`)}</div>
                   </div>
                 </List.Item>
               )}

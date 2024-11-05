@@ -33,7 +33,7 @@ export interface ResourceState {
 export const useResourceStore = create<ResourceState>()(
   persist(
     immer((set, get) => ({
-      copilotSize: 0,
+      copilotSize: 400,
       currentResourceId: '',
       resource: {
         data: null,

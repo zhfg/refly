@@ -1132,6 +1132,12 @@
     "copyEmail": "Copy email "
   },
   "homePage": {
+    "suggestion": {
+      "investment": "Write an Investment Memo",
+      "productSearch": "Write a Competitive Analysis",
+      "academicArticle": "Write an Academic Article about Scaling Law",
+      "socialTweet": "Write Social Media Posts in Founder Mode"
+    },
     "footer": {
       "pricing": "Pricing",
       "contact": "Contact",

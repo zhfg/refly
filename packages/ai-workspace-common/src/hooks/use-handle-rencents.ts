@@ -72,6 +72,7 @@ export const useHandleRecents = (getRecents: boolean = false) => {
   }, [getRecents]);
 
   return {
+    getRecentProjects,
     addRecentProject,
     deleteRecentProject,
     addRecentConversation,
