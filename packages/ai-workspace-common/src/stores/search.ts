@@ -12,9 +12,9 @@ export interface SearchState {
   isSearchOpen: boolean;
 
   // 所有列表资源
-  notes: Resource[];
+  canvases: Resource[];
   readResources: Resource[];
-  knowledgeBases: Project[];
+  projects: Project[];
   convs: Conversation[];
   skills: SkillMeta[];
 
@@ -25,9 +25,9 @@ export interface SearchState {
   pages: string[];
 
   // 所有可搜索的资源
-  searchedNotes: SearchResult[];
+  searchedCanvases: SearchResult[];
   searchedReadResources: SearchResult[];
-  searchedKnowledgeBases: SearchResult[];
+  searchedProjects: SearchResult[];
   searchedConvs: SearchResult[];
   searchedSkills: SearchResult[];
 
@@ -35,19 +35,19 @@ export interface SearchState {
   setIsSearchOpen: (isSearchOpen: boolean) => void;
   setNotes: (notes: Resource[]) => void;
   setReadResources: (readResources: Resource[]) => void;
-  setKnowledgeBases: (knowledgeBases: Project[]) => void;
+  setProjects: (knowledgeBases: Project[]) => void;
   setConvs: (convs: Conversation[]) => void;
   setSkills: (skills: SkillMeta[]) => void;
   setSearchedRes: ({
-    notes,
+    canvases,
     readResources,
-    knowledgeBases,
+    projects,
     convs,
     skills,
   }: {
-    notes: SearchResult[];
+    canvases: SearchResult[];
     readResources: SearchResult[];
-    knowledgeBases: SearchResult[];
+    projects: SearchResult[];
     convs: SearchResult[];
     skills: SearchResult[];
   }) => void;
@@ -58,18 +58,18 @@ export interface SearchState {
 
 export const defaultState = {
   isSearchOpen: false,
-  notes: [],
+  canvases: [],
   pages: ['home'],
   readResources: [],
-  knowledgeBases: [],
+  projects: [],
   convs: [],
   skills: [],
 
   noCategoryBigSearchRes: [],
 
-  searchedNotes: [],
+  searchedCanvases: [],
   searchedReadResources: [],
-  searchedKnowledgeBases: [],
+  searchedProjects: [],
   searchedConvs: [],
   searchedSkills: [],
 };
@@ -79,18 +79,18 @@ export const useSearchStore = create<SearchState>()(
     ...defaultState,
 
     setIsSearchOpen: (isSearchOpen: boolean) => set((state) => ({ ...state, isSearchOpen })),
-    setNotes: (notes: Resource[]) => set((state) => ({ ...state, notes })),
+    setNotes: (notes: Resource[]) => set((state) => ({ ...state, canvases: notes })),
     setReadResources: (readResources: Resource[]) => set((state) => ({ ...state, readResources })),
-    setKnowledgeBases: (knowledgeBases: Project[]) => set((state) => ({ ...state, knowledgeBases })),
+    setProjects: (knowledgeBases: Project[]) => set((state) => ({ ...state, knowledgeBases })),
     setConvs: (convs: Conversation[]) => set((state) => ({ ...state, convs })),
     setSkills: (skills: SkillMeta[]) => set((state) => ({ ...state, skills })),
     setSearchedRes: (data) =>
       set((state) => ({
         ...state,
         searchedConvs: data?.convs,
-        searchedNotes: data?.notes,
+        searchedCanvases: data?.canvases,
         searchedReadResources: data?.readResources,
-        searchedKnowledgeBases: data?.knowledgeBases,
+        searchedProjects: data?.projects,
         searchedSkills: data?.skills,
       })),
     setNoCategoryBigSearchRes: (noCategoryBigSearchRes: Mark[]) =>

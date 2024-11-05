@@ -61,7 +61,7 @@ export function Home({
             {renderItem?.data?.slice(0, 5)?.map((item, index) => (
               <Item
                 key={index}
-                value={`${renderItem?.domain}-${index}-${item?.title}-${item?.content?.[0] || ''}`}
+                value={`${renderItem?.domain}-${index}-${item?.title}-${item?.snippets?.[0]?.text || ''}`}
                 activeValue={activeValue}
                 onSelect={() => {
                   renderItem?.onItemClick(item);
@@ -69,10 +69,14 @@ export function Home({
               >
                 {renderItem?.icon}
                 <div className="search-res-container">
-                  <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.title }}></p>
-                  {item?.content?.length > 0 &&
-                    item.content.map((content, index) => (
-                      <p className="search-res-desc" key={index} dangerouslySetInnerHTML={{ __html: content }}></p>
+                  <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.highlightedTitle }}></p>
+                  {item?.snippets?.length > 0 &&
+                    item.snippets.map((snippet, index) => (
+                      <p
+                        className="search-res-desc"
+                        key={index}
+                        dangerouslySetInnerHTML={{ __html: snippet.highlightedText }}
+                      ></p>
                     ))}
                 </div>
               </Item>

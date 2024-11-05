@@ -45,7 +45,7 @@ const mapSearchResultToMark = (searchResult: SearchResult): Mark => {
     id: searchResult.id,
     entityId: searchResult.id,
     type: searchResult.domain,
-    data: (searchResult?.content || []).join('\n'),
+    data: (searchResult?.snippets?.map((snippet) => snippet.text) || []).join('\n'),
     title: searchResult.title,
   };
 

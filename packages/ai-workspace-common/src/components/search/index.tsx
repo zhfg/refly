@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import { IconMessage, IconFile, IconBook, IconEdit, IconRobot } from '@arco-design/web-react/icon';
+import { IconMessage, IconRobot } from '@arco-design/web-react/icon';
 import { useDebouncedCallback } from 'use-debounce';
 import { defaultFilter } from './cmdk/filter';
 
@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
 import { Message, Spin } from '@arco-design/web-react';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { IconCanvas, IconProject, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 export interface SearchProps extends React.ComponentProps<'div'> {
   showList?: boolean;
@@ -99,7 +100,7 @@ export const Search = (props: SearchProps) => {
       case 'readSesources':
         return 'resource';
       case 'knowledgeBases':
-        return 'collection';
+        return 'project';
       case 'convs':
         return 'conversation';
       case 'skills':
@@ -143,24 +144,22 @@ export const Search = (props: SearchProps) => {
       });
       setLoading(false);
 
-      if (error) {
-        Message.error(String(error));
+      if (error || !data.success) {
         return;
       }
 
       const resData = data?.data || [];
 
-      // notes
-      const notes = resData.filter((item) => item?.domain === 'canvas') || [];
+      const canvases = resData.filter((item) => item?.domain === 'canvas') || [];
       const readResources = resData.filter((item) => item?.domain === 'resource') || [];
-      const knowledgeBases = resData.filter((item) => item?.domain === 'collection') || [];
+      const projects = resData.filter((item) => item?.domain === 'project') || [];
       const convs = resData.filter((item) => item?.domain === 'conversation') || [];
       const skills = resData.filter((item) => item?.domain === 'skill') || [];
 
       searchStore.setSearchedRes({
-        notes,
+        canvases,
         readResources,
-        knowledgeBases,
+        projects,
         convs,
         skills,
       });
@@ -212,21 +211,19 @@ export const Search = (props: SearchProps) => {
       actionHeading: {
         create: t('loggedHomePage.quickSearch.newNote'),
       },
-      data: searchStore.searchedNotes || [],
-      icon: <IconEdit style={{ fontSize: 12 }} />,
+      data: searchStore.searchedCanvases || [],
+      icon: <IconCanvas style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
         jumpToCanvas({
           canvasId: item?.id,
-          // @ts-ignore
-          projectId: item?.metadata?.projectId, // TODO: 这里需要补充 canvas 的 projectId
+          projectId: item?.metadata?.projectId,
         });
         handleAddNoteTab({
           title: item?.title,
           key: item?.id,
           content: '',
           canvasId: item?.id,
-          // @ts-ignore
-          projectId: item?.metadata?.projectId, // TODO: 这里需要补充 canvas 的 projectId
+          projectId: item?.metadata?.projectId,
         });
         searchStore.setIsSearchOpen(false);
       },
@@ -243,7 +240,7 @@ export const Search = (props: SearchProps) => {
         create: t('loggedHomePage.quickSearch.newReadResource'),
       },
       data: searchStore.searchedReadResources || [],
-      icon: <IconBook style={{ fontSize: 12 }} />,
+      icon: <IconResource style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
         jumpToResource({
           resId: item?.id,
@@ -265,8 +262,8 @@ export const Search = (props: SearchProps) => {
       actionHeading: {
         create: t('loggedHomePage.quickSearch.newCollection'),
       },
-      data: searchStore.searchedKnowledgeBases || [],
-      icon: <IconFile style={{ fontSize: 12 }} />,
+      data: searchStore.searchedProjects || [],
+      icon: <IconProject style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
         jumpToProject({
           projectId: item?.id,
@@ -287,8 +284,6 @@ export const Search = (props: SearchProps) => {
       onItemClick: (item: SearchResult) => {
         jumpToConv({
           convId: item?.id,
-          // TODO: 需要后端返回 projectId
-          // @ts-ignore
           projectId: item?.metadata?.projectId,
           state: {
             navigationContext: {
@@ -302,6 +297,7 @@ export const Search = (props: SearchProps) => {
       onCreateClick: async () => {},
     },
   ];
+
   const getRenderData = (domain: string) => {
     return renderData?.find((item) => item.domain === domain);
   };
@@ -331,12 +327,11 @@ export const Search = (props: SearchProps) => {
           return defaultFilter(value, search, keywords);
         }}
         className={classNames(showList ? 'search-active' : '')}
-        onCompositionStart={(e) => console.log('composition start')}
-        onCompositionUpdate={(e) => console.log('composition update')}
-        onCompositionEnd={(e) => console.log('composition end')}
+        // onCompositionStart={() => setIsComposing(true)}
+        // onCompositionUpdate={() => {}}
+        // onCompositionEnd={() => setIsComposing(false)}
         onKeyDownCapture={(e: React.KeyboardEvent) => {
           if (e.key === 'Enter' && !isComposing) {
-            console.log('keydown', searchValue);
             bounce();
           }
 
@@ -363,19 +358,17 @@ export const Search = (props: SearchProps) => {
           ref={inputRef}
           value={searchValue}
           placeholder={getInputPlaceholder(activePage)}
-          onCompositionStart={(e) => {
-            setIsComposing(true);
-          }}
-          onCompositionUpdate={(e) => console.log('composition update')}
-          onCompositionEnd={(e) => {
-            setIsComposing(false);
-          }}
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionUpdate={() => {}}
+          onCompositionEnd={() => setIsComposing(false)}
           onValueChange={(val) => {
             if (onSearchValueChange) {
               onSearchValueChange(val);
             }
             setSearchValue(val);
-            handleBigSearchValueChange(val, activePage);
+            if (!isComposing) {
+              handleBigSearchValueChange(val, activePage);
+            }
           }}
         />
         {showList && (
