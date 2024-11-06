@@ -121,7 +121,7 @@ export async function mergeAndTruncateContexts(
   containerLevelContext: IContext,
   query: string,
   maxTokens: number,
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<IContext> {
   // 1. Handle contentList (highest priority)
   const allContentList = [...relevantContext.contentList, ...containerLevelContext.contentList];

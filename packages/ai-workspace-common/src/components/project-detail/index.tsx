@@ -18,14 +18,22 @@ export const ProjectDetail = () => {
   const { projectId } = useParams();
   const [searchParams] = useSearchParams();
   const convId = searchParams.get('convId');
-  const { setCurrentProjectId, fetchProjectAll, copilotSize, setCopilotSize, fetchProjectDetail } =
-    useProjectStoreShallow((state) => ({
-      copilotSize: state.copilotSize,
-      setCurrentProjectId: state.setCurrentProjectId,
-      fetchProjectAll: state.fetchProjectAll,
-      setCopilotSize: state.setCopilotSize,
-      fetchProjectDetail: state.fetchProjectDetail,
-    }));
+  const {
+    setCurrentProjectId,
+    fetchProjectAll,
+    copilotSize,
+    setCopilotSize,
+    setProjectActiveConvId,
+    fetchProjectDirItems,
+  } = useProjectStoreShallow((state) => ({
+    copilotSize: state.copilotSize,
+    setCurrentProjectId: state.setCurrentProjectId,
+    fetchProjectAll: state.fetchProjectAll,
+    setCopilotSize: state.setCopilotSize,
+    fetchProjectDetail: state.fetchProjectDetail,
+    setProjectActiveConvId: state.setProjectActiveConvId,
+    fetchProjectDirItems: state.fetchProjectDirItems,
+  }));
 
   const { jumpToCanvas, jumpToResource } = useJumpNewPath();
   const { tabsMap, activeTabMap, handleAddTab } = useProjectTabs();
@@ -84,9 +92,20 @@ export const ProjectDetail = () => {
     };
   }, [projectId]);
 
+  useEffect(() => {
+    setProjectActiveConvId(projectId, convId);
+  }, [projectId, convId]);
+
+  useEffect(() => {
+    const currentConversations = useProjectStore.getState().conversations.data;
+    if (convId && !currentConversations.find((item) => item.id === convId)) {
+      fetchProjectDirItems(projectId, 'conversations');
+    }
+  }, [convId]);
+
   return (
     <ProjectProvider context={{ projectId }}>
-      <div className="project-detail-container">
+      <div className="project-detail-container overflow-hidden">
         <Splitter
           layout="horizontal"
           className="workspace-panel-container project-detail-outer-splitter"

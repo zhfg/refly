@@ -12,7 +12,8 @@ import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-ju
 import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
-
+import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { LOCALE } from '@refly/common-types';
 import './index.scss';
 
@@ -44,7 +45,10 @@ export const CanvasList = (props: CanvasListProps) => {
     loadMore();
   }, []);
 
-  const { jumpToCanvas } = useJumpNewPath();
+  const { projectActiveConvId } = useProjectStoreShallow((state) => ({
+    projectActiveConvId: state.projectActiveConvId,
+  }));
+  const { jumpToConv } = useJumpNewPath();
   const { handleAddTabWithNote } = useCanvasTabs();
 
   if (dataList.length === 0 && !isRequesting) {
@@ -52,7 +56,14 @@ export const CanvasList = (props: CanvasListProps) => {
   }
 
   const handleClickCanvas = (canvas: Canvas) => {
-    jumpToCanvas({ canvasId: canvas.canvasId, projectId: canvas.projectId });
+    const activeConvId = projectActiveConvId[canvas.projectId] as string;
+    jumpToConv({
+      canvasId: canvas.canvasId,
+      projectId: canvas.projectId,
+      convId: activeConvId || '',
+      state: { navigationContext: { shouldFetchDetail: true, source: MessageIntentSource.Canvas } },
+    });
+
     handleAddTabWithNote(canvas);
   };
 

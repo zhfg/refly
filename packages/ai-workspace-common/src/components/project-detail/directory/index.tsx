@@ -68,6 +68,7 @@ export const ProjectDirectory = (props: {
     setProjectDirItems: state.setProjectDirItems,
     updateProjectDirItem: state.updateProjectDirItem,
     fetchProjectDetail: state.fetchProjectDetail,
+    fetchProjectDirItems: state.fetchProjectDirItems,
   }));
 
   const currentProject = projectStore.project?.data;
@@ -87,6 +88,7 @@ export const ProjectDirectory = (props: {
   const [searchParams] = useSearchParams();
   const resId = searchParams.get('resId');
   const canvasId = searchParams.get('canvasId');
+  const convId = searchParams.get('convId');
 
   useEffect(() => {
     if (activeTab?.type === 'canvas' && !canvasId) {
@@ -228,6 +230,9 @@ export const ProjectDirectory = (props: {
     }
   };
 
+  const debouncedFetchProjectDetail = useDebouncedCallback(projectStore.fetchProjectDetail, 1000);
+  const debouncedFetchProjectDirItems = useDebouncedCallback(projectStore.fetchProjectDirItems, 1000);
+
   const handleTitleUpdate = async (newTitle: string) => {
     const { project } = useProjectStore.getState();
     const currentProject = project.data;
@@ -240,8 +245,11 @@ export const ProjectDirectory = (props: {
           title: newTitle,
         },
       });
-      projectStore.fetchProjectDetail(currentProject.projectId); // re-fetch project detail
+      debouncedFetchProjectDetail(currentProject.projectId); // re-fetch project detail
     }
+
+    // re-fetch project resources
+    debouncedFetchProjectDirItems(projectId, 'resources');
   };
 
   useEffect(() => {
@@ -266,7 +274,7 @@ export const ProjectDirectory = (props: {
         style={style}
         className={cn(
           'flex items-center p-1 m-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 group',
-          activeTab?.key === item.id && 'bg-gray-100',
+          (activeTab?.key === item.id || convId === item.id) && 'bg-gray-100',
         )}
       >
         <div className="flex items-center grow" onClick={onItemClick}>

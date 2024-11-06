@@ -94,7 +94,6 @@ export const ImportFromWeblink = () => {
   };
 
   const handleSave = async () => {
-    setSaveLoading(true);
     const { scrapeLinks, selectedProjectId } = useImportResourceStore.getState();
 
     if (scrapeLinks?.length === 0) {
@@ -114,12 +113,13 @@ export const ImportFromWeblink = () => {
       };
     });
 
+    setSaveLoading(true);
     const res = await getClient().batchCreateResource({
       body: batchCreateResourceData,
     });
+    setSaveLoading(false);
 
     if (!res?.data?.success) {
-      setSaveLoading(false);
       return;
     }
 
@@ -131,8 +131,6 @@ export const ImportFromWeblink = () => {
       reloadListState.setReloadResourceList(true);
     }
     setLinkStr('');
-
-    setSaveLoading(false);
   };
 
   useEffect(() => {

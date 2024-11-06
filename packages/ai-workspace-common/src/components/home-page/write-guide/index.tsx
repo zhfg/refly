@@ -84,7 +84,7 @@ export const WriteGuide = (props: WriteGuideProps) => {
       <div className="write-guide">
         <div className="write-guide-inner">
           <div className="write-guide-header">
-            <div className="guide-text">What Can I Help You Write?</div>
+            <div className="guide-text">{t('welcomeMessage')}</div>
           </div>
 
           <div className="ai-copilot">

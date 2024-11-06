@@ -55,8 +55,13 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
 
   const handleSendMessage = (userInput?: string) => {
     const tplConfig = form?.getFieldValue('tplConfig');
-    const { messageIntentContext, selectedProject, enableWebSearch, enableKnowledgeBaseSearch } =
-      useChatStore.getState();
+    const {
+      messageIntentContext,
+      selectedProject,
+      enableWebSearch,
+      enableAutoImportWebResource,
+      enableKnowledgeBaseSearch,
+    } = useChatStore.getState();
     const finalProjectId = selectedProject?.projectId || projectId;
     const { currentSelectedMarks } = useContextPanelStore.getState();
 
@@ -81,6 +86,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
         resourceId: currentResource?.entityId || currentResource?.id,
       },
       enableWebSearch,
+      enableAutoImportWebResource,
       enableKnowledgeBaseSearch,
       env: {
         runtime: getRuntime(),

@@ -428,11 +428,11 @@ export const WelcomeMessage = () => {
           ) : null}
           {userStore?.userProfile?.nickname ? (
             <div className="user-container-title">
-              Hello{userStore?.userProfile?.nickname ? `, ${userStore?.userProfile?.nickname}` : ''}
+              {t('copilot.greeting', { name: userStore?.userProfile?.nickname })}
             </div>
           ) : null}
         </div>
-        <div className="welcome-message-text">How can I help you today?</div>
+        <div className="welcome-message-text">{t('welcomeMessage')}</div>
         {needInstallSkillInstance && (
           <div className="skill-onboarding">
             {skillInstances?.length === 0 ? (

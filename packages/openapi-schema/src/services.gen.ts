@@ -224,7 +224,7 @@ export const updateResource = (options: Options<UpdateResourceData>) => {
 export const createResource = (options: Options<CreateResourceData>) => {
   return (options?.client ?? client).post<CreateResourceResponse, CreateResourceError>({
     ...options,
-    url: '/knowledge/resource/new',
+    url: '/knowledge/resource/create',
   });
 };
 
@@ -235,7 +235,7 @@ export const createResource = (options: Options<CreateResourceData>) => {
 export const batchCreateResource = (options: Options<BatchCreateResourceData>) => {
   return (options?.client ?? client).post<BatchCreateResourceResponse2, BatchCreateResourceError>({
     ...options,
-    url: '/knowledge/resource/batch',
+    url: '/knowledge/resource/batchCreate',
   });
 };
 
@@ -301,7 +301,7 @@ export const updateCanvas = (options: Options<UpdateCanvasData>) => {
 export const createCanvas = (options: Options<CreateCanvasData>) => {
   return (options?.client ?? client).post<CreateCanvasResponse, CreateCanvasError>({
     ...options,
-    url: '/knowledge/canvas/new',
+    url: '/knowledge/canvas/create',
   });
 };
 
@@ -400,7 +400,7 @@ export const updateProject = (options: Options<UpdateProjectData>) => {
 export const createProject = (options: Options<CreateProjectData>) => {
   return (options?.client ?? client).post<CreateProjectResponse, CreateProjectError>({
     ...options,
-    url: '/knowledge/project/new',
+    url: '/knowledge/project/create',
   });
 };
 

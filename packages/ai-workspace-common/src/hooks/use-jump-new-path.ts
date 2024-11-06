@@ -1,12 +1,17 @@
 import { useNavigationContextStoreShallow } from '@refly-packages/ai-workspace-common/stores/navigation-context';
 import { NavigationContext } from '@refly-packages/ai-workspace-common/types/copilot';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useConversationStoreShallow } from '@refly-packages/ai-workspace-common/stores/conversation';
 
 export const useJumpNewPath = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { setNavigationContext } = useNavigationContextStoreShallow((state) => ({
     setNavigationContext: state.setNavigationContext,
+  }));
+
+  const conversationStore = useConversationStoreShallow((state) => ({
+    resetState: state.resetState,
   }));
 
   const jumpToCanvas = ({
@@ -172,18 +177,22 @@ export const useJumpNewPath = () => {
     let url: string;
 
     if (projectId) {
-      searchParams.set('convId', convId);
+      convId ? searchParams.set('convId', convId) : searchParams.delete('convId');
       if (canvasId) {
         searchParams.set('canvasId', canvasId);
       }
       setSearchParams(searchParams);
       url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
     } else if (resourceId) {
-      searchParams.set('convId', convId);
+      convId ? searchParams.set('convId', convId) : searchParams.delete('convId');
       setSearchParams(searchParams);
       url = `${baseUrl}/resource/${resourceId}?${searchParams.toString()}`;
     } else {
       url = `${baseUrl}/thread/${convId}`;
+    }
+
+    if (!convId) {
+      conversationStore.resetState();
     }
 
     if (openNewTab) {
