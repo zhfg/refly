@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Button, Progress, Tooltip, Tag, Spin, Message as message, Space } from '@arco-design/web-react';
+import { Button, Progress, Tooltip, Tag, Spin, Space } from '@arco-design/web-react';
 import { HiOutlineQuestionMarkCircle } from 'react-icons/hi2';
 import { HiOutlineExternalLink } from 'react-icons/hi';
 import { RiBillLine } from 'react-icons/ri';
@@ -10,7 +10,7 @@ import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common
 
 // styles
 import './index.scss';
-import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { StorageUsageMeter } from '@refly/openapi-schema';
@@ -44,6 +44,9 @@ export const Subscription = () => {
   }));
 
   const getSubscriptionStatus = async () => {
+    const { userProfile } = useUserStore.getState();
+    if (!userProfile) return;
+
     setIsRequest(true);
     const { data } = await getClient().getSubscriptionUsage();
     if (data?.data) {
@@ -110,14 +113,14 @@ export const Subscription = () => {
 
   const FileStorageUsageItem = (props: { storage: StorageUsageMeter }) => {
     const { storage } = props;
-    const noteSize = Number(storage?.noteSize || 0);
+    const canvasSize = Number(storage?.canvasSize || 0);
     const resourceSize = Number(storage?.resourceSize || 0);
     const fileSize = Number(storage?.fileSize || 0);
 
-    const used = noteSize + resourceSize + fileSize;
+    const used = canvasSize + resourceSize + fileSize;
     const total = Number(storage?.objectStorageQuota || 0);
 
-    const notePercentage = total > 0 ? (noteSize / total) * 100 : 0;
+    const notePercentage = total > 0 ? (canvasSize / total) * 100 : 0;
     const resourcePercentage = total > 0 ? (resourceSize / total) * 100 : 0;
     const knowledgePercentage = total > 0 ? (fileSize / total) * 100 : 0;
 

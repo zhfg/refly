@@ -57,16 +57,9 @@ export const useGetUserSettings = () => {
     if (!token || error || !res.data) {
       userStore.setIsCheckingLoginStatus(false);
       userStore.setUserProfile(undefined);
-      userStore.setLocalSettings(defaultLocalSettings);
       userStore.setToken('');
-      localStorage.removeItem('refly-user-profile');
-      localStorage.removeItem('refly-local-settings');
       userStore.setIsLogin(false);
-      // if (getRuntime() === 'web') {
-      //   window.location.href = getWebLogin(); // Redirect to login page for web
-      // } else {
-      //   navigate('/'); // Extension should navigate to home
-      // }
+
       if (!isShareContent) {
         navigate('/'); // Extension should navigate to home
       }
@@ -134,8 +127,6 @@ export const useGetUserSettings = () => {
       userStore.setUserProfile(undefined);
       userStore.setLocalSettings(defaultLocalSettings);
       userStore.setToken('');
-      localStorage.removeItem('refly-user-profile');
-      localStorage.removeItem('refly-local-settings');
       userStore.setIsLogin(false);
 
       if (
@@ -168,5 +159,5 @@ export const useGetUserSettings = () => {
     } else {
       getLoginStatus();
     }
-  }, [token, userStore.loginModalVisible]);
+  }, [token]);
 };
