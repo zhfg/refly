@@ -18,13 +18,14 @@ export const ProjectDetail = () => {
   const { projectId } = useParams();
   const [searchParams] = useSearchParams();
   const convId = searchParams.get('convId');
-  const { setCurrentProjectId, fetchProjectAll, copilotSize, setCopilotSize, fetchProjectDetail } =
+  const { setCurrentProjectId, fetchProjectAll, copilotSize, setCopilotSize, setProjectActiveConvId } =
     useProjectStoreShallow((state) => ({
       copilotSize: state.copilotSize,
       setCurrentProjectId: state.setCurrentProjectId,
       fetchProjectAll: state.fetchProjectAll,
       setCopilotSize: state.setCopilotSize,
       fetchProjectDetail: state.fetchProjectDetail,
+      setProjectActiveConvId: state.setProjectActiveConvId,
     }));
 
   const { jumpToCanvas, jumpToResource } = useJumpNewPath();
@@ -83,6 +84,10 @@ export const ProjectDetail = () => {
       setCopilotSize(500);
     };
   }, [projectId]);
+
+  useEffect(() => {
+    setProjectActiveConvId(projectId, convId);
+  }, [projectId, convId]);
 
   return (
     <ProjectProvider context={{ projectId }}>

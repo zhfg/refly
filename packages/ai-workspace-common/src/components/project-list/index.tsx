@@ -22,6 +22,8 @@ import { useTranslation } from 'react-i18next';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
+import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 export const getFirstSourceLink = (sources: Source[]) => {
   return sources?.[0]?.metadata?.source;
@@ -62,7 +64,25 @@ export const ProjectList = (props: ProjectListProps) => {
     }
   }, [reloadListState.reloadProjectList]);
 
-  const { jumpToProject } = useJumpNewPath();
+  const { projectActiveConvId } = useProjectStoreShallow((state) => ({
+    projectActiveConvId: state.projectActiveConvId,
+  }));
+  const { jumpToProject, jumpToConv } = useJumpNewPath();
+
+  const handleClickProject = (projectId: string) => {
+    const activeConvId = projectActiveConvId[projectId] as string;
+    if (activeConvId) {
+      jumpToConv({
+        convId: activeConvId,
+        projectId,
+        state: {
+          navigationContext: { shouldFetchDetail: true, source: MessageIntentSource.Project },
+        },
+      });
+    } else {
+      jumpToProject({ projectId });
+    }
+  };
 
   if (dataList.length === 0 && !isRequesting) {
     return <Empty />;
@@ -99,7 +119,8 @@ export const ProjectList = (props: ProjectListProps) => {
               cardData={item}
               cardIcon={<IconFolder style={{ fontSize: '32px', strokeWidth: 3 }} />}
               onClick={() => {
-                jumpToProject({ projectId: item?.projectId });
+                if (!item?.projectId) return;
+                handleClickProject(item.projectId);
               }}
             >
               <div className="flex justify-between items-center mt-6">

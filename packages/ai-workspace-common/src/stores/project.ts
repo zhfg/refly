@@ -39,8 +39,10 @@ export interface ProjectState {
 
   projectActiveTab: Record<string, string>;
   projectTabs: Record<string, ProjectTab[]>;
+  projectActiveConvId: Record<string, string>;
   copilotSize: number;
 
+  setProjectActiveConvId: (projectId: string, convId: string) => void;
   setCopilotSize: (size: number) => void;
   setCurrentProjectId: (projectId: string) => void;
   setProjectActiveTab: (projectId: string, tab: string) => void;
@@ -95,7 +97,12 @@ export const useProjectStore = create<ProjectState>()(
 
       projectActiveTab: {},
       projectTabs: {},
+      projectActiveConvId: {},
 
+      setProjectActiveConvId: (projectId, convId) =>
+        set((state) => {
+          state.projectActiveConvId[projectId] = convId;
+        }),
       setCopilotSize: (size) =>
         set((state) => {
           state.copilotSize = size;
@@ -193,6 +200,7 @@ export const useProjectStore = create<ProjectState>()(
       partialize: (state) => ({
         projectActiveTab: state.projectActiveTab,
         projectTabs: state.projectTabs,
+        projectActiveConvId: state.projectActiveConvId,
       }),
     },
   ),
