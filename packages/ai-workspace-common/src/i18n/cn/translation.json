@@ -942,6 +942,7 @@
       "title": "和 {{name}} 聊聊"
     },
     "addContext": "添加上下文",
+    "moreSettings": "更多设置",
     "baseContextCard": {
       "title": "环境上下文快捷操作",
       "filterTitle": "过滤环境上下文",
@@ -1080,6 +1081,11 @@
     },
     "knowledgeBaseSearch": {
       "title": "知识库搜索",
+      "enable": "启用",
+      "disable": "禁用"
+    },
+    "autoImportWebResource": {
+      "title": "自动导入网页资源",
       "enable": "启用",
       "disable": "禁用"
     },

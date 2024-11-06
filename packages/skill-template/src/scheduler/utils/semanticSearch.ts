@@ -35,7 +35,7 @@ export function assembleChunks(chunks: DocumentInterface[] = []): string {
 export async function sortContentBySimilarity(
   query: string,
   contentList: SkillContextContentItem[],
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextContentItem[]> {
   // 1. construct documents
   const documents: Document<NodeMeta>[] = contentList.map((item) => {
@@ -50,7 +50,7 @@ export async function sortContentBySimilarity(
   });
 
   // 2. index documents
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.configSnapshot.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.user, {
     content: documents,
     query,
     k: documents.length,
@@ -70,7 +70,7 @@ export async function sortContentBySimilarity(
 export async function sortCanvasesBySimilarity(
   query: string,
   canvases: SkillContextCanvasItem[],
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextCanvasItem[]> {
   // 1. construct documents
   const documents: Document<NodeMeta>[] = canvases.map((item) => {
@@ -86,7 +86,7 @@ export async function sortCanvasesBySimilarity(
   });
 
   // 2. index documents
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.configSnapshot.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.user, {
     content: documents,
     query,
     k: documents.length,
@@ -103,7 +103,7 @@ export async function sortCanvasesBySimilarity(
 export async function sortResourcesBySimilarity(
   query: string,
   resources: SkillContextResourceItem[],
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextResourceItem[]> {
   // 1. construct documents
   const documents: Document<NodeMeta>[] = resources.map((item) => {
@@ -119,7 +119,7 @@ export async function sortResourcesBySimilarity(
   });
 
   // 2. index documents
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.configSnapshot.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.user, {
     content: documents,
     query,
     k: documents.length,
@@ -137,7 +137,7 @@ export async function processSelectedContentWithSimilarity(
   query: string,
   contentList: SkillContextContentItem[] = [],
   maxTokens: number,
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextContentItem[]> {
   const MAX_RAG_RELEVANT_CONTENT_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_CONTENT_RATIO);
   const MAX_SHORT_CONTENT_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_CONTENT_RATIO);
@@ -228,7 +228,7 @@ export async function processCanvasesWithSimilarity(
   query: string,
   canvases: SkillContextCanvasItem[] = [],
   maxTokens: number,
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextCanvasItem[]> {
   const MAX_RAG_RELEVANT_CANVASES_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_CANVASES_RATIO);
   const MAX_SHORT_CANVASES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_CANVASES_RATIO);
@@ -323,7 +323,7 @@ export async function processResourcesWithSimilarity(
   query: string,
   resources: SkillContextResourceItem[] = [],
   maxTokens: number,
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextResourceItem[]> {
   const MAX_RAG_RELEVANT_RESOURCES_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_RESOURCES_RATIO);
   const MAX_SHORT_RESOURCES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_RESOURCES_RATIO);
@@ -419,7 +419,7 @@ export async function processMentionedContextWithSimilarity(
   query: string,
   mentionedContext: IContext,
   maxTokens: number,
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<IContext> {
   const MAX_CONTENT_RAG_RELEVANT_RATIO = 0.4;
   const MAX_RESOURCE_RAG_RELEVANT_RATIO = 0.3;
@@ -466,7 +466,7 @@ export async function processMentionedContextWithSimilarity(
 export async function processProjectsWithSimilarity(
   query: string,
   projects: SkillContextProjectItem[] = [],
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<(SkillContextResourceItem | SkillContextCanvasItem)[]> {
   if (projects?.length === 0) {
     return [];
@@ -530,7 +530,7 @@ export async function processProjectsWithSimilarity(
 
 export async function processWholeSpaceWithSimilarity(
   query: string,
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<(SkillContextResourceItem | SkillContextCanvasItem)[]> {
   // 1. scope projects for get relevant chunks
   const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
@@ -588,11 +588,11 @@ export async function processWholeSpaceWithSimilarity(
 export async function knowledgeBaseSearchGetRelevantChunks(
   query: string,
   metadata: { entities: Entity[]; domains: SearchDomain[]; limit: number },
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<DocumentInterface[]> {
   // 1. search relevant chunks
   const res = await ctx.ctxThis.engine.service.search(
-    ctx.configSnapshot.user,
+    ctx.config.user,
     {
       query,
       entities: metadata.entities,
@@ -620,7 +620,7 @@ export async function inMemoryGetRelevantChunks(
   query: string,
   content: string,
   metadata: { entityId: string; title: string; entityType: ContentNodeType },
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<DocumentInterface[]> {
   // 1. 获取 relevantChunks
   const doc: Document<NodeMeta> = {
@@ -630,10 +630,10 @@ export async function inMemoryGetRelevantChunks(
       entityType: metadata.entityType,
       title: metadata.title,
       entityId: metadata.entityId,
-      tenantId: ctx.configSnapshot.user.uid,
+      tenantId: ctx.config.user.uid,
     },
   };
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.configSnapshot.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.user, {
     content: doc,
     query,
     k: 10,

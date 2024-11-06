@@ -1,19 +1,18 @@
-import { Button, Checkbox, Tooltip } from 'antd';
+import { Button, Tooltip } from 'antd';
 
-import { IconClose, IconEdit, IconFile, IconHistory, IconPlus } from '@arco-design/web-react/icon';
+import { IconClose, IconHistory, IconPlus } from '@arco-design/web-react/icon';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 // state
-import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useConversationStoreShallow } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { useKnowledgeBaseStoreShallow } from '../../../stores/knowledge-base';
 // utils
 import { useMessageStateStoreShallow } from '@refly-packages/ai-workspace-common/stores/message-state';
-import classNames from 'classnames';
 
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
-import { useCopilotStore, useCopilotStoreShallow } from '@refly-packages/ai-workspace-common/stores/copilot';
+import { useCopilotStoreShallow } from '@refly-packages/ai-workspace-common/stores/copilot';
 import { getClientOrigin } from '@refly-packages/utils/url';
 
 import Logo from '@/assets/logo.svg';

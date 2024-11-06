@@ -25,6 +25,7 @@ export interface MessageIntentContext {
   };
   convId?: string;
   enableWebSearch?: boolean;
+  enableAutoImportWebResource?: boolean;
   enableKnowledgeBaseSearch?: boolean;
   env: {
     runtime: IRuntime;
@@ -54,6 +55,7 @@ export interface ChatState {
   selectedModel: ModelInfo;
   selectedProject?: ProjectInfo;
   enableWebSearch: boolean;
+  enableAutoImportWebResource: boolean;
   enableKnowledgeBaseSearch: boolean;
   intentMatcher: IntentResult | undefined;
 
@@ -68,6 +70,7 @@ export interface ChatState {
   setSelectedProject: (val: ProjectInfo) => void;
   setModelList: (val: ModelInfo[]) => void;
   setEnableWebSearch: (val: boolean) => void;
+  setEnableAutoImportWebResource: (val: boolean) => void;
   setEnableKnowledgeBaseSearch: (val: boolean) => void;
   setIntentMatcher: (val: IntentResult | undefined) => void;
   resetState: () => void;
@@ -89,6 +92,7 @@ const defaultConfigurableState = {
     },
   ] as ModelInfo[],
   enableWebSearch: true,
+  enableAutoImportWebResource: true,
   enableKnowledgeBaseSearch: true,
 };
 
@@ -133,6 +137,7 @@ export const useChatStore = create<ChatState>()(
         setSelectedProject: (val: ProjectInfo) => set({ selectedProject: val }),
         setModelList: (val: ModelInfo[]) => set({ modelList: val }),
         setEnableWebSearch: (val: boolean) => set({ enableWebSearch: val }),
+        setEnableAutoImportWebResource: (val: boolean) => set({ enableAutoImportWebResource: val }),
         setEnableKnowledgeBaseSearch: (val: boolean) => set({ enableKnowledgeBaseSearch: val }),
         setIntentMatcher: (val: IntentResult | undefined) => set({ intentMatcher: val }),
         resetState: () => {
@@ -142,7 +147,13 @@ export const useChatStore = create<ChatState>()(
       }),
       {
         name: 'chat-storage',
-        partialize: (state) => ({ selectedModel: state.selectedModel, selectedProject: state.selectedProject }),
+        partialize: (state) => ({
+          selectedModel: state.selectedModel,
+          selectedProject: state.selectedProject,
+          enableWebSearch: state.enableWebSearch,
+          enableAutoImportWebResource: state.enableAutoImportWebResource,
+          enableKnowledgeBaseSearch: state.enableKnowledgeBaseSearch,
+        }),
       },
     ),
   ),

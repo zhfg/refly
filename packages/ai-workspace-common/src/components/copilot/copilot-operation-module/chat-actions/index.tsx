@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { Button, Dropdown, Menu, FormInstance, Checkbox } from '@arco-design/web-react';
+import { Button, Dropdown, MenuProps, Switch } from 'antd';
+import { FormInstance } from '@arco-design/web-react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { IconDown, IconPause, IconSend } from '@arco-design/web-react/icon';
+import { IconDown, IconPause, IconSend, IconSettings } from '@arco-design/web-react/icon';
 import { useMessageStateStoreShallow } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +15,6 @@ import { ProjectSelector } from './project-selector';
 
 // styles
 import './index.scss';
-import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components/output-locale-list';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
@@ -40,6 +40,8 @@ export const ChatActions = (props: ChatActionsProps) => {
     setEnableWebSearch: state.setEnableWebSearch,
     enableKnowledgeBaseSearch: state.enableKnowledgeBaseSearch,
     setEnableKnowledgeBaseSearch: state.setEnableKnowledgeBaseSearch,
+    enableAutoImportWebResource: state.enableAutoImportWebResource,
+    setEnableAutoImportWebResource: state.setEnableAutoImportWebResource,
   }));
   const messageStateStore = useMessageStateStoreShallow((state) => ({
     pending: state.pending,
@@ -67,35 +69,111 @@ export const ChatActions = (props: ChatActionsProps) => {
   const canSendMessage = !userStore.isLogin || (!messageStateStore?.pending && tokenAvailable && canSendEmptyMessage);
   const hideProjectSelector = envProjectId || !isWeb || [MessageIntentSource.Share].includes(source);
 
+  const [containerWidth, setContainerWidth] = useState<number>(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const COLLAPSE_WIDTH = 600; // Adjust this threshold as needed
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  const settingsItems: MenuProps['items'] = [
+    ...(containerWidth < COLLAPSE_WIDTH
+      ? [
+          {
+            key: 'webSearch',
+            label: !skillStore?.selectedSkill?.skillId ? (
+              <div
+                className="text-xs flex items-center gap-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  chatStore.setEnableWebSearch(!chatStore.enableWebSearch);
+                }}
+              >
+                <Switch size="small" checked={chatStore.enableWebSearch} />
+                <span className="chat-action-item-text">{t('copilot.webSearch.title')}</span>
+              </div>
+            ) : null,
+          },
+          {
+            key: 'knowledgeBase',
+            label: !skillStore?.selectedSkill?.skillId ? (
+              <div
+                className="text-xs flex items-center gap-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  chatStore.setEnableKnowledgeBaseSearch(!chatStore.enableKnowledgeBaseSearch);
+                }}
+              >
+                <Switch size="small" checked={chatStore.enableKnowledgeBaseSearch} />
+                <span className="chat-action-item-text">{t('copilot.knowledgeBaseSearch.title')}</span>
+              </div>
+            ) : null,
+          },
+        ]
+      : []),
+    {
+      key: 'enableAutoImportWebResource',
+      label: (
+        <div
+          className="text-xs flex items-center gap-2"
+          onClick={(e) => {
+            e.stopPropagation();
+            chatStore.setEnableAutoImportWebResource(!chatStore.enableAutoImportWebResource);
+          }}
+        >
+          <Switch size="small" checked={chatStore.enableAutoImportWebResource} />
+          <span className="chat-action-item-text">{t('copilot.autoImportWebResource.title')}</span>
+        </div>
+      ),
+    },
+  ].filter((item) => item.label !== null);
+
   return (
-    <div className="chat-actions">
+    <div className="chat-actions" ref={containerRef}>
       <div className="left-actions">
         <ModelSelector />
-        {/* <OutputLocaleList /> */}
-        {!skillStore?.selectedSkill?.skillId ? (
+        {containerWidth >= COLLAPSE_WIDTH && !skillStore?.selectedSkill?.skillId ? (
           <div className="chat-action-item" onClick={() => chatStore.setEnableWebSearch(!chatStore.enableWebSearch)}>
-            <Checkbox checked={chatStore.enableWebSearch} />
+            <Switch size="small" checked={chatStore.enableWebSearch} />
             <span className="chat-action-item-text">{t('copilot.webSearch.title')}</span>
           </div>
         ) : null}
-        {!skillStore?.selectedSkill?.skillId ? (
+        {containerWidth >= COLLAPSE_WIDTH && !skillStore?.selectedSkill?.skillId ? (
           <div
             className="chat-action-item"
             onClick={() => chatStore.setEnableKnowledgeBaseSearch(!chatStore.enableKnowledgeBaseSearch)}
           >
-            <Checkbox checked={chatStore.enableKnowledgeBaseSearch} />
+            <Switch size="small" checked={chatStore.enableKnowledgeBaseSearch} />
             <span className="chat-action-item-text">{t('copilot.knowledgeBaseSearch.title')}</span>
           </div>
         ) : null}
+        <Dropdown className="chat-action-item" trigger={['click']} menu={{ items: settingsItems }}>
+          <a onClick={(e) => e.preventDefault()}>
+            <IconSettings fontSize={14} />
+            <span className="chat-action-item-text">{t('copilot.moreSettings')}</span>
+            <IconDown />
+          </a>
+        </Dropdown>
         {!hideProjectSelector ? <ProjectSelector /> : null}
       </div>
       <div className="right-actions">
         {messageStateStore?.pending ? (
           <Button
-            size="mini"
+            size="small"
             icon={<IconPause />}
-            className="search-btn"
-            style={{ color: '#FFF', background: '#000', height: '24px' }}
             onClick={() => {
               handleAbort();
             }}
@@ -103,12 +181,12 @@ export const ChatActions = (props: ChatActionsProps) => {
         ) : null}
         {messageStateStore?.pending && !isWeb ? null : (
           <Button
-            size="mini"
+            size="small"
+            type="primary"
             icon={<IconSend />}
             loading={messageStateStore?.pending}
             disabled={messageStateStore?.pending}
-            className="search-btn"
-            style={{ color: '#FFF', background: '#00968F' }}
+            className="text-xs gap-1"
             onClick={() => {
               handleSendMessage();
             }}

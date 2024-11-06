@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Button, Popover, Tooltip } from '@arco-design/web-react';
+import { Button, Popover, Tooltip } from 'antd';
 import { Badge } from 'antd';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { BaseMarkContextSelector } from '../base-mark-context-selector';
-import './index.scss';
 import { Mark } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
 import { useProcessContextItems } from '../../hooks/use-process-context-items';
@@ -33,7 +32,6 @@ export const AddBaseMarkContext = (props: { source: MessageIntentSource }) => {
   );
 
   const handleAddItem = (newMark: Mark) => {
-    console.log('newMark', newMark);
     // 检查项目是否已经存在于 store 中
     const existingMark = currentSelectedMarks.find((mark) => mark.id === newMark.id && mark.type === newMark.type);
 
@@ -49,7 +47,7 @@ export const AddBaseMarkContext = (props: { source: MessageIntentSource }) => {
     }
   };
 
-  const handleVisibleChange = (visible) => {
+  const handleVisibleChange = (visible: boolean) => {
     setPopoverVisible(visible);
   };
 
@@ -63,35 +61,35 @@ export const AddBaseMarkContext = (props: { source: MessageIntentSource }) => {
 
   return (
     <Badge count={(selectedItems || []).length} size="small" color="#00968F" style={{ zIndex: 1000 }}>
-      <div className="add-base-mark-context">
-        <Popover
-          position="bottom"
-          trigger="click"
-          className="add-base-mark-context-popover"
-          popupVisible={popoverVisible}
-          onVisibleChange={handleVisibleChange}
-          content={
-            <BaseMarkContextSelector
-              source={props.source}
-              onClose={handleClose}
-              onSelect={handleSelect}
-              selectedItems={selectedItems}
-            />
-          }
+      <Popover
+        placement="bottom"
+        trigger="click"
+        overlayInnerStyle={{ padding: 0, boxShadow: 'none' }}
+        open={popoverVisible}
+        onOpenChange={handleVisibleChange}
+        content={
+          <BaseMarkContextSelector
+            source={props.source}
+            onClose={handleClose}
+            onSelect={handleSelect}
+            selectedItems={selectedItems}
+          />
+        }
+      >
+        <Tooltip
+          title={selectedItems?.length > 0 ? t('knowledgeBase.context.addContext') : ''}
+          getPopupContainer={getPopupContainer}
         >
-          <Tooltip content={t('knowledgeBase.context.addContext')} getPopupContainer={getPopupContainer}>
-            <Button
-              icon={<IconPlus />}
-              size="mini"
-              type="outline"
-              className="h-6 text-xs rounded border border-gray-300"
-              style={{ borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
-            >
-              {selectedItems?.length === 0 ? t('copilot.addContext') : null}
-            </Button>
-          </Tooltip>
-        </Popover>
-      </div>
+          <Button
+            icon={<IconPlus />}
+            size="small"
+            type="default"
+            className="text-xs h-6 rounded border text-gray-500 gap-1"
+          >
+            {selectedItems?.length === 0 ? t('copilot.addContext') : null}
+          </Button>
+        </Tooltip>
+      </Popover>
     </Badge>
   );
 };

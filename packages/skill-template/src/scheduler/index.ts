@@ -68,6 +68,19 @@ export class Scheduler extends BaseSkill {
         defaultValue: true,
       },
       {
+        key: 'enableAutoImportWebResource',
+        inputMode: 'radio',
+        labelDict: {
+          en: 'Auto Import Web Resource',
+          'zh-CN': '自动导入网页资源',
+        },
+        descriptionDict: {
+          en: 'Enable auto import web resource',
+          'zh-CN': '启用自动导入网页资源',
+        },
+        defaultValue: true,
+      },
+      {
         key: 'enableKnowledgeBaseSearch',
         inputMode: 'radio',
         labelDict: {
@@ -109,9 +122,6 @@ export class Scheduler extends BaseSkill {
 
   // Default skills to be scheduled (they are actually templates!).
   skills: BaseSkill[] = createSkillInventory(this.engine);
-
-  // Scheduler config snapshot, should keep unchanged except for `spanId`.
-  configSnapshot?: SkillRunnableConfig;
 
   isValidSkillName = (name: string) => {
     return this.skills.some((skill) => skill.name === name);
@@ -307,24 +317,16 @@ Please generate the summary based on these requirements and offer suggestions fo
   };
 
   commonPreprocess = async (state: GraphState, config: SkillRunnableConfig, module: SkillPromptModule) => {
-    this.configSnapshot ??= config;
-    this.engine.logger.log(`config: ${safeStringifyJSON(this.configSnapshot.configurable)}`);
-
     const { messages = [], query: originalQuery } = state;
     const {
       locale = 'en',
       chatHistory = [],
-      installedSkills,
-      currentSkill,
-      spanId,
       modelName,
       resources,
       canvases,
       contentList,
       projects,
-      projectId,
-      convId,
-    } = this.configSnapshot.configurable;
+    } = config.configurable;
 
     const { tplConfig } = config?.configurable || {};
     const enableWebSearch = tplConfig?.enableWebSearch?.value as boolean;
@@ -336,7 +338,7 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     // preprocess query, ensure query is not too long
     const query = preprocessQuery(originalQuery, {
-      configSnapshot: this.configSnapshot,
+      config: config,
       ctxThis: this,
       state: state,
       tplConfig,
@@ -370,7 +372,7 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     if (needRewriteQuery) {
       const analyedRes = await analyzeQueryAndContext(query, {
-        configSnapshot: this.configSnapshot,
+        config,
         ctxThis: this,
         state: state,
         tplConfig,
@@ -391,7 +393,7 @@ Please generate the summary based on these requirements and offer suggestions fo
           hasContext,
         },
         {
-          configSnapshot: this.configSnapshot,
+          config: config,
           ctxThis: this,
           state: state,
           tplConfig,
@@ -429,6 +431,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       initialContent: '',
       projectId,
     });
+    config.configurable.projectId ||= res.data?.projectId;
 
     // Emit intent matcher event
     this.emitEvent(
@@ -454,7 +457,7 @@ Please generate the summary based on these requirements and offer suggestions fo
     };
     const { requestMessages } = await this.commonPreprocess(state, config, module);
 
-    this.emitEvent({ event: 'log', content: `Start to generate canvas...` }, this.configSnapshot);
+    this.emitEvent({ event: 'log', content: `Start to generate canvas...` }, config);
 
     const responseMessage = await model.invoke(requestMessages, {
       ...config,
@@ -473,9 +476,6 @@ Please generate the summary based on these requirements and offer suggestions fo
 
   callRewriteCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { messages = [], query: originalQuery } = state;
-
-    // 确保在使用 configSnapshot 之前初始化它
-    this.configSnapshot ??= config;
 
     const { chatHistory = [], currentSkill, spanId, projectId, convId, canvases } = config.configurable;
 
@@ -534,7 +534,6 @@ Please generate the summary based on these requirements and offer suggestions fo
    */
   callEditCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { messages = [], query: originalQuery } = state;
-    this.configSnapshot ??= config;
 
     const { chatHistory = [], currentSkill, spanId, projectId, convId, canvases, tplConfig } = config.configurable;
 
@@ -656,16 +655,12 @@ Please generate the summary based on these requirements and offer suggestions fo
   };
 
   callCommonQnA = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    this.emitEvent({ event: 'log', content: `Start to call common qna...` }, this.configSnapshot);
+    this.emitEvent({ event: 'log', content: `Start to call common qna...` }, config);
     /**
      * 1. 基于聊天历史，当前意图识别结果，上下文，以及整体优化之后的 query，调用 scheduler 模型，得到一个最优的技能调用序列
      * 2. 基于得到的技能调用序列，调用相应的技能
      */
-
-    this.configSnapshot ??= config;
-
-    const { currentSkill, spanId, resources, canvases, contentList, projects, projectId, convId } =
-      this.configSnapshot.configurable;
+    const { currentSkill, spanId, resources, canvases, projectId, convId } = config.configurable;
 
     const { tplConfig } = config?.configurable || {};
 
@@ -711,13 +706,13 @@ Please generate the summary based on these requirements and offer suggestions fo
     };
     const { requestMessages } = await this.commonPreprocess(state, config, module);
 
-    this.emitEvent({ event: 'log', content: `Start to generate an answer...` }, this.configSnapshot);
+    this.emitEvent({ event: 'log', content: `Start to generate an answer...` }, config);
 
     const model = this.engine.chatModel({ temperature: 0.1 });
     const responseMessage = await model.invoke(requestMessages, {
-      ...this.configSnapshot,
+      ...config,
       metadata: {
-        ...this.configSnapshot.metadata,
+        ...config.metadata,
         ...currentSkill,
         spanId,
       },
@@ -725,7 +720,7 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
 
-    this.emitEvent({ event: 'log', content: `Generated an answer successfully!` }, this.configSnapshot);
+    this.emitEvent({ event: 'log', content: `Generated an answer successfully!` }, config);
 
     return { messages: [responseMessage], skillCalls: [] };
   };
@@ -734,12 +729,10 @@ Please generate the summary based on these requirements and offer suggestions fo
     try {
       const { query: originalQuery } = state;
 
-      this.configSnapshot ??= config;
-
       const { chatHistory = [], projectId, canvases = [], tplConfig } = config.configurable;
       const canvasEditConfig = tplConfig?.canvasEditConfig?.value as CanvasEditConfig;
 
-      this.emitEvent({ event: 'start' }, this.configSnapshot);
+      this.emitEvent({ event: 'start' }, config);
 
       const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
       const intentMatcherTypeDomain = canvasIntentMatcher.prepareIntentMatcherTypeDomain(
@@ -812,7 +805,7 @@ Please generate the summary based on these requirements and offer suggestions fo
             currentSkill: selectedSkill,
           },
         }
-      : this.configSnapshot;
+      : config;
 
     const getSystemPrompt = (locale: string) => `## Role
 You are an SEO (Search Engine Optimization) expert, skilled at identifying key information from the provided context and proposing three semantically relevant recommended questions based on this information to help users gain a deeper understanding of the content.
@@ -916,7 +909,7 @@ Generated question example:
 
   shouldCallSkill = (state: GraphState, config: SkillRunnableConfig): 'skill' | 'relatedQuestions' | typeof END => {
     // const { skillCalls = [] } = state;
-    const { convId } = this.configSnapshot?.configurable ?? config.configurable;
+    const { convId } = config.configurable;
 
     // if (skillCalls.length > 0) {
     //   return 'skill';

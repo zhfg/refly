@@ -8,7 +8,7 @@ import {
   useConversationStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { buildConversation, getConversation } from '@refly-packages/ai-workspace-common/utils/conversation';
-import { Notification } from '@arco-design/web-react';
+import { notification } from 'antd';
 import { useResetState } from './use-reset-state';
 import { useTaskStoreShallow } from '@refly-packages/ai-workspace-common/stores/task';
 
@@ -121,6 +121,7 @@ export const useBuildThreadAndRun = () => {
     const projectId = messageIntentContext?.projectContext?.projectId;
     const forceNewConv = messageIntentContext?.isNewConversation;
     const enableWebSearch = messageIntentContext?.enableWebSearch;
+    const enableAutoImportWebResource = messageIntentContext?.enableAutoImportWebResource;
     const enableKnowledgeBaseSearch = messageIntentContext?.enableKnowledgeBaseSearch;
 
     // 创建新会话并跳转
@@ -145,14 +146,20 @@ export const useBuildThreadAndRun = () => {
           enableWebSearch: {
             value: enableWebSearch,
             configScope: 'runtime' as unknown as ConfigScope,
-            displayValue: localSettings?.uiLocale === 'zh-CN' ? '全网搜索' : 'Web Search',
-            label: localSettings?.uiLocale === 'zh-CN' ? '全网搜索' : 'Web Search',
+            displayValue: t('copilot.webSearch.title'),
+            label: t('copilot.webSearch.title'),
+          },
+          enableAutoImportWebResource: {
+            value: enableAutoImportWebResource,
+            configScope: 'runtime' as unknown as ConfigScope,
+            displayValue: t('copilot.autoImportWebResource.title'),
+            label: t('copilot.autoImportWebResource.title'),
           },
           enableKnowledgeBaseSearch: {
             value: enableKnowledgeBaseSearch,
             configScope: 'runtime' as unknown as ConfigScope,
-            displayValue: localSettings?.uiLocale === 'zh-CN' ? '知识库搜索' : 'Knowledge Base Search',
-            label: localSettings?.uiLocale === 'zh-CN' ? '知识库搜索' : 'Knowledge Base Search',
+            displayValue: t('copilot.knowledgeBaseSearch.title'),
+            label: t('copilot.knowledgeBaseSearch.title'),
           },
           ...(canvasEditConfig
             ? {
@@ -187,6 +194,7 @@ export const useBuildThreadAndRun = () => {
       ...{ createConvParam: getConversation({ ...conv, title: question }) },
     };
     taskStore.setTask(task);
+
     // 开始提问
     buildTaskAndGenReponse(task as InvokeSkillRequest);
     // chatStore.setNewQAText('');
@@ -205,10 +213,9 @@ export const useBuildThreadAndRun = () => {
 
     const { formErrors } = useContextPanelStore.getState();
     if (formErrors && Object.keys(formErrors).length > 0) {
-      Notification.error({
-        style: { width: 400 },
-        title: t('copilot.configManager.errorTipTitle'),
-        content: t('copilot.configManager.errorTip'),
+      notification.error({
+        message: t('copilot.configManager.errorTipTitle'),
+        description: t('copilot.configManager.errorTip'),
       });
       return;
     }
