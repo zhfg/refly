@@ -92,6 +92,7 @@ export const BindResourceModal = (props: BindResourceModalProps) => {
           <SearchSelect
             domain={domain}
             mode={mode}
+            allowCreateNewEntity={domain === 'project'}
             placeholder={t(`knowledgeBase.resourceCollectionAssociativeModal.${domain}Placeholder`)}
             onChange={(val) => {
               form.setFieldValue('selectedValue', val);

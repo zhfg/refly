@@ -31,7 +31,6 @@ import {
 import Logo from "@/assets/logo.svg"
 import "./sider.scss"
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
-import { useNewCanvasModalStoreShallow } from "@refly-packages/ai-workspace-common/stores/new-canvas-modal"
 import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
 // components
 import { SearchQuickOpenBtn } from "@refly-packages/ai-workspace-common/components/search-quick-open-btn"
@@ -46,6 +45,7 @@ import { useJumpNewPath } from "@refly-packages/ai-workspace-common/hooks/use-ju
 import { useRecentsStoreShallow } from "@refly-packages/ai-workspace-common/stores/recents"
 import { useHandleRecents } from "@refly-packages/ai-workspace-common/hooks/use-handle-rencents"
 import { MessageIntentSource } from "@refly-packages/ai-workspace-common/types/copilot"
+import { useProjectStoreShallow } from "@refly-packages/ai-workspace-common/stores/project"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -216,7 +216,10 @@ export const SiderLayout = () => {
 
   const isGuideDetail = location.pathname.includes("guide/")
 
-  const { jumpToProject } = useJumpNewPath()
+  const { jumpToConv } = useJumpNewPath()
+  const { projectActiveConvId } = useProjectStoreShallow(state => ({
+    projectActiveConvId: state.projectActiveConvId,
+  }))
 
   const { t } = useTranslation()
 
@@ -340,6 +343,20 @@ export const SiderLayout = () => {
 
   useHandleRecents(true)
 
+  const handleClickProject = (projectId: string) => {
+    const activeConvId = projectActiveConvId[projectId] as string
+    jumpToConv({
+      convId: activeConvId || "",
+      projectId,
+      state: {
+        navigationContext: {
+          shouldFetchDetail: true,
+          source: MessageIntentSource.Project,
+        },
+      },
+    })
+  }
+
   return (
     <Sider
       className={`app-sider ${isGuideDetail ? "fixed" : ""}`}
@@ -412,7 +429,7 @@ export const SiderLayout = () => {
                         className="custom-menu-item"
                         key={project.projectId}
                         onClick={() => {
-                          jumpToProject({ projectId: project.projectId })
+                          handleClickProject(project.projectId)
                         }}>
                         {project.title}
                       </MenuItem>

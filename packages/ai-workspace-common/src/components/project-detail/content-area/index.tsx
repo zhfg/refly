@@ -170,7 +170,7 @@ export const ContentArea = (props: { projectId: string; setBindResourceModalVisi
           </Tooltip>
         }
       />
-      <div className="flex-grow overflow-auto">
+      <div className="flex-grow overflow-auto overflow-hidden">
         <Splitter
           layout="vertical"
           onResize={(sizes) => {
