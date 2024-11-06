@@ -315,7 +315,7 @@
   .sider-footer {
     position: absolute;
     bottom: 0;
-    width: calc(100% - 16px); // 根据 sider 宽度调整
+    width: calc(100%); // 根据 sider 宽度调整
     background-color: #f3f3ee;
     padding: 8px 0;
     border-top: 1px solid #e8e8e2;

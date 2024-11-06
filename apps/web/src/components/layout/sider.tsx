@@ -122,7 +122,7 @@ const MenuItemTooltipContent = (props: { title: string }) => {
   return <div>{props.title}</div>
 }
 
-const SettingItem = () => {
+const SettingItem = (props: { collapse: boolean }) => {
   const userStore = useUserStoreShallow(state => ({
     userProfile: state.userProfile,
   }))
@@ -138,15 +138,19 @@ const SettingItem = () => {
                 alt="user-avatar"
               />
             </Avatar>
-            <span className="username">
-              <span>{userStore?.userProfile?.nickname}</span>
-            </span>
-          </div>
-          <div className="subscription-status">
-            {t(
-              `settings.subscription.subscriptionStatus.${userStore?.userProfile?.subscription?.planType || "free"}`,
+            {!props.collapse && (
+              <span className="username">
+                <span>{userStore?.userProfile?.nickname}</span>
+              </span>
             )}
           </div>
+          {!props.collapse && (
+            <div className="subscription-status">
+              {t(
+                `settings.subscription.subscriptionStatus.${userStore?.userProfile?.subscription?.planType || "free"}`,
+              )}
+            </div>
+          )}
         </div>
       </SiderMenuSettingList>
     </div>
@@ -387,7 +391,7 @@ export const SiderLayout = () => {
               </div>
             ))}
 
-            {recentProjects.length > 0 && (
+            {recentProjects.length > 0 && !collapse && (
               <Divider style={{ margin: "8px 0" }} />
             )}
 
@@ -461,7 +465,7 @@ export const SiderLayout = () => {
                     title={t("loggedHomePage.siderMenu.settings")}
                   />
                 )}>
-                <SettingItem></SettingItem>
+                <SettingItem collapse={collapse}></SettingItem>
               </MenuItem>
             )}
 

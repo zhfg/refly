@@ -15,6 +15,7 @@
   .search-quick-open-input {
     display: flex;
     flex-direction: row;
+    flex-wrap: nowrap;
     justify-content: space-between;
     padding: 8px;
     margin: 0 12px;

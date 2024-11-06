@@ -161,36 +161,36 @@ const ShareContent = () => {
         </div>
 
         <div className="canvas-content relative flex-grow overflow-hidden">
-          <Splitter>
-            <Splitter.Panel>
-              <div className="left-panel relative flex h-full w-full">
-                {canvasList.length > 0 && (
-                  <div className="shadow-l w-[20%] flex-shrink-0 overflow-y-auto pt-2">
-                    {canvasList.map((item: Canvas) => (
-                      <div
-                        key={item.canvasId}
-                        className="mb-1 ml-4 mr-4 mt-1 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap rounded-md p-2 text-[14px] hover:bg-gray-100"
-                        style={{
-                          backgroundColor:
-                            currentCanvas?.canvasId === item.canvasId
-                              ? "rgba(0,0,0,0.05)"
-                              : "",
-                        }}
-                        onClick={() => {
-                          setCurrentCanvasId(item.canvasId)
-                        }}>
-                        {item.title}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div className="flex-grow overflow-hidden bg-[#f5f5f5] p-8">
-                  {loading ? (
-                    <Spin
-                      className="flex h-full w-full items-center justify-center"
-                      size="large"
-                    />
-                  ) : (
+          {loading ? (
+            <Spin
+              className="flex h-full w-full items-center justify-center"
+              size="large"
+            />
+          ) : (
+            <Splitter>
+              <Splitter.Panel>
+                <div className="left-panel relative flex h-full w-full">
+                  {canvasList.length > 0 && (
+                    <div className="shadow-l w-[20%] flex-shrink-0 overflow-y-auto pt-2">
+                      {canvasList.map((item: Canvas) => (
+                        <div
+                          key={item.canvasId}
+                          className="mb-1 ml-4 mr-4 mt-1 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap rounded-md p-2 text-[14px] hover:bg-gray-100"
+                          style={{
+                            backgroundColor:
+                              currentCanvas?.canvasId === item.canvasId
+                                ? "rgba(0,0,0,0.05)"
+                                : "",
+                          }}
+                          onClick={() => {
+                            setCurrentCanvasId(item.canvasId)
+                          }}>
+                          {item.title}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex-grow overflow-hidden bg-[#f5f5f5] p-8">
                     <>
                       {currentCanvas ? (
                         <div className="share-canvas-content mx-auto mb-8 box-border h-full max-w-[1024px] overflow-y-auto rounded-lg bg-white p-8 shadow-lg">
@@ -203,15 +203,15 @@ const ShareContent = () => {
                         <Empty />
                       )}
                     </>
-                  )}
+                  </div>
                 </div>
-              </div>
-            </Splitter.Panel>
+              </Splitter.Panel>
 
-            <Splitter.Panel collapsible defaultSize={400} max={500} min={400}>
-              <AICopilot source={MessageIntentSource.Share} />
-            </Splitter.Panel>
-          </Splitter>
+              <Splitter.Panel collapsible defaultSize={400} max={500} min={400}>
+                <AICopilot source={MessageIntentSource.Share} />
+              </Splitter.Panel>
+            </Splitter>
+          )}
         </div>
       </div>
     </ErrorBoundary>
