@@ -42,18 +42,6 @@
         "exit": "Exit",
         "empty": "No content is currently selected..."
       },
-      "weblinkList": {
-        "title": "Knowledge Base",
-        "selectedCnt": "Selected {{count}} items",
-        "drawer": {
-          "cancel": "Cancel",
-          "confirm": "Confirm"
-        },
-        "item": {
-          "read": "Read",
-          "unread": "Unread"
-        }
-      },
       "recommendQuickAction": {
         "title": "Recommended Quick Actions:",
         "summary": {
@@ -88,13 +76,6 @@
         "current": "Ask a question about the current web page...",
         "internet": "Enter keywords for an internet search...",
         "currentSelectedContent": "Ask a question based on the currently selected content..."
-      },
-      "searchScope": {
-        "title": "Select Search Scope",
-        "current": "Current WebPage",
-        "all": "Entire Knowledge Base",
-        "history": "History of Read Content",
-        "internet": "Internet Search"
       },
       "status": {
         "emptyNotify": "The question field cannot be empty.",
@@ -308,13 +289,6 @@
           "current": "Ask a question about the current web page...",
           "internet": "Enter keywords for an internet search...",
           "currentSelectedContent": "Ask a question based on the currently selected content..."
-        },
-        "searchScope": {
-          "title": "Select Search Scope",
-          "current": "Current WebPage",
-          "all": "Entire Knowledge Base",
-          "selected": "Selected Web Page",
-          "internet": "Internet Search"
         },
         "status": {
           "emptyNotify": "The question field cannot be empty.",

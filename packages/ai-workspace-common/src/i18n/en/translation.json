@@ -208,10 +208,9 @@
     "deleteDropdownMenu": {
       "successful": "Deleted successfully!",
       "failed": "Failed to delete",
-      "deleteConfirmForNote": "Are you sure you want to delete this note?",
-      "deleteConfirmForKnowledgeBase": "Are you sure you want to delete this knowledge base?",
+      "deleteConfirmForNote": "Are you sure you want to delete this canvas?",
       "deleteConfirmForResource": "Are you sure you want to delete this resource?",
-      "deleteConfirmForResourceCollection": "Are you sure to remove this resource from the collection?",
+      "deleteConfirmForResourceProject": "Are you sure to remove this resource from the project?",
       "delete": "Delete",
       "edit": "Edit"
     }
@@ -238,14 +237,14 @@
     },
     "note": {
       "connecting": "Connecting...",
-      "newNote": "Create New Note",
+      "newNote": "Create New Canvas",
       "noteCharsCount": "{{count}} characters",
       "autoSaved": "Saved",
       "saving": "Saving...",
       "readOnly": "Canvas is set to read-only mode",
       "edit": "Canvas is set to edit mode",
       "serviceDisconnected": "Service Disconnected",
-      "createNoteFailed": "Failed to create note, please try again!",
+      "createNoteFailed": "Failed to create canvas, please try again!",
       "defaultTitle": "Untitled"
     },
     "canvas": {
@@ -309,9 +308,8 @@
       }
     },
     "header": {
-      "searchAndOpenResourceOrCollection": "Search and open resource or collection",
-      "searchOrOpenResourceOrCollection": "Search or open resource or collection",
-      "searchOrOpenNote": "Search or open note",
+      "searchAndOpenResourceOrProject": "Search and open resource or project",
+      "searchOrOpenNote": "Search or open canvas",
       "searchOrOpenThread": "Search or open thread",
       "openThreadHistory": "Open Thread History",
       "newThread": "New Thread"
@@ -391,8 +389,6 @@
       "home": {
         "heading": "Suggestions",
         "askAI": "Ask Knowledge Curator",
-        "onlineSearch": "AI Online Search",
-        "collectionSearch": "AI Knowledge Base Search",
         "showAll": "View All {{heading}}"
       },
       "basedOn": "Based on",
@@ -404,18 +400,6 @@
       "searchPlaceholder": "Search for Refly",
       "selectedWeblink": {
         "title": "Ask a Question Based on the Selected Web Page:"
-      },
-      "weblinkList": {
-        "title": "Knowledge Base",
-        "selectedCnt": "Selected {{count}} items",
-        "drawer": {
-          "cancel": "Cancel",
-          "confirm": "Confirm"
-        },
-        "item": {
-          "read": "Read",
-          "unread": "Unread"
-        }
       },
       "recommendQuickAction": {
         "title": "Recommended Quick Actions:",
@@ -434,15 +418,6 @@
             "contentHandleFailedNotify": "Processing failed!"
           }
         }
-      },
-      "searchScope": {
-        "title": "Select Search Scope",
-        "none": "General Knowledge Q&A",
-        "currentPage": "Current Selected Page",
-        "currentKnowledgeBase": "Current Knowledge Base",
-        "all": "All Knowledge Bases",
-        "history": "History of Read Content",
-        "internet": "Internet Search"
       },
       "seeKnowledgeLibrary": "View Knowledge Library",
       "status": {
@@ -609,16 +584,16 @@
       "formLabel": {
         "query": "Question",
         "resources": "Resource",
-        "notes": "Note",
-        "collections": "Collection",
+        "notes": "Canvas",
+        "collections": "Project",
         "contentList": "Content",
         "urls": "URLs"
       },
       "placeholder": {
         "query": "Please enter question",
         "resources": "Please select resource",
-        "notes": "Please select note",
-        "collections": "Please select collection",
+        "notes": "Please select canvas",
+        "collections": "Please select project",
         "contentList": {
           "select": "Please select content",
           "textarea": "Please enter or paste content"
@@ -628,11 +603,11 @@
       "context": {
         "contentList": {
           "resourceSelection": "Resource Selection",
-          "noteSelection": "Note Selection",
+          "noteSelection": "Canvas Selection",
           "extensionWeblinkSelection": "Web Link Selection",
-          "canvasCursorSelection": "Note Cursor Selection",
-          "canvasBeforeCursorSelection": "Note Before Cursor Selection",
-          "canvasAfterCursorSelection": "Note After Cursor Selection"
+          "canvasCursorSelection": "Canvas Cursor Selection",
+          "canvasBeforeCursorSelection": "Canvas Before Cursor Selection",
+          "canvasAfterCursorSelection": "Canvas After Cursor Selection"
         }
       },
       "invokeConfig": "Invocation Config",
@@ -731,13 +706,13 @@
         "yearlyPlan": "Yearly Auto-Renewal",
         "tooltip": {
           "modelToken": "Usage includes both model input and output tokens",
-          "vectorStorage": "Used for storing semantic embeddings of resources and notes",
-          "fileStorage": "Used for storing resource texts, text and history versions of notes, and uploaded files (images)"
+          "vectorStorage": "Used for storing semantic embeddings of resources and canvases",
+          "fileStorage": "Used for storing resource texts, text and history versions of canvases, and uploaded files (images)"
         },
         "vectorStorage": "Vector Storage",
         "fileStorage": "File Storage",
         "fileStorageType": {
-          "note": "Notes",
+          "note": "Canvases",
           "resource": "Resources",
           "file": "Uploaded Files"
         },
@@ -867,13 +842,6 @@
       },
       "input": {
         "placeholder": "Ask a follow-up question...",
-        "searchScope": {
-          "title": "Select Search Scope",
-          "current": "Current WebPage",
-          "all": "Entire Knowledge Base",
-          "selected": "Selected Web Page",
-          "internet": "Internet Search"
-        },
         "selectedWeblink": {
           "title": "Ask a Question Based on the Selected Web Page:"
         },
@@ -898,14 +866,14 @@
     "placeholder": {
       "project": "Select Project",
       "resource": "Select Resource",
-      "note": "Select Note",
+      "note": "Select Canvas",
       "skill": "Select Skill",
       "conversation": "Select Conversation"
     },
     "createEntity": {
       "project": "New Project",
       "resource": "New Resource",
-      "note": "New Note",
+      "note": "New Canvas",
       "skill": "New Skill",
       "conversation": "New Conversation",
       "newProjectNameIsEmpty": "Please enter the name of the project"
@@ -939,8 +907,8 @@
         }
       },
       "noteContextCard": {
-        "title": "Quick Actions for Current Note",
-        "noteSelectedTitle": "Question within Selected Note Content",
+        "title": "Quick Actions for Current Canvas",
+        "noteSelectedTitle": "Question within Selected Canvas Content",
         "selectedContentCount": "({{count}} items)",
         "noSelectedContent": "No selected content...",
         "improveWriting": {
@@ -1018,10 +986,10 @@
       "placeholder": "No selected content...",
       "options": {
         "resource": "Selected Resource Content",
-        "note": "Selected Note Content",
-        "noteCursorSelection": "Note Cursor Selection",
-        "noteBeforeCursorSelection": "Note Cursor Before Selection",
-        "noteAfterCursorSelection": "Note Cursor After Selection",
+        "note": "Selected Canvas Content",
+        "noteCursorSelection": "Canvas Cursor Selection",
+        "noteBeforeCursorSelection": "Canvas Before Cursor Selection",
+        "noteAfterCursorSelection": "Canvas After Cursor Selection",
         "conversation": "Selected Conversation Content"
       },
       "save": {
@@ -1075,9 +1043,9 @@
     "message": {
       "copy": "Copy",
       "copySuccess": "Copy Success",
-      "insertBlow": "Insert Note",
+      "insertBlow": "Insert Canvas",
       "replaceSelection": "Replace Selection",
-      "createNewNote": "Create New Note",
+      "createNewNote": "Create New Canvas",
       "skillRunSuccess": "Skill Completed, {{count}} Logs",
       "skillRunning": "Skill Running...",
       "relatedQuestion": "You may also ask",
@@ -1105,16 +1073,13 @@
       }
     },
     "contentSelector": {
-      "openForWeb": "Enable content selection for questions, and the note is now in read-only mode",
-      "closeForWeb": "Close the selector, and the note is now in edit mode",
+      "openForWeb": "Enable content selection for questions, and the canvas is now in read-only mode",
+      "closeForWeb": "Close the selector, and the canvas is now in edit mode",
       "open": "Content selector is enabled",
       "close": "Content selector is disabled"
     },
     "convListModal": {
       "title": "Threads"
-    },
-    "kbListModal": {
-      "title": "Knowledge Bases"
     },
     "sourceListModal": {
       "title": "Result Sources",
