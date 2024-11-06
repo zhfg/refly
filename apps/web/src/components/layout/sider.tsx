@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Avatar,
   Divider,
@@ -59,6 +59,8 @@ const getNavSelectedKeys = (pathname = "") => {
     return "Skill"
   } else if (pathname.startsWith("/library")) {
     return "Library"
+  } else if (pathname.startsWith("/project")) {
+    return "Project"
   }
 
   return "Home"
@@ -220,6 +222,8 @@ export const SiderLayout = () => {
   const { projectActiveConvId } = useProjectStoreShallow(state => ({
     projectActiveConvId: state.projectActiveConvId,
   }))
+  const projectId = location?.pathname?.split("/")?.[2]
+  const [currentProjectId, setCurrentProjectId] = useState(projectId)
 
   const { t } = useTranslation()
 
@@ -357,6 +361,11 @@ export const SiderLayout = () => {
     })
   }
 
+  useEffect(() => {
+    const projectId = location?.pathname?.split("/")?.[2]
+    setCurrentProjectId(projectId)
+  }, [location.pathname])
+
   return (
     <Sider
       className={`app-sider ${isGuideDetail ? "fixed" : ""}`}
@@ -426,7 +435,7 @@ export const SiderLayout = () => {
 
                     {recentProjects.map(project => (
                       <MenuItem
-                        className="custom-menu-item"
+                        className={`custom-menu-item ${currentProjectId === project.projectId ? "arco-menu-selected" : ""}`}
                         key={project.projectId}
                         onClick={() => {
                           handleClickProject(project.projectId)
