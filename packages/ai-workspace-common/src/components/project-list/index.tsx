@@ -71,17 +71,16 @@ export const ProjectList = (props: ProjectListProps) => {
 
   const handleClickProject = (projectId: string) => {
     const activeConvId = projectActiveConvId[projectId] as string;
-    if (activeConvId) {
-      jumpToConv({
-        convId: activeConvId,
-        projectId,
-        state: {
-          navigationContext: { shouldFetchDetail: true, source: MessageIntentSource.Project },
+    jumpToConv({
+      convId: activeConvId || '',
+      projectId,
+      state: {
+        navigationContext: {
+          shouldFetchDetail: true,
+          source: MessageIntentSource.Project,
         },
-      });
-    } else {
-      jumpToProject({ projectId });
-    }
+      },
+    });
   };
 
   if (dataList.length === 0 && !isRequesting) {

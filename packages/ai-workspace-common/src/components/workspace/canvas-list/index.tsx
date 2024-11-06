@@ -48,7 +48,7 @@ export const CanvasList = (props: CanvasListProps) => {
   const { projectActiveConvId } = useProjectStoreShallow((state) => ({
     projectActiveConvId: state.projectActiveConvId,
   }));
-  const { jumpToCanvas, jumpToConv } = useJumpNewPath();
+  const { jumpToConv } = useJumpNewPath();
   const { handleAddTabWithNote } = useCanvasTabs();
 
   if (dataList.length === 0 && !isRequesting) {
@@ -57,16 +57,12 @@ export const CanvasList = (props: CanvasListProps) => {
 
   const handleClickCanvas = (canvas: Canvas) => {
     const activeConvId = projectActiveConvId[canvas.projectId] as string;
-    if (activeConvId) {
-      jumpToConv({
-        canvasId: canvas.canvasId,
-        projectId: canvas.projectId,
-        convId: activeConvId,
-        state: { navigationContext: { shouldFetchDetail: true, source: MessageIntentSource.Canvas } },
-      });
-    } else {
-      jumpToCanvas({ canvasId: canvas.canvasId, projectId: canvas.projectId });
-    }
+    jumpToConv({
+      canvasId: canvas.canvasId,
+      projectId: canvas.projectId,
+      convId: activeConvId || '',
+      state: { navigationContext: { shouldFetchDetail: true, source: MessageIntentSource.Canvas } },
+    });
 
     handleAddTabWithNote(canvas);
   };
