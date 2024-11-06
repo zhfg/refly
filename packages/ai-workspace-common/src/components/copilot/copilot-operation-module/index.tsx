@@ -25,6 +25,7 @@ import { useProjectContext } from '@refly-packages/ai-workspace-common/component
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { editorEmitter, InPlaceSendMessagePayload } from '@refly-packages/utils/event-emitter/editor';
 import { LOCALE, MarkType } from '@refly/common-types';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 interface CopilotInputModuleProps {
   source: MessageIntentSource;
@@ -71,7 +72,6 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
 
     const newMessageIntentContext: Partial<MessageIntentContext> = {
       ...(messageIntentContext || {}),
-      source: messageIntentContext?.source || source, // may edit from other side
       isNewConversation: messageIntentContext?.isNewConversation || forceNewConv,
       projectContext: {
         projectId: finalProjectId,
@@ -82,6 +82,10 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       },
       enableWebSearch,
       enableKnowledgeBaseSearch,
+      env: {
+        runtime: getRuntime(),
+        source, // may edit from other side,
+      },
     };
 
     chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);

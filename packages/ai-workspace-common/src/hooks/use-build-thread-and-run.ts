@@ -84,7 +84,7 @@ export const useBuildThreadAndRun = () => {
       state: {
         navigationContext: {
           shouldFetchDetail: false,
-          source: messageIntentContext?.source,
+          source: messageIntentContext?.env?.source,
         },
       },
     });
@@ -122,6 +122,7 @@ export const useBuildThreadAndRun = () => {
     const forceNewConv = messageIntentContext?.isNewConversation;
     const enableWebSearch = messageIntentContext?.enableWebSearch;
     const enableKnowledgeBaseSearch = messageIntentContext?.enableKnowledgeBaseSearch;
+    const env = messageIntentContext?.env;
 
     // 创建新会话并跳转
     const conv = ensureConversationExist(projectId, forceNewConv);
@@ -154,6 +155,16 @@ export const useBuildThreadAndRun = () => {
             displayValue: localSettings?.uiLocale === 'zh-CN' ? '知识库搜索' : 'Knowledge Base Search',
             label: localSettings?.uiLocale === 'zh-CN' ? '知识库搜索' : 'Knowledge Base Search',
           },
+          ...(env
+            ? {
+                env: {
+                  value: env.runtime,
+                  configScope: 'runtime' as unknown as ConfigScope,
+                  displayValue: localSettings?.uiLocale === 'zh-CN' ? '环境变量' : 'Environment Variables',
+                  label: localSettings?.uiLocale === 'zh-CN' ? '环境变量' : 'Environment Variables',
+                },
+              }
+            : {}),
           ...(canvasEditConfig
             ? {
                 canvasEditConfig: {
