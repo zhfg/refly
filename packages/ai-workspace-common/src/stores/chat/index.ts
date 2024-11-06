@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
-import type { ClientChatMessage, SessionItem } from '@refly/common-types';
+import type { ClientChatMessage, IRuntime, SessionItem } from '@refly/common-types';
 import { ModelInfo, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
 import { IntentResult } from '@refly-packages/ai-workspace-common/hooks/use-handle-ai-canvas';
 
@@ -13,7 +13,6 @@ import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/c
 export type ChatBehavior = 'askIntentMatch' | 'askFollowUp' | 'askNew';
 
 export interface MessageIntentContext {
-  source: MessageIntentSource;
   isNewConversation: boolean;
   canvasEditConfig?: CanvasEditConfig;
   inPlaceActionType?: InPlaceActionType;
@@ -27,6 +26,10 @@ export interface MessageIntentContext {
   convId?: string;
   enableWebSearch?: boolean;
   enableKnowledgeBaseSearch?: boolean;
+  env: {
+    runtime: IRuntime;
+    source: MessageIntentSource;
+  };
 }
 
 export interface ProjectInfo {

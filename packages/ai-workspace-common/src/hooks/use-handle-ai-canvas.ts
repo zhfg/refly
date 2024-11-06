@@ -39,7 +39,7 @@ export const useHandleAICanvas = () => {
       state: {
         navigationContext: {
           shouldFetchDetail: false,
-          source: messageIntentContext?.source,
+          source: messageIntentContext?.env?.source,
         },
       },
     });
@@ -55,7 +55,7 @@ export const useHandleAICanvas = () => {
         state: {
           navigationContext: {
             shouldFetchDetail: false,
-            source: messageIntentContext?.source,
+            source: messageIntentContext?.env?.source,
           },
         },
       });
@@ -72,7 +72,7 @@ export const useHandleAICanvas = () => {
         state: {
           navigationContext: {
             shouldFetchDetail: false,
-            source: messageIntentContext?.source,
+            source: messageIntentContext?.env?.source,
           },
         },
       });
@@ -83,37 +83,39 @@ export const useHandleAICanvas = () => {
     async (intent: IntentResult) => {
       const { messageIntentContext, messages = [] } = useChatStore.getState();
 
-      if ([MessageIntentSource.Project].includes(messageIntentContext?.source) && intent.projectId) {
+      if ([MessageIntentSource.Project].includes(messageIntentContext?.env?.source) && intent.projectId) {
         jumpToConv({
           projectId: intent.projectId,
           convId: intent.convId,
           state: {
             navigationContext: {
               shouldFetchDetail: false,
-              source: messageIntentContext?.source,
+              source: messageIntentContext?.env?.source,
             },
           },
         });
       } else if (
-        [MessageIntentSource.ConversationDetail, MessageIntentSource.HomePage].includes(messageIntentContext?.source)
+        [MessageIntentSource.ConversationDetail, MessageIntentSource.HomePage].includes(
+          messageIntentContext?.env?.source,
+        )
       ) {
         jumpToConv({
           convId: intent.convId,
           state: {
             navigationContext: {
               shouldFetchDetail: false,
-              source: messageIntentContext?.source,
+              source: messageIntentContext?.env?.source,
             },
           },
         });
-      } else if ([MessageIntentSource.Resource].includes(messageIntentContext?.source) && intent.resourceId) {
+      } else if ([MessageIntentSource.Resource].includes(messageIntentContext?.env?.source) && intent.resourceId) {
         jumpToConv({
           convId: intent.convId,
           resourceId: intent.resourceId,
           state: {
             navigationContext: {
               shouldFetchDetail: false,
-              source: messageIntentContext?.source,
+              source: messageIntentContext?.env?.source,
             },
           },
         });

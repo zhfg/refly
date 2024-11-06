@@ -19,6 +19,7 @@ import { SaveToKnowledgeBase } from './components/save-to-knowledge-base/index';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 
 // types
 import { Project, Canvas, Resource, SearchDomain, SearchResult } from '@refly/openapi-schema';
@@ -33,6 +34,7 @@ import {
 
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
   let searchResults: SearchResult[] = [];
@@ -49,7 +51,7 @@ const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
   return searchResults;
 };
 
-export const ContextManager = () => {
+export const ContextManager = (props: { source: MessageIntentSource }) => {
   const [activeItemId, setActiveItemId] = useState(null);
   const { processedContextItems } = useProcessContextItems();
   const {
@@ -100,6 +102,10 @@ export const ContextManager = () => {
   const currentKnowledgeBase = useKnowledgeBaseStoreShallow((state) => state.currentKnowledgeBase);
   const currentResource = useKnowledgeBaseStoreShallow((state) => state.currentResource);
   const currentCanvas = useCanvasStoreShallow((state) => state.currentCanvas);
+  const { project } = useProjectStoreShallow((state) => ({
+    project: state?.project?.data,
+  }));
+
   const { initMessageListener } = useSelectedMark();
 
   const currentSelectedContentList =
@@ -172,8 +178,8 @@ export const ContextManager = () => {
   };
 
   useEffect(() => {
-    updateContext(currentKnowledgeBase, 'project');
-  }, [currentKnowledgeBase?.projectId]);
+    updateContext(project, 'project');
+  }, [project?.projectId]);
 
   useEffect(() => {
     updateContext(currentResource, 'resource');
@@ -195,7 +201,7 @@ export const ContextManager = () => {
     <div className="context-manager">
       <div className="context-content">
         <div className="context-items-container">
-          <AddBaseMarkContext />
+          <AddBaseMarkContext source={props.source} />
 
           {processedContextItems?.length > 0 && <ResetContentSelectorBtn />}
 

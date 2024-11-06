@@ -3,6 +3,7 @@ import './index.scss';
 import { BaseSearchAndSelector } from '../base-search-and-selector';
 import classNames from 'classnames';
 import { Mark } from '@refly/common-types';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 interface CustomProps {
   showList?: boolean;
@@ -11,6 +12,7 @@ interface CustomProps {
   onSelect?: (item: Mark) => void;
   selectedItems: Mark[];
   onClose?: () => void;
+  source: MessageIntentSource;
 }
 
 export interface BaseMarkContextSelectorProps
@@ -18,7 +20,7 @@ export interface BaseMarkContextSelectorProps
     CustomProps {}
 
 export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => {
-  const { onClickOutside, onSearchValueChange, onClose, onSelect, selectedItems, ...divProps } = props;
+  const { onClickOutside, onSearchValueChange, onClose, onSelect, selectedItems, source, ...divProps } = props;
 
   return (
     <div {...divProps} className={classNames('refly-base-context-selector', divProps?.className)}>
@@ -29,6 +31,7 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
         onClose={onClose}
         showList={true}
         selectedItems={selectedItems}
+        source={source}
       />
     </div>
   );

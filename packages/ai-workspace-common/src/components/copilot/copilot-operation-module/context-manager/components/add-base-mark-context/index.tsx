@@ -10,8 +10,9 @@ import { useProcessContextItems } from '../../hooks/use-process-context-items';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { backendBaseMarkTypes, BaseMarkType, frontendBaseMarkTypes } from '@refly/common-types';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
-export const AddBaseMarkContext = () => {
+export const AddBaseMarkContext = (props: { source: MessageIntentSource }) => {
   const [popoverVisible, setPopoverVisible] = useState(false);
   const { t } = useTranslation();
 
@@ -70,7 +71,12 @@ export const AddBaseMarkContext = () => {
           popupVisible={popoverVisible}
           onVisibleChange={handleVisibleChange}
           content={
-            <BaseMarkContextSelector onClose={handleClose} onSelect={handleSelect} selectedItems={selectedItems} />
+            <BaseMarkContextSelector
+              source={props.source}
+              onClose={handleClose}
+              onSelect={handleSelect}
+              selectedItems={selectedItems}
+            />
           }
         >
           <Tooltip content={t('knowledgeBase.context.addContext')} getPopupContainer={getPopupContainer}>
@@ -78,7 +84,7 @@ export const AddBaseMarkContext = () => {
               icon={<IconPlus />}
               size="mini"
               type="outline"
-              className="text-xs h-6 rounded border border-gray-300"
+              className="h-6 text-xs rounded border border-gray-300"
               style={{ borderColor: '#e5e5e5', color: 'rgba(0,0,0,0.6)' }}
             >
               {selectedItems?.length === 0 ? t('copilot.addContext') : null}

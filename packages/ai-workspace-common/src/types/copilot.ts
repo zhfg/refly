@@ -12,6 +12,7 @@ export enum MessageIntentSource {
   Share = 'share', // for qa and generateCanvas
   Canvas = 'canvas', // for edit and qa
   Search = 'search', // for qa
+  AISelector = 'aiSelector', // for editor
 }
 
 export interface NavigationContext {

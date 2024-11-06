@@ -18,15 +18,17 @@ import { OutputLocaleList } from '@refly-packages/ai-workspace-common/components
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 interface ChatActionsProps {
   form?: FormInstance;
   handleSendMessage: () => void;
   handleAbort: () => void;
+  source: MessageIntentSource;
 }
 
 export const ChatActions = (props: ChatActionsProps) => {
-  const { handleSendMessage, handleAbort } = props;
+  const { handleSendMessage, handleAbort, source } = props;
 
   const { t } = useTranslation();
   const { projectId: envProjectId } = useProjectContext();
@@ -63,6 +65,7 @@ export const ChatActions = (props: ChatActionsProps) => {
 
   const canSendEmptyMessage = skillStore?.selectedSkill || (!skillStore?.selectedSkill && chatStore.newQAText?.trim());
   const canSendMessage = !userStore.isLogin || (!messageStateStore?.pending && tokenAvailable && canSendEmptyMessage);
+  const hideProjectSelector = envProjectId || !isWeb || [MessageIntentSource.Share].includes(source);
 
   return (
     <div className="chat-actions">
@@ -84,7 +87,7 @@ export const ChatActions = (props: ChatActionsProps) => {
             <span className="chat-action-item-text">{t('copilot.knowledgeBaseSearch.title')}</span>
           </div>
         ) : null}
-        {!envProjectId ? <ProjectSelector /> : null}
+        {!hideProjectSelector ? <ProjectSelector /> : null}
       </div>
       <div className="right-actions">
         {messageStateStore?.pending ? (
