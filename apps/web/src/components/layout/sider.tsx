@@ -222,8 +222,7 @@ export const SiderLayout = () => {
   const { projectActiveConvId } = useProjectStoreShallow(state => ({
     projectActiveConvId: state.projectActiveConvId,
   }))
-  const projectId = location?.pathname?.split("/")?.[2]
-  const [currentProjectId, setCurrentProjectId] = useState(projectId)
+  const [currentProjectId, setCurrentProjectId] = useState("")
 
   const { t } = useTranslation()
 
@@ -290,20 +289,6 @@ export const SiderLayout = () => {
 
   const siderSections: SiderCenterProps[][] = [
     [
-      // {
-      //   key: "NewDraft",
-      //   name: "newDraft",
-      //   icon: (
-      //     <HiOutlineDocumentAdd
-      //       className="arco-icon"
-      //       style={{ fontSize: 20 }}
-      //     />
-      //   ),
-      //   showDivider: true,
-      //   onClick: () => {
-      //     newCanvasModalStore.setNewCanvasModalVisible(true)
-      //   },
-      // },
       {
         key: "Import",
         name: "newResource",
@@ -362,7 +347,10 @@ export const SiderLayout = () => {
   }
 
   useEffect(() => {
-    const projectId = location?.pathname?.split("/")?.[2]
+    const projectId = location.pathname.startsWith("/project/")
+      ? location.pathname.split("/")[2]
+      : ""
+
     setCurrentProjectId(projectId)
   }, [location.pathname])
 
