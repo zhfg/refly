@@ -928,6 +928,7 @@
       "title": "Chat with {{name}}"
     },
     "addContext": "Add Context",
+    "moreSettings": "More Settings",
     "baseContextCard": {
       "title": "Environment Context Quick Actions",
       "filterTitle": "Filter Environment Context",
@@ -1066,6 +1067,11 @@
     },
     "knowledgeBaseSearch": {
       "title": "Library Search",
+      "enable": "Enable",
+      "disable": "Disable"
+    },
+    "autoImportWebResource": {
+      "title": "Auto Import Web Resources",
       "enable": "Enable",
       "disable": "Disable"
     },

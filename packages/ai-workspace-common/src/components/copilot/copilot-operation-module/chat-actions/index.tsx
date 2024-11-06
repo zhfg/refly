@@ -1,8 +1,8 @@
-import { Button, Switch } from 'antd';
+import { Button, Dropdown, MenuProps, Switch } from 'antd';
 import { FormInstance, Checkbox } from '@arco-design/web-react';
 
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { IconPause, IconSend } from '@arco-design/web-react/icon';
+import { IconDown, IconPause, IconSend, IconSettings } from '@arco-design/web-react/icon';
 import { useMessageStateStoreShallow } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useTranslation } from 'react-i18next';
@@ -37,6 +37,8 @@ export const ChatActions = (props: ChatActionsProps) => {
     setEnableWebSearch: state.setEnableWebSearch,
     enableKnowledgeBaseSearch: state.enableKnowledgeBaseSearch,
     setEnableKnowledgeBaseSearch: state.setEnableKnowledgeBaseSearch,
+    enableAutoImportWebResource: state.enableAutoImportWebResource,
+    setEnableAutoImportWebResource: state.setEnableAutoImportWebResource,
   }));
   const messageStateStore = useMessageStateStoreShallow((state) => ({
     pending: state.pending,
@@ -63,11 +65,28 @@ export const ChatActions = (props: ChatActionsProps) => {
   const canSendEmptyMessage = skillStore?.selectedSkill || (!skillStore?.selectedSkill && chatStore.newQAText?.trim());
   const canSendMessage = !userStore.isLogin || (!messageStateStore?.pending && tokenAvailable && canSendEmptyMessage);
 
+  const settingsItems: MenuProps['items'] = [
+    {
+      key: 'enableAutoImportWebResource',
+      label: (
+        <div
+          className="text-xs flex items-center gap-2"
+          onClick={(e) => {
+            e.stopPropagation();
+            chatStore.setEnableAutoImportWebResource(!chatStore.enableAutoImportWebResource);
+          }}
+        >
+          <Switch size="small" checked={chatStore.enableAutoImportWebResource} />
+          <span className="chat-action-item-text">{t('copilot.autoImportWebResource.title')}</span>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="chat-actions">
       <div className="left-actions">
         <ModelSelector />
-        {/* <OutputLocaleList /> */}
         {!skillStore?.selectedSkill?.skillId ? (
           <div className="chat-action-item" onClick={() => chatStore.setEnableWebSearch(!chatStore.enableWebSearch)}>
             <Switch size="small" checked={chatStore.enableWebSearch} />
@@ -83,6 +102,13 @@ export const ChatActions = (props: ChatActionsProps) => {
             <span className="chat-action-item-text">{t('copilot.knowledgeBaseSearch.title')}</span>
           </div>
         ) : null}
+        <Dropdown className="chat-action-item" trigger={['click']} menu={{ items: settingsItems }}>
+          <a onClick={(e) => e.preventDefault()}>
+            <IconSettings fontSize={14} />
+            <span className="chat-action-item-text">{t('copilot.moreSettings')}</span>
+            <IconDown />
+          </a>
+        </Dropdown>
         {!envProjectId ? <ProjectSelector /> : null}
       </div>
       <div className="right-actions">

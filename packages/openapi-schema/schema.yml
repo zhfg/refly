@@ -127,7 +127,7 @@ paths:
                 $ref: '#/components/schemas/UpsertResourceResponse'
       security:
         - api_key: []
-  /knowledge/resource/new:
+  /knowledge/resource/create:
     post:
       tags:
         - knowledge
@@ -150,7 +150,7 @@ paths:
                 $ref: '#/components/schemas/UpsertResourceResponse'
       security:
         - api_key: []
-  /knowledge/resource/batch:
+  /knowledge/resource/batchCreate:
     post:
       tags:
         - knowledge
@@ -305,7 +305,7 @@ paths:
                 $ref: '#/components/schemas/UpsertCanvasResponse'
       security:
         - api_key: []
-  /knowledge/canvas/new:
+  /knowledge/canvas/create:
     post:
       tags:
         - knowledge
@@ -522,7 +522,7 @@ paths:
                 $ref: '#/components/schemas/UpsertProjectResponse'
       security:
         - api_key: []
-  /knowledge/project/new:
+  /knowledge/project/create:
     post:
       tags:
         - knowledge

@@ -34,6 +34,7 @@ import {
   GetResourceDetailData,
   GetProjectDetailData,
   GetProjectDetailResponse,
+  BatchCreateResourceResponse,
 } from '@refly-packages/openapi-schema';
 
 // TODO: unify with frontend
@@ -55,6 +56,7 @@ export interface ReflyService {
   listCanvas: (user: User, param: ListCanvasData['query']) => Promise<ListCanvasResponse>;
   getResourceDetail: (user: User, req: GetResourceDetailData['query']) => Promise<GetResourceDetailResponse>;
   createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
+  batchCreateResource: (user: User, req: UpsertResourceRequest[]) => Promise<BatchCreateResourceResponse>;
   updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;
   createProject: (user: User, req: UpsertProjectRequest) => Promise<CreateProjectResponse>;
   updateProject: (user: User, req: UpsertProjectRequest) => Promise<UpdateProjectResponse>;

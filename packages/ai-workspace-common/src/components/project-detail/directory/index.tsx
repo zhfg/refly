@@ -68,6 +68,7 @@ export const ProjectDirectory = (props: {
     setProjectDirItems: state.setProjectDirItems,
     updateProjectDirItem: state.updateProjectDirItem,
     fetchProjectDetail: state.fetchProjectDetail,
+    fetchProjectDirItems: state.fetchProjectDirItems,
   }));
 
   const currentProject = projectStore.project?.data;
@@ -228,6 +229,9 @@ export const ProjectDirectory = (props: {
     }
   };
 
+  const debouncedFetchProjectDetail = useDebouncedCallback(projectStore.fetchProjectDetail, 1000);
+  const debouncedFetchProjectDirItems = useDebouncedCallback(projectStore.fetchProjectDirItems, 1000);
+
   const handleTitleUpdate = async (newTitle: string) => {
     const { project } = useProjectStore.getState();
     const currentProject = project.data;
@@ -240,8 +244,11 @@ export const ProjectDirectory = (props: {
           title: newTitle,
         },
       });
-      projectStore.fetchProjectDetail(currentProject.projectId); // re-fetch project detail
+      debouncedFetchProjectDetail(currentProject.projectId); // re-fetch project detail
     }
+
+    // re-fetch project resources
+    debouncedFetchProjectDirItems(projectId, 'resources');
   };
 
   useEffect(() => {

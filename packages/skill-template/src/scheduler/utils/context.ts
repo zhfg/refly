@@ -42,9 +42,9 @@ export async function prepareContext(
     maxTokens: number;
     hasContext: boolean;
   },
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<string> {
-  ctx.ctxThis.emitEvent({ event: 'log', content: `Start to prepare context...` }, ctx.configSnapshot);
+  ctx.ctxThis.emitEvent({ event: 'log', content: `Start to prepare context...` }, ctx.config);
 
   const enableWebSearch = ctx.tplConfig?.enableWebSearch?.value;
   const enableKnowledgeBaseSearch = ctx.tplConfig?.enableKnowledgeBaseSearch?.value;
@@ -104,7 +104,7 @@ export async function prepareContext(
     projects: [],
   };
   if (remainingTokens > 0 && (hasContext || enableKnowledgeBaseSearch)) {
-    const { contentList = [], resources = [], canvases = [], projects = [] } = ctx.configSnapshot.configurable;
+    const { contentList = [], resources = [], canvases = [], projects = [] } = ctx.config.configurable;
     // prev remove overlapping items in mentioned context
     ctx.ctxThis.engine.logger.log(
       `Remove Overlapping Items In Mentioned Context...
@@ -163,10 +163,10 @@ export async function prepareContext(
       content: JSON.stringify(sources),
       structuredDataKey: 'sources',
     },
-    ctx.configSnapshot,
+    ctx.config,
   );
 
-  ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared context successfully!` }, ctx.configSnapshot);
+  ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared context successfully!` }, ctx.config);
   ctx.ctxThis.engine.logger.log(`Prepared context successfully! ${safeStringifyJSON(mergedContext)}`);
 
   return contextStr;
@@ -179,11 +179,11 @@ export async function prepareWebSearchContext(
   }: {
     query: string;
   },
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<{
   processedWebSearchContext: IContext;
 }> {
-  ctx.ctxThis.emitEvent({ event: 'log', content: `Prepare Web Search Context...` }, ctx.configSnapshot);
+  ctx.ctxThis.emitEvent({ event: 'log', content: `Prepare Web Search Context...` }, ctx.config);
   ctx.ctxThis.engine.logger.log(`Prepare Web Search Context...`);
 
   const processedWebSearchContext: IContext = {
@@ -192,7 +192,7 @@ export async function prepareWebSearchContext(
     canvases: [],
     webSearchSources: [],
   };
-  const res = await ctx.ctxThis.engine.service.webSearch(ctx.configSnapshot.user, {
+  const res = await ctx.ctxThis.engine.service.webSearch(ctx.config.user, {
     query,
     limit: 10,
   });
@@ -203,7 +203,28 @@ export async function prepareWebSearchContext(
   }));
   processedWebSearchContext.webSearchSources = webSearchSources;
 
-  ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared Web Search Context successfully!` }, ctx.configSnapshot);
+  const enableAutoImportWebResource = ctx.tplConfig?.enableAutoImportWebResource?.value;
+  ctx.ctxThis.engine.logger.log(`Enable Auto Import Web Resource: ${enableAutoImportWebResource}`);
+
+  if (enableAutoImportWebResource) {
+    const batchCreateResourceRes = await ctx.ctxThis.engine.service.batchCreateResource(
+      ctx.config.user,
+      webSearchSources.map((item) => ({
+        title: item.title,
+        data: {
+          url: item.url,
+          title: item.title,
+        },
+        resourceType: 'weblink',
+        projectId: ctx.config.configurable?.projectId,
+      })),
+    );
+    ctx.ctxThis.engine.logger.log(
+      `Batch import web search resources res: ${safeStringifyJSON(batchCreateResourceRes)}`,
+    );
+  }
+
+  ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared Web Search Context successfully!` }, ctx.config);
   ctx.ctxThis.engine.logger.log(
     `Prepared Web Search Context successfully! ${safeStringifyJSON(processedWebSearchContext)}`,
   );
@@ -223,7 +244,7 @@ export async function prepareMentionedContext(
     mentionedContext: IContext;
     maxMentionedContextTokens: number;
   },
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<{
   mentionedContextTokens: number;
   processedMentionedContext: IContext;
@@ -248,7 +269,7 @@ export async function prepareMentionedContext(
     };
   } else {
     // if mentioned context is not empty, we need to mutate the metadata of the mentioned context
-    const { contentList = [], resources = [], canvases = [] } = ctx.configSnapshot.configurable;
+    const { contentList = [], resources = [], canvases = [] } = ctx.config.configurable;
     const context: IContext = {
       contentList,
       resources,
@@ -299,7 +320,7 @@ export async function prepareLowerPriorityContext(
     context: IContext;
     processedMentionedContext: IContext;
   },
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<IContext> {
   ctx.ctxThis.engine.logger.log(`Prepare Lower Priority Context..., ${safeStringifyJSON(context)}`);
 
@@ -348,7 +369,7 @@ export async function prepareRelevantContext(
     query: string;
     context: IContext;
   },
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<IContext> {
   const { contentList = [], resources = [], canvases = [] } = context;
   let relevantContexts: IContext = {
@@ -384,7 +405,7 @@ export async function prepareContainerLevelContext(
     query: string;
     context: IContext;
   },
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<IContext> {
   const enableKnowledgeBaseSearch = ctx.tplConfig?.enableKnowledgeBaseSearch?.value;
   const enableSearchWholeSpace = enableKnowledgeBaseSearch;

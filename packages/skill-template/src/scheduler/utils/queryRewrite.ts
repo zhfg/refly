@@ -192,9 +192,9 @@ Examples of query rewriting with context and chat history:
 // TODO: build chatHistory and context related system prompt
 export async function analyzeQueryAndContext(
   query: string,
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<QueryAnalysis> {
-  const { chatHistory, resources, canvases, contentList, projects, modelName } = ctx.configSnapshot.configurable;
+  const { chatHistory, resources, canvases, contentList, projects, modelName } = ctx.config.configurable;
   const context: IContext = {
     resources,
     canvases,
@@ -202,7 +202,7 @@ export async function analyzeQueryAndContext(
     projects,
   };
 
-  ctx.ctxThis.emitEvent({ event: 'log', content: 'Analyzing query and context...' }, ctx.configSnapshot);
+  ctx.ctxThis.emitEvent({ event: 'log', content: 'Analyzing query and context...' }, ctx.config);
 
   // preprocess context for better extract mentioned context
   const preprocessedContext = preprocessContext(context);
@@ -282,7 +282,7 @@ Please analyze the query, focusing primarily on the current query and available 
     - Reasoning: ${result.reasoning}
     `);
 
-  ctx.ctxThis.emitEvent({ event: 'log', content: `Analyzed query and context successfully!` }, ctx.configSnapshot);
+  ctx.ctxThis.emitEvent({ event: 'log', content: `Analyzed query and context successfully!` }, ctx.config);
 
   return {
     optimizedQuery: result.rewrittenQuery,
@@ -295,9 +295,9 @@ Please analyze the query, focusing primarily on the current query and available 
 
 export const preprocessQuery = (
   query: string,
-  ctx: { configSnapshot: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ) => {
-  const { modelName } = ctx.configSnapshot.configurable;
+  const { modelName } = ctx.config.configurable;
   const maxQueryTokens = ModelContextLimitMap[modelName] * MAX_QUERY_TOKENS_RATIO;
 
   return truncateText(query, maxQueryTokens);

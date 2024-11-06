@@ -97,7 +97,7 @@ export class KnowledgeController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('project/new')
+  @Post('project/create')
   async createProject(
     @User() user: UserModel,
     @Body() body: UpsertProjectRequest,
@@ -159,7 +159,7 @@ export class KnowledgeController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('resource/new')
+  @Post('resource/create')
   async createResource(
     @User() user: UserModel,
     @Body() body: UpsertResourceRequest,
@@ -171,7 +171,7 @@ export class KnowledgeController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('resource/batch')
+  @Post('resource/batchCreate')
   async importResource(
     @User() user: UserModel,
     @Body() body: UpsertResourceRequest[],
@@ -250,7 +250,7 @@ export class KnowledgeController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('canvas/new')
+  @Post('canvas/create')
   async createCanvas(
     @User() user: UserModel,
     @Body() body: UpsertCanvasRequest,

@@ -183,7 +183,6 @@ export const ModelSelector = () => {
       getPopupContainer={getPopupContainer}
     >
       <span className={classNames('model-selector', 'chat-action-item')}>
-        <IconDown />
         {selectedModel ? (
           <>
             <img className="w-3 h-3 mx-1" src={providerIcons[selectedModel?.provider]} alt={selectedModel?.provider} />
@@ -195,6 +194,7 @@ export const ModelSelector = () => {
             <span className="text-yellow-600">{t('copilot.modelSelector.noModelAvailable')}</span>
           </>
         )}
+        <IconDown />
       </span>
     </Dropdown>
   );

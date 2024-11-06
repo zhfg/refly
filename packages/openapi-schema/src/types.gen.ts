@@ -3160,7 +3160,7 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/resource/new': {
+  '/knowledge/resource/create': {
     post: {
       req: CreateResourceData;
       res: {
@@ -3171,7 +3171,7 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/resource/batch': {
+  '/knowledge/resource/batchCreate': {
     post: {
       req: BatchCreateResourceData;
       res: {
@@ -3237,7 +3237,7 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/canvas/new': {
+  '/knowledge/canvas/create': {
     post: {
       req: CreateCanvasData;
       res: {
@@ -3336,7 +3336,7 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/project/new': {
+  '/knowledge/project/create': {
     post: {
       req: CreateProjectData;
       res: {

@@ -170,6 +170,10 @@ export class SkillService {
         const resource = await this.knowledge.createResource(user, req);
         return buildSuccessResponse(resourcePO2DTO(resource));
       },
+      batchCreateResource: async (user, req) => {
+        const resources = await this.knowledge.batchCreateResource(user, req);
+        return buildSuccessResponse(resources.map(resourcePO2DTO));
+      },
       updateResource: async (user, req) => {
         const resource = await this.knowledge.updateResource(user, req);
         return buildSuccessResponse(resourcePO2DTO(resource));
