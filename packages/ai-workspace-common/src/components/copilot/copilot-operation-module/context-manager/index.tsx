@@ -19,6 +19,7 @@ import { SaveToKnowledgeBase } from './components/save-to-knowledge-base/index';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 
 // types
 import { Project, Canvas, Resource, SearchDomain, SearchResult } from '@refly/openapi-schema';
@@ -101,6 +102,10 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
   const currentKnowledgeBase = useKnowledgeBaseStoreShallow((state) => state.currentKnowledgeBase);
   const currentResource = useKnowledgeBaseStoreShallow((state) => state.currentResource);
   const currentCanvas = useCanvasStoreShallow((state) => state.currentCanvas);
+  const { project } = useProjectStoreShallow((state) => ({
+    project: state?.project?.data,
+  }));
+
   const { initMessageListener } = useSelectedMark();
 
   const currentSelectedContentList =
@@ -173,8 +178,8 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
   };
 
   useEffect(() => {
-    updateContext(currentKnowledgeBase, 'project');
-  }, [currentKnowledgeBase?.projectId]);
+    updateContext(project, 'project');
+  }, [project?.projectId]);
 
   useEffect(() => {
     updateContext(currentResource, 'resource');
