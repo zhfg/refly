@@ -227,38 +227,53 @@ export class ElasticsearchService implements OnModuleInit {
   }
 
   async deleteResource(resourceId: string) {
-    return this.client.delete({
-      index: indexConfig.resource.index,
-      id: resourceId,
-    });
+    return this.client.delete(
+      {
+        index: indexConfig.resource.index,
+        id: resourceId,
+      },
+      { ignore: [404] },
+    );
   }
 
   async deleteCanvas(canvasId: string) {
-    return this.client.delete({
-      index: indexConfig.canvas.index,
-      id: canvasId,
-    });
+    return this.client.delete(
+      {
+        index: indexConfig.canvas.index,
+        id: canvasId,
+      },
+      { ignore: [404] },
+    );
   }
 
   async deleteProject(projectId: string) {
-    return this.client.delete({
-      index: indexConfig.project.index,
-      id: projectId,
-    });
+    return this.client.delete(
+      {
+        index: indexConfig.project.index,
+        id: projectId,
+      },
+      { ignore: [404] },
+    );
   }
 
   async deleteConversationMessage(messageId: string) {
-    return this.client.delete({
-      index: indexConfig.conversationMessage.index,
-      id: messageId,
-    });
+    return this.client.delete(
+      {
+        index: indexConfig.conversationMessage.index,
+        id: messageId,
+      },
+      { ignore: [404] },
+    );
   }
 
   async deleteSkill(skillId: string) {
-    return this.client.delete({
-      index: indexConfig.skill.index,
-      id: skillId,
-    });
+    return this.client.delete(
+      {
+        index: indexConfig.skill.index,
+        id: skillId,
+      },
+      { ignore: [404] },
+    );
   }
 
   async searchResources(user: User, req: SearchRequest) {
