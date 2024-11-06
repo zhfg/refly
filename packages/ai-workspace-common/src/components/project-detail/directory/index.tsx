@@ -283,7 +283,7 @@ export const ProjectDirectory = (props: {
         </div>
         {item.type !== 'conversations' && (
           <div
-            className="flex items-center invisible group-hover:visible cursor-grab text-gray-400 hover:text-gray-600"
+            className="flex invisible items-center text-gray-400 group-hover:visible cursor-grab hover:text-gray-600"
             {...attributes}
             {...listeners}
           >
@@ -370,8 +370,8 @@ export const ProjectDirectory = (props: {
   }, [resId, canvasId]);
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex flex-row items-center justify-between p-4 pb-0">
+    <div className="flex flex-col h-full project-detail-directory-container">
+      <div className="flex flex-row justify-between items-center p-4 pb-0">
         <div className="flex w-full">
           <div className="intro-icon">
             <IconProject style={{ fontSize: 28, color: 'rgba(0, 0, 0, .5)', strokeWidth: 3 }} />
@@ -407,7 +407,7 @@ export const ProjectDirectory = (props: {
         )}
       </div>
 
-      <div className="p-4 w-full flex gap-3">
+      <div className="flex gap-3 p-4 w-full">
         <Button
           loading={shareLoading}
           className="w-[50%]"
@@ -429,7 +429,7 @@ export const ProjectDirectory = (props: {
         </Button>
       </div>
 
-      <div className="w-full pl-4 pr-4">
+      <div className="pr-4 pl-4 w-full">
         <Divider className="m-0" />
       </div>
 
@@ -466,7 +466,7 @@ export const ProjectDirectory = (props: {
         </div>
       </div>
 
-      <div className="flex-1 min-h-10 overflow-auto">
+      <div className="overflow-auto flex-1 min-h-10">
         {dataListLoading ? (
           <Skeleton active className="p-6 w-full" title={false} paragraph={{ rows: 5 }} />
         ) : filteredDataList.length > 0 ? (

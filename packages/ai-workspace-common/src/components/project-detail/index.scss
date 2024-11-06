@@ -2,6 +2,71 @@
   height: 100%;
   position: relative;
 
+  // 外层 Splitter 样式
+  .project-detail-outer-splitter {
+    background-color: #f3f3ee;
+
+    // 只处理第一层的分割条样式
+    > .ant-splitter-bar .ant-splitter-bar-dragger {
+      width: 8px;
+      background-color: #f3f3ee;
+
+      &:hover:before {
+        background-color: rgba(0, 0, 0, 0.04) !important;
+      }
+    }
+
+    // 只处理第一层的分割条before伪元素
+    > .ant-splitter-bar .ant-splitter-bar-dragger:before {
+      background-color: transparent !important;
+    }
+
+    // 只处理第一层的面板
+    > .ant-splitter-panel {
+      background-color: #f3f3ee;
+
+      // 每个面板的内容容器背景色
+      > .project-detail-directory-container,
+      > .project-detail-content-container,
+      > .project-detail-copilot-panel {
+        background-color: #fcfcf9;
+        border-radius: 12px;
+      }
+    }
+  }
+
+  // 内层 Splitter 样式（如果有的话）
+  .project-detail-inner-splitter {
+    background-color: #f3f3ee;
+
+    .ant-splitter-panel {
+      background-color: #fcfcf9;
+    }
+
+    .ant-splitter-bar-dragger {
+      width: 8px;
+      background-color: transparent;
+    }
+
+    > .ant-splitter-bar .ant-splitter-bar-dragger {
+      background-color: transparent !important;
+
+      &:hover:before {
+        background-color: rgba(0, 0, 0, 0.04) !important;
+      }
+    }
+
+    & .ant-splitter-bar-dragger:before {
+      background-color: transparent !important;
+
+      &:hover:before {
+        background-color: rgba(0, 0, 0, 0.04) !important;
+      }
+    }
+  }
+
+  // ... 其他原有样式保持不变
+
   .arco-drawer-content {
     padding: 0;
   }

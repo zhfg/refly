@@ -127,7 +127,7 @@ export const ContentArea = (props: { projectId: string; setBindResourceModalVisi
   ];
 
   return (
-    <div className="h-full relative flex flex-col">
+    <div className="flex relative flex-col h-full project-detail-content-container">
       <Tabs
         tabBarStyle={{ marginBottom: 0 }}
         animated
@@ -170,7 +170,7 @@ export const ContentArea = (props: { projectId: string; setBindResourceModalVisi
           </Tooltip>
         }
       />
-      <div className="flex-grow overflow-auto">
+      <div className="overflow-auto flex-grow">
         <Splitter
           layout="vertical"
           onResize={(sizes) => {
