@@ -158,7 +158,7 @@ export const ContentArea = (props: { projectId: string; setBindResourceModalVisi
           </DndContext>
         )}
         tabBarExtraContent={
-          <Tooltip title={t('knowledgeBase.header.searchAndOpenResourceOrCollection')}>
+          <Tooltip title={t('knowledgeBase.header.searchAndOpenResourceOrProject')}>
             <Button
               icon={<HiMagnifyingGlass />}
               type="text"

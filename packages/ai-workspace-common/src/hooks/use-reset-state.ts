@@ -1,22 +1,17 @@
-import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores/message-state';
-import { usePopupStore } from '@refly-packages/ai-workspace-common/stores/popup';
+import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useMessageStateStoreShallow } from '@refly-packages/ai-workspace-common/stores/message-state';
 
 export const useResetState = () => {
-  const chatStore = useChatStore((state) => ({
+  const chatStore = useChatStoreShallow((state) => ({
     resetState: state.resetState,
   }));
-  const messageStateStore = useMessageStateStore((state) => ({
-    resetState: state.resetState,
-  }));
-  const popupStore = usePopupStore((state) => ({
+  const messageStateStore = useMessageStateStoreShallow((state) => ({
     resetState: state.resetState,
   }));
 
   const resetState = () => {
-    chatStore.resetState(); // 新会话默认是没有创建 title 的状态
+    chatStore.resetState();
     messageStateStore.resetState();
-    popupStore.resetState();
   };
 
   return {

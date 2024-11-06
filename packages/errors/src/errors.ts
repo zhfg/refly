@@ -16,6 +16,14 @@ export class ConnectionError extends BaseError {
   };
 }
 
+export class UnauthorizedError extends BaseError {
+  code = 'E0002';
+  messageDict = {
+    en: 'Unauthorized, please login',
+    'zh-CN': '未授权，请登录',
+  };
+}
+
 export class ParamsError extends BaseError {
   code = 'E1001';
   messageDict = {
@@ -132,6 +140,7 @@ export class ModelNotSupportedError extends BaseError {
 const errorMap = {
   E0000: UnknownError,
   E0001: ConnectionError,
+  E0002: UnauthorizedError,
   E1000: ProjectNotFoundError,
   E1001: ParamsError,
   E1002: ResourceNotFoundError,

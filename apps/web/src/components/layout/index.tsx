@@ -23,9 +23,9 @@ interface AppLayoutProps {
 }
 
 export const AppLayout = (props: AppLayoutProps) => {
-  const showSider = !useMatch("/share/:shareCode")
   // stores
   const userStore = useUserStoreShallow(state => ({
+    userProfile: state.userProfile,
     loginModalVisible: state.loginModalVisible,
   }))
   const importResourceStore = useImportResourceStoreShallow(state => ({
@@ -38,7 +38,8 @@ export const AppLayout = (props: AppLayoutProps) => {
     showNewProjectModal: state.showNewProjectModal,
   }))
 
-  // 绑定快捷键
+  const showSider = !useMatch("/share/:shareCode") && !!userStore.userProfile
+
   useBindCommands()
 
   return (

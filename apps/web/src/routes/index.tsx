@@ -22,7 +22,6 @@ const Project = lazy(() => import("@/pages/project"))
 const Skill = lazy(() => import("@/pages/skill"))
 const SkillDetailPage = lazy(() => import("@/pages/skill-detail"))
 const Settings = lazy(() => import("@/pages/settings"))
-const Login = lazy(() => import("@/pages/login"))
 const ShareContent = lazy(() => import("@/pages/share-content"))
 
 // Loading component

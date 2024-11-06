@@ -7,7 +7,7 @@ import classNames from 'classnames';
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 
 import { PiWarningCircleBold } from 'react-icons/pi';
@@ -135,18 +135,17 @@ export const ModelSelector = () => {
   };
 
   const fetchTokenUsage = async () => {
-    try {
-      const { data, error } = await getClient().getSubscriptionUsage();
-      if (error) {
-        console.error(error);
-        return;
-      }
+    const { userProfile } = useUserStore.getState();
+    if (!userProfile) return;
 
-      if (data) {
-        setTokenUsage(data.data?.token);
-      }
-    } catch (error) {
+    const { data, error } = await getClient().getSubscriptionUsage();
+    if (error) {
       console.error(error);
+      return;
+    }
+
+    if (data) {
+      setTokenUsage(data.data?.token);
     }
   };
 

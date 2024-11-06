@@ -88,13 +88,6 @@ export const translation = {
           internet: 'Enter keywords for an internet search...',
           currentSelectedContent: 'Ask a question based on the currently selected content...',
         },
-        searchScope: {
-          title: 'Select Search Scope',
-          current: 'Current WebPage',
-          all: 'Entire Knowledge Base',
-          history: 'History of Read Content',
-          internet: 'Internet Search',
-        },
         status: {
           emptyNotify: 'The question field cannot be empty.',
           contentHandling: 'Processing content...',

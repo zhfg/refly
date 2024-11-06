@@ -41,6 +41,7 @@ let uniqueId = genUniqueId();
 export const useBuildTask = () => {
   const chatStore = useChatStoreShallow((state) => ({
     setMessages: state.setMessages,
+    setNewQAText: state.setNewQAText,
     setIntentMatcher: state.setIntentMatcher,
     setIsFirstStreamContent: state.setIsFirstStreamContent,
     setMessageIntentContext: state.setMessageIntentContext,
@@ -271,6 +272,7 @@ export const useBuildTask = () => {
     if (skillEvent?.structuredDataKey === 'intentMatcher') {
       handleStructuredDataChange(lastRelatedMessage);
       chatStore.setIntentMatcher(structuredData);
+      chatStore.setNewQAText(''); // make sure the chat input is cleaned (we did not clean it in the home page)
     }
   };
 
