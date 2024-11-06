@@ -35,6 +35,10 @@ import { IconCanvas } from "@refly-packages/ai-workspace-common/components/commo
 import { HiOutlineShare } from "react-icons/hi"
 import { copyToClipboard } from "@refly-packages/ai-workspace-common/utils"
 import { Tooltip } from "@arco-design/web-react"
+import { getClientOrigin } from "@refly/utils/url"
+import { useContentSelector } from "@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector"
+import { useSelectedMark } from "@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark"
+import { useCanvasStoreShallow } from "@refly-packages/ai-workspace-common/stores/canvas"
 
 const ShareContent = () => {
   const { t } = useTranslation()
@@ -48,7 +52,6 @@ const ShareContent = () => {
   )
   const [showCopilot, setShowCopilot] = useState(false)
   const canvasList = useShareStoreShallow(state => state.canvasList)
-  const currentCanvasId = useShareStoreShallow(state => state.currentCanvasId)
   const setCanvasList = useShareStoreShallow(state => state.setCanvasList)
   const setCurrentCanvasId = useShareStoreShallow(
     state => state.setCurrentCanvasId,
@@ -56,6 +59,9 @@ const ShareContent = () => {
   const { project, setProject } = useProjectStoreShallow(state => ({
     project: state?.project?.data,
     setProject: state.setProject,
+  }))
+  const canvasStore = useCanvasStoreShallow(state => ({
+    updateCurrentCanvas: state.updateCurrentCanvas,
   }))
   const [searchParams, setSearchParams] = useSearchParams()
   const urlCanvasId = searchParams.get("canvasId") as string
@@ -65,6 +71,16 @@ const ShareContent = () => {
   const [loading, setLoading] = useState(false)
   const [currentCanvas, setCurrentCanvas] = useState<Canvas>()
   const [breadItems, setBreadItems] = useState<any[]>([])
+
+  const baseUrl = getClientOrigin()
+  const { initMessageListener, initContentSelectorElem } = useContentSelector(
+    "share-content",
+    "canvasSelection",
+    {
+      url: `${baseUrl}/share/${shareCode}`,
+    },
+  )
+  const { handleInitContentSelectorListener } = useSelectedMark()
 
   const items = [
     {
@@ -91,6 +107,7 @@ const ShareContent = () => {
     const result = data.data
 
     setCurrentCanvas(result?.canvas)
+    canvasStore.updateCurrentCanvas(result?.canvas as Canvas)
     if (!canvasList?.length) {
       const canvasList =
         result?.canvasList || (result?.canvas ? [result.canvas] : [])
@@ -138,6 +155,18 @@ const ShareContent = () => {
     }
   }, [currentCanvas?.title, project?.title])
 
+  // 初始化块选择
+  useEffect(() => {
+    if (loading || !currentCanvas?.canvasId) {
+      return
+    }
+    const remove = initMessageListener()
+    handleInitContentSelectorListener()
+    return () => {
+      remove()
+    }
+  }, [currentCanvas?.canvasId, loading])
+
   const title = project
     ? `${project.title} · ${currentCanvas?.title}`
     : currentCanvas?.title
@@ -173,29 +202,36 @@ const ShareContent = () => {
                       <Breadcrumb items={breadItems} className="text-l" />
                     </div>
                     <div className="flex items-center">
-                      <Button
-                        type="primary"
-                        size="small"
-                        className="mr-2 text-xs"
-                        onClick={() => setShowCopilot(!showCopilot)}
-                        icon={<IconCanvas />}>
-                        问问 Refly AI
-                      </Button>
-                      <Tooltip content={t("projectDetail.share.copyLink")}>
-                        <Button
-                          type="text"
-                          size="small"
-                          className="mr-2 text-xs"
-                          style={{
-                            color: currentCanvas?.shareCode ? "#00968F" : "",
-                          }}
-                          icon={<HiOutlineShare />}
-                          onClick={() => {
-                            handleCopy(location.href)
-                          }}>
-                          {t("projectDetail.share.copyLink")}
-                        </Button>
-                      </Tooltip>
+                      {currentCanvas
+                        ? [
+                            <Button
+                              type="primary"
+                              size="small"
+                              className="mr-2 text-xs"
+                              onClick={() => setShowCopilot(!showCopilot)}
+                              icon={<IconCanvas />}>
+                              问问 Refly AI
+                            </Button>,
+                            <Tooltip
+                              content={t("projectDetail.share.copyLink")}>
+                              <Button
+                                type="text"
+                                size="small"
+                                className="mr-2 text-xs"
+                                style={{
+                                  color: currentCanvas?.shareCode
+                                    ? "#00968F"
+                                    : "",
+                                }}
+                                icon={<HiOutlineShare />}
+                                onClick={() => {
+                                  handleCopy(location.href)
+                                }}>
+                                {t("projectDetail.share.copyLink")}
+                              </Button>
+                            </Tooltip>,
+                          ]
+                        : []}
                       {!isLogin ? (
                         <Button
                           type="primary"
@@ -214,13 +250,13 @@ const ShareContent = () => {
                     </div>
                   </div>
                   <Splitter className="share-content-inner-splitter">
-                    <Splitter.Panel
-                      collapsible
-                      defaultSize={300}
-                      min={200}
-                      max={300}
-                      className="share-canvas-list-panel">
-                      {canvasList.length > 0 && (
+                    {
+                      <Splitter.Panel
+                        collapsible
+                        defaultSize={300}
+                        min={200}
+                        max={300}
+                        className="share-canvas-list-panel">
                         <div className="shadow-l flex-shrink-0 overflow-y-auto pt-2">
                           {canvasList.map((item: Canvas) => (
                             <div
@@ -239,8 +275,8 @@ const ShareContent = () => {
                             </div>
                           ))}
                         </div>
-                      )}
-                    </Splitter.Panel>
+                      </Splitter.Panel>
+                    }
                     <Splitter.Panel
                       min={450}
                       className="share-canvas-content-panel">
@@ -252,6 +288,7 @@ const ShareContent = () => {
                                 <div className="mb-4 w-full text-2xl font-bold">
                                   {currentCanvas?.title}
                                 </div>
+                                {initContentSelectorElem()}
                                 <Markdown
                                   content={currentCanvas?.content || ""}
                                 />

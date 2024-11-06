@@ -197,7 +197,7 @@ export const AICopilot = memo((props: AICopilotProps) => {
     };
   }, [convId, jobId]);
 
-  useResizeCopilot({ containerSelector: 'ai-copilot-container' });
+  // useResizeCopilot({ containerSelector: 'ai-copilot-container' });
   useDynamicInitContextPanelState(); // 动态根据页面状态更新上下文面板状态
 
   useEffect(() => {
