@@ -15,7 +15,8 @@ export const ProjectSelector = () => {
     setSelectedProject: state.setSelectedProject,
   }));
 
-  const title = project?.title?.length > 32 ? `${project.title.slice(0, 32)}...` : project?.title;
+  const titleTruncated = project?.title?.length > 15;
+  const title = titleTruncated ? `${project.title.slice(0, 15)}...` : project?.title;
 
   return (
     <>

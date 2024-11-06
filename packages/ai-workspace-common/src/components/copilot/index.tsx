@@ -11,12 +11,10 @@ import { useLocation, useParams, useSearchParams, useNavigate } from 'react-rout
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { useResetState } from '@refly-packages/ai-workspace-common/hooks/use-reset-state';
-import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useKnowledgeBaseStore } from '../../stores/knowledge-base';
 
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
-import { useResizeCopilot } from '@refly-packages/ai-workspace-common/hooks/use-resize-copilot';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-common/hooks/use-init-context-panel-state';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
@@ -83,8 +81,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
   }));
 
   const [isFetching, setIsFetching] = useState(false);
-
-  const { runSkill } = useBuildThreadAndRun();
 
   const { resetState } = useResetState();
 
@@ -197,7 +193,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
     };
   }, [convId, jobId]);
 
-  // useResizeCopilot({ containerSelector: 'ai-copilot-container' });
   useDynamicInitContextPanelState(); // 动态根据页面状态更新上下文面板状态
 
   useEffect(() => {
