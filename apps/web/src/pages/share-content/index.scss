@@ -1,9 +1,58 @@
 .share-content {
   .share-header {
     border-bottom: solid 1px #e8e8e8;
+    height: 40px;
   }
 
-  .share-canvas-content {
-    border: solid 1px #e8e8e8;
+  .share-content-outer-splitter {
+    background-color: #f3f3ee;
+
+    .ant-splitter-bar-dragger {
+      width: 8px;
+      background-color: #f3f3ee;
+
+      &:hover:before {
+        background-color: rgba(0, 0, 0, 0.04) !important;
+      }
+    }
+
+    & .ant-splitter-bar-dragger:before {
+      background-color: transparent !important;
+    }
+
+    .ant-splitter-panel {
+      background-color: #f3f3ee;
+    }
+
+    .ai-copilot-container {
+      background-color: #fcfcf9;
+      border-radius: 12px;
+    }
+
+    .share-main-content-panel {
+      border-radius: 12px;
+    }
+
+    .share-content-content-container {
+      background-color: #fcfcf9;
+      height: 100%;
+    }
+  }
+
+  .share-content-inner-splitter {
+    background-color: #f3f3ee;
+
+    .ant-splitter-panel {
+      background-color: #fcfcf9;
+    }
+
+    .ant-splitter-bar-dragger {
+      width: 8px;
+      background-color: transparent;
+    }
+
+    & .ant-splitter-bar-dragger:before {
+      background-color: rgba(0, 0, 0, 0.04) !important;
+    }
   }
 }

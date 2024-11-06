@@ -135,7 +135,9 @@
       "cancel": "Cancel Share",
       "cancelShareFailed": "Failed to cancel share, please try again!",
       "cancelShareSuccess": "Cancel share successfully!",
-      "sharing": "Sharing"
+      "sharing": "Sharing",
+      "copyLinkFailed": "Failed to copy link, please try again!",
+      "copyLinkSuccess": "Link has been copied to the clipboard!"
     },
     "contentArea": {
       "addCanvas": "New Canvas",

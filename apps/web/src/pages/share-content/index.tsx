@@ -31,6 +31,10 @@ import {
   useProjectStore,
   useProjectStoreShallow,
 } from "@refly-packages/ai-workspace-common/stores/project"
+import { IconCanvas } from "@refly-packages/ai-workspace-common/components/common/icon"
+import { HiOutlineShare } from "react-icons/hi"
+import { copyToClipboard } from "@refly-packages/ai-workspace-common/utils"
+import { Tooltip } from "@arco-design/web-react"
 
 const ShareContent = () => {
   const { t } = useTranslation()
@@ -42,6 +46,7 @@ const ShareContent = () => {
       setLoginModalVisible: state.setLoginModalVisible,
     }),
   )
+  const [showCopilot, setShowCopilot] = useState(false)
   const canvasList = useShareStoreShallow(state => state.canvasList)
   const currentCanvasId = useShareStoreShallow(state => state.currentCanvasId)
   const setCanvasList = useShareStoreShallow(state => state.setCanvasList)
@@ -97,6 +102,15 @@ const ShareContent = () => {
     setLoading(false)
   }
 
+  const handleCopy = async (text: string) => {
+    try {
+      await copyToClipboard(text)
+      message.success(t("projectDetail.share.copyLinkSuccess"))
+    } catch (err) {
+      message.error(t("projectDetail.share.copyLinkFailed"))
+    }
+  }
+
   useEffect(() => {
     getCanvas()
   }, [currentCanvasId])
@@ -133,33 +147,6 @@ const ShareContent = () => {
         </title>
       </Helmet>
       <div className="share-content flex h-full flex-col">
-        <div className="share-header flex items-center justify-between pb-2 pl-6 pr-6 pt-2">
-          <div className="flex items-center">
-            <img
-              className="mr-2 h-[32px] w-[32px] cursor-pointer"
-              src={Logo}
-              alt="Refly"
-              onClick={() => {
-                navigate("/")
-              }}
-            />
-            <Breadcrumb items={breadItems} className="text-l" />
-          </div>
-          {!isLogin ? (
-            <Button type="primary" onClick={() => setLoginModalVisible(true)}>
-              {t("shareContent.login")}
-            </Button>
-          ) : (
-            <Dropdown menu={{ items }}>
-              <Avatar
-                src={userProfile?.avatar}
-                icon={isLogin ? null : <FaRegUser />}
-                className="cursor-pointer border-2 hover:border-[#00968F]"
-              />
-            </Dropdown>
-          )}
-        </div>
-
         <div className="canvas-content relative flex-grow overflow-hidden">
           {loading ? (
             <Spin
@@ -167,49 +154,126 @@ const ShareContent = () => {
               size="large"
             />
           ) : (
-            <Splitter>
-              <Splitter.Panel>
-                <div className="left-panel relative flex h-full w-full">
-                  {canvasList.length > 0 && (
-                    <div className="shadow-l w-[20%] flex-shrink-0 overflow-y-auto pt-2">
-                      {canvasList.map((item: Canvas) => (
-                        <div
-                          key={item.canvasId}
-                          className="mb-1 ml-4 mr-4 mt-1 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap rounded-md p-2 text-[14px] hover:bg-gray-100"
-                          style={{
-                            backgroundColor:
-                              currentCanvas?.canvasId === item.canvasId
-                                ? "rgba(0,0,0,0.05)"
-                                : "",
-                          }}
-                          onClick={() => {
-                            setCurrentCanvasId(item.canvasId)
-                          }}>
-                          {item.title}
-                        </div>
-                      ))}
+            <Splitter className="share-content-outer-splitter">
+              <Splitter.Panel className="share-main-content-panel">
+                <div className="share-content-content-container">
+                  <div className="share-header flex items-center justify-between pl-6 pr-6">
+                    <div className="flex items-center">
+                      <img
+                        className="mr-2 h-[20px] w-[20px] cursor-pointer"
+                        src={Logo}
+                        alt="Refly"
+                        onClick={() => {
+                          navigate("/")
+                        }}
+                      />
+                      <Breadcrumb items={breadItems} className="text-l" />
                     </div>
-                  )}
-                  <div className="flex-grow overflow-hidden bg-[#f5f5f5] p-8">
-                    <>
-                      {currentCanvas ? (
-                        <div className="share-canvas-content mx-auto mb-8 box-border h-full max-w-[1024px] overflow-y-auto rounded-lg bg-white p-8 shadow-lg">
-                          <div className="mb-4 w-full text-center text-2xl font-bold">
-                            {currentCanvas?.title}
-                          </div>
-                          <Markdown content={currentCanvas?.content || ""} />
-                        </div>
+                    <div className="flex items-center">
+                      <Button
+                        type="primary"
+                        size="small"
+                        className="mr-2 text-xs"
+                        onClick={() => setShowCopilot(!showCopilot)}
+                        icon={<IconCanvas />}>
+                        问问 Refly AI
+                      </Button>
+                      <Tooltip content={t("projectDetail.share.copyLink")}>
+                        <Button
+                          type="text"
+                          size="small"
+                          className="mr-2 text-xs"
+                          style={{
+                            color: currentCanvas?.shareCode ? "#00968F" : "",
+                          }}
+                          icon={<HiOutlineShare />}
+                          onClick={() => {
+                            handleCopy(location.href)
+                          }}>
+                          {t("projectDetail.share.copyLink")}
+                        </Button>
+                      </Tooltip>
+                      {!isLogin ? (
+                        <Button
+                          type="primary"
+                          onClick={() => setLoginModalVisible(true)}>
+                          {t("shareContent.login")}
+                        </Button>
                       ) : (
-                        <Empty />
+                        <Dropdown menu={{ items }}>
+                          <Avatar
+                            src={userProfile?.avatar}
+                            icon={isLogin ? null : <FaRegUser />}
+                            className="cursor-pointer border-2 hover:border-[#00968F]"
+                          />
+                        </Dropdown>
                       )}
-                    </>
+                    </div>
                   </div>
+                  <Splitter className="share-content-inner-splitter">
+                    <Splitter.Panel
+                      collapsible
+                      defaultSize={300}
+                      min={200}
+                      max={300}
+                      className="share-canvas-list-panel">
+                      {canvasList.length > 0 && (
+                        <div className="shadow-l flex-shrink-0 overflow-y-auto pt-2">
+                          {canvasList.map((item: Canvas) => (
+                            <div
+                              key={item.canvasId}
+                              className="mb-1 ml-4 mr-4 mt-1 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap rounded-md p-2 text-[14px] hover:bg-gray-100"
+                              style={{
+                                backgroundColor:
+                                  currentCanvas?.canvasId === item.canvasId
+                                    ? "rgba(0,0,0,0.05)"
+                                    : "",
+                              }}
+                              onClick={() => {
+                                setCurrentCanvasId(item.canvasId)
+                              }}>
+                              {item.title}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Splitter.Panel>
+                    <Splitter.Panel
+                      min={450}
+                      className="share-canvas-content-panel">
+                      <div className="left-panel relative flex h-full">
+                        <div className="h-full flex-grow overflow-hidden overflow-y-auto p-8">
+                          <>
+                            {currentCanvas ? (
+                              <div className="share-canvas-content mx-auto mb-8 box-border h-full max-w-[1024px] rounded-l">
+                                <div className="mb-4 w-full text-2xl font-bold">
+                                  {currentCanvas?.title}
+                                </div>
+                                <Markdown
+                                  content={currentCanvas?.content || ""}
+                                />
+                              </div>
+                            ) : (
+                              <Empty />
+                            )}
+                          </>
+                        </div>
+                      </div>
+                    </Splitter.Panel>
+                  </Splitter>
                 </div>
               </Splitter.Panel>
 
-              <Splitter.Panel collapsible defaultSize={400} max={500} min={400}>
-                <AICopilot source={MessageIntentSource.Share} />
-              </Splitter.Panel>
+              {showCopilot ? (
+                <Splitter.Panel
+                  className="share-copilot-panel"
+                  collapsible
+                  defaultSize={400}
+                  max={500}
+                  min={400}>
+                  <AICopilot source={MessageIntentSource.Share} />
+                </Splitter.Panel>
+              ) : null}
             </Splitter>
           )}
         </div>

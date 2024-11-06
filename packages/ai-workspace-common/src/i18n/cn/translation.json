@@ -135,7 +135,9 @@
       "cancel": "取消分享",
       "cancelShareFailed": "取消分享失败，请重试！",
       "cancelShareSuccess": "取消分享成功！",
-      "sharing": "分享中"
+      "sharing": "分享中",
+      "copyLinkFailed": "复制链接失败，请重试！",
+      "copyLinkSuccess": "链接已复制到剪切板！"
     },
     "contentArea": {
       "addCanvas": "新稿布",
