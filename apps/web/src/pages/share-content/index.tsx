@@ -58,7 +58,7 @@ const ShareContent = () => {
     setProject: state.setProject,
   }))
   const [searchParams, setSearchParams] = useSearchParams()
-  const canvasId = searchParams.get("canvasId") as string
+  const urlCanvasId = searchParams.get("canvasId") as string
 
   const { shareCode } = useParams()
 
@@ -73,14 +73,14 @@ const ShareContent = () => {
     },
   ]
 
-  const getCanvas = async () => {
+  const getCanvas = async (targetCanvasId?: string) => {
     const { project: projectState } = useProjectStore.getState()
 
     setLoading(true)
     const { data } = await getClient().getShareContent({
       query: {
         shareCode: shareCode || "",
-        ...(currentCanvasId && { canvasId: currentCanvasId }),
+        ...(targetCanvasId ? { canvasId: targetCanvasId } : {}),
       },
     })
     if (!data?.success) {
@@ -111,29 +111,32 @@ const ShareContent = () => {
     }
   }
 
-  useEffect(() => {
-    getCanvas()
-  }, [currentCanvasId])
+  const handleCanvasChange = (canvasId: string) => {
+    setSearchParams({ canvasId }, { replace: true })
+    setCurrentCanvasId(canvasId)
+    getCanvas(canvasId)
+  }
 
   useEffect(() => {
-    setBreadItems([
-      {
-        title: project?.title,
-      },
-      {
-        title: currentCanvas?.title,
-      },
-    ])
-  }, [currentCanvas?.title, project?.title])
-
-  useEffect(() => {
-    if (currentCanvasId && canvasId !== currentCanvasId) {
-      setCurrentCanvasId(canvasId)
-      setSearchParams({
-        canvasId: currentCanvasId,
-      })
+    if (urlCanvasId) {
+      handleCanvasChange(urlCanvasId)
+    } else {
+      getCanvas()
     }
-  }, [canvasId, currentCanvasId])
+  }, [shareCode]) // 只在 shareCode 变化时重新加载
+
+  useEffect(() => {
+    if (project?.title || currentCanvas?.title) {
+      setBreadItems([
+        {
+          title: project?.title,
+        },
+        {
+          title: currentCanvas?.title,
+        },
+      ])
+    }
+  }, [currentCanvas?.title, project?.title])
 
   const title = project
     ? `${project.title} · ${currentCanvas?.title}`
@@ -230,7 +233,7 @@ const ShareContent = () => {
                                     : "",
                               }}
                               onClick={() => {
-                                setCurrentCanvasId(item.canvasId)
+                                handleCanvasChange(item.canvasId)
                               }}>
                               {item.title}
                             </div>
