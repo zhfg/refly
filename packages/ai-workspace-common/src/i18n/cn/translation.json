@@ -1,6 +1,7 @@
 {
   "language": "简体中文",
   "productName": "Refly",
+  "welcomeMessage": "今天准备写点什么?",
   "common": {
     "confirm": "确认",
     "cancel": "取消",
@@ -149,15 +150,6 @@
     "login": "开始用 Refly 写作"
   },
   "workspace": {
-    "leftPanel": {
-      "welcomeTitle": "你好， ",
-      "welcomeQuestion": "有什么可以帮助您的吗? ",
-      "guessTitle": "猜你想问",
-      "keyword": {
-        "title": "知识归类",
-        "seeMore": "查看更多分类"
-      }
-    },
     "contentPanel": {
       "tabPanel": {
         "resource": "资源",
@@ -941,6 +933,7 @@
     "selectedSkillHeader": {
       "title": "和 {{name}} 聊聊"
     },
+    "greeting": "嗨，{{name}}",
     "addContext": "添加上下文",
     "moreSettings": "更多设置",
     "baseContextCard": {
@@ -1055,7 +1048,7 @@
       "manager": "管理"
     },
     "chatInput": {
-      "placeholder": "提出问题，发现新知",
+      "placeholder": "让 Refly 帮你写点什么...",
       "defaultQuestion": "[调用技能: {{name}}]",
       "chatWithReflyAssistant": "和「知识管家」聊聊"
     },

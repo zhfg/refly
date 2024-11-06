@@ -1,6 +1,7 @@
 {
   "language": "English",
   "productName": "Refly",
+  "welcomeMessage": "What Can I Help You Write?",
   "common": {
     "confirm": "Confirm",
     "cancel": "Cancel",
@@ -149,15 +150,6 @@
     "login": "Start Writing with Refly"
   },
   "workspace": {
-    "leftPanel": {
-      "welcomeTitle": "Hello, ",
-      "welcomeQuestion": "How can I help you today?",
-      "guessTitle": "Recommend Questions",
-      "keyword": {
-        "title": "Knowledge Category",
-        "seeMore": "See more categories"
-      }
-    },
     "contentPanel": {
       "tabPanel": {
         "resource": "Resources",
@@ -929,6 +921,7 @@
     "selectedSkillHeader": {
       "title": "Chat with {{name}}"
     },
+    "greeting": "Hello, {{name}}",
     "addContext": "Add Context",
     "moreSettings": "More Settings",
     "baseContextCard": {
@@ -1043,7 +1036,7 @@
       "manager": "Manage"
     },
     "chatInput": {
-      "placeholder": "Ask a question, discover new knowledge",
+      "placeholder": "Let Refly write something for you...",
       "defaultQuestion": "[Call Skill: {{name}}]",
       "chatWithReflyAssistant": "Chat with Refly Assistant"
     },
