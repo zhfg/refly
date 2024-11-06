@@ -105,7 +105,7 @@ export const ProjectDetail = () => {
 
   return (
     <ProjectProvider context={{ projectId }}>
-      <div className="project-detail-container">
+      <div className="project-detail-container overflow-hidden">
         <Splitter
           layout="horizontal"
           className="workspace-panel-container"
