@@ -185,7 +185,7 @@ export const ChatActions = (props: ChatActionsProps) => {
             type="primary"
             icon={<IconSend />}
             loading={messageStateStore?.pending}
-            disabled={messageStateStore?.pending}
+            disabled={!canSendMessage}
             className="text-xs gap-1"
             onClick={() => {
               handleSendMessage();

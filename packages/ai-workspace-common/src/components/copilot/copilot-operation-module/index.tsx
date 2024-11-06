@@ -14,9 +14,12 @@ import { ConfigManager } from './config-manager';
 // stores
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useChatStore, MessageIntentContext } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
-import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
+import {
+  useChatStore,
+  MessageIntentContext,
+  useChatStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/chat';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 // hooks
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
 import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
@@ -39,7 +42,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
   const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
   }));
-  const chatStore = useChatStore((state) => ({
+  const chatStore = useChatStoreShallow((state) => ({
     setMessageIntentContext: state.setMessageIntentContext,
   }));
 
