@@ -57,7 +57,7 @@ export class ConversationController {
       order,
     });
 
-    return buildSuccessResponse(conversationList?.map(conversationPO2DTO));
+    return buildSuccessResponse((conversationList ?? []).map(conversationPO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)

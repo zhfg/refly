@@ -237,6 +237,13 @@ export class KnowledgeService {
         where: { projectId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
       }),
+      this.prisma.canvas.updateMany({
+        where: { projectId, uid, deletedAt: null },
+        data: { deletedAt: new Date() },
+      }),
+      this.prisma.projectResourceRelation.deleteMany({
+        where: { projectId },
+      }),
       this.prisma.labelInstance.updateMany({
         where: { entityType: 'project', entityId: projectId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
