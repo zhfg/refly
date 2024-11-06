@@ -84,7 +84,7 @@ export const useBuildThreadAndRun = () => {
       state: {
         navigationContext: {
           shouldFetchDetail: false,
-          source: messageIntentContext?.source,
+          source: messageIntentContext?.env?.source,
         },
       },
     });

@@ -9,8 +9,9 @@ import { useProcessContextItems } from '../../hooks/use-process-context-items';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { backendBaseMarkTypes, BaseMarkType, frontendBaseMarkTypes } from '@refly/common-types';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
-export const AddBaseMarkContext = () => {
+export const AddBaseMarkContext = (props: { source: MessageIntentSource }) => {
   const [popoverVisible, setPopoverVisible] = useState(false);
   const { t } = useTranslation();
 
@@ -67,7 +68,12 @@ export const AddBaseMarkContext = () => {
         open={popoverVisible}
         onOpenChange={handleVisibleChange}
         content={
-          <BaseMarkContextSelector onClose={handleClose} onSelect={handleSelect} selectedItems={selectedItems} />
+          <BaseMarkContextSelector
+            source={props.source}
+            onClose={handleClose}
+            onSelect={handleSelect}
+            selectedItems={selectedItems}
+          />
         }
       >
         <Tooltip

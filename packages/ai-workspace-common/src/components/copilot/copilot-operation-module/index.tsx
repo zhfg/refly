@@ -25,6 +25,7 @@ import { useProjectContext } from '@refly-packages/ai-workspace-common/component
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { editorEmitter, InPlaceSendMessagePayload } from '@refly-packages/utils/event-emitter/editor';
 import { LOCALE, MarkType } from '@refly/common-types';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 interface CopilotInputModuleProps {
   source: MessageIntentSource;
@@ -76,7 +77,6 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
 
     const newMessageIntentContext: Partial<MessageIntentContext> = {
       ...(messageIntentContext || {}),
-      source: messageIntentContext?.source || source, // may edit from other side
       isNewConversation: messageIntentContext?.isNewConversation || forceNewConv,
       projectContext: {
         projectId: finalProjectId,
@@ -88,6 +88,10 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       enableWebSearch,
       enableAutoImportWebResource,
       enableKnowledgeBaseSearch,
+      env: {
+        runtime: getRuntime(),
+        source, // may edit from other side,
+      },
     };
 
     chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
@@ -160,7 +164,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
           <div className="ai-copilot-chat-container">
             <div className="chat-input-container">
               <SelectedSkillHeader />
-              <ContextManager />
+              <ContextManager source={source} />
               <div className="chat-input-body">
                 <ChatInput
                   form={form}
@@ -185,7 +189,12 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
                 />
               )}
 
-              <ChatActions form={form} handleSendMessage={handleSendMessage} handleAbort={handleAbort} />
+              <ChatActions
+                form={form}
+                handleSendMessage={handleSendMessage}
+                handleAbort={handleAbort}
+                source={source}
+              />
             </div>
           </div>
         </div>

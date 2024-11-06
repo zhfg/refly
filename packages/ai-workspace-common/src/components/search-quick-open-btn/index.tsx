@@ -36,7 +36,13 @@ export const SearchQuickOpenBtn = (props: SearchQuickOpenBtnProps) => {
         >
           <div className="search-quick-open-text">
             <IconSearch />
-            <span style={{ marginLeft: 8 }}>{t(`${placeholder || 'loggedHomePage.searchEverything'}`)}</span>
+            <span
+              style={{
+                marginLeft: 8,
+              }}
+            >
+              {t(`${placeholder || 'loggedHomePage.searchEverything'}`)}
+            </span>
           </div>
           <div className="search-quick-open-shortcuts">
             <div className="search-quick-open-shortcut-key">{reflyEnv.getOsType() === 'OSX' ? '⌘' : 'ctrl'}</div>

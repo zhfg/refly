@@ -4,20 +4,13 @@ import './index.scss';
 
 import { Command } from 'cmdk';
 import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import { useDebouncedCallback } from 'use-debounce';
-import { defaultFilter } from '@refly-packages/ai-workspace-common/components/search/cmdk/filter';
 
 import './index.scss';
 import { Home } from './home';
 
 // request
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { SearchDomain, SearchResult, SkillMeta } from '@refly/openapi-schema';
 import { RenderItem } from '../../types/item';
 import classNames from 'classnames';
-
-// hooks
-import { useLoadExtensionWeblinkData } from '../../hooks/use-load-weblink-data.extension';
 
 import { useTranslation } from 'react-i18next';
 import { BaseMarkType, frontendBaseMarkTypes, backendBaseMarkTypes, Mark } from '@refly/common-types';
@@ -25,6 +18,8 @@ import { getTypeIcon } from '../../utils/icon';
 import { SortMark } from '../../types/mark';
 
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { useSearchStrategy } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-search-strategy';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 interface CustomProps {
   showList?: boolean;
@@ -32,6 +27,7 @@ interface CustomProps {
   onSearchValueChange?: (value: string) => void;
   onSelect?: (newMark: Mark) => void;
   onClose?: () => void;
+  source: MessageIntentSource;
 }
 
 export interface BaseSearchAndSelectorProps
@@ -40,18 +36,6 @@ export interface BaseSearchAndSelectorProps
   selectedItems: SortMark[];
 }
 
-const mapSearchResultToMark = (searchResult: SearchResult): Mark => {
-  const newMark: Mark = {
-    id: searchResult.id,
-    entityId: searchResult.id,
-    type: searchResult.domain,
-    data: (searchResult?.snippets?.map((snippet) => snippet.text) || []).join('\n'),
-    title: searchResult.title,
-  };
-
-  return newMark;
-};
-
 export const BaseSearchAndSelector = ({
   onClose,
   onSelect,
@@ -59,20 +43,24 @@ export const BaseSearchAndSelector = ({
   onClickOutside,
   onSearchValueChange,
   selectedItems = [],
+  source,
 }: BaseSearchAndSelectorProps) => {
   const [activeTab, setActiveTab] = useState<BaseMarkType | 'all'>('all');
   const [searchValue, setSearchValue] = useState('');
   const [activeValue, setActiveValue] = React.useState('');
   const ref = React.useRef<HTMLDivElement | null>(null);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const [displayMode, setDisplayMode] = useState<'search' | 'list'>('list');
   const [isComposing, setIsComposing] = useState(false);
   const { t } = useTranslation();
 
-  const [loading, setLoading] = useState(false);
+  const { handleSearch, displayMode } = useSearchStrategy({
+    source,
+    onLoadingChange: (loading) => {
+      setLoading(loading);
+    },
+  });
 
-  // handle extension weblink
-  const { loadExtensionWeblinkData } = useLoadExtensionWeblinkData();
+  const [loading, setLoading] = useState(false);
 
   console.log('activeValue', activeValue);
 
@@ -83,95 +71,24 @@ export const BaseSearchAndSelector = ({
   const isHome = activeTab === 'all';
   const isWeb = getRuntime() === 'web';
 
-  const debouncedSearch = useDebouncedCallback(
-    async ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => {
-      setLoading(true);
-
-      const { data, error } = await getClient().search({
-        body: {
-          query: searchVal,
-          domains: domains,
-        },
-      });
-
-      setLoading(false);
-
-      if (error) {
-        Message.error(String(error));
-        return;
-      }
-
-      const resData = data?.data || [];
-      let marks = resData.map(mapSearchResultToMark);
-
-      if (!isWeb) {
-        const { success, data: extensionWeblinkData } = await loadExtensionWeblinkData();
-        if (success) {
-          const filteredExtensionWeblinks = extensionWeblinkData.filter((item) =>
-            defaultFilter(item.title, searchVal, searchVal.toLowerCase().split(/\s+/)),
-          );
-          marks = [...marks, ...filteredExtensionWeblinks];
-        }
-      }
-
-      // notes
-      // 将 SearchResult 转换为 Mark
-
-      searchStore.setNoCategoryBigSearchRes(marks);
-    },
-    200,
-  );
-
-  const handleBigSearchValueChange = (searchVal: string, domain: BaseMarkType) => {
-    // searchVal 为空的时候获取正常列表的内容
-    if (!searchVal) {
-      setDisplayMode('list');
-
-      if (backendBaseMarkTypes.includes(domain)) {
-        debouncedSearch({
-          searchVal: '',
-          domains: (domain ? [domain] : undefined) as SearchDomain[],
-        });
-      } else if (frontendBaseMarkTypes.includes(domain)) {
-        // TODO: 兼容 all 和 extensionWeblink 的场景
-        if (domain === 'all') {
-          debouncedSearch({
-            searchVal: '',
-            domains: backendBaseMarkTypes as SearchDomain[],
-          });
-        }
-      }
-    } else {
-      // searchVal 不为空的时候获取搜索的内容
-      setDisplayMode('search');
-
-      if (backendBaseMarkTypes.includes(domain)) {
-        debouncedSearch({
-          searchVal: searchVal,
-          domains: (domain ? [domain] : undefined) as SearchDomain[],
-        });
-      } else if (frontendBaseMarkTypes.includes(domain)) {
-        // TODO: 兼容 all 和 extensionWeblink 的场景
-        if (domain === 'all') {
-          debouncedSearch({
-            searchVal,
-            domains: backendBaseMarkTypes as SearchDomain[],
-          });
-        }
-      }
-    }
-  };
-
   const handleConfirm = (activeValue: string, sortedRenderData: RenderItem[]) => {
     const [_, id] = activeValue.split('__');
     const mark = sortedRenderData.find((item) => item.data.id === id);
     onSelect(mark?.data);
   };
 
+  const handleSearchValueChange = (val: string) => {
+    if (onSearchValueChange) {
+      onSearchValueChange(val);
+    }
+    setSearchValue(val);
+    handleSearch(val, activeTab);
+  };
+
   useEffect(() => {
     inputRef?.current?.focus();
 
-    handleBigSearchValueChange('', activeTab);
+    handleSearch('', activeTab);
   }, [activeTab]);
 
   useEffect(() => {
@@ -248,13 +165,7 @@ export const BaseSearchAndSelector = ({
           onCompositionEnd={(e) => {
             setIsComposing(false);
           }}
-          onValueChange={(val) => {
-            if (onSearchValueChange) {
-              onSearchValueChange(val);
-            }
-            setSearchValue(val);
-            handleBigSearchValueChange(val, activeTab);
-          }}
+          onValueChange={handleSearchValueChange}
         />
       </div>
       <Spin

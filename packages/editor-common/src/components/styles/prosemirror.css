@@ -12,16 +12,18 @@
 .ProseMirror .is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
-  color: hsl(var(--muted-foreground));
+  color: rgba(0, 0, 0, 0.3) !important;
   pointer-events: none;
   height: 0;
+  font-weight: 400 !important;
 }
 .ProseMirror .is-empty::before {
   content: attr(data-placeholder);
   float: left;
-  color: hsl(var(--muted-foreground));
+  color: rgba(0, 0, 0, 0.3) !important;
   pointer-events: none;
   height: 0;
+  font-weight: 400 !important;
 }
 
 /* Custom image styles */
