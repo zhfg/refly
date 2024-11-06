@@ -100,9 +100,9 @@ const ShareContent = () => {
         ...(targetCanvasId ? { canvasId: targetCanvasId } : {}),
       },
     })
+    setLoading(false)
+
     if (!data?.success) {
-      message.error(data?.errMsg)
-      setLoading(false)
       return
     }
     const result = data.data
@@ -117,12 +117,11 @@ const ShareContent = () => {
     if (!projectState?.data) {
       setProject(result?.project as Project)
     }
-    setLoading(false)
   }
 
   const handleCopy = async (text: string) => {
     try {
-      await copyToClipboard(text)
+      copyToClipboard(text)
       message.success(t("projectDetail.share.copyLinkSuccess"))
     } catch (err) {
       message.error(t("projectDetail.share.copyLinkFailed"))
