@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Avatar,
   Divider,
@@ -59,6 +59,8 @@ const getNavSelectedKeys = (pathname = "") => {
     return "Skill"
   } else if (pathname.startsWith("/library")) {
     return "Library"
+  } else if (pathname.startsWith("/project")) {
+    return "Project"
   }
 
   return "Home"
@@ -220,6 +222,7 @@ export const SiderLayout = () => {
   const { projectActiveConvId } = useProjectStoreShallow(state => ({
     projectActiveConvId: state.projectActiveConvId,
   }))
+  const [currentProjectId, setCurrentProjectId] = useState("")
 
   const { t } = useTranslation()
 
@@ -286,20 +289,6 @@ export const SiderLayout = () => {
 
   const siderSections: SiderCenterProps[][] = [
     [
-      // {
-      //   key: "NewDraft",
-      //   name: "newDraft",
-      //   icon: (
-      //     <HiOutlineDocumentAdd
-      //       className="arco-icon"
-      //       style={{ fontSize: 20 }}
-      //     />
-      //   ),
-      //   showDivider: true,
-      //   onClick: () => {
-      //     newCanvasModalStore.setNewCanvasModalVisible(true)
-      //   },
-      // },
       {
         key: "Import",
         name: "newResource",
@@ -356,6 +345,14 @@ export const SiderLayout = () => {
       },
     })
   }
+
+  useEffect(() => {
+    const projectId = location.pathname.startsWith("/project/")
+      ? location.pathname.split("/")[2]
+      : ""
+
+    setCurrentProjectId(projectId)
+  }, [location.pathname])
 
   return (
     <Sider
@@ -426,7 +423,7 @@ export const SiderLayout = () => {
 
                     {recentProjects.map(project => (
                       <MenuItem
-                        className="custom-menu-item"
+                        className={`custom-menu-item ${currentProjectId === project.projectId ? "arco-menu-selected" : ""}`}
                         key={project.projectId}
                         onClick={() => {
                           handleClickProject(project.projectId)
