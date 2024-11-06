@@ -72,9 +72,10 @@ const ShareContent = () => {
   const [currentCanvas, setCurrentCanvas] = useState<Canvas>()
   const [breadItems, setBreadItems] = useState<any[]>([])
 
+  // for content selector
   const baseUrl = getClientOrigin()
   const { initMessageListener, initContentSelectorElem } = useContentSelector(
-    "share-content",
+    "share-canvas-content-container",
     "canvasSelection",
     {
       url: `${baseUrl}/share/${shareCode}`,
@@ -157,15 +158,17 @@ const ShareContent = () => {
 
   // 初始化块选择
   useEffect(() => {
-    if (loading || !currentCanvas?.canvasId) {
+    if (loading || !shareCode) {
       return
     }
+
     const remove = initMessageListener()
     handleInitContentSelectorListener()
+
     return () => {
       remove()
     }
-  }, [currentCanvas?.canvasId, loading])
+  }, [loading, shareCode])
 
   const title = project
     ? `${project.title} · ${currentCanvas?.title}`
@@ -282,7 +285,7 @@ const ShareContent = () => {
                       className="share-canvas-content-panel">
                       <div className="left-panel relative flex h-full">
                         <div className="h-full flex-grow overflow-hidden overflow-y-auto p-8">
-                          <>
+                          <div className="share-canvas-content-container">
                             {currentCanvas ? (
                               <div className="share-canvas-content mx-auto mb-8 box-border h-full max-w-[1024px] rounded-l">
                                 <div className="mb-4 w-full text-2xl font-bold">
@@ -296,7 +299,7 @@ const ShareContent = () => {
                             ) : (
                               <Empty />
                             )}
-                          </>
+                          </div>
                         </div>
                       </div>
                     </Splitter.Panel>
