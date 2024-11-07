@@ -882,6 +882,14 @@ export const $SourceMeta = {
       type: 'string',
       description: 'Related entity type',
     },
+    originalLocale: {
+      type: 'string',
+      description: 'Original locale',
+    },
+    translatedDisplayLocale: {
+      type: 'string',
+      description: 'Translated display locale',
+    },
   },
 } as const;
 
@@ -3173,6 +3181,26 @@ export const $WebSearchResponse = {
           description: 'Web search results',
           items: {
             $ref: '#/components/schemas/WebSearchResult',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $RerankResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Reranked results',
+          items: {
+            $ref: '#/components/schemas/SearchResult',
           },
         },
       },

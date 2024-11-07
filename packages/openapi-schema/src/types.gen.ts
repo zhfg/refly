@@ -707,6 +707,14 @@ export type SourceMeta = {
    * Related entity type
    */
   entityType?: string;
+  /**
+   * Original locale
+   */
+  originalLocale?: string;
+  /**
+   * Translated display locale
+   */
+  translatedDisplayLocale?: string;
 };
 
 /**
@@ -2178,6 +2186,13 @@ export type WebSearchResponse = BaseResponse & {
    * Web search results
    */
   data?: Array<WebSearchResult>;
+};
+
+export type RerankResponse = BaseResponse & {
+  /**
+   * Reranked results
+   */
+  data?: Array<SearchResult>;
 };
 
 /**

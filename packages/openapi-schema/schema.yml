@@ -2216,6 +2216,12 @@ components:
         entityType:
           type: string
           description: Related entity type
+        originalLocale:
+          type: string
+          description: Original locale
+        translatedDisplayLocale:
+          type: string
+          description: Translated display locale
     SourceSelection:
       type: object
       description: Source selection
@@ -3802,6 +3808,16 @@ components:
               description: Web search results
               items:
                 $ref: '#/components/schemas/WebSearchResult'
+    RerankResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Reranked results
+              items:
+                $ref: '#/components/schemas/SearchResult'
     SearchOptions:
       type: object
       description: Search options for internal use

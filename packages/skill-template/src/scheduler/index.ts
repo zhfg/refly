@@ -1,4 +1,4 @@
-import { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
+import { AIMessage, AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 
 // schema
@@ -10,7 +10,13 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
 import { CanvasEditConfig, pick, safeParseJSON, safeStringifyJSON } from '@refly-packages/utils';
-import { Icon, SkillInvocationConfig, SkillMeta, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SkillInvocationConfig,
+  SkillMeta,
+  SkillTemplateConfigSchema,
+  Source,
+} from '@refly-packages/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
@@ -41,6 +47,14 @@ import * as commonQnA from './module/commonQnA';
 import { HighlightSelection, SelectedRange } from './module/editCanvas/types';
 
 import { InPlaceEditType } from '@refly-packages/utils';
+import {
+  buildRewriteAndTranslateQueryUserPrompt,
+  rewriteAndTranslateQueryOutputSchema,
+  buildRewriteAndTranslateQuerySystemPrompt,
+} from './module/multiLingualSearch/rewriteAndTranslateQuery';
+import { mergeSearchResults, searchResultsToSources, sourcesToSearchResults } from './module/multiLingualSearch/utils';
+import { translateResults } from './module/multiLingualSearch/translateResult';
+import { detectQueryLanguage } from './module/multiLingualSearch/translateResult';
 
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
@@ -472,6 +486,179 @@ Please generate the summary based on these requirements and offer suggestions fo
     this.emitEvent({ event: 'log', content: `Generated canvas successfully!` }, config);
 
     return { messages: [responseMessage], skillCalls: [] };
+  };
+
+  /**
+   * 目标：
+   * 1. 基于用户输入的 query，结合 searchLocaleList 和 resultDisplayLocale，进行多轮搜索，得到最终的 sources
+   * 2. 返回 sources 给前端进行展示
+   *
+   * 输入：
+   * 1. 选择 searchLocaleList: string[], 和结果展示的 resultDisplayLocale: string | auto
+   * 2. 输入查询 Query
+   *
+   * 输出：
+   * 1. 多步推理：
+   * 1.1 rewrite to multi query：比如存在多个意图，则需要拆分为多个 query 或者将不完整的某个意图补充完整
+   * 1.2 基于 searchLocaleList 将 rewrite 后的 query 翻译为多语言，然后合并成一组 list query
+   * 1.3 基于 list query 进行多轮搜索，得到初始的 sources
+   * 1.4 将初始的 sources(title、description/snippet) 翻译为 resultDisplayLocale 对应的语言，整体组成 list sources
+   * 1.5 基于 list sources 进行 rerank 排序生成最终的 sources 并返回
+   *
+   */
+  callMultiLingualWebSearch = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+    const { query } = state;
+    const { currentSkill, spanId, tplConfig } = config.configurable;
+
+    const searchLocaleList = (tplConfig?.searchLocaleList?.value as string[]) || ['en', 'zh-CN', 'ja'];
+    const resultDisplayLocale = (tplConfig?.resultDisplayLocale?.value as string) || 'auto';
+    const enableRerank = (tplConfig?.enableRerank?.value as boolean) || false;
+    const searchLimit = (tplConfig?.searchLimit?.value as number) || 10;
+    const rerankRelevanceThreshold = (tplConfig?.rerankRelevanceThreshold?.value as number) || 0.1;
+    const rerankLimit = tplConfig?.rerankLimit?.value as number;
+    const concurrencyLimit = (tplConfig?.concurrencyLimit?.value as number) || 3;
+    const batchSize = (tplConfig?.batchSize?.value as number) || 5;
+
+    // Step 1: Use LLM to analyze query and generate translations
+    const model = this.engine.chatModel({ temperature: 0.1 });
+
+    const module = {
+      buildSystemPrompt: buildRewriteAndTranslateQuerySystemPrompt,
+      buildUserPrompt: buildRewriteAndTranslateQueryUserPrompt,
+    };
+
+    // Create runnable with structured output
+    const runnable = model.withStructuredOutput(rewriteAndTranslateQueryOutputSchema);
+
+    try {
+      // Get structured output from LLM
+      const analysisResult = await runnable.invoke(
+        [
+          new SystemMessage(module.buildSystemPrompt()),
+          new HumanMessage(
+            module.buildUserPrompt({
+              query,
+              searchLocaleList,
+              resultDisplayLocale,
+            }),
+          ),
+        ],
+        config,
+      );
+
+      // Log analysis for debugging
+      this.engine.logger.log(`Search analysis: ${JSON.stringify(analysisResult.analysis)}`);
+
+      const displayLocale =
+        resultDisplayLocale === 'auto' ? analysisResult.analysis.recommendedDisplayLocale : resultDisplayLocale;
+
+      this.engine.logger.log(`Recommended display locale: ${displayLocale}`);
+
+      // Step 2: Execute searches for each locale and query
+      const allResults: Source[] = [];
+
+      console.time('webSearch');
+      for (const locale of searchLocaleList) {
+        const queries = analysisResult.queries.translatedQueries[locale] || analysisResult.queries.rewrittenQueries;
+
+        for (const q of queries) {
+          const result = await this.engine.service.webSearch(config.user, {
+            query: q,
+            limit: searchLimit,
+            locale,
+          });
+
+          // TODO: 这里需要记录 original locale
+          const webSearchSources = result.data.map((item) => ({
+            url: item.url,
+            title: item.name,
+            pageContent: item.snippet,
+            metadata: {
+              originalLocale: locale,
+            },
+          }));
+
+          allResults.push(...webSearchSources);
+        }
+      }
+      console.timeEnd('webSearch');
+      // Step 3: Merge results
+      const mergedResults = mergeSearchResults(allResults);
+
+      // Translate merged results to display locale
+      console.time('translateResults');
+      const translatedResults = await translateResults({
+        sources: mergedResults,
+        targetLocale: displayLocale,
+        model,
+        config,
+        concurrencyLimit,
+        batchSize,
+      });
+      console.timeEnd('translateResults');
+      // Map translated results back to Source format
+      // TODO: 这里需要记录 original locale 和 translated locale
+      const translatedSources = translatedResults.translations.map((translation, index) => ({
+        ...mergedResults[index],
+        title: translation.title,
+        pageContent: translation.snippet,
+        url: translation.originalUrl,
+        metadata: {
+          originalLocale: mergedResults[index]?.metadata?.originalLocale,
+          translatedDisplayLocale: displayLocale,
+        },
+      }));
+
+      // Step 5: Rerank results
+      /**
+       * 1. 基于 query 和 translatedSources 进行 rerank
+       * 2. 返回 rerank 后的结果
+       */
+      let finalResults: Source[] = [];
+
+      console.time('rerank');
+      try {
+        // Convert translated sources to search results format
+        const searchResults = sourcesToSearchResults(translatedSources);
+
+        // Perform reranking
+        const rerankResponse = await this.engine.service.rerank(query, searchResults, {
+          topN: rerankLimit || searchLocaleList.length,
+          relevanceThreshold: rerankRelevanceThreshold,
+        });
+
+        // Convert back to Source format
+        finalResults = searchResultsToSources(rerankResponse.data);
+
+        this.engine.logger.log(`Reranked results count: ${finalResults.length}`);
+      } catch (error) {
+        this.engine.logger.error(`Error in reranking: ${error.stack}`);
+        // Fallback to translated sources without reranking
+        finalResults = translatedSources;
+      }
+      console.timeEnd('rerank');
+
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify(finalResults),
+          structuredDataKey: 'multiLingualSearchResults',
+        },
+        config,
+      );
+
+      // Return results with analysis
+      return {
+        messages: [
+          new AIMessage({
+            content: 'Search completed successfully',
+          }),
+        ],
+      };
+    } catch (error) {
+      this.engine.logger.error(`Error in multilingual search: ${error.stack}`);
+      throw error;
+    }
   };
 
   callRewriteCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
@@ -943,21 +1130,24 @@ Generated question example:
       channels: this.graphState,
     })
       // .addNode('direct', this.directCallSkill)
-      .addNode('generateCanvas', this.callGenerateCanvas)
-      .addNode('rewriteCanvas', this.callRewriteCanvas)
-      .addNode('editCanvas', this.callEditCanvas)
-      .addNode('other', this.callCommonQnA)
+      // .addNode('generateCanvas', this.callGenerateCanvas)
+      // .addNode('rewriteCanvas', this.callRewriteCanvas)
+      // .addNode('editCanvas', this.callEditCanvas)
+      // .addNode('other', this.callCommonQnA)
+      .addNode('callMultiLingualWebSearch', this.callMultiLingualWebSearch)
       .addNode('relatedQuestions', this.genRelatedQuestions);
 
     // workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
     // workflow.addConditionalEdges('direct', this.onDirectSkillCallFinish);
     // workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
-    workflow.addConditionalEdges(START, this.callScheduler);
+    // workflow.addConditionalEdges(START, this.callScheduler);
+    workflow.addEdge(START, 'callMultiLingualWebSearch');
     // workflow.addEdge(START, 'editCanvas');
-    workflow.addEdge('generateCanvas', 'relatedQuestions');
-    workflow.addEdge('rewriteCanvas', 'relatedQuestions');
-    workflow.addEdge('editCanvas', 'relatedQuestions');
-    workflow.addEdge('other', 'relatedQuestions');
+    // workflow.addEdge('generateCanvas', 'relatedQuestions');
+    // workflow.addEdge('rewriteCanvas', 'relatedQuestions');
+    // workflow.addEdge('editCanvas', 'relatedQuestions');
+    // workflow.addEdge('other', 'relatedQuestions');
+    workflow.addEdge('callMultiLingualWebSearch', 'relatedQuestions');
     workflow.addEdge('relatedQuestions', END);
 
     return workflow.compile();

@@ -202,6 +202,10 @@ export class SkillService {
         const result = await this.search.webSearch(user, req);
         return buildSuccessResponse(result);
       },
+      rerank: async (query, results, options) => {
+        const result = await this.rag.rerank(query, results, options);
+        return buildSuccessResponse(result);
+      },
       search: async (user, req, options) => {
         const result = await this.search.search(user, req, options);
         return buildSuccessResponse(result);
