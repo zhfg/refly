@@ -124,7 +124,15 @@
       "newCanvas": "新稿布",
       "importResource": "导入资源",
       "chat": "Chat",
-      "empty": "空空如也"
+      "empty": "空空如也",
+      "move": "移动",
+      "remove": "移除",
+      "delete": "删除",
+      "projectSelector": {
+        "title": "移动稿布",
+        "tip": "请选择目标项目",
+        "success": "移动成功！"
+      }
     },
     "share": {
       "createShareFailed": "创建分享失败，请重试！",
@@ -207,6 +215,7 @@
     },
     "deleteDropdownMenu": {
       "successful": "删除成功！",
+      "unbindSuccessful": "移除成功！",
       "failed": "删除失败！",
       "deleteConfirmForCanvas": "确定删除该稿布吗？",
       "deleteConfirmForProject": "确定删除该项目吗？",
