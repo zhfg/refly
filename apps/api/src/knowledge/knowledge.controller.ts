@@ -34,6 +34,7 @@ import {
   AddReferencesRequest,
   DeleteReferencesRequest,
   ListOrder,
+  DeleteProjectResponse,
 } from '@refly-packages/openapi-schema';
 import { User as UserModel } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
@@ -111,12 +112,15 @@ export class KnowledgeController {
 
   @UseGuards(JwtAuthGuard)
   @Post('project/delete')
-  async deleteProject(@User() user: UserModel, @Body() body: DeleteProjectRequest) {
+  async deleteProject(
+    @User() user: UserModel,
+    @Body() body: DeleteProjectRequest,
+  ): Promise<DeleteProjectResponse> {
     if (!body.projectId) {
       throw new ParamsError('projectId is required');
     }
     await this.knowledgeService.deleteProject(user, body.projectId);
-    return { data: body };
+    return buildSuccessResponse({});
   }
 
   @UseGuards(JwtAuthGuard)
@@ -236,7 +240,7 @@ export class KnowledgeController {
       pageSize,
       order,
     });
-    return buildSuccessResponse(canvases?.map(canvasPO2DTO));
+    return buildSuccessResponse((canvases ?? []).map(canvasPO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -275,8 +279,8 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Post('canvas/batchUpdate')
   async batchUpdateCanvas(@User() user: UserModel, @Body() body: UpsertCanvasRequest[]) {
-    const canvases = await this.knowledgeService.batchUpdateCanvas(user, body);
-    return buildSuccessResponse(canvases.map(canvasPO2DTO));
+    await this.knowledgeService.batchUpdateCanvas(user, body);
+    return buildSuccessResponse({});
   }
 
   @UseGuards(JwtAuthGuard)

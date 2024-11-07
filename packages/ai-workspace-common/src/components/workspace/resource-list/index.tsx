@@ -29,7 +29,7 @@ export const ResourceList = () => {
       });
       return res?.data;
     },
-    pageSize: 12,
+    pageSize: 20,
   });
 
   const reLoadResource = async (resourceId: string) => {

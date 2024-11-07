@@ -1,7 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bull';
 import pLimit from 'p-limit';
+import crypto from 'node:crypto';
 import { InjectQueue } from '@nestjs/bull';
+import normalizeUrl from 'normalize-url';
 import { readingTime } from 'reading-time-estimator';
 import { Canvas, Prisma, Resource as ResourceModel } from '@prisma/client';
 import { RAGService } from '@/rag/rag.service';
@@ -211,7 +213,7 @@ export class KnowledgeService {
 
           await tx.projectResourceRelation.upsert({
             where: { projectId_resourceId: { projectId, resourceId } },
-            create: { projectId, resourceId, order: finalOrder },
+            create: { projectId, resourceId, uid, order: finalOrder },
             update: { order: finalOrder },
           });
         } else if (operation === 'unbind') {
@@ -236,6 +238,13 @@ export class KnowledgeService {
       this.prisma.project.update({
         where: { projectId, uid, deletedAt: null },
         data: { deletedAt: new Date() },
+      }),
+      this.prisma.canvas.updateMany({
+        where: { projectId, uid, deletedAt: null },
+        data: { deletedAt: new Date() },
+      }),
+      this.prisma.projectResourceRelation.deleteMany({
+        where: { projectId },
       }),
       this.prisma.labelInstance.updateMany({
         where: { entityType: 'project', entityId: projectId, uid, deletedAt: null },
@@ -290,7 +299,22 @@ export class KnowledgeService {
         .map((res, index) => ({ ...res, order: index }));
     }
 
-    return resources;
+    // Get projectIds for each resource
+    const resourceProjects = await this.prisma.projectResourceRelation.findMany({
+      select: { resourceId: true, projectId: true },
+      where: { resourceId: { in: resources.map((r) => r.resourceId) } },
+    });
+    const resourceProjectMap = new Map<string, string[]>();
+    resourceProjects.forEach((rp) => {
+      const projectIds = resourceProjectMap.get(rp.resourceId) || [];
+      projectIds.push(rp.projectId);
+      resourceProjectMap.set(rp.resourceId, projectIds);
+    });
+
+    return resources.map((res) => ({
+      ...res,
+      projectIds: resourceProjectMap.get(res.resourceId),
+    }));
   }
 
   async getResourceDetail(user: User, param: GetResourceDetailData['query']) {
@@ -334,6 +358,7 @@ export class KnowledgeService {
 
     let storageKey: string;
     let storageSize: number = 0;
+    let identifier: string;
     let indexStatus: IndexStatus = 'wait_parse';
 
     if (param.resourceType === 'weblink') {
@@ -345,13 +370,25 @@ export class KnowledgeService {
         throw new ParamsError('url is required');
       }
       param.title ||= title;
+      param.data.url = normalizeUrl(url, { stripHash: true });
+      identifier = param.data.url;
     } else if (param.resourceType === 'text') {
       if (!param.content) {
         throw new ParamsError('content is required for text resource');
       }
+      const md5Hash = crypto
+        .createHash('md5')
+        .update(param.content ?? '')
+        .digest('hex');
+      identifier = `text://${md5Hash}`;
     } else {
       throw new ParamsError('Invalid resource type');
     }
+
+    const existingResource = await this.prisma.resource.findFirst({
+      where: { uid: user.uid, identifier, deletedAt: null },
+    });
+    param.resourceId = existingResource ? existingResource.resourceId : genResourceID();
 
     const cleanedContent = param.content?.replace(/x00/g, '') ?? '';
 
@@ -366,16 +403,25 @@ export class KnowledgeService {
     }
 
     const resource = await this.prisma.$transaction(async (tx) => {
-      const resource = await tx.resource.create({
-        data: {
+      const resource = await tx.resource.upsert({
+        where: { resourceId: param.resourceId },
+        create: {
           resourceId: param.resourceId,
+          identifier,
           resourceType: param.resourceType,
           meta: JSON.stringify(param.data || {}),
           contentPreview: cleanedContent?.slice(0, 500),
           storageKey,
           storageSize,
           uid: user.uid,
-          readOnly: !!param.readOnly,
+          title: param.title || 'Untitled',
+          indexStatus,
+        },
+        update: {
+          meta: JSON.stringify(param.data || {}),
+          contentPreview: cleanedContent?.slice(0, 500),
+          storageKey,
+          storageSize,
           title: param.title || 'Untitled',
           indexStatus,
         },
@@ -574,7 +620,7 @@ export class KnowledgeService {
       throw new ResourceNotFoundError(`resource ${param.resourceId} not found`);
     }
 
-    const updates: Prisma.ResourceUpdateInput = pick(param, ['title', 'readOnly']);
+    const updates: Prisma.ResourceUpdateInput = pick(param, ['title']);
     if (param.data) {
       updates.meta = JSON.stringify(param.data);
     }
@@ -822,14 +868,16 @@ export class KnowledgeService {
       throw new CanvasNotFoundError('Some of the canvases cannot be found');
     }
 
-    return this.prisma.$transaction(
+    await this.prisma.$transaction(
       param.map((p) =>
         this.prisma.canvas.update({
           where: { canvasId: p.canvasId },
-          data: pick(p, ['title', 'readOnly', 'order']),
+          data: pick(p, ['title', 'readOnly', 'order', 'projectId']),
         }),
       ),
     );
+
+    // TODO: update elastcisearch docs and qdrant data points
   }
 
   async deleteCanvas(user: User, canvasId: string) {

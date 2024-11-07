@@ -228,12 +228,12 @@ model Resource {
   storageSize    BigInt    @default(0) @map("storage_size")
   /// Vector storage size (in bytes)
   vectorSize     BigInt    @default(0) @map("vector_size")
-  /// Whether this resource is readonly
-  readOnly       Boolean   @default(false) @map("read_only")
   /// Index status
   indexStatus    String    @default("init") @map("index_status")
   /// Title
   title          String    @map("title")
+  /// Resource identifier
+  identifier     String?   @map("identifier")
   /// Resource metadata
   meta           String    @map("meta")
   /// Create timestamp
@@ -243,7 +243,7 @@ model Resource {
   /// Soft delete timestamp
   deletedAt      DateTime? @map("deleted_at") @db.Timestamptz()
 
-  @@index([uid, deletedAt, updatedAt])
+  @@index([uid, identifier, deletedAt, updatedAt])
   @@map("resources")
 }
 
@@ -328,6 +328,8 @@ model ProjectResourceRelation {
   projectId  String   @map("project_id")
   /// Resource id
   resourceId String   @map("resource_id")
+  /// UID
+  uid        String   @default("") @map("uid")
   /// Create timestamp
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
   /// Display order within project

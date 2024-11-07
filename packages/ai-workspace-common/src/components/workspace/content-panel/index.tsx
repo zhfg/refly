@@ -6,7 +6,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/workspace/resource-list';
 import { CanvasList } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list';
-import { ProjectList } from '@refly-packages/ai-workspace-common/components/project-list';
+import { ProjectList } from '@refly-packages/ai-workspace-common/components/workspace/project-list';
 import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { useImportProjectModal } from '@refly-packages/ai-workspace-common/stores/import-project-modal';
 import { useNewCanvasModalStoreShallow } from '@refly-packages/ai-workspace-common/stores/new-canvas-modal';

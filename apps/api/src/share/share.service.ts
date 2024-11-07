@@ -94,7 +94,12 @@ export class ShareService {
 
     const projects = await this.prisma.project.findMany({
       where: { shareCode },
-      include: { canvases: { orderBy: { order: 'asc' } } },
+      include: {
+        canvases: {
+          where: { deletedAt: null },
+          orderBy: { order: 'asc' },
+        },
+      },
       take: 1,
     });
 
@@ -134,7 +139,7 @@ export class ShareService {
     const result: SharedContent = {};
 
     const canvases = await this.prisma.canvas.findMany({
-      where: { shareCode, canvasId },
+      where: { shareCode, canvasId, deletedAt: null },
       take: 1,
     });
 

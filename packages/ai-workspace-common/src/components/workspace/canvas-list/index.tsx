@@ -38,7 +38,7 @@ export const CanvasList = (props: CanvasListProps) => {
       });
       return res?.data;
     },
-    pageSize: 12,
+    pageSize: 20,
   });
 
   useEffect(() => {

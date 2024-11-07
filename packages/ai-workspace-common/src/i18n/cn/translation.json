@@ -363,7 +363,7 @@
       "addTime": "添加时间",
       "updateTime": "更新时间",
       "source": "来源",
-      "storageSize": "存储存储",
+      "storageSize": "文件存储",
       "vectorSize": "向量存储",
       "indexStatus": "索引状态",
       "referenced": "{{count}} 被引用",
