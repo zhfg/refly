@@ -149,6 +149,13 @@ export const $Resource = {
       description: 'Resource metadata',
       $ref: '#/components/schemas/ResourceMeta',
     },
+    projectIds: {
+      type: 'array',
+      description: 'Project IDs related to this resource',
+      items: {
+        type: 'string',
+      },
+    },
     indexStatus: {
       description: 'Resource index status',
       $ref: '#/components/schemas/IndexStatus',

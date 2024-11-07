@@ -299,7 +299,22 @@ export class KnowledgeService {
         .map((res, index) => ({ ...res, order: index }));
     }
 
-    return resources;
+    // Get projectIds for each resource
+    const resourceProjects = await this.prisma.projectResourceRelation.findMany({
+      select: { resourceId: true, projectId: true },
+      where: { resourceId: { in: resources.map((r) => r.resourceId) } },
+    });
+    const resourceProjectMap = new Map<string, string[]>();
+    resourceProjects.forEach((rp) => {
+      const projectIds = resourceProjectMap.get(rp.resourceId) || [];
+      projectIds.push(rp.projectId);
+      resourceProjectMap.set(rp.resourceId, projectIds);
+    });
+
+    return resources.map((res) => ({
+      ...res,
+      projectIds: resourceProjectMap.get(res.resourceId),
+    }));
   }
 
   async getResourceDetail(user: User, param: GetResourceDetailData['query']) {

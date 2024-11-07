@@ -123,6 +123,10 @@ export type Resource = {
    */
   data?: ResourceMeta;
   /**
+   * Project IDs related to this resource
+   */
+  projectIds?: Array<string>;
+  /**
    * Resource index status
    */
   indexStatus?: IndexStatus;
