@@ -67,7 +67,7 @@ export const ImportFromText = () => {
 
       setSaveLoading(false);
       const resourceId = res?.data?.data?.resourceId;
-      const url = `${getClientOrigin(false)}/knowledge-base?resId=${resourceId}`;
+      const url = `${getClientOrigin(false)}/resource/${resourceId}`;
       return { success: true, url };
     } catch (err) {
       setSaveLoading(false);

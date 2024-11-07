@@ -35,7 +35,7 @@ export const useSaveCurrentWeblinkAsResource = () => {
 
       const { data } = await getClient().createResource(createResourceData);
       const resourceId = data?.data?.resourceId;
-      const url = `${getClientOrigin(false)}/knowledge-base?resId=${resourceId}`;
+      const url = `${getClientOrigin(false)}/resource/${resourceId}`;
 
       return { success: true, url };
     } catch (err) {

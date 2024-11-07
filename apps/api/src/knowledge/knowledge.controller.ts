@@ -279,8 +279,8 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Post('canvas/batchUpdate')
   async batchUpdateCanvas(@User() user: UserModel, @Body() body: UpsertCanvasRequest[]) {
-    const canvases = await this.knowledgeService.batchUpdateCanvas(user, body);
-    return buildSuccessResponse(canvases.map(canvasPO2DTO));
+    await this.knowledgeService.batchUpdateCanvas(user, body);
+    return buildSuccessResponse({});
   }
 
   @UseGuards(JwtAuthGuard)
