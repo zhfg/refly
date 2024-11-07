@@ -124,7 +124,14 @@
       "newCanvas": "New Canvas",
       "importResource": "Import Resource",
       "chat": "Chat",
-      "empty": "No Data"
+      "empty": "No Data",
+      "move": "Move",
+      "remove": "Remove",
+      "delete": "Delete",
+      "projectSelector": {
+        "title": "Move Canvas",
+        "tip": "Please select the target project"
+      }
     },
     "share": {
       "createShareFailed": "Failed to create share, please try again!",
