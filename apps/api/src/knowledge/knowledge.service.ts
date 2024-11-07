@@ -213,7 +213,7 @@ export class KnowledgeService {
 
           await tx.projectResourceRelation.upsert({
             where: { projectId_resourceId: { projectId, resourceId } },
-            create: { projectId, resourceId, order: finalOrder },
+            create: { projectId, resourceId, uid, order: finalOrder },
             update: { order: finalOrder },
           });
         } else if (operation === 'unbind') {

@@ -328,6 +328,8 @@ model ProjectResourceRelation {
   projectId  String   @map("project_id")
   /// Resource id
   resourceId String   @map("resource_id")
+  /// UID
+  uid        String   @default("") @map("uid")
   /// Create timestamp
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
   /// Display order within project
