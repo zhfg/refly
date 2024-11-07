@@ -3327,6 +3327,10 @@ export const $SearchResult = {
         $ref: '#/components/schemas/SearchResultSnippet',
       },
     },
+    relevanceScore: {
+      type: 'number',
+      description: 'Search result relevance score',
+    },
     metadata: {
       description: 'Search result metadata',
       $ref: '#/components/schemas/SearchResultMeta',

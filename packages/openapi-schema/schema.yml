@@ -3914,6 +3914,9 @@ components:
           description: Search result content list with highlight marks
           items:
             $ref: '#/components/schemas/SearchResultSnippet'
+        relevanceScore:
+          type: number
+          description: Search result relevance score
         metadata:
           description: Search result metadata
           $ref: '#/components/schemas/SearchResultMeta'

@@ -342,10 +342,20 @@ export class RAGService {
 
       return data.results
         .filter((r) => r.relevance_score >= relevanceThreshold)
-        .map((r) => contentMap.get(r.document.text) as SearchResult);
+        .map((r) => {
+          const originalResult = contentMap.get(r.document.text);
+          return {
+            ...originalResult,
+            relevanceScore: r.relevance_score, // Add relevance score to the result
+          } as SearchResult;
+        });
     } catch (e) {
       this.logger.error(`Reranker failed, fallback to default: ${e.stack}`);
-      return results;
+      // When falling back, maintain the original order but add default relevance scores
+      return results.map((result, index) => ({
+        ...result,
+        relevanceScore: 1 - index * 0.1, // Simple fallback scoring based on original order
+      }));
     }
   }
 }

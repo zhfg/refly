@@ -34,6 +34,7 @@ import {
   ModelContextLimitMap,
   checkHasContext,
 } from './utils/token';
+import { TimeTracker } from './utils/timeTracker';
 import { buildFinalRequestMessages, SkillPromptModule } from './utils/message';
 
 // prompts
@@ -48,13 +49,18 @@ import { HighlightSelection, SelectedRange } from './module/editCanvas/types';
 
 import { InPlaceEditType } from '@refly-packages/utils';
 import {
-  buildRewriteAndTranslateQueryUserPrompt,
-  rewriteAndTranslateQueryOutputSchema,
-  buildRewriteAndTranslateQuerySystemPrompt,
-} from './module/multiLingualSearch/rewriteAndTranslateQuery';
+  buildRewriteQuerySystemPrompt,
+  buildRewriteQueryUserPrompt,
+  rewriteQueryOutputSchema,
+} from './module/multiLingualSearch/rewriteQuery';
+import {
+  buildTranslateQuerySystemPrompt,
+  buildTranslateQueryUserPrompt,
+  translateQueryOutputSchema,
+} from './module/multiLingualSearch/translateQuery';
 import { mergeSearchResults, searchResultsToSources, sourcesToSearchResults } from './module/multiLingualSearch/utils';
 import { translateResults } from './module/multiLingualSearch/translateResult';
-import { detectQueryLanguage } from './module/multiLingualSearch/translateResult';
+import { performConcurrentWebSearch } from './module/multiLingualSearch/webSearch';
 
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
@@ -516,86 +522,94 @@ Please generate the summary based on these requirements and offer suggestions fo
     const searchLimit = (tplConfig?.searchLimit?.value as number) || 10;
     const rerankRelevanceThreshold = (tplConfig?.rerankRelevanceThreshold?.value as number) || 0.1;
     const rerankLimit = tplConfig?.rerankLimit?.value as number;
-    const concurrencyLimit = (tplConfig?.concurrencyLimit?.value as number) || 3;
+    const translateConcurrencyLimit = (tplConfig?.translateConcurrencyLimit?.value as number) || 10;
+    const webSearchConcurrencyLimit = (tplConfig?.webSearchConcurrencyLimit?.value as number) || 3;
     const batchSize = (tplConfig?.batchSize?.value as number) || 5;
 
-    // Step 1: Use LLM to analyze query and generate translations
+    const timeTracker = new TimeTracker();
+
     const model = this.engine.chatModel({ temperature: 0.1 });
 
-    const module = {
-      buildSystemPrompt: buildRewriteAndTranslateQuerySystemPrompt,
-      buildUserPrompt: buildRewriteAndTranslateQueryUserPrompt,
-    };
-
-    // Create runnable with structured output
-    const runnable = model.withStructuredOutput(rewriteAndTranslateQueryOutputSchema);
-
     try {
-      // Get structured output from LLM
-      const analysisResult = await runnable.invoke(
+      // Step 1: Rewrite query
+      timeTracker.startStep('rewriteQuery');
+      const rewriteResult = await model.withStructuredOutput(rewriteQueryOutputSchema).invoke(
         [
-          new SystemMessage(module.buildSystemPrompt()),
+          new SystemMessage(buildRewriteQuerySystemPrompt()),
           new HumanMessage(
-            module.buildUserPrompt({
+            buildRewriteQueryUserPrompt({
               query,
-              searchLocaleList,
               resultDisplayLocale,
             }),
           ),
         ],
         config,
       );
+      const rewriteDuration = timeTracker.endStep('rewriteQuery');
+      this.engine.logger.log(`Rewrite queries completed in ${rewriteDuration}ms`);
+      this.emitEvent({ event: 'log', content: `Rewrite queries completed in ${rewriteDuration}ms` }, config);
 
-      // Log analysis for debugging
-      this.engine.logger.log(`Search analysis: ${JSON.stringify(analysisResult.analysis)}`);
+      // Step 2: Translate query
+      timeTracker.startStep('translateQuery');
+      const translateResult = await model.withStructuredOutput(translateQueryOutputSchema).invoke(
+        [
+          new SystemMessage(buildTranslateQuerySystemPrompt()),
+          new HumanMessage(
+            buildTranslateQueryUserPrompt({
+              queries: rewriteResult.queries.rewrittenQueries,
+              searchLocaleList,
+              sourceLocale: rewriteResult.analysis.detectedQueryLocale,
+            }),
+          ),
+        ],
+        config,
+      );
+      const translateDuration = timeTracker.endStep('translateQuery');
+      this.engine.logger.log(`Translate queries completed in ${translateDuration}ms`);
+      this.emitEvent({ event: 'log', content: `Translate queries completed in ${translateDuration}ms` }, config);
 
+      // Determine display locale
       const displayLocale =
-        resultDisplayLocale === 'auto' ? analysisResult.analysis.recommendedDisplayLocale : resultDisplayLocale;
+        resultDisplayLocale === 'auto' ? rewriteResult.analysis.recommendedDisplayLocale : resultDisplayLocale;
 
+      this.engine.logger.log(`Search analysis: ${JSON.stringify(rewriteResult.analysis)}`);
       this.engine.logger.log(`Recommended display locale: ${displayLocale}`);
 
-      // Step 2: Execute searches for each locale and query
-      const allResults: Source[] = [];
-
-      console.time('webSearch');
+      // Prepare query map for concurrent search
+      const queryMap: Record<string, string[]> = {};
       for (const locale of searchLocaleList) {
-        const queries = analysisResult.queries.translatedQueries[locale] || analysisResult.queries.rewrittenQueries;
-
-        for (const q of queries) {
-          const result = await this.engine.service.webSearch(config.user, {
-            query: q,
-            limit: searchLimit,
-            locale,
-          });
-
-          // TODO: 这里需要记录 original locale
-          const webSearchSources = result.data.map((item) => ({
-            url: item.url,
-            title: item.name,
-            pageContent: item.snippet,
-            metadata: {
-              originalLocale: locale,
-            },
-          }));
-
-          allResults.push(...webSearchSources);
-        }
+        queryMap[locale] = translateResult.translations[locale] || rewriteResult.queries.rewrittenQueries;
       }
-      console.timeEnd('webSearch');
-      // Step 3: Merge results
+
+      // Step 3: Perform concurrent web search
+      timeTracker.startStep('webSearch');
+      const allResults = await performConcurrentWebSearch({
+        queryMap,
+        searchLimit,
+        concurrencyLimit: webSearchConcurrencyLimit,
+        user: config.user,
+        engine: this.engine,
+      });
+      const webSearchDuration = timeTracker.endStep('webSearch');
+      this.engine.logger.log(`Web search completed in ${webSearchDuration}ms`);
+      this.emitEvent({ event: 'log', content: `Web search completed in ${webSearchDuration}ms` }, config);
+
       const mergedResults = mergeSearchResults(allResults);
 
-      // Translate merged results to display locale
-      console.time('translateResults');
+      // Step 4: Translate merged results to display locale
+      timeTracker.startStep('translateResults');
       const translatedResults = await translateResults({
         sources: mergedResults,
         targetLocale: displayLocale,
         model,
         config,
-        concurrencyLimit,
+        concurrencyLimit: translateConcurrencyLimit,
         batchSize,
       });
-      console.timeEnd('translateResults');
+      const translateResultsDuration = timeTracker.endStep('translateResults');
+      this.engine.logger.log(`Translate results completed in ${translateResultsDuration}ms`);
+      this.emitEvent({ event: 'log', content: `Translate results completed in ${translateResultsDuration}ms` }, config);
+
       // Map translated results back to Source format
       // TODO: 这里需要记录 original locale 和 translated locale
       const translatedSources = translatedResults.translations.map((translation, index) => ({
@@ -610,20 +624,15 @@ Please generate the summary based on these requirements and offer suggestions fo
       }));
 
       // Step 5: Rerank results
-      /**
-       * 1. 基于 query 和 translatedSources 进行 rerank
-       * 2. 返回 rerank 后的结果
-       */
+      timeTracker.startStep('rerank');
       let finalResults: Source[] = [];
-
-      console.time('rerank');
       try {
         // Convert translated sources to search results format
         const searchResults = sourcesToSearchResults(translatedSources);
 
         // Perform reranking
         const rerankResponse = await this.engine.service.rerank(query, searchResults, {
-          topN: rerankLimit || searchLocaleList.length,
+          topN: rerankLimit || searchResults.length,
           relevanceThreshold: rerankRelevanceThreshold,
         });
 
@@ -636,7 +645,13 @@ Please generate the summary based on these requirements and offer suggestions fo
         // Fallback to translated sources without reranking
         finalResults = translatedSources;
       }
-      console.timeEnd('rerank');
+      const rerankDuration = timeTracker.endStep('rerank');
+      this.engine.logger.log(`Rerank completed in ${rerankDuration}ms`);
+      this.emitEvent({ event: 'log', content: `Rerank completed in ${rerankDuration}ms` }, config);
+
+      const totalDuration = timeTracker.getSummary();
+      this.engine.logger.log(`Total duration: ${totalDuration}`);
+      this.emitEvent({ event: 'log', content: `Total duration: ${totalDuration}` }, config);
 
       this.emitEvent(
         {

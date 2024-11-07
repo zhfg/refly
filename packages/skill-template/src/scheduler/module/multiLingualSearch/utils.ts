@@ -48,8 +48,6 @@ export const mergeSearchResults = (results: Source[]): Source[] => {
   });
 };
 
-// ... existing imports ...
-
 // Helper function to convert Source[] to SearchResult[]
 export const sourcesToSearchResults = (sources: Source[]): SearchResult[] => {
   return sources.map((source) => ({
@@ -59,10 +57,10 @@ export const sourcesToSearchResults = (sources: Source[]): SearchResult[] => {
     snippets: [
       {
         text: source.pageContent || '',
-        // Optional: you can add highlight info if available
         highlights: [],
       },
     ],
+    relevanceScore: source.score, // Preserve existing score if any
     metadata: {
       ...source.metadata,
       url: source.url,
@@ -76,7 +74,10 @@ export const searchResultsToSources = (results: SearchResult[]): Source[] => {
     url: result.metadata?.['url'] || '',
     title: result.title,
     pageContent: result.snippets?.[0]?.text || '',
-    score: result.metadata?.['score'],
-    metadata: result.metadata as any as SourceMeta,
+    score: result.relevanceScore, // Map relevanceScore to score
+    metadata: {
+      ...result.metadata,
+      score: result.relevanceScore, // Also store in metadata for consistency
+    } as any as SourceMeta,
   }));
 };

@@ -2280,6 +2280,10 @@ export type SearchResult = {
    */
   snippets?: Array<SearchResultSnippet>;
   /**
+   * Search result relevance score
+   */
+  relevanceScore?: number;
+  /**
    * Search result metadata
    */
   metadata?: SearchResultMeta;
