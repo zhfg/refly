@@ -326,7 +326,8 @@
   "resource": {
     "import": {
       "title": "资源集成",
-      "fromWeblink": "网页链接",
+      "fromWebSearch": "全网搜索",
+      "fromWeblink": "粘贴链接",
       "webLinkPlaceholer": "输入或粘贴有效的网页链接，每行一个....",
       "fromText": "复制文本",
       "linkFormatError": "请输入有效的网页链接，以 http 或 https 开头",

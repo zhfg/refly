@@ -13,6 +13,8 @@ import './index.scss';
 import { useState } from 'react';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { IconSearch } from '@arco-design/web-react/icon';
+import MultilingualSearch from '@refly-packages/ai-workspace-common/modules/multilingual-search';
 
 const MenuItem = Menu.Item;
 
@@ -57,6 +59,12 @@ export const ImportResourceModal = () => {
                 }}
               >
                 <h2 className="left-panel-menu-title">{t('resource.import.integration')}</h2>
+                <MenuItem key="import-from-web-search" className="left-panel-menu-item">
+                  <span className="menu-item-icon">
+                    <IconSearch />
+                  </span>
+                  {t('resource.import.fromWebSearch')}
+                </MenuItem>
                 <MenuItem key="import-from-weblink" className="left-panel-menu-item">
                   <span className="menu-item-icon">
                     <HiLink />
@@ -76,6 +84,7 @@ export const ImportResourceModal = () => {
         <div className="import-resource-right-panel">
           {importResourceStore.selectedMenuItem === 'import-from-weblink' ? <ImportFromWeblink /> : null}
           {importResourceStore.selectedMenuItem === 'import-from-paste-text' ? <ImportFromText /> : null}
+          {importResourceStore.selectedMenuItem === 'import-from-web-search' ? <MultilingualSearch /> : null}
         </div>
       </div>
     </Modal>

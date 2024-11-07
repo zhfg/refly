@@ -327,7 +327,8 @@
   "resource": {
     "import": {
       "title": "Resource Integration",
-      "fromWeblink": "Web Link",
+      "fromWebSearch": "Web Search",
+      "fromWeblink": "Paste Weblink",
       "webLinkPlaceholer": "Enter or paste valid web links, one per line...",
       "fromText": "Copy Text",
       "linkFormatError": "Please enter a valid web link starting with http or https",

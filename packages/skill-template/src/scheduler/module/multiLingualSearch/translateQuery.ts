@@ -2,14 +2,7 @@ import { z } from 'zod';
 
 export const translateQueryOutputSchema = z
   .object({
-    translations: z
-      .record(z.string(), z.array(z.string()))
-      .describe('Queries translated into each target language')
-      .default({})
-      .refine(
-        (translations) => Object.values(translations).every((queries) => queries.length > 0),
-        'Each language must have at least one query',
-      ),
+    translations: z.record(z.string(), z.array(z.string())).describe('Queries translated into each target language'),
   })
   .describe('Query translation results');
 

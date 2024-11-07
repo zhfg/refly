@@ -562,15 +562,17 @@ Please generate the summary based on these requirements and offer suggestions fo
       this.emitEvent(
         {
           event: 'structured_data',
-          content: JSON.stringify({
-            step: 'rewriteQuery',
-            duration: rewriteDuration,
-            result: {
-              rewrittenQueries: rewriteResult?.queries?.rewrittenQueries || [],
-              outputLocale: displayLocale,
-              searchLocales: searchLocaleList,
+          content: JSON.stringify([
+            {
+              step: 'rewriteQuery',
+              duration: rewriteDuration,
+              result: {
+                rewrittenQueries: rewriteResult?.queries?.rewrittenQueries || [],
+                outputLocale: displayLocale,
+                searchLocales: searchLocaleList,
+              },
             },
-          }),
+          ]),
           structuredDataKey: 'multiLingualSearchStepUpdate',
         },
         config,
@@ -598,13 +600,15 @@ Please generate the summary based on these requirements and offer suggestions fo
       this.emitEvent(
         {
           event: 'structured_data',
-          content: JSON.stringify({
-            step: 'translateQuery',
-            duration: translateDuration,
-            result: {
-              translatedQueries: translateResult?.translations || [],
+          content: JSON.stringify([
+            {
+              step: 'translateQuery',
+              duration: translateDuration,
+              result: {
+                translatedQueries: translateResult?.translations || [],
+              },
             },
-          }),
+          ]),
           structuredDataKey: 'multiLingualSearchStepUpdate',
         },
         config,
@@ -633,14 +637,16 @@ Please generate the summary based on these requirements and offer suggestions fo
       this.emitEvent(
         {
           event: 'structured_data',
-          content: JSON.stringify({
-            step: 'webSearch',
-            duration: webSearchDuration,
-            result: {
-              length: mergedResults?.length,
-              localeLength: searchLocaleList?.length,
+          content: JSON.stringify([
+            {
+              step: 'webSearch',
+              duration: webSearchDuration,
+              result: {
+                length: mergedResults?.length,
+                localeLength: searchLocaleList?.length,
+              },
             },
-          }),
+          ]),
           structuredDataKey: 'multiLingualSearchStepUpdate',
         },
         config,
@@ -663,14 +669,16 @@ Please generate the summary based on these requirements and offer suggestions fo
       this.emitEvent(
         {
           event: 'structured_data',
-          content: JSON.stringify({
-            step: 'translateResults',
-            duration: translateResultsDuration,
-            result: {
-              length: mergedResults?.length,
-              localeLength: searchLocaleList?.length,
+          content: JSON.stringify([
+            {
+              step: 'translateResults',
+              duration: translateResultsDuration,
+              result: {
+                length: mergedResults?.length,
+                localeLength: searchLocaleList?.length,
+              },
             },
-          }),
+          ]),
           structuredDataKey: 'multiLingualSearchStepUpdate',
         },
         config,
@@ -718,13 +726,15 @@ Please generate the summary based on these requirements and offer suggestions fo
       this.emitEvent(
         {
           event: 'structured_data',
-          content: JSON.stringify({
-            step: 'rerank',
-            duration: rerankDuration,
-            result: {
-              length: finalResults?.length,
+          content: JSON.stringify([
+            {
+              step: 'rerank',
+              duration: rerankDuration,
+              result: {
+                length: finalResults?.length,
+              },
             },
-          }),
+          ]),
           structuredDataKey: 'multiLingualSearchStepUpdate',
         },
         config,
@@ -738,11 +748,13 @@ Please generate the summary based on these requirements and offer suggestions fo
       this.emitEvent(
         {
           event: 'structured_data',
-          content: JSON.stringify({
-            step: 'finish',
-            duration: totalDuration,
-            result: {},
-          }),
+          content: JSON.stringify([
+            {
+              step: 'finish',
+              duration: totalDuration,
+              result: {},
+            },
+          ]),
           structuredDataKey: 'multiLingualSearchStepUpdate',
         },
         config,
