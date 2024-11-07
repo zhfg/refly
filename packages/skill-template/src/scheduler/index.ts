@@ -513,9 +513,12 @@ Please generate the summary based on these requirements and offer suggestions fo
    *
    */
   callMultiLingualWebSearch = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+    this.emitEvent({ event: 'start' }, config);
+
     const { query } = state;
     const { currentSkill, spanId, tplConfig } = config.configurable;
 
+    // TODO: 针对在 scheduler 里面调用,
     const searchLocaleList = (tplConfig?.searchLocaleList?.value as string[]) || ['en', 'zh-CN', 'ja'];
     const resultDisplayLocale = (tplConfig?.resultDisplayLocale?.value as string) || 'auto';
     const enableRerank = (tplConfig?.enableRerank?.value as boolean) || false;
@@ -549,6 +552,30 @@ Please generate the summary based on these requirements and offer suggestions fo
       this.engine.logger.log(`Rewrite queries completed in ${rewriteDuration}ms`);
       this.emitEvent({ event: 'log', content: `Rewrite queries completed in ${rewriteDuration}ms` }, config);
 
+      // Determine display locale
+      const displayLocale =
+        resultDisplayLocale === 'auto' ? rewriteResult.analysis.recommendedDisplayLocale : resultDisplayLocale;
+
+      this.engine.logger.log(`Search analysis: ${JSON.stringify(rewriteResult.analysis)}`);
+      this.engine.logger.log(`Recommended display locale: ${displayLocale}`);
+
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify({
+            step: 'rewriteQuery',
+            duration: rewriteDuration,
+            result: {
+              rewrittenQueries: rewriteResult?.queries?.rewrittenQueries || [],
+              outputLocale: displayLocale,
+              searchLocales: searchLocaleList,
+            },
+          }),
+          structuredDataKey: 'multiLingualSearchStepUpdate',
+        },
+        config,
+      );
+
       // Step 2: Translate query
       timeTracker.startStep('translateQuery');
       const translateResult = await model.withStructuredOutput(translateQueryOutputSchema).invoke(
@@ -568,12 +595,20 @@ Please generate the summary based on these requirements and offer suggestions fo
       this.engine.logger.log(`Translate queries completed in ${translateDuration}ms`);
       this.emitEvent({ event: 'log', content: `Translate queries completed in ${translateDuration}ms` }, config);
 
-      // Determine display locale
-      const displayLocale =
-        resultDisplayLocale === 'auto' ? rewriteResult.analysis.recommendedDisplayLocale : resultDisplayLocale;
-
-      this.engine.logger.log(`Search analysis: ${JSON.stringify(rewriteResult.analysis)}`);
-      this.engine.logger.log(`Recommended display locale: ${displayLocale}`);
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify({
+            step: 'translateQuery',
+            duration: translateDuration,
+            result: {
+              translatedQueries: translateResult?.translations || [],
+            },
+          }),
+          structuredDataKey: 'multiLingualSearchStepUpdate',
+        },
+        config,
+      );
 
       // Prepare query map for concurrent search
       const queryMap: Record<string, string[]> = {};
@@ -593,8 +628,23 @@ Please generate the summary based on these requirements and offer suggestions fo
       const webSearchDuration = timeTracker.endStep('webSearch');
       this.engine.logger.log(`Web search completed in ${webSearchDuration}ms`);
       this.emitEvent({ event: 'log', content: `Web search completed in ${webSearchDuration}ms` }, config);
-
       const mergedResults = mergeSearchResults(allResults);
+
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify({
+            step: 'webSearch',
+            duration: webSearchDuration,
+            result: {
+              length: mergedResults?.length,
+              localeLength: searchLocaleList?.length,
+            },
+          }),
+          structuredDataKey: 'multiLingualSearchStepUpdate',
+        },
+        config,
+      );
 
       // Step 4: Translate merged results to display locale
       timeTracker.startStep('translateResults');
@@ -609,6 +659,22 @@ Please generate the summary based on these requirements and offer suggestions fo
       const translateResultsDuration = timeTracker.endStep('translateResults');
       this.engine.logger.log(`Translate results completed in ${translateResultsDuration}ms`);
       this.emitEvent({ event: 'log', content: `Translate results completed in ${translateResultsDuration}ms` }, config);
+
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify({
+            step: 'translateResults',
+            duration: translateResultsDuration,
+            result: {
+              length: mergedResults?.length,
+              localeLength: searchLocaleList?.length,
+            },
+          }),
+          structuredDataKey: 'multiLingualSearchStepUpdate',
+        },
+        config,
+      );
 
       // Map translated results back to Source format
       // TODO: 这里需要记录 original locale 和 translated locale
@@ -649,24 +715,55 @@ Please generate the summary based on these requirements and offer suggestions fo
       this.engine.logger.log(`Rerank completed in ${rerankDuration}ms`);
       this.emitEvent({ event: 'log', content: `Rerank completed in ${rerankDuration}ms` }, config);
 
-      const totalDuration = timeTracker.getSummary();
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify({
+            step: 'rerank',
+            duration: rerankDuration,
+            result: {
+              length: finalResults?.length,
+            },
+          }),
+          structuredDataKey: 'multiLingualSearchStepUpdate',
+        },
+        config,
+      );
+
+      const stepSummary = timeTracker.getSummary();
+      const totalDuration = stepSummary.totalDuration;
       this.engine.logger.log(`Total duration: ${totalDuration}`);
       this.emitEvent({ event: 'log', content: `Total duration: ${totalDuration}` }, config);
 
       this.emitEvent(
         {
           event: 'structured_data',
-          content: JSON.stringify(finalResults),
-          structuredDataKey: 'multiLingualSearchResults',
+          content: JSON.stringify({
+            step: 'finish',
+            duration: totalDuration,
+            result: {},
+          }),
+          structuredDataKey: 'multiLingualSearchStepUpdate',
         },
         config,
       );
+
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify(finalResults),
+          structuredDataKey: 'multiLingualSearchResult',
+        },
+        config,
+      );
+
+      this.emitEvent({ event: 'end' }, config);
 
       // Return results with analysis
       return {
         messages: [
           new AIMessage({
-            content: 'Search completed successfully',
+            content: `Search Process ${finalResults?.length} results (${totalDuration / 1000} seconds)`,
           }),
         ],
       };
