@@ -13,6 +13,7 @@ import {
   useProjectStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/project';
 import { useNewCanvasModalStoreShallow } from '@refly-packages/ai-workspace-common/stores/new-canvas-modal';
+import { useReloadListStateShallow } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
 import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
@@ -74,6 +75,11 @@ export const ProjectDirectory = (props: {
     updateProjectDirItem: state.updateProjectDirItem,
     fetchProjectDetail: state.fetchProjectDetail,
     fetchProjectDirItems: state.fetchProjectDirItems,
+  }));
+
+  const { reloadDirectoryResourceList, setReloadDirectoryResourceList } = useReloadListStateShallow((state) => ({
+    reloadDirectoryResourceList: state.reloadDirectoryResourceList,
+    setReloadDirectoryResourceList: state.setReloadDirectoryResourceList,
   }));
 
   const currentProject = projectStore.project?.data;
@@ -523,6 +529,13 @@ export const ProjectDirectory = (props: {
       return;
     }
   }, [resId, canvasId]);
+
+  useEffect(() => {
+    if (reloadDirectoryResourceList) {
+      debouncedFetchProjectDirItems(projectId, 'resources');
+      setReloadDirectoryResourceList(false);
+    }
+  }, [reloadDirectoryResourceList]);
 
   return (
     <div className="h-full flex flex-col">

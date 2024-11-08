@@ -230,7 +230,8 @@
       "resource": "Resource",
       "project": "Project",
       "resourcePlaceholder": "Please select resources",
-      "projectPlaceholder": "Please select project"
+      "projectPlaceholder": "Please select project",
+      "importResource": "Import Resource"
     },
     "directory": {
       "resourceCount": "{{count}} contents",

@@ -22,6 +22,14 @@
     }
   }
 
+  .wait_parse-alert {
+    padding: 6px 15px;
+    .arco-alert-content {
+      font-size: 13px;
+      color: rgb(202 138 4);
+    }
+  }
+
   .wait_index-alert {
     padding: 6px 15px;
     .arco-alert-content {
@@ -31,6 +39,14 @@
   }
 
   .index_failed-alert {
+    padding: 6px 15px;
+    .arco-alert-content {
+      font-size: 13px;
+      color: rgb(220 38 38);
+    }
+  }
+
+  .parse_failed-alert {
     padding: 6px 15px;
     .arco-alert-content {
       font-size: 13px;

@@ -170,13 +170,13 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
             <>
               <TopBar />
               <div className="knowledge-base-resource-meta">
-                {['wait_index', 'index_failed'].includes(resourceDetail?.indexStatus) && (
+                {['wait_parse', 'parse_failed', 'wait_index', 'index_failed'].includes(resourceDetail?.indexStatus) && (
                   <Alert
                     className={`${resourceDetail?.indexStatus}-alert`}
                     style={{ marginBottom: 16 }}
-                    type={resourceDetail?.indexStatus === 'wait_index' ? 'warning' : 'error'}
+                    type={['wait_index', 'wait_parse'].includes(resourceDetail?.indexStatus) ? 'warning' : 'error'}
                     icon={
-                      resourceDetail?.indexStatus === 'wait_index' ? (
+                      ['wait_index', 'wait_parse'].includes(resourceDetail?.indexStatus) ? (
                         <IconLoading style={{ color: 'rgb(202 138 4)' }} />
                       ) : (
                         <IconCloseCircle style={{ color: 'rgb(220 38 38)' }} />
@@ -184,11 +184,12 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
                     }
                     content={
                       t(`resource.${resourceDetail?.indexStatus}`) +
-                      ': ' +
-                      t(`resource.${resourceDetail?.indexStatus}_tip`)
+                      (['wait_index', 'index_failed'].includes(resourceDetail?.indexStatus)
+                        ? ': ' + t(`resource.${resourceDetail?.indexStatus}_tip`)
+                        : '')
                     }
                     action={
-                      resourceDetail?.indexStatus === 'index_failed' ? (
+                      ['index_failed', 'parse_failed'].includes(resourceDetail?.indexStatus) ? (
                         <Button
                           size="mini"
                           type="outline"

@@ -1,7 +1,10 @@
 import { Divider, Modal, Menu } from '@arco-design/web-react';
 import { AiOutlineImport } from 'react-icons/ai';
 import { HiOutlinePencil, HiLink } from 'react-icons/hi';
-import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
+import {
+  ImportResourceMenuItem,
+  useImportResourceStore,
+} from '@refly-packages/ai-workspace-common/stores/import-resource';
 
 // 组件
 import { ImportFromWeblink } from './intergrations/import-from-weblink';
@@ -53,7 +56,7 @@ export const ImportResourceModal = () => {
                 className="left-panel-menu"
                 selectedKeys={[importResourceStore.selectedMenuItem]}
                 onClickMenuItem={(key) => {
-                  importResourceStore.setSelectedMenuItem(key);
+                  importResourceStore.setSelectedMenuItem(key as ImportResourceMenuItem);
                 }}
               >
                 <h2 className="left-panel-menu-title">{t('resource.import.integration')}</h2>
