@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
+import { Source } from '@refly/openapi-schema';
 
-import { SearchState, SearchLocale, SearchStep } from '../types';
+import { mockSearchSteps, mockResults } from '../mock-data/search-data';
 
 const defaultLocales: SearchLocale[] = [
   { code: 'en', name: 'English' },
@@ -9,14 +10,58 @@ const defaultLocales: SearchLocale[] = [
   { code: 'ja', name: 'Japanese' },
 ];
 
+export interface SearchLocale {
+  code: string;
+  name: string;
+}
+
+export interface SearchState {
+  query: string;
+  searchLocales: SearchLocale[];
+  outputLocale: SearchLocale;
+  isSearching: boolean;
+  searchProgress: number;
+  searchSteps: SearchStep[];
+  results: Source[];
+
+  selectedItems: Source[];
+  setSelectedItems: (items: Source[]) => void;
+  toggleSelectedItem: (item: Source, checked: boolean) => void;
+  clearSelectedItems: () => void;
+
+  setQuery: (query: string) => void;
+  setIsSearching: (isSearching: boolean) => void;
+  setSearchLocales: (locales: SearchLocale[]) => void;
+  setOutputLocale: (locale: SearchLocale) => void;
+  updateProgress: (progress: number) => void;
+  addSearchStep: (step: SearchStep) => void;
+  setProcessingStep: () => void;
+  setResults: (results: Source[]) => void;
+  resetSearch: () => void;
+}
+
+export interface SearchStep {
+  step: string;
+  duration: number;
+  result?: any;
+}
+
 export const useMultilingualSearchStore = create<SearchState>((set) => ({
   query: '',
   searchLocales: defaultLocales,
   outputLocale: defaultLocales[0],
   isSearching: false,
   searchProgress: 0,
-  searchSteps: [],
-  results: [],
+  searchSteps: mockSearchSteps,
+  results: mockResults,
+
+  selectedItems: [],
+  setSelectedItems: (items) => set({ selectedItems: items }),
+  toggleSelectedItem: (item, checked) =>
+    set((state) => ({
+      selectedItems: checked ? [...state.selectedItems, item] : state.selectedItems.filter((i) => i !== item),
+    })),
+  clearSelectedItems: () => set({ selectedItems: [] }),
 
   setQuery: (query) => set({ query }),
   setSearchLocales: (locales) => set({ searchLocales: locales }),

@@ -328,6 +328,7 @@
       "title": "资源集成",
       "fromWebSearch": "全网搜索",
       "fromWeblink": "粘贴链接",
+      "selectAll": "全选",
       "webLinkPlaceholer": "输入或粘贴有效的网页链接，每行一个....",
       "fromText": "复制文本",
       "linkFormatError": "请输入有效的网页链接，以 http 或 https 开头",
@@ -896,7 +897,7 @@
   },
   "entitySelector": {
     "placeholder": {
-      "project": "选择知识库",
+      "project": "选择项目",
       "resource": "选择资源",
       "note": "选择笔记",
       "skill": "选择技能",
