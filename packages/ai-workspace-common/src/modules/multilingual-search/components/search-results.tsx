@@ -52,7 +52,7 @@ export const SearchResults: React.FC = () => {
   return (
     <div className="search-results">
       <div className="search-results-content">
-        <h2>Search Results ({results.length} sources)</h2>
+        <h3>Search Results ({results.length} sources)</h3>
         <List
           itemLayout="vertical"
           size="large"

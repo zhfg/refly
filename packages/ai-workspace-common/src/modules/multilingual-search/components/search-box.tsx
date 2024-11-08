@@ -131,6 +131,7 @@ export const SearchBox: React.FC = () => {
             size="large"
             placeholder={t('resource.multilingualSearch.placeholder')}
             value={query}
+            className="search-input"
             onChange={(e) => setQuery(e.target.value)}
             onSearch={handleMultilingualSearch}
             enterButton={<Search />}
