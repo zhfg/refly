@@ -339,7 +339,12 @@ export class KnowledgeService {
       content = await streamToString(contentStream);
     }
 
-    return { ...resource, content };
+    const projectIds = await this.prisma.projectResourceRelation.findMany({
+      select: { projectId: true },
+      where: { resourceId },
+    });
+
+    return { ...resource, content, projectIds: projectIds.map((p) => p.projectId) };
   }
 
   async createResource(
