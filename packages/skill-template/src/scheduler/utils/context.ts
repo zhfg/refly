@@ -193,7 +193,8 @@ export async function prepareWebSearchContext(
     webSearchSources: [],
   };
   const res = await ctx.ctxThis.engine.service.webSearch(ctx.config.user, {
-    query,
+    q: query,
+    hl: ctx.config.user.outputLocale || 'en',
     limit: 10,
   });
   const webSearchSources = res.data.map((item) => ({

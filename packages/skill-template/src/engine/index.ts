@@ -37,6 +37,7 @@ import {
   BatchCreateResourceResponse,
   SearchResult,
   RerankResponse,
+  BatchWebSearchRequest,
 } from '@refly-packages/openapi-schema';
 
 // TODO: unify with frontend
@@ -65,7 +66,7 @@ export interface ReflyService {
   getProjectDetail: (user: User, req: GetProjectDetailData['query']) => Promise<GetProjectDetailResponse>;
   createLabelClass: (user: User, req: CreateLabelClassRequest) => Promise<CreateLabelClassResponse>;
   createLabelInstance: (user: User, req: CreateLabelInstanceRequest) => Promise<CreateLabelInstanceResponse>;
-  webSearch: (user: User, req: WebSearchRequest) => Promise<WebSearchResponse>;
+  webSearch: (user: User, req: WebSearchRequest | BatchWebSearchRequest) => Promise<WebSearchResponse>;
   search: (user: User, req: SearchRequest, options?: SearchOptions) => Promise<SearchResponse>;
   rerank: (
     query: string,

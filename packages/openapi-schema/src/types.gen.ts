@@ -2153,17 +2153,28 @@ export type GetSubscriptionUsageResponse = BaseResponse & {
 
 export type WebSearchRequest = {
   /**
-   * Web search query
+   * Search query
    */
-  query?: string;
+  q?: string;
   /**
-   * Web search locale
+   * Language/locale code
    */
-  locale?: string;
+  hl?: string;
   /**
    * Web search result limit
    */
   limit?: number;
+};
+
+export type BatchWebSearchRequest = {
+  /**
+   * Web search result limit
+   */
+  limit?: number;
+  /**
+   * Web search queries
+   */
+  queries?: Array<WebSearchRequest>;
 };
 
 export type WebSearchResult = {

@@ -15,6 +15,7 @@ import {
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
+import { ConfigScope } from '@refly/openapi-schema';
 
 const { Search: AntSearch } = Input;
 
@@ -74,27 +75,14 @@ export const SearchBox: React.FC = () => {
   const handleMultilingualSearch = (userInput?: string) => {
     if (userInput?.trim()?.length === 0) return;
 
-    // Add processing step before sending the message
     setIsSearching(true);
     setProcessingStep();
 
-    const {
-      messageIntentContext,
-      selectedProject,
-      enableWebSearch,
-      enableAutoImportWebResource,
-      enableKnowledgeBaseSearch,
-    } = useChatStore.getState();
-
-    // TODO: later may add more source
-    const forceNewConv = true;
+    const { messageIntentContext } = useChatStore.getState();
 
     const newMessageIntentContext: Partial<MessageIntentContext> = {
       ...(messageIntentContext || {}),
-      isNewConversation: messageIntentContext?.isNewConversation || forceNewConv,
-      enableWebSearch,
-      enableAutoImportWebResource,
-      enableKnowledgeBaseSearch,
+      isNewConversation: messageIntentContext?.isNewConversation || true,
       env: {
         runtime: getRuntime(),
         source: MessageIntentSource.MultilingualSearch,
@@ -103,8 +91,31 @@ export const SearchBox: React.FC = () => {
 
     chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
 
+    // 添加搜索相关配置
+    const searchConfig = {
+      searchLocaleList: {
+        value: searchLocales.map((locale) => locale.code),
+        configScope: 'runtime' as unknown as ConfigScope,
+        displayValue: t('resource.multilingualSearch.searchLocales'),
+        label: t('resource.multilingualSearch.searchLocales'),
+      },
+      resultDisplayLocale: {
+        value: outputLocale.code,
+        configScope: 'runtime' as unknown as ConfigScope,
+        displayValue: t('resource.multilingualSearch.displayLocale'),
+        label: t('resource.multilingualSearch.displayLocale'),
+      },
+      // 可以添加其他搜索相关配置
+      enableRerank: {
+        value: true,
+        configScope: 'runtime' as unknown as ConfigScope,
+        displayValue: t('resource.multilingualSearch.enableRerank'),
+        label: t('resource.multilingualSearch.enableRerank'),
+      },
+    };
+
     sendChatMessage({
-      tplConfig: null,
+      tplConfig: searchConfig,
       userInput,
       messageIntentContext: newMessageIntentContext as MessageIntentContext,
     });

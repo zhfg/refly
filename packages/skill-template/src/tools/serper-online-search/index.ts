@@ -32,7 +32,11 @@ export class SerperSearch extends Tool {
     'A search engine. Useful for when you need to answer questions about current events. Input should be a search query.';
 
   async _call(input: string): Promise<string> {
-    const res = await this.engine.service.webSearch(this.user, { query: input, limit: this.params.maxResults });
+    const res = await this.engine.service.webSearch(this.user, {
+      q: input,
+      hl: this?.params?.locale || 'en',
+      limit: this.params.maxResults,
+    });
 
     return JSON.stringify(res);
   }

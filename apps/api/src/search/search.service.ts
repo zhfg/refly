@@ -12,6 +12,7 @@ import {
   User,
   WebSearchRequest,
   WebSearchResult,
+  BatchWebSearchRequest,
 } from '@refly-packages/openapi-schema';
 import { RAGService } from '@/rag/rag.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
@@ -437,18 +438,20 @@ export class SearchService {
     }));
   }
 
-  async webSearch(user: User, req: WebSearchRequest): Promise<WebSearchResult[]> {
-    const { query, limit = 8 } = req;
-    const locale = user.outputLocale || LOCALE.EN;
+  async webSearch(
+    user: User,
+    req: WebSearchRequest | BatchWebSearchRequest,
+  ): Promise<WebSearchResult[]> {
+    const limit = req?.limit || 10;
 
-    let jsonContent: any = [];
     try {
-      const queryPayload = JSON.stringify({
-        q: query,
+      const queries = 'queries' in req ? req.queries : [req];
+      const queryPayload = queries.map((query) => ({
+        ...query,
         num: limit,
-        hl: locale.toLocaleLowerCase(),
-        gl: locale.toLocaleLowerCase() === LOCALE.ZH_CN.toLocaleLowerCase() ? 'cn' : 'us',
-      });
+        gl: 'us', // TODO: support multiple locales
+        location: 'United States', // TODO: support multiple locations
+      }));
 
       const res = await fetch('https://google.serper.dev/search', {
         method: 'post',
@@ -456,49 +459,74 @@ export class SearchService {
           'X-API-KEY': this.configService.get('credentials.serper'),
           'Content-Type': 'application/json',
         },
-        body: queryPayload,
+        body: JSON.stringify(queryPayload),
       });
-      jsonContent = await res.json();
 
-      // convert to the same format as bing/google
-      const contexts: WebSearchResult[] = [];
-      if (jsonContent.hasOwnProperty('knowledgeGraph')) {
-        const url = jsonContent.knowledgeGraph.descriptionUrl || jsonContent.knowledgeGraph.website;
-        const snippet = jsonContent.knowledgeGraph.description;
-        if (url && snippet) {
-          contexts.push({
-            name: jsonContent.knowledgeGraph.title || '',
-            url: url,
-            snippet: snippet,
-          });
-        }
-      }
+      const jsonContent = await res.json();
+      const results = this.parseSearchResults(jsonContent);
 
-      if (jsonContent.hasOwnProperty('answerBox')) {
-        const url = jsonContent.answerBox.url;
-        const snippet = jsonContent.answerBox.snippet || jsonContent.answerBox.answer;
-        if (url && snippet) {
-          contexts.push({
-            name: jsonContent.answerBox.title || '',
-            url: url,
-            snippet: snippet,
-          });
-        }
-      }
-      if (jsonContent.hasOwnProperty('organic')) {
-        for (const c of jsonContent.organic) {
-          contexts.push({
-            name: c.title,
-            url: c.link,
-            snippet: c.snippet || '',
-          });
-        }
-      }
-      return contexts.slice(0, limit);
+      return 'queries' in req ? results : results?.slice(0, limit);
     } catch (e) {
-      this.logger.error(`onlineSearch error encountered: ${e}`);
+      this.logger.error(`Batch web search error: ${e}`);
       return [];
     }
+  }
+
+  // Helper to parse results consistently
+  private parseSearchResults(jsonContent: any): WebSearchResult[] {
+    const contexts: WebSearchResult[] = [];
+
+    if (Array.isArray(jsonContent)) {
+      // Handle batch results
+      for (const result of jsonContent) {
+        contexts.push(...this.parseSingleSearchResult(result));
+      }
+    } else {
+      // Handle single result
+      contexts.push(...this.parseSingleSearchResult(jsonContent));
+    }
+
+    return contexts;
+  }
+
+  private parseSingleSearchResult(result: any): WebSearchResult[] {
+    const contexts: WebSearchResult[] = [];
+
+    if (result.knowledgeGraph) {
+      const url = result.knowledgeGraph.descriptionUrl || result.knowledgeGraph.website;
+      const snippet = result.knowledgeGraph.description;
+      if (url && snippet) {
+        contexts.push({
+          name: result.knowledgeGraph.title || '',
+          url,
+          snippet,
+        });
+      }
+    }
+
+    if (result.answerBox) {
+      const url = result.answerBox.url;
+      const snippet = result.answerBox.snippet || result.answerBox.answer;
+      if (url && snippet) {
+        contexts.push({
+          name: result.answerBox.title || '',
+          url,
+          snippet,
+        });
+      }
+    }
+
+    if (result.organic) {
+      for (const c of result.organic) {
+        contexts.push({
+          name: c.title,
+          url: c.link,
+          snippet: c.snippet || '',
+        });
+      }
+    }
+
+    return contexts;
   }
 
   async search(user: User, req: SearchRequest, options?: SearchOptions): Promise<SearchResult[]> {

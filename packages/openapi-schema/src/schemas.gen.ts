@@ -3133,19 +3133,36 @@ export const $GetSubscriptionUsageResponse = {
 export const $WebSearchRequest = {
   type: 'object',
   properties: {
-    query: {
+    q: {
       type: 'string',
-      description: 'Web search query',
+      description: 'Search query',
     },
-    locale: {
+    hl: {
       type: 'string',
-      description: 'Web search locale',
-      default: 'en',
+      description: 'Language/locale code',
     },
     limit: {
       type: 'number',
       description: 'Web search result limit',
-      default: 8,
+      default: 10,
+    },
+  },
+} as const;
+
+export const $BatchWebSearchRequest = {
+  type: 'object',
+  properties: {
+    limit: {
+      type: 'number',
+      description: 'Web search result limit',
+      default: 10,
+    },
+    queries: {
+      type: 'array',
+      description: 'Web search queries',
+      items: {
+        $ref: '#/components/schemas/WebSearchRequest',
+      },
     },
   },
 } as const;

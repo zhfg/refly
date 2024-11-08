@@ -1,37 +1,38 @@
 import pLimit from 'p-limit';
-import { Source } from '@refly-packages/openapi-schema';
+import { BatchWebSearchRequest, Source, User } from '@refly-packages/openapi-schema';
+import { SkillEngine } from '../../../engine';
 
-interface WebSearchParams {
-  query: string;
-  locale: string;
+const BATCH_SIZE = 100; // Serper's batch limit
+
+interface BatchSearchParams {
+  queries: Array<{
+    q: string;
+    hl: string;
+  }>;
   limit: number;
-  user: any;
-  engine: any;
+  user: User;
+  engine: SkillEngine;
 }
 
-interface WebSearchBatch {
-  queries: string[];
-  locale: string;
-  limit: number;
-  user: any;
-  engine: any;
-}
+// Helper to chunk array into batches
+const chunk = <T>(arr: T[], size: number): T[][] => {
+  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, i * size + size));
+};
 
-// Helper function to perform web search for a single query
-const performWebSearch = async ({ query, locale, limit, user, engine }: WebSearchParams): Promise<Source[]> => {
+// Perform batch search
+const performBatchWebSearch = async ({ queries, limit, user, engine }: BatchSearchParams): Promise<Source[]> => {
   const result = await engine.service.webSearch(user, {
-    query,
+    queries,
     limit,
-    locale,
-  });
+  } as BatchWebSearchRequest);
 
-  return result.data.map((item) => ({
+  return result.data.map((item, index) => ({
     url: item.url,
     title: item.name,
     pageContent: item.snippet,
     metadata: {
-      originalLocale: locale,
-      originalQuery: query,
+      originalLocale: queries[index].hl,
+      originalQuery: queries[index].q,
     },
   }));
 };
@@ -44,31 +45,39 @@ export const performConcurrentWebSearch = async ({
   user,
   engine,
 }: {
-  queryMap: Record<string, string[]>; // locale -> queries
+  queryMap: Record<string, string[]>;
   searchLimit: number;
   concurrencyLimit: number;
   user: any;
   engine: any;
 }): Promise<Source[]> => {
+  // Convert queryMap to array of query objects
+  const allQueries = Object.entries(queryMap).flatMap(([locale, queries]) =>
+    queries.map((query) => ({
+      q: query,
+      hl: locale.toLowerCase(),
+    })),
+  );
+
+  // Split into batches of 100 queries
+  const batches = chunk(allQueries, BATCH_SIZE);
+
   // Initialize concurrency limiter
   const limit = pLimit(concurrencyLimit);
 
-  // Create search tasks for all queries across all locales
-  const searchTasks = Object.entries(queryMap).flatMap(([locale, queries]) =>
-    queries.map((query) =>
+  try {
+    // Create batch search tasks
+    const searchTasks = batches.map((batch) =>
       limit(() =>
-        performWebSearch({
-          query,
-          locale,
+        performBatchWebSearch({
+          queries: batch,
           limit: searchLimit,
           user,
           engine,
         }),
       ),
-    ),
-  );
+    );
 
-  try {
     // Execute all search tasks with concurrency control
     const results = await Promise.all(searchTasks);
 
