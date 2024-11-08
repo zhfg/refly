@@ -71,8 +71,8 @@ export const useMultilingualSearchStore = create<SearchState>((set) => ({
   outputLocale: { code: 'auto', name: 'Auto' },
   isSearching: false,
   searchProgress: 0,
-  searchSteps: mockSearchSteps,
-  results: mockResults,
+  searchSteps: [],
+  results: [],
 
   selectedItems: [],
   setSelectedItems: (items) => set({ selectedItems: items }),

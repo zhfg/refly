@@ -12,12 +12,15 @@ import {
   User,
   WebSearchRequest,
   WebSearchResult,
+  MultiLingualWebSearchRequest,
   BatchWebSearchRequest,
+  Source,
 } from '@refly-packages/openapi-schema';
 import { RAGService } from '@/rag/rag.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
-import { LOCALE } from '@refly-packages/common-types';
 import { ParamsError } from '@refly-packages/errors';
+import { TimeTracker } from '@refly-packages/utils';
+import { searchResultsToSources, sourcesToSearchResults } from '@refly-packages/utils';
 
 interface ProcessedSearchRequest extends SearchRequest {}
 
@@ -560,5 +563,109 @@ export class SearchService {
     }
 
     return results.flat();
+  }
+
+  async multiLingualWebSearch(
+    user: User,
+    req: MultiLingualWebSearchRequest,
+  ): Promise<{ sources: Source[]; analytics: any }> {
+    const {
+      query,
+      searchLocaleList = ['en', 'zh-CN'],
+      searchLimit = 10,
+      enableRerank = false,
+      rerankLimit,
+      rerankRelevanceThreshold = 0.1,
+    } = req;
+
+    const timeTracker = new TimeTracker();
+    let finalResults: Source[] = [];
+    const analytics: any[] = [];
+
+    try {
+      // Step 1: Prepare queries for each locale
+      const queries = searchLocaleList.map((locale) => ({
+        q: query,
+        hl: locale,
+      }));
+
+      // Step 2: Perform web search
+      timeTracker.startStep('webSearch');
+      const searchResults = await this.webSearch(user, {
+        queries,
+        limit: searchLimit,
+      });
+      const webSearchDuration = timeTracker.endStep('webSearch');
+      this.logger.log(`Web search completed in ${webSearchDuration}ms`);
+
+      analytics.push({
+        step: 'webSearch',
+        duration: webSearchDuration,
+        result: {
+          length: searchResults?.length,
+          localeLength: searchLocaleList?.length,
+        },
+      });
+
+      // Convert to Source format
+      finalResults = searchResults.map((result) => ({
+        url: result.url,
+        title: result.name,
+        pageContent: result.snippet,
+        metadata: {
+          originalLocale:
+            queries.find((q) => result.snippet?.toLowerCase().includes(q.q.toLowerCase()))?.hl ||
+            'unknown',
+        },
+      }));
+
+      if (enableRerank) {
+        // Step 3: Rerank results if enabled
+        timeTracker.startStep('rerank');
+        try {
+          const rerankResults = sourcesToSearchResults(finalResults);
+
+          const rerankResponse = await this.rag.rerank(query, rerankResults, {
+            topN: rerankLimit || rerankResults.length,
+            relevanceThreshold: rerankRelevanceThreshold,
+          });
+
+          finalResults = searchResultsToSources(rerankResponse);
+
+          this.logger.log(`Reranked results count: ${finalResults.length}`);
+        } catch (error) {
+          this.logger.error(`Error in reranking: ${error.stack}`);
+          // Fallback to non-reranked results
+        }
+        const rerankDuration = timeTracker.endStep('rerank');
+        this.logger.log(`Rerank completed in ${rerankDuration}ms`);
+
+        analytics.push({
+          step: 'rerank',
+          duration: rerankDuration,
+          result: {
+            length: finalResults?.length,
+          },
+        });
+      }
+
+      const stepSummary = timeTracker.getSummary();
+      const totalDuration = stepSummary.totalDuration;
+      this.logger.log(`Total duration: ${totalDuration}ms`);
+
+      analytics.push({
+        step: 'finish',
+        duration: totalDuration,
+        result: {},
+      });
+
+      return {
+        sources: finalResults,
+        analytics,
+      };
+    } catch (error) {
+      this.logger.error(`Error in multilingual web search: ${error.stack}`);
+      throw error;
+    }
   }
 }

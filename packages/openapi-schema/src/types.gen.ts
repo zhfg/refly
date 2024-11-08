@@ -2177,6 +2177,33 @@ export type BatchWebSearchRequest = {
   queries?: Array<WebSearchRequest>;
 };
 
+export type MultiLingualWebSearchRequest = {
+  /**
+   * Search query
+   */
+  query: string;
+  /**
+   * List of search locales
+   */
+  searchLocaleList: Array<string>;
+  /**
+   * Web search result limit per locale
+   */
+  searchLimit?: number;
+  /**
+   * Whether to enable reranking of search results
+   */
+  enableRerank?: boolean;
+  /**
+   * Limit for reranked results
+   */
+  rerankLimit?: number;
+  /**
+   * Relevance threshold for reranking
+   */
+  rerankRelevanceThreshold?: number;
+};
+
 export type WebSearchResult = {
   /**
    * Web search result name

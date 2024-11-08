@@ -3797,6 +3797,32 @@ components:
           description: Web search queries
           items:
             $ref: '#/components/schemas/WebSearchRequest'
+    MultiLingualWebSearchRequest:
+      type: object
+      required:
+        - query
+        - searchLocaleList
+      properties:
+        query:
+          type: string
+          description: Search query
+        searchLocaleList:
+          type: array
+          description: List of search locales
+          items:
+            type: string
+        searchLimit:
+          type: number
+          description: Web search result limit per locale
+        enableRerank:
+          type: boolean
+          description: Whether to enable reranking of search results
+        rerankLimit:
+          type: number
+          description: Limit for reranked results
+        rerankRelevanceThreshold:
+          type: number
+          description: Relevance threshold for reranking
     WebSearchResult:
       type: object
       properties:

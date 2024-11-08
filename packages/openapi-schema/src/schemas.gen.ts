@@ -3167,6 +3167,40 @@ export const $BatchWebSearchRequest = {
   },
 } as const;
 
+export const $MultiLingualWebSearchRequest = {
+  type: 'object',
+  required: ['query', 'searchLocaleList'],
+  properties: {
+    query: {
+      type: 'string',
+      description: 'Search query',
+    },
+    searchLocaleList: {
+      type: 'array',
+      description: 'List of search locales',
+      items: {
+        type: 'string',
+      },
+    },
+    searchLimit: {
+      type: 'number',
+      description: 'Web search result limit per locale',
+    },
+    enableRerank: {
+      type: 'boolean',
+      description: 'Whether to enable reranking of search results',
+    },
+    rerankLimit: {
+      type: 'number',
+      description: 'Limit for reranked results',
+    },
+    rerankRelevanceThreshold: {
+      type: 'number',
+      description: 'Relevance threshold for reranking',
+    },
+  },
+} as const;
+
 export const $WebSearchResult = {
   type: 'object',
   properties: {
