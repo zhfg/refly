@@ -8,7 +8,26 @@ const defaultLocales: SearchLocale[] = [
   { code: 'en', name: 'English' },
   { code: 'zh-CN', name: 'Simplified Chinese' },
   { code: 'ja', name: 'Japanese' },
+  { code: 'zh-Hant', name: 'Traditional Chinese' },
+  { code: 'fr', name: 'French' },
+  { code: 'de-DE', name: 'Standard German' },
+  { code: 'ko', name: 'Korean' },
+  { code: 'hi', name: 'Hindi' },
+  { code: 'es', name: 'Spanish' },
+  { code: 'ru', name: 'Russian' },
+  { code: 'de', name: 'German' },
+  { code: 'it', name: 'Italian' },
+  { code: 'tr', name: 'Turkish' },
+  { code: 'pt', name: 'Portuguese' },
+  { code: 'vi', name: 'Vietnamese' },
+  { code: 'id', name: 'Indonesian' },
+  { code: 'th', name: 'Thai' },
+  { code: 'ar', name: 'Arabic' },
+  { code: 'mn', name: 'Mongolian' },
+  { code: 'fa', name: 'Persian' },
 ];
+
+const defaultSelectedLocales = ['en', 'zh-CN', 'ja'];
 
 export interface SearchLocale {
   code: string;
@@ -48,8 +67,8 @@ export interface SearchStep {
 
 export const useMultilingualSearchStore = create<SearchState>((set) => ({
   query: '',
-  searchLocales: defaultLocales,
-  outputLocale: defaultLocales[0],
+  searchLocales: defaultLocales.filter((locale) => defaultSelectedLocales.includes(locale.code)),
+  outputLocale: { code: 'auto', name: 'Auto' },
   isSearching: false,
   searchProgress: 0,
   searchSteps: mockSearchSteps,

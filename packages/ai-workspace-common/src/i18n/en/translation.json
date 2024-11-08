@@ -325,6 +325,13 @@
     }
   },
   "resource": {
+    "multilingualSearch": {
+      "placeholder": "Search the world in your own language",
+      "searchLabel": "Search Language",
+      "displayLabel": "Display Language",
+      "selectSearchLanguages": "Select Search Languages",
+      "selectDisplayLanguage": "Select Display Language"
+    },
     "import": {
       "title": "Resource Integration",
       "fromWebSearch": "Web Search",
