@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
+import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
 
 export const ResourceView = (props: { resourceId: string; projectId?: string }) => {
   const { resourceId, projectId } = props;
@@ -205,9 +206,10 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
 
                 <div className="knowledge-base-directory-site-intro">
                   <div className="site-intro-icon">
-                    <img
-                      src={`https://www.google.com/s2/favicons?domain=${safeParseURL(resourceDetail?.data?.url as string)}&sz=${32}`}
-                      alt={resourceDetail?.data?.url}
+                    <ResourceIcon
+                      url={resourceDetail?.data?.url}
+                      resourceType={resourceDetail?.resourceType}
+                      size={24}
                     />
                   </div>
                   <div className="site-intro-content">

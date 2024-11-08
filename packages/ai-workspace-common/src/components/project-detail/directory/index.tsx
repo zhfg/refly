@@ -22,6 +22,7 @@ import { HiOutlineSearch, HiFolderRemove } from 'react-icons/hi';
 import { HiOutlinePlus, HiOutlineShare, HiOutlineSparkles } from 'react-icons/hi2';
 import { IconCanvas, IconProject, IconThread } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Favicon } from '@refly-packages/ai-workspace-common/components/common/favicon';
+import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 
@@ -300,7 +301,7 @@ export const ProjectDirectory = (props: {
       const resources = projectStore.resources?.data?.filter((resource) => resource.id !== item.id);
       if (resources) {
         projectStore.setProjectDirItems(projectId, 'resources', resources);
-        const projectIds = item?.projectIds || [];
+        const projectIds = item?.resourceData?.projectIds || [];
         projectIds.forEach((projectId) => {
           handleDeleteTab(projectId, item.id);
         });
@@ -413,7 +414,7 @@ export const ProjectDirectory = (props: {
             {item.type === 'canvases' ? (
               <IconCanvas />
             ) : item.type === 'resources' ? (
-              <Favicon url={item.url} />
+              <ResourceIcon url={item.url} resourceType={item.resourceData?.resourceType} />
             ) : item.type === 'conversations' ? (
               <IconThread />
             ) : null}
