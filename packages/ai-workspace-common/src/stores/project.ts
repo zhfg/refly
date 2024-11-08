@@ -14,6 +14,7 @@ export interface ProjectDirListItem {
   type: ProjectDirListItemType;
   url?: string;
   order?: number;
+  projectIds?: string[];
 }
 
 export interface ProjectTab {
@@ -175,6 +176,7 @@ export const useProjectStore = create<ProjectState>()(
             type: itemType,
             order: item.order,
             url: item.data?.url,
+            projectIds: item?.projectIds,
           }));
           if (error || !data?.success) {
             state[config.stateKey].error = String(error) || 'request not success';

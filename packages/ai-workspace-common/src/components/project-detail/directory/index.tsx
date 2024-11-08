@@ -300,7 +300,10 @@ export const ProjectDirectory = (props: {
       const resources = projectStore.resources?.data?.filter((resource) => resource.id !== item.id);
       if (resources) {
         projectStore.setProjectDirItems(projectId, 'resources', resources);
-        handleDeleteTab(projectId, item.id);
+        const projectIds = item?.projectIds || [];
+        projectIds.forEach((projectId) => {
+          handleDeleteTab(projectId, item.id);
+        });
       }
     };
 
@@ -545,7 +548,7 @@ export const ProjectDirectory = (props: {
                   {' · '}
                   <span>
                     {t('knowledgeBase.directory.resourceCount', {
-                      count: resources?.data?.length || 0,
+                      count: (resources?.data?.length || 0) + (canvases?.data?.length || 0),
                     })}
                   </span>
                 </div>

@@ -246,8 +246,8 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
                   .utc()
                   .fromNow()}
               </span>
-              {' · '}
-              <span>{t('resourceDetail.directory.referenced', { count: 9 })}</span>
+              {/* {' · '}
+              <span>{t('resourceDetail.directory.referenced', { count: 9 })}</span> */}
             </div>
           </div>
         </div>
