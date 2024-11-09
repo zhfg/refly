@@ -15,6 +15,7 @@ import {
   MultiLingualWebSearchRequest,
   BatchWebSearchRequest,
   Source,
+  SearchStep,
 } from '@refly-packages/openapi-schema';
 import { RAGService } from '@/rag/rag.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
@@ -23,6 +24,50 @@ import { TimeTracker } from '@refly-packages/utils';
 import { searchResultsToSources, sourcesToSearchResults } from '@refly-packages/utils';
 
 interface ProcessedSearchRequest extends SearchRequest {}
+
+// Add interface for better type safety
+interface SerperSearchResult {
+  searchParameters: {
+    q: string;
+    hl: string;
+    type: string;
+    num: number;
+    location: string;
+    engine: string;
+    gl: string;
+  };
+  organic: Array<{
+    title: string;
+    link: string;
+    snippet: string;
+    sitelinks?: { title: string; link: string }[];
+    position: number;
+  }>;
+  knowledgeGraph?: {
+    title: string;
+    type: string;
+    description?: string;
+    descriptionUrl?: string;
+    website?: string;
+    imageUrl?: string;
+    attributes?: Record<string, string>;
+  };
+  answerBox?: {
+    title?: string;
+    url?: string;
+    snippet?: string;
+    answer?: string;
+  };
+  peopleAlsoAsk?: Array<{
+    question: string;
+    link: string;
+    snippet: string;
+    title: string;
+  }>;
+  relatedSearches?: Array<{
+    query: string;
+  }>;
+}
 
 @Injectable()
 export class SearchService {
@@ -492,8 +537,9 @@ export class SearchService {
     return contexts;
   }
 
-  private parseSingleSearchResult(result: any): WebSearchResult[] {
+  private parseSingleSearchResult(result: SerperSearchResult): WebSearchResult[] {
     const contexts: WebSearchResult[] = [];
+    const searchLocale = result.searchParameters?.hl || 'unknown';
 
     if (result.knowledgeGraph) {
       const url = result.knowledgeGraph.descriptionUrl || result.knowledgeGraph.website;
@@ -503,6 +549,7 @@ export class SearchService {
           name: result.knowledgeGraph.title || '',
           url,
           snippet,
+          locale: searchLocale,
         });
       }
     }
@@ -515,6 +562,7 @@ export class SearchService {
           name: result.answerBox.title || '',
           url,
           snippet,
+          locale: searchLocale,
         });
       }
     }
@@ -525,6 +573,7 @@ export class SearchService {
           name: c.title,
           url: c.link,
           snippet: c.snippet || '',
+          locale: searchLocale,
         });
       }
     }
@@ -568,7 +617,7 @@ export class SearchService {
   async multiLingualWebSearch(
     user: User,
     req: MultiLingualWebSearchRequest,
-  ): Promise<{ sources: Source[]; analytics: any }> {
+  ): Promise<{ sources: Source[]; searchSteps: SearchStep[] }> {
     const {
       query,
       searchLocaleList = ['en', 'zh-CN'],
@@ -580,7 +629,7 @@ export class SearchService {
 
     const timeTracker = new TimeTracker();
     let finalResults: Source[] = [];
-    const analytics: any[] = [];
+    const searchSteps: SearchStep[] = [];
 
     try {
       // Step 1: Prepare queries for each locale
@@ -598,7 +647,7 @@ export class SearchService {
       const webSearchDuration = timeTracker.endStep('webSearch');
       this.logger.log(`Web search completed in ${webSearchDuration}ms`);
 
-      analytics.push({
+      searchSteps.push({
         step: 'webSearch',
         duration: webSearchDuration,
         result: {
@@ -613,9 +662,7 @@ export class SearchService {
         title: result.name,
         pageContent: result.snippet,
         metadata: {
-          originalLocale:
-            queries.find((q) => result.snippet?.toLowerCase().includes(q.q.toLowerCase()))?.hl ||
-            'unknown',
+          originalLocale: result?.locale || 'unknown',
         },
       }));
 
@@ -640,7 +687,7 @@ export class SearchService {
         const rerankDuration = timeTracker.endStep('rerank');
         this.logger.log(`Rerank completed in ${rerankDuration}ms`);
 
-        analytics.push({
+        searchSteps.push({
           step: 'rerank',
           duration: rerankDuration,
           result: {
@@ -653,7 +700,7 @@ export class SearchService {
       const totalDuration = stepSummary.totalDuration;
       this.logger.log(`Total duration: ${totalDuration}ms`);
 
-      analytics.push({
+      searchSteps.push({
         step: 'finish',
         duration: totalDuration,
         result: {},
@@ -661,7 +708,7 @@ export class SearchService {
 
       return {
         sources: finalResults,
-        analytics,
+        searchSteps,
       };
     } catch (error) {
       this.logger.error(`Error in multilingual web search: ${error.stack}`);

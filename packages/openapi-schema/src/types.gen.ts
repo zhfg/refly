@@ -772,6 +772,26 @@ export type Source = {
 };
 
 /**
+ * Search step
+ */
+export type SearchStep = {
+  /**
+   * Search step name
+   */
+  step?: string;
+  /**
+   * Step duration in milliseconds
+   */
+  duration?: number;
+  /**
+   * Step-specific result data
+   */
+  result?: {
+    [key: string]: unknown;
+  };
+};
+
+/**
  * Chat message type
  */
 export type MessageType = 'ai' | 'human' | 'system';
@@ -2204,6 +2224,22 @@ export type MultiLingualWebSearchRequest = {
   rerankRelevanceThreshold?: number;
 };
 
+export type MultiLingualWebSearchResponse = BaseResponse & {
+  /**
+   * Multilingual web search results
+   */
+  data?: {
+    /**
+     * Search result sources
+     */
+    sources: Array<Source>;
+    /**
+     * Search steps
+     */
+    searchSteps: Array<SearchStep>;
+  };
+};
+
 export type WebSearchResult = {
   /**
    * Web search result name
@@ -2217,6 +2253,10 @@ export type WebSearchResult = {
    * Web search result snippet
    */
   snippet?: string;
+  /**
+   * Web search result locale
+   */
+  locale?: string;
 };
 
 export type WebSearchResponse = BaseResponse & {
@@ -3165,6 +3205,14 @@ export type SearchResponse2 = SearchResponse;
 
 export type SearchError = unknown;
 
+export type MultiLingualWebSearchData = {
+  body: MultiLingualWebSearchRequest;
+};
+
+export type MultiLingualWebSearchResponse2 = MultiLingualWebSearchResponse;
+
+export type MultiLingualWebSearchError = unknown;
+
 export type ScrapeData = {
   body: ScrapeWeblinkRequest;
 };
@@ -3823,6 +3871,17 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': SearchResponse;
+      };
+    };
+  };
+  '/search/multilingualSearch': {
+    post: {
+      req: MultiLingualWebSearchData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': MultiLingualWebSearchResponse;
       };
     };
   };

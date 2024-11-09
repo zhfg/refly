@@ -7,36 +7,15 @@ import { LOCALE } from '@refly/common-types';
 import { languageNameToLocale, localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
 
 import './search-box.scss';
-import {
-  MessageIntentContext,
-  useChatStore,
-  useChatStoreShallow,
-} from '@refly-packages/ai-workspace-common/stores/chat';
-import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { ConfigScope } from '@refly/openapi-schema';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 const { Search: AntSearch } = Input;
 
 export const SearchBox: React.FC = () => {
   const { i18n, t } = useTranslation();
   const currentUiLocale = i18n.language as LOCALE;
-  const chatStore = useChatStoreShallow((state) => ({
-    setMessageIntentContext: state.setMessageIntentContext,
-  }));
-  const { sendChatMessage } = useBuildThreadAndRun();
 
-  const {
-    query,
-    searchLocales,
-    outputLocale,
-    setQuery,
-    setSearchLocales,
-    setOutputLocale,
-    setProcessingStep,
-    setIsSearching,
-  } = useMultilingualSearchStoreShallow((state) => ({
+  const multilingualSearchStore = useMultilingualSearchStoreShallow((state) => ({
     query: state.query,
     searchLocales: state.searchLocales,
     outputLocale: state.outputLocale,
@@ -45,6 +24,8 @@ export const SearchBox: React.FC = () => {
     setOutputLocale: state.setOutputLocale,
     setProcessingStep: state.setProcessingStep,
     setIsSearching: state.setIsSearching,
+    addSearchStep: state.addSearchStep,
+    setResults: state.setResults,
   }));
 
   // 构建语言选项
@@ -72,53 +53,41 @@ export const SearchBox: React.FC = () => {
     return names[locale] || locale;
   };
 
-  const handleMultilingualSearch = (userInput?: string) => {
+  const handleMultilingualSearch = async (userInput?: string) => {
     if (userInput?.trim()?.length === 0) return;
 
-    setIsSearching(true);
-    setProcessingStep();
+    multilingualSearchStore.setIsSearching(true);
+    multilingualSearchStore.setProcessingStep();
 
-    const { messageIntentContext } = useChatStore.getState();
+    try {
+      const { data } = await getClient().multiLingualWebSearch({
+        body: {
+          query: userInput,
+          searchLocaleList: multilingualSearchStore.searchLocales.map((locale) => locale.code),
+          // resultDisplayLocale: multilingualSearchStore.outputLocale.code,
+          enableRerank: true,
+        },
+      });
 
-    const newMessageIntentContext: Partial<MessageIntentContext> = {
-      ...(messageIntentContext || {}),
-      isNewConversation: messageIntentContext?.isNewConversation || true,
-      env: {
-        runtime: getRuntime(),
-        source: MessageIntentSource.MultilingualSearch,
-      },
-    };
+      // Update search steps and results from response
+      if (data?.data?.searchSteps) {
+        data.data.searchSteps.forEach((step) => {
+          if (step.step === 'finish') {
+            multilingualSearchStore.addSearchStep(step);
+          } else {
+            multilingualSearchStore.addSearchStep(step);
+            multilingualSearchStore.setProcessingStep();
+          }
+        });
+      }
 
-    chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
-
-    // 添加搜索相关配置
-    const searchConfig = {
-      searchLocaleList: {
-        value: searchLocales.map((locale) => locale.code),
-        configScope: 'runtime' as unknown as ConfigScope,
-        displayValue: t('resource.multilingualSearch.searchLocales'),
-        label: t('resource.multilingualSearch.searchLocales'),
-      },
-      resultDisplayLocale: {
-        value: outputLocale.code,
-        configScope: 'runtime' as unknown as ConfigScope,
-        displayValue: t('resource.multilingualSearch.displayLocale'),
-        label: t('resource.multilingualSearch.displayLocale'),
-      },
-      // 可以添加其他搜索相关配置
-      enableRerank: {
-        value: true,
-        configScope: 'runtime' as unknown as ConfigScope,
-        displayValue: t('resource.multilingualSearch.enableRerank'),
-        label: t('resource.multilingualSearch.enableRerank'),
-      },
-    };
-
-    sendChatMessage({
-      tplConfig: searchConfig,
-      userInput,
-      messageIntentContext: newMessageIntentContext as MessageIntentContext,
-    });
+      if (data?.data?.sources) {
+        multilingualSearchStore.setResults(data.data.sources);
+      }
+    } catch (error) {
+      console.error('Multilingual search failed:', error);
+      multilingualSearchStore.setIsSearching(false);
+    }
   };
 
   const handleSearchLocalesChange = (values: string[]) => {
@@ -131,7 +100,7 @@ export const SearchBox: React.FC = () => {
       code,
       name: getLocaleName(code),
     }));
-    setSearchLocales(newLocales);
+    multilingualSearchStore.setSearchLocales(newLocales);
   };
 
   return (
@@ -141,9 +110,9 @@ export const SearchBox: React.FC = () => {
           <AntSearch
             size="large"
             placeholder={t('resource.multilingualSearch.placeholder')}
-            value={query}
+            value={multilingualSearchStore.query}
             className="search-input"
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => multilingualSearchStore.setQuery(e.target.value)}
             onSearch={handleMultilingualSearch}
             enterButton={<Search />}
           />
@@ -158,7 +127,7 @@ export const SearchBox: React.FC = () => {
                 style={{ minWidth: 300 }}
                 maxTagCount="responsive"
                 placeholder={t('resource.multilingualSearch.selectSearchLanguages')}
-                value={searchLocales.map((l) => l.code)}
+                value={multilingualSearchStore.searchLocales.map((l) => l.code)}
                 onChange={handleSearchLocalesChange}
                 options={languageOptions}
                 maxTagTextLength={10}
@@ -176,9 +145,9 @@ export const SearchBox: React.FC = () => {
                 variant="filled"
                 style={{ minWidth: 200 }}
                 placeholder={t('resource.multilingualSearch.selectDisplayLanguage')}
-                value={outputLocale.code}
+                value={multilingualSearchStore.outputLocale.code}
                 onChange={(value) => {
-                  setOutputLocale({
+                  multilingualSearchStore.setOutputLocale({
                     code: value,
                     name: value === 'auto' ? (currentUiLocale === LOCALE.EN ? 'Auto' : '自动') : getLocaleName(value),
                   });

@@ -174,6 +174,9 @@ import type {
   SearchData,
   SearchError,
   SearchResponse2,
+  MultiLingualWebSearchData,
+  MultiLingualWebSearchError,
+  MultiLingualWebSearchResponse2,
   ScrapeData,
   ScrapeError,
   ScrapeResponse,
@@ -830,6 +833,17 @@ export const search = (options: Options<SearchData>) => {
   return (options?.client ?? client).post<SearchResponse2, SearchError>({
     ...options,
     url: '/search',
+  });
+};
+
+/**
+ * Multilingual Web Search
+ * Search web content across multiple languages
+ */
+export const multiLingualWebSearch = (options: Options<MultiLingualWebSearchData>) => {
+  return (options?.client ?? client).post<MultiLingualWebSearchResponse2, MultiLingualWebSearchError>({
+    ...options,
+    url: '/search/multilingualSearch',
   });
 };
 

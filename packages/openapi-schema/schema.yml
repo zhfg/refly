@@ -1453,6 +1453,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SearchResponse'
+  /search/multilingualSearch:
+    post:
+      tags:
+        - search
+      summary: Multilingual Web Search
+      description: Search web content across multiple languages
+      operationId: multiLingualWebSearch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MultiLingualWebSearchRequest'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultiLingualWebSearchResponse'
   /misc/scrape:
     post:
       tags:
@@ -2273,6 +2293,19 @@ components:
           description: Source selections
           items:
             $ref: '#/components/schemas/SourceSelection'
+    SearchStep:
+      type: object
+      description: Search step
+      properties:
+        step:
+          type: string
+          description: Search step name
+        duration:
+          type: number
+          description: Step duration in milliseconds
+        result:
+          type: object
+          description: Step-specific result data
     MessageType:
       type: string
       description: Chat message type
@@ -3823,6 +3856,28 @@ components:
         rerankRelevanceThreshold:
           type: number
           description: Relevance threshold for reranking
+    MultiLingualWebSearchResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Multilingual web search results
+              required:
+                - sources
+                - searchSteps
+              properties:
+                sources:
+                  type: array
+                  description: Search result sources
+                  items:
+                    $ref: '#/components/schemas/Source'
+                searchSteps:
+                  type: array
+                  description: Search steps
+                  items:
+                    $ref: '#/components/schemas/SearchStep'
     WebSearchResult:
       type: object
       properties:
@@ -3835,6 +3890,9 @@ components:
         snippet:
           type: string
           description: Web search result snippet
+        locale:
+          type: string
+          description: Web search result locale
     WebSearchResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

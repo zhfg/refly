@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
-import { Source } from '@refly/openapi-schema';
+import { Source, SearchStep } from '@refly/openapi-schema';
 
-import { mockSearchSteps, mockResults } from '../mock-data/search-data';
+// import { mockSearchSteps, mockResults } from '../mock-data/search-data';
 
 const defaultLocales: SearchLocale[] = [
   { code: 'en', name: 'English' },
@@ -57,12 +57,6 @@ export interface SearchState {
   setProcessingStep: () => void;
   setResults: (results: Source[]) => void;
   resetSearch: () => void;
-}
-
-export interface SearchStep {
-  step: string;
-  duration: number;
-  result?: any;
 }
 
 export const useMultilingualSearchStore = create<SearchState>((set) => ({

@@ -951,6 +951,25 @@ export const $Source = {
   },
 } as const;
 
+export const $SearchStep = {
+  type: 'object',
+  description: 'Search step',
+  properties: {
+    step: {
+      type: 'string',
+      description: 'Search step name',
+    },
+    duration: {
+      type: 'number',
+      description: 'Step duration in milliseconds',
+    },
+    result: {
+      type: 'object',
+      description: 'Step-specific result data',
+    },
+  },
+} as const;
+
 export const $MessageType = {
   type: 'string',
   description: 'Chat message type',
@@ -3201,6 +3220,40 @@ export const $MultiLingualWebSearchRequest = {
   },
 } as const;
 
+export const $MultiLingualWebSearchResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Multilingual web search results',
+          required: ['sources', 'searchSteps'],
+          properties: {
+            sources: {
+              type: 'array',
+              description: 'Search result sources',
+              items: {
+                $ref: '#/components/schemas/Source',
+              },
+            },
+            searchSteps: {
+              type: 'array',
+              description: 'Search steps',
+              items: {
+                $ref: '#/components/schemas/SearchStep',
+              },
+            },
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
 export const $WebSearchResult = {
   type: 'object',
   properties: {
@@ -3215,6 +3268,10 @@ export const $WebSearchResult = {
     snippet: {
       type: 'string',
       description: 'Web search result snippet',
+    },
+    locale: {
+      type: 'string',
+      description: 'Web search result locale',
     },
   },
 } as const;
