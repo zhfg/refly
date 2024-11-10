@@ -215,7 +215,7 @@ export async function prepareWebSearchContext(
     {
       searchLimit,
       searchLocaleList,
-      resultDisplayLocale: outputLocale || 'en',
+      resultDisplayLocale: outputLocale || 'auto',
       enableRerank,
       enableTranslateQuery,
       enableTranslateResult: false,

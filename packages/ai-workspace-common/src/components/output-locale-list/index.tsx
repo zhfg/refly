@@ -24,7 +24,7 @@ export const OutputLocaleList = (props: {
 
   const userStore = useUserStore();
   let { outputLocale } = userStore?.localSettings || {};
-  outputLocale = outputLocale || LOCALE.EN;
+  outputLocale = outputLocale || 'auto';
 
   const changeLang = async (lng: OutputLocale) => {
     const { localSettings } = useUserStore.getState();
@@ -59,6 +59,11 @@ export const OutputLocaleList = (props: {
     </Menu>
   );
 
+  const displayLocale =
+    outputLocale === 'auto'
+      ? t('settings.language.outputLocale.auto')
+      : localeToLanguageName?.[uiLocale]?.[outputLocale];
+
   return (
     <Dropdown
       droplist={dropList}
@@ -68,7 +73,7 @@ export const OutputLocaleList = (props: {
     >
       {props.children || (
         <span className={classNames('output-locale-list-btn', 'chat-action-item')}>
-          <IconDown /> {localeToLanguageName?.[uiLocale]?.[outputLocale]}{' '}
+          <IconDown /> {displayLocale} {outputLocale === 'auto' && <IconTranslate style={{ marginLeft: 4 }} />}
         </span>
       )}
     </Dropdown>
