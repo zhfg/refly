@@ -1,42 +1,27 @@
 .action-menu {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  background: #fff;
-  margin-top: 16px;
-  border-top: 1px solid #e8e8e8;
-  z-index: 1;
+  gap: 16px;
 
   .action-menu-left {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 12px;
 
     .selected-count {
-      color: #666;
+      color: var(--color-text-2);
+      margin-right: 16px;
     }
 
     .project-selector {
       display: flex;
       align-items: center;
       gap: 8px;
-      min-width: 300px;
-      margin-left: 8px;
 
       .kg-selector {
         width: 200px;
       }
     }
-  }
-
-  .action-menu-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
   }
 }

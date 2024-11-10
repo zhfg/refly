@@ -2,7 +2,9 @@ import {
   useKnowledgeBaseStore,
   useKnowledgeBaseStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { Drawer, Tabs } from '@arco-design/web-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Drawer } from '@arco-design/web-react';
+import { Tabs } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { SourceDetailList } from '@refly-packages/ai-workspace-common/components/source-list/source-detail-list';
 import { Source } from '@refly/openapi-schema';
@@ -10,6 +12,9 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import './index.scss';
 import { IconLink, IconMessage } from '@arco-design/web-react/icon';
+import { SearchResults } from '@refly-packages/ai-workspace-common/modules/multilingual-search/components/search-results';
+import { ActionMenu } from '@refly-packages/ai-workspace-common/modules/multilingual-search/components/action-menu';
+import { useMultilingualSearchStoreShallow } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
 
 const TabPane = Tabs.TabPane;
 
@@ -22,29 +27,50 @@ interface SourceListModalProps {
 
 export const SourceListModal = (props: SourceListModalProps) => {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<string>('webSearch');
   const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
     sourceListDrawer: state.sourceListDrawer,
     updateSourceListDrawer: state.updateSourceListDrawer,
   }));
+
+  // 移除不必要的状态订阅
+  const { setResults, setIsSearching } = useMultilingualSearchStoreShallow((state) => ({
+    setResults: state.setResults,
+    setIsSearching: state.setIsSearching,
+  }));
+
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
-
   const width = isWeb ? '50%' : props.width || '100%';
   const height = isWeb ? '100%' : props.height || '66%';
 
-  // 将资源按来源分类
-  const groupedSources = (knowledgeBaseStore?.sourceListDrawer?.sources || []).reduce(
-    (acc, source) => {
-      const sourceType = source?.metadata?.sourceType || 'library';
-      if (sourceType === 'webSearch') {
-        acc.webSearch.push(source);
-      } else {
-        acc.library.push(source);
-      }
-      return acc;
-    },
-    { webSearch: [], library: [] } as { webSearch: Source[]; library: Source[] },
-  );
+  // 将资源分类逻辑移到 useMemo 中
+  const groupedSources = useMemo(() => {
+    return (knowledgeBaseStore?.sourceListDrawer?.sources || []).reduce(
+      (acc, source) => {
+        const sourceType = source?.metadata?.sourceType || 'library';
+        if (sourceType === 'webSearch') {
+          acc.webSearch.push(source);
+        } else {
+          acc.library.push(source);
+        }
+        return acc;
+      },
+      { webSearch: [], library: [] } as { webSearch: Source[]; library: Source[] },
+    );
+  }, [knowledgeBaseStore?.sourceListDrawer?.sources]);
+
+  // 初始化搜索结果到 store
+  useEffect(() => {
+    if (activeTab === 'webSearch' && knowledgeBaseStore.sourceListDrawer.visible) {
+      setResults(groupedSources.webSearch);
+      setIsSearching(false);
+    } else {
+      // 清理状态
+      setResults([]);
+      setIsSearching(false);
+    }
+  }, [knowledgeBaseStore.sourceListDrawer.visible, groupedSources.webSearch, activeTab]);
 
   return (
     <Drawer
@@ -58,6 +84,7 @@ export const SourceListModal = (props: SourceListModalProps) => {
         const container = getPopupContainer();
         return !isWeb ? (container.querySelector('.ai-copilot-container') as Element) : container;
       }}
+      className="source-list-modal"
       headerStyle={{
         padding: '16px 24px',
         height: 'auto',
@@ -88,40 +115,58 @@ export const SourceListModal = (props: SourceListModalProps) => {
       }}
       onCancel={() => {
         knowledgeBaseStore.updateSourceListDrawer({ visible: false });
+        // 清理搜索结果
+        setResults([]);
+        setIsSearching(false);
       }}
     >
-      <Tabs defaultActiveTab="webSearch">
-        <TabPane
-          key="webSearch"
-          title={
-            <span>
-              {t('copilot.sourceListModal.webSearchTab')} ({groupedSources.webSearch.length})
-            </span>
-          }
-        >
-          <SourceDetailList
-            placeholder={t('copilot.sourceListModal.searchPlaceholder')}
-            sources={groupedSources.webSearch}
-            classNames={props.classNames}
-            handleItemClick={() => {}}
-          />
-        </TabPane>
-        <TabPane
-          key="library"
-          title={
-            <span>
-              {t('copilot.sourceListModal.libraryTab')} ({groupedSources.library.length})
-            </span>
-          }
-        >
-          <SourceDetailList
-            placeholder={t('copilot.sourceListModal.searchPlaceholder')}
-            sources={groupedSources.library}
-            classNames={props.classNames}
-            handleItemClick={() => {}}
-          />
-        </TabPane>
-      </Tabs>
+      <div className="source-list-modal-tabs">
+        <Tabs
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          defaultActiveKey="webSearch"
+          items={[
+            {
+              key: 'webSearch',
+              label: (
+                <span>
+                  {t('copilot.sourceListModal.webSearchTab')} ({groupedSources.webSearch.length})
+                </span>
+              ),
+              children: (
+                <div className="source-list-modal-web-search">
+                  {groupedSources.webSearch.length > 0 && (
+                    <>
+                      <SearchResults />
+                    </>
+                  )}
+                </div>
+              ),
+            },
+            {
+              key: 'library',
+              label: (
+                <span>
+                  {t('copilot.sourceListModal.libraryTab')} ({groupedSources.library.length})
+                </span>
+              ),
+              children: (
+                <SourceDetailList
+                  placeholder={t('copilot.sourceListModal.searchPlaceholder')}
+                  sources={groupedSources.library}
+                  classNames={props.classNames}
+                  handleItemClick={() => {}}
+                />
+              ),
+            },
+          ]}
+        />
+        {activeTab === 'webSearch' && groupedSources.webSearch.length > 0 && (
+          <div className="source-list-modal-action-menu-container">
+            <ActionMenu />
+          </div>
+        )}
+      </div>
     </Drawer>
   );
 };

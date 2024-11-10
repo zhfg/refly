@@ -7,7 +7,7 @@ import './search-results.scss';
 import { Source } from '@refly/openapi-schema';
 import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 
-export const SearchResults: React.FC = () => {
+export const SearchResults: React.FC<{ className?: string }> = ({ className }) => {
   const { t } = useTranslation();
   const { results, selectedItems, toggleSelectedItem } = useMultilingualSearchStore();
   const [saveLoading, setSaveLoading] = useState(false);
@@ -50,9 +50,8 @@ export const SearchResults: React.FC = () => {
   );
 
   return (
-    <div className="search-results">
+    <div className={`search-results ${className || ''}`}>
       <div className="search-results-content">
-        <h3>Search Results ({results.length} sources)</h3>
         <List
           itemLayout="vertical"
           size="large"
@@ -68,7 +67,7 @@ export const SearchResults: React.FC = () => {
                 <Popover
                   content={renderPopoverContent(item)}
                   title={null}
-                  placement="right"
+                  placement="left"
                   overlayClassName="search-result-popover"
                   trigger="hover"
                   mouseEnterDelay={0.5}
@@ -80,9 +79,11 @@ export const SearchResults: React.FC = () => {
                     }}
                   >
                     <List.Item.Meta title={item.title} description={item.url} />
-                    <Tag color="blue">
-                      {item.metadata.originalLocale} → {item.metadata.translatedDisplayLocale}
-                    </Tag>
+                    {item.metadata?.translatedDisplayLocale && (
+                      <Tag color="blue">
+                        {item.metadata.originalLocale} → {item.metadata.translatedDisplayLocale}
+                      </Tag>
+                    )}
                   </div>
                 </Popover>
               </div>
