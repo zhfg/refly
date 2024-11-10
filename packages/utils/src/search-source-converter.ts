@@ -19,11 +19,15 @@ export const mergeSearchResults = (results: Source[]): Source[] => {
       // If source exists, merge metadata and selections if present
       const existingSource = sourceMap.get(key)!;
 
-      // Merge metadata if exists
+      // Merge metadata with translation information
       if (source.metadata && existingSource.metadata) {
         existingSource.metadata = {
           ...existingSource.metadata,
           ...source.metadata,
+          // Preserve translation information
+          originalQuery: source.metadata.originalQuery || existingSource.metadata.originalQuery,
+          translatedQuery: source.metadata.translatedQuery || existingSource.metadata.translatedQuery,
+          isTranslated: source.metadata.isTranslated || existingSource.metadata.isTranslated,
         };
       }
 
@@ -41,10 +45,17 @@ export const mergeSearchResults = (results: Source[]): Source[] => {
 
   // Convert Map back to array and sort by score if available
   return Array.from(sourceMap.values()).sort((a, b) => {
-    if (a.score === undefined && b.score === undefined) return 0;
-    if (a.score === undefined) return 1;
-    if (b.score === undefined) return -1;
-    return b.score - a.score;
+    // Add translation boost if needed
+    const getEffectiveScore = (source: Source) => {
+      let score = source.score || 0;
+      // Optionally boost scores for results from translated queries
+      if (source.metadata?.isTranslated) {
+        score *= 0.95; // Slight penalty for translated results
+      }
+      return score;
+    };
+
+    return getEffectiveScore(b) - getEffectiveScore(a);
   });
 };
 

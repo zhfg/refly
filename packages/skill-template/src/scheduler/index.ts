@@ -87,6 +87,19 @@ export class Scheduler extends BaseSkill {
         defaultValue: true,
       },
       {
+        key: 'enableDeepReasonWebSearch',
+        inputMode: 'radio',
+        labelDict: {
+          en: 'Deep Reason Web Search',
+          'zh-CN': '深度网页搜索',
+        },
+        descriptionDict: {
+          en: 'Enable deep reason web search',
+          'zh-CN': '启用深度网页搜索',
+        },
+        defaultValue: false,
+      },
+      {
         key: 'enableKnowledgeBaseSearch',
         inputMode: 'radio',
         labelDict: {

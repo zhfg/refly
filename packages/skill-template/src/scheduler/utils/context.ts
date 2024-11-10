@@ -29,6 +29,7 @@ import {
 import { uniqBy } from 'lodash';
 import { MAX_CONTEXT_RATIO } from './constants';
 import { safeStringifyJSON } from '@refly-packages/utils';
+import { callMultiLingualWebSearch } from '../module/multiLingualSearch';
 
 export async function prepareContext(
   {
@@ -172,7 +173,6 @@ export async function prepareContext(
   return contextStr;
 }
 
-// TODO: should be agentic search: 1. query split 2. atom query rewrite 3. multi-round search 4. reflection 5. end? -> iterative search
 export async function prepareWebSearchContext(
   {
     query,
@@ -186,22 +186,55 @@ export async function prepareWebSearchContext(
   ctx.ctxThis.emitEvent({ event: 'log', content: `Prepare Web Search Context...` }, ctx.config);
   ctx.ctxThis.engine.logger.log(`Prepare Web Search Context...`);
 
+  // two searchMode
+  const enableDeepReasonWebSearch = (ctx.tplConfig?.enableDeepReasonWebSearch?.value as boolean) || false;
+  const outputLocale = ctx.config.user.outputLocale;
+
+  let searchLimit = 10;
+  let searchLocaleListLen = 2;
+  let enableRerank = false;
+  let enableTranslateQuery = false;
+  let searchLocaleList: string[] = ['en'];
+
+  if (enableDeepReasonWebSearch) {
+    searchLimit = 20;
+    searchLocaleListLen = 3;
+    enableRerank = true;
+    enableTranslateQuery = true;
+  }
+
   const processedWebSearchContext: IContext = {
     contentList: [],
     resources: [],
     canvases: [],
     webSearchSources: [],
   };
-  const res = await ctx.ctxThis.engine.service.webSearch(ctx.config.user, {
-    q: query,
-    hl: ctx.config.user.outputLocale || 'en',
-    limit: 10,
-  });
-  const webSearchSources = res.data.map((item) => ({
-    url: item.url,
-    title: item.name,
-    pageContent: item.snippet,
-  }));
+
+  // Call multiLingualWebSearch instead of webSearch
+  const searchResult = await callMultiLingualWebSearch(
+    {
+      searchLimit,
+      searchLocaleList,
+      resultDisplayLocale: outputLocale || 'en',
+      enableRerank,
+      enableTranslateQuery,
+      enableTranslateResult: false,
+      rerankRelevanceThreshold: 0.1,
+      translateConcurrencyLimit: 10,
+      webSearchConcurrencyLimit: 3,
+      batchSize: 5,
+      enableDeepReasonWebSearch,
+    },
+    {
+      config: ctx.config,
+      ctxThis: ctx.ctxThis,
+      state: { ...ctx.state, query },
+    },
+  );
+
+  // Take only first 10 sources
+  const webSearchSources = (searchResult.sources || []).slice(0, 10);
+
   processedWebSearchContext.webSearchSources = webSearchSources;
 
   const enableAutoImportWebResource = ctx.tplConfig?.enableAutoImportWebResource?.value;
@@ -223,6 +256,7 @@ export async function prepareWebSearchContext(
     ctx.ctxThis.engine.logger.log(
       `Batch import web search resources res: ${safeStringifyJSON(batchCreateResourceRes)}`,
     );
+    ctx.ctxThis.emitEvent({ event: 'log', content: `Batch import web search resources successfully!` }, ctx.config);
   }
 
   ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared Web Search Context successfully!` }, ctx.config);

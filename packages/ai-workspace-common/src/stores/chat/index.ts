@@ -26,6 +26,7 @@ export interface MessageIntentContext {
   convId?: string;
   enableWebSearch?: boolean;
   enableAutoImportWebResource?: boolean;
+  enableDeepReasonWebSearch?: boolean;
   enableKnowledgeBaseSearch?: boolean;
   env: {
     runtime: IRuntime;
@@ -56,6 +57,7 @@ export interface ChatState {
   selectedProject?: ProjectInfo;
   enableWebSearch: boolean;
   enableAutoImportWebResource: boolean;
+  enableDeepReasonWebSearch: boolean;
   enableKnowledgeBaseSearch: boolean;
   intentMatcher: IntentResult | undefined;
 
@@ -71,6 +73,7 @@ export interface ChatState {
   setModelList: (val: ModelInfo[]) => void;
   setEnableWebSearch: (val: boolean) => void;
   setEnableAutoImportWebResource: (val: boolean) => void;
+  setEnableDeepReasonWebSearch: (val: boolean) => void;
   setEnableKnowledgeBaseSearch: (val: boolean) => void;
   setIntentMatcher: (val: IntentResult | undefined) => void;
   resetState: () => void;
@@ -93,6 +96,7 @@ const defaultConfigurableState = {
   ] as ModelInfo[],
   enableWebSearch: true,
   enableAutoImportWebResource: true,
+  enableDeepReasonWebSearch: false,
   enableKnowledgeBaseSearch: true,
 };
 
@@ -138,6 +142,7 @@ export const useChatStore = create<ChatState>()(
         setModelList: (val: ModelInfo[]) => set({ modelList: val }),
         setEnableWebSearch: (val: boolean) => set({ enableWebSearch: val }),
         setEnableAutoImportWebResource: (val: boolean) => set({ enableAutoImportWebResource: val }),
+        setEnableDeepReasonWebSearch: (val: boolean) => set({ enableDeepReasonWebSearch: val }),
         setEnableKnowledgeBaseSearch: (val: boolean) => set({ enableKnowledgeBaseSearch: val }),
         setIntentMatcher: (val: IntentResult | undefined) => set({ intentMatcher: val }),
         resetState: () => {

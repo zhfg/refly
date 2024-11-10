@@ -193,6 +193,7 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
       title: source.title,
       pageContent: source.pageContent,
       metadata: {
+        ...source.metadata,
         source: source.url,
         title: source.title,
       },
@@ -209,6 +210,7 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
       title: metadata?.title,
       pageContent: content.content,
       metadata: {
+        ...metadata,
         source: metadata?.url,
         title: metadata?.title,
         entityId: metadata?.entityId,

@@ -715,6 +715,18 @@ export type SourceMeta = {
    * Translated display locale
    */
   translatedDisplayLocale?: string;
+  /**
+   * Whether the source is translated
+   */
+  isTranslated?: boolean;
+  /**
+   * Original query
+   */
+  originalQuery?: string;
+  /**
+   * Translated query
+   */
+  translatedQuery?: string;
 };
 
 /**

@@ -32,29 +32,72 @@ import { performConcurrentWebSearch } from './webSearch';
  * 1.5 基于 list sources 进行 rerank 排序生成最终的 sources 并返回
  *
  */
-export const callMultiLingualWebSearch = async (ctx: {
-  config: SkillRunnableConfig;
-  ctxThis: BaseSkill;
-  state: GraphState;
-}): Promise<{ sources: Source[] }> => {
+
+export const LOCALE_PRIORITY = ['en', 'fr', 'es', 'de', 'it', 'ja', 'zh-CN', 'ko'];
+
+const getOptimizedSearchLocales = (baseLocale: string, enableDeepReasonWebSearch: boolean): string[] => {
+  // Start with English as base locale
+  const locales = new Set(['en']);
+
+  // Add recommended/display locale if different from English
+  if (baseLocale !== 'en') {
+    locales.add(baseLocale);
+  }
+
+  // For deep search, add one more locale from priority list
+  if (enableDeepReasonWebSearch && locales.size < 3) {
+    // Find first locale from priority list that's not already included
+    const additionalLocale = LOCALE_PRIORITY.find((locale) => !locales.has(locale));
+    if (additionalLocale) {
+      locales.add(additionalLocale);
+    }
+  }
+
+  // Convert Set back to array, maintaining LOCALE_PRIORITY order
+  return LOCALE_PRIORITY.filter((locale) => locales.has(locale));
+};
+
+interface CallMultiLingualWebSearchParams {
+  searchLimit: number;
+  searchLocaleList: string[];
+  resultDisplayLocale: string;
+  enableRerank: boolean;
+  enableTranslateQuery: boolean;
+  enableTranslateResult: boolean;
+  rerankRelevanceThreshold?: number;
+  rerankLimit?: number;
+  translateConcurrencyLimit: number;
+  webSearchConcurrencyLimit: number;
+  batchSize: number;
+  enableDeepReasonWebSearch: boolean;
+}
+
+export const callMultiLingualWebSearch = async (
+  params: CallMultiLingualWebSearchParams,
+  ctx: {
+    config: SkillRunnableConfig;
+    ctxThis: BaseSkill;
+    state: GraphState;
+  },
+): Promise<{ sources: Source[] }> => {
   const { config, ctxThis, state } = ctx;
   const { engine } = ctxThis;
-  const { tplConfig } = config?.configurable || {};
 
   const { query } = state;
 
   // TODO: 针对在 scheduler 里面调用,
-  const searchLocaleList = (tplConfig?.searchLocaleList?.value as string[]) || ['en', 'zh-CN', 'ja'];
-  const resultDisplayLocale = (tplConfig?.resultDisplayLocale?.value as string) || 'auto';
-  const enableRerank = (tplConfig?.enableRerank?.value as boolean) || false;
-  const enableTranslate = (tplConfig?.enableTranslate?.value as boolean) || false;
-  const searchLimit = (tplConfig?.searchLimit?.value as number) || 10;
-  const rerankRelevanceThreshold = (tplConfig?.rerankRelevanceThreshold?.value as number) || 0.1;
-  const rerankLimit = tplConfig?.rerankLimit?.value as number;
-  const translateConcurrencyLimit = (tplConfig?.translateConcurrencyLimit?.value as number) || 10;
-  const webSearchConcurrencyLimit = (tplConfig?.webSearchConcurrencyLimit?.value as number) || 3;
-  const batchSize = (tplConfig?.batchSize?.value as number) || 5;
-
+  let searchLocaleList = params.searchLocaleList || ['en'];
+  const resultDisplayLocale = params.resultDisplayLocale || 'auto';
+  const enableRerank = params.enableRerank || false;
+  const enableTranslateQuery = params.enableTranslateQuery || false;
+  const enableTranslateResult = params.enableTranslateResult || false;
+  const searchLimit = params.searchLimit || 10;
+  const rerankRelevanceThreshold = params.rerankRelevanceThreshold || 0.1;
+  const rerankLimit = params.rerankLimit || 10;
+  const translateConcurrencyLimit = params.translateConcurrencyLimit || 10;
+  const webSearchConcurrencyLimit = params.webSearchConcurrencyLimit || 3;
+  const batchSize = params.batchSize || 5;
+  const enableDeepReasonWebSearch = params.enableDeepReasonWebSearch || false;
   const timeTracker = new TimeTracker();
   let finalResults: Source[] = [];
 
@@ -77,11 +120,19 @@ export const callMultiLingualWebSearch = async (ctx: {
     );
     const rewriteDuration = timeTracker.endStep('rewriteQuery');
     engine.logger.log(`Rewrite queries completed in ${rewriteDuration}ms`);
-    ctxThis.emitEvent({ event: 'log', content: `Rewrite queries completed in ${rewriteDuration}ms` }, config);
+    ctxThis.emitEvent(
+      {
+        event: 'log',
+        content: `Rewrite queries completed in ${rewriteDuration}ms, rewrittenQueries: ${rewriteResult.queries.rewrittenQueries}`,
+      },
+      config,
+    );
 
     // Determine display locale
     const displayLocale =
       resultDisplayLocale === 'auto' ? rewriteResult.analysis.recommendedDisplayLocale : resultDisplayLocale;
+    const optimizedSearchLocales = getOptimizedSearchLocales(displayLocale, enableDeepReasonWebSearch);
+    searchLocaleList = optimizedSearchLocales;
 
     engine.logger.log(`Search analysis: ${JSON.stringify(rewriteResult.analysis)}`);
     engine.logger.log(`Recommended display locale: ${displayLocale}`);
@@ -97,6 +148,7 @@ export const callMultiLingualWebSearch = async (ctx: {
               rewrittenQueries: rewriteResult?.queries?.rewrittenQueries || [],
               outputLocale: displayLocale,
               searchLocales: searchLocaleList,
+              enableDeepReasonWebSearch,
             },
           },
         ]),
@@ -105,46 +157,83 @@ export const callMultiLingualWebSearch = async (ctx: {
       config,
     );
 
-    // Step 2: Translate query
-    timeTracker.startStep('translateQuery');
-    const translateResult = await model.withStructuredOutput(translateQueryOutputSchema).invoke(
-      [
-        new SystemMessage(buildTranslateQuerySystemPrompt()),
-        new HumanMessage(
-          buildTranslateQueryUserPrompt({
-            queries: rewriteResult.queries.rewrittenQueries,
-            searchLocaleList,
-            sourceLocale: rewriteResult.analysis.detectedQueryLocale,
-          }),
-        ),
-      ],
-      config,
-    );
-    const translateDuration = timeTracker.endStep('translateQuery');
-    engine.logger.log(`Translate queries completed in ${translateDuration}ms`);
-    ctxThis.emitEvent({ event: 'log', content: `Translate queries completed in ${translateDuration}ms` }, config);
-
-    ctxThis.emitEvent(
-      {
-        event: 'structured_data',
-        content: JSON.stringify([
-          {
-            step: 'translateQuery',
-            duration: translateDuration,
-            result: {
-              translatedQueries: translateResult?.translations || [],
-            },
-          },
-        ]),
-        structuredDataKey: 'multiLingualSearchStepUpdate',
-      },
-      config,
-    );
-
-    // Prepare query map for concurrent search
+    // Step 2: Translate query (if enabled)
     const queryMap: Record<string, string[]> = {};
-    for (const locale of searchLocaleList) {
-      queryMap[locale] = translateResult.translations[locale] || rewriteResult.queries.rewrittenQueries;
+    let translatedQueries = {};
+
+    if (enableTranslateQuery) {
+      timeTracker.startStep('translateQuery');
+      const translateResult = await model.withStructuredOutput(translateQueryOutputSchema).invoke(
+        [
+          new SystemMessage(buildTranslateQuerySystemPrompt()),
+          new HumanMessage(
+            buildTranslateQueryUserPrompt({
+              queries: rewriteResult.queries.rewrittenQueries,
+              searchLocaleList,
+              sourceLocale: rewriteResult.analysis.detectedQueryLocale,
+            }),
+          ),
+        ],
+        config,
+      );
+      const translateDuration = timeTracker.endStep('translateQuery');
+      engine.logger.log(`Translate queries completed in ${translateDuration}ms`);
+
+      // Store translated queries for each locale
+      translatedQueries = translateResult.translations;
+
+      // Prepare query map with translated queries
+      for (const locale of searchLocaleList) {
+        queryMap[locale] = translateResult.translations[locale] || rewriteResult.queries.rewrittenQueries;
+      }
+
+      ctxThis.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify([
+            {
+              step: 'translateQuery',
+              duration: translateDuration,
+              result: {
+                translatedQueries: translateResult?.translations || [],
+                enableTranslateQuery: true,
+              },
+            },
+          ]),
+          structuredDataKey: 'multiLingualSearchStepUpdate',
+        },
+        config,
+      );
+      ctxThis.emitEvent(
+        {
+          event: 'log',
+          content: `Translate queries completed in ${translateDuration}ms, translatedQueries: ${translateResult.translations}`,
+        },
+        config,
+      );
+    } else {
+      // If translation is disabled, use original queries for all locales
+      for (const locale of searchLocaleList) {
+        queryMap[locale] = rewriteResult.queries.rewrittenQueries;
+      }
+
+      ctxThis.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify([
+            {
+              step: 'translateQuery',
+              duration: 0,
+              result: {
+                translatedQueries: {},
+                enableTranslateQuery: false,
+              },
+            },
+          ]),
+          structuredDataKey: 'multiLingualSearchStepUpdate',
+        },
+        config,
+      );
     }
 
     // Step 3: Perform concurrent web search
@@ -155,6 +244,7 @@ export const callMultiLingualWebSearch = async (ctx: {
       concurrencyLimit: webSearchConcurrencyLimit,
       user: config.user,
       engine: engine,
+      enableTranslateQuery,
     });
     const webSearchDuration = timeTracker.endStep('webSearch');
     engine.logger.log(`Web search completed in ${webSearchDuration}ms`);
@@ -181,7 +271,15 @@ export const callMultiLingualWebSearch = async (ctx: {
       config,
     );
 
-    if (enableTranslate) {
+    ctxThis.emitEvent(
+      {
+        event: 'log',
+        content: `Web search completed in ${webSearchDuration}ms, total results: ${mergedResults?.length}`,
+      },
+      config,
+    );
+
+    if (enableTranslateResult) {
       // Step 4: Translate merged results to display locale
       timeTracker.startStep('translateResults');
       const translatedResults = await translateResults({

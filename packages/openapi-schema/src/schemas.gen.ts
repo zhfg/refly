@@ -890,6 +890,18 @@ export const $SourceMeta = {
       type: 'string',
       description: 'Translated display locale',
     },
+    isTranslated: {
+      type: 'boolean',
+      description: 'Whether the source is translated',
+    },
+    originalQuery: {
+      type: 'string',
+      description: 'Original query',
+    },
+    translatedQuery: {
+      type: 'string',
+      description: 'Translated query',
+    },
   },
 } as const;
 

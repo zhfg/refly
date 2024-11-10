@@ -8,10 +8,12 @@ interface BatchSearchParams {
   queries: Array<{
     q: string;
     hl: string;
+    originalQuery?: string;
   }>;
   limit: number;
   user: User;
   engine: SkillEngine;
+  enableTranslateQuery: boolean;
 }
 
 // Helper to chunk array into batches
@@ -20,7 +22,13 @@ const chunk = <T>(arr: T[], size: number): T[][] => {
 };
 
 // Perform batch search
-const performBatchWebSearch = async ({ queries, limit, user, engine }: BatchSearchParams): Promise<Source[]> => {
+const performBatchWebSearch = async ({
+  queries,
+  limit,
+  user,
+  engine,
+  enableTranslateQuery,
+}: BatchSearchParams): Promise<Source[]> => {
   const result = await engine.service.webSearch(user, {
     queries,
     limit,
@@ -32,7 +40,9 @@ const performBatchWebSearch = async ({ queries, limit, user, engine }: BatchSear
     pageContent: item.snippet,
     metadata: {
       originalLocale: queries[index].hl,
-      originalQuery: queries[index].q,
+      originalQuery: queries[index].originalQuery || queries[index].q,
+      translatedQuery: enableTranslateQuery ? queries[index].q : undefined,
+      isTranslated: enableTranslateQuery,
     },
   }));
 };
@@ -44,18 +54,21 @@ export const performConcurrentWebSearch = async ({
   concurrencyLimit,
   user,
   engine,
+  enableTranslateQuery,
 }: {
   queryMap: Record<string, string[]>;
   searchLimit: number;
   concurrencyLimit: number;
   user: any;
   engine: any;
+  enableTranslateQuery: boolean;
 }): Promise<Source[]> => {
   // Convert queryMap to array of query objects
   const allQueries = Object.entries(queryMap).flatMap(([locale, queries]) =>
-    queries.map((query) => ({
+    queries.map((query, index) => ({
       q: query,
       hl: locale.toLowerCase(),
+      originalQuery: enableTranslateQuery ? queryMap[locale][index] : undefined,
     })),
   );
 
@@ -74,6 +87,7 @@ export const performConcurrentWebSearch = async ({
           limit: searchLimit,
           user,
           engine,
+          enableTranslateQuery,
         }),
       ),
     );

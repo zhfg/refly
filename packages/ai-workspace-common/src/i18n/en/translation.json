@@ -1082,6 +1082,11 @@
       "enable": "Enable",
       "disable": "Disable"
     },
+    "deepReasonWebSearch": {
+      "title": "Enable Deep Reason Web Search",
+      "enable": "Enable",
+      "disable": "Disable"
+    },
     "tokenUsage": "Input {{inputCount}}, Output {{outputCount}}",
     "reflyAssistant": "Knowledge Curator",
     "message": {
