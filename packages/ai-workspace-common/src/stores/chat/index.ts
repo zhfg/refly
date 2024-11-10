@@ -3,8 +3,10 @@ import { devtools, persist } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
 import type { ClientChatMessage, IRuntime, SessionItem } from '@refly/common-types';
-import { ModelInfo, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
+import { ModelInfo, SkillContext, SkillTemplateConfig, Source } from '@refly/openapi-schema';
 import { IntentResult } from '@refly-packages/ai-workspace-common/hooks/use-handle-ai-canvas';
+
+import { mockChatMessage, mockHumanMessage } from './mock-data';
 
 // types
 import type { CanvasEditConfig, InPlaceActionType } from '@refly/utils';
@@ -102,7 +104,7 @@ const defaultConfigurableState = {
 
 export const defaultExtraState = {
   // messages: fakeMessages as any,
-  messages: [],
+  messages: [mockHumanMessage, mockChatMessage] as any,
 
   isFirstStreamContent: true,
   messageIntentContext: undefined,
@@ -158,6 +160,7 @@ export const useChatStore = create<ChatState>()(
           enableWebSearch: state.enableWebSearch,
           enableAutoImportWebResource: state.enableAutoImportWebResource,
           enableKnowledgeBaseSearch: state.enableKnowledgeBaseSearch,
+          sourceListDrawer: state.sourceListDrawer,
         }),
       },
     ),

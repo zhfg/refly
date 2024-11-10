@@ -105,6 +105,7 @@ const CollapseItem = Collapse.Item;
 export const AssistantMessage = memo(
   (props: {
     message: Partial<ClientChatMessage>;
+    humanMessage?: Partial<ClientChatMessage>;
     isPendingFirstToken: boolean;
     isPending: boolean;
     isLastSession: boolean;
@@ -117,6 +118,7 @@ export const AssistantMessage = memo(
       isPending,
       isLastSession = false,
       disable,
+      humanMessage,
       handleAskFollowing,
     } = props;
     const runtime = getRuntime();
@@ -278,6 +280,8 @@ export const AssistantMessage = memo(
                     isPendingFirstToken={isPendingFirstToken}
                     sources={sources || []}
                     isLastSession={isLastSession}
+                    humanMessage={humanMessage}
+                    aiMessage={message}
                   />
                 </div>
                 {(sources || [])?.length > 0 ? (

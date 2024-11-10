@@ -187,7 +187,7 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
   const sources: Source[] = [];
 
   // Web search sources
-  webSearchSources.forEach((source, index) => {
+  webSearchSources.forEach((source) => {
     sources.push({
       url: source.url,
       title: source.title,
@@ -196,6 +196,7 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
         ...source.metadata,
         source: source.url,
         title: source.title,
+        sourceType: 'webSearch', // Add source type for web search results
       },
     });
   });
@@ -203,7 +204,7 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
   const baseUrl = getClientOrigin();
 
   // User selected content
-  contentList.forEach((content: SkillContextContentItem, index) => {
+  contentList.forEach((content: SkillContextContentItem) => {
     const metadata = content.metadata as unknown as SkillContextContentItemMetadata;
     sources.push({
       url: metadata?.url,
@@ -215,6 +216,7 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
         title: metadata?.title,
         entityId: metadata?.entityId,
         entityType: metadata?.domain,
+        sourceType: 'library', // Add source type for knowledge base content
       },
     });
   });
@@ -230,12 +232,13 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
         entityId: canvas.canvas?.canvasId,
         entityType: 'canvas',
         source: `${baseUrl}/knowledge-base?noteId=${canvas.canvas?.canvasId}`,
+        sourceType: 'library', // Add source type for knowledge base canvases
       },
     });
   });
 
   // Knowledge base resources
-  resources.forEach((resource: SkillContextResourceItem, index) => {
+  resources.forEach((resource: SkillContextResourceItem) => {
     sources.push({
       url: `${baseUrl}/knowledge-base?resId=${resource.resource?.resourceId}`,
       title: resource.resource?.title,
@@ -245,6 +248,7 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
         entityId: resource.resource?.resourceId,
         entityType: 'resource',
         source: `${baseUrl}/knowledge-base?resId=${resource.resource?.resourceId}`,
+        sourceType: 'library', // Add source type for knowledge base resources
       },
     });
   });

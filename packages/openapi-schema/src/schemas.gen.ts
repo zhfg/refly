@@ -902,6 +902,11 @@ export const $SourceMeta = {
       type: 'string',
       description: 'Translated query',
     },
+    sourceType: {
+      type: 'string',
+      description: 'Source type',
+      enum: ['webSearch', 'library'],
+    },
   },
 } as const;
 

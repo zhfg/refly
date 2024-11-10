@@ -2251,6 +2251,12 @@ components:
         translatedQuery:
           type: string
           description: Translated query
+        sourceType:
+          type: string
+          description: Source type
+          enum:
+            - webSearch
+            - library
     SourceSelection:
       type: object
       description: Source selection

@@ -150,6 +150,7 @@ export async function prepareContext(
 
   ctx.ctxThis.engine.logger.log(`Prepared Lower Priority after deduplication! ${safeStringifyJSON(mergedContext)}`);
 
+  // TODO: need add rerank here
   const contextStr = concatMergedContextToStr(mergedContext);
   const sources = flattenMergedContextToSources(mergedContext);
 

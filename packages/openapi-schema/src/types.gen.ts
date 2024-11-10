@@ -727,7 +727,16 @@ export type SourceMeta = {
    * Translated query
    */
   translatedQuery?: string;
+  /**
+   * Source type
+   */
+  sourceType?: 'webSearch' | 'library';
 };
+
+/**
+ * Source type
+ */
+export type sourceType = 'webSearch' | 'library';
 
 /**
  * Source selection

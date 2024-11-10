@@ -13,8 +13,11 @@ import { ImportResourceModal } from "@refly-packages/ai-workspace-common/compone
 import { NewProjectModal } from "@refly-packages/ai-workspace-common/components/project-detail/new-project-modal"
 import { SubscribeModal } from "@refly-packages/ai-workspace-common/components/settings/subscribe-modal"
 import { NewCanvasModal } from "@/components/new-canvas-modal"
+import { SourceListModal } from "@refly-packages/ai-workspace-common/components/source-list/source-list-modal"
 
 import "./index.scss"
+import { useKnowledgeBaseStoreShallow } from "@refly-packages/ai-workspace-common/stores/knowledge-base"
+import { getRuntime } from "@refly-packages/ai-workspace-common/utils/env"
 
 const Content = Layout.Content
 
@@ -37,6 +40,12 @@ export const AppLayout = (props: AppLayoutProps) => {
   const importProjectModal = useImportProjectModalShallow(state => ({
     showNewProjectModal: state.showNewProjectModal,
   }))
+  const sourceListDrawerVisible = useKnowledgeBaseStoreShallow(
+    state => state.sourceListDrawer.visible,
+  )
+
+  const runtime = getRuntime()
+  const isWeb = runtime === "web"
 
   // 绑定快捷键
   useBindCommands()
@@ -61,6 +70,9 @@ export const AppLayout = (props: AppLayoutProps) => {
       ) : null}
       {newCanvasModalStore.newCanvasModalVisible ? <NewCanvasModal /> : null}
       {importProjectModal.showNewProjectModal && <NewProjectModal />}
+      {sourceListDrawerVisible && isWeb ? (
+        <SourceListModal classNames="source-list-modal" />
+      ) : null}
       <SubscribeModal />
     </Layout>
   )

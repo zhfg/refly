@@ -1138,7 +1138,9 @@
       "moreSources": "View More {{count}} Sources",
       "searchPlaceholder": "Search Sources...",
       "openOriginWebsite": "Open Origin Website",
-      "openKnowledgeBaseLink": "Open Knowledge Base Link"
+      "openKnowledgeBaseLink": "Open Knowledge Base Link",
+      "webSearchTab": "Web Search",
+      "libraryTab": "Library Search"
     }
   },
   "hooks": {

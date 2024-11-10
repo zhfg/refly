@@ -105,6 +105,7 @@ export const callMultiLingualWebSearch = async (
 
   try {
     // Step 1: Rewrite query
+    // TODO: 同时在 deepReasonSearch 和非 deepReasonSearch 下应该应用不同的改写设计（比如 deepReasonSearch 会拆分为更多个 query）
     timeTracker.startStep('rewriteQuery');
     const rewriteResult = await model.withStructuredOutput(rewriteQueryOutputSchema).invoke(
       [

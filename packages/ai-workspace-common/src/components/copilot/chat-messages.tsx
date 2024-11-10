@@ -50,6 +50,7 @@ export const ChatMessages = memo((props: ChatMessagesProps) => {
           <AssistantMessage
             disable={props?.disable}
             message={item}
+            humanMessage={messages?.[index - 1]}
             key={item?.msgId}
             isLastSession={index === messages.length - 1}
             isPendingFirstToken={messageStateStore?.pendingFirstToken as boolean}
