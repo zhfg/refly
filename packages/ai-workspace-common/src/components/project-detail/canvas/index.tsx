@@ -331,6 +331,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
   const processorRef = useRef<TokenStreamProcessor>();
 
   const canvasStore = useCanvasStoreShallow((state) => ({
+    isAiEditing: state.isAiEditing,
     currentCanvas: state.currentCanvas,
     canvasServerStatus: state.canvasServerStatus,
     updateCurrentCanvas: state.updateCurrentCanvas,
@@ -606,6 +607,15 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
     >
       {initContentSelectorElem()}
       <div className="w-full h-full">
+        {canvasStore.isAiEditing && (
+          <div
+            className="absolute inset-0 bg-transparent z-[1000] pointer-events-auto select-none"
+            onMouseDown={(e) => e.preventDefault()}
+            onMouseUp={(e) => e.preventDefault()}
+            onClick={(e) => e.preventDefault()}
+            onDoubleClick={(e) => e.preventDefault()}
+          />
+        )}
         <EditorRoot>
           <EditorContent
             extensions={extensions}

@@ -34,6 +34,7 @@ interface CanvasBaseState {
   currentCanvas: Canvas | null;
   isRequesting: boolean;
   newCanvasCreating: boolean;
+  isAiEditing: boolean;
 
   // tabs
   tabs: CanvasTab[];
@@ -54,6 +55,7 @@ interface CanvasBaseState {
   updateCurrentCanvas: (canvas: Canvas) => void;
   updateIsRequesting: (isRequesting: boolean) => void;
   updateNewCanvasCreating: (creating: boolean) => void;
+  updateIsAiEditing: (editing: boolean) => void;
   updateTabs: (tabs: CanvasTab[]) => void;
   updateActiveTab: (key: string) => void;
   updateCanvasPanelVisible: (visible: boolean) => void;
@@ -75,6 +77,7 @@ export const defaultState = {
   canvasPanelVisible: false,
   isRequesting: false,
   newCanvasCreating: false,
+  isAiEditing: false,
   tocItems: [],
 
   // canvases
@@ -96,6 +99,7 @@ export const useCanvasStore = create<CanvasBaseState>()(
     updateTabs: (tabs: CanvasTab[]) => set((state) => ({ ...state, tabs })),
     updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
     updateNewCanvasCreating: (creating: boolean) => set((state) => ({ ...state, newCanvasCreating: creating })),
+    updateIsAiEditing: (editing: boolean) => set((state) => ({ ...state, isAiEditing: editing })),
 
     // tabs
     updateCanvasPanelVisible: (visible: boolean) => set((state) => ({ ...state, canvasPanelVisible: visible })),
