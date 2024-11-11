@@ -334,14 +334,17 @@
   },
   "resource": {
     "multilingualSearch": {
-      "placeholder": "用您的语言搜索世界",
+      "title": "用您的语言搜索世界",
+      "placeholder": "问 Refly 任何问题...",
       "searchLabel": "搜索语言",
       "displayLabel": "显示语言",
       "selectSearchLanguages": "选择搜索语言",
       "selectDisplayLanguage": "选择显示语言",
       "enableRerank": "启用重排序",
       "searchLocales": "搜索语言",
-      "displayLocale": "显示语言"
+      "displayLocale": "显示语言",
+      "searchResults": "搜索结果",
+      "search": "搜索"
     },
     "import": {
       "title": "资源集成",

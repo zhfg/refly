@@ -334,14 +334,17 @@
   },
   "resource": {
     "multilingualSearch": {
-      "placeholder": "Search the world in your own language",
+      "title": "Search the world in your own language",
+      "placeholder": "Ask Refly anything...",
       "searchLabel": "Search Language",
       "displayLabel": "Display Language",
       "selectSearchLanguages": "Select Search Languages",
       "selectDisplayLanguage": "Select Display Language",
       "enableRerank": "Enable Rerank",
       "searchLocales": "Search Language",
-      "displayLocale": "Display Language"
+      "displayLocale": "Display Language",
+      "searchResults": "Search Results",
+      "search": "Search"
     },
     "import": {
       "title": "Resource Integration",

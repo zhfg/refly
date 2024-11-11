@@ -105,7 +105,7 @@ export const ImportFromText = () => {
             </span>
             <span className="intergration-header-title">{t('resource.import.fromText')}</span>
           </div>
-          <Divider />
+          <Divider style={{ marginTop: 10, marginBottom: 10 }} />
           <div className="intergation-body">
             <div className="intergation-body-action">
               <Form>

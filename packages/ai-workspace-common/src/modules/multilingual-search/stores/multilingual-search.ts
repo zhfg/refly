@@ -27,6 +27,8 @@ const defaultLocales: SearchLocale[] = [
   { code: 'fa', name: 'Persian' },
 ];
 
+export type SearchPageState = 'home' | 'results';
+
 const defaultSelectedLocales = ['en', 'zh-CN', 'ja'];
 
 export interface SearchLocale {
@@ -57,6 +59,11 @@ export interface SearchState {
   setProcessingStep: () => void;
   setResults: (results: Source[]) => void;
   resetSearch: () => void;
+
+  pageState: SearchPageState;
+  setPageState: (state: SearchPageState) => void;
+
+  resetAll: () => void;
 }
 
 export const useMultilingualSearchStore = create<SearchState>((set) => ({
@@ -103,6 +110,22 @@ export const useMultilingualSearchStore = create<SearchState>((set) => ({
       searchProgress: 0,
       searchSteps: [],
       results: [],
+    }),
+
+  pageState: 'home',
+  setPageState: (state) => set({ pageState: state }),
+
+  resetAll: () =>
+    set({
+      query: '',
+      searchLocales: defaultLocales.filter((locale) => defaultSelectedLocales.includes(locale.code)),
+      outputLocale: { code: 'auto', name: 'Auto' },
+      isSearching: false,
+      searchProgress: 0,
+      searchSteps: [],
+      results: [],
+      selectedItems: [],
+      pageState: 'home',
     }),
 }));
 
