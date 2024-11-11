@@ -6,6 +6,7 @@ import {
   countResourceTokens,
   countToken,
   countWebSearchContextTokens,
+  checkHasContext,
 } from './token';
 import { ModelContextLimitMap } from './token';
 import {
@@ -150,6 +151,15 @@ export async function prepareContext(
 
   ctx.ctxThis.engine.logger.log(`Prepared Lower Priority after deduplication! ${safeStringifyJSON(mergedContext)}`);
 
+  const hasMentionedContext = checkHasContext(processedMentionedContext);
+  const hasLowerPriorityContext = checkHasContext(deduplicatedLowerPriorityContext);
+
+  // may optimize web search sources by context
+  const LIMIT_WEB_SEARCH_SOURCES_COUNT = 10;
+  if (hasMentionedContext || hasLowerPriorityContext) {
+    mergedContext.webSearchSources = mergedContext.webSearchSources.slice(0, LIMIT_WEB_SEARCH_SOURCES_COUNT);
+  }
+
   // TODO: need add rerank here
   const contextStr = concatMergedContextToStr(mergedContext);
   const sources = flattenMergedContextToSources(mergedContext);
@@ -219,7 +229,7 @@ export async function prepareWebSearchContext(
       enableRerank,
       enableTranslateQuery,
       enableTranslateResult: false,
-      rerankRelevanceThreshold: 0.1,
+      rerankRelevanceThreshold: 0.2,
       translateConcurrencyLimit: 10,
       webSearchConcurrencyLimit: 3,
       batchSize: 5,
@@ -233,7 +243,7 @@ export async function prepareWebSearchContext(
   );
 
   // Take only first 10 sources
-  const webSearchSources = (searchResult.sources || []).slice(0, 10);
+  const webSearchSources = searchResult.sources || [];
 
   processedWebSearchContext.webSearchSources = webSearchSources;
 

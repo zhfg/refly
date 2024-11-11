@@ -1,6 +1,6 @@
 import { SkillRunnableConfig, BaseSkill } from '../../../base';
 import { GraphState } from '../../types';
-import { TimeTracker } from '@refly-packages/utils';
+import { deduplicateSourcesByTitle, TimeTracker } from '@refly-packages/utils';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
 import { Source } from '@refly-packages/openapi-schema';
 
@@ -93,7 +93,7 @@ export const callMultiLingualWebSearch = async (
   const enableTranslateResult = params.enableTranslateResult || false;
   const searchLimit = params.searchLimit || 10;
   const rerankRelevanceThreshold = params.rerankRelevanceThreshold || 0.1;
-  const rerankLimit = params.rerankLimit || 10;
+  const rerankLimit = params.rerankLimit;
   const translateConcurrencyLimit = params.translateConcurrencyLimit || 10;
   const webSearchConcurrencyLimit = params.webSearchConcurrencyLimit || 3;
   const batchSize = params.batchSize || 5;
@@ -394,6 +394,13 @@ export const callMultiLingualWebSearch = async (
       },
       config,
     );
+
+    engine.logger.log(`Reranked results count: before: ${finalResults.length}`);
+
+    // Deduplicate sources by title
+    finalResults = deduplicateSourcesByTitle(finalResults);
+
+    engine.logger.log(`Deduplicated results count: ${finalResults.length}`);
 
     ctxThis.emitEvent(
       {

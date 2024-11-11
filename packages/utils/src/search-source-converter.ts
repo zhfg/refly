@@ -92,3 +92,26 @@ export const searchResultsToSources = (results: SearchResult[]): Source[] => {
     } as any as SourceMeta,
   }));
 };
+
+// Add new function to deduplicate sources by title
+export const deduplicateSourcesByTitle = (sources: Source[]): Source[] => {
+  const titleMap = new Map<string, Source>();
+
+  sources.forEach((source) => {
+    const normalizedTitle = source.title?.trim().toLowerCase() || '';
+
+    // Skip empty titles
+    if (!normalizedTitle) return;
+
+    // If title exists, only replace if current source has higher score
+    if (!titleMap.has(normalizedTitle) || (source.score || 0) > (titleMap.get(normalizedTitle)!.score || 0)) {
+      titleMap.set(normalizedTitle, source);
+    }
+  });
+
+  // Keep sources with unique titles and any sources without titles
+  return sources.filter((source) => {
+    const normalizedTitle = source.title?.trim().toLowerCase() || '';
+    return !normalizedTitle || titleMap.get(normalizedTitle) === source;
+  });
+};
