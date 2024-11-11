@@ -23,10 +23,12 @@ export const ProjectDetail = () => {
     setCurrentProjectId,
     fetchProjectAll,
     copilotSize,
+    isCopilotFullScreen,
     setCopilotSize,
     setProjectActiveConvId,
     fetchProjectDirItems,
   } = useProjectStoreShallow((state) => ({
+    isCopilotFullScreen: state.isCopilotFullScreen,
     copilotSize: state.copilotSize,
     setCurrentProjectId: state.setCurrentProjectId,
     fetchProjectAll: state.fetchProjectAll,
@@ -43,6 +45,9 @@ export const ProjectDetail = () => {
   const activeTab = tabs.find((x) => x.key === activeTabMap[projectId]);
 
   const [bindResourceModalVisible, setBindResourceModalVisible] = useState(false);
+
+  const [directorySize, setDirectorySize] = useState(300);
+  const [contentSize, setContentSize] = useState(450);
 
   const setInitialTab = async () => {
     const currentCanvases = useProjectStore.getState().canvases.data;
@@ -108,26 +113,51 @@ export const ProjectDetail = () => {
     }
   }, [convId]);
 
+  useEffect(() => {
+    if (isCopilotFullScreen) {
+      requestAnimationFrame(() => {
+        setDirectorySize(0);
+        setContentSize(0);
+      });
+    } else {
+      requestAnimationFrame(() => {
+        setDirectorySize(300);
+        setContentSize(450);
+      });
+    }
+  }, [isCopilotFullScreen]);
+
   return (
     <ProjectProvider context={{ projectId }}>
       <div className="project-detail-container overflow-hidden">
         <Splitter
           layout="horizontal"
           className="workspace-panel-container"
-          onResize={(size) => setCopilotSize(size[2])}
+          onResize={(size) => {
+            setDirectorySize(size[0]);
+            setContentSize(size[1]);
+            setCopilotSize(size[2]);
+          }}
         >
           <Splitter.Panel
             collapsible
-            defaultSize={300}
+            size={directorySize}
             min={300}
             className="workspace-left-assist-panel"
             key="workspace-left-assist-panel"
           >
             <ProjectDirectory projectId={projectId} setBindResourceModalVisible={setBindResourceModalVisible} />
           </Splitter.Panel>
-          <Splitter.Panel min={450} className="workspace-content-panel" key="workspace-content-panel-content">
+
+          <Splitter.Panel
+            size={contentSize}
+            min={450}
+            className="workspace-content-panel"
+            key="workspace-content-panel-content"
+          >
             <ContentArea projectId={projectId} setBindResourceModalVisible={setBindResourceModalVisible} />
           </Splitter.Panel>
+
           <Splitter.Panel
             collapsible
             className="workspace-content-panel"

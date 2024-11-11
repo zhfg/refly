@@ -322,7 +322,9 @@
       "searchOrOpenNote": "搜索或打开稿布",
       "searchOrOpenThread": "搜索或打开会话",
       "openThreadHistory": "打开会话历史",
-      "newThread": "新建会话"
+      "newThread": "新建会话",
+      "fullScreen": "全屏",
+      "exitFullScreen": "退出全屏"
     }
   },
   "canvas": {

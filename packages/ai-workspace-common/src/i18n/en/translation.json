@@ -322,7 +322,9 @@
       "searchOrOpenNote": "Search or open canvas",
       "searchOrOpenThread": "Search or open thread",
       "openThreadHistory": "Open Thread History",
-      "newThread": "New Thread"
+      "newThread": "New Thread",
+      "fullScreen": "Full Screen",
+      "exitFullScreen": "Exit Full Screen"
     }
   },
   "canvas": {

@@ -2,6 +2,18 @@
   height: 100%;
   position: relative;
 
+  .workspace-panel-container {
+    // 修改 transition 属性，确保包含 width 和 transform
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: width, transform; // 添加 will-change 提高性能
+
+    .workspace-left-assist-panel,
+    .workspace-content-panel {
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      will-change: width, transform;
+    }
+  }
+
   .arco-drawer-content {
     padding: 0;
   }

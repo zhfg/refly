@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Button, Tooltip } from 'antd';
 
+import { RiFullscreenFill, RiFullscreenExitLine } from 'react-icons/ri';
 import { IconClose, IconHistory, IconPlus } from '@arco-design/web-react/icon';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
@@ -69,6 +71,8 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
   }));
   const projectStore = useProjectStoreShallow((state) => ({
     project: state.project,
+    isCopilotFullScreen: state.isCopilotFullScreen,
+    setIsCopilotFullScreen: state.setIsCopilotFullScreen,
   }));
 
   const handleNewTempConv = () => {
@@ -96,6 +100,12 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
     knowledgeBaseStore.updateConvModalVisible(true);
   };
 
+  useEffect(() => {
+    return () => {
+      projectStore.setIsCopilotFullScreen(false);
+    };
+  }, []);
+
   return (
     <div className="knowledge-base-detail-header">
       {!disable && (
@@ -122,6 +132,26 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
             ) : null}
           </div>
           <div className="knowledge-base-detail-navigation-bar">
+            {source === MessageIntentSource.Project && (
+              <Tooltip
+                title={t(`knowledgeBase.header.${projectStore.isCopilotFullScreen ? 'exitFullScreen' : 'fullScreen'}`)}
+                getPopupContainer={getPopupContainer}
+              >
+                <Button
+                  icon={
+                    projectStore.isCopilotFullScreen ? (
+                      <RiFullscreenExitLine className="text-green-600 flex items-center" />
+                    ) : (
+                      <RiFullscreenFill className="text-green-600 flex items-center" />
+                    )
+                  }
+                  type="text"
+                  onClick={() => {
+                    projectStore.setIsCopilotFullScreen(!projectStore.isCopilotFullScreen);
+                  }}
+                ></Button>
+              </Tooltip>
+            )}
             <Tooltip
               key="threadHistory"
               title={t('knowledgeBase.header.openThreadHistory')}
