@@ -11,11 +11,16 @@ import {
   User,
   WebSearchRequest,
   WebSearchResult,
+  MultiLingualWebSearchRequest,
+  BatchWebSearchRequest,
+  Source,
+  SearchStep,
 } from '@refly-packages/openapi-schema';
 import { RAGService } from '@/rag/rag.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
-import { LOCALE } from '@refly-packages/common-types';
 import { ParamsError } from '@refly-packages/errors';
+import { TimeTracker } from '@refly-packages/utils';
+import { searchResultsToSources, sourcesToSearchResults } from '@refly-packages/utils';
 
 interface ProcessedSearchRequest extends SearchRequest {
   user?: User; // search user on behalf of
@@ -23,6 +28,50 @@ interface ProcessedSearchRequest extends SearchRequest {
 
 interface UserEntity extends Entity {
   user: User;
+}
+
+// Add interface for better type safety
+interface SerperSearchResult {
+  searchParameters: {
+    q: string;
+    hl: string;
+    type: string;
+    num: number;
+    location: string;
+    engine: string;
+    gl: string;
+  };
+  organic: Array<{
+    title: string;
+    link: string;
+    snippet: string;
+    sitelinks?: { title: string; link: string }[];
+    position: number;
+  }>;
+  knowledgeGraph?: {
+    title: string;
+    type: string;
+    description?: string;
+    descriptionUrl?: string;
+    website?: string;
+    imageUrl?: string;
+    attributes?: Record<string, string>;
+  };
+  answerBox?: {
+    title?: string;
+    url?: string;
+    snippet?: string;
+    answer?: string;
+  };
+  peopleAlsoAsk?: Array<{
+    question: string;
+    link: string;
+    snippet: string;
+    title: string;
+  }>;
+  relatedSearches?: Array<{
+    query: string;
+  }>;
 }
 
 @Injectable()
@@ -536,18 +585,20 @@ export class SearchService {
     }));
   }
 
-  async webSearch(user: User, req: WebSearchRequest): Promise<WebSearchResult[]> {
-    const { query, limit = 8 } = req;
-    const locale = user.outputLocale || LOCALE.EN;
+  async webSearch(
+    user: User,
+    req: WebSearchRequest | BatchWebSearchRequest,
+  ): Promise<WebSearchResult[]> {
+    const limit = req?.limit || 10;
 
-    let jsonContent: any = [];
     try {
-      const queryPayload = JSON.stringify({
-        q: query,
+      const queries = 'queries' in req ? req.queries : [req];
+      const queryPayload = queries.map((query) => ({
+        ...query,
         num: limit,
-        hl: locale.toLocaleLowerCase(),
-        gl: locale.toLocaleLowerCase() === LOCALE.ZH_CN.toLocaleLowerCase() ? 'cn' : 'us',
-      });
+        gl: 'us', // TODO: support multiple locales
+        location: 'United States', // TODO: support multiple locations
+      }));
 
       const res = await fetch('https://google.serper.dev/search', {
         method: 'post',
@@ -555,49 +606,78 @@ export class SearchService {
           'X-API-KEY': this.configService.get('credentials.serper'),
           'Content-Type': 'application/json',
         },
-        body: queryPayload,
+        body: JSON.stringify(queryPayload),
       });
-      jsonContent = await res.json();
 
-      // convert to the same format as bing/google
-      const contexts: WebSearchResult[] = [];
-      if (jsonContent.hasOwnProperty('knowledgeGraph')) {
-        const url = jsonContent.knowledgeGraph.descriptionUrl || jsonContent.knowledgeGraph.website;
-        const snippet = jsonContent.knowledgeGraph.description;
-        if (url && snippet) {
-          contexts.push({
-            name: jsonContent.knowledgeGraph.title || '',
-            url: url,
-            snippet: snippet,
-          });
-        }
-      }
+      const jsonContent = await res.json();
+      const results = this.parseSearchResults(jsonContent);
 
-      if (jsonContent.hasOwnProperty('answerBox')) {
-        const url = jsonContent.answerBox.url;
-        const snippet = jsonContent.answerBox.snippet || jsonContent.answerBox.answer;
-        if (url && snippet) {
-          contexts.push({
-            name: jsonContent.answerBox.title || '',
-            url: url,
-            snippet: snippet,
-          });
-        }
-      }
-      if (jsonContent.hasOwnProperty('organic')) {
-        for (const c of jsonContent.organic) {
-          contexts.push({
-            name: c.title,
-            url: c.link,
-            snippet: c.snippet || '',
-          });
-        }
-      }
-      return contexts.slice(0, limit);
+      return 'queries' in req ? results : results?.slice(0, limit);
     } catch (e) {
-      this.logger.error(`onlineSearch error encountered: ${e}`);
+      this.logger.error(`Batch web search error: ${e}`);
       return [];
     }
+  }
+
+  // Helper to parse results consistently
+  private parseSearchResults(jsonContent: any): WebSearchResult[] {
+    const contexts: WebSearchResult[] = [];
+
+    if (Array.isArray(jsonContent)) {
+      // Handle batch results
+      for (const result of jsonContent) {
+        contexts.push(...this.parseSingleSearchResult(result));
+      }
+    } else {
+      // Handle single result
+      contexts.push(...this.parseSingleSearchResult(jsonContent));
+    }
+
+    return contexts;
+  }
+
+  private parseSingleSearchResult(result: SerperSearchResult): WebSearchResult[] {
+    const contexts: WebSearchResult[] = [];
+    const searchLocale = result.searchParameters?.hl || 'unknown';
+
+    if (result.knowledgeGraph) {
+      const url = result.knowledgeGraph.descriptionUrl || result.knowledgeGraph.website;
+      const snippet = result.knowledgeGraph.description;
+      if (url && snippet) {
+        contexts.push({
+          name: result.knowledgeGraph.title || '',
+          url,
+          snippet,
+          locale: searchLocale,
+        });
+      }
+    }
+
+    if (result.answerBox) {
+      const url = result.answerBox.url;
+      const snippet = result.answerBox.snippet || result.answerBox.answer;
+      if (url && snippet) {
+        contexts.push({
+          name: result.answerBox.title || '',
+          url,
+          snippet,
+          locale: searchLocale,
+        });
+      }
+    }
+
+    if (result.organic) {
+      for (const c of result.organic) {
+        contexts.push({
+          name: c.title,
+          url: c.link,
+          snippet: c.snippet || '',
+          locale: searchLocale,
+        });
+      }
+    }
+
+    return contexts;
   }
 
   async search(user: User, req: SearchRequest, options?: SearchOptions): Promise<SearchResult[]> {
@@ -632,5 +712,107 @@ export class SearchService {
     }
 
     return results.flat();
+  }
+
+  async multiLingualWebSearch(
+    user: User,
+    req: MultiLingualWebSearchRequest,
+  ): Promise<{ sources: Source[]; searchSteps: SearchStep[] }> {
+    const {
+      query,
+      searchLocaleList = ['en', 'zh-CN'],
+      searchLimit = 10,
+      enableRerank = false,
+      rerankLimit,
+      rerankRelevanceThreshold = 0.1,
+    } = req;
+
+    const timeTracker = new TimeTracker();
+    let finalResults: Source[] = [];
+    const searchSteps: SearchStep[] = [];
+
+    try {
+      // Step 1: Prepare queries for each locale
+      const queries = searchLocaleList.map((locale) => ({
+        q: query,
+        hl: locale,
+      }));
+
+      // Step 2: Perform web search
+      timeTracker.startStep('webSearch');
+      const searchResults = await this.webSearch(user, {
+        queries,
+        limit: searchLimit,
+      });
+      const webSearchDuration = timeTracker.endStep('webSearch');
+      this.logger.log(`Web search completed in ${webSearchDuration}ms`);
+
+      searchSteps.push({
+        step: 'webSearch',
+        duration: webSearchDuration,
+        result: {
+          length: searchResults?.length,
+          localeLength: searchLocaleList?.length,
+        },
+      });
+
+      // Convert to Source format
+      finalResults = searchResults.map((result) => ({
+        url: result.url,
+        title: result.name,
+        pageContent: result.snippet,
+        metadata: {
+          originalLocale: result?.locale || 'unknown',
+        },
+      }));
+
+      if (enableRerank) {
+        // Step 3: Rerank results if enabled
+        timeTracker.startStep('rerank');
+        try {
+          const rerankResults = sourcesToSearchResults(finalResults);
+
+          const rerankResponse = await this.rag.rerank(query, rerankResults, {
+            topN: rerankLimit || rerankResults.length,
+            relevanceThreshold: rerankRelevanceThreshold,
+          });
+
+          finalResults = searchResultsToSources(rerankResponse);
+
+          this.logger.log(`Reranked results count: ${finalResults.length}`);
+        } catch (error) {
+          this.logger.error(`Error in reranking: ${error.stack}`);
+          // Fallback to non-reranked results
+        }
+        const rerankDuration = timeTracker.endStep('rerank');
+        this.logger.log(`Rerank completed in ${rerankDuration}ms`);
+
+        searchSteps.push({
+          step: 'rerank',
+          duration: rerankDuration,
+          result: {
+            length: finalResults?.length,
+          },
+        });
+      }
+
+      const stepSummary = timeTracker.getSummary();
+      const totalDuration = stepSummary.totalDuration;
+      this.logger.log(`Total duration: ${totalDuration}ms`);
+
+      searchSteps.push({
+        step: 'finish',
+        duration: totalDuration,
+        result: {},
+      });
+
+      return {
+        sources: finalResults,
+        searchSteps,
+      };
+    } catch (error) {
+      this.logger.error(`Error in multilingual web search: ${error.stack}`);
+      throw error;
+    }
   }
 }

@@ -201,6 +201,10 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                   console.log('val', val);
                   setInputValue(val);
                 }}
+                style={{
+                  borderRadius: 8,
+                  resize: 'none',
+                }}
                 onKeyDown={handleKeyDown}
                 autoFocus
                 className={cn(

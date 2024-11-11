@@ -13,6 +13,7 @@ export enum MessageIntentSource {
   Canvas = 'canvas', // for edit and qa
   Search = 'search', // for qa
   AISelector = 'aiSelector', // for editor
+  MultilingualSearch = 'multilingualSearch', // for multilingual search
 }
 
 export interface NavigationContext {

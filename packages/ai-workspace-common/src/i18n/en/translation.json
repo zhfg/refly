@@ -333,9 +333,21 @@
     }
   },
   "resource": {
+    "multilingualSearch": {
+      "placeholder": "Search the world in your own language",
+      "searchLabel": "Search Language",
+      "displayLabel": "Display Language",
+      "selectSearchLanguages": "Select Search Languages",
+      "selectDisplayLanguage": "Select Display Language",
+      "enableRerank": "Enable Rerank",
+      "searchLocales": "Search Language",
+      "displayLocale": "Display Language"
+    },
     "import": {
       "title": "Resource Integration",
-      "fromWeblink": "Web Link",
+      "fromWebSearch": "Web Search",
+      "fromWeblink": "Paste Weblink",
+      "selectAll": "Select All",
       "webLinkPlaceholer": "Enter or paste valid web links, one per line...",
       "fromText": "Copy Text",
       "linkFormatError": "Please enter a valid web link starting with http or https",
@@ -1048,6 +1060,11 @@
       "enable": "Enable",
       "disable": "Disable"
     },
+    "deepReasonWebSearch": {
+      "title": "Enable Deep Reason Web Search",
+      "enable": "Enable",
+      "disable": "Disable"
+    },
     "tokenUsage": "Input {{inputCount}}, Output {{outputCount}}",
     "reflyAssistant": "Knowledge Curator",
     "message": {
@@ -1096,7 +1113,9 @@
       "moreSources": "View More {{count}} Sources",
       "searchPlaceholder": "Search Sources...",
       "openOriginWebsite": "Open Origin Website",
-      "openKnowledgeBaseLink": "Open Knowledge Base Link"
+      "openKnowledgeBaseLink": "Open Knowledge Base Link",
+      "webSearchTab": "Web Search",
+      "libraryTab": "Library Search"
     }
   },
   "hooks": {

@@ -1,0 +1,27 @@
+.action-menu {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+
+  .action-menu-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .selected-count {
+      color: var(--color-text-2);
+      margin-right: 16px;
+    }
+
+    .project-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .kg-selector {
+        width: 200px;
+      }
+    }
+  }
+}

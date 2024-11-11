@@ -711,7 +711,36 @@ export type SourceMeta = {
    * Related entity type
    */
   entityType?: string;
+  /**
+   * Original locale
+   */
+  originalLocale?: string;
+  /**
+   * Translated display locale
+   */
+  translatedDisplayLocale?: string;
+  /**
+   * Whether the source is translated
+   */
+  isTranslated?: boolean;
+  /**
+   * Original query
+   */
+  originalQuery?: string;
+  /**
+   * Translated query
+   */
+  translatedQuery?: string;
+  /**
+   * Source type
+   */
+  sourceType?: 'webSearch' | 'library';
 };
+
+/**
+ * Source type
+ */
+export type sourceType = 'webSearch' | 'library';
 
 /**
  * Source selection
@@ -765,6 +794,26 @@ export type Source = {
    * Source selections
    */
   selections?: Array<SourceSelection>;
+};
+
+/**
+ * Search step
+ */
+export type SearchStep = {
+  /**
+   * Search step name
+   */
+  step?: string;
+  /**
+   * Step duration in milliseconds
+   */
+  duration?: number;
+  /**
+   * Step-specific result data
+   */
+  result?: {
+    [key: string]: unknown;
+  };
 };
 
 /**
@@ -2145,17 +2194,71 @@ export type GetSubscriptionUsageResponse = BaseResponse & {
 
 export type WebSearchRequest = {
   /**
-   * Web search query
+   * Search query
    */
-  query?: string;
+  q?: string;
   /**
-   * Web search locale
+   * Language/locale code
    */
-  locale?: string;
+  hl?: string;
   /**
    * Web search result limit
    */
   limit?: number;
+};
+
+export type BatchWebSearchRequest = {
+  /**
+   * Web search result limit
+   */
+  limit?: number;
+  /**
+   * Web search queries
+   */
+  queries?: Array<WebSearchRequest>;
+};
+
+export type MultiLingualWebSearchRequest = {
+  /**
+   * Search query
+   */
+  query: string;
+  /**
+   * List of search locales
+   */
+  searchLocaleList: Array<string>;
+  /**
+   * Web search result limit per locale
+   */
+  searchLimit?: number;
+  /**
+   * Whether to enable reranking of search results
+   */
+  enableRerank?: boolean;
+  /**
+   * Limit for reranked results
+   */
+  rerankLimit?: number;
+  /**
+   * Relevance threshold for reranking
+   */
+  rerankRelevanceThreshold?: number;
+};
+
+export type MultiLingualWebSearchResponse = BaseResponse & {
+  /**
+   * Multilingual web search results
+   */
+  data?: {
+    /**
+     * Search result sources
+     */
+    sources: Array<Source>;
+    /**
+     * Search steps
+     */
+    searchSteps: Array<SearchStep>;
+  };
 };
 
 export type WebSearchResult = {
@@ -2171,6 +2274,10 @@ export type WebSearchResult = {
    * Web search result snippet
    */
   snippet?: string;
+  /**
+   * Web search result locale
+   */
+  locale?: string;
 };
 
 export type WebSearchResponse = BaseResponse & {
@@ -2178,6 +2285,13 @@ export type WebSearchResponse = BaseResponse & {
    * Web search results
    */
   data?: Array<WebSearchResult>;
+};
+
+export type RerankResponse = BaseResponse & {
+  /**
+   * Reranked results
+   */
+  data?: Array<SearchResult>;
 };
 
 /**
@@ -2264,6 +2378,10 @@ export type SearchResult = {
    * Search result content list with highlight marks
    */
   snippets?: Array<SearchResultSnippet>;
+  /**
+   * Search result relevance score
+   */
+  relevanceScore?: number;
   /**
    * Search result metadata
    */
@@ -3108,6 +3226,14 @@ export type SearchResponse2 = SearchResponse;
 
 export type SearchError = unknown;
 
+export type MultiLingualWebSearchData = {
+  body: MultiLingualWebSearchRequest;
+};
+
+export type MultiLingualWebSearchResponse2 = MultiLingualWebSearchResponse;
+
+export type MultiLingualWebSearchError = unknown;
+
 export type ScrapeData = {
   body: ScrapeWeblinkRequest;
 };
@@ -3766,6 +3892,17 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': SearchResponse;
+      };
+    };
+  };
+  '/search/multilingualSearch': {
+    post: {
+      req: MultiLingualWebSearchData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': MultiLingualWebSearchResponse;
       };
     };
   };

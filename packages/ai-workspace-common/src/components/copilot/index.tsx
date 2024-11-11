@@ -45,6 +45,8 @@ export const AICopilot = memo((props: AICopilotProps) => {
   const queryConvId = searchParams.get('convId');
   const { convId: pathConvId } = useParams();
   const convId = queryConvId || pathConvId;
+  const runtime = getRuntime();
+  const isWeb = runtime === 'web';
 
   const location = useLocation();
 
@@ -52,12 +54,11 @@ export const AICopilot = memo((props: AICopilotProps) => {
     resourcePanelVisible: state.resourcePanelVisible,
     kbModalVisible: state.kbModalVisible,
     actionSource: state.actionSource,
-    tempConvResources: state.tempConvResources,
     updateConvModalVisible: state.updateConvModalVisible,
     updateResourcePanelVisible: state.updateResourcePanelVisible,
     currentKnowledgeBase: state.currentKnowledgeBase,
     convModalVisible: state.convModalVisible,
-    sourceListModalVisible: state.sourceListModalVisible,
+    sourceListDrawerVisible: state.sourceListDrawer.visible,
   }));
 
   const contextPanelStore = useContextPanelStore((state) => ({
@@ -219,12 +220,8 @@ export const AICopilot = memo((props: AICopilotProps) => {
       {knowledgeBaseStore?.convModalVisible ? (
         <ConvListModal source={source} title={t('copilot.convListModal.title')} classNames="conv-list-modal" />
       ) : null}
-      {knowledgeBaseStore?.sourceListModalVisible ? (
-        <SourceListModal
-          title={`${t('copilot.sourceListModal.title')} (${knowledgeBaseStore?.tempConvResources?.length || 0})`}
-          classNames="source-list-modal"
-          resources={knowledgeBaseStore?.tempConvResources || []}
-        />
+      {knowledgeBaseStore?.sourceListDrawerVisible && !isWeb ? (
+        <SourceListModal classNames="source-list-modal" />
       ) : null}
 
       <SkillManagementModal />

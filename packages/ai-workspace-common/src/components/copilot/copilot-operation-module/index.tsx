@@ -63,6 +63,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       selectedProject,
       enableWebSearch,
       enableAutoImportWebResource,
+      enableDeepReasonWebSearch,
       enableKnowledgeBaseSearch,
     } = useChatStore.getState();
     const finalProjectId = selectedProject?.projectId || projectId;
@@ -90,6 +91,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       },
       enableWebSearch,
       enableAutoImportWebResource,
+      enableDeepReasonWebSearch,
       enableKnowledgeBaseSearch,
       env: {
         runtime: getRuntime(),

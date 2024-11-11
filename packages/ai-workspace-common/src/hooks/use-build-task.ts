@@ -32,6 +32,10 @@ import { getCanvasContent } from '@refly-packages/ai-workspace-common/components
 // hooks
 import { IntentResult, useHandleAICanvas } from './use-handle-ai-canvas';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import {
+  useMultilingualSearchStore,
+  useMultilingualSearchStoreShallow,
+} from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
 
 const globalStreamingChatPortRef = { current: null as Runtime.Port | null };
 const globalAbortControllerRef = { current: null as AbortController | null };
@@ -53,6 +57,11 @@ export const useBuildTask = () => {
   const conversationStore = useConversationStoreShallow((state) => ({
     setCurrentConversation: state.setCurrentConversation,
     currentConversation: state.currentConversation,
+  }));
+  const multilingualSearchStore = useMultilingualSearchStoreShallow((state) => ({
+    addSearchStep: state.addSearchStep,
+    setResults: state.setResults,
+    setProcessingStep: state.setProcessingStep,
   }));
 
   // hooks
@@ -243,7 +252,15 @@ export const useBuildTask = () => {
       return;
     }
 
-    if (['sources', 'relatedQuestions', 'intentMatcher'].includes(skillEvent?.structuredDataKey)) {
+    if (
+      [
+        'sources',
+        'relatedQuestions',
+        'intentMatcher',
+        'multiLingualSearchStepUpdate',
+        'multiLingualSearchResult',
+      ].includes(skillEvent?.structuredDataKey)
+    ) {
       let existingData = lastRelatedMessage.structuredData[skillEvent.structuredDataKey];
       const isObject = (val: unknown): val is Record<string, unknown> =>
         typeof val === 'object' && val !== null && !Array.isArray(val);
@@ -273,6 +290,22 @@ export const useBuildTask = () => {
       handleStructuredDataChange(lastRelatedMessage);
       chatStore.setIntentMatcher(structuredData);
       chatStore.setNewQAText(''); // make sure the chat input is cleaned (we did not clean it in the home page)
+    }
+
+    if (skillEvent?.structuredDataKey === 'multiLingualSearchStepUpdate') {
+      // TODO: 未来实现
+      const step = structuredData?.[0];
+
+      if (step?.step === 'finish') {
+        multilingualSearchStore.addSearchStep(step);
+      } else {
+        // For other steps, add them while keeping the Processing step at the end
+        multilingualSearchStore.addSearchStep(step);
+        multilingualSearchStore.setProcessingStep();
+      }
+    } else if (skillEvent?.structuredDataKey === 'multiLingualSearchResult') {
+      const results = structuredData;
+      multilingualSearchStore.setResults(results);
     }
   };
 

@@ -6,6 +6,7 @@ import {
   countResourceTokens,
   countToken,
   countWebSearchContextTokens,
+  checkHasContext,
 } from './token';
 import { ModelContextLimitMap } from './token';
 import {
@@ -29,6 +30,7 @@ import {
 import { uniqBy } from 'lodash';
 import { MAX_CONTEXT_RATIO } from './constants';
 import { safeStringifyJSON } from '@refly-packages/utils';
+import { callMultiLingualWebSearch } from '../module/multiLingualSearch';
 
 export async function prepareContext(
   {
@@ -36,11 +38,13 @@ export async function prepareContext(
     mentionedContext,
     maxTokens,
     hasContext,
+    outputLocale,
   }: {
     query: string;
     mentionedContext: IContext;
     maxTokens: number;
     hasContext: boolean;
+    outputLocale: string;
   },
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<string> {
@@ -67,6 +71,7 @@ export async function prepareContext(
     const preparedRes = await prepareWebSearchContext(
       {
         query,
+        outputLocale,
       },
       ctx,
     );
@@ -149,6 +154,16 @@ export async function prepareContext(
 
   ctx.ctxThis.engine.logger.log(`Prepared Lower Priority after deduplication! ${safeStringifyJSON(mergedContext)}`);
 
+  const hasMentionedContext = checkHasContext(processedMentionedContext);
+  const hasLowerPriorityContext = checkHasContext(deduplicatedLowerPriorityContext);
+
+  // may optimize web search sources by context
+  const LIMIT_WEB_SEARCH_SOURCES_COUNT = 10;
+  if (hasMentionedContext || hasLowerPriorityContext) {
+    mergedContext.webSearchSources = mergedContext.webSearchSources.slice(0, LIMIT_WEB_SEARCH_SOURCES_COUNT);
+  }
+
+  // TODO: need add rerank here
   const contextStr = concatMergedContextToStr(mergedContext);
   const sources = flattenMergedContextToSources(mergedContext);
 
@@ -172,12 +187,13 @@ export async function prepareContext(
   return contextStr;
 }
 
-// TODO: should be agentic search: 1. query split 2. atom query rewrite 3. multi-round search 4. reflection 5. end? -> iterative search
 export async function prepareWebSearchContext(
   {
     query,
+    outputLocale,
   }: {
     query: string;
+    outputLocale: string;
   },
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<{
@@ -186,21 +202,55 @@ export async function prepareWebSearchContext(
   ctx.ctxThis.emitEvent({ event: 'log', content: `Prepare Web Search Context...` }, ctx.config);
   ctx.ctxThis.engine.logger.log(`Prepare Web Search Context...`);
 
+  // two searchMode
+  const enableDeepReasonWebSearch = (ctx.tplConfig?.enableDeepReasonWebSearch?.value as boolean) || false;
+
+  let searchLimit = 10;
+  let searchLocaleListLen = 2;
+  let enableRerank = true;
+  let enableTranslateQuery = false;
+  let searchLocaleList: string[] = ['en'];
+  let rerankRelevanceThreshold = 0.2;
+
+  if (enableDeepReasonWebSearch) {
+    searchLimit = 20;
+    searchLocaleListLen = 3;
+    enableTranslateQuery = true;
+    rerankRelevanceThreshold = 0.4;
+  }
+
   const processedWebSearchContext: IContext = {
     contentList: [],
     resources: [],
     canvases: [],
     webSearchSources: [],
   };
-  const res = await ctx.ctxThis.engine.service.webSearch(ctx.config.user, {
-    query,
-    limit: 10,
-  });
-  const webSearchSources = res.data.map((item) => ({
-    url: item.url,
-    title: item.name,
-    pageContent: item.snippet,
-  }));
+
+  // Call multiLingualWebSearch instead of webSearch
+  const searchResult = await callMultiLingualWebSearch(
+    {
+      searchLimit,
+      searchLocaleList,
+      resultDisplayLocale: outputLocale || 'auto',
+      enableRerank,
+      enableTranslateQuery,
+      enableTranslateResult: false,
+      rerankRelevanceThreshold,
+      translateConcurrencyLimit: 10,
+      webSearchConcurrencyLimit: 3,
+      batchSize: 5,
+      enableDeepReasonWebSearch,
+    },
+    {
+      config: ctx.config,
+      ctxThis: ctx.ctxThis,
+      state: { ...ctx.state, query },
+    },
+  );
+
+  // Take only first 10 sources
+  const webSearchSources = searchResult.sources || [];
+
   processedWebSearchContext.webSearchSources = webSearchSources;
 
   const enableAutoImportWebResource = ctx.tplConfig?.enableAutoImportWebResource?.value;
@@ -222,6 +272,7 @@ export async function prepareWebSearchContext(
     ctx.ctxThis.engine.logger.log(
       `Batch import web search resources res: ${safeStringifyJSON(batchCreateResourceRes)}`,
     );
+    ctx.ctxThis.emitEvent({ event: 'log', content: `Batch import web search resources successfully!` }, ctx.config);
   }
 
   ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared Web Search Context successfully!` }, ctx.config);

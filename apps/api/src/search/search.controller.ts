@@ -1,6 +1,11 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { User as UserModel } from '@prisma/client';
-import { SearchRequest, SearchResponse } from '@refly-packages/openapi-schema';
+import {
+  MultiLingualWebSearchRequest,
+  SearchRequest,
+  SearchResponse,
+  MultiLingualWebSearchResponse,
+} from '@refly-packages/openapi-schema';
 
 import { buildSuccessResponse } from '@/utils';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
@@ -15,5 +20,15 @@ export class SearchController {
   @Post()
   async search(@User() user: UserModel, @Body() body: SearchRequest): Promise<SearchResponse> {
     return buildSuccessResponse(await this.searchService.search(user, body));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/multilingualSearch')
+  async multiLingualWebSearch(
+    @User() user: UserModel,
+    @Body() body: MultiLingualWebSearchRequest,
+  ): Promise<MultiLingualWebSearchResponse> {
+    const result = await this.searchService.multiLingualWebSearch(user, body);
+    return buildSuccessResponse(result);
   }
 }

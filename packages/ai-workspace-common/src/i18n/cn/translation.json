@@ -333,9 +333,21 @@
     }
   },
   "resource": {
+    "multilingualSearch": {
+      "placeholder": "用您的语言搜索世界",
+      "searchLabel": "搜索语言",
+      "displayLabel": "显示语言",
+      "selectSearchLanguages": "选择搜索语言",
+      "selectDisplayLanguage": "选择显示语言",
+      "enableRerank": "启用重排序",
+      "searchLocales": "搜索语言",
+      "displayLocale": "显示语言"
+    },
     "import": {
       "title": "资源集成",
-      "fromWeblink": "网页链接",
+      "fromWebSearch": "全网搜索",
+      "fromWeblink": "粘贴链接",
+      "selectAll": "全选",
       "webLinkPlaceholer": "输入或粘贴有效的网页链接，每行一个....",
       "fromText": "复制文本",
       "linkFormatError": "请输入有效的网页链接，以 http 或 https 开头",
@@ -1061,6 +1073,11 @@
       "enable": "启用",
       "disable": "禁用"
     },
+    "deepReasonWebSearch": {
+      "title": "深度网页搜索",
+      "enable": "启用",
+      "disable": "禁用"
+    },
     "tokenUsage": "输入 {{inputCount}}，输出 {{outputCount}}",
     "reflyAssistant": "知识管家",
     "message": {
@@ -1109,7 +1126,9 @@
       "moreSources": "查看更多 {{count}} 来源",
       "searchPlaceholder": "搜索来源...",
       "openOriginWebsite": "打开来源链接",
-      "openKnowledgeBaseLink": "打开项目链接"
+      "openKnowledgeBaseLink": "打开项目链接",
+      "webSearchTab": "全网搜索",
+      "libraryTab": "知识库搜索"
     }
   },
   "title": "欢迎 {{name}}，使用 react-i18next 完全类型安全的 React",
