@@ -1,9 +1,10 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { LOCALE } from '@refly/common-types';
 import cn from 'classnames';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
-import { Segmented, Skeleton, Button, Divider, Input, Empty } from 'antd';
+import { Segmented, Skeleton, Button, Divider, Input, Empty, Dropdown, Popconfirm, message } from 'antd';
+import type { DropdownProps } from 'antd';
 
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import {
@@ -13,21 +14,24 @@ import {
   useProjectStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/project';
 import { useNewCanvasModalStoreShallow } from '@refly-packages/ai-workspace-common/stores/new-canvas-modal';
+import { useReloadListStateShallow } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
-import { BindResourceModal } from '../resource-view/resource-collection-associative-modal';
+import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
 import { useTranslation } from 'react-i18next';
-import { HiOutlineSearch } from 'react-icons/hi';
+import { HiOutlineSearch, HiFolderRemove } from 'react-icons/hi';
 import { HiOutlinePlus, HiOutlineShare, HiOutlineSparkles } from 'react-icons/hi2';
 import { IconCanvas, IconProject, IconThread } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Favicon } from '@refly-packages/ai-workspace-common/components/common/favicon';
+import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { CanvasMoveModal } from '@refly-packages/ai-workspace-common/components/project-detail/canvas-move-modal';
 
 import {
   DndContext,
@@ -47,6 +51,9 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { LuGripVertical } from 'react-icons/lu';
+import { FiMoreVertical } from 'react-icons/fi';
+import { MdMoveDown } from 'react-icons/md';
+import { RiDeleteBinLine } from 'react-icons/ri';
 import { useDebouncedCallback } from 'use-debounce';
 import { useDebounce } from 'react-use';
 
@@ -71,6 +78,11 @@ export const ProjectDirectory = (props: {
     fetchProjectDirItems: state.fetchProjectDirItems,
   }));
 
+  const { reloadDirectoryResourceList, setReloadDirectoryResourceList } = useReloadListStateShallow((state) => ({
+    reloadDirectoryResourceList: state.reloadDirectoryResourceList,
+    setReloadDirectoryResourceList: state.setReloadDirectoryResourceList,
+  }));
+
   const currentProject = projectStore.project?.data;
   const canvases = projectStore.canvases;
   const resources = projectStore.resources;
@@ -81,7 +93,7 @@ export const ProjectDirectory = (props: {
   }));
 
   const { jumpToCanvas, jumpToResource, jumpToConv } = useJumpNewPath();
-  const { tabsMap, activeTabMap, handleAddTab } = useProjectTabs();
+  const { tabsMap, activeTabMap, handleAddTab, handleDeleteTab } = useProjectTabs();
   const tabs = tabsMap[projectId] || [];
   const activeTab = tabs.find((x) => x.key === activeTabMap[projectId]);
 
@@ -89,6 +101,8 @@ export const ProjectDirectory = (props: {
   const resId = searchParams.get('resId');
   const canvasId = searchParams.get('canvasId');
   const convId = searchParams.get('convId');
+
+  const { addRecentProject } = useHandleRecents();
 
   useEffect(() => {
     if (activeTab?.type === 'canvas' && !canvasId) {
@@ -236,6 +250,7 @@ export const ProjectDirectory = (props: {
   const handleTitleUpdate = async (newTitle: string) => {
     const { project } = useProjectStore.getState();
     const currentProject = project.data;
+    addRecentProject({ ...currentProject, title: newTitle });
 
     // if project title is empty, update it with canvas title
     if (!currentProject?.title || currentProject?.title === 'Untitled') {
@@ -262,19 +277,156 @@ export const ProjectDirectory = (props: {
 
   const SortableItem = ({ item, onItemClick }: { item: ProjectDirListItem; onItemClick: () => void }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id });
-
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
     };
 
+    const itemRef = useRef<HTMLDivElement>(null);
+    const itemClass = 'flex items-center';
+    const iconStyle = { fontSize: 16, marginRight: 8 };
+    const [openMoveCanvasModal, setOpenMoveCanvasModal] = useState(false);
+    const [isActive, setIsActive] = useState<boolean>(false);
+    const [dropdownVisible, setDropdownVisible] = useState(false);
+
+    const handleRemoveCanvas = () => {
+      const canvases = projectStore.canvases?.data?.filter((canvas) => canvas.id !== item.id);
+      if (canvases) {
+        projectStore.setProjectDirItems(projectId, 'canvases', canvases);
+        handleDeleteTab(projectId, item.id);
+      }
+    };
+
+    const handleDeleteCanvas = async () => {
+      const { data } = await getClient().deleteCanvas({ body: { canvasId: item.id } });
+      if (data.success) {
+        message.success(t('workspace.deleteDropdownMenu.successful'));
+        handleRemoveCanvas();
+      }
+    };
+
+    const handleRemoveResource = async () => {
+      const resources = projectStore.resources?.data?.filter((resource) => resource.id !== item.id);
+      if (resources) {
+        projectStore.setProjectDirItems(projectId, 'resources', resources);
+        const projectIds = item?.resourceData?.projectIds || [];
+        projectIds.forEach((projectId) => {
+          handleDeleteTab(projectId, item.id);
+        });
+      }
+    };
+
+    const handleUnbindResource = async () => {
+      const { data } = await getClient().bindProjectResources({
+        body: [{ projectId, operation: 'unbind', resourceId: item.id }],
+      });
+      if (data.success) {
+        message.success(t('workspace.deleteDropdownMenu.unbindSuccessful'));
+        handleRemoveResource();
+      }
+    };
+
+    const handleDeleteResource = async () => {
+      const { data } = await getClient().deleteResource({ body: { resourceId: item.id } });
+      if (data.success) {
+        message.success(t('workspace.deleteDropdownMenu.successful'));
+        handleRemoveResource();
+      }
+    };
+
+    const canvasItems = [
+      {
+        label: (
+          <div
+            className={itemClass}
+            onClick={() => {
+              setDropdownVisible(false);
+              setOpenMoveCanvasModal(true);
+            }}
+          >
+            <MdMoveDown style={iconStyle} />
+            {t('projectDetail.directory.move')}
+          </div>
+        ),
+        key: 'move-to-project',
+      },
+      {
+        label: (
+          <Popconfirm
+            title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas')}
+            onConfirm={handleDeleteCanvas}
+            okText={t('common.confirm')}
+            cancelText={t('common.cancel')}
+          >
+            <div className={`${itemClass} text-red-600`}>
+              <RiDeleteBinLine style={iconStyle} />
+              {t('projectDetail.directory.delete')}
+            </div>
+          </Popconfirm>
+        ),
+        key: 'delete-canvas',
+      },
+    ];
+
+    const resourceItems = [
+      {
+        label: (
+          <Popconfirm
+            title={t('workspace.deleteDropdownMenu.deleteConfirmForResourceProject')}
+            onConfirm={handleUnbindResource}
+            okText={t('common.confirm')}
+            cancelText={t('common.cancel')}
+          >
+            <div className={itemClass}>
+              <HiFolderRemove style={iconStyle} />
+              {t('projectDetail.directory.remove')}
+            </div>
+          </Popconfirm>
+        ),
+        key: 'remove',
+      },
+      {
+        label: (
+          <Popconfirm
+            title={t('workspace.deleteDropdownMenu.deleteConfirmForResource')}
+            onConfirm={handleDeleteResource}
+            okText={t('common.confirm')}
+            cancelText={t('common.cancel')}
+          >
+            <div className={`${itemClass} text-red-600`}>
+              <RiDeleteBinLine style={iconStyle} />
+              {t('projectDetail.directory.delete')}
+            </div>
+          </Popconfirm>
+        ),
+        key: 'delete-resource',
+      },
+    ];
+
+    const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
+      if (info.source === 'trigger') {
+        setDropdownVisible(open);
+      }
+    };
+
+    useEffect(() => {
+      const active = activeTab?.key === item.id || convId === item.id;
+      setIsActive(active);
+      if (active && itemRef.current) {
+        itemRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, [activeTab?.key, convId, item.id]);
+
     return (
       <div
-        ref={setNodeRef}
+        ref={(node) => {
+          setNodeRef(node);
+          if (node) itemRef.current = node;
+        }}
         style={style}
         className={cn(
           'flex items-center p-1 m-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 group',
-          (activeTab?.key === item.id || convId === item.id) && 'bg-gray-100',
+          isActive && 'bg-gray-100',
         )}
       >
         <div className="flex items-center grow" onClick={onItemClick}>
@@ -282,13 +434,14 @@ export const ProjectDirectory = (props: {
             {item.type === 'canvases' ? (
               <IconCanvas />
             ) : item.type === 'resources' ? (
-              <Favicon url={item.url} />
+              <ResourceIcon url={item.url} resourceType={item.resourceData?.resourceType} />
             ) : item.type === 'conversations' ? (
               <IconThread />
             ) : null}
           </div>
           <div>{item.title}</div>
         </div>
+
         {item.type !== 'conversations' && (
           <div
             className="flex invisible items-center text-gray-400 group-hover:visible cursor-grab hover:text-gray-600"
@@ -298,6 +451,30 @@ export const ProjectDirectory = (props: {
             <LuGripVertical />
           </div>
         )}
+        {item.type !== 'conversations' && (
+          <Dropdown
+            open={dropdownVisible}
+            onOpenChange={handleOpenChange}
+            menu={{
+              items: item.type === 'canvases' ? canvasItems : resourceItems,
+            }}
+            trigger={['click']}
+          >
+            <div
+              className="flex justify-center items-center flex-shrink-0 invisible group-hover:visible rounded-md hover:text-[#00968F] hover:bg-gray-200 w-[20px] h-[20px]"
+              onClick={() => setDropdownVisible(true)}
+            >
+              <FiMoreVertical />
+            </div>
+          </Dropdown>
+        )}
+
+        <CanvasMoveModal
+          canvasId={item.id}
+          open={openMoveCanvasModal}
+          setOpen={setOpenMoveCanvasModal}
+          handleMoveCallback={handleRemoveCanvas}
+        />
       </div>
     );
   };
@@ -363,7 +540,7 @@ export const ProjectDirectory = (props: {
   };
 
   useEffect(() => {
-    setFilteredDataList(dataList.filter((item) => item.title.includes(searchVal)));
+    setFilteredDataList(dataList.filter((item) => item.title.toLowerCase().includes(searchVal.toLowerCase())));
   }, [searchVal, dataList]);
 
   useEffect(() => {
@@ -376,6 +553,13 @@ export const ProjectDirectory = (props: {
       return;
     }
   }, [resId, canvasId]);
+
+  useEffect(() => {
+    if (reloadDirectoryResourceList) {
+      debouncedFetchProjectDirItems(projectId, 'resources');
+      setReloadDirectoryResourceList(false);
+    }
+  }, [reloadDirectoryResourceList]);
 
   return (
     <div className="flex flex-col h-full project-detail-directory-container">
@@ -402,7 +586,7 @@ export const ProjectDirectory = (props: {
                   {' · '}
                   <span>
                     {t('knowledgeBase.directory.resourceCount', {
-                      count: resources?.data?.length || 0,
+                      count: (resources?.data?.length || 0) + (canvases?.data?.length || 0),
                     })}
                   </span>
                 </div>

@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/common/prisma.service';
 import {
   Entity,
-  EntityType,
   ResourceMeta,
   ResourceType,
   SearchOptions,
@@ -23,7 +22,13 @@ import { ParamsError } from '@refly-packages/errors';
 import { TimeTracker } from '@refly-packages/utils';
 import { searchResultsToSources, sourcesToSearchResults } from '@refly-packages/utils';
 
-interface ProcessedSearchRequest extends SearchRequest {}
+interface ProcessedSearchRequest extends SearchRequest {
+  user?: User; // search user on behalf of
+}
+
+interface UserEntity extends Entity {
+  user: User;
+}
 
 // Add interface for better type safety
 interface SerperSearchResult {
@@ -80,7 +85,7 @@ export class SearchService {
     private rag: RAGService,
   ) {}
 
-  async preprocessSearchRequest(user: User, req: SearchRequest): Promise<SearchRequest[]> {
+  async preprocessSearchRequest(user: User, req: SearchRequest): Promise<ProcessedSearchRequest[]> {
     req.query = req.query?.trim() || '';
 
     if (!req.limit || req.limit <= 0) {
@@ -98,53 +103,147 @@ export class SearchService {
       req.domains ??= ['resource', 'canvas', 'project', 'conversation', 'skill'];
     }
 
-    const reqList: SearchRequest[] = [];
-
     if (req.entities?.length > 0) {
-      const entities = req.entities.filter((entity) => req.domains.includes(entity.entityType));
-      if (entities.length === 0) {
-        return [];
-      }
-
-      // Add project resources to entities
-      const projectIds = entities
-        .filter((entity) => entity.entityType === 'project')
-        .map((entity) => entity.entityId);
-      if (projectIds.length > 0) {
-        const relations = await this.prisma.projectResourceRelation.findMany({
-          select: { resourceId: true },
-          where: { projectId: { in: projectIds } },
-        });
-        relations.forEach((relation) => {
-          entities.push({
-            entityType: 'resource',
-            entityId: relation.resourceId,
-          });
-        });
-      }
-
-      const entityMap = new Map<EntityType, Set<Entity>>();
-
-      entities.forEach((entity) => {
-        const entitySet = entityMap.get(entity.entityType) || new Set<Entity>();
-        entitySet.add(entity);
-        entityMap.set(entity.entityType, entitySet);
-      });
-
-      entityMap.forEach((entitySet, entityType) => {
-        reqList.push({
-          ...req,
-          domains: [entityType],
-          entities: Array.from(entitySet),
-        });
-      });
-    } else {
-      req.domains.forEach((domain) => {
-        reqList.push({ ...req, domains: [domain] });
-      });
+      return this.groupSearchEntities(user, req);
     }
 
-    return reqList;
+    return req.domains.map((domain) => ({ ...req, domains: [domain] }));
+  }
+
+  /**
+   * Group search entities by user and domain
+   */
+  private async groupSearchEntities(
+    user: User,
+    req: SearchRequest,
+  ): Promise<ProcessedSearchRequest[]> {
+    if (req.entities.length > 20) {
+      throw new ParamsError('Too many entities');
+    }
+
+    const entities = req.entities.filter((entity) =>
+      ['resource', 'canvas', 'project'].includes(entity.entityType),
+    );
+    if (entities.length === 0) {
+      return [];
+    }
+
+    const [resources, canvases, projects] = await Promise.all([
+      this.processResourceEntities(user, entities),
+      this.processCanvasEntities(user, entities),
+      this.processProjectEntities(user, entities),
+    ]);
+    const totalEntities = [...resources, ...canvases, ...projects];
+
+    // Group entities by user.uid and entityType using generic type parameter
+    const groupedEntities = totalEntities.reduce<Record<string, UserEntity[]>>((acc, entity) => {
+      const key = `${entity.user.uid}-${entity.entityType}`;
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(entity);
+      return acc;
+    }, {});
+
+    // Convert grouped entities to ProcessedSearchRequest array
+    return Object.values(groupedEntities).map((entities) => ({
+      ...req,
+      user: entities[0].user,
+      domains: [entities[0].entityType],
+      entities: entities,
+    }));
+  }
+
+  private async processResourceEntities(user: User, entities: Entity[]): Promise<UserEntity[]> {
+    const resourceIds = entities
+      .filter((entity) => entity.entityType === 'resource')
+      .map((entity) => entity.entityId);
+
+    if (resourceIds?.length === 0) {
+      return [];
+    }
+
+    const resources = await this.prisma.resource.findMany({
+      where: { resourceId: { in: resourceIds }, uid: user.uid, deletedAt: null },
+    });
+
+    return (resources ?? []).map((resource) => ({
+      entityType: 'resource',
+      entityId: resource.resourceId,
+      user: user,
+    }));
+  }
+
+  private async processCanvasEntities(user: User, entities: Entity[]): Promise<UserEntity[]> {
+    const canvasIds = entities
+      .filter((entity) => entity.entityType === 'canvas')
+      .map((entity) => entity.entityId);
+
+    if (canvasIds?.length === 0) {
+      return [];
+    }
+
+    const canvases = await this.prisma.canvas.findMany({
+      where: {
+        canvasId: { in: canvasIds },
+        OR: [{ uid: user.uid }, { shareCode: { not: null } }],
+        deletedAt: null,
+      },
+    });
+
+    return (canvases ?? []).map((canvas) => ({
+      entityType: 'canvas',
+      entityId: canvas.canvasId,
+      user: { uid: canvas.uid },
+    }));
+  }
+
+  private async processProjectEntities(user: User, entities: Entity[]): Promise<UserEntity[]> {
+    const projectIds = entities
+      .filter((entity) => entity.entityType === 'project')
+      .map((entity) => entity.entityId);
+
+    if (projectIds?.length === 0) {
+      return [];
+    }
+
+    const projects = await this.prisma.project.findMany({
+      where: {
+        projectId: { in: projectIds },
+        OR: [{ uid: user.uid }, { shareCode: { not: null } }],
+        deletedAt: null,
+      },
+    });
+    const filteredProjectIds = projects.map((project) => project.projectId);
+
+    const [resourceRels, canvasRels] = await this.prisma.$transaction([
+      this.prisma.projectResourceRelation.findMany({
+        select: { resourceId: true, uid: true },
+        where: { projectId: { in: filteredProjectIds } },
+      }),
+      this.prisma.canvas.findMany({
+        select: { canvasId: true, uid: true },
+        where: { projectId: { in: filteredProjectIds }, deletedAt: null },
+      }),
+    ]);
+
+    return [
+      ...projects.map((project) => ({
+        entityType: 'project' as const,
+        entityId: project.projectId,
+        user: { uid: project.uid },
+      })),
+      ...resourceRels.map((rel) => ({
+        entityType: 'resource' as const,
+        entityId: rel.resourceId,
+        user: { uid: rel.uid },
+      })),
+      ...canvasRels.map((rel) => ({
+        entityType: 'canvas' as const,
+        entityId: rel.canvasId,
+        user: { uid: rel.uid },
+      })),
+    ];
   }
 
   async emptySearchResources(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
@@ -183,7 +282,7 @@ export class SearchService {
     user: User,
     req: ProcessedSearchRequest,
   ): Promise<SearchResult[]> {
-    const hits = await this.elasticsearch.searchResources(user, req);
+    const hits = await this.elasticsearch.searchResources(req.user ?? user, req);
 
     return hits.map((hit) => ({
       id: hit._id,
@@ -205,7 +304,7 @@ export class SearchService {
   }
 
   async searchResourcesByVector(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const nodes = await this.rag.retrieve(user, {
+    const nodes = await this.rag.retrieve(req.user ?? user, {
       query: req.query,
       limit: req.limit,
       filter: {
@@ -289,7 +388,7 @@ export class SearchService {
   }
 
   async searchCanvasesByKeywords(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const hits = await this.elasticsearch.searchCanvases(user, req);
+    const hits = await this.elasticsearch.searchCanvases(req.user ?? user, req);
 
     return hits.map((hit) => ({
       id: hit._id,
@@ -311,7 +410,7 @@ export class SearchService {
   }
 
   async searchCanvasesByVector(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const nodes = await this.rag.retrieve(user, {
+    const nodes = await this.rag.retrieve(req.user ?? user, {
       query: req.query,
       limit: req.limit,
       filter: {
@@ -381,7 +480,7 @@ export class SearchService {
       return this.emptySearchProjects(user, req);
     }
 
-    const hits = await this.elasticsearch.searchProjects(user, req);
+    const hits = await this.elasticsearch.searchProjects(req.user ?? user, req);
 
     return hits.map((hit) => ({
       id: hit._id,
@@ -583,6 +682,7 @@ export class SearchService {
 
   async search(user: User, req: SearchRequest, options?: SearchOptions): Promise<SearchResult[]> {
     const reqList = await this.preprocessSearchRequest(user, req);
+    this.logger.log(`preprocessed search request: ${JSON.stringify(reqList)}`);
 
     const results = await Promise.all(
       reqList.map((req) => {

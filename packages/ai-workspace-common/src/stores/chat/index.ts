@@ -155,6 +155,7 @@ export const useChatStore = create<ChatState>()(
       {
         name: 'chat-storage',
         partialize: (state) => ({
+          newQAText: state.newQAText,
           selectedModel: state.selectedModel,
           selectedProject: state.selectedProject,
           enableWebSearch: state.enableWebSearch,

@@ -1,5 +1,4 @@
-import { Button, Modal, Divider, Typography } from "@arco-design/web-react"
-import { HiLanguage } from "react-icons/hi2"
+import { Button, Modal, Divider, Typography } from "antd"
 import { Link } from "@refly-packages/ai-workspace-common/utils/router"
 
 // stores
@@ -11,10 +10,8 @@ import Google from "@/assets/google.svg"
 import GitHub from "@/assets/github-mark.svg"
 
 // styles
-import "./index.scss"
 import { getServerOrigin, getClientOrigin } from "@refly/utils/url"
 import { useTranslation } from "react-i18next"
-import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
 
 export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   const userStore = useUserStoreShallow(state => ({
@@ -40,47 +37,15 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
     location.href = `${getServerOrigin()}/v1/auth/${provider}`
   }
 
-  // props
-  let modalProps: any = {
-    closable: false,
-    maskClosable: false,
-    maskStyle: {
-      opacity: 1,
-    },
-  }
-
-  if (props.visible) {
-    modalProps = {
-      visible: true,
-      ...modalProps,
-    }
-  } else {
-    modalProps = {
-      visible: userStore?.loginModalVisible,
-      ...modalProps,
-    }
-  }
-
   return (
     <Modal
-      {...modalProps}
+      open={props.visible || userStore.loginModalVisible}
+      centered
       footer={null}
-      className="login-modal"
-      autoFocus={false}
-      wrapStyle={{
-        borderRadius: 8,
-      }}
       onCancel={() => userStore.setLoginModalVisible(false)}>
-      <div className="login-container">
-        <div className="language-btn">
-          <UILocaleList>
-            <Button
-              type="text"
-              icon={<HiLanguage style={{ fontSize: 20 }} />}></Button>
-          </UILocaleList>
-        </div>
-        <div className="login-brand">
-          <img src={Logo} alt="Refly" style={{ width: 38, height: 38 }} />
+      <div className="relative flex h-full w-full flex-col items-center justify-center">
+        <div className="flex flex-row items-center">
+          <img src={Logo} alt="Refly" style={{ width: 24, height: 24 }} />
           <span
             style={{
               fontSize: 20,
@@ -91,45 +56,41 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
             Refly
           </span>
         </div>
-        <div className="login-hint-text">
+        <div className="mt-2 text-sm text-gray-500">
           {t("landingPage.loginModal.title")}
         </div>
-        <div className="login-btn-group">
+        <div className="mt-4 flex flex-col items-center justify-center">
           <Button
-            className="login-btn"
-            type="outline"
             onClick={() => handleLogin("github")}
-            style={{ width: 260, height: 32 }}
+            className="mt-2 h-8 w-72"
             loading={userStore.isLogin && userStore.loginProvider === "github"}
             disabled={
               userStore.isLogin && userStore.loginProvider !== "github"
             }>
-            <img src={GitHub} alt="github" />
+            <img src={GitHub} alt="github" className="mr-1 h-4 w-4" />
             {userStore.isLogin && userStore.loginProvider === "github"
               ? t("landingPage.loginModal.loggingStatus")
               : t("landingPage.loginModal.loginBtn.github")}
           </Button>
           <Button
-            className="login-btn"
-            type="outline"
             onClick={() => handleLogin("google")}
-            style={{ width: 260, height: 32 }}
+            className="mt-2 h-8 w-72"
             loading={userStore.isLogin && userStore.loginProvider === "google"}
             disabled={
               userStore.isLogin && userStore.loginProvider !== "google"
             }>
-            <img src={Google} alt="google" />
+            <img src={Google} alt="google" className="mr-1 h-4 w-4" />
             {userStore.isLogin && userStore.loginProvider === "google"
               ? t("landingPage.loginModal.loggingStatus")
               : t("landingPage.loginModal.loginBtn.google")}
           </Button>
         </div>
         <Divider></Divider>
-        <Typography.Paragraph className="term-text">
+        <Typography.Paragraph className="text-xs font-bold text-gray-400">
           {t("landingPage.loginModal.utilText")}
           <Link
             to={`${getClientOrigin(true)}/terms`}
-            style={{ margin: "0 4px" }}
+            className="mx-1"
             onClick={() => {
               userStore.setLoginModalVisible(false)
             }}>
@@ -140,7 +101,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
           {t("landingPage.loginModal.and")}
           <Link
             to={`${getClientOrigin(true)}/privacy`}
-            style={{ margin: "0 4px" }}
+            className="mx-1"
             onClick={() => {
               userStore.setLoginModalVisible(false)
             }}>

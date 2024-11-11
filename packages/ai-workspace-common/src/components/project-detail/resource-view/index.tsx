@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
+import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
 
 export const ResourceView = (props: { resourceId: string; projectId?: string }) => {
   const { resourceId, projectId } = props;
@@ -169,13 +170,13 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
             <>
               <TopBar />
               <div className="knowledge-base-resource-meta">
-                {['wait_index', 'index_failed'].includes(resourceDetail?.indexStatus) && (
+                {['wait_parse', 'parse_failed', 'wait_index', 'index_failed'].includes(resourceDetail?.indexStatus) && (
                   <Alert
                     className={`${resourceDetail?.indexStatus}-alert`}
                     style={{ marginBottom: 16 }}
-                    type={resourceDetail?.indexStatus === 'wait_index' ? 'warning' : 'error'}
+                    type={['wait_index', 'wait_parse'].includes(resourceDetail?.indexStatus) ? 'warning' : 'error'}
                     icon={
-                      resourceDetail?.indexStatus === 'wait_index' ? (
+                      ['wait_index', 'wait_parse'].includes(resourceDetail?.indexStatus) ? (
                         <IconLoading style={{ color: 'rgb(202 138 4)' }} />
                       ) : (
                         <IconCloseCircle style={{ color: 'rgb(220 38 38)' }} />
@@ -183,11 +184,12 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
                     }
                     content={
                       t(`resource.${resourceDetail?.indexStatus}`) +
-                      ': ' +
-                      t(`resource.${resourceDetail?.indexStatus}_tip`)
+                      (['wait_index', 'index_failed'].includes(resourceDetail?.indexStatus)
+                        ? ': ' + t(`resource.${resourceDetail?.indexStatus}_tip`)
+                        : '')
                     }
                     action={
-                      resourceDetail?.indexStatus === 'index_failed' ? (
+                      ['index_failed', 'parse_failed'].includes(resourceDetail?.indexStatus) ? (
                         <Button
                           size="mini"
                           type="outline"
@@ -205,9 +207,10 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
 
                 <div className="knowledge-base-directory-site-intro">
                   <div className="site-intro-icon">
-                    <img
-                      src={`https://www.google.com/s2/favicons?domain=${safeParseURL(resourceDetail?.data?.url as string)}&sz=${32}`}
-                      alt={resourceDetail?.data?.url}
+                    <ResourceIcon
+                      url={resourceDetail?.data?.url}
+                      resourceType={resourceDetail?.resourceType}
+                      size={24}
                     />
                   </div>
                   <div className="site-intro-content">

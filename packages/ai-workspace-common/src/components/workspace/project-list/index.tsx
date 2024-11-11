@@ -8,7 +8,7 @@ import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { getClientOrigin } from '@refly/utils/url';
 // components
 import { useEffect } from 'react';
-import { ProjectItemCard } from '@refly-packages/ai-workspace-common/components/project-list/project-card';
+import { ProjectItemCard } from '@refly-packages/ai-workspace-common/components/workspace/project-list/project-card';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
 // utils
@@ -50,7 +50,7 @@ export const ProjectList = (props: ProjectListProps) => {
       });
       return res?.data;
     },
-    pageSize: 12,
+    pageSize: 20,
   });
 
   useEffect(() => {
@@ -116,7 +116,7 @@ export const ProjectList = (props: ProjectListProps) => {
             <ProjectItemCard
               index={key}
               cardData={item}
-              cardIcon={<IconFolder style={{ fontSize: '32px', strokeWidth: 3 }} />}
+              cardIcon={<IconFolder style={{ fontSize: '18px', strokeWidth: 4 }} />}
               onClick={() => {
                 if (!item?.projectId) return;
                 handleClickProject(item.projectId);

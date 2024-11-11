@@ -1,5 +1,6 @@
 import { List, Divider } from '@arco-design/web-react';
-import { IconDown } from '@arco-design/web-react/icon';
+import { Button } from 'antd';
+import { IconDown, IconUser } from '@arco-design/web-react/icon';
 import cn from 'classnames';
 
 import { useTranslation } from 'react-i18next';
@@ -15,6 +16,7 @@ import { GridPattern } from './grid-pattern';
 
 // types
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 const quickStartList = [
   {
@@ -35,14 +37,14 @@ const quickStartList = [
   },
 ];
 
-interface WriteGuideProps {
-  isLogin: boolean;
-}
-
-export const WriteGuide = (props: WriteGuideProps) => {
+export const WriteGuide = () => {
   const { t } = useTranslation();
   const { setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
     setSubscribeModalVisible: state.setSubscribeModalVisible,
+  }));
+  const userStore = useUserStoreShallow((state) => ({
+    userProfile: state.userProfile,
+    setLoginModalVisible: state.setLoginModalVisible,
   }));
 
   const chatStore = useChatStoreShallow((state) => ({
@@ -70,7 +72,7 @@ export const WriteGuide = (props: WriteGuideProps) => {
     },
   ];
 
-  if (props.isLogin) {
+  if (userStore.userProfile) {
     footerList.unshift({
       title: 'pricing',
       handleClick: () => {
@@ -81,9 +83,19 @@ export const WriteGuide = (props: WriteGuideProps) => {
 
   return (
     <div className="write-guide-container">
+      {!userStore.userProfile && (
+        <Button
+          type="primary"
+          icon={<IconUser />}
+          className="absolute right-3 top-3 px-4 py-2"
+          onClick={() => userStore.setLoginModalVisible(true)}
+        >
+          {t('common.login')}
+        </Button>
+      )}
       <div className="write-guide">
         <div className="write-guide-inner">
-          <div className="write-guide-header">
+          <div className="write-guide-header flex justify-between items-center">
             <div className="guide-text">{t('welcomeMessage')}</div>
           </div>
 

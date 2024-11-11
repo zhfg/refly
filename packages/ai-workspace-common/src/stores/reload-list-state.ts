@@ -8,12 +8,14 @@ interface ReloadListState {
   reloadProjectList: boolean;
   reloadCanvasList: boolean;
   reloadResourceDetail: boolean;
+  reloadDirectoryResourceList: boolean;
 
   // method
   setReloadResourceList: (val: boolean) => void;
   setReloadProjectList: (val: boolean) => void;
   setReloadCanvasList: (val: boolean) => void;
   setReloadResourceDetail: (val: boolean) => void;
+  setReloadDirectoryResourceList: (val: boolean) => void;
 }
 
 export const useReloadListState = create<ReloadListState>()(
@@ -22,11 +24,12 @@ export const useReloadListState = create<ReloadListState>()(
     reloadProjectList: false,
     reloadCanvasList: false,
     reloadResourceDetail: false,
-
+    reloadDirectoryResourceList: false,
     setReloadResourceList: (val: boolean) => set({ reloadResourceList: val }),
     setReloadProjectList: (val: boolean) => set({ reloadProjectList: val }),
     setReloadCanvasList: (val: boolean) => set({ reloadCanvasList: val }),
     setReloadResourceDetail: (val: boolean) => set({ reloadResourceDetail: val }),
+    setReloadDirectoryResourceList: (val: boolean) => set({ reloadDirectoryResourceList: val }),
   })),
 );
 

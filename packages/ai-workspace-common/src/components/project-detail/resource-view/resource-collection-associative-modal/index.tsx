@@ -5,8 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { SearchSelect } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 // store
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 
-import { Modal, Form, Message } from '@arco-design/web-react';
+import { Modal, Form, Message, Button } from '@arco-design/web-react';
 const FormItem = Form.Item;
 
 type domain = 'resource' | 'project';
@@ -26,6 +27,9 @@ export const BindResourceModal = (props: BindResourceModalProps) => {
   const { t } = useTranslation();
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm();
+  const { setImportResourceModalVisible } = useImportResourceStore((state) => ({
+    setImportResourceModalVisible: state.setImportResourceModalVisible,
+  }));
 
   const onOk = () => {
     form.validate().then(async (res) => {
@@ -98,6 +102,18 @@ export const BindResourceModal = (props: BindResourceModalProps) => {
               form.setFieldValue('selectedValue', val);
             }}
           />
+        </FormItem>
+        <FormItem label=" ">
+          <Button
+            type="outline"
+            size="mini"
+            onClick={() => {
+              setImportResourceModalVisible(true);
+              setVisible(false);
+            }}
+          >
+            {t('knowledgeBase.resourceCollectionAssociativeModal.importResource')}
+          </Button>
         </FormItem>
       </Form>
     </Modal>

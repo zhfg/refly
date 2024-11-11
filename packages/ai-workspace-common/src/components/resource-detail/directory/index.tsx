@@ -13,14 +13,12 @@ import { BindResourceModal } from '@refly-packages/ai-workspace-common/component
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
 import { useTranslation } from 'react-i18next';
-import { HiOutlineSearch } from 'react-icons/hi';
-import { HiOutlinePencil, HiOutlinePlus, HiOutlineSparkles } from 'react-icons/hi2';
-import { IconCanvas, IconProject, IconThread } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { Favicon } from '@refly-packages/ai-workspace-common/components/common/favicon';
+import { HiOutlinePlus, HiOutlineSparkles } from 'react-icons/hi2';
+import { IconProject } from '@refly-packages/ai-workspace-common/components/common/icon';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 import { formatStorage } from '@refly-packages/ai-workspace-common/modules/entity-selector/utils';
-
+import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
 type DirectoryItemType = 'meta' | 'project';
 
 export const ResourceDirectory = (props: { resourceId: string }) => {
@@ -44,10 +42,11 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
     pageSize: 12,
   });
 
-  const { resource, copilotSize, setCopilotSize } = useResourceStoreShallow((state) => ({
+  const { resource, copilotSize, setCopilotSize, setResource } = useResourceStoreShallow((state) => ({
     copilotSize: state.copilotSize,
     resource: state.resource,
     setCopilotSize: state.setCopilotSize,
+    setResource: state.setResource,
   }));
   const resourceData = resource.data;
 
@@ -232,10 +231,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
       <div className="project-directory-intro">
         <div className="intro-body">
           <div className="intro-icon">
-            <img
-              src={`https://www.google.com/s2/favicons?domain=${resourceData?.data?.url}&sz=${32}`}
-              alt={resourceData?.data?.title}
-            />
+            <ResourceIcon url={resourceData?.data?.url} resourceType={resourceData?.resourceType} size={24} />
           </div>
 
           <div className="intro-content">
@@ -246,8 +242,8 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
                   .utc()
                   .fromNow()}
               </span>
-              {' · '}
-              <span>{t('resourceDetail.directory.referenced', { count: 9 })}</span>
+              {/* {' · '}
+              <span>{t('resourceDetail.directory.referenced', { count: 9 })}</span> */}
             </div>
           </div>
         </div>
@@ -296,6 +292,7 @@ export const ResourceDirectory = (props: { resourceId: string }) => {
         postConfirmCallback={() => {
           reloadProjects();
           setSelectedTab('project');
+          setResource({ ...resourceData, projectIds: dataList.map((item) => item.projectId) });
         }}
       />
     </div>

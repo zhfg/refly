@@ -33,13 +33,14 @@ export const resourcePO2DTO = (
   resource: ResourceModel & {
     order?: number;
     content?: string;
+    projectIds?: string[];
   },
 ): Resource => {
   if (!resource) {
     return null;
   }
   return {
-    ...pick(resource, ['resourceId', 'title', 'readOnly', 'content', 'contentPreview', 'order']),
+    ...pick(resource, ['resourceId', 'title', 'content', 'contentPreview', 'order', 'projectIds']),
     resourceType: resource.resourceType as ResourceType,
     indexStatus: resource.indexStatus as IndexStatus,
     storageSize: resource.storageSize.toString(),

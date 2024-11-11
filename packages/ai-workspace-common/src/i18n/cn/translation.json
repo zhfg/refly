@@ -124,7 +124,15 @@
       "newCanvas": "新稿布",
       "importResource": "导入资源",
       "chat": "Chat",
-      "empty": "空空如也"
+      "empty": "空空如也",
+      "move": "移动",
+      "remove": "移除",
+      "delete": "删除",
+      "projectSelector": {
+        "title": "移动稿布",
+        "tip": "请选择目标项目",
+        "success": "移动成功！"
+      }
     },
     "share": {
       "createShareFailed": "创建分享失败，请重试！",
@@ -207,11 +215,12 @@
     },
     "deleteDropdownMenu": {
       "successful": "删除成功！",
+      "unbindSuccessful": "移除成功！",
       "failed": "删除失败！",
-      "deleteConfirmForNote": "确定删除该笔记吗？",
-      "deleteConfirmForKnowledgeBase": "确定删除该知识库吗？",
+      "deleteConfirmForCanvas": "确定删除该稿布吗？",
+      "deleteConfirmForProject": "确定删除该项目吗？",
       "deleteConfirmForResource": "确定删除该资源吗？",
-      "deleteConfirmForResourceCollection": "确认要从知识库移除吗?",
+      "deleteConfirmForResourceProject": "确认要从项目移除吗?",
       "delete": "删除",
       "edit": "编辑"
     }
@@ -224,7 +233,8 @@
       "resource": "资源",
       "project": "项目",
       "resourcePlaceholder": "请选择资源",
-      "projectPlaceholder": "请选择项目"
+      "projectPlaceholder": "请选择项目",
+      "importResource": "导入资源"
     },
     "directory": {
       "resourceCount": "{{count}} 个内容",
@@ -238,14 +248,14 @@
     },
     "note": {
       "connecting": "连接中...",
-      "newNote": "创建新笔记",
+      "newNote": "创建新稿布",
       "noteCharsCount": "共 {{count}} 字",
       "autoSaved": "已自动保存",
       "saving": "保存中...",
       "readOnly": "稿布已设为只读状态",
       "edit": "稿布已设为可编辑状态",
       "serviceDisconnected": "服务已断开",
-      "createNoteFailed": "创建笔记失败，请重试！",
+      "createNoteFailed": "创建稿布失败，请重试！",
       "defaultTitle": "未命名"
     },
     "canvas": {
@@ -270,22 +280,22 @@
       "resources": "资源",
       "canvas": "稿布",
       "canvases": "稿布",
-      "projects": "知识库",
+      "projects": "项目",
       "project": "项目",
       "contentList": "内容列表",
       "extensionWeblink": "网页",
       "extensionWeblinkSelection": "网页选中",
       "canvasSelection": "稿布选中",
       "resourceSelection": "资源选中",
-      "noteCursorSelection": "笔记光标选中内容",
-      "noteBeforeCursorSelection": "笔记光标前内容",
-      "noteAfterCursorSelection": "笔记光标后内容",
+      "noteCursorSelection": "稿布光标选中内容",
+      "noteBeforeCursorSelection": "稿布光标前内容",
+      "noteAfterCursorSelection": "稿布光标后内容",
       "contextLimitTipTitle": "请调整上下文后重试",
       "contextRequiredTip": "至少选择 1 个{{type}}",
       "contextLimitTip": "最多可选择{{limit}}个{{type}}，当前已选择{{currentCount}}个",
       "popoverSelector": {
-        "webPlaceholder": "搜索笔记、资源或知识库...",
-        "extensionPlaceholder": "搜索网页、笔记、资源或知识库...",
+        "webPlaceholder": "搜索稿布、资源或项目...",
+        "extensionPlaceholder": "搜索网页、稿布、资源或项目...",
         "footer": {
           "navigate": "导航",
           "toggle": "切换",
@@ -308,9 +318,8 @@
       }
     },
     "header": {
-      "searchAndOpenResourceOrCollection": "搜索并打开资源或知识库",
-      "searchOrOpenResourceOrCollection": "搜索或打开资源或知识库",
-      "searchOrOpenNote": "搜索或打开笔记",
+      "searchAndOpenResourceOrProject": "搜索并打开资源或项目",
+      "searchOrOpenNote": "搜索或打开稿布",
       "searchOrOpenThread": "搜索或打开会话",
       "openThreadHistory": "打开会话历史",
       "newThread": "新建会话"
@@ -376,7 +385,7 @@
       "addTime": "添加时间",
       "updateTime": "更新时间",
       "source": "来源",
-      "storageSize": "存储存储",
+      "storageSize": "文件存储",
       "vectorSize": "向量存储",
       "indexStatus": "索引状态",
       "referenced": "{{count}} 被引用",
@@ -402,8 +411,6 @@
       "home": {
         "heading": "建议",
         "askAI": "问问知识管家",
-        "onlineSearch": "AI 全网搜索",
-        "collectionSearch": "AI 知识库搜索",
         "showAll": "查看所有{{heading}}"
       },
       "basedOn": "基于",
@@ -443,27 +450,6 @@
             "contentHandleFailedNotify": "处理失败！"
           }
         }
-      },
-      "weblinkList": {
-        "title": "知识库",
-        "selectedCnt": "已选择 {{count}} 项",
-        "drawer": {
-          "cancel": "取消",
-          "confirm": "确认"
-        },
-        "item": {
-          "read": "已处理",
-          "unread": "未处理"
-        }
-      },
-      "searchScope": {
-        "title": "选择问答搜索范围",
-        "none": "常识问答",
-        "currentPage": "当前选中页面",
-        "currentKnowledgeBase": "当前知识库",
-        "all": "全部知识库",
-        "history": "历史已阅读",
-        "internet": "全网搜索"
       },
       "seeKnowledgeLibrary": "查看知识库",
       "status": {
@@ -636,7 +622,7 @@
       "formLabel": {
         "query": "问题",
         "resources": "资源",
-        "notes": "笔记",
+        "notes": "稿布",
         "collections": "知识库",
         "contentList": "内容",
         "urls": "链接列表"
@@ -644,7 +630,7 @@
       "placeholder": {
         "query": "请输入问题",
         "resources": "请选择资源",
-        "notes": "请选择笔记",
+        "notes": "请选择稿布",
         "collections": "请选择知识库",
         "contentList": {
           "select": "请选择内容",
@@ -655,11 +641,11 @@
       "context": {
         "contentList": {
           "resourceSelection": "资源选中",
-          "noteSelection": "笔记选中",
+          "noteSelection": "稿布选中",
           "extensionWeblinkSelection": "网页选中",
-          "noteCursorSelection": "笔记光标选中内容",
-          "noteBeforeCursorSelection": "笔记光标前内容",
-          "noteAfterCursorSelection": "笔记光标后内容"
+          "noteCursorSelection": "稿布光标选中内容",
+          "noteBeforeCursorSelection": "稿布光标前内容",
+          "noteAfterCursorSelection": "稿布光标后内容"
         }
       },
       "invokeConfig": "运行配置",
@@ -743,13 +729,13 @@
         "yearlyPlan": "每年自动续费",
         "tooltip": {
           "modelToken": "Token 同时包括模型输入和输出",
-          "vectorStorage": "用于存储资源和笔记的语义化向量数据",
-          "fileStorage": "用于存储资源文本、笔记文本和历史版本、以及上传的文件（图片）数据"
+          "vectorStorage": "用于存储资源和稿布的语义化向量数据",
+          "fileStorage": "用于存储资源文本、稿布文本和历史版本、以及上传的文件（图片）数据"
         },
         "vectorStorage": "向量存储",
         "fileStorage": "文件存储",
         "fileStorageType": {
-          "note": "笔记",
+          "note": "稿布",
           "resource": "资源",
           "file": "上传文件"
         },
@@ -878,13 +864,6 @@
       },
       "input": {
         "placeholder": "继续提问...",
-        "searchScope": {
-          "title": "选择搜索范围",
-          "current": "当前网页",
-          "all": "全部知识库",
-          "selected": "选中网页",
-          "internet": "全网搜索"
-        },
         "selectedWeblink": {
           "title": "基于选中网页提问："
         },
@@ -909,17 +888,17 @@
     "placeholder": {
       "project": "选择项目",
       "resource": "选择资源",
-      "note": "选择笔记",
+      "note": "选择稿布",
       "skill": "选择技能",
       "conversation": "选择会话"
     },
     "createEntity": {
-      "project": "新建知识库",
+      "project": "新建项目",
       "resource": "新建资源",
-      "note": "新建笔记",
+      "note": "新建稿布",
       "skill": "新建技能",
       "conversation": "新建会话",
-      "newProjectNameIsEmpty": "请输入知识库名称"
+      "newProjectNameIsEmpty": "请输入项目名称"
     }
   },
   "hooks": {
@@ -963,8 +942,8 @@
         }
       },
       "noteContextCard": {
-        "title": "当前笔记快捷操作",
-        "noteSelectedTitle": "选中笔记内容问答",
+        "title": "当前稿布快捷操作",
+        "noteSelectedTitle": "选中稿布内容问答",
         "selectedContentCount": "（共 {{count}} 个）",
         "noSelectedContent": "暂无选中内容...",
         "improveWriting": {
@@ -1042,10 +1021,10 @@
       "placeholder": "暂无选中内容...",
       "options": {
         "resource": "选中资源内容",
-        "note": "选中笔记内容",
-        "noteCursorSelection": "笔记光标选中内容",
-        "noteBeforeCursorSelection": "笔记光标前内容",
-        "noteAfterCursorSelection": "笔记光标后内容",
+        "note": "选中稿布内容",
+        "noteCursorSelection": "稿布光标选中内容",
+        "noteBeforeCursorSelection": "稿布光标前内容",
+        "noteAfterCursorSelection": "稿布光标后内容",
         "conversation": "选中会话内容"
       },
       "save": {
@@ -1104,9 +1083,9 @@
     "message": {
       "copy": "复制",
       "copySuccess": "复制成功",
-      "insertBlow": "插入笔记",
+      "insertBlow": "插入稿布",
       "replaceSelection": "替换选中",
-      "createNewNote": "创建新笔记",
+      "createNewNote": "创建新稿布",
       "skillRunSuccess": "技能已完成，共 {{count}} 条日志",
       "skillRunning": "技能运行中...",
       "relatedQuestion": "你可能还想问",
@@ -1134,23 +1113,20 @@
       }
     },
     "contentSelector": {
-      "openForWeb": "开启选择内容提问, 笔记已进入只读模式",
-      "closeForWeb": "关闭选择器, 笔记已恢复编辑",
+      "openForWeb": "开启选择内容提问, 稿布已进入只读模式",
+      "closeForWeb": "关闭选择器, 稿布已恢复编辑",
       "open": "已开启内容选择器",
       "close": "已关闭内容选择器"
     },
     "convListModal": {
       "title": "会话库"
     },
-    "kbListModal": {
-      "title": "知识库"
-    },
     "sourceListModal": {
       "title": "结果来源",
       "moreSources": "查看更多 {{count}} 来源",
       "searchPlaceholder": "搜索来源...",
       "openOriginWebsite": "打开来源链接",
-      "openKnowledgeBaseLink": "打开知识库链接",
+      "openKnowledgeBaseLink": "打开项目链接",
       "webSearchTab": "全网搜索",
       "libraryTab": "知识库搜索"
     }

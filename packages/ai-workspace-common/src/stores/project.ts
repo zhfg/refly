@@ -3,10 +3,15 @@ import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-import { Project } from '@refly/openapi-schema';
+import { Project, ResourceType } from '@refly/openapi-schema';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 export type ProjectDirListItemType = 'canvases' | 'resources' | 'conversations';
+
+type ResourceData = {
+  projectIds?: string[];
+  resourceType?: ResourceType;
+};
 
 export interface ProjectDirListItem {
   id: string;
@@ -14,6 +19,7 @@ export interface ProjectDirListItem {
   type: ProjectDirListItemType;
   url?: string;
   order?: number;
+  resourceData?: ResourceData;
 }
 
 export interface ProjectTab {
@@ -175,6 +181,12 @@ export const useProjectStore = create<ProjectState>()(
             type: itemType,
             order: item.order,
             url: item.data?.url,
+            resourceData: item?.resourceType
+              ? {
+                  projectIds: item?.projectIds,
+                  resourceType: item?.resourceType,
+                }
+              : undefined,
           }));
           if (error || !data?.success) {
             state[config.stateKey].error = String(error) || 'request not success';

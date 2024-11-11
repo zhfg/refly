@@ -12,6 +12,7 @@ import { IconCopy } from '@arco-design/web-react/icon';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
+import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 const iconStyle = {
   marginRight: 8,
   fontSize: 16,
@@ -121,6 +122,7 @@ export const DeleteDropdownMenu = (props: DeleteDropdownMenuProps) => {
 
   const importProjectModal = useImportProjectModal();
   const { deleteRecentProject } = useHandleRecents();
+  const { handleDeleteTab } = useProjectTabs();
 
   const handleDeleteClick = async (e: MouseEvent) => {
     e.stopPropagation();
@@ -128,7 +130,11 @@ export const DeleteDropdownMenu = (props: DeleteDropdownMenuProps) => {
     if (type === 'canvas') {
       const { error } = await getClient().deleteCanvas({ body: { canvasId: data.canvasId } });
       resultError = error;
+      if (!resultError) {
+        handleDeleteTab(data.projectId, data.canvasId);
+      }
     }
+
     if (type === 'project') {
       const { error } = await getClient().deleteProject({ body: { projectId: data.projectId } });
       resultError = error;
@@ -136,23 +142,29 @@ export const DeleteDropdownMenu = (props: DeleteDropdownMenuProps) => {
         deleteRecentProject(data.projectId);
       }
     }
+
     if (type === 'resource') {
       const { error } = await getClient().deleteResource({ body: { resourceId: data.resourceId } });
       resultError = error;
+      if (!resultError) {
+        const projectIds = data?.projectIds || [];
+        projectIds.forEach((projectId) => {
+          handleDeleteTab(projectId, data.resourceId);
+        });
+      }
     }
+
     if (type === 'resourceCollection') {
       const { error } = await getClient().bindProjectResources({ body: data });
       resultError = error;
     }
 
-    setPopupVisible(false);
-
     if (resultError) {
-      console.error(resultError);
-      Message.error({ content: t('workspace.deleteDropdownMenu.failed') });
-    } else {
-      Message.success({ content: t('workspace.deleteDropdownMenu.successful') });
+      return;
     }
+
+    setPopupVisible(false);
+    Message.success({ content: t('workspace.deleteDropdownMenu.successful') });
 
     if (postDeleteList) {
       postDeleteList(data);

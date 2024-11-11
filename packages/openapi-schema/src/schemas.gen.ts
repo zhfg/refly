@@ -149,6 +149,13 @@ export const $Resource = {
       description: 'Resource metadata',
       $ref: '#/components/schemas/ResourceMeta',
     },
+    projectIds: {
+      type: 'array',
+      description: 'Project IDs related to this resource',
+      items: {
+        type: 'string',
+      },
+    },
     indexStatus: {
       description: 'Resource index status',
       $ref: '#/components/schemas/IndexStatus',
@@ -1488,7 +1495,7 @@ export const $UpsertResourceRequest = {
     },
     projectId: {
       type: 'string',
-      description: 'Project ID (will add to the project if given)',
+      description: 'Project ID (will add to the project when creating resource)',
       example: 'p-g30e1b80b5g1itbemc0g5jj3',
     },
     data: {
@@ -1498,11 +1505,6 @@ export const $UpsertResourceRequest = {
     content: {
       type: 'string',
       description: 'Resource content (this will be ignored if storageKey was set)',
-    },
-    readOnly: {
-      type: 'boolean',
-      description: 'Whether this resource is read-only',
-      default: false,
     },
   },
 } as const;

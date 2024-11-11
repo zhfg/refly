@@ -42,18 +42,6 @@
         "exit": "退出",
         "empty": "暂无选中内容..."
       },
-      "weblinkList": {
-        "title": "知识库",
-        "selectedCnt": "已选择 {{count}} 项",
-        "drawer": {
-          "cancel": "取消",
-          "confirm": "确认"
-        },
-        "item": {
-          "read": "已处理",
-          "unread": "未处理"
-        }
-      },
       "recommendQuickAction": {
         "title": "推荐快捷操作：",
         "summary": {
@@ -88,13 +76,6 @@
         "current": "对当前网页进行提问...",
         "internet": "输入关键词进行网络搜索...",
         "currentSelectedContent": "基于实时选择内容提问..."
-      },
-      "searchScope": {
-        "title": "选择搜索范围",
-        "current": "当前网页",
-        "all": "全部知识库",
-        "history": "历史已阅读",
-        "internet": "联网搜索"
       },
       "status": {
         "emptyNotify": "提问内容不能为空",
@@ -299,13 +280,6 @@
           "current": "对当前网页进行提问...",
           "internet": "输入关键词进行网络搜索...",
           "currentSelectedContent": "基于实时选择内容提问..."
-        },
-        "searchScope": {
-          "title": "选择搜索范围",
-          "current": "当前网页",
-          "all": "全部知识库",
-          "selected": "选中网页",
-          "internet": "联网搜索"
         },
         "status": {
           "emptyNotify": "提问内容不能为空",

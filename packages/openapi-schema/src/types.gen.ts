@@ -123,6 +123,10 @@ export type Resource = {
    */
   data?: ResourceMeta;
   /**
+   * Project IDs related to this resource
+   */
+  projectIds?: Array<string>;
+  /**
    * Resource index status
    */
   indexStatus?: IndexStatus;
@@ -1198,7 +1202,7 @@ export type UpsertResourceRequest = {
    */
   resourceId?: string;
   /**
-   * Project ID (will add to the project if given)
+   * Project ID (will add to the project when creating resource)
    */
   projectId?: string;
   /**
@@ -1209,10 +1213,6 @@ export type UpsertResourceRequest = {
    * Resource content (this will be ignored if storageKey was set)
    */
   content?: string;
-  /**
-   * Whether this resource is read-only
-   */
-  readOnly?: boolean;
 };
 
 export type UpsertResourceResponse = BaseResponse & {

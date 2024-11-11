@@ -7,12 +7,12 @@ import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stor
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
-import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
-import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useReloadListStateShallow } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 import { SearchSelect } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 import { useTranslation } from 'react-i18next';
 import { useSaveResourceNotify } from '@refly-packages/ai-workspace-common/hooks/use-save-resouce-notify';
 import { getClientOrigin } from '@refly/utils/url';
+import { useMatch } from '@refly-packages/ai-workspace-common/utils/router';
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
@@ -22,9 +22,12 @@ export const ImportFromText = () => {
   const importResourceStore = useImportResourceStore();
   const { handleSaveResourceAndNotify } = useSaveResourceNotify();
 
-  const reloadListState = useReloadListState();
-  const [queryParams] = useSearchParams();
-  const kbId = queryParams.get('kbId');
+  const reloadListState = useReloadListStateShallow((state) => ({
+    setReloadProjectList: state.setReloadProjectList,
+    setReloadResourceList: state.setReloadResourceList,
+    setReloadDirectoryResourceList: state.setReloadDirectoryResourceList,
+  }));
+  const projectId = useMatch('/project/:projectId')?.params?.projectId;
 
   //
   const [saveLoading, setSaveLoading] = useState(false);
@@ -60,14 +63,15 @@ export const ImportFromText = () => {
 
       importResourceStore.setCopiedTextPayload({ title: '', content: '' });
       importResourceStore.setImportResourceModalVisible(false);
-      if (!kbId || (kbId && selectedProjectId === kbId)) {
+      if (!projectId || (projectId && selectedProjectId === projectId)) {
         reloadListState.setReloadProjectList(true);
         reloadListState.setReloadResourceList(true);
+        reloadListState.setReloadDirectoryResourceList(true);
       }
 
       setSaveLoading(false);
       const resourceId = res?.data?.data?.resourceId;
-      const url = `${getClientOrigin(false)}/knowledge-base?resId=${resourceId}`;
+      const url = `${getClientOrigin(false)}/resource/${resourceId}`;
       return { success: true, url };
     } catch (err) {
       setSaveLoading(false);
@@ -76,7 +80,7 @@ export const ImportFromText = () => {
   };
 
   useEffect(() => {
-    importResourceStore.setSelectedProjectId(kbId);
+    importResourceStore.setSelectedProjectId(projectId);
 
     // 使用 copiedTextPayload 中的值初始化表单
     const { title, content, url } = importResourceStore.copiedTextPayload;
@@ -145,6 +149,7 @@ export const ImportFromText = () => {
             <div className="save-container">
               <p className="text-item">{t('resource.import.saveTo')} </p>
               <SearchSelect
+                defaultValue={importResourceStore.selectedProjectId}
                 domain="project"
                 className="kg-selector"
                 allowCreateNewEntity

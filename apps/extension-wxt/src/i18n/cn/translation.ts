@@ -88,13 +88,6 @@ export const translation = {
           internet: '输入关键词进行网络搜索...',
           currentSelectedContent: '基于实时选择内容提问...',
         },
-        searchScope: {
-          title: '选择搜索范围',
-          current: '当前网页',
-          all: '全部知识库',
-          history: '历史已阅读',
-          internet: '全网搜索',
-        },
         status: {
           emptyNotify: '提问内容不能为空',
           contentHandling: '处理内容中...',

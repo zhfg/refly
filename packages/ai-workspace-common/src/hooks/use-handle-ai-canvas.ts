@@ -15,10 +15,10 @@ import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 export interface IntentResult {
   type: CanvasIntentType;
   confidence: number;
-  projectId?: string; // 对于画布相关操作可能需要
-  canvasId?: string; // 对于更新/重写画布操作需要
-  convId?: string; // 对于画布相关操作需要
-  resourceId?: string; // 对于资源相关操作需要
+  projectId?: string;
+  canvasId?: string;
+  convId?: string;
+  resourceId?: string;
   metadata?: Record<string, any>;
 }
 
@@ -144,7 +144,7 @@ export const useHandleAICanvas = () => {
     [convId],
   );
 
-  // 监听结构化数据中的意图识别结果
+  // Monitor the intent recognition result in the structured data
   const handleStructuredDataChange = useCallback(
     (message: ChatMessage) => {
       const intentMatcher = message?.structuredData?.intentMatcher as IntentResult;

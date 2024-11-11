@@ -73,6 +73,10 @@ export const SearchSelect = (props: SearchSelectProps) => {
     onChange?.(projectId, { label: title, value: projectId });
   };
 
+  useEffect(() => {
+    setValue(defaultValue);
+  }, [defaultValue]);
+
   return (
     <Select
       size="middle"

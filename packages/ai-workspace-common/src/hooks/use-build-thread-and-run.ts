@@ -11,17 +11,15 @@ import { buildConversation, getConversation } from '@refly-packages/ai-workspace
 import { notification } from 'antd';
 import { useResetState } from './use-reset-state';
 import { useTaskStoreShallow } from '@refly-packages/ai-workspace-common/stores/task';
-
 import { ConfigScope, InvokeSkillRequest, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
-// request
 import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
 import { useBuildTask } from './use-build-task';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-// hooks
 import { useBuildSkillContext } from './use-build-skill-context';
 import { useTranslation } from 'react-i18next';
+import { useMatch } from '@refly-packages/ai-workspace-common/utils/router';
 import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
@@ -60,6 +58,7 @@ export const useBuildThreadAndRun = () => {
   const { jumpToConv } = useJumpNewPath();
   const { addRecentConversation } = useHandleRecents();
   const { handleFilterErrorTip } = useContextFilterErrorTip();
+  const isHomePage = useMatch('/');
 
   // TODO: temp not need this function
   const emptyConvRunSkill = (
@@ -125,7 +124,6 @@ export const useBuildThreadAndRun = () => {
     const enableKnowledgeBaseSearch = messageIntentContext?.enableKnowledgeBaseSearch;
     const enableDeepReasonWebSearch = messageIntentContext?.enableDeepReasonWebSearch;
 
-    // 创建新会话并跳转
     const conv = ensureConversationExist(projectId, forceNewConv);
     const skillContext = invokeParams?.skillContext || buildSkillContext();
 
@@ -138,6 +136,12 @@ export const useBuildThreadAndRun = () => {
     if (forceNewConv) {
       resetState();
     }
+
+    // Restore the question text when the user is on the home page
+    if (isHomePage) {
+      chatStore.setNewQAText(comingQuestion);
+    }
+
     chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
 
     // TODO: temp make scheduler support
@@ -186,7 +190,6 @@ export const useBuildThreadAndRun = () => {
         ? t('copilot.chatInput.defaultQuestion', { name: selectedSkill?.displayName })
         : t('copilot.chatInput.chatWithReflyAssistant'));
 
-    // 设置当前的任务类型及会话 id
     const task: InvokeSkillRequest = {
       skillId: selectedSkill?.skillId,
       projectId,
@@ -202,9 +205,13 @@ export const useBuildThreadAndRun = () => {
     };
     taskStore.setTask(task);
 
-    // 开始提问
+    // Start asking
     buildTaskAndGenReponse(task as InvokeSkillRequest);
-    // chatStore.setNewQAText('');
+
+    // Clean the chat input when the user is not on the home page
+    if (!isHomePage) {
+      chatStore.setNewQAText('');
+    }
   };
 
   const sendChatMessage = (params: InvokeParams) => {
