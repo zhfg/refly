@@ -14,6 +14,7 @@ import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
+import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
 
 import './index.scss';
 
@@ -78,12 +79,6 @@ export const ResourceList = () => {
     return <Empty />;
   }
 
-  const cardIcon = (item: Resource) => {
-    return (
-      <img src={`https://www.google.com/s2/favicons?domain=${item?.data?.url}&sz=${32}`} alt={item?.data?.title} />
-    );
-  };
-
   return (
     <List
       grid={{
@@ -111,7 +106,7 @@ export const ResourceList = () => {
               index={key}
               key={item.resourceId}
               cardData={item}
-              cardIcon={cardIcon(item)}
+              cardIcon={<ResourceIcon url={item.data?.url} resourceType={item.resourceType} />}
               onClick={() => {
                 if (['wait_parse', 'parse_failed'].includes(item.indexStatus)) {
                   return;

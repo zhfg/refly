@@ -4,6 +4,7 @@ import cn from 'classnames';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 import { Segmented, Skeleton, Button, Divider, Input, Empty, Dropdown, Popconfirm, message } from 'antd';
+import type { DropdownProps } from 'antd';
 
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import {
@@ -13,6 +14,7 @@ import {
   useProjectStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/project';
 import { useNewCanvasModalStoreShallow } from '@refly-packages/ai-workspace-common/stores/new-canvas-modal';
+import { useReloadListStateShallow } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
 import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
@@ -22,6 +24,7 @@ import { HiOutlineSearch, HiFolderRemove } from 'react-icons/hi';
 import { HiOutlinePlus, HiOutlineShare, HiOutlineSparkles } from 'react-icons/hi2';
 import { IconCanvas, IconProject, IconThread } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Favicon } from '@refly-packages/ai-workspace-common/components/common/favicon';
+import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 
@@ -73,6 +76,11 @@ export const ProjectDirectory = (props: {
     updateProjectDirItem: state.updateProjectDirItem,
     fetchProjectDetail: state.fetchProjectDetail,
     fetchProjectDirItems: state.fetchProjectDirItems,
+  }));
+
+  const { reloadDirectoryResourceList, setReloadDirectoryResourceList } = useReloadListStateShallow((state) => ({
+    reloadDirectoryResourceList: state.reloadDirectoryResourceList,
+    setReloadDirectoryResourceList: state.setReloadDirectoryResourceList,
   }));
 
   const currentProject = projectStore.project?.data;
@@ -276,9 +284,10 @@ export const ProjectDirectory = (props: {
 
     const itemRef = useRef<HTMLDivElement>(null);
     const itemClass = 'flex items-center';
-    const iconStyle = { fontSize: 16, marginRight: 4 };
+    const iconStyle = { fontSize: 16, marginRight: 8 };
     const [openMoveCanvasModal, setOpenMoveCanvasModal] = useState(false);
     const [isActive, setIsActive] = useState<boolean>(false);
+    const [dropdownVisible, setDropdownVisible] = useState(false);
 
     const handleRemoveCanvas = () => {
       const canvases = projectStore.canvases?.data?.filter((canvas) => canvas.id !== item.id);
@@ -300,7 +309,10 @@ export const ProjectDirectory = (props: {
       const resources = projectStore.resources?.data?.filter((resource) => resource.id !== item.id);
       if (resources) {
         projectStore.setProjectDirItems(projectId, 'resources', resources);
-        handleDeleteTab(projectId, item.id);
+        const projectIds = item?.resourceData?.projectIds || [];
+        projectIds.forEach((projectId) => {
+          handleDeleteTab(projectId, item.id);
+        });
       }
     };
 
@@ -325,7 +337,13 @@ export const ProjectDirectory = (props: {
     const canvasItems = [
       {
         label: (
-          <div className={itemClass} onClick={() => setOpenMoveCanvasModal(true)}>
+          <div
+            className={itemClass}
+            onClick={() => {
+              setDropdownVisible(false);
+              setOpenMoveCanvasModal(true);
+            }}
+          >
             <MdMoveDown style={iconStyle} />
             {t('projectDetail.directory.move')}
           </div>
@@ -340,7 +358,7 @@ export const ProjectDirectory = (props: {
             okText={t('common.confirm')}
             cancelText={t('common.cancel')}
           >
-            <div className={itemClass}>
+            <div className={`${itemClass} text-red-600`}>
               <RiDeleteBinLine style={iconStyle} />
               {t('projectDetail.directory.delete')}
             </div>
@@ -375,7 +393,7 @@ export const ProjectDirectory = (props: {
             okText={t('common.confirm')}
             cancelText={t('common.cancel')}
           >
-            <div className={itemClass}>
+            <div className={`${itemClass} text-red-600`}>
               <RiDeleteBinLine style={iconStyle} />
               {t('projectDetail.directory.delete')}
             </div>
@@ -384,6 +402,12 @@ export const ProjectDirectory = (props: {
         key: 'delete-resource',
       },
     ];
+
+    const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
+      if (info.source === 'trigger') {
+        setDropdownVisible(open);
+      }
+    };
 
     useEffect(() => {
       const active = activeTab?.key === item.id || convId === item.id;
@@ -410,7 +434,7 @@ export const ProjectDirectory = (props: {
             {item.type === 'canvases' ? (
               <IconCanvas />
             ) : item.type === 'resources' ? (
-              <Favicon url={item.url} />
+              <ResourceIcon url={item.url} resourceType={item.resourceData?.resourceType} />
             ) : item.type === 'conversations' ? (
               <IconThread />
             ) : null}
@@ -428,8 +452,18 @@ export const ProjectDirectory = (props: {
           </div>
         )}
         {item.type !== 'conversations' && (
-          <Dropdown menu={{ items: item.type === 'canvases' ? canvasItems : resourceItems }} trigger={['click']}>
-            <div className="flex justify-center items-center flex-shrink-0 rounded-md hover:text-[#00968F] hover:bg-gray-200 w-[20px] h-[20px]">
+          <Dropdown
+            open={dropdownVisible}
+            onOpenChange={handleOpenChange}
+            menu={{
+              items: item.type === 'canvases' ? canvasItems : resourceItems,
+            }}
+            trigger={['click']}
+          >
+            <div
+              className="flex justify-center items-center flex-shrink-0 invisible group-hover:visible rounded-md hover:text-[#00968F] hover:bg-gray-200 w-[20px] h-[20px]"
+              onClick={() => setDropdownVisible(true)}
+            >
               <FiMoreVertical />
             </div>
           </Dropdown>
@@ -520,6 +554,13 @@ export const ProjectDirectory = (props: {
     }
   }, [resId, canvasId]);
 
+  useEffect(() => {
+    if (reloadDirectoryResourceList) {
+      debouncedFetchProjectDirItems(projectId, 'resources');
+      setReloadDirectoryResourceList(false);
+    }
+  }, [reloadDirectoryResourceList]);
+
   return (
     <div className="h-full flex flex-col">
       <div className="flex flex-row items-center justify-between p-4 pb-0">
@@ -545,7 +586,7 @@ export const ProjectDirectory = (props: {
                   {' · '}
                   <span>
                     {t('knowledgeBase.directory.resourceCount', {
-                      count: resources?.data?.length || 0,
+                      count: (resources?.data?.length || 0) + (canvases?.data?.length || 0),
                     })}
                   </span>
                 </div>

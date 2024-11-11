@@ -134,6 +134,7 @@ export const DeleteDropdownMenu = (props: DeleteDropdownMenuProps) => {
         handleDeleteTab(data.projectId, data.canvasId);
       }
     }
+
     if (type === 'project') {
       const { error } = await getClient().deleteProject({ body: { projectId: data.projectId } });
       resultError = error;
@@ -141,22 +142,29 @@ export const DeleteDropdownMenu = (props: DeleteDropdownMenuProps) => {
         deleteRecentProject(data.projectId);
       }
     }
+
     if (type === 'resource') {
       const { error } = await getClient().deleteResource({ body: { resourceId: data.resourceId } });
       resultError = error;
+      if (!resultError) {
+        const projectIds = data?.projectIds || [];
+        projectIds.forEach((projectId) => {
+          handleDeleteTab(projectId, data.resourceId);
+        });
+      }
     }
+
     if (type === 'resourceCollection') {
       const { error } = await getClient().bindProjectResources({ body: data });
       resultError = error;
     }
 
-    setPopupVisible(false);
-
     if (resultError) {
-      Message.error({ content: t('workspace.deleteDropdownMenu.failed') });
-    } else {
-      Message.success({ content: t('workspace.deleteDropdownMenu.successful') });
+      return;
     }
+
+    setPopupVisible(false);
+    Message.success({ content: t('workspace.deleteDropdownMenu.successful') });
 
     if (postDeleteList) {
       postDeleteList(data);

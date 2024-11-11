@@ -11,8 +11,8 @@ import { LinkMeta, useImportResourceStore } from '@refly-packages/ai-workspace-c
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { SearchSelect } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
-import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
-import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useReloadListStateShallow } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
+import { useMatch } from '@refly-packages/ai-workspace-common/utils/router';
 import { useTranslation } from 'react-i18next';
 
 const { TextArea } = Input;
@@ -21,14 +21,15 @@ export const ImportFromWeblink = () => {
   const { t } = useTranslation();
   const [linkStr, setLinkStr] = useState('');
   const importResourceStore = useImportResourceStore();
-  const reloadListState = useReloadListState();
+  const reloadListState = useReloadListStateShallow((state) => ({
+    setReloadProjectList: state.setReloadProjectList,
+    setReloadResourceList: state.setReloadResourceList,
+    setReloadDirectoryResourceList: state.setReloadDirectoryResourceList,
+  }));
 
-  const [queryParams] = useSearchParams();
-  const kbId = queryParams.get('kbId');
+  const projectId = useMatch('/project/:projectId')?.params?.projectId;
 
   const { selectedProjectId, scrapeLinks = [] } = importResourceStore;
-
-  console.log('select project id', selectedProjectId);
 
   const [saveLoading, setSaveLoading] = useState(false);
 
@@ -126,15 +127,16 @@ export const ImportFromWeblink = () => {
     message.success(t('common.putSuccess'));
     importResourceStore.setScrapeLinks([]);
     importResourceStore.setImportResourceModalVisible(false);
-    if (!kbId || (kbId && selectedProjectId === kbId)) {
+    if (!projectId || (projectId && selectedProjectId === projectId)) {
       reloadListState.setReloadProjectList(true);
       reloadListState.setReloadResourceList(true);
+      reloadListState.setReloadDirectoryResourceList(true);
     }
     setLinkStr('');
   };
 
   useEffect(() => {
-    importResourceStore.setSelectedProjectId(kbId);
+    importResourceStore.setSelectedProjectId(projectId);
     return () => {
       /* reset selectedProjectId after modal hide */
       importResourceStore.setSelectedProjectId('');
@@ -202,6 +204,7 @@ export const ImportFromWeblink = () => {
             <div className="save-container">
               <p className="text-item save-text-item">{t('resource.import.saveTo')}</p>
               <SearchSelect
+                defaultValue={selectedProjectId}
                 domain="project"
                 className="kg-selector"
                 allowCreateNewEntity

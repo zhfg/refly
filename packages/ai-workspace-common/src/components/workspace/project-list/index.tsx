@@ -116,7 +116,7 @@ export const ProjectList = (props: ProjectListProps) => {
             <ProjectItemCard
               index={key}
               cardData={item}
-              cardIcon={<IconFolder style={{ fontSize: '32px', strokeWidth: 3 }} />}
+              cardIcon={<IconFolder style={{ fontSize: '18px', strokeWidth: 4 }} />}
               onClick={() => {
                 if (!item?.projectId) return;
                 handleClickProject(item.projectId);

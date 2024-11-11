@@ -170,7 +170,7 @@ export const BaseSearchAndSelector = ({
       </div>
       <Spin
         loading={loading}
-        style={{ width: '100%', height: 'calc(100% - 56px)' }}
+        style={{ width: '100%', height: 'calc(100% - 72px)' }}
         className="context-search-list-container"
       >
         <Command.List>
