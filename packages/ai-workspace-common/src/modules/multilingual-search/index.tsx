@@ -4,13 +4,17 @@ import { SearchBox } from './components/search-box';
 import { SearchProgress } from './components/search-progress';
 import { SearchResults } from './components/search-results';
 import { ActionMenu } from './components/action-menu';
-import { useMultilingualSearchStore } from './stores/multilingual-search';
+import { useMultilingualSearchStore, useMultilingualSearchStoreShallow } from './stores/multilingual-search';
 import './index.scss';
 
 const { Header, Content } = Layout;
 
 function MultilingualSearch() {
-  const { isSearching, results } = useMultilingualSearchStore();
+  const { isSearching, results, outputLocale } = useMultilingualSearchStoreShallow((state) => ({
+    isSearching: state.isSearching,
+    results: state.results,
+    outputLocale: state.outputLocale,
+  }));
 
   return (
     <div className="multilingual-search-container">
@@ -20,7 +24,7 @@ function MultilingualSearch() {
         {!isSearching && results.length > 0 && (
           <>
             <h3>Search Results ({results.length} sources)</h3>
-            <SearchResults />
+            <SearchResults outputLocale={outputLocale} />
           </>
         )}
       </div>

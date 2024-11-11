@@ -14,7 +14,11 @@ import './index.scss';
 import { IconLink, IconMessage } from '@arco-design/web-react/icon';
 import { SearchResults } from '@refly-packages/ai-workspace-common/modules/multilingual-search/components/search-results';
 import { ActionMenu } from '@refly-packages/ai-workspace-common/modules/multilingual-search/components/action-menu';
-import { useMultilingualSearchStoreShallow } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
+import {
+  SearchLocale,
+  useMultilingualSearchStoreShallow,
+} from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 const TabPane = Tabs.TabPane;
 
@@ -26,12 +30,14 @@ interface SourceListModalProps {
 }
 
 export const SourceListModal = (props: SourceListModalProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<string>('webSearch');
   const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
     sourceListDrawer: state.sourceListDrawer,
     updateSourceListDrawer: state.updateSourceListDrawer,
   }));
+
+  const outputLocale = i18n.language as any as SearchLocale;
 
   // 移除不必要的状态订阅
   const { setResults, setIsSearching } = useMultilingualSearchStoreShallow((state) => ({
@@ -137,7 +143,7 @@ export const SourceListModal = (props: SourceListModalProps) => {
                 <div className="source-list-modal-web-search">
                   {groupedSources.webSearch.length > 0 && (
                     <>
-                      <SearchResults />
+                      <SearchResults outputLocale={outputLocale} />
                     </>
                   )}
                 </div>
