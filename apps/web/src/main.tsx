@@ -2,11 +2,13 @@ import React, { Suspense, useEffect, lazy } from "react"
 import { ConfigProvider } from "antd"
 import ReactDOM from "react-dom/client"
 import {
-  BrowserRouter,
+  createBrowserRouter,
   useLocation,
   useNavigationType,
   createRoutesFromChildren,
   matchRoutes,
+  RouterProvider,
+  Outlet,
 } from "react-router-dom"
 
 // Import AppRouter lazily
@@ -22,7 +24,6 @@ const AppLayout = lazy(() =>
 
 // 导入 i18n
 import "@refly-packages/ai-workspace-common/i18n/config"
-import { Spin } from "@arco-design/web-react"
 import {
   getEnv,
   setRuntime,
@@ -31,6 +32,7 @@ import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/
 
 // styles
 import "@/styles/style.css"
+import { LoadingFallback } from "@/routes"
 
 setRuntime("web")
 
@@ -66,14 +68,7 @@ const initSentry = async () => {
 // Call Sentry initialization
 initSentry()
 
-// Prefetch function
-const prefetchComponents = () => {
-  // Prefetch AppRouter
-  import("./routes/index")
-  // Prefetch AppLayout
-  import("@/components/layout/index")
-}
-
+// Update App component to remove Suspense (moved to router definition)
 export const App = () => {
   const userStore = useUserStoreShallow(state => ({
     setRuntime: state.setRuntime,
@@ -82,28 +77,46 @@ export const App = () => {
   useEffect(() => {
     setRuntime("web")
     userStore.setRuntime("web")
-
-    // Trigger prefetching
-    prefetchComponents()
   }, [])
 
   return (
-    <Suspense fallback={<Spin style={{ margin: "200px auto" }} />}>
-      <BrowserRouter>
-        <Suspense fallback={<Spin style={{ margin: "200px auto" }} />}>
-          <ConfigProvider
-            theme={{
-              token: {
-                colorPrimary: "#00968F",
-                borderRadius: 6,
-              },
-            }}>
-            <AppRouter layout={AppLayout} />
-          </ConfigProvider>
-        </Suspense>
-      </BrowserRouter>
-    </Suspense>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: "#00968F",
+          borderRadius: 6,
+        },
+      }}>
+      <Outlet />
+    </ConfigProvider>
   )
 }
 
-ReactDOM.createRoot(document.getElementById("root")!).render(<App />)
+// Update router creation to use createBrowserRouter with proper route definitions
+const router = createBrowserRouter([
+  {
+    path: "*",
+    element: <App />,
+    children: [
+      {
+        path: "*",
+        async loader() {
+          await Promise.all([
+            import("./routes/index"),
+            import("@/components/layout/index"),
+          ])
+          return null
+        },
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AppRouter layout={AppLayout} />
+          </Suspense>
+        ),
+      },
+    ],
+  },
+])
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <RouterProvider router={router} />,
+)

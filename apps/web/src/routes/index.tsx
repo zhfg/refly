@@ -25,7 +25,7 @@ const Settings = lazy(() => import("@/pages/settings"))
 const ShareContent = lazy(() => import("@/pages/share-content"))
 
 // Loading component
-const LoadingFallback = () => (
+export const LoadingFallback = () => (
   <div
     style={{
       height: "100vh",
@@ -51,7 +51,7 @@ const prefetchRoutes = () => {
   import("@/pages/skill-detail")
   import("@/pages/settings")
   import("@/pages/share-content")
-  import("@refly-packages/ai-workspace-common/components/request-access/index")
+  import("@refly-packages/ai-workspace-common/components/request-access")
 }
 
 export const AppRouter = (props: { layout?: any }) => {

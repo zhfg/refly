@@ -206,22 +206,10 @@ export const ProjectDirectory = (props: {
         canvasId: item.id,
         projectId: projectId,
       });
-      handleAddTab({
-        projectId: projectId,
-        key: item.id,
-        title: item.title,
-        type: 'canvas',
-      });
     } else if (item.type === 'resources') {
       jumpToResource({
         resId: item.id,
         projectId: projectId,
-      });
-      handleAddTab({
-        projectId: projectId,
-        key: item.id,
-        title: item.title,
-        type: 'resource',
       });
     } else if (item.type === 'conversations') {
       jumpToConv({

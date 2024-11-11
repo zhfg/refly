@@ -45,7 +45,7 @@ export const ContentArea = (props: { projectId: string; setBindResourceModalVisi
   const { projectId, setBindResourceModalVisible } = props;
   const { t } = useTranslation();
 
-  const { tabsMap, activeTabMap, setProjectTabs, setActiveTab, handleDeleteTab } = useProjectTabs();
+  const { tabsMap, activeTabMap, setProjectTabs, handleDeleteTab } = useProjectTabs();
   const { jumpToCanvas, jumpToResource } = useJumpNewPath();
   const tabs = tabsMap[projectId] || [];
   const activeTab = tabs.find((x) => x.key === activeTabMap[projectId]);
@@ -67,7 +67,6 @@ export const ContentArea = (props: { projectId: string; setBindResourceModalVisi
   }));
 
   const onChange = (newActiveKey: string) => {
-    setActiveTab(projectId, newActiveKey);
     const tab = tabs.find((x) => x.key === newActiveKey);
     if (tab?.type === 'canvas') {
       jumpToCanvas({

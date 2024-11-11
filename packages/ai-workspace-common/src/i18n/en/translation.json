@@ -265,6 +265,10 @@
         "toolbar": {
           "quote": "Quote Content to Ask"
         }
+      },
+      "leavePageModal": {
+        "title": "Are you sure to leave the current canvas?",
+        "content": "AI is still writing, and you will lose the content if leaving the page. Are you sure to leave?"
       }
     },
     "context": {
