@@ -4,6 +4,7 @@ import cn from 'classnames';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 
 import { Segmented, Skeleton, Button, Divider, Input, Empty, Dropdown, Popconfirm, message } from 'antd';
+import type { DropdownProps } from 'antd';
 
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import {
@@ -283,9 +284,10 @@ export const ProjectDirectory = (props: {
 
     const itemRef = useRef<HTMLDivElement>(null);
     const itemClass = 'flex items-center';
-    const iconStyle = { fontSize: 16, marginRight: 4 };
+    const iconStyle = { fontSize: 16, marginRight: 8 };
     const [openMoveCanvasModal, setOpenMoveCanvasModal] = useState(false);
     const [isActive, setIsActive] = useState<boolean>(false);
+    const [dropdownVisible, setDropdownVisible] = useState(false);
 
     const handleRemoveCanvas = () => {
       const canvases = projectStore.canvases?.data?.filter((canvas) => canvas.id !== item.id);
@@ -335,7 +337,13 @@ export const ProjectDirectory = (props: {
     const canvasItems = [
       {
         label: (
-          <div className={itemClass} onClick={() => setOpenMoveCanvasModal(true)}>
+          <div
+            className={itemClass}
+            onClick={() => {
+              setDropdownVisible(false);
+              setOpenMoveCanvasModal(true);
+            }}
+          >
             <MdMoveDown style={iconStyle} />
             {t('projectDetail.directory.move')}
           </div>
@@ -350,7 +358,7 @@ export const ProjectDirectory = (props: {
             okText={t('common.confirm')}
             cancelText={t('common.cancel')}
           >
-            <div className={itemClass}>
+            <div className={`${itemClass} text-red-600`}>
               <RiDeleteBinLine style={iconStyle} />
               {t('projectDetail.directory.delete')}
             </div>
@@ -385,7 +393,7 @@ export const ProjectDirectory = (props: {
             okText={t('common.confirm')}
             cancelText={t('common.cancel')}
           >
-            <div className={itemClass}>
+            <div className={`${itemClass} text-red-600`}>
               <RiDeleteBinLine style={iconStyle} />
               {t('projectDetail.directory.delete')}
             </div>
@@ -394,6 +402,12 @@ export const ProjectDirectory = (props: {
         key: 'delete-resource',
       },
     ];
+
+    const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
+      if (info.source === 'trigger') {
+        setDropdownVisible(open);
+      }
+    };
 
     useEffect(() => {
       const active = activeTab?.key === item.id || convId === item.id;
@@ -438,8 +452,18 @@ export const ProjectDirectory = (props: {
           </div>
         )}
         {item.type !== 'conversations' && (
-          <Dropdown menu={{ items: item.type === 'canvases' ? canvasItems : resourceItems }} trigger={['click']}>
-            <div className="flex justify-center items-center flex-shrink-0 rounded-md hover:text-[#00968F] hover:bg-gray-200 w-[20px] h-[20px]">
+          <Dropdown
+            open={dropdownVisible}
+            onOpenChange={handleOpenChange}
+            menu={{
+              items: item.type === 'canvases' ? canvasItems : resourceItems,
+            }}
+            trigger={['click']}
+          >
+            <div
+              className="flex justify-center items-center flex-shrink-0 invisible group-hover:visible rounded-md hover:text-[#00968F] hover:bg-gray-200 w-[20px] h-[20px]"
+              onClick={() => setDropdownVisible(true)}
+            >
               <FiMoreVertical />
             </div>
           </Dropdown>
