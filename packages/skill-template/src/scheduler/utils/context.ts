@@ -38,11 +38,13 @@ export async function prepareContext(
     mentionedContext,
     maxTokens,
     hasContext,
+    outputLocale,
   }: {
     query: string;
     mentionedContext: IContext;
     maxTokens: number;
     hasContext: boolean;
+    outputLocale: string;
   },
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<string> {
@@ -69,6 +71,7 @@ export async function prepareContext(
     const preparedRes = await prepareWebSearchContext(
       {
         query,
+        outputLocale,
       },
       ctx,
     );
@@ -187,8 +190,10 @@ export async function prepareContext(
 export async function prepareWebSearchContext(
   {
     query,
+    outputLocale,
   }: {
     query: string;
+    outputLocale: string;
   },
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<{
@@ -199,18 +204,19 @@ export async function prepareWebSearchContext(
 
   // two searchMode
   const enableDeepReasonWebSearch = (ctx.tplConfig?.enableDeepReasonWebSearch?.value as boolean) || false;
-  const outputLocale = ctx.config.user.outputLocale;
 
   let searchLimit = 10;
   let searchLocaleListLen = 2;
   let enableRerank = true;
   let enableTranslateQuery = false;
   let searchLocaleList: string[] = ['en'];
+  let rerankRelevanceThreshold = 0.2;
 
   if (enableDeepReasonWebSearch) {
     searchLimit = 20;
     searchLocaleListLen = 3;
     enableTranslateQuery = true;
+    rerankRelevanceThreshold = 0.4;
   }
 
   const processedWebSearchContext: IContext = {
@@ -229,7 +235,7 @@ export async function prepareWebSearchContext(
       enableRerank,
       enableTranslateQuery,
       enableTranslateResult: false,
-      rerankRelevanceThreshold: 0.2,
+      rerankRelevanceThreshold,
       translateConcurrencyLimit: 10,
       webSearchConcurrencyLimit: 3,
       batchSize: 5,

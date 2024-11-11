@@ -1,18 +1,14 @@
 import { SkillRunnableConfig, BaseSkill } from '../../../base';
 import { GraphState } from '../../types';
-import { deduplicateSourcesByTitle, TimeTracker } from '@refly-packages/utils';
+import { deduplicateSourcesByTitle, TimeTracker, translateText, batchTranslateText } from '@refly-packages/utils';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
 import { Source } from '@refly-packages/openapi-schema';
 
 import { buildRewriteQuerySystemPrompt, buildRewriteQueryUserPrompt, rewriteQueryOutputSchema } from './rewriteQuery';
-import {
-  buildTranslateQuerySystemPrompt,
-  buildTranslateQueryUserPrompt,
-  translateQueryOutputSchema,
-} from './translateQuery';
 import { mergeSearchResults, searchResultsToSources, sourcesToSearchResults } from '@refly-packages/utils';
 import { translateResults } from './translateResult';
 import { performConcurrentWebSearch } from './webSearch';
+import { getOptimizedSearchLocales, normalizeLocale } from './locale';
 
 /**
  * 目标：
@@ -32,30 +28,6 @@ import { performConcurrentWebSearch } from './webSearch';
  * 1.5 基于 list sources 进行 rerank 排序生成最终的 sources 并返回
  *
  */
-
-export const LOCALE_PRIORITY = ['en', 'fr', 'es', 'de', 'it', 'ja', 'zh-CN', 'ko'];
-
-const getOptimizedSearchLocales = (baseLocale: string, enableDeepReasonWebSearch: boolean): string[] => {
-  // Start with English as base locale
-  const locales = new Set(['en']);
-
-  // Add recommended/display locale if different from English
-  if (baseLocale !== 'en') {
-    locales.add(baseLocale);
-  }
-
-  // For deep search, add one more locale from priority list
-  if (enableDeepReasonWebSearch && locales.size < 3) {
-    // Find first locale from priority list that's not already included
-    const additionalLocale = LOCALE_PRIORITY.find((locale) => !locales.has(locale));
-    if (additionalLocale) {
-      locales.add(additionalLocale);
-    }
-  }
-
-  // Convert Set back to array, maintaining LOCALE_PRIORITY order
-  return LOCALE_PRIORITY.filter((locale) => locales.has(locale));
-};
 
 interface CallMultiLingualWebSearchParams {
   searchLimit: number;
@@ -113,7 +85,6 @@ export const callMultiLingualWebSearch = async (
         new HumanMessage(
           buildRewriteQueryUserPrompt({
             query,
-            resultDisplayLocale,
           }),
         ),
       ],
@@ -130,9 +101,9 @@ export const callMultiLingualWebSearch = async (
     );
 
     // Determine display locale
-    const displayLocale =
-      resultDisplayLocale === 'auto' ? rewriteResult.analysis.recommendedDisplayLocale : resultDisplayLocale;
-    const optimizedSearchLocales = getOptimizedSearchLocales(displayLocale, enableDeepReasonWebSearch);
+    const displayLocale = resultDisplayLocale;
+    const searchLocaleListLen = enableDeepReasonWebSearch ? 3 : 2;
+    const optimizedSearchLocales = getOptimizedSearchLocales(displayLocale, searchLocaleListLen);
     searchLocaleList = optimizedSearchLocales;
 
     engine.logger.log(`Search analysis: ${JSON.stringify(rewriteResult.analysis)}`);
@@ -160,58 +131,81 @@ export const callMultiLingualWebSearch = async (
 
     // Step 2: Translate query (if enabled)
     const queryMap: Record<string, string[]> = {};
-    let translatedQueries = {};
 
+    // TODO: try/catch 处理报错，如果报错，则不进行翻译，走和 else 一样的流程
     if (enableTranslateQuery) {
       timeTracker.startStep('translateQuery');
-      const translateResult = await model.withStructuredOutput(translateQueryOutputSchema).invoke(
-        [
-          new SystemMessage(buildTranslateQuerySystemPrompt()),
-          new HumanMessage(
-            buildTranslateQueryUserPrompt({
-              queries: rewriteResult.queries.rewrittenQueries,
-              searchLocaleList,
-              sourceLocale: rewriteResult.analysis.detectedQueryLocale,
-            }),
-          ),
-        ],
-        config,
-      );
-      const translateDuration = timeTracker.endStep('translateQuery');
-      engine.logger.log(`Translate queries completed in ${translateDuration}ms`);
+      try {
+        // 构建翻译结果对象
+        const translations: Record<string, string[]> = {};
 
-      // Store translated queries for each locale
-      translatedQueries = translateResult.translations;
+        // 为每个目标语言进行翻译
+        for (const targetLocale of searchLocaleList) {
+          // 使用标准化的 locale 进行比较
+          if (normalizeLocale(targetLocale) === normalizeLocale(resultDisplayLocale)) {
+            queryMap[targetLocale] = rewriteResult.queries.rewrittenQueries;
+            continue;
+          }
 
-      // Prepare query map with translated queries
-      for (const locale of searchLocaleList) {
-        queryMap[locale] = translateResult.translations[locale] || rewriteResult.queries.rewrittenQueries;
-      }
+          // 批量翻译查询，使用标准化的 locale 进行翻译
+          const translatedQueries = await batchTranslateText(
+            rewriteResult.queries.rewrittenQueries,
+            normalizeLocale(targetLocale),
+            normalizeLocale(resultDisplayLocale),
+          );
+          queryMap[targetLocale] = translatedQueries;
+        }
 
-      ctxThis.emitEvent(
-        {
-          event: 'structured_data',
-          content: JSON.stringify([
-            {
-              step: 'translateQuery',
-              duration: translateDuration,
-              result: {
-                translatedQueries: translateResult?.translations || [],
-                enableTranslateQuery: true,
+        const translateQueryDuration = timeTracker.endStep('translateQuery');
+        engine.logger.log(`Translate query completed in ${translateQueryDuration}ms`);
+
+        ctxThis.emitEvent(
+          { event: 'log', content: `Translate query completed in ${translateQueryDuration}ms` },
+          config,
+        );
+
+        ctxThis.emitEvent(
+          {
+            event: 'structured_data',
+            content: JSON.stringify([
+              {
+                step: 'translateQuery',
+                duration: translateQueryDuration,
+                result: {
+                  translatedQueries: queryMap,
+                  enableTranslateQuery: true,
+                },
               },
-            },
-          ]),
-          structuredDataKey: 'multiLingualSearchStepUpdate',
-        },
-        config,
-      );
-      ctxThis.emitEvent(
-        {
-          event: 'log',
-          content: `Translate queries completed in ${translateDuration}ms, translatedQueries: ${translateResult.translations}`,
-        },
-        config,
-      );
+            ]),
+            structuredDataKey: 'multiLingualSearchStepUpdate',
+          },
+          config,
+        );
+      } catch (error) {
+        engine.logger.error(`Error in query translation: ${error.stack}`);
+        // 翻译失败时，使用原始查询
+        for (const locale of searchLocaleList) {
+          queryMap[locale] = rewriteResult.queries.rewrittenQueries;
+        }
+
+        ctxThis.emitEvent(
+          {
+            event: 'structured_data',
+            content: JSON.stringify([
+              {
+                step: 'translateQuery',
+                duration: 0,
+                result: {
+                  translatedQueries: queryMap,
+                  enableTranslateQuery: false,
+                },
+              },
+            ]),
+            structuredDataKey: 'multiLingualSearchStepUpdate',
+          },
+          config,
+        );
+      }
     } else {
       // If translation is disabled, use original queries for all locales
       for (const locale of searchLocaleList) {
@@ -226,7 +220,7 @@ export const callMultiLingualWebSearch = async (
               step: 'translateQuery',
               duration: 0,
               result: {
-                translatedQueries: {},
+                translatedQueries: queryMap,
                 enableTranslateQuery: false,
               },
             },
