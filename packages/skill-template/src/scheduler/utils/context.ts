@@ -193,14 +193,13 @@ export async function prepareWebSearchContext(
 
   let searchLimit = 10;
   let searchLocaleListLen = 2;
-  let enableRerank = false;
+  let enableRerank = true;
   let enableTranslateQuery = false;
   let searchLocaleList: string[] = ['en'];
 
   if (enableDeepReasonWebSearch) {
     searchLimit = 20;
     searchLocaleListLen = 3;
-    enableRerank = true;
     enableTranslateQuery = true;
   }
 

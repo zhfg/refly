@@ -34,17 +34,24 @@ const performBatchWebSearch = async ({
     limit,
   } as BatchWebSearchRequest);
 
-  return result.data.map((item, index) => ({
-    url: item.url,
-    title: item.name,
-    pageContent: item.snippet,
-    metadata: {
-      originalLocale: queries[index].hl,
-      originalQuery: queries[index].originalQuery || queries[index].q,
-      translatedQuery: enableTranslateQuery ? queries[index].q : undefined,
-      isTranslated: enableTranslateQuery,
-    },
-  }));
+  // 将结果映射回对应的查询
+  return result.data.map((item) => {
+    // 根据返回结果的 locale 找到对应的原始查询
+    const queryIndex = queries.findIndex((q) => q.hl.toLowerCase() === item.locale?.toLowerCase());
+    const query = queryIndex >= 0 ? queries[queryIndex] : null;
+
+    return {
+      url: item.url,
+      title: item.name,
+      pageContent: item.snippet,
+      metadata: {
+        originalLocale: item.locale || query?.hl || 'unknown',
+        originalQuery: query?.originalQuery || query?.q,
+        translatedQuery: enableTranslateQuery && query ? query.q : undefined,
+        isTranslated: enableTranslateQuery,
+      },
+    };
+  });
 };
 
 // Main function to handle concurrent web searches

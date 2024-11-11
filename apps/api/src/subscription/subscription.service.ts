@@ -567,7 +567,7 @@ export class SubscriptionService implements OnModuleInit {
           ...pick(usage, ['tier', 'modelProvider', 'modelName', 'inputTokens', 'outputTokens']),
           skillId: skill.skillId,
           skillTplName: skill.tplName,
-          skillDisplayName: skill.displayName,
+          skillDisplayName: skill.displayName || '',
         },
       }),
       this.prisma.tokenUsageMeter.updateMany({
