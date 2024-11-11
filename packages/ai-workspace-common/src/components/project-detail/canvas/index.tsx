@@ -614,6 +614,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
       modal.confirm({
         title: t('knowledgeBase.canvas.leavePageModal.title'),
         content: t('knowledgeBase.canvas.leavePageModal.content'),
+        centered: true,
         okText: t('common.confirm'),
         cancelText: t('common.cancel'),
         onOk: () => {
