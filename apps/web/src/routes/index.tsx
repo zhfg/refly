@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react"
 import { Route, Routes, useMatch } from "react-router-dom"
-import { Spin } from "@arco-design/web-react"
+import { Spin } from "antd"
 import { useEffect } from "react"
 import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
@@ -11,6 +11,7 @@ import {
   BetaProtectedRoute,
   RequestAccessRoute,
 } from "@refly-packages/ai-workspace-common/components/request-access/protected-route"
+import { useHandlePaymentCallback } from "@refly-packages/ai-workspace-common/hooks/use-handle-payment-callback"
 
 // Lazy load components
 const Home = lazy(() => import("@/pages/home"))
@@ -93,6 +94,9 @@ export const AppRouter = (props: { layout?: any }) => {
       i18n.changeLanguage(locale)
     }
   }, [i18n, locale])
+
+  // Handle payment callback
+  useHandlePaymentCallback()
 
   const routeLogin = useMatch("/")
 
