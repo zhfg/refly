@@ -6,6 +6,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import './search-results.scss';
 import { Source } from '@refly/openapi-schema';
 import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
+import { TranslationWrapper } from '@refly-packages/ai-workspace-common/components/translation-wrapper';
 
 export const SearchResults: React.FC<{ className?: string }> = ({ className }) => {
   const { t } = useTranslation();
@@ -44,8 +45,20 @@ export const SearchResults: React.FC<{ className?: string }> = ({ className }) =
 
   const renderPopoverContent = (item: Source) => (
     <div className="search-result-popover-content">
-      <h4>{item.title}</h4>
-      <div className="content-body">{item.pageContent}</div>
+      <h4>
+        <TranslationWrapper
+          content={item.title || ''}
+          targetLanguage={useMultilingualSearchStore.getState().outputLocale.code}
+          originalLocale={item.metadata?.originalLocale}
+        />
+      </h4>
+      <div className="content-body">
+        <TranslationWrapper
+          content={item.pageContent}
+          targetLanguage={useMultilingualSearchStore.getState().outputLocale.code}
+          originalLocale={item.metadata?.originalLocale}
+        />
+      </div>
     </div>
   );
 
@@ -78,7 +91,16 @@ export const SearchResults: React.FC<{ className?: string }> = ({ className }) =
                       window.open(item.url, '_blank');
                     }}
                   >
-                    <List.Item.Meta title={item.title} description={item.url} />
+                    <List.Item.Meta
+                      title={
+                        <TranslationWrapper
+                          content={item.title || ''}
+                          targetLanguage={useMultilingualSearchStore.getState().outputLocale.code}
+                          originalLocale={item.metadata?.originalLocale}
+                        />
+                      }
+                      description={item.url}
+                    />
                     {item.metadata?.translatedDisplayLocale && (
                       <Tag color="blue">
                         {item.metadata.originalLocale} → {item.metadata.translatedDisplayLocale}
