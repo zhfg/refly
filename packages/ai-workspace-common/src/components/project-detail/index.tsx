@@ -23,12 +23,11 @@ export const ProjectDetail = () => {
     setCurrentProjectId,
     fetchProjectAll,
     copilotSize,
-    isCopilotFullScreen,
     setCopilotSize,
     setProjectActiveConvId,
     fetchProjectDirItems,
+    setProject,
   } = useProjectStoreShallow((state) => ({
-    isCopilotFullScreen: state.isCopilotFullScreen,
     copilotSize: state.copilotSize,
     setCurrentProjectId: state.setCurrentProjectId,
     fetchProjectAll: state.fetchProjectAll,
@@ -36,6 +35,7 @@ export const ProjectDetail = () => {
     fetchProjectDetail: state.fetchProjectDetail,
     setProjectActiveConvId: state.setProjectActiveConvId,
     fetchProjectDirItems: state.fetchProjectDirItems,
+    setProject: state.setProject,
   }));
 
   const { addRecentProject } = useHandleRecents();
@@ -48,6 +48,7 @@ export const ProjectDetail = () => {
 
   const [directorySize, setDirectorySize] = useState(300);
   const [contentSize, setContentSize] = useState(450);
+  const isCopilotFullScreen = searchParams.get('fullScreen');
 
   const setInitialTab = async () => {
     const currentCanvases = useProjectStore.getState().canvases.data;
@@ -99,6 +100,8 @@ export const ProjectDetail = () => {
 
     return () => {
       setCopilotSize(500);
+      setCurrentProjectId('');
+      setProject(null);
     };
   }, [projectId]);
 

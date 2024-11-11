@@ -41,6 +41,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
   const { t } = useTranslation();
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const fullScreen = searchParams.get('fullScreen');
 
   // 所属的环境
   const runtime = getRuntime();
@@ -71,8 +72,6 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
   }));
   const projectStore = useProjectStoreShallow((state) => ({
     project: state.project,
-    isCopilotFullScreen: state.isCopilotFullScreen,
-    setIsCopilotFullScreen: state.setIsCopilotFullScreen,
   }));
 
   const handleNewTempConv = () => {
@@ -100,11 +99,15 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
     knowledgeBaseStore.updateConvModalVisible(true);
   };
 
-  useEffect(() => {
-    return () => {
-      projectStore.setIsCopilotFullScreen(false);
-    };
-  }, []);
+  const handleFullScreen = () => {
+    if (fullScreen) {
+      searchParams.delete('fullScreen');
+      setSearchParams(searchParams);
+    } else {
+      searchParams.set('fullScreen', '1');
+      setSearchParams(searchParams);
+    }
+  };
 
   return (
     <div className="knowledge-base-detail-header">
@@ -134,21 +137,19 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
           <div className="knowledge-base-detail-navigation-bar">
             {source === MessageIntentSource.Project && (
               <Tooltip
-                title={t(`knowledgeBase.header.${projectStore.isCopilotFullScreen ? 'exitFullScreen' : 'fullScreen'}`)}
+                title={t(`knowledgeBase.header.${fullScreen ? 'exitFullScreen' : 'fullScreen'}`)}
                 getPopupContainer={getPopupContainer}
               >
                 <Button
                   icon={
-                    projectStore.isCopilotFullScreen ? (
+                    fullScreen ? (
                       <RiFullscreenExitLine className="text-green-600 flex items-center" />
                     ) : (
                       <RiFullscreenFill className="text-green-600 flex items-center" />
                     )
                   }
                   type="text"
-                  onClick={() => {
-                    projectStore.setIsCopilotFullScreen(!projectStore.isCopilotFullScreen);
-                  }}
+                  onClick={handleFullScreen}
                 ></Button>
               </Tooltip>
             )}

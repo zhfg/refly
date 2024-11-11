@@ -17,7 +17,8 @@ import { ContextFilter } from './components/context-filter/index';
 import { SaveToKnowledgeBase } from './components/save-to-knowledge-base/index';
 // stores
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+
+import { useResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/resource';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 
@@ -99,8 +100,9 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
 
   const processContextFilterProps = useProcessContextFilter(true);
 
-  const currentKnowledgeBase = useKnowledgeBaseStoreShallow((state) => state.currentKnowledgeBase);
-  const currentResource = useKnowledgeBaseStoreShallow((state) => state.currentResource);
+  const { currentResource } = useResourceStoreShallow((state) => ({
+    currentResource: state.resource.data,
+  }));
   const currentCanvas = useCanvasStoreShallow((state) => state.currentCanvas);
   const { project } = useProjectStoreShallow((state) => ({
     project: state?.project?.data,

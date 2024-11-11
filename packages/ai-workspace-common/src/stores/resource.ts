@@ -28,17 +28,22 @@ export interface ResourceState {
   setResource: (resource: Resource) => void;
 
   fetchResource: (resourceId: string, reindex?: boolean) => Promise<void>;
+  resetState: () => void;
 }
+
+export const defaultState = {
+  copilotSize: 400,
+  currentResourceId: '',
+  resource: {
+    data: null,
+    loading: false,
+  },
+};
 
 export const useResourceStore = create<ResourceState>()(
   persist(
     immer((set, get) => ({
-      copilotSize: 400,
-      currentResourceId: '',
-      resource: {
-        data: null,
-        loading: false,
-      },
+      ...defaultState,
 
       setCopilotSize: (size) =>
         set((state) => {
@@ -88,6 +93,8 @@ export const useResourceStore = create<ResourceState>()(
           }
         });
       },
+
+      resetState: () => set(defaultState),
     })),
     {
       name: 'resource-storage',
