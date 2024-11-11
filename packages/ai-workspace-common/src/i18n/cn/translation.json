@@ -267,6 +267,10 @@
         "toolbar": {
           "quote": "引用内容提问"
         }
+      },
+      "leavePageModal": {
+        "title": "确认离开当前稿布吗？",
+        "content": "AI 仍在写作中，退出页面会导致内容丢失，是否确认离开？"
       }
     },
     "context": {

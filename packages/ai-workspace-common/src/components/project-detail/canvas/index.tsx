@@ -45,11 +45,12 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 import { ToC } from './ToC';
 import { IconBook } from '@arco-design/web-react/icon';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
-import { Button, Divider, message } from 'antd';
+import { Button, Divider, message, Modal } from 'antd';
 import { useProjectStore, useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
+import { useBlocker } from 'react-router-dom';
 
 class TokenStreamProcessor {
   private editor: EditorInstance;
@@ -331,8 +332,10 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
   const processorRef = useRef<TokenStreamProcessor>();
 
   const canvasStore = useCanvasStoreShallow((state) => ({
+    isAiEditing: state.isAiEditing,
     currentCanvas: state.currentCanvas,
     canvasServerStatus: state.canvasServerStatus,
+    updateIsAiEditing: state.updateIsAiEditing,
     updateCurrentCanvas: state.updateCurrentCanvas,
     updateCanvasCharsCount: state.updateCanvasCharsCount,
     updateCanvasSaveStatus: state.updateCanvasSaveStatus,
@@ -360,8 +363,6 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
         const defaultPlaceholder = t('knowledgeBase.canvas.editor.placeholder.default', {
           defaultValue: "Write something, or press 'space' for AI, '/' for commands",
         });
-
-        console.log('node', node.type.name);
 
         switch (node.type.name) {
           case 'heading':
@@ -598,6 +599,51 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
     }
   }, [readOnly]);
 
+  // Add navigation blocker
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      canvasStore.isAiEditing &&
+      (currentLocation.pathname !== nextLocation.pathname || currentLocation.search !== nextLocation.search),
+  );
+
+  const [modal, contextHolder] = Modal.useModal();
+
+  // Handle blocking navigation
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      modal.confirm({
+        title: t('knowledgeBase.canvas.leavePageModal.title'),
+        content: t('knowledgeBase.canvas.leavePageModal.content'),
+        centered: true,
+        okText: t('common.confirm'),
+        cancelText: t('common.cancel'),
+        onOk: () => {
+          canvasStore.updateIsAiEditing(false);
+          blocker.proceed();
+        },
+        onCancel: () => {
+          blocker.reset();
+        },
+      });
+    }
+  }, [blocker]);
+
+  // Add window beforeunload handler
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (canvasStore.isAiEditing) {
+        // Standard-compliant browsers
+        const message = 'AI is still editing. Changes you made may not be saved.';
+        e.preventDefault();
+        e.returnValue = message; // Chrome requires returnValue to be set
+        return message; // Safari requires return value
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [canvasStore.isAiEditing]);
+
   return (
     <div
       className={classNames('w-full', 'ai-note-editor-content-container', {
@@ -608,6 +654,15 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
     >
       {initContentSelectorElem()}
       <div className="w-full h-full">
+        {canvasStore.isAiEditing && (
+          <div
+            className="absolute inset-0 bg-transparent z-[1000] pointer-events-auto select-none"
+            onMouseDown={(e) => e.preventDefault()}
+            onMouseUp={(e) => e.preventDefault()}
+            onClick={(e) => e.preventDefault()}
+            onDoubleClick={(e) => e.preventDefault()}
+          />
+        )}
         <EditorRoot>
           <EditorContent
             extensions={extensions}
@@ -644,6 +699,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
           </EditorContent>
         </EditorRoot>
       </div>
+      {contextHolder}
     </div>
   );
 };

@@ -631,7 +631,7 @@ export class SkillService {
     if (conversation) {
       const messages = await this.prisma.chatMessage.findMany({
         where: { convId: conversation.convId },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { pk: 'asc' },
       });
       config.configurable.chatHistory = messages.map((m) => createLangchainMessage(m));
     }
@@ -1039,7 +1039,7 @@ export class SkillService {
       }),
       this.prisma.chatMessage.findMany({
         where: { uid, jobId },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { pk: 'asc' },
       }),
     ]);
 
