@@ -889,6 +889,31 @@ export const $SourceMeta = {
       type: 'string',
       description: 'Related entity type',
     },
+    originalLocale: {
+      type: 'string',
+      description: 'Original locale',
+    },
+    translatedDisplayLocale: {
+      type: 'string',
+      description: 'Translated display locale',
+    },
+    isTranslated: {
+      type: 'boolean',
+      description: 'Whether the source is translated',
+    },
+    originalQuery: {
+      type: 'string',
+      description: 'Original query',
+    },
+    translatedQuery: {
+      type: 'string',
+      description: 'Translated query',
+    },
+    sourceType: {
+      type: 'string',
+      description: 'Source type',
+      enum: ['webSearch', 'library'],
+    },
   },
 } as const;
 
@@ -946,6 +971,25 @@ export const $Source = {
       items: {
         $ref: '#/components/schemas/SourceSelection',
       },
+    },
+  },
+} as const;
+
+export const $SearchStep = {
+  type: 'object',
+  description: 'Search step',
+  properties: {
+    step: {
+      type: 'string',
+      description: 'Search step name',
+    },
+    duration: {
+      type: 'number',
+      description: 'Step duration in milliseconds',
+    },
+    result: {
+      type: 'object',
+      description: 'Step-specific result data',
     },
   },
 } as const;
@@ -3127,21 +3171,106 @@ export const $GetSubscriptionUsageResponse = {
 export const $WebSearchRequest = {
   type: 'object',
   properties: {
-    query: {
+    q: {
       type: 'string',
-      description: 'Web search query',
+      description: 'Search query',
     },
-    locale: {
+    hl: {
       type: 'string',
-      description: 'Web search locale',
-      default: 'en',
+      description: 'Language/locale code',
     },
     limit: {
       type: 'number',
       description: 'Web search result limit',
-      default: 8,
+      default: 10,
     },
   },
+} as const;
+
+export const $BatchWebSearchRequest = {
+  type: 'object',
+  properties: {
+    limit: {
+      type: 'number',
+      description: 'Web search result limit',
+      default: 10,
+    },
+    queries: {
+      type: 'array',
+      description: 'Web search queries',
+      items: {
+        $ref: '#/components/schemas/WebSearchRequest',
+      },
+    },
+  },
+} as const;
+
+export const $MultiLingualWebSearchRequest = {
+  type: 'object',
+  required: ['query', 'searchLocaleList'],
+  properties: {
+    query: {
+      type: 'string',
+      description: 'Search query',
+    },
+    searchLocaleList: {
+      type: 'array',
+      description: 'List of search locales',
+      items: {
+        type: 'string',
+      },
+    },
+    searchLimit: {
+      type: 'number',
+      description: 'Web search result limit per locale',
+    },
+    enableRerank: {
+      type: 'boolean',
+      description: 'Whether to enable reranking of search results',
+    },
+    rerankLimit: {
+      type: 'number',
+      description: 'Limit for reranked results',
+    },
+    rerankRelevanceThreshold: {
+      type: 'number',
+      description: 'Relevance threshold for reranking',
+    },
+  },
+} as const;
+
+export const $MultiLingualWebSearchResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Multilingual web search results',
+          required: ['sources', 'searchSteps'],
+          properties: {
+            sources: {
+              type: 'array',
+              description: 'Search result sources',
+              items: {
+                $ref: '#/components/schemas/Source',
+              },
+            },
+            searchSteps: {
+              type: 'array',
+              description: 'Search steps',
+              items: {
+                $ref: '#/components/schemas/SearchStep',
+              },
+            },
+          },
+        },
+      },
+    },
+  ],
 } as const;
 
 export const $WebSearchResult = {
@@ -3159,6 +3288,10 @@ export const $WebSearchResult = {
       type: 'string',
       description: 'Web search result snippet',
     },
+    locale: {
+      type: 'string',
+      description: 'Web search result locale',
+    },
   },
 } as const;
 
@@ -3175,6 +3308,26 @@ export const $WebSearchResponse = {
           description: 'Web search results',
           items: {
             $ref: '#/components/schemas/WebSearchResult',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $RerankResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Reranked results',
+          items: {
+            $ref: '#/components/schemas/SearchResult',
           },
         },
       },
@@ -3300,6 +3453,10 @@ export const $SearchResult = {
       items: {
         $ref: '#/components/schemas/SearchResultSnippet',
       },
+    },
+    relevanceScore: {
+      type: 'number',
+      description: 'Search result relevance score',
     },
     metadata: {
       description: 'Search result metadata',

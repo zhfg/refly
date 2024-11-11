@@ -42,6 +42,8 @@ export const ChatActions = (props: ChatActionsProps) => {
     setEnableKnowledgeBaseSearch: state.setEnableKnowledgeBaseSearch,
     enableAutoImportWebResource: state.enableAutoImportWebResource,
     setEnableAutoImportWebResource: state.setEnableAutoImportWebResource,
+    enableDeepReasonWebSearch: state.enableDeepReasonWebSearch,
+    setEnableDeepReasonWebSearch: state.setEnableDeepReasonWebSearch,
   }));
   const messageStateStore = useMessageStateStoreShallow((state) => ({
     pending: state.pending,
@@ -136,6 +138,21 @@ export const ChatActions = (props: ChatActionsProps) => {
         >
           <Switch size="small" checked={chatStore.enableAutoImportWebResource} />
           <span className="chat-action-item-text">{t('copilot.autoImportWebResource.title')}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'enableDeepReasonWebSearch',
+      label: (
+        <div
+          className="text-xs flex items-center gap-2"
+          onClick={(e) => {
+            e.stopPropagation();
+            chatStore.setEnableDeepReasonWebSearch(!chatStore.enableDeepReasonWebSearch);
+          }}
+        >
+          <Switch size="small" checked={chatStore.enableDeepReasonWebSearch} />
+          <span className="chat-action-item-text">{t('copilot.deepReasonWebSearch.title')}</span>
         </div>
       ),
     },

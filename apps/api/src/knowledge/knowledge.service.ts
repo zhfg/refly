@@ -90,7 +90,7 @@ export class KnowledgeService {
         where: { resourceId },
         skip: (page - 1) * pageSize,
         take: pageSize,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { pk: 'desc' },
       });
       projectIdFilter.in = relations.map((r) => r.projectId);
       projectOrder = projectIdFilter.in;
@@ -100,7 +100,7 @@ export class KnowledgeService {
       where: { projectId: projectIdFilter, uid: user.uid, deletedAt: null },
       ...(!resourceId
         ? {
-            orderBy: { createdAt: order === 'creationAsc' ? 'asc' : 'desc' },
+            orderBy: { pk: order === 'creationAsc' ? 'asc' : 'desc' },
             skip: (page - 1) * pageSize,
             take: pageSize,
           }
@@ -285,7 +285,7 @@ export class KnowledgeService {
         ? {
             skip: (page - 1) * pageSize,
             take: pageSize,
-            orderBy: { createdAt: order === 'creationAsc' ? 'asc' : 'desc' },
+            orderBy: { pk: order === 'creationAsc' ? 'asc' : 'desc' },
           }
         : {}),
     });
@@ -703,9 +703,9 @@ export class KnowledgeService {
     if (projectId) {
       orderBy.order = 'asc';
     } else if (order === 'creationAsc') {
-      orderBy.createdAt = 'asc';
+      orderBy.pk = 'asc';
     } else {
-      orderBy.createdAt = 'desc';
+      orderBy.pk = 'desc';
     }
 
     if (projectId) {

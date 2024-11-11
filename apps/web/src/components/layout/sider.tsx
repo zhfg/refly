@@ -296,7 +296,7 @@ export const SiderLayout = () => {
         showDivider: true,
         onClick: () => {
           importResourceStore.setImportResourceModalVisible(true)
-          importResourceStore.setSelectedMenuItem("import-from-weblink")
+          importResourceStore.setSelectedMenuItem("import-from-web-search")
         },
       },
     ],
@@ -340,6 +340,7 @@ export const SiderLayout = () => {
       state: {
         navigationContext: {
           shouldFetchDetail: true,
+          clearSearchParams: true,
           source: MessageIntentSource.Project,
         },
       },

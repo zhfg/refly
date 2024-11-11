@@ -73,7 +73,7 @@ export const ChatInput = (props: ChatInputProps) => {
         <TextArea
           ref={inputRef}
           autoFocus
-          value={chatStore?.newQAText}
+          value={chatStore?.newQAText || ''}
           onChange={(value) => {
             chatStore.setNewQAText(value);
           }}
@@ -83,7 +83,10 @@ export const ChatInput = (props: ChatInputProps) => {
             resize: 'none',
           }}
           placeholder={props.placeholder}
-          autoSize={{ maxRows: 6 }}
+          autoSize={{
+            minRows: 1,
+            maxRows: 5,
+          }}
         ></TextArea>
       </div>
     </div>

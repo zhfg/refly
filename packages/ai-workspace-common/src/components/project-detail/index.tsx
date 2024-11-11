@@ -132,16 +132,36 @@ export const ProjectDetail = () => {
 
   return (
     <ProjectProvider context={{ projectId }}>
-      <div className="project-detail-container overflow-hidden">
+      <div className="overflow-hidden project-detail-container">
         <Splitter
           layout="horizontal"
-          className="workspace-panel-container"
+          className="workspace-panel-container project-detail-outer-splitter"
           onResize={(size) => {
             setDirectorySize(size[0]);
             setContentSize(size[1]);
             setCopilotSize(size[2]);
           }}
         >
+          <Splitter>
+            <Splitter className="project-detail-inner-splitter">
+              <Splitter.Panel
+                collapsible
+                defaultSize={300}
+                min={300}
+                className="workspace-left-assist-panel project-detail-left-panel"
+                key="workspace-left-assist-panel"
+              >
+                <ProjectDirectory projectId={projectId} setBindResourceModalVisible={setBindResourceModalVisible} />
+              </Splitter.Panel>
+              <Splitter.Panel
+                min={450}
+                className="workspace-content-panel project-detail-main-content-panel"
+                key="workspace-content-panel-content"
+              >
+                <ContentArea projectId={projectId} setBindResourceModalVisible={setBindResourceModalVisible} />
+              </Splitter.Panel>
+            </Splitter>
+          </Splitter>
           <Splitter.Panel
             collapsible
             size={directorySize}
@@ -163,7 +183,7 @@ export const ProjectDetail = () => {
 
           <Splitter.Panel
             collapsible
-            className="workspace-content-panel"
+            className="workspace-content-panel project-detail-copilot-panel"
             size={copilotSize}
             min={400}
             key="workspace-content-panel-copilot"

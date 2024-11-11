@@ -2,6 +2,7 @@ import { LOCALE } from '@refly/common-types';
 
 export const languageNameToLocale = {
   en: {
+    'Auto (Detect Input)': 'auto',
     'English (English)': 'en',
     'Simplified Chinese (简体中文)': 'zh-CN',
     'Traditional Chinese (繁體中文)': 'zh-Hant',
@@ -24,6 +25,7 @@ export const languageNameToLocale = {
     'Persian (فارسی)': 'fa',
   },
   'zh-CN': {
+    '自动检测 (Auto Detect)': 'auto',
     '英语 (English)': 'en',
     '简体中文 (Simplified Chinese)': 'zh-CN',
     '繁体中文 (Traditional Chinese)': 'zh-Hant',
@@ -49,6 +51,7 @@ export const languageNameToLocale = {
 
 export const localeToLanguageName = {
   en: {
+    auto: 'Auto Detect',
     en: 'English',
     'zh-CN': '简体中文',
     'zh-Hant': '繁體中文',
@@ -72,6 +75,7 @@ export const localeToLanguageName = {
     fa: 'فارسی',
   },
   'zh-CN': {
+    auto: '自动检测',
     en: 'English',
     'zh-CN': '简体中文',
     'zh-Hant': '繁體中文',
@@ -98,6 +102,7 @@ export const localeToLanguageName = {
 
 export const depLocaleToLanguageName = {
   en: {
+    auto: 'Auto (Detect Input)',
     en: 'English',
     'zh-CN': 'Simplified Chinese (简体中文)',
     'zh-Hant': 'Traditional Chinese (繁體中文)',
@@ -121,6 +126,7 @@ export const depLocaleToLanguageName = {
     fa: 'Persian (فارسی)',
   },
   'zh-CN': {
+    auto: '自动检测 (Auto Detect)',
     en: '英语 (English)',
     'zh-CN': '简体中文',
     'zh-Hant': '繁體中文',

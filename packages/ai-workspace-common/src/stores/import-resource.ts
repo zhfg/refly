@@ -13,7 +13,7 @@ export interface LinkMeta {
   isError?: boolean; // 处理失败
 }
 
-export type ImportResourceMenuItem = 'import-from-weblink' | 'import-from-paste-text';
+export type ImportResourceMenuItem = 'import-from-weblink' | 'import-from-paste-text' | 'import-from-web-search';
 
 interface ImportResourceState {
   importResourceModalVisible: boolean;
@@ -39,7 +39,7 @@ export const defaultState = {
   scrapeLinks: [],
   selectedProjectId: '',
   importResourceModalVisible: false,
-  selectedMenuItem: 'import-from-weblink' as ImportResourceMenuItem,
+  selectedMenuItem: 'import-from-web-search' as ImportResourceMenuItem,
 };
 
 export const useImportResourceStore = create<ImportResourceState>()(

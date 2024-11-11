@@ -75,7 +75,8 @@
     "uuid": "^9.0.0",
     "vite-tsconfig-paths": "~4.3.2",
     "wxt": "workspace:*",
-    "zustand": "^4.5.1"
+    "zustand": "^4.5.1",
+    "lucide-react": "~0.454.0"
   },
   "devDependencies": {
     "@refly/arco-vite-plugin-react": "1.3.3",

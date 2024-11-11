@@ -3,8 +3,10 @@ import { devtools, persist } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
 import type { ClientChatMessage, IRuntime, SessionItem } from '@refly/common-types';
-import { ModelInfo, SkillContext, SkillTemplateConfig } from '@refly/openapi-schema';
+import { ModelInfo, SkillContext, SkillTemplateConfig, Source } from '@refly/openapi-schema';
 import { IntentResult } from '@refly-packages/ai-workspace-common/hooks/use-handle-ai-canvas';
+
+import { mockChatMessage, mockHumanMessage } from './mock-data';
 
 // types
 import type { CanvasEditConfig, InPlaceActionType } from '@refly/utils';
@@ -26,6 +28,7 @@ export interface MessageIntentContext {
   convId?: string;
   enableWebSearch?: boolean;
   enableAutoImportWebResource?: boolean;
+  enableDeepReasonWebSearch?: boolean;
   enableKnowledgeBaseSearch?: boolean;
   env: {
     runtime: IRuntime;
@@ -56,6 +59,7 @@ export interface ChatState {
   selectedProject?: ProjectInfo;
   enableWebSearch: boolean;
   enableAutoImportWebResource: boolean;
+  enableDeepReasonWebSearch: boolean;
   enableKnowledgeBaseSearch: boolean;
   intentMatcher: IntentResult | undefined;
 
@@ -71,6 +75,7 @@ export interface ChatState {
   setModelList: (val: ModelInfo[]) => void;
   setEnableWebSearch: (val: boolean) => void;
   setEnableAutoImportWebResource: (val: boolean) => void;
+  setEnableDeepReasonWebSearch: (val: boolean) => void;
   setEnableKnowledgeBaseSearch: (val: boolean) => void;
   setIntentMatcher: (val: IntentResult | undefined) => void;
   resetState: () => void;
@@ -93,6 +98,7 @@ const defaultConfigurableState = {
   ] as ModelInfo[],
   enableWebSearch: true,
   enableAutoImportWebResource: true,
+  enableDeepReasonWebSearch: false,
   enableKnowledgeBaseSearch: true,
 };
 
@@ -138,6 +144,7 @@ export const useChatStore = create<ChatState>()(
         setModelList: (val: ModelInfo[]) => set({ modelList: val }),
         setEnableWebSearch: (val: boolean) => set({ enableWebSearch: val }),
         setEnableAutoImportWebResource: (val: boolean) => set({ enableAutoImportWebResource: val }),
+        setEnableDeepReasonWebSearch: (val: boolean) => set({ enableDeepReasonWebSearch: val }),
         setEnableKnowledgeBaseSearch: (val: boolean) => set({ enableKnowledgeBaseSearch: val }),
         setIntentMatcher: (val: IntentResult | undefined) => set({ intentMatcher: val }),
         resetState: () => {
@@ -154,6 +161,7 @@ export const useChatStore = create<ChatState>()(
           enableWebSearch: state.enableWebSearch,
           enableAutoImportWebResource: state.enableAutoImportWebResource,
           enableKnowledgeBaseSearch: state.enableKnowledgeBaseSearch,
+          sourceListDrawer: state.sourceListDrawer,
         }),
       },
     ),

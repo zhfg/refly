@@ -307,7 +307,15 @@ export class RAGService {
   /**
    * Rerank search results using Jina Reranker.
    */
-  async rerank(query: string, results: SearchResult[]): Promise<SearchResult[]> {
+  async rerank(
+    query: string,
+    results: SearchResult[],
+    options?: { topN?: number; relevanceThreshold?: number },
+  ): Promise<SearchResult[]> {
+    const topN = options?.topN || this.config.get('reranker.topN');
+    const relevanceThreshold =
+      options?.relevanceThreshold || this.config.get('reranker.relevanceThreshold');
+
     const contentMap = new Map<string, SearchResult>();
     results.forEach((r) => {
       contentMap.set(r.snippets.map((s) => s.text).join('\n\n'), r);
@@ -316,7 +324,7 @@ export class RAGService {
     const payload = JSON.stringify({
       query,
       model: this.config.get('reranker.model'),
-      top_n: this.config.get('reranker.topN'),
+      top_n: topN,
       documents: Array.from(contentMap.keys()),
     });
 
@@ -333,11 +341,21 @@ export class RAGService {
       this.logger.debug(`Jina reranker results: ${JSON.stringify(data)}`);
 
       return data.results
-        .filter((r) => r.relevance_score >= this.config.get('reranker.relevanceThreshold'))
-        .map((r) => contentMap.get(r.document.text) as SearchResult);
+        .filter((r) => r.relevance_score >= relevanceThreshold)
+        .map((r) => {
+          const originalResult = contentMap.get(r.document.text);
+          return {
+            ...originalResult,
+            relevanceScore: r.relevance_score, // Add relevance score to the result
+          } as SearchResult;
+        });
     } catch (e) {
       this.logger.error(`Reranker failed, fallback to default: ${e.stack}`);
-      return results;
+      // When falling back, maintain the original order but add default relevance scores
+      return results.map((result, index) => ({
+        ...result,
+        relevanceScore: 1 - index * 0.1, // Simple fallback scoring based on original order
+      }));
     }
   }
 }

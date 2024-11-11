@@ -32,6 +32,8 @@ import { getCanvasContent } from '@refly-packages/ai-workspace-common/components
 // hooks
 import { IntentResult, useHandleAICanvas } from './use-handle-ai-canvas';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useMultilingualSearchStoreShallow } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
+import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 const globalStreamingChatPortRef = { current: null as Runtime.Port | null };
 const globalAbortControllerRef = { current: null as AbortController | null };
@@ -39,6 +41,9 @@ const globalIsAbortedRef = { current: false as boolean };
 let uniqueId = genUniqueId();
 
 export const useBuildTask = () => {
+  const canvasStore = useCanvasStoreShallow((state) => ({
+    updateIsAiEditing: state.updateIsAiEditing,
+  }));
   const chatStore = useChatStoreShallow((state) => ({
     setMessages: state.setMessages,
     setNewQAText: state.setNewQAText,
@@ -53,6 +58,11 @@ export const useBuildTask = () => {
   const conversationStore = useConversationStoreShallow((state) => ({
     setCurrentConversation: state.setCurrentConversation,
     currentConversation: state.currentConversation,
+  }));
+  const multilingualSearchStore = useMultilingualSearchStoreShallow((state) => ({
+    addSearchStep: state.addSearchStep,
+    setResults: state.setResults,
+    setProcessingStep: state.setProcessingStep,
   }));
 
   // hooks
@@ -162,16 +172,29 @@ export const useBuildTask = () => {
       lastRelatedMessage.content = '';
     }
 
-    // 获取更新前的 canvas 内容
+    // Get canvas content before update
     const prevCanvasContent = getCanvasContent(lastRelatedMessage.content);
 
-    // 更新消息内容
+    // Update message content
     lastRelatedMessage.content += skillEvent.content;
 
-    // 获取更新后的 canvas 内容
+    // Update canvas AI editing status
+    if (lastRelatedMessage.content.match(/<reflyCanvas[^>]*>/)) {
+      if (lastRelatedMessage.content.includes('</reflyCanvas>')) {
+        if (useCanvasStore.getState().isAiEditing) {
+          canvasStore.updateIsAiEditing(false);
+        }
+      } else {
+        if (!useCanvasStore.getState().isAiEditing) {
+          canvasStore.updateIsAiEditing(true);
+        }
+      }
+    }
+
+    // Get updated canvas content
     const currentCanvasContent = getCanvasContent(lastRelatedMessage.content);
 
-    // 计算增量内容
+    // Calculate incremental content
     let incrementalContent = currentCanvasContent.slice(prevCanvasContent.length);
     if (incrementalContent?.length > 0) {
       incrementalContent = incrementalContent
@@ -181,7 +204,7 @@ export const useBuildTask = () => {
         .replace(/&lt;\/reflyCanvas&gt;/g, '');
     }
 
-    // 处理 Citation 的序列号
+    // Handle citation sequence numbers
     lastRelatedMessage.content = markdownCitationParse(lastRelatedMessage.content);
 
     messages[lastRelatedMessageIndex] = lastRelatedMessage;
@@ -191,7 +214,7 @@ export const useBuildTask = () => {
       messageStateStore.setMessageState({ pendingFirstToken: false });
     }
 
-    // 如果是画布内容且有增量内容，发送到编辑器
+    // If it is canvas content and has incremental content, send it to the editor
     const intentMatcher = lastRelatedMessage?.structuredData?.intentMatcher as IntentResult;
     if (
       [CanvasIntentType.GenerateCanvas, CanvasIntentType.EditCanvas].includes(intentMatcher?.type) &&
@@ -199,11 +222,13 @@ export const useBuildTask = () => {
     ) {
       if (intentMatcher?.type === CanvasIntentType.GenerateCanvas && incrementalContent) {
         editorEmitter.emit('streamCanvasContent', {
+          canvasId: intentMatcher?.canvasId,
           isFirst: isFirstStreamContent,
           content: incrementalContent,
         });
       } else if (intentMatcher?.type === CanvasIntentType.EditCanvas && incrementalContent) {
         editorEmitter.emit('streamEditCanvasContent', {
+          canvasId: intentMatcher?.canvasId,
           isFirst: isFirstStreamContent,
           content: incrementalContent,
         });
@@ -243,7 +268,15 @@ export const useBuildTask = () => {
       return;
     }
 
-    if (['sources', 'relatedQuestions', 'intentMatcher'].includes(skillEvent?.structuredDataKey)) {
+    if (
+      [
+        'sources',
+        'relatedQuestions',
+        'intentMatcher',
+        'multiLingualSearchStepUpdate',
+        'multiLingualSearchResult',
+      ].includes(skillEvent?.structuredDataKey)
+    ) {
       let existingData = lastRelatedMessage.structuredData[skillEvent.structuredDataKey];
       const isObject = (val: unknown): val is Record<string, unknown> =>
         typeof val === 'object' && val !== null && !Array.isArray(val);
@@ -273,6 +306,22 @@ export const useBuildTask = () => {
       handleStructuredDataChange(lastRelatedMessage);
       chatStore.setIntentMatcher(structuredData);
       chatStore.setNewQAText(''); // make sure the chat input is cleaned (we did not clean it in the home page)
+    }
+
+    if (skillEvent?.structuredDataKey === 'multiLingualSearchStepUpdate') {
+      // TODO: 未来实现
+      const step = structuredData?.[0];
+
+      if (step?.step === 'finish') {
+        multilingualSearchStore.addSearchStep(step);
+      } else {
+        // For other steps, add them while keeping the Processing step at the end
+        multilingualSearchStore.addSearchStep(step);
+        multilingualSearchStore.setProcessingStep();
+      }
+    } else if (skillEvent?.structuredDataKey === 'multiLingualSearchResult') {
+      const results = structuredData;
+      multilingualSearchStore.setResults(results);
     }
   };
 

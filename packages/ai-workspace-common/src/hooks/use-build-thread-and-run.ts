@@ -122,6 +122,7 @@ export const useBuildThreadAndRun = () => {
     const enableWebSearch = messageIntentContext?.enableWebSearch;
     const enableAutoImportWebResource = messageIntentContext?.enableAutoImportWebResource;
     const enableKnowledgeBaseSearch = messageIntentContext?.enableKnowledgeBaseSearch;
+    const enableDeepReasonWebSearch = messageIntentContext?.enableDeepReasonWebSearch;
 
     const conv = ensureConversationExist(projectId, forceNewConv);
     const skillContext = invokeParams?.skillContext || buildSkillContext();
@@ -164,6 +165,12 @@ export const useBuildThreadAndRun = () => {
             configScope: 'runtime' as unknown as ConfigScope,
             displayValue: t('copilot.knowledgeBaseSearch.title'),
             label: t('copilot.knowledgeBaseSearch.title'),
+          },
+          enableDeepReasonWebSearch: {
+            value: enableDeepReasonWebSearch,
+            configScope: 'runtime' as unknown as ConfigScope,
+            displayValue: t('copilot.deepReasonWebSearch.title'),
+            label: t('copilot.deepReasonWebSearch.title'),
           },
           ...(canvasEditConfig
             ? {

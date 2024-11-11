@@ -159,7 +159,13 @@ export default {
       },
     },
   },
-  plugins: [forms, animate, typography],
+  plugins: [
+    forms({
+      strategy: "class", // 只在使用 form-* 类时应用样式
+    }),
+    animate,
+    typography,
+  ],
   corePlugins: {
     preflight: false,
   },

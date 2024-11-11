@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Project, Resource } from '@refly/openapi-schema';
+import { Project, Resource, Source } from '@refly/openapi-schema';
+import { ClientChatMessage } from '@refly/common-types';
 
 export enum ActionSource {
   KnowledgeBase = 'knowledge-base',
@@ -15,6 +16,13 @@ export interface KnowledgeBaseTab {
   key: string;
   content: string;
   resourceId: string;
+}
+
+export interface SourceListDrawer {
+  visible: boolean;
+  sources?: Source[];
+  currentHumanMessage?: ClientChatMessage;
+  currentAIMessage?: ClientChatMessage;
 }
 
 export interface KnowledgeBaseState {
@@ -40,8 +48,7 @@ export interface KnowledgeBaseState {
   actionSource: ActionSource;
 
   // source-list
-  sourceListModalVisible: boolean;
-  tempConvResources: Resource[];
+  sourceListDrawer: SourceListDrawer;
 
   updateIsSaveKnowledgeBaseModalVisible: (isSaveKnowledgeBaseModalVisible: boolean) => void;
   updateIsRequesting: (isRequesting: boolean) => void;
@@ -53,8 +60,7 @@ export interface KnowledgeBaseState {
   updateConvModalVisible: (convModalVisible: boolean) => void;
   updateActionSource: (actionSource: ActionSource) => void;
   updateKbModalVisible: (kbModalVisible: boolean) => void;
-  updateSourceListModalVisible: (sourceListModalVisible: boolean) => void;
-  updateTempConvResources: (tempConvResources: Resource[]) => void;
+  updateSourceListDrawer: (sourceListDrawer: Partial<SourceListDrawer>) => void;
   updateTabs: (tabs: KnowledgeBaseTab[]) => void;
   updateActiveTab: (key: string) => void;
   updateResourcePanelVisible: (visible: boolean) => void;
@@ -75,8 +81,12 @@ export const defaultState = {
   resourcePanelVisible: false,
   convModalVisible: false,
   kbModalVisible: false,
-  sourceListModalVisible: false,
-  tempConvResources: [] as Resource[],
+  sourceListDrawer: {
+    visible: false,
+    sources: [],
+    currentHumanMessage: undefined,
+    currentAIMessage: undefined,
+  },
   actionSource: ActionSource.Conv,
   currentKnowledgeBase: null,
   currentResource: null,
@@ -112,11 +122,10 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
     updateHasMore: (hasMore: boolean) => set((state) => ({ ...state, hasMore })),
     updateConvModalVisible: (convModalVisible: boolean) => set((state) => ({ ...state, convModalVisible })),
     updateKbModalVisible: (kbModalVisible: boolean) => set((state) => ({ ...state, kbModalVisible })),
-    updateSourceListModalVisible: (sourceListModalVisible: boolean) =>
-      set((state) => ({ ...state, sourceListModalVisible })),
     updateIsRequesting: (isRequesting: boolean) => set((state) => ({ ...state, isRequesting })),
     updateActionSource: (actionSource: ActionSource) => set((state) => ({ ...state, actionSource })),
-    updateTempConvResources: (tempConvResources: Resource[]) => set((state) => ({ ...state, tempConvResources })),
+    updateSourceListDrawer: (sourceListDrawer: Partial<SourceListDrawer>) =>
+      set((state) => ({ ...state, sourceListDrawer: { ...state.sourceListDrawer, ...sourceListDrawer } })),
 
     updateTabs: (tabs: KnowledgeBaseTab[]) => set((state) => ({ ...state, tabs })),
     updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),

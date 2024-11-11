@@ -112,7 +112,7 @@ export class ConversationService {
       }),
       this.prisma.chatMessage.findMany({
         where: { convId, uid: user.uid },
-        orderBy: { createdAt: 'asc' },
+        orderBy: { pk: 'asc' },
       }),
     ]);
 

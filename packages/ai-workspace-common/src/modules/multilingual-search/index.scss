@@ -1,0 +1,19 @@
+.multilingual-search-container {
+  height: 100%;
+  position: relative;
+
+  .multilingual-search-inner-container {
+    padding: 2rem;
+    overflow-y: auto;
+    height: 100%;
+  }
+
+  .multilingual-search-action-menu-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 12px;
+    background: #fcfcf9;
+  }
+}

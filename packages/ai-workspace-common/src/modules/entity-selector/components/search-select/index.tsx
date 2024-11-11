@@ -126,6 +126,7 @@ export const SearchSelect = (props: SearchSelectProps) => {
                 <Input
                   allowClear
                   size="small"
+                  placeholder={t(`entitySelector.createEntity.${domain}`)}
                   style={{ marginRight: 8 }}
                   value={newEntityName}
                   onChange={(e) => setNewEntityName(e.target.value)}

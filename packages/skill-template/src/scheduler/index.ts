@@ -1,4 +1,4 @@
-import { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
+import { AIMessage, AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 
 // schema
@@ -10,7 +10,13 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { ToolMessage } from '@langchain/core/messages';
 import { CanvasEditConfig, pick, safeParseJSON, safeStringifyJSON } from '@refly-packages/utils';
-import { Icon, SkillInvocationConfig, SkillMeta, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SkillInvocationConfig,
+  SkillMeta,
+  SkillTemplateConfigSchema,
+  Source,
+} from '@refly-packages/openapi-schema';
 import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { randomUUID } from 'node:crypto';
 import { createSkillInventory } from '../inventory';
@@ -41,6 +47,7 @@ import * as commonQnA from './module/commonQnA';
 import { HighlightSelection, SelectedRange } from './module/editCanvas/types';
 
 import { InPlaceEditType } from '@refly-packages/utils';
+import { detectLanguage } from '@refly-packages/utils';
 
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
@@ -79,6 +86,19 @@ export class Scheduler extends BaseSkill {
           'zh-CN': '启用自动导入网页资源',
         },
         defaultValue: true,
+      },
+      {
+        key: 'enableDeepReasonWebSearch',
+        inputMode: 'radio',
+        labelDict: {
+          en: 'Deep Reason Web Search',
+          'zh-CN': '深度网页搜索',
+        },
+        descriptionDict: {
+          en: 'Enable deep reason web search',
+          'zh-CN': '启用深度网页搜索',
+        },
+        defaultValue: false,
       },
       {
         key: 'enableKnowledgeBaseSearch',
@@ -336,6 +356,8 @@ Please generate the summary based on these requirements and offer suggestions fo
     let mentionedContext: IContext;
     let context: string = '';
 
+    const detectedLang = (await detectLanguage(originalQuery)) || locale || 'en';
+
     // preprocess query, ensure query is not too long
     const query = preprocessQuery(originalQuery, {
       config: config,
@@ -388,6 +410,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       context = await prepareContext(
         {
           query: optimizedQuery,
+          outputLocale: detectedLang,
           mentionedContext,
           maxTokens: remainingTokens,
           hasContext,
@@ -819,9 +842,9 @@ You are an SEO (Search Engine Optimization) expert, skilled at identifying key i
 - Propose three questions that best fit the context's semantics based on key information, to assist users in better understanding the content.
 - Format example:
 =====
-   - ❓ Recommended Question 1: <Question 1>
-   - ❓ Recommended Question 2: <Question 2>
-   - ❓ Recommended Question 3: <Question 3>
+   - Recommended Question 1: <Question 1>
+   - Recommended Question 2: <Question 2>
+   - Recommended Question 3: <Question 3>
 =====
 
 ## Emphasis
@@ -947,17 +970,20 @@ Generated question example:
       .addNode('rewriteCanvas', this.callRewriteCanvas)
       .addNode('editCanvas', this.callEditCanvas)
       .addNode('other', this.callCommonQnA)
+      // .addNode('callMultiLingualWebSearch', this.callMultiLingualWebSearch)
       .addNode('relatedQuestions', this.genRelatedQuestions);
 
     // workflow.addConditionalEdges(START, this.shouldDirectCallSkill);
     // workflow.addConditionalEdges('direct', this.onDirectSkillCallFinish);
     // workflow.addConditionalEdges('scheduler', this.shouldCallSkill);
     workflow.addConditionalEdges(START, this.callScheduler);
+    // workflow.addEdge(START, 'callMultiLingualWebSearch');
     // workflow.addEdge(START, 'editCanvas');
     workflow.addEdge('generateCanvas', 'relatedQuestions');
     workflow.addEdge('rewriteCanvas', 'relatedQuestions');
     workflow.addEdge('editCanvas', 'relatedQuestions');
     workflow.addEdge('other', 'relatedQuestions');
+    // workflow.addEdge('callMultiLingualWebSearch', 'relatedQuestions');
     workflow.addEdge('relatedQuestions', END);
 
     return workflow.compile();
