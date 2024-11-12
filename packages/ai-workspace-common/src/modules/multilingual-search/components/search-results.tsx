@@ -11,9 +11,26 @@ import { SearchLocale } from '../stores/multilingual-search';
 import { safeParseURL } from '@refly-packages/utils/url';
 import { AiOutlineGlobal, AiOutlineTranslation } from 'react-icons/ai';
 
-export const SearchResults: React.FC<{ className?: string; outputLocale: SearchLocale }> = ({
+interface SearchResultsProps {
+  className?: string;
+  outputLocale: SearchLocale;
+  config?: {
+    showCheckbox?: boolean; // 是否显示复选框
+    startIndex?: number; // 序号起始值
+    showIndex?: boolean; // 是否显示序号
+    handleItemClick?: (item: Source) => void; // 自定义点击处理
+  };
+}
+
+export const SearchResults: React.FC<SearchResultsProps> = ({
   className,
   outputLocale,
+  config = {
+    showCheckbox: true,
+    startIndex: 1,
+    showIndex: true,
+    handleItemClick: (item) => window.open(item.url, '_blank'),
+  },
 }) => {
   const { t } = useTranslation();
   const { results, selectedItems, toggleSelectedItem } = useMultilingualSearchStoreShallow((state) => ({
@@ -80,10 +97,12 @@ export const SearchResults: React.FC<{ className?: string; outputLocale: SearchL
           renderItem={(item, index) => (
             <List.Item className="result-item">
               <div className="result-item-inner">
-                <Checkbox
-                  checked={selectedItems.includes(item)}
-                  onChange={(e) => toggleSelectedItem(item, e.target.checked)}
-                />
+                {config.showCheckbox && (
+                  <Checkbox
+                    checked={selectedItems.includes(item)}
+                    onChange={(e) => toggleSelectedItem(item, e.target.checked)}
+                  />
+                )}
                 <Popover
                   content={renderPopoverContent(item)}
                   title={null}
@@ -92,17 +111,14 @@ export const SearchResults: React.FC<{ className?: string; outputLocale: SearchL
                   trigger="hover"
                   mouseEnterDelay={0.5}
                 >
-                  <div
-                    className="result-details"
-                    onClick={(e) => {
-                      window.open(item.url, '_blank');
-                    }}
-                  >
-                    <div className="w-5">
-                      <span className="h-8 w-8 inline-flex items-center justify-center origin-top-left scale-[60%] transform cursor-pointer rounded-full bg-zinc-100 text-center text-base font-medium no-underline hover:bg-zinc-300">
-                        {index + 1}
-                      </span>
-                    </div>
+                  <div className="result-details" onClick={() => config.handleItemClick?.(item)}>
+                    {config.showIndex && (
+                      <div className="w-5">
+                        <span className="h-8 w-8 inline-flex items-center justify-center origin-top-left scale-[60%] transform cursor-pointer rounded-full bg-zinc-100 text-center text-base font-medium no-underline hover:bg-zinc-300">
+                          {(config.startIndex || 1) + index}
+                        </span>
+                      </div>
+                    )}
                     <div className="result-body">
                       <div className="result-header">
                         <div className="site-info">

@@ -73,7 +73,7 @@ export const useMultilingualSearchStore = create<SearchState>((set) => ({
   isSearching: false,
   searchProgress: 0,
   searchSteps: [],
-  results: mockResults,
+  results: [],
 
   selectedItems: [],
   setSelectedItems: (items) => set({ selectedItems: items }),
@@ -112,7 +112,7 @@ export const useMultilingualSearchStore = create<SearchState>((set) => ({
       results: [],
     }),
 
-  pageState: 'results',
+  pageState: 'home',
   setPageState: (state) => set({ pageState: state }),
 
   resetAll: () =>

@@ -71,12 +71,15 @@ export const SourceListModal = (props: SourceListModalProps) => {
     if (activeTab === 'webSearch' && knowledgeBaseStore.sourceListDrawer.visible) {
       setResults(groupedSources.webSearch);
       setIsSearching(false);
+    } else if (activeTab === 'library' && knowledgeBaseStore.sourceListDrawer.visible) {
+      setResults(groupedSources.library);
+      setIsSearching(false);
     } else {
       // 清理状态
       setResults([]);
       setIsSearching(false);
     }
-  }, [knowledgeBaseStore.sourceListDrawer.visible, groupedSources.webSearch, activeTab]);
+  }, [knowledgeBaseStore.sourceListDrawer.visible, groupedSources.webSearch, groupedSources.library, activeTab]);
 
   return (
     <Drawer
@@ -143,7 +146,16 @@ export const SourceListModal = (props: SourceListModalProps) => {
                 <div className="source-list-modal-web-search">
                   {groupedSources.webSearch.length > 0 && (
                     <>
-                      <SearchResults outputLocale={outputLocale} />
+                      <SearchResults
+                        outputLocale={outputLocale}
+                        config={{
+                          showCheckbox: true,
+                          showIndex: true,
+                          handleItemClick: (item) => {
+                            window.open(item.url, '_blank');
+                          },
+                        }}
+                      />
                     </>
                   )}
                 </div>
@@ -160,7 +172,17 @@ export const SourceListModal = (props: SourceListModalProps) => {
                 <div className="source-list-modal-web-search">
                   {groupedSources.library.length > 0 && (
                     <>
-                      <SearchResults outputLocale={outputLocale} />
+                      <SearchResults
+                        outputLocale={outputLocale}
+                        config={{
+                          showCheckbox: false,
+                          showIndex: true,
+                          startIndex: groupedSources.webSearch.length + 1,
+                          handleItemClick: (item) => {
+                            window.open(item.url, '_blank');
+                          },
+                        }}
+                      />
                     </>
                   )}
                 </div>
