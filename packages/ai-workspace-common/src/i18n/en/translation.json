@@ -337,14 +337,52 @@
   },
   "resource": {
     "multilingualSearch": {
-      "placeholder": "Search the world in your own language",
+      "title": "Search the world in your own language",
+      "placeholder": "Search anything...",
       "searchLabel": "Search Language",
       "displayLabel": "Display Language",
       "selectSearchLanguages": "Select Search Languages",
       "selectDisplayLanguage": "Select Display Language",
       "enableRerank": "Enable Rerank",
       "searchLocales": "Search Language",
-      "displayLocale": "Display Language"
+      "displayLocale": "Display Language",
+      "searchResults": "Search Results",
+      "search": "Search",
+      "noResults": "No results found",
+      "progress": {
+        "title": "Search Process",
+        "summary": "{{count}} results ({{duration}}ms)",
+        "duration": "{{duration}}ms"
+      },
+      "steps": {
+        "processing": "Processing...",
+        "rewriteQuery": {
+          "title": "Rewrite Query",
+          "rewrittenQueries": "Rewritten Queries",
+          "outputLocale": "Output Locale",
+          "searchLocales": "Search Locales"
+        },
+        "translateQuery": {
+          "title": "Translate Query"
+        },
+        "webSearch": {
+          "title": "Web Search",
+          "results": "Results",
+          "searchLocales": "Search Locales"
+        },
+        "translateResults": {
+          "title": "Translate Results",
+          "results": "Results",
+          "searchLocales": "Search Locales"
+        },
+        "rerank": {
+          "title": "Rerank Results",
+          "finalResults": "Final Results"
+        },
+        "finish": {
+          "title": "Complete"
+        }
+      }
     },
     "import": {
       "title": "Resource Integration",

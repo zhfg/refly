@@ -712,6 +712,10 @@ export type SourceMeta = {
    */
   entityType?: string;
   /**
+   * Related project ID
+   */
+  projectId?: string;
+  /**
    * Original locale
    */
   originalLocale?: string;
@@ -2227,6 +2231,10 @@ export type MultiLingualWebSearchRequest = {
    * List of search locales
    */
   searchLocaleList: Array<string>;
+  /**
+   * Display locale
+   */
+  displayLocale?: string;
   /**
    * Web search result limit per locale
    */

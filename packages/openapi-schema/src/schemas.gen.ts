@@ -889,6 +889,10 @@ export const $SourceMeta = {
       type: 'string',
       description: 'Related entity type',
     },
+    projectId: {
+      type: 'string',
+      description: 'Related project ID',
+    },
     originalLocale: {
       type: 'string',
       description: 'Original locale',
@@ -3219,6 +3223,11 @@ export const $MultiLingualWebSearchRequest = {
       items: {
         type: 'string',
       },
+    },
+    displayLocale: {
+      type: 'string',
+      description: 'Display locale',
+      default: 'auto',
     },
     searchLimit: {
       type: 'number',

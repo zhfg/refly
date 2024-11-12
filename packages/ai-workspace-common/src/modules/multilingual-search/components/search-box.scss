@@ -1,34 +1,9 @@
 .search-progress {
   padding-top: 8px;
-  max-width: 800px;
   margin: 0 auto;
 
   .duration {
     color: #888;
     font-size: 0.9em;
   }
-}
-
-.search-box {
-  .search-container {
-    .search-options {
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-
-      .select-group {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-
-        .select-label {
-          font-size: 12px;
-          color: #666;
-          margin-left: 4px;
-        }
-      }
-    }
-  }
-
-  // ... rest of the existing styles
 }

@@ -19,6 +19,7 @@ import {
   useMultilingualSearchStoreShallow,
 } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 const TabPane = Tabs.TabPane;
 
@@ -36,6 +37,7 @@ export const SourceListModal = (props: SourceListModalProps) => {
     sourceListDrawer: state.sourceListDrawer,
     updateSourceListDrawer: state.updateSourceListDrawer,
   }));
+  const { jumpToResource, jumpToCanvas } = useJumpNewPath();
 
   const outputLocale = i18n.language as any as SearchLocale;
 
@@ -66,17 +68,22 @@ export const SourceListModal = (props: SourceListModalProps) => {
     );
   }, [knowledgeBaseStore?.sourceListDrawer?.sources]);
 
+  console.log('groupedSources', groupedSources);
+
   // 初始化搜索结果到 store
   useEffect(() => {
     if (activeTab === 'webSearch' && knowledgeBaseStore.sourceListDrawer.visible) {
       setResults(groupedSources.webSearch);
+      setIsSearching(false);
+    } else if (activeTab === 'library' && knowledgeBaseStore.sourceListDrawer.visible) {
+      setResults(groupedSources.library);
       setIsSearching(false);
     } else {
       // 清理状态
       setResults([]);
       setIsSearching(false);
     }
-  }, [knowledgeBaseStore.sourceListDrawer.visible, groupedSources.webSearch, activeTab]);
+  }, [knowledgeBaseStore.sourceListDrawer.visible, groupedSources.webSearch, groupedSources.library, activeTab]);
 
   return (
     <Drawer
@@ -143,7 +150,16 @@ export const SourceListModal = (props: SourceListModalProps) => {
                 <div className="source-list-modal-web-search">
                   {groupedSources.webSearch.length > 0 && (
                     <>
-                      <SearchResults outputLocale={outputLocale} />
+                      <SearchResults
+                        outputLocale={outputLocale}
+                        config={{
+                          showCheckbox: true,
+                          showIndex: true,
+                          handleItemClick: (item) => {
+                            window.open(item.url, '_blank');
+                          },
+                        }}
+                      />
                     </>
                   )}
                 </div>
@@ -157,19 +173,35 @@ export const SourceListModal = (props: SourceListModalProps) => {
                 </span>
               ),
               children: (
-                <SourceDetailList
-                  placeholder={t('copilot.sourceListModal.searchPlaceholder')}
-                  sources={groupedSources.library}
-                  classNames={props.classNames}
-                  handleItemClick={() => {}}
-                />
+                <div className="source-list-modal-web-search">
+                  <SearchResults
+                    outputLocale={outputLocale}
+                    config={{
+                      showCheckbox: false,
+                      showIndex: true,
+                      startIndex: groupedSources.webSearch.length + 1,
+                      handleItemClick: (item) => {
+                        if (item?.metadata?.sourceType === 'library' && item?.metadata?.entityType === 'resource') {
+                          jumpToResource({ resId: item.metadata.entityId });
+                          knowledgeBaseStore.updateSourceListDrawer({ visible: false });
+                        } else if (
+                          item?.metadata?.sourceType === 'library' &&
+                          item?.metadata?.entityType === 'canvas'
+                        ) {
+                          jumpToCanvas({ canvasId: item.metadata?.entityId, projectId: item?.metadata?.projectId });
+                          knowledgeBaseStore.updateSourceListDrawer({ visible: false });
+                        }
+                      },
+                    }}
+                  />
+                </div>
               ),
             },
           ]}
         />
         {activeTab === 'webSearch' && groupedSources.webSearch.length > 0 && (
           <div className="source-list-modal-action-menu-container">
-            <ActionMenu />
+            <ActionMenu getTarget={() => document.querySelector('.source-list-modal-tabs') as HTMLElement} />
           </div>
         )}
       </div>

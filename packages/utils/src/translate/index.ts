@@ -86,7 +86,7 @@ export async function batchTranslateText(
   for (const text of texts) {
     const translated = await translateText(text, targetLanguage, sourceLanguage);
     results.push(translated);
-    await delay(1000); // 添加1秒延迟
+    await delay(100); // 添加1秒延迟
   }
 
   return results;

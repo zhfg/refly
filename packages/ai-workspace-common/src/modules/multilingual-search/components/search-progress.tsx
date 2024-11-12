@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Timeline, Button } from 'antd';
-import { IconUp, IconDown } from '@arco-design/web-react/icon';
+import { Timeline, Button, Spin, Collapse } from 'antd';
+import { IconLoading } from '@arco-design/web-react/icon';
 import { useMultilingualSearchStore } from '../stores/multilingual-search';
 import './search-progress.scss';
+import { useTranslation } from 'react-i18next';
 
-const renderStepResult = (step: string, result: any) => {
+const renderStepResult = (step: string, result: any, t: any) => {
   switch (step) {
     case 'rewriteQuery':
       return (
         <ul>
-          <li>Rewritten Queries: {result.rewrittenQueries.join(', ')}</li>
-          <li>Output Locale: {result.outputLocale}</li>
-          <li>Search Locales: {result.searchLocales.join(', ')}</li>
+          <li>
+            {t('resource.multilingualSearch.steps.rewriteQuery.rewrittenQueries')}: {result.rewrittenQueries.join(', ')}
+          </li>
+          <li>
+            {t('resource.multilingualSearch.steps.rewriteQuery.outputLocale')}: {result.outputLocale}
+          </li>
+          <li>
+            {t('resource.multilingualSearch.steps.rewriteQuery.searchLocales')}: {result.searchLocales.join(', ')}
+          </li>
         </ul>
       );
 
@@ -30,15 +37,21 @@ const renderStepResult = (step: string, result: any) => {
     case 'translateResults':
       return (
         <ul>
-          <li>Results: {result.length}</li>
-          <li>Search Locales: {result.localeLength}</li>
+          <li>
+            {t('resource.multilingualSearch.steps.webSearch.results')}: {result.length}
+          </li>
+          <li>
+            {t('resource.multilingualSearch.steps.webSearch.searchLocales')}: {result.localeLength}
+          </li>
         </ul>
       );
 
     case 'rerank':
       return (
         <ul>
-          <li>Final Results: {result.length}</li>
+          <li>
+            {t('resource.multilingualSearch.steps.rerank.finalResults')}: {result.length}
+          </li>
         </ul>
       );
 
@@ -58,44 +71,78 @@ const renderStepResult = (step: string, result: any) => {
   }
 };
 
-export const SearchProgress: React.FC = () => {
-  const [isExpanded, setIsExpanded] = useState(true);
-  const { searchSteps, isSearching, results } = useMultilingualSearchStore((state) => ({
-    searchSteps: state.searchSteps,
-    isSearching: state.isSearching,
-    results: state.results,
-  }));
+// 步骤名称映射
+const getStepName = (step: string, t: any) => {
+  const stepMap: Record<string, string> = {
+    rewriteQuery: t('resource.multilingualSearch.steps.rewriteQuery.title'),
+    translateQuery: t('resource.multilingualSearch.steps.translateQuery.title'),
+    webSearch: t('resource.multilingualSearch.steps.webSearch.title'),
+    translateResults: t('resource.multilingualSearch.steps.translateResults.title'),
+    rerank: t('resource.multilingualSearch.steps.rerank.title'),
+    finish: t('resource.multilingualSearch.steps.finish.title'),
+    'Processing...': t('resource.multilingualSearch.steps.processing'),
+  };
 
-  // Auto expand when searching starts
+  return stepMap[step] || step;
+};
+
+export const SearchProgress: React.FC = () => {
+  const { t } = useTranslation();
+  const { searchSteps, isSearching, results, clearSearchSteps, setProcessingStep } = useMultilingualSearchStore(
+    (state) => ({
+      searchSteps: state.searchSteps,
+      isSearching: state.isSearching,
+      results: state.results,
+      clearSearchSteps: state.clearSearchSteps,
+      setProcessingStep: state.setProcessingStep,
+    }),
+  );
+
   useEffect(() => {
-    setIsExpanded(isSearching);
-  }, [isSearching]);
+    if (isSearching) {
+      clearSearchSteps();
+      setProcessingStep();
+    }
+  }, [isSearching, clearSearchSteps]);
 
   const finishStep = searchSteps.find((step) => step.step === 'finish');
-  const summaryText = finishStep ? `${results.length} results (${finishStep.duration}ms)` : 'Processing...';
-
-  console.log('searchSteps', searchSteps);
+  const summaryText = finishStep
+    ? t('resource.multilingualSearch.progress.summary', { count: results.length, duration: finishStep.duration })
+    : t('resource.multilingualSearch.steps.processing');
 
   return (
     <div className="search-progress">
-      <div className="search-progress-header" onClick={() => setIsExpanded(!isExpanded)}>
-        <Button type="text" icon={isExpanded ? <IconUp /> : <IconDown />}>
-          Search Process - {summaryText}
-        </Button>
-      </div>
-      {isExpanded && (
-        <Timeline
-          items={searchSteps.map((step) => ({
+      <Collapse
+        ghost
+        defaultActiveKey={isSearching ? ['1'] : []}
+        items={[
+          {
+            key: '1',
+            label: `${t('resource.multilingualSearch.progress.title')} - ${summaryText}`,
             children: (
-              <div className="step-content">
-                <h4>{step.step}</h4>
-                {step.result && renderStepResult(step.step, step.result)}
-                <span className="duration">{step.duration}ms</span>
-              </div>
+              <Timeline
+                items={searchSteps.map((step) => ({
+                  dot:
+                    step.step === 'Processing...' ? (
+                      <Spin indicator={<IconLoading style={{ fontSize: 12, color: '#00968f' }} spin />} />
+                    ) : undefined,
+                  children: (
+                    <div className="step-content">
+                      <h4>{getStepName(step.step, t)}</h4>
+                      {step.result && renderStepResult(step.step, step.result, t)}
+                      {step.duration > 0 && (
+                        <span className="duration">
+                          {t('resource.multilingualSearch.progress.duration', { duration: step.duration })}
+                        </span>
+                      )}
+                    </div>
+                  ),
+                }))}
+              />
             ),
-          }))}
-        />
-      )}
+          },
+        ]}
+      />
     </div>
   );
 };

@@ -2241,6 +2241,9 @@ components:
         entityType:
           type: string
           description: Related entity type
+        projectId:
+          type: string
+          description: Related project ID
         originalLocale:
           type: string
           description: Original locale
@@ -3860,6 +3863,10 @@ components:
           description: List of search locales
           items:
             type: string
+        displayLocale:
+          type: string
+          description: Display locale
+          default: auto
         searchLimit:
           type: number
           description: Web search result limit per locale

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import { Source, SearchStep } from '@refly/openapi-schema';
 
-// import { mockSearchSteps, mockResults } from '../mock-data/search-data';
+import { mockSearchSteps, mockResults } from '../mock-data/search-data';
 
 const defaultLocales: SearchLocale[] = [
   { code: 'en', name: 'English' },
@@ -26,6 +26,8 @@ const defaultLocales: SearchLocale[] = [
   { code: 'mn', name: 'Mongolian' },
   { code: 'fa', name: 'Persian' },
 ];
+
+export type SearchPageState = 'home' | 'results';
 
 const defaultSelectedLocales = ['en', 'zh-CN', 'ja'];
 
@@ -57,6 +59,13 @@ export interface SearchState {
   setProcessingStep: () => void;
   setResults: (results: Source[]) => void;
   resetSearch: () => void;
+
+  pageState: SearchPageState;
+  setPageState: (state: SearchPageState) => void;
+
+  resetAll: () => void;
+
+  clearSearchSteps: () => void;
 }
 
 export const useMultilingualSearchStore = create<SearchState>((set) => ({
@@ -79,7 +88,12 @@ export const useMultilingualSearchStore = create<SearchState>((set) => ({
   setQuery: (query) => set({ query }),
   setSearchLocales: (locales) => set({ searchLocales: locales }),
   setOutputLocale: (locale) => set({ outputLocale: locale }),
-  setIsSearching: (isSearching) => set({ isSearching }),
+  setIsSearching: (isSearching) =>
+    set((state) => ({
+      isSearching,
+      searchSteps: isSearching ? [] : state.searchSteps,
+      searchProgress: isSearching ? 0 : state.searchProgress,
+    })),
 
   updateProgress: (progress) => set({ searchProgress: progress }),
   addSearchStep: (step) =>
@@ -103,6 +117,28 @@ export const useMultilingualSearchStore = create<SearchState>((set) => ({
       searchProgress: 0,
       searchSteps: [],
       results: [],
+    }),
+
+  pageState: 'home',
+  setPageState: (state) => set({ pageState: state }),
+
+  resetAll: () =>
+    set({
+      query: '',
+      searchLocales: defaultLocales.filter((locale) => defaultSelectedLocales.includes(locale.code)),
+      outputLocale: { code: 'auto', name: 'Auto' },
+      isSearching: false,
+      searchProgress: 0,
+      searchSteps: [],
+      results: [],
+      selectedItems: [],
+      pageState: 'home',
+    }),
+
+  clearSearchSteps: () =>
+    set({
+      searchSteps: [],
+      searchProgress: 0,
     }),
 }));
 

@@ -18,6 +18,7 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { IconSearch } from '@arco-design/web-react/icon';
 import MultilingualSearch from '@refly-packages/ai-workspace-common/modules/multilingual-search';
+import { Splitter } from 'antd';
 
 const MenuItem = Menu.Item;
 
@@ -46,49 +47,60 @@ export const ImportResourceModal = () => {
       style={{ height: '70%', minHeight: 500, maxHeight: 700, width: '60%', minWidth: '300px', maxWidth: '950px' }}
     >
       <div className="import-resource-container">
-        {isWeb ? (
-          <div className="import-resource-left-panel">
-            <div className="left-panel-header">
-              <div className="left-panel-header-title">
-                <AiOutlineImport />
-                <span className="left-panel-header-title-text">{t('resource.import.title')}</span>
+        <Splitter>
+          <Splitter.Panel
+            collapsible
+            defaultSize={210}
+            max={210}
+            style={{ backgroundColor: '#f3f3ee', borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+          >
+            {isWeb ? (
+              <div className="import-resource-left-panel">
+                <div className="left-panel-header">
+                  <div className="left-panel-header-title">
+                    <AiOutlineImport />
+                    <span className="left-panel-header-title-text">{t('resource.import.title')}</span>
+                  </div>
+                  <Divider style={{ margin: '12px 0' }} />
+                  <Menu
+                    className="left-panel-menu"
+                    selectedKeys={[importResourceStore.selectedMenuItem]}
+                    onClickMenuItem={(key) => {
+                      importResourceStore.setSelectedMenuItem(key as ImportResourceMenuItem);
+                    }}
+                  >
+                    <h2 className="left-panel-menu-title">{t('resource.import.integration')}</h2>
+                    <MenuItem key="import-from-web-search" className="left-panel-menu-item">
+                      <span className="menu-item-icon">
+                        <IconSearch />
+                      </span>
+                      {t('resource.import.fromWebSearch')}
+                    </MenuItem>
+                    <MenuItem key="import-from-weblink" className="left-panel-menu-item">
+                      <span className="menu-item-icon">
+                        <HiLink />
+                      </span>
+                      {t('resource.import.fromWeblink')}
+                    </MenuItem>
+                    <MenuItem key="import-from-paste-text" className="left-panel-menu-item">
+                      <span className="menu-item-icon">
+                        <HiOutlinePencil />
+                      </span>
+                      {t('resource.import.fromText')}
+                    </MenuItem>
+                  </Menu>
+                </div>
               </div>
-              <Divider style={{ margin: '12px 0' }} />
-              <Menu
-                className="left-panel-menu"
-                selectedKeys={[importResourceStore.selectedMenuItem]}
-                onClickMenuItem={(key) => {
-                  importResourceStore.setSelectedMenuItem(key as ImportResourceMenuItem);
-                }}
-              >
-                <h2 className="left-panel-menu-title">{t('resource.import.integration')}</h2>
-                <MenuItem key="import-from-web-search" className="left-panel-menu-item">
-                  <span className="menu-item-icon">
-                    <IconSearch />
-                  </span>
-                  {t('resource.import.fromWebSearch')}
-                </MenuItem>
-                <MenuItem key="import-from-weblink" className="left-panel-menu-item">
-                  <span className="menu-item-icon">
-                    <HiLink />
-                  </span>
-                  {t('resource.import.fromWeblink')}
-                </MenuItem>
-                <MenuItem key="import-from-paste-text" className="left-panel-menu-item">
-                  <span className="menu-item-icon">
-                    <HiOutlinePencil />
-                  </span>
-                  {t('resource.import.fromText')}
-                </MenuItem>
-              </Menu>
+            ) : null}
+          </Splitter.Panel>
+          <Splitter.Panel style={{ backgroundColor: '#fcfcf9' }}>
+            <div className="import-resource-right-panel">
+              {importResourceStore.selectedMenuItem === 'import-from-weblink' ? <ImportFromWeblink /> : null}
+              {importResourceStore.selectedMenuItem === 'import-from-paste-text' ? <ImportFromText /> : null}
+              {importResourceStore.selectedMenuItem === 'import-from-web-search' ? <MultilingualSearch /> : null}
             </div>
-          </div>
-        ) : null}
-        <div className="import-resource-right-panel">
-          {importResourceStore.selectedMenuItem === 'import-from-weblink' ? <ImportFromWeblink /> : null}
-          {importResourceStore.selectedMenuItem === 'import-from-paste-text' ? <ImportFromText /> : null}
-          {importResourceStore.selectedMenuItem === 'import-from-web-search' ? <MultilingualSearch /> : null}
-        </div>
+          </Splitter.Panel>
+        </Splitter>
       </div>
     </Modal>
   );

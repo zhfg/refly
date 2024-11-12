@@ -198,9 +198,9 @@ export const useProcessContextItems = () => {
         } else if (key === 'resources') {
           id = item?.resourceId;
           typeKey = 'resource';
-        } else if (key === 'collections') {
-          id = item?.collectionId;
-          typeKey = 'collection';
+        } else if (key === 'projects') {
+          id = item?.projectId;
+          typeKey = 'project';
         } else {
           id = metadata.entityId;
           typeKey = metadata.domain;
@@ -231,6 +231,8 @@ export const useProcessContextItems = () => {
     });
     return contextItems;
   };
+
+  console.log('processedContextItems', processedContextItems);
 
   return { processedContextItems, contextItemTypes, contextItemIdsByType, processContextItemsFromMessage };
 };
