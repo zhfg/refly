@@ -1,3 +1,22 @@
+import java from 'highlight.js/lib/languages/java';
+import javascript from 'highlight.js/lib/languages/javascript';
+import python from 'highlight.js/lib/languages/python';
+import go from 'highlight.js/lib/languages/go';
+import css from 'highlight.js/lib/languages/css';
+import c from 'highlight.js/lib/languages/c';
+import cpp from 'highlight.js/lib/languages/cpp';
+import csharp from 'highlight.js/lib/languages/csharp';
+import json from 'highlight.js/lib/languages/json';
+import markdown from 'highlight.js/lib/languages/markdown';
+import sql from 'highlight.js/lib/languages/sql';
+import typescript from 'highlight.js/lib/languages/typescript';
+import yaml from 'highlight.js/lib/languages/yaml';
+import php from 'highlight.js/lib/languages/php';
+import rust from 'highlight.js/lib/languages/rust';
+import shell from 'highlight.js/lib/languages/shell';
+import swift from 'highlight.js/lib/languages/swift';
+import ruby from 'highlight.js/lib/languages/ruby';
+
 let configuredHljs: any = null;
 
 export const configureHighlightJs = async () => {
@@ -6,32 +25,29 @@ export const configureHighlightJs = async () => {
   const hljs = (await import('highlight.js/lib/core')).default;
 
   const languages = {
-    java: () => import('highlight.js/lib/languages/java'),
-    javascript: () => import('highlight.js/lib/languages/javascript'),
-    python: () => import('highlight.js/lib/languages/python'),
-    go: () => import('highlight.js/lib/languages/go'),
-    css: () => import('highlight.js/lib/languages/css'),
-    c: () => import('highlight.js/lib/languages/c'),
-    cpp: () => import('highlight.js/lib/languages/cpp'),
-    csharp: () => import('highlight.js/lib/languages/csharp'),
-    json: () => import('highlight.js/lib/languages/json'),
-    markdown: () => import('highlight.js/lib/languages/markdown'),
-    sql: () => import('highlight.js/lib/languages/sql'),
-    typescript: () => import('highlight.js/lib/languages/typescript'),
-    yaml: () => import('highlight.js/lib/languages/yaml'),
-    php: () => import('highlight.js/lib/languages/php'),
-    rust: () => import('highlight.js/lib/languages/rust'),
-    shell: () => import('highlight.js/lib/languages/shell'),
-    swift: () => import('highlight.js/lib/languages/swift'),
-    ruby: () => import('highlight.js/lib/languages/ruby'),
+    java,
+    javascript,
+    python,
+    go,
+    css,
+    c,
+    cpp,
+    csharp,
+    json,
+    markdown,
+    sql,
+    typescript,
+    yaml,
+    php,
+    rust,
+    shell,
+    swift,
+    ruby,
   };
 
-  await Promise.all(
-    Object.entries(languages).map(async ([name, importFn]) => {
-      const language = (await importFn()).default;
-      hljs.registerLanguage(name, language);
-    }),
-  );
+  Object.entries(languages).forEach(([name, language]) => {
+    hljs.registerLanguage(name, language);
+  });
 
   configuredHljs = hljs;
   return configuredHljs;
