@@ -69,14 +69,13 @@ function MultilingualSearch() {
         <SearchHome />
       ) : (
         <>
-          <div className="multilingual-search-inner-container">
+          <div
+            className="multilingual-search-inner-container"
+            style={{ height: isSearching ? 'calc(100% - 45px)' : 'calc(100% - 115px)' }}
+          >
             <SearchBox />
             {isSearching || results?.length > 0 ? <SearchProgress /> : null}
-            {!isSearching && results.length > 0 && (
-              <>
-                <SearchResults outputLocale={outputLocale} />
-              </>
-            )}
+            <SearchResults outputLocale={outputLocale} />
           </div>
           {!isSearching && results.length > 0 && (
             <div className="multilingual-search-action-menu-container">

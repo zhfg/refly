@@ -64,6 +64,8 @@ export interface SearchState {
   setPageState: (state: SearchPageState) => void;
 
   resetAll: () => void;
+
+  clearSearchSteps: () => void;
 }
 
 export const useMultilingualSearchStore = create<SearchState>((set) => ({
@@ -86,7 +88,12 @@ export const useMultilingualSearchStore = create<SearchState>((set) => ({
   setQuery: (query) => set({ query }),
   setSearchLocales: (locales) => set({ searchLocales: locales }),
   setOutputLocale: (locale) => set({ outputLocale: locale }),
-  setIsSearching: (isSearching) => set({ isSearching }),
+  setIsSearching: (isSearching) =>
+    set((state) => ({
+      isSearching,
+      searchSteps: isSearching ? [] : state.searchSteps,
+      searchProgress: isSearching ? 0 : state.searchProgress,
+    })),
 
   updateProgress: (progress) => set({ searchProgress: progress }),
   addSearchStep: (step) =>
@@ -126,6 +133,12 @@ export const useMultilingualSearchStore = create<SearchState>((set) => ({
       results: [],
       selectedItems: [],
       pageState: 'home',
+    }),
+
+  clearSearchSteps: () =>
+    set({
+      searchSteps: [],
+      searchProgress: 0,
     }),
 }));
 

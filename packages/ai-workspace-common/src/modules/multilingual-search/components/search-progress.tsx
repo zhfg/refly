@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Timeline, Button } from 'antd';
-import { IconUp, IconDown } from '@arco-design/web-react/icon';
+import { Timeline, Button, Spin } from 'antd';
+import { IconUp, IconDown, IconLoading } from '@arco-design/web-react/icon';
 import { useMultilingualSearchStore } from '../stores/multilingual-search';
 import './search-progress.scss';
 
@@ -60,16 +60,26 @@ const renderStepResult = (step: string, result: any) => {
 
 export const SearchProgress: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(true);
-  const { searchSteps, isSearching, results } = useMultilingualSearchStore((state) => ({
-    searchSteps: state.searchSteps,
-    isSearching: state.isSearching,
-    results: state.results,
-  }));
+  const { searchSteps, isSearching, results, clearSearchSteps, setProcessingStep } = useMultilingualSearchStore(
+    (state) => ({
+      searchSteps: state.searchSteps,
+      isSearching: state.isSearching,
+      results: state.results,
+      clearSearchSteps: state.clearSearchSteps,
+      setProcessingStep: state.setProcessingStep,
+    }),
+  );
 
-  // Auto expand when searching starts
+  // Auto expand when searching starts and clear previous steps
   useEffect(() => {
-    setIsExpanded(isSearching);
-  }, [isSearching]);
+    if (isSearching) {
+      setIsExpanded(true);
+      clearSearchSteps();
+      setProcessingStep();
+    } else {
+      setIsExpanded(false);
+    }
+  }, [isSearching, clearSearchSteps]);
 
   const finishStep = searchSteps.find((step) => step.step === 'finish');
   const summaryText = finishStep ? `${results.length} results (${finishStep.duration}ms)` : 'Processing...';
@@ -85,12 +95,16 @@ export const SearchProgress: React.FC = () => {
       </div>
       {isExpanded && (
         <Timeline
-          items={searchSteps.map((step) => ({
+          items={searchSteps.map((step, index) => ({
+            dot:
+              step.step === 'Processing...' ? (
+                <Spin indicator={<IconLoading style={{ fontSize: 12, color: '#00968f' }} spin />} />
+              ) : undefined,
             children: (
               <div className="step-content">
                 <h4>{step.step}</h4>
                 {step.result && renderStepResult(step.step, step.result)}
-                <span className="duration">{step.duration}ms</span>
+                {step.duration > 0 ? <span className="duration">{step.duration}ms</span> : null}
               </div>
             ),
           }))}

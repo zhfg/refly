@@ -1,9 +1,17 @@
 .search-progress {
   margin-top: 12px;
-  margin-bottom: 8px;
+
+  :where(.css-dev-only-do-not-override-10341ku).ant-timeline .ant-timeline-item-last > .ant-timeline-item-content {
+    min-height: auto;
+  }
+
+  :where(.css-dev-only-do-not-override-10341ku).ant-timeline .ant-timeline-item {
+    padding-bottom: 0;
+  }
 
   .search-progress-header {
     cursor: pointer;
+    margin-bottom: 8px;
 
     &:hover {
       opacity: 0.8;

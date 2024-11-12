@@ -20,6 +20,12 @@
       transition: all 0.3s;
     }
 
+    .search-results-skeleton-list {
+      .ant-list-item {
+        padding: 0px;
+      }
+    }
+
     .result-item-inner {
       display: flex;
       align-items: flex-start;
