@@ -170,21 +170,17 @@ export const SourceListModal = (props: SourceListModalProps) => {
               ),
               children: (
                 <div className="source-list-modal-web-search">
-                  {groupedSources.library.length > 0 && (
-                    <>
-                      <SearchResults
-                        outputLocale={outputLocale}
-                        config={{
-                          showCheckbox: false,
-                          showIndex: true,
-                          startIndex: groupedSources.webSearch.length + 1,
-                          handleItemClick: (item) => {
-                            window.open(item.url, '_blank');
-                          },
-                        }}
-                      />
-                    </>
-                  )}
+                  <SearchResults
+                    outputLocale={outputLocale}
+                    config={{
+                      showCheckbox: false,
+                      showIndex: true,
+                      startIndex: groupedSources.webSearch.length + 1,
+                      handleItemClick: (item) => {
+                        window.open(item.url, '_blank');
+                      },
+                    }}
+                  />
                 </div>
               ),
             },

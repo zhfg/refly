@@ -344,7 +344,8 @@
       "searchLocales": "搜索语言",
       "displayLocale": "显示语言",
       "searchResults": "搜索结果",
-      "search": "搜索"
+      "search": "搜索",
+      "noResults": "未找到结果"
     },
     "import": {
       "title": "资源集成",

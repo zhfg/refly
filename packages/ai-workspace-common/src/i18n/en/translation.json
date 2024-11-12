@@ -344,7 +344,8 @@
       "searchLocales": "Search Language",
       "displayLocale": "Display Language",
       "searchResults": "Search Results",
-      "search": "Search"
+      "search": "Search",
+      "noResults": "No results found"
     },
     "import": {
       "title": "Resource Integration",

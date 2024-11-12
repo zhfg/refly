@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { List, Tag, Checkbox, Button, Popover, message, Skeleton } from 'antd';
+import { List, Tag, Checkbox, Button, Popover, message, Skeleton, Empty } from 'antd';
 import { useMultilingualSearchStore, useMultilingualSearchStoreShallow } from '../stores/multilingual-search';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -114,6 +114,13 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
               <React.Fragment key={i}>{renderSkeletonItem()}</React.Fragment>
             ))}
           </List>
+        ) : results.length === 0 ? (
+          <div className="search-results-empty">
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={<span className="text-gray-500">{t('resource.multilingualSearch.noResults')}</span>}
+            />
+          </div>
         ) : (
           <List
             dataSource={results}
