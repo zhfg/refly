@@ -59,6 +59,7 @@ export interface Mark {
   isCurrentContext?: boolean; // 是否是当前上下文
   metadata?: Record<string, any>; // TODO: 元数据，用于添加额外的元数据，比如 canvas 的 projectId
   parentId?: string; // 父级 id 比如 noteselection 的 parentId 是 noteId, resourceSelection 的 parentId 是 resourceId
+  projectId?: string; // 项目 id
 }
 
 export interface Selection {

@@ -19,6 +19,7 @@ import {
   useMultilingualSearchStoreShallow,
 } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 const TabPane = Tabs.TabPane;
 
@@ -36,6 +37,7 @@ export const SourceListModal = (props: SourceListModalProps) => {
     sourceListDrawer: state.sourceListDrawer,
     updateSourceListDrawer: state.updateSourceListDrawer,
   }));
+  const { jumpToResource, jumpToCanvas } = useJumpNewPath();
 
   const outputLocale = i18n.language as any as SearchLocale;
 
@@ -65,6 +67,8 @@ export const SourceListModal = (props: SourceListModalProps) => {
       { webSearch: [], library: [] } as { webSearch: Source[]; library: Source[] },
     );
   }, [knowledgeBaseStore?.sourceListDrawer?.sources]);
+
+  console.log('groupedSources', groupedSources);
 
   // 初始化搜索结果到 store
   useEffect(() => {
@@ -177,7 +181,16 @@ export const SourceListModal = (props: SourceListModalProps) => {
                       showIndex: true,
                       startIndex: groupedSources.webSearch.length + 1,
                       handleItemClick: (item) => {
-                        window.open(item.url, '_blank');
+                        if (item?.metadata?.sourceType === 'library' && item?.metadata?.entityType === 'resource') {
+                          jumpToResource({ resId: item.metadata.entityId });
+                          knowledgeBaseStore.updateSourceListDrawer({ visible: false });
+                        } else if (
+                          item?.metadata?.sourceType === 'library' &&
+                          item?.metadata?.entityType === 'canvas'
+                        ) {
+                          jumpToCanvas({ canvasId: item.metadata?.entityId, projectId: item?.metadata?.projectId });
+                          knowledgeBaseStore.updateSourceListDrawer({ visible: false });
+                        }
                       },
                     }}
                   />

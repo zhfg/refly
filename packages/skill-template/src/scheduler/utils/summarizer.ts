@@ -216,6 +216,7 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
         title: metadata?.title,
         entityId: metadata?.entityId,
         entityType: metadata?.domain,
+        projectId: metadata?.projectId,
         sourceType: 'library', // Add source type for knowledge base content
       },
     });
@@ -224,14 +225,15 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
   // Knowledge base canvases
   canvases.forEach((canvas: SkillContextCanvasItem) => {
     sources.push({
-      url: `${baseUrl}/knowledge-base?noteId=${canvas.canvas?.canvasId}`,
+      url: `${baseUrl}/project/${canvas.canvas?.projectId}?canvasId=${canvas.canvas?.canvasId}`,
       title: canvas.canvas?.title,
       pageContent: canvas.canvas?.content || '',
       metadata: {
+        projectId: canvas.canvas?.projectId,
         title: canvas.canvas?.title,
         entityId: canvas.canvas?.canvasId,
         entityType: 'canvas',
-        source: `${baseUrl}/knowledge-base?noteId=${canvas.canvas?.canvasId}`,
+        source: `${baseUrl}/project/${canvas.canvas?.projectId}?canvasId=${canvas.canvas?.canvasId}`,
         sourceType: 'library', // Add source type for knowledge base canvases
       },
     });
@@ -240,14 +242,14 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
   // Knowledge base resources
   resources.forEach((resource: SkillContextResourceItem) => {
     sources.push({
-      url: `${baseUrl}/knowledge-base?resId=${resource.resource?.resourceId}`,
+      url: `${baseUrl}/resource/${resource.resource?.resourceId}`,
       title: resource.resource?.title,
       pageContent: resource.resource?.content || '',
       metadata: {
         title: resource.resource?.title,
         entityId: resource.resource?.resourceId,
         entityType: 'resource',
-        source: `${baseUrl}/knowledge-base?resId=${resource.resource?.resourceId}`,
+        source: `${baseUrl}/resource/${resource.resource?.resourceId}`,
         sourceType: 'library', // Add source type for knowledge base resources
       },
     });

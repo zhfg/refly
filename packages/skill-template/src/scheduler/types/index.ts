@@ -16,6 +16,7 @@ export interface SkillContextContentItemMetadata {
   url?: string;
   title: string;
   entityId?: string;
+  projectId?: string;
 }
 
 export type SelectedContentDomain = 'resourceSelection' | 'canvasSelection' | 'extensionWeblinkSelection';

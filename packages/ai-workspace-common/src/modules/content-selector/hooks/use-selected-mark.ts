@@ -59,15 +59,18 @@ export const useSelectedMark = () => {
         const { currentCanvas } = useCanvasStore.getState();
         let title = '';
         let parentId = '';
+        let projectId = '';
+
         if (mark.domain === 'canvasSelection') {
           title = currentCanvas?.title;
           parentId = currentCanvas?.canvasId;
+          projectId = currentCanvas?.projectId;
         } else if (mark.domain === 'resourceSelection' || mark.domain === 'extensionWeblinkSelection') {
           title = currentResource?.title;
           parentId = currentResource?.resourceId;
         }
 
-        const newMark = { ...mark, id: genUniqueId(), title, parentId };
+        const newMark = { ...mark, id: genUniqueId(), title, parentId, projectId };
         console.log('newMark===', newMark);
 
         // check if the content selection mark is already exists

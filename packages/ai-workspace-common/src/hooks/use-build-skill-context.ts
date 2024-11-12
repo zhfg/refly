@@ -26,6 +26,7 @@ export const useBuildSkillContext = () => {
             url: item?.url || '',
             title: item?.title || '',
             isCurrentContext: item?.isCurrentContext,
+            projectId: item?.projectId,
           },
         }))
         .filter((item) => {

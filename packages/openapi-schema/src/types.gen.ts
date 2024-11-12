@@ -712,6 +712,10 @@ export type SourceMeta = {
    */
   entityType?: string;
   /**
+   * Related project ID
+   */
+  projectId?: string;
+  /**
    * Original locale
    */
   originalLocale?: string;
