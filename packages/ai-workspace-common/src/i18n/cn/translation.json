@@ -335,7 +335,7 @@
   "resource": {
     "multilingualSearch": {
       "title": "用您的语言搜索世界",
-      "placeholder": "搜索任何内容...",
+      "placeholder": "搜索任何内容并导入资源...",
       "searchLabel": "搜索语言",
       "displayLabel": "显示语言",
       "selectSearchLanguages": "选择搜索语言",
