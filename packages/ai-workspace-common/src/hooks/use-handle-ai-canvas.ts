@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 
 // hooks
 import { useJumpNewPath } from './use-jump-new-path';
@@ -24,6 +25,7 @@ export interface IntentResult {
 
 export const useHandleAICanvas = () => {
   const { jumpToConv } = useJumpNewPath();
+  const location = useLocation();
 
   const [searchParams] = useSearchParams();
   const queryConvId = searchParams.get('convId');
@@ -36,6 +38,7 @@ export const useHandleAICanvas = () => {
       projectId: intent.projectId,
       convId: intent.convId,
       canvasId: intent.canvasId,
+      fullScreen: location.pathname === '/',
       state: {
         navigationContext: {
           shouldFetchDetail: false,

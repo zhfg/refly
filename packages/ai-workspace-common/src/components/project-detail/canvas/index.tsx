@@ -50,7 +50,7 @@ import { useProjectStore, useProjectStoreShallow } from '@refly-packages/ai-work
 import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
-import { useBlocker } from 'react-router-dom';
+import { useBlocker, useSearchParams } from 'react-router-dom';
 
 class TokenStreamProcessor {
   private editor: EditorInstance;
@@ -350,6 +350,18 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
     updateAfterSelectionNoteContent: state.updateAfterSelectionNoteContent,
     updateCurrentSelectionContent: state.updateCurrentSelectionContent,
   }));
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    // Make sure the copilot full screen is closed when the AI is editing
+    if (canvasStore.isAiEditing) {
+      console.log('delete fullScreen');
+      searchParams.delete('fullScreen');
+      setSearchParams(searchParams);
+    }
+  }, [canvasStore.isAiEditing]);
+
   const editorRef = useRef<EditorInstance>();
 
   const { showContentSelector, scope } = useContentSelectorStore((state) => ({
@@ -415,32 +427,30 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
   }, [canvasId]);
 
   const uploadFn = useMemo(() => createUploadFn({ entityId: canvasId, entityType: 'canvas' }), [canvasId]);
-  const slashCommand = useMemo(
-    () =>
+
+  const extensions = useMemo(
+    () => [
+      ...defaultExtensions,
       configureSlashCommand({
         entityId: canvasId,
         entityType: 'canvas',
       }),
-    [canvasId],
+      createPlaceholderExtension(),
+      Collaboration.configure({
+        document: websocketProvider.document,
+      }),
+      CollaborationCursor.configure({
+        provider: websocketProvider,
+      }),
+      TableOfContents.configure({
+        getIndex: getHierarchicalIndexes,
+        onUpdate(content) {
+          canvasStore.updateTocItems(content);
+        },
+      }),
+    ],
+    [websocketProvider, canvasId],
   );
-
-  const extensions = [
-    ...defaultExtensions,
-    slashCommand,
-    createPlaceholderExtension(),
-    Collaboration.configure({
-      document: websocketProvider.document,
-    }),
-    CollaborationCursor.configure({
-      provider: websocketProvider,
-    }),
-    TableOfContents.configure({
-      getIndex: getHierarchicalIndexes,
-      onUpdate(content) {
-        canvasStore.updateTocItems(content);
-      },
-    }),
-  ];
 
   // Apply Codeblock Highlighting on the HTML from editor.getHTML()
   const highlightCodeblocks = async (content: string) => {

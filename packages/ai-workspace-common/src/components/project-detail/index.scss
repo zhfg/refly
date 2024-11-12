@@ -14,12 +14,10 @@
     }
   }
 
-  // 外层 Splitter 样式
   .project-detail-outer-splitter {
     background-color: #f3f3ee;
 
-    // 只处理第一层的分割条样式
-    > .ant-splitter-bar .ant-splitter-bar-dragger {
+    > .workspace-content-panel + .ant-splitter-bar .ant-splitter-bar-dragger {
       width: 8px;
       background-color: #f3f3ee;
 
@@ -28,16 +26,13 @@
       }
     }
 
-    // 只处理第一层的分割条before伪元素
     > .ant-splitter-bar .ant-splitter-bar-dragger:before {
       background-color: transparent !important;
     }
 
-    // 只处理第一层的面板
     > .ant-splitter-panel {
       background-color: #f3f3ee;
 
-      // 每个面板的内容容器背景色
       > .project-detail-directory-container,
       > .project-detail-content-container,
       > .project-detail-copilot-panel {
@@ -76,8 +71,6 @@
       }
     }
   }
-
-  // ... 其他原有样式保持不变
 
   .arco-drawer-content {
     padding: 0;

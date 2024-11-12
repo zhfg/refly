@@ -151,6 +151,7 @@ export const useJumpNewPath = () => {
     resourceId,
     baseUrl = '',
     openNewTab = false,
+    fullScreen = false,
     state,
   }: {
     convId: string;
@@ -159,6 +160,7 @@ export const useJumpNewPath = () => {
     resourceId?: string;
     baseUrl?: string;
     openNewTab?: boolean;
+    fullScreen?: boolean;
     state: { navigationContext?: NavigationContext };
   }) => {
     if (state.navigationContext?.clearSearchParams) {
@@ -173,6 +175,9 @@ export const useJumpNewPath = () => {
       convId ? searchParams.set('convId', convId) : searchParams.delete('convId');
       if (canvasId) {
         searchParams.set('canvasId', canvasId);
+      }
+      if (fullScreen) {
+        searchParams.set('fullScreen', '1');
       }
       setSearchParams(searchParams);
       url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
