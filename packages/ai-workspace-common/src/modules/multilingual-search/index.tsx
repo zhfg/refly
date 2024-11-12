@@ -74,14 +74,13 @@ function MultilingualSearch() {
             {isSearching || results?.length > 0 ? <SearchProgress /> : null}
             {!isSearching && results.length > 0 && (
               <>
-                <h3>Search Results ({results.length} sources)</h3>
                 <SearchResults outputLocale={outputLocale} />
               </>
             )}
           </div>
           {!isSearching && results.length > 0 && (
             <div className="multilingual-search-action-menu-container">
-              <ActionMenu />
+              <ActionMenu getTarget={() => document.querySelector('.import-resource-right-panel') as HTMLElement} />
             </div>
           )}
         </>

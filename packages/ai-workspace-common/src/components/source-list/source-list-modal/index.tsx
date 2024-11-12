@@ -157,19 +157,20 @@ export const SourceListModal = (props: SourceListModalProps) => {
                 </span>
               ),
               children: (
-                <SourceDetailList
-                  placeholder={t('copilot.sourceListModal.searchPlaceholder')}
-                  sources={groupedSources.library}
-                  classNames={props.classNames}
-                  handleItemClick={() => {}}
-                />
+                <div className="source-list-modal-web-search">
+                  {groupedSources.library.length > 0 && (
+                    <>
+                      <SearchResults outputLocale={outputLocale} />
+                    </>
+                  )}
+                </div>
               ),
             },
           ]}
         />
         {activeTab === 'webSearch' && groupedSources.webSearch.length > 0 && (
           <div className="source-list-modal-action-menu-container">
-            <ActionMenu />
+            <ActionMenu getTarget={() => document.querySelector('.source-list-modal-tabs') as HTMLElement} />
           </div>
         )}
       </div>

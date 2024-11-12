@@ -2,13 +2,13 @@
   height: 100%;
   position: relative;
   padding: 0 12px;
+  padding-top: 16px;
 
   .intergration-header {
     font-size: 18px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-top: 16px;
 
     .intergration-header-title {
       font-weight: bold;
@@ -46,7 +46,8 @@
 
   .multilingual-search-inner-container {
     overflow-y: auto;
-    height: 100%;
+    padding-top: 12px;
+    height: calc(100% - 115px);
   }
 
   .multilingual-search-action-menu-container {
@@ -54,7 +55,23 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 12px 12px;
     background: #fcfcf9;
+
+    .action-menu {
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-radius: 8px;
+      z-index: 1;
+
+      border-top: 1px solid var(--color-neutral-3);
+      width: 100%;
+      background-color: white;
+    }
   }
 }

@@ -31,11 +31,7 @@ export const SearchOptions = () => {
 
   // 构建输出语言选项，增加 Auto 选项
   const outputLanguageOptions = useMemo(() => {
-    const autoOption = {
-      label: currentUiLocale === LOCALE.EN ? 'Auto' : '自动',
-      value: 'auto',
-    };
-    return [autoOption, ...languageOptions];
+    return [...languageOptions];
   }, [languageOptions, currentUiLocale]);
 
   // 获取当前语言的显示名称

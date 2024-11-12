@@ -104,7 +104,7 @@ const defaultConfigurableState = {
 
 export const defaultExtraState = {
   // messages: fakeMessages as any,
-  messages: [],
+  messages: [mockHumanMessage, mockChatMessage] as any,
 
   isFirstStreamContent: true,
   messageIntentContext: undefined,

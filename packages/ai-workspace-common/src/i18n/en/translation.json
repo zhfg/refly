@@ -335,7 +335,7 @@
   "resource": {
     "multilingualSearch": {
       "title": "Search the world in your own language",
-      "placeholder": "Ask Refly anything...",
+      "placeholder": "Search anything...",
       "searchLabel": "Search Language",
       "displayLabel": "Display Language",
       "selectSearchLanguages": "Select Search Languages",

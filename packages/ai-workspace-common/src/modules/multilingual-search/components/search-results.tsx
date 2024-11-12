@@ -8,6 +8,8 @@ import { Source } from '@refly/openapi-schema';
 import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { TranslationWrapper } from '@refly-packages/ai-workspace-common/components/translation-wrapper';
 import { SearchLocale } from '../stores/multilingual-search';
+import { safeParseURL } from '@refly-packages/utils/url';
+import { AiOutlineGlobal, AiOutlineTranslation } from 'react-icons/ai';
 
 export const SearchResults: React.FC<{ className?: string; outputLocale: SearchLocale }> = ({
   className,
@@ -74,13 +76,10 @@ export const SearchResults: React.FC<{ className?: string; outputLocale: SearchL
     <div className={`search-results ${className || ''}`}>
       <div className="search-results-content">
         <List
-          itemLayout="vertical"
-          size="large"
-          pagination={{ pageSize: 10 }}
           dataSource={results}
-          renderItem={(item) => (
-            <List.Item>
-              <div className="result-item">
+          renderItem={(item, index) => (
+            <List.Item className="result-item">
+              <div className="result-item-inner">
                 <Checkbox
                   checked={selectedItems.includes(item)}
                   onChange={(e) => toggleSelectedItem(item, e.target.checked)}
@@ -99,21 +98,55 @@ export const SearchResults: React.FC<{ className?: string; outputLocale: SearchL
                       window.open(item.url, '_blank');
                     }}
                   >
-                    <List.Item.Meta
-                      title={
-                        <TranslationWrapper
-                          content={item.title || ''}
-                          targetLanguage={outputLocale.code}
-                          originalLocale={item.metadata?.originalLocale}
-                        />
-                      }
-                      description={item.url}
-                    />
-                    {item.metadata?.translatedDisplayLocale && (
-                      <Tag color="blue">
-                        {item.metadata.originalLocale} → {item.metadata.translatedDisplayLocale}
-                      </Tag>
-                    )}
+                    <div className="w-5">
+                      <span className="h-8 w-8 inline-flex items-center justify-center origin-top-left scale-[60%] transform cursor-pointer rounded-full bg-zinc-100 text-center text-base font-medium no-underline hover:bg-zinc-300">
+                        {index + 1}
+                      </span>
+                    </div>
+                    <div className="result-body">
+                      <div className="result-header">
+                        <div className="site-info">
+                          <img
+                            className="site-icon"
+                            src={`https://www.google.com/s2/favicons?domain=${safeParseURL(item.url)}&sz=32`}
+                            alt=""
+                          />
+                          <div className="site-meta">
+                            <a className="site-url" href={item.url} target="_blank" rel="noreferrer">
+                              {item.url}
+                            </a>
+                          </div>
+                        </div>
+                        {item.metadata?.translatedDisplayLocale && (
+                          <Tag className="locale-tag">
+                            <span>
+                              <AiOutlineGlobal /> {item.metadata.originalLocale}
+                            </span>{' '}
+                            →{' '}
+                            <span>
+                              <AiOutlineTranslation /> {item.metadata.translatedDisplayLocale}
+                            </span>
+                          </Tag>
+                        )}
+                      </div>
+                      <div className="result-content">
+                        <div className="result-title">
+                          <TranslationWrapper
+                            className="site-title"
+                            content={item.title || ''}
+                            targetLanguage={outputLocale.code}
+                            originalLocale={item.metadata?.originalLocale}
+                          />
+                        </div>
+                        <div className="result-content">
+                          <TranslationWrapper
+                            content={item.pageContent}
+                            targetLanguage={outputLocale.code}
+                            originalLocale={item.metadata?.originalLocale}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </Popover>
               </div>
