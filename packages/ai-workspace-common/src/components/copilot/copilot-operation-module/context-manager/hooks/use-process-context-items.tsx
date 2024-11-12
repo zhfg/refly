@@ -232,7 +232,5 @@ export const useProcessContextItems = () => {
     return contextItems;
   };
 
-  console.log('processedContextItems', processedContextItems);
-
   return { processedContextItems, contextItemTypes, contextItemIdsByType, processContextItemsFromMessage };
 };

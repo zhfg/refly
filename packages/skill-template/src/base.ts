@@ -87,7 +87,7 @@ export abstract class BaseSkill extends StructuredTool {
     // Ensure currentSkill is not empty.
     config.configurable.currentSkill ??= {
       tplName: this.name,
-      displayName: this.displayName[config.configurable.locale || 'en'],
+      displayName: this.displayName[config.configurable.uiLocale || 'en'],
       icon: this.icon,
     };
 
@@ -150,6 +150,7 @@ export interface SkillRunnableConfig extends RunnableConfig {
     projectId?: string;
     project?: Project;
     locale?: string;
+    uiLocale?: string;
     modelName?: string;
     selectedSkill?: SkillMeta;
     currentSkill?: SkillMeta;

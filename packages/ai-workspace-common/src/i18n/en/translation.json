@@ -342,7 +342,7 @@
   "resource": {
     "multilingualSearch": {
       "title": "Search the world in your own language",
-      "placeholder": "Search anything...",
+      "placeholder": "Search anything and import resources...",
       "searchLabel": "Search Language",
       "displayLabel": "Display Language",
       "selectSearchLanguages": "Select Search Languages",

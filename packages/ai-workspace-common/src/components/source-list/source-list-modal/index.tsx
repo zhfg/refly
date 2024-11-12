@@ -15,6 +15,7 @@ import { IconLink, IconMessage } from '@arco-design/web-react/icon';
 import { SearchResults } from '@refly-packages/ai-workspace-common/modules/multilingual-search/components/search-results';
 import { ActionMenu } from '@refly-packages/ai-workspace-common/modules/multilingual-search/components/action-menu';
 import {
+  defaultLocalesMap,
   SearchLocale,
   useMultilingualSearchStoreShallow,
 } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
@@ -33,13 +34,21 @@ interface SourceListModalProps {
 export const SourceListModal = (props: SourceListModalProps) => {
   const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<string>('webSearch');
+  const currentUiLocale = i18n.language as 'en' | 'zh-CN';
   const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
     sourceListDrawer: state.sourceListDrawer,
     updateSourceListDrawer: state.updateSourceListDrawer,
   }));
   const { jumpToResource, jumpToCanvas } = useJumpNewPath();
 
-  const outputLocale = i18n.language as any as SearchLocale;
+  const outputLocale: SearchLocale = useMemo(
+    () => ({
+      code: currentUiLocale,
+      name:
+        defaultLocalesMap[currentUiLocale].find((locale) => locale.code === currentUiLocale)?.name || currentUiLocale,
+    }),
+    [currentUiLocale],
+  );
 
   // 移除不必要的状态订阅
   const { setResults, setIsSearching } = useMultilingualSearchStoreShallow((state) => ({

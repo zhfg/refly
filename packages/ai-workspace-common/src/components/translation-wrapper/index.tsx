@@ -1,8 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Spin } from 'antd';
 
 import './index.scss';
 import { IconLoading } from '@arco-design/web-react/icon';
+
+// Add translation cache
+const translationCache: Record<string, string> = {};
+const getCacheKey = (text: string, source: string, target: string) => `${source}:${target}:${text}`;
 
 interface TranslationWrapperProps {
   content: string;
@@ -12,7 +16,7 @@ interface TranslationWrapperProps {
 }
 
 // 限制请求频率的延迟时间（毫秒）
-const THROTTLE_DELAY = 100;
+const THROTTLE_DELAY = 200;
 
 // 翻译文本的队列和状态管理
 let translationQueue: (() => Promise<void>)[] = [];
@@ -40,19 +44,35 @@ export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const shouldTranslate = (source: string, target: string): boolean => {
-    if (target === 'auto') return false;
-    if (!source) return true; // 如果没有源语言，则默认翻译
-    return source !== target;
-  };
+  const shouldTranslate = useMemo(() => {
+    if (targetLanguage === 'auto') return false;
+    if (!originalLocale) return true;
+    return originalLocale !== targetLanguage;
+  }, [targetLanguage, originalLocale]);
+
+  const cacheKey = useMemo(() => {
+    return getCacheKey(content, originalLocale || 'auto', targetLanguage);
+  }, [content, originalLocale, targetLanguage]);
 
   const translateText = async (text: string) => {
+    // Check cache first
+    const cached = translationCache[cacheKey];
+    if (cached) {
+      return cached;
+    }
+
     try {
       const response = await fetch(
-        `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=${originalLocale || 'auto'}&tl=${targetLanguage}&q=${encodeURIComponent(text)}`,
+        `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=${
+          originalLocale || 'auto'
+        }&tl=${targetLanguage}&q=${encodeURIComponent(text)}`,
       );
       const data = await response.json();
-      return data[0][0][0];
+      const translated = data[0][0][0];
+
+      // Store in cache
+      translationCache[cacheKey] = translated;
+      return translated;
     } catch (error) {
       console.error('Translation failed:', error);
       return text;
@@ -60,8 +80,15 @@ export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
   };
 
   useEffect(() => {
-    if (!shouldTranslate(originalLocale, targetLanguage) || !content) {
+    if (!shouldTranslate || !content) {
       setTranslatedContent(null);
+      return;
+    }
+
+    // Check cache first
+    const cached = translationCache[cacheKey];
+    if (cached) {
+      setTranslatedContent(cached);
       return;
     }
 
@@ -79,10 +106,10 @@ export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
     return () => {
       translationQueue = translationQueue.filter((task) => task !== translationTask);
     };
-  }, [content, targetLanguage, originalLocale]);
+  }, [content, shouldTranslate, cacheKey]);
 
   // 如果不需要翻译或翻译完成但结果与原文相同
-  if (!translatedContent || translatedContent === content) {
+  if (!shouldTranslate || translatedContent === content) {
     return <span className={className}>{content}</span>;
   }
 
@@ -95,7 +122,7 @@ export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
             <Spin indicator={<IconLoading style={{ fontSize: 12, marginLeft: 4 }} spin />} />
           </>
         ) : (
-          <span>{translatedContent}</span>
+          <span>{translatedContent || content}</span>
         )}
       </div>
     </div>

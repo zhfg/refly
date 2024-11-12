@@ -10,6 +10,7 @@ import { TranslationWrapper } from '@refly-packages/ai-workspace-common/componen
 import { SearchLocale } from '../stores/multilingual-search';
 import { safeParseURL } from '@refly-packages/utils/url';
 import { AiOutlineGlobal, AiOutlineTranslation } from 'react-icons/ai';
+import { defaultLocalesMap } from '../stores/multilingual-search';
 
 interface SearchResultsProps {
   className?: string;
@@ -32,7 +33,8 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     handleItemClick: (item) => window.open(item.url, '_blank'),
   },
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentUiLocale = i18n.language as 'en' | 'zh-CN';
   const { results, selectedItems, toggleSelectedItem, isSearching } = useMultilingualSearchStoreShallow((state) => ({
     results: state.results,
     selectedItems: state.selectedItems,
@@ -76,14 +78,14 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
       <h4>
         <TranslationWrapper
           content={item.title || ''}
-          targetLanguage={item.metadata?.translatedDisplayLocale || outputLocale.code}
+          targetLanguage={outputLocale.code === 'auto' ? item.metadata?.translatedDisplayLocale : outputLocale.code}
           originalLocale={item.metadata?.originalLocale}
         />
       </h4>
       <div className="content-body">
         <TranslationWrapper
           content={item.pageContent}
-          targetLanguage={item.metadata?.translatedDisplayLocale || outputLocale.code}
+          targetLanguage={outputLocale.code === 'auto' ? item.metadata?.translatedDisplayLocale : outputLocale.code}
           originalLocale={item.metadata?.originalLocale}
         />
       </div>
@@ -104,6 +106,11 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
       </div>
     </List.Item>
   );
+
+  const getLocaleName = (localeCode: string) => {
+    const localeList = defaultLocalesMap[currentUiLocale];
+    return localeList.find((locale) => locale.code === localeCode)?.name || localeCode;
+  };
 
   return (
     <div className={`search-results ${className || ''}`}>
@@ -166,11 +173,11 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                           {item.metadata?.translatedDisplayLocale && (
                             <Tag className="locale-tag">
                               <span>
-                                <AiOutlineGlobal /> {item.metadata.originalLocale}
+                                <AiOutlineGlobal /> {getLocaleName(item.metadata.originalLocale)}
                               </span>{' '}
                               →{' '}
                               <span>
-                                <AiOutlineTranslation /> {item.metadata.translatedDisplayLocale}
+                                <AiOutlineTranslation /> {getLocaleName(item.metadata.translatedDisplayLocale)}
                               </span>
                             </Tag>
                           )}
@@ -180,14 +187,22 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                             <TranslationWrapper
                               className="site-title"
                               content={item.title || ''}
-                              targetLanguage={item.metadata?.translatedDisplayLocale || outputLocale.code}
+                              targetLanguage={
+                                outputLocale.code === 'auto'
+                                  ? item.metadata?.translatedDisplayLocale
+                                  : outputLocale.code
+                              }
                               originalLocale={item.metadata?.originalLocale}
                             />
                           </div>
                           <div className="result-content">
                             <TranslationWrapper
                               content={item.pageContent}
-                              targetLanguage={item.metadata?.translatedDisplayLocale || outputLocale.code}
+                              targetLanguage={
+                                outputLocale.code === 'auto'
+                                  ? item.metadata?.translatedDisplayLocale
+                                  : outputLocale.code
+                              }
                               originalLocale={item.metadata?.originalLocale}
                             />
                           </div>

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Input, Select, Space, Divider } from 'antd';
 import { Search } from 'lucide-react';
 import { useMultilingualSearchStoreShallow } from '../stores/multilingual-search';
@@ -7,10 +7,13 @@ import { LOCALE } from '@refly/common-types';
 import { languageNameToLocale, localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
 
 import './search-options.scss';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 export const SearchOptions = () => {
   const { i18n, t } = useTranslation();
   const currentUiLocale = i18n.language as LOCALE;
+
+  console.log('currentUiLocale', currentUiLocale);
 
   const multilingualSearchStore = useMultilingualSearchStoreShallow((state) => ({
     searchLocales: state.searchLocales,
@@ -18,6 +21,15 @@ export const SearchOptions = () => {
     setSearchLocales: state.setSearchLocales,
     setOutputLocale: state.setOutputLocale,
   }));
+
+  useEffect(() => {
+    if (!multilingualSearchStore.outputLocale.code) {
+      multilingualSearchStore.setOutputLocale({
+        code: currentUiLocale,
+        name: getLocaleName(currentUiLocale),
+      });
+    }
+  }, [currentUiLocale]);
 
   // 构建语言选项
   const languageOptions = useMemo(() => {
@@ -60,7 +72,6 @@ export const SearchOptions = () => {
         <Select
           mode="multiple"
           showSearch
-          size="small"
           variant="filled"
           style={{ minWidth: 300 }}
           maxTagCount="responsive"
@@ -79,7 +90,6 @@ export const SearchOptions = () => {
         <label className="select-label">{t('resource.multilingualSearch.displayLabel')}</label>
         <Select
           showSearch
-          size="small"
           variant="filled"
           style={{ minWidth: 200 }}
           placeholder={t('resource.multilingualSearch.selectDisplayLanguage')}
