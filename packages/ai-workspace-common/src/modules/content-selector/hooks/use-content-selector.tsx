@@ -35,12 +35,22 @@ export const getContainerElem = (selector: string | null) => {
 
 export const useContentSelector = (selector: string | null, domain: SelectedTextDomain, metadata?: { url: string }) => {
   const statusRef = useRef(true);
-  const markRef = useRef<HTMLDivElement>(undefined);
+  const markRef = useRef<HTMLDivElement | null>(null);
   const targetList = useRef<Element[]>([]);
   const markListRef = useRef<Mark[]>([]);
   const showContentSelectorRef = useRef<boolean>(false);
   const messageListenerEventRef = useRef<any>();
   const selectorScopeRef = useRef<MarkScope>('block');
+
+  useEffect(() => {
+    const containerElem = getContainerElem(selector);
+    if (containerElem) {
+      const existingMark = containerElem.querySelector('.refly-content-selector-mark');
+      if (existingMark) {
+        markRef.current = existingMark as HTMLDivElement;
+      }
+    }
+  }, [selector]);
 
   const buildMark = (textType: TextType, content: string, xPath: string) => {
     const mark: Mark = {
@@ -583,12 +593,12 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
   };
 
   const initContentSelectorElem = () => {
-    // 处理多处引用问题
-
     return (
       <div className="refly-content-selector-container">
         <div
-          ref={markRef}
+          ref={(el) => {
+            if (el) markRef.current = el;
+          }}
           style={{
             backgroundColor: '#ffd40024 !important',
             position: 'absolute',
