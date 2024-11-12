@@ -12,6 +12,7 @@
     "remove": "Remove",
     "loading": "Loading...",
     "loadMore": "Load More",
+    "appStarting": "Application is starting",
     "more": "More",
     "putErr": "Failed to perform operation. Please try again!",
     "putSuccess": "Operation Successful",

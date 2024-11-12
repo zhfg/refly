@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react"
 import { Route, Routes, useMatch } from "react-router-dom"
-import { Spin } from "antd"
 import { useEffect } from "react"
 import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
@@ -12,6 +11,7 @@ import {
   RequestAccessRoute,
 } from "@refly-packages/ai-workspace-common/components/request-access/protected-route"
 import { useHandlePaymentCallback } from "@refly-packages/ai-workspace-common/hooks/use-handle-payment-callback"
+import { SuspenseLoading } from "@refly-packages/ai-workspace-common/components/common/loading"
 
 // Lazy load components
 const Home = lazy(() => import("@/pages/home"))
@@ -24,20 +24,6 @@ const Skill = lazy(() => import("@/pages/skill"))
 const SkillDetailPage = lazy(() => import("@/pages/skill-detail"))
 const Settings = lazy(() => import("@/pages/settings"))
 const ShareContent = lazy(() => import("@/pages/share-content"))
-
-// Loading component
-export const LoadingFallback = () => (
-  <div
-    style={{
-      height: "100vh",
-      width: "100%",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-    }}>
-    <Spin />
-  </div>
-)
 
 const prefetchRoutes = () => {
   // Prefetch common routes
@@ -107,11 +93,11 @@ export const AppRouter = (props: { layout?: any }) => {
       !userStore.isCheckingLoginStatus === undefined ||
       userStore.isCheckingLoginStatus
     ) {
-      return <LoadingFallback />
+      return <SuspenseLoading />
     }
 
     if (!notShowLoginBtn && !routeLogin) {
-      return <LoadingFallback />
+      return <SuspenseLoading />
     }
   }
 
@@ -120,7 +106,7 @@ export const AppRouter = (props: { layout?: any }) => {
     : true
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={<SuspenseLoading />}>
       <Layout>
         <Routes>
           <Route

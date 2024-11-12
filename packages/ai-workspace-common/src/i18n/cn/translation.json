@@ -12,6 +12,7 @@
     "remove": "移除",
     "loading": "加载中...",
     "loadMore": "加载更多",
+    "appStarting": "应用启动中",
     "more": "更多",
     "putErr": "操作失败，请尝试重试！",
     "putSuccess": "操作成功",
