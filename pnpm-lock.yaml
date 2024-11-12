@@ -50,9 +50,6 @@ importers:
       '@hocuspocus/extension-database':
         specifier: ~2.13.0
         version: 2.13.6(y-protocols@1.0.6)(yjs@13.6.16)
-      '@hocuspocus/extension-logger':
-        specifier: ~2.13.0
-        version: 2.13.6(y-protocols@1.0.6)(yjs@13.6.16)
       '@hocuspocus/server':
         specifier: ~2.13.0
         version: 2.13.6(y-protocols@1.0.6)(yjs@13.6.16)
@@ -3783,17 +3780,6 @@ packages:
       - bufferutil
       - utf-8-validate
       - y-protocols
-    dev: false
-
-  /@hocuspocus/extension-logger@2.13.6(y-protocols@1.0.6)(yjs@13.6.16):
-    resolution: {integrity: sha512-DQ1zBGFdRBCEmGfo3bcR2W3P/6SQmMmSYq4iqKB98U54901fKJz7cI+vrp6Xfr447Z1j2sfdlN9YTPaVMjv4rQ==}
-    dependencies:
-      '@hocuspocus/server': 2.13.6(y-protocols@1.0.6)(yjs@13.6.16)
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-      - y-protocols
-      - yjs
     dev: false
 
   /@hocuspocus/provider@2.13.6(y-protocols@1.0.6)(yjs@13.6.16):
