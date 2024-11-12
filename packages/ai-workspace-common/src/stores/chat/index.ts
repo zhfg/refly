@@ -27,7 +27,6 @@ export interface MessageIntentContext {
   };
   convId?: string;
   enableWebSearch?: boolean;
-  enableAutoImportWebResource?: boolean;
   enableDeepReasonWebSearch?: boolean;
   enableKnowledgeBaseSearch?: boolean;
   env: {
@@ -58,7 +57,6 @@ export interface ChatState {
   selectedModel: ModelInfo;
   selectedProject?: ProjectInfo;
   enableWebSearch: boolean;
-  enableAutoImportWebResource: boolean;
   enableDeepReasonWebSearch: boolean;
   enableKnowledgeBaseSearch: boolean;
   intentMatcher: IntentResult | undefined;
@@ -74,7 +72,6 @@ export interface ChatState {
   setSelectedProject: (val: ProjectInfo) => void;
   setModelList: (val: ModelInfo[]) => void;
   setEnableWebSearch: (val: boolean) => void;
-  setEnableAutoImportWebResource: (val: boolean) => void;
   setEnableDeepReasonWebSearch: (val: boolean) => void;
   setEnableKnowledgeBaseSearch: (val: boolean) => void;
   setIntentMatcher: (val: IntentResult | undefined) => void;
@@ -97,7 +94,6 @@ const defaultConfigurableState = {
     },
   ] as ModelInfo[],
   enableWebSearch: true,
-  enableAutoImportWebResource: true,
   enableDeepReasonWebSearch: false,
   enableKnowledgeBaseSearch: true,
 };
@@ -143,7 +139,6 @@ export const useChatStore = create<ChatState>()(
         setSelectedProject: (val: ProjectInfo) => set({ selectedProject: val }),
         setModelList: (val: ModelInfo[]) => set({ modelList: val }),
         setEnableWebSearch: (val: boolean) => set({ enableWebSearch: val }),
-        setEnableAutoImportWebResource: (val: boolean) => set({ enableAutoImportWebResource: val }),
         setEnableDeepReasonWebSearch: (val: boolean) => set({ enableDeepReasonWebSearch: val }),
         setEnableKnowledgeBaseSearch: (val: boolean) => set({ enableKnowledgeBaseSearch: val }),
         setIntentMatcher: (val: IntentResult | undefined) => set({ intentMatcher: val }),
@@ -159,7 +154,6 @@ export const useChatStore = create<ChatState>()(
           selectedModel: state.selectedModel,
           selectedProject: state.selectedProject,
           enableWebSearch: state.enableWebSearch,
-          enableAutoImportWebResource: state.enableAutoImportWebResource,
           enableKnowledgeBaseSearch: state.enableKnowledgeBaseSearch,
           enableDeepReasonWebSearch: state.enableDeepReasonWebSearch,
         }),
