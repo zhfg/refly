@@ -17,6 +17,15 @@
   .project-detail-outer-splitter {
     background-color: #f3f3ee;
 
+    > .workspace-left-assist-panel + .ant-splitter-bar .ant-splitter-bar-dragger {
+      width: 2px;
+      background-color: #f3f3ee;
+
+      &:hover:before {
+        background-color: rgba(0, 0, 0, 0.04) !important;
+      }
+    }
+
     > .workspace-content-panel + .ant-splitter-bar .ant-splitter-bar-dragger {
       width: 8px;
       background-color: #f3f3ee;
