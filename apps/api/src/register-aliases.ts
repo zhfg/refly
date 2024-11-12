@@ -21,6 +21,7 @@ if (!getPreloadModules().includes('tsconfig-paths/register')) {
       __dirname,
       '../../../packages/openapi-schema/dist',
     ),
+    '@refly-packages/errors': path.resolve(__dirname, '../../../packages/errors/dist'),
     '@refly-packages/common-types': path.resolve(__dirname, '../../../packages/common-types/dist'),
     '@refly-packages/utils': path.resolve(__dirname, '../../../packages/utils/dist'),
     '@refly-packages/skill-template': path.resolve(
