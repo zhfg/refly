@@ -356,8 +356,6 @@ Please generate the summary based on these requirements and offer suggestions fo
     let mentionedContext: IContext;
     let context: string = '';
 
-    const detectedLang = (await detectLanguage(originalQuery)) || locale || 'en';
-
     // preprocess query, ensure query is not too long
     const query = preprocessQuery(originalQuery, {
       config: config,
@@ -410,7 +408,6 @@ Please generate the summary based on these requirements and offer suggestions fo
       context = await prepareContext(
         {
           query: optimizedQuery,
-          outputLocale: detectedLang,
           mentionedContext,
           maxTokens: remainingTokens,
           hasContext,

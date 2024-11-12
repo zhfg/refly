@@ -48,7 +48,12 @@ import {
   SkillRunnableMeta,
   createSkillInventory,
 } from '@refly-packages/skill-template';
-import { genSkillID, genSkillJobID, genSkillTriggerID } from '@refly-packages/utils';
+import {
+  detectLanguage,
+  genSkillID,
+  genSkillJobID,
+  genSkillTriggerID,
+} from '@refly-packages/utils';
 import { PrismaService } from '@/common/prisma.service';
 import {
   CHANNEL_INVOKE_SKILL,
@@ -608,11 +613,15 @@ export class SkillService {
       icon: JSON.parse(s.icon),
     }));
 
+    const displayLocale =
+      (await detectLanguage(data?.input?.query)) || data?.locale || user?.uiLocale || 'en';
+
     const config: SkillRunnableConfig = {
       configurable: {
         ...context,
         modelName,
-        locale: data?.locale ?? user.uiLocale ?? 'en',
+        locale: displayLocale,
+        uiLocale: user.uiLocale,
         installedSkills,
         convId,
         projectId: data?.projectId ?? '',

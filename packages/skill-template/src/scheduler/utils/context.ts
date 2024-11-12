@@ -38,13 +38,11 @@ export async function prepareContext(
     mentionedContext,
     maxTokens,
     hasContext,
-    outputLocale,
   }: {
     query: string;
     mentionedContext: IContext;
     maxTokens: number;
     hasContext: boolean;
-    outputLocale: string;
   },
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<string> {
@@ -71,7 +69,6 @@ export async function prepareContext(
     const preparedRes = await prepareWebSearchContext(
       {
         query,
-        outputLocale,
       },
       ctx,
     );
@@ -190,10 +187,8 @@ export async function prepareContext(
 export async function prepareWebSearchContext(
   {
     query,
-    outputLocale,
   }: {
     query: string;
-    outputLocale: string;
   },
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<{
@@ -204,6 +199,7 @@ export async function prepareWebSearchContext(
 
   // two searchMode
   const enableDeepReasonWebSearch = (ctx.tplConfig?.enableDeepReasonWebSearch?.value as boolean) || false;
+  const { locale = 'en' } = ctx?.config?.configurable || {};
 
   let searchLimit = 10;
   let searchLocaleListLen = 2;
@@ -231,7 +227,7 @@ export async function prepareWebSearchContext(
     {
       searchLimit,
       searchLocaleList,
-      resultDisplayLocale: outputLocale || 'auto',
+      resultDisplayLocale: locale || 'auto',
       enableRerank,
       enableTranslateQuery,
       enableTranslateResult: false,

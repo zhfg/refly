@@ -150,6 +150,7 @@ export interface SkillRunnableConfig extends RunnableConfig {
     projectId?: string;
     project?: Project;
     locale?: string;
+    uiLocale?: string;
     modelName?: string;
     selectedSkill?: SkillMeta;
     currentSkill?: SkillMeta;
