@@ -41,6 +41,7 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
     fetchResource: state.fetchResource,
     setCurrentResourceId: state.setCurrentResourceId,
     setResource: state.setResource,
+    resetState: state.resetState,
   }));
 
   const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
@@ -49,6 +50,13 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
 
   const resource = resourceStore.resource;
   const resourceDetail = resourceStore.resource?.data;
+
+  useEffect(() => {
+    return () => {
+      resourceStore.resetState();
+      knowledgeBaseStore.updateResource(null);
+    };
+  }, []);
 
   useEffect(() => {
     if (resourceId) {

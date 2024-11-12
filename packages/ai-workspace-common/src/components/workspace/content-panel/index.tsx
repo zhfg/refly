@@ -139,31 +139,6 @@ export const ContentPanel = () => {
     setVal(tab || 'canvas');
   }, [searchParams]);
 
-  useEffect(() => {
-    const paySuccess = searchParams.get('paySuccess');
-    const payCancel = searchParams.get('payCancel');
-    if (paySuccess || payCancel) {
-      setTimeout(() => {
-        const title = paySuccess ? t('settings.action.paySuccessNotify') : t('settings.action.payCancelNotify');
-        const description = paySuccess
-          ? t('settings.action.paySuccessDescription')
-          : t('settings.action.payCancelDescription');
-        if (paySuccess) {
-          Modal.success({
-            title,
-            content: description,
-          });
-        } else {
-          Modal.error({
-            title,
-            content: description,
-          });
-        }
-        navigate('/', { replace: true });
-      }, 1);
-    }
-  }, []);
-
   return (
     <div className="content-panel-container" ref={ref}>
       <Affix offsetTop={0} target={() => ref.current} onChange={setHitTop}>

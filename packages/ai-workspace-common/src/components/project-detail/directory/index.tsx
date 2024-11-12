@@ -577,8 +577,14 @@ export const ProjectDirectory = (props: {
                   </span>
                   {' · '}
                   <span>
+                    {t('knowledgeBase.directory.canvasCount', {
+                      count: canvases?.data?.length || 0,
+                    })}
+                  </span>
+                  {' · '}
+                  <span>
                     {t('knowledgeBase.directory.resourceCount', {
-                      count: (resources?.data?.length || 0) + (canvases?.data?.length || 0),
+                      count: resources?.data?.length || 0,
                     })}
                   </span>
                 </div>

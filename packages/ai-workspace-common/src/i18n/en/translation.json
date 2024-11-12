@@ -12,6 +12,7 @@
     "remove": "Remove",
     "loading": "Loading...",
     "loadMore": "Load More",
+    "appStarting": "Application is starting",
     "more": "More",
     "putErr": "Failed to perform operation. Please try again!",
     "putSuccess": "Operation Successful",
@@ -235,7 +236,8 @@
       "importResource": "Import Resource"
     },
     "directory": {
-      "resourceCount": "{{count}} contents",
+      "canvasCount": "{{count}} canvases",
+      "resourceCount": "{{count}} resources",
       "resourcesSearchPlaceholder": "Search Resources...",
       "canvasesSearchPlaceholder": "Search Canvases...",
       "conversationsSearchPlaceholder": "Search Conversations..."
@@ -325,7 +327,9 @@
       "searchOrOpenNote": "Search or open canvas",
       "searchOrOpenThread": "Search or open thread",
       "openThreadHistory": "Open Thread History",
-      "newThread": "New Thread"
+      "newThread": "New Thread",
+      "fullScreen": "Full Screen",
+      "exitFullScreen": "Exit Full Screen"
     }
   },
   "canvas": {
@@ -1067,7 +1071,7 @@
       "manager": "Manage"
     },
     "chatInput": {
-      "placeholder": "Let Refly write something for you...",
+      "placeholder": "Let Refly write something for you, or search anything you are interested in...",
       "defaultQuestion": "[Call Skill: {{name}}]",
       "chatWithReflyAssistant": "Chat with Refly Assistant"
     },
