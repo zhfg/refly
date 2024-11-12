@@ -3220,6 +3220,11 @@ export const $MultiLingualWebSearchRequest = {
         type: 'string',
       },
     },
+    displayLocale: {
+      type: 'string',
+      description: 'Display locale',
+      default: 'auto',
+    },
     searchLimit: {
       type: 'number',
       description: 'Web search result limit per locale',

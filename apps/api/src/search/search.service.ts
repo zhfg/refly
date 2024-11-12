@@ -19,7 +19,7 @@ import {
 import { RAGService } from '@/rag/rag.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { ParamsError } from '@refly-packages/errors';
-import { TimeTracker } from '@refly-packages/utils';
+import { detectLanguage, TimeTracker } from '@refly-packages/utils';
 import { searchResultsToSources, sourcesToSearchResults } from '@refly-packages/utils';
 
 interface ProcessedSearchRequest extends SearchRequest {
@@ -721,6 +721,7 @@ export class SearchService {
     const {
       query,
       searchLocaleList = ['en', 'zh-CN'],
+      displayLocale = 'auto',
       searchLimit = 10,
       enableRerank = false,
       rerankLimit,
@@ -732,6 +733,9 @@ export class SearchService {
     const searchSteps: SearchStep[] = [];
 
     try {
+      const translatedDisplayLocale =
+        displayLocale === 'auto' ? await detectLanguage(query) : displayLocale;
+
       // Step 1: Prepare queries for each locale
       const queries = searchLocaleList.map((locale) => ({
         q: query,
@@ -763,6 +767,7 @@ export class SearchService {
         pageContent: result.snippet,
         metadata: {
           originalLocale: result?.locale || 'unknown',
+          translatedDisplayLocale,
         },
       }));
 

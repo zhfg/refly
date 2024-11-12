@@ -76,14 +76,14 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
       <h4>
         <TranslationWrapper
           content={item.title || ''}
-          targetLanguage={outputLocale.code}
+          targetLanguage={item.metadata?.translatedDisplayLocale || outputLocale.code}
           originalLocale={item.metadata?.originalLocale}
         />
       </h4>
       <div className="content-body">
         <TranslationWrapper
           content={item.pageContent}
-          targetLanguage={outputLocale.code}
+          targetLanguage={item.metadata?.translatedDisplayLocale || outputLocale.code}
           originalLocale={item.metadata?.originalLocale}
         />
       </div>
@@ -173,14 +173,14 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                             <TranslationWrapper
                               className="site-title"
                               content={item.title || ''}
-                              targetLanguage={outputLocale.code}
+                              targetLanguage={item.metadata?.translatedDisplayLocale || outputLocale.code}
                               originalLocale={item.metadata?.originalLocale}
                             />
                           </div>
                           <div className="result-content">
                             <TranslationWrapper
                               content={item.pageContent}
-                              targetLanguage={outputLocale.code}
+                              targetLanguage={item.metadata?.translatedDisplayLocale || outputLocale.code}
                               originalLocale={item.metadata?.originalLocale}
                             />
                           </div>

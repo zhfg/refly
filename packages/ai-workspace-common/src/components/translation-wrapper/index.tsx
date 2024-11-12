@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Spin } from 'antd';
 
+import './index.scss';
+import { IconLoading } from '@arco-design/web-react/icon';
+
 interface TranslationWrapperProps {
   content: string;
   targetLanguage: string;
@@ -9,7 +12,7 @@ interface TranslationWrapperProps {
 }
 
 // 限制请求频率的延迟时间（毫秒）
-const THROTTLE_DELAY = 1000;
+const THROTTLE_DELAY = 100;
 
 // 翻译文本的队列和状态管理
 let translationQueue: (() => Promise<void>)[] = [];
@@ -34,7 +37,7 @@ export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
   originalLocale,
   className,
 }) => {
-  const [translatedContent, setTranslatedContent] = useState(content);
+  const [translatedContent, setTranslatedContent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const shouldTranslate = (source: string, target: string): boolean => {
@@ -58,7 +61,7 @@ export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
 
   useEffect(() => {
     if (!shouldTranslate(originalLocale, targetLanguage) || !content) {
-      setTranslatedContent(content);
+      setTranslatedContent(null);
       return;
     }
 
@@ -78,9 +81,23 @@ export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
     };
   }, [content, targetLanguage, originalLocale]);
 
-  if (isLoading) {
-    return <Spin size="small" />;
+  // 如果不需要翻译或翻译完成但结果与原文相同
+  if (!translatedContent || translatedContent === content) {
+    return <span className={className}>{content}</span>;
   }
 
-  return <span className={className}>{translatedContent}</span>;
+  return (
+    <div className={`translation-wrapper ${className || ''}`}>
+      <div className="translation-content">
+        {isLoading ? (
+          <>
+            <span className="original-text">{content}</span>
+            <Spin indicator={<IconLoading style={{ fontSize: 12, marginLeft: 4 }} spin />} />
+          </>
+        ) : (
+          <span>{translatedContent}</span>
+        )}
+      </div>
+    </div>
+  );
 };

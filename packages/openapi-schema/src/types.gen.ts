@@ -2228,6 +2228,10 @@ export type MultiLingualWebSearchRequest = {
    */
   searchLocaleList: Array<string>;
   /**
+   * Display locale
+   */
+  displayLocale?: string;
+  /**
    * Web search result limit per locale
    */
   searchLimit?: number;

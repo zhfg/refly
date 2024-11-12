@@ -41,7 +41,7 @@ export const SearchBox: React.FC = () => {
         body: {
           query: userInput,
           searchLocaleList: multilingualSearchStore.searchLocales.map((locale) => locale.code),
-          // resultDisplayLocale: multilingualSearchStore.outputLocale.code,
+          displayLocale: multilingualSearchStore.outputLocale.code,
           enableRerank: true,
         },
       });
