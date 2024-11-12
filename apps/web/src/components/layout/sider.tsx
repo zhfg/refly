@@ -358,7 +358,7 @@ export const SiderLayout = () => {
   return (
     <Sider
       className={`app-sider ${isGuideDetail ? "fixed" : ""}`}
-      width={collapse ? 90 : 220}>
+      width={collapse ? 64 : 220}>
       <div
         className={`sider-header ${collapse ? "sider-header-collapse" : ""}`}>
         <SiderLogo
