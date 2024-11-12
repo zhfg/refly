@@ -9,6 +9,14 @@
     padding-bottom: 0;
   }
 
+  :where(.css-dev-only-do-not-override-10341ku).ant-collapse .ant-collapse-content > .ant-collapse-content-box {
+    padding: 16px 0;
+  }
+
+  :where(.css-dev-only-do-not-override-10341ku).ant-collapse > .ant-collapse-item > .ant-collapse-header {
+    padding: 0;
+  }
+
   .search-progress-header {
     cursor: pointer;
     margin-bottom: 8px;

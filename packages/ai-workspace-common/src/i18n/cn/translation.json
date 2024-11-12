@@ -345,7 +345,41 @@
       "displayLocale": "显示语言",
       "searchResults": "搜索结果",
       "search": "搜索",
-      "noResults": "未找到结果"
+      "noResults": "未找到结果",
+      "progress": {
+        "title": "搜索进度",
+        "summary": "{{count}} 个结果 ({{duration}}毫秒)",
+        "duration": "{{duration}}毫秒"
+      },
+      "steps": {
+        "processing": "处理中...",
+        "rewriteQuery": {
+          "title": "重写查询",
+          "rewrittenQueries": "重写后的查询",
+          "outputLocale": "输出语言",
+          "searchLocales": "搜索语言"
+        },
+        "translateQuery": {
+          "title": "翻译查询"
+        },
+        "webSearch": {
+          "title": "网页搜索",
+          "results": "结果数",
+          "searchLocales": "搜索语言"
+        },
+        "translateResults": {
+          "title": "翻译结果",
+          "results": "结果数",
+          "searchLocales": "搜索语言"
+        },
+        "rerank": {
+          "title": "重新排序",
+          "finalResults": "最终结果数"
+        },
+        "finish": {
+          "title": "完成"
+        }
+      }
     },
     "import": {
       "title": "资源集成",
