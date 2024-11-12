@@ -70,9 +70,9 @@ export const SearchBox: React.FC = () => {
   return (
     <div className="search-box">
       <div className="search-container">
-        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+        <Space direction="vertical" size="middle" style={{ width: 610 }}>
           <AntSearch
-            style={{ maxWidth: 610 }}
+            style={{ width: 610 }}
             size="large"
             placeholder={t('resource.multilingualSearch.placeholder')}
             value={multilingualSearchStore.query}
