@@ -235,7 +235,8 @@
       "importResource": "Import Resource"
     },
     "directory": {
-      "resourceCount": "{{count}} contents",
+      "canvasCount": "{{count}} canvases",
+      "resourceCount": "{{count}} resources",
       "resourcesSearchPlaceholder": "Search Resources...",
       "canvasesSearchPlaceholder": "Search Canvases...",
       "conversationsSearchPlaceholder": "Search Conversations..."
@@ -1031,7 +1032,7 @@
       "manager": "Manage"
     },
     "chatInput": {
-      "placeholder": "Let Refly write something for you...",
+      "placeholder": "Let Refly write something for you, or search anything you are interested in...",
       "defaultQuestion": "[Call Skill: {{name}}]",
       "chatWithReflyAssistant": "Chat with Refly Assistant"
     },

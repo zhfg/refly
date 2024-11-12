@@ -237,7 +237,8 @@
       "importResource": "导入资源"
     },
     "directory": {
-      "resourceCount": "{{count}} 个内容",
+      "canvasCount": "{{count}} 篇稿布",
+      "resourceCount": "{{count}} 篇资源",
       "resourcesSearchPlaceholder": "搜索资源...",
       "canvasesSearchPlaceholder": "搜索稿布...",
       "conversationsSearchPlaceholder": "搜索会话..."
@@ -1045,7 +1046,7 @@
       "manager": "管理"
     },
     "chatInput": {
-      "placeholder": "让 Refly 帮你写点什么...",
+      "placeholder": "让 Refly 帮你写点什么，或者搜索任何感兴趣的内容...",
       "defaultQuestion": "[调用技能: {{name}}]",
       "chatWithReflyAssistant": "和「知识管家」聊聊"
     },

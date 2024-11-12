@@ -27,7 +27,7 @@ import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/c
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
 import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
-import { IconProject } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconThread } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 interface CopilotChatHeaderProps {
   source: MessageIntentSource;
@@ -116,8 +116,8 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
           <div className="knowledge-base-detail-navigation-bar">
             {isWeb ? (
               <div className="text-gray-500 font-normal flex items-center gap-2 ml-3 max-w-[300px]">
-                <IconProject className="text-gray-500 h-4 w-4" />
-                <div className="truncate">{projectStore.project.data?.title}</div>
+                <IconThread className="text-gray-500 h-4 w-4" />
+                <div className="truncate">{conversationStore.currentConversation?.title}</div>
               </div>
             ) : null}
             {!isWeb ? (
