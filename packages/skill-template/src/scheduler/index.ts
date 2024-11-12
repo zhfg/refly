@@ -75,27 +75,14 @@ export class Scheduler extends BaseSkill {
         defaultValue: true,
       },
       {
-        key: 'enableAutoImportWebResource',
-        inputMode: 'radio',
-        labelDict: {
-          en: 'Auto Import Web Resource',
-          'zh-CN': '自动导入网页资源',
-        },
-        descriptionDict: {
-          en: 'Enable auto import web resource',
-          'zh-CN': '启用自动导入网页资源',
-        },
-        defaultValue: true,
-      },
-      {
         key: 'enableDeepReasonWebSearch',
         inputMode: 'radio',
         labelDict: {
-          en: 'Deep Reason Web Search',
+          en: 'Deep Web Search',
           'zh-CN': '深度网页搜索',
         },
         descriptionDict: {
-          en: 'Enable deep reason web search',
+          en: 'Enable deep web search',
           'zh-CN': '启用深度网页搜索',
         },
         defaultValue: false,

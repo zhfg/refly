@@ -253,28 +253,6 @@ export async function prepareWebSearchContext(
 
   processedWebSearchContext.webSearchSources = webSearchSources;
 
-  const enableAutoImportWebResource = ctx.tplConfig?.enableAutoImportWebResource?.value;
-  ctx.ctxThis.engine.logger.log(`Enable Auto Import Web Resource: ${enableAutoImportWebResource}`);
-
-  if (enableAutoImportWebResource) {
-    const batchCreateResourceRes = await ctx.ctxThis.engine.service.batchCreateResource(
-      ctx.config.user,
-      webSearchSources.map((item) => ({
-        title: item.title,
-        data: {
-          url: item.url,
-          title: item.title,
-        },
-        resourceType: 'weblink',
-        projectId: ctx.config.configurable?.projectId,
-      })),
-    );
-    ctx.ctxThis.engine.logger.log(
-      `Batch import web search resources res: ${safeStringifyJSON(batchCreateResourceRes)}`,
-    );
-    ctx.ctxThis.emitEvent({ event: 'log', content: `Batch import web search resources successfully!` }, ctx.config);
-  }
-
   ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared Web Search Context successfully!` }, ctx.config);
   ctx.ctxThis.engine.logger.log(
     `Prepared Web Search Context successfully! ${safeStringifyJSON(processedWebSearchContext)}`,

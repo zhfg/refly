@@ -78,7 +78,7 @@ export const indexConfig = {
     },
   },
   canvas: {
-    index: 'refly_notes',
+    index: 'refly_canvases',
     settings: commonSettings,
     properties: {
       title: { type: 'text' },
@@ -89,7 +89,7 @@ export const indexConfig = {
     },
   },
   project: {
-    index: 'refly_collections',
+    index: 'refly_projects',
     settings: commonSettings,
     properties: {
       title: { type: 'text' },

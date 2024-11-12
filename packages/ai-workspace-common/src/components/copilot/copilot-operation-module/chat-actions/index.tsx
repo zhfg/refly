@@ -40,8 +40,6 @@ export const ChatActions = (props: ChatActionsProps) => {
     setEnableWebSearch: state.setEnableWebSearch,
     enableKnowledgeBaseSearch: state.enableKnowledgeBaseSearch,
     setEnableKnowledgeBaseSearch: state.setEnableKnowledgeBaseSearch,
-    enableAutoImportWebResource: state.enableAutoImportWebResource,
-    setEnableAutoImportWebResource: state.setEnableAutoImportWebResource,
     enableDeepReasonWebSearch: state.enableDeepReasonWebSearch,
     setEnableDeepReasonWebSearch: state.setEnableDeepReasonWebSearch,
   }));
@@ -126,21 +124,6 @@ export const ChatActions = (props: ChatActionsProps) => {
           },
         ]
       : []),
-    {
-      key: 'enableAutoImportWebResource',
-      label: (
-        <div
-          className="text-xs flex items-center gap-2"
-          onClick={(e) => {
-            e.stopPropagation();
-            chatStore.setEnableAutoImportWebResource(!chatStore.enableAutoImportWebResource);
-          }}
-        >
-          <Switch size="small" checked={chatStore.enableAutoImportWebResource} />
-          <span className="chat-action-item-text">{t('copilot.autoImportWebResource.title')}</span>
-        </div>
-      ),
-    },
     {
       key: 'enableDeepReasonWebSearch',
       label: (

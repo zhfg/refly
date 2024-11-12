@@ -434,8 +434,12 @@ export class KnowledgeService {
 
       // Add to project if specified
       if (param.projectId) {
-        await tx.projectResourceRelation.create({
-          data: { projectId: param.projectId, resourceId: param.resourceId },
+        await tx.projectResourceRelation.upsert({
+          where: {
+            projectId_resourceId: { projectId: param.projectId, resourceId: param.resourceId },
+          },
+          create: { projectId: param.projectId, resourceId: param.resourceId },
+          update: {},
         });
       }
 
