@@ -161,7 +161,7 @@ export const useChatStore = create<ChatState>()(
           enableWebSearch: state.enableWebSearch,
           enableAutoImportWebResource: state.enableAutoImportWebResource,
           enableKnowledgeBaseSearch: state.enableKnowledgeBaseSearch,
-          sourceListDrawer: state.sourceListDrawer,
+          enableDeepReasonWebSearch: state.enableDeepReasonWebSearch,
         }),
       },
     ),
