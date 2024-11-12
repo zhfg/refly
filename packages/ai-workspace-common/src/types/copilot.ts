@@ -20,4 +20,5 @@ export interface NavigationContext {
   source: MessageIntentSource;
   shouldFetchDetail: boolean;
   intentType?: CanvasIntentType;
+  clearSearchParams?: boolean;
 }

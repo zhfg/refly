@@ -144,19 +144,6 @@ export const useJumpNewPath = () => {
     }
   };
 
-  const removeKbAndResId = ({ baseUrl = '' }: { baseUrl?: string }) => {
-    searchParams.delete('kbId');
-    searchParams.delete('resId');
-    setSearchParams(searchParams);
-    navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
-  };
-
-  const removeNoteId = ({ baseUrl = '' }: { baseUrl?: string }) => {
-    searchParams.delete('noteId');
-    setSearchParams(searchParams);
-    navigate(`${baseUrl}/knowledge-base?${searchParams.toString()}`);
-  };
-
   const jumpToConv = ({
     convId,
     projectId,
@@ -164,6 +151,7 @@ export const useJumpNewPath = () => {
     resourceId,
     baseUrl = '',
     openNewTab = false,
+    fullScreen = false,
     state,
   }: {
     convId: string;
@@ -172,14 +160,24 @@ export const useJumpNewPath = () => {
     resourceId?: string;
     baseUrl?: string;
     openNewTab?: boolean;
+    fullScreen?: boolean;
     state: { navigationContext?: NavigationContext };
   }) => {
+    if (state.navigationContext?.clearSearchParams) {
+      for (const key of Array.from(searchParams.keys())) {
+        searchParams.delete(key);
+      }
+    }
+
     let url: string;
 
     if (projectId) {
       convId ? searchParams.set('convId', convId) : searchParams.delete('convId');
       if (canvasId) {
         searchParams.set('canvasId', canvasId);
+      }
+      if (fullScreen) {
+        searchParams.set('fullScreen', '1');
       }
       setSearchParams(searchParams);
       url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
@@ -208,7 +206,5 @@ export const useJumpNewPath = () => {
     jumpToProject,
     jumpToResource,
     jumpToConv,
-    removeKbAndResId,
-    removeNoteId,
   };
 };

@@ -104,21 +104,6 @@ export const ProjectDirectory = (props: {
 
   const { addRecentProject } = useHandleRecents();
 
-  useEffect(() => {
-    if (activeTab?.type === 'canvas' && !canvasId) {
-      jumpToCanvas({
-        canvasId: activeTab.key,
-        projectId,
-      });
-    }
-    if (activeTab?.type === 'resource' && !resId) {
-      jumpToResource({
-        resId: activeTab.key,
-        projectId,
-      });
-    }
-  }, [activeTab, canvasId, resId]);
-
   const { createShare } = useHandleShare();
   const [shareLoading, setShareLoading] = useState(false);
   const handleShare = async () => {
@@ -130,6 +115,25 @@ export const ProjectDirectory = (props: {
     });
     setShareLoading(false);
   };
+
+  useEffect(() => {
+    if (canvasId || resId) {
+      return;
+    }
+
+    // Handle cases where activeTab exists but canvasId or resId query param is missing
+    if (activeTab?.type === 'canvas') {
+      jumpToCanvas({
+        canvasId: activeTab.key,
+        projectId,
+      });
+    } else if (activeTab?.type === 'resource') {
+      jumpToResource({
+        resId: activeTab.key,
+        projectId,
+      });
+    }
+  }, [activeTab, canvasId, resId]);
 
   // Watch for canvasId change
   useDebounce(
@@ -146,7 +150,7 @@ export const ProjectDirectory = (props: {
         }
       }
     },
-    100,
+    10,
     [canvasId, canvases],
   );
 
@@ -165,7 +169,7 @@ export const ProjectDirectory = (props: {
         }
       }
     },
-    100,
+    10,
     [resId, resources],
   );
 
@@ -202,22 +206,10 @@ export const ProjectDirectory = (props: {
         canvasId: item.id,
         projectId: projectId,
       });
-      handleAddTab({
-        projectId: projectId,
-        key: item.id,
-        title: item.title,
-        type: 'canvas',
-      });
     } else if (item.type === 'resources') {
       jumpToResource({
         resId: item.id,
         projectId: projectId,
-      });
-      handleAddTab({
-        projectId: projectId,
-        key: item.id,
-        title: item.title,
-        type: 'resource',
       });
     } else if (item.type === 'conversations') {
       jumpToConv({
@@ -585,8 +577,14 @@ export const ProjectDirectory = (props: {
                   </span>
                   {' · '}
                   <span>
+                    {t('knowledgeBase.directory.canvasCount', {
+                      count: canvases?.data?.length || 0,
+                    })}
+                  </span>
+                  {' · '}
+                  <span>
                     {t('knowledgeBase.directory.resourceCount', {
-                      count: (resources?.data?.length || 0) + (canvases?.data?.length || 0),
+                      count: resources?.data?.length || 0,
                     })}
                   </span>
                 </div>

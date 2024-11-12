@@ -2,12 +2,31 @@
   height: 100%;
   position: relative;
 
-  // 外层 Splitter 样式
+  .workspace-panel-container {
+    // 修改 transition 属性，确保包含 width 和 transform
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: width, transform; // 添加 will-change 提高性能
+
+    .workspace-left-assist-panel,
+    .workspace-content-panel {
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      will-change: width, transform;
+    }
+  }
+
   .project-detail-outer-splitter {
     background-color: #f3f3ee;
 
-    // 只处理第一层的分割条样式
-    > .ant-splitter-bar .ant-splitter-bar-dragger {
+    > .workspace-left-assist-panel + .ant-splitter-bar .ant-splitter-bar-dragger {
+      width: 2px;
+      background-color: #f3f3ee;
+
+      &:hover:before {
+        background-color: rgba(0, 0, 0, 0.04) !important;
+      }
+    }
+
+    > .workspace-content-panel + .ant-splitter-bar .ant-splitter-bar-dragger {
       width: 8px;
       background-color: #f3f3ee;
 
@@ -16,16 +35,13 @@
       }
     }
 
-    // 只处理第一层的分割条before伪元素
     > .ant-splitter-bar .ant-splitter-bar-dragger:before {
       background-color: transparent !important;
     }
 
-    // 只处理第一层的面板
     > .ant-splitter-panel {
       background-color: #f3f3ee;
 
-      // 每个面板的内容容器背景色
       > .project-detail-directory-container,
       > .project-detail-content-container,
       > .project-detail-copilot-panel {
@@ -64,8 +80,6 @@
       }
     }
   }
-
-  // ... 其他原有样式保持不变
 
   .arco-drawer-content {
     padding: 0;

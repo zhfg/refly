@@ -8,7 +8,7 @@ import { AICopilot } from '@refly-packages/ai-workspace-common/components/copilo
 import { useProjectStore, useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 
 import './index.scss';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
@@ -26,6 +26,7 @@ export const ProjectDetail = () => {
     setCopilotSize,
     setProjectActiveConvId,
     fetchProjectDirItems,
+    setProject,
   } = useProjectStoreShallow((state) => ({
     copilotSize: state.copilotSize,
     setCurrentProjectId: state.setCurrentProjectId,
@@ -34,6 +35,7 @@ export const ProjectDetail = () => {
     fetchProjectDetail: state.fetchProjectDetail,
     setProjectActiveConvId: state.setProjectActiveConvId,
     fetchProjectDirItems: state.fetchProjectDirItems,
+    setProject: state.setProject,
   }));
 
   const { addRecentProject } = useHandleRecents();
@@ -43,6 +45,13 @@ export const ProjectDetail = () => {
   const activeTab = tabs.find((x) => x.key === activeTabMap[projectId]);
 
   const [bindResourceModalVisible, setBindResourceModalVisible] = useState(false);
+
+  const [directorySize, setDirectorySize] = useState(300);
+  const [contentSize, setContentSize] = useState(450);
+  const isCopilotFullScreen = searchParams.get('fullScreen');
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [totalWidth, setTotalWidth] = useState(0);
+  console.log('totalWidth', totalWidth);
 
   const setInitialTab = async () => {
     const currentCanvases = useProjectStore.getState().canvases.data;
@@ -94,6 +103,8 @@ export const ProjectDetail = () => {
 
     return () => {
       setCopilotSize(500);
+      setCurrentProjectId('');
+      setProject(null);
     };
   }, [projectId]);
 
@@ -108,34 +119,70 @@ export const ProjectDetail = () => {
     }
   }, [convId]);
 
+  useEffect(() => {
+    if (isCopilotFullScreen) {
+      requestAnimationFrame(() => {
+        setDirectorySize(0);
+        setContentSize(0);
+      });
+    } else {
+      requestAnimationFrame(() => {
+        setDirectorySize(300);
+        setContentSize(totalWidth - 300 - 500);
+      });
+    }
+  }, [isCopilotFullScreen, totalWidth]);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setTotalWidth(containerRef.current.offsetWidth);
+      }
+    };
+
+    // Initial measurement
+    updateWidth();
+
+    // Add resize listener
+    const resizeObserver = new ResizeObserver(updateWidth);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
   return (
     <ProjectProvider context={{ projectId }}>
-      <div className="overflow-hidden project-detail-container">
+      <div className="overflow-hidden project-detail-container" ref={containerRef}>
         <Splitter
           layout="horizontal"
           className="workspace-panel-container project-detail-outer-splitter"
-          onResize={(size) => setCopilotSize(size[2])}
+          onResize={(size) => {
+            setDirectorySize(size[0]);
+            setContentSize(size[1]);
+            setCopilotSize(size[2]);
+          }}
         >
-          <Splitter>
-            <Splitter className="project-detail-inner-splitter">
-              <Splitter.Panel
-                collapsible
-                defaultSize={300}
-                min={300}
-                className="workspace-left-assist-panel project-detail-left-panel"
-                key="workspace-left-assist-panel"
-              >
-                <ProjectDirectory projectId={projectId} setBindResourceModalVisible={setBindResourceModalVisible} />
-              </Splitter.Panel>
-              <Splitter.Panel
-                min={450}
-                className="workspace-content-panel project-detail-main-content-panel"
-                key="workspace-content-panel-content"
-              >
-                <ContentArea projectId={projectId} setBindResourceModalVisible={setBindResourceModalVisible} />
-              </Splitter.Panel>
-            </Splitter>
-          </Splitter>
+          <Splitter.Panel
+            collapsible
+            size={directorySize}
+            min={300}
+            className="workspace-left-assist-panel"
+            key="workspace-left-assist-panel"
+          >
+            <ProjectDirectory projectId={projectId} setBindResourceModalVisible={setBindResourceModalVisible} />
+          </Splitter.Panel>
+
+          <Splitter.Panel
+            size={contentSize}
+            min={450}
+            className="workspace-content-panel"
+            key="workspace-content-panel-content"
+          >
+            <ContentArea projectId={projectId} setBindResourceModalVisible={setBindResourceModalVisible} />
+          </Splitter.Panel>
+
           <Splitter.Panel
             collapsible
             className="workspace-content-panel project-detail-copilot-panel"

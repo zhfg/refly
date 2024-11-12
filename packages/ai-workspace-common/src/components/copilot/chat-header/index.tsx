@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Button, Tooltip } from 'antd';
 
+import { RiFullscreenFill, RiFullscreenExitLine } from 'react-icons/ri';
 import { IconClose, IconHistory, IconPlus } from '@arco-design/web-react/icon';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
@@ -25,7 +27,7 @@ import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/c
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
 import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
-import { IconProject } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconThread } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 interface CopilotChatHeaderProps {
   source: MessageIntentSource;
@@ -39,6 +41,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
   const { t } = useTranslation();
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const fullScreen = searchParams.get('fullScreen');
 
   // 所属的环境
   const runtime = getRuntime();
@@ -96,6 +99,16 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
     knowledgeBaseStore.updateConvModalVisible(true);
   };
 
+  const handleFullScreen = () => {
+    if (fullScreen) {
+      searchParams.delete('fullScreen');
+      setSearchParams(searchParams);
+    } else {
+      searchParams.set('fullScreen', '1');
+      setSearchParams(searchParams);
+    }
+  };
+
   return (
     <div className="knowledge-base-detail-header">
       {!disable && (
@@ -103,8 +116,8 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
           <div className="knowledge-base-detail-navigation-bar">
             {isWeb ? (
               <div className="text-gray-500 font-normal flex items-center gap-2 ml-3 max-w-[300px]">
-                <IconProject className="text-gray-500 h-4 w-4" />
-                <div className="truncate">{projectStore.project.data?.title}</div>
+                <IconThread className="text-gray-500 h-4 w-4" />
+                <div className="truncate">{conversationStore.currentConversation?.title}</div>
               </div>
             ) : null}
             {!isWeb ? (
@@ -122,6 +135,24 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
             ) : null}
           </div>
           <div className="knowledge-base-detail-navigation-bar">
+            {source === MessageIntentSource.Project && (
+              <Tooltip
+                title={t(`knowledgeBase.header.${fullScreen ? 'exitFullScreen' : 'fullScreen'}`)}
+                getPopupContainer={getPopupContainer}
+              >
+                <Button
+                  icon={
+                    fullScreen ? (
+                      <RiFullscreenExitLine className="text-green-600 flex items-center" />
+                    ) : (
+                      <RiFullscreenFill className="text-green-600 flex items-center" />
+                    )
+                  }
+                  type="text"
+                  onClick={handleFullScreen}
+                ></Button>
+              </Tooltip>
+            )}
             <Tooltip
               key="threadHistory"
               title={t('knowledgeBase.header.openThreadHistory')}

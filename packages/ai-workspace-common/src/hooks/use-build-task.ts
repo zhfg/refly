@@ -32,10 +32,8 @@ import { getCanvasContent } from '@refly-packages/ai-workspace-common/components
 // hooks
 import { IntentResult, useHandleAICanvas } from './use-handle-ai-canvas';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import {
-  useMultilingualSearchStore,
-  useMultilingualSearchStoreShallow,
-} from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
+import { useMultilingualSearchStoreShallow } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
+import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 const globalStreamingChatPortRef = { current: null as Runtime.Port | null };
 const globalAbortControllerRef = { current: null as AbortController | null };
@@ -43,6 +41,9 @@ const globalIsAbortedRef = { current: false as boolean };
 let uniqueId = genUniqueId();
 
 export const useBuildTask = () => {
+  const canvasStore = useCanvasStoreShallow((state) => ({
+    updateIsAiEditing: state.updateIsAiEditing,
+  }));
   const chatStore = useChatStoreShallow((state) => ({
     setMessages: state.setMessages,
     setNewQAText: state.setNewQAText,
@@ -171,16 +172,29 @@ export const useBuildTask = () => {
       lastRelatedMessage.content = '';
     }
 
-    // 获取更新前的 canvas 内容
+    // Get canvas content before update
     const prevCanvasContent = getCanvasContent(lastRelatedMessage.content);
 
-    // 更新消息内容
+    // Update message content
     lastRelatedMessage.content += skillEvent.content;
 
-    // 获取更新后的 canvas 内容
+    // Update canvas AI editing status
+    if (lastRelatedMessage.content.match(/<reflyCanvas[^>]*>/)) {
+      if (lastRelatedMessage.content.includes('</reflyCanvas>')) {
+        if (useCanvasStore.getState().isAiEditing) {
+          canvasStore.updateIsAiEditing(false);
+        }
+      } else {
+        if (!useCanvasStore.getState().isAiEditing) {
+          canvasStore.updateIsAiEditing(true);
+        }
+      }
+    }
+
+    // Get updated canvas content
     const currentCanvasContent = getCanvasContent(lastRelatedMessage.content);
 
-    // 计算增量内容
+    // Calculate incremental content
     let incrementalContent = currentCanvasContent.slice(prevCanvasContent.length);
     if (incrementalContent?.length > 0) {
       incrementalContent = incrementalContent
@@ -190,7 +204,7 @@ export const useBuildTask = () => {
         .replace(/&lt;\/reflyCanvas&gt;/g, '');
     }
 
-    // 处理 Citation 的序列号
+    // Handle citation sequence numbers
     lastRelatedMessage.content = markdownCitationParse(lastRelatedMessage.content);
 
     messages[lastRelatedMessageIndex] = lastRelatedMessage;
@@ -200,7 +214,7 @@ export const useBuildTask = () => {
       messageStateStore.setMessageState({ pendingFirstToken: false });
     }
 
-    // 如果是画布内容且有增量内容，发送到编辑器
+    // If it is canvas content and has incremental content, send it to the editor
     const intentMatcher = lastRelatedMessage?.structuredData?.intentMatcher as IntentResult;
     if (
       [CanvasIntentType.GenerateCanvas, CanvasIntentType.EditCanvas].includes(intentMatcher?.type) &&
@@ -208,11 +222,13 @@ export const useBuildTask = () => {
     ) {
       if (intentMatcher?.type === CanvasIntentType.GenerateCanvas && incrementalContent) {
         editorEmitter.emit('streamCanvasContent', {
+          canvasId: intentMatcher?.canvasId,
           isFirst: isFirstStreamContent,
           content: incrementalContent,
         });
       } else if (intentMatcher?.type === CanvasIntentType.EditCanvas && incrementalContent) {
         editorEmitter.emit('streamEditCanvasContent', {
+          canvasId: intentMatcher?.canvasId,
           isFirst: isFirstStreamContent,
           content: incrementalContent,
         });

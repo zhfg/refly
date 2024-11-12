@@ -47,9 +47,11 @@ export interface ProjectState {
   projectTabs: Record<string, ProjectTab[]>;
   projectActiveConvId: Record<string, string>;
   copilotSize: number;
+  isCopilotFullScreen: boolean;
 
   setProjectActiveConvId: (projectId: string, convId: string) => void;
   setCopilotSize: (size: number) => void;
+  setIsCopilotFullScreen: (isFullScreen: boolean) => void;
   setCurrentProjectId: (projectId: string) => void;
   setProjectActiveTab: (projectId: string, tab: string) => void;
   setProjectTabs: (projectId: string, tabs: ProjectTab[]) => void;
@@ -84,6 +86,7 @@ export const useProjectStore = create<ProjectState>()(
     immer((set, get) => ({
       currentProjectId: '',
       copilotSize: 500,
+      isCopilotFullScreen: false,
       project: {
         data: null,
         loading: false,
@@ -112,6 +115,10 @@ export const useProjectStore = create<ProjectState>()(
       setCopilotSize: (size) =>
         set((state) => {
           state.copilotSize = size;
+        }),
+      setIsCopilotFullScreen: (isFullScreen) =>
+        set((state) => {
+          state.isCopilotFullScreen = isFullScreen;
         }),
       setCurrentProjectId: (projectId) =>
         set((state) => {

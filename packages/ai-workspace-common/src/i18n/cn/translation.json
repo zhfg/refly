@@ -12,6 +12,7 @@
     "remove": "移除",
     "loading": "加载中...",
     "loadMore": "加载更多",
+    "appStarting": "应用启动中",
     "more": "更多",
     "putErr": "操作失败，请尝试重试！",
     "putSuccess": "操作成功",
@@ -237,7 +238,8 @@
       "importResource": "导入资源"
     },
     "directory": {
-      "resourceCount": "{{count}} 个内容",
+      "canvasCount": "{{count}} 篇稿布",
+      "resourceCount": "{{count}} 篇资源",
       "resourcesSearchPlaceholder": "搜索资源...",
       "canvasesSearchPlaceholder": "搜索稿布...",
       "conversationsSearchPlaceholder": "搜索会话..."
@@ -267,6 +269,10 @@
         "toolbar": {
           "quote": "引用内容提问"
         }
+      },
+      "leavePageModal": {
+        "title": "确认离开当前稿布吗？",
+        "content": "AI 仍在写作中，退出页面会导致内容丢失，是否确认离开？"
       }
     },
     "context": {
@@ -322,7 +328,9 @@
       "searchOrOpenNote": "搜索或打开稿布",
       "searchOrOpenThread": "搜索或打开会话",
       "openThreadHistory": "打开会话历史",
-      "newThread": "新建会话"
+      "newThread": "新建会话",
+      "fullScreen": "全屏",
+      "exitFullScreen": "退出全屏"
     }
   },
   "canvas": {
@@ -1077,7 +1085,7 @@
       "manager": "管理"
     },
     "chatInput": {
-      "placeholder": "让 Refly 帮你写点什么...",
+      "placeholder": "让 Refly 帮你写点什么，或者搜索任何感兴趣的内容...",
       "defaultQuestion": "[调用技能: {{name}}]",
       "chatWithReflyAssistant": "和「知识管家」聊聊"
     },

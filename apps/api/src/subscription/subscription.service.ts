@@ -286,7 +286,7 @@ export class SubscriptionService implements OnModuleInit {
 
     const checkoutSession = await this.prisma.checkoutSession.findFirst({
       where: { sessionId: session.id },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { pk: 'desc' },
     });
 
     if (!checkoutSession) {
@@ -327,7 +327,7 @@ export class SubscriptionService implements OnModuleInit {
 
     const checkoutSession = await this.prisma.checkoutSession.findFirst({
       where: { subscriptionId: subscription.id, paymentStatus: 'paid' },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { pk: 'desc' },
     });
     if (!checkoutSession) {
       this.logger.error(`No checkout session found for subscription ${subscription.id}`);
