@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Helmet } from "react-helmet"
 import { useTranslation } from "react-i18next"
 import { ErrorBoundary } from "@sentry/react"
@@ -31,7 +31,6 @@ import {
   useProjectStore,
   useProjectStoreShallow,
 } from "@refly-packages/ai-workspace-common/stores/project"
-import { IconCanvas } from "@refly-packages/ai-workspace-common/components/common/icon"
 import { HiOutlineShare } from "react-icons/hi"
 import { copyToClipboard } from "@refly-packages/ai-workspace-common/utils"
 import { Tooltip } from "@arco-design/web-react"
@@ -70,6 +69,12 @@ const ShareContent = () => {
   const [loading, setLoading] = useState(false)
   const [currentCanvas, setCurrentCanvas] = useState<Canvas>()
   const [breadItems, setBreadItems] = useState<any[]>([])
+
+  const [totalWidth, setTotalWidth] = useState(0)
+  const [leftPanelSize, setLeftPanelSize] = useState(800)
+  const [copilotSize, setCopilotSize] = useState(400)
+  const isCopilotFullScreen = searchParams.get("fullScreen")
+  const containerRef = useRef<HTMLDivElement>(null)
 
   // for content selector
   const baseUrl = getClientOrigin()
@@ -167,6 +172,41 @@ const ShareContent = () => {
     }
   }, [loading, shareCode])
 
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setTotalWidth(containerRef.current.offsetWidth)
+      }
+    }
+
+    // Initial measurement
+    updateWidth()
+
+    // Add resize listener
+    const resizeObserver = new ResizeObserver(updateWidth)
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current)
+    }
+
+    return () => resizeObserver.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (isCopilotFullScreen) {
+      requestAnimationFrame(() => {
+        setLeftPanelSize(0)
+      })
+    } else {
+      requestAnimationFrame(() => {
+        if (totalWidth > 1250) {
+          setLeftPanelSize(totalWidth - 400)
+        } else {
+          setLeftPanelSize(800)
+        }
+      })
+    }
+  }, [isCopilotFullScreen, totalWidth])
+
   const title = project
     ? `${project.title} · ${currentCanvas?.title}`
     : currentCanvas?.title
@@ -178,9 +218,17 @@ const ShareContent = () => {
           {title || t("shareContent.title")} · {t("productName")}
         </title>
       </Helmet>
-      <div className="share-content flex h-full flex-col">
-        <Splitter className="share-content-outer-splitter">
-          <Splitter.Panel className="share-main-content-panel">
+      <div className="share-content flex h-full flex-col" ref={containerRef}>
+        <Splitter
+          className="share-content-outer-splitter"
+          onResize={size => {
+            setLeftPanelSize(size[0])
+            setCopilotSize(size[1])
+          }}>
+          <Splitter.Panel
+            className="share-main-content-panel"
+            size={leftPanelSize}
+            min={700}>
             <div className="flex h-full flex-col overflow-hidden bg-[#fcfcf9]">
               <div className="share-header flex items-center justify-between px-6 py-2">
                 <div className="flex items-center">
@@ -287,7 +335,7 @@ const ShareContent = () => {
             </div>
           </Splitter.Panel>
 
-          <Splitter.Panel collapsible defaultSize={400} max={500} min={400}>
+          <Splitter.Panel collapsible size={copilotSize} min={400}>
             <AICopilot source={MessageIntentSource.Share} />
           </Splitter.Panel>
         </Splitter>
