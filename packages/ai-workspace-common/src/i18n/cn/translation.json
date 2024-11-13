@@ -1164,7 +1164,7 @@
     },
     "sourceListModal": {
       "title": "结果来源",
-      "moreSources": "查看更多 {{count}} 来源",
+      "moreSources": "查看更多并导入为资源",
       "searchPlaceholder": "搜索来源...",
       "openOriginWebsite": "打开来源链接",
       "openKnowledgeBaseLink": "打开项目链接",

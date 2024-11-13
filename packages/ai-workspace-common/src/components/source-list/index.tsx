@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 // 样式
 import './index.scss';
-import { IconBook, IconCompass } from '@arco-design/web-react/icon';
+import { IconBook, IconCompass, IconRight } from '@arco-design/web-react/icon';
 import { Markdown } from '../markdown';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { mapSourceToResource } from '@refly-packages/ai-workspace-common/utils/resource';
@@ -62,8 +62,8 @@ const ViewMoreItem = ({
         onClick?.();
       }}
     >
-      <div className="overflow-hidden font-medium whitespace-nowrap break-all text-ellipsis text-zinc-950">
-        {t('copilot.sourceListModal.moreSources', { count: extraCnt })}
+      <div className="overflow-hidden font-medium whitespace-nowrap break-all text-ellipsis text-zinc-500">
+        {t('copilot.sourceListModal.moreSources', { count: extraCnt })} <IconRight />
       </div>
       {sources?.slice(sources.length - extraCnt)?.map((item, index) => {
         const url = item?.url;

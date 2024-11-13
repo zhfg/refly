@@ -1150,7 +1150,7 @@
     },
     "sourceListModal": {
       "title": "Result Sources",
-      "moreSources": "View More {{count}} Sources",
+      "moreSources": "View More and Import as Resource",
       "searchPlaceholder": "Search Sources...",
       "openOriginWebsite": "Open Origin Website",
       "openKnowledgeBaseLink": "Open Knowledge Base Link",
