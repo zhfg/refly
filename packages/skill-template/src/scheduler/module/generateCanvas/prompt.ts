@@ -1,8 +1,19 @@
+export const commonNote = (locale: string) => `
+Note: 
+1. The <response> tags below are only used to structure these examples. DO NOT include these tags in your actual output.
+2. These examples are shown in English for demonstration. Your actual output should be entirely in the specified locale (${locale}), including:
+   - Initial content analysis
+   - Thinking process content
+   - Canvas content
+   - Brief summary
+   Only technical terms should remain in their original form.
+`;
+
 // Non-contextual examples - keeping existing examples
-export const noContextExamples = `
+export const noContextExamples = (locale: string) => `
 ## Examples
-// Add note about response tags before examples
-Note: The <response> tags below are only used to structure these examples. Do NOT include these tags in your actual output.
+
+${commonNote(locale)}
 
 <example index="1">
 <query>
@@ -68,9 +79,11 @@ This announcement presents your AI tool's innovative features and market-changin
 `;
 
 // New contextual examples demonstrating context and citation usage
-export const contextualExamples = `
+export const contextualExamples = (locale: string) => `
 ## Context-Aware Examples
-Note: The <response> tags below are only used to structure these examples. Do NOT include these tags in your actual output.
+
+Note:
+${commonNote(locale)}
 
 <example index="1">
 <context>
@@ -211,7 +224,7 @@ export const buildGenerateCanvasCommonPrompt = (example: string, locale: string)
 ## Response Structure
 1. Initial Analysis (without <response> tags)
 2. Thinking Process (<reflyThinking> tags only)
-3. Content Generation (<reflyCanvas> tags only) 
+3. Content Generation (<reflyCanvas> tags only)
 4. Brief Summary (without <response> tags)
 
 ## Tag Formats
@@ -235,8 +248,10 @@ The thinking process should be wrapped in reflyThinking tags:
    - <reflyThinking> section
    - <reflyCanvas> section
    - Brief summary
-
-2. Content Generation:
+3. Language Requirements:
+   - All content must be in specified locale (${locale}), includes initial content analysis, <reflyThinking> section, <reflyCanvas> section, and brief summary
+   - Only technical terms remain unchanged
+4. Content Generation:
 
 The content should be wrapped in reflyCanvas tags. The title should ONLY appear in the tag attributes, not in the content:
 
@@ -283,7 +298,7 @@ Professional content creation assistant focused on generating high-quality, deta
 5. Include relevant examples and explanations
 6. Structure content logically with clear sections
 
-${buildGenerateCanvasCommonPrompt(noContextExamples, locale)}
+${buildGenerateCanvasCommonPrompt(noContextExamples(locale), locale)}
 `;
 
 const buildContextualGenerateCanvasPrompt = (locale: string) => `
@@ -350,7 +365,7 @@ You will be provided with context in XML format. This context is structured hier
    </OtherContext>
 </Context>
 
-${buildGenerateCanvasCommonPrompt(contextualExamples, locale)}
+${buildGenerateCanvasCommonPrompt(contextualExamples(locale), locale)}
 
 ## Additional Guidelines
 1. Use provided context to enrich your content generation
