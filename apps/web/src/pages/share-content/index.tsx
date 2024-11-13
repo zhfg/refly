@@ -179,129 +179,118 @@ const ShareContent = () => {
         </title>
       </Helmet>
       <div className="share-content flex h-full flex-col">
-        <div className="canvas-content relative flex-grow overflow-hidden">
-          <Splitter className="share-content-outer-splitter">
-            <Splitter.Panel className="share-main-content-panel">
-              <div className="share-content-content-container flex h-full flex-col overflow-hidden">
-                <div className="share-header flex items-center justify-between px-6 py-2">
-                  <div className="flex items-center">
-                    <img
-                      className="mr-2 h-[20px] w-[20px] cursor-pointer"
-                      src={Logo}
-                      alt="Refly"
-                      onClick={() => {
-                        navigate("/")
-                      }}
-                    />
-                    <Breadcrumb items={breadItems} className="text-l" />
-                  </div>
-                  <div className="flex items-center">
-                    {currentCanvas
-                      ? [
-                          <Tooltip content={t("projectDetail.share.copyLink")}>
-                            <Button
-                              type="text"
-                              size="small"
-                              className="mr-2 text-xs"
-                              style={{ color: "#00968F" }}
-                              icon={<HiOutlineShare />}
-                              onClick={() => {
-                                handleCopy(location.href)
-                              }}>
-                              {t("projectDetail.share.copyLink")}
-                            </Button>
-                          </Tooltip>,
-                        ]
-                      : []}
-                    {!isLogin ? (
-                      <Button
-                        type="primary"
-                        size="small"
-                        className="text-xs"
-                        onClick={() => setLoginModalVisible(true)}>
-                        {t("shareContent.login")}
-                      </Button>
-                    ) : (
-                      <Dropdown menu={{ items }}>
-                        <Avatar
-                          src={userProfile?.avatar}
-                          icon={isLogin ? null : <FaRegUser />}
-                          className="cursor-pointer border-2 hover:border-[#00968F]"
-                        />
-                      </Dropdown>
-                    )}
-                  </div>
+        <Splitter className="share-content-outer-splitter">
+          <Splitter.Panel className="share-main-content-panel">
+            <div className="flex h-full flex-col overflow-hidden bg-[#fcfcf9]">
+              <div className="share-header flex items-center justify-between px-6 py-2">
+                <div className="flex items-center">
+                  <img
+                    className="mr-2 h-[20px] w-[20px] cursor-pointer"
+                    src={Logo}
+                    alt="Refly"
+                    onClick={() => {
+                      navigate("/")
+                    }}
+                  />
+                  <Breadcrumb items={breadItems} className="text-l" />
                 </div>
-                <Splitter className="share-content-inner-splitter flex-grow">
-                  {
-                    <Splitter.Panel
-                      collapsible
-                      defaultSize={300}
-                      min={200}
-                      max={300}
-                      className="share-canvas-list-panel">
-                      <div className="shadow-l flex-shrink-0 overflow-y-auto pt-2">
-                        {canvasList.map((item: Canvas) => (
-                          <div
-                            key={item.canvasId}
-                            className="mb-1 ml-4 mr-4 mt-1 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap rounded-md p-2 text-[14px] hover:bg-gray-100"
-                            style={{
-                              backgroundColor:
-                                currentCanvas?.canvasId === item.canvasId
-                                  ? "rgba(0,0,0,0.05)"
-                                  : "",
-                            }}
+                <div className="flex items-center">
+                  {currentCanvas
+                    ? [
+                        <Tooltip content={t("projectDetail.share.copyLink")}>
+                          <Button
+                            type="text"
+                            size="small"
+                            className="mr-2 text-xs"
+                            style={{ color: "#00968F" }}
+                            icon={<HiOutlineShare />}
                             onClick={() => {
-                              setSearchParams(
-                                { canvasId: item.canvasId },
-                                { replace: true },
-                              )
+                              handleCopy(location.href)
                             }}>
-                            {item.title}
-                          </div>
-                        ))}
+                            {t("projectDetail.share.copyLink")}
+                          </Button>
+                        </Tooltip>,
+                      ]
+                    : []}
+                  {!isLogin ? (
+                    <Button
+                      type="primary"
+                      size="small"
+                      className="text-xs"
+                      onClick={() => setLoginModalVisible(true)}>
+                      {t("shareContent.login")}
+                    </Button>
+                  ) : (
+                    <Dropdown menu={{ items }}>
+                      <Avatar
+                        src={userProfile?.avatar}
+                        icon={isLogin ? null : <FaRegUser />}
+                        className="cursor-pointer border-2 hover:border-[#00968F]"
+                      />
+                    </Dropdown>
+                  )}
+                </div>
+              </div>
+              <Splitter className="share-content-inner-splitter">
+                <Splitter.Panel
+                  collapsible
+                  defaultSize={300}
+                  min={200}
+                  max={300}>
+                  <div
+                    className="border-box relative flex-shrink-0 overflow-y-auto pt-2"
+                    style={{ height: "calc(100vh - 56px)" }}>
+                    {canvasList.map((item: Canvas) => (
+                      <div
+                        key={item.canvasId}
+                        className="mb-1 ml-4 mr-4 mt-1 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap rounded-md p-2 text-[14px] hover:bg-gray-100"
+                        style={{
+                          backgroundColor:
+                            currentCanvas?.canvasId === item.canvasId
+                              ? "rgba(0,0,0,0.05)"
+                              : "",
+                        }}
+                        onClick={() => {
+                          setSearchParams(
+                            { canvasId: item.canvasId },
+                            { replace: true },
+                          )
+                        }}>
+                        {item.title}
                       </div>
-                    </Splitter.Panel>
-                  }
-                  <Splitter.Panel
-                    min={450}
-                    className="share-canvas-content-panel">
-                    <div className="left-panel relative flex h-full">
-                      <div className="h-full flex-grow overflow-hidden overflow-y-auto p-8">
-                        <div className="share-canvas-content-container">
-                          {loading ? (
-                            <Spin />
-                          ) : currentCanvas ? (
-                            <div className="share-canvas-content mx-auto mb-8 box-border h-full max-w-[1024px] rounded-l">
-                              <div className="mb-4 w-full text-2xl font-bold">
-                                {currentCanvas?.title}
-                              </div>
-                              {initContentSelectorElem()}
-                              <Markdown
-                                content={currentCanvas?.content || ""}
-                              />
+                    ))}
+                  </div>
+                </Splitter.Panel>
+
+                <Splitter.Panel min={450}>
+                  <div className="relative flex h-full">
+                    <div className="h-full overflow-hidden overflow-y-auto p-8">
+                      <div className="share-canvas-content-container">
+                        {loading ? (
+                          <Spin />
+                        ) : currentCanvas ? (
+                          <div className="share-canvas-content mx-auto mb-8 box-border h-full max-w-[1024px] rounded-l">
+                            <div className="mb-4 w-full text-2xl font-bold">
+                              {currentCanvas?.title}
                             </div>
-                          ) : (
-                            <Empty description={t("common.empty")} />
-                          )}
-                        </div>
+                            {initContentSelectorElem()}
+                            <Markdown content={currentCanvas?.content || ""} />
+                          </div>
+                        ) : (
+                          <Empty description={t("common.empty")} />
+                        )}
                       </div>
                     </div>
-                  </Splitter.Panel>
-                </Splitter>
-              </div>
-            </Splitter.Panel>
+                  </div>
+                </Splitter.Panel>
+              </Splitter>
+            </div>
+          </Splitter.Panel>
 
-            <Splitter.Panel
-              className="share-copilot-panel"
-              collapsible
-              defaultSize={400}
-              max={500}
-              min={400}>
-              <AICopilot source={MessageIntentSource.Share} />
-            </Splitter.Panel>
-          </Splitter>
-        </div>
+          <Splitter.Panel collapsible defaultSize={400} max={500} min={400}>
+            <AICopilot source={MessageIntentSource.Share} />
+          </Splitter.Panel>
+        </Splitter>
       </div>
     </ErrorBoundary>
   )

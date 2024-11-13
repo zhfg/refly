@@ -2,6 +2,7 @@
   .share-header {
     border-bottom: solid 1px #e8e8e8;
     height: 40px;
+    box-sizing: border-box;
   }
 
   .share-content-outer-splitter {
@@ -26,11 +27,6 @@
 
     .share-main-content-panel {
       border-radius: 12px;
-    }
-
-    .share-content-content-container {
-      background-color: #fcfcf9;
-      height: 100%;
     }
   }
 
