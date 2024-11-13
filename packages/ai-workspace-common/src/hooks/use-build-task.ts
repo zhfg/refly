@@ -395,8 +395,8 @@ export const useBuildTask = () => {
     }
     chatStore.setMessages([...messages.slice(0, -1), lastMessage]);
 
-    const errorMsg = msg || (locale?.includes('zh') ? '你已经终止了技能运行' : 'You have terminated the skill run');
-    buildErrMsgAndAppendToChat(errorMsg);
+    // const errorMsg = msg || (locale?.includes('zh') ? '你已经终止了技能运行' : 'You have terminated the skill run');
+    // buildErrMsgAndAppendToChat(errorMsg);
     messageStateStore.resetState();
     // 更新消息之后滚动到底部
     setTimeout(() => {
