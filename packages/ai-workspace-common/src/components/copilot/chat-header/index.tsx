@@ -135,7 +135,7 @@ export const CopilotChatHeader = (props: CopilotChatHeaderProps) => {
             ) : null}
           </div>
           <div className="knowledge-base-detail-navigation-bar">
-            {source === MessageIntentSource.Project && (
+            {[MessageIntentSource.Project, MessageIntentSource.Share].includes(source) && (
               <Tooltip
                 title={t(`knowledgeBase.header.${fullScreen ? 'exitFullScreen' : 'fullScreen'}`)}
                 getPopupContainer={getPopupContainer}
