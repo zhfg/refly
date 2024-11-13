@@ -263,7 +263,7 @@
     "canvas": {
       "editor": {
         "placeholder": {
-          "default": "写点什么，或按空格键激活 AI，或按 '/' 键激活命令",
+          "default": "写点什么，或按空格键或 ++ 激活 AI，按 '/' 键激活命令",
           "heading": "标题 {{level}}"
         },
         "toolbar": {

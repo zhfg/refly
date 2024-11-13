@@ -261,7 +261,7 @@
     "canvas": {
       "editor": {
         "placeholder": {
-          "default": "Write something, or press 'space' for AI, '/' for commands",
+          "default": "Write something, or press 'space' or '++' for AI, '/' for commands",
           "heading": "Heading {{level}}"
         },
         "toolbar": {
