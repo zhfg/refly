@@ -1106,7 +1106,7 @@
       "disable": "Disable"
     },
     "tokenUsage": "Input {{inputCount}}, Output {{outputCount}}",
-    "reflyAssistant": "Knowledge Curator",
+    "reflyAssistant": "Refly Knowledge Curator",
     "message": {
       "copy": "Copy",
       "copySuccess": "Copy Success",

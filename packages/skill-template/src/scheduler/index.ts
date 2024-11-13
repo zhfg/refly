@@ -54,7 +54,7 @@ export class Scheduler extends BaseSkill {
 
   displayName = {
     en: 'Knowledge Curator',
-    'zh-CN': 'Refly AI 知识管家',
+    'zh-CN': 'Refly 知识管家',
   };
 
   icon: Icon = { type: 'emoji', value: '🧙‍♂️' };

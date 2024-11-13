@@ -1120,7 +1120,7 @@
       "disable": "禁用"
     },
     "tokenUsage": "输入 {{inputCount}}，输出 {{outputCount}}",
-    "reflyAssistant": "知识管家",
+    "reflyAssistant": "Refly 知识管家",
     "message": {
       "copy": "复制",
       "copySuccess": "复制成功",
