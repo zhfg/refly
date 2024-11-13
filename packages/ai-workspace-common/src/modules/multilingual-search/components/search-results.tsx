@@ -146,6 +146,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     placement="left"
                     overlayClassName="search-result-popover"
                     trigger="hover"
+                    align={{ offset: [-50, 0] }}
                     mouseEnterDelay={0.5}
                   >
                     <div className="result-details" onClick={() => config.handleItemClick?.(item)}>

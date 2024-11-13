@@ -1,6 +1,7 @@
 import { Resource, Source } from '@refly/openapi-schema';
 import { getClientOrigin, safeParseURL } from '@refly/utils/url';
-import { Popover, Skeleton, Tooltip } from '@arco-design/web-react';
+import { Skeleton, Tooltip } from '@arco-design/web-react';
+import { Popover } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -15,6 +16,7 @@ import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-ju
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { ClientChatMessage } from '@refly/common-types';
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { TranslationWrapper } from '@refly-packages/ai-workspace-common/components/translation-wrapper';
 
 interface SourceListProps {
   sources: Source[];
@@ -26,21 +28,83 @@ interface SourceListProps {
 
 const SourceItem = ({ source, index }: { source: Source; index: number }) => {
   const domain = safeParseURL(source?.url || '');
+  const { jumpToResource, jumpToCanvas } = useJumpNewPath();
+  const { i18n } = useTranslation();
+  const currentUiLocale = i18n.language as 'en' | 'zh-CN';
+  const runtime = getRuntime();
+  const isWeb = runtime === 'web';
 
-  return (
-    <div className="flex relative flex-col text-xs rounded-lg source-list-item" key={index}>
-      <div className="overflow-hidden font-medium whitespace-nowrap break-words text-ellipsis text-zinc-950">
-        {index + 1} · {source?.title}
-      </div>
-      <div className="overflow-hidden flex-1 pl-2">
-        <div className="overflow-hidden w-full whitespace-nowrap break-all text-ellipsis text-zinc-400">{domain}</div>
-      </div>
-      <div className="flex gap-2 items-center">
-        <div className="flex flex-none items-center">
-          <img className="w-3 h-3" alt={domain} src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`} />
-        </div>
+  // Handle click based on source type
+  const handleClick = () => {
+    if (source?.metadata?.sourceType === 'library') {
+      if (source.metadata?.entityType === 'resource') {
+        jumpToResource({ resId: source.metadata.entityId });
+      } else if (source.metadata?.entityType === 'canvas') {
+        jumpToCanvas({
+          canvasId: source.metadata?.entityId,
+          projectId: source?.metadata?.projectId,
+        });
+      }
+    } else {
+      // For web links, open in new tab
+      window.open(source.url, '_blank');
+    }
+  };
+
+  // Popover content with translation support
+  const renderPopoverContent = () => (
+    <div className="search-result-popover-content">
+      <h4>
+        <TranslationWrapper
+          content={source.title || ''}
+          targetLanguage={currentUiLocale}
+          originalLocale={source.metadata?.originalLocale}
+        />
+      </h4>
+      <div className="content-body">
+        <TranslationWrapper
+          content={source.pageContent}
+          targetLanguage={currentUiLocale}
+          originalLocale={source.metadata?.originalLocale}
+        />
       </div>
     </div>
+  );
+
+  return (
+    <Popover
+      content={renderPopoverContent()}
+      placement={isWeb ? 'left' : 'top'}
+      trigger="hover"
+      overlayClassName="search-result-popover"
+    >
+      <div
+        className="flex relative flex-col text-xs rounded-lg source-list-item cursor-pointer hover:bg-gray-50"
+        key={index}
+        onClick={handleClick}
+      >
+        <div className="overflow-hidden font-medium whitespace-nowrap break-words text-ellipsis text-zinc-950 flex items-center flex-row gap-1">
+          <span>{index + 1} ·</span>
+          <TranslationWrapper
+            content={source.title || ''}
+            targetLanguage={currentUiLocale}
+            originalLocale={source.metadata?.originalLocale}
+          />
+        </div>
+        <div className="overflow-hidden flex-1 pl-2">
+          <div className="overflow-hidden w-full whitespace-nowrap break-all text-ellipsis text-zinc-400">{domain}</div>
+        </div>
+        <div className="flex gap-2 items-center">
+          <div className="flex flex-none items-center">
+            <img
+              className="w-3 h-3"
+              alt={domain}
+              src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
+            />
+          </div>
+        </div>
+      </div>
+    </Popover>
   );
 };
 
