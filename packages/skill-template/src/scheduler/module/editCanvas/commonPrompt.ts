@@ -12,18 +12,15 @@ export const referenceContextHandlingPrompt = `
 ### Context Integration Capabilities
 1. Analyze and incorporate provided context
 2. Synthesize information from multiple sources
-3. Maintain proper citations and references
-4. Connect related concepts across sources
-5. Generate original content that builds upon context
+3. Connect related concepts across sources
+4. Generate original content that builds upon context
 
 ### Context Handling Guidelines
 1. Prioritize context in order: MentionedContext > WebSearchContext > OtherContext
-2. Use citation format [citation:x] when referencing context
-3. Combine multiple citations when needed [citation:1][citation:2]
-4. Connect information across different context sources
-5. Use context to enrich examples and explanations
+2. Connect information across different context sources
+3. Use context to enrich examples and explanations
 
-### Context Structure and Citation Guidelines
+### Context Structure Guidelines
 You will be provided with context in XML format. This context is structured hierarchically and may include web search results, mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, canvases, and projects. Always consider all relevant context when formulating your responses. The context is structured as follows:
 
 <referenceContext>
@@ -49,6 +46,4 @@ You will be provided with context in XML format. This context is structured hier
       ... (similar structure as MentionedContext)
    </OtherContext>
 </referenceContext>
-
-${importantCitationRules}
 `;

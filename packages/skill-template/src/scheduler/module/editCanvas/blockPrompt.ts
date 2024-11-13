@@ -1,6 +1,6 @@
 import { Canvas } from '@refly-packages/openapi-schema';
 import { HighlightSelection } from './types';
-import { referenceContextHandlingPrompt, importantCitationRules } from './commonPrompt';
+import { referenceContextHandlingPrompt } from './commonPrompt';
 
 /**
  * 1. beforeHighlight and afterHighlight may be empty
@@ -165,16 +165,16 @@ I'll create a detailed section about microservices architecture, incorporating c
 <reflyCanvas identifier="tech-doc" type="document" title="System Architecture">
 ## Microservices Architecture
 
-Our transition from a monolithic architecture [citation:2] to microservices will incorporate industry-standard patterns [citation:1] while following best practices [citation:3].
+Our transition from a monolithic architecture to microservices will incorporate industry-standard patterns while following best practices.
 
 ### Architecture Evolution
-- Current: Tightly coupled components with centralized processing [citation:2]
-- Future: Service mesh architecture with independent scaling [citation:1][citation:3]
+- Current: Tightly coupled components with centralized processing
+- Future: Service mesh architecture with independent scaling
 
 ### Implementation Strategy
 1. Service Boundaries
-   - API-first design approach [citation:3]
-   - Circuit breaker implementation [citation:1]
+   - API-first design approach
+   - Circuit breaker implementation
    - Event-driven communication patterns
 
 [Note: Would continue with detailed implementation specifics]
@@ -235,7 +235,7 @@ I'll add comprehensive authentication examples that implement our security requi
 <reflyCanvas identifier="api-docs" type="document" title="API Authentication Guide">
 ### Authentication Implementation
 
-Our authentication system implements OAuth 2.0 best practices [citation:1] while meeting internal security requirements [citation:2].
+Our authentication system implements OAuth 2.0 best practices while meeting internal security requirements.
 
 #### JavaScript Implementation
 \`\`\`javascript
@@ -254,7 +254,7 @@ const authenticateAPI = async () => {
 \`\`\`python
 def authenticate_api():
     # Secure token handling
-    token = rotate_oauth_token()  # Regular rotation [citation:1]
+    token = rotate_oauth_token()  # Regular rotation
     # Request encryption
     encrypted_request = encrypt_payload(request)
 \`\`\`
@@ -370,7 +370,6 @@ export const buildContextualBlockEditCanvasPrompt = (locale: string) => `
 You are an advanced AI content generator developed by Refly, specializing in creating context-aware block-level content. Your primary responsibility is to:
 - Generate comprehensive block content at specified insertion points (<highlight></highlight>)
 - Synthesize information from both reference materials and document context
-- Maintain document coherence while incorporating cited references
 - Create well-structured, multi-block content that seamlessly integrates with existing document flow
 - Generate all content in ${locale} while preserving technical terms
 
@@ -378,7 +377,6 @@ You are an advanced AI content generator developed by Refly, specializing in cre
 1. Context Processing
    - Analyze and integrate reference context (web search, knowledge base, user content)
    - Understand document context and maintain structural integrity
-   - Apply proper citation practices using [citation:x] format
    - Identify relevant information from multiple context sources
 
 2. Block Generation
@@ -401,10 +399,8 @@ You are an advanced AI content generator developed by Refly, specializing in cre
    - Maintain document coherence and flow
 
 2. Ensure Reference Integration
-   - Properly cite reference context using [citation:x] format
    - Prioritize context according to hierarchy (MentionedContext > WebSearchContext > OtherContext)
    - Synthesize information from multiple reference sources
-   - Support claims with appropriate citations
 
 3. Maintain Document Quality
    - Follow core editing instructions for block generation
@@ -456,8 +452,6 @@ export const buildBlockEditCanvasUserPrompt = ({
  ${rewrittenQuery}
    
  ${importantRemindersPrompt}
-
- ${importantCitationRules}
 
  Remember to generate all content in ${locale} while preserving technical terms
    `;
