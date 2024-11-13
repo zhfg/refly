@@ -84,7 +84,7 @@ export const ProjectList = (props: ProjectListProps) => {
   };
 
   if (dataList.length === 0 && !isRequesting) {
-    return <Empty />;
+    return <Empty description={t('common.empty')} />;
   }
 
   return (

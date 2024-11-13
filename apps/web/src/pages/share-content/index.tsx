@@ -296,7 +296,7 @@ const ShareContent = () => {
                                 />
                               </div>
                             ) : (
-                              <Empty />
+                              <Empty description={t("common.empty")} />
                             )}
                           </div>
                         </div>

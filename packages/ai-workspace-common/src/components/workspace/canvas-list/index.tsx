@@ -52,7 +52,7 @@ export const CanvasList = (props: CanvasListProps) => {
   const { handleAddTabWithNote } = useCanvasTabs();
 
   if (dataList.length === 0 && !isRequesting) {
-    return <Empty />;
+    return <Empty description={t('common.empty')} />;
   }
 
   const handleClickCanvas = (canvas: Canvas) => {

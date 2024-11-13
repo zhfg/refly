@@ -76,7 +76,7 @@ export const ResourceList = () => {
   const { jumpToResource } = useJumpNewPath();
 
   if (dataList.length === 0 && !isRequesting) {
-    return <Empty />;
+    return <Empty description={t('common.empty')} />;
   }
 
   return (
