@@ -1114,11 +1114,6 @@
       "enable": "启用",
       "disable": "禁用"
     },
-    "autoImportWebResource": {
-      "title": "自动导入网页资源",
-      "enable": "启用",
-      "disable": "禁用"
-    },
     "deepReasonWebSearch": {
       "title": "深度网页搜索",
       "enable": "启用",

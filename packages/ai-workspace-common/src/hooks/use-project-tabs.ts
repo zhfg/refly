@@ -3,8 +3,11 @@ import {
   useProjectStore,
   useProjectStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/project';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 export const useProjectTabs = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const projectStore = useProjectStoreShallow((state) => ({
     tabs: state.projectTabs,
     activeTab: state.projectActiveTab,
@@ -30,11 +33,16 @@ export const useProjectTabs = () => {
     const index = tabs.findIndex((x) => x.key === key);
     const newTabs = tabs.slice(0, index).concat(tabs.slice(index + 1));
     projectStore.setProjectTabs(projectId, newTabs);
+    searchParams.delete('canvasId');
+    searchParams.delete('resId');
 
     if (key === activeTabMap[projectId] && index > -1 && newTabs.length) {
-      const activeTab = newTabs[index] ? newTabs[index].key : newTabs[index - 1].key;
-      projectStore.setProjectActiveTab(projectId, activeTab);
+      const activeTab = newTabs[index] ? newTabs[index] : newTabs[index - 1];
+      const activeTabKey = activeTab.key;
+      projectStore.setProjectActiveTab(projectId, activeTabKey);
+      searchParams.set(activeTab?.type === 'canvas' ? 'canvasId' : 'resId', activeTabKey);
     }
+    setSearchParams(searchParams);
   };
 
   const handleUpdateTab = (projectId: string, key: string, tab: ProjectTab) => {

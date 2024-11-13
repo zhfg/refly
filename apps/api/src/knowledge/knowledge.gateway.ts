@@ -3,7 +3,6 @@ import { WebSocket } from 'ws';
 import { Inject, Logger } from '@nestjs/common';
 import jwt from 'jsonwebtoken';
 import { Server, Hocuspocus } from '@hocuspocus/server';
-import { Logger as HocuspocusLogger } from '@hocuspocus/extension-logger';
 import { Database } from '@hocuspocus/extension-database';
 import { OnGatewayConnection, WebSocketGateway } from '@nestjs/websockets';
 import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
@@ -40,7 +39,6 @@ export class CanvasWsGateway implements OnGatewayConnection {
     this.server = Server.configure({
       port: config.get<number>('wsPort'),
       extensions: [
-        new HocuspocusLogger({ log: (...args) => this.logger.log(args.join('; ')) }),
         new Database({
           fetch: async ({ context }: { context: CanvasContext }) => {
             const { canvas } = context;

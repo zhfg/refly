@@ -16,7 +16,7 @@ export class QdrantService implements OnModuleInit {
       port: this.configService.getOrThrow('vectorStore.port'),
       apiKey: this.configService.get('vectorStore.apiKey') || undefined,
     });
-    this.collectionName = 'refly_resource';
+    this.collectionName = 'refly_vectors';
   }
 
   static estimatePointsSize(points: PointStruct[]): number {

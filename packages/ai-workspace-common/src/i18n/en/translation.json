@@ -1100,13 +1100,8 @@
       "enable": "Enable",
       "disable": "Disable"
     },
-    "autoImportWebResource": {
-      "title": "Auto Import Web Resources",
-      "enable": "Enable",
-      "disable": "Disable"
-    },
     "deepReasonWebSearch": {
-      "title": "Enable Deep Reason Web Search",
+      "title": "Enable Deep Web Search",
       "enable": "Enable",
       "disable": "Disable"
     },

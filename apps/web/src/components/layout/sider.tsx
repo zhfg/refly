@@ -57,7 +57,10 @@ const getNavSelectedKeys = (pathname = "") => {
     return "ThreadLibrary"
   } else if (pathname.includes("skill")) {
     return "Skill"
-  } else if (pathname.startsWith("/library")) {
+  } else if (
+    pathname.startsWith("/library") ||
+    pathname.startsWith("/resource")
+  ) {
     return "Library"
   } else if (pathname.startsWith("/project")) {
     return "Project"

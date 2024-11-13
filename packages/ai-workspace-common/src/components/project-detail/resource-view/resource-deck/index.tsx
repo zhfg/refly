@@ -71,7 +71,7 @@ const ResourceDeck = (props: ResourceDeckProps) => {
             );
           })
         ) : (
-          <Empty />
+          <Empty description={t('common.empty')} />
         )}
       </div>
     );

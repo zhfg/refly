@@ -124,6 +124,9 @@ export const useHandleShare = () => {
       ]),
       width: 500,
       okText: t('projectDetail.share.cancel'),
+      okButtonProps: {
+        className: 'bg-[#00968F] text-white',
+      },
       onOk: async () => {
         await handleDeleteShare({ entityType, shareCode });
         modal.destroy();

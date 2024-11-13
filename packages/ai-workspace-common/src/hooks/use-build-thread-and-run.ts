@@ -120,7 +120,6 @@ export const useBuildThreadAndRun = () => {
     const projectId = messageIntentContext?.projectContext?.projectId;
     const forceNewConv = messageIntentContext?.isNewConversation;
     const enableWebSearch = messageIntentContext?.enableWebSearch;
-    const enableAutoImportWebResource = messageIntentContext?.enableAutoImportWebResource;
     const enableKnowledgeBaseSearch = messageIntentContext?.enableKnowledgeBaseSearch;
     const enableDeepReasonWebSearch = messageIntentContext?.enableDeepReasonWebSearch;
 
@@ -153,12 +152,6 @@ export const useBuildThreadAndRun = () => {
             configScope: 'runtime' as unknown as ConfigScope,
             displayValue: t('copilot.webSearch.title'),
             label: t('copilot.webSearch.title'),
-          },
-          enableAutoImportWebResource: {
-            value: enableAutoImportWebResource,
-            configScope: 'runtime' as unknown as ConfigScope,
-            displayValue: t('copilot.autoImportWebResource.title'),
-            label: t('copilot.autoImportWebResource.title'),
           },
           enableKnowledgeBaseSearch: {
             value: enableKnowledgeBaseSearch,

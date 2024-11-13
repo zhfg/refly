@@ -62,7 +62,6 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       messageIntentContext,
       selectedProject,
       enableWebSearch,
-      enableAutoImportWebResource,
       enableDeepReasonWebSearch,
       enableKnowledgeBaseSearch,
     } = useChatStore.getState();
@@ -90,7 +89,6 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
         resourceId: currentResource?.entityId || currentResource?.id,
       },
       enableWebSearch,
-      enableAutoImportWebResource,
       enableDeepReasonWebSearch,
       enableKnowledgeBaseSearch,
       env: {

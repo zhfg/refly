@@ -51,8 +51,8 @@ export const useHandleRecents = (getRecents: boolean = false) => {
   };
 
   const deleteRecentProject = (projectId: string) => {
-    const inRencent = recentProjects.find((project) => project.projectId === projectId);
-    if (inRencent) {
+    const inRecent = recentProjects.find((project) => project.projectId === projectId);
+    if (inRecent) {
       getRecentProjects();
     }
   };

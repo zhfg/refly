@@ -95,7 +95,7 @@ export const ProjectDetail = () => {
         }
 
         const currentProject = useProjectStore.getState().project.data;
-        addRecentProject(currentProject);
+        currentProject && addRecentProject(currentProject);
       }
     };
 
