@@ -1,4 +1,11 @@
-import { ExceptionFilter, HttpStatus, Catch, ArgumentsHost, Logger } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  HttpStatus,
+  Catch,
+  ArgumentsHost,
+  Logger,
+  HttpException,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 
 import * as Sentry from '@sentry/node';
@@ -14,6 +21,20 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    // Handle http exceptions
+    if (exception instanceof HttpException) {
+      this.logger.warn(
+        `Request: ${request.method} ${request.url} http exception: (${exception.getStatus()}) ${
+          exception.message
+        }, ` + `stack: ${exception.stack}`,
+      );
+
+      const status = exception.getStatus();
+      response.status(status).json(exception.getResponse());
+      return;
+    }
+
+    // Handle other business exceptions
     const baseRespData = genBaseRespDataFromError(exception);
 
     if (baseRespData.errCode === new UnknownError().code) {

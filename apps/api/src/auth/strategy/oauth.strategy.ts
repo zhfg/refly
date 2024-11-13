@@ -4,13 +4,10 @@ import { Profile } from 'passport';
 
 export function OAuthStrategy(strategy: any, name?: string) {
   return class extends PassportStrategy(strategy, name) {
-    async validate(
-      accessToken: string,
-      refreshToken: string,
-      profile: Profile,
-    ) {
+    async validate(accessToken: string, refreshToken: string, profile: Profile) {
       this.logger.log(
-        `oauth validate, accessToken: ${accessToken}, refreshToken: ${refreshToken}, profile: ${profile}`,
+        `oauth validate, accessToken: ${accessToken}, refreshToken: ${refreshToken}, ` +
+          `profile: ${profile}`,
       );
       const { provider, id, emails, username, photos } = profile;
 
@@ -24,9 +21,7 @@ export function OAuthStrategy(strategy: any, name?: string) {
 
       // 如果有认证账户，且存在对应的用户，则直接返回
       if (account) {
-        this.logger.log(
-          `account found for provider ${provider}, account id: ${id}`,
-        );
+        this.logger.log(`account found for provider ${provider}, account id: ${id}`);
         const user = await this.userService.findUnique({
           id: account.userId,
         });

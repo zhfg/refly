@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/common/prisma.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { JwtPayload } from '../dto';
+import { UnauthorizedError } from '@refly-packages/errors';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -20,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       where: { uid: payload.uid },
     });
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedError();
     }
     return user;
   }
