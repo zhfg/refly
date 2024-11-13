@@ -14,7 +14,11 @@ function ATag({ ...props }, sources: Source[]) {
       }
     } catch (err) {}
 
-    return <a href={props.href}>{props.children}</a>;
+    return (
+      <a href={props.href} target="_blank">
+        {props.children}
+      </a>
+    );
   }
   return (
     <span className="inline-block w-4">
