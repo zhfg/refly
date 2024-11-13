@@ -1,6 +1,8 @@
 // Non-contextual examples - keeping existing examples
 export const noContextExamples = `
 ## Examples
+// Add note about response tags before examples
+Note: The <response> tags below are only used to structure these examples. Do NOT include these tags in your actual output.
 
 <example index="1">
 <query>
@@ -68,6 +70,7 @@ This announcement presents your AI tool's innovative features and market-changin
 // New contextual examples demonstrating context and citation usage
 export const contextualExamples = `
 ## Context-Aware Examples
+Note: The <response> tags below are only used to structure these examples. Do NOT include these tags in your actual output.
 
 <example index="1">
 <context>
@@ -195,11 +198,21 @@ export const buildGenerateCanvasCommonPrompt = (example: string, locale: string)
    - Include necessary metadata
    - Follow specified tag structure
 
+## Important Notes
+1. The <response> tags in examples are for demonstration purposes only - DO NOT include these tags in your actual response
+2. Your actual response should only include:
+   - Initial content analysis 
+   - <reflyThinking> section
+   - <reflyCanvas> section
+   - Brief summary
+3. Keep minimum content length of 2000 words
+4. Remember to generate all content in ${locale} while preserving technical terms
+
 ## Response Structure
-1. Initial Analysis
-2. Thinking Process
-3. Content Generation
-4. Brief Summary
+1. Initial Analysis (without <response> tags)
+2. Thinking Process (<reflyThinking> tags only)
+3. Content Generation (<reflyCanvas> tags only) 
+4. Brief Summary (without <response> tags)
 
 ## Tag Formats
 
@@ -236,14 +249,15 @@ The content should be wrapped in reflyCanvas tags. The title should ONLY appear 
 ${example}
 
 ## Remember:
-1. Title should ONLY appear in reflyCanvas tag attributes
-2. Start content directly with main sections
-3. Use proper markdown formatting for content structure
-4. Maintain professional tone throughout
-5. Ensure minimum content length of 2000 words
-6. Keep XML blocks properly formatted
-7. Ensure XML blocks are properly separated in the markdown structure
-8. Remember to generate all content in ${locale} while preserving technical terms, including initial analysis, thinking process, content modification, and brief summary
+1. DO NOT include <response> tags in your output - they are only for example structure
+2. Title should ONLY appear in reflyCanvas tag attributes
+3. Start content directly with main sections
+4. Use proper markdown formatting for content structure
+5. Maintain professional tone throughout
+6. Ensure minimum content length of 2000 words
+7. Keep XML blocks properly formatted
+8. Ensure XML blocks are properly separated in the markdown structure
+9. Remember to generate all content in ${locale} while preserving technical terms, including initial analysis, thinking process, content modification, and brief summary
 `;
 
 export const buildNoContextGenerateCanvasPrompt = (locale: string) => `
