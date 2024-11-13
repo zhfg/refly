@@ -43,7 +43,7 @@ import { buildSuccessResponse } from '@/utils';
 import { Response } from 'express';
 import { skillInstancePO2DTO, skillJobPO2DTO, skillTriggerPO2DTO } from './skill.dto';
 
-@Controller('skill')
+@Controller('v1/skill')
 export class SkillController {
   constructor(private skillService: SkillService) {}
 

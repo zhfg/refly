@@ -6,7 +6,7 @@ import { User } from '@/utils/decorators/user.decorator';
 import { User as UserModel } from '@prisma/client';
 import { buildSuccessResponse } from '@/utils';
 
-@Controller('share')
+@Controller('v1/share')
 export class ShareController {
   constructor(private readonly shareService: ShareService) {}
 

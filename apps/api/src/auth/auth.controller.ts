@@ -9,7 +9,7 @@ import { LocalAuthGuard } from './guard/local-auth.guard';
 import { GithubOauthGuard } from './guard/github-oauth.guard';
 import { GoogleOauthGuard } from './guard/google-oauth.guard';
 
-@Controller('auth')
+@Controller('v1/auth')
 export class AuthController {
   private logger = new Logger(AuthController.name);
 

@@ -26,7 +26,7 @@ import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ParamsError } from '@refly-packages/errors';
 
-@Controller('misc')
+@Controller('v1/misc')
 export class MiscController {
   constructor(private readonly miscService: MiscService) {}
 

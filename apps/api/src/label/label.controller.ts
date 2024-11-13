@@ -29,7 +29,7 @@ import { User } from '@/utils/decorators/user.decorator';
 import { User as UserModel } from '@prisma/client';
 import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
 
-@Controller('label')
+@Controller('v1/label')
 export class LabelController {
   constructor(private labelService: LabelService) {}
 

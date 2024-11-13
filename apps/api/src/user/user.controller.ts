@@ -1,4 +1,4 @@
-import { Controller, Logger, Get, Body, UseGuards, Put, Query } from '@nestjs/common';
+import { Controller, Logger, Get, Body, UseGuards, Put, Query, Req } from '@nestjs/common';
 
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
@@ -15,7 +15,7 @@ import { User as UserModel } from '@prisma/client';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { subscriptionPO2DTO } from '@/subscription/subscription.dto';
 
-@Controller('user')
+@Controller('v1/user')
 export class UserController {
   private logger = new Logger(UserController.name);
 
@@ -24,6 +24,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get('settings')
   async getSettings(@User() user: UserModel): Promise<GetUserSettingsResponse> {
+    this.logger.log('getSettings for user');
     const settings: UserSettings = {
       ...pick(user, [
         'uid',

@@ -44,7 +44,7 @@ import { User } from '@/utils/decorators/user.decorator';
 import { canvasPO2DTO, resourcePO2DTO, projectPO2DTO, referencePO2DTO } from './knowledge.dto';
 import { ParamsError, ProjectNotFoundError } from '@refly-packages/errors';
 
-@Controller('knowledge')
+@Controller('v1/knowledge')
 export class KnowledgeController {
   constructor(private knowledgeService: KnowledgeService) {}
 

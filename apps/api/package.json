@@ -73,7 +73,7 @@
     "passport-jwt": "~4.0.1",
     "passport-local": "~1.0.0",
     "pdf-parse": "~1.1.1",
-    "pino-http": "^9.0.0",
+    "pino-http": "^10.3.0",
     "pino-pretty": "^11.0.0",
     "reading-time-estimator": "^1.11.0",
     "redis": "^4.6.13",
