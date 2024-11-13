@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Message, Spin } from '@arco-design/web-react';
+import { Message, Spin } from '@arco-design/web-react';
+import { Button } from 'antd';
 import './index.scss';
 
 import { Command } from 'cmdk';
@@ -20,6 +21,9 @@ import { SortMark } from '../../types/mark';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSearchStrategy } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-search-strategy';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { IconRefresh } from '@arco-design/web-react/icon';
+import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 
 interface CustomProps {
   showList?: boolean;
@@ -66,6 +70,10 @@ export const BaseSearchAndSelector = ({
 
   // stores
   const searchStore = useSearchStore();
+  const contextPanelStore = useContextPanelStoreShallow((state) => ({
+    resetSelectedTextCardState: state.resetSelectedTextCardState,
+  }));
+  const { handleReset } = useSelectedMark();
   // hooks
 
   const isHome = activeTab === 'all';
@@ -200,8 +208,15 @@ export const BaseSearchAndSelector = ({
             </div>
           </div>
           <div className="cmdk-footer-action">
-            <Button type="primary" size="mini" onClick={() => onClose?.()}>
-              {t('knowledgeBase.context.popoverSelector.footer.done')}
+            <Button
+              size="small"
+              icon={<IconRefresh />}
+              onClick={() => {
+                contextPanelStore.resetSelectedTextCardState();
+                handleReset();
+              }}
+            >
+              {t('knowledgeBase.context.clearContext')}
             </Button>
           </div>
         </div>

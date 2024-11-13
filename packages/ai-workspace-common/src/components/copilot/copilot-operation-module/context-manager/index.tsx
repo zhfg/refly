@@ -205,7 +205,7 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
         <div className="context-items-container">
           <AddBaseMarkContext source={props.source} />
 
-          {processedContextItems?.length > 0 && <ResetContentSelectorBtn />}
+          {/* {processedContextItems?.length > 0 && <ResetContentSelectorBtn />} */}
 
           {/* <ContextFilter processContextFilterProps={processContextFilterProps} /> */}
 
