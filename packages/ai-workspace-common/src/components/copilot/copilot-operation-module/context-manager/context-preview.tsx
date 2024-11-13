@@ -5,6 +5,7 @@ import { Mark } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useMatch, useSearchParams, useParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 export const ContextPreview = ({
   item,
@@ -20,6 +21,9 @@ export const ContextPreview = ({
   onOpenUrl: (url: string | (() => string) | (() => void)) => void;
 }) => {
   const { t } = useTranslation();
+  const isShare = useMatch('/share/:shareCode');
+  const { shareCode } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [content, setContent] = useState(item.data);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,9 +58,35 @@ export const ContextPreview = ({
     setContent(newRes?.data?.content);
   };
 
+  const getShareCanvas = async (targetCanvasId?: string) => {
+    setIsLoading(true);
+    const { data } = await getClient().getShareContent({
+      query: {
+        shareCode: shareCode || '',
+        ...(targetCanvasId ? { canvasId: targetCanvasId } : {}),
+      },
+    });
+    setIsLoading(false);
+
+    if (!data?.success) {
+      return;
+    }
+    const result = data.data;
+
+    setContent(result?.canvas?.content);
+  };
+
+  const handleShareCanvasChange = (canvasId: string) => {
+    setSearchParams({ canvasId }, { replace: true });
+  };
+
   useEffect(() => {
     if (item.type === 'canvas') {
-      getCanvasDetail(item.id);
+      if (isShare) {
+        getShareCanvas(item.id);
+      } else {
+        getCanvasDetail(item.id);
+      }
     } else if (item.type === 'resource') {
       getResourceDetail(item.id);
     } else {
@@ -74,15 +104,24 @@ export const ContextPreview = ({
         <>
           <div className="preview-action-container">
             <div className="preview-actions">
-              <Button
-                className="preview-action-btn"
-                icon={<IconLink />}
-                type="outline"
-                size="mini"
-                onClick={() => onOpenUrl(item.url)}
-              >
-                {t('common.open')}
-              </Button>
+              {!(isShare && item.type === 'project') && (
+                <Button
+                  className="preview-action-btn"
+                  icon={<IconLink />}
+                  type="outline"
+                  size="mini"
+                  onClick={() => {
+                    if (isShare) {
+                      handleShareCanvasChange(item.id);
+                    } else {
+                      onOpenUrl(item.url);
+                    }
+                  }}
+                >
+                  {t('common.open')}
+                </Button>
+              )}
+
               {!canNotRemove && (
                 <Button
                   className="preview-action-btn"
