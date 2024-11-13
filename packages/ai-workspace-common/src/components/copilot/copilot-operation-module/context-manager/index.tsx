@@ -61,6 +61,7 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
     toggleMarkActive,
     clearMarks,
     updateMark,
+    resetState,
     currentSelectedMarks,
     filterIdsOfCurrentSelectedMarks,
     filterErrorInfo,
@@ -70,6 +71,7 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
     toggleMarkActive: state.toggleMarkActive,
     clearMarks: state.clearMarks,
     updateMark: state.updateMark,
+    resetState: state.resetState,
     currentSelectedMarks: state.currentSelectedMarks,
     filterIdsOfCurrentSelectedMarks: state.filterIdsOfCurrentSelectedMarks,
     filterErrorInfo: state.filterErrorInfo,
@@ -195,6 +197,7 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
     const clearEvent = initMessageListener();
 
     return () => {
+      resetState();
       clearEvent?.();
     };
   }, []);

@@ -63,7 +63,8 @@ export const ProjectDirectory = (props: {
 }) => {
   const { projectId, setBindResourceModalVisible } = props;
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.languages?.[0];
 
   const projectStore = useProjectStoreShallow((state) => ({
     project: state.project,
@@ -571,7 +572,7 @@ export const ProjectDirectory = (props: {
                 <div className="overflow-auto my-1 max-h-10 text-xs text-gray-500">{currentProject?.description}</div>
                 <div className="mt-1 text-xs text-gray-500">
                   <span>
-                    {time(currentProject?.updatedAt as string, LOCALE.EN)
+                    {time(currentProject?.updatedAt as string, language as LOCALE)
                       .utc()
                       .fromNow()}
                   </span>
