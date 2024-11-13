@@ -73,6 +73,14 @@ export const SearchSelect = (props: SearchSelectProps) => {
     onChange?.(projectId, { label: title, value: projectId });
   };
 
+  const handlePopupScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { currentTarget } = e;
+    // 检查是否滚动到底部附近(距离底部20px内)
+    if (currentTarget.scrollTop + currentTarget.clientHeight >= currentTarget.scrollHeight - 20) {
+      loadMore();
+    }
+  };
+
   useEffect(() => {
     setValue(defaultValue);
   }, [defaultValue]);
@@ -109,7 +117,7 @@ export const SearchSelect = (props: SearchSelectProps) => {
           onChange(value, option);
         }
       }}
-      onPopupScroll={() => loadMore()}
+      onPopupScroll={handlePopupScroll}
       dropdownRender={(menu) => (
         <div>
           {menu}

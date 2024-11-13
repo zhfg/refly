@@ -10,9 +10,17 @@ import {
   useImportResourceStore,
 } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
 export const ActionMenu: React.FC<{ getTarget: () => HTMLElement }> = (props) => {
   const { t } = useTranslation();
+  const { setReloadDirectoryResourceList } = useReloadListState((state) => ({
+    setReloadDirectoryResourceList: state.setReloadDirectoryResourceList,
+  }));
+  const { updateSourceListDrawer } = useKnowledgeBaseStore((state) => ({
+    updateSourceListDrawer: state.updateSourceListDrawer,
+  }));
 
   const { selectedItems, results, setSelectedItems } = useMultilingualSearchStore();
   const importResourceStore = useImportResourceStoreShallow((state) => ({
@@ -24,6 +32,10 @@ export const ActionMenu: React.FC<{ getTarget: () => HTMLElement }> = (props) =>
 
   const handleSelectAll = (checked: boolean) => {
     setSelectedItems(checked ? results : []);
+  };
+
+  const handleClose = () => {
+    updateSourceListDrawer({ visible: false });
   };
 
   const handleSave = async () => {
@@ -55,11 +67,14 @@ export const ActionMenu: React.FC<{ getTarget: () => HTMLElement }> = (props) =>
 
       message.success(t('common.putSuccess'));
       setSelectedItems([]);
+      setReloadDirectoryResourceList(true);
     } catch (err) {
       message.error(t('common.putError'));
     } finally {
       setSaveLoading(false);
     }
+
+    handleClose();
   };
 
   return (
@@ -87,7 +102,7 @@ export const ActionMenu: React.FC<{ getTarget: () => HTMLElement }> = (props) =>
           </div>
         </div>
         <div className="footer-action">
-          <Button style={{ marginRight: 8 }} onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
+          <Button style={{ marginRight: 8 }} onClick={handleClose}>
             {t('common.cancel')}
           </Button>
           <Button type="primary" onClick={handleSave} disabled={selectedItems.length === 0} loading={saveLoading}>
