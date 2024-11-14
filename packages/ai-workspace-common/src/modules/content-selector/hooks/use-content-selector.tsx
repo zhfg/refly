@@ -27,6 +27,7 @@ import { ElementType } from '../utils';
 import HoverMenu from '@refly-packages/ai-workspace-common/modules/content-selector/components/hover-menu';
 import { getPopupContainer } from '../utils/get-popup-container';
 import { t } from 'i18next';
+import { useParams } from 'react-router-dom';
 
 export const getContainerElem = (selector: string | null) => {
   const container = getPopupContainer();
@@ -41,6 +42,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
   const showContentSelectorRef = useRef<boolean>(false);
   const messageListenerEventRef = useRef<any>();
   const selectorScopeRef = useRef<MarkScope>('block');
+  const { projectId } = useParams();
 
   useEffect(() => {
     const containerElem = getContainerElem(selector);
@@ -61,6 +63,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
       scope: selectorScopeRef.current,
       domain,
       url: metadata?.url || document?.location?.href || (document as any as Location)?.href || '',
+      metadata: domain === 'canvasSelection' ? { projectId } : null,
     };
 
     return mark;
@@ -358,6 +361,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
           scope: selectorScopeRef.current,
           domain: mark?.domain,
           url: mark?.url,
+          metadata: mark?.metadata,
         },
       },
     };
