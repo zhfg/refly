@@ -124,6 +124,21 @@ export const AssistantMessage = memo(
     const runtime = getRuntime();
     const isWeb = runtime === 'web';
 
+    const editorActionList = [
+      {
+        icon: <IconImport style={{ fontSize: 14 }} />,
+        key: 'insertBlow',
+      },
+      {
+        icon: <IconCheckCircle style={{ fontSize: 14 }} />,
+        key: 'replaceSelection',
+      },
+      {
+        icon: <IconBook style={{ fontSize: 14 }} />,
+        key: 'createNewNote',
+      },
+    ];
+
     const { t } = useTranslation();
     const noteStoreEditor = useCanvasStore((state) => state.editor);
     let sources =
@@ -360,25 +375,24 @@ export const AssistantMessage = memo(
                           Message.success(t('copilot.message.copySuccess'));
                         }}
                       >
-                        {t('copilot.message.copy')}
+                        <span className="action-text">{t('copilot.message.copy')}</span>
                       </Button>
-                      {isWeb ? (
-                        <Dropdown droplist={dropList} position="bl">
-                          <Button
-                            type="text"
-                            className={'assist-action-item'}
-                            icon={<IconImport style={{ fontSize: 14 }} />}
-                            style={{ color: '#64645F' }}
-                            onClick={() => {
-                              const parsedText = parseMarkdownCitationsAndCanvasTags(message?.content, sources);
-                              handleEditorOperation('insertBlow', parsedText || '');
-                            }}
-                          >
-                            {t('copilot.message.insertBlow')}
-                            <IconCaretDown />
-                          </Button>
-                        </Dropdown>
-                      ) : null}
+                      {isWeb
+                        ? editorActionList.map((item) => (
+                            <Button
+                              type="text"
+                              className={'assist-action-item'}
+                              icon={item.icon}
+                              style={{ color: '#64645F' }}
+                              onClick={() => {
+                                const parsedText = parseMarkdownCitationsAndCanvasTags(message?.content, sources);
+                                handleEditorOperation(item.key as EditorOperation, parsedText || '');
+                              }}
+                            >
+                              <span className="action-text">{t(`copilot.message.${item.key}`)}</span>
+                            </Button>
+                          ))
+                        : null}
                     </div>
                     <div className="session-answer-actionbar-right"></div>
                   </div>
