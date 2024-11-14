@@ -25,7 +25,7 @@ import { User } from '@/utils/decorators/user.decorator';
 import { conversationPO2DTO } from '@/conversation/conversation.dto';
 import { ConversationNotFoundError } from '@refly-packages/errors';
 
-@Controller('conversation')
+@Controller('v1/conversation')
 export class ConversationController {
   private logger = new Logger(ConversationController.name);
 
