@@ -14,14 +14,14 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
         },
       ],
     });
-
-    this.$on('query' as never, (e: any) => {
-      this.logger.log(`query: ${e.query}, param: ${e.params}, duration: ${e.duration}ms`);
-    });
   }
 
   async onModuleInit() {
     await this.$connect();
     this.logger.log('Connected to database');
+
+    this.$on('query' as never, (e: any) => {
+      this.logger.log(`query: ${e.query}, param: ${e.params}, duration: ${e.duration}ms`);
+    });
   }
 }
