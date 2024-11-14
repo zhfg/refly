@@ -31,7 +31,7 @@ import { ShareModule } from './share/share.module';
     LoggerModule.forRoot({
       pinoHttp: {
         redact: {
-          paths: ['req.headers.authorization'],
+          paths: ['pid', 'hostname', 'req.headers'],
           remove: true,
         },
         genReqId: () => api.trace.getSpan(api.context.active())?.spanContext()?.traceId,
