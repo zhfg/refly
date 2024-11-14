@@ -96,80 +96,76 @@ export const ImportFromText = () => {
   }, []);
 
   return (
-    <div className="intergation-container intergation-import-from-weblink">
-      <div className="intergation-content">
-        <div className="intergation-operation-container">
-          <div className="intergration-header">
-            <span className="menu-item-icon">
-              <HiOutlinePencil />
-            </span>
-            <span className="intergration-header-title">{t('resource.import.fromText')}</span>
-          </div>
-          <Divider style={{ marginTop: 10, marginBottom: 10 }} />
-          <div className="intergation-body">
-            <div className="intergation-body-action">
-              <Form>
-                <FormItem layout="vertical" label={t('resource.import.textTitlePlaceholder')}>
-                  <Input
-                    // placeholder={t('resource.import.textTitlePlaceholder')}
-                    value={importResourceStore.copiedTextPayload?.title}
-                    onChange={(value) => importResourceStore.setCopiedTextPayload({ title: value })}
-                  />
-                </FormItem>
-                <FormItem layout="vertical" label={t('resource.import.textUrlPlaceholder')}>
-                  <Input
-                    // placeholder={t('resource.import.textUrlPlaceholder')}
-                    value={importResourceStore.copiedTextPayload?.url}
-                    onChange={(value) => importResourceStore.setCopiedTextPayload({ url: value })}
-                  />
-                </FormItem>
-                <FormItem required layout="vertical" label={t('resource.import.textContentPlaceholder')}>
-                  <TextArea
-                    // placeholder={t('resource.import.textContentPlaceholder')}
-                    rows={4}
-                    autoSize={{
-                      minRows: 4,
-                      maxRows: 8,
-                    }}
-                    showWordLimit
-                    maxLength={6000}
-                    value={importResourceStore.copiedTextPayload?.content}
-                    allowClear
-                    onChange={(value) => importResourceStore.setCopiedTextPayload({ content: value })}
-                  />
-                </FormItem>
-              </Form>
-            </div>
-          </div>
+    <div className="h-full flex flex-col min-w-[500px] box-border intergation-import-from-weblink">
+      {/* header */}
+      <div className="flex items-center gap-x-[8px] pt-[12px] px-[12px]">
+        <span className="w-[18px] h-[18px] rounded-[4px] bg-[#f1f1f0] box-shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] flex items-center justify-center">
+          <HiOutlinePencil />
+        </span>
+        <div className="text-[16px] font-bold">{t('resource.import.fromWeblink')}</div>
+      </div>
+
+      <Divider style={{ marginTop: 10, marginBottom: 10 }} />
+
+      {/* content */}
+      <div className="flex-grow overflow-y-auto px-[12px] box-border">
+        <Form>
+          <FormItem layout="vertical" label={t('resource.import.textTitlePlaceholder')}>
+            <Input
+              // placeholder={t('resource.import.textTitlePlaceholder')}
+              value={importResourceStore.copiedTextPayload?.title}
+              onChange={(value) => importResourceStore.setCopiedTextPayload({ title: value })}
+            />
+          </FormItem>
+          <FormItem layout="vertical" label={t('resource.import.textUrlPlaceholder')}>
+            <Input
+              // placeholder={t('resource.import.textUrlPlaceholder')}
+              value={importResourceStore.copiedTextPayload?.url}
+              onChange={(value) => importResourceStore.setCopiedTextPayload({ url: value })}
+            />
+          </FormItem>
+          <FormItem required layout="vertical" label={t('resource.import.textContentPlaceholder')}>
+            <TextArea
+              // placeholder={t('resource.import.textContentPlaceholder')}
+              rows={4}
+              autoSize={{
+                minRows: 4,
+                maxRows: 7,
+              }}
+              showWordLimit
+              maxLength={6000}
+              value={importResourceStore.copiedTextPayload?.content}
+              allowClear
+              onChange={(value) => importResourceStore.setCopiedTextPayload({ content: value })}
+            />
+          </FormItem>
+        </Form>
+      </div>
+
+      {/* footer */}
+      <div className="w-full flex justify-between items-center border-t border-solid border-[#e5e5e5] border-x-0 border-b-0 p-[16px] rounded-none">
+        <div className="flex items-center gap-x-[8px]">
+          <p className="text-item">{t('resource.import.saveTo')} </p>
+          <SearchSelect
+            defaultValue={importResourceStore.selectedProjectId}
+            domain="project"
+            className="min-w-[200px] max-w-[220px] flex-1"
+            allowCreateNewEntity
+            onChange={(value) => {
+              if (!value) return;
+              importResourceStore.setSelectedProjectId(value);
+            }}
+          />
+        </div>
+        <div className="flex items-center gap-x-[8px]">
+          <Button style={{ marginRight: 8 }} onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
+            {t('common.cancel')}
+          </Button>
+          <Button type="primary" onClick={() => handleSaveResourceAndNotify(handleSave)}>
+            {t('common.save')}
+          </Button>
         </div>
       </div>
-      <Affix offsetBottom={0} target={() => document.querySelector('.import-resource-right-panel') as HTMLElement}>
-        <div className="intergation-footer">
-          <div className="footer-location">
-            <div className="save-container">
-              <p className="text-item">{t('resource.import.saveTo')} </p>
-              <SearchSelect
-                defaultValue={importResourceStore.selectedProjectId}
-                domain="project"
-                className="kg-selector"
-                allowCreateNewEntity
-                onChange={(value) => {
-                  if (!value) return;
-                  importResourceStore.setSelectedProjectId(value);
-                }}
-              />
-            </div>
-          </div>
-          <div className="footer-action">
-            <Button style={{ marginRight: 8 }} onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
-              {t('common.cancel')}
-            </Button>
-            <Button type="primary" onClick={() => handleSaveResourceAndNotify(handleSave)}>
-              {t('common.save')}
-            </Button>
-          </div>
-        </div>
-      </Affix>
     </div>
   );
 };

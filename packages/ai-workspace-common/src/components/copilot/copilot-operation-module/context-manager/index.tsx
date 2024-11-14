@@ -142,6 +142,7 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
         onlyForCurrentContext: true,
         isCurrentContext: true,
         url: (data as Resource)?.data?.url || '',
+        metadata: type === 'canvas' ? { projectId: (data as Canvas).projectId } : null,
       },
     ];
   };
