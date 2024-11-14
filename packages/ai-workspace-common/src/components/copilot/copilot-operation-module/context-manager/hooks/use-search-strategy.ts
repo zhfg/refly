@@ -29,6 +29,7 @@ const mapSearchResultToMark = (searchResult: SearchResult): Mark => {
     type: searchResult.domain,
     data: (searchResult?.snippets?.map((snippet) => snippet.text) || []).join('\n'),
     title: searchResult.title,
+    metadata: searchResult.metadata,
   };
 
   return newMark;
