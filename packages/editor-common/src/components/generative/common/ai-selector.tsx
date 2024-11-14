@@ -13,10 +13,13 @@ import AICompletionCommands from '../inline/ai-completion-command';
 import AISelectorCommands from '../inline/ai-selector-commands';
 import { LOCALE } from '@refly/common-types';
 import { editorEmitter, InPlaceEditType, InPlaceActionType } from '@refly/utils/event-emitter/editor';
-import { Input, Button } from '@arco-design/web-react';
+import { Input } from '@arco-design/web-react';
+import { Button } from 'antd';
 import { cn } from '@refly-packages/editor-component/utils';
 import { getOsType } from '@refly-packages/utils/env';
 import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/components/add-base-mark-context';
+import { AISettingsDropdown } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/chat-actions/ai-settings';
+
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 //TODO: I think it makes more sense to create a custom Tiptap extension for this functionality https://tiptap.dev/docs/editor/ai/introduction
 
@@ -168,7 +171,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   }, []);
 
   return (
-    <div className="w-[460px]" ref={ref}>
+    <div className="w-[500px]" ref={ref}>
       {isLoading && (
         <div className="flex items-center px-4 w-full h-12 text-sm font-medium text-primary-600 text-muted-foreground">
           <Magic className="mr-2 w-4 h-4 shrink-0" />
@@ -182,7 +185,14 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
         <>
           <div className="flex relative flex-row items-center" cmdk-input-wrapper="">
             <div className="flex flex-1 items-center pl-4 border-b" cmdk-input-wrapper="">
-              <Magic className="mr-2 w-4 h-4 text-primary-600 shrink-0" />
+              <Button size="small" type="default" className="text-xs w-6 h-6 rounded border text-gray-500 gap-1 mr-1">
+                <AISettingsDropdown
+                  placement="bottomCenter"
+                  collapsed={true}
+                  briefMode={true}
+                  modelSelectorPlacement="bottomCenter"
+                />
+              </Button>
               <AddBaseMarkContext source={MessageIntentSource.AISelector} />
               <Input.TextArea
                 value={inputValue}
@@ -210,7 +220,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                 className={cn(
                   'flex py-3 mx-0.5 w-full h-11 text-sm border-none outline-none calc-width-64px important-outline-none important-box-shadow-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 !bg-transparent',
                 )}
-                placeholder={'Ask AI to edit or generate...'}
+                placeholder={'Ask AI to edit or chat...'}
                 onFocus={() => {
                   addAIHighlight(editor);
                 }}
@@ -218,7 +228,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
             </div>
             <div className="flex flex-row gap-1 mr-2">
               <Button
-                size="mini"
+                size="small"
                 disabled={!inputValue}
                 onClick={() => {
                   handleEmitInPlaceSendMessage('chat');
@@ -228,7 +238,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
               </Button>
               <Button
                 type="primary"
-                size="mini"
+                size="small"
                 disabled={!inputValue}
                 onClick={() => {
                   handleEmitInPlaceSendMessage('edit');
