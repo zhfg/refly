@@ -158,40 +158,52 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
       });
   };
 
-  const handleAddCurrentContext = (newMark: Mark) => {
-    removeNotCurrentContext(newMark.type);
-
-    const existingMark = currentSelectedMarks.find((mark) => mark.id === newMark.id && mark.type === newMark.type);
-
-    if (!existingMark) {
-      addMark(newMark);
-    } else {
-      newMark.onlyForCurrentContext = existingMark.onlyForCurrentContext;
-      updateMark(newMark);
-    }
-  };
-
   const updateContext = (item: any, type: 'project' | 'resource' | 'canvas') => {
     const envContext = buildEnvContext(item, type);
     const contextItem = envContext?.[0];
-    if (contextItem) {
-      handleAddCurrentContext(contextItem);
-    } else {
+
+    if (!contextItem) {
       removeNotCurrentContext(type);
+      return;
     }
+
+    // Find existing mark of the same type
+    const existingMark = currentSelectedMarks.find((mark) => mark.type === type && mark.onlyForCurrentContext);
+
+    if (!existingMark) {
+      // No existing mark, add new one
+      addMark(contextItem);
+    } else if (existingMark.entityId !== contextItem.entityId) {
+      // Different entity, replace old with new
+      removeMark(existingMark.id);
+      addMark(contextItem);
+    } else if (
+      existingMark.title !== contextItem.title ||
+      existingMark.data !== contextItem.data ||
+      existingMark.url !== contextItem.url
+    ) {
+      // Same entity but content changed, update properties
+      updateMark({
+        ...existingMark,
+        title: contextItem.title,
+        data: contextItem.data,
+        url: contextItem.url,
+      });
+    }
+    // If everything is the same, do nothing
   };
 
   useEffect(() => {
     updateContext(project, 'project');
-  }, [project?.projectId]);
+  }, [project?.projectId, project?.title]);
 
   useEffect(() => {
     updateContext(currentResource, 'resource');
-  }, [currentResource?.resourceId]);
+  }, [currentResource?.resourceId, currentResource?.title]);
 
   useEffect(() => {
     updateContext(currentCanvas, 'canvas');
-  }, [currentCanvas?.canvasId]);
+  }, [currentCanvas?.canvasId, currentCanvas?.title]);
 
   useEffect(() => {
     const clearEvent = initMessageListener();
