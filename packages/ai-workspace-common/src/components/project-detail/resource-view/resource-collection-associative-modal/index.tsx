@@ -103,18 +103,20 @@ export const BindResourceModal = (props: BindResourceModalProps) => {
             }}
           />
         </FormItem>
-        <FormItem label=" ">
-          <Button
-            type="outline"
-            size="mini"
-            onClick={() => {
-              setImportResourceModalVisible(true);
-              setVisible(false);
-            }}
-          >
-            {t('knowledgeBase.resourceCollectionAssociativeModal.importResource')}
-          </Button>
-        </FormItem>
+        {domain === 'resource' && (
+          <FormItem label=" ">
+            <Button
+              type="outline"
+              size="mini"
+              onClick={() => {
+                setImportResourceModalVisible(true);
+                setVisible(false);
+              }}
+            >
+              {t('knowledgeBase.resourceCollectionAssociativeModal.importResource')}
+            </Button>
+          </FormItem>
+        )}
       </Form>
     </Modal>
   );

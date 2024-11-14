@@ -261,7 +261,7 @@
     "canvas": {
       "editor": {
         "placeholder": {
-          "default": "Write something, or press 'space' for AI, '/' for commands",
+          "default": "Write something, or press 'space' or '++' for AI, '/' for commands",
           "heading": "Heading {{level}}"
         },
         "toolbar": {
@@ -279,7 +279,7 @@
       "contentSelectorIsEmpty": "Please select text",
       "clearSelector": "Clear Selection",
       "addContext": "Add Context",
-      "clearContext": "Clear Context",
+      "clearContext": "Clear",
       "addToContext": "Quote",
       "resource": "Resource",
       "resources": "Resource",
@@ -1106,7 +1106,7 @@
       "disable": "Disable"
     },
     "tokenUsage": "Input {{inputCount}}, Output {{outputCount}}",
-    "reflyAssistant": "Knowledge Curator",
+    "reflyAssistant": "Refly Knowledge Curator",
     "message": {
       "copy": "Copy",
       "copySuccess": "Copy Success",
@@ -1150,7 +1150,7 @@
     },
     "sourceListModal": {
       "title": "Result Sources",
-      "moreSources": "View More {{count}} Sources",
+      "moreSources": "View More and Import as Resource",
       "searchPlaceholder": "Search Sources...",
       "openOriginWebsite": "Open Origin Website",
       "openKnowledgeBaseLink": "Open Knowledge Base Link",

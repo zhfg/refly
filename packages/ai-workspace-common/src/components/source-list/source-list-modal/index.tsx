@@ -210,7 +210,10 @@ export const SourceListModal = (props: SourceListModalProps) => {
         />
         {activeTab === 'webSearch' && groupedSources.webSearch.length > 0 && (
           <div className="source-list-modal-action-menu-container">
-            <ActionMenu getTarget={() => document.querySelector('.source-list-modal-tabs') as HTMLElement} />
+            <ActionMenu
+              getTarget={() => document.querySelector('.source-list-modal-tabs') as HTMLElement}
+              sourceType="sourceListModal"
+            />
           </div>
         )}
       </div>

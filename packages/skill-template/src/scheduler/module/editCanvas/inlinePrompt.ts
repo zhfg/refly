@@ -1,6 +1,6 @@
 import { Canvas } from '@refly-packages/openapi-schema';
 import { HighlightSelection } from './types';
-import { importantCitationRules, referenceContextHandlingPrompt } from './commonPrompt';
+import { referenceContextHandlingPrompt } from './commonPrompt';
 
 // response.reflyCanvas frontend need return surround content
 export const noContextExamples = `
@@ -128,7 +128,7 @@ I'll enhance this section with specific benefits while maintaining the document 
 </reflyThinking>
 
 <reflyCanvas identifier="tech-doc" type="document" title="Cloud Computing Overview">
-Cloud computing is transforming modern business. It delivers elastic scalability and pay-per-use pricing [citation:1], resulting in a documented 40% reduction in infrastructure costs and 60% improvement in resource utilization [citation:2]. Organizations can access computing power on demand while benefiting from reduced maintenance overhead and global accessibility [citation:1]. Many organizations are adopting cloud solutions.
+Cloud computing is transforming modern business. It delivers elastic scalability and pay-per-use pricing, resulting in a documented 40% reduction in infrastructure costs and 60% improvement in resource utilization. Organizations can access computing power on demand while benefiting from reduced maintenance overhead and global accessibility. Many organizations are adopting cloud solutions.
 </reflyCanvas>
 
 The revised content now incorporates specific benefits and statistics while maintaining document flow.
@@ -179,7 +179,7 @@ I'll enhance the clarity while incorporating security best practices.
 </reflyThinking>
 
 <reflyCanvas identifier="api-docs" type="document" title="API Documentation">
-Authentication is required for all endpoints. To make API calls, first obtain a JWT token [citation:2] following secure token storage practices [citation:1]. Include this token in your request headers, ensuring proper implementation of rate limiting [citation:1]. The token expires after 15 minutes [citation:2] as per our security requirements. Requests without valid authentication will receive error responses. See the authentication section for details.
+Authentication is required for all endpoints. To make API calls, first obtain a JWT token following secure token storage practices. Include this token in your request headers, ensuring proper implementation of rate limiting. The token expires after 15 minutes as per our security requirements. Requests without valid authentication will receive error responses. See the authentication section for details.
 </reflyCanvas>
 
 The revised content now presents a clear, professional explanation with security best practices.
@@ -229,7 +229,7 @@ I'll enhance the deployment process description with specific details.
 </reflyThinking>
 
 <reflyCanvas identifier="tech-doc" type="document" title="Deployment Process">
-Our deployment workflow ensures quality. The process begins with a thorough manual code review [citation:1], followed by automated testing and continuous integration practices [citation:2]. After passing automated tests, the code undergoes comprehensive testing in the staging environment [citation:1], leveraging automated deployment procedures [citation:2]. This process maintains our standards.
+Our deployment workflow ensures quality. The process begins with a thorough manual code review, followed by automated testing and continuous integration practices. After passing automated tests, the code undergoes comprehensive testing in the staging environment, leveraging automated deployment procedures. This process maintains our standards.
 </reflyCanvas>
 
 The revised content now provides a detailed explanation of the deployment process.
@@ -379,14 +379,13 @@ You are an advanced AI content editor developed by Refly, specializing in precis
 1. Context Processing
    - Analyze and integrate reference context (web search, knowledge base, user content)
    - Understand document context and maintain content flow
-   - Apply proper citation practices using [citation:x] format
    - Identify relevant information from multiple context sources
 
 2. Inline Editing
    - Make precise modifications within highlight tags
    - Maintain sentence and paragraph coherence
    - Preserve original document style and tone
-   - Integrate citations naturally into text flow
+   - Ensure natural text flow
 
 3. Content Integration
    - Seamlessly blend edited content with surrounding text
@@ -402,10 +401,9 @@ You are an advanced AI content editor developed by Refly, specializing in precis
    - Maintain document coherence and flow
 
 2. Ensure Reference Integration
-   - Properly cite reference context using [citation:x] format
    - Prioritize context according to hierarchy (MentionedContext > WebSearchContext > OtherContext)
-   - Weave citations naturally into sentence structure
-   - Support modifications with appropriate citations
+   - Integrate information naturally into sentence structure
+   - Support modifications with relevant context
 
 3. Maintain Document Quality
    - Follow core editing instructions for inline modifications
@@ -457,8 +455,6 @@ export const buildInlineEditCanvasUserPrompt = ({
   ${rewrittenQuery}
     
   ${importantRemindersPrompt}
-
-  ${importantCitationRules}
 
   Remember to generate all content in ${locale} while preserving technical terms
     `;

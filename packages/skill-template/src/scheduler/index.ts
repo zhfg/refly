@@ -54,7 +54,7 @@ export class Scheduler extends BaseSkill {
 
   displayName = {
     en: 'Knowledge Curator',
-    'zh-CN': 'Refly AI 知识管家',
+    'zh-CN': 'Refly 知识管家',
   };
 
   icon: Icon = { type: 'emoji', value: '🧙‍♂️' };
@@ -373,7 +373,14 @@ Please generate the summary based on these requirements and offer suggestions fo
       `maxTokens: ${maxTokens}, queryTokens: ${queryTokens}, chatHistoryTokens: ${chatHistoryTokens}, remainingTokens: ${remainingTokens}`,
     );
 
-    const needRewriteQuery = hasContext || chatHistoryTokens > 0;
+    // 新增：定义长查询的阈值（可以根据实际需求调整）
+    const LONG_QUERY_TOKENS_THRESHOLD = 100; // 约等于50-75个英文单词或25-35个中文字
+
+    // 优化 needRewriteQuery 判断逻辑
+    const needRewriteQuery =
+      queryTokens < LONG_QUERY_TOKENS_THRESHOLD && // 只有短查询才需要重写
+      (hasContext || chatHistoryTokens > 0); // 保持原有的上下文相关判断
+
     const needPrepareContext = (hasContext && remainingTokens > 0) || enableWebSearch || enableKnowledgeBaseSearch;
     this.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`);
 

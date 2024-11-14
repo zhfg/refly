@@ -92,6 +92,7 @@ export const useHandleShare = () => {
     const shareUrl = `${window.location.origin}/share/${shareCode}`;
 
     const modal = Modal.success({
+      centered: true,
       closable: true,
       title: t('projectDetail.share.title', { entityType: t(`projectDetail.share.${entityType}`) }),
       content: React.createElement('div', null, [

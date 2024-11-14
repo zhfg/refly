@@ -263,7 +263,7 @@
     "canvas": {
       "editor": {
         "placeholder": {
-          "default": "写点什么，或按空格键激活 AI，或按 '/' 键激活命令",
+          "default": "写点什么，或按空格键或 ++ 激活 AI，按 '/' 键激活命令",
           "heading": "标题 {{level}}"
         },
         "toolbar": {
@@ -280,7 +280,7 @@
       "contentSelectorIsEmpty": "请选择文本",
       "contentSelector": "内容划线选择器",
       "addContext": "添加上下文",
-      "clearContext": "清空上下文",
+      "clearContext": "清空",
       "addToContext": "引用",
       "resource": "资源",
       "resources": "资源",
@@ -1120,7 +1120,7 @@
       "disable": "禁用"
     },
     "tokenUsage": "输入 {{inputCount}}，输出 {{outputCount}}",
-    "reflyAssistant": "知识管家",
+    "reflyAssistant": "Refly 知识管家",
     "message": {
       "copy": "复制",
       "copySuccess": "复制成功",
@@ -1164,7 +1164,7 @@
     },
     "sourceListModal": {
       "title": "结果来源",
-      "moreSources": "查看更多 {{count}} 来源",
+      "moreSources": "查看更多并导入为资源",
       "searchPlaceholder": "搜索来源...",
       "openOriginWebsite": "打开来源链接",
       "openKnowledgeBaseLink": "打开项目链接",
