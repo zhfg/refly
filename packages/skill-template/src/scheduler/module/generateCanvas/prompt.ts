@@ -2,7 +2,7 @@ export const commonNote = (locale: string) => `
 Note: 
 1. The <response> tags below are only used to structure these examples. DO NOT include these tags in your actual output.
 2. These examples are shown in English for demonstration. Your actual output should be entirely in the specified locale (${locale}), including:
-   - Initial content analysis
+   - Brieft content analysis
    - Thinking process content
    - Canvas content
    - Brief summary
@@ -25,13 +25,13 @@ export const commonImportantNotes = (locale: string) => `
 ## Important Notes
  1. The <response> tags in examples are for demonstration purposes only
  2. Your actual response should only include these four parts in sequence:
-    - Initial content analysis (no labels or prefixes)
+    - Brieft content analysis (no labels or prefixes)
     - <reflyThinking> section
     - <reflyCanvas> section
     - Brief summary (no labels or prefixes)
  3. Keep minimum content length of 2000 words
  4. Remember to generate all content in ${locale} while preserving technical terms
- 5. IMPORTANT: Never include labels like "Initial Analysis:", "Brief Summary:", or their translations in any language`;
+ 5. IMPORTANT: Never include labels like "Brief Analysis", "Brief Summary:", or their translations in any language`;
 
 // Non-contextual examples - keeping existing examples
 export const noContextExamples = (locale: string) => `
@@ -226,9 +226,10 @@ export const buildGenerateCanvasCommonPrompt = (example: string, locale: string)
 
 ## Constraints
 1. Content Length:
-   - reflyCanvas content: Minimum 2000 words
-   - Final summary: Maximum 50 words
+   - Brief content analysis: Maximum 50 words
    - Thinking reflection: 3-5 clear steps
+   - reflyCanvas content: Minimum 2000 words
+   - Brief summary: Maximum 50 words
 
 2. Format Requirements:
    - Use proper markdown formatting
@@ -236,21 +237,21 @@ export const buildGenerateCanvasCommonPrompt = (example: string, locale: string)
    - Follow specified tag structure
 
 ## Response Structure
-1. Initial content analysis (direct analysis without labels, such as "Initial content analysis:")
+1. Brief content analysis (direct analysis without labels, such as "Befief content analysis, maximum 50 words)
 2. Thinking process (<reflyThinking> tags)
 3. Content generation (<reflyCanvas> tags)
-4. Brief summary (direct summary without labels, such as "Brief summary:")
+4. Brief summary (direct summary without labels, such as "Brief summary, maximum 50 words)
 
 ## Important Notes
 1. The <response> tags in examples are for demonstration purposes only - DO NOT include these tags in your actual response
 2. Your actual response should only include:
-   - Initial content analysis 
+   - Brief content analysis (50 words maximum)
    - <reflyThinking> section
    - <reflyCanvas> section
-   - Brief summary
+   - Brief summary (50 words maximum)
 3. Keep minimum content length of 2000 words
 4. Remember to generate all content in ${locale} while preserving technical terms
-5. The Initial content analysis and Brief summary should be direct analysis without labels, such as "Initial content analysis:" or "Brief summary:"
+5. The Brief content analysis and Brief summary should be direct analysis without labels, such as "Brief content analysis:" or "Brief summary:"
 
 ## Tag Formats
 
@@ -269,12 +270,12 @@ The thinking process should be wrapped in reflyThinking tags:
 ## Important Notes
 1. The <response> tags in examples are for demonstration purposes only - DO NOT include these tags in your actual response
 2. Your actual response should only include:
-   - Initial content analysis 
+   - Brief content analysis (50 words maximum)
    - <reflyThinking> section
    - <reflyCanvas> section
-   - Brief summary
+   - Brief summary (50 words maximum)
 3. Language Requirements:
-   - All content must be in specified locale (${locale}), includes initial content analysis, <reflyThinking> section, <reflyCanvas> section, and brief summary
+   - All content must be in specified locale (${locale}), includes brief content analysis, <reflyThinking> section, <reflyCanvas> section, and brief summary
    - Only technical terms remain unchanged
 4. Content Generation:
 
@@ -297,7 +298,7 @@ ${example}
 6. Ensure minimum content length of 2000 words
 7. Keep XML blocks properly formatted
 8. Ensure XML blocks are properly separated in the markdown structure
-9. Remember to generate all content in ${locale} while preserving technical terms, including initial analysis, thinking process, content modification, and brief summary
+9. Remember to generate all content in ${locale} while preserving technical terms, including brief analysis, thinking process, content modification, and brief summary
 `;
 
 export const buildNoContextGenerateCanvasPrompt = (locale: string) => `
