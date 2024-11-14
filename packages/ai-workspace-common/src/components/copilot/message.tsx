@@ -339,7 +339,6 @@ export const AssistantMessage = memo(
                           onClick={() => handleAskFollowing(item)}
                         >
                           <p className="ai-copilot-related-question-title">{item}</p>
-                          {/* <IconRight style={{ color: 'rgba(0, 0, 0, 0.5)' }} /> */}
                         </div>
                       ))}
                     </div>
@@ -356,7 +355,7 @@ export const AssistantMessage = memo(
                         icon={<MdOutlineToken style={{ fontSize: 14, marginRight: 4 }} />}
                         className={'assist-action-item'}
                       >
-                        {tokenUsage} Tokens
+                        <span className="action-text">{tokenUsage} Tokens</span>
                       </Button>
                     </Dropdown>
                   </div>
