@@ -12,7 +12,7 @@ import {
 } from '@refly-packages/openapi-schema';
 import { buildSuccessResponse, pick } from '@/utils';
 
-@Controller('subscription')
+@Controller('v1/subscription')
 export class SubscriptionController {
   constructor(private readonly subscriptionService: SubscriptionService) {}
 

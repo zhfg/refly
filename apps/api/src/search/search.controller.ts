@@ -12,7 +12,7 @@ import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { User } from '@/utils/decorators/user.decorator';
 import { SearchService } from '@/search/search.service';
 
-@Controller('search')
+@Controller('v1/search')
 export class SearchController {
   constructor(private searchService: SearchService) {}
 

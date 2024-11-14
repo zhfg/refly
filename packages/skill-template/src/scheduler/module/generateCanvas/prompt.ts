@@ -2,7 +2,7 @@ export const commonNote = (locale: string) => `
 Note: 
 1. The <response> tags below are only used to structure these examples. DO NOT include these tags in your actual output.
 2. These examples are shown in English for demonstration. Your actual output should be entirely in the specified locale (${locale}), including:
-   - Brieft content analysis
+   - Brief content analysis
    - Thinking process content
    - Canvas content
    - Brief summary
@@ -25,7 +25,7 @@ export const commonImportantNotes = (locale: string) => `
 ## Important Notes
  1. The <response> tags in examples are for demonstration purposes only
  2. Your actual response should only include these four parts in sequence:
-    - Brieft content analysis (no labels or prefixes)
+    - Brief content analysis (no labels or prefixes)
     - <reflyThinking> section
     - <reflyCanvas> section
     - Brief summary (no labels or prefixes)
@@ -237,7 +237,7 @@ export const buildGenerateCanvasCommonPrompt = (example: string, locale: string)
    - Follow specified tag structure
 
 ## Response Structure
-1. Brief content analysis (direct analysis without labels, such as "Befief content analysis, maximum 50 words)
+1. Brief content analysis (direct analysis without labels, such as "Brief content analysis, maximum 50 words)
 2. Thinking process (<reflyThinking> tags)
 3. Content generation (<reflyCanvas> tags)
 4. Brief summary (direct summary without labels, such as "Brief summary, maximum 50 words)

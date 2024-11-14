@@ -6,7 +6,7 @@ import { RAGService } from './rag.service';
 import { sha256Hash } from '../utils';
 import { cleanMarkdownForIngest } from '@refly-packages/utils';
 
-@Controller('rag')
+@Controller('v1/rag')
 export class RagController {
   private logger = new Logger(RagController.name);
 

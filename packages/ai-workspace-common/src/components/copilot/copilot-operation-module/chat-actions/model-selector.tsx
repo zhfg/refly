@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Dropdown, MenuProps, Tag, Tooltip } from 'antd';
+import { Button, Dropdown, DropdownProps, MenuProps, Tag, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { IconDown } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
@@ -20,7 +20,13 @@ const providerIcons = {
   anthropic: AnthropicIcon,
 };
 
-export const ModelSelector = () => {
+interface ModelSelectorProps {
+  dropdownMode?: boolean; // Whether to show as dropdown button
+  className?: string;
+  placement?: DropdownProps['placement'];
+}
+
+export const ModelSelector = ({ placement = 'bottom' }: ModelSelectorProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -176,7 +182,8 @@ export const ModelSelector = () => {
           }
         },
       }}
-      trigger={['click']}
+      trigger={['hover']}
+      placement={placement || 'bottom'}
       open={dropdownOpen}
       onOpenChange={setDropdownOpen}
       getPopupContainer={getPopupContainer}
