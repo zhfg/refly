@@ -10,9 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 // components
-import { ModelSelector } from './model-selector';
 import { ProjectSelector } from './project-selector';
-
+import { AISettingsDropdown } from './ai-settings';
 // styles
 import './index.scss';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
@@ -89,84 +88,10 @@ export const ChatActions = (props: ChatActionsProps) => {
     };
   }, []);
 
-  const settingsItems: MenuProps['items'] = [
-    ...(containerWidth < COLLAPSE_WIDTH
-      ? [
-          {
-            key: 'webSearch',
-            label: !skillStore?.selectedSkill?.skillId ? (
-              <div
-                className="text-xs flex items-center gap-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  chatStore.setEnableWebSearch(!chatStore.enableWebSearch);
-                }}
-              >
-                <Switch size="small" checked={chatStore.enableWebSearch} />
-                <span className="chat-action-item-text">{t('copilot.webSearch.title')}</span>
-              </div>
-            ) : null,
-          },
-          {
-            key: 'knowledgeBase',
-            label: !skillStore?.selectedSkill?.skillId ? (
-              <div
-                className="text-xs flex items-center gap-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  chatStore.setEnableKnowledgeBaseSearch(!chatStore.enableKnowledgeBaseSearch);
-                }}
-              >
-                <Switch size="small" checked={chatStore.enableKnowledgeBaseSearch} />
-                <span className="chat-action-item-text">{t('copilot.knowledgeBaseSearch.title')}</span>
-              </div>
-            ) : null,
-          },
-        ]
-      : []),
-    {
-      key: 'enableDeepReasonWebSearch',
-      label: (
-        <div
-          className="text-xs flex items-center gap-2"
-          onClick={(e) => {
-            e.stopPropagation();
-            chatStore.setEnableDeepReasonWebSearch(!chatStore.enableDeepReasonWebSearch);
-          }}
-        >
-          <Switch size="small" checked={chatStore.enableDeepReasonWebSearch} />
-          <span className="chat-action-item-text">{t('copilot.deepReasonWebSearch.title')}</span>
-        </div>
-      ),
-    },
-  ].filter((item) => item.label !== null);
-
   return (
     <div className="chat-actions" ref={containerRef}>
       <div className="left-actions">
-        <ModelSelector />
-        {containerWidth >= COLLAPSE_WIDTH && !skillStore?.selectedSkill?.skillId ? (
-          <div className="chat-action-item" onClick={() => chatStore.setEnableWebSearch(!chatStore.enableWebSearch)}>
-            <Switch size="small" checked={chatStore.enableWebSearch} />
-            <span className="chat-action-item-text">{t('copilot.webSearch.title')}</span>
-          </div>
-        ) : null}
-        {containerWidth >= COLLAPSE_WIDTH && !skillStore?.selectedSkill?.skillId ? (
-          <div
-            className="chat-action-item"
-            onClick={() => chatStore.setEnableKnowledgeBaseSearch(!chatStore.enableKnowledgeBaseSearch)}
-          >
-            <Switch size="small" checked={chatStore.enableKnowledgeBaseSearch} />
-            <span className="chat-action-item-text">{t('copilot.knowledgeBaseSearch.title')}</span>
-          </div>
-        ) : null}
-        <Dropdown className="chat-action-item" trigger={['click']} menu={{ items: settingsItems }}>
-          <a onClick={(e) => e.preventDefault()}>
-            <IconSettings fontSize={14} />
-            <span className="chat-action-item-text">{t('copilot.moreSettings')}</span>
-            <IconDown />
-          </a>
-        </Dropdown>
+        <AISettingsDropdown collapsed={containerWidth < COLLAPSE_WIDTH} briefMode={false} />
         {!hideProjectSelector ? <ProjectSelector /> : null}
       </div>
       <div className="right-actions">

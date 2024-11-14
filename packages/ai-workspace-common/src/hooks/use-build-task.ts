@@ -34,6 +34,7 @@ import { IntentResult, useHandleAICanvas } from './use-handle-ai-canvas';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useMultilingualSearchStoreShallow } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
 import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import throttle from 'lodash.throttle';
 
 const globalStreamingChatPortRef = { current: null as Runtime.Port | null };
 const globalAbortControllerRef = { current: null as AbortController | null };
@@ -158,13 +159,25 @@ export const useBuildTask = () => {
     chatStore.setMessages(messages);
   };
 
+  // 添加节流逻辑，确保每 50ms 最多执行一次更新
+  const throttledSetMessages = useCallback(
+    throttle(
+      (msgs: ClientChatMessage[]) => {
+        chatStore.setMessages(msgs);
+      },
+      50,
+      { leading: true },
+    ), // leading: true 确保第一次调用立即执行
+    [],
+  );
+
   const onSkillStream = (skillEvent: SkillEvent) => {
     const { messages = [], isFirstStreamContent = true } = useChatStore.getState();
     const { pendingFirstToken } = useMessageStateStore.getState();
     const lastRelatedMessage = findLastRelatedMessage(messages, skillEvent);
     const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
 
-    if (!lastRelatedMessage) {
+    if (!lastRelatedMessage || !skillEvent.content) {
       return;
     }
 
@@ -207,8 +220,12 @@ export const useBuildTask = () => {
     // Handle citation sequence numbers
     lastRelatedMessage.content = markdownCitationParse(lastRelatedMessage.content);
 
-    messages[lastRelatedMessageIndex] = lastRelatedMessage;
-    chatStore.setMessages(messages);
+    const newMessages = [...messages];
+    newMessages[lastRelatedMessageIndex] = {
+      ...lastRelatedMessage,
+    };
+    // chatStore.setMessages(messages);
+    throttledSetMessages(newMessages);
 
     if (pendingFirstToken && lastRelatedMessage.content.trim()) {
       messageStateStore.setMessageState({ pendingFirstToken: false });

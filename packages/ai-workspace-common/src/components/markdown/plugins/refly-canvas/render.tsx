@@ -42,7 +42,10 @@ const Render = memo<CanvasProps>(({ identifier, title, type, children, id }) => 
   // canvasContent for render
   const [isCanvasTagClosed, intentMatcherResult] = useChatStore((s) => {
     const message = chatSelectors.getMessageById(id)(s);
-    const intentMatcherResult = safeParseJSON(message?.structuredData?.intentMatcher);
+    const intentMatcherResult =
+      typeof message?.structuredData?.['intentMatcher'] === 'string'
+        ? safeParseJSON(message?.structuredData?.['intentMatcher'])
+        : message?.structuredData?.['intentMatcher'];
 
     return [isReflyCanvasClosed(message?.content), intentMatcherResult];
   });

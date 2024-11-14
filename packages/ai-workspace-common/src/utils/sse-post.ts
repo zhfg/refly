@@ -77,7 +77,10 @@ export const ssePost = async ({
               try {
                 skillEvent = JSON.parse(message.substring(6)) as SkillEvent;
               } catch (err) {
-                console.log('ssePost 消息解析错误，静默失败：', err); // 这里只是解析错误，可以静默失败
+                console.log('Parse error:', {
+                  message: message.substring(6),
+                  error: err,
+                });
                 return;
               }
 

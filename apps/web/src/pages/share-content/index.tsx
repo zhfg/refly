@@ -311,8 +311,8 @@ const ShareContent = () => {
                 </Splitter.Panel>
 
                 <Splitter.Panel min={450}>
-                  <div className="relative flex h-full">
-                    <div className="h-full overflow-hidden overflow-y-auto p-8">
+                  <div className="relative flex h-full overflow-hidden">
+                    <div className="h-full w-full overflow-y-auto px-12 py-8">
                       <div className="share-canvas-content-container">
                         {loading ? (
                           <Spin />

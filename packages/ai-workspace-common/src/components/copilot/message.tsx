@@ -31,7 +31,7 @@ import { ClientChatMessage, Mark } from '@refly/common-types';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { memo } from 'react';
 import classNames from 'classnames';
-import { parseMarkdownWithCitations } from '@refly/utils/parse';
+import { parseMarkdownCitationsAndCanvasTags } from '@refly/utils/parse';
 import { useState, useEffect } from 'react';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useProcessContextItems } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-process-context-items';
@@ -142,7 +142,7 @@ export const AssistantMessage = memo(
     };
 
     const handleEditorOperation = (type: EditorOperation, content: string) => {
-      const parsedContent = parseMarkdownWithCitations(content, sources);
+      const parsedContent = parseMarkdownCitationsAndCanvasTags(content, sources);
 
       if (type === 'insertBlow' || type === 'replaceSelection') {
         const editor = noteStoreEditor;
@@ -173,7 +173,7 @@ export const AssistantMessage = memo(
       <Menu
         className={'output-locale-list-menu'}
         onClickMenuItem={(key) => {
-          const parsedText = parseMarkdownWithCitations(message?.content, sources);
+          const parsedText = parseMarkdownCitationsAndCanvasTags(message?.content, sources);
           handleEditorOperation(key as EditorOperation, parsedText || '');
         }}
         style={{ width: 240 }}
@@ -355,7 +355,7 @@ export const AssistantMessage = memo(
                         style={{ color: '#64645F' }}
                         className={'assist-action-item'}
                         onClick={() => {
-                          const parsedText = parseMarkdownWithCitations(message?.content, sources);
+                          const parsedText = parseMarkdownCitationsAndCanvasTags(message?.content, sources);
                           copyToClipboard(parsedText || '');
                           Message.success(t('copilot.message.copySuccess'));
                         }}
@@ -370,7 +370,7 @@ export const AssistantMessage = memo(
                             icon={<IconImport style={{ fontSize: 14 }} />}
                             style={{ color: '#64645F' }}
                             onClick={() => {
-                              const parsedText = parseMarkdownWithCitations(message?.content, sources);
+                              const parsedText = parseMarkdownCitationsAndCanvasTags(message?.content, sources);
                               handleEditorOperation('insertBlow', parsedText || '');
                             }}
                           >

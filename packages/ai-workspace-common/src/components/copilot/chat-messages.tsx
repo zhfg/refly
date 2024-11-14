@@ -62,7 +62,7 @@ export const ChatMessages = memo((props: ChatMessagesProps) => {
         );
       }
     },
-    [messages.length, lastMessage?.type, messageStateStore.pending, messageStateStore.pendingFirstToken],
+    [messages.length, messages, lastMessage?.type, messageStateStore.pending, messageStateStore.pendingFirstToken],
   );
 
   return (

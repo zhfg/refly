@@ -43,16 +43,16 @@ export function isJSON(variable: any): boolean {
 const getParsedCitation = (markdown: string = '') => {
   return markdown
     ?.replace(/\[\s*([cC])itation/g, '[citation')
-    .replace(/\[\[([cC])itation/g, "[citation")
-    .replace(/[cC]itation:(\d+)]]/g, "citation:$1]")
+    .replace(/\[\[([cC])itation/g, '[citation')
+    .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
     .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
-    .replace(/\[[cC]itation:(\d+)]/g, "[citation]($1)")
+    .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)')
     .replace(/[cC]itation\s*:\s*(\d+)\s*]]/g, 'citation:$1]')
     .replace(/\[\s*([cC]itation\s*:\s*\d+)\s*]](?!])/g, `[$1]`)
-  .replace(/\[\s*[cC]itation\s*:\s*(\d+)\s*]/g, '[citation]($1)')
-  .replace(/【\s*[cC]itation\s*:\s*(\d+)\s*】/g, '[citation]($1)')
-  .replace(/\[\[\s*[cC]itation\s*:\s*(\d+)\s*]]/g, '[citation]($1)');
-}
+    .replace(/\[\s*[cC]itation\s*:\s*(\d+)\s*]/g, '[citation]($1)')
+    .replace(/【\s*[cC]itation\s*:\s*(\d+)\s*】/g, '[citation]($1)')
+    .replace(/\[\[\s*[cC]itation\s*:\s*(\d+)\s*]]/g, '[citation]($1)');
+};
 
 export const markdownCitationParse = (markdown: string) => {
   if (typeof markdown !== 'string') {
@@ -61,6 +61,37 @@ export const markdownCitationParse = (markdown: string) => {
 
   return getParsedCitation(markdown);
 };
+
+export function parseMarkdownCitationsAndCanvasTags(content: string, sources: Source[]): string {
+  // Remove citation references
+  const citationRegex = /\[\s*citation\s*]\s*\(\s*(\d+)\s*\)|\[\s*citation\s*:\s*(\d+)\s*]/g;
+  let parsedContent = getParsedCitation(content).replace(citationRegex, '');
+
+  // Remove refly tags and keep their content
+  const reflyTagsRegex = {
+    thinking: /<reflyThinking\b[^>]*>([\s\S]*?)<\/reflyThinking>/g,
+    canvas: /<reflyCanvas\b[^>]*>([\s\S]*?)<\/reflyCanvas>/g,
+  };
+
+  // Extract content from thinking tags
+  parsedContent = parsedContent.replace(reflyTagsRegex.thinking, (_, content) => {
+    return content.trim();
+  });
+
+  // Extract content from canvas tags
+  parsedContent = parsedContent.replace(reflyTagsRegex.canvas, (_, content) => {
+    return content.trim();
+  });
+
+  // Remove any remaining unclosed tags
+  parsedContent = parsedContent
+    .replace(/<reflyThinking\b[^>]*>/g, '')
+    .replace(/<reflyCanvas\b[^>]*>/g, '')
+    .replace(/<\/reflyThinking>/g, '')
+    .replace(/<\/reflyCanvas>/g, '');
+
+  return parsedContent.trim();
+}
 
 export function parseMarkdownWithCitations(content: string, sources: Source[]): string {
   // 统一引用格式

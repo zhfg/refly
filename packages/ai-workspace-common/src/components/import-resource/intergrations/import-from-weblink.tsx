@@ -144,87 +144,90 @@ export const ImportFromWeblink = () => {
   }, []);
 
   return (
-    <div className="intergation-container intergation-import-from-weblink">
-      <div className="intergation-content">
-        <div className="intergation-operation-container">
-          <div className="intergration-header">
-            <span className="menu-item-icon">
-              <HiLink />
-            </span>
-            <span className="intergration-header-title">{t('resource.import.fromWeblink')}</span>
-          </div>
-          <Divider style={{ marginTop: 10, marginBottom: 10 }} />
-          <div className="intergation-body">
-            <div className="intergation-body-action">
-              <TextArea
-                placeholder={t('resource.import.webLinkPlaceholer')}
-                rows={4}
-                autoSize={{
-                  minRows: 4,
-                  maxRows: 4,
-                }}
-                value={linkStr}
-                onChange={(value) => setLinkStr(value)}
+    <div className="h-full flex flex-col min-w-[500px] box-border intergation-import-from-weblink">
+      {/* header */}
+      <div className="flex items-center gap-x-[8px] pt-[12px] px-[12px]">
+        <span className="w-[18px] h-[18px] rounded-[4px] bg-[#f1f1f0] box-shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] flex items-center justify-center">
+          <HiLink />
+        </span>
+        <div className="text-[16px] font-bold">{t('resource.import.fromWeblink')}</div>
+      </div>
+
+      <Divider style={{ marginTop: 10, marginBottom: 10 }} />
+
+      {/* content */}
+      <div className="flex-grow overflow-y-auto px-[12px] box-border">
+        <div>
+          <TextArea
+            placeholder={t('resource.import.webLinkPlaceholer')}
+            rows={4}
+            autoSize={{
+              minRows: 4,
+              maxRows: 4,
+            }}
+            value={linkStr}
+            onChange={(value) => setLinkStr(value)}
+          />
+          <Button
+            type="primary"
+            long
+            style={{ marginTop: 16 }}
+            disabled={!linkStr}
+            onClick={() => {
+              scrapeLink(linkStr);
+            }}
+          >
+            {t('common.add')}
+          </Button>
+        </div>
+
+        <div className="mt-[24px]">
+          <h2 className="text-sm font-bold text-[#00000080]">{t('resource.import.waitingList')}</h2>
+          <div className="mt-[12px]">
+            {scrapeLinks?.length > 0 ? (
+              <List
+                style={{ marginBottom: 48, border: 'none' }}
+                dataSource={scrapeLinks}
+                render={(item, index) => <RenderItem item={item} key={index} />}
               />
-              <Button
-                type="primary"
-                long
-                style={{ marginTop: 16 }}
-                disabled={!linkStr}
-                onClick={() => {
-                  scrapeLink(linkStr);
-                }}
-              >
-                {t('common.add')}
-              </Button>
-            </div>
-            <div className="intergation-body-result">
-              <h2 className="intergation-body-result-title">{t('resource.import.waitingList')}</h2>
-              <div className="intergation-result-list">
-                {scrapeLinks?.length > 0 ? (
-                  <List
-                    style={{ width: 700, marginBottom: 48, border: 'none' }}
-                    dataSource={scrapeLinks}
-                    render={(item, index) => <RenderItem item={item} key={index} />}
-                  />
-                ) : (
-                  <Empty />
-                )}
-              </div>
-            </div>
+            ) : (
+              <Empty />
+            )}
           </div>
         </div>
       </div>
-      <Affix offsetBottom={0} target={() => document.querySelector('.import-resource-right-panel') as HTMLElement}>
-        <div className="intergation-footer">
-          <div className="footer-location">
-            <p className="footer-count text-item">
-              {t('resource.import.linkCount', { count: scrapeLinks?.length || 0 })}
-            </p>
-            <div className="save-container">
-              <p className="text-item save-text-item">{t('resource.import.saveTo')}</p>
-              <SearchSelect
-                defaultValue={selectedProjectId}
-                domain="project"
-                className="kg-selector"
-                allowCreateNewEntity
-                onChange={(value) => {
-                  if (!value) return;
-                  importResourceStore.setSelectedProjectId(value);
-                }}
-              />
-            </div>
-          </div>
-          <div className="footer-action">
-            <Button style={{ marginRight: 8 }} onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
-              {t('common.cancel')}
-            </Button>
-            <Button type="primary" onClick={handleSave} disabled={scrapeLinks.length === 0} loading={saveLoading}>
-              {t('common.save')}
-            </Button>
+
+      {/* footer */}
+      <div className="w-full flex justify-between items-center border-t border-solid border-[#e5e5e5] border-x-0 border-b-0 p-[16px] rounded-none">
+        <div className="flex items-center gap-x-[8px]">
+          <p className="font-bold whitespace-nowrap text-md text-[#00968f]">
+            {t('resource.import.linkCount', { count: scrapeLinks?.length || 0 })}
+          </p>
+
+          <div className="flex items-center gap-x-[8px]">
+            <p className="whitespace-nowrap">{t('resource.import.saveTo')}</p>
+            <SearchSelect
+              defaultValue={selectedProjectId}
+              domain="project"
+              className="min-w-[200px] max-w-[220px] flex-1"
+              allowCreateNewEntity
+              onChange={(value) => {
+                if (!value) return;
+                importResourceStore.setSelectedProjectId(value);
+              }}
+            />
           </div>
         </div>
-      </Affix>
+
+        <div className="flex items-center gap-x-[8px] flex-shrink-0">
+          <Button style={{ marginRight: 8 }} onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
+            {t('common.cancel')}
+          </Button>
+          <Button type="primary" onClick={handleSave} disabled={scrapeLinks.length === 0} loading={saveLoading}>
+            {t('common.save')}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

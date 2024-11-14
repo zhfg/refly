@@ -7,7 +7,7 @@ import { ActionMenu } from './components/action-menu';
 import { SearchHome } from './components/search-home';
 import { useMultilingualSearchStoreShallow } from './stores/multilingual-search';
 import './index.scss';
-import { IconSearch, IconRight } from '@arco-design/web-react/icon';
+import { IconSearch } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 
 const { Header, Content } = Layout;
@@ -65,28 +65,24 @@ function MultilingualSearch() {
         </div>
       </div>
       <Divider style={{ marginTop: 10, marginBottom: 10 }} />
-      {pageState === 'home' ? (
-        <SearchHome />
-      ) : (
-        <>
-          <div
-            className="multilingual-search-inner-container"
-            style={{ height: isSearching ? 'calc(100% - 45px)' : 'calc(100% - 115px)' }}
-          >
+      <div className="multilingual-search-inner-container">
+        {pageState === 'home' ? (
+          <SearchHome />
+        ) : (
+          <>
             <SearchBox />
             {isSearching || results?.length > 0 ? <SearchProgress /> : null}
             <SearchResults outputLocale={outputLocale} />
-          </div>
-          {!isSearching && results.length > 0 && (
-            <div className="multilingual-search-action-menu-container">
-              <ActionMenu
-                getTarget={() => document.querySelector('.import-resource-right-panel') as HTMLElement}
-                sourceType="multilingualSearch"
-              />
-            </div>
-          )}
-        </>
-      )}
+          </>
+        )}
+      </div>
+
+      <div className="multilingual-search-action-menu-container">
+        <ActionMenu
+          getTarget={() => document.querySelector('.import-resource-right-panel') as HTMLElement}
+          sourceType="multilingualSearch"
+        />
+      </div>
     </div>
   );
 }
