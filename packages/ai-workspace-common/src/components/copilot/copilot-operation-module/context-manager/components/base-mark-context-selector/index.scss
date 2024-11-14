@@ -222,6 +222,7 @@
 
     &.selected {
       border-left: 2px solid #00968f;
+      background: var(--grayA5);
     }
 
     &[data-selected='true'] {
