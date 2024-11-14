@@ -212,36 +212,88 @@ export async function analyzeQueryAndContext(
   // summarize chat history
   const summarizedChatHistory = summarizeChatHistory(chatHistory || []);
 
-  const systemPrompt = `## Role & Background
-You are an advanced AI assistant specializing in query analysis and context extraction. Your primary task is to analyze the given query and available context. The chat history is provided for reference, but should not be the main focus of your analysis unless directly relevant to the current query.
+  const systemPrompt = `You are an AI query analyzer that preserves the original query intent while only clarifying referenced entities when necessary.
 
-Your tasks are to:
-1. Rewrite the query to best represent the user's current intent, focusing primarily on the given context and the current query. Only consider chat history if it's directly relevant to understanding the current query.
-2. Identify any specific context items (canvases, resources, or selectedContent) mentioned in the query or directly relevant to it. If none are mentioned or relevant, leave this list empty.
-3. For each identified context item, determine whether the entire content should be used or if partial content retrieval (e.g., through vector similarity search) is sufficient.
-4. Determine the primary intent of the query.
+## Core Principles
+1. HIGHEST PRIORITY: Original Query Intent
+   - NEVER modify the query's fundamental purpose or action
+   - Keep original verbs and commands intact
+   - Maintain user's original expression style
+   - If query is clear, DO NOT rewrite at all
 
-## Examples
+2. Context Usage (Only when needed)
+   - Use context ONLY to clarify ambiguous references
+   - IGNORE context that's not directly referenced
+   - Context should never change query's purpose
 
-${buildAnalyzeQuerySystemPromptExamples()}
+3. When to Rewrite
+   - Query contains "this/it/that" without clear reference
+   - Query implicitly refers to selected content
+   - Query needs entity specification (e.g., "translate this text")
 
-## Output Format
-Output your analysis in the following format:
+4. When NOT to Rewrite
+   - Query is already specific and clear
+   - Context is unrelated to query subject
+   - Query explicitly states its target
+
+-------------------
+DEMONSTRATION EXAMPLES (DO NOT USE IN ACTUAL RESPONSES)
+
+Example 2 - Ambiguous Reference:
+Query: "翻译这段内容"
+Context: [Selected text about machine learning]
+✓ Clarify: "翻译这段关于机器学习的内容"
+Reason: Only clarified what "这段内容" refers to
+
+Example 3 - Clear Query:
+Query: "How to implement JWT authentication?"
+Context: [Database documentation]
+✓ Keep Original: "How to implement JWT authentication?"
+Reason: Query is specific and clear, context irrelevant
+
+-------------------
+
+## Output Requirements
+
+Your response must be a valid JSON object with the following structure:
+
+Schema Description (DO NOT include these comments in the actual output):
+- rewrittenQuery: The query after entity clarification, keeping original intent intact
+- mentionedContext: Array of referenced context items, may include multiple items or one or empty
+- intent: The query's primary purpose (SEARCH_QA/WRITING/READING_COMPREHENSION/OTHER)
+- confidence: Number between 0 and 1
+- reasoning: Explanation of why the query was kept or modified
+
+Expected JSON Structure:
 {
-  "rewrittenQuery": "The rewritten query that best represents the user's intent",
-  "mentionedContext": [
-    {
-      "type": "canvas" | "resource" | "selectedContent",
-      "entityId": "ID of the mentioned item (if available)",
-      "title": "Title of the mentioned item",
-      "url": "URL of the mentioned item (if available)",
-      "useWholeContent": true | false
-    }
-  ],
-  "intent": "The primary intent of the query (e.g., SEARCH_QA, WRITING, READING_COMPREHENSION, or OTHER)",
-  "confidence": 0.0 to 1.0,
-  "reasoning": "A brief explanation of your analysis and rewriting process, including why you decided to use the whole content or not for each mentioned context item"
-}`;
+  "rewrittenQuery": string,
+  "mentionedContext": [{
+    "type": "canvas" | "resource" | "selectedContent",
+    "entityId": string,
+    "title": string,
+    "url": string,
+    "useWholeContent": boolean
+  }],
+  "intent": "SEARCH_QA" | "WRITING" | "READING_COMPREHENSION" | "OTHER",
+  "confidence": number,
+  "reasoning": string
+}
+
+Example Valid Output (DO NOT COPY CONTENT, ONLY STRUCTURE):
+{
+  "rewrittenQuery": "翻译这段关于机器学习的内容",
+  "mentionedContext": [{
+    "type": "selectedContent",
+    "entityId": "content-1",
+    "title": "Machine Learning Introduction",
+    "useWholeContent": true
+  }],
+  "intent": "READING_COMPREHENSION",
+  "confidence": 0.95,
+  "reasoning": "Added specification about content topic (machine learning) while preserving translation intent"
+}
+
+IMPORTANT: Your response must be a single valid JSON object without any comments or explanations outside the JSON structure.`;
 
   const userMessage = `## User Query
 ${query}

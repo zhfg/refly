@@ -6,6 +6,30 @@ export const importantCitationRules = `
 5. Ensure all factual claims are properly cited
 `;
 
+export const commonQueryAndContextPriorityRules = (locale: string) => `
+## Query Priority and Context Relevance
+1. ALWAYS prioritize the user's original query intent above all else
+2. Context Assessment:
+   - First determine if provided context is DIRECTLY relevant to the user's original request
+   - If context is NOT relevant to the request, IGNORE it completely and generate content based on original query
+   - Only use context when it clearly adds value to the requested content
+3. Examples of Query Priority:
+   - Query: "Write a guide about React" + Context about "Python" => Write React guide, ignore Python context
+   - Query: "Create a marketing plan" + Context about "technical specs" => Focus on marketing plan, ignore tech specs
+   - Query: "Write about this document" + Context with relevant document => Use context for content`;
+
+export const commonImportantNotes = (locale: string) => `
+## Important Notes
+ 1. The <response> tags in examples are for demonstration purposes only
+ 2. Your actual response should only include these four parts in sequence:
+    - Initial content analysis (no labels or prefixes)
+    - <reflyThinking> section
+    - <reflyCanvas> section
+    - Brief summary (no labels or prefixes)
+ 3. Keep minimum content length of 2000 words
+ 4. Remember to generate all content in ${locale} while preserving technical terms
+ 5. IMPORTANT: Never include labels like "Initial Analysis:", "Brief Summary:", or their translations in any language`;
+
 export const referenceContextHandlingPrompt = `
 ## Reference Context Handling Instructions
 

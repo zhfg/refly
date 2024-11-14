@@ -47,6 +47,8 @@ export const truncateMessages = (
 };
 
 export const truncateText = (text: string, maxTokens: number): string => {
+  if (!text || typeof text !== 'string') return '';
+
   const words = text.split(' ');
   let truncatedText = '';
   let currentTokens = 0;

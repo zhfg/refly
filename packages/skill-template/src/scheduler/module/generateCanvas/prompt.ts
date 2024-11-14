@@ -9,6 +9,30 @@ Note:
    Only technical terms should remain in their original form.
 `;
 
+export const commonQueryAndContextPriorityRules = (locale: string) => `
+## Query Priority and Context Relevance
+1. ALWAYS prioritize the user's original query intent above all else
+2. Context Assessment:
+   - First determine if provided context is DIRECTLY relevant to the user's original request
+   - If context is NOT relevant to the request, IGNORE it completely and generate content based on original query
+   - Only use context when it clearly adds value to the requested content
+3. Examples of Query Priority:
+   - Query: "Write a guide about React" + Context about "Python" => Write React guide, ignore Python context
+   - Query: "Create a marketing plan" + Context about "technical specs" => Focus on marketing plan, ignore tech specs
+   - Query: "Write about this document" + Context with relevant document => Use context for content`;
+
+export const commonImportantNotes = (locale: string) => `
+## Important Notes
+ 1. The <response> tags in examples are for demonstration purposes only
+ 2. Your actual response should only include these four parts in sequence:
+    - Initial content analysis (no labels or prefixes)
+    - <reflyThinking> section
+    - <reflyCanvas> section
+    - Brief summary (no labels or prefixes)
+ 3. Keep minimum content length of 2000 words
+ 4. Remember to generate all content in ${locale} while preserving technical terms
+ 5. IMPORTANT: Never include labels like "Initial Analysis:", "Brief Summary:", or their translations in any language`;
+
 // Non-contextual examples - keeping existing examples
 export const noContextExamples = (locale: string) => `
 ## Examples
@@ -186,19 +210,19 @@ This technical overview successfully demonstrates how the XR-5000's cutting-edge
 `;
 
 export const buildGenerateCanvasCommonPrompt = (example: string, locale: string) => `
-## Core Capabilities
-- Long-form content generation
-- Document structure optimization
-- Professional writing and formatting
-- Technical documentation expertise
-- Business analysis and reporting
-- Marketing content creation
+## Core Capabilities and Goals
+1. Address user's original request precisely and comprehensively
+2. Generate detailed, well-structured content (minimum 2000 words)
+3. Only incorporate relevant context that serves the original request
+4. Create engaging and informative documents
+5. Deliver concise summaries of generated content
 
-## Goals
-- Generate detailed, well-structured content (minimum 2000 words)
-- Provide clear analysis of user requirements
-- Create engaging and informative documents
-- Deliver concise summaries of generated content
+## Query Processing Order
+1. First, fully understand the original request's intent
+2. Then, check if provided context is DIRECTLY relevant
+3. If context is relevant, use it to enhance your content
+4. If context is not relevant, ignore it completely
+5. Consider rewritten query only if it helps clarify original intent
 
 ## Constraints
 1. Content Length:
@@ -211,6 +235,12 @@ export const buildGenerateCanvasCommonPrompt = (example: string, locale: string)
    - Include necessary metadata
    - Follow specified tag structure
 
+## Response Structure
+1. Initial content analysis (direct analysis without labels, such as "Initial content analysis:")
+2. Thinking process (<reflyThinking> tags)
+3. Content generation (<reflyCanvas> tags)
+4. Brief summary (direct summary without labels, such as "Brief summary:")
+
 ## Important Notes
 1. The <response> tags in examples are for demonstration purposes only - DO NOT include these tags in your actual response
 2. Your actual response should only include:
@@ -220,12 +250,7 @@ export const buildGenerateCanvasCommonPrompt = (example: string, locale: string)
    - Brief summary
 3. Keep minimum content length of 2000 words
 4. Remember to generate all content in ${locale} while preserving technical terms
-
-## Response Structure
-1. Initial Analysis (without <response> tags)
-2. Thinking Process (<reflyThinking> tags only)
-3. Content Generation (<reflyCanvas> tags only)
-4. Brief Summary (without <response> tags)
+5. The Initial content analysis and Brief summary should be direct analysis without labels, such as "Initial content analysis:" or "Brief summary:"
 
 ## Tag Formats
 
@@ -242,7 +267,7 @@ The thinking process should be wrapped in reflyThinking tags:
 </reflyThinking>
 
 ## Important Notes
-1. The <response> tags in examples are for demonstration purposes only
+1. The <response> tags in examples are for demonstration purposes only - DO NOT include these tags in your actual response
 2. Your actual response should only include:
    - Initial content analysis 
    - <reflyThinking> section
@@ -397,6 +422,10 @@ export const buildGenerateCanvasUserPrompt = ({
      ${originalQuery}
 
      Remember to generate all content in ${locale} while preserving technical terms
+
+     ${commonImportantNotes(locale)}
+
+     ${commonQueryAndContextPriorityRules(locale)}
      `;
   }
 
@@ -406,15 +435,9 @@ export const buildGenerateCanvasUserPrompt = ({
  ## Rewritten User Query
  ${rewrittenQuery}
 
- ## Important Notes
- 1. The <response> tags in examples are for demonstration purposes only
- 2. Your actual response should only include:
-    - Initial content analysis
-    - <reflyThinking> section
-    - <reflyCanvas> section
-    - Brief summary
- 3. Keep minimum content length of 2000 words
- 4. Remember to generate all content in ${locale} while preserving technical terms
+ ${commonImportantNotes(locale)}
+
+ ${commonQueryAndContextPriorityRules(locale)}
  `;
 };
 
