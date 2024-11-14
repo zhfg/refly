@@ -11,6 +11,7 @@ import { Request, Response } from 'express';
 import * as Sentry from '@sentry/node';
 import { UnknownError } from '@refly-packages/errors';
 import { genBaseRespDataFromError } from '@/utils/exception';
+import { User } from '@prisma/client';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -34,11 +35,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       return;
     }
 
+    const user = request.user as User;
+
     // Handle other business exceptions
     const baseRespData = genBaseRespDataFromError(exception);
 
     if (baseRespData.errCode === new UnknownError().code) {
-      Sentry.captureException(exception);
+      Sentry.captureException(exception, {
+        user: {
+          id: user?.uid,
+          email: user?.email,
+        },
+      });
       this.logger.error(
         `Request: ${request.method} ${request.url} unknown err: ${exception.stack}`,
       );

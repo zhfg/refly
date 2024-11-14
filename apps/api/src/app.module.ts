@@ -30,9 +30,15 @@ import { ShareModule } from './share/share.module';
     }),
     LoggerModule.forRoot({
       pinoHttp: {
-        autoLogging: false,
-        quietReqLogger: true,
+        redact: {
+          paths: ['req.headers.authorization'],
+          remove: true,
+        },
         genReqId: () => api.trace.getSpan(api.context.active())?.spanContext()?.traceId,
+        customSuccessObject: (req) => ({
+          env: process.env.NODE_ENV,
+          uid: (req as any).user?.uid || 'anonymous',
+        }),
         transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
       },
     }),
