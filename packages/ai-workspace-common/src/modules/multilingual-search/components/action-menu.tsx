@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useMatch } from '@refly-packages/ai-workspace-common/utils/router';
 import { Affix, Button, Checkbox, message } from 'antd';
 import { useMultilingualSearchStore } from '../stores/multilingual-search';
 import { SearchSelect } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
@@ -13,7 +14,12 @@ import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
-export const ActionMenu: React.FC<{ getTarget: () => HTMLElement }> = (props) => {
+interface ActionMenuProps {
+  getTarget: () => HTMLElement;
+  sourceType: 'multilingualSearch' | 'sourceListModal';
+}
+
+export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
   const { t } = useTranslation();
   const { setReloadDirectoryResourceList } = useReloadListState((state) => ({
     setReloadDirectoryResourceList: state.setReloadDirectoryResourceList,
@@ -29,13 +35,19 @@ export const ActionMenu: React.FC<{ getTarget: () => HTMLElement }> = (props) =>
     setImportResourceModalVisible: state.setImportResourceModalVisible,
   }));
   const [saveLoading, setSaveLoading] = useState(false);
+  const projectId = useMatch('/project/:projectId')?.params?.projectId;
 
   const handleSelectAll = (checked: boolean) => {
     setSelectedItems(checked ? results : []);
   };
 
   const handleClose = () => {
-    updateSourceListDrawer({ visible: false });
+    if (props.sourceType === 'sourceListModal') {
+      updateSourceListDrawer({ visible: false });
+    }
+    if (props.sourceType === 'multilingualSearch') {
+      importResourceStore.setImportResourceModalVisible(false);
+    }
   };
 
   const handleSave = async () => {
@@ -77,6 +89,14 @@ export const ActionMenu: React.FC<{ getTarget: () => HTMLElement }> = (props) =>
     handleClose();
   };
 
+  useEffect(() => {
+    importResourceStore.setSelectedProjectId(projectId);
+    return () => {
+      /* reset selectedProjectId after modal hide */
+      importResourceStore.setSelectedProjectId('');
+    };
+  }, []);
+
   return (
     <Affix offsetBottom={0} target={props.getTarget}>
       <div className="intergation-footer">
@@ -90,7 +110,7 @@ export const ActionMenu: React.FC<{ getTarget: () => HTMLElement }> = (props) =>
           <div className="save-container">
             <p className="text-item save-text-item">{t('resource.import.saveTo')}</p>
             <SearchSelect
-              defaultValue={''}
+              defaultValue={importResourceStore.selectedProjectId}
               domain="project"
               className="kg-selector"
               allowCreateNewEntity
