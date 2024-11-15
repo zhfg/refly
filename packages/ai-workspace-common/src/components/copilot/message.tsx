@@ -28,7 +28,7 @@ import { ContextItem } from '@refly-packages/ai-workspace-common/components/copi
 import { ContextPreview } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/context-preview';
 
 import { ClientChatMessage, Mark } from '@refly/common-types';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { memo } from 'react';
 import classNames from 'classnames';
 import { parseMarkdownCitationsAndCanvasTags } from '@refly/utils/parse';
@@ -124,8 +124,27 @@ export const AssistantMessage = memo(
     const runtime = getRuntime();
     const isWeb = runtime === 'web';
 
+    const editorActionList = [
+      {
+        icon: <IconImport style={{ fontSize: 14 }} />,
+        key: 'insertBlow',
+      },
+      {
+        icon: <IconCheckCircle style={{ fontSize: 14 }} />,
+        key: 'replaceSelection',
+      },
+      {
+        icon: <IconBook style={{ fontSize: 14 }} />,
+        key: 'createNewNote',
+      },
+    ];
+
     const { t } = useTranslation();
-    const noteStoreEditor = useCanvasStore((state) => state.editor);
+    const { editor: noteStoreEditor, isCreatingNewCanvasOnHumanMessage } = useCanvasStoreShallow((state) => ({
+      editor: state.editor,
+      isCreatingNewCanvasOnHumanMessage: state.isCreatingNewCanvasOnHumanMessage,
+    }));
+
     let sources =
       typeof message?.structuredData?.['sources'] === 'string'
         ? safeParseJSON(message?.structuredData?.['sources'])
@@ -168,27 +187,6 @@ export const AssistantMessage = memo(
         editorEmitter.emit('createNewNote', parsedContent);
       }
     };
-
-    const dropList = (
-      <Menu
-        className={'output-locale-list-menu'}
-        onClickMenuItem={(key) => {
-          const parsedText = parseMarkdownCitationsAndCanvasTags(message?.content, sources);
-          handleEditorOperation(key as EditorOperation, parsedText || '');
-        }}
-        style={{ width: 240 }}
-      >
-        <Menu.Item key="insertBlow">
-          <IconImport /> {t('copilot.message.insertBlow')}
-        </Menu.Item>
-        <Menu.Item key="replaceSelection">
-          <IconCheckCircle /> {t('copilot.message.replaceSelection')}
-        </Menu.Item>
-        <Menu.Item key="createNewNote">
-          <IconBook /> {t('copilot.message.createNewNote')}
-        </Menu.Item>
-      </Menu>
-    );
 
     const tokenUsageDropdownList = (
       <Menu>
@@ -324,7 +322,6 @@ export const AssistantMessage = memo(
                           onClick={() => handleAskFollowing(item)}
                         >
                           <p className="ai-copilot-related-question-title">{item}</p>
-                          {/* <IconRight style={{ color: 'rgba(0, 0, 0, 0.5)' }} /> */}
                         </div>
                       ))}
                     </div>
@@ -341,7 +338,7 @@ export const AssistantMessage = memo(
                         icon={<MdOutlineToken style={{ fontSize: 14, marginRight: 4 }} />}
                         className={'assist-action-item'}
                       >
-                        {tokenUsage} Tokens
+                        <span className="action-text">{tokenUsage} Tokens</span>
                       </Button>
                     </Dropdown>
                   </div>
@@ -360,25 +357,25 @@ export const AssistantMessage = memo(
                           Message.success(t('copilot.message.copySuccess'));
                         }}
                       >
-                        {t('copilot.message.copy')}
+                        <span className="action-text">{t('copilot.message.copy')}</span>
                       </Button>
-                      {isWeb ? (
-                        <Dropdown droplist={dropList} position="bl">
-                          <Button
-                            type="text"
-                            className={'assist-action-item'}
-                            icon={<IconImport style={{ fontSize: 14 }} />}
-                            style={{ color: '#64645F' }}
-                            onClick={() => {
-                              const parsedText = parseMarkdownCitationsAndCanvasTags(message?.content, sources);
-                              handleEditorOperation('insertBlow', parsedText || '');
-                            }}
-                          >
-                            {t('copilot.message.insertBlow')}
-                            <IconCaretDown />
-                          </Button>
-                        </Dropdown>
-                      ) : null}
+                      {isWeb
+                        ? editorActionList.map((item) => (
+                            <Button
+                              loading={item.key === 'createNewNote' && isCreatingNewCanvasOnHumanMessage}
+                              type="text"
+                              className={'assist-action-item'}
+                              icon={item.icon}
+                              style={{ color: '#64645F' }}
+                              onClick={() => {
+                                const parsedText = parseMarkdownCitationsAndCanvasTags(message?.content, sources);
+                                handleEditorOperation(item.key as EditorOperation, parsedText || '');
+                              }}
+                            >
+                              <span className="action-text">{t(`copilot.message.${item.key}`)}</span>
+                            </Button>
+                          ))
+                        : null}
                     </div>
                     <div className="session-answer-actionbar-right"></div>
                   </div>

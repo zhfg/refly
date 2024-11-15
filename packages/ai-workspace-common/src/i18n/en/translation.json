@@ -821,7 +821,9 @@
         "year": "Year",
         "forFree": "Free",
         "resetAt": "reset at {{date}}"
-      }
+      },
+      "testTipTitle": "Reminder",
+      "testTip": "Our product is still in testing phase. in the beta testing phase. If you encounter insufficient model token or storage quota, please contact the Refly team for quota expansion. We will officially launch subscription plans in future versions. Thank you for using our product."
     },
 
     "action": {
