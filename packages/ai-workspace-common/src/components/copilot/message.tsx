@@ -184,27 +184,6 @@ export const AssistantMessage = memo(
       }
     };
 
-    const dropList = (
-      <Menu
-        className={'output-locale-list-menu'}
-        onClickMenuItem={(key) => {
-          const parsedText = parseMarkdownCitationsAndCanvasTags(message?.content, sources);
-          handleEditorOperation(key as EditorOperation, parsedText || '');
-        }}
-        style={{ width: 240 }}
-      >
-        <Menu.Item key="insertBlow">
-          <IconImport /> {t('copilot.message.insertBlow')}
-        </Menu.Item>
-        <Menu.Item key="replaceSelection">
-          <IconCheckCircle /> {t('copilot.message.replaceSelection')}
-        </Menu.Item>
-        <Menu.Item key="createNewNote">
-          <IconBook /> {t('copilot.message.createNewNote')}
-        </Menu.Item>
-      </Menu>
-    );
-
     const tokenUsageDropdownList = (
       <Menu>
         {message?.tokenUsage?.map((item, index) => (

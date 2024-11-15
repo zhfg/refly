@@ -187,22 +187,22 @@ export const Search = (props: SearchProps) => {
   }, []);
 
   const renderData: RenderItem[] = [
-    {
-      domain: 'skill',
-      heading: t('loggedHomePage.quickSearch.skills'),
-      action: false,
-      data: searchStore.searchedSkills || [],
-      icon: <IconRobot style={{ fontSize: 12 }} />,
-      onItemClick: (item: SearchResult) => {
-        const skill: SkillMeta = {
-          displayName: item?.title,
-          tplName: item?.title,
-          skillId: item?.id,
-        };
-        setSelectedSkill(skill);
-        setPages([...pages, 'skill-execute']);
-      },
-    },
+    // {
+    //   domain: 'skill',
+    //   heading: t('loggedHomePage.quickSearch.skills'),
+    //   action: false,
+    //   data: searchStore.searchedSkills || [],
+    //   icon: <IconRobot style={{ fontSize: 12 }} />,
+    //   onItemClick: (item: SearchResult) => {
+    //     const skill: SkillMeta = {
+    //       displayName: item?.title,
+    //       tplName: item?.title,
+    //       skillId: item?.id,
+    //     };
+    //     setSelectedSkill(skill);
+    //     setPages([...pages, 'skill-execute']);
+    //   },
+    // },
     {
       domain: 'note',
       heading: t('loggedHomePage.quickSearch.canvas'),

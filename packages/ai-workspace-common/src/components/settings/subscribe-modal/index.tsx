@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Button, Modal, Link, Message as message, Tooltip } from '@arco-design/web-react';
+import { Button, Modal, Tooltip } from 'antd';
 import { getClientOrigin } from '@refly/utils/url';
 
 // styles
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { IconCheck, IconQuestionCircle } from '@arco-design/web-react/icon';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
+import { AiFillInfoCircle } from 'react-icons/ai';
 
 interface ModelFeatures {
   name: string;
@@ -141,7 +142,7 @@ export const SubscribeModal = () => {
                 <IconCheck style={{ color: 'green', strokeWidth: 6 }} /> {feature.name}{' '}
                 {feature.count ? ` (${feature.count}) ` : ''}
                 {feature.tooltip && (
-                  <Tooltip mini content={<div>{feature.tooltip}</div>}>
+                  <Tooltip title={<div>{feature.tooltip}</div>}>
                     <IconQuestionCircle />
                   </Tooltip>
                 )}
@@ -162,63 +163,86 @@ export const SubscribeModal = () => {
 
   return (
     <Modal
-      style={{ width: 1080, height: 720 }}
-      visible={visible}
-      footer={null}
-      className="subscribe-modal"
+      open={visible}
+      centered
       onCancel={() => setVisible(false)}
+      footer={
+        <Button type="primary" onClick={() => setVisible(false)}>
+          {t('common.confirm')}
+        </Button>
+      }
+      title={
+        <div className="text-lg flex items-center gap-2">
+          <AiFillInfoCircle size={22} style={{ color: '#00968F' }} /> {t('settings.subscription.testTipTitle')}
+        </div>
+      }
     >
-      <div className="subscribe-content">
-        <div className="subscribe-content-title">{t('settings.subscription.subscribe.title')}</div>
-        <div className="subscribe-content-subtitle">{t('settings.subscription.subscribe.subtitle')}</div>
-
-        <div className="subscribe-content-type">
-          <div className="subscribe-content-type-inner">
-            <div
-              className={`subscribe-content-type-inner-item ${lookupKey === 'monthly' ? 'active' : ''}`}
-              onClick={() => setLookupKey('monthly')}
-            >
-              {t('settings.subscription.subscribe.monthly')}
-            </div>
-            <div
-              className={`subscribe-content-type-inner-item ${lookupKey === 'yearly' ? 'active' : ''}`}
-              onClick={() => setLookupKey('yearly')}
-            >
-              {t('settings.subscription.subscribe.yearly')}
-            </div>
-          </div>
-        </div>
-
-        <div className="subscribe-content-plans">
-          <PlanItem
-            title="pro"
-            price={lookupKey === 'monthly' ? 19.9 : 16.9}
-            buttonText={t('settings.subscription.subscribe.pro.buttonText')}
-            description={t('settings.subscription.subscribe.pro.description')}
-            features={proFeatures}
-            isActive={true}
-            handleClick={createCheckoutSession}
-          />
-          <PlanItem
-            title="free"
-            price={0}
-            buttonText={t('settings.subscription.subscribe.free.buttonText')}
-            description={t('settings.subscription.subscribe.free.description')}
-            features={freeFeatures}
-            isActive={false}
-            handleClick={() => {
-              setVisible(false);
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="subscribe-content-description">
-        {t('settings.subscription.subscribe.description')}
-        <Link href={`${getClientOrigin(true)}/privacy`}>{t('settings.subscription.subscribe.privacy')}</Link>
-        {t('settings.subscription.subscribe.and')}
-        <Link href={`${getClientOrigin(true)}/terms`}>{t('settings.subscription.subscribe.terms')}</Link>
-      </div>
+      <div className="text-md">{t('settings.subscription.testTip')}</div>
     </Modal>
+    // <Modal
+    //   width={1080}
+    //   height={720}
+    //   centered
+    //   open={visible}
+    //   footer={null}
+    //   className="subscribe-modal"
+    //   onCancel={() => setVisible(false)}
+    // >
+    //   <div className="subscribe-content">
+    //     <div className="subscribe-content-title">{t('settings.subscription.subscribe.title')}</div>
+    //     <div className="subscribe-content-subtitle">{t('settings.subscription.subscribe.subtitle')}</div>
+
+    //     <div className="subscribe-content-type">
+    //       <div className="subscribe-content-type-inner">
+    //         <div
+    //           className={`subscribe-content-type-inner-item ${lookupKey === 'monthly' ? 'active' : ''}`}
+    //           onClick={() => setLookupKey('monthly')}
+    //         >
+    //           {t('settings.subscription.subscribe.monthly')}
+    //         </div>
+    //         <div
+    //           className={`subscribe-content-type-inner-item ${lookupKey === 'yearly' ? 'active' : ''}`}
+    //           onClick={() => setLookupKey('yearly')}
+    //         >
+    //           {t('settings.subscription.subscribe.yearly')}
+    //         </div>
+    //       </div>
+    //     </div>
+
+    //     <div className="subscribe-content-plans">
+    //       <PlanItem
+    //         title="pro"
+    //         price={lookupKey === 'monthly' ? 19.9 : 16.9}
+    //         buttonText={t('settings.subscription.subscribe.pro.buttonText')}
+    //         description={t('settings.subscription.subscribe.pro.description')}
+    //         features={proFeatures}
+    //         isActive={true}
+    //         handleClick={createCheckoutSession}
+    //       />
+    //       <PlanItem
+    //         title="free"
+    //         price={0}
+    //         buttonText={t('settings.subscription.subscribe.free.buttonText')}
+    //         description={t('settings.subscription.subscribe.free.description')}
+    //         features={freeFeatures}
+    //         isActive={false}
+    //         handleClick={() => {
+    //           setVisible(false);
+    //         }}
+    //       />
+    //     </div>
+    //   </div>
+
+    //   <div className="subscribe-content-description">
+    //     {t('settings.subscription.subscribe.description')}
+    //     <a href={`${getClientOrigin(true)}/privacy`} target="_blank" rel="noreferrer">
+    //       {t('settings.subscription.subscribe.privacy')}
+    //     </a>
+    //     {t('settings.subscription.subscribe.and')}
+    //     <a href={`${getClientOrigin(true)}/terms`} target="_blank" rel="noreferrer">
+    //       {t('settings.subscription.subscribe.terms')}
+    //     </a>
+    //   </div>
+    // </Modal>
   );
 };
