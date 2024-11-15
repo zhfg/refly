@@ -29,7 +29,7 @@ import { ContextPreview } from '@refly-packages/ai-workspace-common/components/c
 
 import { ClientChatMessage, Mark } from '@refly/common-types';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import classNames from 'classnames';
 import { parseMarkdownCitationsAndCanvasTags } from '@refly/utils/parse';
 import { useState, useEffect } from 'react';
@@ -215,6 +215,53 @@ export const AssistantMessage = memo(
       setTokenUsage(total);
     }, [message.tokenUsage]);
 
+    // Track editor selection state
+    const [hasEditorSelection, setHasEditorSelection] = useState(false);
+
+    // Update selection state when editor changes
+    useEffect(() => {
+      if (!noteStoreEditor) {
+        setHasEditorSelection(false);
+        return;
+      }
+
+      const updateSelection = () => {
+        const { state } = noteStoreEditor.view;
+        const { from, to } = state.selection;
+        setHasEditorSelection(from !== to);
+      };
+
+      // Update initial state
+      updateSelection();
+
+      // Listen for selection changes
+      noteStoreEditor.on('selectionUpdate', updateSelection);
+      noteStoreEditor.on('blur', updateSelection);
+      noteStoreEditor.on('focus', updateSelection);
+
+      return () => {
+        noteStoreEditor.off('selectionUpdate', updateSelection);
+        noteStoreEditor.off('blur', updateSelection);
+        noteStoreEditor.off('focus', updateSelection);
+      };
+    }, [noteStoreEditor]);
+
+    // Filter editor actions based on conditions
+    const availableEditorActions = useMemo(() => {
+      if (!noteStoreEditor) {
+        // If no editor, only show create new note
+        return editorActionList.filter((item) => item.key === 'createNewNote');
+      }
+
+      if (!hasEditorSelection) {
+        // If no selection, show create new note and insert below
+        return editorActionList.filter((item) => ['createNewNote', 'insertBlow'].includes(item.key));
+      }
+
+      // If has selection, show all actions
+      return editorActionList;
+    }, [noteStoreEditor, hasEditorSelection]);
+
     return (
       <div className="ai-copilot-message assistant-message-container">
         <div className="assistant-message">
@@ -360,7 +407,7 @@ export const AssistantMessage = memo(
                         <span className="action-text">{t('copilot.message.copy')}</span>
                       </Button>
                       {isWeb
-                        ? editorActionList.map((item) => (
+                        ? availableEditorActions.map((item) => (
                             <Button
                               loading={item.key === 'createNewNote' && isCreatingNewCanvasOnHumanMessage}
                               type="text"
