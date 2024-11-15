@@ -351,17 +351,6 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
     updateCurrentSelectionContent: state.updateCurrentSelectionContent,
   }));
 
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  useEffect(() => {
-    // Make sure the copilot full screen is closed when the AI is editing
-    if (canvasStore.isAiEditing) {
-      console.log('delete fullScreen');
-      searchParams.delete('fullScreen');
-      setSearchParams(searchParams);
-    }
-  }, [canvasStore.isAiEditing]);
-
   const editorRef = useRef<EditorInstance>();
 
   const { showContentSelector, scope } = useContentSelectorStore((state) => ({

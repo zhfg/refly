@@ -42,6 +42,7 @@ export type Events = {
   inPlaceSendMessage: InPlaceSendMessagePayload;
   askAIResponse: Omit<InPlaceSendMessagePayload, 'userInput'>;
   editorSynced: void;
+  exitFullScreen: void;
 };
 
 export type EditorOperation =
@@ -55,6 +56,7 @@ export type EditorOperation =
   | 'inPlaceSendMessage'
   | 'activeAskAI'
   | 'askAIResponse'
-  | 'editorSynced';
+  | 'editorSynced'
+  | 'exitFullScreen';
 
 export const editorEmitter = mitt<Events>();
