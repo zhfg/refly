@@ -28,7 +28,7 @@ import { ContextItem } from '@refly-packages/ai-workspace-common/components/copi
 import { ContextPreview } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/context-preview';
 
 import { ClientChatMessage, Mark } from '@refly/common-types';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { memo } from 'react';
 import classNames from 'classnames';
 import { parseMarkdownCitationsAndCanvasTags } from '@refly/utils/parse';
@@ -140,7 +140,11 @@ export const AssistantMessage = memo(
     ];
 
     const { t } = useTranslation();
-    const noteStoreEditor = useCanvasStore((state) => state.editor);
+    const { editor: noteStoreEditor, isCreatingNewCanvasOnHumanMessage } = useCanvasStoreShallow((state) => ({
+      editor: state.editor,
+      isCreatingNewCanvasOnHumanMessage: state.isCreatingNewCanvasOnHumanMessage,
+    }));
+
     let sources =
       typeof message?.structuredData?.['sources'] === 'string'
         ? safeParseJSON(message?.structuredData?.['sources'])
@@ -358,6 +362,7 @@ export const AssistantMessage = memo(
                       {isWeb
                         ? editorActionList.map((item) => (
                             <Button
+                              loading={item.key === 'createNewNote' && isCreatingNewCanvasOnHumanMessage}
                               type="text"
                               className={'assist-action-item'}
                               icon={item.icon}
