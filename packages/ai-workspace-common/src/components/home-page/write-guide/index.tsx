@@ -55,13 +55,13 @@ export const WriteGuide = () => {
     {
       title: 'terms',
       handleClick: () => {
-        window.open(`${getClientOrigin(true)}/terms`, '_blank');
+        window.open(`/terms`, '_blank');
       },
     },
     {
       title: 'privacy',
       handleClick: () => {
-        window.open(`${getClientOrigin(true)}/privacy`, '_blank');
+        window.open(`/privacy`, '_blank');
       },
     },
     {

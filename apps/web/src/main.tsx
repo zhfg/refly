@@ -10,6 +10,8 @@ import {
   RouterProvider,
   Outlet,
 } from "react-router-dom"
+import Privacy from "@/pages/privacy"
+import Terms from "@/pages/terms"
 
 // Import AppRouter lazily
 const AppRouter = lazy(() =>
@@ -93,6 +95,14 @@ export const App = () => {
 
 // Update router creation to use createBrowserRouter with proper route definitions
 const router = createBrowserRouter([
+  {
+    path: "/privacy",
+    element: <Privacy />,
+  },
+  {
+    path: "/terms",
+    element: <Terms />,
+  },
   {
     path: "*",
     element: <App />,
