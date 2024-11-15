@@ -28,19 +28,18 @@ import { ShareModule } from './share/share.module';
       cache: true,
       expandVariables: true,
     }),
-    LoggerModule.forRootAsync({
-      useFactory: async () => {
-        return {
-          pinoHttp: {
-            autoLogging: false,
-            base: null,
-            quietReqLogger: true,
-            genReqId: () => api.trace.getSpan(api.context.active())?.spanContext()?.traceId,
-            level: 'debug',
-            transport:
-              process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
-          },
-        };
+    LoggerModule.forRoot({
+      pinoHttp: {
+        redact: {
+          paths: ['pid', 'hostname', 'req.headers'],
+          remove: true,
+        },
+        genReqId: () => api.trace.getSpan(api.context.active())?.spanContext()?.traceId,
+        customSuccessObject: (req) => ({
+          env: process.env.NODE_ENV,
+          uid: (req as any).user?.uid || 'anonymous',
+        }),
+        transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
       },
     }),
     BullModule.forRootAsync({

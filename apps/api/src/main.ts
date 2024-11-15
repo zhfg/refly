@@ -29,8 +29,10 @@ Sentry.init({
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
+    bufferLogs: true,
   });
-  const logger = app.get(Logger);
+  app.useLogger(app.get(Logger));
+
   const configService = app.get(ConfigService);
 
   process.on('uncaughtException', (err) => {
@@ -45,14 +47,12 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('hbs');
 
-  app.useLogger(logger);
   app.use(setTraceID);
   app.use(helmet());
   app.enableCors();
   app.use(cookieParser());
   app.useWebSocketAdapter(new CustomWsAdapter(app, configService.get<number>('wsPort')));
   app.useGlobalFilters(new GlobalExceptionFilter());
-  app.setGlobalPrefix('/v1', { exclude: ['/'] });
 
   tracer.start();
 

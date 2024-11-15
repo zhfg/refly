@@ -9,6 +9,7 @@ import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
+import { useDebouncedCallback } from 'use-debounce';
 
 interface CreateCanvasParams {
   content?: string;
@@ -19,8 +20,10 @@ interface CreateCanvasParams {
 export const useAINote = (shouldInitListener = false) => {
   const { t } = useTranslation();
   const canvasStore = useCanvasStoreShallow((state) => ({
+    isCreatingNewCanvasOnHumanMessage: state.isCreatingNewCanvasOnHumanMessage,
     updateNewNoteCreating: state.updateNewCanvasCreating,
     updateNotePanelVisible: state.updateCanvasPanelVisible,
+    updateIsCreatingNewCanvasOnHumanMessage: state.updateIsCreatingNewCanvasOnHumanMessage,
   }));
   const { jumpToCanvas } = useJumpNewPath();
   const { handleAddTab: handleAddProjectTab } = useProjectTabs();
@@ -61,11 +64,35 @@ export const useAINote = (shouldInitListener = false) => {
     });
   };
 
+  const debouncedHandleInitEmptyNote = useDebouncedCallback(
+    (params: { content: string }) => {
+      return handleInitEmptyNote(params);
+    },
+    300,
+    { leading: true },
+  );
+
   useEffect(() => {
     if (shouldInitListener) {
-      editorEmitter.on('createNewNote', (content: string) => {
-        handleInitEmptyNote({ content });
-      });
+      const handler = async (content: string) => {
+        if (canvasStore.isCreatingNewCanvasOnHumanMessage) {
+          return;
+        }
+        canvasStore.updateIsCreatingNewCanvasOnHumanMessage(true);
+        try {
+          await debouncedHandleInitEmptyNote({ content });
+        } catch (error) {
+          console.error('Failed to create note:', error);
+        }
+        canvasStore.updateIsCreatingNewCanvasOnHumanMessage(false);
+      };
+
+      editorEmitter.on('createNewNote', handler);
+
+      // 添加清理函数
+      return () => {
+        editorEmitter.off('createNewNote', handler);
+      };
     }
   }, [shouldInitListener]);
 

@@ -823,7 +823,9 @@
         "year": "年",
         "forFree": "免费",
         "resetAt": "将于 {{date}} 重置"
-      }
+      },
+      "testTipTitle": "温馨提示",
+      "testTip": "产品当前在内测阶段，如有模型 Token 和存储使用额度不足的情况，请联系 Refly 团队为您扩充额度。我们会在后续版本中正式推出订阅计划，感谢您的使用。"
     },
     "action": {
       "putErrorNotify": "修改用户配置失败，请尝试重试！",
