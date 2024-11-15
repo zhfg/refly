@@ -35,6 +35,7 @@ import { showErrorNotification } from '@refly-packages/ai-workspace-common/reque
 import { useMultilingualSearchStoreShallow } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
 import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import throttle from 'lodash.throttle';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
 const globalStreamingChatPortRef = { current: null as Runtime.Port | null };
 const globalAbortControllerRef = { current: null as AbortController | null };
@@ -191,7 +192,6 @@ export const useBuildTask = () => {
     // Update message content
     lastRelatedMessage.content += skillEvent.content;
 
-    // Update canvas AI editing status
     if (lastRelatedMessage.content.match(/<reflyCanvas[^>]*>/)) {
       if (lastRelatedMessage.content.includes('</reflyCanvas>')) {
         if (useCanvasStore.getState().isAiEditing) {
@@ -256,6 +256,7 @@ export const useBuildTask = () => {
         chatStore.setIsFirstStreamContent(newIsFirstStreamContent);
 
         handleAICanvasBeforeStreamHook();
+        editorEmitter.emit('exitFullScreen');
       }
     } else if ([CanvasIntentType.Other].includes(intentMatcher?.type)) {
       if (isFirstStreamContent) {

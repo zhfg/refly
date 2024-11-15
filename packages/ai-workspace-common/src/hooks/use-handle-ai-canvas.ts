@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 // hooks
@@ -27,7 +27,7 @@ export const useHandleAICanvas = () => {
   const { jumpToConv } = useJumpNewPath();
   const location = useLocation();
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryConvId = searchParams.get('convId');
   const { convId: pathConvId } = useParams();
   const convId = queryConvId || pathConvId;
@@ -157,6 +157,21 @@ export const useHandleAICanvas = () => {
     },
     [convId],
   );
+
+  useEffect(() => {
+    const handleExitFullScreen = () => {
+      console.log('exitFullScreen', searchParams.toString());
+      if (searchParams.has('fullScreen')) {
+        searchParams.delete('fullScreen');
+        setSearchParams(searchParams);
+      }
+    };
+
+    editorEmitter.on('exitFullScreen', handleExitFullScreen);
+    return () => {
+      editorEmitter.off('exitFullScreen', handleExitFullScreen);
+    };
+  }, [searchParams, setSearchParams]);
 
   const handleAICanvasBeforeStreamHook = useCallback(() => {
     const { messageIntentContext } = useChatStore.getState();

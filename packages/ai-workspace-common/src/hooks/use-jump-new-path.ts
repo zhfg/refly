@@ -2,9 +2,11 @@ import { useNavigationContextStoreShallow } from '@refly-packages/ai-workspace-c
 import { NavigationContext } from '@refly-packages/ai-workspace-common/types/copilot';
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useConversationStoreShallow } from '@refly-packages/ai-workspace-common/stores/conversation';
+import { useEffect, useRef } from 'react';
 
 export const useJumpNewPath = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const searchParamsRef = useRef(searchParams);
   const navigate = useNavigate();
   const { setNavigationContext } = useNavigationContextStoreShallow((state) => ({
     setNavigationContext: state.setNavigationContext,
@@ -13,6 +15,12 @@ export const useJumpNewPath = () => {
   const conversationStore = useConversationStoreShallow((state) => ({
     resetState: state.resetState,
   }));
+
+  // Helper function to get fresh searchParams
+  const getCleanSearchParams = () => {
+    const currentParams = searchParamsRef.current;
+    return currentParams;
+  };
 
   const jumpToCanvas = ({
     canvasId,
@@ -25,14 +33,15 @@ export const useJumpNewPath = () => {
     baseUrl?: string;
     openNewTab?: boolean;
   }) => {
-    for (const key of Array.from(searchParams.keys())) {
+    const currentParams = getCleanSearchParams();
+    for (const key of Array.from(currentParams.keys())) {
       if (['resId', 'canvasId'].includes(key)) {
-        searchParams.delete(key);
+        currentParams.delete(key);
       }
     }
-    searchParams.set('canvasId', canvasId);
-    setSearchParams(searchParams);
-    const url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
+    currentParams.set('canvasId', canvasId);
+    setSearchParams(currentParams);
+    const url = `${baseUrl}/project/${projectId}?${currentParams.toString()}`;
 
     if (openNewTab) {
       window.open(url, '_blank');
@@ -55,9 +64,10 @@ export const useJumpNewPath = () => {
     },
     extraQuery?: Record<string, string>,
   ) => {
-    for (const key of Array.from(searchParams.keys())) {
+    const currentParams = getCleanSearchParams();
+    for (const key of Array.from(currentParams.keys())) {
       if (['resId', 'canvasId'].includes(key)) {
-        searchParams.delete(key);
+        currentParams.delete(key);
       }
     }
 
@@ -66,17 +76,17 @@ export const useJumpNewPath = () => {
         if (!['canvasId', 'resId', 'convId'].includes(key)) {
           return;
         }
-        searchParams.set(key, value);
+        currentParams.set(key, value);
       });
     }
 
-    setSearchParams(searchParams);
+    setSearchParams(currentParams);
 
     if (onlySetParams) {
       return;
     }
 
-    const url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
+    const url = `${baseUrl}/project/${projectId}?${currentParams.toString()}`;
 
     if (openNewTab) {
       window.open(url, '_blank');
@@ -96,10 +106,11 @@ export const useJumpNewPath = () => {
     baseUrl?: string;
     openNewTab?: boolean;
   }) => {
-    searchParams.set('resId', resId);
-    searchParams.delete('canvasId'); // either resId or canvasId can be displayed
-    setSearchParams(searchParams);
-    const url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
+    const currentParams = getCleanSearchParams();
+    currentParams.set('resId', resId);
+    currentParams.delete('canvasId'); // either resId or canvasId can be displayed
+    setSearchParams(currentParams);
+    const url = `${baseUrl}/project/${projectId}?${currentParams.toString()}`;
 
     if (openNewTab) {
       window.open(url, '_blank');
@@ -117,7 +128,8 @@ export const useJumpNewPath = () => {
     baseUrl?: string;
     openNewTab?: boolean;
   }) => {
-    const url = `${baseUrl}/resource/${resId}?${searchParams.toString()}`;
+    const currentParams = getCleanSearchParams();
+    const url = `${baseUrl}/resource/${resId}?${currentParams.toString()}`;
 
     if (openNewTab) {
       window.open(url, '_blank');
@@ -163,28 +175,30 @@ export const useJumpNewPath = () => {
     fullScreen?: boolean;
     state: { navigationContext?: NavigationContext };
   }) => {
+    const currentParams = getCleanSearchParams();
+
     if (state.navigationContext?.clearSearchParams) {
-      for (const key of Array.from(searchParams.keys())) {
-        searchParams.delete(key);
+      for (const key of Array.from(currentParams.keys())) {
+        currentParams.delete(key);
       }
     }
 
     let url: string;
 
     if (projectId) {
-      convId ? searchParams.set('convId', convId) : searchParams.delete('convId');
+      convId ? currentParams.set('convId', convId) : currentParams.delete('convId');
       if (canvasId) {
-        searchParams.set('canvasId', canvasId);
+        currentParams.set('canvasId', canvasId);
       }
       if (fullScreen) {
-        searchParams.set('fullScreen', '1');
+        currentParams.set('fullScreen', '1');
       }
-      setSearchParams(searchParams);
-      url = `${baseUrl}/project/${projectId}?${searchParams.toString()}`;
+      setSearchParams(currentParams);
+      url = `${baseUrl}/project/${projectId}?${currentParams.toString()}`;
     } else if (resourceId) {
-      convId ? searchParams.set('convId', convId) : searchParams.delete('convId');
-      setSearchParams(searchParams);
-      url = `${baseUrl}/resource/${resourceId}?${searchParams.toString()}`;
+      convId ? currentParams.set('convId', convId) : currentParams.delete('convId');
+      setSearchParams(currentParams);
+      url = `${baseUrl}/resource/${resourceId}?${currentParams.toString()}`;
     } else {
       url = `${baseUrl}/thread/${convId}`;
     }
@@ -200,6 +214,10 @@ export const useJumpNewPath = () => {
       setNavigationContext(state.navigationContext);
     }
   };
+
+  useEffect(() => {
+    searchParamsRef.current = searchParams;
+  }, [searchParams]);
 
   return {
     jumpToCanvas,
