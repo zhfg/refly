@@ -2,7 +2,7 @@ import { IContext } from '../types';
 import { get_encoding } from '@dqbd/tiktoken';
 import { BaseMessage } from '@langchain/core/messages';
 import {
-  SkillContextCanvasItem,
+  SkillContextDocumentItem,
   SkillContextContentItem,
   SkillContextResourceItem,
   Source,
@@ -35,8 +35,8 @@ export const countResourceTokens = (resources: SkillContextResourceItem[] = []) 
   return resources.reduce((sum, resource) => sum + countToken(resource?.resource?.content), 0);
 };
 
-export const countCanvasTokens = (canvases: SkillContextCanvasItem[] = []) => {
-  return canvases.reduce((sum, canvas) => sum + countToken(canvas?.canvas?.content), 0);
+export const countDocumentTokens = (documents: SkillContextDocumentItem[] = []) => {
+  return documents.reduce((sum, document) => sum + countToken(document?.document?.content), 0);
 };
 
 export const countWebSearchContextTokens = (webSearchSources: Source[] = []) => {
@@ -52,7 +52,7 @@ export const countContextTokens = (context: IContext) => {
   return (
     countContentTokens(context?.contentList) +
     countResourceTokens(context?.resources) +
-    countCanvasTokens(context?.canvases)
+    countDocumentTokens(context?.documents)
   );
 };
 
@@ -60,7 +60,7 @@ export const checkHasContext = (context: IContext) => {
   return (
     context?.contentList?.length > 0 ||
     context?.resources?.length > 0 ||
-    context?.canvases?.length > 0 ||
+    context?.documents?.length > 0 ||
     context?.projects?.length > 0
   );
 };

@@ -1,6 +1,6 @@
 import {
   SkillContextContentItem,
-  SkillContextCanvasItem,
+  SkillContextDocumentItem,
   SkillContextResourceItem,
 } from '@refly-packages/openapi-schema';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
@@ -71,7 +71,7 @@ export const truncateContext = (context: IContext, maxTokens: number): IContext 
   const truncatedContext: IContext = { ...context };
 
   // Helper function to truncate a list of items, truncate priority is resource > canvas > contentList
-  const truncateItems = <T extends SkillContextContentItem | SkillContextResourceItem | SkillContextCanvasItem>(
+  const truncateItems = <T extends SkillContextContentItem | SkillContextResourceItem | SkillContextDocumentItem>(
     items: T[],
     getContent: (item: T) => string,
     setContent: (item: T, content: string) => T,
@@ -101,11 +101,11 @@ export const truncateContext = (context: IContext, maxTokens: number): IContext 
     (item, content) => ({ ...item, resource: { ...item.resource!, content } }),
   );
 
-  // Truncate canvases
-  truncatedContext.canvases = truncateItems<SkillContextCanvasItem>(
-    context.canvases,
-    (item) => item.canvas?.content || '',
-    (item, content) => ({ ...item, canvas: { ...item.canvas!, content } }),
+  // Truncate documents
+  truncatedContext.documents = truncateItems<SkillContextDocumentItem>(
+    context.documents,
+    (item) => item.document?.content || '',
+    (item, content) => ({ ...item, document: { ...item.document!, content } }),
   );
 
   // Truncate contentList
@@ -139,11 +139,11 @@ export async function mergeAndTruncateContexts(
   }
 
   // 2. Merge resources and canvases into one array
-  const combinedItems: (SkillContextResourceItem | SkillContextCanvasItem)[] = [
+  const combinedItems: (SkillContextResourceItem | SkillContextDocumentItem)[] = [
     ...relevantContext.resources,
-    ...relevantContext.canvases,
+    ...relevantContext.documents,
     ...containerLevelContext.resources,
-    ...containerLevelContext.canvases,
+    ...containerLevelContext.documents,
   ];
 
   // 3. Deduplicate (by id and content combination)
@@ -151,9 +151,9 @@ export async function mergeAndTruncateContexts(
     new Set(
       combinedItems.map((item) => {
         const id =
-          (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextCanvasItem).canvas?.canvasId;
+          (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextDocumentItem).document?.docId;
         const content =
-          (item as SkillContextResourceItem).resource?.content || (item as SkillContextCanvasItem).canvas?.content;
+          (item as SkillContextResourceItem).resource?.content || (item as SkillContextDocumentItem).document?.content;
         return `${id}:${content}`;
       }),
     ),
@@ -161,23 +161,24 @@ export async function mergeAndTruncateContexts(
     (key) =>
       combinedItems.find((item) => {
         const id =
-          (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextCanvasItem).canvas?.canvasId;
+          (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextDocumentItem).document?.docId;
         const content =
-          (item as SkillContextResourceItem).resource?.content || (item as SkillContextCanvasItem).canvas?.content;
+          (item as SkillContextResourceItem).resource?.content || (item as SkillContextDocumentItem).document?.content;
         return `${id}:${content}` === key;
       })!,
   );
 
   // 4. Sort by similarity
   const itemsForSorting = uniqueCombinedItems.map((item) => ({
-    content: (item as SkillContextResourceItem).resource?.content || (item as SkillContextCanvasItem).canvas?.content,
+    content:
+      (item as SkillContextResourceItem).resource?.content || (item as SkillContextDocumentItem).document?.content,
     metadata: {
-      type: 'resource' in item ? 'resource' : 'canvas',
-      id: (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextCanvasItem).canvas?.canvasId,
+      type: 'resource' in item ? 'resource' : 'document',
+      id: (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextDocumentItem).document?.docId,
     },
   }));
 
-  let sortedItems: (SkillContextResourceItem | SkillContextCanvasItem)[] = [];
+  let sortedItems: (SkillContextResourceItem | SkillContextDocumentItem)[] = [];
   if (itemsForSorting.length > 1) {
     sortedItems = await sortContentBySimilarity(query, itemsForSorting, ctx);
   } else {
@@ -189,9 +190,9 @@ export async function mergeAndTruncateContexts(
     (sortedItem) =>
       uniqueCombinedItems.find(
         (item) =>
-          ('resource' in item ? 'resource' : 'canvas') === sortedItem.metadata.type &&
+          ('resource' in item ? 'resource' : 'document') === sortedItem.metadata.type &&
           ((item as SkillContextResourceItem).resource?.resourceId ||
-            (item as SkillContextCanvasItem).canvas?.canvasId) === sortedItem.metadata.id,
+            (item as SkillContextDocumentItem).document?.docId) === sortedItem.metadata.id,
       )!,
   );
 
@@ -210,7 +211,7 @@ function truncateContextWithPriority(
   const truncatedContext: IContext = {
     contentList: [],
     resources: [],
-    canvases: [],
+    documents: [],
   };
 
   // First, add contentList items
@@ -226,13 +227,13 @@ function truncateContextWithPriority(
 
   // Then, add combined items (resources and canvases)
   for (const item of combinedItems) {
-    const content = 'resource' in item ? item.resource?.content : item.canvas?.content;
+    const content = 'resource' in item ? item.resource?.content : item.document?.content;
     const tokens = countToken(content);
     if (remainingTokens >= tokens) {
       if ('resource' in item) {
         truncatedContext.resources.push(item);
       } else {
-        truncatedContext.canvases.push(item);
+        truncatedContext.documents.push(item);
       }
       remainingTokens -= tokens;
     } else {

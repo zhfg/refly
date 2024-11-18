@@ -35,8 +35,8 @@ import {
   UpdateSkillInstanceRequest,
   UpdateSkillTriggerRequest,
   User,
-  Canvas,
   Project,
+  Document,
 } from '@refly-packages/openapi-schema';
 import {
   BaseSkill,
@@ -68,7 +68,7 @@ import { InvokeSkillJobData, skillInstancePO2DTO } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
 import {
   projectPO2DTO,
-  canvasPO2DTO,
+  documentPO2DTO,
   resourcePO2DTO,
   referencePO2DTO,
 } from '@/knowledge/knowledge.dto';
@@ -92,6 +92,8 @@ import {
   SkillNotFoundError,
 } from '@refly-packages/errors';
 import { genBaseRespDataFromError } from '@/utils/exception';
+import { CanvasService } from '@/canvas/canvas.service';
+import { canvasPO2DTO } from '@/canvas/canvas.dto';
 
 export function createLangchainMessage(message: ChatMessageModel): BaseMessage {
   const messageData = {
@@ -142,6 +144,7 @@ export class SkillService {
     private search: SearchService,
     private knowledge: KnowledgeService,
     private rag: RAGService,
+    private canvas: CanvasService,
     private conversation: ConversationService,
     private subscription: SubscriptionService,
     @InjectQueue(QUEUE_SKILL) private skillQueue: Queue<InvokeSkillJobData>,
@@ -155,17 +158,33 @@ export class SkillService {
 
   buildReflyService = (): ReflyService => {
     return {
-      getCanvasDetail: async (user, param) => {
-        const canvas = await this.knowledge.getCanvasDetail(user, param);
-        return buildSuccessResponse(canvasPO2DTO(canvas));
-      },
       createCanvas: async (user, req) => {
-        const canvas = await this.knowledge.createCanvas(user, req);
+        const canvas = await this.canvas.createCanvas(user, req);
         return buildSuccessResponse(canvasPO2DTO(canvas));
       },
-      listCanvas: async (user, param) => {
-        const canvasList = await this.knowledge.listCanvases(user, param);
+      listCanvases: async (user, param) => {
+        const canvasList = await this.canvas.listCanvases(user, param);
         return buildSuccessResponse(canvasList.map((canvas) => canvasPO2DTO(canvas)));
+      },
+      deleteCanvas: async (user, param) => {
+        await this.canvas.deleteCanvas(user, param);
+        return buildSuccessResponse({});
+      },
+      getDocumentDetail: async (user, param) => {
+        const canvas = await this.knowledge.getDocumentDetail(user, param);
+        return buildSuccessResponse(documentPO2DTO(canvas));
+      },
+      createDocument: async (user, req) => {
+        const canvas = await this.knowledge.createDocument(user, req);
+        return buildSuccessResponse(documentPO2DTO(canvas));
+      },
+      listDocuments: async (user, param) => {
+        const canvasList = await this.knowledge.listDocuments(user, param);
+        return buildSuccessResponse(canvasList.map((canvas) => documentPO2DTO(canvas)));
+      },
+      deleteDocument: async (user, param) => {
+        await this.knowledge.deleteDocument(user, param);
+        return buildSuccessResponse({});
       },
       getResourceDetail: async (user, req) => {
         const resource = await this.knowledge.getResourceDetail(user, req);
@@ -523,26 +542,26 @@ export class SkillService {
       });
     }
 
-    // Populate canvases
-    if (context.canvases?.length > 0) {
-      const canvasIds = [
+    // Populate documents
+    if (context.documents?.length > 0) {
+      const docIds = [
         ...new Set(
-          context.canvases
-            .filter((item) => !item.canvas)
-            .map((item) => item.canvasId)
+          context.documents
+            .filter((item) => !item.document)
+            .map((item) => item.docId)
             .filter((id) => id),
         ),
       ];
       const limit = pLimit(5);
-      const canvases = await Promise.all(
-        canvasIds.map((id) => limit(() => this.knowledge.getCanvasDetail(user, { canvasId: id }))),
+      const docs = await Promise.all(
+        docIds.map((id) => limit(() => this.knowledge.getDocumentDetail(user, { docId: id }))),
       );
-      const canvasMap = new Map<string, Canvas>();
-      canvases.forEach((c) => canvasMap.set(c.canvasId, canvasPO2DTO(c)));
+      const docMap = new Map<string, Document>();
+      docs.forEach((d) => docMap.set(d.docId, documentPO2DTO(d)));
 
-      context.canvases.forEach((item) => {
-        if (item.canvas) return;
-        item.canvas = canvasMap.get(item.canvasId);
+      context.documents.forEach((item) => {
+        if (item.document) return;
+        item.document = docMap.get(item.docId);
       });
     }
 
@@ -555,7 +574,6 @@ export class SkillService {
     // remove actual content from context to save storage
     const contextCopy: SkillContext = JSON.parse(JSON.stringify(context ?? {}));
     contextCopy.resources?.forEach(({ resource }) => (resource.content = ''));
-    contextCopy.canvases?.forEach(({ canvas }) => (canvas.content = ''));
 
     return this.prisma.skillJob.create({
       data: {
@@ -624,8 +642,6 @@ export class SkillService {
         uiLocale: user.uiLocale,
         installedSkills,
         convId,
-        projectId: data?.projectId ?? '',
-        project: data?.project,
         tplConfig,
       },
       user: pick(user, ['uid', 'uiLocale', 'outputLocale']),
@@ -727,7 +743,11 @@ export class SkillService {
           const intentType = content.type;
           const projectId = content.projectId;
 
-          if (intentType === CanvasIntentType.GenerateCanvas && projectId && conversation?.convId) {
+          if (
+            intentType === CanvasIntentType.GenerateDocument &&
+            projectId &&
+            conversation?.convId
+          ) {
             await this.prisma.conversation.update({
               where: { convId: conversation?.convId },
               data: { projectId },

@@ -607,7 +607,7 @@ export class SubscriptionService implements OnModuleInit {
     }
 
     await this.prisma.$transaction(async (prisma) => {
-      const [resourceSizeSum, canvasSizeSum, fileSizeSum] = await Promise.all([
+      const [resourceSizeSum, docSizeSum, fileSizeSum] = await Promise.all([
         prisma.resource.aggregate({
           _sum: {
             storageSize: true,
@@ -615,7 +615,7 @@ export class SubscriptionService implements OnModuleInit {
           },
           where: { uid, deletedAt: null },
         }),
-        prisma.canvas.aggregate({
+        prisma.document.aggregate({
           _sum: {
             storageSize: true,
             vectorSize: true,
@@ -634,11 +634,11 @@ export class SubscriptionService implements OnModuleInit {
         where: { meterId: activeMeter.meterId },
         data: {
           resourceSize: resourceSizeSum._sum.storageSize || 0,
-          canvasSize: canvasSizeSum._sum.storageSize || 0,
+          canvasSize: docSizeSum._sum.storageSize || 0,
           fileSize: fileSizeSum._sum.storageSize || 0,
           vectorStorageUsed:
             (resourceSizeSum._sum.vectorSize || BigInt(0)) +
-            (canvasSizeSum._sum.vectorSize || BigInt(0)),
+            (docSizeSum._sum.vectorSize || BigInt(0)),
           syncedAt: timestamp,
         },
       });

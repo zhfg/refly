@@ -25,15 +25,23 @@ export class UnauthorizedError extends BaseError {
 }
 
 export class ParamsError extends BaseError {
-  code = 'E1001';
+  code = 'E0003';
   messageDict = {
     en: 'System parameter error. The Refly team is working quickly to address it. Please try again later.',
     'zh-CN': '系统参数错误，Refly 团队正在火速处理中，请稍后重试。',
   };
 }
 
-export class ProjectNotFoundError extends BaseError {
+export class CanvasNotFoundError extends BaseError {
   code = 'E1000';
+  messageDict = {
+    en: 'Canvas not found, please refresh',
+    'zh-CN': '画布不存在，请刷新重试',
+  };
+}
+
+export class ProjectNotFoundError extends BaseError {
+  code = 'E1001';
   messageDict = {
     en: 'Project not found, please refresh',
     'zh-CN': '项目不存在，请刷新重试',
@@ -48,11 +56,11 @@ export class ResourceNotFoundError extends BaseError {
   };
 }
 
-export class CanvasNotFoundError extends BaseError {
+export class DocumentNotFoundError extends BaseError {
   code = 'E1003';
   messageDict = {
-    en: 'Canvas not found, please refresh',
-    'zh-CN': '稿布不存在，请刷新重试',
+    en: 'Document not found, please refresh',
+    'zh-CN': '文档不存在，请刷新重试',
   };
 }
 
@@ -141,10 +149,11 @@ const errorMap = {
   E0000: UnknownError,
   E0001: ConnectionError,
   E0002: UnauthorizedError,
-  E1000: ProjectNotFoundError,
-  E1001: ParamsError,
+  E0003: ParamsError,
+  E1000: CanvasNotFoundError,
+  E1001: ProjectNotFoundError,
   E1002: ResourceNotFoundError,
-  E1003: CanvasNotFoundError,
+  E1003: DocumentNotFoundError,
   E1004: ReferenceNotFoundError,
   E1005: ReferenceObjectMissingError,
   E1006: SkillNotFoundError,

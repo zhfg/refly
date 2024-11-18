@@ -47,8 +47,7 @@ import * as commonQnA from './module/commonQnA';
 import { HighlightSelection, SelectedRange } from './module/editCanvas/types';
 
 import { InPlaceEditType } from '@refly-packages/utils';
-import { detectLanguage } from '@refly-packages/utils';
-
+import { DocumentNotFoundError } from '@refly-packages/errors';
 export class Scheduler extends BaseSkill {
   name = 'scheduler';
 
@@ -330,7 +329,7 @@ Please generate the summary based on these requirements and offer suggestions fo
       chatHistory = [],
       modelName,
       resources,
-      canvases,
+      documents,
       contentList,
       projects,
     } = config.configurable;
@@ -360,7 +359,7 @@ Please generate the summary based on these requirements and offer suggestions fo
     const hasContext = checkHasContext({
       contentList,
       resources,
-      canvases,
+      documents,
       projects: projects,
     });
     this.engine.logger.log(`checkHasContext: ${hasContext}`);
@@ -436,16 +435,14 @@ Please generate the summary based on these requirements and offer suggestions fo
   callGenerateCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     this.emitEvent({ event: 'log', content: `Start to call generate canvas...` }, config);
 
-    const { projectId, convId, currentSkill, spanId } = config?.configurable || {};
+    const { convId, currentSkill, spanId } = config?.configurable || {};
     const { user } = config;
 
     // Create canvas first
-    const res = await this.engine.service.createCanvas(user, {
+    const res = await this.engine.service.createDocument(user, {
       title: '',
       initialContent: '',
-      projectId,
     });
-    config.configurable.projectId ||= res.data?.projectId;
 
     // Emit intent matcher event
     this.emitEvent(
@@ -453,9 +450,8 @@ Please generate the summary based on these requirements and offer suggestions fo
         event: 'structured_data',
         structuredDataKey: 'intentMatcher',
         content: JSON.stringify({
-          type: CanvasIntentType.GenerateCanvas,
-          projectId: res.data?.projectId || projectId,
-          canvasId: res.data?.canvasId || '',
+          type: CanvasIntentType.GenerateDocument,
+          docId: res.data?.docId || '',
           convId,
         }),
       },
@@ -491,11 +487,11 @@ Please generate the summary based on these requirements and offer suggestions fo
   callRewriteCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { messages = [], query: originalQuery } = state;
 
-    const { chatHistory = [], currentSkill, spanId, projectId, convId, canvases } = config.configurable;
+    const { chatHistory = [], currentSkill, spanId, convId, documents } = config.configurable;
 
     this.emitEvent({ event: 'log', content: `Start to rewrite canvas...` }, config);
 
-    const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
+    const currentDoc = documents?.find((canvas) => canvas?.metadata?.isCurrentContext);
 
     // send intent matcher event
     this.emitEvent(
@@ -503,9 +499,8 @@ Please generate the summary based on these requirements and offer suggestions fo
         event: 'structured_data',
         structuredDataKey: 'intentMatcher',
         content: JSON.stringify({
-          type: CanvasIntentType.RewriteCanvas,
-          projectId: projectId,
-          canvasId: currentCanvas?.canvasId || '',
+          type: CanvasIntentType.RewriteDocument,
+          docId: currentDoc?.docId || '',
           convId,
         }),
       },
@@ -515,7 +510,7 @@ Please generate the summary based on these requirements and offer suggestions fo
     const model = this.engine.chatModel({ temperature: 0.1 });
 
     const rewriteCanvasUserPrompt = rewriteCanvas.rewriteCanvasUserPrompt(originalQuery);
-    const rewriteCanvasContext = rewriteCanvas.rewriteCanvasContext(currentCanvas?.canvas);
+    const rewriteCanvasContext = rewriteCanvas.rewriteDocumentContext(currentDoc?.document);
 
     const requestMessages = [
       new SystemMessage(rewriteCanvas.rewriteCanvasSystemPrompt),
@@ -549,19 +544,19 @@ Please generate the summary based on these requirements and offer suggestions fo
   callEditCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { messages = [], query: originalQuery } = state;
 
-    const { chatHistory = [], currentSkill, spanId, projectId, convId, canvases, tplConfig } = config.configurable;
+    const { currentSkill, spanId, convId, documents, tplConfig } = config.configurable;
 
-    const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
+    const currentDoc = documents?.find((doc) => doc?.metadata?.isCurrentContext);
     const canvasEditConfig = tplConfig?.canvasEditConfig?.value as CanvasEditConfig;
 
-    if (!currentCanvas?.canvas) {
-      throw new Error('No current canvas found for editing');
+    if (!currentDoc?.document) {
+      throw new DocumentNotFoundError('No current document found for editing');
     }
 
     this.emitEvent(
       {
         event: 'log',
-        content: `Starting canvas edit operation for canvas: ${currentCanvas.canvas.title}`,
+        content: `Starting canvas edit operation for document: ${currentDoc.document.title}`,
       },
       config,
     );
@@ -582,9 +577,8 @@ Please generate the summary based on these requirements and offer suggestions fo
         event: 'structured_data',
         structuredDataKey: 'intentMatcher',
         content: JSON.stringify({
-          type: CanvasIntentType.EditCanvas,
-          projectId,
-          canvasId: currentCanvas.canvasId,
+          type: CanvasIntentType.EditDocument,
+          docId: currentDoc.docId,
           convId,
           metadata: {
             selectedRange,
@@ -603,7 +597,7 @@ Please generate the summary based on these requirements and offer suggestions fo
 
     // Get module based on edit type
     const module: SkillPromptModule = editCanvas.getEditCanvasModule(inPlaceEditType, {
-      canvas: currentCanvas.canvas,
+      document: currentDoc.document,
       selectedContent: highlightSelection,
     });
 
@@ -617,8 +611,7 @@ Please generate the summary based on these requirements and offer suggestions fo
           ...config.metadata,
           ...currentSkill,
           spanId,
-          canvasId: currentCanvas.canvasId,
-          projectId,
+          docId: currentDoc.docId,
           selectedRange,
           inPlaceEditType,
         },
@@ -674,11 +667,11 @@ Please generate the summary based on these requirements and offer suggestions fo
      * 1. 基于聊天历史，当前意图识别结果，上下文，以及整体优化之后的 query，调用 scheduler 模型，得到一个最优的技能调用序列
      * 2. 基于得到的技能调用序列，调用相应的技能
      */
-    const { currentSkill, spanId, resources, canvases, projectId, convId } = config.configurable;
+    const { currentSkill, spanId, resources, documents, convId } = config.configurable;
 
     const { tplConfig } = config?.configurable || {};
 
-    const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext); // ensure current canvas exists
+    const currentDoc = documents?.find((doc) => doc?.metadata?.isCurrentContext); // ensure current canvas exists
     const currentResource = resources?.find((resource) => resource?.metadata?.isCurrentContext);
     const canvasEditConfig = (tplConfig?.canvasEditConfig?.value as CanvasEditConfig) || {};
 
@@ -698,8 +691,7 @@ Please generate the summary based on these requirements and offer suggestions fo
         structuredDataKey: 'intentMatcher',
         content: JSON.stringify({
           type: CanvasIntentType.Other,
-          projectId,
-          canvasId: currentCanvas?.canvasId,
+          docId: currentDoc.docId,
           convId,
           resourceId: currentResource?.resourceId,
           metadata: {
@@ -743,16 +735,15 @@ Please generate the summary based on these requirements and offer suggestions fo
     try {
       const { query: originalQuery } = state;
 
-      const { chatHistory = [], projectId, canvases = [], tplConfig } = config.configurable;
+      const { chatHistory = [], documents = [], tplConfig } = config.configurable;
       const canvasEditConfig = tplConfig?.canvasEditConfig?.value as CanvasEditConfig;
 
       this.emitEvent({ event: 'start' }, config);
 
-      const currentCanvas = canvases?.find((canvas) => canvas?.metadata?.isCurrentContext);
+      const currentDoc = documents?.find((doc) => doc?.metadata?.isCurrentContext);
       const intentMatcherTypeDomain = canvasIntentMatcher.prepareIntentMatcherTypeDomain(
-        currentCanvas?.canvas,
+        currentDoc?.document,
         canvasEditConfig,
-        projectId,
       );
 
       let finalIntentType = CanvasIntentType.Other;

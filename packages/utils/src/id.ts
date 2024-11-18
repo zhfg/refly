@@ -30,6 +30,10 @@ export function genChatMessageID(): string {
   return 'cm-' + createId();
 }
 
+export function genDocumentID(): string {
+  return 'd-' + createId();
+}
+
 export function genResourceID(): string {
   return 'r-' + createId();
 }

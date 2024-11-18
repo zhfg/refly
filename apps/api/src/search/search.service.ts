@@ -97,10 +97,10 @@ export class SearchService {
     req.mode ??= 'keyword';
 
     if (req.mode === 'vector') {
-      // Currently only resource and canvas are supported for vector search
-      req.domains ??= ['resource', 'canvas'];
+      // Currently only resource and document are supported for vector search
+      req.domains ??= ['resource', 'document'];
     } else {
-      req.domains ??= ['resource', 'canvas', 'project', 'conversation', 'skill'];
+      req.domains ??= ['resource', 'document', 'skill'];
     }
 
     if (req.entities?.length > 0) {
@@ -122,18 +122,17 @@ export class SearchService {
     }
 
     const entities = req.entities.filter((entity) =>
-      ['resource', 'canvas', 'project'].includes(entity.entityType),
+      ['resource', 'document'].includes(entity.entityType),
     );
     if (entities.length === 0) {
       return [];
     }
 
-    const [resources, canvases, projects] = await Promise.all([
+    const [resources, documents] = await Promise.all([
       this.processResourceEntities(user, entities),
-      this.processCanvasEntities(user, entities),
-      this.processProjectEntities(user, entities),
+      this.processDocumentEntities(user, entities),
     ]);
-    const totalEntities = [...resources, ...canvases, ...projects];
+    const totalEntities = [...resources, ...documents];
 
     // Group entities by user.uid and entityType using generic type parameter
     const groupedEntities = totalEntities.reduce<Record<string, UserEntity[]>>((acc, entity) => {
@@ -174,76 +173,28 @@ export class SearchService {
     }));
   }
 
-  private async processCanvasEntities(user: User, entities: Entity[]): Promise<UserEntity[]> {
-    const canvasIds = entities
-      .filter((entity) => entity.entityType === 'canvas')
+  private async processDocumentEntities(user: User, entities: Entity[]): Promise<UserEntity[]> {
+    const docIds = entities
+      .filter((entity) => entity.entityType === 'document')
       .map((entity) => entity.entityId);
 
-    if (canvasIds?.length === 0) {
+    if (docIds?.length === 0) {
       return [];
     }
 
-    const canvases = await this.prisma.canvas.findMany({
+    const documents = await this.prisma.document.findMany({
       where: {
-        canvasId: { in: canvasIds },
+        docId: { in: docIds },
         OR: [{ uid: user.uid }, { shareCode: { not: null } }],
         deletedAt: null,
       },
     });
 
-    return (canvases ?? []).map((canvas) => ({
-      entityType: 'canvas',
-      entityId: canvas.canvasId,
-      user: { uid: canvas.uid },
+    return (documents ?? []).map((document) => ({
+      entityType: 'document',
+      entityId: document.docId,
+      user: { uid: document.uid },
     }));
-  }
-
-  private async processProjectEntities(user: User, entities: Entity[]): Promise<UserEntity[]> {
-    const projectIds = entities
-      .filter((entity) => entity.entityType === 'project')
-      .map((entity) => entity.entityId);
-
-    if (projectIds?.length === 0) {
-      return [];
-    }
-
-    const projects = await this.prisma.project.findMany({
-      where: {
-        projectId: { in: projectIds },
-        OR: [{ uid: user.uid }, { shareCode: { not: null } }],
-        deletedAt: null,
-      },
-    });
-    const filteredProjectIds = projects.map((project) => project.projectId);
-
-    const [resourceRels, canvasRels] = await this.prisma.$transaction([
-      this.prisma.projectResourceRelation.findMany({
-        select: { resourceId: true, uid: true },
-        where: { projectId: { in: filteredProjectIds } },
-      }),
-      this.prisma.canvas.findMany({
-        select: { canvasId: true, uid: true },
-        where: { projectId: { in: filteredProjectIds }, deletedAt: null },
-      }),
-    ]);
-
-    return [
-      ...projects.map((project) => ({
-        entityType: 'project' as const,
-        entityId: project.projectId,
-        user: { uid: project.uid },
-      })),
-      ...resourceRels.map((rel) => ({
-        entityType: 'resource' as const,
-        entityId: rel.resourceId,
-        user: { uid: rel.uid },
-      })),
-      ...canvasRels.map((rel) => ({
-        entityType: 'canvas' as const,
-        entityId: rel.canvasId,
-        user: { uid: rel.uid },
-      })),
-    ];
   }
 
   async emptySearchResources(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
@@ -357,13 +308,12 @@ export class SearchService {
     }
   }
 
-  async emptySearchCanvases(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const canvases = await this.prisma.canvas.findMany({
+  async emptySearchDocuments(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const documents = await this.prisma.document.findMany({
       select: {
-        canvasId: true,
-        projectId: true,
+        docId: true,
         title: true,
-        content: true,
+        contentPreview: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -371,28 +321,31 @@ export class SearchService {
       orderBy: { updatedAt: 'desc' },
       take: req.limit || 5,
     });
-    return canvases.map((canvas) => ({
-      id: canvas.canvasId,
-      domain: 'canvas',
-      title: canvas.title,
-      highlightedTitle: canvas.title,
+    return documents.map((document) => ({
+      id: document.docId,
+      domain: 'document',
+      title: document.title,
+      highlightedTitle: document.title,
       snippets: [
-        { text: canvas.content ? canvas.content.slice(0, 250) + '...' : '', highlightedText: '' },
+        {
+          text: document.contentPreview ? document.contentPreview.slice(0, 250) + '...' : '',
+          highlightedText: '',
+        },
       ],
-      createdAt: canvas.createdAt.toJSON(),
-      updatedAt: canvas.updatedAt.toJSON(),
-      metadata: {
-        projectId: canvas.projectId,
-      },
+      createdAt: document.createdAt.toJSON(),
+      updatedAt: document.updatedAt.toJSON(),
     }));
   }
 
-  async searchCanvasesByKeywords(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const hits = await this.elasticsearch.searchCanvases(req.user ?? user, req);
+  async searchDocumentsByKeywords(
+    user: User,
+    req: ProcessedSearchRequest,
+  ): Promise<SearchResult[]> {
+    const hits = await this.elasticsearch.searchDocuments(req.user ?? user, req);
 
     return hits.map((hit) => ({
       id: hit._id,
-      domain: 'canvas',
+      domain: 'document',
       title: hit._source.title,
       highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
       snippets: [
@@ -403,19 +356,16 @@ export class SearchService {
       ],
       createdAt: hit._source.createdAt,
       updatedAt: hit._source.updatedAt,
-      metadata: {
-        projectId: hit._source.projectId,
-      },
     }));
   }
 
-  async searchCanvasesByVector(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+  async searchDocumentsByVector(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
     const nodes = await this.rag.retrieve(req.user ?? user, {
       query: req.query,
       limit: req.limit,
       filter: {
-        nodeTypes: ['canvas'],
-        canvasIds: req.entities?.map((entity) => entity.entityId),
+        nodeTypes: ['document'],
+        docIds: req.entities?.map((entity) => entity.entityId),
       },
     });
     if (nodes.length === 0) {
@@ -423,126 +373,29 @@ export class SearchService {
     }
 
     return nodes.map((node) => ({
-      id: node.canvasId,
-      domain: 'canvas',
+      id: node.docId,
+      domain: 'document',
       title: node.title,
       highlightedTitle: node.title,
       snippets: [{ text: node.content, highlightedText: node.content }],
-      metadata: {
-        projectId: node.projectId,
-      },
     }));
   }
 
-  async searchCanvases(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+  async searchDocuments(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
     if (req.query.length === 0) {
-      return this.emptySearchCanvases(user, req);
+      return this.emptySearchDocuments(user, req);
     }
 
     switch (req.mode) {
       case 'keyword':
-        return this.searchCanvasesByKeywords(user, req);
+        return this.searchDocumentsByKeywords(user, req);
       case 'vector':
-        return this.searchCanvasesByVector(user, req);
+        return this.searchDocumentsByVector(user, req);
       case 'hybrid':
         throw new ParamsError('Not implemented');
       default:
-        return this.searchCanvasesByKeywords(user, req);
+        return this.searchDocumentsByKeywords(user, req);
     }
-  }
-
-  async emptySearchProjects(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const projects = await this.prisma.project.findMany({
-      select: {
-        projectId: true,
-        title: true,
-        description: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      where: { uid: user.uid, deletedAt: null },
-      orderBy: { updatedAt: 'desc' },
-      take: req.limit || 5,
-    });
-    return projects.map((project) => ({
-      id: project.projectId,
-      domain: 'project',
-      title: project.title,
-      highlightedTitle: project.title,
-      snippets: [{ text: project.description, highlightedText: project.description }],
-      createdAt: project.createdAt.toJSON(),
-      updatedAt: project.updatedAt.toJSON(),
-    }));
-  }
-
-  async searchProjects(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    if (req.query.length === 0) {
-      return this.emptySearchProjects(user, req);
-    }
-
-    const hits = await this.elasticsearch.searchProjects(req.user ?? user, req);
-
-    return hits.map((hit) => ({
-      id: hit._id,
-      domain: 'project',
-      title: hit._source.title,
-      highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
-      snippets: [
-        {
-          text: hit._source.description,
-          highlightedText: hit.highlight?.description?.[0] || hit._source.description,
-        },
-      ],
-      createdAt: hit._source.createdAt,
-      updatedAt: hit._source.updatedAt,
-    }));
-  }
-
-  async emptySearchConversations(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const conversations = await this.prisma.conversation.findMany({
-      select: {
-        convId: true,
-        title: true,
-        lastMessage: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      where: { uid: user.uid },
-      orderBy: { updatedAt: 'desc' },
-      take: req.limit || 5,
-    });
-    return conversations.map((conversation) => ({
-      id: conversation.convId,
-      domain: 'conversation',
-      title: conversation.title,
-      highlightedTitle: conversation.title,
-      snippets: [{ text: conversation.lastMessage, highlightedText: conversation.lastMessage }],
-      createdAt: conversation.createdAt.toJSON(),
-      updatedAt: conversation.updatedAt.toJSON(),
-    }));
-  }
-
-  async searchConversations(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    if (req.query.length === 0) {
-      return this.emptySearchConversations(user, req);
-    }
-
-    const hits = await this.elasticsearch.searchConversationMessages(user, req);
-
-    return hits.map((hit) => ({
-      id: hit._source.convId,
-      domain: 'conversation',
-      title: hit._source.convTitle,
-      highlightedTitle: hit.highlight?.convTitle?.[0] || hit._source.convTitle,
-      snippets: [
-        {
-          text: hit._source.content,
-          highlightedText: hit.highlight?.content?.[0] || hit._source.content,
-        },
-      ],
-      createdAt: hit._source.createdAt,
-      updatedAt: hit._source.updatedAt,
-    }));
   }
 
   async emptySearchSkills(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
@@ -689,12 +542,8 @@ export class SearchService {
         switch (req.domains[0]) {
           case 'resource':
             return this.searchResources(user, req);
-          case 'canvas':
-            return this.searchCanvases(user, req);
-          case 'project':
-            return this.searchProjects(user, req);
-          case 'conversation':
-            return this.searchConversations(user, req);
+          case 'document':
+            return this.searchDocuments(user, req);
           case 'skill':
             return this.searchSkills(user, req);
           default:

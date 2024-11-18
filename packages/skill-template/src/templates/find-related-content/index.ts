@@ -107,14 +107,14 @@ export class FindRelatedContent extends BaseSkill {
   retrieve = async (state: GraphState, config: SkillRunnableConfig) => {
     const { user } = config;
 
-    const { resources, canvases, contentList, tplConfig = {} } = config?.configurable || {};
+    const { resources, documents: contextDocuments, contentList, tplConfig = {} } = config?.configurable || {};
 
     let content = '';
 
     if (resources?.length > 0) {
       content = resources[0].resource?.content;
-    } else if (canvases?.length > 0) {
-      content = canvases[0].canvas?.content;
+    } else if (contextDocuments?.length > 0) {
+      content = contextDocuments[0].document?.content;
     } else if (contentList?.length > 0) {
       content = contentList.join('\n\n');
     }

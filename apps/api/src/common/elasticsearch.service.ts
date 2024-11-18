@@ -14,9 +14,8 @@ interface ResourceDocument {
   uid: string;
 }
 
-interface CanvasDocument {
+interface DocumentDocument {
   id: string;
-  projectId?: string;
   title?: string;
   content?: string;
   createdAt?: string;
@@ -77,8 +76,8 @@ export const indexConfig = {
       uid: { type: 'keyword' },
     },
   },
-  canvas: {
-    index: 'refly_canvases',
+  document: {
+    index: 'refly_documents',
     settings: commonSettings,
     properties: {
       title: { type: 'text' },
@@ -188,7 +187,7 @@ export class ElasticsearchService implements OnModuleInit {
     }
   }
 
-  private async upsertDocument<T extends { id: string }>(index: string, document: T) {
+  private async upsertESDoc<T extends { id: string }>(index: string, document: T) {
     try {
       const result = await this.client.update({
         index,
@@ -207,23 +206,23 @@ export class ElasticsearchService implements OnModuleInit {
   }
 
   async upsertResource(resource: ResourceDocument) {
-    return this.upsertDocument(indexConfig.resource.index, resource);
+    return this.upsertESDoc(indexConfig.resource.index, resource);
   }
 
   async upsertProject(project: ProjectDocument) {
-    return this.upsertDocument(indexConfig.project.index, project);
+    return this.upsertESDoc(indexConfig.project.index, project);
   }
 
-  async upsertCanvas(canvas: CanvasDocument) {
-    return this.upsertDocument(indexConfig.canvas.index, canvas);
+  async upsertDocument(document: DocumentDocument) {
+    return this.upsertESDoc(indexConfig.document.index, document);
   }
 
   async upsertConversationMessage(message: ConversationMessageDocument) {
-    return this.upsertDocument(indexConfig.conversationMessage.index, message);
+    return this.upsertESDoc(indexConfig.conversationMessage.index, message);
   }
 
   async upsertSkill(skill: SkillDocument) {
-    return this.upsertDocument(indexConfig.skill.index, skill);
+    return this.upsertESDoc(indexConfig.skill.index, skill);
   }
 
   async deleteResource(resourceId: string) {
@@ -236,11 +235,11 @@ export class ElasticsearchService implements OnModuleInit {
     );
   }
 
-  async deleteCanvas(canvasId: string) {
+  async deleteDocument(docId: string) {
     return this.client.delete(
       {
-        index: indexConfig.canvas.index,
-        id: canvasId,
+        index: indexConfig.document.index,
+        id: docId,
       },
       { ignore: [404] },
     );
@@ -311,10 +310,10 @@ export class ElasticsearchService implements OnModuleInit {
     return body.hits.hits;
   }
 
-  async searchCanvases(user: User, req: SearchRequest) {
+  async searchDocuments(user: User, req: SearchRequest) {
     const { query, limit, entities } = req;
-    const { body } = await this.client.search<SearchResponse<CanvasDocument>>({
-      index: indexConfig.canvas.index,
+    const { body } = await this.client.search<SearchResponse<DocumentDocument>>({
+      index: indexConfig.document.index,
       body: {
         query: {
           bool: {

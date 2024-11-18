@@ -8,7 +8,7 @@ export type FrontendBaseMarkType = 'extensionWeblink' | 'all';
 export type BaseMarkType = FrontendBaseMarkType | SearchDomain;
 
 export const frontendBaseMarkTypes: BaseMarkType[] = ['extensionWeblink', 'all'];
-export const backendBaseMarkTypes: BaseMarkType[] = ['canvas', 'resource', 'project']; // conversation and skill not supported yet
+export const backendBaseMarkTypes: BaseMarkType[] = ['document', 'resource']; // conversation and skill not supported yet
 
 export type SelectedTextMarkType = 'resourceSelection' | 'canvasSelection' | 'extensionWeblinkSelection';
 // for notion cursor selection, mainly for note-related skills

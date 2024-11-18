@@ -1,4 +1,4 @@
-import { Canvas } from '@refly-packages/openapi-schema';
+import { Document } from '@refly-packages/openapi-schema';
 
 export const rewriteCanvasSystemPrompt = `# AI Content Rewriting Assistant
 
@@ -180,14 +180,13 @@ Please rewrite the content based on the query above while following these guidel
 - Focus only on requested changes
 - Ensure smooth transitions with unmodified sections`;
 
-export const rewriteCanvasContext = (canvas: Canvas) => `# Context
+export const rewriteDocumentContext = (document: Document) => `# Context
 <context>
-<reflyCanvas 
+<reflyDocument
   type="document" 
-  title="${canvas.title}"
-  id="${canvas.canvasId}"
-  projectId="${canvas.projectId}"
+  title="${document.title}"
+  id="${document.docId}"
 >
-${canvas.content}
-</reflyCanvas>
+${document.content}
+</reflyDocument>
 </context>`;

@@ -127,7 +127,7 @@ export const buildIntentMessage = (data: BuildMessageData) => {
   return message;
 };
 export const buildQuestionMessage = (data: BuildMessageData): ChatMessage => {
-  const { content = '', questionType = QuestionType.NORMAL, selectedWeblinkConfig = '' } = data;
+  const { content = '', questionType = QuestionType.NORMAL } = data;
 
   let dataExtra = {};
   if (questionType === QuestionType.INTENT) {
@@ -141,7 +141,6 @@ export const buildQuestionMessage = (data: BuildMessageData): ChatMessage => {
     msgId: itemId,
     type: 'human',
     content,
-    selectedWeblinkConfig,
   };
 };
 

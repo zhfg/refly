@@ -11,18 +11,19 @@ import {
   SharedContent,
   User,
 } from '@refly-packages/openapi-schema';
-import { canvasPO2DTO, projectPO2DTO } from '@/knowledge/knowledge.dto';
+import { documentPO2DTO } from '@/knowledge/knowledge.dto';
 import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
 import { streamToString } from '@/utils';
 import { ParamsError, ShareNotFoundError } from '@refly-packages/errors';
+import { canvasPO2DTO } from '@/canvas/canvas.dto';
 
 const SHARE_CODE_PREFIX = {
-  PROJECT: 'proj',
-  CANVAS: 'canv',
+  DOCUMENT: 'doc',
+  CANVAS: 'can',
 };
 
-function genProjectShareCode(): string {
-  return SHARE_CODE_PREFIX.PROJECT + createId();
+function genDocumentShareCode(): string {
+  return SHARE_CODE_PREFIX.DOCUMENT + createId();
 }
 
 function genCanvasShareCode(): string {
@@ -42,17 +43,17 @@ export class ShareService {
   async createShare(user: User, body: CreateShareRequest): Promise<CreateShareResult> {
     const { entityType, entityId } = body;
 
-    if (entityType !== 'project' && entityType !== 'canvas') {
+    if (entityType !== 'canvas' && entityType !== 'document') {
       throw new ParamsError('Unsupported entity type for sharing');
     }
 
     await this.miscService.checkEntity(user, entityId, entityType);
 
-    const shareCode = entityType === 'project' ? genProjectShareCode() : genCanvasShareCode();
+    const shareCode = entityType === 'document' ? genDocumentShareCode() : genCanvasShareCode();
 
-    if (entityType === 'project') {
-      await this.prisma.project.update({
-        where: { projectId: entityId },
+    if (entityType === 'document') {
+      await this.prisma.document.update({
+        where: { docId: entityId },
         data: { shareCode },
       });
     } else if (entityType === 'canvas') {
@@ -69,8 +70,8 @@ export class ShareService {
     const { shareCode } = body;
     let updateResult: Prisma.BatchPayload;
 
-    if (shareCode.startsWith(SHARE_CODE_PREFIX.PROJECT)) {
-      updateResult = await this.prisma.project.updateMany({
+    if (shareCode.startsWith(SHARE_CODE_PREFIX.DOCUMENT)) {
+      updateResult = await this.prisma.document.updateMany({
         where: { uid: user.uid, shareCode, deletedAt: null },
         data: { shareCode: null },
       });
@@ -86,92 +87,65 @@ export class ShareService {
     }
   }
 
-  private async getSharedContentForProject(
+  private async getSharedContentForDocument(
     shareCode: string,
-    canvasId?: string,
+    docId?: string,
   ): Promise<SharedContent> {
     const result: SharedContent = {};
 
-    const projects = await this.prisma.project.findMany({
-      where: { shareCode },
-      include: {
-        canvases: {
-          where: { deletedAt: null },
-          orderBy: { order: 'asc' },
-        },
-      },
+    const documents = await this.prisma.document.findMany({
+      where: { shareCode, docId, deletedAt: null },
       take: 1,
     });
 
-    if (projects.length === 0) {
+    if (documents.length === 0) {
+      this.logger.warn(`document not found for share code: ${shareCode}`);
       throw new ShareNotFoundError();
     }
 
-    const project = projects[0];
-    result.project = projectPO2DTO(project);
-    result.canvasList = project.canvases.map((c) => canvasPO2DTO(c));
+    const document = documents[0];
 
     const user = await this.prisma.user.findUnique({
       select: { name: true, nickname: true, avatar: true },
-      where: { uid: project.uid },
+      where: { uid: document.uid },
     });
     result.users = [user];
 
-    const selectedCanvasId = canvasId || project.canvases[0].canvasId;
-    const canvas = project.canvases.find((c) => c.canvasId === selectedCanvasId);
-
-    if (!canvas) {
-      throw new ShareNotFoundError();
-    }
-
-    result.canvas = canvasPO2DTO({
-      ...canvas,
-      content: await streamToString(await this.minio.client.getObject(canvas.storageKey)),
+    result.document = documentPO2DTO({
+      ...document,
+      content: await streamToString(await this.minio.client.getObject(document.storageKey)),
     });
 
     return result;
   }
 
-  private async getSharedContentForCanvas(
-    shareCode: string,
-    canvasId?: string,
-  ): Promise<SharedContent> {
+  private async getSharedContentForCanvas(shareCode: string): Promise<SharedContent> {
     const result: SharedContent = {};
 
     const canvases = await this.prisma.canvas.findMany({
-      where: { shareCode, canvasId, deletedAt: null },
+      where: { shareCode },
       take: 1,
     });
 
     if (canvases.length === 0) {
-      this.logger.warn(`canvas not found for share code: ${shareCode}`);
       throw new ShareNotFoundError();
     }
 
     const canvas = canvases[0];
 
-    const user = await this.prisma.user.findUnique({
-      select: { name: true, nickname: true, avatar: true },
-      where: { uid: canvas.uid },
-    });
-    result.users = [user];
-
-    result.canvas = canvasPO2DTO({
-      ...canvas,
-      content: await streamToString(await this.minio.client.getObject(canvas.storageKey)),
-    });
+    result.canvas = canvasPO2DTO(canvas);
 
     return result;
   }
 
   async getShareDetail(params: GetShareContentData['query']): Promise<SharedContent> {
-    const { shareCode, canvasId } = params;
+    const { shareCode } = params;
 
-    if (shareCode.startsWith(SHARE_CODE_PREFIX.PROJECT)) {
-      return this.getSharedContentForProject(shareCode, canvasId);
+    if (shareCode.startsWith(SHARE_CODE_PREFIX.DOCUMENT)) {
+      return this.getSharedContentForDocument(shareCode);
     }
     if (shareCode.startsWith(SHARE_CODE_PREFIX.CANVAS)) {
-      return this.getSharedContentForCanvas(shareCode, canvasId);
+      return this.getSharedContentForCanvas(shareCode);
     }
 
     throw new ShareNotFoundError();

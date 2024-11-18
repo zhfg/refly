@@ -1,4 +1,4 @@
-import { Canvas } from '@refly-packages/openapi-schema';
+import { Document } from '@refly-packages/openapi-schema';
 import { HighlightSelection } from './types';
 import { InPlaceEditType } from '@refly-packages/utils';
 import {
@@ -16,12 +16,12 @@ interface EditCanvasModule {
   buildSystemPrompt: (locale: string, needPrepareContext: boolean) => string;
   buildUserPrompt: (params: { originalQuery: string; rewrittenQuery: string }) => string;
   buildContextUserPrompt: (documentContext: {
-    canvas: Canvas;
+    document: Document;
     selectedContent: HighlightSelection;
   }) => (context: string, needPrepareContext: boolean) => string;
 }
 
-const getModules = (documentContext: { canvas: Canvas; selectedContent: HighlightSelection }) => {
+const getModules = (documentContext: { document: Document; selectedContent: HighlightSelection }) => {
   return {
     block: {
       buildSystemPrompt: buildBlockEditCanvasSystemPrompt,
@@ -39,7 +39,7 @@ const getModules = (documentContext: { canvas: Canvas; selectedContent: Highligh
 export const getEditCanvasModule = (
   type: InPlaceEditType,
   documentContext: {
-    canvas: Canvas;
+    document: Document;
     selectedContent: HighlightSelection;
   },
 ) => {

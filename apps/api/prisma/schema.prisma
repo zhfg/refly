@@ -209,6 +209,35 @@ model StaticFile {
   @@map("static_files")
 }
 
+model Canvas {
+  /// Primary key
+  pk          BigInt    @id @default(autoincrement())
+  /// Canvas id
+  canvasId    String    @unique @map("canvas_id")
+  /// Owner UID
+  uid         String    @map("uid")
+  /// Canvas title
+  title       String    @default("Untitled") @map("title")
+  /// Canvas yjs doc storage size (in bytes)
+  storageSize BigInt    @default(0) @map("storage_size")
+  /// Canvas yjs doc storage key
+  storageKey  String?   @map("storage_key")
+  /// Share code
+  shareCode   String?   @map("share_code")
+  /// Whether this canvas is readonly
+  readOnly    Boolean   @default(false) @map("read_only")
+  /// Create timestamp
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@index([uid, updatedAt])
+  @@index([shareCode])
+  @@map("canvases")
+}
+
 model Resource {
   /// Primary key
   pk             BigInt    @id @default(autoincrement())
@@ -247,23 +276,17 @@ model Resource {
   @@map("resources")
 }
 
-model Canvas {
+model Document {
   /// Primary key
   pk              BigInt    @id @default(autoincrement())
-  /// Canvas id
-  canvasId        String    @unique @map("canvas_id")
-  /// Project id
-  projectId       String?   @map("project_id")
-  /// Related project
-  project         Project?  @relation(fields: [projectId], references: [projectId])
-  /// UID
+  /// Document id
+  docId           String    @unique @map("doc_id")
+  /// Owner UID
   uid             String    @map("uid")
-  /// Canvas title
+  /// Document title
   title           String    @default("Untitled") @map("title")
   /// Word count
   wordCount       Int       @default(0) @map("word_count")
-  /// Content of resource (deprecated)
-  content         String?   @map("content")
   /// Content preview
   contentPreview  String?   @map("content_preview")
   /// Content storage key
@@ -276,7 +299,7 @@ model Canvas {
   stateStorageKey String    @default("") @map("state_storage_key")
   /// Share code
   shareCode       String?   @map("share_code")
-  /// Whether this canvas is readonly
+  /// Whether this document is readonly
   readOnly        Boolean   @default(false) @map("read_only")
   /// Create timestamp
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
@@ -284,12 +307,10 @@ model Canvas {
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   /// Soft delete timestamp
   deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
-  /// Display order within project
-  order           Int       @default(0) @map("order")
 
   @@index([uid, deletedAt, updatedAt])
   @@index([shareCode])
-  @@map("canvases")
+  @@map("documents")
 }
 
 model Project {
@@ -311,8 +332,6 @@ model Project {
   updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz()
   /// Soft delete timestamp
   deletedAt     DateTime?      @map("deleted_at") @db.Timestamptz()
-  /// Related canvases
-  canvases      Canvas[]
   /// Related conversations
   conversations Conversation[]
 
@@ -625,7 +644,9 @@ model StorageUsageMeter {
   /// Resource storage size in use (in bytes)
   resourceSize       BigInt    @default(0) @map("resource_size")
   /// Canvas storage size in use (in bytes)
-  canvasSize         BigInt    @default(0) @map("note_size")
+  canvasSize         BigInt    @default(0) @map("canvas_size")
+  /// Document storage size in use (in bytes)
+  documentSize       BigInt    @default(0) @map("document_size")
   /// Static file storage size in use (in bytes)
   fileSize           BigInt    @default(0) @map("file_size")
   /// Vector storage size quota (in bytes)

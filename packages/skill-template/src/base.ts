@@ -147,8 +147,7 @@ export interface SkillRunnableConfig extends RunnableConfig {
   configurable?: SkillContext & {
     spanId?: string;
     convId?: string;
-    projectId?: string;
-    project?: Project;
+    canvasId?: string;
     locale?: string;
     uiLocale?: string;
     modelName?: string;

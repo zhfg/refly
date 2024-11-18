@@ -67,6 +67,33 @@ export type BaseReference = {
   targetId: string;
 };
 
+export type Canvas = {
+  /**
+   * Canvas ID
+   */
+  canvasId: string;
+  /**
+   * Canvas title
+   */
+  title: string;
+  /**
+   * Share code
+   */
+  shareCode?: string;
+  /**
+   * Whether this canvas is read-only
+   */
+  readOnly?: boolean;
+  /**
+   * Canvas creation time
+   */
+  createdAt: string;
+  /**
+   * Canvas update time
+   */
+  updatedAt: string;
+};
+
 export type Reference = BaseReference & {
   /**
    * Reference ID
@@ -159,31 +186,23 @@ export type Resource = {
 /**
  * Reference type
  */
-export type ReferenceType = 'canvas' | 'resource';
+export type ReferenceType = 'document' | 'resource';
 
-export type Canvas = {
+export type Document = {
   /**
-   * Canvas ID
+   * Document ID
    */
-  canvasId: string;
+  docId: string;
   /**
-   * Project ID
-   */
-  projectId: string;
-  /**
-   * Canvas order in project
-   */
-  order?: number;
-  /**
-   * Canvas title
+   * Document title
    */
   title: string;
   /**
-   * Canvas content preview
+   * Document content preview
    */
   contentPreview?: string;
   /**
-   * Full canvas content (only returned in detail api)
+   * Full document content (only returned in detail api)
    */
   content?: string;
   /**
@@ -191,15 +210,15 @@ export type Canvas = {
    */
   shareCode?: string;
   /**
-   * Whether this canvas is read-only
+   * Whether this document is read-only
    */
   readOnly: boolean;
   /**
-   * Canvas creation time
+   * Document creation time
    */
   createdAt: string;
   /**
-   * Canvas update time
+   * Document update time
    */
   updatedAt: string;
 };
@@ -234,7 +253,7 @@ export type Project = {
 /**
  * Entity type
  */
-export type EntityType = 'canvas' | 'resource' | 'project';
+export type EntityType = 'document' | 'resource' | 'canvas';
 
 /**
  * Entity
@@ -895,16 +914,6 @@ export type ChatMessage = {
    */
   errors?: Array<string>;
   /**
-   * Related questions
-   * @deprecated
-   */
-  relatedQuestions?: Array<string>;
-  /**
-   * Related sources
-   * @deprecated
-   */
-  sources?: Array<Source>;
-  /**
    * Token usage
    */
   tokenUsage?: Array<TokenUsageItem>;
@@ -912,10 +921,6 @@ export type ChatMessage = {
    * Skill invocation parameters
    */
   invokeParam?: InvokeSkillRequest;
-  /**
-   * Selected weblink config (JSON)
-   */
-  selectedWeblinkConfig?: string;
   /**
    * Message creation time
    */
@@ -1192,6 +1197,42 @@ export type BaseResponse = {
   stack?: string;
 };
 
+export type ListCanvasResponse = BaseResponse & {
+  /**
+   * Canvas list
+   */
+  data?: Array<Canvas>;
+};
+
+export type GetCanvasDetailResponse = BaseResponse & {
+  /**
+   * Canvas data
+   */
+  data?: Canvas;
+};
+
+export type UpsertCanvasRequest = {
+  /**
+   * Canvas title
+   */
+  title?: string;
+  /**
+   * Canvas ID (only used for update)
+   */
+  canvasId?: string;
+};
+
+export type UpsertCanvasResponse = BaseResponse & {
+  data?: Canvas;
+};
+
+export type DeleteCanvasRequest = {
+  /**
+   * Canvas ID to delete
+   */
+  canvasId: string;
+};
+
 export type UpsertResourceRequest = {
   /**
    * Resource title
@@ -1265,56 +1306,48 @@ export type GetResourceDetailResponse = BaseResponse & {
   data?: Resource;
 };
 
-export type ListCanvasResponse = BaseResponse & {
+export type ListDocumentResponse = BaseResponse & {
   /**
    * Canvas list
    */
-  data?: Array<Canvas>;
+  data?: Array<Document>;
 };
 
-export type GetCanvasDetailResponse = BaseResponse & {
+export type GetDocumentDetailResponse = BaseResponse & {
   /**
-   * Canvas data
+   * Document data
    */
-  data?: Canvas;
+  data?: Document;
 };
 
-export type UpsertCanvasRequest = {
+export type UpsertDocumentRequest = {
   /**
    * Canvas title
    */
   title?: string;
   /**
-   * Canvas ID (only used for update)
+   * Document ID (only used for update)
    */
-  canvasId?: string;
+  docId?: string;
   /**
-   * Canvas order in project
-   */
-  order?: number;
-  /**
-   * Project ID (will add to the project if given)
-   */
-  projectId?: string;
-  /**
-   * Whether this canvas is read-only
+   * Whether this document is read-only
    */
   readOnly?: boolean;
   /**
-   * Canvas initial content
+   * Document initial content
    */
   initialContent?: string;
 };
 
-export type UpsertCanvasResponse = BaseResponse & {
-  data?: Canvas;
+export type UpsertDocumentResponse = BaseResponse & {
+  data?: Document;
 };
 
-export type DeleteCanvasRequest = {
+export type DeleteDocumentRequest = {
   /**
-   * Canvas ID to delete
+   * Document ID to delete
    */
-  canvasId: string;
+  docId: string;
 };
 
 export type QueryReferencesRequest = {
@@ -1471,17 +1504,13 @@ export type ShareUser = {
 
 export type SharedContent = {
   /**
-   * Shared project data
-   */
-  project?: Project;
-  /**
-   * Shared canvas list
-   */
-  canvasList?: Array<Canvas>;
-  /**
-   * Selected canvas detail
+   * Shared canvas data
    */
   canvas?: Canvas;
+  /**
+   * Selected document detail
+   */
+  document?: Document;
   /**
    * Share users
    */
@@ -1770,19 +1799,19 @@ export type SkillContextProjectItem = {
 };
 
 /**
- * Skill context canvas item
+ * Skill context document item
  */
-export type SkillContextCanvasItem = {
+export type SkillContextDocumentItem = {
   /**
-   * Canvas ID
+   * Document ID
    */
-  canvasId?: string;
+  docId?: string;
   /**
-   * Canvas
+   * Document
    */
-  canvas?: Canvas;
+  document?: Document;
   /**
-   * Whether this canvas is current
+   * Whether this document is current
    */
   isCurrent?: boolean;
   /**
@@ -1838,9 +1867,9 @@ export type SkillContext = {
    */
   projects?: Array<SkillContextProjectItem>;
   /**
-   * Context canvases
+   * Context documents
    */
-  canvases?: Array<SkillContextCanvasItem>;
+  documents?: Array<SkillContextDocumentItem>;
   /**
    * Context content list
    */
@@ -2312,7 +2341,7 @@ export type SearchOptions = {
   enableReranker?: boolean;
 };
 
-export type SearchDomain = 'resource' | 'canvas' | 'project' | 'conversation' | 'skill';
+export type SearchDomain = 'resource' | 'document' | 'canvas' | 'skill';
 
 export type SearchMode = 'keyword' | 'vector' | 'hybrid';
 
@@ -2518,6 +2547,43 @@ export type InMemorySearchResponse = BaseResponse & {
   data?: Array<DocumentInterface>;
 };
 
+export type ListCanvasesData = {
+  query?: {
+    /**
+     * Order
+     */
+    order?: ListOrder;
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    pageSize?: number;
+  };
+};
+
+export type ListCanvasesResponse = unknown;
+
+export type ListCanvasesError = unknown;
+
+export type CreateCanvasData = {
+  body: UpsertCanvasRequest;
+};
+
+export type CreateCanvasResponse = UpsertCanvasResponse;
+
+export type CreateCanvasError = unknown;
+
+export type DeleteCanvasData = {
+  body: DeleteCanvasRequest;
+};
+
+export type DeleteCanvasResponse = BaseResponse;
+
+export type DeleteCanvasError = unknown;
+
 export type ListResourcesData = {
   query?: {
     /**
@@ -2613,7 +2679,7 @@ export type DeleteResourceResponse = BaseResponse;
 
 export type DeleteResourceError = unknown;
 
-export type ListCanvasData = {
+export type ListDocumentsData = {
   query?: {
     /**
      * Order by
@@ -2627,67 +2693,63 @@ export type ListCanvasData = {
      * Page size
      */
     pageSize?: number;
-    /**
-     * Project ID
-     */
-    projectId?: string;
   };
 };
 
-export type ListCanvasResponse2 = ListCanvasResponse;
+export type ListDocumentsResponse = ListDocumentResponse;
 
-export type ListCanvasError = unknown;
+export type ListDocumentsError = unknown;
 
-export type GetCanvasDetailData = {
+export type GetDocumentDetailData = {
   query: {
     /**
-     * Canvas ID to retrieve
+     * Document ID to retrieve
      */
-    canvasId: string;
+    docId: string;
   };
 };
 
-export type GetCanvasDetailResponse2 = GetCanvasDetailResponse;
+export type GetDocumentDetailResponse2 = GetDocumentDetailResponse;
 
-export type GetCanvasDetailError = unknown;
+export type GetDocumentDetailError = unknown;
 
-export type UpdateCanvasData = {
+export type UpdateDocumentData = {
   /**
-   * Canvas update request
+   * Document update request
    */
-  body: UpsertCanvasRequest;
+  body: UpsertDocumentRequest;
 };
 
-export type UpdateCanvasResponse = UpsertCanvasResponse;
+export type UpdateDocumentResponse = UpsertDocumentResponse;
 
-export type UpdateCanvasError = unknown;
+export type UpdateDocumentError = unknown;
 
-export type CreateCanvasData = {
+export type CreateDocumentData = {
   /**
-   * Canvas creation request
+   * Document creation request
    */
-  body: UpsertCanvasRequest;
+  body: UpsertDocumentRequest;
 };
 
-export type CreateCanvasResponse = UpsertCanvasResponse;
+export type CreateDocumentResponse = UpsertDocumentResponse;
 
-export type CreateCanvasError = unknown;
+export type CreateDocumentError = unknown;
 
-export type DeleteCanvasData = {
-  body: DeleteCanvasRequest;
+export type DeleteDocumentData = {
+  body: DeleteDocumentRequest;
 };
 
-export type DeleteCanvasResponse = BaseResponse;
+export type DeleteDocumentResponse = BaseResponse;
 
-export type DeleteCanvasError = unknown;
+export type DeleteDocumentError = unknown;
 
-export type BatchUpdateCanvasData = {
-  body: Array<UpsertCanvasRequest>;
+export type BatchUpdateDocumentData = {
+  body: Array<UpsertDocumentRequest>;
 };
 
-export type BatchUpdateCanvasResponse = BaseResponse;
+export type BatchUpdateDocumentResponse = BaseResponse;
 
-export type BatchUpdateCanvasError = unknown;
+export type BatchUpdateDocumentError = unknown;
 
 export type QueryReferencesData = {
   body: QueryReferencesRequest;
@@ -2811,10 +2873,6 @@ export type DeleteShareError = unknown;
 
 export type GetShareContentData = {
   query: {
-    /**
-     * Canvas ID, by default the first canvas will be selected
-     */
-    canvasId?: string;
     /**
      * Share code
      */
@@ -3261,6 +3319,39 @@ export type ServeStaticResponse = unknown;
 export type ServeStaticError = unknown;
 
 export type $OpenApiTs = {
+  '/canvas/list': {
+    get: {
+      req: ListCanvasesData;
+      res: {
+        /**
+         * Successful operation
+         */
+        '200': unknown;
+      };
+    };
+  };
+  '/canvas/create': {
+    post: {
+      req: CreateCanvasData;
+      res: {
+        /**
+         * Successful operation
+         */
+        '200': UpsertCanvasResponse;
+      };
+    };
+  };
+  '/canvas/delete': {
+    post: {
+      req: DeleteCanvasData;
+      res: {
+        /**
+         * Successful operation
+         */
+        '200': BaseResponse;
+      };
+    };
+  };
   '/knowledge/resource/list': {
     get: {
       req: ListResourcesData;
@@ -3338,53 +3429,53 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/canvas/list': {
+  '/knowledge/document/list': {
     get: {
-      req: ListCanvasData;
+      req: ListDocumentsData;
       res: {
         /**
          * Successful operation
          */
-        '200': ListCanvasResponse;
+        '200': ListDocumentResponse;
       };
     };
   };
-  '/knowledge/canvas/detail': {
+  '/knowledge/document/detail': {
     get: {
-      req: GetCanvasDetailData;
+      req: GetDocumentDetailData;
       res: {
         /**
          * Successful operation
          */
-        '200': GetCanvasDetailResponse;
+        '200': GetDocumentDetailResponse;
       };
     };
   };
-  '/knowledge/canvas/update': {
+  '/knowledge/document/update': {
     post: {
-      req: UpdateCanvasData;
+      req: UpdateDocumentData;
       res: {
         /**
          * successful operation
          */
-        '200': UpsertCanvasResponse;
+        '200': UpsertDocumentResponse;
       };
     };
   };
-  '/knowledge/canvas/create': {
+  '/knowledge/document/create': {
     post: {
-      req: CreateCanvasData;
+      req: CreateDocumentData;
       res: {
         /**
          * successful operation
          */
-        '200': UpsertCanvasResponse;
+        '200': UpsertDocumentResponse;
       };
     };
   };
-  '/knowledge/canvas/delete': {
+  '/knowledge/document/delete': {
     post: {
-      req: DeleteCanvasData;
+      req: DeleteDocumentData;
       res: {
         /**
          * Successful operation
@@ -3393,9 +3484,9 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/knowledge/canvas/batchUpdate': {
+  '/knowledge/document/batchUpdate': {
     post: {
-      req: BatchUpdateCanvasData;
+      req: BatchUpdateDocumentData;
       res: {
         /**
          * Successful operation

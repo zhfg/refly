@@ -11,6 +11,8 @@ externalDocs:
 servers:
   - url: /v1
 tags:
+  - name: canvas
+    description: Canvas management endpoints
   - name: knowledge
     description: Knowledge base management endpoints
   - name: share
@@ -28,6 +30,74 @@ tags:
   - name: misc
     description: Miscellaneous endpoints
 paths:
+  /canvas/list:
+    get:
+      tags:
+        - canvas
+      summary: List user canvases
+      description: List all canvases for a user
+      operationId: listCanvases
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
+        - name: order
+          in: query
+          description: Order
+          schema:
+            $ref: '#/components/schemas/ListOrder'
+      responses:
+        '200':
+          description: Successful operation
+  /canvas/create:
+    post:
+      tags:
+        - canvas
+      summary: Create canvas
+      description: Create a new canvas
+      operationId: createCanvas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertCanvasRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertCanvasResponse'
+  /canvas/delete:
+    post:
+      tags:
+        - canvas
+      summary: Delete canvas
+      description: Delete an existing canvas
+      operationId: deleteCanvas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteCanvasRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
   /knowledge/resource/list:
     get:
       tags:
@@ -219,20 +289,14 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /knowledge/canvas/list:
+  /knowledge/document/list:
     get:
       tags:
         - knowledge
-      summary: List user canvases
-      description: List all canvases for a user
-      operationId: listCanvas
+      summary: List user documents
+      description: List all documents for a user
+      operationId: listDocuments
       parameters:
-        - name: projectId
-          in: query
-          description: Project ID
-          required: false
-          schema:
-            type: string
         - name: page
           in: query
           description: Page number
@@ -259,88 +323,88 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListCanvasResponse'
-  /knowledge/canvas/detail:
+                $ref: '#/components/schemas/ListDocumentResponse'
+  /knowledge/document/detail:
     get:
       tags:
         - knowledge
       summary: Get canvas detail
-      description: Return canvas detail
-      operationId: getCanvasDetail
+      description: Return document detail
+      operationId: getDocumentDetail
       parameters:
-        - name: canvasId
+        - name: docId
           in: query
-          description: Canvas ID to retrieve
+          description: Document ID to retrieve
           required: true
           schema:
             type: string
-            example: c-g30e1b80b5g1itbemc0g5jj3
+            example: d-g30e1b80b5g1itbemc0g5jj3
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetCanvasDetailResponse'
-  /knowledge/canvas/update:
+                $ref: '#/components/schemas/GetDocumentDetailResponse'
+  /knowledge/document/update:
     post:
       tags:
         - knowledge
       summary: Update canvas
-      description: Update an existing canvas
-      operationId: updateCanvas
+      description: Update an existing document
+      operationId: updateDocument
       requestBody:
-        description: Canvas update request
+        description: Document update request
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertCanvasRequest'
+              $ref: '#/components/schemas/UpsertDocumentRequest'
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpsertCanvasResponse'
+                $ref: '#/components/schemas/UpsertDocumentResponse'
       security:
         - api_key: []
-  /knowledge/canvas/create:
+  /knowledge/document/create:
     post:
       tags:
         - knowledge
       summary: Create new canvas
-      description: Create a new canvas
-      operationId: createCanvas
+      description: Create a new document
+      operationId: createDocument
       requestBody:
-        description: Canvas creation request
+        description: Document creation request
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertCanvasRequest'
+              $ref: '#/components/schemas/UpsertDocumentRequest'
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpsertCanvasResponse'
+                $ref: '#/components/schemas/UpsertDocumentResponse'
       security:
         - api_key: []
-  /knowledge/canvas/delete:
+  /knowledge/document/delete:
     post:
       tags:
         - knowledge
       summary: Delete canvas
-      description: Delete an existing canvas
-      operationId: deleteCanvas
+      description: Delete an existing document
+      operationId: deleteDocument
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeleteCanvasRequest'
+              $ref: '#/components/schemas/DeleteDocumentRequest'
       responses:
         '200':
           description: Successful operation
@@ -350,13 +414,13 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /knowledge/canvas/batchUpdate:
+  /knowledge/document/batchUpdate:
     post:
       tags:
         - knowledge
-      summary: Batch update canvases
-      description: Batch update existing canvases
-      operationId: batchUpdateCanvas
+      summary: Batch update documents
+      description: Batch update existing documents
+      operationId: batchUpdateDocument
       requestBody:
         required: true
         content:
@@ -364,7 +428,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/UpsertCanvasRequest'
+                $ref: '#/components/schemas/UpsertDocumentRequest'
       responses:
         '200':
           description: Successful operation
@@ -643,12 +707,6 @@ paths:
           in: query
           description: Share code
           required: true
-          schema:
-            type: string
-        - name: canvasId
-          in: query
-          description: Canvas ID, by default the first canvas will be selected
-          required: false
           schema:
             type: string
       responses:
@@ -1583,6 +1641,36 @@ components:
         targetId:
           type: string
           description: Target entity ID
+    Canvas:
+      type: object
+      required:
+        - canvasId
+        - title
+        - createdAt
+        - updatedAt
+      properties:
+        canvasId:
+          type: string
+          description: Canvas ID
+          example: c-g30e1b80b5g1itbemc0g5jj3
+        title:
+          type: string
+          description: Canvas title
+          example: My canvas
+        shareCode:
+          type: string
+          description: Share code
+        readOnly:
+          type: boolean
+          description: Whether this canvas is read-only
+        createdAt:
+          type: string
+          format: date-time
+          description: Canvas creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Canvas update time
     Reference:
       allOf:
         - $ref: '#/components/schemas/BaseReference'
@@ -1676,53 +1764,45 @@ components:
       type: string
       description: Reference type
       enum:
-        - canvas
+        - document
         - resource
-    Canvas:
+    Document:
       type: object
       required:
-        - canvasId
-        - projectId
+        - docId
         - title
         - readOnly
         - createdAt
         - updatedAt
       properties:
-        canvasId:
+        docId:
           type: string
-          description: Canvas ID
-          example: c-g30e1b80b5g1itbemc0g5jj3
-        projectId:
-          type: string
-          description: Project ID
-          example: p-g30e1b80b5g1itbemc0g5jj3
-        order:
-          type: number
-          description: Canvas order in project
+          description: Document ID
+          example: d-g30e1b80b5g1itbemc0g5jj3
         title:
           type: string
-          description: Canvas title
-          example: My canvas
+          description: Document title
+          example: My document
         contentPreview:
           type: string
-          description: Canvas content preview
+          description: Document content preview
         content:
           type: string
-          description: Full canvas content (only returned in detail api)
+          description: Full document content (only returned in detail api)
         shareCode:
           type: string
           description: Share code
         readOnly:
           type: boolean
-          description: Whether this canvas is read-only
+          description: Whether this document is read-only
         createdAt:
           type: string
           format: date-time
-          description: Canvas creation time
+          description: Document creation time
         updatedAt:
           type: string
           format: date-time
-          description: Canvas update time
+          description: Document update time
     Project:
       type: object
       required:
@@ -1758,9 +1838,9 @@ components:
       type: string
       description: Entity type
       enum:
-        - canvas
+        - document
         - resource
-        - project
+        - canvas
     Entity:
       type: object
       description: Entity
@@ -2411,18 +2491,6 @@ components:
           description: Errors
           items:
             type: string
-        relatedQuestions:
-          type: array
-          description: Related questions
-          items:
-            type: string
-          deprecated: true
-        sources:
-          type: array
-          description: Related sources
-          items:
-            $ref: '#/components/schemas/Source'
-          deprecated: true
         tokenUsage:
           type: array
           description: Token usage
@@ -2431,9 +2499,6 @@ components:
         invokeParam:
           description: Skill invocation parameters
           $ref: '#/components/schemas/InvokeSkillRequest'
-        selectedWeblinkConfig:
-          type: string
-          description: Selected weblink config (JSON)
         createdAt:
           type: string
           format: date-time
@@ -2731,6 +2796,52 @@ components:
         stack:
           type: string
           description: Error stack (only returned in development environment)
+    ListCanvasResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Canvas list
+              items:
+                $ref: '#/components/schemas/Canvas'
+    GetCanvasDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Canvas data
+              $ref: '#/components/schemas/Canvas'
+    UpsertCanvasRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Canvas title
+          example: My Canvas
+        canvasId:
+          type: string
+          description: Canvas ID (only used for update)
+          example: c-g30e1b80b5g1itbemc0g5jj3
+    UpsertCanvasResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Canvas'
+    DeleteCanvasRequest:
+      type: object
+      required:
+        - canvasId
+      properties:
+        canvasId:
+          type: string
+          description: Canvas ID to delete
+          example: c-g30e1b80b5g1itbemc0g5jj3
     UpsertResourceRequest:
       type: object
       required:
@@ -2823,7 +2934,7 @@ components:
               type: object
               description: Resource data
               $ref: '#/components/schemas/Resource'
-    ListCanvasResponse:
+    ListDocumentResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
@@ -2832,57 +2943,50 @@ components:
               type: array
               description: Canvas list
               items:
-                $ref: '#/components/schemas/Canvas'
-    GetCanvasDetailResponse:
+                $ref: '#/components/schemas/Document'
+    GetDocumentDetailResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
               type: object
-              description: Canvas data
-              $ref: '#/components/schemas/Canvas'
-    UpsertCanvasRequest:
+              description: Document data
+              $ref: '#/components/schemas/Document'
+    UpsertDocumentRequest:
       type: object
       properties:
         title:
           type: string
           description: Canvas title
           example: My Canvas
-        canvasId:
+        docId:
           type: string
-          description: Canvas ID (only used for update)
-          example: c-g30e1b80b5g1itbemc0g5jj3
-        order:
-          type: number
-          description: Canvas order in project
-        projectId:
-          type: string
-          description: Project ID (will add to the project if given)
-          example: p-g30e1b80b5g1itbemc0g5jj3
+          description: Document ID (only used for update)
+          example: d-g30e1b80b5g1itbemc0g5jj3
         readOnly:
           type: boolean
-          description: Whether this canvas is read-only
+          description: Whether this document is read-only
           default: false
         initialContent:
           type: string
-          description: Canvas initial content
-    UpsertCanvasResponse:
+          description: Document initial content
+    UpsertDocumentResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/Canvas'
-    DeleteCanvasRequest:
+              $ref: '#/components/schemas/Document'
+    DeleteDocumentRequest:
       type: object
       required:
-        - canvasId
+        - docId
       properties:
-        canvasId:
+        docId:
           type: string
-          description: Canvas ID to delete
-          example: c-g30e1b80b5g1itbemc0g5jj3
+          description: Document ID to delete
+          example: d-g30e1b80b5g1itbemc0g5jj3
     QueryReferencesRequest:
       type: object
       properties:
@@ -3058,20 +3162,13 @@ components:
           description: User avatar
     SharedContent:
       type: object
-      required:
-        - selectedCanvas
       properties:
-        project:
-          description: Shared project data
-          $ref: '#/components/schemas/Project'
-        canvasList:
-          type: array
-          description: Shared canvas list
-          items:
-            $ref: '#/components/schemas/Canvas'
         canvas:
-          description: Selected canvas detail
+          description: Shared canvas data
           $ref: '#/components/schemas/Canvas'
+        document:
+          description: Selected document detail
+          $ref: '#/components/schemas/Document'
         users:
           type: array
           description: Share users
@@ -3375,19 +3472,19 @@ components:
         metadata:
           type: object
           description: Project context metadata
-    SkillContextCanvasItem:
+    SkillContextDocumentItem:
       type: object
-      description: Skill context canvas item
+      description: Skill context document item
       properties:
-        canvasId:
+        docId:
           type: string
-          description: Canvas ID
-        canvas:
-          description: Canvas
-          $ref: '#/components/schemas/Canvas'
+          description: Document ID
+        document:
+          description: Document
+          $ref: '#/components/schemas/Document'
         isCurrent:
           type: boolean
-          description: Whether this canvas is current
+          description: Whether this document is current
         metadata:
           type: object
           description: Canvas context metadata
@@ -3429,11 +3526,11 @@ components:
           description: Context projects
           items:
             $ref: '#/components/schemas/SkillContextProjectItem'
-        canvases:
+        documents:
           type: array
-          description: Context canvases
+          description: Context documents
           items:
-            $ref: '#/components/schemas/SkillContextCanvasItem'
+            $ref: '#/components/schemas/SkillContextDocumentItem'
         contentList:
           type: array
           description: Context content list
@@ -3948,9 +4045,8 @@ components:
       type: string
       enum:
         - resource
+        - document
         - canvas
-        - project
-        - conversation
         - skill
     SearchMode:
       type: string

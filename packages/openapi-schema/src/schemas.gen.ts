@@ -73,6 +73,41 @@ export const $BaseReference = {
   },
 } as const;
 
+export const $Canvas = {
+  type: 'object',
+  required: ['canvasId', 'title', 'createdAt', 'updatedAt'],
+  properties: {
+    canvasId: {
+      type: 'string',
+      description: 'Canvas ID',
+      example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    title: {
+      type: 'string',
+      description: 'Canvas title',
+      example: 'My canvas',
+    },
+    shareCode: {
+      type: 'string',
+      description: 'Share code',
+    },
+    readOnly: {
+      type: 'boolean',
+      description: 'Whether this canvas is read-only',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Canvas creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Canvas update time',
+    },
+  },
+} as const;
+
 export const $Reference = {
   allOf: [
     {
@@ -192,39 +227,30 @@ export const $Resource = {
 export const $ReferenceType = {
   type: 'string',
   description: 'Reference type',
-  enum: ['canvas', 'resource'],
+  enum: ['document', 'resource'],
 } as const;
 
-export const $Canvas = {
+export const $Document = {
   type: 'object',
-  required: ['canvasId', 'projectId', 'title', 'readOnly', 'createdAt', 'updatedAt'],
+  required: ['docId', 'title', 'readOnly', 'createdAt', 'updatedAt'],
   properties: {
-    canvasId: {
+    docId: {
       type: 'string',
-      description: 'Canvas ID',
-      example: 'c-g30e1b80b5g1itbemc0g5jj3',
-    },
-    projectId: {
-      type: 'string',
-      description: 'Project ID',
-      example: 'p-g30e1b80b5g1itbemc0g5jj3',
-    },
-    order: {
-      type: 'number',
-      description: 'Canvas order in project',
+      description: 'Document ID',
+      example: 'd-g30e1b80b5g1itbemc0g5jj3',
     },
     title: {
       type: 'string',
-      description: 'Canvas title',
-      example: 'My canvas',
+      description: 'Document title',
+      example: 'My document',
     },
     contentPreview: {
       type: 'string',
-      description: 'Canvas content preview',
+      description: 'Document content preview',
     },
     content: {
       type: 'string',
-      description: 'Full canvas content (only returned in detail api)',
+      description: 'Full document content (only returned in detail api)',
     },
     shareCode: {
       type: 'string',
@@ -232,17 +258,17 @@ export const $Canvas = {
     },
     readOnly: {
       type: 'boolean',
-      description: 'Whether this canvas is read-only',
+      description: 'Whether this document is read-only',
     },
     createdAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Canvas creation time',
+      description: 'Document creation time',
     },
     updatedAt: {
       type: 'string',
       format: 'date-time',
-      description: 'Canvas update time',
+      description: 'Document update time',
     },
   },
 } as const;
@@ -286,7 +312,7 @@ export const $Project = {
 export const $EntityType = {
   type: 'string',
   description: 'Entity type',
-  enum: ['canvas', 'resource', 'project'],
+  enum: ['document', 'resource', 'canvas'],
 } as const;
 
 export const $Entity = {
@@ -1090,22 +1116,6 @@ export const $ChatMessage = {
         type: 'string',
       },
     },
-    relatedQuestions: {
-      type: 'array',
-      description: 'Related questions',
-      items: {
-        type: 'string',
-      },
-      deprecated: true,
-    },
-    sources: {
-      type: 'array',
-      description: 'Related sources',
-      items: {
-        $ref: '#/components/schemas/Source',
-      },
-      deprecated: true,
-    },
     tokenUsage: {
       type: 'array',
       description: 'Token usage',
@@ -1116,10 +1126,6 @@ export const $ChatMessage = {
     invokeParam: {
       description: 'Skill invocation parameters',
       $ref: '#/components/schemas/InvokeSkillRequest',
-    },
-    selectedWeblinkConfig: {
-      type: 'string',
-      description: 'Selected weblink config (JSON)',
     },
     createdAt: {
       type: 'string',
@@ -1479,6 +1485,88 @@ export const $BaseResponse = {
   },
 } as const;
 
+export const $ListCanvasResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Canvas list',
+          items: {
+            $ref: '#/components/schemas/Canvas',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $GetCanvasDetailResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Canvas data',
+          $ref: '#/components/schemas/Canvas',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $UpsertCanvasRequest = {
+  type: 'object',
+  properties: {
+    title: {
+      type: 'string',
+      description: 'Canvas title',
+      example: 'My Canvas',
+    },
+    canvasId: {
+      type: 'string',
+      description: 'Canvas ID (only used for update)',
+      example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+  },
+} as const;
+
+export const $UpsertCanvasResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/Canvas',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $DeleteCanvasRequest = {
+  type: 'object',
+  required: ['canvasId'],
+  properties: {
+    canvasId: {
+      type: 'string',
+      description: 'Canvas ID to delete',
+      example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+  },
+} as const;
+
 export const $UpsertResourceRequest = {
   type: 'object',
   required: ['title', 'resourceType'],
@@ -1633,7 +1721,7 @@ export const $GetResourceDetailResponse = {
   ],
 } as const;
 
-export const $ListCanvasResponse = {
+export const $ListDocumentResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -1645,7 +1733,7 @@ export const $ListCanvasResponse = {
           type: 'array',
           description: 'Canvas list',
           items: {
-            $ref: '#/components/schemas/Canvas',
+            $ref: '#/components/schemas/Document',
           },
         },
       },
@@ -1653,7 +1741,7 @@ export const $ListCanvasResponse = {
   ],
 } as const;
 
-export const $GetCanvasDetailResponse = {
+export const $GetDocumentDetailResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -1663,15 +1751,15 @@ export const $GetCanvasDetailResponse = {
       properties: {
         data: {
           type: 'object',
-          description: 'Canvas data',
-          $ref: '#/components/schemas/Canvas',
+          description: 'Document data',
+          $ref: '#/components/schemas/Document',
         },
       },
     },
   ],
 } as const;
 
-export const $UpsertCanvasRequest = {
+export const $UpsertDocumentRequest = {
   type: 'object',
   properties: {
     title: {
@@ -1679,33 +1767,24 @@ export const $UpsertCanvasRequest = {
       description: 'Canvas title',
       example: 'My Canvas',
     },
-    canvasId: {
+    docId: {
       type: 'string',
-      description: 'Canvas ID (only used for update)',
-      example: 'c-g30e1b80b5g1itbemc0g5jj3',
-    },
-    order: {
-      type: 'number',
-      description: 'Canvas order in project',
-    },
-    projectId: {
-      type: 'string',
-      description: 'Project ID (will add to the project if given)',
-      example: 'p-g30e1b80b5g1itbemc0g5jj3',
+      description: 'Document ID (only used for update)',
+      example: 'd-g30e1b80b5g1itbemc0g5jj3',
     },
     readOnly: {
       type: 'boolean',
-      description: 'Whether this canvas is read-only',
+      description: 'Whether this document is read-only',
       default: false,
     },
     initialContent: {
       type: 'string',
-      description: 'Canvas initial content',
+      description: 'Document initial content',
     },
   },
 } as const;
 
-export const $UpsertCanvasResponse = {
+export const $UpsertDocumentResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -1714,21 +1793,21 @@ export const $UpsertCanvasResponse = {
       type: 'object',
       properties: {
         data: {
-          $ref: '#/components/schemas/Canvas',
+          $ref: '#/components/schemas/Document',
         },
       },
     },
   ],
 } as const;
 
-export const $DeleteCanvasRequest = {
+export const $DeleteDocumentRequest = {
   type: 'object',
-  required: ['canvasId'],
+  required: ['docId'],
   properties: {
-    canvasId: {
+    docId: {
       type: 'string',
-      description: 'Canvas ID to delete',
-      example: 'c-g30e1b80b5g1itbemc0g5jj3',
+      description: 'Document ID to delete',
+      example: 'd-g30e1b80b5g1itbemc0g5jj3',
     },
   },
 } as const;
@@ -2006,22 +2085,14 @@ export const $ShareUser = {
 
 export const $SharedContent = {
   type: 'object',
-  required: ['selectedCanvas'],
   properties: {
-    project: {
-      description: 'Shared project data',
-      $ref: '#/components/schemas/Project',
-    },
-    canvasList: {
-      type: 'array',
-      description: 'Shared canvas list',
-      items: {
-        $ref: '#/components/schemas/Canvas',
-      },
-    },
     canvas: {
-      description: 'Selected canvas detail',
+      description: 'Shared canvas data',
       $ref: '#/components/schemas/Canvas',
+    },
+    document: {
+      description: 'Selected document detail',
+      $ref: '#/components/schemas/Document',
     },
     users: {
       type: 'array',
@@ -2489,21 +2560,21 @@ export const $SkillContextProjectItem = {
   },
 } as const;
 
-export const $SkillContextCanvasItem = {
+export const $SkillContextDocumentItem = {
   type: 'object',
-  description: 'Skill context canvas item',
+  description: 'Skill context document item',
   properties: {
-    canvasId: {
+    docId: {
       type: 'string',
-      description: 'Canvas ID',
+      description: 'Document ID',
     },
-    canvas: {
-      description: 'Canvas',
-      $ref: '#/components/schemas/Canvas',
+    document: {
+      description: 'Document',
+      $ref: '#/components/schemas/Document',
     },
     isCurrent: {
       type: 'boolean',
-      description: 'Whether this canvas is current',
+      description: 'Whether this document is current',
     },
     metadata: {
       type: 'object',
@@ -2562,11 +2633,11 @@ export const $SkillContext = {
         $ref: '#/components/schemas/SkillContextProjectItem',
       },
     },
-    canvases: {
+    documents: {
       type: 'array',
-      description: 'Context canvases',
+      description: 'Context documents',
       items: {
-        $ref: '#/components/schemas/SkillContextCanvasItem',
+        $ref: '#/components/schemas/SkillContextDocumentItem',
       },
     },
     contentList: {
@@ -3358,7 +3429,7 @@ export const $SearchOptions = {
 
 export const $SearchDomain = {
   type: 'string',
-  enum: ['resource', 'canvas', 'project', 'conversation', 'skill'],
+  enum: ['resource', 'document', 'canvas', 'skill'],
 } as const;
 
 export const $SearchMode = {

@@ -32,12 +32,10 @@ export class EventService {
 
     if (triggers.length > 0) {
       const skillContext: SkillContext = {};
-      if (entityType === 'project') {
-        skillContext.projects = [{ projectId: entityId }];
+      if (entityType === 'document') {
+        skillContext.documents = [{ docId: entityId }];
       } else if (entityType === 'resource') {
         skillContext.resources = [{ resourceId: entityId }];
-      } else if (entityType === 'canvas') {
-        skillContext.canvases = [{ canvasId: entityId }];
       }
 
       const skills = await this.prisma.skillInstance.findMany({

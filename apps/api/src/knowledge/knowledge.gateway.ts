@@ -9,7 +9,7 @@ import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
 import { PrismaService } from '@/common/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from '@/auth/dto';
-import { Canvas, Prisma, User } from '@prisma/client';
+import { Document, Prisma, User } from '@prisma/client';
 import { state2Markdown } from '@refly-packages/utils';
 import { RAGService } from '@/rag/rag.service';
 import { streamToBuffer } from '@/utils';
@@ -17,15 +17,15 @@ import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { MiscService } from '@/misc/misc.service';
 
-interface CanvasContext {
-  canvas: Canvas;
+interface DocumentContext {
+  doc: Document;
   user: User;
 }
 
 @WebSocketGateway()
-export class CanvasWsGateway implements OnGatewayConnection {
+export class DocumentWsGateway implements OnGatewayConnection {
   private server: Hocuspocus;
-  private logger = new Logger(CanvasWsGateway.name);
+  private logger = new Logger(DocumentWsGateway.name);
 
   constructor(
     private rag: RAGService,
@@ -40,8 +40,8 @@ export class CanvasWsGateway implements OnGatewayConnection {
       port: config.get<number>('wsPort'),
       extensions: [
         new Database({
-          fetch: async ({ context }: { context: CanvasContext }) => {
-            const { canvas } = context;
+          fetch: async ({ context }: { context: DocumentContext }) => {
+            const { doc: canvas } = context;
             if (!canvas.stateStorageKey) return null;
             try {
               const readable = await this.minio.client.getObject(canvas.stateStorageKey);
@@ -53,12 +53,12 @@ export class CanvasWsGateway implements OnGatewayConnection {
               return null;
             }
           },
-          store: async ({ state, context }: { state: Buffer; context: CanvasContext }) => {
-            const { user, canvas } = context;
+          store: async ({ state, context }: { state: Buffer; context: DocumentContext }) => {
+            const { user, doc } = context;
 
             const content = state2Markdown(state);
-            const storageKey = canvas.storageKey || `canvas/${canvas.canvasId}.txt`;
-            const stateStorageKey = canvas.stateStorageKey || `state/${canvas.canvasId}`;
+            const storageKey = doc.storageKey || `doc/${doc.docId}.txt`;
+            const stateStorageKey = doc.stateStorageKey || `state/${doc.docId}`;
 
             // Save content and ydoc state to object storage
             await Promise.all([
@@ -67,15 +67,15 @@ export class CanvasWsGateway implements OnGatewayConnection {
             ]);
 
             // Prepare canvas updates
-            const canvasUpdates: Prisma.CanvasUpdateInput = {};
-            if (!canvas.storageKey) {
-              canvasUpdates.storageKey = storageKey;
+            const docUpdates: Prisma.DocumentUpdateInput = {};
+            if (!doc.storageKey) {
+              docUpdates.storageKey = storageKey;
             }
-            if (!canvas.stateStorageKey) {
-              canvasUpdates.stateStorageKey = stateStorageKey;
+            if (!doc.stateStorageKey) {
+              docUpdates.stateStorageKey = stateStorageKey;
             }
-            if (canvas.contentPreview !== content.slice(0, 500)) {
-              canvasUpdates.contentPreview = content.slice(0, 500);
+            if (doc.contentPreview !== content.slice(0, 500)) {
+              docUpdates.contentPreview = content.slice(0, 500);
             }
 
             // Re-calculate storage size
@@ -83,32 +83,31 @@ export class CanvasWsGateway implements OnGatewayConnection {
               this.minio.client.statObject(storageKey),
               this.minio.client.statObject(stateStorageKey),
             ]);
-            canvasUpdates.storageSize = storageStat.size + stateStorageStat.size;
+            docUpdates.storageSize = storageStat.size + stateStorageStat.size;
 
             // Re-index content to elasticsearch and vector store
             const [, { size }] = await Promise.all([
-              this.elasticsearch.upsertCanvas({
-                id: canvas.canvasId,
-                projectId: canvas.projectId,
+              this.elasticsearch.upsertDocument({
+                id: doc.docId,
                 content,
-                uid: canvas.uid,
+                uid: doc.uid,
               }),
               this.rag.indexDocument(user, {
                 pageContent: content,
                 metadata: {
-                  nodeType: 'canvas',
-                  title: canvas.title,
-                  canvasId: canvas.canvasId,
+                  nodeType: 'document',
+                  title: doc.title,
+                  docId: doc.docId,
                 },
               }),
             ]);
-            canvasUpdates.vectorSize = size;
+            docUpdates.vectorSize = size;
 
-            const updatedCanvas = await this.prisma.canvas.update({
-              where: { canvasId: canvas.canvasId },
-              data: canvasUpdates,
+            const updatedDoc = await this.prisma.document.update({
+              where: { docId: doc.docId },
+              data: docUpdates,
             });
-            context.canvas = updatedCanvas;
+            context.doc = updatedDoc;
 
             await this.subscriptionService.syncStorageUsage({
               uid: user.uid,
@@ -140,10 +139,10 @@ export class CanvasWsGateway implements OnGatewayConnection {
           payload = decoded as JwtPayload;
         }
 
-        const canvas = await this.prisma.canvas.findFirst({
-          where: { canvasId: documentName, deletedAt: null },
+        const doc = await this.prisma.document.findFirst({
+          where: { docId: documentName, deletedAt: null },
         });
-        if (canvas.uid !== payload.uid) {
+        if (doc.uid !== payload.uid) {
           throw new Error(`user not authorized: ${documentName}`);
         }
         const user = await this.prisma.user.findFirst({
@@ -154,7 +153,7 @@ export class CanvasWsGateway implements OnGatewayConnection {
         }
 
         // Set contextual data to use it in other hooks
-        return { user, canvas } as CanvasContext;
+        return { user, doc } as DocumentContext;
       },
     });
   }

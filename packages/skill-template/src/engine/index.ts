@@ -21,8 +21,7 @@ import {
   SearchOptions,
   WebSearchRequest,
   WebSearchResponse,
-  ListCanvasData,
-  ListCanvasResponse,
+  ListCanvasesData,
   UpsertProjectRequest,
   CreateProjectResponse,
   UpdateProjectResponse,
@@ -30,7 +29,6 @@ import {
   AddReferencesResponse,
   DeleteReferencesRequest,
   DeleteReferencesResponse,
-  GetCanvasDetailData,
   GetResourceDetailData,
   GetProjectDetailData,
   GetProjectDetailResponse,
@@ -38,10 +36,21 @@ import {
   SearchResult,
   RerankResponse,
   BatchWebSearchRequest,
+  GetDocumentDetailData,
+  UpsertDocumentRequest,
+  ListDocumentsData,
+  CreateDocumentResponse,
+  GetDocumentDetailResponse,
+  ListDocumentsResponse,
+  ListCanvasesResponse,
+  DeleteCanvasResponse,
+  DeleteCanvasRequest,
+  DeleteDocumentResponse,
+  DeleteDocumentRequest,
 } from '@refly-packages/openapi-schema';
 
 // TODO: unify with frontend
-export type ContentNodeType = 'resource' | 'canvas' | 'extensionWeblink' | 'resourceSelection' | 'canvasSelection';
+export type ContentNodeType = 'resource' | 'document' | 'extensionWeblink' | 'resourceSelection' | 'canvasSelection';
 
 export interface NodeMeta {
   title: string;
@@ -54,9 +63,13 @@ export interface NodeMeta {
 }
 
 export interface ReflyService {
-  getCanvasDetail: (user: User, req: GetCanvasDetailData['query']) => Promise<GetCanvasDetailResponse>;
   createCanvas: (user: User, req: UpsertCanvasRequest) => Promise<CreateCanvasResponse>;
-  listCanvas: (user: User, param: ListCanvasData['query']) => Promise<ListCanvasResponse>;
+  listCanvases: (user: User, param: ListCanvasesData['query']) => Promise<ListCanvasesResponse>;
+  deleteCanvas: (user: User, req: DeleteCanvasRequest) => Promise<DeleteCanvasResponse>;
+  getDocumentDetail: (user: User, req: GetDocumentDetailData['query']) => Promise<GetDocumentDetailResponse>;
+  createDocument: (user: User, req: UpsertDocumentRequest) => Promise<CreateDocumentResponse>;
+  listDocuments: (user: User, param: ListDocumentsData['query']) => Promise<ListDocumentsResponse>;
+  deleteDocument: (user: User, req: DeleteDocumentRequest) => Promise<DeleteDocumentResponse>;
   getResourceDetail: (user: User, req: GetResourceDetailData['query']) => Promise<GetResourceDetailResponse>;
   createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
   batchCreateResource: (user: User, req: UpsertResourceRequest[]) => Promise<BatchCreateResourceResponse>;

@@ -1,4 +1,4 @@
-import { Canvas } from '@refly-packages/openapi-schema';
+import { Document } from '@refly-packages/openapi-schema';
 import { HighlightSelection } from './types';
 import { referenceContextHandlingPrompt } from './commonPrompt';
 
@@ -458,16 +458,16 @@ export const buildBlockEditCanvasUserPrompt = ({
 };
 
 export const buildContextualBlockEditCanvasDocumentContext = (documentContext: {
-  canvas: Canvas;
+  document: Document;
   selectedContent: HighlightSelection;
 }) => {
-  const { canvas, selectedContent } = documentContext;
+  const { document, selectedContent } = documentContext;
 
   return `
  <documentContext>
  <reflyCanvas 
    type="document" 
-   title="${canvas.title}"
+   title="${document.title}"
  >
  ${selectedContent.beforeHighlight}
  <highlight></highlight>
@@ -482,7 +482,7 @@ export const buildContextualBlockEditCanvasReferenceContext = (referenceContext:
  </referenceContext>`;
 
 export const buildContextualBlockEditCanvasContext = (
-  documentContext: { canvas: Canvas; selectedContent: HighlightSelection },
+  documentContext: { document: Document; selectedContent: HighlightSelection },
   referenceContext: string,
 ) => {
   const documentContextString = buildContextualBlockEditCanvasDocumentContext(documentContext);
@@ -496,16 +496,16 @@ export const buildContextualBlockEditCanvasContext = (
 };
 
 export const buildNoContextBlockEditCanvasContext = (documentContext: {
-  canvas: Canvas;
+  document: Document;
   selectedContent: HighlightSelection;
 }) => {
-  const { canvas, selectedContent } = documentContext;
+  const { document, selectedContent } = documentContext;
 
   return `
 <context>
 <reflyCanvas 
   type="document" 
-  title="${canvas.title}"
+  title="${document.title}"
 >
 ${selectedContent.beforeHighlight}
 <highlight></highlight>
@@ -515,7 +515,7 @@ ${selectedContent.afterHighlight}
 };
 
 export const buildContextualBlockEditCanvasContextUserPrompt = (documentContext: {
-  canvas: Canvas;
+  document: Document;
   selectedContent: HighlightSelection;
 }) => {
   return (context: string, needPrepareContext: boolean) => {

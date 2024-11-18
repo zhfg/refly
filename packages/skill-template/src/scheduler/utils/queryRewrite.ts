@@ -12,11 +12,11 @@ import { safeStringifyJSON } from '@refly-packages/utils';
 
 // simplify context entityId for better extraction
 export const preprocessContext = (context: IContext): IContext => {
-  const { resources, canvases, contentList, projects } = context;
+  const { resources, documents, contentList, projects } = context;
 
   const preprocessedContext = {
     resources: resources.map((r, index) => ({ ...r, resource: { ...r.resource, resourceId: `resource-${index}` } })),
-    canvases: canvases.map((c, index) => ({ ...c, canvas: { ...c.canvas, canvasId: `canvas-${index}` } })),
+    documents: documents.map((c, index) => ({ ...c, document: { ...c.document, docId: `document-${index}` } })),
     contentList: contentList.map((c, index) => ({ ...c, metadata: { ...c.metadata, entityId: `content-${index}` } })),
     projects: projects.map((c, index) => ({
       ...c,
@@ -33,7 +33,7 @@ export const postprocessContext = (
 ): IContext => {
   let context: IContext = {
     resources: [],
-    canvases: [],
+    documents: [],
     contentList: [],
     projects: [],
   };
@@ -41,9 +41,9 @@ export const postprocessContext = (
   mentionedContextList.forEach((item) => {
     if (item.type === 'canvas') {
       // 这里需要根据entityId在originalContext中找到对应的canvas
-      const originalCanvas = originalContext.canvases.find((c, index) => `canvas-${index}` === item.entityId);
+      const originalCanvas = originalContext.documents.find((c, index) => `document-${index}` === item.entityId);
       if (originalCanvas) {
-        context.canvases.push({
+        context.documents.push({
           ...originalCanvas,
           metadata: { ...originalCanvas.metadata, useWholeContent: item?.useWholeContent },
         });
@@ -194,10 +194,10 @@ export async function analyzeQueryAndContext(
   query: string,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<QueryAnalysis> {
-  const { chatHistory, resources, canvases, contentList, projects, modelName } = ctx.config.configurable;
+  const { chatHistory, resources, documents, contentList, projects, modelName } = ctx.config.configurable;
   const context: IContext = {
     resources,
-    canvases,
+    documents,
     contentList,
     projects,
   };

@@ -1,4 +1,4 @@
-import { Canvas } from '@refly-packages/openapi-schema';
+import { Document } from '@refly-packages/openapi-schema';
 import { HighlightSelection } from './types';
 import { referenceContextHandlingPrompt } from './commonPrompt';
 
@@ -461,16 +461,16 @@ export const buildInlineEditCanvasUserPrompt = ({
 };
 
 export const buildContextualInlineEditCanvasDocumentContext = (documentContext: {
-  canvas: Canvas;
+  document: Document;
   selectedContent: HighlightSelection;
 }) => {
-  const { canvas, selectedContent } = documentContext;
+  const { document, selectedContent } = documentContext;
 
   return `
   <documentContext>
   <reflyCanvas 
   type="document" 
-  title="${canvas.title}"
+  title="${document.title}"
 >
 ${selectedContent.beforeHighlight}<highlight>${selectedContent.highlightedText}</highlight>${selectedContent.afterHighlight}
 </reflyCanvas>
@@ -483,7 +483,7 @@ export const buildContextualInlineEditCanvasReferenceContext = (referenceContext
   </referenceContext>`;
 
 export const buildContextualInlineEditCanvasContext = (
-  documentContext: { canvas: Canvas; selectedContent: HighlightSelection },
+  documentContext: { document: Document; selectedContent: HighlightSelection },
   referenceContext: string,
 ) => {
   const documentContextString = buildContextualInlineEditCanvasDocumentContext(documentContext);
@@ -497,16 +497,16 @@ export const buildContextualInlineEditCanvasContext = (
 };
 
 export const buildNoContextInlineEditCanvasContext = (documentContext: {
-  canvas: Canvas;
+  document: Document;
   selectedContent: HighlightSelection;
 }) => {
-  const { canvas, selectedContent } = documentContext;
+  const { document, selectedContent } = documentContext;
 
   return `
 <context>
 <reflyCanvas 
   type="document" 
-  title="${canvas.title}"
+  title="${document.title}"
 >
 ${selectedContent.beforeHighlight}<highlight>${selectedContent.highlightedText}</highlight>${selectedContent.afterHighlight}
 </reflyCanvas>
@@ -514,7 +514,7 @@ ${selectedContent.beforeHighlight}<highlight>${selectedContent.highlightedText}<
 };
 
 export const buildContextualInlineEditCanvasContextUserPrompt = (documentContext: {
-  canvas: Canvas;
+  document: Document;
   selectedContent: HighlightSelection;
 }) => {
   return (context: string, needPrepareContext: boolean) => {

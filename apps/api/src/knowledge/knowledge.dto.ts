@@ -1,18 +1,18 @@
 import {
   Resource as ResourceModel,
-  Canvas as CanvasModel,
+  Document as DocumentModel,
   Project as ProjectModel,
   Reference as ReferenceModel,
 } from '@prisma/client';
 import {
   Resource,
-  Canvas,
   ResourceType,
   IndexStatus,
   Project,
   Reference,
   ReferenceType,
   ReferenceMeta,
+  Document,
 } from '@refly-packages/openapi-schema';
 import { pick } from '@/utils';
 
@@ -51,26 +51,18 @@ export const resourcePO2DTO = (
   };
 };
 
-export const canvasPO2DTO = (
-  canvas: CanvasModel & {
+export const documentPO2DTO = (
+  doc: DocumentModel & {
     content?: string;
   },
-): Canvas => {
-  if (!canvas) {
+): Document => {
+  if (!doc) {
     return null;
   }
-  const res: Canvas = {
-    ...pick(canvas, [
-      'canvasId',
-      'projectId',
-      'title',
-      'content',
-      'contentPreview',
-      'shareCode',
-      'readOnly',
-    ]),
-    createdAt: canvas.createdAt.toJSON(),
-    updatedAt: canvas.updatedAt.toJSON(),
+  const res: Document = {
+    ...pick(doc, ['docId', 'title', 'content', 'contentPreview', 'shareCode', 'readOnly']),
+    createdAt: doc.createdAt.toJSON(),
+    updatedAt: doc.updatedAt.toJSON(),
   };
   return res;
 };

@@ -2,6 +2,15 @@
 
 import { client, type Options, formDataBodySerializer } from '@hey-api/client-fetch';
 import type {
+  ListCanvasesData,
+  ListCanvasesError,
+  ListCanvasesResponse,
+  CreateCanvasData,
+  CreateCanvasError,
+  CreateCanvasResponse,
+  DeleteCanvasData,
+  DeleteCanvasError,
+  DeleteCanvasResponse,
   ListResourcesData,
   ListResourcesError,
   ListResourcesResponse,
@@ -23,24 +32,24 @@ import type {
   DeleteResourceData,
   DeleteResourceError,
   DeleteResourceResponse,
-  ListCanvasData,
-  ListCanvasError,
-  ListCanvasResponse2,
-  GetCanvasDetailData,
-  GetCanvasDetailError,
-  GetCanvasDetailResponse2,
-  UpdateCanvasData,
-  UpdateCanvasError,
-  UpdateCanvasResponse,
-  CreateCanvasData,
-  CreateCanvasError,
-  CreateCanvasResponse,
-  DeleteCanvasData,
-  DeleteCanvasError,
-  DeleteCanvasResponse,
-  BatchUpdateCanvasData,
-  BatchUpdateCanvasError,
-  BatchUpdateCanvasResponse,
+  ListDocumentsData,
+  ListDocumentsError,
+  ListDocumentsResponse,
+  GetDocumentDetailData,
+  GetDocumentDetailError,
+  GetDocumentDetailResponse2,
+  UpdateDocumentData,
+  UpdateDocumentError,
+  UpdateDocumentResponse,
+  CreateDocumentData,
+  CreateDocumentError,
+  CreateDocumentResponse,
+  DeleteDocumentData,
+  DeleteDocumentError,
+  DeleteDocumentResponse,
+  BatchUpdateDocumentData,
+  BatchUpdateDocumentError,
+  BatchUpdateDocumentResponse,
   QueryReferencesData,
   QueryReferencesError,
   QueryReferencesResponse2,
@@ -188,6 +197,39 @@ import type {
 } from './types.gen';
 
 /**
+ * List user canvases
+ * List all canvases for a user
+ */
+export const listCanvases = (options?: Options<ListCanvasesData>) => {
+  return (options?.client ?? client).get<ListCanvasesResponse, ListCanvasesError>({
+    ...options,
+    url: '/canvas/list',
+  });
+};
+
+/**
+ * Create canvas
+ * Create a new canvas
+ */
+export const createCanvas = (options: Options<CreateCanvasData>) => {
+  return (options?.client ?? client).post<CreateCanvasResponse, CreateCanvasError>({
+    ...options,
+    url: '/canvas/create',
+  });
+};
+
+/**
+ * Delete canvas
+ * Delete an existing canvas
+ */
+export const deleteCanvas = (options: Options<DeleteCanvasData>) => {
+  return (options?.client ?? client).post<DeleteCanvasResponse, DeleteCanvasError>({
+    ...options,
+    url: '/canvas/delete',
+  });
+};
+
+/**
  * List resources
  * List all resources
  */
@@ -265,68 +307,68 @@ export const deleteResource = (options: Options<DeleteResourceData>) => {
 };
 
 /**
- * List user canvases
- * List all canvases for a user
+ * List user documents
+ * List all documents for a user
  */
-export const listCanvas = (options?: Options<ListCanvasData>) => {
-  return (options?.client ?? client).get<ListCanvasResponse2, ListCanvasError>({
+export const listDocuments = (options?: Options<ListDocumentsData>) => {
+  return (options?.client ?? client).get<ListDocumentsResponse, ListDocumentsError>({
     ...options,
-    url: '/knowledge/canvas/list',
+    url: '/knowledge/document/list',
   });
 };
 
 /**
  * Get canvas detail
- * Return canvas detail
+ * Return document detail
  */
-export const getCanvasDetail = (options: Options<GetCanvasDetailData>) => {
-  return (options?.client ?? client).get<GetCanvasDetailResponse2, GetCanvasDetailError>({
+export const getDocumentDetail = (options: Options<GetDocumentDetailData>) => {
+  return (options?.client ?? client).get<GetDocumentDetailResponse2, GetDocumentDetailError>({
     ...options,
-    url: '/knowledge/canvas/detail',
+    url: '/knowledge/document/detail',
   });
 };
 
 /**
  * Update canvas
- * Update an existing canvas
+ * Update an existing document
  */
-export const updateCanvas = (options: Options<UpdateCanvasData>) => {
-  return (options?.client ?? client).post<UpdateCanvasResponse, UpdateCanvasError>({
+export const updateDocument = (options: Options<UpdateDocumentData>) => {
+  return (options?.client ?? client).post<UpdateDocumentResponse, UpdateDocumentError>({
     ...options,
-    url: '/knowledge/canvas/update',
+    url: '/knowledge/document/update',
   });
 };
 
 /**
  * Create new canvas
- * Create a new canvas
+ * Create a new document
  */
-export const createCanvas = (options: Options<CreateCanvasData>) => {
-  return (options?.client ?? client).post<CreateCanvasResponse, CreateCanvasError>({
+export const createDocument = (options: Options<CreateDocumentData>) => {
+  return (options?.client ?? client).post<CreateDocumentResponse, CreateDocumentError>({
     ...options,
-    url: '/knowledge/canvas/create',
+    url: '/knowledge/document/create',
   });
 };
 
 /**
  * Delete canvas
- * Delete an existing canvas
+ * Delete an existing document
  */
-export const deleteCanvas = (options: Options<DeleteCanvasData>) => {
-  return (options?.client ?? client).post<DeleteCanvasResponse, DeleteCanvasError>({
+export const deleteDocument = (options: Options<DeleteDocumentData>) => {
+  return (options?.client ?? client).post<DeleteDocumentResponse, DeleteDocumentError>({
     ...options,
-    url: '/knowledge/canvas/delete',
+    url: '/knowledge/document/delete',
   });
 };
 
 /**
- * Batch update canvases
- * Batch update existing canvases
+ * Batch update documents
+ * Batch update existing documents
  */
-export const batchUpdateCanvas = (options: Options<BatchUpdateCanvasData>) => {
-  return (options?.client ?? client).post<BatchUpdateCanvasResponse, BatchUpdateCanvasError>({
+export const batchUpdateDocument = (options: Options<BatchUpdateDocumentData>) => {
+  return (options?.client ?? client).post<BatchUpdateDocumentResponse, BatchUpdateDocumentError>({
     ...options,
-    url: '/knowledge/canvas/batchUpdate',
+    url: '/knowledge/document/batchUpdate',
   });
 };
 

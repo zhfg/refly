@@ -1,10 +1,10 @@
 import { IContext, SelectedContentDomain, SkillContextContentItemMetadata } from '../types';
 import {
   SkillContextContentItem,
-  SkillContextCanvasItem,
   SkillContextResourceItem,
   Source,
   ResourceType,
+  SkillContextDocumentItem,
 } from '@refly-packages/openapi-schema';
 import { truncateContext, truncateMessages } from './truncator';
 import { BaseMessage } from '@langchain/core/messages';
@@ -88,7 +88,7 @@ export const flattenMergedContextToSources = (mergedContext: {
 // TODO: should replace id with `type-index` for better llm extraction
 // citationIndex for each context item is used for LLM to cite the context item in the final answer
 export const concatContextToStr = (context: Partial<IContext>, startIndex: number = 1) => {
-  const { contentList = [], resources = [], canvases = [], webSearchSources = [] } = context || {};
+  const { contentList = [], resources = [], documents = [], webSearchSources = [] } = context || {};
 
   let contextStr = '';
   let index = startIndex; // Use passed in startIndex
@@ -125,14 +125,14 @@ export const concatContextToStr = (context: Partial<IContext>, startIndex: numbe
     contextStr += `\n\n<UserSelectedContent>\n${contentStr}\n</UserSelectedContent>\n\n`;
   }
 
-  if (canvases.length > 0) {
+  if (documents.length > 0) {
     // contextStr += 'Following are the knowledge base canvases: \n';
     const concatCanvas = (id: string, title: string, content: string) => {
       return `<ContextItem citationIndex='[[citation:${index++}]]' type='canvas' entityId='${id}' title='${title}'>${content}</ContextItem>`;
     };
 
-    const canvasStr = canvases
-      .map((n) => concatCanvas(n.canvas?.canvasId!, n.canvas?.title!, n.canvas?.content!))
+    const canvasStr = documents
+      .map((n) => concatCanvas(n.document?.docId!, n.document?.title!, n.document?.content!))
       .join('\n\n');
 
     contextStr += `\n\n<KnowledgeBaseCanvases>\n${canvasStr}\n</KnowledgeBaseCanvases>\n\n`;
@@ -157,15 +157,15 @@ export const concatContextToStr = (context: Partial<IContext>, startIndex: numbe
 };
 
 export const summarizeContext = (context: IContext, maxContextTokens: number): string => {
-  const { contentList = [], resources = [], canvases = [] } = context || {};
+  const { contentList = [], resources = [], documents = [] } = context || {};
   const previewedContext: IContext = {
     resources: resources.map((r) => ({
       ...r,
       content: r?.resource?.contentPreview || r.resource?.content?.slice(0, 50) + '...',
     })),
-    canvases: canvases.map((n) => ({
+    documents: documents.map((n) => ({
       ...n,
-      content: n?.canvas?.contentPreview || n.canvas?.content?.slice(0, 50) + '...',
+      content: n?.document?.contentPreview || n.document?.content?.slice(0, 50) + '...',
     })),
     contentList: contentList.map((c) => ({ ...c, content: c.content?.slice(0, 50) + '...' })),
   };
@@ -183,7 +183,7 @@ export const summarizeChatHistory = (messages: BaseMessage[]): string => {
 };
 
 export function flattenContextToSources(context: Partial<IContext>): Source[] {
-  const { webSearchSources = [], contentList = [], resources = [], canvases = [] } = context || {};
+  const { webSearchSources = [], contentList = [], resources = [], documents = [] } = context || {};
   const sources: Source[] = [];
 
   // Web search sources
@@ -222,19 +222,19 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
     });
   });
 
-  // Knowledge base canvases
-  canvases.forEach((canvas: SkillContextCanvasItem) => {
+  // Knowledge base documents
+  documents.forEach((document: SkillContextDocumentItem) => {
     sources.push({
-      url: `${baseUrl}/project/${canvas.canvas?.projectId}?canvasId=${canvas.canvas?.canvasId}`,
-      title: canvas.canvas?.title,
-      pageContent: canvas.canvas?.content || '',
+      url: `${baseUrl}/project/${document.document?.docId}?docId=${document.document?.docId}`, // TODO: fix this
+      title: document.document?.title,
+      pageContent: document.document?.content || '',
       metadata: {
-        projectId: canvas.canvas?.projectId,
-        title: canvas.canvas?.title,
-        entityId: canvas.canvas?.canvasId,
-        entityType: 'canvas',
-        source: `${baseUrl}/project/${canvas.canvas?.projectId}?canvasId=${canvas.canvas?.canvasId}`,
-        sourceType: 'library', // Add source type for knowledge base canvases
+        projectId: document.document?.docId,
+        title: document.document?.title,
+        entityId: document.document?.docId,
+        entityType: 'document',
+        source: `${baseUrl}/project/${document.document?.docId}?docId=${document.document?.docId}`, // TODO: fix this
+        sourceType: 'library', // Add source type for knowledge base documents
       },
     });
   });
