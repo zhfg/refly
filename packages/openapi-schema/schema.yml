@@ -58,6 +58,10 @@ paths:
       responses:
         '200':
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCanvasResponse'
   /canvas/create:
     post:
       tags:

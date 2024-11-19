@@ -2564,7 +2564,7 @@ export type ListCanvasesData = {
   };
 };
 
-export type ListCanvasesResponse = unknown;
+export type ListCanvasesResponse = ListCanvasResponse;
 
 export type ListCanvasesError = unknown;
 
@@ -3326,7 +3326,7 @@ export type $OpenApiTs = {
         /**
          * Successful operation
          */
-        '200': unknown;
+        '200': ListCanvasResponse;
       };
     };
   };

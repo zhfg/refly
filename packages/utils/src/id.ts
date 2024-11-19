@@ -2,76 +2,92 @@ import md5 from 'md5';
 import { v4 as UUIDV4 } from 'uuid';
 import { createId } from '@paralleldrive/cuid2';
 
+export enum IDPrefix {
+  UID = 'u-',
+  EVENT = 'ev-',
+  LABEL_CLASS = 'lc-',
+  LABEL_INSTANCE = 'li-',
+  CONVERSATION = 'cv-',
+  CHAT_MESSAGE = 'cm-',
+  DOCUMENT = 'd-',
+  RESOURCE = 'r-',
+  PROJECT = 'p-',
+  CANVAS = 'c-',
+  REFERENCE = 'rf-',
+  TOKEN_USAGE_METER = 'tum-',
+  STORAGE_USAGE_METER = 'sum-',
+  SKILL = 'sk-',
+  SKILL_TRIGGER = 'tr-',
+  SKILL_JOB = 'sj-',
+  CONTENT_SELECTOR = 'cs-',
+}
+
 export function genUID(): string {
-  return 'u-' + createId();
+  return IDPrefix.UID + createId();
 }
 
 export function genEventID(): string {
-  return 'ev-' + createId();
-}
-
-export function genLinkID(): string {
-  return 'l-' + createId();
+  return IDPrefix.EVENT + createId();
 }
 
 export function genLabelClassID(): string {
-  return 'lc-' + createId();
+  return IDPrefix.LABEL_CLASS + createId();
 }
 
 export function genLabelInstanceID(): string {
-  return 'li-' + createId();
+  return IDPrefix.LABEL_INSTANCE + createId();
 }
 
 export function genConvID(): string {
-  return 'cv-' + createId();
+  return IDPrefix.CONVERSATION + createId();
 }
 
 export function genChatMessageID(): string {
-  return 'cm-' + createId();
+  return IDPrefix.CHAT_MESSAGE + createId();
 }
 
 export function genDocumentID(): string {
-  return 'd-' + createId();
+  return IDPrefix.DOCUMENT + createId();
 }
 
 export function genResourceID(): string {
-  return 'r-' + createId();
+  return IDPrefix.RESOURCE + createId();
 }
 
 export function genProjectID(): string {
-  return 'p-' + createId();
+  return IDPrefix.PROJECT + createId();
 }
 
 export function genCanvasID(): string {
-  return 'c-' + createId();
+  return IDPrefix.CANVAS + createId();
 }
 
 export function genReferenceID(): string {
-  return 'rf-' + createId();
+  return IDPrefix.REFERENCE + createId();
 }
 
 export function genTokenUsageMeterID(): string {
-  return 'tum-' + createId();
+  return IDPrefix.TOKEN_USAGE_METER + createId();
 }
 
 export function genStorageUsageMeterID(): string {
-  return 'sum-' + createId();
+  return IDPrefix.STORAGE_USAGE_METER + createId();
 }
 
 export function genSkillID(): string {
-  return 'sk-' + createId();
+  return IDPrefix.SKILL + createId();
 }
 
 export function genSkillTriggerID(): string {
-  return 'tr-' + createId();
+  return IDPrefix.SKILL_TRIGGER + createId();
 }
 
 export function genSkillJobID(): string {
-  return 'sj-' + createId();
+  return IDPrefix.SKILL_JOB + createId();
 }
 
 export function genContentSelectorID(): string {
-  return 'cs-' + createId();
+  return IDPrefix.CONTENT_SELECTOR + createId();
 }
 
 export const genUniqueId = () => {

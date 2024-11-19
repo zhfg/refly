@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { List, Divider } from '@arco-design/web-react';
 import { Button } from 'antd';
 import { IconDown, IconUser } from '@arco-design/web-react/icon';
@@ -10,13 +12,14 @@ import './index.scss';
 import { CopilotOperationModule } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { getClientOrigin } from '@refly/utils/url';
 import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
 import { GridPattern } from './grid-pattern';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 // types
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { Canvas } from '@refly/openapi-schema';
 
 const quickStartList = [
   {
@@ -39,6 +42,8 @@ const quickStartList = [
 
 export const WriteGuide = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
   const { setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
     setSubscribeModalVisible: state.setSubscribeModalVisible,
   }));
@@ -81,6 +86,20 @@ export const WriteGuide = () => {
     });
   }
 
+  const [canvasList, setCanvasList] = useState<Canvas[]>([]);
+
+  useEffect(() => {
+    getClient()
+      .listCanvases({})
+      .then((res) => {
+        const { data, error } = res;
+        if (error) {
+          return;
+        }
+        setCanvasList(data?.data || []);
+      });
+  }, []);
+
   return (
     <div className="write-guide-container">
       {!userStore.userProfile && (
@@ -112,17 +131,17 @@ export const WriteGuide = () => {
               wrapperStyle={{ width: '100%' }}
               bordered={false}
               pagination={false}
-              dataSource={quickStartList}
+              dataSource={canvasList}
               render={(item, key) => (
                 <List.Item key={key} className="quick-start-item-container" actionLayout="vertical">
                   <div
                     className="quick-start-item"
                     onClick={() => {
-                      chatStore.setNewQAText(t(`homePage.suggestion.${item.title}`));
+                      navigate(`/canvas/${item.canvasId}`);
                     }}
                   >
-                    <div className="quick-start-item-emoji">{item.emoji}</div>
-                    <div className="quick-start-item-title">{t(`homePage.suggestion.${item.title}`)}</div>
+                    <div className="quick-start-item-emoji">🗓️</div>
+                    <div className="quick-start-item-title">{item.title}</div>
                   </div>
                 </List.Item>
               )}

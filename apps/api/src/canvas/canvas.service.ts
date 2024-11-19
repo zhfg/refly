@@ -71,8 +71,8 @@ export class CanvasService {
       }),
     ];
 
-    if (canvas.storageKey) {
-      cleanups.push(this.minio.client.removeObject(canvas.storageKey));
+    if (canvas.stateStorageKey) {
+      cleanups.push(this.minio.client.removeObject(canvas.stateStorageKey));
     }
 
     const files = await this.prisma.staticFile.findMany({

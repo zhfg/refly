@@ -9,7 +9,6 @@ import { RAGModule } from '@/rag/rag.module';
 import { MiscModule } from '@/misc/misc.module';
 import { SubscriptionModule } from '@/subscription/subscription.module';
 import { ResourceProcessor } from './knowledge.processor';
-import { DocumentWsGateway } from './knowledge.gateway';
 import { QUEUE_RESOURCE, QUEUE_SIMPLE_EVENT, QUEUE_SYNC_STORAGE_USAGE } from '@/utils';
 
 @Module({
@@ -24,7 +23,7 @@ import { QUEUE_RESOURCE, QUEUE_SIMPLE_EVENT, QUEUE_SYNC_STORAGE_USAGE } from '@/
     BullModule.registerQueue({ name: QUEUE_SYNC_STORAGE_USAGE }),
   ],
   controllers: [KnowledgeController],
-  providers: [KnowledgeService, ResourceProcessor, DocumentWsGateway],
+  providers: [KnowledgeService, ResourceProcessor],
   exports: [KnowledgeService],
 })
 export class KnowledgeModule {}

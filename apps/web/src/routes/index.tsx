@@ -15,6 +15,7 @@ import { SuspenseLoading } from "@refly-packages/ai-workspace-common/components/
 
 // Lazy load components
 const Home = lazy(() => import("@/pages/home"))
+const Canvas = lazy(() => import("@/pages/canvas"))
 const Library = lazy(() => import("@/pages/library"))
 const Resource = lazy(() => import("@/pages/resource"))
 const ConvLibrary = lazy(() => import("@/pages/conv-library"))
@@ -29,6 +30,7 @@ const prefetchRoutes = () => {
   // Prefetch common routes
   import("@/pages/login")
   import("@/pages/home")
+  import("@/pages/canvas")
   import("@/pages/library")
   import("@/pages/resource")
   import("@/pages/project")
@@ -119,6 +121,15 @@ export const AppRouter = (props: { layout?: any }) => {
             }
           />
 
+          <Route
+            path="/canvas/:canvasId"
+            element={
+              <BetaProtectedRoute
+                component={Canvas}
+                hasBetaAccess={hasBetaAccess}
+              />
+            }
+          />
           <Route
             path="/library"
             element={

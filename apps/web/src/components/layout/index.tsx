@@ -47,7 +47,10 @@ export const AppLayout = (props: AppLayoutProps) => {
   const runtime = getRuntime()
   const isWeb = runtime === "web"
 
-  const showSider = !useMatch("/share/:shareCode") && !!userStore.userProfile
+  const matchShare = useMatch("/share/:shareCode")
+  const matchCanvas = useMatch("/canvas/:canvasId")
+
+  const showSider = !matchShare && !matchCanvas && !!userStore.userProfile
 
   useBindCommands()
 

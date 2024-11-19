@@ -21,6 +21,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
 import { StripeModule } from '@golevelup/nestjs-stripe';
 import { ShareModule } from './share/share.module';
 import { CanvasModule } from './canvas/canvas.module';
+import { CollabModule } from './collab/collab.module';
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { CanvasModule } from './canvas/canvas.module';
     SubscriptionModule,
     ShareModule,
     CanvasModule,
+    CollabModule,
   ],
   controllers: [AppController],
 })
