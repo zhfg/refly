@@ -1,13 +1,11 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from 'antd';
-import { useCookie } from 'react-use';
+import { Button, Input, Radio, Space } from 'antd';
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
-  Panel,
   Connection,
   Node,
   Edge,
@@ -16,36 +14,26 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from '@xyflow/react';
-import { HocuspocusProvider } from '@hocuspocus/provider';
+import { NodePreview } from './node-preview';
+import { nodeTypes, prepareNodeData, CanvasNodeType, CanvasNode } from './node';
+import { useCollabProvider } from '@refly-packages/ai-workspace-common/hooks/use-collab-provider';
 
 import '@xyflow/react/dist/style.css';
-import { PreviewPanel } from './preview-panel';
-import { getWsServerOrigin } from '@refly-packages/utils/url';
 
 export const Canvas = (props: { canvasId: string }) => {
   const { canvasId } = props;
 
   const navigate = useNavigate();
 
-  const [token] = useCookie('_refly_ai_sid');
-
-  const [nodes, setNodes] = useState<Node[]>([]);
+  const [nodes, setNodes] = useState<CanvasNode[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
 
-  const websocketProvider = useMemo(() => {
-    const provider = new HocuspocusProvider({
-      url: getWsServerOrigin(),
-      name: canvasId,
-      token,
-    });
-    provider.on('status', (event) => {
-      console.log('websocketProvider event', event);
-    });
-    return provider;
-  }, [canvasId, token]);
-  const ydoc = websocketProvider.document;
+  const [nodeType, setNodeType] = useState<CanvasNodeType>('skill');
 
-  const yNodes = ydoc.getArray<Node>('nodes');
+  const collabProvider = useCollabProvider(canvasId);
+  const ydoc = collabProvider.document;
+
+  const yNodes = ydoc.getArray<CanvasNode>('nodes');
   const yEdges = ydoc.getArray<Edge>('edges');
 
   useEffect(() => {
@@ -61,12 +49,13 @@ export const Canvas = (props: { canvasId: string }) => {
     });
 
     return () => {
-      websocketProvider.destroy();
+      collabProvider.forceSync();
+      collabProvider.destroy();
     };
-  }, [canvasId, websocketProvider]);
+  }, [canvasId, collabProvider]);
 
   const onNodesChange = useCallback(
-    (changes: NodeChange<Node>[]) => {
+    (changes: NodeChange<CanvasNode>[]) => {
       ydoc.transact(() => {
         const updatedNodes = applyNodeChanges(changes, yNodes.toJSON());
         yNodes.delete(0, yNodes.length);
@@ -89,7 +78,7 @@ export const Canvas = (props: { canvasId: string }) => {
 
   const [message, setMessage] = useState('');
   // Add state for selected node
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [selectedNode, setSelectedNode] = useState<CanvasNode | null>(null);
 
   // Update the onConnect handler to use y-doc
   const onConnect = useCallback(
@@ -103,8 +92,7 @@ export const Canvas = (props: { canvasId: string }) => {
   );
 
   // Add node click handler
-  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
-    console.log('node', node);
+  const onNodeClick = useCallback((event: React.MouseEvent, node: CanvasNode) => {
     setSelectedNode(node);
   }, []);
 
@@ -118,20 +106,10 @@ export const Canvas = (props: { canvasId: string }) => {
     e.preventDefault();
     if (!message.trim()) return;
 
-    const newNode = {
-      id: `node-${Date.now()}`,
-      position: {
-        x: Math.random() * 500,
-        y: Math.random() * 500,
-      },
-      data: { label: message },
-      style: {
-        background: '#fff',
-        padding: '10px',
-        borderRadius: '8px',
-        border: '1px solid #ddd',
-      },
-    };
+    const newNode = prepareNodeData({
+      data: { entityId: message, metadata: {} },
+      type: nodeType,
+    });
 
     ydoc.transact(() => {
       yNodes.push([newNode]);
@@ -143,7 +121,7 @@ export const Canvas = (props: { canvasId: string }) => {
           id: `edge-${lastNode.id}-${newNode.id}`,
           source: lastNode.id,
           target: newNode.id,
-          style: { stroke: '#999' },
+          style: { stroke: '#666' },
         };
         yEdges.push([newEdge]);
       }
@@ -165,6 +143,7 @@ export const Canvas = (props: { canvasId: string }) => {
         panOnScroll
         fitView
         selectionOnDrag
+        nodeTypes={nodeTypes}
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
@@ -177,55 +156,25 @@ export const Canvas = (props: { canvasId: string }) => {
         <MiniMap position="top-right" />
       </ReactFlow>
 
-      <form onSubmit={handleSubmit} className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl">
+      <form onSubmit={handleSubmit} className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl">
         <div className="relative">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type your message..."
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <button
-            type="submit"
-            className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-          >
-            Send
-          </button>
+          <Radio.Group className="mb-2" value={nodeType} onChange={(e) => setNodeType(e.target.value)}>
+            <Radio.Button value="skill">Skill</Radio.Button>
+            <Radio.Button value="document">Document</Radio.Button>
+            <Radio.Button value="resource">Resource</Radio.Button>
+            <Radio.Button value="tool">Tool</Radio.Button>
+            <Radio.Button value="response">Response</Radio.Button>
+          </Radio.Group>
+          <Space.Compact style={{ width: '100%' }}>
+            <Input value={message} onChange={(e) => setMessage(e.target.value)} onPressEnter={handleSubmit} />
+            <Button type="primary" onClick={handleSubmit}>
+              Submit
+            </Button>
+          </Space.Compact>
         </div>
       </form>
 
-      {selectedNode && (
-        <div className="absolute top-1 right-4 w-96 h-[95%] m-3 bg-white rounded-lg shadow-lg p-4 z-10">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">Node Preview</h3>
-            <button onClick={handleClosePanel} className="text-gray-500 hover:text-gray-700">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
-
-          <div className="bg-gray-50 rounded p-3">
-            <p className="text-gray-800">{JSON.stringify(selectedNode.data)}</p>
-          </div>
-
-          <div className="mt-4 text-sm text-gray-500">
-            <p>Node ID: {selectedNode.id}</p>
-            <p>
-              Position: ({Math.round(selectedNode.position.x)}, {Math.round(selectedNode.position.y)})
-            </p>
-          </div>
-        </div>
-      )}
+      {selectedNode && <NodePreview node={selectedNode} handleClosePanel={handleClosePanel} />}
     </div>
   );
 };
