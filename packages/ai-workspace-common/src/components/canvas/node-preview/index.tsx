@@ -1,3 +1,4 @@
+import { Button } from 'antd';
 import { CanvasNode, CanvasNodeType } from '../node';
 import { ResponseNodePreview } from './response';
 import { ResourceNodePreview } from './resource';
@@ -26,10 +27,13 @@ export const NodePreview = (props: { node: CanvasNode; handleClosePanel: () => v
   };
 
   return (
-    <div className="absolute top-1 right-4 w-1/3 min-w-96 h-[95%] m-3 bg-white rounded-lg shadow-lg p-4 z-10">
+    <div
+      className="absolute top-1 right-1 w-1/3 min-w-96 m-3 bg-white rounded-lg shadow-lg p-4 z-10"
+      style={{ height: 'calc(100vh - 40px)' }}
+    >
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">Node Preview</h3>
-        <button onClick={handleClosePanel} className="text-gray-500 hover:text-gray-700">
+        <Button type="text" onClick={handleClosePanel} className="px-2 text-gray-500 hover:text-gray-700">
           <svg
             className="w-5 h-5"
             fill="none"
@@ -41,10 +45,10 @@ export const NodePreview = (props: { node: CanvasNode; handleClosePanel: () => v
           >
             <path d="M6 18L18 6M6 6l12 12"></path>
           </svg>
-        </button>
+        </Button>
       </div>
 
-      {previewComponent(node.type)}
+      <div style={{ height: 'calc(100% - 40px)' }}>{previewComponent(node.type)}</div>
     </div>
   );
 };
