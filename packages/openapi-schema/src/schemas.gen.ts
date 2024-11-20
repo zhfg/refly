@@ -3749,3 +3749,8 @@ export const $InMemorySearchResponse = {
     },
   ],
 } as const;
+
+export const $CanvasNodeType = {
+  type: 'string',
+  enum: ['document', 'resource', 'skill', 'tool', 'response'],
+} as const;

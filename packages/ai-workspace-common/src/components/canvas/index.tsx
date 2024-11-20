@@ -17,6 +17,9 @@ import {
 import { NodePreview } from './node-preview';
 import { nodeTypes, prepareNodeData, CanvasNodeType, CanvasNode } from './node';
 import { useCollabProvider } from '@refly-packages/ai-workspace-common/hooks/use-collab-provider';
+import { CanvasToolbar } from './canvas-toolbar';
+import { canvasEmitter } from '@refly-packages/utils/event-emitter/canvas';
+import { Resource } from '@refly/openapi-schema';
 
 import '@xyflow/react/dist/style.css';
 
@@ -130,6 +133,46 @@ export const Canvas = (props: { canvasId: string }) => {
     setMessage('');
   };
 
+  const handleToolSelect = (tool: string) => {
+    // Handle tool selection
+    console.log('Selected tool:', tool);
+  };
+
+  const addNewNode = (entityId: string, type: CanvasNodeType) => {
+    const newNode = prepareNodeData({
+      data: { entityId, metadata: {} },
+      type,
+    });
+    ydoc.transact(() => {
+      yNodes.push([newNode]);
+
+      // If there are existing nodes, create an edge from the last node to the new node
+      if (nodes.length > 0) {
+        const lastNode = nodes[nodes.length - 1];
+        const newEdge = {
+          id: `edge-${lastNode.id}-${newNode.id}`,
+          source: lastNode.id,
+          target: newNode.id,
+          style: { stroke: '#666' },
+        };
+        yEdges.push([newEdge]);
+      }
+    });
+  };
+
+  const handleAddNode = (payload: { type: CanvasNodeType; data: Resource[] }) => {
+    payload.data.forEach((resource) => {
+      addNewNode(resource.resourceId, payload.type);
+    });
+  };
+
+  useEffect(() => {
+    canvasEmitter.on('addNode', handleAddNode);
+    return () => {
+      canvasEmitter.off('addNode', handleAddNode);
+    };
+  }, []);
+
   return (
     <div className="w-screen h-screen relative">
       <Button
@@ -138,6 +181,8 @@ export const Canvas = (props: { canvasId: string }) => {
       >
         ← Back
       </Button>
+
+      <CanvasToolbar onToolSelect={handleToolSelect} />
 
       <ReactFlow
         panOnScroll

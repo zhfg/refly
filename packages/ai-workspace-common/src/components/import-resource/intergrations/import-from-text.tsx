@@ -7,12 +7,8 @@ import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stor
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
-import { useReloadListStateShallow } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
-import { SearchSelect } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 import { useTranslation } from 'react-i18next';
-import { useSaveResourceNotify } from '@refly-packages/ai-workspace-common/hooks/use-save-resouce-notify';
-import { getClientOrigin } from '@refly/utils/url';
-import { useMatch } from '@refly-packages/ai-workspace-common/utils/router';
+import { canvasEmitter } from '@refly-packages/utils/event-emitter/canvas';
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
@@ -20,21 +16,11 @@ const FormItem = Form.Item;
 export const ImportFromText = () => {
   const { t } = useTranslation();
   const importResourceStore = useImportResourceStore();
-  const { handleSaveResourceAndNotify } = useSaveResourceNotify();
+  const { copiedTextPayload } = useImportResourceStore.getState();
 
-  const reloadListState = useReloadListStateShallow((state) => ({
-    setReloadProjectList: state.setReloadProjectList,
-    setReloadResourceList: state.setReloadResourceList,
-    setReloadDirectoryResourceList: state.setReloadDirectoryResourceList,
-  }));
-  const projectId = useMatch('/project/:projectId')?.params?.projectId;
-
-  //
   const [saveLoading, setSaveLoading] = useState(false);
 
   const handleSave = async () => {
-    setSaveLoading(true);
-    const { copiedTextPayload, selectedProjectId } = useImportResourceStore.getState();
     if (!copiedTextPayload?.content || !copiedTextPayload?.title) {
       message.warning(t('resource.import.emptyText'));
       return;
@@ -44,44 +30,29 @@ export const ImportFromText = () => {
       resourceType: 'text',
       title: copiedTextPayload?.title,
       content: copiedTextPayload?.content,
-      projectId: selectedProjectId,
       data: {
         url: copiedTextPayload?.url,
         title: copiedTextPayload?.title,
       },
     };
+    setSaveLoading(true);
+    const { data } = await getClient().createResource({
+      body: createResourceData,
+    });
 
-    try {
-      const res = await getClient().createResource({
-        body: createResourceData,
+    setSaveLoading(false);
+    importResourceStore.setCopiedTextPayload({ title: '', content: '' });
+    importResourceStore.setImportResourceModalVisible(false);
+
+    if (data?.success) {
+      canvasEmitter.emit('addNode', {
+        type: 'resource',
+        data: [data?.data],
       });
-
-      if (!res?.data?.success) {
-        setSaveLoading(false);
-        return { success: false };
-      }
-
-      importResourceStore.setCopiedTextPayload({ title: '', content: '' });
-      importResourceStore.setImportResourceModalVisible(false);
-      if (!projectId || (projectId && selectedProjectId === projectId)) {
-        reloadListState.setReloadProjectList(true);
-        reloadListState.setReloadResourceList(true);
-        reloadListState.setReloadDirectoryResourceList(true);
-      }
-
-      setSaveLoading(false);
-      const resourceId = res?.data?.data?.resourceId;
-      const url = `${getClientOrigin(false)}/resource/${resourceId}`;
-      return { success: true, url };
-    } catch (err) {
-      setSaveLoading(false);
-      return { success: false };
     }
   };
 
   useEffect(() => {
-    importResourceStore.setSelectedProjectId(projectId);
-
     // 使用 copiedTextPayload 中的值初始化表单
     const { title, content, url } = importResourceStore.copiedTextPayload;
     if (title) importResourceStore.setCopiedTextPayload({ title });
@@ -89,8 +60,7 @@ export const ImportFromText = () => {
     if (url) importResourceStore.setCopiedTextPayload({ url });
 
     return () => {
-      /* reset selectedCollectionId and copiedTextPayload after modal hide */
-      importResourceStore.setSelectedProjectId('');
+      /* reset and copiedTextPayload after modal hide */
       importResourceStore.setCopiedTextPayload({ title: '', content: '', url: '' });
     };
   }, []);
@@ -110,7 +80,7 @@ export const ImportFromText = () => {
       {/* content */}
       <div className="flex-grow overflow-y-auto px-[12px] box-border">
         <Form>
-          <FormItem layout="vertical" label={t('resource.import.textTitlePlaceholder')}>
+          <FormItem required layout="vertical" label={t('resource.import.textTitlePlaceholder')}>
             <Input
               // placeholder={t('resource.import.textTitlePlaceholder')}
               value={importResourceStore.copiedTextPayload?.title}
@@ -143,25 +113,17 @@ export const ImportFromText = () => {
       </div>
 
       {/* footer */}
-      <div className="w-full flex justify-between items-center border-t border-solid border-[#e5e5e5] border-x-0 border-b-0 p-[16px] rounded-none">
-        <div className="flex items-center gap-x-[8px]">
-          <p className="text-item">{t('resource.import.saveTo')} </p>
-          <SearchSelect
-            defaultValue={importResourceStore.selectedProjectId}
-            domain="project"
-            className="min-w-[200px] max-w-[220px] flex-1"
-            allowCreateNewEntity
-            onChange={(value) => {
-              if (!value) return;
-              importResourceStore.setSelectedProjectId(value);
-            }}
-          />
-        </div>
+      <div className="w-full flex justify-end items-center border-t border-solid border-[#e5e5e5] border-x-0 border-b-0 p-[16px] rounded-none">
         <div className="flex items-center gap-x-[8px]">
           <Button style={{ marginRight: 8 }} onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
             {t('common.cancel')}
           </Button>
-          <Button type="primary" onClick={() => handleSaveResourceAndNotify(handleSave)}>
+          <Button
+            type="primary"
+            loading={saveLoading}
+            disabled={!copiedTextPayload?.content || !copiedTextPayload?.title}
+            onClick={handleSave}
+          >
             {t('common.save')}
           </Button>
         </div>

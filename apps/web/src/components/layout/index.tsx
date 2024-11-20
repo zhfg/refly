@@ -52,11 +52,7 @@ export const AppLayout = (props: AppLayoutProps) => {
 
   useBindCommands()
 
-  if (matchCanvas) {
-    return <>{props.children}</>
-  }
-
-  const showSider = !matchShare && !!userStore.userProfile
+  const showSider = !matchCanvas && !matchShare && !!userStore.userProfile
 
   return (
     <Layout className="app-layout main">

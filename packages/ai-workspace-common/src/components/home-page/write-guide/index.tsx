@@ -112,6 +112,7 @@ export const WriteGuide = () => {
           {t('common.login')}
         </Button>
       )}
+
       <div className="write-guide">
         <div className="write-guide-inner">
           <div className="write-guide-header flex justify-between items-center">
@@ -147,6 +148,26 @@ export const WriteGuide = () => {
               )}
             />
           </div>
+          <Button
+            type="primary"
+            onClick={() => {
+              getClient()
+                .createCanvas({
+                  body: {
+                    title: `Canvas-${new Date().toISOString()}`,
+                  },
+                })
+                .then((res) => {
+                  const { data, error } = res;
+                  if (error) {
+                    return;
+                  }
+                  navigate(`/canvas/${data?.data?.canvasId}`);
+                });
+            }}
+          >
+            Create Canvas
+          </Button>
         </div>
       </div>
 

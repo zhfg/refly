@@ -339,6 +339,14 @@
     }
   },
   "canvas": {
+    "toolbar": {
+      "changeMode": "Change Mode",
+      "importResource": "Import Resource",
+      "addResource": "Add Resource",
+      "addSkill": "Add Skill",
+      "addTool": "Add Tool",
+      "addDocument": "Add Document"
+    },
     "newCanvas": {
       "modalTitle": "New Canvas",
       "titlePlaceholder": "Please enter the title of the canvas",

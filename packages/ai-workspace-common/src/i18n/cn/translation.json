@@ -340,6 +340,14 @@
     }
   },
   "canvas": {
+    "toolbar": {
+      "changeMode": "切换选择模式",
+      "importResource": "导入资源",
+      "addResource": "添加资源",
+      "addSkill": "添加技能",
+      "addTool": "添加工具",
+      "addDocument": "添加文档"
+    },
     "newCanvas": {
       "modalTitle": "新稿布",
       "titlePlaceholder": "请输入写作标题",
