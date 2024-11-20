@@ -112,6 +112,7 @@ export const WriteGuide = () => {
           {t('common.login')}
         </Button>
       )}
+
       <div className="write-guide">
         <div className="write-guide-inner">
           <div className="write-guide-header flex justify-between items-center">
