@@ -1,12 +1,11 @@
 import { Handle, Node, NodeProps, NodeTypes, Position } from '@xyflow/react';
 import { v4 as UUIDV4 } from 'uuid';
+import { CanvasNodeType } from '@refly/openapi-schema';
 
 export type CanvasNodeData<CanvasMeta extends Record<string, unknown> = Record<string, unknown>> = {
   entityId: string;
   metadata: CanvasMeta;
 };
-
-export type CanvasNodeType = 'document' | 'resource' | 'skill' | 'tool' | 'response';
 
 export type CanvasNode = Node<CanvasNodeData, CanvasNodeType>;
 

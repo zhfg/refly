@@ -2547,6 +2547,8 @@ export type InMemorySearchResponse = BaseResponse & {
   data?: Array<DocumentInterface>;
 };
 
+export type CanvasNodeType = 'document' | 'resource' | 'skill' | 'tool' | 'response';
+
 export type ListCanvasesData = {
   query?: {
     /**

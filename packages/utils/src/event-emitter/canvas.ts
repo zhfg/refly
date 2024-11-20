@@ -1,5 +1,5 @@
-import { Resource } from '@refly-packages/openapi-schema';
-import { CanvasNodeType } from '@refly-packages/ai-workspace-common/components/canvas/node';
+import { Resource, CanvasNodeType } from '@refly-packages/openapi-schema';
+
 import mitt from 'mitt';
 export type Events = {
   addNode: {
