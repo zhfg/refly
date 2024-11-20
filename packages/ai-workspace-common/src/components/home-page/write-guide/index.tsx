@@ -148,6 +148,26 @@ export const WriteGuide = () => {
               )}
             />
           </div>
+          <Button
+            type="primary"
+            onClick={() => {
+              getClient()
+                .createCanvas({
+                  body: {
+                    title: `Canvas-${new Date().toISOString()}`,
+                  },
+                })
+                .then((res) => {
+                  const { data, error } = res;
+                  if (error) {
+                    return;
+                  }
+                  navigate(`/canvas/${data?.data?.canvasId}`);
+                });
+            }}
+          >
+            Create Canvas
+          </Button>
         </div>
       </div>
 
