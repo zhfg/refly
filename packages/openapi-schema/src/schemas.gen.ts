@@ -779,6 +779,10 @@ export const $ActionMeta = {
       type: 'string',
       description: 'Action name',
     },
+    icon: {
+      description: 'Skill icon',
+      $ref: '#/components/schemas/Icon',
+    },
   },
 } as const;
 
@@ -1085,6 +1089,93 @@ export const $TokenUsageItem = {
     outputTokens: {
       type: 'number',
       description: 'Output tokens',
+    },
+  },
+} as const;
+
+export const $ActionResultStatus = {
+  type: 'string',
+  description: 'Action result status',
+  enum: ['waiting', 'executing', 'finish', 'failed'],
+} as const;
+
+export const $ActionResult = {
+  type: 'object',
+  description: 'Action result',
+  required: ['resultId', 'type', 'content', 'actionMeta'],
+  properties: {
+    resultId: {
+      type: 'string',
+      readOnly: true,
+      description: 'Action result ID',
+      example: 'ar-g30e1b80b5g1itbemc0g5jj3',
+    },
+    canvasId: {
+      type: 'string',
+      description: 'Canvas ID',
+      example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    type: {
+      description: 'Action type',
+      $ref: '#/components/schemas/ActionType',
+    },
+    actionMeta: {
+      type: 'object',
+      description: 'Action metadata',
+      $ref: '#/components/schemas/ActionMeta',
+    },
+    content: {
+      type: 'string',
+      description: 'Response content',
+      example: 'Hello',
+    },
+    status: {
+      type: 'string',
+      description: 'Action result status',
+      $ref: '#/components/schemas/ActionResultStatus',
+    },
+    logs: {
+      type: 'array',
+      description: 'Response logs',
+      items: {
+        type: 'string',
+      },
+    },
+    structuredData: {
+      type: 'object',
+      description: 'Structured data output',
+      example: {
+        sources: ['Source'],
+        relatedQuestions: ['string'],
+      },
+    },
+    errors: {
+      type: 'array',
+      description: 'Errors',
+      items: {
+        type: 'string',
+      },
+    },
+    tokenUsage: {
+      type: 'array',
+      description: 'Token usage',
+      items: {
+        $ref: '#/components/schemas/TokenUsageItem',
+      },
+    },
+    invokeParam: {
+      description: 'Skill invocation parameters',
+      $ref: '#/components/schemas/InvokeActionRequest',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Message creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Message update time',
     },
   },
 } as const;
@@ -1835,6 +1926,22 @@ export const $DeleteDocumentRequest = {
       example: 'd-g30e1b80b5g1itbemc0g5jj3',
     },
   },
+} as const;
+
+export const $GetActionResultResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/ActionResult',
+        },
+      },
+    },
+  ],
 } as const;
 
 export const $QueryReferencesRequest = {
@@ -2994,9 +3101,9 @@ export const $InvokeSkillResponse = {
     {
       type: 'object',
       properties: {
-        jobId: {
+        resultId: {
           type: 'string',
-          description: 'Skill job ID',
+          description: 'Skill result ID',
         },
       },
     },

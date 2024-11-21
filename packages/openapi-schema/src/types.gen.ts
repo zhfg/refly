@@ -617,6 +617,10 @@ export type ActionMeta = {
    * Action name
    */
   name?: string;
+  /**
+   * Skill icon
+   */
+  icon?: Icon;
 };
 
 /**
@@ -894,6 +898,71 @@ export type TokenUsageItem = {
    * Output tokens
    */
   outputTokens: number;
+};
+
+/**
+ * Action result status
+ */
+export type ActionResultStatus = 'waiting' | 'executing' | 'finish' | 'failed';
+
+/**
+ * Action result
+ */
+export type ActionResult = {
+  /**
+   * Action result ID
+   */
+  readonly resultId: string;
+  /**
+   * Canvas ID
+   */
+  canvasId?: string;
+  /**
+   * Action type
+   */
+  type: ActionType;
+  /**
+   * Action metadata
+   */
+  actionMeta: ActionMeta;
+  /**
+   * Response content
+   */
+  content: string;
+  /**
+   * Action result status
+   */
+  status?: ActionResultStatus;
+  /**
+   * Response logs
+   */
+  logs?: Array<string>;
+  /**
+   * Structured data output
+   */
+  structuredData?: {
+    [key: string]: unknown;
+  };
+  /**
+   * Errors
+   */
+  errors?: Array<string>;
+  /**
+   * Token usage
+   */
+  tokenUsage?: Array<TokenUsageItem>;
+  /**
+   * Skill invocation parameters
+   */
+  invokeParam?: InvokeActionRequest;
+  /**
+   * Message creation time
+   */
+  createdAt?: string;
+  /**
+   * Message update time
+   */
+  updatedAt?: string;
 };
 
 /**
@@ -1369,6 +1438,10 @@ export type DeleteDocumentRequest = {
    * Document ID to delete
    */
   docId: string;
+};
+
+export type GetActionResultResponse = BaseResponse & {
+  data?: ActionResult;
 };
 
 export type QueryReferencesRequest = {
@@ -2124,9 +2197,9 @@ export type InvokeSkillRequest = {
 
 export type InvokeSkillResponse = BaseResponse & {
   /**
-   * Skill job ID
+   * Skill result ID
    */
-  jobId?: string;
+  resultId?: string;
 };
 
 export type ListSkillTriggerResponse = BaseResponse & {
@@ -3159,6 +3232,19 @@ export type StreamInvokeActionResponse = string;
 
 export type StreamInvokeActionError = unknown;
 
+export type GetActionResultData = {
+  query: {
+    /**
+     * Action result ID
+     */
+    resultId: string;
+  };
+};
+
+export type GetActionResultResponse2 = GetActionResultResponse;
+
+export type GetActionResultError = unknown;
+
 export type ListSkillsResponse = ListSkillResponse;
 
 export type ListSkillsError = unknown;
@@ -3896,6 +3982,17 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': string;
+      };
+    };
+  };
+  '/action/result': {
+    get: {
+      req: GetActionResultData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': GetActionResultResponse;
       };
     };
   };

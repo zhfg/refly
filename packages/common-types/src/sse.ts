@@ -6,9 +6,9 @@ export interface SkillEvent {
    */
   event: 'start' | 'end' | 'stream' | 'log' | 'structured_data' | 'usage' | 'error';
   /**
-   * The event span, which can be used to separate events into message groups
+   * The result ID
    */
-  spanId?: string;
+  resultId?: string;
   /**
    * Event content.
    *

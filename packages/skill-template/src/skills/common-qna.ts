@@ -169,7 +169,7 @@ export class CommonQnA extends BaseSkill {
   callCommonQnA = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     this.emitEvent({ event: 'log', content: `Start to call common qna...` }, config);
 
-    const { currentSkill, spanId } = config.configurable;
+    const { currentSkill } = config.configurable;
 
     // common preprocess
     const module = {
@@ -187,7 +187,6 @@ export class CommonQnA extends BaseSkill {
       metadata: {
         ...config.metadata,
         ...currentSkill,
-        spanId,
       },
     });
 
@@ -284,8 +283,6 @@ Generated question example:
     } catch (error) {
       // Models can sometimes fail to return structured data, so we just log it and do nothing
       this.engine.logger.error(`Error generating related questions: ${error.stack}`);
-    } finally {
-      this.emitEvent({ event: 'end' }, skillConfig);
     }
 
     return {};
@@ -294,13 +291,10 @@ Generated question example:
   toRunnable(): Runnable<any, any, RunnableConfig> {
     const workflow = new StateGraph<BaseSkillState>({
       channels: this.graphState,
-    })
-      .addNode('commonQnA', this.callCommonQnA)
-      .addNode('relatedQuestions', this.genRelatedQuestions);
+    }).addNode('commonQnA', this.callCommonQnA);
 
     workflow.addEdge(START, 'commonQnA');
-    workflow.addEdge('commonQnA', 'relatedQuestions');
-    workflow.addEdge('relatedQuestions', END);
+    workflow.addEdge('commonQnA', END);
 
     return workflow.compile();
   }

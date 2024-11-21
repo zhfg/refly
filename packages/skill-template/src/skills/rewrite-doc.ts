@@ -166,7 +166,7 @@ export class RewriteDoc extends BaseSkill {
   callRewriteCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { messages = [], query: originalQuery } = state;
 
-    const { chatHistory = [], currentSkill, spanId, convId, documents } = config.configurable;
+    const { chatHistory = [], currentSkill, documents } = config.configurable;
 
     this.emitEvent({ event: 'log', content: `Start to rewrite canvas...` }, config);
 
@@ -180,7 +180,6 @@ export class RewriteDoc extends BaseSkill {
         content: JSON.stringify({
           type: CanvasIntentType.RewriteDocument,
           docId: currentDoc?.docId || '',
-          convId,
         }),
       },
       config,
@@ -203,7 +202,6 @@ export class RewriteDoc extends BaseSkill {
       metadata: {
         ...config.metadata,
         ...currentSkill,
-        spanId,
       },
     });
 

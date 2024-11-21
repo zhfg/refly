@@ -176,7 +176,7 @@ export class EditDoc extends BaseSkill {
   callEditDoc = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { messages = [], query: originalQuery } = state;
 
-    const { currentSkill, spanId, convId, documents, tplConfig } = config.configurable;
+    const { currentSkill, documents, tplConfig } = config.configurable;
 
     const currentDoc = documents?.find((doc) => doc?.metadata?.isCurrentContext);
     const canvasEditConfig = tplConfig?.canvasEditConfig?.value as CanvasEditConfig;
@@ -211,7 +211,6 @@ export class EditDoc extends BaseSkill {
         content: JSON.stringify({
           type: CanvasIntentType.EditDocument,
           docId: currentDoc.docId,
-          convId,
           metadata: {
             selectedRange,
             inPlaceEditType,
@@ -242,7 +241,6 @@ export class EditDoc extends BaseSkill {
         metadata: {
           ...config.metadata,
           ...currentSkill,
-          spanId,
           docId: currentDoc.docId,
           selectedRange,
           inPlaceEditType,

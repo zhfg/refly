@@ -59,8 +59,8 @@ export class SkillController {
     @User() user: UserModel,
     @Body() body: InvokeSkillRequest,
   ): Promise<InvokeSkillResponse> {
-    const { jobId } = await this.skillService.sendInvokeSkillTask(user, body);
-    return buildSuccessResponse({ jobId });
+    const { resultId } = await this.skillService.sendInvokeSkillTask(user, body);
+    return buildSuccessResponse({ resultId });
   }
 
   @UseGuards(JwtAuthGuard)

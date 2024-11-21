@@ -43,10 +43,7 @@ export abstract class BaseSkill extends StructuredTool {
    */
   abstract graphState: StateGraphArgs<BaseSkillState>['channels'];
 
-  constructor(
-    public engine: SkillEngine,
-    protected params?: BaseToolParams,
-  ) {
+  constructor(public engine: SkillEngine, protected params?: BaseToolParams) {
     super(params);
   }
 
@@ -59,7 +56,7 @@ export abstract class BaseSkill extends StructuredTool {
    * Emit a skill event.
    */
   emitEvent(data: Partial<SkillEvent>, config: SkillRunnableConfig) {
-    const { emitter, currentSkill, spanId } = config?.configurable || {};
+    const { emitter, currentSkill, resultId } = config?.configurable || {};
 
     if (!emitter) {
       return;
@@ -67,8 +64,8 @@ export abstract class BaseSkill extends StructuredTool {
 
     const eventData: SkillEvent = {
       event: data.event!,
-      spanId,
       skillMeta: currentSkill,
+      resultId: config.configurable.resultId,
       ...data,
     };
 
@@ -94,17 +91,19 @@ export abstract class BaseSkill extends StructuredTool {
       icon: this.icon,
     };
 
-    // Ensure spanId is not empty.
-    config.configurable.spanId ??= randomUUID();
+    this.emitEvent({ event: 'start' }, config);
 
     const response = await this.toRunnable().invoke(input, {
       ...config,
       metadata: {
         ...config.metadata,
         ...config.configurable.currentSkill,
-        spanId: config.configurable.spanId,
+        resultId: config.configurable.resultId,
       },
     });
+
+    this.emitEvent({ event: 'end' }, config);
+
     return response;
   }
 }
@@ -148,8 +147,7 @@ export interface SkillRunnableMeta extends Record<string, unknown>, SkillMeta {
 
 export interface SkillRunnableConfig extends RunnableConfig {
   configurable?: SkillContext & {
-    spanId?: string;
-    convId?: string;
+    resultId?: string;
     canvasId?: string;
     locale?: string;
     uiLocale?: string;

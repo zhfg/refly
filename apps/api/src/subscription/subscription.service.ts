@@ -553,7 +553,7 @@ export class SubscriptionService implements OnModuleInit {
   }
 
   async syncTokenUsage(data: SyncTokenUsageJobData) {
-    const { uid, usage, skill, timestamp } = data;
+    const { uid, usage, timestamp } = data;
     const user = await this.prisma.user.findUnique({ where: { uid } });
     if (!user) {
       this.logger.warn(`No user found for uid ${uid}`);
@@ -563,11 +563,8 @@ export class SubscriptionService implements OnModuleInit {
     await this.prisma.$transaction([
       this.prisma.tokenUsage.create({
         data: {
-          ...pick(data, ['uid', 'convId', 'jobId', 'spanId']),
+          ...pick(data, ['uid', 'resultId']),
           ...pick(usage, ['tier', 'modelProvider', 'modelName', 'inputTokens', 'outputTokens']),
-          skillId: skill.skillId,
-          skillTplName: skill.tplName,
-          skillDisplayName: skill.displayName || '',
         },
       }),
       this.prisma.tokenUsageMeter.updateMany({

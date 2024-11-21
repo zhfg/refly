@@ -118,6 +118,9 @@ import type {
   StreamInvokeActionData,
   StreamInvokeActionError,
   StreamInvokeActionResponse,
+  GetActionResultData,
+  GetActionResultError,
+  GetActionResultResponse2,
   ListSkillsError,
   ListSkillsResponse,
   InvokeSkillData,
@@ -629,6 +632,17 @@ export const streamInvokeAction = (options: Options<StreamInvokeActionData>) => 
   return (options?.client ?? client).post<StreamInvokeActionResponse, StreamInvokeActionError>({
     ...options,
     url: '/action/streamInvoke',
+  });
+};
+
+/**
+ * Get action result
+ * Get action result by result ID
+ */
+export const getActionResult = (options: Options<GetActionResultData>) => {
+  return (options?.client ?? client).get<GetActionResultResponse2, GetActionResultError>({
+    ...options,
+    url: '/action/result',
   });
 };
 

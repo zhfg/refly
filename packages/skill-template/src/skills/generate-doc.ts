@@ -161,7 +161,7 @@ export class GenerateDoc extends BaseSkill {
   callGenerateDoc = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     this.emitEvent({ event: 'log', content: `Start to call generate document...` }, config);
 
-    const { convId, currentSkill, spanId } = config?.configurable || {};
+    const { currentSkill } = config?.configurable || {};
     const { user } = config;
 
     // Create document first
@@ -178,7 +178,6 @@ export class GenerateDoc extends BaseSkill {
         content: JSON.stringify({
           type: CanvasIntentType.GenerateDocument,
           docId: res.data?.docId || '',
-          convId,
         }),
       },
       config,
@@ -200,7 +199,6 @@ export class GenerateDoc extends BaseSkill {
       metadata: {
         ...config.metadata,
         ...currentSkill,
-        spanId,
       },
     });
 
