@@ -39,6 +39,8 @@
     "close": "Close",
     "canvas": "Canvas",
     "resource": "Resource",
+    "document": "Document",
+    "skill": "Skill",
     "thread": "Thread",
     "meta": "Meta",
     "project": "Project",
@@ -48,7 +50,8 @@
       "failed": "Copy failed, please try again!"
     },
     "login": "Login",
-    "share": "Share"
+    "share": "Share",
+    "noMoreText": "No more~"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -346,6 +349,9 @@
       "addSkill": "Add Skill",
       "addTool": "Add Tool",
       "addDocument": "Add Document"
+    },
+    "contextList": {
+      "placeholder": "Search {{domain}}..."
     },
     "newCanvas": {
       "modalTitle": "New Canvas",

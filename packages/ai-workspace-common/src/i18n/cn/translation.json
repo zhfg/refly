@@ -37,8 +37,10 @@
     "collapse": "折叠",
     "open": "打开",
     "close": "关闭",
-    "canvas": "稿布",
+    "canvas": "画布",
     "resource": "资源",
+    "document": "文档",
+    "skill": "技能",
     "thread": "会话",
     "meta": "元信息",
     "project": "项目",
@@ -48,7 +50,8 @@
       "failed": "复制失败，请重试！"
     },
     "login": "登录",
-    "share": "分享"
+    "share": "分享",
+    "noMoreText": "已经到底啦~"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
@@ -347,6 +350,9 @@
       "addSkill": "添加技能",
       "addTool": "添加工具",
       "addDocument": "添加文档"
+    },
+    "contextList": {
+      "placeholder": "搜索{{domain}}..."
     },
     "newCanvas": {
       "modalTitle": "新稿布",

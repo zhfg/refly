@@ -8,7 +8,7 @@ import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stor
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
-import { canvasEmitter } from '@refly-packages/utils/event-emitter/canvas';
+import { canvasEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/canvas';
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
@@ -47,7 +47,13 @@ export const ImportFromText = () => {
     if (data?.success) {
       canvasEmitter.emit('addNode', {
         type: 'resource',
-        data: [data?.data],
+        data: [
+          {
+            id: data?.data?.resourceId,
+            title: data?.data?.title,
+            domain: 'resource',
+          },
+        ],
       });
     }
   };

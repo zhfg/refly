@@ -15,11 +15,12 @@ import {
   applyEdgeChanges,
 } from '@xyflow/react';
 import { NodePreview } from './node-preview';
-import { nodeTypes, prepareNodeData, CanvasNodeType, CanvasNode } from './node';
+import { nodeTypes, prepareNodeData, CanvasNode } from './node';
+import { CanvasNodeType } from '@refly/openapi-schema';
 import { useCollabProvider } from '@refly-packages/ai-workspace-common/hooks/use-collab-provider';
 import { CanvasToolbar } from './canvas-toolbar';
-import { canvasEmitter } from '@refly-packages/utils/event-emitter/canvas';
-import { Resource } from '@refly/openapi-schema';
+import { canvasEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/canvas';
+import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 
 import '@xyflow/react/dist/style.css';
 
@@ -160,9 +161,9 @@ export const Canvas = (props: { canvasId: string }) => {
     });
   };
 
-  const handleAddNode = (payload: { type: CanvasNodeType; data: Resource[] }) => {
-    payload.data.forEach((resource) => {
-      addNewNode(resource.resourceId, payload.type);
+  const handleAddNode = (payload: { type: CanvasNodeType; data: ContextItem[] }) => {
+    payload.data.forEach((item) => {
+      addNewNode(item.id, payload.type);
     });
   };
 

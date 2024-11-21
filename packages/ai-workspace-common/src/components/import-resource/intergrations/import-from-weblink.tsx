@@ -11,7 +11,7 @@ import { LinkMeta, useImportResourceStore } from '@refly-packages/ai-workspace-c
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { Resource, UpsertResourceRequest } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
-import { canvasEmitter } from '@refly-packages/utils/event-emitter/canvas';
+import { canvasEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/canvas';
 
 const { TextArea } = Input;
 
@@ -105,14 +105,12 @@ export const ImportFromWeblink = () => {
     });
 
     setSaveLoading(true);
-    const res = await getClient().batchCreateResource({
+    const { data } = await getClient().batchCreateResource({
       body: batchCreateResourceData,
     });
     setSaveLoading(false);
 
-    console.log('res', res);
-
-    if (!res?.data?.success) {
+    if (!data?.success) {
       return;
     }
 
@@ -121,7 +119,11 @@ export const ImportFromWeblink = () => {
     importResourceStore.setImportResourceModalVisible(false);
     setLinkStr('');
 
-    const resources = (res?.data?.data || []) as Resource[];
+    const resources = (Array.isArray(data?.data) ? data?.data : []).map((resource) => ({
+      id: resource.resourceId,
+      title: resource.title,
+      domain: 'resource',
+    }));
     canvasEmitter.emit('addNode', {
       type: 'resource',
       data: resources,
