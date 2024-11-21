@@ -7,8 +7,8 @@ import './action-menu.scss';
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { canvasEmitter } from '@refly/utils/event-emitter/canvas';
-import { Resource } from '@refly/openapi-schema';
+import { canvasEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/canvas';
+
 interface ActionMenuProps {
   getTarget: () => HTMLElement;
   sourceType: 'multilingualSearch' | 'sourceListModal';
@@ -65,7 +65,11 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
     if (data.success) {
       message.success(t('common.putSuccess'));
       setSelectedItems([]);
-      const resources = (data?.data || []) as Resource[];
+      const resources = (Array.isArray(data?.data) ? data?.data : []).map((resource) => ({
+        id: resource.resourceId,
+        title: resource.title,
+        domain: 'resource',
+      }));
       canvasEmitter.emit('addNode', {
         type: 'resource',
         data: resources,
