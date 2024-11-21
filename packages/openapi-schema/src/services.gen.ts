@@ -110,9 +110,22 @@ import type {
   DeleteLabelInstanceData,
   DeleteLabelInstanceError,
   DeleteLabelInstanceResponse,
-  ListSkillTemplatesData,
-  ListSkillTemplatesError,
-  ListSkillTemplatesResponse,
+  ListActionsError,
+  ListActionsResponse,
+  InvokeActionData,
+  InvokeActionError,
+  InvokeActionResponse2,
+  StreamInvokeActionData,
+  StreamInvokeActionError,
+  StreamInvokeActionResponse,
+  ListSkillsError,
+  ListSkillsResponse,
+  InvokeSkillData,
+  InvokeSkillError,
+  InvokeSkillResponse2,
+  StreamInvokeSkillData,
+  StreamInvokeSkillError,
+  StreamInvokeSkillResponse,
   ListSkillInstancesData,
   ListSkillInstancesError,
   ListSkillInstancesResponse,
@@ -131,12 +144,6 @@ import type {
   DeleteSkillInstanceData,
   DeleteSkillInstanceError,
   DeleteSkillInstanceResponse,
-  InvokeSkillData,
-  InvokeSkillError,
-  InvokeSkillResponse2,
-  StreamInvokeSkillData,
-  StreamInvokeSkillError,
-  StreamInvokeSkillResponse,
   ListSkillTriggersData,
   ListSkillTriggersError,
   ListSkillTriggersResponse,
@@ -593,13 +600,68 @@ export const deleteLabelInstance = (options: Options<DeleteLabelInstanceData>) =
 };
 
 /**
- * List skill templates
- * List all skill templates
+ * List actions
+ * List all actions
  */
-export const listSkillTemplates = (options?: Options<ListSkillTemplatesData>) => {
-  return (options?.client ?? client).get<ListSkillTemplatesResponse, ListSkillTemplatesError>({
+export const listActions = (options?: Options) => {
+  return (options?.client ?? client).get<ListActionsResponse, ListActionsError>({
     ...options,
-    url: '/skill/template/list',
+    url: '/action/list',
+  });
+};
+
+/**
+ * Invoke action
+ * Invoke an action asynchronously
+ */
+export const invokeAction = (options: Options<InvokeActionData>) => {
+  return (options?.client ?? client).post<InvokeActionResponse2, InvokeActionError>({
+    ...options,
+    url: '/action/invoke',
+  });
+};
+
+/**
+ * Stream invoke action
+ * Invoke an action and return SSE stream
+ */
+export const streamInvokeAction = (options: Options<StreamInvokeActionData>) => {
+  return (options?.client ?? client).post<StreamInvokeActionResponse, StreamInvokeActionError>({
+    ...options,
+    url: '/action/streamInvoke',
+  });
+};
+
+/**
+ * List skills
+ * List all skills
+ */
+export const listSkills = (options?: Options) => {
+  return (options?.client ?? client).get<ListSkillsResponse, ListSkillsError>({
+    ...options,
+    url: '/skill/list',
+  });
+};
+
+/**
+ * Invoke skill
+ * Invoke a skill
+ */
+export const invokeSkill = (options: Options<InvokeSkillData>) => {
+  return (options?.client ?? client).post<InvokeSkillResponse2, InvokeSkillError>({
+    ...options,
+    url: '/skill/invoke',
+  });
+};
+
+/**
+ * Stream invoke skill
+ * Invoke a skill and return SSE stream
+ */
+export const streamInvokeSkill = (options: Options<StreamInvokeSkillData>) => {
+  return (options?.client ?? client).post<StreamInvokeSkillResponse, StreamInvokeSkillError>({
+    ...options,
+    url: '/skill/streamInvoke',
   });
 };
 
@@ -666,28 +728,6 @@ export const deleteSkillInstance = (options: Options<DeleteSkillInstanceData>) =
   return (options?.client ?? client).post<DeleteSkillInstanceResponse, DeleteSkillInstanceError>({
     ...options,
     url: '/skill/instance/delete',
-  });
-};
-
-/**
- * Invoke skill
- * Invoke a skill
- */
-export const invokeSkill = (options: Options<InvokeSkillData>) => {
-  return (options?.client ?? client).post<InvokeSkillResponse2, InvokeSkillError>({
-    ...options,
-    url: '/skill/invoke',
-  });
-};
-
-/**
- * Stream invoke skill
- * Invoke a skill and return SSE stream
- */
-export const streamInvokeSkill = (options: Options<StreamInvokeSkillData>) => {
-  return (options?.client ?? client).post<StreamInvokeSkillResponse, StreamInvokeSkillError>({
-    ...options,
-    url: '/skill/streamInvoke',
   });
 };
 

@@ -595,9 +595,9 @@ export const $Icon = {
   },
 } as const;
 
-export const $SkillTemplate = {
+export const $Skill = {
   type: 'object',
-  description: 'Skill template',
+  description: 'Skill',
   required: ['name', 'displayName'],
   properties: {
     name: {
@@ -766,9 +766,34 @@ export const $SkillMeta = {
   },
 } as const;
 
+export const $ActionMeta = {
+  type: 'object',
+  description: 'Action metadata',
+  properties: {
+    type: {
+      type: 'string',
+      description: 'Action type',
+      $ref: '#/components/schemas/ActionType',
+    },
+    name: {
+      type: 'string',
+      description: 'Action name',
+    },
+  },
+} as const;
+
 export const $SkillTemplateConfig = {
   type: 'object',
   description: 'Skill template config (key is config item key, value is config value)',
+  additionalProperties: {
+    description: 'Skill template config value',
+    $ref: '#/components/schemas/DynamicConfigValue',
+  },
+} as const;
+
+export const $ActionConfig = {
+  type: 'object',
+  description: 'Action config (key is config item key, value is config value)',
   additionalProperties: {
     description: 'Skill template config value',
     $ref: '#/components/schemas/DynamicConfigValue',
@@ -1125,7 +1150,7 @@ export const $ChatMessage = {
     },
     invokeParam: {
       description: 'Skill invocation parameters',
-      $ref: '#/components/schemas/InvokeSkillRequest',
+      $ref: '#/components/schemas/InvokeActionRequest',
     },
     createdAt: {
       type: 'string',
@@ -2321,7 +2346,26 @@ export const $DeleteLabelInstanceRequest = {
   },
 } as const;
 
-export const $ListSkillTemplateResponse = {
+export const $Action = {
+  type: 'object',
+  properties: {
+    actionType: {
+      type: 'string',
+      description: 'Action type',
+      $ref: '#/components/schemas/ActionType',
+    },
+    actionName: {
+      type: 'string',
+      description: 'Action name',
+    },
+    displayName: {
+      type: 'string',
+      description: 'Action display name',
+    },
+  },
+} as const;
+
+export const $ListActionResponse = {
   allOf: [
     {
       $ref: '#/components/schemas/BaseResponse',
@@ -2331,9 +2375,29 @@ export const $ListSkillTemplateResponse = {
       properties: {
         data: {
           type: 'array',
-          description: 'Skill template list',
+          description: 'Action list',
           items: {
-            $ref: '#/components/schemas/SkillTemplate',
+            $ref: '#/components/schemas/Action',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const $ListSkillResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Skill list',
+          items: {
+            $ref: '#/components/schemas/Skill',
           },
         },
       },
@@ -2751,6 +2815,118 @@ export const $SkillJobStatus = {
   enum: ['scheduling', 'running', 'finish', 'failed'],
 } as const;
 
+export const $ActionType = {
+  type: 'string',
+  enum: ['skill', 'tool'],
+} as const;
+
+export const $ActionContextType = {
+  type: 'string',
+  enum: ['resource', 'document'],
+} as const;
+
+export const $ActionContextEntity = {
+  type: 'object',
+  properties: {
+    title: {
+      type: 'string',
+      description: 'Entity title',
+    },
+    content: {
+      type: 'string',
+      description: 'Entity content',
+    },
+  },
+} as const;
+
+export const $ActionContextItem = {
+  type: 'object',
+  properties: {
+    type: {
+      description: 'Context item type',
+      $ref: '#/components/schemas/ActionContextType',
+    },
+    entityId: {
+      type: 'string',
+      description: 'Entity ID',
+    },
+    entityData: {
+      description: 'Entity data (will be auto populated if not provided)',
+      $ref: '#/components/schemas/ActionContextEntity',
+    },
+    metadata: {
+      type: 'object',
+      description: 'Context metadata',
+    },
+  },
+} as const;
+
+export const $InvokeActionRequest = {
+  type: 'object',
+  properties: {
+    actionType: {
+      description: 'Action type',
+      $ref: '#/components/schemas/ActionType',
+    },
+    actionName: {
+      type: 'string',
+      description: 'Action name',
+    },
+    input: {
+      description: 'Action input',
+      $ref: '#/components/schemas/SkillInput',
+    },
+    context: {
+      type: 'array',
+      description: 'Action invocation context',
+      items: {
+        $ref: '#/components/schemas/ActionContextItem',
+      },
+    },
+    config: {
+      description: 'Action config',
+      $ref: '#/components/schemas/ActionConfig',
+    },
+    canvasId: {
+      description: 'Canvas ID',
+      type: 'string',
+    },
+    locale: {
+      type: 'string',
+      description: 'Selected output locale',
+    },
+    modelName: {
+      type: 'string',
+      description: 'Selected model',
+    },
+    jobId: {
+      description: 'Skill job ID (if not provided, a new job will be created)',
+      type: 'string',
+    },
+    triggerId: {
+      description: "Trigger ID (typically you don't need to provide this)",
+      type: 'string',
+    },
+  },
+} as const;
+
+export const $InvokeActionResponse = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        jobId: {
+          type: 'string',
+          description: 'Skill job ID',
+        },
+      },
+    },
+  ],
+} as const;
+
 export const $InvokeSkillRequest = {
   type: 'object',
   properties: {
@@ -2769,6 +2945,15 @@ export const $InvokeSkillRequest = {
     projectId: {
       type: 'string',
       description: 'Project ID (if not provided, new project will be created)',
+    },
+    skillName: {
+      type: 'string',
+      description: 'Skill name (if not provided, common_qna will be used)',
+      default: 'common_qna',
+    },
+    canvasId: {
+      type: 'string',
+      description: 'Canvas ID',
     },
     skillId: {
       type: 'string',

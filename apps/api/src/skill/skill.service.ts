@@ -21,13 +21,12 @@ import {
   InvokeSkillRequest,
   ListSkillInstancesData,
   ListSkillJobsData,
-  ListSkillTemplatesData,
   ListSkillTriggersData,
   PinSkillInstanceRequest,
   Resource,
   SkillContext,
   SkillMeta,
-  SkillTemplate,
+  Skill,
   SkillTriggerCreateParam,
   TimerInterval,
   TimerTriggerConfig,
@@ -41,7 +40,6 @@ import {
 import {
   BaseSkill,
   ReflyService,
-  Scheduler,
   SkillEngine,
   SkillEventMap,
   SkillRunnableConfig,
@@ -249,10 +247,9 @@ export class SkillService {
     };
   };
 
-  listSkillTemplates(user: User, param: ListSkillTemplatesData['query']): SkillTemplate[] {
-    const { page, pageSize } = param;
+  listSkills(user: User): Skill[] {
     const locale = user.uiLocale || 'en';
-    const templates = this.skillInventory.map((skill) => ({
+    const skills = this.skillInventory.map((skill) => ({
       name: skill.name,
       displayName: skill.displayName[locale],
       icon: skill.icon,
@@ -260,7 +257,7 @@ export class SkillService {
       configSchema: skill.configSchema,
     }));
 
-    return templates.slice((page - 1) * pageSize, page * pageSize);
+    return skills;
   }
 
   async listSkillInstances(user: User, param: ListSkillInstancesData['query']) {
@@ -761,7 +758,8 @@ export class SkillService {
         msgAggregator.addSkillEvent(data);
       },
     });
-    const scheduler = new Scheduler(this.skillEngine);
+
+    const skill = this.skillInventory.find((s) => s.name === data.skillName);
 
     // Save user query to conversation right before invoking skill
     // but after the chatHistory of runnable config is built
@@ -787,7 +785,7 @@ export class SkillService {
     };
 
     try {
-      for await (const event of scheduler.streamEvents(input, { ...config, version: 'v2' })) {
+      for await (const event of skill.streamEvents(input, { ...config, version: 'v2' })) {
         if (aborted) {
           if (runMeta) {
             msgAggregator.addSkillEvent({

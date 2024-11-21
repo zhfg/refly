@@ -19,6 +19,8 @@ tags:
     description: Share management endpoints
   - name: label
     description: Label management endpoints
+  - name: action
+    description: Action management endpoints
   - name: skill
     description: Skill management endpoints
   - name: chat
@@ -924,33 +926,118 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-  /skill/template/list:
+  /action/list:
     get:
       tags:
-        - skill
-      summary: List skill templates
-      description: List all skill templates
-      operationId: listSkillTemplates
-      parameters:
-        - name: page
-          in: query
-          description: Page number
-          schema:
-            type: number
-            default: 1
-        - name: pageSize
-          in: query
-          description: Page size
-          schema:
-            type: number
-            default: 10
+        - action
+      summary: List actions
+      description: List all actions
+      operationId: listActions
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListSkillTemplateResponse'
+                $ref: '#/components/schemas/ListActionResponse'
+  /action/invoke:
+    post:
+      tags:
+        - action
+      summary: Invoke action
+      description: Invoke an action asynchronously
+      operationId: invokeAction
+      requestBody:
+        description: Action invocation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvokeActionRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvokeActionResponse'
+  /action/streamInvoke:
+    post:
+      tags:
+        - action
+      summary: Stream invoke action
+      description: Invoke an action and return SSE stream
+      operationId: streamInvokeAction
+      requestBody:
+        description: Skill invocation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvokeActionRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/event-stream:
+              schema:
+                type: string
+  /skill/list:
+    get:
+      tags:
+        - skill
+      summary: List skills
+      description: List all skills
+      operationId: listSkills
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSkillResponse'
+  /skill/invoke:
+    post:
+      tags:
+        - skill
+      summary: Invoke skill
+      description: Invoke a skill
+      operationId: invokeSkill
+      requestBody:
+        description: Skill invocation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvokeSkillRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvokeSkillResponse'
+  /skill/streamInvoke:
+    post:
+      tags:
+        - skill
+      summary: Stream invoke skill
+      description: Invoke a skill and return SSE stream
+      operationId: streamInvokeSkill
+      requestBody:
+        description: Skill invocation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvokeSkillRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/event-stream:
+              schema:
+                type: string
   /skill/instance/list:
     get:
       tags:
@@ -1093,48 +1180,6 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /skill/invoke:
-    post:
-      tags:
-        - skill
-      summary: Invoke skill
-      description: Invoke a skill
-      operationId: invokeSkill
-      requestBody:
-        description: Skill invocation request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvokeSkillRequest'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InvokeSkillResponse'
-  /skill/streamInvoke:
-    post:
-      tags:
-        - skill
-      summary: Stream invoke skill
-      description: Invoke a skill and return SSE stream
-      operationId: streamInvokeSkill
-      requestBody:
-        description: Skill invocation request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvokeSkillRequest'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            text/event-stream:
-              schema:
-                type: string
   /skill/trigger/list:
     get:
       tags:
@@ -2060,9 +2105,9 @@ components:
         value:
           type: string
           description: Icon value
-    SkillTemplate:
+    Skill:
       type: object
-      description: Skill template
+      description: Skill
       required:
         - name
         - displayName
@@ -2205,9 +2250,26 @@ components:
         icon:
           description: Skill icon
           $ref: '#/components/schemas/Icon'
+    ActionMeta:
+      type: object
+      description: Action metadata
+      properties:
+        type:
+          type: string
+          description: Action type
+          $ref: '#/components/schemas/ActionType'
+        name:
+          type: string
+          description: Action name
     SkillTemplateConfig:
       type: object
       description: Skill template config (key is config item key, value is config value)
+      additionalProperties:
+        description: Skill template config value
+        $ref: '#/components/schemas/DynamicConfigValue'
+    ActionConfig:
+      type: object
+      description: Action config (key is config item key, value is config value)
       additionalProperties:
         description: Skill template config value
         $ref: '#/components/schemas/DynamicConfigValue'
@@ -2502,7 +2564,7 @@ components:
             $ref: '#/components/schemas/TokenUsageItem'
         invokeParam:
           description: Skill invocation parameters
-          $ref: '#/components/schemas/InvokeSkillRequest'
+          $ref: '#/components/schemas/InvokeActionRequest'
         createdAt:
           type: string
           format: date-time
@@ -3321,16 +3383,39 @@ components:
           type: string
           description: Label ID to delete
           example: lb-g30e1b80b5g1itbemc0g5jj3
-    ListSkillTemplateResponse:
+    Action:
+      type: object
+      properties:
+        actionType:
+          type: string
+          description: Action type
+          $ref: '#/components/schemas/ActionType'
+        actionName:
+          type: string
+          description: Action name
+        displayName:
+          type: string
+          description: Action display name
+    ListActionResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
               type: array
-              description: Skill template list
+              description: Action list
               items:
-                $ref: '#/components/schemas/SkillTemplate'
+                $ref: '#/components/schemas/Action'
+    ListSkillResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Skill list
+              items:
+                $ref: '#/components/schemas/Skill'
     ListSkillInstanceResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3623,6 +3708,83 @@ components:
         - running
         - finish
         - failed
+    ActionType:
+      type: string
+      enum:
+        - skill
+        - tool
+    ActionContextType:
+      type: string
+      enum:
+        - resource
+        - document
+    ActionContextEntity:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Entity title
+        content:
+          type: string
+          description: Entity content
+    ActionContextItem:
+      type: object
+      properties:
+        type:
+          description: Context item type
+          $ref: '#/components/schemas/ActionContextType'
+        entityId:
+          type: string
+          description: Entity ID
+        entityData:
+          description: Entity data (will be auto populated if not provided)
+          $ref: '#/components/schemas/ActionContextEntity'
+        metadata:
+          type: object
+          description: Context metadata
+    InvokeActionRequest:
+      type: object
+      properties:
+        actionType:
+          description: Action type
+          $ref: '#/components/schemas/ActionType'
+        actionName:
+          type: string
+          description: Action name
+        input:
+          description: Action input
+          $ref: '#/components/schemas/SkillInput'
+        context:
+          type: array
+          description: Action invocation context
+          items:
+            $ref: '#/components/schemas/ActionContextItem'
+        config:
+          description: Action config
+          $ref: '#/components/schemas/ActionConfig'
+        canvasId:
+          description: Canvas ID
+          type: string
+        locale:
+          type: string
+          description: Selected output locale
+        modelName:
+          type: string
+          description: Selected model
+        jobId:
+          description: Skill job ID (if not provided, a new job will be created)
+          type: string
+        triggerId:
+          description: Trigger ID (typically you don't need to provide this)
+          type: string
+    InvokeActionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            jobId:
+              type: string
+              description: Skill job ID
     InvokeSkillRequest:
       type: object
       properties:
@@ -3638,6 +3800,13 @@ components:
         projectId:
           type: string
           description: Project ID (if not provided, new project will be created)
+        skillName:
+          type: string
+          description: Skill name (if not provided, common_qna will be used)
+          default: common_qna
+        canvasId:
+          type: string
+          description: Canvas ID
         skillId:
           type: string
           description: Skill instance ID to invoke (if not provided, skill scheduler will be used)
