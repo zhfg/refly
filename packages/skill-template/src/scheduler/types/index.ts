@@ -60,9 +60,4 @@ export interface GraphState extends BaseSkillState {
    * Accumulated messages.
    */
   messages: BaseMessage[];
-  /**
-   * Skill calls to run.
-   */
-  skillCalls: ToolCall[];
-  contextualUserQuery: string; // 基于上下文改写 userQuery
 }

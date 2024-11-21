@@ -29,6 +29,8 @@ import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/c
 import { editorEmitter, InPlaceSendMessagePayload } from '@refly-packages/utils/event-emitter/editor';
 import { LOCALE, MarkType } from '@refly/common-types';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/components/canvas/context-provider';
+import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
 
 interface CopilotInputModuleProps {
   source: MessageIntentSource;
@@ -43,12 +45,14 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
     selectedSkill: state.selectedSkill,
   }));
   const chatStore = useChatStoreShallow((state) => ({
+    setNewQAText: state.setNewQAText,
     setMessageIntentContext: state.setMessageIntentContext,
   }));
 
   // hooks
-  const { buildShutdownTaskAndGenResponse, sendChatMessage } = useBuildThreadAndRun();
+  const { invokeAction, abortAction } = useInvokeAction();
   const { projectId } = useProjectContext();
+  const { canvasId } = useCanvasContext();
 
   const [form] = Form.useForm();
   const { formErrors, setFormErrors } = useContextPanelStore((state) => ({
@@ -81,9 +85,12 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
     const newMessageIntentContext: Partial<MessageIntentContext> = {
       ...(messageIntentContext || {}),
       isNewConversation: messageIntentContext?.isNewConversation || forceNewConv,
+      canvasContext: {
+        canvasId: canvasId,
+      },
       projectContext: {
         projectId: finalProjectId,
-        canvasId: currentCanvas?.entityId || currentCanvas?.id,
+        docId: currentCanvas?.entityId || currentCanvas?.id,
       },
       resourceContext: {
         resourceId: currentResource?.entityId || currentResource?.id,
@@ -99,7 +106,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
 
     chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
 
-    sendChatMessage({
+    invokeAction({
       tplConfig,
       userInput,
       messageIntentContext: newMessageIntentContext as MessageIntentContext,
@@ -107,7 +114,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
   };
 
   const handleAbort = () => {
-    buildShutdownTaskAndGenResponse();
+    abortAction();
   };
 
   const handleInPlaceEditSendMessage = (data: InPlaceSendMessagePayload) => {

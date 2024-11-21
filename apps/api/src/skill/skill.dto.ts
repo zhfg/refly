@@ -1,6 +1,6 @@
 import {
+  ActionResult,
   InvokeSkillRequest,
-  Project,
   SimpleEventName,
   SkillInstance,
   SkillJob,
@@ -21,10 +21,7 @@ import { chatMessagePO2DTO, conversationPO2DTO } from '@/conversation/conversati
 export interface InvokeSkillJobData extends InvokeSkillRequest {
   uid: string;
   rawParam: string;
-  skill?: SkillInstance;
-  project?: Project;
-  job?: Omit<SkillJobModel, 'pk'>;
-  conversation?: Omit<ConversationModel, 'pk'>;
+  result?: ActionResult;
 }
 
 export function skillInstancePO2DTO(skill: SkillInstanceModel): SkillInstance {

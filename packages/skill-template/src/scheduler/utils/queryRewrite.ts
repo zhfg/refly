@@ -2,7 +2,6 @@ import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { GraphState, IContext, MentionedContextItem, QueryAnalysis } from '../types';
 import { summarizeChatHistory, summarizeContext } from './summarizer';
 import { z } from 'zod';
-import { SkillEngine } from '../../engine';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { SkillTemplateConfig } from '@refly-packages/openapi-schema';
 import { ModelContextLimitMap } from './token';

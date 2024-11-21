@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 // components
-import { ProjectSelector } from './project-selector';
 import { AISettingsDropdown } from './ai-settings';
 // styles
 import './index.scss';
@@ -30,7 +29,6 @@ export const ChatActions = (props: ChatActionsProps) => {
   const { handleSendMessage, handleAbort, source } = props;
 
   const { t } = useTranslation();
-  const { projectId: envProjectId } = useProjectContext();
 
   // stores
   const chatStore = useChatStoreShallow((state) => ({
@@ -66,7 +64,6 @@ export const ChatActions = (props: ChatActionsProps) => {
 
   const canSendEmptyMessage = skillStore?.selectedSkill || (!skillStore?.selectedSkill && chatStore.newQAText?.trim());
   const canSendMessage = !userStore.isLogin || (!messageStateStore?.pending && tokenAvailable && canSendEmptyMessage);
-  const hideProjectSelector = envProjectId || !isWeb || [MessageIntentSource.Share].includes(source);
 
   const [containerWidth, setContainerWidth] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -92,7 +89,6 @@ export const ChatActions = (props: ChatActionsProps) => {
     <div className="chat-actions" ref={containerRef}>
       <div className="left-actions">
         <AISettingsDropdown collapsed={containerWidth < COLLAPSE_WIDTH} briefMode={false} />
-        {!hideProjectSelector ? <ProjectSelector /> : null}
       </div>
       <div className="right-actions">
         {messageStateStore?.pending ? (

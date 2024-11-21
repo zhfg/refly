@@ -10,7 +10,7 @@ export const ssePost = async ({
   token,
   payload,
   onStart,
-  onSkillThoughout,
+  onSkillLog,
   onSkillStart,
   onSkillStream,
   onSkillEnd,
@@ -23,7 +23,7 @@ export const ssePost = async ({
   token: string;
   payload: InvokeSkillRequest;
   onStart: () => void;
-  onSkillThoughout: (event: SkillEvent) => void;
+  onSkillLog: (event: SkillEvent) => void;
   onSkillStart: (event: SkillEvent) => void;
   onSkillStream: (event: SkillEvent) => void;
   onSkillEnd: (event: SkillEvent) => void;
@@ -89,7 +89,7 @@ export const ssePost = async ({
                   onSkillStart(skillEvent);
                 }
               } else if (skillEvent?.event === 'log') {
-                onSkillThoughout(skillEvent);
+                onSkillLog(skillEvent);
               } else if (skillEvent?.event === 'end') {
                 onSkillEnd(skillEvent);
                 isSkillFirstMessage = true;

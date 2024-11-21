@@ -9,6 +9,7 @@ export enum IDPrefix {
   LABEL_INSTANCE = 'li-',
   CONVERSATION = 'cv-',
   CHAT_MESSAGE = 'cm-',
+  ACTION_RESULT = 'ar-',
   DOCUMENT = 'd-',
   RESOURCE = 'r-',
   PROJECT = 'p-',
@@ -44,6 +45,10 @@ export function genConvID(): string {
 
 export function genChatMessageID(): string {
   return IDPrefix.CHAT_MESSAGE + createId();
+}
+
+export function genActionResultID(): string {
+  return IDPrefix.ACTION_RESULT + createId();
 }
 
 export function genDocumentID(): string {

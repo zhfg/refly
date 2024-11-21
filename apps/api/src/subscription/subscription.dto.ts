@@ -1,5 +1,4 @@
 import {
-  SkillMeta,
   Subscription,
   SubscriptionPlanType,
   SubscriptionInterval,
@@ -26,10 +25,7 @@ export interface CreateSubscriptionParam {
 
 export interface SyncTokenUsageJobData {
   uid: string;
-  convId: string;
-  jobId: string;
-  spanId: string;
-  skill: SkillMeta;
+  resultId?: string;
   usage: TokenUsageItem;
   timestamp: Date;
 }

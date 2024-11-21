@@ -147,37 +147,74 @@ model ChatMessage {
   @@map("chat_messages")
 }
 
+model ActionResult {
+  /// Primary key
+  pk             BigInt             @id @default(autoincrement())
+  /// Action result id
+  resultId       String             @unique @map("result_id")
+  /// Canvas ID
+  canvasId       String?            @map("canvas_id")
+  /// Action type
+  type           String             @map("type")
+  /// UID
+  uid            String             @default("") @map("uid")
+  /// Result content
+  content        String             @map("content")
+  /// Action metadata
+  actionMeta     String             @default("{}") @map("action_meta")
+  /// Result logs
+  logs           String             @default("[]") @map("logs")
+  /// Structured data output (JSON)
+  structuredData String             @default("{}") @map("structured_data")
+  /// Errors
+  errors         String?            @map("errors")
+  /// Tool calls (JSON array)
+  toolCalls      String?            @map("tool_calls")
+  /// Token usage summary
+  tokenUsage     String?            @map("token_usage")
+  /// Skill invocation parameters (JSON of `InvokeSkillRequest`)
+  invokeParam    String?            @map("invoke_param")
+  /// Locale setting
+  locale         String?            @default("") @map("locale")
+  /// Action result status
+  status         ActionResultStatus @default(waiting) @map("status")
+  /// Create timestamp
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt      DateTime           @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([canvasId])
+  @@map("action_results")
+}
+
+enum ActionResultStatus {
+  waiting
+  executing
+  finish
+  failed
+}
+
 model TokenUsage {
   /// Primary key
-  pk               BigInt   @id @default(autoincrement())
+  pk            BigInt   @id @default(autoincrement())
   /// UID
-  uid              String   @map("uid")
-  /// Conversation ID
-  convId           String?  @map("conv_id")
-  /// Skill job ID
-  jobId            String   @map("job_id")
-  /// Span id
-  spanId           String   @map("span_id")
+  uid           String   @map("uid")
+  /// Action result id
+  resultId      String?  @map("result_id")
   /// Model tier
-  tier             String   @map("tier")
+  tier          String   @map("tier")
   /// Model provider
-  modelProvider    String   @map("model_provider")
+  modelProvider String   @map("model_provider")
   /// Model name
-  modelName        String   @map("model_name")
+  modelName     String   @map("model_name")
   /// Input tokens
-  inputTokens      Int      @default(0) @map("input_tokens")
+  inputTokens   Int      @default(0) @map("input_tokens")
   /// Output tokens
-  outputTokens     Int      @default(0) @map("output_tokens")
-  /// Skill id
-  skillId          String?  @map("skill_id")
-  /// Skill template name
-  skillTplName     String   @map("skill_tpl_name")
-  /// Skill display name
-  skillDisplayName String   @map("skill_display_name")
+  outputTokens  Int      @default(0) @map("output_tokens")
   /// Create timestamp
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@index([uid, createdAt])
   @@map("token_usages")

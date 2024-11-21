@@ -461,9 +461,9 @@ export type Icon = {
 };
 
 /**
- * Skill template
+ * Skill
  */
-export type SkillTemplate = {
+export type Skill = {
   /**
    * Skill template name
    */
@@ -606,9 +606,34 @@ export type SkillMeta = {
 };
 
 /**
+ * Action metadata
+ */
+export type ActionMeta = {
+  /**
+   * Action type
+   */
+  type?: ActionType;
+  /**
+   * Action name
+   */
+  name?: string;
+  /**
+   * Skill icon
+   */
+  icon?: Icon;
+};
+
+/**
  * Skill template config (key is config item key, value is config value)
  */
 export type SkillTemplateConfig = {
+  [key: string]: DynamicConfigValue;
+};
+
+/**
+ * Action config (key is config item key, value is config value)
+ */
+export type ActionConfig = {
   [key: string]: DynamicConfigValue;
 };
 
@@ -873,6 +898,71 @@ export type TokenUsageItem = {
    * Output tokens
    */
   outputTokens: number;
+};
+
+/**
+ * Action result status
+ */
+export type ActionResultStatus = 'waiting' | 'executing' | 'finish' | 'failed';
+
+/**
+ * Action result
+ */
+export type ActionResult = {
+  /**
+   * Action result ID
+   */
+  readonly resultId: string;
+  /**
+   * Canvas ID
+   */
+  canvasId?: string;
+  /**
+   * Action type
+   */
+  type: ActionType;
+  /**
+   * Action metadata
+   */
+  actionMeta: ActionMeta;
+  /**
+   * Response content
+   */
+  content: string;
+  /**
+   * Action result status
+   */
+  status?: ActionResultStatus;
+  /**
+   * Response logs
+   */
+  logs?: Array<string>;
+  /**
+   * Structured data output
+   */
+  structuredData?: {
+    [key: string]: unknown;
+  };
+  /**
+   * Errors
+   */
+  errors?: Array<string>;
+  /**
+   * Token usage
+   */
+  tokenUsage?: Array<TokenUsageItem>;
+  /**
+   * Skill invocation parameters
+   */
+  invokeParam?: InvokeSkillRequest;
+  /**
+   * Message creation time
+   */
+  createdAt?: string;
+  /**
+   * Message update time
+   */
+  updatedAt?: string;
 };
 
 /**
@@ -1350,6 +1440,10 @@ export type DeleteDocumentRequest = {
   docId: string;
 };
 
+export type GetActionResultResponse = BaseResponse & {
+  data?: ActionResult;
+};
+
 export type QueryReferencesRequest = {
   /**
    * Source entity type
@@ -1638,11 +1732,33 @@ export type DeleteLabelInstanceRequest = {
   labelId: string;
 };
 
-export type ListSkillTemplateResponse = BaseResponse & {
+export type Action = {
   /**
-   * Skill template list
+   * Action type
    */
-  data?: Array<SkillTemplate>;
+  actionType?: ActionType;
+  /**
+   * Action name
+   */
+  actionName?: string;
+  /**
+   * Action display name
+   */
+  displayName?: string;
+};
+
+export type ListActionResponse = BaseResponse & {
+  /**
+   * Action list
+   */
+  data?: Array<Action>;
+};
+
+export type ListSkillResponse = BaseResponse & {
+  /**
+   * Skill list
+   */
+  data?: Array<Skill>;
 };
 
 export type ListSkillInstanceResponse = BaseResponse & {
@@ -1938,6 +2054,92 @@ export type SkillInvocationConfig = {
  */
 export type SkillJobStatus = 'scheduling' | 'running' | 'finish' | 'failed';
 
+export type ActionType = 'skill' | 'tool';
+
+export type ActionContextType = 'resource' | 'document';
+
+export type ActionContextEntity = {
+  /**
+   * Entity title
+   */
+  title?: string;
+  /**
+   * Entity content
+   */
+  content?: string;
+};
+
+export type ActionContextItem = {
+  /**
+   * Context item type
+   */
+  type?: ActionContextType;
+  /**
+   * Entity ID
+   */
+  entityId?: string;
+  /**
+   * Entity data (will be auto populated if not provided)
+   */
+  entityData?: ActionContextEntity;
+  /**
+   * Context metadata
+   */
+  metadata?: {
+    [key: string]: unknown;
+  };
+};
+
+export type InvokeActionRequest = {
+  /**
+   * Action type
+   */
+  actionType?: ActionType;
+  /**
+   * Action name
+   */
+  actionName?: string;
+  /**
+   * Action input
+   */
+  input?: SkillInput;
+  /**
+   * Action invocation context
+   */
+  context?: Array<ActionContextItem>;
+  /**
+   * Action config
+   */
+  config?: ActionConfig;
+  /**
+   * Canvas ID
+   */
+  canvasId?: string;
+  /**
+   * Selected output locale
+   */
+  locale?: string;
+  /**
+   * Selected model
+   */
+  modelName?: string;
+  /**
+   * Skill job ID (if not provided, a new job will be created)
+   */
+  jobId?: string;
+  /**
+   * Trigger ID (typically you don't need to provide this)
+   */
+  triggerId?: string;
+};
+
+export type InvokeActionResponse = BaseResponse & {
+  /**
+   * Skill job ID
+   */
+  jobId?: string;
+};
+
 export type InvokeSkillRequest = {
   /**
    * Skill input
@@ -1955,6 +2157,18 @@ export type InvokeSkillRequest = {
    * Project ID (if not provided, new project will be created)
    */
   projectId?: string;
+  /**
+   * Skill name (if not provided, common_qna will be used)
+   */
+  skillName?: string;
+  /**
+   * Canvas ID
+   */
+  canvasId?: string;
+  /**
+   * Result ID (will be generated if not provided)
+   */
+  resultId?: string;
   /**
    * Skill instance ID to invoke (if not provided, skill scheduler will be used)
    */
@@ -1987,9 +2201,9 @@ export type InvokeSkillRequest = {
 
 export type InvokeSkillResponse = BaseResponse & {
   /**
-   * Skill job ID
+   * Skill result ID
    */
-  jobId?: string;
+  resultId?: string;
 };
 
 export type ListSkillTriggerResponse = BaseResponse & {
@@ -2996,22 +3210,70 @@ export type DeleteLabelInstanceResponse = BaseResponse;
 
 export type DeleteLabelInstanceError = unknown;
 
-export type ListSkillTemplatesData = {
-  query?: {
+export type ListActionsResponse = ListActionResponse;
+
+export type ListActionsError = unknown;
+
+export type InvokeActionData = {
+  /**
+   * Action invocation request
+   */
+  body: InvokeActionRequest;
+};
+
+export type InvokeActionResponse2 = InvokeActionResponse;
+
+export type InvokeActionError = unknown;
+
+export type StreamInvokeActionData = {
+  /**
+   * Skill invocation request
+   */
+  body: InvokeActionRequest;
+};
+
+export type StreamInvokeActionResponse = string;
+
+export type StreamInvokeActionError = unknown;
+
+export type GetActionResultData = {
+  query: {
     /**
-     * Page number
+     * Action result ID
      */
-    page?: number;
-    /**
-     * Page size
-     */
-    pageSize?: number;
+    resultId: string;
   };
 };
 
-export type ListSkillTemplatesResponse = ListSkillTemplateResponse;
+export type GetActionResultResponse2 = GetActionResultResponse;
 
-export type ListSkillTemplatesError = unknown;
+export type GetActionResultError = unknown;
+
+export type ListSkillsResponse = ListSkillResponse;
+
+export type ListSkillsError = unknown;
+
+export type InvokeSkillData = {
+  /**
+   * Skill invocation request
+   */
+  body: InvokeSkillRequest;
+};
+
+export type InvokeSkillResponse2 = InvokeSkillResponse;
+
+export type InvokeSkillError = unknown;
+
+export type StreamInvokeSkillData = {
+  /**
+   * Skill invocation request
+   */
+  body: InvokeSkillRequest;
+};
+
+export type StreamInvokeSkillResponse = string;
+
+export type StreamInvokeSkillError = unknown;
 
 export type ListSkillInstancesData = {
   query?: {
@@ -3083,28 +3345,6 @@ export type DeleteSkillInstanceData = {
 export type DeleteSkillInstanceResponse = BaseResponse;
 
 export type DeleteSkillInstanceError = unknown;
-
-export type InvokeSkillData = {
-  /**
-   * Skill invocation request
-   */
-  body: InvokeSkillRequest;
-};
-
-export type InvokeSkillResponse2 = InvokeSkillResponse;
-
-export type InvokeSkillError = unknown;
-
-export type StreamInvokeSkillData = {
-  /**
-   * Skill invocation request
-   */
-  body: InvokeSkillRequest;
-};
-
-export type StreamInvokeSkillResponse = string;
-
-export type StreamInvokeSkillError = unknown;
 
 export type ListSkillTriggersData = {
   query?: {
@@ -3717,14 +3957,78 @@ export type $OpenApiTs = {
       };
     };
   };
-  '/skill/template/list': {
+  '/action/list': {
     get: {
-      req: ListSkillTemplatesData;
       res: {
         /**
          * successful operation
          */
-        '200': ListSkillTemplateResponse;
+        '200': ListActionResponse;
+      };
+    };
+  };
+  '/action/invoke': {
+    post: {
+      req: InvokeActionData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': InvokeActionResponse;
+      };
+    };
+  };
+  '/action/streamInvoke': {
+    post: {
+      req: StreamInvokeActionData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': string;
+      };
+    };
+  };
+  '/action/result': {
+    get: {
+      req: GetActionResultData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': GetActionResultResponse;
+      };
+    };
+  };
+  '/skill/list': {
+    get: {
+      res: {
+        /**
+         * successful operation
+         */
+        '200': ListSkillResponse;
+      };
+    };
+  };
+  '/skill/invoke': {
+    post: {
+      req: InvokeSkillData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': InvokeSkillResponse;
+      };
+    };
+  };
+  '/skill/streamInvoke': {
+    post: {
+      req: StreamInvokeSkillData;
+      res: {
+        /**
+         * successful operation
+         */
+        '200': string;
       };
     };
   };
@@ -3791,28 +4095,6 @@ export type $OpenApiTs = {
          * successful operation
          */
         '200': BaseResponse;
-      };
-    };
-  };
-  '/skill/invoke': {
-    post: {
-      req: InvokeSkillData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': InvokeSkillResponse;
-      };
-    };
-  };
-  '/skill/streamInvoke': {
-    post: {
-      req: StreamInvokeSkillData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': string;
       };
     };
   };

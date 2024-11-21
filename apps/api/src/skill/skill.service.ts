@@ -8,8 +8,6 @@ import {
   Prisma,
   SkillTrigger as SkillTriggerModel,
   ChatMessage as ChatMessageModel,
-  Conversation as ConversationModel,
-  SkillJob as SkillJobModel,
 } from '@prisma/client';
 import { Response } from 'express';
 import { AIMessageChunk, BaseMessage } from '@langchain/core/dist/messages';
@@ -21,13 +19,12 @@ import {
   InvokeSkillRequest,
   ListSkillInstancesData,
   ListSkillJobsData,
-  ListSkillTemplatesData,
   ListSkillTriggersData,
   PinSkillInstanceRequest,
   Resource,
   SkillContext,
   SkillMeta,
-  SkillTemplate,
+  Skill,
   SkillTriggerCreateParam,
   TimerInterval,
   TimerTriggerConfig,
@@ -37,11 +34,11 @@ import {
   User,
   Project,
   Document,
+  TokenUsageItem,
 } from '@refly-packages/openapi-schema';
 import {
   BaseSkill,
   ReflyService,
-  Scheduler,
   SkillEngine,
   SkillEventMap,
   SkillRunnableConfig,
@@ -49,9 +46,10 @@ import {
   createSkillInventory,
 } from '@refly-packages/skill-template';
 import {
-  detectLanguage,
+  aggregateTokenUsage,
+  // detectLanguage,
+  genActionResultID,
   genSkillID,
-  genSkillJobID,
   genSkillTriggerID,
 } from '@refly-packages/utils';
 import { PrismaService } from '@/common/prisma.service';
@@ -62,9 +60,8 @@ import {
   writeSSEResponse,
   pick,
   QUEUE_SYNC_TOKEN_USAGE,
-  omit,
 } from '@/utils';
-import { InvokeSkillJobData, skillInstancePO2DTO } from './skill.dto';
+import { InvokeSkillJobData } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
 import {
   projectPO2DTO,
@@ -73,8 +70,7 @@ import {
   referencePO2DTO,
 } from '@/knowledge/knowledge.dto';
 import { ConversationService } from '@/conversation/conversation.service';
-import { MessageAggregator } from '@/utils/message';
-import { CanvasIntentType, SkillEvent } from '@refly-packages/common-types';
+import { SkillEvent } from '@refly-packages/common-types';
 import { ConfigService } from '@nestjs/config';
 import { SearchService } from '@/search/search.service';
 import { RAGService } from '@/rag/rag.service';
@@ -84,16 +80,15 @@ import { SyncTokenUsageJobData } from '@/subscription/subscription.dto';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import {
-  ConversationNotFoundError,
   ModelNotSupportedError,
   ModelUsageQuotaExceeded,
   ParamsError,
-  ProjectNotFoundError,
   SkillNotFoundError,
 } from '@refly-packages/errors';
 import { genBaseRespDataFromError } from '@/utils/exception';
 import { CanvasService } from '@/canvas/canvas.service';
 import { canvasPO2DTO } from '@/canvas/canvas.dto';
+import { actionResultPO2DTO } from '@/action/action.dto';
 
 export function createLangchainMessage(message: ChatMessageModel): BaseMessage {
   const messageData = {
@@ -249,10 +244,9 @@ export class SkillService {
     };
   };
 
-  listSkillTemplates(user: User, param: ListSkillTemplatesData['query']): SkillTemplate[] {
-    const { page, pageSize } = param;
+  listSkills(user: User): Skill[] {
     const locale = user.uiLocale || 'en';
-    const templates = this.skillInventory.map((skill) => ({
+    const skills = this.skillInventory.map((skill) => ({
       name: skill.name,
       displayName: skill.displayName[locale],
       icon: skill.icon,
@@ -260,7 +254,7 @@ export class SkillService {
       configSchema: skill.configSchema,
     }));
 
-    return templates.slice((page - 1) * pageSize, page * pageSize);
+    return skills;
   }
 
   async listSkillInstances(user: User, param: ListSkillInstancesData['query']) {
@@ -402,86 +396,52 @@ export class SkillService {
 
   async skillInvokePreCheck(user: User, param: InvokeSkillRequest): Promise<InvokeSkillJobData> {
     const { uid } = user;
-    const data: InvokeSkillJobData = { ...param, uid, rawParam: JSON.stringify(param) };
 
     // Check for token quota
     const usageResult = await this.subscription.checkTokenUsage(user);
 
-    data.modelName ||= this.config.get('skill.defaultModel');
-    const modelInfo = await this.prisma.modelInfo.findUnique({ where: { name: data.modelName } });
+    const modelName = param.modelName || this.config.get('skill.defaultModel');
+    const modelInfo = await this.prisma.modelInfo.findUnique({ where: { name: modelName } });
 
     if (!modelInfo) {
-      throw new ModelNotSupportedError(`model ${data.modelName} not supported`);
+      throw new ModelNotSupportedError(`model ${modelName} not supported`);
     }
 
     if (!usageResult[modelInfo.tier]) {
       throw new ModelUsageQuotaExceeded(
-        `model ${data.modelName} (${modelInfo.tier}) not available for current plan`,
+        `model ${modelName} (${modelInfo.tier}) not available for current plan`,
       );
     }
 
-    data.input ??= { query: '' };
-    data.context ??= {};
+    const resultId = param.resultId || genActionResultID();
+    const existingResult = await this.prisma.actionResult.findFirst({ where: { resultId, uid } });
+    if (existingResult) {
+      throw new ParamsError('action result already exists');
+    }
+
+    param.input ??= { query: '' };
+    param.skillName ??= 'common_qna';
+    param.context ??= {};
+
+    const result = await this.prisma.actionResult.create({
+      data: {
+        resultId,
+        uid,
+        canvasId: param.canvasId,
+        type: 'skill',
+        status: 'executing',
+        content: '',
+        invokeParam: JSON.stringify(param),
+      },
+    });
+
+    const data: InvokeSkillJobData = {
+      ...param,
+      uid,
+      result: actionResultPO2DTO(result),
+      rawParam: JSON.stringify(param),
+    };
     data.context = await this.populateSkillContext(user, data.context);
-
-    // If skill is specified, find the skill instance and add to job data
-    if (data.skillId) {
-      const skillInstance = await this.prisma.skillInstance.findUnique({
-        where: { skillId: data.skillId, uid: user.uid, deletedAt: null },
-      });
-      if (!skillInstance) {
-        throw new SkillNotFoundError(`skill not found: ${data.skillId}`);
-      }
-
-      const skill = skillInstancePO2DTO(skillInstance);
-      data.skill = skill;
-      data.tplConfig = { ...skill?.tplConfig, ...data.tplConfig };
-    }
-
-    // Create or retrieve conversation
-    let conversation: ConversationModel | null = null;
-    if (data.createConvParam) {
-      data.createConvParam.projectId ||= data.projectId;
-      conversation = await this.conversation.upsertConversation(
-        user,
-        data.createConvParam,
-        data.convId,
-      );
-      data.convId = conversation.convId;
-    } else if (data.convId) {
-      conversation = await this.prisma.conversation.findFirst({
-        where: { uid: user.uid, convId: data.convId },
-      });
-      if (!data.conversation) {
-        throw new ConversationNotFoundError(`conversation not found: ${data.convId}`);
-      }
-    }
-    if (conversation) {
-      data.conversation = omit(conversation, ['pk']);
-    }
-
-    // If project is specified, find the project
-    if (data.projectId) {
-      const project = await this.prisma.project.findUnique({
-        where: { projectId: data.projectId, uid: user.uid, deletedAt: null },
-      });
-      if (!project) {
-        throw new ProjectNotFoundError();
-      }
-      data.project = projectPO2DTO(project);
-    }
-
-    // If job is specified, find the job and add to job data
-    let job: SkillJobModel | null = null;
-    if (data.jobId) {
-      job = await this.prisma.skillJob.findFirst({ where: { jobId: data.jobId } });
-    }
-    if (!job) {
-      // If job is not specified or found, create a new job
-      job = await this.createSkillJob(user, data);
-    }
-    data.job = omit(job, ['pk']);
-    data.jobId = data.job.jobId;
 
     return data;
   }
@@ -568,34 +528,11 @@ export class SkillService {
     return context;
   }
 
-  async createSkillJob(user: User, param: InvokeSkillJobData) {
-    const { input, context, skill, triggerId, convId } = param;
-
-    // remove actual content from context to save storage
-    const contextCopy: SkillContext = JSON.parse(JSON.stringify(context ?? {}));
-    contextCopy.resources?.forEach(({ resource }) => (resource.content = ''));
-
-    return this.prisma.skillJob.create({
-      data: {
-        jobId: genSkillJobID(),
-        uid: user.uid,
-        skillId: skill?.skillId ?? '',
-        skillDisplayName: skill?.displayName ?? 'Scheduler',
-        input: JSON.stringify(input),
-        context: JSON.stringify(contextCopy ?? {}),
-        tplConfig: JSON.stringify(param.tplConfig ?? {}),
-        status: 'running',
-        triggerId,
-        convId,
-      },
-    });
-  }
-
   async sendInvokeSkillTask(user: User, param: InvokeSkillRequest) {
     const data = await this.skillInvokePreCheck(user, param);
     await this.skillQueue.add(CHANNEL_INVOKE_SKILL, data);
 
-    return data.job;
+    return data.result;
   }
 
   async invokeSkillFromQueue(jobData: InvokeSkillJobData) {
@@ -621,7 +558,7 @@ export class SkillService {
       eventListener?: (data: SkillEvent) => void;
     },
   ): Promise<SkillRunnableConfig> {
-    const { skill, context, convId, tplConfig, conversation, modelName, eventListener } = data;
+    const { context, tplConfig, modelName, eventListener } = data;
     const installedSkills: SkillMeta[] = (
       await this.prisma.skillInstance.findMany({
         where: { uid: user.uid, deletedAt: null },
@@ -631,8 +568,7 @@ export class SkillService {
       icon: JSON.parse(s.icon),
     }));
 
-    const displayLocale =
-      (await detectLanguage(data?.input?.query)) || data?.locale || user?.uiLocale || 'en';
+    const displayLocale = data?.locale || user?.uiLocale || 'en';
 
     const config: SkillRunnableConfig = {
       configurable: {
@@ -641,25 +577,11 @@ export class SkillService {
         locale: displayLocale,
         uiLocale: user.uiLocale,
         installedSkills,
-        convId,
         tplConfig,
+        resultId: data.result?.resultId,
       },
       user: pick(user, ['uid', 'uiLocale', 'outputLocale']),
     };
-
-    if (skill) {
-      config.configurable.selectedSkill = {
-        ...pick(skill, ['skillId', 'tplName', 'displayName', 'icon']),
-      };
-    }
-
-    if (conversation) {
-      const messages = await this.prisma.chatMessage.findMany({
-        where: { convId: conversation.convId },
-        orderBy: { pk: 'asc' },
-      });
-      config.configurable.chatHistory = messages.map((m) => createLangchainMessage(m));
-    }
 
     if (eventListener) {
       const emitter = new EventEmitter<SkillEventMap>();
@@ -686,21 +608,14 @@ export class SkillService {
 
     try {
       await this._invokeSkill(user, data, res);
-      await this.prisma.skillJob.update({
-        where: { jobId: data.jobId },
-        data: { status: 'finish' },
-      });
     } catch (err) {
-      writeSSEResponse(res, {
-        event: 'error',
-        content: JSON.stringify(genBaseRespDataFromError(err)),
-      });
+      if (res) {
+        writeSSEResponse(res, {
+          event: 'error',
+          content: JSON.stringify(genBaseRespDataFromError(err)),
+        });
+      }
       this.logger.error(`invoke skill error: ${err.stack}`);
-
-      await this.prisma.skillJob.update({
-        where: { jobId: data.jobId },
-        data: { status: 'failed' },
-      });
     } finally {
       if (res) {
         res.end(``);
@@ -709,15 +624,8 @@ export class SkillService {
   }
 
   private async _invokeSkill(user: User, data: InvokeSkillJobData, res?: Response) {
-    const { input, conversation, job, rawParam } = data;
-
-    const convParam = conversation
-      ? {
-          convId: conversation.convId,
-          title: input.query,
-          uid: user.uid,
-        }
-      : null;
+    const { input, result } = data;
+    const { resultId, actionMeta } = result;
 
     let aborted = false;
 
@@ -728,7 +636,15 @@ export class SkillService {
       });
     }
 
-    const msgAggregator = new MessageAggregator();
+    const resultUpdates = {
+      content: '',
+      logs: [],
+      structuredData: {},
+      errors: [],
+      toolCalls: [],
+      usageItems: [],
+    };
+
     const config = await this.buildInvokeConfig(user, {
       ...data,
       eventListener: async (data: SkillEvent) => {
@@ -737,66 +653,39 @@ export class SkillService {
           return;
         }
 
-        // Update conversation projectId if intentMatcher result is generateCanvas
-        if (data.event === 'structured_data' && data.structuredDataKey === 'intentMatcher') {
-          const content = JSON.parse(data.content || '{}');
-          const intentType = content.type;
-          const projectId = content.projectId;
-
-          if (
-            intentType === CanvasIntentType.GenerateDocument &&
-            projectId &&
-            conversation?.convId
-          ) {
-            await this.prisma.conversation.update({
-              where: { convId: conversation?.convId },
-              data: { projectId },
-            });
-          }
-        }
-
         if (res) {
           writeSSEResponse(res, data);
         }
-        msgAggregator.addSkillEvent(data);
+        switch (data.event) {
+          case 'log':
+            resultUpdates.logs.push(data.content);
+            return;
+          case 'structured_data':
+            if (data.structuredDataKey) {
+              resultUpdates.structuredData[data.structuredDataKey] = data.content;
+            }
+            return;
+          case 'error':
+            resultUpdates.errors.push(data.content);
+            return;
+        }
       },
     });
-    const scheduler = new Scheduler(this.skillEngine);
 
-    // Save user query to conversation right before invoking skill
-    // but after the chatHistory of runnable config is built
-    await this.conversation.addChatMessages(
-      [
-        {
-          type: 'human',
-          content: input.query,
-          uid: user.uid,
-          convId: conversation?.convId,
-          jobId: job?.jobId,
-          invokeParam: rawParam,
-        },
-      ],
-      convParam,
-    );
+    const skill = this.skillInventory.find((s) => s.name === data.skillName);
 
     let runMeta: SkillRunnableMeta | null = null;
     const basicUsageData = {
       uid: user.uid,
-      convId: conversation?.convId,
-      jobId: job?.jobId,
+      resultId,
+      actionMeta,
     };
 
     try {
-      for await (const event of scheduler.streamEvents(input, { ...config, version: 'v2' })) {
+      for await (const event of skill.streamEvents(input, { ...config, version: 'v2' })) {
         if (aborted) {
           if (runMeta) {
-            msgAggregator.addSkillEvent({
-              event: 'error',
-              spanId: runMeta.spanId,
-              skillMeta: runMeta,
-              content: 'AbortError',
-            });
-            msgAggregator.abort();
+            resultUpdates.errors.push('AbortError');
           }
           throw new Error('AbortError');
         }
@@ -806,11 +695,10 @@ export class SkillService {
 
         switch (event.event) {
           case 'on_chat_model_stream':
-            if (res) {
+            if (chunk.content && res) {
               writeSSEResponse(res, {
                 event: 'stream',
-                skillMeta: runMeta,
-                spanId: runMeta.spanId,
+                resultId,
                 content: chunk.content.toString(),
               });
             }
@@ -821,42 +709,56 @@ export class SkillService {
               if (!modelInfo) {
                 this.logger.error(`model not found: ${String(runMeta.ls_model_name)}`);
               }
+              const usage: TokenUsageItem = {
+                tier: modelInfo?.tier,
+                modelProvider: modelInfo?.provider,
+                modelName: modelInfo?.name,
+                inputTokens: chunk.usage_metadata?.input_tokens ?? 0,
+                outputTokens: chunk.usage_metadata?.output_tokens ?? 0,
+              };
               const tokenUsage: SyncTokenUsageJobData = {
                 ...basicUsageData,
-                spanId: runMeta.spanId,
-                usage: {
-                  tier: modelInfo?.tier,
-                  modelProvider: modelInfo?.provider,
-                  modelName: modelInfo?.name,
-                  inputTokens: chunk.usage_metadata?.input_tokens ?? 0,
-                  outputTokens: chunk.usage_metadata?.output_tokens ?? 0,
-                },
-                skill: pick(runMeta, ['skillId', 'tplName', 'displayName']),
+                usage,
                 timestamp: new Date(),
               };
               await this.usageReportQueue.add(tokenUsage);
-              msgAggregator.handleStreamEndEvent(runMeta, chunk, tokenUsage.usage);
+
+              resultUpdates.content += chunk.content.toString();
+              resultUpdates.toolCalls.push(...chunk.tool_calls);
+              resultUpdates.usageItems.push(usage);
             }
             break;
         }
       }
+    } catch (err) {
+      if (res) {
+        writeSSEResponse(res, {
+          event: 'error',
+          content: JSON.stringify(genBaseRespDataFromError(err)),
+        });
+      }
+      resultUpdates.errors.push(err.message);
     } finally {
-      const messages = msgAggregator.getMessages({
-        user,
-        convId: conversation?.convId,
-        jobId: job?.jobId,
-      });
-
-      messages.forEach((msg) => {
+      if (res) {
         writeSSEResponse(res, {
           event: 'usage',
-          skillMeta: JSON.parse(msg.skillMeta || '{}'),
-          spanId: msg.spanId,
-          content: JSON.stringify({ token: JSON.parse(msg.tokenUsage || '{}') }),
+          resultId,
+          content: JSON.stringify({ token: aggregateTokenUsage(resultUpdates.usageItems) }),
         });
-      });
+      }
 
-      await this.conversation.addChatMessages(messages, convParam);
+      await this.prisma.actionResult.update({
+        where: { resultId },
+        data: {
+          status: resultUpdates.errors.length > 0 ? 'failed' : 'finish',
+          content: resultUpdates.content,
+          logs: JSON.stringify(resultUpdates.logs),
+          structuredData: JSON.stringify(resultUpdates.structuredData),
+          errors: JSON.stringify(resultUpdates.errors),
+          toolCalls: JSON.stringify(resultUpdates.toolCalls),
+          tokenUsage: JSON.stringify(aggregateTokenUsage(resultUpdates.usageItems)),
+        },
+      });
     }
   }
 

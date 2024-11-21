@@ -1,5 +1,6 @@
 import { Button } from 'antd';
-import { CanvasNode, CanvasNodeType } from '../node';
+import { CanvasNodeType } from '@refly/openapi-schema';
+import { CanvasNode } from '../node';
 import { ResponseNodePreview } from './response';
 import { ResourceNodePreview } from './resource';
 import { SkillNodePreview } from './skill';
@@ -20,7 +21,7 @@ export const NodePreview = (props: { node: CanvasNode; handleClosePanel: () => v
       case 'tool':
         return <ToolNodePreview />;
       case 'response':
-        return <ResponseNodePreview />;
+        return <ResponseNodePreview resultId={node.data.entityId} />;
       default:
         return null;
     }
