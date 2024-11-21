@@ -70,9 +70,13 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
         title: resource.title,
         domain: 'resource',
       }));
-      canvasEmitter.emit('addNode', {
-        type: 'resource',
-        data: resources,
+      resources.forEach((resource) => {
+        canvasEmitter.emit('addNode', {
+          type: 'resource',
+          data: {
+            entityId: resource.id,
+          },
+        });
       });
     }
 

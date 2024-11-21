@@ -954,7 +954,7 @@ export type ActionResult = {
   /**
    * Skill invocation parameters
    */
-  invokeParam?: InvokeActionRequest;
+  invokeParam?: InvokeSkillRequest;
   /**
    * Message creation time
    */
@@ -1010,7 +1010,7 @@ export type ChatMessage = {
   /**
    * Skill invocation parameters
    */
-  invokeParam?: InvokeActionRequest;
+  invokeParam?: InvokeSkillRequest;
   /**
    * Message creation time
    */
@@ -2165,6 +2165,10 @@ export type InvokeSkillRequest = {
    * Canvas ID
    */
   canvasId?: string;
+  /**
+   * Result ID (will be generated if not provided)
+   */
+  resultId?: string;
   /**
    * Skill instance ID to invoke (if not provided, skill scheduler will be used)
    */

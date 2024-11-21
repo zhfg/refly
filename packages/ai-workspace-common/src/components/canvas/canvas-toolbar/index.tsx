@@ -10,7 +10,7 @@ import { FC } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
-import { SearchDomain } from '@refly/openapi-schema';
+import { CanvasNodeType, SearchDomain } from '@refly/openapi-schema';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 import { canvasEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/canvas';
 
@@ -64,9 +64,11 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
   const handleConfirm = (selectedItems: ContextItem[]) => {
     if (selectedItems.length > 0) {
       const domain = selectedItems[0]?.domain;
-      canvasEmitter.emit('addNode', {
-        type: domain,
-        data: selectedItems,
+      selectedItems.forEach((item) => {
+        canvasEmitter.emit('addNode', {
+          type: domain as CanvasNodeType,
+          data: { entityId: item.id },
+        });
       });
     }
   };

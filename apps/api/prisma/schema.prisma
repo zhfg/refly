@@ -153,7 +153,7 @@ model ActionResult {
   /// Action result id
   resultId       String             @unique @map("result_id")
   /// Canvas ID
-  canvasId       String             @map("canvas_id")
+  canvasId       String?            @map("canvas_id")
   /// Action type
   type           String             @map("type")
   /// UID

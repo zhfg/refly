@@ -2601,7 +2601,7 @@ components:
             $ref: '#/components/schemas/TokenUsageItem'
         invokeParam:
           description: Skill invocation parameters
-          $ref: '#/components/schemas/InvokeActionRequest'
+          $ref: '#/components/schemas/InvokeSkillRequest'
         createdAt:
           type: string
           format: date-time
@@ -2661,7 +2661,7 @@ components:
             $ref: '#/components/schemas/TokenUsageItem'
         invokeParam:
           description: Skill invocation parameters
-          $ref: '#/components/schemas/InvokeActionRequest'
+          $ref: '#/components/schemas/InvokeSkillRequest'
         createdAt:
           type: string
           format: date-time
@@ -3911,6 +3911,9 @@ components:
         canvasId:
           type: string
           description: Canvas ID
+        resultId:
+          type: string
+          description: Result ID (will be generated if not provided)
         skillId:
           type: string
           description: Skill instance ID to invoke (if not provided, skill scheduler will be used)

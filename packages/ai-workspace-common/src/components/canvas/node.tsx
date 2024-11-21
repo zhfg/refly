@@ -4,7 +4,7 @@ import { CanvasNodeType } from '@refly/openapi-schema';
 
 export type CanvasNodeData<CanvasMeta extends Record<string, unknown> = Record<string, unknown>> = {
   entityId: string;
-  metadata: CanvasMeta;
+  metadata?: CanvasMeta;
 };
 
 export type CanvasNode = Node<CanvasNodeData, CanvasNodeType>;

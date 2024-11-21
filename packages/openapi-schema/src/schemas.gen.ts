@@ -1165,7 +1165,7 @@ export const $ActionResult = {
     },
     invokeParam: {
       description: 'Skill invocation parameters',
-      $ref: '#/components/schemas/InvokeActionRequest',
+      $ref: '#/components/schemas/InvokeSkillRequest',
     },
     createdAt: {
       type: 'string',
@@ -1241,7 +1241,7 @@ export const $ChatMessage = {
     },
     invokeParam: {
       description: 'Skill invocation parameters',
-      $ref: '#/components/schemas/InvokeActionRequest',
+      $ref: '#/components/schemas/InvokeSkillRequest',
     },
     createdAt: {
       type: 'string',
@@ -3061,6 +3061,10 @@ export const $InvokeSkillRequest = {
     canvasId: {
       type: 'string',
       description: 'Canvas ID',
+    },
+    resultId: {
+      type: 'string',
+      description: 'Result ID (will be generated if not provided)',
     },
     skillId: {
       type: 'string',

@@ -413,13 +413,20 @@ export class SkillService {
       );
     }
 
+    const resultId = param.resultId || genActionResultID();
+    const existingResult = await this.prisma.actionResult.findFirst({ where: { resultId, uid } });
+    if (existingResult) {
+      throw new ParamsError('action result already exists');
+    }
+
     param.input ??= { query: '' };
     param.skillName ??= 'common_qna';
     param.context ??= {};
 
     const result = await this.prisma.actionResult.create({
       data: {
-        resultId: genActionResultID(),
+        resultId,
+        uid,
         canvasId: param.canvasId,
         type: 'skill',
         status: 'executing',

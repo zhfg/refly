@@ -61,7 +61,7 @@ export const CanvasList = (props: CanvasListProps) => {
       canvasId: canvas.canvasId,
       projectId: canvas.projectId,
       convId: activeConvId || '',
-      state: { navigationContext: { shouldFetchDetail: true, source: MessageIntentSource.Canvas } },
+      state: { navigationContext: { shouldFetchDetail: true, source: MessageIntentSource.Document } },
     });
 
     handleAddTabWithNote(canvas);
