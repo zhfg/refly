@@ -15,12 +15,5 @@ export class ActionProcessor {
   @Process()
   async handleInvokeAction(job: Job<InvokeActionJobData>) {
     this.logger.log(`[handleInvokeAction] job: ${JSON.stringify(job)}`);
-
-    try {
-      await this.actionService.invokeActionFromQueue(job.data);
-    } catch (error) {
-      this.logger.error(`[handleInvokeAction] error: ${error?.stack}`);
-      throw error;
-    }
   }
 }
