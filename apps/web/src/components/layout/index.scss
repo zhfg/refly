@@ -1,4 +1,5 @@
 .app-layout {
+  background-color: #eef4f7;
   display: flex;
   flex-direction: row;
 
@@ -465,5 +466,16 @@
     .nav-item.nav-item-active {
       border-top: 2px solid rgb(19, 52, 59);
     }
+  }
+}
+
+.sider-drawer {
+  background-color: #eef4f7 !important;
+  .ant-drawer-header {
+    display: none;
+  }
+  .ant-drawer-body {
+    margin: 8px 0;
+    padding: 0;
   }
 }

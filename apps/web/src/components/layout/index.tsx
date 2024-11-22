@@ -48,15 +48,14 @@ export const AppLayout = (props: AppLayoutProps) => {
   const isWeb = runtime === "web"
 
   const matchShare = useMatch("/share/:shareCode")
-  const matchCanvas = useMatch("/canvas/:canvasId")
 
   useBindCommands()
 
-  const showSider = !matchCanvas && !matchShare && !!userStore.userProfile
+  const showSider = !matchShare && !!userStore.userProfile
 
   return (
     <Layout className="app-layout main">
-      {showSider ? <SiderLayout /> : null}
+      {showSider ? <SiderLayout source="sider" /> : null}
       <Layout
         className="content-layout"
         style={{

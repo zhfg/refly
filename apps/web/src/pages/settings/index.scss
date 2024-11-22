@@ -2,6 +2,7 @@
   width: 100%;
   height: 100%;
   padding: 24px;
+  padding-top: 0;
   box-sizing: border-box;
   .settings-inner-container {
     max-width: 1024px;
@@ -28,7 +29,8 @@
       align-items: center;
     }
   }
-  .arco-tabs-header-size-large.arco-tabs-header-nav-line .arco-tabs-header-title {
+  .arco-tabs-header-size-large.arco-tabs-header-nav-line
+    .arco-tabs-header-title {
     font-size: 16px;
     .arco-tabs-header-title-text {
       display: inline-block;

@@ -29,6 +29,7 @@ import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasProvider } from './context-provider';
 import { useCollabProvider } from '@refly-packages/ai-workspace-common/hooks/use-collab-provider';
 import { CanvasToolbar } from './canvas-toolbar';
+import { TopToolbar } from './top-toolbar';
 import { canvasEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/canvas';
 
 import '@xyflow/react/dist/style.css';
@@ -247,72 +248,64 @@ export const Canvas = (props: { canvasId: string }) => {
 
   return (
     <CanvasProvider context={{ canvasId }}>
-      <div className="w-screen h-screen relative">
-        <Button
-          onClick={() => navigate('/')}
-          className="absolute top-4 left-4 z-10 px-4 py-2 bg-white rounded-md shadow-md hover:bg-gray-100 transition-colors"
-        >
-          ← Back
-        </Button>
-
+      <div className="w-screen h-screen relative flex flex-col">
         <CanvasToolbar onToolSelect={handleToolSelect} />
-
-        <ReactFlow
-          panOnScroll
-          fitView
-          selectionOnDrag
-          nodeTypes={nodeTypes}
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onNodeClick={onNodeClick}
-        >
-          <Background />
-          <MiniMap
-            position="bottom-left"
-            style={{
-              border: '1px solid rgba(16, 24, 40, 0.0784)',
-              boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
-            }}
-            className="bg-white/80 w-[140px] h-[92px] mb-[50px] ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
-            // zoomable
-            // pannable
-            // maskColor="rgb(0, 0, 0, 0.1)"
-            // nodeColor="#333"
-            // nodeStrokeWidth={3}
-          />
-          <Controls
-            position="bottom-left"
-            style={{
-              marginBottom: '12px',
-              marginLeft: '10px',
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '2px',
-              padding: '2px',
-              border: '1px solid rgba(16, 24, 40, 0.0784)',
-              boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              height: '36px',
-            }}
-            className="[&>button]:border-0 [&>button]:border-r [&>button]:border-gray-200 [&>button:last-child]:border-0 [&>button]:w-[32px] [&>button]:h-[32px] [&>button]:rounded-lg [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:transition-colors [&>button]:duration-200"
-            showZoom={true}
-            showFitView={true}
-            showInteractive={true}
-          />
-        </ReactFlow>
-
+        <TopToolbar />
+        <div className="flex-grow">
+          <ReactFlow
+            panOnScroll
+            fitView
+            selectionOnDrag
+            nodeTypes={nodeTypes}
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeClick={onNodeClick}
+          >
+            <Background />
+            <MiniMap
+              position="bottom-left"
+              style={{
+                border: '1px solid rgba(16, 24, 40, 0.0784)',
+                boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
+              }}
+              className="bg-white/80 w-[140px] h-[92px] mb-[50px] ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
+              // zoomable
+              // pannable
+              // maskColor="rgb(0, 0, 0, 0.1)"
+              // nodeColor="#333"
+              // nodeStrokeWidth={3}
+            />
+            <Controls
+              position="bottom-left"
+              style={{
+                marginBottom: '12px',
+                marginLeft: '10px',
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '2px',
+                padding: '2px',
+                border: '1px solid rgba(16, 24, 40, 0.0784)',
+                boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
+                backgroundColor: 'white',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                height: '36px',
+              }}
+              className="[&>button]:border-0 [&>button]:border-r [&>button]:border-gray-200 [&>button:last-child]:border-0 [&>button]:w-[32px] [&>button]:h-[32px] [&>button]:rounded-lg [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:transition-colors [&>button]:duration-200"
+              showZoom={true}
+              showFitView={true}
+              showInteractive={true}
+            />
+          </ReactFlow>
+        </div>
         <div className="absolute bottom-[12px] left-1/2 -translate-x-1/2 w-[444px]">
           <CopilotOperationModule source={MessageIntentSource.Canvas} />
         </div>
-
-        {selectedNode && <NodePreview node={selectedNode} handleClosePanel={handleClosePanel} />}
       </div>
     </CanvasProvider>
   );
