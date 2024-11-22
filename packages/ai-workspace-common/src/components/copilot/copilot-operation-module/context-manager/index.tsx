@@ -19,7 +19,7 @@ import { SaveToKnowledgeBase } from './components/save-to-knowledge-base/index';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 import { useResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/resource';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 
 // types
@@ -105,7 +105,7 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
   const { currentResource } = useResourceStoreShallow((state) => ({
     currentResource: state.resource.data,
   }));
-  const currentCanvas = useCanvasStoreShallow((state) => state.currentCanvas);
+  const currentCanvas = useDocumentStoreShallow((state) => state.currentCanvas);
   const { project } = useProjectStoreShallow((state) => ({
     project: state?.project?.data,
   }));

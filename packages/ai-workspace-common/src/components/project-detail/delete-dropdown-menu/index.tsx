@@ -9,7 +9,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { useTranslation } from 'react-i18next';
 import { useImportProjectModal } from '@refly-packages/ai-workspace-common/stores/import-project-modal';
 import { IconCopy } from '@arco-design/web-react/icon';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useDocumentStore } from '@refly-packages/ai-workspace-common/stores/document';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
@@ -33,7 +33,7 @@ interface DropListProps {
 
 const DropList = (props: DropListProps) => {
   const { handleCancel, handleDeleteClick, handlEditProject, type, getPopupContainer, position, canCopy } = props;
-  const canvasStore = useCanvasStore((state) => ({
+  const canvasStore = useDocumentStore((state) => ({
     editor: state.editor,
   }));
   const { t } = useTranslation();

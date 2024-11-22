@@ -33,7 +33,7 @@ import { getCanvasContent } from '@refly-packages/ai-workspace-common/components
 import { IntentResult, useHandleAICanvas } from './use-handle-ai-canvas';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useMultilingualSearchStoreShallow } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
-import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useDocumentStore, useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import throttle from 'lodash.throttle';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
@@ -43,7 +43,7 @@ const globalIsAbortedRef = { current: false as boolean };
 let uniqueId = genUniqueId();
 
 export const useBuildTask = () => {
-  const canvasStore = useCanvasStoreShallow((state) => ({
+  const canvasStore = useDocumentStoreShallow((state) => ({
     updateIsAiEditing: state.updateIsAiEditing,
   }));
   const chatStore = useChatStoreShallow((state) => ({
@@ -194,11 +194,11 @@ export const useBuildTask = () => {
 
     if (lastRelatedMessage.content.match(/<reflyCanvas[^>]*>/)) {
       if (lastRelatedMessage.content.includes('</reflyCanvas>')) {
-        if (useCanvasStore.getState().isAiEditing) {
+        if (useDocumentStore.getState().isAiEditing) {
           canvasStore.updateIsAiEditing(false);
         }
       } else {
-        if (!useCanvasStore.getState().isAiEditing) {
+        if (!useDocumentStore.getState().isAiEditing) {
           canvasStore.updateIsAiEditing(true);
         }
       }

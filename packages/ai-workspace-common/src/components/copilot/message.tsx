@@ -28,7 +28,7 @@ import { ContextItem } from '@refly-packages/ai-workspace-common/components/copi
 import { ContextPreview } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/context-preview';
 
 import { ClientChatMessage, Mark } from '@refly/common-types';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { memo, useMemo } from 'react';
 import classNames from 'classnames';
 import { parseMarkdownCitationsAndCanvasTags } from '@refly/utils/parse';
@@ -140,7 +140,7 @@ export const AssistantMessage = memo(
     ];
 
     const { t } = useTranslation();
-    const { editor: noteStoreEditor, isCreatingNewCanvasOnHumanMessage } = useCanvasStoreShallow((state) => ({
+    const { editor: noteStoreEditor, isCreatingNewCanvasOnHumanMessage } = useDocumentStoreShallow((state) => ({
       editor: state.editor,
       isCreatingNewCanvasOnHumanMessage: state.isCreatingNewCanvasOnHumanMessage,
     }));

@@ -32,7 +32,7 @@ import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-t
 
 import { AiOutlineWarning, AiOutlineFileWord } from 'react-icons/ai';
 import { getClientOrigin, getWsServerOrigin } from '@refly-packages/utils/url';
-import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useDocumentStore, useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 
 // content selector
@@ -331,7 +331,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
   const [token] = useCookie('_refly_ai_sid');
   const processorRef = useRef<TokenStreamProcessor>();
 
-  const canvasStore = useCanvasStoreShallow((state) => ({
+  const canvasStore = useDocumentStoreShallow((state) => ({
     isAiEditing: state.isAiEditing,
     currentCanvas: state.currentCanvas,
     canvasServerStatus: state.canvasServerStatus,
@@ -705,7 +705,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
 
 export const CanvasStatusBar = () => {
   const { currentCanvas, updateCurrentCanvas, canvasServerStatus, noteCharsCount, noteSaveStatus, editor, tocItems } =
-    useCanvasStoreShallow((state) => ({
+    useDocumentStoreShallow((state) => ({
       currentCanvas: state.currentCanvas,
       updateCurrentCanvas: state.updateCurrentCanvas,
       canvasServerStatus: state.canvasServerStatus,
@@ -834,7 +834,7 @@ export const CanvasStatusBar = () => {
 
 export const CanvasEditorHeader = (props: { projectId: string; canvasId: string }) => {
   const { projectId, canvasId } = props;
-  const { currentCanvas, updateCurrentCanvas } = useCanvasStoreShallow((state) => ({
+  const { currentCanvas, updateCurrentCanvas } = useDocumentStoreShallow((state) => ({
     currentCanvas: state.currentCanvas,
     updateCurrentCanvas: state.updateCurrentCanvas,
   }));
@@ -845,7 +845,7 @@ export const CanvasEditorHeader = (props: { projectId: string; canvasId: string 
   const tab = tabsMap[projectId]?.find((tab) => tab.key === canvasId);
 
   const onTitleChange = (newTitle: string) => {
-    const currentCanvas = useCanvasStore.getState().currentCanvas;
+    const currentCanvas = useDocumentStore.getState().currentCanvas;
     const tabsMap = useProjectStore.getState().projectTabs;
 
     if (!currentCanvas) {
@@ -902,7 +902,7 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
     updateIsRequesting,
     updateCanvasServerStatus,
     resetState,
-  } = useCanvasStoreShallow((state) => ({
+  } = useDocumentStoreShallow((state) => ({
     currentCanvas: state.currentCanvas,
     isRequesting: state.isRequesting,
     newNoteCreating: state.newCanvasCreating,

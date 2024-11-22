@@ -13,7 +13,7 @@ import { useNewCanvasModalStoreShallow } from '@refly-packages/ai-workspace-comm
 
 import './index.scss';
 import classNames from 'classnames';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useDocumentStore } from '@refly-packages/ai-workspace-common/stores/document';
 import { IconLoading } from '@arco-design/web-react/icon';
 
 const RadioGroup = Radio.Group;
@@ -56,7 +56,7 @@ const NewFileButton = (props: { val: string }) => {
   const { t } = useTranslation();
   const importResourceStore = useImportResourceStore();
   const importProjectModal = useImportProjectModal();
-  const { newNoteCreating } = useCanvasStore((state) => ({
+  const { newNoteCreating } = useDocumentStore((state) => ({
     newNoteCreating: state.newCanvasCreating,
   }));
   const newCanvasModalStore = useNewCanvasModalStoreShallow((state) => ({

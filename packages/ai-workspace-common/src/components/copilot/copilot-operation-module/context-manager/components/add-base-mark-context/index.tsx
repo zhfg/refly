@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Popover, Tooltip } from 'antd';
-import { Badge } from 'antd';
+import { Badge, Button, Popover, Tooltip } from 'antd';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { BaseMarkContextSelector } from '../base-mark-context-selector';
 import { Mark } from '@refly/common-types';
