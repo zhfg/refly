@@ -6,21 +6,29 @@ import { useEffect, useState } from 'react';
 // utils
 import { isUrl } from '@refly/utils/isUrl';
 import { genUniqueId } from '@refly-packages/utils/id';
-import { LinkMeta, useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
+import {
+  LinkMeta,
+  useImportResourceStore,
+  useImportResourceStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/import-resource';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { Resource, UpsertResourceRequest } from '@refly/openapi-schema';
+import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
-import { canvasEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/canvas';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
 const { TextArea } = Input;
 
 export const ImportFromWeblink = () => {
   const { t } = useTranslation();
   const [linkStr, setLinkStr] = useState('');
-  const importResourceStore = useImportResourceStore();
+  const { scrapeLinks, setScrapeLinks, setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
+    scrapeLinks: state.scrapeLinks,
+    setScrapeLinks: state.setScrapeLinks,
+    setImportResourceModalVisible: state.setImportResourceModalVisible,
+  }));
 
-  const { scrapeLinks = [] } = importResourceStore;
+  const { addNode } = useCanvasControl();
 
   const [saveLoading, setSaveLoading] = useState(false);
 
@@ -45,7 +53,7 @@ export const ImportFromWeblink = () => {
 
         return link;
       });
-      importResourceStore.setScrapeLinks(newLinks);
+      setScrapeLinks(newLinks);
     } catch (err) {
       console.log('fetch url error, silent ignore');
       const newLinks = scrapeLinks.map((link) => {
@@ -55,7 +63,7 @@ export const ImportFromWeblink = () => {
 
         return link;
       });
-      importResourceStore.setScrapeLinks(newLinks);
+      setScrapeLinks(newLinks);
     }
   };
 
@@ -75,7 +83,8 @@ export const ImportFromWeblink = () => {
         return;
       }
 
-      importResourceStore.setScrapeLinks(scrapeLinks.concat(links));
+      const { scrapeLinks } = useImportResourceStore.getState();
+      setScrapeLinks(scrapeLinks.concat(links));
       setLinkStr('');
 
       // Scrape the link information
@@ -115,8 +124,8 @@ export const ImportFromWeblink = () => {
     }
 
     message.success(t('common.putSuccess'));
-    importResourceStore.setScrapeLinks([]);
-    importResourceStore.setImportResourceModalVisible(false);
+    setScrapeLinks([]);
+    setImportResourceModalVisible(false);
     setLinkStr('');
 
     const resources = (Array.isArray(data?.data) ? data?.data : []).map((resource) => ({
@@ -125,7 +134,7 @@ export const ImportFromWeblink = () => {
       domain: 'resource',
     }));
     resources.forEach((resource) => {
-      canvasEmitter.emit('addNode', {
+      addNode({
         type: 'resource',
         data: {
           entityId: resource.id,
@@ -197,7 +206,7 @@ export const ImportFromWeblink = () => {
         </div>
 
         <div className="flex items-center gap-x-[8px] flex-shrink-0">
-          <Button style={{ marginRight: 8 }} onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
+          <Button style={{ marginRight: 8 }} onClick={() => setImportResourceModalVisible(false)}>
             {t('common.cancel')}
           </Button>
           <Button type="primary" onClick={handleSave} disabled={scrapeLinks.length === 0} loading={saveLoading}>

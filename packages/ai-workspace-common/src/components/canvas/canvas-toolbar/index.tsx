@@ -3,7 +3,6 @@ import { FaArrowPointer } from 'react-icons/fa6';
 import { RiUploadCloud2Line } from 'react-icons/ri';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { HiOutlineSquare2Stack } from 'react-icons/hi2';
-import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
 import { HiOutlineDocumentText } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { FC } from 'react';
@@ -12,7 +11,11 @@ import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-s
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { CanvasNodeType, SearchDomain } from '@refly/openapi-schema';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
-import { canvasEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/canvas';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { ImportResourceModal } from '@refly-packages/ai-workspace-common/components/import-resource';
+import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
+import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -28,10 +31,17 @@ interface ToolbarProps {
 
 export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
   const { t } = useTranslation();
+  const { addNode } = useCanvasControl();
 
-  const { setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
+  const { importResourceModalVisible, setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
+    importResourceModalVisible: state.importResourceModalVisible,
     setImportResourceModalVisible: state.setImportResourceModalVisible,
   }));
+  const sourceListDrawerVisible = useKnowledgeBaseStoreShallow((state) => state.sourceListDrawer.visible);
+
+  const runtime = getRuntime();
+  const isWeb = runtime === 'web';
+
   // Define toolbar items
   const tools: ToolbarItem[] = [
     { icon: FaArrowPointer, value: 'changeMode', type: 'button', domain: 'changeMode' },
@@ -65,7 +75,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     if (selectedItems.length > 0) {
       const domain = selectedItems[0]?.domain;
       selectedItems.forEach((item) => {
-        canvasEmitter.emit('addNode', {
+        addNode({
           type: domain as CanvasNodeType,
           data: { entityId: item.id },
         });
@@ -101,6 +111,8 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
           </SearchList>
         ),
       )}
+      {importResourceModalVisible ? <ImportResourceModal /> : null}
+      {sourceListDrawerVisible && isWeb ? <SourceListModal classNames="source-list-modal" /> : null}
     </div>
   );
 };

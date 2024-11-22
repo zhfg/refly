@@ -29,7 +29,7 @@ import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/c
 import { editorEmitter, InPlaceSendMessagePayload } from '@refly-packages/utils/event-emitter/editor';
 import { LOCALE, MarkType } from '@refly/common-types';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useCanvasContext } from '@refly-packages/ai-workspace-common/components/canvas/context-provider';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
 
 interface CopilotInputModuleProps {

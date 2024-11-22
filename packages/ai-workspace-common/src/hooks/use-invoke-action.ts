@@ -29,7 +29,7 @@ import {
   useActionResultStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { genActionResultID } from '@refly-packages/utils/id';
-import { canvasEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/canvas';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
 interface InvokeParams {
   skillContext?: SkillContext;
@@ -52,6 +52,7 @@ export const useInvokeAction = () => {
     setNewQAText: state.setNewQAText,
   }));
 
+  const { addNode } = useCanvasControl();
   const updateActionResult = useActionResultStoreShallow((state) => state.updateActionResult);
 
   const globalAbortControllerRef = { current: null as AbortController | null };
@@ -274,7 +275,7 @@ export const useInvokeAction = () => {
       invokeParam,
     });
 
-    canvasEmitter.emit('addNode', {
+    addNode({
       type: 'response',
       data: {
         entityId: resultId,
