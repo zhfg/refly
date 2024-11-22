@@ -29,8 +29,13 @@ export const NodePreview = (props: { node: CanvasNode; handleClosePanel: () => v
 
   return (
     <div
-      className="fixed top-1/2 right-2 w-[420px] bg-white rounded-lg shadow-lg z-10 transform -translate-y-1/2"
-      style={{ height: 'calc(100vh - 16px)', maxHeight: 'calc(100vh - 16px)' }}
+      className="fixed top-1/2 right-2 w-[420px] bg-white rounded-lg z-10 transform -translate-y-1/2"
+      style={{
+        height: 'calc(100vh - 16px)',
+        maxHeight: 'calc(100vh - 16px)',
+        border: '1px solid rgba(16, 24, 40, 0.0784)',
+        boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
+      }}
     >
       <div className="flex justify-between items-center p-4">
         <h3 className="text-lg font-semibold">Node Preview</h3>

@@ -272,13 +272,11 @@ export const Canvas = (props: { canvasId: string }) => {
           <Background />
           <MiniMap
             position="bottom-left"
-            // style={{
-            //   marginBottom: '80px',
-            //   marginLeft: '10px',
-            //   width: '162px',
-            //   height: '92px',
-            // }}
-            className="bg-white/80 w-[162px] h-[92px] mb-[60px] ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
+            style={{
+              border: '1px solid rgba(16, 24, 40, 0.0784)',
+              boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
+            }}
+            className="bg-white/80 w-[140px] h-[92px] mb-[50px] ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
             // zoomable
             // pannable
             // maskColor="rgb(0, 0, 0, 0.1)"
@@ -292,17 +290,25 @@ export const Canvas = (props: { canvasId: string }) => {
               marginLeft: '10px',
               display: 'flex',
               flexDirection: 'row',
-              gap: '0',
-              padding: '0',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '2px',
+              padding: '2px',
+              border: '1px solid rgba(16, 24, 40, 0.0784)',
+              boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              overflow: 'hidden',
+              height: '36px',
             }}
-            className="bg-white/80 rounded-lg shadow-md overflow-hidden [&>button]:border-0 [&>button]:border-r [&>button]:border-gray-200 [&>button:last-child]:border-0 [&>button]:rounded-none [&>button]:w-[54px] [&>button]:h-[40px]"
+            className="[&>button]:border-0 [&>button]:border-r [&>button]:border-gray-200 [&>button:last-child]:border-0 [&>button]:w-[32px] [&>button]:h-[32px] [&>button]:rounded-lg [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:transition-colors [&>button]:duration-200"
             showZoom={true}
             showFitView={true}
             showInteractive={true}
           />
         </ReactFlow>
 
-        <div className="absolute bottom-[12px] h-48 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl">
+        <div className="absolute bottom-[12px] left-1/2 -translate-x-1/2 w-[444px]">
           <CopilotOperationModule source={MessageIntentSource.Canvas} />
         </div>
 

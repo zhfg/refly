@@ -74,7 +74,13 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
   };
 
   return (
-    <div className="fixed left-4 top-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-2 flex flex-col gap-2 z-10 border-solid border-1 border-gray-100">
+    <div
+      className="fixed left-4 top-1/2 -translate-y-1/2 bg-white rounded-lg p-2 flex flex-col gap-2 z-10"
+      style={{
+        border: '1px solid rgba(16, 24, 40, 0.0784)',
+        boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
+      }}
+    >
       {tools.map((tool, index) =>
         tool.type === 'button' ? (
           <Button
@@ -85,7 +91,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
             icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
           ></Button>
         ) : (
-          <SearchList domain={tool.domain as SearchDomain} handleConfirm={handleConfirm}>
+          <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm}>
             <Button
               type="text"
               onClick={(event) => handleToolSelect(event, tool.value)}
