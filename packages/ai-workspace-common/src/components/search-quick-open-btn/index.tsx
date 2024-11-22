@@ -9,47 +9,35 @@ import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 
 interface SearchQuickOpenBtnProps extends React.ComponentProps<'div'> {
   placeholder?: string;
-  collapse?: boolean;
 }
 export const SearchQuickOpenBtn = (props: SearchQuickOpenBtnProps) => {
-  const { placeholder, collapse, ...divProps } = props;
+  const { placeholder, ...divProps } = props;
 
   const { t } = useTranslation();
 
   return (
     <div {...divProps} className={classNames('search-quick-open-container', divProps.className)}>
-      {collapse ? (
-        <div
-          className="flex justify-center items-center quick-search-btn-collapse"
-          onClick={() => {
-            bigSearchQuickOpenEmitter.emit('openSearch');
-          }}
-        >
-          <IconSearch style={{ fontSize: 20 }} />
+      <div
+        className="search-quick-open-input"
+        onClick={() => {
+          bigSearchQuickOpenEmitter.emit('openSearch');
+        }}
+      >
+        <div className="search-quick-open-text">
+          <IconSearch />
+          <span
+            style={{
+              marginLeft: 8,
+            }}
+          >
+            {t(`${placeholder || 'loggedHomePage.searchEverything'}`)}
+          </span>
         </div>
-      ) : (
-        <div
-          className="search-quick-open-input"
-          onClick={() => {
-            bigSearchQuickOpenEmitter.emit('openSearch');
-          }}
-        >
-          <div className="search-quick-open-text">
-            <IconSearch />
-            <span
-              style={{
-                marginLeft: 8,
-              }}
-            >
-              {t(`${placeholder || 'loggedHomePage.searchEverything'}`)}
-            </span>
-          </div>
-          <div className="search-quick-open-shortcuts">
-            <div className="search-quick-open-shortcut-key">{reflyEnv.getOsType() === 'OSX' ? '⌘' : 'ctrl'}</div>
-            <div className="search-quick-open-shortcut-key search-quick-open-shortcut-key__right">K</div>
-          </div>
+        <div className="search-quick-open-shortcuts">
+          <div className="search-quick-open-shortcut-key">{reflyEnv.getOsType() === 'OSX' ? '⌘' : 'ctrl'}</div>
+          <div className="search-quick-open-shortcut-key search-quick-open-shortcut-key__right">K</div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

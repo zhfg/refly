@@ -4,36 +4,17 @@
 
 .workspace-inner-container {
   height: 100%;
-  background-color: #f3f3ee;
+  background-color: #eef4f7;
 }
 
 .workspace-panel-container {
   height: 100%;
 }
 
-.workspace-left-assist-panel {
-  background-color: #fcfcf9;
-  border-right: 1px solid hsla(60, 11%, 83%, 0.5);
-  box-shadow: 0 1px 1px 0 hsla(60, 11%, 83%, 0.3);
-}
-
 .workspace-content-panel {
-  background-color: #fcfcf9;
+  background-color: #eef4f7;
   border-color: hsla(60, 11%, 83%, 0.5);
   box-shadow: 0 1px 1px 0 hsla(60, 11%, 83%, 0.3);
   border-bottom-right-radius: 12px;
   border-top-right-radius: 12px;
-}
-
-.workspace-panel-resize {
-  background-color: #f3f3ee;
-  width: 2px;
-  margin: 0 3px;
-  height: calc(100% - 4px);
-  margin-top: 4px;
-  transition: background-color;
-
-  &:hover {
-    background-color: #00968f;
-  }
 }
