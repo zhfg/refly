@@ -29,10 +29,10 @@ export const NodePreview = (props: { node: CanvasNode; handleClosePanel: () => v
 
   return (
     <div
-      className="absolute top-1 right-1 w-[420px] m-3 bg-white rounded-lg shadow-lg z-10"
-      style={{ height: 'calc(100vh - 40px)' }}
+      className="fixed top-1/2 right-2 w-[420px] bg-white rounded-lg shadow-lg z-10 transform -translate-y-1/2"
+      style={{ height: 'calc(100vh - 40px)', maxHeight: 'calc(100vh - 40px)' }}
     >
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center p-4">
         <h3 className="text-lg font-semibold">Node Preview</h3>
         <Button type="text" onClick={handleClosePanel} className="px-2 text-gray-500 hover:text-gray-700">
           <svg
@@ -49,7 +49,7 @@ export const NodePreview = (props: { node: CanvasNode; handleClosePanel: () => v
         </Button>
       </div>
 
-      <div style={{ height: 'calc(100% - 40px)' }}>{previewComponent(node.type)}</div>
+      <div className="h-[calc(100%-64px)] overflow-auto rounded-b-lg">{previewComponent(node?.type)}</div>
     </div>
   );
 };

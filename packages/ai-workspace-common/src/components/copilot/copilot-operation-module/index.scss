@@ -6,6 +6,7 @@
   transform: translateX(-50%);
   max-width: 444px;
   max-height: 100%;
+  border-radius: 8px;
 
   box-sizing: border-box;
   overflow-y: scroll;
@@ -15,10 +16,6 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    margin: 12px;
-    background-color: white;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
   }
 
   .skill-container {
@@ -67,6 +64,7 @@
     position: relative;
     background-color: #fff;
     z-index: 1;
+    border-radius: 8px;
 
     .chat-setting-container {
       width: 100%;

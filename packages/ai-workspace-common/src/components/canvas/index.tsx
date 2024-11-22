@@ -270,11 +270,39 @@ export const Canvas = (props: { canvasId: string }) => {
           onNodeClick={onNodeClick}
         >
           <Background />
-          <Controls />
-          <MiniMap position="top-right" />
+          <MiniMap
+            position="bottom-left"
+            // style={{
+            //   marginBottom: '80px',
+            //   marginLeft: '10px',
+            //   width: '162px',
+            //   height: '92px',
+            // }}
+            className="bg-white/80 w-[162px] h-[92px] mb-[60px] ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
+            // zoomable
+            // pannable
+            // maskColor="rgb(0, 0, 0, 0.1)"
+            // nodeColor="#333"
+            // nodeStrokeWidth={3}
+          />
+          <Controls
+            position="bottom-left"
+            style={{
+              marginBottom: '12px',
+              marginLeft: '10px',
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '0',
+              padding: '0',
+            }}
+            className="bg-white/80 rounded-lg shadow-md overflow-hidden [&>button]:border-0 [&>button]:border-r [&>button]:border-gray-200 [&>button:last-child]:border-0 [&>button]:rounded-none [&>button]:w-[54px] [&>button]:h-[40px]"
+            showZoom={true}
+            showFitView={true}
+            showInteractive={true}
+          />
         </ReactFlow>
 
-        <div className="absolute bottom-4 h-48 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl">
+        <div className="absolute bottom-[12px] h-48 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl">
           <CopilotOperationModule source={MessageIntentSource.Canvas} />
         </div>
 
