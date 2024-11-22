@@ -67,7 +67,7 @@ export const ProjectDetail = () => {
         projectId: projectId,
         key: item.id,
         title: item.title,
-        type: 'canvas',
+        type: 'document',
       });
     } else if (currentResources?.length) {
       const item = currentResources[0];

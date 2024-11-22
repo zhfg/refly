@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, Tabs, Tooltip, Splitter, Dropdown, MenuProps } from 'antd';
 
 import { ResourceView } from '../resource-view';
-import { CanvasEditor } from '../canvas';
+import { DocumentEditor } from '../document';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
@@ -68,11 +68,11 @@ export const ContentArea = (props: { projectId: string; setBindResourceModalVisi
 
   const onChange = (newActiveKey: string) => {
     const tab = tabs.find((x) => x.key === newActiveKey);
-    if (tab?.type === 'canvas') {
-      jumpToCanvas({
-        canvasId: tab.key,
-        projectId,
-      });
+    if (tab?.type === 'document') {
+      // jumpToDocument({
+      //   docId: tab.key,
+      //   projectId,
+      // });
     } else if (tab?.type === 'resource') {
       jumpToResource({
         resId: tab.key,
@@ -189,8 +189,8 @@ export const ContentArea = (props: { projectId: string; setBindResourceModalVisi
           }}
         >
           <Splitter.Panel>
-            {activeTab?.type === 'canvas' ? (
-              <CanvasEditor projectId={projectId} canvasId={activeTab?.key} />
+            {activeTab?.type === 'document' ? (
+              <DocumentEditor docId={activeTab?.key} />
             ) : (
               <ResourceView projectId={projectId} resourceId={activeTab?.key} />
             )}

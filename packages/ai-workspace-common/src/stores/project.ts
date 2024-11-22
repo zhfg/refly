@@ -26,7 +26,7 @@ export interface ProjectTab {
   key: string;
   title: string;
   projectId: string;
-  type: 'canvas' | 'resource';
+  type: 'resource' | 'document';
 }
 
 export type StateField<T> = {

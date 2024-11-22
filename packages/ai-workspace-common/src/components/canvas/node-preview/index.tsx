@@ -15,7 +15,14 @@ export const NodePreview = (props: { node: CanvasNode; handleClosePanel: () => v
       case 'resource':
         return <ResourceNodePreview resourceId={node.data.entityId} />;
       case 'document':
-        return <DocumentNodePreview />;
+        return (
+          <DocumentNodePreview
+            nodeData={{
+              entityId: node.data?.entityId,
+              entityType: 'document',
+            }}
+          />
+        );
       case 'skill':
         return <SkillNodePreview />;
       case 'tool':

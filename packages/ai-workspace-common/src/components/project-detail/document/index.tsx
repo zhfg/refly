@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import wordsCount from 'words-count';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { Canvas } from '@refly/openapi-schema';
+import { Document } from '@refly/openapi-schema';
 
 import './index.scss';
 import { useCookie } from 'react-use';
@@ -44,9 +44,7 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 // componets
 import { ToC } from './ToC';
 import { IconBook } from '@arco-design/web-react/icon';
-import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 import { Button, Divider, message, Modal } from 'antd';
-import { useProjectStore, useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
 import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
@@ -325,21 +323,21 @@ class TokenStreamProcessor {
 
 const MemorizedToC = memo(ToC);
 
-const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canvasId: string }) => {
+const CollaborativeEditor = ({ docId }: { docId: string }) => {
   const { t } = useTranslation();
   const lastCursorPosRef = useRef<number>();
   const [token] = useCookie('_refly_ai_sid');
   const processorRef = useRef<TokenStreamProcessor>();
 
-  const canvasStore = useDocumentStoreShallow((state) => ({
+  const documentStore = useDocumentStoreShallow((state) => ({
     isAiEditing: state.isAiEditing,
-    currentCanvas: state.currentCanvas,
-    canvasServerStatus: state.canvasServerStatus,
+    currentDocument: state.currentDocument,
+    documentServerStatus: state.documentServerStatus,
     updateIsAiEditing: state.updateIsAiEditing,
-    updateCurrentCanvas: state.updateCurrentCanvas,
-    updateCanvasCharsCount: state.updateCanvasCharsCount,
-    updateCanvasSaveStatus: state.updateCanvasSaveStatus,
-    updateCanvasServerStatus: state.updateCanvasServerStatus,
+    updateCurrentDocument: state.updateCurrentDocument,
+    updateDocumentCharsCount: state.updateDocumentCharsCount,
+    updateDocumentSaveStatus: state.updateDocumentSaveStatus,
+    updateDocumentServerStatus: state.updateDocumentServerStatus,
     updateEditor: state.updateEditor,
     updateTocItems: state.updateTocItems,
     updateLastCursorPosRef: state.updateLastCursorPosRef,
@@ -394,18 +392,19 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
     'ai-note-editor-content-container',
     'canvasSelection',
     {
-      url: `${baseUrl}/project/${projectId}?canvasId=${canvasId}`,
+      url: `${baseUrl}/docs/${docId}`,
     },
   );
 
+  console.log('docId', docId);
   const websocketProvider = useMemo(() => {
     const provider = new HocuspocusProvider({
       url: getWsServerOrigin(),
-      name: canvasId,
+      name: docId,
       token,
     });
     provider.on('status', (event) => {
-      canvasStore.updateCanvasServerStatus(event.status);
+      documentStore.updateDocumentServerStatus(event.status);
     });
 
     // Add synced event listener
@@ -413,16 +412,16 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
       editorEmitter.emit('editorSynced');
     });
     return provider;
-  }, [canvasId]);
+  }, [docId]);
 
-  const uploadFn = useMemo(() => createUploadFn({ entityId: canvasId, entityType: 'canvas' }), [canvasId]);
+  const uploadFn = useMemo(() => createUploadFn({ entityId: docId, entityType: 'document' }), [docId]);
 
   const extensions = useMemo(
     () => [
       ...defaultExtensions,
       configureSlashCommand({
-        entityId: canvasId,
-        entityType: 'canvas',
+        entityId: docId,
+        entityType: 'document',
       }),
       createPlaceholderExtension(),
       Collaboration.configure({
@@ -434,11 +433,11 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
       TableOfContents.configure({
         getIndex: getHierarchicalIndexes,
         onUpdate(content) {
-          canvasStore.updateTocItems(content);
+          documentStore.updateTocItems(content);
         },
       }),
     ],
-    [websocketProvider, canvasId],
+    [websocketProvider, docId],
   );
 
   // Apply Codeblock Highlighting on the HTML from editor.getHTML()
@@ -456,11 +455,11 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
   const debouncedUpdates = useDebouncedCallback(async (editor: EditorInstance) => {
     const json = editor.getJSON();
     const markdown = editor.storage.markdown.getMarkdown();
-    canvasStore.updateCanvasCharsCount(wordsCount(markdown));
+    documentStore.updateDocumentCharsCount(wordsCount(markdown));
     window.localStorage.setItem('html-content', await highlightCodeblocks(editor.getHTML()));
     window.localStorage.setItem('novel-content', JSON.stringify(json));
     window.localStorage.setItem('markdown', editor.storage.markdown.getMarkdown());
-    canvasStore.updateCanvasSaveStatus('Saved');
+    documentStore.updateDocumentSaveStatus('Saved');
   }, 500);
 
   const handleContentSelectorClick = () => {
@@ -473,9 +472,9 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
       websocketProvider.destroy();
       editorRef.current?.destroy();
     };
-  }, [canvasId]);
+  }, [docId]);
 
-  const readOnly = canvasStore?.currentCanvas?.readOnly ?? false;
+  const readOnly = documentStore?.currentDocument?.readOnly ?? false;
 
   useEffect(() => {
     if (editorRef.current && !readOnly) {
@@ -497,7 +496,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
         const afterSelectionContent = getMarkdownSlice(to, editor?.state?.doc?.content?.size);
         const selectedContent = getMarkdownSlice(from, to);
 
-        canvasStore.updateLastCursorPosRef(lastCursorPosRef.current);
+        documentStore.updateLastCursorPosRef(lastCursorPosRef.current);
         contextPanelStore.updateCurrentSelectionContent(selectedContent);
         contextPanelStore.updateBeforeSelectionNoteContent(prevSelectionContent);
         contextPanelStore.updateAfterSelectionNoteContent(afterSelectionContent);
@@ -601,7 +600,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
   // Add navigation blocker
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      canvasStore.isAiEditing &&
+      documentStore.isAiEditing &&
       (currentLocation.pathname !== nextLocation.pathname || currentLocation.search !== nextLocation.search),
   );
 
@@ -617,7 +616,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
         okText: t('common.confirm'),
         cancelText: t('common.cancel'),
         onOk: () => {
-          canvasStore.updateIsAiEditing(false);
+          documentStore.updateIsAiEditing(false);
           blocker.proceed();
         },
         onCancel: () => {
@@ -630,7 +629,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
   // Add window beforeunload handler
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (canvasStore.isAiEditing) {
+      if (documentStore.isAiEditing) {
         // Standard-compliant browsers
         const message = 'AI is still editing. Changes you made may not be saved.';
         e.preventDefault();
@@ -641,7 +640,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [canvasStore.isAiEditing]);
+  }, [documentStore.isAiEditing]);
 
   return (
     <div
@@ -653,7 +652,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
     >
       {initContentSelectorElem()}
       <div className="w-full h-full">
-        {canvasStore.isAiEditing && (
+        {documentStore.isAiEditing && (
           <div
             className="absolute inset-0 bg-transparent z-[1000] pointer-events-auto select-none"
             onMouseDown={(e) => e.preventDefault()}
@@ -667,7 +666,7 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
             extensions={extensions}
             onCreate={({ editor }) => {
               editorRef.current = editor;
-              canvasStore.updateEditor(editor);
+              documentStore.updateEditor(editor);
             }}
             editable={!readOnly}
             className="w-full h-full border-muted sm:rounded-lg"
@@ -683,11 +682,11 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
             }}
             onUpdate={({ editor }) => {
               debouncedUpdates(editor);
-              canvasStore.updateCanvasSaveStatus('Unsaved');
+              documentStore.updateDocumentSaveStatus('Unsaved');
             }}
             slotAfter={<ImageResizer />}
           >
-            <CollabEditorCommand entityId={canvasId} entityType="note" />
+            <CollabEditorCommand entityId={docId} entityType="document" />
             <CollabGenAIMenuSwitch
               contentSelector={{
                 text: t('knowledgeBase.context.addToContext'),
@@ -704,16 +703,23 @@ const CollaborativeEditor = ({ projectId, canvasId }: { projectId: string; canva
 };
 
 export const CanvasStatusBar = () => {
-  const { currentCanvas, updateCurrentCanvas, canvasServerStatus, noteCharsCount, noteSaveStatus, editor, tocItems } =
-    useDocumentStoreShallow((state) => ({
-      currentCanvas: state.currentCanvas,
-      updateCurrentCanvas: state.updateCurrentCanvas,
-      canvasServerStatus: state.canvasServerStatus,
-      noteCharsCount: state.canvasCharsCount,
-      noteSaveStatus: state.canvasSaveStatus,
-      editor: state.editor,
-      tocItems: state.tocItems,
-    }));
+  const {
+    currentDocument,
+    updateCurrentDocument,
+    documentServerStatus,
+    documentCharsCount,
+    documentSaveStatus,
+    editor,
+    tocItems,
+  } = useDocumentStoreShallow((state) => ({
+    currentDocument: state.currentDocument,
+    updateCurrentDocument: state.updateCurrentDocument,
+    documentServerStatus: state.documentServerStatus,
+    documentCharsCount: state.documentCharsCount,
+    documentSaveStatus: state.documentSaveStatus,
+    editor: state.editor,
+    tocItems: state.tocItems,
+  }));
   const { handleDeleteTab } = useCanvasTabs();
   const { t } = useTranslation();
   const { deckSize, setDeckSize } = useReferencesStoreShallow((state) => ({
@@ -726,9 +732,9 @@ export const CanvasStatusBar = () => {
   const handleShare = async () => {
     setShareLoading(true);
     await createShare({
-      entityType: 'canvas',
-      entityId: currentCanvas?.canvasId,
-      shareCode: currentCanvas?.shareCode || undefined,
+      entityType: 'document',
+      entityId: currentDocument?.docId,
+      shareCode: currentDocument?.shareCode || undefined,
     });
     setShareLoading(false);
   };
@@ -742,16 +748,16 @@ export const CanvasStatusBar = () => {
             <p className="conv-title">{t('knowledgeBase.note.noteCharsCount', { count: noteCharsCount })}</p>
           </div>
         ) : null} */}
-        {canvasServerStatus === 'connected' ? (
+        {documentServerStatus === 'connected' ? (
           <div className="note-status-bar-item">
             <HiOutlineClock />
             <p className="conv-title">
-              {noteSaveStatus === 'Saved' ? t('knowledgeBase.note.autoSaved') : t('knowledgeBase.note.saving')}
+              {documentSaveStatus === 'Saved' ? t('knowledgeBase.note.autoSaved') : t('knowledgeBase.note.saving')}
             </p>
           </div>
         ) : null}
 
-        {canvasServerStatus === 'disconnected' ? (
+        {documentServerStatus === 'disconnected' ? (
           <div className="note-status-bar-item">
             <AiOutlineWarning />
             <p className="conv-title">{t('knowledgeBase.note.serviceDisconnected')}</p>
@@ -790,21 +796,21 @@ export const CanvasStatusBar = () => {
         <Button
           type="text"
           size="small"
-          style={{ color: currentCanvas?.shareCode ? '#00968F' : '' }}
+          style={{ color: currentDocument?.shareCode ? '#00968F' : '' }}
           loading={shareLoading}
           icon={<HiOutlineShare />}
           onClick={handleShare}
         >
-          {currentCanvas?.shareCode ? t('projectDetail.share.sharing') : t('common.share')}
+          {currentDocument?.shareCode ? t('projectDetail.share.sharing') : t('common.share')}
         </Button>
         <Divider type="vertical" />
 
-        {currentCanvas && canvasServerStatus === 'connected' ? (
+        {currentDocument && documentServerStatus === 'connected' ? (
           <div
             className="note-status-bar-item"
             onClick={() => {
-              updateCurrentCanvas({ ...currentCanvas, readOnly: !currentCanvas?.readOnly });
-              currentCanvas?.readOnly
+              updateCurrentDocument({ ...currentDocument, readOnly: !currentDocument?.readOnly });
+              currentDocument?.readOnly
                 ? message.success(t('knowledgeBase.note.edit'))
                 : message.warning(t('knowledgeBase.note.readOnly'));
             }}
@@ -813,7 +819,7 @@ export const CanvasStatusBar = () => {
               type="text"
               style={{ width: 32, height: 32 }}
               icon={
-                currentCanvas?.readOnly ? <HiOutlineLockClosed style={{ color: '#00968F' }} /> : <HiOutlineLockOpen />
+                currentDocument?.readOnly ? <HiOutlineLockClosed style={{ color: '#00968F' }} /> : <HiOutlineLockOpen />
               }
             />
           </div>
@@ -821,10 +827,10 @@ export const CanvasStatusBar = () => {
         <div className="note-status-bar-item">
           <Divider type="vertical" />
           <DeleteDropdownMenu
-            type="canvas"
+            type="document"
             canCopy={true}
-            data={currentCanvas}
-            postDeleteList={(canvas: Canvas) => handleDeleteTab(canvas.canvasId)}
+            data={currentDocument}
+            postDeleteList={(document: Document) => handleDeleteTab(document.docId)}
           />
         </div>
       </div>
@@ -832,37 +838,20 @@ export const CanvasStatusBar = () => {
   );
 };
 
-export const CanvasEditorHeader = (props: { projectId: string; canvasId: string }) => {
-  const { projectId, canvasId } = props;
-  const { currentCanvas, updateCurrentCanvas } = useDocumentStoreShallow((state) => ({
-    currentCanvas: state.currentCanvas,
-    updateCurrentCanvas: state.updateCurrentCanvas,
+export const DocumentEditorHeader = () => {
+  const { currentDocument, updateCurrentDocument } = useDocumentStoreShallow((state) => ({
+    currentDocument: state.currentDocument,
+    updateCurrentDocument: state.updateCurrentDocument,
   }));
-  const { updateProjectDirItem } = useProjectStoreShallow((state) => ({
-    updateProjectDirItem: state.updateProjectDirItem,
-  }));
-  const { tabsMap, handleUpdateTab } = useProjectTabs();
-  const tab = tabsMap[projectId]?.find((tab) => tab.key === canvasId);
 
   const onTitleChange = (newTitle: string) => {
-    const currentCanvas = useDocumentStore.getState().currentCanvas;
-    const tabsMap = useProjectStore.getState().projectTabs;
+    const currentDocument = useDocumentStore.getState().currentDocument;
 
-    if (!currentCanvas) {
+    if (!currentDocument) {
       return;
     }
 
-    updateCurrentCanvas({ ...currentCanvas, title: newTitle });
-    updateProjectDirItem(projectId, 'canvases', currentCanvas.canvasId, { title: newTitle });
-
-    const tab = tabsMap[projectId]?.find((tab) => tab.key === currentCanvas.canvasId);
-
-    if (tab) {
-      handleUpdateTab(projectId, currentCanvas.canvasId, {
-        ...tab,
-        title: newTitle,
-      });
-    }
+    updateCurrentDocument({ ...currentDocument, title: newTitle });
   };
 
   useEffect(() => {
@@ -873,7 +862,7 @@ export const CanvasEditorHeader = (props: { projectId: string; canvasId: string 
     };
   }, []);
 
-  const title = currentCanvas?.title || tab?.title;
+  const title = currentDocument?.title;
 
   return (
     <div className="w-full">
@@ -889,30 +878,30 @@ export const CanvasEditorHeader = (props: { projectId: string; canvasId: string 
   );
 };
 
-export const CanvasEditor = (props: { projectId: string; canvasId: string }) => {
-  const { projectId, canvasId } = props;
+export const DocumentEditor = (props: { docId: string }) => {
+  const { docId } = props;
 
   const { t } = useTranslation();
 
   const {
-    currentCanvas: canvas,
+    currentDocument: document,
     isRequesting,
-    canvasServerStatus,
-    updateCurrentCanvas,
+    documentServerStatus,
+    updateCurrentDocument,
     updateIsRequesting,
-    updateCanvasServerStatus,
+    updateDocumentServerStatus,
     resetState,
   } = useDocumentStoreShallow((state) => ({
-    currentCanvas: state.currentCanvas,
+    currentDocument: state.currentDocument,
     isRequesting: state.isRequesting,
-    newNoteCreating: state.newCanvasCreating,
-    canvasServerStatus: state.canvasServerStatus,
-    updateCurrentCanvas: state.updateCurrentCanvas,
+    newDocumentCreating: state.newDocumentCreating,
+    documentServerStatus: state.documentServerStatus,
+    updateCurrentDocument: state.updateCurrentDocument,
     updateIsRequesting: state.updateIsRequesting,
-    updateCanvasServerStatus: state.updateCanvasServerStatus,
+    updateDocumentServerStatus: state.updateDocumentServerStatus,
     resetState: state.resetState,
   }));
-  const prevNote = useRef<Canvas>();
+  const prevNote = useRef<Document>();
 
   useEffect(() => {
     return () => {
@@ -925,30 +914,30 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
 
     const fetchData = async () => {
       updateIsRequesting(true);
-      const { data } = await getClient().getCanvasDetail({
-        query: { canvasId },
+      const { data } = await getClient().getDocumentDetail({
+        query: { docId },
       });
-      const canvas = data?.data;
-      if (canvas) {
-        updateCurrentCanvas(canvas);
+      const document = data?.data;
+      if (document) {
+        updateCurrentDocument(document);
         updateIsRequesting(false);
       }
     };
-    if (canvasId && canvas?.canvasId !== canvasId) {
+    if (docId && document?.docId !== docId) {
       fetchData();
     }
 
     return () => {
       updateIsRequesting(false);
     };
-  }, [canvasId, canvas?.canvasId]);
+  }, [docId, document?.docId]);
 
-  const debouncedUpdateCanvas = useDebouncedCallback(async (canvas: Canvas) => {
-    const res = await getClient().updateCanvas({
+  const debouncedUpdateDocument = useDebouncedCallback(async (document: Document) => {
+    const res = await getClient().updateDocument({
       body: {
-        canvasId: canvas.canvasId,
-        title: canvas.title,
-        readOnly: canvas.readOnly,
+        docId: document.docId,
+        title: document.title,
+        readOnly: document.readOnly,
       },
     });
     if (res.error) {
@@ -958,11 +947,11 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
   }, 500);
 
   useEffect(() => {
-    if (canvas && prevNote.current?.canvasId === canvas.canvasId) {
-      debouncedUpdateCanvas(canvas);
+    if (document && prevNote.current?.docId === document.docId) {
+      debouncedUpdateDocument(document);
     }
-    prevNote.current = canvas;
-  }, [canvas, debouncedUpdateCanvas]);
+    prevNote.current = document;
+  }, [document, debouncedUpdateDocument]);
 
   return (
     <div className="flex flex-col ai-note-container">
@@ -970,13 +959,13 @@ export const CanvasEditor = (props: { projectId: string; canvasId: string }) => 
       <div className="overflow-auto flex-grow">
         <Spin
           tip={t('knowledgeBase.note.connecting')}
-          loading={!canvas || isRequesting || canvasServerStatus !== 'connected'}
+          loading={!document || isRequesting || documentServerStatus !== 'connected'}
           style={{ height: '100%', width: '100%' }}
         >
           <div className="ai-note-editor">
             <div className="ai-note-editor-container">
-              <CanvasEditorHeader projectId={projectId} canvasId={canvasId} />
-              <CollaborativeEditor projectId={projectId} canvasId={canvasId} />
+              <DocumentEditorHeader />
+              <CollaborativeEditor docId={docId} />
             </div>
           </div>
         </Spin>

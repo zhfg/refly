@@ -3,7 +3,7 @@ import { RiDeleteBinLine, RiMoreFill } from 'react-icons/ri';
 import { TbEdit } from 'react-icons/tb';
 import { Dropdown, Menu, Button, Popconfirm, Message } from '@arco-design/web-react';
 
-import { Canvas, Project, Resource, BindProjectResourceRequest } from '@refly/openapi-schema';
+import { Document, Project, Resource, BindProjectResourceRequest } from '@refly/openapi-schema';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { useTranslation } from 'react-i18next';
@@ -91,7 +91,7 @@ const DropList = (props: DropListProps) => {
 
 // Base interface for common props
 interface BaseDropdownMenuProps {
-  postDeleteList?: (canvas: Canvas | Project | Resource | BindProjectResourceRequest[]) => void;
+  postDeleteList?: (document: Document | Project | Resource | BindProjectResourceRequest[]) => void;
   getPopupContainer?: () => HTMLElement;
   deleteConfirmPosition?: positionType;
   canCopy?: boolean;
@@ -99,8 +99,8 @@ interface BaseDropdownMenuProps {
 
 type DeleteDropdownMenuProps =
   | (BaseDropdownMenuProps & {
-      type: 'canvas';
-      data: Canvas;
+      type: 'document';
+      data: Document;
     })
   | (BaseDropdownMenuProps & {
       type: 'project';
@@ -127,12 +127,12 @@ export const DeleteDropdownMenu = (props: DeleteDropdownMenuProps) => {
   const handleDeleteClick = async (e: MouseEvent) => {
     e.stopPropagation();
     let resultError: unknown;
-    if (type === 'canvas') {
-      const { error } = await getClient().deleteCanvas({ body: { canvasId: data.canvasId } });
+    if (type === 'document') {
+      const { error } = await getClient().deleteDocument({ body: { docId: data.docId } });
       resultError = error;
-      if (!resultError) {
-        handleDeleteTab(data.projectId, data.canvasId);
-      }
+      // if (!resultError) {
+      //   handleDeleteTab(data.projectId, data.docId); // no need to delete tab
+      // }
     }
 
     if (type === 'project') {
