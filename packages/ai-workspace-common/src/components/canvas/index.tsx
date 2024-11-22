@@ -14,7 +14,17 @@ import {
   applyEdgeChanges,
 } from '@xyflow/react';
 import { NodePreview } from './node-preview';
-import { nodeTypes, prepareNodeData, CanvasNode, CanvasNodeData } from './nodes';
+import {
+  nodeTypes,
+  prepareNodeData,
+  CanvasNode,
+  CanvasNodeData,
+  DocumentNodeMeta,
+  ResourceNodeMeta,
+  SkillNodeMeta,
+  ToolNodeMeta,
+  ResponseNodeMeta,
+} from './nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasProvider } from './context-provider';
 import { useCollabProvider } from '@refly-packages/ai-workspace-common/hooks/use-collab-provider';
@@ -89,9 +99,20 @@ export const Canvas = (props: { canvasId: string }) => {
   // Update the onConnect handler to use y-doc
   const onConnect = useCallback(
     (params: Connection) => {
-      ydoc.transact(() => {
-        const newEdge = { ...params, id: `edge-${params.source}-${params.target}` };
-        yEdges.push([newEdge]);
+      if (!params?.source || !params?.target) {
+        console.warn('Invalid connection parameters');
+        return;
+      }
+
+      ydoc?.transact(() => {
+        const newEdge = {
+          ...params,
+          id: `edge-${params.source}-${params.target}`,
+          // Add additional edge properties with defaults
+          animated: false,
+          style: { stroke: '#666' },
+        };
+        yEdges?.push([newEdge]);
       });
     },
     [ydoc, yEdges],
@@ -99,6 +120,10 @@ export const Canvas = (props: { canvasId: string }) => {
 
   // Add node click handler
   const onNodeClick = useCallback((event: React.MouseEvent, node: CanvasNode) => {
+    if (!node?.id) {
+      console.warn('Invalid node clicked');
+      return;
+    }
     setSelectedNode(node);
   }, []);
 
@@ -113,30 +138,110 @@ export const Canvas = (props: { canvasId: string }) => {
   };
 
   const handleAddNode = (node: { type: CanvasNodeType; data: CanvasNodeData }) => {
-    const newNode = prepareNodeData(node);
-    ydoc.transact(() => {
-      yNodes.push([newNode]);
+    // Add defensive programming for input validation
+    if (!node?.type || !node?.data) {
+      console.warn('Invalid node data provided');
+      return;
+    }
+
+    // Add default metadata based on node type
+    const enrichedData = {
+      ...node.data,
+      metadata: {
+        ...node?.data?.metadata, // Use optional chaining
+        ...getDefaultMetadata(node.type),
+      },
+    };
+
+    const newNode = prepareNodeData({
+      type: node.type,
+      data: enrichedData,
+    });
+
+    ydoc?.transact(() => {
+      yNodes?.push([newNode]);
 
       // If there are existing nodes, create an edge from the last node to the new node
-      if (nodes.length > 0) {
+      if (nodes?.length > 0) {
         const lastNode = nodes[nodes.length - 1];
-        const newEdge = {
-          id: `edge-${lastNode.id}-${newNode.id}`,
-          source: lastNode.id,
-          target: newNode.id,
-          style: { stroke: '#666' },
-        };
-        yEdges.push([newEdge]);
+        if (lastNode?.id && newNode?.id) {
+          const newEdge = {
+            id: `edge-${lastNode.id}-${newNode.id}`,
+            source: lastNode.id,
+            target: newNode.id,
+            style: { stroke: '#666' },
+          };
+          yEdges?.push([newEdge]);
+        }
       }
     });
 
     setSelectedNode(newNode);
   };
 
+  // Helper function to get default metadata based on node type
+  const getDefaultMetadata = (nodeType: CanvasNodeType) => {
+    if (!nodeType) {
+      return {};
+    }
+
+    switch (nodeType) {
+      case 'document':
+        return {
+          contentPreview: 'Loading document content...',
+          // Add optional fields with default values
+          title: '',
+          lastModified: new Date().toISOString(),
+        } as DocumentNodeMeta;
+
+      case 'resource':
+        return {
+          resourceType: 'weblink', // Default to weblink
+          url: '',
+          description: '',
+          lastAccessed: new Date().toISOString(),
+        } as ResourceNodeMeta;
+
+      case 'skill':
+        return {
+          query: '',
+          skillType: 'prompt',
+          model: 'gpt-4',
+          parameters: {}, // Additional parameters if needed
+          lastExecuted: null,
+        } as SkillNodeMeta;
+
+      case 'tool':
+        return {
+          toolType: 'TextToSpeech',
+          configuration: {}, // Tool-specific configuration
+          status: 'ready',
+          lastUsed: null,
+        } as ToolNodeMeta;
+
+      case 'response':
+        return {
+          modelName: 'AI Assistant',
+          timestamp: new Date().toISOString(),
+          status: 'pending',
+          executionTime: null,
+        } as ResponseNodeMeta;
+
+      default:
+        return {};
+    }
+  };
+
+  // Add defensive programming for useEffect
   useEffect(() => {
-    canvasEmitter.on('addNode', handleAddNode);
+    if (!canvasEmitter) {
+      console.warn('Canvas emitter not initialized');
+      return;
+    }
+
+    canvasEmitter?.on('addNode', handleAddNode);
     return () => {
-      canvasEmitter.off('addNode', handleAddNode);
+      canvasEmitter?.off('addNode', handleAddNode);
     };
   }, []);
 

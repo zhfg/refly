@@ -1,6 +1,6 @@
 import { Button } from 'antd';
 import { CanvasNodeType } from '@refly/openapi-schema';
-import { CanvasNode } from '../node';
+import { CanvasNode } from '../nodes/types';
 import { ResponseNodePreview } from './response';
 import { ResourceNodePreview } from './resource';
 import { SkillNodePreview } from './skill';
@@ -13,7 +13,7 @@ export const NodePreview = (props: { node: CanvasNode; handleClosePanel: () => v
   const previewComponent = (nodeType: CanvasNodeType) => {
     switch (nodeType) {
       case 'resource':
-        return <ResourceNodePreview />;
+        return <ResourceNodePreview resourceId={node.data.entityId} />;
       case 'document':
         return <DocumentNodePreview />;
       case 'skill':
@@ -29,7 +29,7 @@ export const NodePreview = (props: { node: CanvasNode; handleClosePanel: () => v
 
   return (
     <div
-      className="absolute top-1 right-1 w-1/3 min-w-96 m-3 bg-white rounded-lg shadow-lg p-4 z-10"
+      className="absolute top-1 right-1 w-[420px] m-3 bg-white rounded-lg shadow-lg z-10"
       style={{ height: 'calc(100vh - 40px)' }}
     >
       <div className="flex justify-between items-center mb-4">
