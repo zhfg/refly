@@ -8,7 +8,7 @@ import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stor
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
-import { canvasEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/canvas';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
@@ -17,6 +17,7 @@ export const ImportFromText = () => {
   const { t } = useTranslation();
   const importResourceStore = useImportResourceStore();
   const { copiedTextPayload } = useImportResourceStore.getState();
+  const { addNode } = useCanvasControl();
 
   const [saveLoading, setSaveLoading] = useState(false);
 
@@ -45,7 +46,7 @@ export const ImportFromText = () => {
     importResourceStore.setImportResourceModalVisible(false);
 
     if (data?.success) {
-      canvasEmitter.emit('addNode', {
+      addNode({
         type: 'resource',
         data: {
           entityId: data?.data?.resourceId,
