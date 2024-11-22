@@ -1,5 +1,4 @@
 .app-layout {
-  background-color: #f3f3ee;
   display: flex;
   flex-direction: row;
 
@@ -35,12 +34,7 @@
 .content-layout {
   box-sizing: border-box;
 
-  margin-top: 8px;
-  margin-bottom: 8px;
-  margin-right: 8px;
-  margin-left: 8px;
-  background-color: #fcfcf9;
-  border-radius: 8px;
+  background: #eef4f7;
 }
 
 :host {

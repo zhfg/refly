@@ -60,7 +60,7 @@ export const AppLayout = (props: AppLayoutProps) => {
       <Layout
         className="content-layout"
         style={{
-          height: "calc(100vh - 16px)",
+          height: "calc(100vh)",
           flexGrow: 1,
           overflowY: "auto",
           width: showSider ? `calc(100% - 200px - 16px)` : `calc(100% - 16px)`,

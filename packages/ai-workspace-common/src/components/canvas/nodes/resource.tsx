@@ -6,7 +6,7 @@ import { FileText, Link2, MoreHorizontal } from 'lucide-react';
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
 export const ResourceNode = ({ data, selected }: NodeProps<ResourceNode>) => {
-  const ResourceIcon = data.metadata.resourceType === 'weblink' ? Link2 : FileText;
+  const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? Link2 : FileText;
 
   return (
     <div className="relative group">
@@ -87,7 +87,7 @@ export const ResourceNode = ({ data, selected }: NodeProps<ResourceNode>) => {
                 truncate
               "
             >
-              {data.metadata.resourceType === 'weblink' ? 'Web Link' : 'Plain Text'}
+              {data?.metadata?.resourceType === 'weblink' ? 'Web Link' : 'Plain Text'}
             </span>
           </div>
 

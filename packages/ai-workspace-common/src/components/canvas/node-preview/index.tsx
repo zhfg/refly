@@ -1,6 +1,6 @@
 import { Button } from 'antd';
 import { CanvasNodeType } from '@refly/openapi-schema';
-import { CanvasNode } from '../node';
+import { CanvasNode } from '../nodes/types';
 import { ResponseNodePreview } from './response';
 import { ResourceNodePreview } from './resource';
 import { SkillNodePreview } from './skill';
@@ -13,7 +13,7 @@ export const NodePreview = (props: { node: CanvasNode; handleClosePanel: () => v
   const previewComponent = (nodeType: CanvasNodeType) => {
     switch (nodeType) {
       case 'resource':
-        return <ResourceNodePreview />;
+        return <ResourceNodePreview resourceId={node.data.entityId} />;
       case 'document':
         return <DocumentNodePreview />;
       case 'skill':
@@ -29,10 +29,15 @@ export const NodePreview = (props: { node: CanvasNode; handleClosePanel: () => v
 
   return (
     <div
-      className="absolute top-1 right-1 w-1/3 min-w-96 m-3 bg-white rounded-lg shadow-lg p-4 z-10"
-      style={{ height: 'calc(100vh - 40px)' }}
+      className="fixed top-1/2 right-2 w-[420px] bg-white rounded-lg z-10 transform -translate-y-1/2"
+      style={{
+        height: 'calc(100vh - 16px)',
+        maxHeight: 'calc(100vh - 16px)',
+        border: '1px solid rgba(16, 24, 40, 0.0784)',
+        boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
+      }}
     >
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center p-4">
         <h3 className="text-lg font-semibold">Node Preview</h3>
         <Button type="text" onClick={handleClosePanel} className="px-2 text-gray-500 hover:text-gray-700">
           <svg
@@ -49,7 +54,7 @@ export const NodePreview = (props: { node: CanvasNode; handleClosePanel: () => v
         </Button>
       </div>
 
-      <div style={{ height: 'calc(100% - 40px)' }}>{previewComponent(node.type)}</div>
+      <div className="h-[calc(100%-64px)] overflow-auto rounded-b-lg">{previewComponent(node?.type)}</div>
     </div>
   );
 };
