@@ -14,7 +14,7 @@ import {
   applyEdgeChanges,
 } from '@xyflow/react';
 import { NodePreview } from './node-preview';
-import { nodeTypes, prepareNodeData, CanvasNode, CanvasNodeData } from './node';
+import { nodeTypes, prepareNodeData, CanvasNode, CanvasNodeData } from './nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasProvider } from './context-provider';
 import { useCollabProvider } from '@refly-packages/ai-workspace-common/hooks/use-collab-provider';
@@ -38,6 +38,11 @@ export const Canvas = (props: { canvasId: string }) => {
 
   const yNodes = ydoc.getArray<CanvasNode>('nodes');
   const yEdges = ydoc.getArray<Edge>('edges');
+
+  console.log('nodes', nodes);
+  console.log('yNodes', yNodes.toJSON());
+  console.log('edges', edges);
+  console.log('yEdges', yEdges.toJSON());
 
   useEffect(() => {
     setNodes(yNodes.toJSON());
