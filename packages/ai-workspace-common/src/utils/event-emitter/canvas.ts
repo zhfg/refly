@@ -1,11 +1,11 @@
 import { CanvasNodeType } from '@refly/openapi-schema';
-import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 import mitt from 'mitt';
+import { CanvasNodeData } from '@refly-packages/ai-workspace-common/components/canvas/node';
 
 export type Events = {
   addNode: {
     type: CanvasNodeType;
-    data: ContextItem[];
+    data: CanvasNodeData;
   };
 };
 

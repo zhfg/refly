@@ -22,6 +22,7 @@ import { StripeModule } from '@golevelup/nestjs-stripe';
 import { ShareModule } from './share/share.module';
 import { CanvasModule } from './canvas/canvas.module';
 import { CollabModule } from './collab/collab.module';
+import { ActionModule } from './action/action.module';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { CollabModule } from './collab/collab.module';
     ShareModule,
     CanvasModule,
     CollabModule,
+    ActionModule,
   ],
   controllers: [AppController],
 })

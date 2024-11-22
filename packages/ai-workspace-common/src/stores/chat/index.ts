@@ -18,9 +18,12 @@ export interface MessageIntentContext {
   isNewConversation: boolean;
   canvasEditConfig?: CanvasEditConfig;
   inPlaceActionType?: InPlaceActionType;
+  canvasContext?: {
+    canvasId?: string;
+  };
   projectContext?: {
     projectId: string;
-    canvasId?: string;
+    docId?: string;
   };
   resourceContext?: {
     resourceId?: string; // may sendMessage from resource's copilot

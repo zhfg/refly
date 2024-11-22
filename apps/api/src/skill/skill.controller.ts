@@ -22,7 +22,6 @@ import {
   InvokeSkillRequest,
   InvokeSkillResponse,
   ListSkillInstanceResponse,
-  ListSkillTemplateResponse,
   ListSkillTriggerResponse,
   CreateSkillInstanceRequest,
   CreateSkillInstanceResponse,
@@ -38,6 +37,7 @@ import {
   PinSkillInstanceResponse,
   UnpinSkillInstanceRequest,
   UnpinSkillInstanceResponse,
+  ListSkillResponse,
 } from '@refly-packages/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
 import { Response } from 'express';
@@ -48,13 +48,9 @@ export class SkillController {
   constructor(private skillService: SkillService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Get('/template/list')
-  async listSkillTemplates(
-    @User() user: UserModel,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
-  ): Promise<ListSkillTemplateResponse> {
-    return buildSuccessResponse(this.skillService.listSkillTemplates(user, { page, pageSize }));
+  @Get('/list')
+  async listSkillTemplates(@User() user: UserModel): Promise<ListSkillResponse> {
+    return buildSuccessResponse(this.skillService.listSkills(user));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -63,8 +59,8 @@ export class SkillController {
     @User() user: UserModel,
     @Body() body: InvokeSkillRequest,
   ): Promise<InvokeSkillResponse> {
-    const { jobId } = await this.skillService.sendInvokeSkillTask(user, body);
-    return buildSuccessResponse({ jobId });
+    const { resultId } = await this.skillService.sendInvokeSkillTask(user, body);
+    return buildSuccessResponse({ resultId });
   }
 
   @UseGuards(JwtAuthGuard)

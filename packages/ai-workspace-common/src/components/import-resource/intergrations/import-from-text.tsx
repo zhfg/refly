@@ -47,13 +47,12 @@ export const ImportFromText = () => {
     if (data?.success) {
       canvasEmitter.emit('addNode', {
         type: 'resource',
-        data: [
-          {
-            id: data?.data?.resourceId,
+        data: {
+          entityId: data?.data?.resourceId,
+          metadata: {
             title: data?.data?.title,
-            domain: 'resource',
           },
-        ],
+        },
       });
     }
   };

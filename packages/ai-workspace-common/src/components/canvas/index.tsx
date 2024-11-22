@@ -1,13 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Input, Radio, Space } from 'antd';
+import { Button } from 'antd';
 import {
   ReactFlow,
   Background,
   Controls,
   MiniMap,
   Connection,
-  Node,
   Edge,
   NodeChange,
   EdgeChange,
@@ -15,14 +14,16 @@ import {
   applyEdgeChanges,
 } from '@xyflow/react';
 import { NodePreview } from './node-preview';
-import { nodeTypes, prepareNodeData, CanvasNode } from './nodes';
+import { nodeTypes, prepareNodeData, CanvasNode, CanvasNodeData } from './nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
+import { CanvasProvider } from './context-provider';
 import { useCollabProvider } from '@refly-packages/ai-workspace-common/hooks/use-collab-provider';
 import { CanvasToolbar } from './canvas-toolbar';
 import { canvasEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/canvas';
-import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 
 import '@xyflow/react/dist/style.css';
+import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { CopilotOperationModule } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module';
 
 export const Canvas = (props: { canvasId: string }) => {
   const { canvasId } = props;
@@ -31,8 +32,6 @@ export const Canvas = (props: { canvasId: string }) => {
 
   const [nodes, setNodes] = useState<CanvasNode[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
-
-  const [nodeType, setNodeType] = useState<CanvasNodeType>('skill');
 
   const collabProvider = useCollabProvider(canvasId);
   const ydoc = collabProvider.document;
@@ -85,8 +84,6 @@ export const Canvas = (props: { canvasId: string }) => {
     [ydoc, yEdges],
   );
 
-  const [message, setMessage] = useState('');
-  // Add state for selected node
   const [selectedNode, setSelectedNode] = useState<CanvasNode | null>(null);
 
   // Update the onConnect handler to use y-doc
@@ -110,45 +107,13 @@ export const Canvas = (props: { canvasId: string }) => {
     setSelectedNode(null);
   };
 
-  // Update the handleSubmit function where we create new edges
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim()) return;
-
-    const newNode = prepareNodeData({
-      data: { entityId: message, metadata: {} },
-      type: nodeType,
-    });
-
-    ydoc.transact(() => {
-      yNodes.push([newNode]);
-
-      // If there are existing nodes, create an edge from the last node to the new node
-      if (nodes.length > 0) {
-        const lastNode = nodes[nodes.length - 1];
-        const newEdge = {
-          id: `edge-${lastNode.id}-${newNode.id}`,
-          source: lastNode.id,
-          target: newNode.id,
-          style: { stroke: '#666' },
-        };
-        yEdges.push([newEdge]);
-      }
-    });
-
-    setMessage('');
-  };
-
   const handleToolSelect = (tool: string) => {
     // Handle tool selection
     console.log('Selected tool:', tool);
   };
 
-  const addNewNode = (entityId: string, type: CanvasNodeType) => {
-    const newNode = prepareNodeData({
-      data: { entityId, metadata: {} },
-      type,
-    });
+  const handleAddNode = (node: { type: CanvasNodeType; data: CanvasNodeData }) => {
+    const newNode = prepareNodeData(node);
     ydoc.transact(() => {
       yNodes.push([newNode]);
 
@@ -164,12 +129,8 @@ export const Canvas = (props: { canvasId: string }) => {
         yEdges.push([newEdge]);
       }
     });
-  };
 
-  const handleAddNode = (payload: { type: CanvasNodeType; data: ContextItem[] }) => {
-    payload.data.forEach((item) => {
-      addNewNode(item.id, payload.type);
-    });
+    setSelectedNode(newNode);
   };
 
   useEffect(() => {
@@ -180,52 +141,40 @@ export const Canvas = (props: { canvasId: string }) => {
   }, []);
 
   return (
-    <div className="w-screen h-screen relative">
-      <Button
-        onClick={() => navigate('/')}
-        className="absolute top-4 left-4 z-10 px-4 py-2 bg-white rounded-md shadow-md hover:bg-gray-100 transition-colors"
-      >
-        ← Back
-      </Button>
+    <CanvasProvider context={{ canvasId }}>
+      <div className="w-screen h-screen relative">
+        <Button
+          onClick={() => navigate('/')}
+          className="absolute top-4 left-4 z-10 px-4 py-2 bg-white rounded-md shadow-md hover:bg-gray-100 transition-colors"
+        >
+          ← Back
+        </Button>
 
-      <CanvasToolbar onToolSelect={handleToolSelect} />
+        <CanvasToolbar onToolSelect={handleToolSelect} />
 
-      <ReactFlow
-        panOnScroll
-        fitView
-        selectionOnDrag
-        nodeTypes={nodeTypes}
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeClick={onNodeClick}
-      >
-        <Background />
-        <Controls />
-        <MiniMap position="top-right" />
-      </ReactFlow>
+        <ReactFlow
+          panOnScroll
+          fitView
+          selectionOnDrag
+          nodeTypes={nodeTypes}
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onNodeClick={onNodeClick}
+        >
+          <Background />
+          <Controls />
+          <MiniMap position="top-right" />
+        </ReactFlow>
 
-      <form onSubmit={handleSubmit} className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl">
-        <div className="relative">
-          <Radio.Group className="mb-2" value={nodeType} onChange={(e) => setNodeType(e.target.value)}>
-            <Radio.Button value="skill">Skill</Radio.Button>
-            <Radio.Button value="document">Document</Radio.Button>
-            <Radio.Button value="resource">Resource</Radio.Button>
-            <Radio.Button value="tool">Tool</Radio.Button>
-            <Radio.Button value="response">Response</Radio.Button>
-          </Radio.Group>
-          <Space.Compact style={{ width: '100%' }}>
-            <Input value={message} onChange={(e) => setMessage(e.target.value)} onPressEnter={handleSubmit} />
-            <Button type="primary" onClick={handleSubmit}>
-              Submit
-            </Button>
-          </Space.Compact>
+        <div className="absolute bottom-4 h-48 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl">
+          <CopilotOperationModule source={MessageIntentSource.Canvas} />
         </div>
-      </form>
 
-      {selectedNode && <NodePreview node={selectedNode} handleClosePanel={handleClosePanel} />}
-    </div>
+        {selectedNode && <NodePreview node={selectedNode} handleClosePanel={handleClosePanel} />}
+      </div>
+    </CanvasProvider>
   );
 };
