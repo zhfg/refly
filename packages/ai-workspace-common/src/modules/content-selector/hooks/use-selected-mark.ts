@@ -9,7 +9,7 @@ import type { SyncMarkEvent, SyncStatusEvent } from '@refly/common-types';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useDocumentStore } from '@refly-packages/ai-workspace-common/stores/document';
 import { Message } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 
@@ -56,7 +56,7 @@ export const useSelectedMark = () => {
         contextPanelStore.updateCurrentSelectedMark(null);
       } else if (type === 'add') {
         const { currentResource } = useKnowledgeBaseStore.getState();
-        const { currentCanvas } = useCanvasStore.getState();
+        const { currentCanvas } = useDocumentStore.getState();
         let title = '';
         let parentId = '';
         let projectId = '';

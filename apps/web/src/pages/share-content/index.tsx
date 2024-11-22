@@ -37,7 +37,7 @@ import { Tooltip } from "@arco-design/web-react"
 import { getClientOrigin } from "@refly/utils/url"
 import { useContentSelector } from "@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector"
 import { useSelectedMark } from "@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark"
-import { useCanvasStoreShallow } from "@refly-packages/ai-workspace-common/stores/canvas"
+import { useDocumentStoreShallow } from "@refly-packages/ai-workspace-common/stores/document"
 
 const ShareContent = () => {
   const { t } = useTranslation()
@@ -58,7 +58,7 @@ const ShareContent = () => {
     project: state?.project?.data,
     setProject: state.setProject,
   }))
-  const canvasStore = useCanvasStoreShallow(state => ({
+  const canvasStore = useDocumentStoreShallow(state => ({
     updateCurrentCanvas: state.updateCurrentCanvas,
   }))
   const [searchParams, setSearchParams] = useSearchParams()

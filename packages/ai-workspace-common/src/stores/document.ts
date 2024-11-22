@@ -19,8 +19,8 @@ export interface CanvasTab {
   projectId: string;
 }
 
-export type CanvasServerStatus = 'disconnected' | 'connected';
-export type CanvasSaveStatus = 'Saved' | 'Unsaved';
+export type DocumentServerStatus = 'disconnected' | 'connected';
+export type DocumentSaveStatus = 'Saved' | 'Unsaved';
 
 export interface TableOfContentsItem {
   isActive: boolean;
@@ -30,7 +30,7 @@ export interface TableOfContentsItem {
   textContent: string;
 }
 
-interface CanvasBaseState {
+interface DocumentBaseState {
   currentCanvas: Canvas | null;
   isRequesting: boolean;
   newCanvasCreating: boolean;
@@ -44,9 +44,9 @@ interface CanvasBaseState {
 
   // canvas
   editor: EditorInstance | null;
-  canvasServerStatus: CanvasServerStatus;
+  canvasServerStatus: DocumentServerStatus;
   canvasCharsCount: number;
-  canvasSaveStatus: CanvasSaveStatus;
+  canvasSaveStatus: DocumentSaveStatus;
 
   lastCursorPosRef: number | null;
 
@@ -61,8 +61,8 @@ interface CanvasBaseState {
   updateTabs: (tabs: CanvasTab[]) => void;
   updateActiveTab: (key: string) => void;
   updateCanvasPanelVisible: (visible: boolean) => void;
-  updateCanvasServerStatus: (status: CanvasServerStatus) => void;
-  updateCanvasSaveStatus: (status: CanvasSaveStatus) => void;
+  updateCanvasServerStatus: (status: DocumentServerStatus) => void;
+  updateCanvasSaveStatus: (status: DocumentSaveStatus) => void;
   updateCanvasCharsCount: (count: number) => void;
   updateEditor: (editor: EditorInstance) => void;
 
@@ -85,15 +85,15 @@ export const defaultState = {
 
   // canvases
   editor: null,
-  canvasServerStatus: 'disconnected' as CanvasServerStatus,
+  canvasServerStatus: 'disconnected' as DocumentServerStatus,
   canvasCharsCount: 0,
-  canvasSaveStatus: 'Unsaved' as CanvasSaveStatus,
+  canvasSaveStatus: 'Unsaved' as DocumentSaveStatus,
 
   // canvas selection status content, main for skill consume
   lastCursorPosRef: null,
 };
 
-export const useCanvasStore = create<CanvasBaseState>()(
+export const useDocumentStore = create<DocumentBaseState>()(
   devtools((set) => ({
     ...defaultState,
 
@@ -111,9 +111,9 @@ export const useCanvasStore = create<CanvasBaseState>()(
 
     // canvases
     updateEditor: (editor: EditorInstance) => set((state) => ({ ...state, editor })),
-    updateCanvasServerStatus: (status: CanvasServerStatus) =>
+    updateCanvasServerStatus: (status: DocumentServerStatus) =>
       set((state) => ({ ...state, canvasServerStatus: status })),
-    updateCanvasSaveStatus: (status: CanvasSaveStatus) => set((state) => ({ ...state, canvasSaveStatus: status })),
+    updateCanvasSaveStatus: (status: DocumentSaveStatus) => set((state) => ({ ...state, canvasSaveStatus: status })),
     updateCanvasCharsCount: (count: number) => set((state) => ({ ...state, canvasCharsCount: count })),
     updateLastCursorPosRef: (pos: number) => set((state) => ({ ...state, lastCursorPosRef: pos })),
     updateTocItems: (items: TableOfContentsItem[]) => set((state) => ({ ...state, tocItems: items })),
@@ -122,6 +122,6 @@ export const useCanvasStore = create<CanvasBaseState>()(
   })),
 );
 
-export const useCanvasStoreShallow = <T>(selector: (state: CanvasBaseState) => T) => {
-  return useCanvasStore(useShallow(selector));
+export const useDocumentStoreShallow = <T>(selector: (state: DocumentBaseState) => T) => {
+  return useDocumentStore(useShallow(selector));
 };

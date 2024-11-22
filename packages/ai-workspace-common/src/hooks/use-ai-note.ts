@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -19,7 +19,7 @@ interface CreateCanvasParams {
 
 export const useAINote = (shouldInitListener = false) => {
   const { t } = useTranslation();
-  const canvasStore = useCanvasStoreShallow((state) => ({
+  const canvasStore = useDocumentStoreShallow((state) => ({
     isCreatingNewCanvasOnHumanMessage: state.isCreatingNewCanvasOnHumanMessage,
     updateNewNoteCreating: state.updateNewCanvasCreating,
     updateNotePanelVisible: state.updateCanvasPanelVisible,

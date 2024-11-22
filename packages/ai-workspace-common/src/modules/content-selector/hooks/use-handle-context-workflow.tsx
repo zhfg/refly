@@ -2,7 +2,7 @@ import { Menu, Message as message } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import { useSelectedMark } from '../hooks/use-selected-mark';
 // styles
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useDocumentStore } from '@refly-packages/ai-workspace-common/stores/document';
 // stores
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEffect } from 'react';
@@ -10,7 +10,7 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 
 export const useHandleContextWorkflow = () => {
-  const noteStore = useCanvasStore((state) => ({
+  const noteStore = useDocumentStore((state) => ({
     updateCurrentNote: state.updateCurrentCanvas,
   }));
   const { setShowContextCard, setContextDomain } = useContextPanelStore((state) => ({
@@ -45,7 +45,7 @@ export const useHandleContextWorkflow = () => {
 
   const handleSidePanelClose = () => {
     handleStopContentSelectorListener();
-    const { currentCanvas: currentNote } = useCanvasStore.getState();
+    const { currentCanvas: currentNote } = useDocumentStore.getState();
     noteStore.updateCurrentNote({ ...currentNote, readOnly: false });
   };
 

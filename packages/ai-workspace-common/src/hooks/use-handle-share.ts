@@ -6,7 +6,7 @@ import { FiCopy } from 'react-icons/fi';
 // requests
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useProjectStoreShallow } from '@refly-packages/ai-workspace-common/stores/project';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { useTranslation } from 'react-i18next';
 
 import { EntityType } from '@refly/openapi-schema';
@@ -24,7 +24,7 @@ export const useHandleShare = () => {
     setProject: state.setProject,
   }));
 
-  const { canvas, updateCurrentCanvas } = useCanvasStoreShallow((state) => ({
+  const { canvas, updateCurrentCanvas } = useDocumentStoreShallow((state) => ({
     canvas: state.currentCanvas,
     updateCurrentCanvas: state.updateCurrentCanvas,
   }));
