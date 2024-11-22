@@ -40,7 +40,7 @@ export const useProjectTabs = () => {
       const activeTab = newTabs[index] ? newTabs[index] : newTabs[index - 1];
       const activeTabKey = activeTab.key;
       projectStore.setProjectActiveTab(projectId, activeTabKey);
-      searchParams.set(activeTab?.type === 'canvas' ? 'canvasId' : 'resId', activeTabKey);
+      searchParams.set(activeTab?.type === 'document' ? 'docId' : 'resId', activeTabKey);
     }
     setSearchParams(searchParams);
   };

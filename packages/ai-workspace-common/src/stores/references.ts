@@ -14,19 +14,19 @@ export type StateField<T> = {
 
 interface ReferencesParams {
   sourceId?: string;
-  sourceType?: 'resource' | 'canvas';
-  targetType?: 'resource' | 'canvas';
+  sourceType?: 'resource' | 'document';
+  targetType?: 'resource' | 'document';
   targetId?: string;
 }
 
 export interface ReferencesState {
-  domain: 'resource' | 'canvas';
+  domain: 'resource' | 'document';
   id: string;
   deckSize: number;
 
   references: StateField<Reference[]>;
   referencedBy: StateField<Reference[]>;
-  setDomain: (domain: 'resource' | 'canvas') => void;
+  setDomain: (domain: 'resource' | 'document') => void;
   setId: (id: string) => void;
   setDeckSize: (size: number) => void;
   fetchReferences: (params: ReferencesParams) => Promise<void>;

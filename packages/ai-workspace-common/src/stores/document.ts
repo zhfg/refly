@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Canvas } from '@refly/openapi-schema';
+import { Document } from '@refly/openapi-schema';
 import { EditorInstance } from '@refly-packages/editor-core/components';
 
 export enum ActionSource {
@@ -31,11 +31,11 @@ export interface TableOfContentsItem {
 }
 
 interface DocumentBaseState {
-  currentCanvas: Canvas | null;
+  currentDocument: Document | null;
   isRequesting: boolean;
-  newCanvasCreating: boolean;
+  newDocumentCreating: boolean;
   isAiEditing: boolean;
-  isCreatingNewCanvasOnHumanMessage: boolean;
+  isCreatingNewDocumentOnHumanMessage: boolean;
 
   // tabs
   tabs: CanvasTab[];
@@ -44,26 +44,26 @@ interface DocumentBaseState {
 
   // canvas
   editor: EditorInstance | null;
-  canvasServerStatus: DocumentServerStatus;
-  canvasCharsCount: number;
-  canvasSaveStatus: DocumentSaveStatus;
+  documentServerStatus: DocumentServerStatus;
+  documentCharsCount: number;
+  documentSaveStatus: DocumentSaveStatus;
 
   lastCursorPosRef: number | null;
 
   // tocItems
   tocItems: TableOfContentsItem[];
 
-  updateCurrentCanvas: (canvas: Canvas) => void;
+  updateCurrentDocument: (document: Document) => void;
   updateIsRequesting: (isRequesting: boolean) => void;
-  updateNewCanvasCreating: (creating: boolean) => void;
-  updateIsCreatingNewCanvasOnHumanMessage: (creating: boolean) => void;
+  updateNewDocumentCreating: (creating: boolean) => void;
+  updateIsCreatingNewDocumentOnHumanMessage: (creating: boolean) => void;
   updateIsAiEditing: (editing: boolean) => void;
   updateTabs: (tabs: CanvasTab[]) => void;
   updateActiveTab: (key: string) => void;
   updateCanvasPanelVisible: (visible: boolean) => void;
-  updateCanvasServerStatus: (status: DocumentServerStatus) => void;
-  updateCanvasSaveStatus: (status: DocumentSaveStatus) => void;
-  updateCanvasCharsCount: (count: number) => void;
+  updateDocumentServerStatus: (status: DocumentServerStatus) => void;
+  updateDocumentSaveStatus: (status: DocumentSaveStatus) => void;
+  updateDocumentCharsCount: (count: number) => void;
   updateEditor: (editor: EditorInstance) => void;
 
   updateLastCursorPosRef: (pos: number) => void;
@@ -73,21 +73,21 @@ interface DocumentBaseState {
 }
 
 export const defaultState = {
-  currentCanvas: null as null | Canvas,
+  currentDocument: null as null | Document,
   tabs: [],
   activeTab: 'key1',
   canvasPanelVisible: false,
   isRequesting: false,
-  newCanvasCreating: false,
-  isCreatingNewCanvasOnHumanMessage: false,
+  newDocumentCreating: false,
+  isCreatingNewDocumentOnHumanMessage: false,
   isAiEditing: false,
   tocItems: [],
 
   // canvases
   editor: null,
-  canvasServerStatus: 'disconnected' as DocumentServerStatus,
-  canvasCharsCount: 0,
-  canvasSaveStatus: 'Unsaved' as DocumentSaveStatus,
+  documentServerStatus: 'disconnected' as DocumentServerStatus,
+  documentCharsCount: 0,
+  documentSaveStatus: 'Unsaved' as DocumentSaveStatus,
 
   // canvas selection status content, main for skill consume
   lastCursorPosRef: null,
@@ -97,13 +97,13 @@ export const useDocumentStore = create<DocumentBaseState>()(
   devtools((set) => ({
     ...defaultState,
 
-    updateCurrentCanvas: (canvas) => set((state) => ({ ...state, currentCanvas: canvas })),
+    updateCurrentDocument: (document: Document) => set((state) => ({ ...state, currentDocument: document })),
     updateIsRequesting: (isRequesting: boolean) => set((state) => ({ ...state, isRequesting })),
     updateTabs: (tabs: CanvasTab[]) => set((state) => ({ ...state, tabs })),
     updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
-    updateNewCanvasCreating: (creating: boolean) => set((state) => ({ ...state, newCanvasCreating: creating })),
-    updateIsCreatingNewCanvasOnHumanMessage: (creating: boolean) =>
-      set((state) => ({ ...state, isCreatingNewCanvasOnHumanMessage: creating })),
+    updateNewDocumentCreating: (creating: boolean) => set((state) => ({ ...state, newDocumentCreating: creating })),
+    updateIsCreatingNewDocumentOnHumanMessage: (creating: boolean) =>
+      set((state) => ({ ...state, isCreatingNewDocumentOnHumanMessage: creating })),
     updateIsAiEditing: (editing: boolean) => set((state) => ({ ...state, isAiEditing: editing })),
 
     // tabs
@@ -111,10 +111,11 @@ export const useDocumentStore = create<DocumentBaseState>()(
 
     // canvases
     updateEditor: (editor: EditorInstance) => set((state) => ({ ...state, editor })),
-    updateCanvasServerStatus: (status: DocumentServerStatus) =>
-      set((state) => ({ ...state, canvasServerStatus: status })),
-    updateCanvasSaveStatus: (status: DocumentSaveStatus) => set((state) => ({ ...state, canvasSaveStatus: status })),
-    updateCanvasCharsCount: (count: number) => set((state) => ({ ...state, canvasCharsCount: count })),
+    updateDocumentServerStatus: (status: DocumentServerStatus) =>
+      set((state) => ({ ...state, documentServerStatus: status })),
+    updateDocumentSaveStatus: (status: DocumentSaveStatus) =>
+      set((state) => ({ ...state, documentSaveStatus: status })),
+    updateDocumentCharsCount: (count: number) => set((state) => ({ ...state, documentCharsCount: count })),
     updateLastCursorPosRef: (pos: number) => set((state) => ({ ...state, lastCursorPosRef: pos })),
     updateTocItems: (items: TableOfContentsItem[]) => set((state) => ({ ...state, tocItems: items })),
 
