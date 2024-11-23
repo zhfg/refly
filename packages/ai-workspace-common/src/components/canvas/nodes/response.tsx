@@ -2,10 +2,44 @@ import { Handle, NodeProps, Position } from '@xyflow/react';
 import { CanvasNodeData, ResponseNodeMeta } from './types';
 import { Node } from '@xyflow/react';
 import { MessageSquare, MoreHorizontal } from 'lucide-react';
+import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
+import { useEffect } from 'react';
+import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 type ResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'response'>;
 
 export const ResponseNode = ({ data, selected }: NodeProps<ResponseNode>) => {
+  // Get result from store
+  const { result, updateActionResult } = useActionResultStoreShallow((state) => ({
+    result: state.resultMap[data.entityId],
+    updateActionResult: state.updateActionResult,
+  }));
+
+  // Fetch result if not available
+  const fetchActionResult = async (resultId: string) => {
+    const { data, error } = await getClient().getActionResult({
+      query: { resultId },
+    });
+
+    if (error || !data?.success) {
+      return;
+    }
+
+    updateActionResult(resultId, data.data);
+  };
+
+  useEffect(() => {
+    if (!result && data.entityId) {
+      fetchActionResult(data.entityId);
+    }
+  }, [data.entityId]);
+
+  // Get query and response content from result
+  const query = result?.invokeParam?.input?.query ?? 'Loading...';
+  const content = result?.content ?? 'Loading response...';
+  const modelName = result?.actionMeta?.name ?? 'AI Assistant';
+
   return (
     <div className="relative group">
       {/* Action Button */}
@@ -86,7 +120,7 @@ export const ResponseNode = ({ data, selected }: NodeProps<ResponseNode>) => {
                 truncate
               "
             >
-              {data.metadata.modelName || 'AI Response'}
+              {modelName}
             </span>
           </div>
 
@@ -98,10 +132,12 @@ export const ResponseNode = ({ data, selected }: NodeProps<ResponseNode>) => {
               leading-normal
               text-[rgba(0,0,0,0.8)]
               font-['PingFang_SC']
-              truncate
+              line-clamp-2
+              overflow-hidden
+              text-ellipsis
             "
           >
-            {data.title}
+            {query}
           </div>
 
           {/* Response Content Preview */}
@@ -111,14 +147,12 @@ export const ResponseNode = ({ data, selected }: NodeProps<ResponseNode>) => {
               leading-3
               text-[rgba(0,0,0,0.8)]
               font-['PingFang_SC']
-              line-clamp-2
+              line-clamp-3
               overflow-hidden
               text-ellipsis
             "
           >
-            {/* 这里可以添加实际的响应内容 */}
-            百度开发了文心IRAG（Image based
-            RAG），检索增强的文生图技术，用于解决大模型在图片生成上的幻觉问题。iRAG将程度搜索的亿级图片资源跟强大的基础模型能力相结合，可以生成各种超真实的图片...
+            {content}
           </div>
         </div>
       </div>

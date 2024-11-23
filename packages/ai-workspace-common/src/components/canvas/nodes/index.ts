@@ -88,7 +88,7 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
 
     case 'response':
       return {
-        modelName: 'AI Assistant',
+        modelName: 'AI Response',
         timestamp: new Date().toISOString(),
         status: 'pending',
         executionTime: null,

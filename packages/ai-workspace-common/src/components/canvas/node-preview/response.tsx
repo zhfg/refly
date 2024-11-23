@@ -1,22 +1,28 @@
 import { useEffect } from 'react';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { Space } from 'antd';
-import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
+import { HumanMessage, AssistantMessage } from '../../copilot/message';
+import { ChatMessage } from '@refly/openapi-schema';
+import './response.scss';
 
-export const ResponseNodePreview = ({ resultId }: { resultId: string }) => {
+interface ResponseNodePreviewProps {
+  resultId: string;
+}
+
+export const ResponseNodePreview = ({ resultId }: ResponseNodePreviewProps) => {
+  const userProfile = useUserStoreShallow((state) => state.userProfile);
   const { result, updateActionResult } = useActionResultStoreShallow((state) => ({
     result: state.resultMap[resultId],
     updateActionResult: state.updateActionResult,
   }));
-  const { input, context, tplConfig } = result?.invokeParam || {};
 
   const fetchActionResult = async (resultId: string) => {
     const { data, error } = await getClient().getActionResult({
       query: { resultId },
     });
 
-    if (error || !data.success) {
+    if (error || !data?.success) {
       return;
     }
 
@@ -29,15 +35,56 @@ export const ResponseNodePreview = ({ resultId }: { resultId: string }) => {
     }
   }, [resultId]);
 
+  if (!result) {
+    return <div className="flex h-full items-center justify-center text-gray-500">Loading response data...</div>;
+  }
+
+  const humanMessage: Partial<ChatMessage> = {
+    msgId: `${resultId}-human`,
+    type: 'human',
+    content: result.invokeParam?.input?.query ?? '',
+    invokeParam: {
+      context: result.invokeParam?.context,
+    },
+  };
+
+  const assistantMessage: Partial<ChatMessage> = {
+    msgId: `${resultId}-assistant`,
+    type: 'ai',
+    content: result.content ?? '',
+    skillMeta: {
+      displayName: result.actionMeta?.name ?? 'AI Response',
+      icon: result.actionMeta?.icon,
+    },
+    tokenUsage: result.tokenUsage,
+    structuredData: result.structuredData,
+  };
+
   return (
-    <div className="h-full bg-gray-50 rounded p-3">
-      <Space direction="vertical" size={10} className="w-full">
-        <h1>{input?.query}</h1>
-        <pre className="text-black text-sm h-20 overflow-y-auto">Context: {JSON.stringify(context, null, 2)}</pre>
-        <pre className="text-black text-sm h-20 overflow-y-auto">Config: {JSON.stringify(tplConfig, null, 2)}</pre>
-        <Markdown content={result?.content} />
-        {result?.tokenUsage?.length > 0 && <div>Token Usage: {JSON.stringify(result?.tokenUsage)}</div>}
-      </Space>
+    <div className="ai-copilot-message-container">
+      {/* Human Message */}
+      {humanMessage.content && (
+        <HumanMessage
+          message={humanMessage}
+          profile={{
+            avatar: userProfile?.avatar ?? '',
+            name: userProfile?.nickname ?? 'User',
+          }}
+          disable={true}
+        />
+      )}
+
+      {/* AI Response */}
+      {assistantMessage.content && (
+        <AssistantMessage
+          message={assistantMessage}
+          humanMessage={humanMessage}
+          disable={false}
+          isLastSession={true}
+          isPendingFirstToken={false}
+          isPending={false}
+        />
+      )}
     </div>
   );
 };
