@@ -153,13 +153,28 @@ export const useInvokeAction = () => {
       invokeParam: payload,
     });
 
-    addNode({
-      type: 'response',
-      data: {
-        title: payload.input.query,
-        entityId: resultId,
+    const connectTo = [
+      ...(payload.context?.resources ?? []).map((resource) => ({
+        type: 'resource' as const,
+        entityId: resource.resourceId,
+      })),
+      ...(payload.context?.documents ?? []).map((document) => ({
+        type: 'document' as const,
+        entityId: document.docId,
+      })),
+    ];
+    addNode(
+      {
+        type: 'response',
+        data: {
+          title: payload.input.query,
+          entityId: resultId,
+        },
       },
-    });
+      connectTo,
+    );
+
+    return;
 
     globalAbortControllerRef.current = new AbortController();
 

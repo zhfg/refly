@@ -13,14 +13,14 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 export const ContextManager = (props: { source: MessageIntentSource }) => {
-  const { selectedContextItems, addContextItem, removeContextItem, filterErrorInfo } = useContextPanelStoreShallow(
-    (state) => ({
+  const { selectedContextItems, addContextItem, removeContextItem, clearContextItems, filterErrorInfo } =
+    useContextPanelStoreShallow((state) => ({
       selectedContextItems: state.selectedContextItems,
       addContextItem: state.addContextItem,
       removeContextItem: state.removeContextItem,
+      clearContextItems: state.clearContextItems,
       filterErrorInfo: state.filterErrorInfo,
-    }),
-  );
+    }));
   const { selectedNode, setSelectedNode } = useCanvasControl();
 
   const handleToggleItem = (item: CanvasNode) => {
@@ -46,6 +46,12 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
       }
     }
   }, [selectedNode]);
+
+  useEffect(() => {
+    return () => {
+      clearContextItems();
+    };
+  }, []);
 
   return (
     <div className="flex flex-col h-full p-2 px-3">
