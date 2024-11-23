@@ -182,7 +182,7 @@ export const ModelSelector = ({ placement = 'bottom' }: ModelSelectorProps) => {
           }
         },
       }}
-      trigger={['hover']}
+      trigger={['click']}
       placement={placement || 'bottom'}
       open={dropdownOpen}
       onOpenChange={setDropdownOpen}

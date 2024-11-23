@@ -36,6 +36,8 @@ import {
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
   let searchResults: SearchResult[] = [];
@@ -55,183 +57,42 @@ const mapMarkToSearchResult = (marks: Mark[]): SearchResult[] => {
 export const ContextManager = (props: { source: MessageIntentSource }) => {
   const [activeItemId, setActiveItemId] = useState(null);
   const { processedContextItems } = useProcessContextItems();
-  const {
-    addMark,
-    removeMark,
-    toggleMarkActive,
-    clearMarks,
-    updateMark,
-    resetState,
-    currentSelectedMarks,
-    filterIdsOfCurrentSelectedMarks,
-    filterErrorInfo,
-  } = useContextPanelStoreShallow((state) => ({
-    addMark: state.addMark,
-    removeMark: state.removeMark,
-    toggleMarkActive: state.toggleMarkActive,
-    clearMarks: state.clearMarks,
-    updateMark: state.updateMark,
+  const { selectedNodes, removeNode, resetState, filterErrorInfo } = useContextPanelStoreShallow((state) => ({
+    selectedNodes: state.selectedContextItems,
+    removeNode: state.removeContextItem,
     resetState: state.resetState,
-    currentSelectedMarks: state.currentSelectedMarks,
-    filterIdsOfCurrentSelectedMarks: state.filterIdsOfCurrentSelectedMarks,
     filterErrorInfo: state.filterErrorInfo,
   }));
-  const runtime = getRuntime();
-  const isWeb = runtime === 'web';
+  const { setSelectedNode } = useCanvasControl();
 
-  const handleToggleItem = (id) => {
-    toggleMarkActive(id);
-    setActiveItemId((prevId) => (prevId === id ? null : id));
+  const handleToggleItem = (item: CanvasNode) => {
+    setSelectedNode(item);
   };
 
-  const handleRemoveItem = (id) => {
-    removeMark(id);
-    if (activeItemId === id) {
-      setActiveItemId(null);
-    }
+  const handleRemoveItem = (item: CanvasNode) => {
+    removeNode(item.id);
   };
 
-  const activeItem = processedContextItems.find((item) => item.id === activeItemId);
+  // const { initMessageListener } = useSelectedMark();
 
-  const handleExpandItem = (id) => {
-    // 这里可以添加展开项目的逻辑
-    console.log(`Expanding item with id: ${id}`);
-    // 例如，可以设置一个新的状态来跟踪展开的项目
-    // setExpandedItems(prev => [...prev, id]);
-  };
+  // useEffect(() => {
+  //   const clearEvent = initMessageListener();
 
-  const processContextFilterProps = useProcessContextFilter(true);
-
-  const { currentResource } = useResourceStoreShallow((state) => ({
-    currentResource: state.resource.data,
-  }));
-  const currentCanvas = useDocumentStoreShallow((state) => state.currentCanvas);
-  const { project } = useProjectStoreShallow((state) => ({
-    project: state?.project?.data,
-  }));
-
-  const { initMessageListener } = useSelectedMark();
-
-  const currentSelectedContentList =
-    (currentSelectedMarks || []).filter(
-      (mark) =>
-        selectedTextDomains?.includes(mark?.domain) || selectedTextDomains.includes(mark?.type as SelectedTextDomain),
-    ) || [];
-
-  const buildEnvContext = (data: Project | Resource | Canvas, type: 'project' | 'resource' | 'canvas'): Mark[] => {
-    if (!data) return [];
-
-    const typeMap = {
-      resource: 'resourceId',
-      project: 'projectId',
-      canvas: 'canvasId',
-    };
-
-    const idKey = typeMap[type];
-    const id = data[idKey];
-
-    if (!id) return [];
-
-    return [
-      {
-        title: data.title,
-        type,
-        id,
-        entityId: id,
-        data: type === 'project' ? (data as Project).description : (data as Resource | Canvas).content,
-        onlyForCurrentContext: true,
-        isCurrentContext: true,
-        url: (data as Resource)?.data?.url || '',
-        metadata: type === 'canvas' ? { projectId: (data as Canvas).projectId } : null,
-      },
-    ];
-  };
-
-  const removeNotCurrentContext = (type: string) => {
-    currentSelectedMarks
-      .filter((mark) => mark.type === type)
-      .forEach((mark) => {
-        if (mark.onlyForCurrentContext) {
-          removeMark(mark.id);
-        } else if (mark.isCurrentContext) {
-          updateMark({ ...mark, isCurrentContext: false });
-        }
-      });
-  };
-
-  const updateContext = (item: any, type: 'project' | 'resource' | 'canvas') => {
-    const envContext = buildEnvContext(item, type);
-    const contextItem = envContext?.[0];
-
-    if (!contextItem) {
-      removeNotCurrentContext(type);
-      return;
-    }
-
-    // Find existing mark of the same type
-    const existingMark = currentSelectedMarks.find((mark) => mark.type === type && mark.onlyForCurrentContext);
-
-    if (!existingMark) {
-      // No existing mark, add new one
-      addMark(contextItem);
-    } else if (existingMark.entityId !== contextItem.entityId) {
-      // Different entity, replace old with new
-      removeMark(existingMark.id);
-      addMark(contextItem);
-    } else if (
-      existingMark.title !== contextItem.title ||
-      existingMark.data !== contextItem.data ||
-      existingMark.url !== contextItem.url
-    ) {
-      // Same entity but content changed, update properties
-      updateMark({
-        ...existingMark,
-        title: contextItem.title,
-        data: contextItem.data,
-        url: contextItem.url,
-      });
-    }
-    // If everything is the same, do nothing
-  };
-
-  useEffect(() => {
-    updateContext(project, 'project');
-  }, [project?.projectId, project?.title]);
-
-  useEffect(() => {
-    updateContext(currentResource, 'resource');
-  }, [currentResource?.resourceId, currentResource?.title]);
-
-  useEffect(() => {
-    updateContext(currentCanvas, 'canvas');
-  }, [currentCanvas?.canvasId, currentCanvas?.title]);
-
-  useEffect(() => {
-    const clearEvent = initMessageListener();
-
-    return () => {
-      resetState();
-      clearEvent?.();
-    };
-  }, []);
+  //   return () => {
+  //     resetState();
+  //     clearEvent?.();
+  //   };
+  // }, []);
 
   return (
     <div className="context-manager">
       <div className="context-content">
         <div className="context-items-container">
           <AddBaseMarkContext source={props.source} />
-
-          {/* {processedContextItems?.length > 0 && <ResetContentSelectorBtn />} */}
-
-          {/* <ContextFilter processContextFilterProps={processContextFilterProps} /> */}
-
-          {!isWeb && currentSelectedContentList?.length > 0 && <SaveToKnowledgeBase />}
-
-          {processedContextItems.map((item) => (
+          {selectedNodes.map((item) => (
             <ContextItem
               key={item.id}
               item={item}
-              disabled={(filterIdsOfCurrentSelectedMarks || []).includes(item.id)}
               isLimit={!!filterErrorInfo?.[mapSelectionTypeToContentList(item.type)]}
               isActive={item.id === activeItemId}
               onToggle={handleToggleItem}
@@ -239,21 +100,6 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
             />
           ))}
         </div>
-
-        {activeItem && (
-          <ContextPreview
-            item={activeItem}
-            onClose={() => setActiveItemId(null)}
-            onRemove={handleRemoveItem}
-            onOpenUrl={(url) => {
-              if (typeof url === 'function') {
-                url(); // 执行跳转函数
-              } else {
-                window.open(url, '_blank'); // 打开外部链接
-              }
-            }}
-          />
-        )}
       </div>
     </div>
   );

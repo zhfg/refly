@@ -49,10 +49,8 @@ export const ImportFromText = () => {
       addNode({
         type: 'resource',
         data: {
+          title: data?.data?.title || 'Untitled',
           entityId: data?.data?.resourceId,
-          metadata: {
-            title: data?.data?.title,
-          },
         },
       });
     }

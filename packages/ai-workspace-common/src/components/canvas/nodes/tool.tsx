@@ -117,7 +117,7 @@ export const ToolNode = ({ data, selected }: NodeProps<ToolNode>) => {
               truncate
             "
           >
-            {data.entityId}
+            {data.title}
           </div>
         </div>
       </div>

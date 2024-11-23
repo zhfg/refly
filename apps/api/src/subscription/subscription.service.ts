@@ -593,7 +593,7 @@ export class SubscriptionService implements OnModuleInit {
       return;
     }
 
-    this.logger.log(`Syncing storage usage for user ${uid}`);
+    // this.logger.log(`Syncing storage usage for user ${uid}`);
 
     const activeMeter = await this.getOrCreateStorageUsageMeter(user);
 
@@ -641,7 +641,7 @@ export class SubscriptionService implements OnModuleInit {
       });
     });
 
-    this.logger.log(`Storage usage for user ${uid} synced at ${timestamp}`);
+    // this.logger.log(`Storage usage for user ${uid} synced at ${timestamp}`);
   }
 
   async getModelList() {

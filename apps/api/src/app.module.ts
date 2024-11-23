@@ -37,6 +37,8 @@ import { ActionModule } from './action/action.module';
           paths: ['pid', 'hostname', 'req.headers'],
           remove: true,
         },
+        quietReqLogger: process.env.NODE_ENV !== 'production',
+        quietResLogger: process.env.NODE_ENV !== 'production',
         genReqId: () => api.trace.getSpan(api.context.active())?.spanContext()?.traceId,
         customSuccessObject: (req) => ({
           env: process.env.NODE_ENV,

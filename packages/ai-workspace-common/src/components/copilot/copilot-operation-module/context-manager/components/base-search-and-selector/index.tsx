@@ -1,35 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { Message, Spin } from '@arco-design/web-react';
 import { Button } from 'antd';
 import './index.scss';
 
 import { Command } from 'cmdk';
-import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
 
 import './index.scss';
 import { Home } from './home';
 
 // request
-import { RenderItem } from '../../types/item';
+import { RenderItem } from './type';
 import classNames from 'classnames';
 
 import { useTranslation } from 'react-i18next';
-import { BaseMarkType, frontendBaseMarkTypes, backendBaseMarkTypes, Mark } from '@refly/common-types';
-import { getTypeIcon } from '../../utils/icon';
-import { SortMark } from '../../types/mark';
+import { BaseMarkType, Mark } from '@refly/common-types';
+import { getNodeIcon, getTypeIcon } from '../../utils/icon';
 
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useSearchStrategy } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-search-strategy';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { CanvasNodeType } from '@refly/openapi-schema';
 
 interface CustomProps {
   showList?: boolean;
   onClickOutside?: () => void;
   onSearchValueChange?: (value: string) => void;
-  onSelect?: (newMark: Mark) => void;
+  onSelect?: (node: CanvasNode) => void;
   onClose?: () => void;
   source: MessageIntentSource;
 }
@@ -37,7 +36,7 @@ interface CustomProps {
 export interface BaseSearchAndSelectorProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onSelect'>,
     CustomProps {
-  selectedItems: SortMark[];
+  selectedItems: CanvasNode[];
 }
 
 export const BaseSearchAndSelector = ({
@@ -47,7 +46,6 @@ export const BaseSearchAndSelector = ({
   onClickOutside,
   onSearchValueChange,
   selectedItems = [],
-  source,
 }: BaseSearchAndSelectorProps) => {
   const [activeTab, setActiveTab] = useState<BaseMarkType | 'all'>('all');
   const [searchValue, setSearchValue] = useState('');
@@ -57,19 +55,8 @@ export const BaseSearchAndSelector = ({
   const [isComposing, setIsComposing] = useState(false);
   const { t } = useTranslation();
 
-  const { handleSearch, displayMode } = useSearchStrategy({
-    source,
-    onLoadingChange: (loading) => {
-      setLoading(loading);
-    },
-  });
+  const [displayMode, setDisplayMode] = useState<'list' | 'search'>('list');
 
-  const [loading, setLoading] = useState(false);
-
-  console.log('activeValue', activeValue);
-
-  // stores
-  const searchStore = useSearchStore();
   const contextPanelStore = useContextPanelStoreShallow((state) => ({
     resetSelectedTextCardState: state.resetSelectedTextCardState,
   }));
@@ -77,26 +64,16 @@ export const BaseSearchAndSelector = ({
   // hooks
 
   const isHome = activeTab === 'all';
-  const isWeb = getRuntime() === 'web';
-
-  const handleConfirm = (activeValue: string, sortedRenderData: RenderItem[]) => {
-    const [_, id] = activeValue.split('__');
-    const mark = sortedRenderData.find((item) => item.data.id === id);
-    onSelect(mark?.data);
-  };
 
   const handleSearchValueChange = (val: string) => {
     if (onSearchValueChange) {
       onSearchValueChange(val);
     }
     setSearchValue(val);
-    handleSearch(val, activeTab);
   };
 
   useEffect(() => {
     inputRef?.current?.focus();
-
-    handleSearch('', activeTab);
   }, [activeTab]);
 
   useEffect(() => {
@@ -113,32 +90,21 @@ export const BaseSearchAndSelector = ({
     };
   }, []);
 
-  const sortedMarks: Mark[] = [
+  const { nodes } = useCanvasControl();
+  console.log('nodes', nodes);
+  console.log('selectedItems', selectedItems);
+  const sortedNodes: CanvasNode[] = [
     ...((selectedItems || []).map((item) => ({ ...item, isSelected: true })) || []),
-    ...(searchStore.noCategoryBigSearchRes?.filter(
-      (item) => !selectedItems.some((selected) => selected.id === item.id),
-    ) || []),
+    ...(nodes?.filter((item) => !selectedItems.some((selected) => selected.id === item.id)) || []),
   ];
-  const sortedRenderData: RenderItem[] = sortedMarks.map((item) => ({
-    domain: item.domain,
-    heading: item.title,
+  const sortedRenderData: RenderItem[] = sortedNodes.map((item) => ({
     data: item,
     type: item.type,
-    icon: getTypeIcon(item.type, { width: 12, height: 12 }),
-    onItemClick: (item: Mark) => {
+    icon: getNodeIcon(item.type, { width: 12, height: 12 }),
+    onItemClick: (item: CanvasNode) => {
       onSelect(item);
     },
   }));
-
-  const getInputPlaceholder = (domain: BaseMarkType | 'all') => {
-    if (domain === 'all') {
-      if (getRuntime() === 'web') {
-        return t('knowledgeBase.context.popoverSelector.webPlaceholder');
-      } else {
-        return t('knowledgeBase.context.popoverSelector.extensionPlaceholder');
-      }
-    }
-  };
 
   return (
     <Command
@@ -165,7 +131,7 @@ export const BaseSearchAndSelector = ({
           autoFocus
           ref={inputRef}
           value={searchValue}
-          placeholder={getInputPlaceholder(activeTab)}
+          placeholder={t('canvas.contextSelector.placeholder')}
           onCompositionStart={(e) => {
             setIsComposing(true);
           }}
@@ -176,24 +142,18 @@ export const BaseSearchAndSelector = ({
           onValueChange={handleSearchValueChange}
         />
       </div>
-      <Spin
-        loading={loading}
-        style={{ width: '100%', height: 'calc(100% - 72px)' }}
-        className="context-search-list-container"
-      >
-        <Command.List>
-          <Command.Empty>No results found.</Command.Empty>
-          <Home
-            showItemDetail={false}
-            key={'search'}
-            displayMode={displayMode}
-            data={sortedRenderData}
-            activeValue={activeValue}
-            setValue={setActiveValue}
-            searchValue={searchValue}
-          />
-        </Command.List>
-      </Spin>
+      <Command.List>
+        <Command.Empty>No results found.</Command.Empty>
+        <Home
+          showItemDetail={false}
+          key={'search'}
+          displayMode={displayMode}
+          data={sortedRenderData}
+          activeValue={activeValue}
+          setValue={setActiveValue}
+          searchValue={searchValue}
+        />
+      </Command.List>
       <div cmdk-footer="">
         <div className="cmdk-footer-inner">
           <div className="cmdk-footer-hint">

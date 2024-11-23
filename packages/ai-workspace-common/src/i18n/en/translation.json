@@ -357,6 +357,9 @@
       "modalTitle": "New Canvas",
       "titlePlaceholder": "Please enter the title of the canvas",
       "descriptionPlaceholder": "Please enter the description of the canvas"
+    },
+    "contextSelector": {
+      "placeholder": "Enter keywords to search for nodes in the canvas..."
     }
   },
   "resource": {

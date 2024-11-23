@@ -32,7 +32,6 @@ import {
   UpdateSkillInstanceRequest,
   UpdateSkillTriggerRequest,
   User,
-  Project,
   Document,
   TokenUsageItem,
 } from '@refly-packages/openapi-schema';
@@ -451,31 +450,6 @@ export class SkillService {
    * These data can be used in skill invocation.
    */
   async populateSkillContext(user: User, context: SkillContext): Promise<SkillContext> {
-    const { uid } = user;
-
-    // Populate projects
-    if (context.projects?.length > 0) {
-      // Query projects which are not populated
-      const projectIds = [
-        ...new Set(
-          context.projects
-            .filter((item) => !item.project)
-            .map((item) => item.projectId)
-            .filter((id) => id),
-        ),
-      ];
-      const projects = await this.prisma.project.findMany({
-        where: { projectId: { in: projectIds }, uid, deletedAt: null },
-      });
-      const projectMap = new Map<string, Project>();
-      projects.forEach((p) => projectMap.set(p.projectId, projectPO2DTO(p)));
-
-      context.projects.forEach((item) => {
-        if (item.project) return;
-        item.project = projectMap.get(item.projectId);
-      });
-    }
-
     // Populate resources
     if (context.resources?.length > 0) {
       // Query resources which are not populated
@@ -731,6 +705,7 @@ export class SkillService {
         }
       }
     } catch (err) {
+      this.logger.error(`invoke skill error: ${err.stack}`);
       if (res) {
         writeSSEResponse(res, {
           event: 'error',

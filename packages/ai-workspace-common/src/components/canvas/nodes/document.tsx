@@ -104,7 +104,7 @@ export const DocumentNode = ({ data, selected }: NodeProps<DocumentNode>) => {
               font-['PingFang_SC']
             "
           >
-            {data.entityId}
+            {data.title}
           </div>
 
           {/* Document Content Preview */}

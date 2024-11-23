@@ -77,7 +77,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
       selectedItems.forEach((item) => {
         addNode({
           type: domain as CanvasNodeType,
-          data: { entityId: item.id },
+          data: { title: item.title, entityId: item.id },
         });
       });
     }

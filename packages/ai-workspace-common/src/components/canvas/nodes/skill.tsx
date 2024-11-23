@@ -136,7 +136,7 @@ export const SkillNode = ({ data, selected }: NodeProps<SkillNode>) => {
               font-['PingFang_SC']
             "
           >
-            {data.entityId}
+            {data.title}
           </div>
 
           {/* Skill Preview Content */}

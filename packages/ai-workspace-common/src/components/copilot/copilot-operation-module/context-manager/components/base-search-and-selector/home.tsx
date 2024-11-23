@@ -4,7 +4,7 @@ import './index.scss';
 import { Item } from './item';
 
 // request
-import { RenderItem } from '../../types/item';
+import { RenderItem } from './type';
 
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
@@ -32,19 +32,19 @@ export function Home({
       {data?.map((item, index) => (
         <Item
           key={index}
-          className={classNames(item?.data?.isSelected ? 'selected' : '', 'search-res-item')}
-          value={`${item?.data?.title}__${item?.data?.id}`}
+          className={classNames(item?.isSelected ? 'selected' : '', 'search-res-item')}
+          value={`${item?.data?.data?.title}__${item?.data?.data?.entityId}`}
           activeValue={activeValue}
           onSelect={() => {
-            item?.onItemClick(item?.data);
+            item?.onItemClick(item.data);
           }}
         >
           <span className="search-res-icon">{item?.icon}</span>
           <div className="search-res-container">
             <p
               className="search-res-title"
-              dangerouslySetInnerHTML={{ __html: item?.data?.title }}
-              title={item?.data?.title.replace(/<[^>]*>/g, '')}
+              dangerouslySetInnerHTML={{ __html: item?.data?.data?.title }}
+              title={item?.data?.data?.title.replace(/<[^>]*>/g, '')}
             ></p>
           </div>
         </Item>

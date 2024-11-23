@@ -1,7 +1,8 @@
 import { Button } from 'antd';
 import { IconClose } from '@arco-design/web-react/icon';
-import { Mark } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
+import { getNodeIcon } from './utils/icon';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export const ContextItem = ({
   item,
@@ -13,34 +14,37 @@ export const ContextItem = ({
   canNotRemove,
 }: {
   canNotRemove?: boolean;
-  item: Mark;
+  item: IContextItem;
   isActive: boolean;
   isLimit?: boolean;
   disabled?: boolean;
-  onToggle: any;
-  onRemove?: any;
+  onToggle: (item: IContextItem) => void;
+  onRemove?: (item: IContextItem) => void;
 }) => {
   const { t } = useTranslation();
+  const { data } = item;
+  const icon = getNodeIcon(item.type);
+
   return (
     <Button
       className={`context-item ${isActive ? 'active' : isLimit ? 'limit' : disabled ? 'disabled' : ''}`}
-      onClick={() => onToggle(item.id)}
+      onClick={() => onToggle(item)}
     >
       <div className="item-content">
-        <span className="item-icon">{item.icon}</span>
-        <span className="item-title" title={item.title}>
-          {item.title}
+        <span className="item-icon">{icon}</span>
+        <span className="item-title" title={data.title}>
+          {data.title}
         </span>
-        <span className="item-type">
+        {/* <span className="item-type">
           {item.isCurrentContext ? t('copilot.contextItem.current') : ''}
-          {item?.name}
-        </span>
+          {data.title}
+        </span> */}
         {!canNotRemove && (
           <IconClose
             className="item-close"
             onClick={(e) => {
               e.stopPropagation();
-              onRemove && onRemove(item.id);
+              onRemove && onRemove(item);
             }}
           />
         )}

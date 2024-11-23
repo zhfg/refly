@@ -75,6 +75,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
         addNode({
           type: 'resource',
           data: {
+            title: resource.title,
             entityId: resource.id,
           },
         });

@@ -358,6 +358,9 @@
       "modalTitle": "新稿布",
       "titlePlaceholder": "请输入写作标题",
       "descriptionPlaceholder": "请输入稿布描述"
+    },
+    "contextSelector": {
+      "placeholder": "输入关键词搜索画布内节点..."
     }
   },
   "resource": {
