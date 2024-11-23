@@ -7,7 +7,7 @@ import './action-menu.scss';
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { canvasEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/canvas';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
 interface ActionMenuProps {
   getTarget: () => HTMLElement;
@@ -20,6 +20,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
   const { updateSourceListDrawer } = useKnowledgeBaseStore((state) => ({
     updateSourceListDrawer: state.updateSourceListDrawer,
   }));
+  const { addNode } = useCanvasControl();
 
   const { selectedItems, results, setSelectedItems } = useMultilingualSearchStore();
   const importResourceStore = useImportResourceStoreShallow((state) => ({
@@ -71,9 +72,10 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
         domain: 'resource',
       }));
       resources.forEach((resource) => {
-        canvasEmitter.emit('addNode', {
+        addNode({
           type: 'resource',
           data: {
+            title: resource.title,
             entityId: resource.id,
           },
         });

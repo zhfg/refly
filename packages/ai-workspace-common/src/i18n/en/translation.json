@@ -357,6 +357,9 @@
       "modalTitle": "New Canvas",
       "titlePlaceholder": "Please enter the title of the canvas",
       "descriptionPlaceholder": "Please enter the description of the canvas"
+    },
+    "contextSelector": {
+      "placeholder": "Enter keywords to search for nodes in the canvas..."
     }
   },
   "resource": {
@@ -512,7 +515,7 @@
       }
     },
     "siderMenu": {
-      "homePage": "New Writing",
+      "canvas": "Canvas",
       "news": "What's new?",
       "threadLibrary": "Threads",
       "explore": "Explore",
@@ -1087,6 +1090,9 @@
         "successNotify": "Save successfully!",
         "errorNotify": "Save failed!"
       }
+    },
+    "chatHistory": {
+      "title": "Chat History Context"
     },
     "skillDisplay": {
       "skillManager": "Skill Manage",

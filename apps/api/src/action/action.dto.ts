@@ -9,7 +9,7 @@ export interface InvokeActionJobData extends InvokeActionRequest {
 
 export function actionResultPO2DTO(result: ActionResultModel): ActionResult {
   return {
-    ...pick(result, ['resultId', 'canvasId', 'status', 'content']),
+    ...pick(result, ['resultId', 'title', 'canvasId', 'status', 'content']),
     type: result.type as ActionType,
     actionMeta: JSON.parse(result.actionMeta || '{}'),
     logs: JSON.parse(result.logs || '[]'),

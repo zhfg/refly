@@ -6,6 +6,7 @@ import { User as UserModel } from '@prisma/client';
 import { buildSuccessResponse } from '@/utils/response';
 import { ActionService } from '@/action/action.service';
 import { actionResultPO2DTO } from '@/action/action.dto';
+import { ActionResultNotFoundError } from '@refly-packages/errors';
 
 @Controller('v1/action')
 export class ActionController {
@@ -18,6 +19,9 @@ export class ActionController {
     @Query('resultId') resultId: string,
   ): Promise<GetActionResultResponse> {
     const result = await this.actionService.getActionResult(user, { resultId });
+    if (!result) {
+      throw new ActionResultNotFoundError();
+    }
     return buildSuccessResponse(actionResultPO2DTO(result));
   }
 }

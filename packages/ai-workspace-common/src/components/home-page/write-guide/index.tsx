@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 
 import './index.scss';
 
-import { CopilotOperationModule } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
@@ -120,7 +119,6 @@ export const WriteGuide = () => {
           </div>
 
           <div className="ai-copilot">
-            <CopilotOperationModule source={MessageIntentSource.HomePage} />
             <List
               grid={{
                 sm: 48,

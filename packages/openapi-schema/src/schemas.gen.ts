@@ -1102,7 +1102,7 @@ export const $ActionResultStatus = {
 export const $ActionResult = {
   type: 'object',
   description: 'Action result',
-  required: ['resultId', 'type', 'content', 'actionMeta'],
+  required: ['resultId'],
   properties: {
     resultId: {
       type: 'string',
@@ -1114,6 +1114,10 @@ export const $ActionResult = {
       type: 'string',
       description: 'Canvas ID',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    title: {
+      type: 'string',
+      description: 'Action result title',
     },
     type: {
       description: 'Action type',
@@ -3044,6 +3048,13 @@ export const $InvokeSkillRequest = {
     context: {
       description: 'Skill invocation context',
       $ref: '#/components/schemas/SkillContext',
+    },
+    resultHistory: {
+      type: 'array',
+      description: 'Skill result history',
+      items: {
+        $ref: '#/components/schemas/ActionResult',
+      },
     },
     tplConfig: {
       description: 'Skill template config',

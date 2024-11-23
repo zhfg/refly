@@ -120,6 +120,14 @@ export class ConversationNotFoundError extends BaseError {
   };
 }
 
+export class ActionResultNotFoundError extends BaseError {
+  code = 'E1011';
+  messageDict = {
+    en: 'Action result not found, please refresh',
+    'zh-CN': '执行结果不存在，请刷新重试',
+  };
+}
+
 export class StorageQuotaExceeded extends BaseError {
   code = 'E2001';
   messageDict = {
@@ -161,6 +169,7 @@ const errorMap = {
   E1008: LabelInstanceNotFoundError,
   E1009: ShareNotFoundError,
   E1010: ConversationNotFoundError,
+  E1011: ActionResultNotFoundError,
   E2001: StorageQuotaExceeded,
   E2002: ModelUsageQuotaExceeded,
   E2003: ModelNotSupportedError,

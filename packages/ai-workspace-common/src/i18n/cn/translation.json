@@ -358,6 +358,9 @@
       "modalTitle": "新稿布",
       "titlePlaceholder": "请输入写作标题",
       "descriptionPlaceholder": "请输入稿布描述"
+    },
+    "contextSelector": {
+      "placeholder": "输入关键词搜索画布内节点..."
     }
   },
   "resource": {
@@ -523,7 +526,7 @@
       }
     },
     "siderMenu": {
-      "homePage": "新写作",
+      "canvas": "画布",
       "news": "新特性",
       "explore": "探索",
       "threadLibrary": "会话",
@@ -1101,6 +1104,9 @@
         "successNotify": "保存成功！",
         "errorNotify": "保存失败！"
       }
+    },
+    "chatHistory": {
+      "title": "对话历史上下文"
     },
     "skillDisplay": {
       "skillManager": "技能管理",

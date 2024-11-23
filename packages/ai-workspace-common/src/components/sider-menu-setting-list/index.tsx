@@ -12,6 +12,7 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 // styles
 import './index.scss';
+import { AiOutlineTwitter } from 'react-icons/ai';
 
 export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
   const { t } = useTranslation();
@@ -82,6 +83,21 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
           <Menu.Item key="logout">
             <LuLogOut style={{ transform: 'translateY(2px)', marginRight: 8 }} />
             {t('loggedHomePage.siderMenu.logout')}
+          </Menu.Item>
+          <Menu.Item
+            key="getHelp"
+            onClick={() => {
+              window.open(`https://twitter.com/tuturetom`, '_blank');
+            }}
+          >
+            <AiOutlineTwitter
+              style={{
+                fontSize: 16,
+                transform: 'translateY(3px)',
+                marginRight: 8,
+              }}
+            />
+            {t('loggedHomePage.siderMenu.getHelp')}
           </Menu.Item>
         </Menu>
       </div>

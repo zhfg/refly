@@ -19,7 +19,6 @@ import {
   SearchLocale,
   useMultilingualSearchStoreShallow,
 } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
-import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 
 const TabPane = Tabs.TabPane;
@@ -50,7 +49,6 @@ export const SourceListModal = (props: SourceListModalProps) => {
     [currentUiLocale],
   );
 
-  // 移除不必要的状态订阅
   const { setResults, setIsSearching } = useMultilingualSearchStoreShallow((state) => ({
     setResults: state.setResults,
     setIsSearching: state.setIsSearching,

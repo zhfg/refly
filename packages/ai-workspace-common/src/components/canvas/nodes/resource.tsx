@@ -100,7 +100,7 @@ export const ResourceNode = ({ data, selected }: NodeProps<ResourceNode>) => {
               font-['PingFang_SC']
             "
           >
-            {data.entityId}
+            {data.title}
           </div>
 
           <div

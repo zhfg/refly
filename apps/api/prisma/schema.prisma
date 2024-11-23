@@ -158,6 +158,8 @@ model ActionResult {
   type           String             @map("type")
   /// UID
   uid            String             @default("") @map("uid")
+  /// Result title
+  title          String             @default("") @map("title")
   /// Result content
   content        String             @map("content")
   /// Action metadata

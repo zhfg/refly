@@ -17,6 +17,8 @@ import { RiAccountBoxLine } from "react-icons/ri"
 import { HiOutlineLanguage } from "react-icons/hi2"
 import { MdOutlineSubscriptions } from "react-icons/md"
 
+import PageTitle from "@/pages/page-title"
+
 const TabPane = Tabs.TabPane
 const iconStyle = { fontSize: 16, marginRight: 8 }
 
@@ -43,8 +45,8 @@ const Settings = () => {
           {t("productName")} | {t("tabMeta.settings.title")}
         </title>
       </Helmet>
-      <div className="settings-inner-container">
-        <div className="settings-title">{t("settings.title")}</div>
+      <PageTitle title={t("settings.title")} />
+      <div className="settings-inner-container pt-4">
         <Tabs
           activeTab={tab}
           tabPosition="left"

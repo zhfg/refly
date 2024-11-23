@@ -1,7 +1,9 @@
 import { Button } from 'antd';
 import { IconClose } from '@arco-design/web-react/icon';
-import { Mark } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
+import { getNodeIcon } from './utils/icon';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import cn from 'classnames';
 
 export const ContextItem = ({
   item,
@@ -13,34 +15,50 @@ export const ContextItem = ({
   canNotRemove,
 }: {
   canNotRemove?: boolean;
-  item: Mark;
+  item: IContextItem;
   isActive: boolean;
   isLimit?: boolean;
   disabled?: boolean;
-  onToggle: any;
-  onRemove?: any;
+  onToggle: (item: IContextItem) => void;
+  onRemove?: (item: IContextItem) => void;
 }) => {
   const { t } = useTranslation();
+  const { data } = item ?? {};
+  const icon = getNodeIcon(item?.type);
+
   return (
     <Button
-      className={`context-item ${isActive ? 'active' : isLimit ? 'limit' : disabled ? 'disabled' : ''}`}
-      onClick={() => onToggle(item.id)}
+      className={cn(
+        'max-w-[200px] h-6 px-1 flex items-center border border-gray-200 rounded transition-all duration-300',
+        {
+          'border-green-500 text-green-500': isActive,
+          'border-red-300 bg-red-50 text-red-500': isLimit,
+          'bg-gray-100 border-gray-200': disabled,
+          'border-dashed': item?.isPreview,
+        },
+      )}
+      onClick={() => onToggle?.(item)}
     >
-      <div className="item-content">
-        <span className="item-icon">{item.icon}</span>
-        <span className="item-title" title={item.title}>
-          {item.title}
-        </span>
-        <span className="item-type">
-          {item.isCurrentContext ? t('copilot.contextItem.current') : ''}
-          {item?.name}
+      <div className="h-[18px] flex items-center w-full text-xs">
+        <span className="flex items-center flex-shrink-0 mr-1">{icon}</span>
+        <span
+          className={cn('flex-1 whitespace-nowrap overflow-hidden text-ellipsis min-w-0', {
+            'text-gray-300': disabled,
+            'text-red-500': isLimit,
+          })}
+          title={data?.title ?? ''}
+        >
+          {data?.title}
         </span>
         {!canNotRemove && (
           <IconClose
-            className="item-close"
+            className={cn('flex-shrink-0 text-xs cursor-pointer', {
+              'text-gray-300': disabled,
+              'text-red-500': isLimit,
+            })}
             onClick={(e) => {
               e.stopPropagation();
-              onRemove && onRemove(item.id);
+              onRemove?.(item);
             }}
           />
         )}
