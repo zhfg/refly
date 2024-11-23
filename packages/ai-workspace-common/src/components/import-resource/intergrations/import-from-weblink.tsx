@@ -137,6 +137,7 @@ export const ImportFromWeblink = () => {
       addNode({
         type: 'resource',
         data: {
+          title: resource.title,
           entityId: resource.id,
         },
       });

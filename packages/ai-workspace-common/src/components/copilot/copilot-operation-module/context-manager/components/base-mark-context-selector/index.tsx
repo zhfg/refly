@@ -2,15 +2,15 @@ import React from 'react';
 import './index.scss';
 import { BaseSearchAndSelector } from '../base-search-and-selector';
 import classNames from 'classnames';
-import { Mark } from '@refly/common-types';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 interface CustomProps {
   showList?: boolean;
   onClickOutside?: () => void;
   onSearchValueChange?: (value: string) => void;
-  onSelect?: (item: Mark) => void;
-  selectedItems: Mark[];
+  onSelect?: (item: CanvasNode) => void;
+  selectedItems: CanvasNode[];
   onClose?: () => void;
   source: MessageIntentSource;
 }

@@ -918,17 +918,21 @@ export type ActionResult = {
    */
   canvasId?: string;
   /**
+   * Action result title
+   */
+  title?: string;
+  /**
    * Action type
    */
-  type: ActionType;
+  type?: ActionType;
   /**
    * Action metadata
    */
-  actionMeta: ActionMeta;
+  actionMeta?: ActionMeta;
   /**
    * Response content
    */
-  content: string;
+  content?: string;
   /**
    * Action result status
    */
@@ -2149,6 +2153,10 @@ export type InvokeSkillRequest = {
    * Skill invocation context
    */
   context?: SkillContext;
+  /**
+   * Skill result history
+   */
+  resultHistory?: Array<ActionResult>;
   /**
    * Skill template config
    */

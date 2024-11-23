@@ -38,8 +38,6 @@ export const useProcessContextItems = () => {
         return t('knowledgeBase.context.resource');
       case 'canvas':
         return t('knowledgeBase.context.canvas');
-      case 'project':
-        return t('knowledgeBase.context.project');
       case 'extensionWeblink':
         return t('knowledgeBase.context.extensionWeblink');
       case 'extensionWeblinkSelection':
@@ -92,14 +90,6 @@ export const useProcessContextItems = () => {
         };
       } else {
         return `${baseUrl}/resource/${mark.id}`;
-      }
-    }
-
-    if (mark.type === 'project') {
-      if (isWebRuntime) {
-        return () => jumpToProject({ projectId: mark.id });
-      } else {
-        return `${baseUrl}/knowledge-base?kbId=${mark.id}`;
       }
     }
   };

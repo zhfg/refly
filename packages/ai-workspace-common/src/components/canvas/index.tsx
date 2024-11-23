@@ -1,7 +1,5 @@
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from 'antd';
-import { ReactFlow, Background, Controls, MiniMap } from '@xyflow/react';
+import { ReactFlow, Background, Controls, MiniMap, ReactFlowProvider } from '@xyflow/react';
 import { nodeTypes, CanvasNode } from './nodes';
 import { CanvasToolbar } from './canvas-toolbar';
 import { TopToolbar } from './top-toolbar';
@@ -30,8 +28,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const handleClosePanel = () => {
     setSelectedNode(null);
   };
-
-  const navigate = useNavigate();
 
   const handleToolSelect = (tool: string) => {
     // Handle tool selection
@@ -91,6 +87,9 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             showZoom={true}
             showFitView={true}
             showInteractive={true}
+            fitViewOptions={{
+              padding: 10,
+            }}
           />
         </ReactFlow>
       </div>
@@ -109,7 +108,9 @@ export const Canvas = (props: { canvasId: string }) => {
 
   return (
     <CanvasProvider canvasId={canvasId}>
-      <Flow canvasId={canvasId} />
+      <ReactFlowProvider>
+        <Flow canvasId={canvasId} />
+      </ReactFlowProvider>
     </CanvasProvider>
   );
 };

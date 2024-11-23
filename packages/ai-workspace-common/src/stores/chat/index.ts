@@ -6,8 +6,6 @@ import type { ClientChatMessage, IRuntime, SessionItem } from '@refly/common-typ
 import { ModelInfo, SkillContext, SkillTemplateConfig, Source } from '@refly/openapi-schema';
 import { IntentResult } from '@refly-packages/ai-workspace-common/hooks/use-handle-ai-canvas';
 
-import { mockChatMessage, mockHumanMessage } from './mock-data';
-
 // types
 import type { CanvasEditConfig, InPlaceActionType } from '@refly/utils';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
@@ -15,15 +13,10 @@ import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/c
 export type ChatBehavior = 'askIntentMatch' | 'askFollowUp' | 'askNew';
 
 export interface MessageIntentContext {
-  isNewConversation: boolean;
   canvasEditConfig?: CanvasEditConfig;
   inPlaceActionType?: InPlaceActionType;
   canvasContext?: {
     canvasId?: string;
-  };
-  projectContext?: {
-    projectId: string;
-    docId?: string;
   };
   resourceContext?: {
     resourceId?: string; // may sendMessage from resource's copilot

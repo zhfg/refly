@@ -11,16 +11,12 @@ import { safeStringifyJSON } from '@refly-packages/utils';
 
 // simplify context entityId for better extraction
 export const preprocessContext = (context: IContext): IContext => {
-  const { resources, documents, contentList, projects } = context;
+  const { resources = [], documents = [], contentList = [] } = context;
 
   const preprocessedContext = {
     resources: resources.map((r, index) => ({ ...r, resource: { ...r.resource, resourceId: `resource-${index}` } })),
     documents: documents.map((c, index) => ({ ...c, document: { ...c.document, docId: `document-${index}` } })),
     contentList: contentList.map((c, index) => ({ ...c, metadata: { ...c.metadata, entityId: `content-${index}` } })),
-    projects: projects.map((c, index) => ({
-      ...c,
-      project: { ...c.project, projectId: `project-${index}` },
-    })),
   };
 
   return preprocessedContext;

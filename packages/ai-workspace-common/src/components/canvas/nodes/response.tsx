@@ -101,7 +101,7 @@ export const ResponseNode = ({ data, selected }: NodeProps<ResponseNode>) => {
               truncate
             "
           >
-            {data.entityId}
+            {data.title}
           </div>
 
           {/* Response Content Preview */}
