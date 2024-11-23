@@ -13,14 +13,21 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 export const ContextManager = (props: { source: MessageIntentSource }) => {
-  const { selectedContextItems, addContextItem, removeContextItem, clearContextItems, filterErrorInfo } =
-    useContextPanelStoreShallow((state) => ({
-      selectedContextItems: state.selectedContextItems,
-      addContextItem: state.addContextItem,
-      removeContextItem: state.removeContextItem,
-      clearContextItems: state.clearContextItems,
-      filterErrorInfo: state.filterErrorInfo,
-    }));
+  const {
+    selectedContextItems,
+    addContextItem,
+    removeContextItem,
+    removePreviewContextItem,
+    clearContextItems,
+    filterErrorInfo,
+  } = useContextPanelStoreShallow((state) => ({
+    selectedContextItems: state.selectedContextItems,
+    addContextItem: state.addContextItem,
+    removeContextItem: state.removeContextItem,
+    removePreviewContextItem: state.removePreviewContextItem,
+    clearContextItems: state.clearContextItems,
+    filterErrorInfo: state.filterErrorInfo,
+  }));
   const { selectedNode, setSelectedNode } = useCanvasControl();
 
   const handleToggleItem = (item: CanvasNode) => {
@@ -36,14 +43,11 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
       // Add the selected node as a preview item
       const item = selectedContextItems.find((item) => item.id === selectedNode.id);
       if (!item) {
+        removePreviewContextItem();
         addContextItem({ ...selectedNode, isPreview: true });
-
-        // Remove current preview item, since only one preview item is allowed
-        const previewItem = selectedContextItems.find((item) => item.isPreview);
-        if (previewItem) {
-          removeContextItem(previewItem.id);
-        }
       }
+    } else {
+      removePreviewContextItem();
     }
   }, [selectedNode]);
 

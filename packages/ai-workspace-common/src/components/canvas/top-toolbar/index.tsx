@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { FC } from 'react';
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
+import { BsLayoutWtf } from 'react-icons/bs';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
 interface TopToolbarProps {}
@@ -44,7 +45,10 @@ export const TopToolbar: FC<TopToolbarProps> = ({}) => {
         )}
         <Divider type="vertical" className="pr-[4px]" />
         <div className="text-sm font-bold text-gray-500">Canvas Name: xxxx</div>
-        <Button onClick={() => onLayout('LR')}>Layout</Button>
+        <Divider type="vertical" className="pr-[4px]" />
+        <Button type="text" icon={<BsLayoutWtf />} onClick={() => onLayout('LR')}>
+          Layout
+        </Button>
       </div>
 
       <div className="flex items-center gap-2">action buttons</div>

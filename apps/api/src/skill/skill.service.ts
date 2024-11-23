@@ -3,12 +3,8 @@ import { EventEmitter } from 'node:events';
 import pLimit from 'p-limit';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
-import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
-import {
-  Prisma,
-  SkillTrigger as SkillTriggerModel,
-  ChatMessage as ChatMessageModel,
-} from '@prisma/client';
+import { AIMessage, HumanMessage } from '@langchain/core/messages';
+import { Prisma, SkillTrigger as SkillTriggerModel } from '@prisma/client';
 import { Response } from 'express';
 import { AIMessageChunk, BaseMessage } from '@langchain/core/dist/messages';
 import {
@@ -34,6 +30,7 @@ import {
   User,
   Document,
   TokenUsageItem,
+  ActionResult,
 } from '@refly-packages/openapi-schema';
 import {
   BaseSkill,
@@ -89,26 +86,26 @@ import { CanvasService } from '@/canvas/canvas.service';
 import { canvasPO2DTO } from '@/canvas/canvas.dto';
 import { actionResultPO2DTO } from '@/action/action.dto';
 
-export function createLangchainMessage(message: ChatMessageModel): BaseMessage {
+export function createLangchainMessage(result: ActionResult): BaseMessage[] {
+  const query = result.invokeParam?.input?.query;
   const messageData = {
-    content: message.content,
+    content: result.content,
     additional_kwargs: {
-      logs: JSON.parse(message.logs),
-      skillMeta: JSON.parse(message.skillMeta),
-      structuredData: JSON.parse(message.structuredData),
-      type: message.type,
+      logs: result.logs,
+      skillMeta: result.actionMeta,
+      structuredData: result.structuredData,
+      type: result.type,
     },
   };
 
-  switch (message.type) {
-    case 'ai':
-      return new AIMessage(messageData);
-    case 'human':
-      return new HumanMessage(messageData);
-    case 'system':
-      return new SystemMessage(messageData);
+  switch (result.type) {
+    case 'skill':
+      return [new HumanMessage({ content: query }), new AIMessage(messageData)];
+    case 'tool':
+      // TODO: is it a good choice to represent tool result as an AI message?
+      return [new HumanMessage({ content: query }), new AIMessage(messageData)];
     default:
-      throw new Error(`invalid message source: ${message.type}`);
+      throw new Error(`invalid message source: ${result.type}`);
   }
 }
 
@@ -427,6 +424,7 @@ export class SkillService {
         resultId,
         uid,
         canvasId: param.canvasId,
+        title: param.input?.query,
         type: 'skill',
         status: 'executing',
         content: '',
@@ -441,12 +439,15 @@ export class SkillService {
       rawParam: JSON.stringify(param),
     };
     data.context = await this.populateSkillContext(user, data.context);
+    if (data.resultHistory?.length > 0) {
+      data.resultHistory = await this.populateSkillResultHistory(user, data.resultHistory);
+    }
 
     return data;
   }
 
   /**
-   * Populate skill context with actual projects, resources and canvases.
+   * Populate skill context with actual resources and documents.
    * These data can be used in skill invocation.
    */
   async populateSkillContext(user: User, context: SkillContext): Promise<SkillContext> {
@@ -502,6 +503,18 @@ export class SkillService {
     return context;
   }
 
+  async populateSkillResultHistory(user: User, resultHistory: ActionResult[]) {
+    const results = await this.prisma.actionResult.findMany({
+      where: { resultId: { in: resultHistory.map((r) => r.resultId) }, uid: user.uid },
+    });
+    const resultMap = new Map<string, ActionResult>();
+    results.forEach((r) => resultMap.set(r.resultId, actionResultPO2DTO(r)));
+
+    return resultHistory
+      .map((r) => resultMap.get(r.resultId))
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  }
+
   async sendInvokeSkillTask(user: User, param: InvokeSkillRequest) {
     const data = await this.skillInvokePreCheck(user, param);
     await this.skillQueue.add(CHANNEL_INVOKE_SKILL, data);
@@ -532,7 +545,7 @@ export class SkillService {
       eventListener?: (data: SkillEvent) => void;
     },
   ): Promise<SkillRunnableConfig> {
-    const { context, tplConfig, modelName, eventListener } = data;
+    const { context, tplConfig, modelName, resultHistory, eventListener } = data;
     const installedSkills: SkillMeta[] = (
       await this.prisma.skillInstance.findMany({
         where: { uid: user.uid, deletedAt: null },
@@ -556,6 +569,10 @@ export class SkillService {
       },
       user: pick(user, ['uid', 'uiLocale', 'outputLocale']),
     };
+
+    if (resultHistory?.length > 0) {
+      config.configurable.chatHistory = resultHistory.flatMap((r) => createLangchainMessage(r));
+    }
 
     if (eventListener) {
       const emitter = new EventEmitter<SkillEventMap>();

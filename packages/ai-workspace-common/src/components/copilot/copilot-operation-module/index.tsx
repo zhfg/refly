@@ -11,10 +11,14 @@ import { ContextManager } from './context-manager';
 import { ChatActions } from './chat-actions';
 import { SelectedSkillHeader } from './selected-skill-header';
 import { ConfigManager } from './config-manager';
+import { ChatHistory } from './chat-history';
 
 // stores
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import {
+  useContextPanelStore,
+  useContextPanelStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 import {
   useChatStore,
   MessageIntentContext,
@@ -59,7 +63,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
   const { canvasId } = useCanvasContext();
 
   const [form] = Form.useForm();
-  const { formErrors, setFormErrors } = useContextPanelStore((state) => ({
+  const { formErrors, setFormErrors } = useContextPanelStoreShallow((state) => ({
     formErrors: state.formErrors,
     setFormErrors: state.setFormErrors,
   }));
@@ -86,7 +90,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
 
     const { localSettings } = useUserStore.getState();
     const { newQAText, selectedModel } = useChatStore.getState();
-    const { selectedContextItems } = useContextPanelStore.getState();
+    const { selectedContextItems, selectedResultItems } = useContextPanelStore.getState();
 
     const resultId = genActionResultID();
     const param: InvokeSkillRequest = {
@@ -112,6 +116,9 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
             metadata: item.data?.metadata,
           })),
       },
+      resultHistory: selectedResultItems.map((item) => ({
+        resultId: item.resultId,
+      })),
       skillName: 'common_qna', // TODO: allow select skill
       locale: localSettings?.outputLocale,
       tplConfig: {}, // TODO: add tplConfig
@@ -181,6 +188,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       <div ref={ref} className="ai-copilot-operation-container">
         <div className="ai-copilot-operation-body">
           {/* <SkillDisplay source={source} /> */}
+          <ChatHistory />
           <div className="ai-copilot-chat-container">
             <div className="chat-input-container">
               <SelectedSkillHeader />

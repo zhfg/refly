@@ -12,7 +12,6 @@ import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useConversationStore } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { useResetState } from '@refly-packages/ai-workspace-common/hooks/use-reset-state';
 import { useKnowledgeBaseStore } from '../../stores/knowledge-base';
-
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';

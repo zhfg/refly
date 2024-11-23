@@ -1091,6 +1091,9 @@
         "errorNotify": "Save failed!"
       }
     },
+    "chatHistory": {
+      "title": "Chat History Context"
+    },
     "skillDisplay": {
       "skillManager": "Skill Manage",
       "manager": "Manage"

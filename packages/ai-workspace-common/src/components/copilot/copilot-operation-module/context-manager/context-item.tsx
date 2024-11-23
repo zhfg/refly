@@ -34,6 +34,7 @@ export const ContextItem = ({
           'border-green-500 text-green-500': isActive,
           'border-red-300 bg-red-50 text-red-500': isLimit,
           'bg-gray-100 border-gray-200': disabled,
+          'border-dashed': item?.isPreview,
         },
       )}
       onClick={() => onToggle?.(item)}
@@ -44,7 +45,6 @@ export const ContextItem = ({
           className={cn('flex-1 whitespace-nowrap overflow-hidden text-ellipsis min-w-0', {
             'text-gray-300': disabled,
             'text-red-500': isLimit,
-            italic: item?.isPreview,
           })}
           title={data?.title ?? ''}
         >

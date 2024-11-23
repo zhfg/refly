@@ -162,6 +162,10 @@ export const useInvokeAction = () => {
         type: 'document' as const,
         entityId: document.docId,
       })),
+      ...(payload.resultHistory ?? []).map((result) => ({
+        type: 'response' as const,
+        entityId: result.resultId,
+      })),
     ];
     addNode(
       {
@@ -173,8 +177,6 @@ export const useInvokeAction = () => {
       },
       connectTo,
     );
-
-    return;
 
     globalAbortControllerRef.current = new AbortController();
 

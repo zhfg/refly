@@ -1,5 +1,5 @@
 import { TreeProps } from '@arco-design/web-react';
-import { SearchDomain, SearchResult } from '@refly/openapi-schema';
+import { ActionResult, SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
@@ -66,21 +66,21 @@ export interface IContextItem extends CanvasNode {
   isCurrentContext?: boolean;
 }
 
+export interface IResultItem extends ActionResult {
+  isPreview?: boolean; // is preview mode
+}
+
 interface ContextPanelState {
   envContextInitMap: { resource: boolean; collection: boolean; note: boolean };
 
   contextPanelPopoverVisible: boolean;
   importPopoverVisible: boolean;
 
-  // context 选中内容
-  selectedResources: TreeProps['treeData'];
-  selectedCollections: TreeProps['treeData'];
-  selectedNotes: TreeProps['treeData'];
-  // extension only
-  selectedWeblinks: TreeProps['treeData'];
-
   // Canvas selected nodes
   selectedContextItems: IContextItem[];
+
+  // Canvas selected result items
+  selectedResultItems: IResultItem[];
 
   // context card 的处理
   nowSelectedContextDomain: SearchDomain;
@@ -145,8 +145,15 @@ interface ContextPanelState {
 
   addContextItem: (node: IContextItem) => void;
   removeContextItem: (id: string) => void;
+  removePreviewContextItem: () => void;
   clearContextItems: () => void;
   updateContextItem: (node: IContextItem) => void;
+
+  addResultItem: (node: IResultItem) => void;
+  removeResultItem: (id: string) => void;
+  removePreviewResultItem: () => void;
+  clearResultItems: () => void;
+  updateResultItem: (node: IResultItem) => void;
 }
 
 export const defaultSelectedTextCardState = {
@@ -176,11 +183,8 @@ export const defaultState = {
   nowSelectedContextDomain: 'resource' as SearchDomain,
   contextPanelPopoverVisible: false,
   importPopoverVisible: false,
-  selectedResources: [],
-  selectedCollections: [],
-  selectedNotes: [],
+  selectedResultItems: [],
   selectedContextItems: [],
-  selectedWeblinks: [],
   allSelectedIds: [],
   checkedKeys: [],
   expandedKeys: [],
@@ -244,13 +248,45 @@ export const useContextPanelStore = create<ContextPanelState>()(
     addContextItem: (node: CanvasNode) =>
       set((state) => ({ ...state, selectedContextItems: [...state.selectedContextItems, node] })),
     removeContextItem: (id: string) =>
-      set((state) => ({ ...state, selectedContextItems: state.selectedContextItems.filter((node) => node.id !== id) })),
+      set((state) => ({
+        ...state,
+        selectedContextItems: state.selectedContextItems.filter((node) => node.id !== id),
+      })),
+    removePreviewContextItem: () =>
+      set((state) => ({
+        ...state,
+        selectedContextItems: state.selectedContextItems.filter((node) => !node.isPreview),
+      })),
     clearContextItems: () => set((state) => ({ ...state, selectedContextItems: [] })),
     updateContextItem: (node: CanvasNode) =>
       set((state) => ({
         ...state,
         selectedContextItems: state.selectedContextItems.map((item) =>
           item.id === node.id ? { ...item, ...node } : item,
+        ),
+      })),
+
+    addResultItem: (node: IResultItem) =>
+      set((state) => ({
+        ...state,
+        selectedResultItems: [...state.selectedResultItems, node],
+      })),
+    removeResultItem: (id: string) =>
+      set((state) => ({
+        ...state,
+        selectedResultItems: state.selectedResultItems.filter((node) => node.resultId !== id),
+      })),
+    removePreviewResultItem: () =>
+      set((state) => ({
+        ...state,
+        selectedResultItems: state.selectedResultItems.filter((node) => !node.isPreview),
+      })),
+    clearResultItems: () => set((state) => ({ ...state, selectedResultItems: [] })),
+    updateResultItem: (node: IResultItem) =>
+      set((state) => ({
+        ...state,
+        selectedResultItems: state.selectedResultItems.map((item) =>
+          item.resultId === node.resultId ? { ...item, ...node } : item,
         ),
       })),
 

@@ -1105,6 +1105,9 @@
         "errorNotify": "保存失败！"
       }
     },
+    "chatHistory": {
+      "title": "对话历史上下文"
+    },
     "skillDisplay": {
       "skillManager": "技能管理",
       "manager": "管理"
