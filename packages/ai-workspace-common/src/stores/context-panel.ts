@@ -62,6 +62,7 @@ export const defaultSelectedTextCardDomainKeysExtension: SelectedTextDomain[] = 
 );
 
 export interface IContextItem extends CanvasNode {
+  isPreview?: boolean; // is preview mode
   isCurrentContext?: boolean;
 }
 
@@ -144,7 +145,7 @@ interface ContextPanelState {
 
   addContextItem: (node: IContextItem) => void;
   removeContextItem: (id: string) => void;
-  clearContextItem: () => void;
+  clearContextItems: () => void;
   updateContextItem: (node: IContextItem) => void;
 }
 
@@ -244,7 +245,7 @@ export const useContextPanelStore = create<ContextPanelState>()(
       set((state) => ({ ...state, selectedContextItems: [...state.selectedContextItems, node] })),
     removeContextItem: (id: string) =>
       set((state) => ({ ...state, selectedContextItems: state.selectedContextItems.filter((node) => node.id !== id) })),
-    clearContextItem: () => set((state) => ({ ...state, selectedContextItems: [] })),
+    clearContextItems: () => set((state) => ({ ...state, selectedContextItems: [] })),
     updateContextItem: (node: CanvasNode) =>
       set((state) => ({
         ...state,

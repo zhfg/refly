@@ -13,16 +13,13 @@ import classNames from 'classnames';
 
 import { useTranslation } from 'react-i18next';
 import { BaseMarkType, Mark } from '@refly/common-types';
-import { getNodeIcon, getTypeIcon } from '../../utils/icon';
+import { getNodeIcon } from '../../utils/icon';
 
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { CanvasNodeType } from '@refly/openapi-schema';
 
 interface CustomProps {
   showList?: boolean;
@@ -58,9 +55,9 @@ export const BaseSearchAndSelector = ({
   const [displayMode, setDisplayMode] = useState<'list' | 'search'>('list');
 
   const contextPanelStore = useContextPanelStoreShallow((state) => ({
+    clearContextItems: state.clearContextItems,
     resetSelectedTextCardState: state.resetSelectedTextCardState,
   }));
-  const { handleReset } = useSelectedMark();
   // hooks
 
   const isHome = activeTab === 'all';
@@ -91,16 +88,18 @@ export const BaseSearchAndSelector = ({
   }, []);
 
   const { nodes } = useCanvasControl();
-  console.log('nodes', nodes);
-  console.log('selectedItems', selectedItems);
+
+  // Only resource and document nodes are allowed to be selected
+  const targetNodes = nodes.filter((item) => item.type === 'resource' || item.type === 'document');
   const sortedNodes: CanvasNode[] = [
-    ...((selectedItems || []).map((item) => ({ ...item, isSelected: true })) || []),
-    ...(nodes?.filter((item) => !selectedItems.some((selected) => selected.id === item.id)) || []),
+    ...(selectedItems || []),
+    ...(targetNodes?.filter((item) => !selectedItems.some((selected) => selected.id === item.id)) || []),
   ];
   const sortedRenderData: RenderItem[] = sortedNodes.map((item) => ({
     data: item,
     type: item.type,
     icon: getNodeIcon(item.type, { width: 12, height: 12 }),
+    isSelected: selectedItems.some((selected) => selected.id === item.id),
     onItemClick: (item: CanvasNode) => {
       onSelect(item);
     },
@@ -173,7 +172,7 @@ export const BaseSearchAndSelector = ({
               icon={<IconRefresh />}
               onClick={() => {
                 contextPanelStore.resetSelectedTextCardState();
-                handleReset();
+                contextPanelStore.clearContextItems();
               }}
             >
               {t('knowledgeBase.context.clearContext')}

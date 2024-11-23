@@ -2,11 +2,7 @@ import { useEffect } from 'react';
 
 import './index.scss';
 import { Item } from './item';
-
-// request
 import { RenderItem } from './type';
-
-import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 
 export function Home({
@@ -21,8 +17,6 @@ export function Home({
   setValue: (val: string) => void;
   showItemDetail: boolean;
 }) {
-  const { t } = useTranslation();
-
   useEffect(() => {
     setValue('refly-built-in-ask-ai');
   }, []);
