@@ -10,7 +10,7 @@ import { CanvasNodeData, getNodeDefaultMetadata } from '@refly-packages/ai-works
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { EDGE_STYLES } from '../components/canvas/constants';
 
-const getLayoutedElements = (nodes: CanvasNode[], edges: Edge[], options: { direction: 'TB' | 'LR' }) => {
+const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: { direction: 'TB' | 'LR' }) => {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
   g.setGraph({ rankdir: options.direction });
 

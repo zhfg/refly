@@ -8,6 +8,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { CustomHandle } from './custom-handle';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { EDGE_STYLES } from '../constants';
+import { getNodeCommonStyles } from './index';
 
 type ResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'response'>;
 
@@ -121,12 +122,7 @@ export const ResponseNode = ({ data, selected, id }: NodeProps<ResponseNode>) =>
         className={`
           w-[170px]
           h-[186px]
-          bg-white 
-          rounded-xl
-          border border-[#EAECF0]
-          shadow-[0px_1px_2px_0px_rgba(16,24,60,0.05)]
-          p-3
-          ${selected ? 'ring-2 ring-blue-500' : ''}
+          ${getNodeCommonStyles({ selected, isHovered })}
         `}
       >
         <CustomHandle
@@ -134,12 +130,14 @@ export const ResponseNode = ({ data, selected, id }: NodeProps<ResponseNode>) =>
           position={Position.Left}
           isConnected={isTargetConnected}
           isNodeHovered={isHovered}
+          nodeType="response"
         />
         <CustomHandle
           type="source"
           position={Position.Right}
           isConnected={isSourceConnected}
           isNodeHovered={isHovered}
+          nodeType="response"
         />
 
         <div className="flex flex-col gap-2">

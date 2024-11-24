@@ -30,7 +30,7 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
 
   const provider = providerRef.current;
   const ydoc = provider.document;
-  const yNodes = ydoc.getArray<CanvasNode>('nodes');
+  const yNodes = ydoc.getArray<CanvasNode<any>>('nodes');
   const yEdges = ydoc.getArray<Edge>('edges');
 
   useEffect(() => {

@@ -6,9 +6,18 @@ interface CustomHandleProps {
   position: Position;
   isConnected: boolean;
   isNodeHovered: boolean;
+  nodeType: string;
 }
 
-export const CustomHandle = ({ type, position, isConnected, isNodeHovered }: CustomHandleProps) => {
+const canAcceptConnection = (nodeType: string, isConnected: boolean) => {
+  return ['tool', 'skill'].includes(nodeType) && !isConnected;
+};
+
+const canShowPlusHandle = (nodeType: string) => {
+  return ['document', 'resource', 'response'].includes(nodeType);
+};
+
+export const CustomHandle = ({ type, position, isConnected, isNodeHovered, nodeType }: CustomHandleProps) => {
   const baseHandleStyle = {
     width: '2px',
     height: '8px',
@@ -59,37 +68,52 @@ export const CustomHandle = ({ type, position, isConnected, isNodeHovered }: Cus
       `}
     >
       <div className="absolute top-1/2 -translate-y-1/2">
-        {/* 默认 handle */}
-        <Handle type={type} position={position} style={baseHandleStyle} />
+        {/* Left handle - only show if position is left and can accept connections */}
+        {position === Position.Left && (
+          <Handle type={type} position={position} style={baseHandleStyle} isConnectable={false} />
+        )}
 
-        {/* Plus 按钮 handle */}
+        {/* Right handle - only show if position is right */}
         {position === Position.Right && (
-          <Handle
-            type={type}
-            position={position}
-            style={plusHandleStyle}
-            className="
-              group
-              hover:![background-color:#007A75]
-              translate-y-[-50%]
-              hover:![transform:translate(0,-50%)_scale(1.5)]
-              transition-all
-              duration-200
-              [transform-origin:center_center]!important
-            "
-          >
-            <Plus
-              className="
-                w-3 
-                h-3 
-                text-white 
-                pointer-events-none
-                transition-transform
-                duration-200
-              "
-              strokeWidth={2.5}
+          <>
+            <Handle
+              type={type}
+              position={position}
+              style={baseHandleStyle}
+              isConnectable={canAcceptConnection(nodeType, isConnected)}
             />
-          </Handle>
+
+            {/* Plus button handle - only show for document/resource/response nodes */}
+            {canShowPlusHandle(nodeType) && (
+              <Handle
+                type={type}
+                position={position}
+                style={plusHandleStyle}
+                isConnectable={true}
+                className="
+                  group
+                  hover:![background-color:#007A75]
+                  translate-y-[-50%]
+                  hover:![transform:translate(0,-50%)_scale(1.5)]
+                  transition-all
+                  duration-200
+                  [transform-origin:center_center]!important
+                "
+              >
+                <Plus
+                  className="
+                    w-3 
+                    h-3 
+                    text-white 
+                    pointer-events-none
+                    transition-transform
+                    duration-200
+                  "
+                  strokeWidth={2.5}
+                />
+              </Handle>
+            )}
+          </>
         )}
       </div>
     </div>

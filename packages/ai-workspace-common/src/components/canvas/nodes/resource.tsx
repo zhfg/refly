@@ -6,6 +6,7 @@ import { CustomHandle } from './custom-handle';
 import { useState, useCallback } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { EDGE_STYLES } from '../constants';
+import { getNodeCommonStyles } from './index';
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
@@ -90,12 +91,7 @@ export const ResourceNode = ({ data, selected, id }: NodeProps<ResourceNode>) =>
         className={`
           w-[170px]
           h-[186px]
-          bg-white 
-          rounded-xl
-          border border-[#EAECF0]
-          shadow-[0px_1px_2px_0px_rgba(16,24,60,0.05)]
-          p-3
-          ${selected ? 'ring-2 ring-blue-500' : ''}
+          ${getNodeCommonStyles({ selected, isHovered })}
         `}
       >
         <CustomHandle
@@ -103,12 +99,14 @@ export const ResourceNode = ({ data, selected, id }: NodeProps<ResourceNode>) =>
           position={Position.Left}
           isConnected={isTargetConnected}
           isNodeHovered={isHovered}
+          nodeType="resource"
         />
         <CustomHandle
           type="source"
           position={Position.Right}
           isConnected={isSourceConnected}
           isNodeHovered={isHovered}
+          nodeType="resource"
         />
 
         <div className="flex flex-col gap-2">
