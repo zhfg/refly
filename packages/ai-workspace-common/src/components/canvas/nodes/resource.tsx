@@ -164,7 +164,7 @@ export const ResourceNode = ({ data, selected, id }: NodeProps<ResourceNode>) =>
               text-ellipsis
             "
           >
-            这是资源的描述文本，如果内容过长会自动截断并显示省略号...
+            {data?.metadata?.contentPreview ?? 'No content preview available...'}
           </div>
         </div>
       </div>

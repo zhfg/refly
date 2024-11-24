@@ -18,6 +18,7 @@ export type DocumentNodeMeta = {
 
 export type ResourceNodeMeta = {
   resourceType: string;
+  contentPreview: string;
 };
 
 export type SkillNodeMeta = {
