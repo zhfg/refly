@@ -5,7 +5,8 @@ import { DocumentNode } from './document';
 import { ResourceNode } from './resource';
 import { SkillNode } from './skill';
 import { ToolNode } from './tool';
-import { ResponseNode } from './response';
+import { SkillResponseNode } from './skill-response';
+import { ToolResponseNode } from './tool-response';
 import {
   NodeMetadataMap,
   CanvasNodeData,
@@ -22,15 +23,16 @@ export * from './document';
 export * from './resource';
 export * from './skill';
 export * from './tool';
-export * from './response';
-
+export * from './skill-response';
+export * from './tool-response';
 // Node types mapping
 export const nodeTypes: NodeTypes = {
   document: DocumentNode,
   resource: ResourceNode,
   skill: SkillNode,
   tool: ToolNode,
-  response: ResponseNode,
+  skillResponse: SkillResponseNode,
+  toolResponse: ToolResponseNode,
 };
 
 // Helper function to prepare node data
@@ -86,9 +88,17 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
         lastUsed: null,
       } as ToolNodeMeta;
 
-    case 'response':
+    case 'skillResponse':
       return {
-        modelName: 'AI Response',
+        modelName: 'Skill Response',
+        timestamp: new Date().toISOString(),
+        status: 'pending',
+        executionTime: null,
+      } as ResponseNodeMeta;
+
+    case 'toolResponse':
+      return {
+        modelName: 'Tool Response',
         timestamp: new Date().toISOString(),
         status: 'pending',
         executionTime: null,

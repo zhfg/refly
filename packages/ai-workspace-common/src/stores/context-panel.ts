@@ -61,7 +61,7 @@ export const defaultSelectedTextCardDomainKeysExtension: SelectedTextDomain[] = 
   (item) => item.key as SelectedTextDomain,
 );
 
-export interface IContextItem extends CanvasNode {
+export interface IContextItem extends CanvasNode<any> {
   isPreview?: boolean; // is preview mode
   isCurrentContext?: boolean;
 }

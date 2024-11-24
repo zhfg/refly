@@ -1,7 +1,7 @@
-import { Button } from 'antd';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasNode } from '../nodes/types';
-import { ResponseNodePreview } from './response';
+import { SkillResponseNodePreview } from './skill-response';
+import { ToolResponseNodePreview } from './tool-response';
 import { ResourceNodePreview } from './resource';
 import { SkillNodePreview } from './skill';
 import { ToolNodePreview } from './tool';
@@ -30,8 +30,10 @@ export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>;
         return <SkillNodePreview />;
       case 'tool':
         return <ToolNodePreview />;
-      case 'response':
-        return <ResponseNodePreview resultId={node.data.entityId} />;
+      case 'skillResponse':
+        return <SkillResponseNodePreview resultId={node.data.entityId} />;
+      case 'toolResponse':
+        return <ToolResponseNodePreview resultId={node.data.entityId} />;
       default:
         return null;
     }

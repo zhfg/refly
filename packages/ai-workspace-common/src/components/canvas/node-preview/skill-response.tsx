@@ -4,13 +4,13 @@ import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { HumanMessage, AssistantMessage } from '../../copilot/message';
 import { ChatMessage } from '@refly/openapi-schema';
-import './response.scss';
+import './skill-response.scss';
 
-interface ResponseNodePreviewProps {
+interface SkillResponseNodePreviewProps {
   resultId: string;
 }
 
-export const ResponseNodePreview = ({ resultId }: ResponseNodePreviewProps) => {
+export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewProps) => {
   const userProfile = useUserStoreShallow((state) => state.userProfile);
   const { result, updateActionResult } = useActionResultStoreShallow((state) => ({
     result: state.resultMap[resultId],

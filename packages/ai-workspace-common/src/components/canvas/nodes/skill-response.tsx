@@ -10,9 +10,9 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { EDGE_STYLES } from '../constants';
 import { getNodeCommonStyles } from './index';
 
-type ResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'response'>;
+type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
-export const ResponseNode = ({ data, selected, id }: NodeProps<ResponseNode>) => {
+export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillResponseNode>) => {
   const [isHovered, setIsHovered] = useState(false);
   const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();

@@ -163,13 +163,13 @@ export const useInvokeAction = () => {
         entityId: document.docId,
       })),
       ...(payload.resultHistory ?? []).map((result) => ({
-        type: 'response' as const,
+        type: 'skillResponse' as const,
         entityId: result.resultId,
       })),
     ];
     addNode(
       {
-        type: 'response',
+        type: 'skillResponse',
         data: {
           title: payload.input.query,
           entityId: resultId,
