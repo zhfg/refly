@@ -9,7 +9,7 @@ import { DocumentNodePreview } from './document';
 import { NodePreviewHeader } from './node-preview-header';
 import { useState } from 'react';
 
-export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode; handleClosePanel: () => void }) => {
+export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>; handleClosePanel: () => void }) => {
   const [isPinned, setIsPinned] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
 

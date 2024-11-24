@@ -1,21 +1,66 @@
-import { Handle, NodeProps, Position } from '@xyflow/react';
+import { Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { CanvasNodeData, DocumentNodeMeta } from './types';
 import { Node } from '@xyflow/react';
-import { FileText } from 'lucide-react';
-import { MoreHorizontal } from 'lucide-react';
+import { FileText, MoreHorizontal } from 'lucide-react';
+import { CustomHandle } from './custom-handle';
+import { useState, useCallback } from 'react';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { EDGE_STYLES } from '../constants';
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
-export const DocumentNode = ({ data, selected }: NodeProps<DocumentNode>) => {
+export const DocumentNode = ({ data, selected, id }: NodeProps<DocumentNode>) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const { edges, onEdgesChange } = useCanvasControl();
+  const { setEdges } = useReactFlow();
+
+  // Check if node has any connections
+  const isTargetConnected = edges?.some((edge) => edge.target === id);
+  const isSourceConnected = edges?.some((edge) => edge.source === id);
+
+  console.log('isHovered', data);
+
+  // Handle node hover events
+  const handleMouseEnter = useCallback(() => {
+    console.log('handleMouseEnter', edges, id);
+    setIsHovered(true);
+    // Update connected edges with hover styles
+    setEdges((eds) =>
+      eds.map((edge) => {
+        if (edge.source === id || edge.target === id) {
+          return {
+            ...edge,
+            style: EDGE_STYLES.hover,
+          };
+        }
+        return edge;
+      }),
+    );
+  }, [id, setEdges]);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    // Restore default edge styles
+    setEdges((eds) =>
+      eds.map((edge) => {
+        if (edge.source === id || edge.target === id) {
+          return {
+            ...edge,
+            style: EDGE_STYLES.default,
+          };
+        }
+        return edge;
+      }),
+    );
+  }, [id, setEdges]);
+
   return (
-    <div className="relative group">
+    <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       {/* Action Button */}
       <div
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
-
-          console.log('click');
         }}
         className="
           absolute 
@@ -57,8 +102,18 @@ export const DocumentNode = ({ data, selected }: NodeProps<DocumentNode>) => {
           ${selected ? 'ring-2 ring-blue-500' : ''}
         `}
       >
-        <Handle type="target" position={Position.Left} className="w-3 h-3 -ml-1.5" />
-        <Handle type="source" position={Position.Right} className="w-3 h-3 -mr-1.5" />
+        <CustomHandle
+          type="target"
+          position={Position.Left}
+          isConnected={isTargetConnected}
+          isNodeHovered={isHovered}
+        />
+        <CustomHandle
+          type="source"
+          position={Position.Right}
+          isConnected={isSourceConnected}
+          isNodeHovered={isHovered}
+        />
 
         <div className="flex flex-col gap-2">
           {/* Header with Icon and Type */}

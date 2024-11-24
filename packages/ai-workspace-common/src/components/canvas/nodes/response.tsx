@@ -1,15 +1,21 @@
-import { Handle, NodeProps, Position } from '@xyflow/react';
+import { Position, NodeProps, useEdges, useReactFlow } from '@xyflow/react';
 import { CanvasNodeData, ResponseNodeMeta } from './types';
 import { Node } from '@xyflow/react';
 import { MessageSquare, MoreHorizontal } from 'lucide-react';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
-import { useEffect } from 'react';
-import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
+import { useEffect, useState, useCallback } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { CustomHandle } from './custom-handle';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { EDGE_STYLES } from '../constants';
 
 type ResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'response'>;
 
-export const ResponseNode = ({ data, selected }: NodeProps<ResponseNode>) => {
+export const ResponseNode = ({ data, selected, id }: NodeProps<ResponseNode>) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const { edges } = useCanvasControl();
+  const { setEdges } = useReactFlow();
+
   // Get result from store
   const { result, updateActionResult } = useActionResultStoreShallow((state) => ({
     result: state.resultMap[data.entityId],
@@ -40,8 +46,43 @@ export const ResponseNode = ({ data, selected }: NodeProps<ResponseNode>) => {
   const content = result?.content ?? 'Loading response...';
   const modelName = result?.actionMeta?.name ?? 'AI Assistant';
 
+  // Check if node has any connections
+  const isTargetConnected = edges?.some((edge) => edge.target === id);
+  const isSourceConnected = edges?.some((edge) => edge.source === id);
+
+  // Handle node hover events
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+    setEdges((eds) =>
+      eds.map((edge) => {
+        if (edge.source === id || edge.target === id) {
+          return {
+            ...edge,
+            style: EDGE_STYLES.hover,
+          };
+        }
+        return edge;
+      }),
+    );
+  }, [id, setEdges]);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    setEdges((eds) =>
+      eds.map((edge) => {
+        if (edge.source === id || edge.target === id) {
+          return {
+            ...edge,
+            style: EDGE_STYLES.default,
+          };
+        }
+        return edge;
+      }),
+    );
+  }, [id, setEdges]);
+
   return (
-    <div className="relative group">
+    <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       {/* Action Button */}
       <div
         onClick={(e) => {
@@ -88,8 +129,18 @@ export const ResponseNode = ({ data, selected }: NodeProps<ResponseNode>) => {
           ${selected ? 'ring-2 ring-blue-500' : ''}
         `}
       >
-        <Handle type="target" position={Position.Left} className="w-3 h-3 -ml-1.5" />
-        <Handle type="source" position={Position.Right} className="w-3 h-3 -mr-1.5" />
+        <CustomHandle
+          type="target"
+          position={Position.Left}
+          isConnected={isTargetConnected}
+          isNodeHovered={isHovered}
+        />
+        <CustomHandle
+          type="source"
+          position={Position.Right}
+          isConnected={isSourceConnected}
+          isNodeHovered={isHovered}
+        />
 
         <div className="flex flex-col gap-2">
           {/* Header with Icon and Type */}

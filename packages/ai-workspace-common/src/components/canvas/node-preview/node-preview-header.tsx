@@ -27,7 +27,7 @@ const NODE_COLORS: Record<CanvasNodeType, string> = {
 };
 
 // Get icon component based on node type and metadata
-const getNodeIcon = (node: CanvasNode) => {
+const getNodeIcon = (node: CanvasNode<any>) => {
   switch (node.type) {
     case 'document':
       return FileText;
@@ -55,7 +55,7 @@ const getNodeIcon = (node: CanvasNode) => {
 };
 
 // Get node title based on node type and metadata
-const getNodeTitle = (node: CanvasNode) => {
+const getNodeTitle = (node: CanvasNode<any>) => {
   switch (node.type) {
     case 'document':
       return 'Document';
@@ -93,7 +93,7 @@ const getNodeTitle = (node: CanvasNode) => {
 };
 
 interface NodePreviewHeaderProps {
-  node: CanvasNode;
+  node: CanvasNode<any>;
   onClose: () => void;
   onPin?: () => void;
   onMaximize?: () => void;

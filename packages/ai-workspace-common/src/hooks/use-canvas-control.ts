@@ -8,6 +8,7 @@ import { CanvasNode, prepareNodeData } from '@refly-packages/ai-workspace-common
 import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CanvasNodeData, getNodeDefaultMetadata } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { EDGE_STYLES } from '../components/canvas/constants';
 
 const getLayoutedElements = (nodes: CanvasNode[], edges: Edge[], options: { direction: 'TB' | 'LR' }) => {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -67,7 +68,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   };
 
   const setSelectedNode = useCallback(
-    (node: CanvasNode) => {
+    (node: CanvasNode<any>) => {
       setSelectedNodeRaw(canvasId, node);
     },
     [setSelectedNodeRaw, canvasId],
@@ -127,7 +128,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   );
 
   const onNodesChange = useCallback(
-    (changes: NodeChange<CanvasNode>[]) => {
+    (changes: NodeChange<CanvasNode<any>>[]) => {
       ydoc.transact(() => {
         const updatedNodes = applyNodeChanges(changes, yNodes.toJSON());
         yNodes.delete(0, yNodes.length);
@@ -160,7 +161,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
           ...params,
           id: `edge-${params.source}-${params.target}`,
           animated: false,
-          style: { stroke: '#666' },
+          style: EDGE_STYLES.default,
         };
         yEdges?.push([newEdge]);
       });
@@ -168,7 +169,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     [ydoc, yEdges],
   );
 
-  const addNode = (node: { type: CanvasNodeType; data: CanvasNodeData }, connectTo?: CanvasNodeFilter[]) => {
+  const addNode = (node: { type: CanvasNodeType; data: CanvasNodeData<any> }, connectTo?: CanvasNodeFilter[]) => {
     const { nodes } = useCanvasStore.getState().data[canvasId];
 
     if (!node?.type || !node?.data) {
@@ -214,7 +215,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
               id: `edge-${targetNode.id}-${newNode.id}`,
               source: targetNode.id,
               target: newNode.id,
-              style: { stroke: '#ccc' },
+              style: EDGE_STYLES.default,
             });
           }
         });

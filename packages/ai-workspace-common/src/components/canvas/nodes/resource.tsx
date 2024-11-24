@@ -1,15 +1,57 @@
-import { Handle, NodeProps, Position } from '@xyflow/react';
+import { Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { CanvasNodeData, ResourceNodeMeta } from './types';
 import { Node } from '@xyflow/react';
 import { FileText, Link2, MoreHorizontal } from 'lucide-react';
+import { CustomHandle } from './custom-handle';
+import { useState, useCallback } from 'react';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { EDGE_STYLES } from '../constants';
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
-export const ResourceNode = ({ data, selected }: NodeProps<ResourceNode>) => {
+export const ResourceNode = ({ data, selected, id }: NodeProps<ResourceNode>) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const { edges } = useCanvasControl();
+  const { setEdges } = useReactFlow();
   const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? Link2 : FileText;
 
+  // Check if node has any connections
+  const isTargetConnected = edges?.some((edge) => edge.target === id);
+  const isSourceConnected = edges?.some((edge) => edge.source === id);
+
+  // Handle node hover events
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+    setEdges((eds) =>
+      eds.map((edge) => {
+        if (edge.source === id || edge.target === id) {
+          return {
+            ...edge,
+            style: EDGE_STYLES.hover,
+          };
+        }
+        return edge;
+      }),
+    );
+  }, [id, setEdges]);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    setEdges((eds) =>
+      eds.map((edge) => {
+        if (edge.source === id || edge.target === id) {
+          return {
+            ...edge,
+            style: EDGE_STYLES.default,
+          };
+        }
+        return edge;
+      }),
+    );
+  }, [id, setEdges]);
+
   return (
-    <div className="relative group">
+    <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <div
         onClick={(e) => {
           e.stopPropagation();
@@ -56,8 +98,18 @@ export const ResourceNode = ({ data, selected }: NodeProps<ResourceNode>) => {
           ${selected ? 'ring-2 ring-blue-500' : ''}
         `}
       >
-        <Handle type="target" position={Position.Left} className="w-3 h-3 -ml-1.5" />
-        <Handle type="source" position={Position.Right} className="w-3 h-3 -mr-1.5" />
+        <CustomHandle
+          type="target"
+          position={Position.Left}
+          isConnected={isTargetConnected}
+          isNodeHovered={isHovered}
+        />
+        <CustomHandle
+          type="source"
+          position={Position.Right}
+          isConnected={isSourceConnected}
+          isNodeHovered={isHovered}
+        />
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
