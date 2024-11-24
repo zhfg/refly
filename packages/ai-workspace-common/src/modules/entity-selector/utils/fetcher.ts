@@ -51,4 +51,34 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
     }));
     return { success: res?.data?.success, data };
   },
+  tool: async (queryPayload) => {
+    // const res = await getClient().listTools({
+    //   query: queryPayload,
+    // });
+    const res = {
+      data: {
+        success: true,
+        data: [
+          {
+            toolId: 'webSearch',
+            displayName: 'Web Search',
+          },
+          {
+            toolId: 'librarySearch',
+            displayName: 'Library Search',
+          },
+          {
+            toolId: 'multilingualSearch',
+            displayName: 'Multilingual Search',
+          },
+        ],
+      },
+    };
+    const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
+      id: item?.toolId,
+      title: item?.displayName,
+      domain: 'tool',
+    }));
+    return { success: res?.data?.success, data };
+  },
 };

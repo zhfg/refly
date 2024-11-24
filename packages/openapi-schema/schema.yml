@@ -4333,6 +4333,7 @@ components:
         - document
         - canvas
         - skill
+        - tool
     SearchMode:
       type: string
       enum:

@@ -2563,7 +2563,7 @@ export type SearchOptions = {
   enableReranker?: boolean;
 };
 
-export type SearchDomain = 'resource' | 'document' | 'canvas' | 'skill';
+export type SearchDomain = 'resource' | 'document' | 'canvas' | 'skill' | 'tool';
 
 export type SearchMode = 'keyword' | 'vector' | 'hybrid';
 

@@ -2,8 +2,8 @@ import { Button, Popover } from 'antd';
 import { FaArrowPointer } from 'react-icons/fa6';
 import { RiUploadCloud2Line } from 'react-icons/ri';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
-import { HiOutlineSquare2Stack } from 'react-icons/hi2';
 import { HiOutlineDocumentText } from 'react-icons/hi2';
+import { Sparkles, Wrench } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { FC } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
@@ -47,8 +47,8 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     { icon: FaArrowPointer, value: 'changeMode', type: 'button', domain: 'changeMode' },
     { icon: RiUploadCloud2Line, value: 'importResource', type: 'button', domain: 'resource' },
     { icon: HiOutlineSquare3Stack3D, value: 'addResource', type: 'popover', domain: 'resource' },
-    { icon: HiOutlineSquare2Stack, value: 'addSkill', type: 'popover', domain: 'skill' },
-    // { icon: HiOutlineWrenchScrewdriver, value: 'addTool', type: 'popover', domain: 'tool' },
+    { icon: Sparkles, value: 'addSkill', type: 'popover', domain: 'skill' },
+    { icon: Wrench, value: 'addTool', type: 'popover', domain: 'tool' },
     { icon: HiOutlineDocumentText, value: 'addDocument', type: 'popover', domain: 'document' },
   ];
 
