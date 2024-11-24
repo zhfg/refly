@@ -9,6 +9,7 @@ import { IconResource } from '@refly-packages/ai-workspace-common/components/com
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 import throttle from 'lodash.throttle';
 import { IconCheck } from '@arco-design/web-react/icon';
+import { FileText, Link2, MessageSquare, Sparkles, Wrench, Cpu, Code2, Globe } from 'lucide-react';
 
 interface SearchListProps {
   domain: SearchDomain;
@@ -20,6 +21,41 @@ interface SearchListProps {
   trigger?: 'click' | 'hover';
   mode?: 'multiple' | 'single';
 }
+
+// Define domain colors similar to NODE_COLORS
+const DOMAIN_COLORS: Record<SearchDomain, string> = {
+  document: '#00968F',
+  resource: '#17B26A',
+  skill: '#6172F3',
+  tool: '#2E90FA',
+  canvas: '#00968F',
+};
+
+// Get icon component based on domain and metadata
+const getDomainIcon = (domain: SearchDomain, metadata?: any) => {
+  switch (domain) {
+    case 'document':
+      return FileText;
+    case 'resource':
+      return metadata?.resourceType === 'weblink' ? Link2 : FileText;
+    case 'skill':
+      switch (metadata?.skillType) {
+        case 'prompt':
+        case 'prompt-struct':
+          return Cpu;
+        case 'code':
+          return Code2;
+        case 'http':
+          return Globe;
+        default:
+          return Sparkles;
+      }
+    case 'tool':
+      return Wrench;
+    default:
+      return FileText;
+  }
+};
 
 export const SearchList = (props: SearchListProps) => {
   const { t } = useTranslation();
@@ -89,6 +125,17 @@ export const SearchList = (props: SearchListProps) => {
     setOpen(false);
   };
 
+  const renderItemIcon = (option: ContextItem) => {
+    const IconComponent = getDomainIcon(domain as SearchDomain, option.metadata);
+    const backgroundColor = DOMAIN_COLORS[domain as SearchDomain];
+
+    return (
+      <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor }}>
+        <IconComponent className="w-3 h-3 text-white" />
+      </div>
+    );
+  };
+
   useEffect(() => {
     if (open) {
       loadMore();
@@ -113,15 +160,15 @@ export const SearchList = (props: SearchListProps) => {
             {sortedItems?.map((option) => (
               <div
                 key={option.id}
-                className={`flex items-center gap-2 p-1 cursor-pointer hover:bg-gray-100 ${option.isSelected ? 'text-[#00968F]' : ''}`}
+                className={`flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-100 ${
+                  option.isSelected ? 'text-[#00968F]' : ''
+                }`}
                 onClick={() => handleItemClick(option)}
               >
-                <div className="flex-shrink-0">
-                  <IconResource className="flex justify-center items-center w-4 h-4" />
-                </div>
-                {option.title}
+                {renderItemIcon(option)}
+                <span className="flex-grow truncate">{option.title}</span>
                 {mode === 'multiple' && option.isSelected && (
-                  <div className="ml-auto">
+                  <div className="flex-shrink-0">
                     <IconCheck className="text-[#00968F] w-4 h-4" />
                   </div>
                 )}
