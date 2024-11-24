@@ -8,6 +8,7 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 import throttle from 'lodash.throttle';
+import { IconCheck } from '@arco-design/web-react/icon';
 
 interface SearchListProps {
   domain: SearchDomain;
@@ -15,11 +16,14 @@ interface SearchListProps {
   defaultValue?: any;
   children?: React.ReactNode;
   handleConfirm?: (selectedItems: ContextItem[]) => void;
+  className?: string;
+  trigger?: 'click' | 'hover';
+  mode?: 'multiple' | 'single';
 }
 
 export const SearchList = (props: SearchListProps) => {
   const { t } = useTranslation();
-  const { domain, fetchData, defaultValue, children, handleConfirm, ...selectProps } = props;
+  const { domain, fetchData, defaultValue, children, handleConfirm, mode = 'multiple', ...selectProps } = props;
 
   const { loadMore, dataList, setDataList, isRequesting, handleValueChange, resetState, hasMore } =
     useFetchOrSearchList({
@@ -61,14 +65,19 @@ export const SearchList = (props: SearchListProps) => {
   };
 
   const handleItemClick = (item: ContextItem) => {
-    setSelectedItems((prev) => {
-      const isSelected = prev.some((selected) => selected.id === item.id);
-      if (isSelected) {
-        return prev.filter((selected) => selected.id !== item.id);
-      } else {
-        return [item, ...prev];
-      }
-    });
+    if (mode === 'single') {
+      handleConfirm?.([item]);
+      setOpen(false);
+    } else {
+      setSelectedItems((prev) => {
+        const isSelected = prev.some((selected) => selected.id === item.id);
+        if (isSelected) {
+          return prev.filter((selected) => selected.id !== item.id);
+        } else {
+          return [item, ...prev];
+        }
+      });
+    }
   };
 
   const cancel = () => {
@@ -94,7 +103,7 @@ export const SearchList = (props: SearchListProps) => {
   return (
     <Popover
       content={
-        <div className="flex flex-col gap-2">
+        <div className={`flex flex-col gap-2 ${props?.className || ''}`}>
           <Input
             className="text-xs"
             placeholder={t('canvas.contextList.placeholder', { domain: t(`common.${domain}`) })}
@@ -111,6 +120,11 @@ export const SearchList = (props: SearchListProps) => {
                   <IconResource className="flex justify-center items-center w-4 h-4" />
                 </div>
                 {option.title}
+                {mode === 'multiple' && option.isSelected && (
+                  <div className="ml-auto">
+                    <IconCheck className="text-[#00968F] w-4 h-4" />
+                  </div>
+                )}
               </div>
             ))}
 
@@ -135,23 +149,25 @@ export const SearchList = (props: SearchListProps) => {
             )}
           </div>
 
-          <div className="pt-2 flex justify-end items-center gap-2 border-solid border-t-1 border-x-0 border-b-0 border-[#E5E5E5]">
-            <Button size="small" className="text-xs" onClick={cancel}>
-              {t('common.cancel')}
-            </Button>
-            <Button
-              type="primary"
-              size="small"
-              className="text-xs"
-              disabled={selectedItems.length === 0}
-              onClick={confirm}
-            >
-              {t('common.confirm')}
-            </Button>
-          </div>
+          {mode === 'multiple' && (
+            <div className="pt-2 flex justify-end items-center gap-2 border-solid border-t-1 border-x-0 border-b-0 border-[#E5E5E5]">
+              <Button size="small" className="text-xs" onClick={cancel}>
+                {t('common.cancel')}
+              </Button>
+              <Button
+                type="primary"
+                size="small"
+                className="text-xs"
+                disabled={selectedItems.length === 0}
+                onClick={confirm}
+              >
+                {t('common.confirm')}
+              </Button>
+            </div>
+          )}
         </div>
       }
-      trigger="click"
+      trigger={props?.trigger || 'click'}
       placement="right"
       open={open}
       onOpenChange={setOpen}

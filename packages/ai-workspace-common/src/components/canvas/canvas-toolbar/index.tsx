@@ -48,7 +48,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     { icon: RiUploadCloud2Line, value: 'importResource', type: 'button', domain: 'resource' },
     { icon: HiOutlineSquare3Stack3D, value: 'addResource', type: 'popover', domain: 'resource' },
     { icon: Sparkles, value: 'addSkill', type: 'popover', domain: 'skill' },
-    { icon: Wrench, value: 'addTool', type: 'popover', domain: 'tool' },
+    // { icon: Wrench, value: 'addTool', type: 'popover', domain: 'tool' },
     { icon: HiOutlineDocumentText, value: 'addDocument', type: 'popover', domain: 'document' },
   ];
 
