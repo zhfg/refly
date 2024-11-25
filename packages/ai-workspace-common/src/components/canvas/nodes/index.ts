@@ -5,7 +5,8 @@ import { DocumentNode } from './document';
 import { ResourceNode } from './resource';
 import { SkillNode } from './skill';
 import { ToolNode } from './tool';
-import { ResponseNode } from './response';
+import { SkillResponseNode } from './skill-response';
+import { ToolResponseNode } from './tool-response';
 import {
   NodeMetadataMap,
   CanvasNodeData,
@@ -22,15 +23,16 @@ export * from './document';
 export * from './resource';
 export * from './skill';
 export * from './tool';
-export * from './response';
-
+export * from './skill-response';
+export * from './tool-response';
 // Node types mapping
 export const nodeTypes: NodeTypes = {
   document: DocumentNode,
   resource: ResourceNode,
   skill: SkillNode,
   tool: ToolNode,
-  response: ResponseNode,
+  skillResponse: SkillResponseNode,
+  toolResponse: ToolResponseNode,
 };
 
 // Helper function to prepare node data
@@ -86,9 +88,17 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
         lastUsed: null,
       } as ToolNodeMeta;
 
-    case 'response':
+    case 'skillResponse':
       return {
-        modelName: 'AI Assistant',
+        modelName: 'Skill Response',
+        timestamp: new Date().toISOString(),
+        status: 'pending',
+        executionTime: null,
+      } as ResponseNodeMeta;
+
+    case 'toolResponse':
+      return {
+        modelName: 'Tool Response',
         timestamp: new Date().toISOString(),
         status: 'pending',
         executionTime: null,
@@ -98,3 +108,17 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
       return {};
   }
 };
+
+// Add this helper function to share common styles
+export const getNodeCommonStyles = ({ selected, isHovered }: { selected: boolean; isHovered: boolean }) => `
+  bg-white 
+  rounded-xl
+  border 
+  shadow-[0px_1px_2px_0px_rgba(16,24,60,0.05)]
+  p-3
+  transition-all
+  duration-200
+  ${selected ? 'ring-2 ring-[#00968F] border-[#00968F]' : 'border-[#EAECF0]'}
+  ${isHovered ? 'shadow-[0px_12px_16px_-4px_rgba(16,24,40,0.08),0px_4px_6px_-2px_rgba(16,24,40,0.03)]' : ''}
+  hover:shadow-[0px_12px_16px_-4px_rgba(16,24,40,0.08),0px_4px_6px_-2px_rgba(16,24,40,0.03)]
+`;

@@ -5,17 +5,17 @@ import { Edge } from '@xyflow/react';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 interface CanvasData {
-  nodes: CanvasNode[];
+  nodes: CanvasNode<any>[];
   edges: Edge[];
-  selectedNode: CanvasNode | null;
+  selectedNode: CanvasNode<any> | null;
 }
 
 export interface CanvasState {
   data: Record<string, CanvasData>;
 
-  setNodes: (canvasId: string, nodes: CanvasNode[]) => void;
+  setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
-  setSelectedNode: (canvasId: string, node: CanvasNode | null) => void;
+  setSelectedNode: (canvasId: string, node: CanvasNode<any> | null) => void;
 }
 
 export const useCanvasStore = create<CanvasState>()(

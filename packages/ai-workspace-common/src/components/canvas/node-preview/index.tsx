@@ -1,7 +1,7 @@
-import { Button } from 'antd';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasNode } from '../nodes/types';
-import { ResponseNodePreview } from './response';
+import { SkillResponseNodePreview } from './skill-response';
+import { ToolResponseNodePreview } from './tool-response';
 import { ResourceNodePreview } from './resource';
 import { SkillNodePreview } from './skill';
 import { ToolNodePreview } from './tool';
@@ -9,7 +9,7 @@ import { DocumentNodePreview } from './document';
 import { NodePreviewHeader } from './node-preview-header';
 import { useState } from 'react';
 
-export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode; handleClosePanel: () => void }) => {
+export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>; handleClosePanel: () => void }) => {
   const [isPinned, setIsPinned] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
 
@@ -30,8 +30,10 @@ export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode; hand
         return <SkillNodePreview />;
       case 'tool':
         return <ToolNodePreview />;
-      case 'response':
-        return <ResponseNodePreview resultId={node.data.entityId} />;
+      case 'skillResponse':
+        return <SkillResponseNodePreview resultId={node.data.entityId} />;
+      case 'toolResponse':
+        return <ToolResponseNodePreview resultId={node.data.entityId} />;
       default:
         return null;
     }

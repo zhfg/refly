@@ -21,19 +21,22 @@ import { CanvasNode } from '../nodes/types';
 const NODE_COLORS: Record<CanvasNodeType, string> = {
   document: '#00968F',
   resource: '#17B26A',
-  response: '#F79009',
+  skillResponse: '#F79009',
+  toolResponse: '#F79009',
   skill: '#6172F3',
   tool: '#2E90FA',
 };
 
 // Get icon component based on node type and metadata
-const getNodeIcon = (node: CanvasNode) => {
+const getNodeIcon = (node: CanvasNode<any>) => {
   switch (node.type) {
     case 'document':
       return FileText;
     case 'resource':
       return node.data?.metadata?.resourceType === 'weblink' ? Link2 : FileText;
-    case 'response':
+    case 'skillResponse':
+      return MessageSquare;
+    case 'toolResponse':
       return MessageSquare;
     case 'skill':
       switch (node.data?.metadata?.skillType) {
@@ -55,14 +58,16 @@ const getNodeIcon = (node: CanvasNode) => {
 };
 
 // Get node title based on node type and metadata
-const getNodeTitle = (node: CanvasNode) => {
+const getNodeTitle = (node: CanvasNode<any>) => {
   switch (node.type) {
     case 'document':
       return 'Document';
     case 'resource':
       return node.data?.metadata?.resourceType === 'weblink' ? 'Web Link' : 'Plain Text';
-    case 'response':
-      return node.data?.metadata?.modelName ?? 'AI Response';
+    case 'skillResponse':
+      return node.data?.metadata?.modelName ?? 'Skill Response';
+    case 'toolResponse':
+      return node.data?.metadata?.modelName ?? 'Tool Response';
     case 'skill':
       const skillType = node.data?.metadata?.skillType;
       switch (skillType) {
@@ -93,7 +98,7 @@ const getNodeTitle = (node: CanvasNode) => {
 };
 
 interface NodePreviewHeaderProps {
-  node: CanvasNode;
+  node: CanvasNode<any>;
   onClose: () => void;
   onPin?: () => void;
   onMaximize?: () => void;

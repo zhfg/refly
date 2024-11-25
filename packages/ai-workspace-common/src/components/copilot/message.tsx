@@ -110,7 +110,7 @@ export const AssistantMessage = memo(
     isPending: boolean;
     isLastSession: boolean;
     disable?: boolean;
-    handleAskFollowing: (question?: string) => void;
+    handleAskFollowing?: (question?: string) => void;
   }) => {
     const {
       message,
@@ -140,9 +140,9 @@ export const AssistantMessage = memo(
     ];
 
     const { t } = useTranslation();
-    const { editor: noteStoreEditor, isCreatingNewCanvasOnHumanMessage } = useDocumentStoreShallow((state) => ({
+    const { editor: noteStoreEditor, isCreatingNewDocumentOnHumanMessage } = useDocumentStoreShallow((state) => ({
       editor: state.editor,
-      isCreatingNewCanvasOnHumanMessage: state.isCreatingNewCanvasOnHumanMessage,
+      isCreatingNewDocumentOnHumanMessage: state.isCreatingNewDocumentOnHumanMessage,
     }));
 
     let sources =
@@ -409,7 +409,7 @@ export const AssistantMessage = memo(
                       {isWeb
                         ? availableEditorActions.map((item) => (
                             <Button
-                              loading={item.key === 'createNewNote' && isCreatingNewCanvasOnHumanMessage}
+                              loading={item.key === 'createNewNote' && isCreatingNewDocumentOnHumanMessage}
                               type="text"
                               className={'assist-action-item'}
                               icon={item.icon}

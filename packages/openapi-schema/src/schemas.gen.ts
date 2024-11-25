@@ -3736,7 +3736,7 @@ export const $SearchOptions = {
 
 export const $SearchDomain = {
   type: 'string',
-  enum: ['resource', 'document', 'canvas', 'skill'],
+  enum: ['resource', 'document', 'canvas', 'skill', 'tool'],
 } as const;
 
 export const $SearchMode = {
@@ -4059,5 +4059,5 @@ export const $InMemorySearchResponse = {
 
 export const $CanvasNodeType = {
   type: 'string',
-  enum: ['document', 'resource', 'skill', 'tool', 'response'],
+  enum: ['document', 'resource', 'skill', 'tool', 'skillResponse', 'toolResponse'],
 } as const;

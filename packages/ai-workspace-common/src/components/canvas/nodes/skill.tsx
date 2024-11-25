@@ -1,7 +1,12 @@
-import { Handle, NodeProps, Position } from '@xyflow/react';
+import { Handle, NodeProps, Position, useEdges, useReactFlow } from '@xyflow/react';
 import { CanvasNodeData, SkillNodeMeta } from './types';
 import { Node } from '@xyflow/react';
 import { Sparkles, MoreHorizontal, Cpu, Code2, Globe } from 'lucide-react';
+import { CustomHandle } from './custom-handle';
+import { useState, useCallback } from 'react';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { EDGE_STYLES } from '../constants';
+import { getNodeCommonStyles } from './index';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
 
@@ -40,11 +45,49 @@ const getSkillTitle = (skillType: string) => {
   }
 };
 
-export const SkillNode = ({ data, selected }: NodeProps<SkillNode>) => {
+export const SkillNode = ({ data, selected, id }: NodeProps<SkillNode>) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const { edges } = useCanvasControl();
+  const { setEdges } = useReactFlow();
   const SkillIcon = getSkillIcon(data.metadata.skillType);
 
+  // Check if node has any connections
+  const isTargetConnected = edges?.some((edge) => edge.target === id);
+  const isSourceConnected = edges?.some((edge) => edge.source === id);
+
+  // Handle node hover events
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+    setEdges((eds) =>
+      eds.map((edge) => {
+        if (edge.source === id || edge.target === id) {
+          return {
+            ...edge,
+            style: EDGE_STYLES.hover,
+          };
+        }
+        return edge;
+      }),
+    );
+  }, [id, setEdges]);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    setEdges((eds) =>
+      eds.map((edge) => {
+        if (edge.source === id || edge.target === id) {
+          return {
+            ...edge,
+            style: EDGE_STYLES.default,
+          };
+        }
+        return edge;
+      }),
+    );
+  }, [id, setEdges]);
+
   return (
-    <div className="relative group">
+    <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       {/* Action Button */}
       <div
         onClick={(e) => {
@@ -82,16 +125,23 @@ export const SkillNode = ({ data, selected }: NodeProps<SkillNode>) => {
         className={`
           w-[170px]
           h-[71px]
-          bg-white 
-          rounded-xl
-          border border-[#EAECF0]
-          shadow-[0px_1px_2px_0px_rgba(16,24,60,0.05)]
-          p-3
-          ${selected ? 'ring-2 ring-blue-500' : ''}
+          ${getNodeCommonStyles({ selected, isHovered })}
         `}
       >
-        <Handle type="target" position={Position.Left} className="w-3 h-3 -ml-1.5" />
-        <Handle type="source" position={Position.Right} className="w-3 h-3 -mr-1.5" />
+        <CustomHandle
+          type="target"
+          position={Position.Left}
+          isConnected={isTargetConnected}
+          isNodeHovered={isHovered}
+          nodeType="skill"
+        />
+        <CustomHandle
+          type="source"
+          position={Position.Right}
+          isConnected={isSourceConnected}
+          isNodeHovered={isHovered}
+          nodeType="skill"
+        />
 
         <div className="flex flex-col gap-2">
           {/* Header with Icon and Type */}

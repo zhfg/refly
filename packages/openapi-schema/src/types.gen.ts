@@ -2563,7 +2563,7 @@ export type SearchOptions = {
   enableReranker?: boolean;
 };
 
-export type SearchDomain = 'resource' | 'document' | 'canvas' | 'skill';
+export type SearchDomain = 'resource' | 'document' | 'canvas' | 'skill' | 'tool';
 
 export type SearchMode = 'keyword' | 'vector' | 'hybrid';
 
@@ -2769,7 +2769,7 @@ export type InMemorySearchResponse = BaseResponse & {
   data?: Array<DocumentInterface>;
 };
 
-export type CanvasNodeType = 'document' | 'resource' | 'skill' | 'tool' | 'response';
+export type CanvasNodeType = 'document' | 'resource' | 'skill' | 'tool' | 'skillResponse' | 'toolResponse';
 
 export type ListCanvasesData = {
   query?: {

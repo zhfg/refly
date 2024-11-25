@@ -1,7 +1,12 @@
-import { Handle, NodeProps, Position } from '@xyflow/react';
+import { Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { CanvasNodeData, ToolNodeMeta } from './types';
 import { Node } from '@xyflow/react';
 import { Wrench, MoreHorizontal } from 'lucide-react';
+import { CustomHandle } from './custom-handle';
+import { useState, useCallback } from 'react';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { EDGE_STYLES } from '../constants';
+import { getNodeCommonStyles } from './index';
 
 type ToolNode = Node<CanvasNodeData<ToolNodeMeta>, 'tool'>;
 
@@ -21,9 +26,48 @@ const getToolTitle = (toolType: string | undefined) => {
   return toolTitles[toolType] || toolType.split(/(?=[A-Z])/).join(' ');
 };
 
-export const ToolNode = ({ data, selected }: NodeProps<ToolNode>) => {
+export const ToolNode = ({ data, selected, id }: NodeProps<ToolNode>) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const { edges } = useCanvasControl();
+  const { setEdges } = useReactFlow();
+
+  // Check if node has any connections
+  const isTargetConnected = edges?.some((edge) => edge.target === id);
+  const isSourceConnected = edges?.some((edge) => edge.source === id);
+
+  // Handle node hover events
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true);
+    setEdges((eds) =>
+      eds.map((edge) => {
+        if (edge.source === id || edge.target === id) {
+          return {
+            ...edge,
+            style: EDGE_STYLES.hover,
+          };
+        }
+        return edge;
+      }),
+    );
+  }, [id, setEdges]);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    setEdges((eds) =>
+      eds.map((edge) => {
+        if (edge.source === id || edge.target === id) {
+          return {
+            ...edge,
+            style: EDGE_STYLES.default,
+          };
+        }
+        return edge;
+      }),
+    );
+  }, [id, setEdges]);
+
   return (
-    <div className="relative group">
+    <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       {/* Action Button */}
       <div
         onClick={(e) => {
@@ -62,16 +106,23 @@ export const ToolNode = ({ data, selected }: NodeProps<ToolNode>) => {
         className={`
           w-[170px]
           h-[71px]
-          bg-white 
-          rounded-xl
-          border border-[#EAECF0]
-          shadow-[0px_1px_2px_0px_rgba(16,24,60,0.05)]
-          p-3
-          ${selected ? 'ring-2 ring-blue-500' : ''}
+          ${getNodeCommonStyles({ selected, isHovered })}
         `}
       >
-        <Handle type="target" position={Position.Left} className="w-3 h-3 -ml-1.5" />
-        <Handle type="source" position={Position.Right} className="w-3 h-3 -mr-1.5" />
+        <CustomHandle
+          type="target"
+          position={Position.Left}
+          isConnected={isTargetConnected}
+          isNodeHovered={isHovered}
+          nodeType="tool"
+        />
+        <CustomHandle
+          type="source"
+          position={Position.Right}
+          isConnected={isSourceConnected}
+          isNodeHovered={isHovered}
+          nodeType="tool"
+        />
 
         <div className="flex flex-col gap-2">
           {/* Header with Icon and Type */}

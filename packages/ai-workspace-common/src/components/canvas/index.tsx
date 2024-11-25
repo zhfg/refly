@@ -10,13 +10,14 @@ import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/c
 import { CopilotOperationModule } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasProvider } from '@refly-packages/ai-workspace-common/context/canvas';
+import { EDGE_STYLES } from './constants';
 
 const Flow = ({ canvasId }: { canvasId: string }) => {
   const { nodes, edges, selectedNode, setSelectedNode, onNodesChange, onEdgesChange, onConnect } =
     useCanvasControl(canvasId);
 
   // Add node click handler
-  const onNodeClick = useCallback((event: React.MouseEvent, node: CanvasNode) => {
+  const onNodeClick = useCallback((event: React.MouseEvent, node: CanvasNode<any>) => {
     if (!node?.id) {
       console.warn('Invalid node clicked');
       return;
@@ -32,6 +33,10 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const handleToolSelect = (tool: string) => {
     // Handle tool selection
     console.log('Selected tool:', tool);
+  };
+
+  const defaultEdgeOptions = {
+    style: EDGE_STYLES.default,
   };
 
   return (
@@ -50,6 +55,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
+          defaultEdgeOptions={defaultEdgeOptions}
         >
           <Background />
           <MiniMap

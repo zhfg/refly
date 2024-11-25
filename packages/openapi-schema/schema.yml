@@ -4333,6 +4333,7 @@ components:
         - document
         - canvas
         - skill
+        - tool
     SearchMode:
       type: string
       enum:
@@ -4556,7 +4557,8 @@ components:
         - resource
         - skill
         - tool
-        - response
+        - skillResponse
+        - toolResponse
   securitySchemes:
     api_key:
       type: apiKey

@@ -30,11 +30,11 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
   }));
   const { selectedNode, setSelectedNode } = useCanvasControl();
 
-  const handleToggleItem = (item: CanvasNode) => {
+  const handleToggleItem = (item: CanvasNode<any>) => {
     setSelectedNode(item);
   };
 
-  const handleRemoveItem = (item: CanvasNode) => {
+  const handleRemoveItem = (item: CanvasNode<any>) => {
     removeContextItem(item.id);
   };
 

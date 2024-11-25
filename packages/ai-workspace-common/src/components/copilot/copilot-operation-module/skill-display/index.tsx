@@ -1,12 +1,14 @@
-import { IconSettings } from '@arco-design/web-react/icon';
+import { IconDown, IconSettings } from '@arco-design/web-react/icon';
 import { useResizeBox } from '@refly-packages/ai-workspace-common/hooks/use-resize-box';
 import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
 import { useTranslation } from 'react-i18next';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
+import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 
 export const SkillDisplay = memo(({ source }: { source: string }) => {
   const skillStore = useSkillStore((state) => ({
@@ -46,6 +48,14 @@ export const SkillDisplay = memo(({ source }: { source: string }) => {
     }
   }, [skillStore.skillInstances]);
 
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  const handlePopoverConfirm = (selectedItems: ContextItem[]) => {
+    // TODO: 需要优化，当前选中技能后，再次打开技能管理面板，会导致选中技能丢失
+    // skillStore?.setSelectedSkillInstance?.(null);
+    setPopoverOpen(false);
+  };
+
   return (
     <div className="skill-container" ref={skillDisplayRef}>
       {skillStore?.skillInstances?.map((item, index) => (
@@ -60,15 +70,18 @@ export const SkillDisplay = memo(({ source }: { source: string }) => {
           <span className="skill-item-title">{item?.displayName}</span>
         </div>
       ))}
-      <div
-        key="more"
-        className="skill-item"
-        onClick={() => {
-          skillStore.setSkillManagerModalVisible(true);
-        }}
-      >
-        <IconSettings /> <p className="skill-title skill-item-title">{t('copilot.skillDisplay.manager')}</p>
-      </div>
+
+      <SearchList domain={'skill'} handleConfirm={handlePopoverConfirm} trigger="hover" mode="single">
+        <div
+          key="more"
+          className={`skill-item group`}
+          onClick={() => {
+            skillStore.setSkillManagerModalVisible(true);
+          }}
+        >
+          <IconDown className="transform transition-transform duration-300 ease-in-out group-hover:rotate-180" />
+        </div>
+      </SearchList>
     </div>
   );
 });
