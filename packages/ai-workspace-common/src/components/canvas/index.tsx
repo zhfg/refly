@@ -25,7 +25,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     zoom: 1,
   };
 
-  // 使用 useMemo 缓存配置对象
   const flowConfig = useMemo(
     () => ({
       defaultViewport,
@@ -39,7 +38,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     [],
   );
 
-  // 使用 useCallback 优化事件处理器
   const onNodeClick = useCallback(
     (event: React.MouseEvent, node: CanvasNode<any>) => {
       if (!node?.id) {
@@ -51,7 +49,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     [setSelectedNode],
   );
 
-  // 将 NodePreview 抽离为单独的组件以避免不必要的重渲染
   const nodePreview = useMemo(() => {
     if (!selectedNode) return null;
     return <NodePreview node={selectedNode} handleClosePanel={() => setSelectedNode(null)} />;
