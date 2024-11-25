@@ -39,14 +39,28 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     style: EDGE_STYLES.default,
   };
 
+  const defaultViewport = {
+    x: 0,
+    y: 0,
+    zoom: 1,
+  };
+
   return (
     <div className="w-full h-screen relative flex flex-col">
       <CanvasToolbar onToolSelect={handleToolSelect} />
       <TopToolbar />
       <div className="flex-grow relative">
         <ReactFlow
+          defaultViewport={defaultViewport}
           panOnScroll
-          fitView
+          fitView={true}
+          fitViewOptions={{
+            padding: 0.2,
+            minZoom: 1,
+            maxZoom: 1,
+          }}
+          minZoom={0.25}
+          maxZoom={2}
           selectionOnDrag
           nodeTypes={nodeTypes}
           nodes={nodes}
