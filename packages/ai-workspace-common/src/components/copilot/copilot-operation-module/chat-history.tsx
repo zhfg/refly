@@ -18,7 +18,7 @@ export const ChatHistory: React.FC = () => {
   const { selectedNode } = useCanvasControl();
 
   useEffect(() => {
-    if (selectedNode?.type === 'response') {
+    if (selectedNode?.type === 'skillResponse') {
       // Add the selected node as a preview item
       const item = selectedResultItems.find((item) => item.resultId === selectedNode.data.entityId);
       if (!item) {
@@ -40,9 +40,7 @@ export const ChatHistory: React.FC = () => {
     } else {
       removePreviewResultItem();
     }
-  }, [selectedNode]);
-
-  console.log('selectedResultItems', selectedResultItems);
+  }, [selectedNode?.id]);
 
   useEffect(() => {
     return () => {

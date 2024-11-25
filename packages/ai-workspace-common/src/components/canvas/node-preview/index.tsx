@@ -7,7 +7,7 @@ import { SkillNodePreview } from './skill';
 import { ToolNodePreview } from './tool';
 import { DocumentNodePreview } from './document';
 import { NodePreviewHeader } from './node-preview-header';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>; handleClosePanel: () => void }) => {
   const [isPinned, setIsPinned] = useState(false);
@@ -39,36 +39,51 @@ export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>;
     }
   };
 
-  return (
-    <div
-      className={`
-        fixed 
-        ${isMaximized ? 'inset-x-4 top-[64px] bottom-4' : 'right-2 w-[420px] top-[64px]'}
-        bg-white 
-        rounded-lg 
-        z-10
-        transition-all 
-        duration-200 
-        ease-in-out
-        border
-        border-[rgba(16,24,40,0.0784)]
-        shadow-[0px_4px_6px_0px_rgba(16,24,40,0.03)]
-      `}
-      style={{
-        height: isMaximized ? undefined : 'calc(100vh - 76px)',
-        maxHeight: 'calc(100vh - 76px)',
-      }}
-    >
-      <NodePreviewHeader
-        node={node}
-        onClose={handleClosePanel}
-        onPin={() => setIsPinned(!isPinned)}
-        onMaximize={() => setIsMaximized(!isMaximized)}
-        isPinned={isPinned}
-        isMaximized={isMaximized}
-      />
+  const previewStyles = useMemo(
+    () => ({
+      height: isMaximized ? 'calc(100vh - 76px)' : 'calc(100vh - 76px)',
+      maxHeight: 'calc(100vh - 76px)',
+      width: isMaximized ? 'calc(100% - 32px)' : '420px',
+      transform: isMaximized ? 'translate3d(-50%, 64px, 0)' : 'translate3d(0, 64px, 0)',
+      '--tw-transform': 'none !important',
+    }),
+    [isMaximized],
+  );
 
-      <div className="h-[calc(100%-64px)] overflow-auto rounded-b-lg">{previewComponent(node?.type)}</div>
+  const previewClassName = useMemo(
+    () => `
+    absolute
+    ${isMaximized ? 'left-1/2' : 'right-2'}
+    top-0
+    bg-white 
+    rounded-lg 
+    z-10
+    transition-all 
+    duration-200 
+    ease-in-out
+    border
+    border-[rgba(16,24,40,0.0784)]
+    shadow-[0px_4px_6px_0px_rgba(16,24,40,0.03)]
+    will-change-transform
+  `,
+    [isMaximized],
+  );
+
+  const preview = useMemo(() => previewComponent(node?.type), [node?.type]);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none">
+      <div className={previewClassName} style={previewStyles}>
+        <NodePreviewHeader
+          node={node}
+          onClose={handleClosePanel}
+          onPin={() => setIsPinned(!isPinned)}
+          onMaximize={() => setIsMaximized(!isMaximized)}
+          isPinned={isPinned}
+          isMaximized={isMaximized}
+        />
+        <div className="h-[calc(100%-64px)] overflow-auto rounded-b-lg pointer-events-auto">{preview}</div>
+      </div>
     </div>
   );
 };
