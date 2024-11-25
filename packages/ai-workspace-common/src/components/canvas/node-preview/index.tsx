@@ -41,8 +41,8 @@ export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>;
 
   const previewStyles = useMemo(
     () => ({
-      height: isMaximized ? 'calc(100vh - 76px)' : 'calc(100vh - 76px)',
-      maxHeight: 'calc(100vh - 76px)',
+      height: isMaximized ? 'calc(100vh - 72px)' : 'calc(100vh - 72px)',
+      maxHeight: 'calc(100vh - 72px)',
       width: isMaximized ? 'calc(100% - 32px)' : '420px',
       transform: isMaximized ? 'translate3d(-50%, 64px, 0)' : 'translate3d(0, 64px, 0)',
       '--tw-transform': 'none !important',

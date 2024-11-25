@@ -86,7 +86,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
               border: '1px solid rgba(16, 24, 40, 0.0784)',
               boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
             }}
-            className="bg-white/80 w-[140px] h-[92px] !mb-[50px] !ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
+            className="bg-white/80 w-[140px] h-[92px] !mb-[46px] !ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
             // zoomable
             // pannable
             // maskColor="rgb(0, 0, 0, 0.1)"
@@ -96,7 +96,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           <Controls
             position="bottom-left"
             style={{
-              marginBottom: '12px',
+              marginBottom: '8px',
               marginLeft: '10px',
               display: 'flex',
               flexDirection: 'row',
@@ -121,7 +121,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           />
         </ReactFlow>
 
-        <div className="absolute bottom-[12px] left-1/2 -translate-x-1/2 w-[444px] z-10">
+        <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-10">
           <CopilotOperationModule source={MessageIntentSource.Canvas} />
         </div>
       </div>
