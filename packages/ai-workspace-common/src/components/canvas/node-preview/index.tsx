@@ -74,14 +74,16 @@ export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>;
   return (
     <div className="absolute inset-0 pointer-events-none">
       <div className={previewClassName} style={previewStyles}>
-        <NodePreviewHeader
-          node={node}
-          onClose={handleClosePanel}
-          onPin={() => setIsPinned(!isPinned)}
-          onMaximize={() => setIsMaximized(!isMaximized)}
-          isPinned={isPinned}
-          isMaximized={isMaximized}
-        />
+        <div className="pointer-events-auto">
+          <NodePreviewHeader
+            node={node}
+            onClose={handleClosePanel}
+            onPin={() => setIsPinned(!isPinned)}
+            onMaximize={() => setIsMaximized(!isMaximized)}
+            isPinned={isPinned}
+            isMaximized={isMaximized}
+          />
+        </div>
         <div className="h-[calc(100%-64px)] overflow-auto rounded-b-lg pointer-events-auto">{preview}</div>
       </div>
     </div>
