@@ -8,7 +8,7 @@ import {
   SearchResponse,
   Source,
   SkillInvocationConfig,
-  SkillTemplateConfigSchema,
+  SkillTemplateConfigDefinition,
   SearchDomain,
   Icon,
 } from '@refly-packages/openapi-schema';
@@ -31,7 +31,7 @@ export class FindRelatedContent extends BaseSkill {
 
   icon: Icon = { type: 'emoji', value: '🔍' };
 
-  configSchema: SkillTemplateConfigSchema = {
+  configSchema: SkillTemplateConfigDefinition = {
     items: [
       {
         key: 'domains',

@@ -5,7 +5,7 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
+import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
 // utils
 import { languageNameToLocale, localeToLanguageName, zhCNLocale } from '@refly-packages/common-types';
 
@@ -33,7 +33,7 @@ export class TranslateSkill extends BaseSkill {
 
   icon: Icon = { type: 'emoji', value: '🔄' };
 
-  configSchema: SkillTemplateConfigSchema = {
+  configSchema: SkillTemplateConfigDefinition = {
     items: [
       {
         key: 'targetLanguage',

@@ -2096,7 +2096,7 @@ components:
         configScope:
           description: The contexts in which the requirement applies
           $ref: '#/components/schemas/ConfigScope'
-    SkillTemplateConfigSchema:
+    SkillTemplateConfigDefinition:
       type: object
       description: Skill template config schema
       required:
@@ -2147,7 +2147,7 @@ components:
           $ref: '#/components/schemas/Icon'
         configSchema:
           description: Skill template config schema
-          $ref: '#/components/schemas/SkillTemplateConfigSchema'
+          $ref: '#/components/schemas/SkillTemplateConfigDefinition'
     SkillTriggerType:
       type: string
       description: Skill trigger type
@@ -2319,7 +2319,7 @@ components:
               $ref: '#/components/schemas/SkillTemplateConfig'
             tplConfigSchema:
               description: Skill template config schema
-              $ref: '#/components/schemas/SkillTemplateConfigSchema'
+              $ref: '#/components/schemas/SkillTemplateConfigDefinition'
             invocationConfig:
               description: Skill invocation config
               $ref: '#/components/schemas/SkillInvocationConfig'

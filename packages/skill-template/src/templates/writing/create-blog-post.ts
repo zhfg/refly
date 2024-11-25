@@ -7,7 +7,7 @@ import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } fr
 import { z } from 'zod';
 import {
   SkillInvocationConfig,
-  SkillTemplateConfigSchema,
+  SkillTemplateConfigDefinition,
   DynamicConfigValue,
   Icon,
 } from '@refly-packages/openapi-schema';
@@ -39,7 +39,7 @@ export class CreateBlogPostSkill extends BaseSkill {
 
   icon: Icon = { type: 'emoji', value: '📰' };
 
-  configSchema: SkillTemplateConfigSchema = {
+  configSchema: SkillTemplateConfigDefinition = {
     items: [
       {
         key: 'targetPlatform',
