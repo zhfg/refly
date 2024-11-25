@@ -35,10 +35,10 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   };
 
   return (
-    <div className="w-screen h-screen relative flex flex-col">
+    <div className="w-full h-screen relative flex flex-col">
       <CanvasToolbar onToolSelect={handleToolSelect} />
       <TopToolbar />
-      <div className="flex-grow">
+      <div className="flex-grow relative">
         <ReactFlow
           panOnScroll
           fitView
@@ -92,10 +92,10 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             }}
           />
         </ReactFlow>
-      </div>
 
-      <div className="absolute bottom-[12px] left-1/2 -translate-x-1/2 w-[444px]">
-        <CopilotOperationModule source={MessageIntentSource.Canvas} />
+        <div className="absolute bottom-[12px] left-1/2 -translate-x-1/2 w-[444px] z-10">
+          <CopilotOperationModule source={MessageIntentSource.Canvas} />
+        </div>
       </div>
 
       {selectedNode && <NodePreview node={selectedNode} handleClosePanel={handleClosePanel} />}

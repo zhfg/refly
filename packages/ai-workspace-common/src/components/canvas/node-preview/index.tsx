@@ -41,7 +41,7 @@ export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode; hand
     <div
       className={`
         fixed 
-        ${isMaximized ? 'inset-4' : 'top-1/2 right-2 w-[420px] -translate-y-1/2'} 
+        ${isMaximized ? 'inset-x-4 top-[64px] bottom-4' : 'right-2 w-[420px] top-[64px]'}
         bg-white 
         rounded-lg 
         z-10
@@ -53,8 +53,8 @@ export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode; hand
         shadow-[0px_4px_6px_0px_rgba(16,24,40,0.03)]
       `}
       style={{
-        height: isMaximized ? undefined : 'calc(100vh - 16px)',
-        maxHeight: 'calc(100vh - 16px)',
+        height: isMaximized ? undefined : 'calc(100vh - 76px)',
+        maxHeight: 'calc(100vh - 76px)',
       }}
     >
       <NodePreviewHeader
