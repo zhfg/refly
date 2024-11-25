@@ -38,8 +38,10 @@
     "open": "打开",
     "close": "关闭",
     "canvas": "画布",
+    "newCanvas": "新画布",
     "resource": "资源",
     "document": "文档",
+    "newDocument": "新文档",
     "skill": "技能",
     "thread": "会话",
     "meta": "元信息",
@@ -527,6 +529,7 @@
     },
     "siderMenu": {
       "canvas": "画布",
+      "newCanvas": "新建画布",
       "news": "新特性",
       "explore": "探索",
       "threadLibrary": "会话",
@@ -539,8 +542,8 @@
       "collapse": "折叠",
       "expand": "展开",
       "logout": "登出",
-      "newDraft": "新建稿布",
       "library": "知识库",
+      "newDocument": "新建文档",
       "recentProjects": "最近项目",
       "recentChats": "最近会话",
       "viewMore": "查看更多"

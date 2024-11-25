@@ -11,7 +11,6 @@ import { useImportProjectModal } from '@refly-packages/ai-workspace-common/store
 import { IconCopy } from '@arco-design/web-react/icon';
 import { useDocumentStore } from '@refly-packages/ai-workspace-common/stores/document';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
-import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 const iconStyle = {
   marginRight: 8,
@@ -121,7 +120,6 @@ export const DeleteDropdownMenu = (props: DeleteDropdownMenuProps) => {
   const { t } = useTranslation();
 
   const importProjectModal = useImportProjectModal();
-  const { deleteRecentProject } = useHandleRecents();
   const { handleDeleteTab } = useProjectTabs();
 
   const handleDeleteClick = async (e: MouseEvent) => {
@@ -138,9 +136,6 @@ export const DeleteDropdownMenu = (props: DeleteDropdownMenuProps) => {
     if (type === 'project') {
       const { error } = await getClient().deleteProject({ body: { projectId: data.projectId } });
       resultError = error;
-      if (!resultError) {
-        deleteRecentProject(data.projectId);
-      }
     }
 
     if (type === 'resource') {

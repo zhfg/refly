@@ -19,7 +19,6 @@ import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill'
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useBuildSkillContext } from './use-build-skill-context';
 import { useTranslation } from 'react-i18next';
-import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
@@ -55,7 +54,6 @@ export const useBuildThreadAndRun = () => {
   }));
   const { buildTaskAndGenReponse, buildShutdownTaskAndGenResponse } = useBuildTask();
   const { jumpToConv } = useJumpNewPath();
-  const { addRecentConversation } = useHandleRecents();
   const { handleFilterErrorTip } = useContextFilterErrorTip();
 
   // TODO: temp not need this function
@@ -85,8 +83,6 @@ export const useBuildThreadAndRun = () => {
         },
       },
     });
-
-    addRecentConversation(newConv);
   };
 
   // TODO: 这里考虑针对 homePage 来的会话请求，需要清除 conv，重新处理

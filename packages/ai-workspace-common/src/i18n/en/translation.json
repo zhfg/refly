@@ -38,8 +38,10 @@
     "open": "Open",
     "close": "Close",
     "canvas": "Canvas",
+    "newCanvas": "New Canvas",
     "resource": "Resource",
     "document": "Document",
+    "newDocument": "New Document",
     "skill": "Skill",
     "thread": "Thread",
     "meta": "Meta",
@@ -516,6 +518,7 @@
     },
     "siderMenu": {
       "canvas": "Canvas",
+      "newCanvas": "New Canvas",
       "news": "What's new?",
       "threadLibrary": "Threads",
       "explore": "Explore",
@@ -530,6 +533,7 @@
       "logout": "Log Out",
       "newDraft": "New Draft",
       "library": "Library",
+      "newDocument": "New Document",
       "recentProjects": "Recent Projects",
       "recentChats": "Recent Chats",
       "viewMore": "View More"

@@ -13,7 +13,6 @@ import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/c
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
 import { BindResourceModal } from '@refly-packages/ai-workspace-common/components/project-detail/resource-view/resource-collection-associative-modal';
-import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
 
 export const ProjectDetail = () => {
   const { projectId } = useParams();
@@ -38,7 +37,6 @@ export const ProjectDetail = () => {
     setProject: state.setProject,
   }));
 
-  const { addRecentProject } = useHandleRecents();
   const { jumpToCanvas, jumpToResource } = useJumpNewPath();
   const { tabsMap, activeTabMap, handleAddTab } = useProjectTabs();
   const tabs = tabsMap[projectId] || [];
@@ -95,7 +93,6 @@ export const ProjectDetail = () => {
         }
 
         const currentProject = useProjectStore.getState().project.data;
-        currentProject && addRecentProject(currentProject);
       }
     };
 

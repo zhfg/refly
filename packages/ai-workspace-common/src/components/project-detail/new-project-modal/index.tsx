@@ -2,7 +2,6 @@ import { Modal, Form, Input, Message } from '@arco-design/web-react';
 import { useState, useEffect } from 'react';
 import { useImportProjectModal } from '@refly-packages/ai-workspace-common/stores/import-project-modal';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
-import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
 
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -21,7 +20,6 @@ export const NewProjectModal = () => {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm();
   const editProject = importProjectModal.editProject;
-  const { addRecentProject } = useHandleRecents();
   const fetchProjectDetail = useProjectStoreShallow((state) => state.fetchProjectDetail);
 
   function onOk() {
@@ -51,9 +49,6 @@ export const NewProjectModal = () => {
             importProjectModal.setShowNewProjectModal(false);
             Message.success(t(`workspace.newProjectModal.${editProject ? 'editSuccessful' : 'successful'}`));
             reloadListState.setReloadProjectList(true);
-            if (result?.data?.data) {
-              addRecentProject(result?.data?.data);
-            }
           }
         } catch (error) {
           Message.error(t(`workspace.newProjectModal.${editProject ? 'editFailed' : 'failed'}`));
