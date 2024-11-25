@@ -268,7 +268,9 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                             <Button
                               loading={createCanvasLoading}
                               type="text"
-                              icon={<IconPlus className="arco-icon" />}
+                              icon={
+                                <IconPlus className="arco-icon !text-[#00968F]" />
+                              }
                               style={newItemStyle}
                             />
 
@@ -299,7 +301,9 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                             <Button
                               loading={createDocumentLoading}
                               type="text"
-                              icon={<IconPlus className="arco-icon" />}
+                              icon={
+                                <IconPlus className="arco-icon !text-[#00968F]" />
+                              }
                               style={newItemStyle}
                             />
 
