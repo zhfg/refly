@@ -47,8 +47,6 @@ import {
   genActionResultID,
   genSkillID,
   genSkillTriggerID,
-  incrementalMarkdownUpdate,
-  ydoc2Markdown,
 } from '@refly-packages/utils';
 import { PrismaService } from '@/common/prisma.service';
 import {
@@ -973,15 +971,13 @@ export class SkillService {
     return { ...job, messages };
   }
 
-  async modifyDoc(documentName: string) {
-    await this.collabService.modifyDocument(documentName, '# hello world again');
-
-    // for (const node of zhLsfContent.slice(0, 10)) {
-    //   markdown += node.content;
-    //   console.log(`modifyDoc: ${markdown}`);
-    //   incrementalMarkdownUpdate(doc, markdown);
-    //   await new Promise((resolve) => setTimeout(resolve, 50));
-    // }
+  async modifyDoc(documentName: string, update: string) {
+    let markdown = '';
+    for (const node of zhLsfContent) {
+      markdown += node.content;
+      await this.collabService.modifyDocument(documentName, markdown);
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
   }
 }
 
@@ -2440,17 +2436,5 @@ export const zhLsfContent = [
   },
   {
     content: '。\n',
-  },
-  {
-    content: '</',
-  },
-  {
-    content: 'ref',
-  },
-  {
-    content: 'ly',
-  },
-  {
-    content: 'Canvas',
   },
 ];

@@ -213,9 +213,9 @@ export class SkillController {
     return buildSuccessResponse(skillJobPO2DTO(job));
   }
 
-  @Get('/modifyDoc')
-  async modifyDoc(@Query('documentName') documentName: string) {
-    await this.skillService.modifyDoc(documentName);
+  @Post('/modifyDoc')
+  async modifyDoc(@Body() body: { documentName: string; update: string }) {
+    await this.skillService.modifyDoc(body.documentName, body.update);
     return buildSuccessResponse();
   }
 }
