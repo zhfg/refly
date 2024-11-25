@@ -16,7 +16,6 @@ import {
 import { useNewCanvasModalStoreShallow } from '@refly-packages/ai-workspace-common/stores/new-canvas-modal';
 import { useReloadListStateShallow } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
-import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
 import { useTranslation } from 'react-i18next';
@@ -102,8 +101,6 @@ export const ProjectDirectory = (props: {
   const resId = searchParams.get('resId');
   const canvasId = searchParams.get('canvasId');
   const convId = searchParams.get('convId');
-
-  const { addRecentProject } = useHandleRecents();
 
   const { createShare } = useHandleShare();
   const [shareLoading, setShareLoading] = useState(false);
@@ -243,7 +240,6 @@ export const ProjectDirectory = (props: {
   const handleTitleUpdate = async (newTitle: string) => {
     const { project } = useProjectStore.getState();
     const currentProject = project.data;
-    addRecentProject({ ...currentProject, title: newTitle });
 
     // if project title is empty, update it with canvas title
     if (!currentProject?.title || currentProject?.title === 'Untitled') {

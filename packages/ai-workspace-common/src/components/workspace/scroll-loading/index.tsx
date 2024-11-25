@@ -14,18 +14,16 @@ export const ScrollLoading = (props: ScrollLoadingProps) => {
   const { t } = useTranslation();
 
   if (!hasMore) {
-    return <span style={{ marginBottom: 120 }}>{t('knowledgeLibrary.archive.item.noMoreText')}</span>;
+    return (
+      <div className="w-full flex justify-center my-6">
+        <span>{t('knowledgeLibrary.archive.item.noMoreText')}</span>
+      </div>
+    );
   }
 
   if (isRequesting) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          width: '100%',
-        }}
-      >
+      <div className="w-full flex flex-col mt-6">
         <Skeleton animation style={{ width: '100%' }}></Skeleton>
         <Skeleton animation style={{ width: '100%', marginTop: 24 }}></Skeleton>
       </div>
@@ -33,8 +31,8 @@ export const ScrollLoading = (props: ScrollLoadingProps) => {
   }
 
   return (
-    <Button onClick={() => loadMore()} style={{ marginBottom: 120 }}>
-      {t('common.loadMore')}
-    </Button>
+    <div className="w-full flex justify-center my-6">
+      <Button onClick={() => loadMore()}>{t('common.loadMore')}</Button>
+    </div>
   );
 };
