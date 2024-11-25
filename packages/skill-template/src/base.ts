@@ -136,6 +136,7 @@ export interface SkillEventMap {
   end: [data: SkillEvent];
   log: [data: SkillEvent];
   stream: [data: SkillEvent];
+  create_node: [data: SkillEvent];
   structured_data: [data: SkillEvent];
   usage: [data: SkillEvent];
   error: [data: SkillEvent];

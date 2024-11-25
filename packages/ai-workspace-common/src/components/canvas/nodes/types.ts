@@ -1,7 +1,7 @@
 import { Node } from '@xyflow/react';
 import { CanvasNodeType } from '@refly/openapi-schema';
 
-export type CanvasNodeData<T> = {
+export type CanvasNodeData<T = Record<string, unknown>> = {
   title: string;
   entityId: string;
   metadata?: T;
@@ -9,7 +9,7 @@ export type CanvasNodeData<T> = {
   sourceHandle?: string;
 };
 
-export type CanvasNode<T> = Node<CanvasNodeData<T>, CanvasNodeType>;
+export type CanvasNode<T = Record<string, unknown>> = Node<CanvasNodeData<T>, CanvasNodeType>;
 
 // Node specific metadata types
 export type DocumentNodeMeta = {

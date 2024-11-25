@@ -212,10 +212,4 @@ export class SkillController {
     const job = await this.skillService.getSkillJobDetail(user, jobId);
     return buildSuccessResponse(skillJobPO2DTO(job));
   }
-
-  @Post('/modifyDoc')
-  async modifyDoc(@Body() body: { documentName: string; update: string }) {
-    await this.skillService.modifyDoc(body.documentName, body.update);
-    return buildSuccessResponse();
-  }
 }

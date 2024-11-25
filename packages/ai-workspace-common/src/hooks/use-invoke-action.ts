@@ -1,4 +1,4 @@
-import { BaseResponse, InvokeSkillRequest } from '@refly/openapi-schema';
+import { BaseResponse, CanvasNodeData, InvokeSkillRequest } from '@refly/openapi-schema';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
 import { SkillEvent, LOCALE } from '@refly/common-types';
@@ -90,6 +90,22 @@ export const useInvokeAction = () => {
       structuredData: { ...result.structuredData, ...structuredData },
     };
     updateActionResult(skillEvent.resultId, updatedResult);
+  };
+
+  const onSkillCreateNode = (skillEvent: SkillEvent) => {
+    const { node, resultId } = skillEvent;
+    addNode(
+      {
+        type: node.type,
+        data: node.data as CanvasNodeData,
+      },
+      [
+        {
+          type: 'skillResponse',
+          entityId: resultId,
+        },
+      ],
+    );
   };
 
   const onSkillEnd = (skillEvent: SkillEvent) => {
@@ -189,6 +205,7 @@ export const useInvokeAction = () => {
       onSkillStream,
       onSkillLog,
       onSkillStructedData,
+      onSkillCreateNode,
       onSkillEnd,
       onCompleted,
       onError,

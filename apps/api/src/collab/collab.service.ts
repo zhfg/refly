@@ -231,6 +231,10 @@ export class CollabService {
     }
   }
 
+  async openDirectConnection(documentName: string, context?: CollabContext) {
+    return this.server.openDirectConnection(documentName, context);
+  }
+
   async modifyDocument(documentName: string, update: string) {
     const { document } = await this.server.openDirectConnection(documentName);
     incrementalMarkdownUpdate(document, update);

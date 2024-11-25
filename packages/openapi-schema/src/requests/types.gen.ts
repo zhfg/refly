@@ -2756,6 +2756,25 @@ export type InMemorySearchResponse = BaseResponse & {
 
 export type CanvasNodeType = 'document' | 'resource' | 'skill' | 'tool' | 'skillResponse' | 'toolResponse';
 
+export type CanvasNodeData = {
+    /**
+     * Node title
+     */
+    title: string;
+    /**
+     * Node entity ID
+     */
+    entityId: string;
+};
+
+export type CanvasNode = {
+    /**
+     * Node type
+     */
+    type: CanvasNodeType;
+    data: CanvasNodeData;
+};
+
 export type ListCanvasesData = {
     query?: {
         /**

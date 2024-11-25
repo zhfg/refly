@@ -1,4 +1,3 @@
-import { BaseMessage } from '@langchain/core/messages';
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 
 // schema
@@ -8,7 +7,6 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { safeStringifyJSON } from '@refly-packages/utils';
 import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
-import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { CanvasIntentType } from '@refly-packages/common-types';
 // types
 import { GraphState, IContext } from '../scheduler/types';
@@ -166,22 +164,9 @@ export class GenerateDoc extends BaseSkill {
 
     // Create document first
     const res = await this.engine.service.createDocument(user, {
-      title: '',
+      title: 'New Document',
       initialContent: '',
     });
-
-    // Emit intent matcher event
-    this.emitEvent(
-      {
-        event: 'structured_data',
-        structuredDataKey: 'intentMatcher',
-        content: JSON.stringify({
-          type: CanvasIntentType.GenerateDocument,
-          docId: res.data?.docId || '',
-        }),
-      },
-      config,
-    );
 
     const model = this.engine.chatModel({ temperature: 0.1 });
 
@@ -193,6 +178,20 @@ export class GenerateDoc extends BaseSkill {
     const { requestMessages } = await this.commonPreprocess(state, config, module);
 
     this.emitEvent({ event: 'log', content: `Start to generate canvas...` }, config);
+
+    this.emitEvent(
+      {
+        event: 'create_node',
+        node: {
+          type: 'document',
+          data: {
+            entityId: res.data?.docId || '',
+            title: 'New Document',
+          },
+        },
+      },
+      config,
+    );
 
     const responseMessage = await model.invoke(requestMessages, {
       ...config,

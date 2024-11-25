@@ -4049,3 +4049,33 @@ export const CanvasNodeTypeSchema = {
     type: 'string',
     enum: ['document', 'resource', 'skill', 'tool', 'skillResponse', 'toolResponse']
 } as const;
+
+export const CanvasNodeDataSchema = {
+    type: 'object',
+    required: ['title', 'entityId'],
+    properties: {
+        title: {
+            type: 'string',
+            description: 'Node title'
+        },
+        entityId: {
+            type: 'string',
+            description: 'Node entity ID'
+        }
+    }
+} as const;
+
+export const CanvasNodeSchema = {
+    type: 'object',
+    required: ['type', 'data'],
+    properties: {
+        type: {
+            description: 'Node type',
+            '$ref': '#/components/schemas/CanvasNodeType'
+        },
+        data: {
+            type: 'object',
+            '$ref': '#/components/schemas/CanvasNodeData'
+        }
+    }
+} as const;

@@ -1,10 +1,10 @@
-import { SkillMeta } from '@refly-packages/openapi-schema';
+import { CanvasNode, SkillMeta } from '@refly-packages/openapi-schema';
 
 export interface SkillEvent {
   /**
    * The event type
    */
-  event: 'start' | 'end' | 'stream' | 'log' | 'structured_data' | 'usage' | 'error';
+  event: 'start' | 'end' | 'stream' | 'log' | 'structured_data' | 'usage' | 'create_node' | 'error';
   /**
    * The event span, which can be used to separate events into message groups
    * @deprecated
@@ -33,4 +33,8 @@ export interface SkillEvent {
    * Only present when `event` is `structured_data`.
    */
   structuredDataKey?: string;
+  /**
+   * Canvas node data. Only present when `event` is `create_node`.
+   */
+  node?: CanvasNode;
 }

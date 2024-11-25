@@ -4566,6 +4566,30 @@ components:
         - tool
         - skillResponse
         - toolResponse
+    CanvasNodeData:
+      type: object
+      required:
+        - title
+        - entityId
+      properties:
+        title:
+          type: string
+          description: Node title
+        entityId:
+          type: string
+          description: Node entity ID
+    CanvasNode:
+      type: object
+      required:
+        - type
+        - data
+      properties:
+        type:
+          description: Node type
+          $ref: '#/components/schemas/CanvasNodeType'
+        data:
+          type: object
+          $ref: '#/components/schemas/CanvasNodeData'
   securitySchemes:
     api_key:
       type: apiKey
