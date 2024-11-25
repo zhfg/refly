@@ -8,6 +8,8 @@ interface CanvasData {
   nodes: CanvasNode<any>[];
   edges: Edge[];
   selectedNode: CanvasNode<any> | null;
+  mode: 'pointer' | 'hand';
+  selectedNodes: CanvasNode<any>[];
 }
 
 export interface CanvasState {
@@ -16,6 +18,8 @@ export interface CanvasState {
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
   setSelectedNode: (canvasId: string, node: CanvasNode<any> | null) => void;
+  setMode: (canvasId: string, mode: 'pointer' | 'hand') => void;
+  setSelectedNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
 }
 
 export const useCanvasStore = create<CanvasState>()(
@@ -23,18 +27,28 @@ export const useCanvasStore = create<CanvasState>()(
     data: {},
     setNodes: (canvasId, nodes) =>
       set((state) => {
-        state.data[canvasId] ??= { nodes: [], edges: [], selectedNode: null };
+        state.data[canvasId] ??= { nodes: [], edges: [], selectedNode: null, mode: 'hand', selectedNodes: [] };
         state.data[canvasId].nodes = nodes;
       }),
     setEdges: (canvasId, edges) =>
       set((state) => {
-        state.data[canvasId] ??= { nodes: [], edges: [], selectedNode: null };
+        state.data[canvasId] ??= { nodes: [], edges: [], selectedNode: null, mode: 'hand', selectedNodes: [] };
         state.data[canvasId].edges = edges;
       }),
     setSelectedNode: (canvasId, node) =>
       set((state) => {
-        state.data[canvasId] ??= { nodes: [], edges: [], selectedNode: null };
+        state.data[canvasId] ??= { nodes: [], edges: [], selectedNode: null, mode: 'hand', selectedNodes: [] };
         state.data[canvasId].selectedNode = node;
+      }),
+    setMode: (canvasId, mode) =>
+      set((state) => {
+        state.data[canvasId] ??= { nodes: [], edges: [], selectedNode: null, mode: 'hand', selectedNodes: [] };
+        state.data[canvasId].mode = mode;
+      }),
+    setSelectedNodes: (canvasId, nodes) =>
+      set((state) => {
+        state.data[canvasId] ??= { nodes: [], edges: [], selectedNode: null, mode: 'hand', selectedNodes: [] };
+        state.data[canvasId].selectedNodes = nodes;
       }),
   })),
 );

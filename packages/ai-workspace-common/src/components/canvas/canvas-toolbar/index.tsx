@@ -1,4 +1,4 @@
-import { Button, Popover } from 'antd';
+import { Button, Popover, Tooltip } from 'antd';
 import { FaArrowPointer } from 'react-icons/fa6';
 import { RiUploadCloud2Line } from 'react-icons/ri';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
@@ -23,6 +23,8 @@ interface ToolbarItem {
   value: string;
   type: 'button' | 'popover';
   domain: string;
+  tooltip: string;
+  active?: boolean;
 }
 
 interface ToolbarProps {
@@ -31,7 +33,7 @@ interface ToolbarProps {
 
 export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
   const { t } = useTranslation();
-  const { addNode } = useCanvasControl();
+  const { addNode, mode, setMode } = useCanvasControl();
 
   const { importResourceModalVisible, setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
     importResourceModalVisible: state.importResourceModalVisible,
@@ -44,12 +46,30 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
 
   // Define toolbar items
   const tools: ToolbarItem[] = [
-    { icon: FaArrowPointer, value: 'changeMode', type: 'button', domain: 'changeMode' },
-    { icon: RiUploadCloud2Line, value: 'importResource', type: 'button', domain: 'resource' },
-    { icon: HiOutlineSquare3Stack3D, value: 'addResource', type: 'popover', domain: 'resource' },
-    { icon: Sparkles, value: 'addSkill', type: 'popover', domain: 'skill' },
-    // { icon: Wrench, value: 'addTool', type: 'popover', domain: 'tool' },
-    { icon: HiOutlineDocumentText, value: 'addDocument', type: 'popover', domain: 'document' },
+    {
+      icon: FaArrowPointer,
+      value: 'changeMode',
+      type: 'button',
+      domain: 'changeMode',
+      tooltip: mode === 'pointer' ? 'Switch to Hand Mode' : 'Switch to Pointer Mode',
+      active: mode === 'pointer',
+    },
+    {
+      icon: RiUploadCloud2Line,
+      value: 'importResource',
+      type: 'button',
+      domain: 'resource',
+      tooltip: 'Import Resource',
+    },
+    {
+      icon: HiOutlineSquare3Stack3D,
+      value: 'addResource',
+      type: 'popover',
+      domain: 'resource',
+      tooltip: 'Add Resource',
+    },
+    { icon: Sparkles, value: 'addSkill', type: 'popover', domain: 'skill', tooltip: 'Add Skill' },
+    { icon: HiOutlineDocumentText, value: 'addDocument', type: 'popover', domain: 'document', tooltip: 'Add Document' },
   ];
 
   const handleToolSelect = (event: React.MouseEvent, tool: string) => {
@@ -66,6 +86,9 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
       case 'addTool':
         break;
       case 'addDocument':
+        break;
+      case 'changeMode':
+        setMode(mode === 'pointer' ? 'hand' : 'pointer');
         break;
     }
     onToolSelect?.(tool);
@@ -91,26 +114,30 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
         boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
       }}
     >
-      {tools.map((tool, index) =>
-        tool.type === 'button' ? (
+      {tools.map((tool, index) => (
+        <Tooltip
+          key={index}
+          title={tool.tooltip}
+          placement="right"
+          mouseEnterDelay={0.5}
+          overlayClassName="!px-2 !py-1"
+          arrow={false}
+        >
           <Button
-            key={index}
             type="text"
             onClick={(event) => handleToolSelect(event, tool.value)}
-            className="h-[32px] w-[32px] flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors duration-200 group"
+            className={`
+              h-[32px] w-[32px] 
+              flex items-center justify-center 
+              hover:bg-gray-100 rounded-lg 
+              transition-colors duration-200 
+              group
+              ${tool.active ? 'bg-gray-100' : ''}
+            `}
             icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
-          ></Button>
-        ) : (
-          <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm}>
-            <Button
-              type="text"
-              onClick={(event) => handleToolSelect(event, tool.value)}
-              className="h-[32px] w-[32px] flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors duration-200 group"
-              icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
-            ></Button>
-          </SearchList>
-        ),
-      )}
+          />
+        </Tooltip>
+      ))}
       {importResourceModalVisible ? <ImportResourceModal /> : null}
       {sourceListDrawerVisible && isWeb ? <SourceListModal classNames="source-list-modal" /> : null}
     </div>

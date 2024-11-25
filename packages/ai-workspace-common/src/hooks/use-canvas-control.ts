@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { Connection, useReactFlow } from '@xyflow/react';
+import { Connection, useReactFlow, Node } from '@xyflow/react';
 import Dagre from '@dagrejs/dagre';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { applyEdgeChanges, applyNodeChanges, Edge, EdgeChange, NodeChange } from '@xyflow/react';
@@ -12,7 +12,13 @@ import { EDGE_STYLES } from '../components/canvas/constants';
 
 const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: { direction: 'TB' | 'LR' }) => {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: options.direction });
+  g.setGraph({
+    rankdir: options.direction,
+    nodesep: 100,
+    ranksep: 80,
+    marginx: 50,
+    marginy: 50,
+  });
 
   edges.forEach((edge) => g.setEdge(edge.source, edge.target));
   nodes.forEach((node) =>
@@ -54,24 +60,44 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     setNodes,
     setEdges,
     setSelectedNode: setSelectedNodeRaw,
+    setMode: setModeRaw,
+    setSelectedNodes: setSelectedNodesRaw,
   } = useCanvasStoreShallow((state) => ({
     data: state.data[canvasId],
     setNodes: state.setNodes,
     setEdges: state.setEdges,
     setSelectedNode: state.setSelectedNode,
+    setMode: state.setMode,
+    setSelectedNodes: state.setSelectedNodes,
   }));
 
-  const { nodes, edges, selectedNode } = data ?? {
+  const { nodes, edges, selectedNode, mode, selectedNodes } = data ?? {
     nodes: [],
     edges: [],
     selectedNode: null,
+    mode: 'hand',
+    selectedNodes: [],
   };
 
   const setSelectedNode = useCallback(
-    (node: CanvasNode<any>) => {
+    (node: CanvasNode<any> | null) => {
       setSelectedNodeRaw(canvasId, node);
     },
     [setSelectedNodeRaw, canvasId],
+  );
+
+  const setMode = useCallback(
+    (newMode: 'pointer' | 'hand') => {
+      setModeRaw(canvasId, newMode);
+    },
+    [setModeRaw, canvasId],
+  );
+
+  const setSelectedNodes = useCallback(
+    (nodes: CanvasNode<any>[]) => {
+      setSelectedNodesRaw(canvasId, nodes);
+    },
+    [setSelectedNodesRaw, canvasId],
   );
 
   const ydoc = provider.document;
@@ -106,7 +132,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     };
   }, [canvasId]);
 
-  const { fitView } = useReactFlow();
+  const { fitView, getNodes, setNodes: setReactFlowNodes } = useReactFlow();
 
   const onLayout = useCallback(
     (direction: 'TB' | 'LR') => {
@@ -120,11 +146,15 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         yEdges.push(layouted.edges);
       });
 
-      // window.requestAnimationFrame(() => {
-      //   fitView();
-      // });
+      window.requestAnimationFrame(() => {
+        fitView({
+          padding: 0.2,
+          duration: 200,
+          maxZoom: 1,
+        });
+      });
     },
-    [canvasId],
+    [canvasId, fitView],
   );
 
   const onNodesChange = useCallback(
@@ -183,7 +213,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       return;
     }
 
-    // Add default metadata based on node type
     const enrichedData = {
       ...node.data,
       metadata: {
@@ -200,7 +229,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     ydoc?.transact(() => {
       yNodes?.push([newNode]);
 
-      // If there are existing nodes, create an edge from the last node to the new node
       if (connectTo?.length > 0) {
         const newEdges: Edge[] = [];
         connectTo.forEach((filter) => {
@@ -219,17 +247,50 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
             });
           }
         });
-        console.log('newEdges', newEdges);
         yEdges?.push(newEdges);
       }
     });
 
-    window.requestAnimationFrame(() => {
-      onLayout('LR');
-    });
+    const currentNodes = getNodes();
+    setReactFlowNodes(
+      currentNodes.map((node) => ({
+        ...node,
+        selected: node.id === newNode.id,
+      })),
+    );
 
     setSelectedNode(newNode);
+
+    setTimeout(() => {
+      onLayout('LR');
+    }, 50);
   };
+
+  const handleSelectionChange = useCallback(
+    ({ nodes: selectedNodes }: { nodes: Node[] }) => {
+      // 过滤并转换节点类型
+      const selectedCanvasNodes = selectedNodes.filter((node): node is CanvasNode<any> => {
+        return (
+          node.type !== undefined &&
+          node.data !== undefined &&
+          typeof node.data === 'object' &&
+          'title' in node.data &&
+          'entityId' in node.data
+        );
+      });
+
+      // 如果只选中一个节点，同时更新 selectedNode
+      if (selectedCanvasNodes.length === 1) {
+        setSelectedNode(selectedCanvasNodes[0]);
+      } else if (selectedCanvasNodes.length === 0) {
+        // @ts-ignore - null is valid here
+        setSelectedNode(null);
+      }
+
+      setSelectedNodes(selectedCanvasNodes);
+    },
+    [setSelectedNodes, setSelectedNode],
+  );
 
   return {
     nodes,
@@ -241,5 +302,10 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     onConnect,
     onLayout,
     addNode,
+    mode,
+    setMode,
+    selectedNodes,
+    setSelectedNodes,
+    handleSelectionChange,
   };
 };
