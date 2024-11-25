@@ -10,5 +10,6 @@ import { CollabService } from './collab.service';
 @Module({
   imports: [CommonModule, ConfigModule, RAGModule, MiscModule, SubscriptionModule],
   providers: [CollabGateway, CollabService],
+  exports: [CollabService],
 })
 export class CollabModule {}

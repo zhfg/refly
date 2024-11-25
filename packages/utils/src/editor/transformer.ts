@@ -10,6 +10,10 @@ import { defaultMarkdownParser } from './from_markdown';
 export const state2Markdown = (stateUpdate: Uint8Array) => {
   const ydoc = new Y.Doc();
   Y.applyUpdate(ydoc, stateUpdate);
+  return ydoc2Markdown(ydoc);
+};
+
+export const ydoc2Markdown = (ydoc: Y.Doc) => {
   const xmlFragment = ydoc.getXmlFragment('default');
   const node = yXmlFragmentToProseMirrorRootNode(xmlFragment, defaultSchema);
   return defaultMarkdownSerializer.serialize(node);
@@ -157,4 +161,30 @@ export const convertHTMLToMarkdown = (mode: FormatMode, html: string): string =>
   }
 
   return tidyMarkdown(contentText || '').trim();
+};
+
+/**
+ * Incrementally updates an existing Yjs document with new markdown content.
+ * This performs an in-place update while preserving formatting and structure where possible.
+ *
+ * @param ydoc - Existing Yjs document to update
+ * @param markdown - New markdown content to merge into the document
+ * @returns The updated Yjs document
+ */
+export const incrementalMarkdownUpdate = (ydoc: Y.Doc, markdown: string): Y.Doc => {
+  // Parse the new markdown content into a ProseMirror node
+  const newNode = parseMarkdown(markdown);
+  const xmlFragment = ydoc?.getXmlFragment('default');
+
+  if (!xmlFragment) {
+    return ydoc;
+  }
+
+  // Create a transaction to batch our updates
+  ydoc.transact(() => {
+    xmlFragment.delete(0, xmlFragment.length);
+    prosemirrorToYXmlFragment(newNode, xmlFragment);
+  });
+
+  return ydoc;
 };

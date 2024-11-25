@@ -212,4 +212,10 @@ export class SkillController {
     const job = await this.skillService.getSkillJobDetail(user, jobId);
     return buildSuccessResponse(skillJobPO2DTO(job));
   }
+
+  @Get('/modifyDoc')
+  async modifyDoc(@Query('documentName') documentName: string) {
+    await this.skillService.modifyDoc(documentName);
+    return buildSuccessResponse();
+  }
 }

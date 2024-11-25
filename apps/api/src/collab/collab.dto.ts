@@ -1,4 +1,5 @@
-import { Canvas, Document, User } from '@prisma/client';
+import { Canvas, Document } from '@prisma/client';
+import { User } from '@refly-packages/openapi-schema';
 
 type BaseEntity = {
   uid: string;
