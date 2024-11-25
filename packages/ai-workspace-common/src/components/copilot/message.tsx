@@ -457,7 +457,6 @@ export const WelcomeMessage = () => {
     setSkillManagerModalVisible: state.setSkillManagerModalVisible,
   }));
 
-  const { skillInstances = [] } = skillStore;
   // const needInstallSkillInstance = skillInstances?.length === 0 && !skillStore?.isFetchingSkillInstances;
   const needInstallSkillInstance = false; // hide skill install hint
 
@@ -481,27 +480,6 @@ export const WelcomeMessage = () => {
           ) : null}
         </div>
         <div className="welcome-message-text">{t('welcomeMessage')}</div>
-        {needInstallSkillInstance && (
-          <div className="skill-onboarding">
-            {skillInstances?.length === 0 ? (
-              <div className="install-skill-hint">
-                <div className="install-skill-hint-container">
-                  <div className="install-skill-hint-title">
-                    {t('copilot.message.installSkillHint')}
-                    <Button
-                      type="text"
-                      onClick={() => {
-                        navigate('/skill?tab=template');
-                      }}
-                    >
-                      {t('copilot.message.installSkillHintTitle')}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        )}
       </div>
     </div>
   );

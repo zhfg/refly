@@ -52,7 +52,7 @@ export const useProcessContextFilter = (filterNow = false) => {
   );
 
   const skillStore = useSkillStore((state) => ({
-    selectedSkill: state.selectedSkill,
+    selectedSkill: state.selectedSkillInstance,
   }));
 
   const useContextFilterConfig = useContextFilterConfigStore((state) => ({

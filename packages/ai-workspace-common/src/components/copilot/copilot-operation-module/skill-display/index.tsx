@@ -1,23 +1,17 @@
-import { IconDown, IconSettings } from '@arco-design/web-react/icon';
+import { IconDown } from '@arco-design/web-react/icon';
 import { useResizeBox } from '@refly-packages/ai-workspace-common/hooks/use-resize-box';
-import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
+import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 import { memo, useEffect, useRef, useState } from 'react';
-import { useSkillManagement } from '@refly-packages/ai-workspace-common/hooks/use-skill-management';
-import { useTranslation } from 'react-i18next';
-import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
-import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
+import { useListSkills } from '@refly/openapi-schema/queries';
 
 export const SkillDisplay = memo(({ source }: { source: string }) => {
-  const skillStore = useSkillStore((state) => ({
-    skillInstances: state.skillInstances,
-    setSelectedSkillInstance: state.setSelectedSkillInstance,
+  const skillStore = useSkillStoreShallow((state) => ({
+    setSelectedSkill: state.setSelectedSkill,
     setSkillManagerModalVisible: state.setSkillManagerModalVisible,
   }));
-
-  const { t } = useTranslation();
 
   const skillDisplayRef = useRef<HTMLDivElement>(null);
 
@@ -29,41 +23,25 @@ export const SkillDisplay = memo(({ source }: { source: string }) => {
     placeholderWidth: 95,
   });
 
-  const { handleGetSkillInstances, handleGetSkillTemplates } = useSkillManagement();
-
-  const isFromSkillJob = () => {
-    return source === MessageIntentSource.SkillJob;
-  };
+  const { data } = useListSkills();
+  const { data: skills } = data || {};
 
   useEffect(() => {
-    if (isFromSkillJob()) return;
-    handleGetSkillInstances();
-  }, []);
-
-  useEffect(() => {
-    if (skillStore.skillInstances.length > 0) {
+    if (skills?.length > 0) {
       setTimeout(() => {
         updateContainCnt();
       }, 0);
     }
-  }, [skillStore.skillInstances]);
-
-  const [popoverOpen, setPopoverOpen] = useState(false);
-
-  const handlePopoverConfirm = (selectedItems: ContextItem[]) => {
-    // TODO: 需要优化，当前选中技能后，再次打开技能管理面板，会导致选中技能丢失
-    // skillStore?.setSelectedSkillInstance?.(null);
-    setPopoverOpen(false);
-  };
+  }, [skills]);
 
   return (
     <div className="skill-container" ref={skillDisplayRef}>
-      {skillStore?.skillInstances?.map((item, index) => (
+      {skills?.map((item, index) => (
         <div
           key={index}
           className={`skill-item ${index >= containCnt ? 'hide' : ''}`}
           onClick={() => {
-            skillStore.setSelectedSkillInstance(item);
+            skillStore.setSelectedSkill(item);
           }}
         >
           <SkillAvatar noBorder size={20} icon={item?.icon} displayName={item?.displayName} background="transparent" />
@@ -71,7 +49,7 @@ export const SkillDisplay = memo(({ source }: { source: string }) => {
         </div>
       ))}
 
-      <SearchList domain={'skill'} handleConfirm={handlePopoverConfirm} trigger="hover" mode="single">
+      <SearchList domain={'skill'} trigger="hover" mode="single">
         <div
           key="more"
           className={`skill-item group`}

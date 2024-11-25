@@ -44,7 +44,7 @@ export const ChatActions = (props: ChatActionsProps) => {
     pending: state.pending,
   }));
   const skillStore = useSkillStoreShallow((state) => ({
-    selectedSkill: state.selectedSkill,
+    selectedSkill: state.selectedSkillInstance,
   }));
 
   const { tokenUsage } = useSubscriptionStoreShallow((state) => ({

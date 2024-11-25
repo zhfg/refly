@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 export const SelectedSkillHeader = () => {
   const { t } = useTranslation();
   const skillStore = useSkillStoreShallow((state) => ({
-    selectedSkill: state.selectedSkill,
+    selectedSkill: state.selectedSkillInstance,
     setSelectedSkillInstance: state.setSelectedSkillInstance,
   }));
 

@@ -50,7 +50,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
     isLogin: state.isLogin,
   }));
   const skillStore = useSkillStoreShallow((state) => ({
-    selectedSkill: state.selectedSkill,
+    selectedSkill: state.selectedSkillInstance,
   }));
   const chatStore = useChatStoreShallow((state) => ({
     setNewQAText: state.setNewQAText,

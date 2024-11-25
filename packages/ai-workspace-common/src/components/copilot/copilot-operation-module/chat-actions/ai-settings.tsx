@@ -32,7 +32,7 @@ export const AISettingsDropdown = ({
   }));
 
   const skillStore = useSkillStoreShallow((state) => ({
-    selectedSkill: state.selectedSkill,
+    selectedSkill: state.selectedSkillInstance,
   }));
 
   // Common settings items

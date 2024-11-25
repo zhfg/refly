@@ -3489,6 +3489,10 @@ components:
           example: lb-g30e1b80b5g1itbemc0g5jj3
     Action:
       type: object
+      required:
+        - actionType
+        - actionName
+        - displayName
       properties:
         actionType:
           type: string
@@ -3497,6 +3501,9 @@ components:
         actionName:
           type: string
           description: Action name
+        icon:
+          description: Action icon
+          $ref: '#/components/schemas/Icon'
         displayName:
           type: string
           description: Action display name
