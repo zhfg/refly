@@ -5,7 +5,9 @@ import {
   HiOutlineSparkles,
   HiSparkles,
   HiOutlineChatBubbleLeftRight,
+  HiMiniPlayCircle,
 } from 'react-icons/hi2';
+
 import { RiDoubleQuotesL } from 'react-icons/ri';
 import { BiText } from 'react-icons/bi';
 import { HiPlus } from 'react-icons/hi';
@@ -20,3 +22,4 @@ export const IconThread = HiOutlineChatBubbleLeftRight;
 export const IconQuote = RiDoubleQuotesL;
 export const IconText = BiText;
 export const IconPlus = HiPlus;
+export const IconPlay = HiMiniPlayCircle;

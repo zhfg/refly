@@ -169,6 +169,9 @@
     "login": "Start Writing with Refly"
   },
   "workspace": {
+    "canvasListModal": {
+      "continue": "Continue Conversation"
+    },
     "contentPanel": {
       "tabPanel": {
         "resource": "Resources",

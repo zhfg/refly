@@ -28,7 +28,7 @@
     "context": "上下文",
     "templateConfig": "模板配置",
     "required": "必填项",
-    "empty": "暂无内容",
+    "empty": "空空如也",
     "selectContext": "选择待使用上下文",
     "emptyInput": "内容为空，请填入或选择内容",
     "retry": "重试",
@@ -170,6 +170,9 @@
     "login": "开始用 Refly 写作"
   },
   "workspace": {
+    "canvasListModal": {
+      "continue": "继续对话"
+    },
     "contentPanel": {
       "tabPanel": {
         "resource": "资源",

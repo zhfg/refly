@@ -6,8 +6,8 @@ import {
   Layout,
   Menu,
   Tag,
-  Message,
 } from "@arco-design/web-react"
+import { Tooltip, message } from "antd"
 import {
   useLocation,
   useNavigate,
@@ -30,6 +30,7 @@ import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/
 import { SearchQuickOpenBtn } from "@refly-packages/ai-workspace-common/components/search-quick-open-btn"
 import { useTranslation } from "react-i18next"
 import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/components/sider-menu-setting-list"
+import { CanvasListModal } from "@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal"
 // hooks
 import { useHandleSiderData } from "@refly-packages/ai-workspace-common/hooks/use-handle-sider-data"
 import { useSiderStoreShallow } from "@refly-packages/ai-workspace-common/stores/sider"
@@ -55,24 +56,6 @@ const SiderLogo = (props: { navigate: (path: string) => void }) => {
         <Tag color="#00968F" className="logo-beta" size="small">
           Beta
         </Tag>
-      </div>
-    </div>
-  )
-}
-
-const MenuItemContent = (props: {
-  icon?: React.ReactNode
-  title?: string
-  collapse?: boolean
-  position?: "left" | "right"
-}) => {
-  const { position = "left" } = props
-  return (
-    <div className="flex">
-      <div className="flex flex-1 flex-nowrap items-center">
-        {position === "left" && props.icon}
-        <span className="sider-menu-title">{props.title}</span>
-        {position === "right" && props.icon}
       </div>
     </div>
   )
@@ -129,10 +112,45 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     loginModalVisible: state.loginModalVisible,
     setLoginModalVisible: state.setLoginModalVisible,
   }))
+  const [showCanvasList, setShowCanvasList] = useState(false)
 
   const { getCanvasList, getLibraryList } = useHandleSiderData(true)
 
   const { t } = useTranslation()
+
+  const MenuItemContent = (props: {
+    icon?: React.ReactNode
+    title?: string
+    type: string
+    collapse?: boolean
+    position?: "left" | "right"
+  }) => {
+    const { position = "left", type } = props
+
+    const handleNavClick = (e: React.MouseEvent) => {
+      e.stopPropagation()
+      if (type === "Canvas") {
+        setShowCanvasList(true)
+      }
+    }
+    return (
+      <>
+        <Tooltip title={t(`loggedHomePage.siderMenu.viewMore`)}>
+          <div
+            className="flex"
+            onClick={e => {
+              handleNavClick(e)
+            }}>
+            <div className="flex flex-1 flex-nowrap items-center">
+              {position === "left" && props.icon}
+              <span className="sider-menu-title">{props.title}</span>
+              {position === "right" && props.icon}
+            </div>
+          </div>
+        </Tooltip>
+      </>
+    )
+  }
 
   const getNavSelectedKeys = () => {
     const pathname = location.pathname
@@ -146,28 +164,6 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
   }
 
   const selectedKey = getNavSelectedKeys()
-
-  const handleNavClick = (itemKey: string) => {
-    switch (itemKey) {
-      case "CanvasList": {
-        console.log("CanvasList")
-        break
-      }
-
-      case "Settings": {
-        break
-      }
-
-      case "Library": {
-        navigate(`/library`)
-        break
-      }
-
-      default: {
-        break
-      }
-    }
-  }
 
   interface SiderCenterProps {
     key: string
@@ -206,7 +202,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
       },
     })
     if (data?.success) {
-      Message.success(t("common.putSuccess"))
+      message.success(t("common.putSuccess"))
       navigate(`/canvas/${data?.data?.canvasId}`)
       getCanvasList()
     }
@@ -225,7 +221,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
       },
     })
     if (data?.success) {
-      Message.success(t("common.putSuccess"))
+      message.success(t("common.putSuccess"))
       getLibraryList()
     }
     setCreateDocumentLoading(false)
@@ -249,8 +245,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
           defaultSelectedKeys={["Home"]}
           className="sider-menu-nav"
           selectedKeys={[selectedKey]}
-          autoOpen={true}
-          onClickMenuItem={handleNavClick}>
+          autoOpen={true}>
           <div className="sider-menu-inner">
             {siderSections.map((section, index) => (
               <div key={`section-${index}`} className="sider-section">
@@ -261,6 +256,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                       title={
                         <>
                           <MenuItemContent
+                            type={item.key}
                             icon={item.icon}
                             title={t(`loggedHomePage.siderMenu.${item.name}`)}
                           />
@@ -357,6 +353,11 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
             )}
           </div>
         </Menu>
+
+        <CanvasListModal
+          visible={showCanvasList}
+          setVisible={setShowCanvasList}
+        />
       </div>
     </Sider>
   )
