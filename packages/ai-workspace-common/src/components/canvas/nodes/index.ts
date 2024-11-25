@@ -114,12 +114,17 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
 export const getNodeCommonStyles = ({ selected, isHovered }: { selected: boolean; isHovered: boolean }) => `
   bg-white 
   rounded-xl
-  border 
-  shadow-[0px_1px_2px_0px_rgba(16,24,60,0.05)]
+  box-border
   p-3
   transition-all
   duration-200
-  ${selected ? 'ring-2 ring-[#00968F] border-[#00968F]' : 'border-[#EAECF0]'}
-  ${isHovered ? 'shadow-[0px_12px_16px_-4px_rgba(16,24,40,0.08),0px_4px_6px_-2px_rgba(16,24,40,0.03)]' : ''}
+  border-[2px]
+  border-solid
+  ${selected ? 'border-[#00968F]' : 'border-transparent'}
+  ${
+    isHovered
+      ? 'shadow-[0px_12px_16px_-4px_rgba(16,24,40,0.08),0px_4px_6px_-2px_rgba(16,24,40,0.03)]'
+      : 'shadow-[0px_1px_2px_0px_rgba(16,24,60,0.05)]'
+  }
   hover:shadow-[0px_12px_16px_-4px_rgba(16,24,40,0.08),0px_4px_6px_-2px_rgba(16,24,40,0.03)]
 `;

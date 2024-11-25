@@ -24,6 +24,7 @@ interface ToolbarItem {
   type: 'button' | 'popover';
   domain: string;
   tooltip: string;
+  active?: boolean;
 }
 
 interface ToolbarProps {
@@ -32,7 +33,7 @@ interface ToolbarProps {
 
 export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
   const { t } = useTranslation();
-  const { addNode } = useCanvasControl();
+  const { addNode, mode, setMode } = useCanvasControl();
 
   const { importResourceModalVisible, setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
     importResourceModalVisible: state.importResourceModalVisible,
@@ -45,7 +46,14 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
 
   // Define toolbar items
   const tools: ToolbarItem[] = [
-    { icon: FaArrowPointer, value: 'changeMode', type: 'button', domain: 'changeMode', tooltip: 'Select Mode' },
+    {
+      icon: FaArrowPointer,
+      value: 'changeMode',
+      type: 'button',
+      domain: 'changeMode',
+      tooltip: mode === 'pointer' ? 'Switch to Hand Mode' : 'Switch to Pointer Mode',
+      active: mode === 'pointer',
+    },
     {
       icon: RiUploadCloud2Line,
       value: 'importResource',
@@ -79,6 +87,9 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
         break;
       case 'addDocument':
         break;
+      case 'changeMode':
+        setMode(mode === 'pointer' ? 'hand' : 'pointer');
+        break;
     }
     onToolSelect?.(tool);
   };
@@ -103,42 +114,30 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
         boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
       }}
     >
-      {tools.map((tool, index) =>
-        tool.type === 'button' ? (
-          <Tooltip
-            key={index}
-            title={tool.tooltip}
-            placement="right"
-            mouseEnterDelay={0.5}
-            overlayClassName="!px-2 !py-1"
-            arrow={false}
-          >
-            <Button
-              type="text"
-              onClick={(event) => handleToolSelect(event, tool.value)}
-              className="h-[32px] w-[32px] flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors duration-200 group"
-              icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
-            />
-          </Tooltip>
-        ) : (
-          <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm}>
-            <Tooltip
-              title={tool.tooltip}
-              placement="right"
-              mouseEnterDelay={0.5}
-              overlayClassName="!px-2 !py-1"
-              arrow={false}
-            >
-              <Button
-                type="text"
-                onClick={(event) => handleToolSelect(event, tool.value)}
-                className="h-[32px] w-[32px] flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors duration-200 group"
-                icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
-              />
-            </Tooltip>
-          </SearchList>
-        ),
-      )}
+      {tools.map((tool, index) => (
+        <Tooltip
+          key={index}
+          title={tool.tooltip}
+          placement="right"
+          mouseEnterDelay={0.5}
+          overlayClassName="!px-2 !py-1"
+          arrow={false}
+        >
+          <Button
+            type="text"
+            onClick={(event) => handleToolSelect(event, tool.value)}
+            className={`
+              h-[32px] w-[32px] 
+              flex items-center justify-center 
+              hover:bg-gray-100 rounded-lg 
+              transition-colors duration-200 
+              group
+              ${tool.active ? 'bg-gray-100' : ''}
+            `}
+            icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
+          />
+        </Tooltip>
+      ))}
       {importResourceModalVisible ? <ImportResourceModal /> : null}
       {sourceListDrawerVisible && isWeb ? <SourceListModal classNames="source-list-modal" /> : null}
     </div>

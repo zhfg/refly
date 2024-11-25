@@ -1,5 +1,14 @@
-import { useCallback, useMemo } from 'react';
-import { ReactFlow, Background, Controls, MiniMap, ReactFlowProvider } from '@xyflow/react';
+import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  MiniMap,
+  ReactFlowProvider,
+  Node,
+  SelectionMode,
+  useReactFlow,
+} from '@xyflow/react';
 import { nodeTypes, CanvasNode } from './nodes';
 import { CanvasToolbar } from './canvas-toolbar';
 import { TopToolbar } from './top-toolbar';
@@ -12,9 +21,34 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { CanvasProvider } from '@refly-packages/ai-workspace-common/context/canvas';
 import { EDGE_STYLES } from './constants';
 
+const selectionStyles = `
+  .react-flow__selection {
+    background: rgba(0, 150, 143, 0.03) !important;
+    border: 0.5px solid #00968F !important;
+  }
+  
+  .react-flow__nodesselection-rect {
+    background: rgba(0, 150, 143, 0.03) !important;
+    border: 0.5px solid #00968F !important;
+  }
+`;
+
 const Flow = ({ canvasId }: { canvasId: string }) => {
-  const { nodes, edges, selectedNode, setSelectedNode, onNodesChange, onEdgesChange, onConnect } =
-    useCanvasControl(canvasId);
+  const {
+    nodes,
+    edges,
+    selectedNode,
+    selectedNodes,
+    mode,
+    setSelectedNode,
+    setSelectedNodes,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+  } = useCanvasControl(canvasId);
+
+  const { getNode, flowToScreenPosition, getNodesBounds } = useReactFlow();
+
   const defaultEdgeOptions = {
     style: EDGE_STYLES.default,
   };
@@ -59,29 +93,43 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     console.log('Selected tool:', tool);
   };
 
+  const handleSelectionChange = useCallback(
+    ({ nodes }: { nodes: Node[] }) => {
+      const selectedCanvasNodes = nodes.filter((node): node is CanvasNode<any> => {
+        return node.type !== undefined && 'title' in node.data && 'entityId' in node.data;
+      });
+
+      setSelectedNodes(selectedCanvasNodes);
+    },
+    [setSelectedNodes],
+  );
+
+  console.log('selectedNodes', selectedNodes);
+
   return (
     <div className="w-full h-screen relative flex flex-col">
       <CanvasToolbar onToolSelect={handleToolSelect} />
       <TopToolbar />
       <div className="flex-grow relative">
+        <style>{selectionStyles}</style>
         <ReactFlow
           {...flowConfig}
-          panOnScroll
-          fitView={true}
-          minZoom={0.25}
-          maxZoom={2}
-          selectionOnDrag
+          panOnScroll={mode !== 'pointer'}
+          selectNodesOnDrag={mode === 'pointer'}
+          selectionMode={mode === 'pointer' ? SelectionMode.Partial : SelectionMode.Full}
+          selectionOnDrag={mode === 'pointer'}
+          panOnDrag={mode !== 'pointer'}
+          selectionKeyCode={null}
+          multiSelectionKeyCode={null}
+          deleteKeyCode={null}
           nodeTypes={nodeTypes}
-          nodes={nodes.map((node) => ({
-            ...node,
-            selected: selectedNode?.id === node.id,
-          }))}
+          nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
-          selectNodesOnDrag={false}
+          onSelectionChange={handleSelectionChange}
         >
           <Background />
           <MiniMap

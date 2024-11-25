@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { Connection, useReactFlow } from '@xyflow/react';
+import { Connection, useReactFlow, Node } from '@xyflow/react';
 import Dagre from '@dagrejs/dagre';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { applyEdgeChanges, applyNodeChanges, Edge, EdgeChange, NodeChange } from '@xyflow/react';
@@ -60,24 +60,44 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     setNodes,
     setEdges,
     setSelectedNode: setSelectedNodeRaw,
+    setMode: setModeRaw,
+    setSelectedNodes: setSelectedNodesRaw,
   } = useCanvasStoreShallow((state) => ({
     data: state.data[canvasId],
     setNodes: state.setNodes,
     setEdges: state.setEdges,
     setSelectedNode: state.setSelectedNode,
+    setMode: state.setMode,
+    setSelectedNodes: state.setSelectedNodes,
   }));
 
-  const { nodes, edges, selectedNode } = data ?? {
+  const { nodes, edges, selectedNode, mode, selectedNodes } = data ?? {
     nodes: [],
     edges: [],
     selectedNode: null,
+    mode: 'hand',
+    selectedNodes: [],
   };
 
   const setSelectedNode = useCallback(
-    (node: CanvasNode<any>) => {
+    (node: CanvasNode<any> | null) => {
       setSelectedNodeRaw(canvasId, node);
     },
     [setSelectedNodeRaw, canvasId],
+  );
+
+  const setMode = useCallback(
+    (newMode: 'pointer' | 'hand') => {
+      setModeRaw(canvasId, newMode);
+    },
+    [setModeRaw, canvasId],
+  );
+
+  const setSelectedNodes = useCallback(
+    (nodes: CanvasNode<any>[]) => {
+      setSelectedNodesRaw(canvasId, nodes);
+    },
+    [setSelectedNodesRaw, canvasId],
   );
 
   const ydoc = provider.document;
@@ -246,6 +266,32 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     }, 50);
   };
 
+  const handleSelectionChange = useCallback(
+    ({ nodes: selectedNodes }: { nodes: Node[] }) => {
+      // 过滤并转换节点类型
+      const selectedCanvasNodes = selectedNodes.filter((node): node is CanvasNode<any> => {
+        return (
+          node.type !== undefined &&
+          node.data !== undefined &&
+          typeof node.data === 'object' &&
+          'title' in node.data &&
+          'entityId' in node.data
+        );
+      });
+
+      // 如果只选中一个节点，同时更新 selectedNode
+      if (selectedCanvasNodes.length === 1) {
+        setSelectedNode(selectedCanvasNodes[0]);
+      } else if (selectedCanvasNodes.length === 0) {
+        // @ts-ignore - null is valid here
+        setSelectedNode(null);
+      }
+
+      setSelectedNodes(selectedCanvasNodes);
+    },
+    [setSelectedNodes, setSelectedNode],
+  );
+
   return {
     nodes,
     edges,
@@ -256,5 +302,10 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     onConnect,
     onLayout,
     addNode,
+    mode,
+    setMode,
+    selectedNodes,
+    setSelectedNodes,
+    handleSelectionChange,
   };
 };

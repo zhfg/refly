@@ -123,7 +123,6 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
           w-[170px]
           h-[186px]
           ${getNodeCommonStyles({ selected, isHovered })}
-          ${selected ? 'ring-2 ring-[#00968F] border-[#00968F]' : ''}
         `}
       >
         <CustomHandle
