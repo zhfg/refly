@@ -6,14 +6,3 @@ Always use optional chaining (?.) when accessing object properties.
 Always use nullish coalescing (??) or default values for potentially undefined values.
 Always check array existence before using array methods.
 Always validate object properties before destructuring.
-
-// Examples:
-// ✅ Good:
-const userName = user?.name ?? 'Anonymous'
-const firstItem = items?.length > 0 ? items[0] : null
-const { title = 'Untitled' } = post ?? {}
-
-// ❌ Avoid:
-const userName = user.name
-const firstItem = items[0]
-const { title } = post

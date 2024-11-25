@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { ReactFlow, Background, Controls, MiniMap, ReactFlowProvider } from '@xyflow/react';
 import { nodeTypes, CanvasNode } from './nodes';
 import { CanvasToolbar } from './canvas-toolbar';
@@ -15,38 +15,61 @@ import { EDGE_STYLES } from './constants';
 const Flow = ({ canvasId }: { canvasId: string }) => {
   const { nodes, edges, selectedNode, setSelectedNode, onNodesChange, onEdgesChange, onConnect } =
     useCanvasControl(canvasId);
-
-  // Add node click handler
-  const onNodeClick = useCallback((event: React.MouseEvent, node: CanvasNode<any>) => {
-    if (!node?.id) {
-      console.warn('Invalid node clicked');
-      return;
-    }
-    setSelectedNode(node);
-  }, []);
-
-  // Add panel close handler
-  const handleClosePanel = () => {
-    setSelectedNode(null);
+  const defaultEdgeOptions = {
+    style: EDGE_STYLES.default,
   };
+
+  const defaultViewport = {
+    x: 0,
+    y: 0,
+    zoom: 1,
+  };
+
+  const flowConfig = useMemo(
+    () => ({
+      defaultViewport,
+      fitViewOptions: {
+        padding: 0.2,
+        minZoom: 1,
+        maxZoom: 1,
+      },
+      defaultEdgeOptions,
+    }),
+    [],
+  );
+
+  const onNodeClick = useCallback(
+    (event: React.MouseEvent, node: CanvasNode<any>) => {
+      if (!node?.id) {
+        console.warn('Invalid node clicked');
+        return;
+      }
+      setSelectedNode(node);
+    },
+    [setSelectedNode],
+  );
+
+  const nodePreview = useMemo(() => {
+    if (!selectedNode) return null;
+    return <NodePreview node={selectedNode} handleClosePanel={() => setSelectedNode(null)} />;
+  }, [selectedNode]);
 
   const handleToolSelect = (tool: string) => {
     // Handle tool selection
     console.log('Selected tool:', tool);
   };
 
-  const defaultEdgeOptions = {
-    style: EDGE_STYLES.default,
-  };
-
   return (
-    <div className="w-screen h-screen relative flex flex-col">
+    <div className="w-full h-screen relative flex flex-col">
       <CanvasToolbar onToolSelect={handleToolSelect} />
       <TopToolbar />
-      <div className="flex-grow">
+      <div className="flex-grow relative">
         <ReactFlow
+          {...flowConfig}
           panOnScroll
-          fitView
+          fitView={true}
+          minZoom={0.25}
+          maxZoom={2}
           selectionOnDrag
           nodeTypes={nodeTypes}
           nodes={nodes}
@@ -55,7 +78,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
-          defaultEdgeOptions={defaultEdgeOptions}
         >
           <Background />
           <MiniMap
@@ -98,13 +120,13 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             }}
           />
         </ReactFlow>
+
+        <div className="absolute bottom-[12px] left-1/2 -translate-x-1/2 w-[444px] z-10">
+          <CopilotOperationModule source={MessageIntentSource.Canvas} />
+        </div>
       </div>
 
-      <div className="absolute bottom-[12px] left-1/2 -translate-x-1/2 w-[444px]">
-        <CopilotOperationModule source={MessageIntentSource.Canvas} />
-      </div>
-
-      {selectedNode && <NodePreview node={selectedNode} handleClosePanel={handleClosePanel} />}
+      {nodePreview}
     </div>
   );
 };
