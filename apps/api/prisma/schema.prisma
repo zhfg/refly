@@ -168,10 +168,10 @@ model ActionResult {
   logs           String             @default("[]") @map("logs")
   /// Structured data output (JSON)
   structuredData String             @default("{}") @map("structured_data")
+  /// Artifacts (JSON array)
+  artifacts      String             @default("[]") @map("artifacts")
   /// Errors
   errors         String?            @map("errors")
-  /// Tool calls (JSON array)
-  toolCalls      String?            @map("tool_calls")
   /// Token usage summary
   tokenUsage     String?            @map("token_usage")
   /// Skill invocation parameters (JSON of `InvokeSkillRequest`)

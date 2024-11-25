@@ -1099,6 +1099,33 @@ export const ActionResultStatusSchema = {
     enum: ['waiting', 'executing', 'finish', 'failed']
 } as const;
 
+export const ArtifactTypeSchema = {
+    type: 'string',
+    description: 'Artifact type',
+    enum: ['document']
+} as const;
+
+export const ArtifactSchema = {
+    type: 'object',
+    description: 'Artifact',
+    required: ['type', 'entityId', 'title'],
+    properties: {
+        type: {
+            type: 'string',
+            description: 'Artifact type',
+            '$ref': '#/components/schemas/ArtifactType'
+        },
+        entityId: {
+            type: 'string',
+            description: 'Entity ID'
+        },
+        title: {
+            type: 'string',
+            description: 'Artifact title'
+        }
+    }
+} as const;
+
 export const ActionResultSchema = {
     type: 'object',
     description: 'Action result',
@@ -1143,6 +1170,13 @@ export const ActionResultSchema = {
             description: 'Response logs',
             items: {
                 type: 'string'
+            }
+        },
+        artifacts: {
+            type: 'array',
+            description: 'Artifacts',
+            items: {
+                '$ref': '#/components/schemas/Artifact'
             }
         },
         structuredData: {

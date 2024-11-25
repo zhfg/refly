@@ -43,7 +43,6 @@ import {
   createSkillInventory,
 } from '@refly-packages/skill-template';
 import {
-  aggregateTokenUsage,
   // detectLanguage,
   genActionResultID,
   genSkillID,
@@ -633,13 +632,13 @@ export class SkillService {
       });
     }
 
-    const resultUpdates = {
+    const resultUpdates: Partial<ActionResult> = {
       content: '',
       logs: [],
       structuredData: {},
       errors: [],
-      toolCalls: [],
-      usageItems: [],
+      tokenUsage: [],
+      artifacts: [],
     };
 
     // Document to be updated
@@ -676,6 +675,11 @@ export class SkillService {
                 entityType: 'document',
               });
               outputDocument = document;
+              resultUpdates.artifacts.push({
+                type: 'document',
+                entityId: documentId,
+                title: doc?.title || 'New Document',
+              });
             }
             return;
           case 'error':
@@ -687,7 +691,6 @@ export class SkillService {
 
     const skill = this.skillInventory.find((s) => s.name === data.skillName);
 
-    let content = '';
     let runMeta: SkillRunnableMeta | null = null;
     const basicUsageData = {
       uid: user.uid,
@@ -719,9 +722,9 @@ export class SkillService {
         switch (event.event) {
           case 'on_chat_model_stream':
             if (chunk.content && res) {
+              resultUpdates.content += chunk.content.toString();
               if (outputDocument) {
-                content += chunk.content.toString();
-                throttledMarkdownUpdate(outputDocument, content);
+                throttledMarkdownUpdate(outputDocument, resultUpdates.content);
               } else {
                 writeSSEResponse(res, {
                   event: 'stream',
@@ -751,9 +754,8 @@ export class SkillService {
               };
               await this.usageReportQueue.add(tokenUsage);
 
-              resultUpdates.content += chunk.content.toString();
-              resultUpdates.toolCalls.push(...chunk.tool_calls);
-              resultUpdates.usageItems.push(usage);
+              resultUpdates.tokenUsage = [usage];
+              resultUpdates.content = chunk.content.toString();
             }
             break;
         }
@@ -772,7 +774,7 @@ export class SkillService {
         writeSSEResponse(res, {
           event: 'usage',
           resultId,
-          content: JSON.stringify({ token: aggregateTokenUsage(resultUpdates.usageItems) }),
+          content: JSON.stringify({ token: resultUpdates.tokenUsage }),
         });
       }
 
@@ -780,12 +782,12 @@ export class SkillService {
         where: { resultId },
         data: {
           status: resultUpdates.errors.length > 0 ? 'failed' : 'finish',
-          content: resultUpdates.content,
+          content: resultUpdates.artifacts.length === 0 ? resultUpdates.content : '',
           logs: JSON.stringify(resultUpdates.logs),
           structuredData: JSON.stringify(resultUpdates.structuredData),
+          artifacts: JSON.stringify(resultUpdates.artifacts),
           errors: JSON.stringify(resultUpdates.errors),
-          toolCalls: JSON.stringify(resultUpdates.toolCalls),
-          tokenUsage: JSON.stringify(aggregateTokenUsage(resultUpdates.usageItems)),
+          tokenUsage: JSON.stringify(resultUpdates.tokenUsage),
         },
       });
     }

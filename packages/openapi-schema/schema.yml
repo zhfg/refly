@@ -2545,6 +2545,29 @@ components:
         - executing
         - finish
         - failed
+    ArtifactType:
+      type: string
+      description: Artifact type
+      enum:
+        - document
+    Artifact:
+      type: object
+      description: Artifact
+      required:
+        - type
+        - entityId
+        - title
+      properties:
+        type:
+          type: string
+          description: Artifact type
+          $ref: '#/components/schemas/ArtifactType'
+        entityId:
+          type: string
+          description: Entity ID
+        title:
+          type: string
+          description: Artifact title
     ActionResult:
       type: object
       description: Action result
@@ -2583,6 +2606,11 @@ components:
           description: Response logs
           items:
             type: string
+        artifacts:
+          type: array
+          description: Artifacts
+          items:
+            $ref: '#/components/schemas/Artifact'
         structuredData:
           type: object
           description: Structured data output

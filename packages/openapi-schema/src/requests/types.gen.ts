@@ -901,6 +901,29 @@ export type TokenUsageItem = {
 export type ActionResultStatus = 'waiting' | 'executing' | 'finish' | 'failed';
 
 /**
+ * Artifact type
+ */
+export type ArtifactType = 'document';
+
+/**
+ * Artifact
+ */
+export type Artifact = {
+    /**
+     * Artifact type
+     */
+    type: ArtifactType;
+    /**
+     * Entity ID
+     */
+    entityId: string;
+    /**
+     * Artifact title
+     */
+    title: string;
+};
+
+/**
  * Action result
  */
 export type ActionResult = {
@@ -936,6 +959,10 @@ export type ActionResult = {
      * Response logs
      */
     logs?: Array<(string)>;
+    /**
+     * Artifacts
+     */
+    artifacts?: Array<Artifact>;
     /**
      * Structured data output
      */
