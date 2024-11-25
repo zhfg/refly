@@ -12,7 +12,13 @@ import { EDGE_STYLES } from '../components/canvas/constants';
 
 const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: { direction: 'TB' | 'LR' }) => {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: options.direction });
+  g.setGraph({
+    rankdir: options.direction,
+    nodesep: 100,
+    ranksep: 80,
+    marginx: 50,
+    marginy: 50,
+  });
 
   edges.forEach((edge) => g.setEdge(edge.source, edge.target));
   nodes.forEach((node) =>
@@ -106,7 +112,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     };
   }, [canvasId]);
 
-  const { fitView } = useReactFlow();
+  const { fitView, getNodes, setNodes: setReactFlowNodes } = useReactFlow();
 
   const onLayout = useCallback(
     (direction: 'TB' | 'LR') => {
@@ -120,11 +126,15 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         yEdges.push(layouted.edges);
       });
 
-      // window.requestAnimationFrame(() => {
-      //   fitView();
-      // });
+      window.requestAnimationFrame(() => {
+        fitView({
+          padding: 0.2,
+          duration: 200,
+          maxZoom: 1,
+        });
+      });
     },
-    [canvasId],
+    [canvasId, fitView],
   );
 
   const onNodesChange = useCallback(
@@ -183,7 +193,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       return;
     }
 
-    // Add default metadata based on node type
     const enrichedData = {
       ...node.data,
       metadata: {
@@ -200,7 +209,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     ydoc?.transact(() => {
       yNodes?.push([newNode]);
 
-      // If there are existing nodes, create an edge from the last node to the new node
       if (connectTo?.length > 0) {
         const newEdges: Edge[] = [];
         connectTo.forEach((filter) => {
@@ -219,16 +227,23 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
             });
           }
         });
-        console.log('newEdges', newEdges);
         yEdges?.push(newEdges);
       }
     });
 
-    window.requestAnimationFrame(() => {
-      onLayout('LR');
-    });
+    const currentNodes = getNodes();
+    setReactFlowNodes(
+      currentNodes.map((node) => ({
+        ...node,
+        selected: node.id === newNode.id,
+      })),
+    );
 
     setSelectedNode(newNode);
+
+    setTimeout(() => {
+      onLayout('LR');
+    }, 50);
   };
 
   return {

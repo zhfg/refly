@@ -13,8 +13,10 @@ export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>;
   const [isPinned, setIsPinned] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
 
-  const previewComponent = (nodeType: CanvasNodeType) => {
-    switch (nodeType) {
+  const previewComponent = useMemo(() => {
+    if (!node?.type) return null;
+
+    switch (node.type) {
       case 'resource':
         return <ResourceNodePreview resourceId={node.data.entityId} />;
       case 'document':
@@ -37,7 +39,7 @@ export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>;
       default:
         return null;
     }
-  };
+  }, [node?.type, node?.data?.entityId]);
 
   const previewStyles = useMemo(
     () => ({
@@ -69,8 +71,6 @@ export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>;
     [isMaximized],
   );
 
-  const preview = useMemo(() => previewComponent(node?.type), [node?.type]);
-
   return (
     <div className="absolute inset-0 pointer-events-none">
       <div className={previewClassName} style={previewStyles}>
@@ -84,7 +84,7 @@ export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>;
             isMaximized={isMaximized}
           />
         </div>
-        <div className="h-[calc(100%-64px)] overflow-auto rounded-b-lg pointer-events-auto">{preview}</div>
+        <div className="h-[calc(100%-64px)] overflow-auto rounded-b-lg pointer-events-auto">{previewComponent}</div>
       </div>
     </div>
   );

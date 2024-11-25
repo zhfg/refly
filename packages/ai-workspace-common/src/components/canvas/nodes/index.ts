@@ -69,6 +69,7 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
         url: '',
         description: '',
         lastAccessed: new Date().toISOString(),
+        contentPreview: 'Loading resource content...',
       } as ResourceNodeMeta;
 
     case 'skill':

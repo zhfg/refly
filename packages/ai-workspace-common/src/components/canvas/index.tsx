@@ -72,12 +72,16 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           maxZoom={2}
           selectionOnDrag
           nodeTypes={nodeTypes}
-          nodes={nodes}
+          nodes={nodes.map((node) => ({
+            ...node,
+            selected: selectedNode?.id === node.id,
+          }))}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
+          selectNodesOnDrag={false}
         >
           <Background />
           <MiniMap
