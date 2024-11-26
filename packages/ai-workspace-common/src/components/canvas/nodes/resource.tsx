@@ -7,6 +7,7 @@ import { useState, useCallback } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { EDGE_STYLES } from '../constants';
 import { getNodeCommonStyles } from './index';
+import { ActionButtons } from './action-buttons';
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
@@ -51,41 +52,36 @@ export const ResourceNode = ({ data, selected, id }: NodeProps<ResourceNode>) =>
     );
   }, [id, setEdges]);
 
+  const handleAddToContext = useCallback(() => {
+    // Implement add to context logic
+    console.log('Add to context:', id);
+  }, [id]);
+
+  const handleDelete = useCallback(() => {
+    // Implement delete logic
+    console.log('Delete node:', id);
+  }, [id]);
+
+  const handleHelpLink = useCallback(() => {
+    // Implement help link logic
+    console.log('Open help link');
+  }, []);
+
+  const handleAbout = useCallback(() => {
+    // Implement about logic
+    console.log('Show about info');
+  }, []);
+
   return (
     <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-
-          console.log('click');
-        }}
-        className="
-          absolute 
-          -top-9 
-          -right-0
-          opacity-0 
-          group-hover:opacity-100
-          transition-opacity 
-          duration-200 
-          ease-in-out
-          z-50
-        "
-      >
-        <button
-          className="
-            p-1.5
-            rounded-md 
-            bg-white
-            hover:bg-gray-50
-            text-gray-600
-            shadow-[0px_1px_2px_0px_rgba(16,24,60,0.05)]
-            border border-[#EAECF0]
-          "
-        >
-          <MoreHorizontal className="w-3.5 h-3.5" />
-        </button>
-      </div>
+      <ActionButtons
+        type="resource"
+        onAddToContext={handleAddToContext}
+        onDelete={handleDelete}
+        onHelpLink={handleHelpLink}
+        onAbout={handleAbout}
+        isProcessing={false}
+      />
 
       <div
         className={`
