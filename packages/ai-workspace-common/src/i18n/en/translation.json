@@ -348,7 +348,8 @@
   },
   "canvas": {
     "toolbar": {
-      "changeMode": "Change Mode",
+      "enablePointerMode": "Enable Pointer Mode",
+      "disablePointerMode": "Disable Pointer Mode",
       "importResource": "Import Resource",
       "addResource": "Add Resource",
       "addSkill": "Add Skill",
