@@ -104,8 +104,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     [setSelectedNodes],
   );
 
-  console.log('selectedNodes', selectedNodes);
-
   return (
     <div className="w-full h-screen relative flex flex-col">
       <CanvasToolbar onToolSelect={handleToolSelect} />

@@ -224,9 +224,6 @@ export const App = () => {
     };
   }, [isDragging]);
 
-  // listen to copilotType
-  console.log('ishovered', isHovered);
-
   const [isVisible, setIsVisible] = useState(true);
 
   const handleClose = (e: React.MouseEvent) => {
