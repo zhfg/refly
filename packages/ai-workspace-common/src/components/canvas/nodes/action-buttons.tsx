@@ -9,11 +9,12 @@ type ActionButtonProps = {
   onClick: () => void;
   loading?: boolean;
   tooltip?: string;
+  withTooltip?: boolean;
 };
 
 // Common action button component
-const ActionButton = ({ icon, onClick, loading, tooltip }: ActionButtonProps) => (
-  <Tooltip title={tooltip} placement="top" mouseEnterDelay={0.5} overlayClassName="!px-2 !py-1" arrow={false}>
+const ActionButton = ({ icon, onClick, loading, tooltip, withTooltip = true }: ActionButtonProps) => {
+  const button = (
     <Button
       className="
         p-2
@@ -32,8 +33,17 @@ const ActionButton = ({ icon, onClick, loading, tooltip }: ActionButtonProps) =>
     >
       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : icon}
     </Button>
-  </Tooltip>
-);
+  );
+
+  // Return button with or without tooltip based on withTooltip prop
+  return withTooltip ? (
+    <Tooltip title={tooltip} placement="top" mouseEnterDelay={0.5} overlayClassName="!px-2 !py-1" arrow={false}>
+      {button}
+    </Tooltip>
+  ) : (
+    button
+  );
+};
 
 type ActionButtonsProps = {
   type: 'document' | 'resource' | 'skill-response';
@@ -168,7 +178,7 @@ export const ActionButtons = ({
       {/* More options dropdown (common for all types) */}
       <Dropdown
         menu={{ items: menuItems }}
-        trigger={['click']}
+        trigger={['click', 'hover']}
         placement="bottomRight"
         overlayClassName="min-w-[160px] w-max"
         getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
@@ -182,6 +192,7 @@ export const ActionButtons = ({
           icon={<MoreHorizontal className="w-4 h-4" />}
           onClick={(e) => e.preventDefault()}
           tooltip="More Options"
+          withTooltip={false}
         />
       </Dropdown>
     </div>
