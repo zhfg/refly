@@ -93,22 +93,28 @@ export const useInvokeAction = () => {
   };
 
   const onSkillArtifact = (skillEvent: SkillEvent) => {
+    const { resultId, artifact } = skillEvent;
     const { resultMap } = useActionResultStore.getState();
-    const result = resultMap[skillEvent.resultId];
+    const result = resultMap[resultId];
 
     if (!result) {
       return;
     }
 
-    const artifact = safeParseJSON(skillEvent?.artifact);
-    if (!artifact) {
-      return;
-    }
+    const existingArtifacts = Array.isArray(result.artifacts) ? [...result.artifacts] : [];
+
+    const artifactIndex = existingArtifacts.findIndex((item) => item?.entityId === artifact?.entityId);
+
+    const updatedArtifacts =
+      artifactIndex !== -1
+        ? existingArtifacts.map((item, index) => (index === artifactIndex ? artifact : item))
+        : [...existingArtifacts, artifact];
 
     const updatedResult = {
       ...result,
-      artifacts: [...(result.artifacts || []), artifact], // TODO: update existing artifact
+      artifacts: updatedArtifacts,
     };
+
     updateActionResult(skillEvent.resultId, updatedResult);
   };
 
@@ -187,6 +193,12 @@ export const useInvokeAction = () => {
       actionMeta: {},
       content: '',
       invokeParam: payload,
+      logs: [],
+      status: 'waiting',
+      artifacts: [],
+      structuredData: {},
+      tokenUsage: [],
+      errors: [],
     });
 
     const connectTo = [
