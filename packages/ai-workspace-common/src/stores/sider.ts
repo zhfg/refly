@@ -17,6 +17,7 @@ interface SiderState {
   libraryList: SiderData[];
   showCanvasListModal: boolean;
   showLibraryModal: boolean;
+  showSettingModal: boolean;
 
   // method
   setCollapse: (val: boolean) => void;
@@ -25,6 +26,7 @@ interface SiderState {
   setLibraryList: (val: SiderData[]) => void;
   setShowCanvasListModal: (val: boolean) => void;
   setShowLibraryModal: (val: boolean) => void;
+  setShowSettingModal: (val: boolean) => void;
 }
 
 export const useSiderStore = create<SiderState>()(
@@ -35,12 +37,15 @@ export const useSiderStore = create<SiderState>()(
     libraryList: [],
     showLibraryModal: false,
     showCanvasListModal: false,
+    showSettingModal: false,
+
     setCollapse: (val: boolean) => set({ collapse: val }),
     setShowSiderDrawer: (val: boolean) => set({ showSiderDrawer: val }),
     setCanvasList: (val: SiderData[]) => set({ canvasList: val }),
     setLibraryList: (val: SiderData[]) => set({ libraryList: val }),
     setShowCanvasListModal: (val: boolean) => set({ showCanvasListModal: val }),
     setShowLibraryModal: (val: boolean) => set({ showLibraryModal: val }),
+    setShowSettingModal: (val: boolean) => set({ showSettingModal: val }),
   })),
 );
 

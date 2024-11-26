@@ -1,0 +1,9 @@
+.settings-modal {
+  .ant-modal-content {
+    padding-left: 0;
+    .ant-modal-body {
+      height: calc(80vh + 40px);
+      overflow: auto;
+    }
+  }
+}

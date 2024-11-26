@@ -1,14 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { useCookie } from 'react-use';
 import Cookies from 'js-cookie';
-import { getWebLogin, getCookieOrigin, getExtensionId } from '@refly/utils/url';
+import { getCookieOrigin, getExtensionId } from '@refly/utils/url';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 import { Dropdown, Menu, Modal, Avatar } from '@arco-design/web-react';
 import { LuSettings, LuLogOut } from 'react-icons/lu';
 import { useState } from 'react';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 
 // styles
 import './index.scss';
@@ -19,8 +19,11 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const userStore = useUserStore();
+  const { setShowSettingModal } = useSiderStoreShallow((state) => ({
+    setShowSettingModal: state.setShowSettingModal,
+  }));
   const [modal, contextHolder] = Modal.useModal();
-  const [token, updateCookie, deleteCookie] = useCookie('_refly_ai_sid');
+  const [deleteCookie] = useCookie('_refly_ai_sid');
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
   const handleLogout = () => {
@@ -52,7 +55,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
 
   const handleMenuClick = (key: string) => {
     if (key === 'settings') {
-      navigate('/settings');
+      setShowSettingModal(true);
     } else if (key === 'logout') {
       handleLogout();
     }

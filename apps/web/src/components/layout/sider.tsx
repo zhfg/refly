@@ -32,6 +32,7 @@ import { useTranslation } from "react-i18next"
 import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/components/sider-menu-setting-list"
 import { CanvasListModal } from "@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal"
 import { LibraryModal } from "@refly-packages/ai-workspace-common/components/workspace/library-modal"
+import { SettingModal } from "@refly-packages/ai-workspace-common/components/settings"
 // hooks
 import { useHandleSiderData } from "@refly-packages/ai-workspace-common/hooks/use-handle-sider-data"
 import { useSiderStoreShallow } from "@refly-packages/ai-workspace-common/stores/sider"
@@ -108,12 +109,16 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     showLibraryModal,
     setShowLibraryModal,
     setShowCanvasListModal,
+    showSettingModal,
+    setShowSettingModal,
   } = useSiderStoreShallow(state => ({
+    showSettingModal: state.showSettingModal,
     showLibraryModal: state.showLibraryModal,
     showCanvasListModal: state.showCanvasListModal,
     collapse: state.collapse,
     libraryList: state.libraryList,
     canvasList: state.canvasList,
+    setShowSettingModal: state.setShowSettingModal,
     setShowLibraryModal: state.setShowLibraryModal,
     setShowCanvasListModal: state.setShowCanvasListModal,
   }))
@@ -380,6 +385,11 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
         <LibraryModal
           visible={showLibraryModal}
           setVisible={setShowLibraryModal}
+        />
+
+        <SettingModal
+          visible={showSettingModal}
+          setVisible={setShowSettingModal}
         />
       </div>
     </Sider>
