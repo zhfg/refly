@@ -20,6 +20,7 @@ interface SearchListProps {
   className?: string;
   trigger?: 'click' | 'hover';
   mode?: 'multiple' | 'single';
+  offset?: number | [number, number];
 }
 
 // Define domain colors similar to NODE_COLORS
@@ -59,7 +60,7 @@ const getDomainIcon = (domain: SearchDomain, metadata?: any) => {
 
 export const SearchList = (props: SearchListProps) => {
   const { t } = useTranslation();
-  const { domain, fetchData, defaultValue, children, handleConfirm, mode = 'multiple', ...selectProps } = props;
+  const { domain, fetchData, defaultValue, children, handleConfirm, mode = 'multiple', offset, ...selectProps } = props;
 
   const { loadMore, dataList, setDataList, isRequesting, handleValueChange, resetState, hasMore } =
     useFetchOrSearchList({
@@ -217,7 +218,14 @@ export const SearchList = (props: SearchListProps) => {
       trigger={props?.trigger || 'click'}
       placement="right"
       open={open}
+      arrow={false}
       onOpenChange={setOpen}
+      align={{
+        offset: [
+          typeof offset === 'number' ? offset : Array.isArray(offset) ? offset[0] : 12,
+          typeof offset === 'number' ? offset : Array.isArray(offset) ? offset[1] : 0,
+        ],
+      }}
     >
       {children}
     </Popover>

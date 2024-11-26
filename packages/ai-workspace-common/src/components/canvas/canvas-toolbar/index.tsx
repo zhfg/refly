@@ -68,7 +68,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
       domain: 'resource',
       tooltip: 'Add Resource',
     },
-    { icon: Sparkles, value: 'addSkill', type: 'popover', domain: 'skill', tooltip: 'Add Skill' },
+    // { icon: Sparkles, value: 'addSkill', type: 'popover', domain: 'skill', tooltip: 'Add Skill' },
     { icon: HiOutlineDocumentText, value: 'addDocument', type: 'popover', domain: 'document', tooltip: 'Add Document' },
   ];
 
@@ -139,7 +139,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
             />
           </Tooltip>
         ) : (
-          <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm}>
+          <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm} offset={12}>
             <Tooltip
               title={tool.tooltip}
               placement="right"
