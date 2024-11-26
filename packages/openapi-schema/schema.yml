@@ -2550,6 +2550,14 @@ components:
       description: Artifact type
       enum:
         - document
+    ArtifactStatus:
+      type: string
+      description: Artifact status
+      enum:
+        - waiting
+        - generating
+        - finish
+        - failed
     Artifact:
       type: object
       description: Artifact
@@ -2568,6 +2576,9 @@ components:
         title:
           type: string
           description: Artifact title
+        status:
+          description: Artifact status
+          $ref: '#/components/schemas/ArtifactStatus'
     ActionResult:
       type: object
       description: Action result
@@ -2596,19 +2607,18 @@ components:
         content:
           type: string
           description: Response content
-          example: Hello
         status:
           type: string
           description: Action result status
           $ref: '#/components/schemas/ActionResultStatus'
         logs:
           type: array
-          description: Response logs
+          description: Action logs
           items:
             type: string
         artifacts:
           type: array
-          description: Artifacts
+          description: Action artifacts
           items:
             $ref: '#/components/schemas/Artifact'
         structuredData:

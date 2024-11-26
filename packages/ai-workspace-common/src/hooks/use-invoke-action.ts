@@ -92,6 +92,26 @@ export const useInvokeAction = () => {
     updateActionResult(skillEvent.resultId, updatedResult);
   };
 
+  const onSkillArtifact = (skillEvent: SkillEvent) => {
+    const { resultMap } = useActionResultStore.getState();
+    const result = resultMap[skillEvent.resultId];
+
+    if (!result) {
+      return;
+    }
+
+    const artifact = safeParseJSON(skillEvent?.artifact);
+    if (!artifact) {
+      return;
+    }
+
+    const updatedResult = {
+      ...result,
+      artifacts: [...(result.artifacts || []), artifact], // TODO: update existing artifact
+    };
+    updateActionResult(skillEvent.resultId, updatedResult);
+  };
+
   const onSkillCreateNode = (skillEvent: SkillEvent) => {
     const { node, resultId } = skillEvent;
     addNode(
@@ -204,6 +224,7 @@ export const useInvokeAction = () => {
       onSkillStart,
       onSkillStream,
       onSkillLog,
+      onSkillArtifact,
       onSkillStructedData,
       onSkillCreateNode,
       onSkillEnd,

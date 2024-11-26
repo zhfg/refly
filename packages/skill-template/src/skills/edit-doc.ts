@@ -35,7 +35,7 @@ export class EditDoc extends BaseSkill {
     'zh-CN': '编辑文档',
   };
 
-  icon: Icon = { type: 'emoji', value: '📝' };
+  icon: Icon = { type: 'emoji', value: '🖊️' };
 
   configSchema: SkillTemplateConfigDefinition = {
     items: [],

@@ -168,7 +168,7 @@ model ActionResult {
   logs           String             @default("[]") @map("logs")
   /// Structured data output (JSON)
   structuredData String             @default("{}") @map("structured_data")
-  /// Artifacts (JSON array)
+  /// Action artifacts (JSON array)
   artifacts      String             @default("[]") @map("artifacts")
   /// Errors
   errors         String?            @map("errors")

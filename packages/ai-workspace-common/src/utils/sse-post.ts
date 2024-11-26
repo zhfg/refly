@@ -14,6 +14,7 @@ export const ssePost = async ({
   onSkillStart,
   onSkillStream,
   onSkillEnd,
+  onSkillArtifact,
   onSkillStructedData,
   onSkillCreateNode,
   onError,
@@ -30,6 +31,7 @@ export const ssePost = async ({
   onSkillEnd: (event: SkillEvent) => void;
   onSkillStructedData: (event: SkillEvent) => void;
   onSkillCreateNode: (event: SkillEvent) => void;
+  onSkillArtifact: (event: SkillEvent) => void;
   onError?: (error: BaseResponse) => void;
   onCompleted?: (val?: boolean) => void;
   onSkillUsage?: (event: SkillEvent) => void;
@@ -97,6 +99,8 @@ export const ssePost = async ({
                 isSkillFirstMessage = true;
               } else if (skillEvent?.event === 'stream') {
                 onSkillStream(skillEvent);
+              } else if (skillEvent?.event === 'artifact') {
+                onSkillArtifact(skillEvent);
               } else if (skillEvent?.event === 'structured_data') {
                 onSkillStructedData(skillEvent);
               } else if (skillEvent?.event === 'create_node') {
