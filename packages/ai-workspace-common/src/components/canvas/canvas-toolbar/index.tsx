@@ -114,30 +114,56 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
         boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
       }}
     >
-      {tools.map((tool, index) => (
-        <Tooltip
-          key={index}
-          title={tool.tooltip}
-          placement="right"
-          mouseEnterDelay={0.5}
-          overlayClassName="!px-2 !py-1"
-          arrow={false}
-        >
-          <Button
-            type="text"
-            onClick={(event) => handleToolSelect(event, tool.value)}
-            className={`
-              h-[32px] w-[32px] 
-              flex items-center justify-center 
-              hover:bg-gray-100 rounded-lg 
-              transition-colors duration-200 
-              group
-              ${tool.active ? 'bg-gray-100' : ''}
-            `}
-            icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
-          />
-        </Tooltip>
-      ))}
+      {tools.map((tool, index) =>
+        tool.type === 'button' ? (
+          <Tooltip
+            key={index}
+            title={tool.tooltip}
+            placement="right"
+            mouseEnterDelay={0.5}
+            overlayClassName="!px-2 !py-1"
+            arrow={false}
+          >
+            <Button
+              type="text"
+              onClick={(event) => handleToolSelect(event, tool.value)}
+              className={`
+                h-[32px] w-[32px] 
+                flex items-center justify-center 
+                hover:bg-gray-100 rounded-lg 
+                transition-colors duration-200 
+                group
+                ${tool.active ? 'bg-gray-100' : ''}
+              `}
+              icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
+            />
+          </Tooltip>
+        ) : (
+          <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm}>
+            <Tooltip
+              title={tool.tooltip}
+              placement="right"
+              mouseEnterDelay={0.5}
+              overlayClassName="!px-2 !py-1"
+              arrow={false}
+            >
+              <Button
+                type="text"
+                onClick={(event) => handleToolSelect(event, tool.value)}
+                className={`
+                  h-[32px] w-[32px] 
+                  flex items-center justify-center 
+                  hover:bg-gray-100 rounded-lg 
+                  transition-colors duration-200 
+                  group
+                  ${tool.active ? 'bg-gray-100' : ''}
+                `}
+                icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
+              />
+            </Tooltip>
+          </SearchList>
+        ),
+      )}
       {importResourceModalVisible ? <ImportResourceModal /> : null}
       {sourceListDrawerVisible && isWeb ? <SourceListModal classNames="source-list-modal" /> : null}
     </div>
