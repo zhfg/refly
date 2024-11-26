@@ -24,11 +24,8 @@ export const DocumentNode = ({ data, selected, id }: NodeProps<DocumentNode>) =>
   const isTargetConnected = edges?.some((edge) => edge.target === id);
   const isSourceConnected = edges?.some((edge) => edge.source === id);
 
-  console.log('isHovered', data);
-
   // Handle node hover events
   const handleMouseEnter = useCallback(() => {
-    console.log('handleMouseEnter', edges, id);
     setIsHovered(true);
     // Update connected edges with hover styles
     setEdges((eds) =>

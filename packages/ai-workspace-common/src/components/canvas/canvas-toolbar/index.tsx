@@ -1,4 +1,4 @@
-import { Button, Popover, Tooltip } from 'antd';
+import { Button, Tooltip } from 'antd';
 import { FaArrowPointer } from 'react-icons/fa6';
 import { RiUploadCloud2Line } from 'react-icons/ri';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
@@ -51,7 +51,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
       value: 'changeMode',
       type: 'button',
       domain: 'changeMode',
-      tooltip: mode === 'pointer' ? 'Switch to Hand Mode' : 'Switch to Pointer Mode',
+      tooltip: mode === 'pointer' ? t('canvas.toolbar.disablePointerMode') : t('canvas.toolbar.enablePointerMode'),
       active: mode === 'pointer',
     },
     {
@@ -59,17 +59,29 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
       value: 'importResource',
       type: 'button',
       domain: 'resource',
-      tooltip: 'Import Resource',
+      tooltip: t('canvas.toolbar.importResource'),
     },
     {
       icon: HiOutlineSquare3Stack3D,
       value: 'addResource',
       type: 'popover',
       domain: 'resource',
-      tooltip: 'Add Resource',
+      tooltip: t('canvas.toolbar.addResource'),
     },
-    // { icon: Sparkles, value: 'addSkill', type: 'popover', domain: 'skill', tooltip: 'Add Skill' },
-    { icon: HiOutlineDocumentText, value: 'addDocument', type: 'popover', domain: 'document', tooltip: 'Add Document' },
+    // {
+    //   icon: Sparkles,
+    //   value: 'addSkill',
+    //   type: 'popover',
+    //   domain: 'skill',
+    //   tooltip: t('canvas.toolbar.addSkill'),
+    // },
+    {
+      icon: HiOutlineDocumentText,
+      value: 'addDocument',
+      type: 'popover',
+      domain: 'document',
+      tooltip: t('canvas.toolbar.addDocument'),
+    },
   ];
 
   const handleToolSelect = (event: React.MouseEvent, tool: string) => {

@@ -7,7 +7,6 @@ import { bigSearchQuickOpenEmitter } from '@refly-packages/ai-workspace-common/u
 export const BigSearchModal = () => {
   const searchStore = useSearchStore();
   const loading = true;
-  console.log('searchStore.isSearchOpen', searchStore.isSearchOpen);
 
   useEffect(() => {
     bigSearchQuickOpenEmitter.on('openSearch', () => {

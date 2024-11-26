@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   ReactFlow,
   Background,
@@ -103,8 +103,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     },
     [setSelectedNodes],
   );
-
-  console.log('selectedNodes', selectedNodes);
 
   return (
     <div className="w-full h-screen relative flex flex-col">
