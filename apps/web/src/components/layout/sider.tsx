@@ -31,6 +31,7 @@ import { SearchQuickOpenBtn } from "@refly-packages/ai-workspace-common/componen
 import { useTranslation } from "react-i18next"
 import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/components/sider-menu-setting-list"
 import { CanvasListModal } from "@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal"
+import { LibraryModal } from "@refly-packages/ai-workspace-common/components/workspace/library-modal"
 // hooks
 import { useHandleSiderData } from "@refly-packages/ai-workspace-common/hooks/use-handle-sider-data"
 import { useSiderStoreShallow } from "@refly-packages/ai-workspace-common/stores/sider"
@@ -99,10 +100,22 @@ const SettingItem = () => {
 
 export const SiderLayout = (props: { source: "sider" | "popover" }) => {
   const { source = "sider" } = props
-  const { collapse, libraryList, canvasList } = useSiderStoreShallow(state => ({
+  const {
+    collapse,
+    libraryList,
+    canvasList,
+    showCanvasListModal,
+    showLibraryModal,
+    setShowLibraryModal,
+    setShowCanvasListModal,
+  } = useSiderStoreShallow(state => ({
+    showLibraryModal: state.showLibraryModal,
+    showCanvasListModal: state.showCanvasListModal,
     collapse: state.collapse,
     libraryList: state.libraryList,
     canvasList: state.canvasList,
+    setShowLibraryModal: state.setShowLibraryModal,
+    setShowCanvasListModal: state.setShowCanvasListModal,
   }))
 
   const navigate = useNavigate()
@@ -112,7 +125,6 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     loginModalVisible: state.loginModalVisible,
     setLoginModalVisible: state.setLoginModalVisible,
   }))
-  const [showCanvasList, setShowCanvasList] = useState(false)
 
   const { getCanvasList, getLibraryList } = useHandleSiderData(true)
 
@@ -130,7 +142,9 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     const handleNavClick = (e: React.MouseEvent) => {
       e.stopPropagation()
       if (type === "Canvas") {
-        setShowCanvasList(true)
+        setShowCanvasListModal(true)
+      } else if (type === "Library") {
+        setShowLibraryModal(true)
       }
     }
     return (
@@ -359,8 +373,13 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
         </Menu>
 
         <CanvasListModal
-          visible={showCanvasList}
-          setVisible={setShowCanvasList}
+          visible={showCanvasListModal}
+          setVisible={setShowCanvasListModal}
+        />
+
+        <LibraryModal
+          visible={showLibraryModal}
+          setVisible={setShowLibraryModal}
         />
       </div>
     </Sider>

@@ -1,37 +1,36 @@
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { List, Card, Dropdown, Button, Popconfirm, message, Empty } from 'antd';
 import type { MenuProps, DropdownProps } from 'antd';
+
 import {
   IconMoreHorizontal,
   IconNotePencil,
   IconDelete,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { GrView } from 'react-icons/gr';
 
 import { useEffect, useState } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import type { Document } from '@refly/openapi-schema';
 import { LOCALE } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
 
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
-import { Resource } from '@refly/openapi-schema';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 
 const { Meta } = Card;
 
-export const ResourceList = () => {
+export const DocumentList = () => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
   const { showLibraryModal } = useSiderStoreShallow((state) => ({
     showLibraryModal: state.showLibraryModal,
   }));
-
   const { getLibraryList } = useHandleSiderData();
   const { dataList, setDataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
     fetchData: async (queryPayload) => {
-      const res = await getClient().listResources({
+      const res = await getClient().listDocuments({
         query: queryPayload,
       });
       return res?.data;
@@ -39,22 +38,22 @@ export const ResourceList = () => {
     pageSize: 20,
   });
 
-  const ActionView = () => {
-    return <Button type="text" icon={<GrView />} />;
+  const ActionEdit = () => {
+    return <Button type="text" icon={<IconNotePencil />} />;
   };
 
-  const ActionDropdown = ({ resource }: { resource: Resource }) => {
+  const ActionDropdown = ({ doc }: { doc: Document }) => {
     const [popupVisible, setPopupVisible] = useState(false);
 
     const handleDelete = async () => {
-      const { data } = await getClient().deleteResource({
+      const { data } = await getClient().deleteDocument({
         body: {
-          resourceId: resource.resourceId,
+          docId: doc.docId,
         },
       });
       if (data?.success) {
         message.success(t('common.putSuccess'));
-        setDataList(dataList.filter((n) => n.resourceId !== resource.resourceId));
+        setDataList(dataList.filter((n) => n.docId !== doc.docId));
         getLibraryList();
       }
     };
@@ -63,7 +62,7 @@ export const ResourceList = () => {
       {
         label: (
           <Popconfirm
-            title={t('workspace.deleteDropdownMenu.deleteConfirmForResource')}
+            title={t('workspace.deleteDropdownMenu.deleteConfirmForDocument')}
             onConfirm={handleDelete}
             onCancel={() => setPopupVisible(false)}
             okText={t('common.confirm')}
@@ -130,7 +129,7 @@ export const ResourceList = () => {
               <Card
                 hoverable
                 cover={<div className="h-[100px] bg-gray-200"></div>}
-                actions={[<ActionView key="view" />, <ActionDropdown resource={item} key="ellipsis" />]}
+                actions={[<ActionEdit key="edit" />, <ActionDropdown doc={item} key="ellipsis" />]}
               >
                 <Meta
                   title={item.title}

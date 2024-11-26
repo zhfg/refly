@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
@@ -6,13 +6,18 @@ import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { Canvas } from '@refly/openapi-schema';
-import { IconCanvas, IconPlay } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { List, Modal, Button } from 'antd';
+import {
+  IconCanvas,
+  IconDelete,
+  IconMoreHorizontal,
+  IconPlay,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
+import { List, Modal, Button, Dropdown, DropdownProps, MenuProps, Popconfirm, message, Empty } from 'antd';
 import { ScrollLoading } from '../scroll-loading';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { LOCALE } from '@refly/common-types';
 import './index.scss';
-
+import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 interface CanvasListProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
@@ -23,7 +28,7 @@ export const CanvasListModal = (props: CanvasListProps) => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
   const navigate = useNavigate();
-  const { dataList, setDataList, loadMore, hasMore, isRequesting } = useFetchDataList({
+  const { dataList, setDataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listCanvases({
         query: queryPayload,
@@ -32,10 +37,11 @@ export const CanvasListModal = (props: CanvasListProps) => {
     },
     pageSize: 20,
   });
+  const { getCanvasList } = useHandleSiderData();
 
   useEffect(() => {
     if (visible) {
-      loadMore();
+      reload();
     }
   }, [visible]);
 
@@ -44,12 +50,65 @@ export const CanvasListModal = (props: CanvasListProps) => {
     navigate(`/canvas/${canvas.canvasId}`);
   };
 
-  const handleDeleteCanvas = (canvas: Canvas) => {
-    setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId));
-  };
-
   const CanvasItem = (props: { canvas: Canvas }) => {
     const { canvas } = props;
+
+    const ActionDropdown = () => {
+      const [popupVisible, setPopupVisible] = useState(false);
+
+      const handleDelete = async () => {
+        const { data } = await getClient().deleteCanvas({
+          body: {
+            canvasId: canvas.canvasId,
+          },
+        });
+        if (data?.success) {
+          message.success(t('common.putSuccess'));
+          setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId));
+          getCanvasList();
+        }
+      };
+
+      const items: MenuProps['items'] = [
+        {
+          label: (
+            <Popconfirm
+              title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas')}
+              onConfirm={handleDelete}
+              onCancel={() => setPopupVisible(false)}
+              okText={t('common.confirm')}
+              cancelText={t('common.cancel')}
+            >
+              <div className="flex items-center">
+                <IconDelete size={16} className="mr-2" />
+                {t('workspace.deleteDropdownMenu.delete')}
+              </div>
+            </Popconfirm>
+          ),
+          key: 'delete',
+        },
+      ];
+
+      const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
+        if (info.source === 'trigger') {
+          setPopupVisible(open);
+        }
+      };
+
+      return (
+        <Dropdown
+          trigger={['click']}
+          open={popupVisible}
+          onOpenChange={handleOpenChange}
+          menu={{
+            items,
+          }}
+        >
+          <Button size="small" type="text" icon={<IconMoreHorizontal />} />
+        </Dropdown>
+      );
+    };
+
     return (
       <div className="px-4 py-3 min-w-[600px] flex items-center justify-between border-b border-solid border-1 border-x-0 border-t-0 border-black/5">
         <div>
@@ -67,7 +126,7 @@ export const CanvasListModal = (props: CanvasListProps) => {
           </div>
         </div>
 
-        <div className="flex">
+        <div className="flex items-center gap-2">
           <Button
             style={{ borderRadius: 8, cursor: 'pointer' }}
             size="small"
@@ -76,8 +135,9 @@ export const CanvasListModal = (props: CanvasListProps) => {
             icon={<IconPlay />}
             onClick={() => handleClickCanvas(canvas)}
           >
-            <span className="text-xs font-medium">{t('workspace.canvasListModal.continue')}</span>
+            <span className="text-xs hover:font-medium">{t('workspace.canvasListModal.continue')}</span>
           </Button>
+          <ActionDropdown />
         </div>
       </div>
     );
@@ -88,22 +148,28 @@ export const CanvasListModal = (props: CanvasListProps) => {
       className="canvas-list"
       centered
       title={t('common.canvas')}
-      width={900}
+      width={1000}
       footer={null}
       open={visible}
       onCancel={() => setVisible(false)}
     >
-      <List
-        itemLayout="vertical"
-        dataSource={dataList}
-        locale={{ emptyText: t('common.empty') }}
-        loadMore={
-          dataList.length > 0 ? (
-            <ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />
-          ) : null
-        }
-        renderItem={(item: Canvas) => <CanvasItem canvas={item} />}
-      ></List>
+      {!isRequesting && dataList.length > 0 ? (
+        <List
+          itemLayout="vertical"
+          dataSource={dataList}
+          locale={{ emptyText: t('common.empty') }}
+          loadMore={
+            dataList.length > 0 ? (
+              <ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />
+            ) : null
+          }
+          renderItem={(item: Canvas) => <CanvasItem canvas={item} />}
+        ></List>
+      ) : (
+        <div className="h-full flex items-center justify-center">
+          <Empty description={t('common.empty')} />
+        </div>
+      )}
     </Modal>
   );
 };
