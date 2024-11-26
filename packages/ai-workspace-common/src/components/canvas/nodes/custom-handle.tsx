@@ -84,7 +84,7 @@ export const CustomHandle = ({ type, position, isConnected, isNodeHovered, nodeT
             />
 
             {/* Plus button handle - only show for document/resource/response nodes */}
-            {canShowPlusHandle(nodeType) && (
+            {/* {canShowPlusHandle(nodeType) && (
               <Handle
                 type={type}
                 position={position}
@@ -112,7 +112,7 @@ export const CustomHandle = ({ type, position, isConnected, isNodeHovered, nodeT
                   strokeWidth={2.5}
                 />
               </Handle>
-            )}
+            )} */}
           </>
         )}
       </div>

@@ -1,5 +1,5 @@
 import { Position, NodeProps, useEdges, useReactFlow } from '@xyflow/react';
-import { CanvasNodeData, ResponseNodeMeta } from './types';
+import { CanvasNodeData, ResponseNodeMeta, CanvasNode } from './types';
 import { Node } from '@xyflow/react';
 import { MessageSquare, MoreHorizontal } from 'lucide-react';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
@@ -9,6 +9,11 @@ import { CustomHandle } from './custom-handle';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { EDGE_STYLES } from '../constants';
 import { getNodeCommonStyles } from './index';
+import { ActionButtons } from './action-buttons';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
+import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/use-insert-to-document';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -82,40 +87,59 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
     );
   }, [id, setEdges]);
 
+  const handleAddToContext = useAddToContext(
+    {
+      id,
+      type: 'skillResponse',
+      data,
+      position: { x: 0, y: 0 },
+    } as CanvasNode,
+    'skillResponse',
+  );
+
+  const handleRerun = useCallback(() => {
+    // Implement rerun logic
+    console.log('Rerun:', id);
+  }, [id]);
+
+  const runtime = getRuntime();
+  const isWeb = runtime === 'web';
+  const handleInsertToDoc = useInsertToDocument(data.entityId);
+
+  const handleDelete = useDeleteNode(
+    {
+      id,
+      type: 'skillResponse',
+      data,
+      position: { x: 0, y: 0 },
+    } as CanvasNode,
+    'skillResponse',
+  );
+
+  const handleHelpLink = useCallback(() => {
+    // Implement help link logic
+    console.log('Open help link');
+  }, []);
+
+  const handleAbout = useCallback(() => {
+    // Implement about logic
+    console.log('Show about info');
+  }, []);
+
   return (
     <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      {/* Action Button */}
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-        }}
-        className="
-          absolute 
-          -top-9 
-          -right-0
-          opacity-0 
-          group-hover:opacity-100
-          transition-opacity 
-          duration-200 
-          ease-in-out
-          z-50
-        "
-      >
-        <button
-          className="
-            p-1.5
-            rounded-md 
-            bg-white
-            hover:bg-gray-50
-            text-gray-600
-            shadow-[0px_1px_2px_0px_rgba(16,24,60,0.05)]
-            border border-[#EAECF0]
-          "
-        >
-          <MoreHorizontal className="w-3.5 h-3.5" />
-        </button>
-      </div>
+      {isWeb && (
+        <ActionButtons
+          type="skill-response"
+          onAddToContext={handleAddToContext}
+          onRerun={handleRerun}
+          onInsertToDoc={() => handleInsertToDoc('insertBlow')}
+          onDelete={handleDelete}
+          onHelpLink={handleHelpLink}
+          onAbout={handleAbout}
+          isCompleted={result?.status === 'finish'}
+        />
+      )}
 
       {/* Main Card Container */}
       <div

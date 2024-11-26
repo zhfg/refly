@@ -334,7 +334,21 @@
         "collapse": "Collapse",
         "result": "Result",
         "empty": "No hit filter conditions"
-      }
+      },
+      "alreadyAddedWithTitle": "[{{type}}] {{title}} is already in context",
+      "addSuccessWithTitle": "[{{type}}] {{title}} added to context",
+      "untitled": "Untitled",
+      "deleteSuccessWithTitle": "Successfully deleted [{{type}}] \"{{title}}\"",
+      "nodeTypes": {
+        "document": "Document",
+        "resource": "Resource",
+        "skillResponse": "Skill Response"
+      },
+      "noContent": "No content available to insert",
+      "noEditor": "No active document editor",
+      "insertSuccess": "Successfully inserted content",
+      "replaceSuccess": "Successfully replaced content",
+      "createNoteSuccess": "Successfully created new note"
     },
     "header": {
       "searchAndOpenResourceOrProject": "Search and open resource or project",

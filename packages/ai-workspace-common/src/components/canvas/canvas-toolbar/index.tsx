@@ -68,13 +68,13 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
       domain: 'resource',
       tooltip: t('canvas.toolbar.addResource'),
     },
-    {
-      icon: Sparkles,
-      value: 'addSkill',
-      type: 'popover',
-      domain: 'skill',
-      tooltip: t('canvas.toolbar.addSkill'),
-    },
+    // {
+    //   icon: Sparkles,
+    //   value: 'addSkill',
+    //   type: 'popover',
+    //   domain: 'skill',
+    //   tooltip: t('canvas.toolbar.addSkill'),
+    // },
     {
       icon: HiOutlineDocumentText,
       value: 'addDocument',
@@ -133,7 +133,6 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
             title={tool.tooltip}
             placement="right"
             mouseEnterDelay={0.5}
-            mouseLeaveDelay={0}
             overlayClassName="!px-2 !py-1"
             arrow={false}
           >
@@ -141,30 +140,36 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
               type="text"
               onClick={(event) => handleToolSelect(event, tool.value)}
               className={`
-              h-[32px] w-[32px] 
-              flex items-center justify-center 
-              hover:bg-gray-100 rounded-lg 
-              transition-colors duration-200 
-              group
-              ${tool.active ? 'bg-gray-100' : ''}
-            `}
+                h-[32px] w-[32px] 
+                flex items-center justify-center 
+                hover:bg-gray-100 rounded-lg 
+                transition-colors duration-200 
+                group
+                ${tool.active ? 'bg-gray-100' : ''}
+              `}
               icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
             />
           </Tooltip>
         ) : (
-          <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm}>
+          <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm} offset={12}>
             <Tooltip
               title={tool.tooltip}
               placement="right"
               mouseEnterDelay={0.5}
-              mouseLeaveDelay={0}
               overlayClassName="!px-2 !py-1"
               arrow={false}
             >
               <Button
                 type="text"
                 onClick={(event) => handleToolSelect(event, tool.value)}
-                className="h-[32px] w-[32px] flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors duration-200 group"
+                className={`
+                  h-[32px] w-[32px] 
+                  flex items-center justify-center 
+                  hover:bg-gray-100 rounded-lg 
+                  transition-colors duration-200 
+                  group
+                  ${tool.active ? 'bg-gray-100' : ''}
+                `}
                 icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
               />
             </Tooltip>

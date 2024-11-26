@@ -1,5 +1,6 @@
 import { FC } from 'react';
-import { Button } from 'antd';
+import { Button, Dropdown } from 'antd';
+import type { MenuProps } from 'antd';
 import {
   FileText,
   Link2,
@@ -13,9 +14,13 @@ import {
   Cpu,
   Code2,
   Globe,
+  FilePlus,
+  Trash2,
 } from 'lucide-react';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasNode } from '../nodes/types';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 
 // Define background colors for different node types
 const NODE_COLORS: Record<CanvasNodeType, string> = {
@@ -118,6 +123,35 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
   const nodeColor = NODE_COLORS[node.type];
   const nodeTitle = getNodeTitle(node);
 
+  // Add hooks for context and delete actions
+  const handleAddToContext = useAddToContext(node, node.type);
+  const handleDelete = useDeleteNode(node, node.type);
+
+  // Define dropdown menu items
+  const menuItems: MenuProps['items'] = [
+    {
+      key: 'addToContext',
+      label: (
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <FilePlus className="w-4 h-4 flex-shrink-0" />
+          Add to Context
+        </div>
+      ),
+      onClick: handleAddToContext,
+    },
+    {
+      key: 'delete',
+      label: (
+        <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
+          <Trash2 className="w-4 h-4 flex-shrink-0" />
+          Delete
+        </div>
+      ),
+      onClick: handleDelete,
+      className: 'hover:bg-red-50',
+    },
+  ];
+
   return (
     <div className="flex justify-between items-center p-4 border-b border-[#EAECF0]">
       {/* Left: Icon and Title */}
@@ -151,9 +185,22 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
             <Maximize2 className="w-4 h-4" />
           </Button>
         )}
-        <Button type="text" className="p-1.5 hover:bg-gray-100 text-gray-500">
-          <MoreHorizontal className="w-4 h-4" />
-        </Button>
+        <Dropdown
+          menu={{ items: menuItems }}
+          trigger={['click']}
+          placement="bottomRight"
+          overlayClassName="min-w-[160px] w-max"
+          getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
+          dropdownRender={(menu) => (
+            <div className="min-w-[160px] bg-white rounded-lg border-[0.5px] border-[rgba(0,0,0,0.03)] shadow-lg">
+              {menu}
+            </div>
+          )}
+        >
+          <Button type="text" className="p-1.5 hover:bg-gray-100 text-gray-500">
+            <MoreHorizontal className="w-4 h-4" />
+          </Button>
+        </Dropdown>
         <Button type="text" className="p-1.5 hover:bg-gray-100 text-gray-500" onClick={onClose}>
           <X className="w-4 h-4" />
         </Button>

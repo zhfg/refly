@@ -1,5 +1,5 @@
 import { Position, NodeProps, useReactFlow } from '@xyflow/react';
-import { CanvasNodeData, DocumentNodeMeta } from './types';
+import { CanvasNode, CanvasNodeData, DocumentNodeMeta } from './types';
 import { Node } from '@xyflow/react';
 import { FileText, MoreHorizontal } from 'lucide-react';
 import { CustomHandle } from './custom-handle';
@@ -7,6 +7,10 @@ import { useState, useCallback } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { EDGE_STYLES } from '../constants';
 import { getNodeCommonStyles } from './index';
+import { ActionButtons } from './action-buttons';
+import { useTranslation } from 'react-i18next';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
@@ -14,6 +18,7 @@ export const DocumentNode = ({ data, selected, id }: NodeProps<DocumentNode>) =>
   const [isHovered, setIsHovered] = useState(false);
   const { edges, onEdgesChange } = useCanvasControl();
   const { setEdges } = useReactFlow();
+  const { t } = useTranslation();
 
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
@@ -52,40 +57,45 @@ export const DocumentNode = ({ data, selected, id }: NodeProps<DocumentNode>) =>
     );
   }, [id, setEdges]);
 
+  const handleAddToContext = useAddToContext(
+    {
+      id,
+      type: 'document',
+      data,
+      position: { x: 0, y: 0 },
+    } as CanvasNode,
+    'document',
+  );
+
+  const handleDelete = useDeleteNode(
+    {
+      id,
+      type: 'document',
+      data,
+      position: { x: 0, y: 0 },
+    } as CanvasNode,
+    'document',
+  );
+
+  const handleHelpLink = useCallback(() => {
+    // Implement help link logic
+    console.log('Open help link');
+  }, []);
+
+  const handleAbout = useCallback(() => {
+    // Implement about logic
+    console.log('Show about info');
+  }, []);
+
   return (
     <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      {/* Action Button */}
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-        }}
-        className="
-          absolute 
-          -top-9 
-          -right-0
-          opacity-0 
-          group-hover:opacity-100
-          transition-opacity 
-          duration-200 
-          ease-in-out
-          z-50
-        "
-      >
-        <button
-          className="
-            p-1.5
-            rounded-md 
-            bg-white
-            hover:bg-gray-50
-            text-gray-600
-            shadow-[0px_1px_2px_0px_rgba(16,24,60,0.05)]
-            border border-[#EAECF0]
-          "
-        >
-          <MoreHorizontal className="w-3.5 h-3.5" />
-        </button>
-      </div>
+      <ActionButtons
+        type="document"
+        onAddToContext={handleAddToContext}
+        onDelete={handleDelete}
+        onHelpLink={handleHelpLink}
+        onAbout={handleAbout}
+      />
 
       {/* Main Card Container */}
       <div
