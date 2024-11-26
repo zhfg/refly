@@ -1,6 +1,7 @@
 import { MoreHorizontal, PlayCircle, FileText, Link, HelpCircle, Info, Trash2, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from 'antd';
+import { Button, Dropdown, Tooltip } from 'antd';
+import type { MenuProps } from 'antd';
 
 // Action button types
 type ActionButtonProps = {
@@ -12,74 +13,26 @@ type ActionButtonProps = {
 
 // Common action button component
 const ActionButton = ({ icon, onClick, loading, tooltip }: ActionButtonProps) => (
-  <Button
-    className="
-      p-2
-      rounded-lg
-      bg-white
-      hover:bg-gray-50
-      text-[rgba(0,0,0,0.5)]
-      transition-colors
-      duration-200
-      disabled:opacity-50
-      disabled:cursor-not-allowed
-    "
-    type="text"
-    onClick={onClick}
-    disabled={loading}
-    title={tooltip}
-  >
-    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : icon}
-  </Button>
-);
-
-// Dropdown menu component
-const DropdownMenu = ({
-  onDelete,
-  onHelpLink,
-  onAbout,
-}: {
-  onDelete: () => void;
-  onHelpLink: () => void;
-  onAbout: () => void;
-}) => (
-  <div
-    className="
-    absolute
-    right-0
-    mt-1
-    p-1
-    bg-white
-    rounded-lg
-    border-[0.5px]
-    border-[rgba(0,0,0,0.03)]
-    shadow-lg
-    z-50
-    min-w-[160px]
-  "
-  >
-    <button
-      onClick={onDelete}
-      className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 rounded-md flex items-center gap-2"
+  <Tooltip title={tooltip} placement="top" mouseEnterDelay={0.5} overlayClassName="!px-2 !py-1" arrow={false}>
+    <Button
+      className="
+        p-2
+        rounded-lg
+        bg-white
+        hover:bg-gray-50
+        text-[rgba(0,0,0,0.5)]
+        transition-colors
+        duration-200
+        disabled:opacity-50
+        disabled:cursor-not-allowed
+      "
+      type="text"
+      onClick={onClick}
+      disabled={loading}
     >
-      <Trash2 className="w-4 h-4" />
-      Delete
-    </button>
-    <button
-      onClick={onHelpLink}
-      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded-md flex items-center gap-2"
-    >
-      <HelpCircle className="w-4 h-4" />
-      Help Link
-    </button>
-    <button
-      onClick={onAbout}
-      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded-md flex items-center gap-2"
-    >
-      <Info className="w-4 h-4" />
-      About
-    </button>
-  </div>
+      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : icon}
+    </Button>
+  </Tooltip>
 );
 
 type ActionButtonsProps = {
@@ -105,7 +58,40 @@ export const ActionButtons = ({
   isProcessing,
   isCompleted,
 }: ActionButtonsProps) => {
-  const [showDropdown, setShowDropdown] = useState(false);
+  // Define dropdown menu items
+  const menuItems: MenuProps['items'] = [
+    {
+      key: 'delete',
+      label: (
+        <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
+          <Trash2 className="w-4 h-4 flex-shrink-0" />
+          Delete
+        </div>
+      ),
+      onClick: onDelete,
+      className: 'hover:bg-red-50',
+    },
+    {
+      key: 'helpLink',
+      label: (
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <HelpCircle className="w-4 h-4 flex-shrink-0" />
+          Help Link
+        </div>
+      ),
+      onClick: onHelpLink,
+    },
+    {
+      key: 'about',
+      label: (
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <Info className="w-4 h-4 flex-shrink-0" />
+          About
+        </div>
+      ),
+      onClick: onAbout,
+    },
+  ];
 
   return (
     <div
@@ -179,21 +165,25 @@ export const ActionButtons = ({
         </>
       )}
 
-      {/* More options button (common for all types) */}
-      <div className="relative">
+      {/* More options dropdown (common for all types) */}
+      <Dropdown
+        menu={{ items: menuItems }}
+        trigger={['click']}
+        placement="bottomRight"
+        overlayClassName="min-w-[160px] w-max"
+        getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
+        dropdownRender={(menu) => (
+          <div className="min-w-[160px] bg-white rounded-lg border-[0.5px] border-[rgba(0,0,0,0.03)] shadow-lg">
+            {menu}
+          </div>
+        )}
+      >
         <ActionButton
           icon={<MoreHorizontal className="w-4 h-4" />}
-          onClick={() => setShowDropdown(!showDropdown)}
+          onClick={(e) => e.preventDefault()}
           tooltip="More Options"
         />
-        {showDropdown && (
-          <DropdownMenu
-            onDelete={onDelete ?? (() => {})}
-            onHelpLink={onHelpLink ?? (() => {})}
-            onAbout={onAbout ?? (() => {})}
-          />
-        )}
-      </div>
+      </Dropdown>
     </div>
   );
 };
