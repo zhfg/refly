@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { Connection, useReactFlow, Node } from '@xyflow/react';
+import { Connection, useReactFlow, Node, XYPosition } from '@xyflow/react';
 import Dagre from '@dagrejs/dagre';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { applyEdgeChanges, applyNodeChanges, Edge, EdgeChange, NodeChange } from '@xyflow/react';
@@ -132,7 +132,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     };
   }, [canvasId]);
 
-  const { fitView, getNodes, setNodes: setReactFlowNodes } = useReactFlow();
+  const { fitView, getNodes, setNodes: setReactFlowNodes, setCenter, getNode } = useReactFlow();
 
   const onLayout = useCallback(
     (direction: 'TB' | 'LR') => {
@@ -199,72 +199,94 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     [ydoc, yEdges],
   );
 
-  const addNode = (node: { type: CanvasNodeType; data: CanvasNodeData<any> }, connectTo?: CanvasNodeFilter[]) => {
-    const { nodes } = useCanvasStore.getState().data[canvasId];
+  const addNode = useCallback(
+    (
+      node: { type: CanvasNodeType; data: CanvasNodeData<any>; position?: XYPosition },
+      connectTo?: CanvasNodeFilter[],
+    ) => {
+      const { nodes } = useCanvasStore.getState().data[canvasId];
 
-    if (!node?.type || !node?.data) {
-      console.warn('Invalid node data provided');
-      return;
-    }
+      if (!node?.type || !node?.data) {
+        console.warn('Invalid node data provided');
+        return;
+      }
 
-    // Check if a node with the same entity already exists
-    if (nodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId)) {
-      console.warn('Node with the same entity already exists');
-      return;
-    }
+      // 检查节点是否已存在
+      if (nodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId)) {
+        console.warn('Node with the same entity already exists');
+        return;
+      }
 
-    const enrichedData = {
-      ...node.data,
-      metadata: {
-        ...node?.data?.metadata,
-        ...getNodeDefaultMetadata(node.type),
-      },
-    };
+      const enrichedData = {
+        ...node.data,
+        metadata: {
+          ...getNodeDefaultMetadata(node.type),
+          ...node?.data?.metadata,
+        },
+      };
 
-    const newNode = prepareNodeData({
-      type: node.type,
-      data: enrichedData,
-    });
+      // 准备新节点
+      const newNode = prepareNodeData({
+        type: node.type,
+        data: enrichedData,
+        position: node.position ?? {
+          x: Math.max(...nodes.map((n) => n.position.x), 0) + 200,
+          y: Math.max(...nodes.map((n) => n.position.y), 0),
+        },
+        selected: true,
+      });
 
-    ydoc?.transact(() => {
-      yNodes?.push([newNode]);
+      // 在一个事务中完成所有操作
+      ydoc?.transact(() => {
+        // 添加新节点
+        yNodes?.push([newNode]);
 
-      if (connectTo?.length > 0) {
-        const newEdges: Edge[] = [];
-        connectTo.forEach((filter) => {
-          if (!filter.type || !filter.entityId) {
-            console.warn('Invalid filter provided');
-            return;
+        // 如果需要连接，创建边
+        if (connectTo?.length > 0) {
+          const newEdges: Edge[] = [];
+          connectTo.forEach((filter) => {
+            const sourceNode = nodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId);
+
+            if (sourceNode) {
+              newEdges.push({
+                id: `edge-${sourceNode.id}-${newNode.id}`,
+                source: sourceNode.id,
+                target: newNode.id,
+                style: EDGE_STYLES.default,
+                type: 'default',
+              });
+            }
+          });
+
+          if (newEdges.length > 0) {
+            yEdges?.push(newEdges);
           }
+        }
 
-          const targetNode = nodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId);
-          if (targetNode) {
-            newEdges.push({
-              id: `edge-${targetNode.id}-${newNode.id}`,
-              source: targetNode.id,
-              target: newNode.id,
-              style: EDGE_STYLES.default,
+        // 更新选中状态
+        setSelectedNode(newNode);
+      });
+
+      // 延迟执行布局和居中
+      setTimeout(() => {
+        // 先执行布局
+        onLayout('LR');
+
+        // 等待布局完成后再居中到新节点
+        setTimeout(() => {
+          const node = getNode(newNode.id);
+          if (node) {
+            // 将新节点居中显示，带动画效果
+            setCenter(node.position.x, node.position.y, {
+              duration: 500,
+              zoom: 1, // 保持当前缩放级别
             });
           }
-        });
-        yEdges?.push(newEdges);
-      }
-    });
-
-    const currentNodes = getNodes();
-    setReactFlowNodes(
-      currentNodes.map((node) => ({
-        ...node,
-        selected: node.id === newNode.id,
-      })),
-    );
-
-    setSelectedNode(newNode);
-
-    setTimeout(() => {
-      onLayout('LR');
-    }, 50);
-  };
+        }, 50);
+      }, 100);
+    },
+    [canvasId, ydoc, yNodes, yEdges, setSelectedNode, onLayout, setNodes, setReactFlowNodes],
+  );
 
   const handleSelectionChange = useCallback(
     ({ nodes: selectedNodes }: { nodes: Node[] }) => {

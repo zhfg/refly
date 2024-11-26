@@ -14,12 +14,13 @@ import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-a
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/use-insert-to-document';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
 export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillResponseNode>) => {
   const [isHovered, setIsHovered] = useState(false);
-  const { edges } = useCanvasControl();
+  const { edges, nodes } = useCanvasControl();
   const { setEdges } = useReactFlow();
 
   // Get result from store
@@ -126,6 +127,16 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
     console.log('Show about info');
   }, []);
 
+  const { debouncedCreateDocument, isCreating } = useCreateDocument();
+
+  const handleCreateDocument = useCallback(async () => {
+    await debouncedCreateDocument(data?.title ?? modelName, content, {
+      sourceNodeId: data.entityId,
+      addToCanvas: true,
+    });
+  }, [content, debouncedCreateDocument, data.entityId, data?.title, modelName]);
+  console.log('data.title', nodes, data);
+
   return (
     <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       {isWeb && (
@@ -134,10 +145,12 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
           onAddToContext={handleAddToContext}
           onRerun={handleRerun}
           onInsertToDoc={() => handleInsertToDoc('insertBlow')}
+          onCreateDocument={handleCreateDocument}
           onDelete={handleDelete}
           onHelpLink={handleHelpLink}
           onAbout={handleAbout}
           isCompleted={result?.status === 'finish'}
+          isCreatingDocument={isCreating}
         />
       )}
 

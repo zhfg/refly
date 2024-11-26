@@ -30,13 +30,6 @@ export const useInsertToDocument = (resultId: string) => {
         result.structuredData?.sources as Source[],
       );
 
-      if (operation === 'createNewNote') {
-        // Create new document with content
-        editorEmitter.emit('createNewNote', parsedContent);
-        message.success(t('knowledgeBase.context.createNoteSuccess'));
-        return;
-      }
-
       // Handle insert or replace operations
       if (editor) {
         const selection = editor.view?.state?.selection;
