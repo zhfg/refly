@@ -49,7 +49,7 @@ export type EditorOperation =
   | 'insertBlow'
   | 'replaceSelection'
   | 'contineInChat'
-  | 'createNewNote'
+  | 'createDocument'
   | 'streamCanvasContent'
   | 'streamEditCanvasContent'
   | 'updateCanvasTitle'

@@ -14,7 +14,6 @@ import { useResetState } from '@refly-packages/ai-workspace-common/hooks/use-res
 import { useKnowledgeBaseStore } from '../../stores/knowledge-base';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
-import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { useDynamicInitContextPanelState } from '@refly-packages/ai-workspace-common/hooks/use-init-context-panel-state';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
@@ -105,9 +104,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
       resizeObserver.disconnect();
     };
   }, [updateOperationModuleHeight]);
-
-  // ai-note handler
-  useAINote(true);
 
   const handleGetThreadMessages = async (convId: string) => {
     const { data: res, error } = await getClient().getConversationDetail({

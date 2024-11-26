@@ -36,15 +36,26 @@ export const nodeTypes: NodeTypes = {
 };
 
 // Helper function to prepare node data
-export const prepareNodeData = <T extends CanvasNodeType>(param: {
+export const prepareNodeData = <T extends CanvasNodeType>({
+  type,
+  data,
+  position = { x: 0, y: 0 },
+  connectable = true,
+  selected = false,
+}: {
   type: T;
   data: CanvasNodeData<NodeMetadataMap[T]>;
+  position?: { x: number; y: number };
+  connectable?: boolean;
+  selected?: boolean;
 }) => {
   return {
     id: `node-${UUIDV4()}`,
-    type: param.type,
-    position: { x: 0, y: 0 },
-    data: param.data,
+    type,
+    position,
+    data,
+    connectable,
+    selected,
   };
 };
 

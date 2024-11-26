@@ -49,7 +49,7 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
   };
 
   const assistantMessage: Partial<ChatMessage> = {
-    msgId: `${resultId}-assistant`,
+    msgId: resultId,
     type: 'ai',
     content: result.content ?? '',
     skillMeta: {

@@ -3,7 +3,6 @@ import { Divider, Modal, Input, Button, Affix } from "@arco-design/web-react"
 import { CgFileDocument } from "react-icons/cg"
 
 import { useNewCanvasModalStoreShallow } from "@refly-packages/ai-workspace-common/stores/new-canvas-modal"
-import { useAINote } from "@refly-packages/ai-workspace-common/hooks/use-ai-note"
 
 // utils
 import { SearchSelect } from "@refly-packages/ai-workspace-common/modules/entity-selector/components"
@@ -13,6 +12,7 @@ import { useTranslation } from "react-i18next"
 import "./index.scss"
 import { getPopupContainer } from "@refly-packages/ai-workspace-common/utils/ui"
 import { useProjectStoreShallow } from "@refly-packages/ai-workspace-common/stores/project"
+import { useCreateDocument } from "@refly-packages/ai-workspace-common/hooks/use-create-document"
 
 const { TextArea } = Input
 
@@ -33,17 +33,19 @@ export const NewCanvasModal = () => {
     fetchProjectDirItems: state.fetchProjectDirItems,
   }))
 
-  const { handleInitEmptyNote } = useAINote()
+  const { debouncedCreateDocument } = useCreateDocument()
 
   const handleSave = async () => {
     setSaveLoading(true)
 
     try {
-      await handleInitEmptyNote({
-        title: newCanvasModalStore.title,
-        projectId: newCanvasModalStore.selectedProjectId,
-        content: newCanvasModalStore.content,
-      })
+      await debouncedCreateDocument(
+        newCanvasModalStore.title,
+        newCanvasModalStore.content,
+        {
+          addToCanvas: true,
+        },
+      )
 
       fetchProjectDirItems(newCanvasModalStore.selectedProjectId, "canvases")
 

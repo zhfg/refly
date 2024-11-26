@@ -1,4 +1,16 @@
-import { MoreHorizontal, PlayCircle, FilePlus, FileInput, Link, HelpCircle, Info, Trash2, Loader2 } from 'lucide-react';
+import {
+  MoreHorizontal,
+  PlayCircle,
+  FileInput,
+  Link,
+  HelpCircle,
+  Info,
+  Trash2,
+  Loader2,
+  MessageSquareDiff,
+  FileText,
+  FilePlus,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Button, Dropdown, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
@@ -55,6 +67,8 @@ type ActionButtonsProps = {
   onAbout?: () => void;
   isProcessing?: boolean;
   isCompleted?: boolean;
+  onCreateDocument?: () => void;
+  isCreatingDocument?: boolean;
 };
 
 export const ActionButtons = ({
@@ -67,6 +81,8 @@ export const ActionButtons = ({
   onAbout,
   isProcessing,
   isCompleted,
+  onCreateDocument,
+  isCreatingDocument,
 }: ActionButtonsProps) => {
   // Define dropdown menu items
   const menuItems: MenuProps['items'] = [
@@ -131,14 +147,22 @@ export const ActionButtons = ({
     >
       {/* Document specific buttons */}
       {type === 'document' && onAddToContext && (
-        <ActionButton icon={<FilePlus className="w-4 h-4" />} onClick={onAddToContext} tooltip="Add to Context" />
+        <ActionButton
+          icon={<MessageSquareDiff className="w-4 h-4" />}
+          onClick={onAddToContext}
+          tooltip="Add to Context"
+        />
       )}
 
       {/* Resource specific buttons */}
       {type === 'resource' && (
         <>
           {onAddToContext && (
-            <ActionButton icon={<FilePlus className="w-4 h-4" />} onClick={onAddToContext} tooltip="Add to Context" />
+            <ActionButton
+              icon={<MessageSquareDiff className="w-4 h-4" />}
+              onClick={onAddToContext}
+              tooltip="Add to Context"
+            />
           )}
           {isProcessing && (
             <ActionButton
@@ -170,14 +194,29 @@ export const ActionButtons = ({
             />
           )}
           {onAddToContext && (
-            <ActionButton icon={<FilePlus className="w-4 h-4" />} onClick={onAddToContext} tooltip="Add to Context" />
+            <ActionButton
+              icon={<MessageSquareDiff className="w-4 h-4" />}
+              onClick={onAddToContext}
+              tooltip="Add to Context"
+            />
+          )}
+          {onCreateDocument && (
+            <ActionButton
+              icon={<FilePlus className="w-4 h-4" />}
+              onClick={onCreateDocument}
+              loading={isCreatingDocument}
+              tooltip={isCreatingDocument ? 'Creating Document...' : 'Create Document'}
+            />
           )}
         </>
       )}
 
       {/* More options dropdown (common for all types) */}
       <Dropdown
-        menu={{ items: menuItems }}
+        menu={{
+          items: menuItems,
+          disabled: isCreatingDocument,
+        }}
         trigger={['click', 'hover']}
         placement="bottomRight"
         overlayClassName="min-w-[160px] w-max"

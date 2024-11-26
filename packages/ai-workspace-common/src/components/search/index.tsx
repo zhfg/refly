@@ -13,7 +13,6 @@ import { Skill } from './skill';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchDomain, SearchResult, SkillMeta } from '@refly/openapi-schema';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
 import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
 import classNames from 'classnames';
@@ -45,7 +44,6 @@ export const Search = (props: SearchProps) => {
   // skill
   const [selectedSkill, setSelectedSkill] = useState<SkillMeta>();
   // notes
-  const { handleInitEmptyNote } = useAINote();
   const { handleAddTab: handleAddNoteTab } = useCanvasTabs();
   const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
 
@@ -227,7 +225,7 @@ export const Search = (props: SearchProps) => {
         searchStore.setIsSearchOpen(false);
       },
       onCreateClick: async () => {
-        await handleInitEmptyNote({ content: '' });
+        // await handleInitEmptyNote({ content: '' });
         searchStore.setIsSearchOpen(false);
       },
     },

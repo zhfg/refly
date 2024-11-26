@@ -32,12 +32,15 @@ import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/sto
 import { memo, useMemo } from 'react';
 import classNames from 'classnames';
 import { parseMarkdownCitationsAndCanvasTags } from '@refly/utils/parse';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useProcessContextItems } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-process-context-items';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
+import { useDebouncedCallback } from 'use-debounce';
 
 // utils
 import { processWithCanvas } from './utils';
+import { FilePlus } from 'lucide-react';
 
 export const HumanMessage = memo(
   (props: { message: Partial<ChatMessage>; profile: { avatar: string; name: string }; disable?: boolean }) => {
@@ -121,6 +124,7 @@ export const AssistantMessage = memo(
       humanMessage,
       handleAskFollowing,
     } = props;
+    const { debouncedCreateDocument, isCreating } = useCreateDocument();
     const runtime = getRuntime();
     const isWeb = runtime === 'web';
 
@@ -134,8 +138,9 @@ export const AssistantMessage = memo(
         key: 'replaceSelection',
       },
       {
-        icon: <IconBook style={{ fontSize: 14 }} />,
-        key: 'createNewNote',
+        icon: <FilePlus style={{ fontSize: 14, width: 14, height: 14 }} />,
+        key: 'createDocument',
+        loading: isCreating,
       },
     ];
 
@@ -160,7 +165,7 @@ export const AssistantMessage = memo(
       icon: message?.skillMeta?.icon,
     };
 
-    const handleEditorOperation = (type: EditorOperation, content: string) => {
+    const handleEditorOperation = async (type: EditorOperation, content: string) => {
       const parsedContent = parseMarkdownCitationsAndCanvasTags(content, sources);
 
       if (type === 'insertBlow' || type === 'replaceSelection') {
@@ -183,8 +188,11 @@ export const AssistantMessage = memo(
             )
             .run();
         }
-      } else if (type === 'createNewNote') {
-        editorEmitter.emit('createNewNote', parsedContent);
+      } else if (type === 'createDocument') {
+        await debouncedCreateDocument(humanMessage?.content ?? 'New Document', content, {
+          sourceNodeId: message?.msgId ?? '',
+          addToCanvas: true,
+        });
       }
     };
 
@@ -250,12 +258,12 @@ export const AssistantMessage = memo(
     const availableEditorActions = useMemo(() => {
       if (!noteStoreEditor) {
         // If no editor, only show create new note
-        return editorActionList.filter((item) => item.key === 'createNewNote');
+        return editorActionList.filter((item) => item.key === 'createDocument');
       }
 
       if (!hasEditorSelection) {
         // If no selection, show create new note and insert below
-        return editorActionList.filter((item) => ['createNewNote', 'insertBlow'].includes(item.key));
+        return editorActionList.filter((item) => ['createDocument', 'insertBlow'].includes(item.key));
       }
 
       // If has selection, show all actions
@@ -409,7 +417,9 @@ export const AssistantMessage = memo(
                       {isWeb
                         ? availableEditorActions.map((item) => (
                             <Button
-                              loading={item.key === 'createNewNote' && isCreatingNewDocumentOnHumanMessage}
+                              loading={
+                                item.key === 'createDocument' && (isCreatingNewDocumentOnHumanMessage || isCreating)
+                              }
                               type="text"
                               className={'assist-action-item'}
                               icon={item.icon}
