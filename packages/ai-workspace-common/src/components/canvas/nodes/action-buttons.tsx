@@ -1,4 +1,4 @@
-import { MoreHorizontal, PlayCircle, FileText, Link, HelpCircle, Info, Trash2, Loader2 } from 'lucide-react';
+import { MoreHorizontal, PlayCircle, FilePlus, FileInput, Link, HelpCircle, Info, Trash2, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button, Dropdown, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
@@ -131,14 +131,14 @@ export const ActionButtons = ({
     >
       {/* Document specific buttons */}
       {type === 'document' && onAddToContext && (
-        <ActionButton icon={<FileText className="w-4 h-4" />} onClick={onAddToContext} tooltip="Add to Context" />
+        <ActionButton icon={<FilePlus className="w-4 h-4" />} onClick={onAddToContext} tooltip="Add to Context" />
       )}
 
       {/* Resource specific buttons */}
       {type === 'resource' && (
         <>
           {onAddToContext && (
-            <ActionButton icon={<Link className="w-4 h-4" />} onClick={onAddToContext} tooltip="Add to Context" />
+            <ActionButton icon={<FilePlus className="w-4 h-4" />} onClick={onAddToContext} tooltip="Add to Context" />
           )}
           {isProcessing && (
             <ActionButton
@@ -164,13 +164,13 @@ export const ActionButtons = ({
           )}
           {onInsertToDoc && (
             <ActionButton
-              icon={<FileText className="w-4 h-4" />}
+              icon={<FileInput className="w-4 h-4" />}
               onClick={onInsertToDoc}
               tooltip="Insert to Document"
             />
           )}
           {onAddToContext && (
-            <ActionButton icon={<Link className="w-4 h-4" />} onClick={onAddToContext} tooltip="Add to Context" />
+            <ActionButton icon={<FilePlus className="w-4 h-4" />} onClick={onAddToContext} tooltip="Add to Context" />
           )}
         </>
       )}

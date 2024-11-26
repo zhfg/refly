@@ -1,5 +1,5 @@
 import { Position, NodeProps, useEdges, useReactFlow } from '@xyflow/react';
-import { CanvasNodeData, ResponseNodeMeta } from './types';
+import { CanvasNodeData, ResponseNodeMeta, CanvasNode } from './types';
 import { Node } from '@xyflow/react';
 import { MessageSquare, MoreHorizontal } from 'lucide-react';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
@@ -10,6 +10,10 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { EDGE_STYLES } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
+import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/use-insert-to-document';
+import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -83,25 +87,34 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
     );
   }, [id, setEdges]);
 
-  const handleAddToContext = useCallback(() => {
-    // Implement add to context logic
-    console.log('Add to context:', id);
-  }, [id]);
+  const handleAddToContext = useAddToContext(
+    {
+      id,
+      type: 'skillResponse',
+      data,
+      position: { x: 0, y: 0 },
+    } as CanvasNode,
+    'skillResponse',
+  );
 
   const handleRerun = useCallback(() => {
     // Implement rerun logic
     console.log('Rerun:', id);
   }, [id]);
 
-  const handleInsertToDoc = useCallback(() => {
-    // Implement insert to document logic
-    console.log('Insert to document:', id);
-  }, [id]);
+  const runtime = getRuntime();
+  const isWeb = runtime === 'web';
+  const handleInsertToDoc = useInsertToDocument(data.entityId);
 
-  const handleDelete = useCallback(() => {
-    // Implement delete logic
-    console.log('Delete node:', id);
-  }, [id]);
+  const handleDelete = useDeleteNode(
+    {
+      id,
+      type: 'skillResponse',
+      data,
+      position: { x: 0, y: 0 },
+    } as CanvasNode,
+    'skillResponse',
+  );
 
   const handleHelpLink = useCallback(() => {
     // Implement help link logic
@@ -115,16 +128,18 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
 
   return (
     <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      <ActionButtons
-        type="skill-response"
-        onAddToContext={handleAddToContext}
-        onRerun={handleRerun}
-        onInsertToDoc={handleInsertToDoc}
-        onDelete={handleDelete}
-        onHelpLink={handleHelpLink}
-        onAbout={handleAbout}
-        isCompleted={result?.status === 'finish'}
-      />
+      {isWeb && (
+        <ActionButtons
+          type="skill-response"
+          onAddToContext={handleAddToContext}
+          onRerun={handleRerun}
+          onInsertToDoc={() => handleInsertToDoc('insertBlow')}
+          onDelete={handleDelete}
+          onHelpLink={handleHelpLink}
+          onAbout={handleAbout}
+          isCompleted={result?.status === 'finish'}
+        />
+      )}
 
       {/* Main Card Container */}
       <div

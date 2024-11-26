@@ -335,7 +335,21 @@
         "collapse": "折叠",
         "result": "结果",
         "empty": "未命中过滤条件"
-      }
+      },
+      "alreadyAddedWithTitle": "[{{type}}] {{title}} 已添加到上下文",
+      "addSuccessWithTitle": "[{{type}}] {{title}} 已成功添加到上下文",
+      "untitled": "未命名",
+      "deleteSuccessWithTitle": "已成功删除 [{{type}}] \"{{title}}\"",
+      "nodeTypes": {
+        "document": "文档",
+        "resource": "资源",
+        "skillResponse": "技能响应"
+      },
+      "noContent": "没有可插入的内容",
+      "noEditor": "没有活动的文档编辑器",
+      "insertSuccess": "内容插入成功",
+      "replaceSuccess": "内容替换成功",
+      "createNoteSuccess": "新建笔记成功"
     },
     "header": {
       "searchAndOpenResourceOrProject": "搜索并打开资源或项目",

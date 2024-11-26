@@ -1,5 +1,5 @@
 import { Position, NodeProps, useReactFlow } from '@xyflow/react';
-import { CanvasNodeData, DocumentNodeMeta } from './types';
+import { CanvasNode, CanvasNodeData, DocumentNodeMeta } from './types';
 import { Node } from '@xyflow/react';
 import { FileText, MoreHorizontal } from 'lucide-react';
 import { CustomHandle } from './custom-handle';
@@ -8,6 +8,9 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { EDGE_STYLES } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
+import { useTranslation } from 'react-i18next';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
@@ -15,6 +18,7 @@ export const DocumentNode = ({ data, selected, id }: NodeProps<DocumentNode>) =>
   const [isHovered, setIsHovered] = useState(false);
   const { edges, onEdgesChange } = useCanvasControl();
   const { setEdges } = useReactFlow();
+  const { t } = useTranslation();
 
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
@@ -56,15 +60,25 @@ export const DocumentNode = ({ data, selected, id }: NodeProps<DocumentNode>) =>
     );
   }, [id, setEdges]);
 
-  const handleAddToContext = useCallback(() => {
-    // Implement add to context logic
-    console.log('Add to context:', id);
-  }, [id]);
+  const handleAddToContext = useAddToContext(
+    {
+      id,
+      type: 'document',
+      data,
+      position: { x: 0, y: 0 },
+    } as CanvasNode,
+    'document',
+  );
 
-  const handleDelete = useCallback(() => {
-    // Implement delete logic
-    console.log('Delete node:', id);
-  }, [id]);
+  const handleDelete = useDeleteNode(
+    {
+      id,
+      type: 'document',
+      data,
+      position: { x: 0, y: 0 },
+    } as CanvasNode,
+    'document',
+  );
 
   const handleHelpLink = useCallback(() => {
     // Implement help link logic
