@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 import {
   ReactFlow,
   Background,
@@ -47,6 +47,25 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     onConnect,
   } = useCanvasControl(canvasId);
 
+  const reactFlowInstance = useReactFlow();
+
+  useEffect(() => {
+    if (selectedNode && !nodes.some((node) => node.id === selectedNode.id)) {
+      setSelectedNode(null);
+    }
+  }, [nodes, selectedNode, setSelectedNode]);
+
+  useEffect(() => {
+    if (nodes?.length > 0) {
+      setTimeout(() => {
+        reactFlowInstance.fitView({
+          padding: 0.2,
+          duration: 200,
+        });
+      }, 100);
+    }
+  }, [nodes?.length]);
+
   const defaultEdgeOptions = {
     style: EDGE_STYLES.default,
   };
@@ -62,8 +81,9 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
       defaultViewport,
       fitViewOptions: {
         padding: 0.2,
-        minZoom: 1,
-        maxZoom: 1,
+        minZoom: 0.5,
+        maxZoom: 2,
+        duration: 200,
       },
       defaultEdgeOptions,
     }),
