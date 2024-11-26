@@ -17,6 +17,7 @@ export function actionResultPO2DTO(result: ActionResultModel): ActionResult {
     errors: JSON.parse(result.errors || '[]'),
     tokenUsage: JSON.parse(result.tokenUsage || '[]'),
     invokeParam: JSON.parse(result.invokeParam || '{}'),
+    artifacts: JSON.parse(result.artifacts || '[]'),
     createdAt: result.createdAt.toJSON(),
     updatedAt: result.updatedAt.toJSON(),
   };

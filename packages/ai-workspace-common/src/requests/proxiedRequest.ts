@@ -1,5 +1,5 @@
 import React from 'react';
-import { createClient, client } from '@hey-api/client-fetch';
+import { client } from '@refly/openapi-schema';
 import * as requestModule from '@refly/openapi-schema';
 import { Button, notification } from 'antd';
 import { IconCopy } from '@arco-design/web-react/icon';
@@ -13,7 +13,7 @@ import { ConnectionError, getErrorMessage, UnknownError } from '@refly/errors';
 import { safeParseJSON, safeStringifyJSON } from '@refly-packages/utils/parse';
 import { BaseResponse } from '@refly/openapi-schema';
 
-createClient({ baseUrl: getServerOrigin() + '/v1' });
+client.setConfig({ baseUrl: getServerOrigin() + '/v1' });
 
 client.interceptors.request.use((request) => {
   const token = getAuthTokenFromCookie();

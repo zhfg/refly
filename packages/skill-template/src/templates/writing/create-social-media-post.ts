@@ -9,7 +9,7 @@ import {
   DynamicConfigValue,
   SkillContextContentItem,
   SkillInvocationConfig,
-  SkillTemplateConfigSchema,
+  SkillTemplateConfigDefinition,
   Icon,
 } from '@refly-packages/openapi-schema';
 import {
@@ -48,7 +48,7 @@ export class CreateSocialMediaPostSkill extends BaseSkill {
 
   icon: Icon = { type: 'emoji', value: '📰' };
 
-  configSchema: SkillTemplateConfigSchema = {
+  configSchema: SkillTemplateConfigDefinition = {
     items: [
       {
         key: 'targetPlatform',

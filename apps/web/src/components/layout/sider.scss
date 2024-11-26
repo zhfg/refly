@@ -45,7 +45,6 @@
   }
 
   .arco-menu-selected {
-    background-color: rgb(238, 243, 245) !important;
     &.setting-menu-item {
       .subscription-status {
         background-color: #faf9f9;
@@ -212,11 +211,9 @@
     color: rgba(0, 0, 0, 0.9) !important;
   }
 
-  .arco-menu-light .arco-menu-item,
-  .arco-menu-light .arco-menu-group-title,
-  .arco-menu-light .arco-menu-pop-header,
-  .arco-menu-light .arco-menu-inline-header {
-    background-color: transparent;
+  .arco-icon {
+    font-size: 16px;
+    margin-right: 12px !important;
   }
 
   .sider-menu-inner {
@@ -245,7 +242,6 @@
         background-color: var(--semi-color-text-0);
         color: #fff;
         transition: background-color 0.5s;
-        // transition: color 0.5s;
       }
     }
   }

@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'node:events';
 import pLimit from 'p-limit';
 import { Queue } from 'bull';
+import * as Y from 'yjs';
 import { InjectQueue } from '@nestjs/bull';
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { Prisma, SkillTrigger as SkillTriggerModel } from '@prisma/client';
@@ -42,11 +43,11 @@ import {
   createSkillInventory,
 } from '@refly-packages/skill-template';
 import {
-  aggregateTokenUsage,
   // detectLanguage,
   genActionResultID,
   genSkillID,
   genSkillTriggerID,
+  incrementalMarkdownUpdate,
 } from '@refly-packages/utils';
 import { PrismaService } from '@/common/prisma.service';
 import {
@@ -85,6 +86,8 @@ import { genBaseRespDataFromError } from '@/utils/exception';
 import { CanvasService } from '@/canvas/canvas.service';
 import { canvasPO2DTO } from '@/canvas/canvas.dto';
 import { actionResultPO2DTO } from '@/action/action.dto';
+import { CollabService } from '@/collab/collab.service';
+import { throttle } from 'lodash';
 
 export function createLangchainMessage(result: ActionResult): BaseMessage[] {
   const query = result.invokeParam?.input?.query;
@@ -138,6 +141,7 @@ export class SkillService {
     private canvas: CanvasService,
     private conversation: ConversationService,
     private subscription: SubscriptionService,
+    private collabService: CollabService,
     @InjectQueue(QUEUE_SKILL) private skillQueue: Queue<InvokeSkillJobData>,
     @InjectQueue(QUEUE_SYNC_TOKEN_USAGE) private usageReportQueue: Queue<SyncTokenUsageJobData>,
   ) {
@@ -581,6 +585,7 @@ export class SkillService {
       emitter.on('end', eventListener);
       emitter.on('log', eventListener);
       emitter.on('error', eventListener);
+      emitter.on('create_node', eventListener);
       emitter.on('structured_data', eventListener);
 
       config.configurable.emitter = emitter;
@@ -627,14 +632,17 @@ export class SkillService {
       });
     }
 
-    const resultUpdates = {
+    const resultUpdates: Partial<ActionResult> = {
       content: '',
       logs: [],
       structuredData: {},
       errors: [],
-      toolCalls: [],
-      usageItems: [],
+      tokenUsage: [],
+      artifacts: [],
     };
+
+    // Document to be updated
+    let outputDocument: Y.Doc | null = null;
 
     const config = await this.buildInvokeConfig(user, {
       ...data,
@@ -656,6 +664,24 @@ export class SkillService {
               resultUpdates.structuredData[data.structuredDataKey] = data.content;
             }
             return;
+          case 'create_node':
+            const documentId = data.node.data.entityId;
+            this.logger.log(`create_node event captured, open direct connection to ${documentId}`);
+            if (documentId) {
+              const doc = await this.prisma.document.findFirst({ where: { docId: documentId } });
+              const { document } = await this.collabService.openDirectConnection(documentId, {
+                user,
+                entity: doc,
+                entityType: 'document',
+              });
+              outputDocument = document;
+              resultUpdates.artifacts.push({
+                type: 'document',
+                entityId: documentId,
+                title: doc?.title || 'New Document',
+              });
+            }
+            return;
           case 'error':
             resultUpdates.errors.push(data.content);
             return;
@@ -672,6 +698,15 @@ export class SkillService {
       actionMeta,
     };
 
+    const throttledMarkdownUpdate = throttle(
+      (doc: Y.Doc, content: string) => incrementalMarkdownUpdate(doc, content),
+      20,
+      {
+        leading: true,
+        trailing: true,
+      },
+    );
+
     try {
       for await (const event of skill.streamEvents(input, { ...config, version: 'v2' })) {
         if (aborted) {
@@ -687,11 +722,16 @@ export class SkillService {
         switch (event.event) {
           case 'on_chat_model_stream':
             if (chunk.content && res) {
-              writeSSEResponse(res, {
-                event: 'stream',
-                resultId,
-                content: chunk.content.toString(),
-              });
+              resultUpdates.content += chunk.content.toString();
+              if (outputDocument) {
+                throttledMarkdownUpdate(outputDocument, resultUpdates.content);
+              } else {
+                writeSSEResponse(res, {
+                  event: 'stream',
+                  resultId,
+                  content: chunk.content.toString(),
+                });
+              }
             }
             break;
           case 'on_chat_model_end':
@@ -714,9 +754,8 @@ export class SkillService {
               };
               await this.usageReportQueue.add(tokenUsage);
 
-              resultUpdates.content += chunk.content.toString();
-              resultUpdates.toolCalls.push(...chunk.tool_calls);
-              resultUpdates.usageItems.push(usage);
+              resultUpdates.tokenUsage = [usage];
+              resultUpdates.content = chunk.content.toString();
             }
             break;
         }
@@ -735,7 +774,7 @@ export class SkillService {
         writeSSEResponse(res, {
           event: 'usage',
           resultId,
-          content: JSON.stringify({ token: aggregateTokenUsage(resultUpdates.usageItems) }),
+          content: JSON.stringify({ token: resultUpdates.tokenUsage }),
         });
       }
 
@@ -743,12 +782,12 @@ export class SkillService {
         where: { resultId },
         data: {
           status: resultUpdates.errors.length > 0 ? 'failed' : 'finish',
-          content: resultUpdates.content,
+          content: resultUpdates.artifacts.length === 0 ? resultUpdates.content : '',
           logs: JSON.stringify(resultUpdates.logs),
           structuredData: JSON.stringify(resultUpdates.structuredData),
+          artifacts: JSON.stringify(resultUpdates.artifacts),
           errors: JSON.stringify(resultUpdates.errors),
-          toolCalls: JSON.stringify(resultUpdates.toolCalls),
-          tokenUsage: JSON.stringify(aggregateTokenUsage(resultUpdates.usageItems)),
+          tokenUsage: JSON.stringify(resultUpdates.tokenUsage),
         },
       });
     }

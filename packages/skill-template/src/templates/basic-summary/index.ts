@@ -5,7 +5,7 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
+import { SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -21,7 +21,7 @@ export class BasicSummarySkill extends BaseSkill {
     'zh-CN': '基础总结',
   };
 
-  configSchema: SkillTemplateConfigSchema = {
+  configSchema: SkillTemplateConfigDefinition = {
     items: [],
   };
 

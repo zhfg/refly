@@ -13,6 +13,7 @@ import { QUEUE_SYNC_TOKEN_USAGE, QUEUE_SKILL } from '@/utils';
 import { LabelModule } from '@/label/label.module';
 import { SkillProcessor } from '@/skill/skill.processor';
 import { SubscriptionModule } from '@/subscription/subscription.module';
+import { CollabModule } from '@/collab/collab.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { SubscriptionModule } from '@/subscription/subscription.module';
     RAGModule,
     ConversationModule,
     SubscriptionModule,
+    CollabModule,
     BullModule.registerQueue({ name: QUEUE_SKILL }),
     BullModule.registerQueue({ name: QUEUE_SYNC_TOKEN_USAGE }),
   ],

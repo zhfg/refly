@@ -8,7 +8,7 @@ import { Item } from './item';
 
 import { useBigSearchQuickAction } from '@refly-packages/ai-workspace-common/hooks/use-big-search-quick-action';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
-import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill';
+import { useSkillStore, useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useTranslation } from 'react-i18next';
 
 export function Home({
@@ -28,9 +28,9 @@ export function Home({
   searchValue: string;
   setValue: (val: string) => void;
 }) {
-  const setIsSearchOpen = useSearchStoreShallow((state) => state.setIsSearchOpen);
   const { triggerSkillQuickAction } = useBigSearchQuickAction();
-  const skillStore = useSkillStore();
+  const setIsSearchOpen = useSearchStoreShallow((state) => state.setIsSearchOpen);
+  const setSelectedSkill = useSkillStoreShallow((state) => state.setSelectedSkill);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export function Home({
           onSelect={() => {
             triggerSkillQuickAction(searchValue);
             setIsSearchOpen(false);
-            skillStore.setSelectedSkillInstance(null);
+            setSelectedSkill(null);
           }}
         >
           <IconMessage style={{ fontSize: 12 }} />

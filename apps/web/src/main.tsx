@@ -12,6 +12,8 @@ import {
 } from "react-router-dom"
 import Privacy from "@/pages/privacy"
 import Terms from "@/pages/terms"
+import { QueryClientProvider } from "@tanstack/react-query"
+import { queryClient } from "@refly-packages/ai-workspace-common/utils/request"
 
 // Import AppRouter lazily
 const AppRouter = lazy(() =>
@@ -127,5 +129,7 @@ const router = createBrowserRouter([
 ])
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <RouterProvider router={router} />,
+  <QueryClientProvider client={queryClient}>
+    <RouterProvider router={router} />
+  </QueryClientProvider>,
 )

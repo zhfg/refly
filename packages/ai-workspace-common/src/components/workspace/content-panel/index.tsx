@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { ResourceList } from '@refly-packages/ai-workspace-common/components/workspace/resource-list';
-import { CanvasList } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list';
 import { ProjectList } from '@refly-packages/ai-workspace-common/components/workspace/project-list';
 import './index.scss';
 import classNames from 'classnames';
@@ -16,8 +15,6 @@ const Content = (props: { val: string }) => {
   switch (props.val) {
     case 'resource':
       return <ResourceList />;
-    case 'canvas':
-      return <CanvasList />;
     case 'project':
       return <ProjectList />;
     default:

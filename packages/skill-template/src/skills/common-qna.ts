@@ -8,7 +8,7 @@ import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { safeStringifyJSON } from '@refly-packages/utils';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
+import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
 import { createSkillTemplateInventory } from '../inventory';
 
 // types
@@ -33,7 +33,7 @@ export class CommonQnA extends BaseSkill {
 
   icon: Icon = { type: 'emoji', value: '🧙‍♂️' };
 
-  configSchema: SkillTemplateConfigSchema = {
+  configSchema: SkillTemplateConfigDefinition = {
     items: [],
   };
 

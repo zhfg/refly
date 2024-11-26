@@ -10,6 +10,7 @@
     "build": "turbo run build",
     "build:api": "turbo run build --filter=@refly/api",
     "build:web": "turbo run build --filter=@refly/web",
+    "codegen": "turbo run codegen",
     "clean": "turbo run clean",
     "lint:ci": "turbo run lint:ci",
     "lint": "turbo run lint",
