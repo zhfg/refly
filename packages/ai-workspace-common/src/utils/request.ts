@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
-import { client } from '@refly/openapi-schema/requests';
 import { getServerOrigin } from '@refly/utils/url';
 import { safeParseJSON } from '@refly/utils/parse';
+import { client } from '@refly-packages/ai-workspace-common/requests';
 import { extractBaseResp, showErrorNotification } from '../requests/proxiedRequest';
 
 const COOKIE_TOKEN_FIELD = '_refly_ai_sid';

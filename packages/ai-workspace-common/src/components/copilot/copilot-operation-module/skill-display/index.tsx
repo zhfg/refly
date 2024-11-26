@@ -5,7 +5,7 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 import { memo, useEffect, useRef, useState } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
-import { useListSkills } from '@refly/openapi-schema/queries';
+import { useListSkills } from '@refly-packages/ai-workspace-common/queries';
 
 export const SkillDisplay = memo(({ source }: { source: string }) => {
   const skillStore = useSkillStoreShallow((state) => ({
