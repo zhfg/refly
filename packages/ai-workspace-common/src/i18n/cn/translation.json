@@ -349,7 +349,8 @@
   },
   "canvas": {
     "toolbar": {
-      "changeMode": "切换选择模式",
+      "enablePointerMode": "启用框选模式",
+      "disablePointerMode": "关闭框选模式",
       "importResource": "导入资源",
       "addResource": "添加资源",
       "addSkill": "添加技能",

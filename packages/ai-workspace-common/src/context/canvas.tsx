@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import * as Y from 'yjs';
 import { useCookie } from 'react-use';
 import { HocuspocusProvider } from '@hocuspocus/provider';
@@ -16,32 +16,34 @@ interface CanvasContextType {
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
 export const CanvasProvider = ({ canvasId, children }: { canvasId: string; children: React.ReactNode }) => {
-  const providerRef = useRef<HocuspocusProvider | null>(null);
-
   const [token] = useCookie('_refly_ai_sid');
 
-  if (!providerRef.current) {
-    providerRef.current = new HocuspocusProvider({
+  const provider = useMemo(() => {
+    return new HocuspocusProvider({
       url: getWsServerOrigin(),
       name: canvasId,
       token,
     });
-  }
-
-  const provider = providerRef.current;
-  const ydoc = provider.document;
-  const yNodes = ydoc.getArray<CanvasNode<any>>('nodes');
-  const yEdges = ydoc.getArray<Edge>('edges');
+  }, [canvasId, token]);
 
   useEffect(() => {
     return () => {
-      if (providerRef.current) {
-        providerRef.current.forceSync();
-        providerRef.current.destroy();
-        providerRef.current = null;
+      if (provider) {
+        provider.forceSync();
+        provider.destroy();
       }
     };
-  }, [canvasId]);
+  }, [canvasId, token]);
+
+  // Safely access provider after initialization
+  const ydoc = provider?.document;
+  const yNodes = ydoc?.getArray<CanvasNode<any>>('nodes');
+  const yEdges = ydoc?.getArray<Edge>('edges');
+
+  // Add null check before rendering
+  if (!provider || !yNodes || !yEdges) {
+    return null;
+  }
 
   return <CanvasContext.Provider value={{ canvasId, provider, yNodes, yEdges }}>{children}</CanvasContext.Provider>;
 };
