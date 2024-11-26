@@ -1,15 +1,15 @@
-import { useEffect } from 'react';
-import { Divider, Typography, Steps } from 'antd';
+import { useEffect, useState } from 'react';
+import { Button, Divider, Steps } from 'antd';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
-import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { HumanMessage, AssistantMessage } from '../../copilot/message';
-import { Artifact, ChatMessage } from '@refly/openapi-schema';
-import { FileText, Sparkles } from 'lucide-react';
+import { Artifact } from '@refly/openapi-schema';
+import { FileText, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import './skill-response.scss';
 import { IconCheckCircle, IconLoading } from '@arco-design/web-react/icon';
 import { cn } from '@refly-packages/utils/cn';
+import { ContextItem } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/context-item';
+import { useProcessContextItems } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-process-context-items';
 
 interface SkillResponseNodePreviewProps {
   resultId: string;
@@ -25,11 +25,11 @@ const getArtifactIcon = (artifact: Artifact) => {
 };
 
 export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewProps) => {
-  const userProfile = useUserStoreShallow((state) => state.userProfile);
   const { result, updateActionResult } = useActionResultStoreShallow((state) => ({
     result: state.resultMap[resultId],
     updateActionResult: state.updateActionResult,
   }));
+  const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
 
   const fetchActionResult = async (resultId: string) => {
     const { data, error } = await getClient().getActionResult({
@@ -49,68 +49,84 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     }
   }, [resultId]);
 
-  if (!result) {
-    return (
-      <div className="flex flex-col w-full space-y-2 p-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="flex justify-between items-center bg-gray-50 rounded-lg p-3">
-            <span className="text-gray-600">处理中</span>
-            <span className="text-gray-400 text-sm">20.18 ms</span>
-          </div>
-        ))}
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (result?.status === 'finish') {
+      setLogBoxCollapsed(true);
+    } else if (result?.status === 'executing') {
+      setLogBoxCollapsed(false);
+    }
+  }, [result?.status]);
 
-  const humanMessage: Partial<ChatMessage> = {
-    msgId: `${resultId}-human`,
-    type: 'human',
-    content: result.invokeParam?.input?.query ?? '',
-    invokeParam: {
-      context: result.invokeParam?.context,
-    },
-  };
+  const { invokeParam, actionMeta } = result ?? {};
+  const { input, context } = invokeParam ?? {};
 
-  const assistantMessage: Partial<ChatMessage> = {
-    msgId: resultId,
-    type: 'ai',
-    content: result.content ?? '',
-    skillMeta: {
-      displayName: result.actionMeta?.name ?? 'AI Response',
-      icon: result.actionMeta?.icon,
-    },
-    tokenUsage: result.tokenUsage,
-    structuredData: result.structuredData,
-  };
-  const description = 'This is a description.';
+  const { processContextItemsFromMessage } = useProcessContextItems();
+  const contextItems = processContextItemsFromMessage(context);
 
   return (
     <div className="flex flex-col space-y-4 p-4">
-      <div className="text-xl font-medium">生成长文</div>
-
-      <div className="ai-copilot-message-container">
-        {humanMessage?.content && (
-          <HumanMessage
-            message={humanMessage}
-            profile={{
-              avatar: userProfile?.avatar ?? '',
-              name: userProfile?.nickname ?? 'User',
-            }}
-            disable={true}
-          />
-        )}
+      <div>
+        {actionMeta?.icon?.value}
+        {actionMeta?.name}
       </div>
 
-      <div className="m-2 p-4 pb-0 border border-solid border-gray-200 rounded-lg">
-        <Steps
-          direction="vertical"
-          current={result.logs?.length ?? 0}
-          size="small"
-          items={result.logs?.map((log, index) => ({
-            title: log,
-            description,
-          }))}
-        />
+      <div className="m-2 border border-solid border-gray-200 rounded-lg p-2 flex items-center space-x-2">
+        <div>
+          {contextItems.length > 0 && (
+            <div className="context-items-container">
+              {contextItems.map((item) => (
+                <ContextItem
+                  canNotRemove={true}
+                  key={item.id}
+                  item={item}
+                  isLimit={false}
+                  isActive={false}
+                  onToggle={() => {}}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+        <div>{input?.query}</div>
+      </div>
+
+      <div
+        className={cn('m-2 p-4 border border-solid border-gray-200 rounded-lg transition-all', {
+          'px-4 py-2 cursor-pointer hover:bg-gray-50': logBoxCollapsed,
+          'relative pb-0': !logBoxCollapsed,
+        })}
+      >
+        {logBoxCollapsed ? (
+          <div
+            className="text-gray-500 text-sm flex items-center justify-between"
+            onClick={() => setLogBoxCollapsed(false)}
+          >
+            <div>
+              <IconCheckCircle /> Skill Completed
+            </div>
+            <div className="flex items-center">
+              <ChevronDown className="w-6 h-6" />
+            </div>
+          </div>
+        ) : (
+          <>
+            <Steps
+              direction="vertical"
+              current={result.logs?.length ?? 0}
+              size="small"
+              items={result.logs?.map((log, index) => ({
+                title: log,
+                description: 'This is a description.',
+              }))}
+            />
+            <Button
+              type="text"
+              icon={<ChevronUp />}
+              onClick={() => setLogBoxCollapsed(true)}
+              className="absolute right-2 top-2"
+            />
+          </>
+        )}
       </div>
 
       <div className="m-2 text-gray-600 text-base">
