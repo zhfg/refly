@@ -119,7 +119,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       resultHistory: selectedResultItems.map((item) => ({
         resultId: item.resultId,
       })),
-      skillName: 'common_qna', // TODO: allow select skill
+      skillName: skillStore.selectedSkill?.name || 'common_qna',
       locale: localSettings?.outputLocale,
       tplConfig: {}, // TODO: add tplConfig
     };
@@ -178,10 +178,10 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
   }, []);
 
   useEffect(() => {
-    if (!skillStore.selectedSkill?.tplConfigSchema?.items?.length) {
+    if (!skillStore.selectedSkill?.configSchema?.items?.length) {
       form.setFieldValue('tplConfig', undefined);
     }
-  }, [skillStore.selectedSkill?.skillId, skillStore.selectedSkill?.tplConfigSchema?.items]);
+  }, [skillStore.selectedSkill?.name, skillStore.selectedSkill?.configSchema?.items]);
 
   return (
     <>
@@ -202,20 +202,20 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
                 />
               </div>
 
-              {skillStore.selectedSkill?.tplConfigSchema?.items?.length > 0 && (
+              {/* {skillStore.selectedSkill?.configSchema?.items?.length > 0 && (
                 <ConfigManager
                   form={form}
                   formErrors={formErrors}
                   setFormErrors={setFormErrors}
-                  schema={skillStore.selectedSkill?.tplConfigSchema}
-                  tplConfig={skillStore.selectedSkill?.tplConfig}
+                  schema={skillStore.selectedSkill?.configSchema}
+                  tplConfig={skillStore.selectedSkill?.config}
                   fieldPrefix="tplConfig"
                   configScope="runtime"
                   resetConfig={() => {
                     form.setFieldValue('tplConfig', skillStore.selectedSkill?.tplConfig || {});
                   }}
                 />
-              )}
+              )} */}
 
               <ChatActions
                 form={form}

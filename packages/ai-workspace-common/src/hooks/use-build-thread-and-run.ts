@@ -106,7 +106,7 @@ export const useBuildThreadAndRun = () => {
   const runSkill = (comingQuestion: string, invokeParams?: InvokeParams) => {
     // support ask follow up question
     const { messages = [], selectedModel, messageIntentContext } = useChatStore.getState();
-    const { selectedSkill } = useSkillStore.getState();
+    const { selectedSkillInstance: selectedSkill } = useSkillStore.getState();
     const { localSettings } = useUserStore.getState();
 
     let question = comingQuestion.trim();

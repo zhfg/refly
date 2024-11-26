@@ -15,7 +15,6 @@ import { AISettingsDropdown } from './ai-settings';
 import './index.scss';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
-import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 
 interface ChatActionsProps {

@@ -10,7 +10,7 @@ export const SelectedSkillHeader = () => {
   const { t } = useTranslation();
   const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
-    setSelectedSkillInstance: state.setSelectedSkillInstance,
+    setSelectedSkill: state.setSelectedSkill,
   }));
 
   return skillStore?.selectedSkill ? (
@@ -32,7 +32,7 @@ export const SelectedSkillHeader = () => {
         <Button
           icon={<IconClose />}
           onClick={() => {
-            skillStore.setSelectedSkillInstance(null);
+            skillStore.setSelectedSkill(null);
           }}
         ></Button>
       </div>

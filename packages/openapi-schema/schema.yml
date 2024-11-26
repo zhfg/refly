@@ -2096,7 +2096,7 @@ components:
         configScope:
           description: The contexts in which the requirement applies
           $ref: '#/components/schemas/ConfigScope'
-    SkillTemplateConfigSchema:
+    SkillTemplateConfigDefinition:
       type: object
       description: Skill template config schema
       required:
@@ -2147,7 +2147,7 @@ components:
           $ref: '#/components/schemas/Icon'
         configSchema:
           description: Skill template config schema
-          $ref: '#/components/schemas/SkillTemplateConfigSchema'
+          $ref: '#/components/schemas/SkillTemplateConfigDefinition'
     SkillTriggerType:
       type: string
       description: Skill trigger type
@@ -2319,7 +2319,7 @@ components:
               $ref: '#/components/schemas/SkillTemplateConfig'
             tplConfigSchema:
               description: Skill template config schema
-              $ref: '#/components/schemas/SkillTemplateConfigSchema'
+              $ref: '#/components/schemas/SkillTemplateConfigDefinition'
             invocationConfig:
               description: Skill invocation config
               $ref: '#/components/schemas/SkillInvocationConfig'
@@ -2545,6 +2545,29 @@ components:
         - executing
         - finish
         - failed
+    ArtifactType:
+      type: string
+      description: Artifact type
+      enum:
+        - document
+    Artifact:
+      type: object
+      description: Artifact
+      required:
+        - type
+        - entityId
+        - title
+      properties:
+        type:
+          type: string
+          description: Artifact type
+          $ref: '#/components/schemas/ArtifactType'
+        entityId:
+          type: string
+          description: Entity ID
+        title:
+          type: string
+          description: Artifact title
     ActionResult:
       type: object
       description: Action result
@@ -2583,6 +2606,11 @@ components:
           description: Response logs
           items:
             type: string
+        artifacts:
+          type: array
+          description: Artifacts
+          items:
+            $ref: '#/components/schemas/Artifact'
         structuredData:
           type: object
           description: Structured data output
@@ -3489,6 +3517,10 @@ components:
           example: lb-g30e1b80b5g1itbemc0g5jj3
     Action:
       type: object
+      required:
+        - actionType
+        - actionName
+        - displayName
       properties:
         actionType:
           type: string
@@ -3497,6 +3529,9 @@ components:
         actionName:
           type: string
           description: Action name
+        icon:
+          description: Action icon
+          $ref: '#/components/schemas/Icon'
         displayName:
           type: string
           description: Action display name
@@ -4559,6 +4594,30 @@ components:
         - tool
         - skillResponse
         - toolResponse
+    CanvasNodeData:
+      type: object
+      required:
+        - title
+        - entityId
+      properties:
+        title:
+          type: string
+          description: Node title
+        entityId:
+          type: string
+          description: Node entity ID
+    CanvasNode:
+      type: object
+      required:
+        - type
+        - data
+      properties:
+        type:
+          description: Node type
+          $ref: '#/components/schemas/CanvasNodeType'
+        data:
+          type: object
+          $ref: '#/components/schemas/CanvasNodeData'
   securitySchemes:
     api_key:
       type: apiKey

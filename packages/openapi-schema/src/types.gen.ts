@@ -434,7 +434,7 @@ export type DynamicConfigValue = {
 /**
  * Skill template config schema
  */
-export type SkillTemplateConfigSchema = {
+export type SkillTemplateConfigDefinition = {
   /**
    * Config items
    */
@@ -483,7 +483,7 @@ export type Skill = {
   /**
    * Skill template config schema
    */
-  configSchema?: SkillTemplateConfigSchema;
+  configSchema?: SkillTemplateConfigDefinition;
 };
 
 /**
@@ -656,7 +656,7 @@ export type SkillInstance = SkillMeta & {
   /**
    * Skill template config schema
    */
-  tplConfigSchema?: SkillTemplateConfigSchema;
+  tplConfigSchema?: SkillTemplateConfigDefinition;
   /**
    * Skill invocation config
    */
@@ -906,6 +906,29 @@ export type TokenUsageItem = {
 export type ActionResultStatus = 'waiting' | 'executing' | 'finish' | 'failed';
 
 /**
+ * Artifact type
+ */
+export type ArtifactType = 'document';
+
+/**
+ * Artifact
+ */
+export type Artifact = {
+  /**
+   * Artifact type
+   */
+  type: ArtifactType;
+  /**
+   * Entity ID
+   */
+  entityId: string;
+  /**
+   * Artifact title
+   */
+  title: string;
+};
+
+/**
  * Action result
  */
 export type ActionResult = {
@@ -941,6 +964,10 @@ export type ActionResult = {
    * Response logs
    */
   logs?: Array<string>;
+  /**
+   * Artifacts
+   */
+  artifacts?: Array<Artifact>;
   /**
    * Structured data output
    */
@@ -1740,15 +1767,19 @@ export type Action = {
   /**
    * Action type
    */
-  actionType?: ActionType;
+  actionType: ActionType;
   /**
    * Action name
    */
-  actionName?: string;
+  actionName: string;
+  /**
+   * Action icon
+   */
+  icon?: Icon;
   /**
    * Action display name
    */
-  displayName?: string;
+  displayName: string;
 };
 
 export type ListActionResponse = BaseResponse & {
@@ -2771,6 +2802,25 @@ export type InMemorySearchResponse = BaseResponse & {
 
 export type CanvasNodeType = 'document' | 'resource' | 'skill' | 'tool' | 'skillResponse' | 'toolResponse';
 
+export type CanvasNodeData = {
+  /**
+   * Node title
+   */
+  title: string;
+  /**
+   * Node entity ID
+   */
+  entityId: string;
+};
+
+export type CanvasNode = {
+  /**
+   * Node type
+   */
+  type: CanvasNodeType;
+  data: CanvasNodeData;
+};
+
 export type ListCanvasesData = {
   query?: {
     /**
@@ -3558,7 +3608,9 @@ export type ScrapeResponse = ScrapeWeblinkResponse;
 
 export type ScrapeError = unknown;
 
-export type UploadData = unknown;
+export type UploadData = {
+  body: UploadRequest;
+};
 
 export type UploadResponse2 = UploadResponse;
 
@@ -3567,766 +3619,3 @@ export type UploadError = unknown;
 export type ServeStaticResponse = unknown;
 
 export type ServeStaticError = unknown;
-
-export type $OpenApiTs = {
-  '/canvas/list': {
-    get: {
-      req: ListCanvasesData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': ListCanvasResponse;
-      };
-    };
-  };
-  '/canvas/create': {
-    post: {
-      req: CreateCanvasData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': UpsertCanvasResponse;
-      };
-    };
-  };
-  '/canvas/delete': {
-    post: {
-      req: DeleteCanvasData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/knowledge/resource/list': {
-    get: {
-      req: ListResourcesData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': ListResourceResponse;
-      };
-    };
-  };
-  '/knowledge/resource/detail': {
-    get: {
-      req: GetResourceDetailData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetResourceDetailResponse;
-      };
-    };
-  };
-  '/knowledge/resource/update': {
-    post: {
-      req: UpdateResourceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertResourceResponse;
-      };
-    };
-  };
-  '/knowledge/resource/create': {
-    post: {
-      req: CreateResourceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertResourceResponse;
-      };
-    };
-  };
-  '/knowledge/resource/batchCreate': {
-    post: {
-      req: BatchCreateResourceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertResourceResponse;
-      };
-    };
-  };
-  '/knowledge/resource/reindex': {
-    post: {
-      req: ReindexResourceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ReindexResourceResponse;
-      };
-    };
-  };
-  '/knowledge/resource/delete': {
-    post: {
-      req: DeleteResourceData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/knowledge/document/list': {
-    get: {
-      req: ListDocumentsData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': ListDocumentResponse;
-      };
-    };
-  };
-  '/knowledge/document/detail': {
-    get: {
-      req: GetDocumentDetailData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': GetDocumentDetailResponse;
-      };
-    };
-  };
-  '/knowledge/document/update': {
-    post: {
-      req: UpdateDocumentData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertDocumentResponse;
-      };
-    };
-  };
-  '/knowledge/document/create': {
-    post: {
-      req: CreateDocumentData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertDocumentResponse;
-      };
-    };
-  };
-  '/knowledge/document/delete': {
-    post: {
-      req: DeleteDocumentData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/knowledge/document/batchUpdate': {
-    post: {
-      req: BatchUpdateDocumentData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/knowledge/reference/query': {
-    post: {
-      req: QueryReferencesData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': unknown;
-      };
-    };
-  };
-  '/knowledge/reference/add': {
-    post: {
-      req: AddReferencesData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/knowledge/reference/delete': {
-    post: {
-      req: DeleteReferencesData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': unknown;
-      };
-    };
-  };
-  '/knowledge/project/list': {
-    get: {
-      req: ListProjectsData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': ListProjectResponse;
-      };
-    };
-  };
-  '/knowledge/project/detail': {
-    get: {
-      req: GetProjectDetailData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetProjectDetailResponse;
-      };
-    };
-  };
-  '/knowledge/project/update': {
-    post: {
-      req: UpdateProjectData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertProjectResponse;
-      };
-    };
-  };
-  '/knowledge/project/create': {
-    post: {
-      req: CreateProjectData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertProjectResponse;
-      };
-    };
-  };
-  '/knowledge/project/bindRes': {
-    post: {
-      req: BindProjectResourcesData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/knowledge/project/delete': {
-    post: {
-      req: DeleteProjectData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/share/new': {
-    post: {
-      req: CreateShareData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': CreateShareResponse;
-      };
-    };
-  };
-  '/share/delete': {
-    post: {
-      req: DeleteShareData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/share/content': {
-    get: {
-      req: GetShareContentData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': GetShareContentResponse;
-      };
-    };
-  };
-  '/label/class/list': {
-    get: {
-      req: ListLabelClassesData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListLabelClassesResponse;
-      };
-    };
-  };
-  '/label/class/new': {
-    post: {
-      req: CreateLabelClassData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertLabelClassResponse;
-      };
-    };
-  };
-  '/label/class/update': {
-    post: {
-      req: UpdateLabelClassData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertLabelClassResponse;
-      };
-    };
-  };
-  '/label/class/delete': {
-    post: {
-      req: DeleteLabelClassData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/label/instance/list': {
-    get: {
-      req: ListLabelInstancesData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListLabelInstancesResponse;
-      };
-    };
-  };
-  '/label/instance/new': {
-    post: {
-      req: CreateLabelInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertLabelInstanceResponse;
-      };
-    };
-  };
-  '/label/instance/update': {
-    post: {
-      req: UpdateLabelInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertLabelInstanceResponse;
-      };
-    };
-  };
-  '/label/instance/delete': {
-    post: {
-      req: DeleteLabelInstanceData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/action/list': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListActionResponse;
-      };
-    };
-  };
-  '/action/invoke': {
-    post: {
-      req: InvokeActionData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': InvokeActionResponse;
-      };
-    };
-  };
-  '/action/streamInvoke': {
-    post: {
-      req: StreamInvokeActionData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': string;
-      };
-    };
-  };
-  '/action/result': {
-    get: {
-      req: GetActionResultData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetActionResultResponse;
-      };
-    };
-  };
-  '/skill/list': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListSkillResponse;
-      };
-    };
-  };
-  '/skill/invoke': {
-    post: {
-      req: InvokeSkillData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': InvokeSkillResponse;
-      };
-    };
-  };
-  '/skill/streamInvoke': {
-    post: {
-      req: StreamInvokeSkillData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': string;
-      };
-    };
-  };
-  '/skill/instance/list': {
-    get: {
-      req: ListSkillInstancesData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListSkillInstanceResponse;
-      };
-    };
-  };
-  '/skill/instance/new': {
-    post: {
-      req: CreateSkillInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': CreateSkillInstanceResponse;
-      };
-    };
-  };
-  '/skill/instance/update': {
-    post: {
-      req: UpdateSkillInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpdateSkillInstanceResponse;
-      };
-    };
-  };
-  '/skill/instance/pin': {
-    post: {
-      req: PinSkillInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/skill/instance/unpin': {
-    post: {
-      req: UnpinSkillInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/skill/instance/delete': {
-    post: {
-      req: DeleteSkillInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/skill/trigger/list': {
-    get: {
-      req: ListSkillTriggersData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListSkillTriggerResponse;
-      };
-    };
-  };
-  '/skill/trigger/new': {
-    post: {
-      req: CreateSkillTriggerData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': CreateSkillTriggerResponse;
-      };
-    };
-  };
-  '/skill/trigger/update': {
-    post: {
-      req: UpdateSkillTriggerData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpdateSkillTriggerResponse;
-      };
-    };
-  };
-  '/skill/trigger/delete': {
-    post: {
-      req: DeleteSkillTriggerData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/skill/job/list': {
-    get: {
-      req: ListSkillJobsData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListSkillJobsResponse;
-      };
-    };
-  };
-  '/skill/job/detail': {
-    get: {
-      req: GetSkillJobDetailData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetSkillJobDetailResponse;
-      };
-    };
-  };
-  '/conversation/list': {
-    get: {
-      req: ListConversationsData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListConversationResponse;
-      };
-    };
-  };
-  '/conversation/{convId}': {
-    get: {
-      req: GetConversationDetailData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetConversationDetailResponse;
-      };
-    };
-  };
-  '/user/settings': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetUserSettingsResponse;
-      };
-    };
-    put: {
-      req: UpdateSettingsData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/user/checkSettingsField': {
-    get: {
-      req: CheckSettingsFieldData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': CheckSettingsFieldResponse;
-      };
-    };
-  };
-  '/subscription/plan': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': unknown;
-      };
-    };
-  };
-  '/subscription/usage': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetSubscriptionUsageResponse;
-      };
-    };
-  };
-  '/subscription/modelList': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListModelsResponse;
-      };
-    };
-  };
-  '/subscription/createCheckoutSession': {
-    post: {
-      req: CreateCheckoutSessionData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': CreateCheckoutSessionResponse;
-      };
-    };
-  };
-  '/subscription/createPortalSession': {
-    post: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': CreatePortalSessionResponse;
-      };
-    };
-  };
-  '/search': {
-    post: {
-      req: SearchData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': SearchResponse;
-      };
-    };
-  };
-  '/search/multilingualSearch': {
-    post: {
-      req: MultiLingualWebSearchData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': MultiLingualWebSearchResponse;
-      };
-    };
-  };
-  '/misc/scrape': {
-    post: {
-      req: ScrapeData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ScrapeWeblinkResponse;
-      };
-    };
-  };
-  '/misc/upload': {
-    post: {
-      req: UploadData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UploadResponse;
-      };
-    };
-  };
-  '/misc/static/{fileName}': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': unknown;
-      };
-    };
-  };
-};

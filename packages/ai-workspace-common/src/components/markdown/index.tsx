@@ -99,7 +99,7 @@ export const Markdown = memo(
                   ],
                 ]}
                 components={{
-                  ...canvasComponents,
+                  // ...canvasComponents,
                   pre: CodeElement.Component,
                   a: (args) => LinkElement.Component(args, props?.sources || []),
                 }}

@@ -18,12 +18,13 @@
     "@refly/ai-workspace-common": "workspace:*",
     "@refly/common-types": "workspace:*",
     "@refly/editor-common": "workspace:*",
-    "@refly/openapi-schema": "workspace:*",
     "@refly/errors": "workspace:*",
+    "@refly/openapi-schema": "workspace:*",
     "@sentry/react": "^7.113.0",
     "@sentry/vite-plugin": "^2.22.4",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.10",
+    "@tanstack/react-query": "^5.61.3",
     "@tiptap-pro/extension-table-of-contents": "~2.11.2",
     "@tiptap-pro/extension-unique-id": "~2.11.2",
     "@types/is-hotkey": "~0.1.7",
@@ -45,6 +46,7 @@
     "js-cookie": "^3.0.5",
     "katex": "0.15.6",
     "lodash.throttle": "^4.1.1",
+    "lucide-react": "~0.454.0",
     "md5": "^2.3.0",
     "qs": "~6.12.3",
     "rate-limiter-flexible": "~5.0.3",
@@ -75,8 +77,7 @@
     "uuid": "^9.0.0",
     "vite-tsconfig-paths": "~4.3.2",
     "wxt": "workspace:*",
-    "zustand": "^4.5.1",
-    "lucide-react": "~0.454.0"
+    "zustand": "^4.5.1"
   },
   "devDependencies": {
     "@refly/arco-vite-plugin-react": "1.3.3",

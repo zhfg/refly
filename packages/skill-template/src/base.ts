@@ -9,7 +9,7 @@ import { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import {
   SkillContext,
   SkillInput,
-  SkillTemplateConfigSchema,
+  SkillTemplateConfigDefinition,
   SkillInvocationConfig,
   SkillMeta,
   User,
@@ -33,7 +33,7 @@ export abstract class BaseSkill extends StructuredTool {
   /**
    * Skill template config schema
    */
-  abstract configSchema: SkillTemplateConfigSchema;
+  abstract configSchema: SkillTemplateConfigDefinition;
   /**
    * Skill invocation config
    */
@@ -136,6 +136,7 @@ export interface SkillEventMap {
   end: [data: SkillEvent];
   log: [data: SkillEvent];
   stream: [data: SkillEvent];
+  create_node: [data: SkillEvent];
   structured_data: [data: SkillEvent];
   usage: [data: SkillEvent];
   error: [data: SkillEvent];

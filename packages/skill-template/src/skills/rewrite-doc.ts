@@ -9,7 +9,7 @@ import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { safeStringifyJSON } from '@refly-packages/utils';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
+import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
 import { CanvasIntentType } from '@refly-packages/common-types';
 // types
 import { GraphState, IContext } from '../scheduler/types';
@@ -33,7 +33,7 @@ export class RewriteDoc extends BaseSkill {
 
   icon: Icon = { type: 'emoji', value: '📝' };
 
-  configSchema: SkillTemplateConfigSchema = {
+  configSchema: SkillTemplateConfigDefinition = {
     items: [],
   };
 
