@@ -1,7 +1,5 @@
 Always output the code comment in English.
 Always use tailwind css to style the component.
-
-// Defensive programming rules
 Always use optional chaining (?.) when accessing object properties.
 Always use nullish coalescing (??) or default values for potentially undefined values.
 Always check array existence before using array methods.
