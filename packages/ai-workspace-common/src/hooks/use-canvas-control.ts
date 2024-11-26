@@ -220,8 +220,8 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const enrichedData = {
         ...node.data,
         metadata: {
-          ...node?.data?.metadata,
           ...getNodeDefaultMetadata(node.type),
+          ...node?.data?.metadata,
         },
       };
 
