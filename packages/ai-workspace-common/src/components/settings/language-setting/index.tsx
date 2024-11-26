@@ -35,7 +35,7 @@ export const LanguageSetting = () => {
           <Typography.Paragraph type="secondary">
             {t('settings.language.outputLocale.description')}
           </Typography.Paragraph>
-          <OutputLocaleList width={600} position="br">
+          <OutputLocaleList width={600} position="bl">
             <Button className="setting-page-language-btn">
               {localeToLanguageName?.[uiLocale]?.[outputLocale]} <IconDown />
             </Button>
