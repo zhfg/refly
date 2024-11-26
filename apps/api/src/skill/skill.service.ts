@@ -782,7 +782,6 @@ export class SkillService {
               await this.usageReportQueue.add(tokenUsage);
 
               result.tokenUsage = [usage];
-              result.content = chunk.content.toString();
             }
             break;
         }
