@@ -47,8 +47,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     onConnect,
   } = useCanvasControl(canvasId);
 
-  const { getNode, flowToScreenPosition, getNodesBounds } = useReactFlow();
-
   const defaultEdgeOptions = {
     style: EDGE_STYLES.default,
   };
@@ -117,9 +115,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           selectionMode={mode === 'pointer' ? SelectionMode.Partial : SelectionMode.Full}
           selectionOnDrag={mode === 'pointer'}
           panOnDrag={mode !== 'pointer'}
-          selectionKeyCode={null}
-          multiSelectionKeyCode={null}
-          deleteKeyCode={null}
           nodeTypes={nodeTypes}
           nodes={nodes}
           edges={edges}
