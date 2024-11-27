@@ -204,6 +204,8 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       node: { type: CanvasNodeType; data: CanvasNodeData<any>; position?: XYPosition },
       connectTo?: CanvasNodeFilter[],
     ) => {
+      console.log('Adding node with connections:', { node, connectTo });
+
       const { nodes } = useCanvasStore.getState().data[canvasId];
 
       if (!node?.type || !node?.data) {

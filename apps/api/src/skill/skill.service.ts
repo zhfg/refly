@@ -665,11 +665,11 @@ export class SkillService {
             }
             return;
           case 'create_node':
-            const documentId = data.node.data.entityId;
-            this.logger.log(`create_node event captured, open direct connection to ${documentId}`);
-            if (documentId) {
-              const doc = await this.prisma.document.findFirst({ where: { docId: documentId } });
-              const { document } = await this.collabService.openDirectConnection(documentId, {
+            const docId = data.node.data.entityId;
+            this.logger.log(`create_node event captured, open direct connection to ${docId}`);
+            if (docId) {
+              const doc = await this.prisma.document.findFirst({ where: { docId } });
+              const { document } = await this.collabService.openDirectConnection(docId, {
                 user,
                 entity: doc,
                 entityType: 'document',
@@ -677,7 +677,7 @@ export class SkillService {
               outputDocument = document;
               resultUpdates.artifacts.push({
                 type: 'document',
-                entityId: documentId,
+                entityId: docId,
                 title: doc?.title || 'New Document',
               });
             }
