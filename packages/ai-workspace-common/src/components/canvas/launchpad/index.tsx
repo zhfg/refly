@@ -147,14 +147,12 @@ export const LaunchPad = () => {
   }, []);
 
   return (
-    <>
-      <div className="ai-copilot-operation-container">
-        <div className="ai-copilot-operation-body">
-          <SkillDisplay />
-          <ChatHistory />
-          <ChatInput handleSendMessage={handleSendMessage} handleAbort={handleAbort} />
-        </div>
+    <div className="ai-copilot-operation-container">
+      <div className="ai-copilot-operation-body">
+        <SkillDisplay />
+        <ChatHistory />
+        <ChatInput handleSendMessage={handleSendMessage} handleAbort={handleAbort} />
       </div>
-    </>
+    </div>
   );
 };

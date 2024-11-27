@@ -1,4 +1,4 @@
-import { Position, NodeProps, useEdges, useReactFlow } from '@xyflow/react';
+import { Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode } from './types';
 import { Node } from '@xyflow/react';
 import { MessageSquare, MoreHorizontal } from 'lucide-react';
@@ -10,17 +10,17 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { EDGE_STYLES } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
-import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/use-insert-to-document';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
+import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/use-add-to-chat-history';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
 export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillResponseNode>) => {
   const [isHovered, setIsHovered] = useState(false);
-  const { edges, nodes } = useCanvasControl();
+  const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();
 
   // Get result from store
@@ -88,15 +88,7 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
     );
   }, [id, setEdges]);
 
-  const handleAddToContext = useAddToContext(
-    {
-      id,
-      type: 'skillResponse',
-      data,
-      position: { x: 0, y: 0 },
-    } as CanvasNode,
-    'skillResponse',
-  );
+  const handleAddToChatHistory = useAddToChatHistory(result);
 
   const handleRerun = useCallback(() => {
     // Implement rerun logic
@@ -141,7 +133,7 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
       {isWeb && (
         <ActionButtons
           type="skill-response"
-          onAddToContext={handleAddToContext}
+          onAddToChatHistory={handleAddToChatHistory}
           onRerun={handleRerun}
           onInsertToDoc={() => handleInsertToDoc('insertBlow')}
           onCreateDocument={handleCreateDocument}

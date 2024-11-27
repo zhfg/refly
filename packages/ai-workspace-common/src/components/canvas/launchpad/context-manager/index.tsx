@@ -13,6 +13,7 @@ import {
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { ChatHistorySwitch } from './components/chat-history-switch';
 
 export const ContextManager = () => {
   const { selectedContextItems, removeContextItem, setContextItems, clearContextItems, filterErrorInfo } =
@@ -59,6 +60,7 @@ export const ContextManager = () => {
     <div className="flex flex-col h-full p-2 px-3">
       <div className="flex flex-col">
         <div className="flex flex-wrap content-start gap-1 w-full">
+          <ChatHistorySwitch />
           <AddBaseMarkContext />
           {selectedContextItems?.map((item) => (
             <ContextItem
