@@ -31,7 +31,7 @@ export class RewriteDoc extends BaseSkill {
     'zh-CN': '重写文档',
   };
 
-  icon: Icon = { type: 'emoji', value: '📝' };
+  icon: Icon = { type: 'emoji', value: '🔄' };
 
   configSchema: SkillTemplateConfigDefinition = {
     items: [],

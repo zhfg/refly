@@ -135,7 +135,6 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
       addToCanvas: true,
     });
   }, [content, debouncedCreateDocument, data.entityId, data?.title, modelName]);
-  console.log('data.title', nodes, data);
 
   return (
     <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>

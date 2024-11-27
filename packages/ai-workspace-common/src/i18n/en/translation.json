@@ -361,6 +361,10 @@
       "exitFullScreen": "Exit Full Screen"
     }
   },
+  "artifact": {
+    "generating": "Generating",
+    "completed": "Completed"
+  },
   "canvas": {
     "toolbar": {
       "enablePointerMode": "Enable Pointer Mode",
@@ -370,6 +374,9 @@
       "addSkill": "Add Skill",
       "addTool": "Add Tool",
       "addDocument": "Add Document"
+    },
+    "skillResponse": {
+      "skillCompleted": "Skill Completed"
     },
     "contextList": {
       "placeholder": "Search {{domain}}..."

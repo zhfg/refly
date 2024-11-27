@@ -31,7 +31,7 @@ export class CommonQnA extends BaseSkill {
     'zh-CN': '通用问答',
   };
 
-  icon: Icon = { type: 'emoji', value: '🧙‍♂️' };
+  icon: Icon = { type: 'emoji', value: '💬' };
 
   configSchema: SkillTemplateConfigDefinition = {
     items: [],

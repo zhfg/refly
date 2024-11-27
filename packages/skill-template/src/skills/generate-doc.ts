@@ -6,8 +6,7 @@ import { z } from 'zod';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { safeStringifyJSON } from '@refly-packages/utils';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
-import { CanvasIntentType } from '@refly-packages/common-types';
+import { Artifact, Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
 // types
 import { GraphState, IContext } from '../scheduler/types';
 // utils
@@ -36,7 +35,7 @@ export class GenerateDoc extends BaseSkill {
 
   invocationConfig: SkillInvocationConfig = {};
 
-  description = "Inference user's intent and run related skill";
+  description = 'Generate a document according to the user query';
 
   schema = z.object({
     query: z.string().optional().describe('The search query'),
@@ -168,6 +167,19 @@ export class GenerateDoc extends BaseSkill {
       initialContent: '',
     });
 
+    const artifact: Artifact = {
+      type: 'document',
+      entityId: res.data?.docId || '',
+      title: res.data?.title || '',
+    };
+    this.emitEvent(
+      {
+        event: 'artifact',
+        artifact: { ...artifact, status: 'generating' },
+      },
+      config,
+    );
+
     const model = this.engine.chatModel({ temperature: 0.1 });
 
     const module = {
@@ -179,30 +191,25 @@ export class GenerateDoc extends BaseSkill {
 
     this.emitEvent({ event: 'log', content: `Start to generate canvas...` }, config);
 
-    this.emitEvent(
-      {
-        event: 'create_node',
-        node: {
-          type: 'document',
-          data: {
-            entityId: res.data?.docId || '',
-            title: 'New Document',
-          },
-        },
-      },
-      config,
-    );
-
     const responseMessage = await model.invoke(requestMessages, {
       ...config,
       metadata: {
         ...config.metadata,
         ...currentSkill,
+        artifact,
       },
     });
 
     this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
     this.emitEvent({ event: 'log', content: `Generated canvas successfully!` }, config);
+
+    this.emitEvent(
+      {
+        event: 'artifact',
+        artifact: { ...artifact, status: 'finish' },
+      },
+      config,
+    );
 
     return { messages: [responseMessage] };
   };

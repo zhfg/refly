@@ -79,7 +79,7 @@ export const Markdown = memo(
     );
 
     return (
-      <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 15}px` }} ref={mdRef}>
+      <div className="markdown-body" ref={mdRef}>
         {shouldLoading ? (
           <IconLoading />
         ) : (
