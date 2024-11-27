@@ -4,7 +4,8 @@ import { IconQuote } from '@refly-packages/ai-workspace-common/components/common
 
 // 自定义样式
 import './index.scss';
-import { Skeleton, Message as message, Empty, Alert, Button, Tooltip } from '@arco-design/web-react';
+import { Skeleton, Message as message, Empty, Alert, Tooltip } from '@arco-design/web-react';
+import { Button } from 'antd';
 import { useResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/resource';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 // 请求
@@ -25,6 +26,12 @@ import { useTranslation } from 'react-i18next';
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
 import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
+import { SelectionBubble } from '@refly-packages/ai-workspace-common/components/selection-bubble';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { genUniqueId } from '@refly-packages/utils/id';
+import { convertMarkToNode } from '@refly-packages/ai-workspace-common/utils/mark-to-node';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { SelectionContext } from '@refly-packages/ai-workspace-common/components/selection-context';
 
 export const ResourceView = (props: { resourceId: string; projectId?: string }) => {
   const { resourceId, projectId } = props;
@@ -71,13 +78,13 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
   }));
 
   const baseUrl = getClientOrigin();
-  const { initMessageListener, initContentSelectorElem } = useContentSelector(
-    'knowledge-base-resource-content',
-    'resourceSelection',
-    {
-      url: `${baseUrl}/resource/${resourceId}`,
-    },
-  );
+  // const { initMessageListener, initContentSelectorElem } = useContentSelector(
+  //   'knowledge-base-resource-content',
+  //   'resourceSelection',
+  //   {
+  //     url: `${baseUrl}/resource/${resourceId}`,
+  //   },
+  // );
 
   const reloadKnowledgeBaseState = useReloadListState();
 
@@ -112,18 +119,44 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
 
   const { handleInitContentSelectorListener } = useSelectedMark();
 
-  // 初始化块选择
-  useEffect(() => {
-    setDeckSize(0);
-    if (resource.loading) {
-      return;
-    }
-    const remove = initMessageListener();
-    handleInitContentSelectorListener();
-    return () => {
-      remove();
+  const { addContextItem } = useContextPanelStore((state) => ({
+    addContextItem: state.addContextItem,
+  }));
+
+  const buildNodeData = (text: string) => {
+    const id = genUniqueId();
+
+    const node: CanvasNode = {
+      id,
+      type: 'resource',
+      position: { x: 0, y: 0 },
+      data: {
+        entityId: resourceDetail.resourceId ?? '',
+        title: resourceDetail.title ?? 'Selected Content',
+        metadata: {
+          contentPreview: text,
+          selectedContent: text,
+          xPath: id,
+          sourceType: 'resourceSelection',
+        },
+      },
     };
-  }, [resourceId, resource.loading]);
+
+    return node;
+  };
+
+  // 初始化块选择
+  // useEffect(() => {
+  //   setDeckSize(0);
+  //   if (resource.loading) {
+  //     return;
+  //   }
+  //   const remove = initMessageListener();
+  //   handleInitContentSelectorListener();
+  //   return () => {
+  //     remove();
+  //   };
+  // }, [resourceId, resource.loading]);
 
   // refresh every 2 seconds if resource is waiting to be parsed or indexed
   useEffect(() => {
@@ -237,9 +270,13 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
                   'refly-inline-selector-mode': scope === 'inline',
                 })}
               >
-                {initContentSelectorElem()}
+                {/* {initContentSelectorElem()} */}
                 <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>
                 <Markdown content={resourceDetail?.content || ''}></Markdown>
+                <SelectionContext
+                  containerClass="knowledge-base-resource-content"
+                  getNodeData={(text) => buildNodeData(text)}
+                ></SelectionContext>
               </div>
             </>
           )}

@@ -254,9 +254,9 @@ export class CreateBlogPostSkill extends BaseSkill {
         {
           key: 'contentList',
           preferredSelectionKeys: [
-            'canvasBeforeCursorSelection',
-            'canvasCursorSelection',
-            'canvasAfterCursorSelection',
+            'documentBeforeCursorSelection',
+            'documentCursorSelection',
+            'documentAfterCursorSelection',
           ],
         },
       ],

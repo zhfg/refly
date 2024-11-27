@@ -163,9 +163,9 @@ export class CreateSocialMediaPostSkill extends BaseSkill {
           key: 'contentList',
           limit: 1,
           preferredSelectionKeys: [
-            'canvasBeforeCursorSelection',
-            'canvasCursorSelection',
-            'canvasAfterCursorSelection',
+            'documentBeforeCursorSelection',
+            'documentCursorSelection',
+            'documentAfterCursorSelection',
           ],
         },
       ],
@@ -240,27 +240,27 @@ LANGUAGE: {language}
       const otherContent = contentList.filter((item) => !item?.metadata?.domain?.includes('Cursor'));
 
       const cursorSelectionDomains = cursorSelectionRelatedContent.map((item) => item?.metadata?.domain);
-      if (cursorSelectionDomains?.includes('canvasBeforeCursorSelection')) {
-        const canvasBeforeCursorSelectionContent = cursorSelectionRelatedContent.find(
-          (item) => item?.metadata?.domain === 'canvasBeforeCursorSelection',
+      if (cursorSelectionDomains?.includes('documentBeforeCursorSelection')) {
+        const documentBeforeCursorSelectionContent = cursorSelectionRelatedContent.find(
+          (item) => item?.metadata?.domain === 'documentBeforeCursorSelection',
         );
-        contentString += `---canvasBeforeCursorSelection---
-${canvasBeforeCursorSelectionContent?.content}
+        contentString += `---documentBeforeCursorSelection---
+${documentBeforeCursorSelectionContent?.content}
 `;
       }
       const cursorSelectionContent = cursorSelectionRelatedContent.find(
-        (item) => item?.metadata?.domain === 'canvasCursorSelection',
+        (item) => item?.metadata?.domain === 'documentCursorSelection',
       );
-      contentString += `---canvasCursorSelection---
+      contentString += `---documentCursorSelection---
 ${cursorSelectionContent?.content}
 `;
 
-      if (cursorSelectionDomains?.includes('canvasAfterCursorSelection')) {
-        const canvasAfterCursorSelectionContent = cursorSelectionRelatedContent.find(
-          (item) => item?.metadata?.domain === 'canvasAfterCursorSelection',
+      if (cursorSelectionDomains?.includes('documentAfterCursorSelection')) {
+        const documentAfterCursorSelectionContent = cursorSelectionRelatedContent.find(
+          (item) => item?.metadata?.domain === 'documentAfterCursorSelection',
         );
-        contentString += `---canvasAfterCursorSelection---
-${canvasAfterCursorSelectionContent?.content}
+        contentString += `---documentAfterCursorSelection---
+${documentAfterCursorSelectionContent?.content}
 `;
       }
 

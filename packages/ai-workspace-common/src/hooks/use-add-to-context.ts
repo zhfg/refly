@@ -12,15 +12,21 @@ export const useAddToContext = (node: CanvasNode, nodeType: CanvasNodeType) => {
     const contextStore = useContextPanelStore.getState();
     const selectedContextItems = contextStore.selectedContextItems;
 
-    // Check if node is already in context
-    const isAlreadyAdded = selectedContextItems.some((item) => item.id === node.id);
+    // Check if item is already in context
+    const isAlreadyAdded = selectedContextItems.some((item) => {
+      if ('id' in node) {
+        return item.id === node.id;
+      }
+    });
 
-    // Get node title based on node type
+    // Get node title based on type
     let nodeTitle = '';
-    if (nodeType === 'skillResponse') {
-      nodeTitle = node.data?.title ?? t('knowledgeBase.context.untitled');
+    if (node?.data?.metadata?.sourceType === 'documentSelection') {
+      nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
+    } else if (nodeType === 'skillResponse') {
+      nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
     } else {
-      nodeTitle = node.data?.title ?? t('knowledgeBase.context.untitled');
+      nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
     }
 
     if (isAlreadyAdded) {
@@ -33,7 +39,7 @@ export const useAddToContext = (node: CanvasNode, nodeType: CanvasNodeType) => {
       return;
     }
 
-    // Add node to context
+    // Add to context
     contextStore.addContextItem(node);
     message.success(
       t('knowledgeBase.context.addSuccessWithTitle', {

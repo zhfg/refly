@@ -390,7 +390,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
   const baseUrl = getClientOrigin();
   const { initContentSelectorElem, addInlineMarkForNote } = useContentSelector(
     'ai-note-editor-content-container',
-    'canvasSelection',
+    'documentSelection',
     {
       url: `${baseUrl}/docs/${docId}`,
     },

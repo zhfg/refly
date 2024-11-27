@@ -2040,15 +2040,15 @@ export type SkillContext = {
   urls?: Array<SkillContextUrlItem>;
 };
 
-export type SkillContextKey = 'resources' | 'projects' | 'canvases' | 'contentList' | 'urls';
+export type SkillContextKey = 'resources' | 'projects' | 'documents' | 'contentList' | 'urls';
 
 export type SelectionKey =
-  | 'canvasSelection'
+  | 'documentSelection'
   | 'resourceSelection'
   | 'extensionWeblinkSelection'
-  | 'canvasCursorSelection'
-  | 'canvasBeforeCursorSelection'
-  | 'canvasAfterCursorSelection';
+  | 'documentCursorSelection'
+  | 'documentBeforeCursorSelection'
+  | 'documentAfterCursorSelection';
 
 export type SkillContextRule = {
   /**

@@ -2882,18 +2882,18 @@ export const SkillContextSchema = {
 
 export const SkillContextKeySchema = {
   type: 'string',
-  enum: ['resources', 'projects', 'canvases', 'contentList', 'urls'],
+  enum: ['resources', 'projects', 'documents', 'contentList', 'urls'],
 } as const;
 
 export const SelectionKeySchema = {
   type: 'string',
   enum: [
-    'canvasSelection',
+    'documentSelection',
     'resourceSelection',
     'extensionWeblinkSelection',
-    'canvasCursorSelection',
-    'canvasBeforeCursorSelection',
-    'canvasAfterCursorSelection',
+    'documentCursorSelection',
+    'documentBeforeCursorSelection',
+    'documentAfterCursorSelection',
   ],
 } as const;
 

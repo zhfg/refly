@@ -11,7 +11,7 @@ import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/mod
 
 export const useHandleContextWorkflow = () => {
   const noteStore = useDocumentStore((state) => ({
-    updateCurrentNote: state.updateCurrentCanvas,
+    updateCurrentNote: state.updateCurrentDocument,
   }));
   const { setShowContextCard, setContextDomain } = useContextPanelStore((state) => ({
     enableMultiSelect: state.enableMultiSelect,
@@ -45,7 +45,7 @@ export const useHandleContextWorkflow = () => {
 
   const handleSidePanelClose = () => {
     handleStopContentSelectorListener();
-    const { currentCanvas: currentNote } = useDocumentStore.getState();
+    const { currentDocument: currentNote } = useDocumentStore.getState();
     noteStore.updateCurrentNote({ ...currentNote, readOnly: false });
   };
 

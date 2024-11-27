@@ -11,7 +11,7 @@ export const getTypeIcon = (markType: MarkType, style?: any) => {
       return <IconResource style={style} />;
     case 'canvas':
       return <IconCanvas style={style} />;
-    case 'canvasSelection':
+    case 'documentSelection':
       return <IconCanvas style={style} />;
     case 'extensionWeblink':
       return <IconLink style={style} />;
@@ -28,7 +28,7 @@ export const getNodeIcon = (node: CanvasNodeType, style?: any) => {
       return <IconDocument style={style} />;
     case 'resource':
       return <IconResource style={style} />;
-    case 'response':
+    case 'skillResponse':
       return <IconCanvas />;
     default:
       return null;

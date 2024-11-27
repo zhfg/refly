@@ -28,7 +28,7 @@ export class ContinueWritingSkill extends BaseSkill {
 
   invocationConfig: SkillInvocationConfig = {
     context: {
-      rules: [{ key: 'contentList', limit: 1, preferredSelectionKeys: ['canvasBeforeCursorSelection'] }],
+      rules: [{ key: 'contentList', limit: 1, preferredSelectionKeys: ['documentBeforeCursorSelection'] }],
     },
   };
 
