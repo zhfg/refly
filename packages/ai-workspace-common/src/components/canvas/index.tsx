@@ -87,23 +87,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     [setSelectedNode],
   );
 
-  const nodePreview = useMemo(() => {
-    const selectedNodes = nodes?.filter((node) => node.selected);
-    if (!selectedNodes?.length) return null;
-
-    const selectedNode = selectedNodes[selectedNodes.length - 1];
-    const handleClosePanel = useCallback(() => {
-      onNodesChange([
-        {
-          id: selectedNode.id,
-          type: 'select',
-          selected: false,
-        },
-      ]);
-    }, [selectedNode.id, onNodesChange]);
-
-    return <NodePreview node={selectedNode} handleClosePanel={handleClosePanel} />;
-  }, [nodes, onNodesChange]);
+  const selectedNodes = nodes?.filter((node) => node.selected);
 
   const handleToolSelect = (tool: string) => {
     // Handle tool selection
@@ -130,7 +114,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
-          onSelectionChange={onSelectionChange}
+          nodeDragThreshold={10}
+          // onSelectionChange={onSelectionChange}
         >
           <Background />
           <MiniMap
@@ -179,7 +164,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         </div>
       </div>
 
-      {nodePreview}
+      {selectedNodes?.length > 0 && <NodePreview node={selectedNodes[selectedNodes.length - 1]} />}
     </div>
   );
 };

@@ -4,9 +4,13 @@ import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useActionResultStore } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { IconResponse } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { time } from '@refly-packages/ai-workspace-common/utils/time';
+import { LOCALE } from '@refly/common-types';
 
 export const ChatHistory: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.languages?.[0];
+
   const { selectedResultItems, addResultItem, removeResultItem, removePreviewResultItem, clearResultItems } =
     useContextPanelStoreShallow((state) => ({
       selectedResultItems: state.selectedResultItems,
@@ -15,32 +19,26 @@ export const ChatHistory: React.FC = () => {
       removePreviewResultItem: state.removePreviewResultItem,
       clearResultItems: state.clearResultItems,
     }));
-  const { selectedNode } = useCanvasControl();
+  const { nodes } = useCanvasControl();
+  const selectedResultNodes = nodes.filter((node) => node.selected && node.type === 'skillResponse');
+  const selectedNodeIds = selectedResultNodes.map((node) => node.id);
 
   useEffect(() => {
-    if (selectedNode?.type === 'skillResponse') {
-      // Add the selected node as a preview item
-      const item = selectedResultItems.find((item) => item.resultId === selectedNode.data.entityId);
-      if (!item) {
-        const resultId = selectedNode.data.entityId;
-        const result = useActionResultStore.getState().resultMap[resultId];
+    if (selectedResultNodes?.length > 0) {
+      removePreviewResultItem();
 
+      selectedResultNodes.forEach((node) => {
+        const result = useActionResultStore.getState().resultMap[node.data.entityId];
         if (!result) {
           return;
         }
 
-        removePreviewResultItem();
-        addResultItem({
-          resultId,
-          title: result.title,
-          content: result.content,
-          isPreview: true,
-        });
-      }
+        addResultItem({ ...result, isPreview: true });
+      });
     } else {
       removePreviewResultItem();
     }
-  }, [selectedNode?.id]);
+  }, [JSON.stringify(selectedNodeIds)]);
 
   useEffect(() => {
     return () => {
@@ -53,24 +51,28 @@ export const ChatHistory: React.FC = () => {
   }
 
   return (
-    <div
-      className="w-full max-w-4xl mx-auto p-3 space-y-4 rounded-lg bg-white mb-1"
-      style={{ border: '1px solid rgba(0, 0, 0, 0.1)' }}
-    >
-      {selectedResultItems?.map((result, index) => (
-        <div key={index} className="space-y-2">
-          <div>
-            <p className="text-gray-800 font-bold">{t('copilot.chatHistory.title')}</p>
-          </div>
-          <div className="p-4 bg-gray-100 rounded-lg">
-            <div className="text-gray-800 font-medium mb-1 flex items-center">
-              <IconResponse className="h-4 w-4 mr-1" />
-              {result?.title}
+    <div className="w-full border-b border-gray-200 max-w-4xl mx-auto p-3 pb-1 space-y-2 rounded-lg bg-white mb-1">
+      <p className="text-gray-800 font-bold">{t('copilot.chatHistory.title')}</p>
+      <div className="max-h-[200px] overflow-y-auto">
+        {selectedResultItems?.map((result, index) => (
+          <div key={index} className="space-y-1 m-1 py-2 px-3 bg-gray-50 rounded-lg mb-2">
+            <div className="text-gray-800 font-medium mb-1 flex items-center justify-between text-xs">
+              <span className="flex items-center">
+                <IconResponse className="h-4 w-4 mr-1" />
+                {result?.title}
+              </span>
+              <span className="text-gray-400 text-xs">
+                {time(result?.createdAt, language as LOCALE)
+                  .utc()
+                  .fromNow()}
+              </span>
             </div>
-            <p className="text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">{result?.content ?? ''}</p>
+            <p className="text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis text-xs">
+              {result?.content ?? ''}
+            </p>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

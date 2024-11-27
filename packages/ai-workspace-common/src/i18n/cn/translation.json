@@ -1135,7 +1135,7 @@
       }
     },
     "chatHistory": {
-      "title": "对话历史上下文"
+      "title": "对话历史"
     },
     "skillDisplay": {
       "skillManager": "技能管理",

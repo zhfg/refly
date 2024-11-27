@@ -72,11 +72,11 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     }
   }, [result?.status]);
 
-  const { invokeParam, actionMeta } = result ?? {};
+  const { invokeParam, actionMeta, logs } = result ?? {};
   const { input, context } = invokeParam ?? {};
 
-  const { processContextItemsFromMessage } = useProcessContextItems();
-  const contextItems = processContextItemsFromMessage(context);
+  // TODO: fill context items
+  const contextItems = [];
 
   return (
     <div className="flex flex-col space-y-4 p-4">
@@ -127,9 +127,9 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
           <>
             <Steps
               direction="vertical"
-              current={result.logs?.length ?? 0}
+              current={logs?.length ?? 0}
               size="small"
-              items={result.logs?.map((log, index) => ({
+              items={logs?.map((log, index) => ({
                 title: log,
                 description: 'This is a description.',
               }))}
@@ -144,13 +144,13 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
         )}
       </div>
 
-      {result.content && (
+      {result?.content && (
         <div className="m-6 text-gray-600 text-base">
-          <Markdown content={result.content} />
+          <Markdown content={result?.content} />
         </div>
       )}
 
-      {result.artifacts?.map((artifact) => (
+      {result?.artifacts?.map((artifact) => (
         <div
           className="border border-solid border-gray-200 rounded-lg m-6 px-4 py-2 h-12 flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
           onClick={() => {
@@ -183,11 +183,11 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
         </div>
       ))}
 
-      {result.tokenUsage?.length > 0 && (
+      {result?.tokenUsage?.length > 0 && (
         <>
           <Divider />
           <div className="flex items-center space-x-2 text-gray-500 text-sm m-6">
-            {result.tokenUsage?.map((usage) => (
+            {result?.tokenUsage?.map((usage) => (
               <span key={usage.modelName}>
                 {usage.modelName}: {usage.inputTokens + usage.outputTokens} Tokens
               </span>

@@ -82,9 +82,12 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   const setSelectedNode = useCallback(
     (node: CanvasNode<any> | null) => {
       ydoc.transact(() => {
-        yNodes.forEach((n) => {
-          n.selected = n.id === node?.id;
-        });
+        const updatedNodes = yNodes.toJSON().map((n) => ({
+          ...n,
+          selected: n.id === node?.id,
+        }));
+        yNodes.delete(0, yNodes.length);
+        yNodes.push(updatedNodes);
       });
     },
     [ydoc, yNodes],
@@ -102,9 +105,12 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   const setSelectedNodes = useCallback(
     (nodes: CanvasNode<any>[]) => {
       ydoc.transact(() => {
-        yNodes.forEach((n) => {
-          n.selected = nodes.some((node) => node.id === n.id);
-        });
+        const updatedNodes = yNodes.toJSON().map((n) => ({
+          ...n,
+          selected: nodes.some((node) => node.id === n.id),
+        }));
+        yNodes.delete(0, yNodes.length);
+        yNodes.push(updatedNodes);
       });
     },
     [ydoc, yNodes],

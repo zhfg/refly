@@ -5,28 +5,24 @@ import { ContextItem } from './context-item';
 import { AddBaseMarkContext } from './components/add-base-mark-context';
 
 // stores
-import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import {
+  useContextPanelStore,
+  useContextPanelStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 export const ContextManager = () => {
-  const {
-    selectedContextItems,
-    addContextItem,
-    removeContextItem,
-    removePreviewContextItem,
-    clearContextItems,
-    filterErrorInfo,
-  } = useContextPanelStoreShallow((state) => ({
-    selectedContextItems: state.selectedContextItems,
-    addContextItem: state.addContextItem,
-    removeContextItem: state.removeContextItem,
-    removePreviewContextItem: state.removePreviewContextItem,
-    clearContextItems: state.clearContextItems,
-    filterErrorInfo: state.filterErrorInfo,
-  }));
+  const { selectedContextItems, removeContextItem, setContextItems, clearContextItems, filterErrorInfo } =
+    useContextPanelStoreShallow((state) => ({
+      selectedContextItems: state.selectedContextItems,
+      removeContextItem: state.removeContextItem,
+      setContextItems: state.setContextItems,
+      clearContextItems: state.clearContextItems,
+      filterErrorInfo: state.filterErrorInfo,
+    }));
   const { nodes, setSelectedNode } = useCanvasControl();
   const selectedContextNodes = nodes.filter(
     (node) => node.selected && (node.type === 'resource' || node.type === 'document'),
@@ -40,17 +36,18 @@ export const ContextManager = () => {
     removeContextItem(item.id);
   };
 
+  const selectedNodeIds = selectedContextNodes?.map((node) => node.id) ?? [];
+
   useEffect(() => {
-    if (selectedContextNodes?.length > 0) {
-      // Add the selected node as a preview item
-      removePreviewContextItem();
-      selectedContextNodes.forEach((node) => {
-        addContextItem({ ...node, isPreview: true });
-      });
-    } else {
-      removePreviewContextItem();
-    }
-  }, [selectedContextNodes]);
+    const { selectedContextItems } = useContextPanelStore.getState();
+    const newContextItems = [
+      ...selectedContextItems.filter((item) => !item.isPreview),
+      ...selectedContextNodes
+        .filter((node) => !selectedContextItems.some((item) => item.id === node.id))
+        .map((node) => ({ ...node, isPreview: true })),
+    ];
+    setContextItems(newContextItems);
+  }, [JSON.stringify(selectedNodeIds)]);
 
   useEffect(() => {
     return () => {

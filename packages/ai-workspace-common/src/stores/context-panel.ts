@@ -144,8 +144,8 @@ interface ContextPanelState {
   updateMark: (mark: Mark) => void;
 
   addContextItem: (node: IContextItem) => void;
+  setContextItems: (nodes: IContextItem[]) => void;
   removeContextItem: (id: string) => void;
-  removePreviewContextItem: () => void;
   clearContextItems: () => void;
   updateContextItem: (node: IContextItem) => void;
 
@@ -247,15 +247,11 @@ export const useContextPanelStore = create<ContextPanelState>()(
 
     addContextItem: (node: CanvasNode) =>
       set((state) => ({ ...state, selectedContextItems: [...state.selectedContextItems, node] })),
+    setContextItems: (nodes: CanvasNode[]) => set((state) => ({ ...state, selectedContextItems: nodes })),
     removeContextItem: (id: string) =>
       set((state) => ({
         ...state,
         selectedContextItems: state.selectedContextItems.filter((node) => node.id !== id),
-      })),
-    removePreviewContextItem: () =>
-      set((state) => ({
-        ...state,
-        selectedContextItems: state.selectedContextItems.filter((node) => !node.isPreview),
       })),
     clearContextItems: () => set((state) => ({ ...state, selectedContextItems: [] })),
     updateContextItem: (node: CanvasNode) =>
