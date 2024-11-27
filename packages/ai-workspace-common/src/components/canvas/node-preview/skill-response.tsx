@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, Divider, Steps } from 'antd';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
@@ -34,7 +34,6 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
   }));
   const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
   const { nodes, setSelectedNode } = useCanvasControl();
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const fetchActionResult = async (resultId: string) => {
     const { data, error } = await getClient().getActionResult({
@@ -55,8 +54,13 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
   }, [resultId]);
 
   useEffect(() => {
-    if (result?.status === 'executing' && containerRef.current) {
-      containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    const container = document.body.querySelector('.preview-container');
+    if (result?.status === 'executing' && container) {
+      const { scrollHeight, clientHeight } = container;
+      container.scroll({
+        behavior: 'smooth',
+        top: scrollHeight - clientHeight + 50,
+      });
     }
   }, [result?.status, result?.content]);
 
@@ -75,7 +79,7 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
   const contextItems = processContextItemsFromMessage(context);
 
   return (
-    <div className="flex flex-col space-y-4 p-4" ref={containerRef}>
+    <div className="flex flex-col space-y-4 p-4">
       <div>
         {actionMeta?.icon?.value}
         {actionMeta?.name}
@@ -127,7 +131,7 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
               size="small"
               items={result.logs?.map((log, index) => ({
                 title: log,
-                // description: 'This is a description.',
+                description: 'This is a description.',
               }))}
             />
             <Button
