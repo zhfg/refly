@@ -16,6 +16,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 
 const { TextArea } = Input;
 
@@ -31,6 +32,7 @@ export const ImportFromWeblink = () => {
   const { addNode } = useCanvasControl();
 
   const [saveLoading, setSaveLoading] = useState(false);
+  const { getLibraryList } = useHandleSiderData();
 
   const scrapeSingleUrl = async (key: string, url: string) => {
     const { scrapeLinks } = useImportResourceStore.getState();
@@ -122,7 +124,7 @@ export const ImportFromWeblink = () => {
     if (!data?.success) {
       return;
     }
-
+    getLibraryList();
     message.success(t('common.putSuccess'));
     setScrapeLinks([]);
     setImportResourceModalVisible(false);

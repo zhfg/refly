@@ -79,7 +79,7 @@ export const CanvasListModal = (props: CanvasListProps) => {
               okText={t('common.confirm')}
               cancelText={t('common.cancel')}
             >
-              <div className="flex items-center">
+              <div className="flex items-center text-red-600">
                 <IconDelete size={16} className="mr-2" />
                 {t('workspace.deleteDropdownMenu.delete')}
               </div>
@@ -153,7 +153,7 @@ export const CanvasListModal = (props: CanvasListProps) => {
       open={visible}
       onCancel={() => setVisible(false)}
     >
-      {!isRequesting && dataList.length > 0 ? (
+      {isRequesting || dataList.length > 0 ? (
         <List
           itemLayout="vertical"
           dataSource={dataList}

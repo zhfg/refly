@@ -4,6 +4,9 @@
     .ant-modal-body {
       height: calc(80vh + 40px);
       overflow: auto;
+      .ant-tabs {
+        height: 100%;
+      }
     }
   }
 }

@@ -6,6 +6,8 @@ import { AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
 import { BsLayoutWtf } from 'react-icons/bs';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import Logo from '../../../../../../apps/web/src/assets/logo.svg';
+import { Avatar } from 'antd';
 
 interface TopToolbarProps {}
 
@@ -25,15 +27,22 @@ export const TopToolbar: FC<TopToolbarProps> = ({}) => {
     >
       <div className="flex items-center">
         {collapse ? (
-          <SiderPopover>
-            <Button
-              type="text"
-              icon={<AiOutlineMenuUnfold size={20} />}
-              onClick={() => {
-                setCollapse(!collapse);
-              }}
-            />
-          </SiderPopover>
+          <>
+            <SiderPopover>
+              <Button
+                type="text"
+                icon={<AiOutlineMenuUnfold size={20} />}
+                onClick={() => {
+                  setCollapse(!collapse);
+                }}
+              />
+            </SiderPopover>
+            <Divider type="vertical" className="pr-[4px]" />
+            <div className="flex items-center justify-center">
+              <Avatar size={32} src={Logo} />
+              <span className="text-sm font-bold ml-2">Refly</span>
+            </div>
+          </>
         ) : (
           <Button
             type="text"
