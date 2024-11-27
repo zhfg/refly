@@ -63,7 +63,7 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
       scope: selectorScopeRef.current,
       domain,
       url: metadata?.url || document?.location?.href || (document as any as Location)?.href || '',
-      metadata: domain === 'canvasSelection' ? { projectId } : null,
+      metadata: domain === 'documentSelection' ? { projectId } : null,
     };
 
     return mark;
@@ -200,16 +200,8 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
   };
 
   const addInlineMarkForNote = () => {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return;
-
-    const range = selection.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-
-    // check selected text
-    const selectedText = selection.toString().trim();
-    if (selectedText.length === 0) {
-      // if selected text is empty, do not show hover menu
+    const selectedText = window.getSelection()?.toString().trim();
+    if (!selectedText) {
       Message.warning(t('knowledgeBase.context.contentSelectorIsEmpty'));
       return;
     }
@@ -218,12 +210,9 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     const content = getSelectionNodesMarkdown();
     const textType = 'text' as ElementType;
     const mark = buildMark(textType, content, xPath);
+    // Sync with content selector
     const markEvent = { type: 'add' as SyncMarkEventType, mark };
-    const msg: Partial<SyncMarkEvent> = {
-      body: markEvent,
-    };
-
-    syncMarkEvent(msg);
+    syncMarkEvent({ body: markEvent });
   };
 
   const addInlineMark = () => {

@@ -50,7 +50,7 @@ import {
 } from '@refly-packages/openapi-schema';
 
 // TODO: unify with frontend
-export type ContentNodeType = 'resource' | 'document' | 'extensionWeblink' | 'resourceSelection' | 'canvasSelection';
+export type ContentNodeType = 'resource' | 'document' | 'extensionWeblink' | 'resourceSelection' | 'documentSelection';
 
 export interface NodeMeta {
   title: string;

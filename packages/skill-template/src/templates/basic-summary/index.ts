@@ -30,11 +30,11 @@ export class BasicSummarySkill extends BaseSkill {
       relation: 'mutuallyExclusive',
       rules: [
         { key: 'resources', limit: 1 },
-        { key: 'canvases', limit: 1 },
+        { key: 'documents', limit: 1 },
         {
           key: 'contentList',
           limit: 1,
-          preferredSelectionKeys: ['resourceSelection', 'canvasSelection', 'extensionWeblinkSelection'],
+          preferredSelectionKeys: ['resourceSelection', 'documentSelection', 'extensionWeblinkSelection'],
         },
       ],
     },

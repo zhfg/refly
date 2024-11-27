@@ -10,6 +10,7 @@ import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 
 export const ContextManager = () => {
   const {
@@ -28,6 +29,7 @@ export const ContextManager = () => {
     filterErrorInfo: state.filterErrorInfo,
   }));
   const { selectedNode, setSelectedNode } = useCanvasControl();
+  const { initMessageListener } = useSelectedMark();
 
   const handleToggleItem = (item: CanvasNode<any>) => {
     setSelectedNode(item);
@@ -54,6 +56,10 @@ export const ContextManager = () => {
     return () => {
       clearContextItems();
     };
+  }, []);
+
+  useEffect(() => {
+    initMessageListener();
   }, []);
 
   return (

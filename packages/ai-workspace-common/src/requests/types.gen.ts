@@ -906,6 +906,11 @@ export type ActionResultStatus = 'waiting' | 'executing' | 'finish' | 'failed';
 export type ArtifactType = 'document';
 
 /**
+ * Artifact status
+ */
+export type ArtifactStatus = 'waiting' | 'generating' | 'finish' | 'failed';
+
+/**
  * Artifact
  */
 export type Artifact = {
@@ -921,20 +926,10 @@ export type Artifact = {
      * Artifact title
      */
     title: string;
-};
-
-/**
- * Action output
- */
-export type ActionOutput = {
     /**
-     * Output content
+     * Artifact status
      */
-    content?: string;
-    /**
-     * Output artifacts
-     */
-    artifacts?: Array<Artifact>;
+    status?: ArtifactStatus;
 };
 
 /**
@@ -963,7 +958,6 @@ export type ActionResult = {
     actionMeta?: ActionMeta;
     /**
      * Response content
-     * @deprecated
      */
     content?: string;
     /**
@@ -975,9 +969,9 @@ export type ActionResult = {
      */
     logs?: Array<(string)>;
     /**
-     * Action outputs
+     * Action artifacts
      */
-    outputs?: Array<ActionOutput>;
+    artifacts?: Array<Artifact>;
     /**
      * Structured data output
      */
@@ -2033,9 +2027,9 @@ export type SkillContext = {
     urls?: Array<SkillContextUrlItem>;
 };
 
-export type SkillContextKey = 'resources' | 'projects' | 'canvases' | 'contentList' | 'urls';
+export type SkillContextKey = 'resources' | 'projects' | 'documents' | 'contentList' | 'urls';
 
-export type SelectionKey = 'canvasSelection' | 'resourceSelection' | 'extensionWeblinkSelection' | 'canvasCursorSelection' | 'canvasBeforeCursorSelection' | 'canvasAfterCursorSelection';
+export type SelectionKey = 'documentSelection' | 'resourceSelection' | 'extensionWeblinkSelection' | 'documentCursorSelection' | 'documentBeforeCursorSelection' | 'documentAfterCursorSelection';
 
 export type SkillContextRule = {
     /**

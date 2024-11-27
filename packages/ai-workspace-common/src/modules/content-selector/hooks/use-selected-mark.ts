@@ -12,6 +12,7 @@ import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/store
 import { useDocumentStore } from '@refly-packages/ai-workspace-common/stores/document';
 import { Message } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
+import { convertMarkToNode } from '@refly-packages/ai-workspace-common/utils/mark-to-node';
 
 // stores
 
@@ -56,15 +57,14 @@ export const useSelectedMark = () => {
         contextPanelStore.updateCurrentSelectedMark(null);
       } else if (type === 'add') {
         const { currentResource } = useKnowledgeBaseStore.getState();
-        const { currentCanvas } = useDocumentStore.getState();
+        const { currentDocument } = useDocumentStore.getState();
         let title = '';
         let parentId = '';
         let projectId = '';
 
-        if (mark.domain === 'canvasSelection') {
-          title = currentCanvas?.title;
-          parentId = currentCanvas?.canvasId;
-          projectId = currentCanvas?.projectId;
+        if (mark.domain === 'documentSelection') {
+          title = currentDocument?.title;
+          parentId = currentDocument?.docId;
         } else if (mark.domain === 'resourceSelection' || mark.domain === 'extensionWeblinkSelection') {
           title = currentResource?.title;
           parentId = currentResource?.resourceId;
@@ -82,8 +82,13 @@ export const useSelectedMark = () => {
           return;
         }
 
-        const newMarks = [...marks, newMark];
-        contentSelectorStore.setMarks(newMarks);
+        // Convert to node and add to context
+        const node = convertMarkToNode(newMark, 'document', mark.domain);
+        const { addContextItem } = useContextPanelStore.getState();
+        addContextItem(node);
+
+        // Update content selector state
+        contentSelectorStore.setMarks([...marks, newMark]);
 
         const newCurrentSelectedMarks = [...currentSelectedMarks, newMark];
         contextPanelStore.updateCurrentSelectedMarks(newCurrentSelectedMarks);

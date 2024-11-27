@@ -19,7 +19,7 @@ export interface SkillContextContentItemMetadata {
   projectId?: string;
 }
 
-export type SelectedContentDomain = 'resourceSelection' | 'canvasSelection' | 'extensionWeblinkSelection';
+export type SelectedContentDomain = 'resourceSelection' | 'documentSelection' | 'extensionWeblinkSelection';
 
 export interface Chunk {
   content: string;

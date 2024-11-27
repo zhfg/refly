@@ -3784,18 +3784,18 @@ components:
       enum:
         - resources
         - projects
-        - canvases
+        - documents
         - contentList
         - urls
     SelectionKey:
       type: string
       enum:
-        - canvasSelection
+        - documentSelection
         - resourceSelection
         - extensionWeblinkSelection
-        - canvasCursorSelection
-        - canvasBeforeCursorSelection
-        - canvasAfterCursorSelection
+        - documentCursorSelection
+        - documentBeforeCursorSelection
+        - documentAfterCursorSelection
     SkillContextRule:
       type: object
       required:

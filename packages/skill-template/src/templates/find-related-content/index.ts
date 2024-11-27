@@ -73,7 +73,7 @@ export class FindRelatedContent extends BaseSkill {
     context: {
       rules: [
         { key: 'resources', limit: 1 },
-        { key: 'canvases', limit: 1 },
+        { key: 'documents', limit: 1 },
         { key: 'contentList', limit: 1 },
       ],
       relation: 'mutuallyExclusive',

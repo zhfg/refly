@@ -1,6 +1,6 @@
 import { useCopilotContextState } from '@refly-packages/ai-workspace-common/hooks/use-copilot-context-state';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { Mark } from '@refly/common-types';
+import { Mark, SelectedTextDomain } from '@refly/common-types';
 
 export const useGetCurrentSelectedMark = () => {
   const { currentSelectedMark } = useCopilotContextState();
@@ -26,30 +26,30 @@ export const useGetCurrentSelectedMark = () => {
 
     // stay order
     if (!selectedTextCardDomain.includes('resource')) {
-      finalUsedMarks = finalUsedMarks.filter((mark) => mark.domain !== 'resource');
+      finalUsedMarks = finalUsedMarks.filter((mark) => mark.domain !== ('resource' as SelectedTextDomain));
     }
 
-    if (!selectedTextCardDomain.includes('canvas')) {
-      finalUsedMarks = finalUsedMarks.filter((mark) => mark.domain !== 'canvas');
+    if (!selectedTextCardDomain.includes('document')) {
+      finalUsedMarks = finalUsedMarks.filter((mark) => mark.domain !== ('document' as SelectedTextDomain));
     }
 
     if (!selectedTextCardDomain.includes('extensionWeblink')) {
-      finalUsedMarks = finalUsedMarks.filter((mark) => mark.domain !== 'extensionWeblink');
+      finalUsedMarks = finalUsedMarks.filter((mark) => mark.domain !== ('extensionWeblink' as SelectedTextDomain));
     }
 
     // final handle note cursor selection
-    if (selectedTextCardDomain.includes('canvasCursorSelection') && currentSelectionContent) {
+    if (selectedTextCardDomain.includes('documentCursorSelection') && currentSelectionContent) {
       finalUsedMarks.push({
-        type: 'canvasSelection',
+        type: 'documentSelection',
         data: currentSelectionContent,
         xPath: '',
         scope: 'block',
-        domain: 'canvasCursorSelection',
+        domain: 'documentCursorSelection',
       });
     }
     if (selectedTextCardDomain.includes('noteBeforeCursorSelection') && beforeSelectionNoteContent) {
       finalUsedMarks.push({
-        type: 'canvasSelection',
+        type: 'documentSelection',
         data: beforeSelectionNoteContent,
         xPath: '',
         scope: 'block',
@@ -58,7 +58,7 @@ export const useGetCurrentSelectedMark = () => {
     }
     if (selectedTextCardDomain.includes('noteAfterCursorSelection') && afterSelectionNoteContent) {
       finalUsedMarks.push({
-        type: 'canvasSelection',
+        type: 'documentSelection',
         data: afterSelectionNoteContent,
         xPath: '',
         scope: 'block',

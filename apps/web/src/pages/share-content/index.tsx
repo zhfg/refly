@@ -59,7 +59,7 @@ const ShareContent = () => {
     setProject: state.setProject,
   }))
   const canvasStore = useDocumentStoreShallow(state => ({
-    updateCurrentCanvas: state.updateCurrentCanvas,
+    updateCurrentDocument: state.updateCurrentDocument,
   }))
   const [searchParams, setSearchParams] = useSearchParams()
   const urlCanvasId = searchParams.get("canvasId") as string
@@ -80,7 +80,7 @@ const ShareContent = () => {
   const baseUrl = getClientOrigin()
   const { initMessageListener, initContentSelectorElem } = useContentSelector(
     "share-canvas-content-container",
-    "canvasSelection",
+    "documentSelection",
     {
       url: `${baseUrl}/share/${shareCode}`,
     },
@@ -112,7 +112,7 @@ const ShareContent = () => {
     const result = data.data
 
     setCurrentCanvas(result?.canvas)
-    canvasStore.updateCurrentCanvas(result?.canvas as Canvas)
+    canvasStore.updateCurrentDocument(result?.document as Document)
     if (!canvasList?.length) {
       const canvasList =
         result?.canvasList || (result?.canvas ? [result.canvas] : [])

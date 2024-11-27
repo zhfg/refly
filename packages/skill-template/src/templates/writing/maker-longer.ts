@@ -33,9 +33,9 @@ export class MakeLongerSkill extends BaseSkill {
           key: 'contentList',
           limit: 1,
           preferredSelectionKeys: [
-            'canvasBeforeCursorSelection',
-            'canvasCursorSelection',
-            'canvasAfterCursorSelection',
+            'documentBeforeCursorSelection',
+            'documentCursorSelection',
+            'documentAfterCursorSelection',
           ],
         },
       ],
