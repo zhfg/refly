@@ -911,6 +911,11 @@ export type ActionResultStatus = 'waiting' | 'executing' | 'finish' | 'failed';
 export type ArtifactType = 'document';
 
 /**
+ * Artifact status
+ */
+export type ArtifactStatus = 'waiting' | 'generating' | 'finish' | 'failed';
+
+/**
  * Artifact
  */
 export type Artifact = {
@@ -926,6 +931,10 @@ export type Artifact = {
    * Artifact title
    */
   title: string;
+  /**
+   * Artifact status
+   */
+  status?: ArtifactStatus;
 };
 
 /**
@@ -961,11 +970,11 @@ export type ActionResult = {
    */
   status?: ActionResultStatus;
   /**
-   * Response logs
+   * Action logs
    */
   logs?: Array<string>;
   /**
-   * Artifacts
+   * Action artifacts
    */
   artifacts?: Array<Artifact>;
   /**

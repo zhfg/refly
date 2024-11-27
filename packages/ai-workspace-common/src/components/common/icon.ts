@@ -7,10 +7,12 @@ import {
   HiOutlineChatBubbleLeftRight,
   HiMiniPlayCircle,
 } from 'react-icons/hi2';
+import { LuMoreVertical, LuMoreHorizontal } from 'react-icons/lu';
 
-import { RiDoubleQuotesL } from 'react-icons/ri';
+import { RiDoubleQuotesL, RiDeleteBinLine } from 'react-icons/ri';
 import { BiText } from 'react-icons/bi';
 import { HiPlus } from 'react-icons/hi';
+import { PiNotePencil } from 'react-icons/pi';
 
 export const IconProject = IconFolder;
 export const IconCanvasFill = HiSparkles;
@@ -23,3 +25,7 @@ export const IconQuote = RiDoubleQuotesL;
 export const IconText = BiText;
 export const IconPlus = HiPlus;
 export const IconPlay = HiMiniPlayCircle;
+export const IconMoreVertical = LuMoreVertical;
+export const IconMoreHorizontal = LuMoreHorizontal;
+export const IconNotePencil = PiNotePencil;
+export const IconDelete = RiDeleteBinLine;

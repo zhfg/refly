@@ -65,7 +65,7 @@ const ResourceDeck = (props: ResourceDeckProps) => {
               >
                 <div className="flex items-center justify-center gap-2">
                   {reference[`${type}Type`] === 'resource' ? <IconResource /> : <IconCanvas />}
-                  <div>{reference[`${type}Meta`]['title']}</div>
+                  <div>{reference[`${type}Meta`]?.['title']}</div>
                 </div>
               </div>
             );

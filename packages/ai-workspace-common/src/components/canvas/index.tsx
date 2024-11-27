@@ -10,13 +10,12 @@ import {
   useReactFlow,
 } from '@xyflow/react';
 import { nodeTypes, CanvasNode } from './nodes';
+import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
 import { TopToolbar } from './top-toolbar';
 import { NodePreview } from './node-preview';
 
 import '@xyflow/react/dist/style.css';
-import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
-import { CopilotOperationModule } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasProvider } from '@refly-packages/ai-workspace-common/context/canvas';
 import { EDGE_STYLES } from './constants';
@@ -187,7 +186,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         </ReactFlow>
 
         <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-10">
-          <CopilotOperationModule source={MessageIntentSource.Canvas} />
+          <LaunchPad />
         </div>
       </div>
 

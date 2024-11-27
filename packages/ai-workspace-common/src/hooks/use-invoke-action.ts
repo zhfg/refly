@@ -92,6 +92,32 @@ export const useInvokeAction = () => {
     updateActionResult(skillEvent.resultId, updatedResult);
   };
 
+  const onSkillArtifact = (skillEvent: SkillEvent) => {
+    const { resultId, artifact } = skillEvent;
+    const { resultMap } = useActionResultStore.getState();
+    const result = resultMap[resultId];
+
+    if (!result) {
+      return;
+    }
+
+    const existingArtifacts = Array.isArray(result.artifacts) ? [...result.artifacts] : [];
+
+    const artifactIndex = existingArtifacts.findIndex((item) => item?.entityId === artifact?.entityId);
+
+    const updatedArtifacts =
+      artifactIndex !== -1
+        ? existingArtifacts.map((item, index) => (index === artifactIndex ? artifact : item))
+        : [...existingArtifacts, artifact];
+
+    const updatedResult = {
+      ...result,
+      artifacts: updatedArtifacts,
+    };
+
+    updateActionResult(skillEvent.resultId, updatedResult);
+  };
+
   const onSkillCreateNode = (skillEvent: SkillEvent) => {
     const { node, resultId } = skillEvent;
     addNode(
@@ -167,6 +193,12 @@ export const useInvokeAction = () => {
       actionMeta: {},
       content: '',
       invokeParam: payload,
+      logs: [],
+      status: 'waiting',
+      artifacts: [],
+      structuredData: {},
+      tokenUsage: [],
+      errors: [],
     });
 
     const connectTo = [
@@ -205,6 +237,7 @@ export const useInvokeAction = () => {
       onSkillStart,
       onSkillStream,
       onSkillLog,
+      onSkillArtifact,
       onSkillStructedData,
       onSkillCreateNode,
       onSkillEnd,

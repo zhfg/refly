@@ -924,6 +924,20 @@ export type Artifact = {
 };
 
 /**
+ * Action output
+ */
+export type ActionOutput = {
+    /**
+     * Output content
+     */
+    content?: string;
+    /**
+     * Output artifacts
+     */
+    artifacts?: Array<Artifact>;
+};
+
+/**
  * Action result
  */
 export type ActionResult = {
@@ -949,6 +963,7 @@ export type ActionResult = {
     actionMeta?: ActionMeta;
     /**
      * Response content
+     * @deprecated
      */
     content?: string;
     /**
@@ -956,13 +971,13 @@ export type ActionResult = {
      */
     status?: ActionResultStatus;
     /**
-     * Response logs
+     * Action logs
      */
     logs?: Array<(string)>;
     /**
-     * Artifacts
+     * Action outputs
      */
-    artifacts?: Array<Artifact>;
+    outputs?: Array<ActionOutput>;
     /**
      * Structured data output
      */

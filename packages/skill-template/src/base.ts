@@ -16,6 +16,7 @@ import {
   SkillTemplateConfig,
   Icon,
   Project,
+  Artifact,
 } from '@refly-packages/openapi-schema';
 import { EventEmitter } from 'node:stream';
 import { randomUUID } from 'node:crypto';
@@ -137,6 +138,7 @@ export interface SkillEventMap {
   log: [data: SkillEvent];
   stream: [data: SkillEvent];
   create_node: [data: SkillEvent];
+  artifact: [data: SkillEvent];
   structured_data: [data: SkillEvent];
   usage: [data: SkillEvent];
   error: [data: SkillEvent];
@@ -144,6 +146,7 @@ export interface SkillEventMap {
 
 export interface SkillRunnableMeta extends Record<string, unknown>, SkillMeta {
   spanId: string;
+  artifact?: Artifact;
 }
 
 export interface SkillRunnableConfig extends RunnableConfig {

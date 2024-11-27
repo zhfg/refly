@@ -232,7 +232,8 @@
       "successful": "删除成功！",
       "unbindSuccessful": "移除成功！",
       "failed": "删除失败！",
-      "deleteConfirmForCanvas": "确定删除该稿布吗？",
+      "deleteConfirmForDocument": "确定删除该文档吗？",
+      "deleteConfirmForCanvas": "确定删除该画布吗？",
       "deleteConfirmForProject": "确定删除该项目吗？",
       "deleteConfirmForResource": "确定删除该资源吗？",
       "deleteConfirmForResourceProject": "确认要从项目移除吗?",
@@ -361,6 +362,10 @@
       "exitFullScreen": "退出全屏"
     }
   },
+  "artifact": {
+    "generating": "生成中",
+    "completed": "已完成"
+  },
   "canvas": {
     "toolbar": {
       "enablePointerMode": "启用框选模式",
@@ -370,6 +375,9 @@
       "addSkill": "添加技能",
       "addTool": "添加工具",
       "addDocument": "添加文档"
+    },
+    "skillResponse": {
+      "skillCompleted": "技能执行完成"
     },
     "contextList": {
       "placeholder": "搜索{{domain}}..."

@@ -32,6 +32,7 @@ import {
   Document,
   TokenUsageItem,
   ActionResult,
+  Artifact,
 } from '@refly-packages/openapi-schema';
 import {
   BaseSkill,
@@ -56,6 +57,7 @@ import {
   buildSuccessResponse,
   writeSSEResponse,
   pick,
+  omit,
   QUEUE_SYNC_TOKEN_USAGE,
 } from '@/utils';
 import { InvokeSkillJobData } from './skill.dto';
@@ -586,6 +588,7 @@ export class SkillService {
       emitter.on('log', eventListener);
       emitter.on('error', eventListener);
       emitter.on('create_node', eventListener);
+      emitter.on('artifact', eventListener);
       emitter.on('structured_data', eventListener);
 
       config.configurable.emitter = emitter;
@@ -632,17 +635,12 @@ export class SkillService {
       });
     }
 
-    const resultUpdates: Partial<ActionResult> = {
-      content: '',
-      logs: [],
-      structuredData: {},
-      errors: [],
-      tokenUsage: [],
-      artifacts: [],
+    type ArtifactOutput = Artifact & {
+      nodeCreated: boolean; // Whether the canvas node is created
+      content: string; // Accumulated content
+      document?: Y.Doc; // Yjs document
     };
-
-    // Document to be updated
-    let outputDocument: Y.Doc | null = null;
+    const artifactMap: Record<string, ArtifactOutput> = {};
 
     const config = await this.buildInvokeConfig(user, {
       ...data,
@@ -655,35 +653,44 @@ export class SkillService {
         if (res) {
           writeSSEResponse(res, data);
         }
-        switch (data.event) {
+
+        const { event, content, structuredDataKey, artifact } = data;
+        switch (event) {
           case 'log':
-            resultUpdates.logs.push(data.content);
+            result.logs.push(content);
             return;
           case 'structured_data':
-            if (data.structuredDataKey) {
-              resultUpdates.structuredData[data.structuredDataKey] = data.content;
+            if (structuredDataKey) {
+              result.structuredData[structuredDataKey] = content;
             }
             return;
-          case 'create_node':
-            const docId = data.node.data.entityId;
-            this.logger.log(`create_node event captured, open direct connection to ${docId}`);
-            if (docId) {
-              const doc = await this.prisma.document.findFirst({ where: { docId } });
-              const { document } = await this.collabService.openDirectConnection(docId, {
-                user,
-                entity: doc,
-                entityType: 'document',
-              });
-              outputDocument = document;
-              resultUpdates.artifacts.push({
-                type: 'document',
-                entityId: docId,
-                title: doc?.title || 'New Document',
-              });
+          case 'artifact':
+            if (artifact) {
+              const { entityId, type, status } = artifact;
+              if (!artifactMap[entityId]) {
+                artifactMap[entityId] = { ...artifact, content: '', nodeCreated: false };
+              } else {
+                // Only update artifact status
+                artifactMap[entityId].status = status;
+              }
+
+              // Open direct connection to yjs doc if artifact type is document
+              if (type === 'document' && !artifactMap[entityId].document) {
+                this.logger.log(`open direct connection to document ${entityId}`);
+                const doc = await this.prisma.document.findFirst({
+                  where: { docId: entityId },
+                });
+                const { document } = await this.collabService.openDirectConnection(entityId, {
+                  user,
+                  entity: doc,
+                  entityType: 'document',
+                });
+                artifactMap[entityId].document = document;
+              }
             }
             return;
           case 'error':
-            resultUpdates.errors.push(data.content);
+            result.errors.push(data.content);
             return;
         }
       },
@@ -711,7 +718,7 @@ export class SkillService {
       for await (const event of skill.streamEvents(input, { ...config, version: 'v2' })) {
         if (aborted) {
           if (runMeta) {
-            resultUpdates.errors.push('AbortError');
+            result.errors.push('AbortError');
           }
           throw new Error('AbortError');
         }
@@ -721,15 +728,35 @@ export class SkillService {
 
         switch (event.event) {
           case 'on_chat_model_stream':
-            if (chunk.content && res) {
-              resultUpdates.content += chunk.content.toString();
-              if (outputDocument) {
-                throttledMarkdownUpdate(outputDocument, resultUpdates.content);
+            const content = chunk.content.toString();
+            if (content && res) {
+              if (runMeta?.artifact) {
+                const { entityId } = runMeta.artifact;
+                const artifact = artifactMap[entityId];
+
+                // Send create_node event to client if not created
+                if (!artifact.nodeCreated) {
+                  writeSSEResponse(res, {
+                    event: 'create_node',
+                    resultId,
+                    node: {
+                      type: 'document',
+                      data: { entityId, title: artifact.title },
+                    },
+                  });
+                  artifact.nodeCreated = true;
+                }
+
+                // Update artifact content and yjs doc
+                artifact.content += content;
+                throttledMarkdownUpdate(artifact.document, artifact.content);
               } else {
+                // Update result content and forward stream events to client
+                result.content += content;
                 writeSSEResponse(res, {
                   event: 'stream',
                   resultId,
-                  content: chunk.content.toString(),
+                  content,
                 });
               }
             }
@@ -754,8 +781,7 @@ export class SkillService {
               };
               await this.usageReportQueue.add(tokenUsage);
 
-              resultUpdates.tokenUsage = [usage];
-              resultUpdates.content = chunk.content.toString();
+              result.tokenUsage = [usage];
             }
             break;
         }
@@ -768,26 +794,31 @@ export class SkillService {
           content: JSON.stringify(genBaseRespDataFromError(err)),
         });
       }
-      resultUpdates.errors.push(err.message);
+      result.errors.push(err.message);
     } finally {
       if (res) {
         writeSSEResponse(res, {
           event: 'usage',
           resultId,
-          content: JSON.stringify({ token: resultUpdates.tokenUsage }),
+          content: JSON.stringify({ token: result.tokenUsage }),
         });
       }
 
       await this.prisma.actionResult.update({
         where: { resultId },
         data: {
-          status: resultUpdates.errors.length > 0 ? 'failed' : 'finish',
-          content: resultUpdates.artifacts.length === 0 ? resultUpdates.content : '',
-          logs: JSON.stringify(resultUpdates.logs),
-          structuredData: JSON.stringify(resultUpdates.structuredData),
-          artifacts: JSON.stringify(resultUpdates.artifacts),
-          errors: JSON.stringify(resultUpdates.errors),
-          tokenUsage: JSON.stringify(resultUpdates.tokenUsage),
+          status: result.errors.length > 0 ? 'failed' : 'finish',
+          content: result.content || '',
+          logs: JSON.stringify(result.logs),
+          structuredData: JSON.stringify(result.structuredData),
+          artifacts: JSON.stringify(
+            Object.values(artifactMap).map((a) => ({
+              ...omit(a, ['content', 'document']),
+              status: 'finish',
+            })),
+          ),
+          errors: JSON.stringify(result.errors),
+          tokenUsage: JSON.stringify(result.tokenUsage),
         },
       });
     }

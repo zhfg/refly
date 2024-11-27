@@ -1,4 +1,3 @@
-import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasNode } from '../nodes/types';
 import { SkillResponseNodePreview } from './skill-response';
 import { ToolResponseNodePreview } from './tool-response';
@@ -84,7 +83,9 @@ export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>;
             isMaximized={isMaximized}
           />
         </div>
-        <div className="h-[calc(100%-64px)] overflow-auto rounded-b-lg pointer-events-auto">{previewComponent}</div>
+        <div className="h-[calc(100%-64px)] overflow-auto rounded-b-lg pointer-events-auto preview-container">
+          {previewComponent}
+        </div>
       </div>
     </div>
   );
