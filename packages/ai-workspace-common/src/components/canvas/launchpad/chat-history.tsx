@@ -13,6 +13,8 @@ import { LOCALE } from '@refly/common-types';
 import { ChevronDown, Pin, PinOff } from 'lucide-react';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
+import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
+import { ActionResult } from '@refly/openapi-schema';
 
 export const ChatHistory: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -47,6 +49,21 @@ export const ChatHistory: React.FC = () => {
     ];
     setResultItems(newResultItems);
   }, [JSON.stringify(selectedNodeIds)]);
+
+  useEffect(() => {
+    const handleResultUpdate = (payload: { resultId: string; payload: ActionResult }) => {
+      const { selectedResultItems } = useContextPanelStore.getState();
+      const index = selectedResultItems.findIndex((item) => item.resultId === payload.resultId);
+      if (index >= 0) {
+        updateResultItem({ ...selectedResultItems[index], ...payload.payload });
+      }
+    };
+    actionEmitter.on('updateResult', handleResultUpdate);
+
+    return () => {
+      actionEmitter.off('updateResult', handleResultUpdate);
+    };
+  }, []);
 
   useEffect(() => {
     return () => {
