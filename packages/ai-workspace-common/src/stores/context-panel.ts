@@ -144,16 +144,17 @@ interface ContextPanelState {
   updateMark: (mark: Mark) => void;
 
   addContextItem: (node: IContextItem) => void;
+  setContextItems: (nodes: IContextItem[]) => void;
   removeContextItem: (id: string) => void;
-  removePreviewContextItem: () => void;
   clearContextItems: () => void;
   updateContextItem: (node: IContextItem) => void;
 
-  addResultItem: (node: IResultItem) => void;
+  addResultItem: (item: IResultItem) => void;
+  setResultItems: (items: IResultItem[]) => void;
   removeResultItem: (id: string) => void;
   removePreviewResultItem: () => void;
   clearResultItems: () => void;
-  updateResultItem: (node: IResultItem) => void;
+  updateResultItem: (item: IResultItem) => void;
 }
 
 export const defaultSelectedTextCardState = {
@@ -246,16 +247,30 @@ export const useContextPanelStore = create<ContextPanelState>()(
       })),
 
     addContextItem: (node: CanvasNode) =>
-      set((state) => ({ ...state, selectedContextItems: [...state.selectedContextItems, node] })),
+      set((state) => {
+        const existingIndex = state.selectedContextItems.findIndex((item) => item.id === node.id);
+
+        if (existingIndex >= 0) {
+          // Update existing item
+          const updatedItems = [...state.selectedContextItems];
+          updatedItems[existingIndex] = node;
+          return {
+            ...state,
+            selectedContextItems: updatedItems,
+          };
+        }
+
+        // Add new item to end
+        return {
+          ...state,
+          selectedContextItems: [...state.selectedContextItems, node],
+        };
+      }),
+    setContextItems: (nodes: CanvasNode[]) => set((state) => ({ ...state, selectedContextItems: nodes })),
     removeContextItem: (id: string) =>
       set((state) => ({
         ...state,
         selectedContextItems: state.selectedContextItems.filter((node) => node.id !== id),
-      })),
-    removePreviewContextItem: () =>
-      set((state) => ({
-        ...state,
-        selectedContextItems: state.selectedContextItems.filter((node) => !node.isPreview),
       })),
     clearContextItems: () => set((state) => ({ ...state, selectedContextItems: [] })),
     updateContextItem: (node: CanvasNode) =>
@@ -266,11 +281,28 @@ export const useContextPanelStore = create<ContextPanelState>()(
         ),
       })),
 
-    addResultItem: (node: IResultItem) =>
-      set((state) => ({
-        ...state,
-        selectedResultItems: [...state.selectedResultItems, node],
-      })),
+    addResultItem: (item: IResultItem) =>
+      set((state) => {
+        const existingIndex = state.selectedResultItems.findIndex((existing) => existing.resultId === item.resultId);
+
+        if (existingIndex >= 0) {
+          // Update existing item
+          const updatedItems = [...state.selectedResultItems];
+          updatedItems[existingIndex] = item;
+          return {
+            ...state,
+            selectedResultItems: updatedItems,
+          };
+        }
+
+        return {
+          ...state,
+          selectedResultItems: item.isPreview
+            ? [item, ...state.selectedResultItems]
+            : [...state.selectedResultItems, item],
+        };
+      }),
+    setResultItems: (items: IResultItem[]) => set((state) => ({ ...state, selectedResultItems: items })),
     removeResultItem: (id: string) =>
       set((state) => ({
         ...state,
@@ -282,11 +314,11 @@ export const useContextPanelStore = create<ContextPanelState>()(
         selectedResultItems: state.selectedResultItems.filter((node) => !node.isPreview),
       })),
     clearResultItems: () => set((state) => ({ ...state, selectedResultItems: [] })),
-    updateResultItem: (node: IResultItem) =>
+    updateResultItem: (result: IResultItem) =>
       set((state) => ({
         ...state,
         selectedResultItems: state.selectedResultItems.map((item) =>
-          item.resultId === node.resultId ? { ...item, ...node } : item,
+          item.resultId === result.resultId ? { ...item, ...result } : item,
         ),
       })),
 

@@ -33,37 +33,24 @@ const selectionStyles = `
 `;
 
 const Flow = ({ canvasId }: { canvasId: string }) => {
-  const {
-    nodes,
-    edges,
-    selectedNode,
-    selectedNodes,
-    mode,
-    setSelectedNode,
-    setSelectedNodes,
-    onNodesChange,
-    onEdgesChange,
-    onConnect,
-  } = useCanvasControl(canvasId);
+  const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, onSelectionChange } =
+    useCanvasControl(canvasId);
 
   const reactFlowInstance = useReactFlow();
 
   useEffect(() => {
-    if (selectedNode && !nodes.some((node) => node.id === selectedNode.id)) {
-      setSelectedNode(null);
-    }
-  }, [nodes, selectedNode, setSelectedNode]);
-
-  useEffect(() => {
-    if (nodes?.length > 0) {
-      setTimeout(() => {
+    // Only run fitView if we have nodes and this is the initial render
+    const timeoutId = setTimeout(() => {
+      if (nodes?.length > 0) {
         reactFlowInstance.fitView({
           padding: 0.2,
           duration: 200,
         });
-      }, 100);
-    }
-  }, [nodes?.length]);
+      }
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, []); // Run only once on mount
 
   const defaultEdgeOptions = {
     style: EDGE_STYLES.default,
@@ -100,26 +87,12 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     [setSelectedNode],
   );
 
-  const nodePreview = useMemo(() => {
-    if (!selectedNode) return null;
-    return <NodePreview node={selectedNode} handleClosePanel={() => setSelectedNode(null)} />;
-  }, [selectedNode]);
+  const selectedNodes = nodes?.filter((node) => node.selected);
 
   const handleToolSelect = (tool: string) => {
     // Handle tool selection
     console.log('Selected tool:', tool);
   };
-
-  const handleSelectionChange = useCallback(
-    ({ nodes }: { nodes: Node[] }) => {
-      const selectedCanvasNodes = nodes.filter((node): node is CanvasNode<any> => {
-        return node.type !== undefined && 'title' in node.data && 'entityId' in node.data;
-      });
-
-      setSelectedNodes(selectedCanvasNodes);
-    },
-    [setSelectedNodes],
-  );
 
   return (
     <div className="w-full h-screen relative flex flex-col">
@@ -141,7 +114,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
-          onSelectionChange={handleSelectionChange}
+          nodeDragThreshold={10}
+          // onSelectionChange={onSelectionChange}
         >
           <Background />
           <MiniMap
@@ -190,7 +164,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         </div>
       </div>
 
-      {nodePreview}
+      {selectedNodes?.length > 0 && <NodePreview node={selectedNodes[selectedNodes.length - 1]} />}
     </div>
   );
 };

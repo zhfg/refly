@@ -6,11 +6,26 @@ import { SkillNodePreview } from './skill';
 import { ToolNodePreview } from './tool';
 import { DocumentNodePreview } from './document';
 import { NodePreviewHeader } from './node-preview-header';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
-export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>; handleClosePanel: () => void }) => {
+export const NodePreview = ({ node }: { node: CanvasNode<any> }) => {
   const [isPinned, setIsPinned] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
+
+  const { onNodesChange } = useCanvasControl();
+  const unselectNode = useCallback(
+    (node: CanvasNode<any>) => {
+      onNodesChange([
+        {
+          id: node.id,
+          type: 'select',
+          selected: false,
+        },
+      ]);
+    },
+    [onNodesChange],
+  );
 
   const previewComponent = useMemo(() => {
     if (!node?.type) return null;
@@ -76,7 +91,7 @@ export const NodePreview = ({ node, handleClosePanel }: { node: CanvasNode<any>;
         <div className="pointer-events-auto">
           <NodePreviewHeader
             node={node}
-            onClose={handleClosePanel}
+            onClose={() => unselectNode(node)}
             onPin={() => setIsPinned(!isPinned)}
             onMaximize={() => setIsMaximized(!isMaximized)}
             isPinned={isPinned}

@@ -15,32 +15,30 @@ export const ChatHistory: React.FC = () => {
       removePreviewResultItem: state.removePreviewResultItem,
       clearResultItems: state.clearResultItems,
     }));
-  const { selectedNode } = useCanvasControl();
+  const { nodes } = useCanvasControl();
+  const selectedResultNodes = nodes.filter((node) => node.type === 'skillResponse');
 
   useEffect(() => {
-    if (selectedNode?.type === 'skillResponse') {
-      // Add the selected node as a preview item
-      const item = selectedResultItems.find((item) => item.resultId === selectedNode.data.entityId);
-      if (!item) {
-        const resultId = selectedNode.data.entityId;
-        const result = useActionResultStore.getState().resultMap[resultId];
+    if (selectedResultNodes?.length > 0) {
+      removePreviewResultItem();
 
+      selectedResultNodes.forEach((node) => {
+        const result = useActionResultStore.getState().resultMap[node.data.entityId];
         if (!result) {
           return;
         }
 
-        removePreviewResultItem();
         addResultItem({
-          resultId,
+          resultId: node.data.entityId,
           title: result.title,
           content: result.content,
           isPreview: true,
         });
-      }
+      });
     } else {
       removePreviewResultItem();
     }
-  }, [selectedNode?.id]);
+  }, [selectedResultNodes]);
 
   useEffect(() => {
     return () => {

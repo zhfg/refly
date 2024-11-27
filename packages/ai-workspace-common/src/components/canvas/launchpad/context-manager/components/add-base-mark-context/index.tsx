@@ -56,7 +56,7 @@ export const AddBaseMarkContext = () => {
           getPopupContainer={getPopupContainer}
         >
           <Button
-            icon={<IconPlus />}
+            icon={<IconPlus className="w-3 h-3" />}
             size="small"
             type="default"
             className="text-xs h-6 rounded border text-gray-500 gap-1"

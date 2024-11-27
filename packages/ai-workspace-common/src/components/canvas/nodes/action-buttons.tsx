@@ -18,7 +18,7 @@ import type { MenuProps } from 'antd';
 // Action button types
 type ActionButtonProps = {
   icon: React.ReactNode;
-  onClick: () => void;
+  onClick: (e: any) => void;
   loading?: boolean;
   tooltip?: string;
   withTooltip?: boolean;
@@ -60,6 +60,7 @@ const ActionButton = ({ icon, onClick, loading, tooltip, withTooltip = true }: A
 type ActionButtonsProps = {
   type: 'document' | 'resource' | 'skill-response';
   onAddToContext?: () => void;
+  onAddToChatHistory?: () => void;
   onRerun?: () => void;
   onInsertToDoc?: () => void;
   onDelete?: () => void;
@@ -74,6 +75,7 @@ type ActionButtonsProps = {
 export const ActionButtons = ({
   type,
   onAddToContext,
+  onAddToChatHistory,
   onRerun,
   onInsertToDoc,
   onDelete,
@@ -193,11 +195,11 @@ export const ActionButtons = ({
               tooltip="Insert to Document"
             />
           )}
-          {onAddToContext && (
+          {onAddToChatHistory && (
             <ActionButton
               icon={<MessageSquareDiff className="w-4 h-4" />}
-              onClick={onAddToContext}
-              tooltip="Add to Context"
+              onClick={onAddToChatHistory}
+              tooltip="Add to Chat History"
             />
           )}
           {onCreateDocument && (

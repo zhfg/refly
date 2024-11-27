@@ -5,30 +5,30 @@ import { ContextItem } from './context-item';
 import { AddBaseMarkContext } from './components/add-base-mark-context';
 
 // stores
-import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import {
+  useContextPanelStore,
+  useContextPanelStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
+import { ChatHistorySwitch } from './components/chat-history-switch';
 
 export const ContextManager = () => {
-  const {
-    selectedContextItems,
-    addContextItem,
-    removeContextItem,
-    removePreviewContextItem,
-    clearContextItems,
-    filterErrorInfo,
-  } = useContextPanelStoreShallow((state) => ({
-    selectedContextItems: state.selectedContextItems,
-    addContextItem: state.addContextItem,
-    removeContextItem: state.removeContextItem,
-    removePreviewContextItem: state.removePreviewContextItem,
-    clearContextItems: state.clearContextItems,
-    filterErrorInfo: state.filterErrorInfo,
-  }));
-  const { selectedNode, setSelectedNode } = useCanvasControl();
+  const { selectedContextItems, removeContextItem, setContextItems, clearContextItems, filterErrorInfo } =
+    useContextPanelStoreShallow((state) => ({
+      selectedContextItems: state.selectedContextItems,
+      removeContextItem: state.removeContextItem,
+      setContextItems: state.setContextItems,
+      clearContextItems: state.clearContextItems,
+      filterErrorInfo: state.filterErrorInfo,
+    }));
+  const { nodes, setSelectedNode } = useCanvasControl();
+  const selectedContextNodes = nodes.filter(
+    (node) => node.selected && (node.type === 'resource' || node.type === 'document'),
+  );
   const { initMessageListener } = useSelectedMark();
 
   const handleToggleItem = (item: CanvasNode<any>) => {
@@ -39,18 +39,18 @@ export const ContextManager = () => {
     removeContextItem(item.id);
   };
 
+  const selectedNodeIds = selectedContextNodes?.map((node) => node.id) ?? [];
+
   useEffect(() => {
-    if (selectedNode?.type === 'resource' || selectedNode?.type === 'document') {
-      // Add the selected node as a preview item
-      const item = selectedContextItems.find((item) => item.id === selectedNode.id);
-      if (!item) {
-        removePreviewContextItem();
-        addContextItem({ ...selectedNode, isPreview: true });
-      }
-    } else {
-      removePreviewContextItem();
-    }
-  }, [selectedNode]);
+    const { selectedContextItems } = useContextPanelStore.getState();
+    const newContextItems = [
+      ...selectedContextItems.filter((item) => !item.isPreview),
+      ...selectedContextNodes
+        .filter((node) => !selectedContextItems.some((item) => item.id === node.id))
+        .map((node) => ({ ...node, isPreview: true })),
+    ];
+    setContextItems(newContextItems);
+  }, [JSON.stringify(selectedNodeIds)]);
 
   useEffect(() => {
     return () => {
@@ -66,13 +66,14 @@ export const ContextManager = () => {
     <div className="flex flex-col h-full p-2 px-3">
       <div className="flex flex-col">
         <div className="flex flex-wrap content-start gap-1 w-full">
+          <ChatHistorySwitch />
           <AddBaseMarkContext />
           {selectedContextItems?.map((item) => (
             <ContextItem
               key={item?.id}
               item={item}
               isLimit={!!filterErrorInfo?.[mapSelectionTypeToContentList(item?.type)]}
-              isActive={item?.id === selectedNode?.id}
+              isActive={selectedContextNodes.some((node) => node.id === item.id)}
               onToggle={handleToggleItem}
               onRemove={handleRemoveItem}
             />

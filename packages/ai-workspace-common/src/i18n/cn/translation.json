@@ -379,6 +379,10 @@
     "skillResponse": {
       "skillCompleted": "技能执行完成"
     },
+    "chatHistory": {
+      "alreadyAdded": "已添加到对话历史",
+      "addSuccess": "成功添加到对话历史"
+    },
     "contextList": {
       "placeholder": "搜索{{domain}}..."
     },
@@ -1135,7 +1139,8 @@
       }
     },
     "chatHistory": {
-      "title": "对话历史上下文"
+      "title": "对话历史",
+      "empty": "未选中任何对话"
     },
     "skillDisplay": {
       "skillManager": "技能管理",

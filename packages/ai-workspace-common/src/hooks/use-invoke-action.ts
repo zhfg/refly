@@ -1,4 +1,4 @@
-import { BaseResponse, CanvasNodeData, InvokeSkillRequest } from '@refly/openapi-schema';
+import { ActionResult, BaseResponse, CanvasNodeData, InvokeSkillRequest } from '@refly/openapi-schema';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
 import { SkillEvent, LOCALE } from '@refly/common-types';
@@ -11,6 +11,7 @@ import {
   useActionResultStore,
   useActionResultStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/action-result';
+import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 
 export const useInvokeAction = () => {
   const { addNode } = useCanvasControl();
@@ -18,6 +19,11 @@ export const useInvokeAction = () => {
 
   const globalAbortControllerRef = { current: null as AbortController | null };
   const globalIsAbortedRef = { current: false as boolean };
+
+  const onUpdateResult = (resultId: string, payload: ActionResult) => {
+    actionEmitter.emit('updateResult', { resultId, payload });
+    updateActionResult(resultId, payload);
+  };
 
   const onSkillStart = (skillEvent: SkillEvent) => {};
 
@@ -33,7 +39,7 @@ export const useInvokeAction = () => {
       ...result,
       logs: [...(result.logs || []), skillEvent.content],
     };
-    updateActionResult(skillEvent.resultId, updatedResult);
+    onUpdateResult(skillEvent.resultId, updatedResult);
   };
 
   const onSkillUsage = (skillEvent: SkillEvent) => {
@@ -53,7 +59,7 @@ export const useInvokeAction = () => {
       ...result,
       tokenUsage: tokenUsage.token,
     };
-    updateActionResult(skillEvent.resultId, updatedResult);
+    onUpdateResult(skillEvent.resultId, updatedResult);
   };
 
   const onSkillStream = (skillEvent: SkillEvent) => {
@@ -69,7 +75,7 @@ export const useInvokeAction = () => {
       status: 'executing' as const,
       content: result.content + skillEvent.content,
     };
-    updateActionResult(skillEvent.resultId, updatedResult);
+    onUpdateResult(skillEvent.resultId, updatedResult);
   };
 
   const onSkillStructedData = (skillEvent: SkillEvent) => {
@@ -89,7 +95,7 @@ export const useInvokeAction = () => {
       ...result,
       structuredData: { ...result.structuredData, ...structuredData },
     };
-    updateActionResult(skillEvent.resultId, updatedResult);
+    onUpdateResult(skillEvent.resultId, updatedResult);
   };
 
   const onSkillArtifact = (skillEvent: SkillEvent) => {
@@ -115,7 +121,7 @@ export const useInvokeAction = () => {
       artifacts: updatedArtifacts,
     };
 
-    updateActionResult(skillEvent.resultId, updatedResult);
+    onUpdateResult(skillEvent.resultId, updatedResult);
   };
 
   const onSkillCreateNode = (skillEvent: SkillEvent) => {
@@ -146,7 +152,7 @@ export const useInvokeAction = () => {
       ...result,
       status: 'finish' as const,
     };
-    updateActionResult(skillEvent.resultId, updatedResult);
+    onUpdateResult(skillEvent.resultId, updatedResult);
   };
 
   const onError = (error?: BaseResponse) => {
@@ -186,12 +192,13 @@ export const useInvokeAction = () => {
   const onStart = () => {};
 
   const invokeAction = (payload: InvokeSkillRequest) => {
-    const { resultId } = payload;
-    updateActionResult(resultId, {
+    const { resultId, input } = payload;
+    onUpdateResult(resultId, {
       resultId,
       type: 'skill',
       actionMeta: {},
       content: '',
+      title: input?.query,
       invokeParam: payload,
       logs: [],
       status: 'waiting',
@@ -220,7 +227,7 @@ export const useInvokeAction = () => {
       {
         type: 'skillResponse',
         data: {
-          title: payload.input.query,
+          title: input?.query,
           entityId: resultId,
         },
       },
