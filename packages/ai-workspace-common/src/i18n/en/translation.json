@@ -305,11 +305,11 @@
       "contentList": "Content List",
       "extensionWeblink": "Web Link",
       "extensionWeblinkSelection": "Web Link Selection",
-      "canvasSelection": "Canvas Selection",
+      "documentSelection": "Document Selection",
       "resourceSelection": "Resource Selection",
-      "canvasCursorSelection": "Canvas Cursor Selection",
-      "canvasBeforeCursorSelection": "Canvas Before Cursor Selection",
-      "canvasAfterCursorSelection": "Canvas After Cursor Selection",
+      "documentCursorSelection": "Document Cursor Selection",
+      "documentBeforeCursorSelection": "Document Before Cursor Selection",
+      "documentAfterCursorSelection": "Document After Cursor Selection",
       "contextLimitTipTitle": "Please adjust the context and try again",
       "contextRequiredTip": "Please select at least 1 {{type}}",
       "contextLimitTip": "{{type}} is limit to {{limit}} , and you have selected {{currentCount}}.",
@@ -723,11 +723,11 @@
       "context": {
         "contentList": {
           "resourceSelection": "Resource Selection",
-          "noteSelection": "Canvas Selection",
+          "documentSelection": "Document Selection",
           "extensionWeblinkSelection": "Web Link Selection",
-          "canvasCursorSelection": "Canvas Cursor Selection",
-          "canvasBeforeCursorSelection": "Canvas Before Cursor Selection",
-          "canvasAfterCursorSelection": "Canvas After Cursor Selection"
+          "documentCursorSelection": "Document Cursor Selection",
+          "documentBeforeCursorSelection": "Document Before Cursor Selection",
+          "documentAfterCursorSelection": "Document After Cursor Selection"
         }
       },
       "invokeConfig": "Invocation Config",
@@ -1184,7 +1184,10 @@
       "openCanvas": "Open Canvas"
     },
     "contextItem": {
-      "current": "Current "
+      "current": "Current ",
+      "documentSelection": "Document Selection",
+      "resourceSelection": "Resource Selection",
+      "skillResponseSelection": "Skill Response Selection"
     },
     "modelSelector": {
       "noModelAvailable": "No model available",

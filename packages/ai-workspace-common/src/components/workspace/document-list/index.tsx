@@ -68,7 +68,7 @@ export const DocumentList = () => {
             okText={t('common.confirm')}
             cancelText={t('common.cancel')}
           >
-            <div className="flex items-center">
+            <div className="flex items-center text-red-600">
               <IconDelete size={16} className="mr-2" />
               {t('workspace.deleteDropdownMenu.delete')}
             </div>
@@ -106,7 +106,7 @@ export const DocumentList = () => {
 
   return (
     <div className="w-full px-[8px] h-[calc(80vh-60px)] overflow-y-auto">
-      {!isRequesting && dataList.length > 0 ? (
+      {isRequesting || dataList.length > 0 ? (
         <List
           grid={{
             gutter: 16,

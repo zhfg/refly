@@ -209,19 +209,20 @@ export const useInvokeAction = () => {
     });
 
     const connectTo = [
+      ...(Array.isArray(payload.context?.documents) ? payload.context.documents : []).map((document) => ({
+        type: 'document' as const,
+        entityId: document.docId,
+      })),
       ...(payload.context?.resources ?? []).map((resource) => ({
         type: 'resource' as const,
         entityId: resource.resourceId,
-      })),
-      ...(payload.context?.documents ?? []).map((document) => ({
-        type: 'document' as const,
-        entityId: document.docId,
       })),
       ...(payload.resultHistory ?? []).map((result) => ({
         type: 'skillResponse' as const,
         entityId: result.resultId,
       })),
-    ];
+    ].filter(Boolean);
+
     addNode(
       {
         type: 'skillResponse',

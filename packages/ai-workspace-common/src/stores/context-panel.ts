@@ -15,31 +15,31 @@ export const selectedTextCardDomainWeb = [
     },
   },
   {
-    key: 'noteSelection',
+    key: 'documentSelection',
     labelDict: {
-      en: 'Note',
-      'zh-CN': '笔记选中',
+      en: 'Document',
+      'zh-CN': '文档选中',
     },
   },
   {
-    key: 'noteCursorSelection',
+    key: 'documentCursorSelection',
     labelDict: {
-      en: 'Note Cursor Selection',
-      'zh-CN': '笔记光标选中文本',
+      en: 'Document Cursor Selection',
+      'zh-CN': '文档光标选中文本',
     },
   },
   {
-    key: 'noteBeforeCursorSelection',
+    key: 'documentBeforeCursorSelection',
     labelDict: {
-      en: 'Note Before Cursor Selection',
-      'zh-CN': '笔记光标选中前文本',
+      en: 'Document Before Cursor Selection',
+      'zh-CN': '文档光标选中前文本',
     },
   },
   {
-    key: 'noteAfterCursorSelection',
+    key: 'documentAfterCursorSelection',
     labelDict: {
-      en: 'Note After Cursor Selection',
-      'zh-CN': '笔记光标选中后文本',
+      en: 'Document After Cursor Selection',
+      'zh-CN': '文档光标选中后文本',
     },
   },
 ];

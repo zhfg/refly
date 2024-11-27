@@ -8,7 +8,7 @@ import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-comm
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-
+import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 interface ActionMenuProps {
   getTarget: () => HTMLElement;
   sourceType: 'multilingualSearch' | 'sourceListModal';
@@ -16,6 +16,7 @@ interface ActionMenuProps {
 
 export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
   const { t } = useTranslation();
+  const { getLibraryList } = useHandleSiderData();
 
   const { updateSourceListDrawer } = useKnowledgeBaseStore((state) => ({
     updateSourceListDrawer: state.updateSourceListDrawer,
@@ -64,6 +65,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
     });
 
     if (data.success) {
+      getLibraryList();
       message.success(t('common.putSuccess'));
       setSelectedItems([]);
       const resources = (Array.isArray(data?.data) ? data?.data : []).map((resource) => ({

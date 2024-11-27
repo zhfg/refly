@@ -12,6 +12,9 @@ import { cn } from '@refly-packages/utils/cn';
 import { ContextItem } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/context-item';
 import { useProcessContextItems } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-process-context-items';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { genUniqueId } from '@refly-packages/utils/id';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { SelectionContext } from '@refly-packages/ai-workspace-common/components/selection-context';
 
 interface SkillResponseNodePreviewProps {
   resultId: string;
@@ -45,6 +48,28 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     }
 
     updateActionResult(resultId, data.data);
+  };
+
+  const buildNodeData = (text: string) => {
+    const id = genUniqueId();
+
+    const node: CanvasNode = {
+      id,
+      type: 'skillResponse',
+      position: { x: 0, y: 0 },
+      data: {
+        entityId: result.resultId ?? '',
+        title: result.title ?? 'Selected Content',
+        metadata: {
+          contentPreview: text,
+          selectedContent: text,
+          xPath: id,
+          sourceType: 'skillResponseSelection',
+        },
+      },
+    };
+
+    return node;
   };
 
   useEffect(() => {
@@ -145,8 +170,12 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
       </div>
 
       {result?.content && (
-        <div className="m-6 text-gray-600 text-base">
-          <Markdown content={result?.content} />
+        <div className="m-6 text-gray-600 text-base skill-response-content">
+          <Markdown content={result.content} />
+          <SelectionContext
+            containerClass="skill-response-content"
+            getNodeData={(text) => buildNodeData(text)}
+          ></SelectionContext>
         </div>
       )}
 

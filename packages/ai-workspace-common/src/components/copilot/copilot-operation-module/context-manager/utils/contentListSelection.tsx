@@ -1,10 +1,10 @@
 const contentListTypeList = [
   'resourceSelection',
-  'noteSelection',
+  'documentSelection',
   'extensionWeblinkSelection',
-  'canvasCursorSelection',
-  'canvasBeforeCursorSelection',
-  'canvasAfterCursorSelection',
+  'documentCursorSelection',
+  'documentBeforeCursorSelection',
+  'documentAfterCursorSelection',
 ];
 
 export const isContentList = (type: string) => {

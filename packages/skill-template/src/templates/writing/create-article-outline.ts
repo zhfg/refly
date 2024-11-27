@@ -35,9 +35,9 @@ export class CreateArticleOutlineSkill extends BaseSkill {
         {
           key: 'contentList',
           preferredSelectionKeys: [
-            'canvasBeforeCursorSelection',
-            'canvasCursorSelection',
-            'canvasAfterCursorSelection',
+            'documentBeforeCursorSelection',
+            'documentCursorSelection',
+            'documentAfterCursorSelection',
           ],
         },
       ],

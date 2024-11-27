@@ -31,7 +31,7 @@ export const ContextItem = ({
       className={cn(
         'max-w-[200px] h-6 px-1 flex items-center border border-gray-200 rounded transition-all duration-300',
         {
-          'border-green-500 text-green-500': isActive,
+          'border-green-500': isActive,
           'border-red-300 bg-red-50 text-red-500': isLimit,
           'bg-gray-100 border-gray-200': disabled,
           'border-dashed': item?.isPreview,
@@ -42,13 +42,17 @@ export const ContextItem = ({
       <div className="h-[18px] flex items-center w-full text-xs">
         <span className="flex items-center flex-shrink-0 mr-1">{icon}</span>
         <span
-          className={cn('flex-1 whitespace-nowrap overflow-hidden text-ellipsis min-w-0', {
+          className={cn('flex-1 whitespace-nowrap overflow-hidden text-ellipsis min-w-0 mr-1', {
             'text-gray-300': disabled,
             'text-red-500': isLimit,
           })}
           title={data?.title ?? ''}
         >
           {data?.title}
+        </span>
+        <span className="item-type text-gray-500 mr-1">
+          {item.isCurrentContext ? t('copilot.contextItem.current') : ''}
+          {item?.data?.metadata?.sourceType && t(`copilot.contextItem.${item?.data?.metadata?.sourceType}`)}
         </span>
         {!canNotRemove && (
           <IconClose

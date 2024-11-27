@@ -13,6 +13,7 @@ import {
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 import { ChatHistorySwitch } from './components/chat-history-switch';
 
 export const ContextManager = () => {
@@ -28,6 +29,7 @@ export const ContextManager = () => {
   const selectedContextNodes = nodes.filter(
     (node) => node.selected && (node.type === 'resource' || node.type === 'document'),
   );
+  const { initMessageListener } = useSelectedMark();
 
   const handleToggleItem = (item: CanvasNode<any>) => {
     setSelectedNode(item);
@@ -54,6 +56,10 @@ export const ContextManager = () => {
     return () => {
       clearContextItems();
     };
+  }, []);
+
+  useEffect(() => {
+    initMessageListener();
   }, []);
 
   return (

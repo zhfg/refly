@@ -10,12 +10,12 @@ export type BaseMarkType = FrontendBaseMarkType | SearchDomain;
 export const frontendBaseMarkTypes: BaseMarkType[] = ['extensionWeblink', 'all'];
 export const backendBaseMarkTypes: BaseMarkType[] = ['document', 'resource']; // conversation and skill not supported yet
 
-export type SelectedTextMarkType = 'resourceSelection' | 'canvasSelection' | 'extensionWeblinkSelection';
+export type SelectedTextMarkType = 'resourceSelection' | 'documentSelection' | 'extensionWeblinkSelection';
 // for notion cursor selection, mainly for note-related skills
 export type SelectedCursorTextMarkType =
-  | 'canvasCursorSelection'
-  | 'canvasBeforeCursorSelection'
-  | 'canvasAfterCursorSelection';
+  | 'documentCursorSelection'
+  | 'documentBeforeCursorSelection'
+  | 'documentAfterCursorSelection';
 
 /**
  * 1. extension-weblink: represent the weblink in the extension
@@ -23,11 +23,11 @@ export type SelectedCursorTextMarkType =
  */
 export const selectedTextDomains: SelectedTextDomain[] = [
   'resourceSelection',
-  'canvasSelection',
+  'documentSelection',
   'extensionWeblinkSelection',
-  'canvasCursorSelection',
-  'canvasBeforeCursorSelection',
-  'canvasAfterCursorSelection',
+  'documentCursorSelection',
+  'documentBeforeCursorSelection',
+  'documentAfterCursorSelection',
 ];
 
 // mainly for display context card, now deprecated
@@ -58,7 +58,7 @@ export interface Mark {
   onlyForCurrentContext?: boolean; // 只是当前上下文使用
   isCurrentContext?: boolean; // 是否是当前上下文
   metadata?: Record<string, any>; // TODO: 元数据，用于添加额外的元数据，比如 canvas 的 projectId
-  parentId?: string; // 父级 id 比如 noteselection 的 parentId 是 noteId, resourceSelection 的 parentId 是 resourceId
+  parentId?: string; // 父级 id 比如  documentSelection 的 parentId 是 docId, resourceSelection 的 parentId 是 resourceId
   projectId?: string; // 项目 id
 }
 
