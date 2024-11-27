@@ -28,6 +28,7 @@ import HoverMenu from '@refly-packages/ai-workspace-common/modules/content-selec
 import { getPopupContainer } from '../utils/get-popup-container';
 import { t } from 'i18next';
 import { useParams } from 'react-router-dom';
+import { createRoot } from 'react-dom/client';
 
 export const getContainerElem = (selector: string | null) => {
   const container = getPopupContainer();
@@ -85,49 +86,51 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
       selected: boolean;
     },
   ) => {
-    // 创建一个容器来放置React组件
     const containerElem = getContainerElem(selector);
 
     const menuContainer = document.createElement('div');
     menuContainer.setAttribute('data-id', 'refly-content-selector-hover-menu');
-    menuContainer.style.position = 'fixed';
+    menuContainer.style.position = 'absolute';
     menuContainer.style.zIndex = '10000';
     menuContainer.style.opacity = '0';
     menuContainer.style.transition = 'opacity 0.3s ease-in-out';
     containerElem?.appendChild?.(menuContainer);
 
+    const root = createRoot(menuContainer);
+
     let hideTimeout: NodeJS.Timeout;
 
-    // 使用React渲染hover菜单
     const renderMenu = () => {
-      clearTimeout(hideTimeout);
-
       if (rect) {
+        // 获取视口相对位置
         menuContainer.style.top = `${rect.top - 30}px`;
         menuContainer.style.left = `${rect.left + rect.width / 2}px`;
         menuContainer.style.opacity = '1';
       } else {
-        const rect = target.getBoundingClientRect();
-        menuContainer.style.top = `${rect.top - 30}px`;
-        menuContainer.style.left = `${rect.left + rect.width / 2}px`;
+        const targetRect = target.getBoundingClientRect();
+        // 计算相对于视口的位置
+        menuContainer.style.top = `${targetRect.top - 30}px`;
+        menuContainer.style.left = `${targetRect.left + targetRect.width / 2}px`;
         menuContainer.style.opacity = '1';
       }
 
-      ReactDOM.render(
+      root.render(
         <HoverMenu
           onClick={onClick}
           selected={selected}
           onMouseEnter={() => clearTimeout(hideTimeout)}
           onMouseLeave={() => removeHoverMenu()}
         />,
-        menuContainer,
       );
     };
 
+    renderMenu();
+
     const removeHoverMenu = () => {
       hideTimeout = setTimeout(() => {
-        ReactDOM.unmountComponentAtNode(menuContainer);
-        menuContainer.style.opacity = '0';
+        root.unmount();
+        // 从 document.body 中移除
+        document.body.removeChild(menuContainer);
       }, 300);
     };
 

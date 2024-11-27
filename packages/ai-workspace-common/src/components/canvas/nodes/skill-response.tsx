@@ -15,6 +15,7 @@ import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-del
 import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/use-insert-to-document';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
+import { genUniqueId } from '@refly-packages/utils/id';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
