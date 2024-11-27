@@ -2,11 +2,9 @@ import { useTranslation } from 'react-i18next';
 import { useCookie } from 'react-use';
 import Cookies from 'js-cookie';
 import { getCookieOrigin, getExtensionId } from '@refly/utils/url';
-import { useNavigate, useLocation } from 'react-router-dom';
-
-import { Dropdown, Menu, Modal, Avatar } from '@arco-design/web-react';
+import { Menu, Modal, Avatar } from '@arco-design/web-react';
+import { Popover } from 'antd';
 import { LuSettings, LuLogOut } from 'react-icons/lu';
-import { useState } from 'react';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 
@@ -16,15 +14,12 @@ import { AiOutlineTwitter } from 'react-icons/ai';
 
 export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const location = useLocation();
   const userStore = useUserStore();
   const { setShowSettingModal } = useSiderStoreShallow((state) => ({
     setShowSettingModal: state.setShowSettingModal,
   }));
   const [modal, contextHolder] = Modal.useModal();
   const [deleteCookie] = useCookie('_refly_ai_sid');
-  const [dropdownVisible, setDropdownVisible] = useState(false);
 
   const handleLogout = () => {
     modal.confirm?.({
@@ -59,7 +54,6 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
     } else if (key === 'logout') {
       handleLogout();
     }
-    setDropdownVisible(false);
   };
 
   const dropList = (
@@ -76,7 +70,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
         </div>
         <Menu
           className={'sider-menu-setting-list-menu'}
-          defaultSelectedKeys={location.pathname === '/settings' ? ['settings'] : []}
+          selectedKeys={[]}
           onClickMenuItem={(key) => handleMenuClick(key)}
         >
           <Menu.Item key="settings">
@@ -109,15 +103,15 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
 
   return (
     <div className="sider-menu-setting-list">
-      <Dropdown
-        droplist={dropList}
-        trigger="click"
-        position="top"
-        popupVisible={dropdownVisible}
-        onVisibleChange={setDropdownVisible}
+      <Popover
+        zIndex={12}
+        overlayInnerStyle={{ padding: 0, backgroundColor: 'transparent', boxShadow: 'none' }}
+        arrow={false}
+        placement="bottom"
+        content={dropList}
       >
         {props.children}
-      </Dropdown>
+      </Popover>
       {contextHolder}
     </div>
   );
