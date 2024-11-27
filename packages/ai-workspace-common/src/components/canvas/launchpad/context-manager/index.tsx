@@ -27,7 +27,10 @@ export const ContextManager = () => {
     clearContextItems: state.clearContextItems,
     filterErrorInfo: state.filterErrorInfo,
   }));
-  const { selectedNode, setSelectedNode } = useCanvasControl();
+  const { nodes, setSelectedNode } = useCanvasControl();
+  const selectedContextNodes = nodes.filter(
+    (node) => node.selected && (node.type === 'resource' || node.type === 'document'),
+  );
 
   const handleToggleItem = (item: CanvasNode<any>) => {
     setSelectedNode(item);
@@ -38,17 +41,16 @@ export const ContextManager = () => {
   };
 
   useEffect(() => {
-    if (selectedNode?.type === 'resource' || selectedNode?.type === 'document') {
+    if (selectedContextNodes?.length > 0) {
       // Add the selected node as a preview item
-      const item = selectedContextItems.find((item) => item.id === selectedNode.id);
-      if (!item) {
-        removePreviewContextItem();
-        addContextItem({ ...selectedNode, isPreview: true });
-      }
+      removePreviewContextItem();
+      selectedContextNodes.forEach((node) => {
+        addContextItem({ ...node, isPreview: true });
+      });
     } else {
       removePreviewContextItem();
     }
-  }, [selectedNode]);
+  }, [selectedContextNodes]);
 
   useEffect(() => {
     return () => {
@@ -66,7 +68,7 @@ export const ContextManager = () => {
               key={item?.id}
               item={item}
               isLimit={!!filterErrorInfo?.[mapSelectionTypeToContentList(item?.type)]}
-              isActive={item?.id === selectedNode?.id}
+              isActive={selectedContextNodes.some((node) => node.id === item.id)}
               onToggle={handleToggleItem}
               onRemove={handleRemoveItem}
             />

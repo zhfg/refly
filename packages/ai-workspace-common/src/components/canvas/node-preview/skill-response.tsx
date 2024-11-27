@@ -33,7 +33,7 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     updateActionResult: state.updateActionResult,
   }));
   const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
-  const { nodes, setSelectedNode } = useCanvasControl();
+  const { setSelectedNodeByEntity } = useCanvasControl();
 
   const fetchActionResult = async (resultId: string) => {
     const { data, error } = await getClient().getActionResult({
@@ -154,10 +154,7 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
         <div
           className="border border-solid border-gray-200 rounded-lg m-6 px-4 py-2 h-12 flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
           onClick={() => {
-            const node = nodes.find((node) => node.data.entityId === artifact.entityId);
-            if (node) {
-              setSelectedNode(node);
-            }
+            setSelectedNodeByEntity({ type: artifact.type, entityId: artifact.entityId });
           }}
         >
           <div className="flex items-center space-x-2">

@@ -52,6 +52,8 @@ export interface CanvasNodeFilter {
 
 export const useCanvasControl = (selectedCanvasId?: string) => {
   const { canvasId: contextCanvasId, provider, yNodes, yEdges } = useCanvasContext();
+  const ydoc = provider.document;
+
   const { canvasId: routeCanvasId } = useParams();
   const canvasId = selectedCanvasId ?? contextCanvasId ?? routeCanvasId;
 
@@ -59,32 +61,16 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     data,
     setNodes,
     setEdges,
-    setSelectedNode: setSelectedNodeRaw,
     setMode: setModeRaw,
-    setSelectedNodes: setSelectedNodesRaw,
   } = useCanvasStoreShallow((state) => ({
     data: state.data[canvasId],
     setNodes: state.setNodes,
     setEdges: state.setEdges,
-    setSelectedNode: state.setSelectedNode,
     setMode: state.setMode,
     setSelectedNodes: state.setSelectedNodes,
   }));
 
-  const { nodes, edges, selectedNode, mode, selectedNodes } = data ?? {
-    nodes: [],
-    edges: [],
-    selectedNode: null,
-    mode: 'hand',
-    selectedNodes: [],
-  };
-
-  const setSelectedNode = useCallback(
-    (node: CanvasNode<any> | null) => {
-      setSelectedNodeRaw(canvasId, node);
-    },
-    [setSelectedNodeRaw, canvasId],
-  );
+  const { nodes = [], edges = [], mode = 'hand' } = data ?? {};
 
   const setMode = useCallback(
     (newMode: 'pointer' | 'hand') => {
@@ -93,18 +79,42 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     [setModeRaw, canvasId],
   );
 
-  const setSelectedNodes = useCallback(
-    (nodes: CanvasNode<any>[]) => {
-      setSelectedNodesRaw(canvasId, nodes);
+  const setSelectedNode = useCallback(
+    (node: CanvasNode<any> | null) => {
+      ydoc.transact(() => {
+        yNodes.forEach((n) => {
+          n.selected = n.id === node?.id;
+        });
+      });
     },
-    [setSelectedNodesRaw, canvasId],
+    [ydoc, yNodes],
   );
 
-  const ydoc = provider.document;
+  const setSelectedNodeByEntity = useCallback(
+    (filter: CanvasNodeFilter) => {
+      const { type, entityId } = filter;
+      const { nodes } = useCanvasStore.getState().data[canvasId];
+      setSelectedNode(nodes.find((node) => node.type === type && node.data?.entityId === entityId));
+    },
+    [canvasId, setSelectedNode],
+  );
+
+  const setSelectedNodes = useCallback(
+    (nodes: CanvasNode<any>[]) => {
+      ydoc.transact(() => {
+        yNodes.forEach((n) => {
+          n.selected = nodes.some((node) => node.id === n.id);
+        });
+      });
+    },
+    [ydoc, yNodes],
+  );
 
   const observersSet = useRef(false);
 
   useEffect(() => {
+    if (!canvasId || !yNodes || !yEdges || observersSet.current) return;
+
     const nodesObserver = () => {
       setNodes(canvasId, yNodes.toJSON());
     };
@@ -113,24 +123,20 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       setEdges(canvasId, yEdges.toJSON());
     };
 
-    if (!observersSet.current) {
-      setNodes(canvasId, yNodes.toJSON());
-      setEdges(canvasId, yEdges.toJSON());
+    setNodes(canvasId, yNodes.toJSON());
+    setEdges(canvasId, yEdges.toJSON());
 
-      yNodes.observe(nodesObserver);
-      yEdges.observe(edgesObserver);
+    yNodes.observe(nodesObserver);
+    yEdges.observe(edgesObserver);
 
-      observersSet.current = true;
-    }
+    observersSet.current = true;
 
     return () => {
-      if (observersSet.current) {
-        yNodes.unobserve(nodesObserver);
-        yEdges.unobserve(edgesObserver);
-        observersSet.current = false;
-      }
+      yNodes.unobserve(nodesObserver);
+      yEdges.unobserve(edgesObserver);
+      observersSet.current = false;
     };
-  }, [canvasId]);
+  }, [canvasId, yNodes, yEdges, setNodes, setEdges]);
 
   const { fitView, getNodes, setNodes: setReactFlowNodes, setCenter, getNode } = useReactFlow();
 
@@ -204,15 +210,16 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       node: { type: CanvasNodeType; data: CanvasNodeData<any>; position?: XYPosition },
       connectTo?: CanvasNodeFilter[],
     ) => {
-      const { nodes } = useCanvasStore.getState().data[canvasId];
+      const currentState = useCanvasStore.getState().data[canvasId];
+      const currentNodes = currentState?.nodes ?? [];
 
       if (!node?.type || !node?.data) {
         console.warn('Invalid node data provided');
         return;
       }
 
-      // 检查节点是否已存在
-      if (nodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId)) {
+      // Check if node with the same entity already exists
+      if (currentNodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId)) {
         console.warn('Node with the same entity already exists');
         return;
       }
@@ -225,27 +232,24 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         },
       };
 
-      // 准备新节点
       const newNode = prepareNodeData({
         type: node.type,
         data: enrichedData,
         position: node.position ?? {
-          x: Math.max(...nodes.map((n) => n.position.x), 0) + 200,
-          y: Math.max(...nodes.map((n) => n.position.y), 0),
+          x: Math.max(...currentNodes.map((n) => n.position.x), 0) + 200,
+          y: Math.max(...currentNodes.map((n) => n.position.y), 0),
         },
         selected: true,
       });
 
-      // 在一个事务中完成所有操作
+      // Use a single transaction for all updates
       ydoc?.transact(() => {
-        // 添加新节点
         yNodes?.push([newNode]);
 
-        // 如果需要连接，创建边
         if (connectTo?.length > 0) {
           const newEdges: Edge[] = [];
           connectTo.forEach((filter) => {
-            const sourceNode = nodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId);
+            const sourceNode = currentNodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId);
 
             if (sourceNode) {
               newEdges.push({
@@ -262,72 +266,49 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
             yEdges?.push(newEdges);
           }
         }
-
-        // 更新选中状态
-        setSelectedNode(newNode);
       });
 
-      // 延迟执行布局和居中
-      setTimeout(() => {
-        // 先执行布局
+      // Use RAF for layout and centering
+      requestAnimationFrame(() => {
         onLayout('LR');
 
-        // 等待布局完成后再居中到新节点
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           const node = getNode(newNode.id);
           if (node) {
-            // 将新节点居中显示，带动画效果
             setCenter(node.position.x, node.position.y, {
               duration: 500,
-              zoom: 1, // 保持当前缩放级别
+              zoom: 1,
             });
           }
-        }, 50);
-      }, 100);
+        });
+      });
     },
-    [canvasId, ydoc, yNodes, yEdges, setSelectedNode, onLayout, setNodes, setReactFlowNodes],
+    [canvasId, ydoc, yNodes, yEdges, onLayout, getNode, setCenter],
   );
 
-  const handleSelectionChange = useCallback(
-    ({ nodes: selectedNodes }: { nodes: Node[] }) => {
-      // 过滤并转换节点类型
-      const selectedCanvasNodes = selectedNodes.filter((node): node is CanvasNode<any> => {
-        return (
-          node.type !== undefined &&
-          node.data !== undefined &&
-          typeof node.data === 'object' &&
-          'title' in node.data &&
-          'entityId' in node.data
-        );
+  const onSelectionChange = useCallback(
+    ({ nodes }: { nodes: Node[] }) => {
+      ydoc.transact(() => {
+        yNodes.delete(0, yNodes.length);
+        yNodes.push(nodes as CanvasNode<any>[]);
       });
-
-      // 如果只选中一个节点，同时更新 selectedNode
-      if (selectedCanvasNodes.length === 1) {
-        setSelectedNode(selectedCanvasNodes[0]);
-      } else if (selectedCanvasNodes.length === 0) {
-        // @ts-ignore - null is valid here
-        setSelectedNode(null);
-      }
-
-      setSelectedNodes(selectedCanvasNodes);
     },
-    [setSelectedNodes, setSelectedNode],
+    [ydoc, yNodes],
   );
 
   return {
     nodes,
     edges,
-    selectedNode,
     setSelectedNode,
+    setSelectedNodeByEntity,
     onNodesChange,
     onEdgesChange,
     onConnect,
     onLayout,
+    onSelectionChange,
     addNode,
     mode,
     setMode,
-    selectedNodes,
     setSelectedNodes,
-    handleSelectionChange,
   };
 };
