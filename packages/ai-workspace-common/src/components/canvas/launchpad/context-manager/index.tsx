@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ContextItem } from './context-item';
 
 // components
@@ -15,6 +15,9 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 import { ChatHistorySwitch } from './components/chat-history-switch';
+import { ContextPreview } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/context-preview';
+
+import './index.scss';
 
 export const ContextManager = () => {
   const { selectedContextItems, removeContextItem, setContextItems, clearContextItems, filterErrorInfo } =
@@ -30,13 +33,18 @@ export const ContextManager = () => {
     (node) => node.selected && (node.type === 'resource' || node.type === 'document'),
   );
   const { initMessageListener } = useSelectedMark();
+  const [activeItemId, setActiveItemId] = useState(null);
 
   const handleToggleItem = (item: CanvasNode<any>) => {
     setSelectedNode(item);
+    setActiveItemId((prevId) => (prevId === item.id ? null : item.id));
   };
 
   const handleRemoveItem = (item: CanvasNode<any>) => {
     removeContextItem(item.id);
+    if (activeItemId === item.id) {
+      setActiveItemId(null);
+    }
   };
 
   const selectedNodeIds = selectedContextNodes?.map((node) => node.id) ?? [];
@@ -62,10 +70,12 @@ export const ContextManager = () => {
     initMessageListener();
   }, []);
 
+  const activeItem = selectedContextItems?.find((item) => item.id === activeItemId);
+
   return (
-    <div className="flex flex-col h-full p-2 px-3">
-      <div className="flex flex-col">
-        <div className="flex flex-wrap content-start gap-1 w-full">
+    <div className="flex flex-col h-full p-2 px-3 launchpad-context-manager">
+      <div className="flex flex-col context-content">
+        <div className="flex flex-wrap content-start gap-1 w-full context-items-container">
           <ChatHistorySwitch />
           <AddBaseMarkContext />
           {selectedContextItems?.map((item) => (
@@ -79,6 +89,20 @@ export const ContextManager = () => {
             />
           ))}
         </div>
+        {activeItem && (
+          <ContextPreview
+            item={activeItem}
+            onClose={() => setActiveItemId(null)}
+            onRemove={handleRemoveItem}
+            onOpenUrl={(url) => {
+              if (typeof url === 'function') {
+                url();
+              } else {
+                window.open(url, '_blank');
+              }
+            }}
+          />
+        )}
       </div>
     </div>
   );
