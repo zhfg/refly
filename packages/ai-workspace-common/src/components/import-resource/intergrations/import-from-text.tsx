@@ -9,6 +9,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
@@ -20,6 +21,7 @@ export const ImportFromText = () => {
   const { addNode } = useCanvasControl();
 
   const [saveLoading, setSaveLoading] = useState(false);
+  const { getLibraryList } = useHandleSiderData();
 
   const handleSave = async () => {
     if (!copiedTextPayload?.content || !copiedTextPayload?.title) {
@@ -46,6 +48,7 @@ export const ImportFromText = () => {
     importResourceStore.setImportResourceModalVisible(false);
 
     if (data?.success) {
+      getLibraryList();
       addNode({
         type: 'resource',
         data: {

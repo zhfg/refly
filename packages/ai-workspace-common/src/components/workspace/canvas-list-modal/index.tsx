@@ -153,7 +153,7 @@ export const CanvasListModal = (props: CanvasListProps) => {
       open={visible}
       onCancel={() => setVisible(false)}
     >
-      {!isRequesting && dataList.length > 0 ? (
+      {isRequesting || dataList.length > 0 ? (
         <List
           itemLayout="vertical"
           dataSource={dataList}
