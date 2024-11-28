@@ -377,7 +377,8 @@
       "addDocument": "添加文档"
     },
     "skillResponse": {
-      "skillCompleted": "技能执行完成"
+      "skillCompleted": "技能执行完成",
+      "stepTitle": "步骤 {{index}}"
     },
     "chatHistory": {
       "alreadyAdded": "已添加到对话历史",

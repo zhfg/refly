@@ -6,7 +6,13 @@ import { z } from 'zod';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { safeStringifyJSON } from '@refly-packages/utils';
-import { Artifact, Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
+import {
+  ActionStepMeta,
+  Artifact,
+  Icon,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+} from '@refly-packages/openapi-schema';
 // types
 import { GraphState, IContext } from '../scheduler/types';
 // utils
@@ -18,6 +24,13 @@ import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils
 
 // prompts
 import * as generateDocument from '../scheduler/module/generateDocument';
+
+const stepTitleDict = {
+  generateDocument: {
+    en: 'Generate Document',
+    'zh-CN': '生成文档',
+  },
+};
 
 export class GenerateDoc extends BaseSkill {
   name = 'generate_doc';
@@ -158,7 +171,7 @@ export class GenerateDoc extends BaseSkill {
   callGenerateDoc = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     this.emitEvent({ event: 'log', content: `Start to call generate document...` }, config);
 
-    const { currentSkill } = config?.configurable || {};
+    const { currentSkill, uiLocale = 'en' } = config?.configurable || {};
     const { user } = config;
 
     // Create document first
@@ -166,6 +179,11 @@ export class GenerateDoc extends BaseSkill {
       title: 'New Document',
       initialContent: '',
     });
+
+    const stepMeta: ActionStepMeta = {
+      name: 'generateDocument',
+      title: stepTitleDict.generateDocument[uiLocale],
+    };
 
     const artifact: Artifact = {
       type: 'document',
@@ -176,6 +194,7 @@ export class GenerateDoc extends BaseSkill {
       {
         event: 'artifact',
         artifact: { ...artifact, status: 'generating' },
+        step: stepMeta,
       },
       config,
     );
@@ -197,6 +216,7 @@ export class GenerateDoc extends BaseSkill {
         ...config.metadata,
         ...currentSkill,
         artifact,
+        step: stepMeta,
       },
     });
 
@@ -207,6 +227,7 @@ export class GenerateDoc extends BaseSkill {
       {
         event: 'artifact',
         artifact: { ...artifact, status: 'finish' },
+        step: stepMeta,
       },
       config,
     );
@@ -218,9 +239,9 @@ export class GenerateDoc extends BaseSkill {
     const workflow = new StateGraph<GraphState>({
       channels: this.graphState,
     })
-      .addNode('generateCanvas', this.callGenerateDoc)
-      .addEdge(START, 'generateCanvas')
-      .addEdge('generateCanvas', END);
+      .addNode('generateDocument', this.callGenerateDoc)
+      .addEdge(START, 'generateDocument')
+      .addEdge('generateDocument', END);
 
     return workflow.compile();
   }

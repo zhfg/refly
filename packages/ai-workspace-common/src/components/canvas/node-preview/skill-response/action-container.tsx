@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
 import { Message } from '@arco-design/web-react';
-import { Source } from '@refly/openapi-schema';
+import { ActionResult, ActionStep, Source } from '@refly/openapi-schema';
 import { FilePlus } from 'lucide-react';
 import { IconCheckCircle, IconCopy, IconImport } from '@arco-design/web-react/icon';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
@@ -10,15 +10,15 @@ import { parseMarkdownCitationsAndCanvasTags, safeParseJSON } from '@refly/utils
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { EditorOperation } from '@refly-packages/utils/event-emitter/editor';
-import { MdOutlineToken } from 'react-icons/md';
 import { Dropdown, Menu } from '@arco-design/web-react';
+import { HiOutlineCircleStack } from 'react-icons/hi2';
 
 interface ActionContainerProps {
-  result: any;
-  resultId: string;
+  step: ActionStep;
+  result: ActionResult;
 }
 
-export const ActionContainer = ({ result, resultId }: ActionContainerProps) => {
+export const ActionContainer = ({ result, step }: ActionContainerProps) => {
   const { t } = useTranslation();
   const { editor: noteStoreEditor, isCreatingNewDocumentOnHumanMessage } = useDocumentStoreShallow((state) => ({
     editor: state.editor,
@@ -26,16 +26,16 @@ export const ActionContainer = ({ result, resultId }: ActionContainerProps) => {
   }));
   const { debouncedCreateDocument, isCreating } = useCreateDocument();
 
-  const { invokeParam, actionMeta, logs } = result ?? {};
-  const { input, context } = invokeParam ?? {};
+  const { invokeParam } = result ?? {};
+  const { input } = invokeParam ?? {};
   const isPending = result?.status === 'executing';
 
   // Track editor selection state
   const [hasEditorSelection, setHasEditorSelection] = useState(false);
   let sources =
-    typeof result?.structuredData?.['sources'] === 'string'
-      ? safeParseJSON(result?.structuredData?.['sources'])
-      : (result?.structuredData?.['sources'] as Source[]);
+    typeof step?.structuredData?.['sources'] === 'string'
+      ? safeParseJSON(step?.structuredData?.['sources'])
+      : (step?.structuredData?.['sources'] as Source[]);
 
   const editorActionList = [
     {
@@ -57,11 +57,11 @@ export const ActionContainer = ({ result, resultId }: ActionContainerProps) => {
 
   useEffect(() => {
     let total = 0;
-    (result?.tokenUsage || []).forEach((item) => {
+    (step?.tokenUsage || []).forEach((item) => {
       total += (item?.inputTokens || 0) + (item?.outputTokens || 0);
     });
     setTokenUsage(total);
-  }, [result?.tokenUsage]);
+  }, [step?.tokenUsage]);
 
   const handleEditorOperation = async (type: EditorOperation, content: string) => {
     const parsedContent = parseMarkdownCitationsAndCanvasTags(content, sources);
@@ -88,7 +88,7 @@ export const ActionContainer = ({ result, resultId }: ActionContainerProps) => {
       }
     } else if (type === 'createDocument') {
       await debouncedCreateDocument(input?.query ?? 'New Document', content, {
-        sourceNodeId: resultId,
+        sourceNodeId: result.resultId,
         addToCanvas: true,
       });
     }
@@ -123,6 +123,10 @@ export const ActionContainer = ({ result, resultId }: ActionContainerProps) => {
 
   // Filter editor actions based on conditions
   const availableEditorActions = useMemo(() => {
+    if (!step.content) {
+      return [];
+    }
+
     if (!noteStoreEditor) {
       // If no editor, only show create new note
       return editorActionList.filter((item) => item.key === 'createDocument');
@@ -139,7 +143,7 @@ export const ActionContainer = ({ result, resultId }: ActionContainerProps) => {
 
   const tokenUsageDropdownList = (
     <Menu>
-      {result?.tokenUsage?.map((item: any, index: number) => (
+      {step?.tokenUsage?.map((item: any, index: number) => (
         <Menu.Item key={'token-usage-' + index}>
           <div className="flex items-center">
             <span>
@@ -156,49 +160,61 @@ export const ActionContainer = ({ result, resultId }: ActionContainerProps) => {
   );
 
   return (
-    <div className="ai-copilot-answer-action-container">
-      {result?.tokenUsage?.length > 0 && (
-        <div className="ai-copilot-answer-token-usage">
+    <div className="mx-4 mt-2 flex items-center justify-between">
+      <div className="-ml-1">
+        {step?.tokenUsage?.length > 0 && (
           <Dropdown droplist={tokenUsageDropdownList}>
-            <Button type="text" icon={<MdOutlineToken style={{ fontSize: 14 }} />} className={'assist-action-item'}>
+            <Button
+              type="text"
+              size="small"
+              icon={<HiOutlineCircleStack style={{ fontSize: 14 }} />}
+              className="text-gray-500 text-xs"
+            >
               {tokenUsage} Tokens
             </Button>
           </Dropdown>
-        </div>
-      )}
+        )}
+      </div>
       {!isPending && (
-        <div className="session-answer-actionbar">
-          <div className="session-answer-actionbar-left">
-            <Button
-              type="text"
-              icon={<IconCopy style={{ fontSize: 14 }} />}
-              style={{ color: '#64645F' }}
-              className={'assist-action-item'}
-              onClick={() => {
-                const parsedText = parseMarkdownCitationsAndCanvasTags(result.content, sources);
-                copyToClipboard(parsedText || '');
-                Message.success(t('copilot.message.copySuccess'));
-              }}
-            >
-              <span className="action-text">{t('copilot.message.copy')}</span>
-            </Button>
+        <div className="flex flex-row justify-between items-center text-sm">
+          <div className="-ml-1 text-sm flex flex-row items-center">
+            {step.content && (
+              <Button
+                type="text"
+                size="small"
+                icon={<IconCopy style={{ fontSize: 14 }} />}
+                className="text-[#64645F] text-xs flex justify-center items-center h-6 px-1 rounded-lg hover:bg-[#f1f1f0] hover:text-[#00968f] transition-all duration-400 relative overflow-hidden group"
+                onClick={() => {
+                  const parsedText = parseMarkdownCitationsAndCanvasTags(step.content, sources);
+                  copyToClipboard(parsedText || '');
+                  Message.success(t('copilot.message.copySuccess'));
+                }}
+              >
+                <span className="opacity-0 max-w-0 transform -translate-x-0.5 transition-all duration-400 whitespace-nowrap group-hover:opacity-100 group-hover:max-w-[200px] group-hover:translate-x-0 group-hover:ml-1">
+                  {t('copilot.message.copy')}
+                </span>
+              </Button>
+            )}
             {availableEditorActions.map((item) => (
               <Button
+                key={item.key}
+                size="small"
                 loading={item.key === 'createDocument' && (isCreatingNewDocumentOnHumanMessage || isCreating)}
                 type="text"
-                className={'assist-action-item'}
+                className="text-[#64645F] text-xs flex justify-center items-center h-6 px-1 rounded-lg hover:bg-[#f1f1f0] hover:text-[#00968f] transition-all duration-400 relative overflow-hidden group"
                 icon={item.icon}
-                style={{ color: '#64645F' }}
                 onClick={() => {
-                  const parsedText = parseMarkdownCitationsAndCanvasTags(result.content, sources);
+                  const parsedText = parseMarkdownCitationsAndCanvasTags(step.content, sources);
                   handleEditorOperation(item.key as EditorOperation, parsedText || '');
                 }}
               >
-                <span className="action-text">{t(`copilot.message.${item.key}`)}</span>
+                <span className="opacity-0 max-w-0 transform -translate-x-0.5 transition-all duration-400 whitespace-nowrap group-hover:opacity-100 group-hover:max-w-[200px] group-hover:translate-x-0 group-hover:ml-1">
+                  {t(`copilot.message.${item.key}`)}
+                </span>
               </Button>
             ))}
           </div>
-          <div className="session-answer-actionbar-right"></div>
+          <div></div>
         </div>
       )}
     </div>

@@ -376,7 +376,8 @@
       "addDocument": "Add Document"
     },
     "skillResponse": {
-      "skillCompleted": "Skill Completed"
+      "skillCompleted": "Skill Completed",
+      "stepTitle": "Step {{index}}"
     },
     "contextList": {
       "placeholder": "Search {{domain}}..."

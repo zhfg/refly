@@ -32,7 +32,9 @@ import {
   Document,
   TokenUsageItem,
   ActionResult,
+  ActionStep,
   Artifact,
+  ActionMeta,
 } from '@refly-packages/openapi-schema';
 import {
   BaseSkill,
@@ -57,7 +59,6 @@ import {
   buildSuccessResponse,
   writeSSEResponse,
   pick,
-  omit,
   QUEUE_SYNC_TOKEN_USAGE,
 } from '@/utils';
 import { InvokeSkillJobData } from './skill.dto';
@@ -87,31 +88,28 @@ import {
 import { genBaseRespDataFromError } from '@/utils/exception';
 import { CanvasService } from '@/canvas/canvas.service';
 import { canvasPO2DTO } from '@/canvas/canvas.dto';
-import { actionResultPO2DTO } from '@/action/action.dto';
+import { actionResultPO2DTO, actionStepPO2DTO } from '@/action/action.dto';
 import { CollabService } from '@/collab/collab.service';
 import { throttle } from 'lodash';
+import { ResultAggregator } from '@/utils/result';
 
-export function createLangchainMessage(result: ActionResult): BaseMessage[] {
+export function createLangchainMessage(result: ActionResult, steps: ActionStep[]): BaseMessage[] {
   const query = result.invokeParam?.input?.query;
-  const messageData = {
-    content: result.content,
-    additional_kwargs: {
-      logs: result.logs,
-      skillMeta: result.actionMeta,
-      structuredData: result.structuredData,
-      type: result.type,
-    },
-  };
 
-  switch (result.type) {
-    case 'skill':
-      return [new HumanMessage({ content: query }), new AIMessage(messageData)];
-    case 'tool':
-      // TODO: is it a good choice to represent tool result as an AI message?
-      return [new HumanMessage({ content: query }), new AIMessage(messageData)];
-    default:
-      throw new Error(`invalid message source: ${result.type}`);
-  }
+  return [
+    new HumanMessage({ content: query }),
+    ...steps.map(
+      (step) =>
+        new AIMessage({
+          content: step.content, // TODO: dump artifact content to message
+          additional_kwargs: {
+            skillMeta: result.actionMeta,
+            structuredData: step.structuredData,
+            type: result.type,
+          },
+        }),
+    ),
+  ];
 }
 
 function validateSkillTriggerCreateParam(param: SkillTriggerCreateParam) {
@@ -416,6 +414,7 @@ export class SkillService {
     }
 
     const resultId = param.resultId || genActionResultID();
+
     const existingResult = await this.prisma.actionResult.findFirst({ where: { resultId, uid } });
     if (existingResult) {
       throw new ParamsError('action result already exists');
@@ -425,6 +424,11 @@ export class SkillService {
     param.skillName ??= 'common_qna';
     param.context ??= {};
 
+    const skill = this.skillInventory.find((s) => s.name === param.skillName);
+    if (!skill) {
+      throw new SkillNotFoundError(`skill ${param.skillName} not found`);
+    }
+
     const result = await this.prisma.actionResult.create({
       data: {
         resultId,
@@ -433,7 +437,11 @@ export class SkillService {
         title: param.input?.query,
         type: 'skill',
         status: 'executing',
-        content: '',
+        actionMeta: JSON.stringify({
+          type: 'skill',
+          name: param.skillName,
+          icon: skill.icon,
+        } as ActionMeta),
         invokeParam: JSON.stringify(param),
       },
     });
@@ -509,15 +517,41 @@ export class SkillService {
     return context;
   }
 
+  /**
+   * Populate skill result history with actual result detail and steps.
+   */
   async populateSkillResultHistory(user: User, resultHistory: ActionResult[]) {
+    // Get all results
     const results = await this.prisma.actionResult.findMany({
       where: { resultId: { in: resultHistory.map((r) => r.resultId) }, uid: user.uid },
     });
+
+    // Get all steps for these results in a single query
+    const steps = await this.prisma.actionStep.findMany({
+      where: { resultId: { in: results.map((r) => r.resultId) } },
+    });
+
+    // Create maps for efficient lookups
     const resultMap = new Map<string, ActionResult>();
-    results.forEach((r) => resultMap.set(r.resultId, actionResultPO2DTO(r)));
+    const stepsMap = new Map<string, ActionStep[]>();
+
+    // Group steps by resultId
+    steps.forEach((step) => {
+      const resultSteps = stepsMap.get(step.resultId) ?? [];
+      resultSteps.push(actionStepPO2DTO(step));
+      stepsMap.set(step.resultId, resultSteps);
+    });
+
+    // Convert results and add steps
+    results.forEach((r) => {
+      const resultDTO = actionResultPO2DTO(r);
+      resultDTO.steps = stepsMap.get(r.resultId);
+      resultMap.set(r.resultId, resultDTO);
+    });
 
     return resultHistory
       .map((r) => resultMap.get(r.resultId))
+      .filter(Boolean) // Remove any undefined results
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
   }
 
@@ -577,7 +611,9 @@ export class SkillService {
     };
 
     if (resultHistory?.length > 0) {
-      config.configurable.chatHistory = resultHistory.flatMap((r) => createLangchainMessage(r));
+      config.configurable.chatHistory = resultHistory.flatMap((r) =>
+        createLangchainMessage(r, r.steps),
+      );
     }
 
     if (eventListener) {
@@ -635,6 +671,8 @@ export class SkillService {
       });
     }
 
+    const resultAggregator = new ResultAggregator();
+
     type ArtifactOutput = Artifact & {
       nodeCreated: boolean; // Whether the canvas node is created
       content: string; // Accumulated content
@@ -661,11 +699,13 @@ export class SkillService {
             return;
           case 'structured_data':
             if (structuredDataKey) {
-              result.structuredData[structuredDataKey] = content;
+              resultAggregator.addSkillEvent(data);
             }
             return;
           case 'artifact':
             if (artifact) {
+              resultAggregator.addSkillEvent(data);
+
               const { entityId, type, status } = artifact;
               if (!artifactMap[entityId]) {
                 artifactMap[entityId] = { ...artifact, content: '', nodeCreated: false };
@@ -752,11 +792,12 @@ export class SkillService {
                 throttledMarkdownUpdate(artifact.document, artifact.content);
               } else {
                 // Update result content and forward stream events to client
-                result.content += content;
+                resultAggregator.handleStreamContent(runMeta, content);
                 writeSSEResponse(res, {
                   event: 'stream',
                   resultId,
                   content,
+                  step: runMeta?.step,
                 });
               }
             }
@@ -774,14 +815,23 @@ export class SkillService {
                 inputTokens: chunk.usage_metadata?.input_tokens ?? 0,
                 outputTokens: chunk.usage_metadata?.output_tokens ?? 0,
               };
+              resultAggregator.addUsageItem(runMeta, usage);
+
+              if (res) {
+                writeSSEResponse(res, {
+                  event: 'token_usage',
+                  resultId,
+                  tokenUsage: usage,
+                  step: runMeta?.step,
+                });
+              }
+
               const tokenUsage: SyncTokenUsageJobData = {
                 ...basicUsageData,
                 usage,
                 timestamp: new Date(),
               };
               await this.usageReportQueue.add(tokenUsage);
-
-              result.tokenUsage = [usage];
             }
             break;
         }
@@ -796,31 +846,19 @@ export class SkillService {
       }
       result.errors.push(err.message);
     } finally {
-      if (res) {
-        writeSSEResponse(res, {
-          event: 'usage',
-          resultId,
-          content: JSON.stringify({ token: result.tokenUsage }),
-        });
-      }
+      const steps = resultAggregator.getSteps({ resultId });
 
-      await this.prisma.actionResult.update({
-        where: { resultId },
-        data: {
-          status: result.errors.length > 0 ? 'failed' : 'finish',
-          content: result.content || '',
-          logs: JSON.stringify(result.logs),
-          structuredData: JSON.stringify(result.structuredData),
-          artifacts: JSON.stringify(
-            Object.values(artifactMap).map((a) => ({
-              ...omit(a, ['content', 'document']),
-              status: 'finish',
-            })),
-          ),
-          errors: JSON.stringify(result.errors),
-          tokenUsage: JSON.stringify(result.tokenUsage),
-        },
-      });
+      await this.prisma.$transaction([
+        this.prisma.actionResult.update({
+          where: { resultId },
+          data: {
+            status: result.errors.length > 0 ? 'failed' : 'finish',
+            logs: JSON.stringify(result.logs),
+            errors: JSON.stringify(result.errors),
+          },
+        }),
+        this.prisma.actionStep.createMany({ data: steps }),
+      ]);
     }
   }
 
