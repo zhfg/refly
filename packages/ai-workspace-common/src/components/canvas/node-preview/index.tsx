@@ -6,14 +6,29 @@ import { SkillNodePreview } from './skill';
 import { ToolNodePreview } from './tool';
 import { DocumentNodePreview } from './document';
 import { NodePreviewHeader } from './node-preview-header';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-
-export const NodePreview = ({ node }: { node: CanvasNode<any> }) => {
-  const [isPinned, setIsPinned] = useState(false);
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+export const NodePreview = ({
+  node,
+  canvasId,
+  isPinned,
+  selected,
+}: {
+  node: CanvasNode<any>;
+  canvasId: string;
+  isPinned: boolean;
+  selected: boolean;
+}) => {
   const [isMaximized, setIsMaximized] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   const { onNodesChange } = useCanvasControl();
+  const { addPinnedNode, removePinnedNode } = useCanvasStoreShallow((state) => ({
+    addPinnedNode: state.addPinnedNode,
+    removePinnedNode: state.removePinnedNode,
+  }));
+
   const unselectNode = useCallback(
     (node: CanvasNode<any>) => {
       onNodesChange([
@@ -26,6 +41,22 @@ export const NodePreview = ({ node }: { node: CanvasNode<any> }) => {
     },
     [onNodesChange],
   );
+
+  const handlePin = useCallback(() => {
+    if (isPinned) {
+      removePinnedNode(canvasId, node);
+    } else {
+      addPinnedNode(canvasId, node);
+    }
+  }, [node, addPinnedNode, removePinnedNode, isPinned]);
+
+  const handleClose = useCallback(() => {
+    if (isPinned) {
+      removePinnedNode(canvasId, node);
+    } else {
+      unselectNode(node);
+    }
+  }, [node, removePinnedNode, isPinned, unselectNode]);
 
   const previewComponent = useMemo(() => {
     if (!node?.type) return null;
@@ -57,42 +88,53 @@ export const NodePreview = ({ node }: { node: CanvasNode<any> }) => {
 
   const previewStyles = useMemo(
     () => ({
-      height: isMaximized ? 'calc(100vh - 72px)' : 'calc(100vh - 72px)',
-      maxHeight: 'calc(100vh - 72px)',
-      width: isMaximized ? 'calc(100% - 32px)' : '420px',
-      transform: isMaximized ? 'translate3d(-50%, 64px, 0)' : 'translate3d(0, 64px, 0)',
+      height: isMaximized ? '100vh' : 'calc(100vh - 72px)',
+      width: isMaximized ? 'calc(100vw)' : '420px',
+      top: isMaximized ? 0 : null,
+      right: isMaximized ? 0 : null,
+      transform: isMaximized ? 'translate3d(0, 0, 0)' : 'translate3d(0, 64px, 0)',
       '--tw-transform': 'none !important',
+      zIndex: isMaximized ? 50 : 10,
+      transition: isMaximized ? 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)' : 'all 50ms cubic-bezier(0.4, 0, 0.2, 1)',
     }),
     [isMaximized],
   );
 
   const previewClassName = useMemo(
     () => `
-    absolute
-    ${isMaximized ? 'left-1/2' : 'right-2'}
-    top-0
     bg-white 
     rounded-lg 
-    z-10
-    transition-all 
-    duration-200 
-    ease-in-out
     border
     border-[rgba(16,24,40,0.0784)]
     shadow-[0px_4px_6px_0px_rgba(16,24,40,0.03)]
     will-change-transform
+    ${isMaximized ? 'fixed' : ''}
   `,
     [isMaximized],
   );
 
+  useEffect(() => {
+    const scrollContainer = previewRef.current?.parentElement?.parentElement;
+    console.log('scrollContainer', scrollContainer);
+    if (isPinned && selected) {
+      setTimeout(() => {
+        previewRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'end',
+        });
+      }, 100);
+    }
+  }, [selected]);
+
   return (
-    <div className="absolute inset-0 pointer-events-none">
+    <div className="pointer-events-none" ref={previewRef}>
       <div className={previewClassName} style={previewStyles}>
         <div className="pointer-events-auto">
           <NodePreviewHeader
             node={node}
-            onClose={() => unselectNode(node)}
-            onPin={() => setIsPinned(!isPinned)}
+            onClose={handleClose}
+            onPin={handlePin}
             onMaximize={() => setIsMaximized(!isMaximized)}
             isPinned={isPinned}
             isMaximized={isMaximized}

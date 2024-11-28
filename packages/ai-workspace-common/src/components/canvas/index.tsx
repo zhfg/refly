@@ -19,6 +19,7 @@ import '@xyflow/react/dist/style.css';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasProvider } from '@refly-packages/ai-workspace-common/context/canvas';
 import { EDGE_STYLES } from './constants';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -35,6 +36,11 @@ const selectionStyles = `
 const Flow = ({ canvasId }: { canvasId: string }) => {
   const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, onSelectionChange } =
     useCanvasControl(canvasId);
+
+  const { pinnedNodes, showPreview } = useCanvasStoreShallow((state) => ({
+    pinnedNodes: state.data[canvasId]?.pinnedNodes,
+    showPreview: state.showPreview,
+  }));
 
   const reactFlowInstance = useReactFlow();
 
@@ -88,6 +94,14 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   );
 
   const selectedNodes = nodes?.filter((node) => node.selected);
+
+  const isPinned = (node: CanvasNode<any>) => {
+    return pinnedNodes?.some((n) => n.id === node.id);
+  };
+
+  const isSelected = (node: CanvasNode<any>) => {
+    return selectedNodes?.some((n) => n.id === node.id);
+  };
 
   const handleToolSelect = (tool: string) => {
     // Handle tool selection
@@ -164,7 +178,33 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         </div>
       </div>
 
-      {selectedNodes?.length > 0 && <NodePreview node={selectedNodes[selectedNodes.length - 1]} />}
+      {showPreview && (
+        <div className="absolute top-0 bottom-0 right-2 overflow-x-auto max-w-[900px]">
+          <div className="flex gap-2">
+            {selectedNodes?.map((node) =>
+              isPinned(node) ? null : (
+                <NodePreview
+                  key={node.id}
+                  node={node}
+                  canvasId={canvasId}
+                  isPinned={isPinned(node)}
+                  selected={isSelected(node)}
+                />
+              ),
+            )}
+
+            {pinnedNodes?.map((node) => (
+              <NodePreview
+                key={node.id}
+                node={node}
+                canvasId={canvasId}
+                isPinned={isPinned(node)}
+                selected={isSelected(node)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
