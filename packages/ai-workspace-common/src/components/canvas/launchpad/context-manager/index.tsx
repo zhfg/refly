@@ -87,6 +87,7 @@ export const ContextManager = () => {
               item={item}
               isLimit={!!filterErrorInfo?.[mapSelectionTypeToContentList(item?.type)]}
               isActive={selectedContextNodes.some((node) => node.id === item.id)}
+              isPreview={item?.id === activeItemId}
               onToggle={handleToggleItem}
               onPreview={handlePreviewItem}
               onRemove={handleRemoveItem}

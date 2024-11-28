@@ -84,13 +84,13 @@ export const ContextPreview = ({
   };
 
   useEffect(() => {
-    if (item.type === 'document') {
+    if (item.type === 'document' && !item?.data?.metadata?.sourceType) {
       if (isShare) {
         getShareDocument(item.data?.entityId as string);
       } else {
         getDocumentDetail(item.data?.entityId as string);
       }
-    } else if (item.type === 'resource') {
+    } else if (item.type === 'resource' && !item?.data?.metadata?.sourceType) {
       getResourceDetail(item.data?.entityId as string);
     } else {
       setContent((item.data?.metadata?.contentPreview as string) || '');

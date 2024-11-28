@@ -14,10 +14,12 @@ export const ContextItem = ({
   onRemove,
   canNotRemove,
   onPreview,
+  isPreview,
 }: {
   canNotRemove?: boolean;
   item: IContextItem;
   isActive: boolean;
+  isPreview?: boolean;
   isLimit?: boolean;
   disabled?: boolean;
   onToggle: (item: IContextItem) => void;
@@ -33,10 +35,10 @@ export const ContextItem = ({
       className={cn(
         'max-w-[200px] h-6 px-1 flex items-center border border-gray-200 rounded transition-all duration-300',
         {
-          'border-green-500': isActive,
+          'border-green-500': isActive || isPreview,
           'border-red-300 bg-red-50 text-red-500': isLimit,
           'bg-gray-100 border-gray-200': disabled,
-          'border-dashed': item?.isPreview,
+          'border-dashed': item?.isPreview && !isPreview,
         },
       )}
       onClick={() => onPreview?.(item)}
@@ -55,7 +57,7 @@ export const ContextItem = ({
         </span>
         <span className="item-type text-gray-500 mr-1">
           {item.isCurrentContext ? t('copilot.contextItem.current') : ''}
-          {item?.data?.metadata?.sourceType && t(`copilot.contextItem.${item?.data?.metadata?.sourceType}`)}
+          {t(`copilot.contextItem.${item?.data?.metadata?.sourceType || item?.type}`)}
         </span>
         {!canNotRemove && (
           <IconClose
