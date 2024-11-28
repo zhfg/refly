@@ -1,4 +1,4 @@
-import { CanvasNode, SkillMeta, Artifact } from '@refly-packages/openapi-schema';
+import { CanvasNode, SkillMeta, Artifact, ActionStepMeta } from '@refly-packages/openapi-schema';
 
 export interface SkillEvent {
   /**
@@ -6,10 +6,9 @@ export interface SkillEvent {
    */
   event: 'start' | 'end' | 'stream' | 'log' | 'artifact' | 'structured_data' | 'usage' | 'create_node' | 'error';
   /**
-   * The event span, which can be used to separate events into message groups
-   * @deprecated
+   * The action step metadata
    */
-  spanId?: string;
+  step?: ActionStepMeta;
   /**
    * The result ID
    */

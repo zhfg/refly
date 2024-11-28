@@ -618,7 +618,7 @@ export type ActionMeta = {
    */
   name?: string;
   /**
-   * Skill icon
+   * Action icon
    */
   icon?: Icon;
 };
@@ -744,7 +744,7 @@ export type SourceMeta = {
    */
   title?: string;
   /**
-   * Source publish time
+   * Source publish timesss
    */
   publishedTime?: string;
   /**
@@ -901,9 +901,9 @@ export type TokenUsageItem = {
 };
 
 /**
- * Action result status
+ * Action status
  */
-export type ActionResultStatus = 'waiting' | 'executing' | 'finish' | 'failed';
+export type ActionStatus = 'waiting' | 'executing' | 'finish' | 'failed';
 
 /**
  * Artifact type
@@ -938,6 +938,52 @@ export type Artifact = {
 };
 
 /**
+ * Action step metadata
+ */
+export type ActionStepMeta = {
+  /**
+   * Step name
+   */
+  name: string;
+  /**
+   * Step title
+   */
+  title: string;
+};
+
+/**
+ * Action step
+ */
+export type ActionStep = {
+  /**
+   * Step title
+   */
+  title: string;
+  /**
+   * Step name
+   */
+  name?: string;
+  /**
+   * Step order
+   */
+  order: number;
+  /**
+   * Step content
+   */
+  content?: string;
+  /**
+   * Step artifacts
+   */
+  artifacts?: Array<Artifact>;
+  /**
+   * Step structured data output
+   */
+  structuredData?: {
+    [key: string]: unknown;
+  };
+};
+
+/**
  * Action result
  */
 export type ActionResult = {
@@ -954,6 +1000,10 @@ export type ActionResult = {
    */
   title?: string;
   /**
+   * Step status
+   */
+  status?: ActionStatus;
+  /**
    * Action type
    */
   type?: ActionType;
@@ -962,27 +1012,13 @@ export type ActionResult = {
    */
   actionMeta?: ActionMeta;
   /**
-   * Response content
+   * Action steps
    */
-  content?: string;
+  steps?: Array<ActionStep>;
   /**
-   * Action result status
-   */
-  status?: ActionResultStatus;
-  /**
-   * Action logs
+   * Action step logs
    */
   logs?: Array<string>;
-  /**
-   * Action artifacts
-   */
-  artifacts?: Array<Artifact>;
-  /**
-   * Structured data output
-   */
-  structuredData?: {
-    [key: string]: unknown;
-  };
   /**
    * Errors
    */

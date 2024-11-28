@@ -780,7 +780,7 @@ export const ActionMetaSchema = {
       description: 'Action name',
     },
     icon: {
-      description: 'Skill icon',
+      description: 'Action icon',
       $ref: '#/components/schemas/Icon',
     },
   },
@@ -934,7 +934,7 @@ export const SourceMetaSchema = {
     publishedTime: {
       type: 'string',
       format: 'date-time',
-      description: 'Source publish time',
+      description: 'Source publish timesss',
     },
     entityId: {
       type: 'string',
@@ -1093,9 +1093,9 @@ export const TokenUsageItemSchema = {
   },
 } as const;
 
-export const ActionResultStatusSchema = {
+export const ActionStatusSchema = {
   type: 'string',
-  description: 'Action result status',
+  description: 'Action status',
   enum: ['waiting', 'executing', 'finish', 'failed'],
 } as const;
 
@@ -1136,6 +1136,61 @@ export const ArtifactSchema = {
   },
 } as const;
 
+export const ActionStepMetaSchema = {
+  type: 'object',
+  description: 'Action step metadata',
+  required: ['name', 'title'],
+  properties: {
+    name: {
+      type: 'string',
+      description: 'Step name',
+    },
+    title: {
+      type: 'string',
+      description: 'Step title',
+    },
+  },
+} as const;
+
+export const ActionStepSchema = {
+  type: 'object',
+  description: 'Action step',
+  required: ['title', 'order', 'status'],
+  properties: {
+    title: {
+      type: 'string',
+      description: 'Step title',
+    },
+    name: {
+      type: 'string',
+      description: 'Step name',
+    },
+    order: {
+      type: 'number',
+      description: 'Step order',
+    },
+    content: {
+      type: 'string',
+      description: 'Step content',
+    },
+    artifacts: {
+      type: 'array',
+      description: 'Step artifacts',
+      items: {
+        $ref: '#/components/schemas/Artifact',
+      },
+    },
+    structuredData: {
+      type: 'object',
+      description: 'Step structured data output',
+      example: {
+        sources: ['Source'],
+        relatedQuestions: ['string'],
+      },
+    },
+  },
+} as const;
+
 export const ActionResultSchema = {
   type: 'object',
   description: 'Action result',
@@ -1156,6 +1211,11 @@ export const ActionResultSchema = {
       type: 'string',
       description: 'Action result title',
     },
+    status: {
+      type: 'string',
+      description: 'Step status',
+      $ref: '#/components/schemas/ActionStatus',
+    },
     type: {
       description: 'Action type',
       $ref: '#/components/schemas/ActionType',
@@ -1165,35 +1225,18 @@ export const ActionResultSchema = {
       description: 'Action metadata',
       $ref: '#/components/schemas/ActionMeta',
     },
-    content: {
-      type: 'string',
-      description: 'Response content',
-    },
-    status: {
-      type: 'string',
-      description: 'Action result status',
-      $ref: '#/components/schemas/ActionResultStatus',
+    steps: {
+      type: 'array',
+      description: 'Action steps',
+      items: {
+        $ref: '#/components/schemas/ActionStep',
+      },
     },
     logs: {
       type: 'array',
-      description: 'Action logs',
+      description: 'Action step logs',
       items: {
         type: 'string',
-      },
-    },
-    artifacts: {
-      type: 'array',
-      description: 'Action artifacts',
-      items: {
-        $ref: '#/components/schemas/Artifact',
-      },
-    },
-    structuredData: {
-      type: 'object',
-      description: 'Structured data output',
-      example: {
-        sources: ['Source'],
-        relatedQuestions: ['string'],
       },
     },
     errors: {

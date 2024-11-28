@@ -15,11 +15,10 @@ import {
   User,
   SkillTemplateConfig,
   Icon,
-  Project,
   Artifact,
+  ActionStepMeta,
 } from '@refly-packages/openapi-schema';
 import { EventEmitter } from 'node:stream';
-import { randomUUID } from 'node:crypto';
 import { SkillEvent } from '@refly-packages/common-types';
 
 export abstract class BaseSkill extends StructuredTool {
@@ -57,7 +56,7 @@ export abstract class BaseSkill extends StructuredTool {
    * Emit a skill event.
    */
   emitEvent(data: Partial<SkillEvent>, config: SkillRunnableConfig) {
-    const { emitter, currentSkill, resultId } = config?.configurable || {};
+    const { emitter, resultId } = config?.configurable || {};
 
     if (!emitter) {
       return;
@@ -65,8 +64,7 @@ export abstract class BaseSkill extends StructuredTool {
 
     const eventData: SkillEvent = {
       event: data.event!,
-      skillMeta: currentSkill,
-      resultId: config.configurable.resultId,
+      resultId,
       ...data,
     };
 
@@ -145,7 +143,7 @@ export interface SkillEventMap {
 }
 
 export interface SkillRunnableMeta extends Record<string, unknown>, SkillMeta {
-  spanId: string;
+  step?: ActionStepMeta;
   artifact?: Artifact;
 }
 
