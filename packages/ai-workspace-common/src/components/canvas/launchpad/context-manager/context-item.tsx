@@ -13,14 +13,18 @@ export const ContextItem = ({
   onToggle,
   onRemove,
   canNotRemove,
+  onPreview,
+  isPreview,
 }: {
   canNotRemove?: boolean;
   item: IContextItem;
   isActive: boolean;
+  isPreview?: boolean;
   isLimit?: boolean;
   disabled?: boolean;
   onToggle: (item: IContextItem) => void;
   onRemove?: (item: IContextItem) => void;
+  onPreview: (item: IContextItem) => void;
 }) => {
   const { t } = useTranslation();
   const { data } = item ?? {};
@@ -32,12 +36,14 @@ export const ContextItem = ({
         'max-w-[200px] h-6 px-1 flex items-center border border-gray-200 rounded transition-all duration-300',
         {
           'border-green-500': isActive,
+          'border-yellow-500': isPreview,
           'border-red-300 bg-red-50 text-red-500': isLimit,
           'bg-gray-100 border-gray-200': disabled,
           'border-dashed': item?.isPreview,
         },
       )}
-      onClick={() => onToggle?.(item)}
+      onClick={() => onPreview?.(item)}
+      onDoubleClick={() => onToggle?.(item)}
     >
       <div className="h-[18px] flex items-center w-full text-xs">
         <span className="flex items-center flex-shrink-0 mr-1">{icon}</span>
@@ -52,7 +58,7 @@ export const ContextItem = ({
         </span>
         <span className="item-type text-gray-500 mr-1">
           {item.isCurrentContext ? t('copilot.contextItem.current') : ''}
-          {item?.data?.metadata?.sourceType && t(`copilot.contextItem.${item?.data?.metadata?.sourceType}`)}
+          {t(`copilot.contextItem.${item?.data?.metadata?.sourceType || item?.type}`)}
         </span>
         {!canNotRemove && (
           <IconClose

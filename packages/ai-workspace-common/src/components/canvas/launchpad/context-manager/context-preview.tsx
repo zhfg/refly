@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useMatch, useSearchParams, useParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 export const ContextPreview = ({
   item,
@@ -14,10 +15,10 @@ export const ContextPreview = ({
   onRemove,
   onOpenUrl,
 }: {
-  item: Mark;
+  item: CanvasNode;
   canNotRemove?: boolean;
   onClose: () => void;
-  onRemove?: (id: string) => void;
+  onRemove?: (item: CanvasNode) => void;
   onOpenUrl: (url: string | (() => string) | (() => void)) => void;
 }) => {
   const { t } = useTranslation();
@@ -25,13 +26,15 @@ export const ContextPreview = ({
   const { shareCode } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [content, setContent] = useState(item.data);
+  console.log('item', item);
+
+  const [content, setContent] = useState<string>((item?.data?.metadata?.contentPreview as string) || '');
   const [isLoading, setIsLoading] = useState(false);
 
-  const getCanvasDetail = async (canvasId: string) => {
+  const getDocumentDetail = async (docId: string) => {
     setIsLoading(true);
-    const { data, error } = await getClient().getCanvasDetail({
-      query: { canvasId },
+    const { data, error } = await getClient().getDocumentDetail({
+      query: { docId },
     });
     setIsLoading(false);
 
@@ -58,12 +61,12 @@ export const ContextPreview = ({
     setContent(newRes?.data?.content);
   };
 
-  const getShareCanvas = async (targetCanvasId?: string) => {
+  const getShareDocument = async (targetDocId?: string) => {
     setIsLoading(true);
     const { data } = await getClient().getShareContent({
       query: {
         shareCode: shareCode || '',
-        ...(targetCanvasId ? { canvasId: targetCanvasId } : {}),
+        ...(targetDocId ? { docId: targetDocId } : {}),
       },
     });
     setIsLoading(false);
@@ -73,7 +76,7 @@ export const ContextPreview = ({
     }
     const result = data.data;
 
-    setContent(result?.canvas?.content);
+    setContent(result?.document?.content);
   };
 
   const handleShareCanvasChange = (canvasId: string) => {
@@ -81,21 +84,21 @@ export const ContextPreview = ({
   };
 
   useEffect(() => {
-    if (item.type === 'canvas') {
+    if (item.type === 'document' && !item?.data?.metadata?.sourceType) {
       if (isShare) {
-        getShareCanvas(item.id);
+        getShareDocument(item.data?.entityId as string);
       } else {
-        getCanvasDetail(item.id);
+        getDocumentDetail(item.data?.entityId as string);
       }
-    } else if (item.type === 'resource') {
-      getResourceDetail(item.id);
+    } else if (item.type === 'resource' && !item?.data?.metadata?.sourceType) {
+      getResourceDetail(item.data?.entityId as string);
     } else {
-      setContent(item.data);
+      setContent((item.data?.metadata?.contentPreview as string) || '');
     }
   }, [item.id]);
 
   return (
-    <div className="context-preview">
+    <div className="context-preview border border-solid border-yellow-500">
       {isLoading ? (
         <Spin
           style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
@@ -104,7 +107,7 @@ export const ContextPreview = ({
         <>
           <div className="preview-action-container">
             <div className="preview-actions">
-              {!(isShare && item.type === 'project') && (
+              {!(isShare && item.type === 'document') && (
                 <Button
                   className="preview-action-btn"
                   icon={<IconLink />}
@@ -114,7 +117,7 @@ export const ContextPreview = ({
                     if (isShare) {
                       handleShareCanvasChange(item.id);
                     } else {
-                      onOpenUrl(item.url);
+                      onOpenUrl(item?.data?.metadata?.url as any);
                     }
                   }}
                 >
@@ -128,7 +131,7 @@ export const ContextPreview = ({
                   icon={<IconDelete />}
                   type="outline"
                   size="mini"
-                  onClick={() => onRemove && onRemove(item.id)}
+                  onClick={() => onRemove && onRemove(item)}
                 >
                   {t('common.delete')}
                 </Button>

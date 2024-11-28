@@ -33,8 +33,12 @@ import { convertMarkToNode } from '@refly-packages/ai-workspace-common/utils/mar
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { SelectionContext } from '@refly-packages/ai-workspace-common/components/selection-context';
 
-export const ResourceView = (props: { resourceId: string; projectId?: string }) => {
-  const { resourceId, projectId } = props;
+interface ResourceViewProps {
+  resourceId: string;
+}
+
+export const ResourceView = (props: ResourceViewProps) => {
+  const { resourceId } = props;
 
   const { t } = useTranslation();
 
@@ -137,6 +141,8 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
           contentPreview: text,
           selectedContent: text,
           xPath: id,
+          sourceEntityId: resourceDetail.resourceId ?? '',
+          sourceEntityType: 'resource',
           sourceType: 'resourceSelection',
         },
       },
@@ -232,8 +238,7 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
                     action={
                       ['index_failed', 'parse_failed'].includes(resourceDetail?.indexStatus) ? (
                         <Button
-                          size="mini"
-                          type="outline"
+                          size="small"
                           loading={isReindexing}
                           icon={<IconRefresh />}
                           className="retry-btn"

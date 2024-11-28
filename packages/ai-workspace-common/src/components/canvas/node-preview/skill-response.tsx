@@ -64,6 +64,8 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
           contentPreview: text,
           selectedContent: text,
           xPath: id,
+          sourceEntityId: result.resultId ?? '',
+          sourceEntityType: 'skillResponse',
           sourceType: 'skillResponseSelection',
         },
       },

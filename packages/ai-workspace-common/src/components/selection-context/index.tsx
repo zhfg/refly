@@ -1,12 +1,9 @@
 import React from 'react';
 import { Button } from 'antd';
-import { IconPlus } from '@arco-design/web-react/icon';
-import { useSelectionContext } from '../../hooks/use-selection-context';
-import { SelectedTextDomain } from '@refly/common-types';
 import { SelectionBubble } from '@refly-packages/ai-workspace-common/components/selection-bubble';
 import { useTranslation } from 'react-i18next';
-import { CanvasNodeData } from '@refly/openapi-schema';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { useSelectionContext } from '@refly-packages/ai-workspace-common/hooks/use-selection-context';
 
 interface SelectionContextProps {
   containerClass?: string;

@@ -2,17 +2,19 @@ import { IconLink } from '@arco-design/web-react/icon';
 import { IconCanvas, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { MarkType } from '@refly/common-types';
 import { CanvasNodeType } from '@refly/openapi-schema';
+import { FileText } from 'lucide-react';
+import { HiOutlineDocumentText, HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 
 export const getTypeIcon = (markType: MarkType, style?: any) => {
   switch (markType) {
     case 'resource':
-      return <IconResource style={style} />;
+      return <HiOutlineSquare3Stack3D style={style} />;
     case 'resourceSelection':
-      return <IconResource style={style} />;
-    case 'canvas':
-      return <IconCanvas style={style} />;
+      return <HiOutlineSquare3Stack3D style={style} />;
+    case 'document':
+      return <HiOutlineDocumentText style={style} />;
     case 'documentSelection':
-      return <IconCanvas style={style} />;
+      return <HiOutlineDocumentText style={style} />;
     case 'extensionWeblink':
       return <IconLink style={style} />;
     case 'extensionWeblinkSelection':
@@ -23,11 +25,9 @@ export const getTypeIcon = (markType: MarkType, style?: any) => {
 export const getNodeIcon = (node: CanvasNodeType, style?: any) => {
   switch (node) {
     case 'resource':
-      return <IconResource style={style} />;
+      return <HiOutlineSquare3Stack3D style={style} />;
     case 'document':
-      return <IconDocument style={style} />;
-    case 'resource':
-      return <IconResource style={style} />;
+      return <HiOutlineDocumentText style={style} />;
     case 'skillResponse':
       return <IconCanvas />;
     default:

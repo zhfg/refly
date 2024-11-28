@@ -1,5 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { ContextItem } from './context-item';
+import { useTranslation } from 'react-i18next';
+import { Message } from '@arco-design/web-react';
 
 // components
 import { AddBaseMarkContext } from './components/add-base-mark-context';
@@ -15,8 +17,12 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 import { ChatHistorySwitch } from './components/chat-history-switch';
+import { ContextPreview } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/context-preview';
+
+import './index.scss';
 
 export const ContextManager = () => {
+  const { t } = useTranslation();
   const { selectedContextItems, removeContextItem, setContextItems, clearContextItems, filterErrorInfo } =
     useContextPanelStoreShallow((state) => ({
       selectedContextItems: state.selectedContextItems,
@@ -30,13 +36,50 @@ export const ContextManager = () => {
     (node) => node.selected && (node.type === 'resource' || node.type === 'document'),
   );
   const { initMessageListener } = useSelectedMark();
+  const [activeItemId, setActiveItemId] = useState(null);
 
-  const handleToggleItem = (item: CanvasNode<any>) => {
-    setSelectedNode(item);
+  const handleToggleItem = useCallback(
+    async (item: CanvasNode<any>) => {
+      const isSelectionNode = item.data?.metadata?.sourceType?.includes('Selection');
+
+      if (isSelectionNode) {
+        const sourceEntityId = item.data?.metadata?.sourceEntityId;
+        const sourceEntityType = item.data?.metadata?.sourceEntityType;
+
+        if (!sourceEntityId || !sourceEntityType) {
+          console.warn('Missing source entity information for selection node');
+          return;
+        }
+
+        // Get latest nodes from canvas control
+        const sourceNode = nodes.find(
+          (node) => node.data?.entityId === sourceEntityId && node.type === sourceEntityType,
+        );
+
+        if (!sourceNode) {
+          Message.warning({
+            content: t('canvas.contextManager.nodeNotFound'),
+          });
+          return;
+        }
+
+        setSelectedNode(sourceNode);
+      } else {
+        setSelectedNode(item);
+      }
+    },
+    [nodes, setSelectedNode, t],
+  );
+
+  const handlePreviewItem = (item: CanvasNode<any>) => {
+    setActiveItemId((prevId) => (prevId === item.id ? null : item.id));
   };
 
   const handleRemoveItem = (item: CanvasNode<any>) => {
     removeContextItem(item.id);
+    if (activeItemId === item.id) {
+      setActiveItemId(null);
+    }
   };
 
   const selectedNodeIds = selectedContextNodes?.map((node) => node.id) ?? [];
@@ -62,10 +105,12 @@ export const ContextManager = () => {
     initMessageListener();
   }, []);
 
+  const activeItem = selectedContextItems?.find((item) => item.id === activeItemId);
+
   return (
-    <div className="flex flex-col h-full p-2 px-3">
-      <div className="flex flex-col">
-        <div className="flex flex-wrap content-start gap-1 w-full">
+    <div className="flex flex-col h-full p-2 px-3 launchpad-context-manager">
+      <div className="flex flex-col context-content">
+        <div className="flex flex-wrap content-start gap-1 w-full context-items-container">
           <ChatHistorySwitch />
           <AddBaseMarkContext />
           {selectedContextItems?.map((item) => (
@@ -74,11 +119,29 @@ export const ContextManager = () => {
               item={item}
               isLimit={!!filterErrorInfo?.[mapSelectionTypeToContentList(item?.type)]}
               isActive={selectedContextNodes.some((node) => node.id === item.id)}
+              isPreview={item?.id === activeItemId}
               onToggle={handleToggleItem}
+              onPreview={handlePreviewItem}
               onRemove={handleRemoveItem}
             />
           ))}
         </div>
+        {activeItem && (
+          <ContextPreview
+            item={activeItem}
+            onClose={() => setActiveItemId(null)}
+            onRemove={handleRemoveItem}
+            onOpenUrl={(url) => {
+              if (typeof url === 'function') {
+                url();
+              } else if (typeof url === 'string') {
+                window.open(url, '_blank');
+              } else {
+                handleToggleItem(activeItem);
+              }
+            }}
+          />
+        )}
       </div>
     </div>
   );

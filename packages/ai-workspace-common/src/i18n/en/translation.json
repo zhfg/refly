@@ -388,6 +388,9 @@
     },
     "contextSelector": {
       "placeholder": "Enter keywords to search for nodes in the canvas..."
+    },
+    "contextManager": {
+      "nodeNotFound": "Source node not found or has been deleted. Please add it to the canvas first."
     }
   },
   "resource": {
@@ -1187,7 +1190,15 @@
       "current": "Current ",
       "documentSelection": "Document Selection",
       "resourceSelection": "Resource Selection",
-      "skillResponseSelection": "Skill Response Selection"
+      "skillResponseSelection": "Skill Response Selection",
+      "documentCursorSelection": "Document Cursor Selection",
+      "documentBeforeCursorSelection": "Document Before Cursor Selection",
+      "documentAfterCursorSelection": "Document After Cursor Selection",
+      "extensionWeblinkSelection": "Extension Web Link Selection",
+      "document": "Document",
+      "resource": "Resource",
+      "skillResponse": "Skill Response",
+      "extensionWeblink": "Extension Web Link"
     },
     "modelSelector": {
       "noModelAvailable": "No model available",
