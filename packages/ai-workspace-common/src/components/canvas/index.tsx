@@ -45,6 +45,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         reactFlowInstance.fitView({
           padding: 0.2,
           duration: 200,
+          minZoom: 0.1,
+          maxZoom: 2
         });
       }
     }, 100);
@@ -59,7 +61,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const defaultViewport = {
     x: 0,
     y: 0,
-    zoom: 1,
+    zoom: 0.75,
   };
 
   const flowConfig = useMemo(
@@ -67,7 +69,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
       defaultViewport,
       fitViewOptions: {
         padding: 0.2,
-        minZoom: 0.5,
+        minZoom: 0.1,
         maxZoom: 2,
         duration: 200,
       },
@@ -95,7 +97,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   };
 
   return (
-    <div className="w-full h-screen relative flex flex-col">
+    <div className="w-full h-screen relative flex flex-col overflow-hidden">
       <CanvasToolbar onToolSelect={handleToolSelect} />
       <TopToolbar />
       <div className="flex-grow relative">
@@ -155,6 +157,9 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             showInteractive={true}
             fitViewOptions={{
               padding: 10,
+              minZoom: 0.1,
+              maxZoom: 2,
+              duration: 200,
             }}
           />
         </ReactFlow>

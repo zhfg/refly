@@ -37,6 +37,9 @@ export const ContextManager = () => {
 
   const handleToggleItem = (item: CanvasNode<any>) => {
     setSelectedNode(item);
+  };
+
+  const handlePreviewItem = (item: CanvasNode<any>) => {
     setActiveItemId((prevId) => (prevId === item.id ? null : item.id));
   };
 
@@ -85,6 +88,7 @@ export const ContextManager = () => {
               isLimit={!!filterErrorInfo?.[mapSelectionTypeToContentList(item?.type)]}
               isActive={selectedContextNodes.some((node) => node.id === item.id)}
               onToggle={handleToggleItem}
+              onPreview={handlePreviewItem}
               onRemove={handleRemoveItem}
             />
           ))}
@@ -97,8 +101,10 @@ export const ContextManager = () => {
             onOpenUrl={(url) => {
               if (typeof url === 'function') {
                 url();
-              } else {
+              } else if (typeof url === 'string') {
                 window.open(url, '_blank');
+              } else {
+                handleToggleItem(activeItem);
               }
             }}
           />

@@ -117,7 +117,7 @@ export const ContextPreview = ({
                     if (isShare) {
                       handleShareCanvasChange(item.id);
                     } else {
-                      onOpenUrl(item.url);
+                      onOpenUrl(item?.data?.metadata?.url as any);
                     }
                   }}
                 >

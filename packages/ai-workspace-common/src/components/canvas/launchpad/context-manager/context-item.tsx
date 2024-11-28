@@ -13,6 +13,7 @@ export const ContextItem = ({
   onToggle,
   onRemove,
   canNotRemove,
+  onPreview,
 }: {
   canNotRemove?: boolean;
   item: IContextItem;
@@ -21,6 +22,7 @@ export const ContextItem = ({
   disabled?: boolean;
   onToggle: (item: IContextItem) => void;
   onRemove?: (item: IContextItem) => void;
+  onPreview: (item: IContextItem) => void;
 }) => {
   const { t } = useTranslation();
   const { data } = item ?? {};
@@ -37,7 +39,8 @@ export const ContextItem = ({
           'border-dashed': item?.isPreview,
         },
       )}
-      onClick={() => onToggle?.(item)}
+      onClick={() => onPreview?.(item)}
+      onDoubleClick={() => onToggle?.(item)}
     >
       <div className="h-[18px] flex items-center w-full text-xs">
         <span className="flex items-center flex-shrink-0 mr-1">{icon}</span>
