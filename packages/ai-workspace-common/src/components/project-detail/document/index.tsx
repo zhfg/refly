@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import wordsCount from 'words-count';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { Document } from '@refly/openapi-schema';
+import { CanvasNodeType, Document } from '@refly/openapi-schema';
 
 import './index.scss';
 import { useCookie } from 'react-use';
@@ -49,6 +49,9 @@ import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-ha
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
 import { useBlocker, useSearchParams } from 'react-router-dom';
+import { genUniqueId } from '@refly-packages/utils/id';
+import { getSelectionNodesMarkdown } from '@refly-packages/ai-workspace-common/modules/content-selector/utils/highlight-selection';
+import { useSelectionContext } from '@refly-packages/ai-workspace-common/hooks/use-selection-context';
 
 class TokenStreamProcessor {
   private editor: EditorInstance;
@@ -386,17 +389,38 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
     });
   };
 
-  // initial block selection
-  const baseUrl = getClientOrigin();
-  const { initContentSelectorElem, addInlineMarkForNote } = useContentSelector(
-    'ai-note-editor-content-container',
-    'documentSelection',
-    {
-      url: `${baseUrl}/docs/${docId}`,
-    },
-  );
+  const { addToContext, selectedText } = useSelectionContext({
+    containerClass: 'ai-note-editor-content-container',
+  });
 
-  console.log('docId', docId);
+  const buildNodeData = (text: string) => {
+    const { currentDocument } = useDocumentStore.getState();
+
+    return {
+      id: genUniqueId(),
+      type: 'document' as CanvasNodeType,
+      position: { x: 0, y: 0 },
+      data: {
+        entityId: currentDocument?.docId ?? '',
+        title: currentDocument?.title ?? 'Selected Content',
+        metadata: {
+          contentPreview: text,
+          selectedContent: text,
+          xPath: genUniqueId(),
+          sourceEntityId: currentDocument?.docId ?? '',
+          sourceEntityType: 'document',
+          sourceType: 'documentSelection',
+        },
+      },
+    };
+  };
+
+  const handleAddToContext = (text: string) => {
+    const node = buildNodeData(text);
+
+    addToContext(node);
+  };
+
   const websocketProvider = useMemo(() => {
     const provider = new HocuspocusProvider({
       url: getWsServerOrigin(),
@@ -461,10 +485,6 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
     window.localStorage.setItem('markdown', editor.storage.markdown.getMarkdown());
     documentStore.updateDocumentSaveStatus('Saved');
   }, 500);
-
-  const handleContentSelectorClick = () => {
-    addInlineMarkForNote();
-  };
 
   useEffect(() => {
     return () => {
@@ -650,7 +670,6 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
         'refly-inline-selector-mode': scope === 'inline',
       })}
     >
-      {initContentSelectorElem()}
       <div className="w-full h-full">
         {documentStore.isAiEditing && (
           <div
@@ -690,7 +709,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
             <CollabGenAIMenuSwitch
               contentSelector={{
                 text: t('knowledgeBase.context.addToContext'),
-                handleClick: handleContentSelectorClick,
+                handleClick: () => handleAddToContext(selectedText),
               }}
             />
             <CollabGenAIBlockMenu />

@@ -5,19 +5,11 @@ import { genUniqueId } from '@refly-packages/utils/id';
 import { useContextPanelStore } from '../stores/context-panel';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
+import { getSelectionNodesMarkdown } from '@refly-packages/ai-workspace-common/modules/content-selector/utils/highlight-selection';
 
 interface UseSelectionContextProps {
   containerClass?: string;
   enabled?: boolean;
-}
-
-interface SelectionMark {
-  id: string;
-  type: string;
-  data: string;
-  title?: string;
-  parentId?: string;
-  projectId?: string;
 }
 
 export const useSelectionContext = ({ containerClass, enabled = true }: UseSelectionContextProps) => {
@@ -35,7 +27,7 @@ export const useSelectionContext = ({ containerClass, enabled = true }: UseSelec
     if (!selection || !container) return;
 
     const range = selection.getRangeAt(0);
-    const text = selection.toString().trim();
+    const text = getSelectionNodesMarkdown();
 
     if (!text || selection.isCollapsed) {
       setIsSelecting(false);

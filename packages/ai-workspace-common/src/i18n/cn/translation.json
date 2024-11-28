@@ -393,6 +393,9 @@
     },
     "contextSelector": {
       "placeholder": "输入关键词搜索画布内节点..."
+    },
+    "contextManager": {
+      "nodeNotFound": "源节点未找到或已被删除，请先添加到画布"
     }
   },
   "resource": {

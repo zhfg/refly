@@ -388,6 +388,9 @@
     },
     "contextSelector": {
       "placeholder": "Enter keywords to search for nodes in the canvas..."
+    },
+    "contextManager": {
+      "nodeNotFound": "Source node not found or has been deleted. Please add it to the canvas first."
     }
   },
   "resource": {

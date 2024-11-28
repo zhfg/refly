@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { ContextItem } from './context-item';
+import { useTranslation } from 'react-i18next';
+import { Message } from '@arco-design/web-react';
 
 // components
 import { AddBaseMarkContext } from './components/add-base-mark-context';
@@ -20,6 +22,7 @@ import { ContextPreview } from '@refly-packages/ai-workspace-common/components/c
 import './index.scss';
 
 export const ContextManager = () => {
+  const { t } = useTranslation();
   const { selectedContextItems, removeContextItem, setContextItems, clearContextItems, filterErrorInfo } =
     useContextPanelStoreShallow((state) => ({
       selectedContextItems: state.selectedContextItems,
@@ -35,9 +38,38 @@ export const ContextManager = () => {
   const { initMessageListener } = useSelectedMark();
   const [activeItemId, setActiveItemId] = useState(null);
 
-  const handleToggleItem = (item: CanvasNode<any>) => {
-    setSelectedNode(item);
-  };
+  const handleToggleItem = useCallback(
+    async (item: CanvasNode<any>) => {
+      const isSelectionNode = item.data?.metadata?.sourceType?.includes('Selection');
+
+      if (isSelectionNode) {
+        const sourceEntityId = item.data?.metadata?.sourceEntityId;
+        const sourceEntityType = item.data?.metadata?.sourceEntityType;
+
+        if (!sourceEntityId || !sourceEntityType) {
+          console.warn('Missing source entity information for selection node');
+          return;
+        }
+
+        // Get latest nodes from canvas control
+        const sourceNode = nodes.find(
+          (node) => node.data?.entityId === sourceEntityId && node.type === sourceEntityType,
+        );
+
+        if (!sourceNode) {
+          Message.warning({
+            content: t('canvas.contextManager.nodeNotFound'),
+          });
+          return;
+        }
+
+        setSelectedNode(sourceNode);
+      } else {
+        setSelectedNode(item);
+      }
+    },
+    [nodes, setSelectedNode, t],
+  );
 
   const handlePreviewItem = (item: CanvasNode<any>) => {
     setActiveItemId((prevId) => (prevId === item.id ? null : item.id));
