@@ -38,7 +38,7 @@ export const ContextManager = () => {
   const { initMessageListener } = useSelectedMark();
   const [activeItemId, setActiveItemId] = useState(null);
 
-  const handleToggleItem = useCallback(
+  const handleItemClick = useCallback(
     async (item: CanvasNode<any>) => {
       const isSelectionNode = item.data?.metadata?.sourceType?.includes('Selection');
 
@@ -51,7 +51,6 @@ export const ContextManager = () => {
           return;
         }
 
-        // Get latest nodes from canvas control
         const sourceNode = nodes.find(
           (node) => node.data?.entityId === sourceEntityId && node.type === sourceEntityType,
         );
@@ -70,10 +69,6 @@ export const ContextManager = () => {
     },
     [nodes, setSelectedNode, t],
   );
-
-  const handlePreviewItem = (item: CanvasNode<any>) => {
-    setActiveItemId((prevId) => (prevId === item.id ? null : item.id));
-  };
 
   const handleRemoveItem = (item: CanvasNode<any>) => {
     removeContextItem(item.id);
@@ -119,29 +114,20 @@ export const ContextManager = () => {
               item={item}
               isLimit={!!filterErrorInfo?.[mapSelectionTypeToContentList(item?.type)]}
               isActive={selectedContextNodes.some((node) => node.id === item.id)}
-              isPreview={item?.id === activeItemId}
-              onToggle={handleToggleItem}
-              onPreview={handlePreviewItem}
+              onClick={() => handleItemClick(item)}
               onRemove={handleRemoveItem}
+              onOpenUrl={(url) => {
+                if (typeof url === 'function') {
+                  url();
+                } else if (typeof url === 'string') {
+                  window.open(url, '_blank');
+                } else {
+                  handleItemClick(item);
+                }
+              }}
             />
           ))}
         </div>
-        {activeItem && (
-          <ContextPreview
-            item={activeItem}
-            onClose={() => setActiveItemId(null)}
-            onRemove={handleRemoveItem}
-            onOpenUrl={(url) => {
-              if (typeof url === 'function') {
-                url();
-              } else if (typeof url === 'string') {
-                window.open(url, '_blank');
-              } else {
-                handleToggleItem(activeItem);
-              }
-            }}
-          />
-        )}
       </div>
     </div>
   );

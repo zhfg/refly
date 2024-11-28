@@ -1,7 +1,6 @@
 import { Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode } from './types';
 import { Node } from '@xyflow/react';
-import { MessageSquare, MoreHorizontal } from 'lucide-react';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { useEffect, useState, useCallback } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
