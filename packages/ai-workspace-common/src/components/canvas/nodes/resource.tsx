@@ -10,6 +10,7 @@ import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
+import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
@@ -17,7 +18,7 @@ export const ResourceNode = ({ data, selected, id }: NodeProps<ResourceNode>) =>
   const [isHovered, setIsHovered] = useState(false);
   const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();
-  const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? Link2 : FileText;
+  const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
 
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);

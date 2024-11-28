@@ -15,6 +15,7 @@ import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/u
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/use-add-to-chat-history';
+import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -184,7 +185,7 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
                 flex-shrink-0
               "
             >
-              <MessageSquare className="w-4 h-4 text-white" />
+              <IconCanvas className="w-4 h-4 text-white" />
             </div>
 
             <span

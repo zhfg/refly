@@ -11,6 +11,7 @@ import { ActionButtons } from './action-buttons';
 import { useTranslation } from 'react-i18next';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
+import { HiOutlineDocumentText } from 'react-icons/hi2';
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
@@ -136,7 +137,7 @@ export const DocumentNode = ({ data, selected, id }: NodeProps<DocumentNode>) =>
                 flex-shrink-0
               "
             >
-              <FileText className="w-4 h-4 text-white" />
+              <HiOutlineDocumentText className="w-4 h-4 text-white" />
             </div>
 
             {/* Node Type */}
