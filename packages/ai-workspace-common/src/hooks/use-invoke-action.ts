@@ -1,4 +1,11 @@
-import { ActionResult, BaseResponse, CanvasNodeData, InvokeSkillRequest } from '@refly/openapi-schema';
+import {
+  ActionResult,
+  ActionStep,
+  ActionStepMeta,
+  BaseResponse,
+  CanvasNodeData,
+  InvokeSkillRequest,
+} from '@refly/openapi-schema';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
 import { SkillEvent, LOCALE } from '@refly/common-types';
@@ -12,6 +19,7 @@ import {
   useActionResultStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
+import { aggregateTokenUsage } from '@refly-packages/utils/index';
 
 export const useInvokeAction = () => {
   const { addNode } = useCanvasControl();
@@ -42,64 +50,8 @@ export const useInvokeAction = () => {
     onUpdateResult(skillEvent.resultId, updatedResult);
   };
 
-  const onSkillUsage = (skillEvent: SkillEvent) => {
-    const { resultMap } = useActionResultStore.getState();
-    const result = resultMap[skillEvent.resultId];
-
-    if (!result) {
-      return;
-    }
-
-    const tokenUsage = safeParseJSON(skillEvent.content);
-    if (!tokenUsage?.token.length) {
-      return;
-    }
-
-    const updatedResult = {
-      ...result,
-      tokenUsage: tokenUsage.token,
-    };
-    onUpdateResult(skillEvent.resultId, updatedResult);
-  };
-
-  const onSkillStream = (skillEvent: SkillEvent) => {
-    const { resultMap } = useActionResultStore.getState();
-    const result = resultMap[skillEvent.resultId];
-
-    if (!result) {
-      return;
-    }
-
-    const updatedResult = {
-      ...result,
-      status: 'executing' as const,
-      content: result.content + skillEvent.content,
-    };
-    onUpdateResult(skillEvent.resultId, updatedResult);
-  };
-
-  const onSkillStructedData = (skillEvent: SkillEvent) => {
-    const { resultMap } = useActionResultStore.getState();
-    const result = resultMap[skillEvent.resultId];
-
-    if (!result) {
-      return;
-    }
-
-    const structuredData = safeParseJSON(skillEvent?.content);
-    if (!structuredData) {
-      return;
-    }
-
-    const updatedResult = {
-      ...result,
-      structuredData: { ...result.structuredData, ...structuredData },
-    };
-    onUpdateResult(skillEvent.resultId, updatedResult);
-  };
-
-  const onSkillArtifact = (skillEvent: SkillEvent) => {
-    const { resultId, artifact } = skillEvent;
+  const onSkillTokenUsage = (skillEvent: SkillEvent) => {
+    const { resultId, step, tokenUsage } = skillEvent;
     const { resultMap } = useActionResultStore.getState();
     const result = resultMap[resultId];
 
@@ -107,18 +59,103 @@ export const useInvokeAction = () => {
       return;
     }
 
-    const existingArtifacts = Array.isArray(result.artifacts) ? [...result.artifacts] : [];
+    const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
+    updatedStep.tokenUsage = aggregateTokenUsage([...(updatedStep.tokenUsage ?? []), tokenUsage]);
 
+    onUpdateResult(resultId, {
+      ...result,
+      steps: getUpdatedSteps(result.steps ?? [], updatedStep),
+    });
+  };
+
+  const findOrCreateStep = (steps: ActionStep[], stepMeta: ActionStepMeta) => {
+    const existingStep = steps?.find((s) => s.name === stepMeta.name);
+    return existingStep
+      ? { ...existingStep }
+      : {
+          ...stepMeta,
+          content: '',
+          artifacts: [],
+          structuredData: {},
+        };
+  };
+
+  const getUpdatedSteps = (steps: ActionStep[], updatedStep: ActionStep) => {
+    if (!steps?.find((step) => step.name === updatedStep.name)) {
+      return [...steps, updatedStep];
+    }
+    return steps.map((step) => (step.name === updatedStep.name ? updatedStep : step));
+  };
+
+  const onSkillStream = (skillEvent: SkillEvent) => {
+    const { resultId, content, step } = skillEvent;
+    const { resultMap } = useActionResultStore.getState();
+    const result = resultMap[resultId];
+
+    if (!result) {
+      return;
+    }
+
+    const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
+    updatedStep.content += content;
+
+    onUpdateResult(resultId, {
+      ...result,
+      status: 'executing' as const,
+      steps: getUpdatedSteps(result.steps ?? [], updatedStep),
+    });
+  };
+
+  const onSkillStructedData = (skillEvent: SkillEvent) => {
+    const { step, resultId, content = '', structuredDataKey = '' } = skillEvent;
+    const { resultMap } = useActionResultStore.getState();
+    const result = resultMap[resultId];
+
+    if (!result || !structuredDataKey) {
+      return;
+    }
+
+    const structuredData = safeParseJSON(content);
+    if (!structuredData) {
+      return;
+    }
+
+    const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
+    updatedStep.structuredData = {
+      ...updatedStep.structuredData,
+      [structuredDataKey]: structuredData,
+    };
+
+    const updatedResult = {
+      ...result,
+      status: 'executing' as const,
+      steps: getUpdatedSteps(result.steps ?? [], updatedStep),
+    };
+    onUpdateResult(skillEvent.resultId, updatedResult);
+  };
+
+  const onSkillArtifact = (skillEvent: SkillEvent) => {
+    const { resultId, artifact, step } = skillEvent;
+    const { resultMap } = useActionResultStore.getState();
+    const result = resultMap[resultId];
+
+    if (!result) {
+      return;
+    }
+
+    const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
+    const existingArtifacts = Array.isArray(updatedStep.artifacts) ? [...updatedStep.artifacts] : [];
     const artifactIndex = existingArtifacts.findIndex((item) => item?.entityId === artifact?.entityId);
 
-    const updatedArtifacts =
+    updatedStep.artifacts =
       artifactIndex !== -1
         ? existingArtifacts.map((item, index) => (index === artifactIndex ? artifact : item))
         : [...existingArtifacts, artifact];
 
     const updatedResult = {
       ...result,
-      artifacts: updatedArtifacts,
+      status: 'executing' as const,
+      steps: getUpdatedSteps(result.steps ?? [], updatedStep),
     };
 
     onUpdateResult(skillEvent.resultId, updatedResult);
@@ -197,14 +234,11 @@ export const useInvokeAction = () => {
       resultId,
       type: 'skill',
       actionMeta: {},
-      content: '',
       title: input?.query,
       invokeParam: payload,
       logs: [],
       status: 'waiting',
-      artifacts: [],
-      structuredData: {},
-      tokenUsage: [],
+      steps: [],
       errors: [],
     });
 
@@ -250,7 +284,7 @@ export const useInvokeAction = () => {
       onSkillEnd,
       onCompleted,
       onError,
-      onSkillUsage,
+      onSkillTokenUsage,
     });
   };
 

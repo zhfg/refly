@@ -149,47 +149,67 @@ model ChatMessage {
 
 model ActionResult {
   /// Primary key
-  pk             BigInt             @id @default(autoincrement())
+  pk          BigInt       @id @default(autoincrement())
   /// Action result id
-  resultId       String             @unique @map("result_id")
+  resultId    String       @unique @map("result_id")
   /// Canvas ID
-  canvasId       String?            @map("canvas_id")
+  canvasId    String?      @map("canvas_id")
   /// Action type
-  type           String             @map("type")
+  type        String       @map("type")
   /// UID
-  uid            String             @default("") @map("uid")
+  uid         String       @default("") @map("uid")
   /// Result title
-  title          String             @default("") @map("title")
-  /// Result content
-  content        String             @map("content")
+  title       String       @default("") @map("title")
   /// Action metadata
-  actionMeta     String             @default("{}") @map("action_meta")
+  actionMeta  String       @default("{}") @map("action_meta")
   /// Result logs
-  logs           String             @default("[]") @map("logs")
-  /// Structured data output (JSON)
-  structuredData String             @default("{}") @map("structured_data")
-  /// Action artifacts (JSON array)
-  artifacts      String             @default("[]") @map("artifacts")
+  logs        String       @default("[]") @map("logs")
   /// Errors
-  errors         String?            @map("errors")
-  /// Token usage summary
-  tokenUsage     String?            @map("token_usage")
+  errors      String?      @map("errors")
   /// Skill invocation parameters (JSON of `InvokeSkillRequest`)
-  invokeParam    String?            @map("invoke_param")
+  invokeParam String?      @map("invoke_param")
   /// Locale setting
-  locale         String?            @default("") @map("locale")
+  locale      String?      @default("") @map("locale")
   /// Action result status
-  status         ActionResultStatus @default(waiting) @map("status")
+  status      ActionStatus @default(waiting) @map("status")
   /// Create timestamp
-  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt      DateTime           @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@index([canvasId])
   @@map("action_results")
 }
 
-enum ActionResultStatus {
+model ActionStep {
+  /// Primary key
+  pk             BigInt   @id @default(autoincrement())
+  /// Action result id which this step belongs to
+  resultId       String   @map("result_id")
+  /// Step order
+  order          Int      @default(0) @map("order")
+  /// Step title
+  title          String   @map("title")
+  /// Step name
+  name           String   @map("name")
+  /// Step content
+  content        String   @map("content")
+  /// Structured data output (JSON)
+  structuredData String   @default("{}") @map("structured_data")
+  /// Action artifacts (JSON array)
+  artifacts      String   @default("[]") @map("artifacts")
+  /// Token usage summary (JSON array)
+  tokenUsage     String   @default("[]") @map("token_usage")
+  /// Create timestamp
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([resultId, order])
+  @@map("action_steps")
+}
+
+enum ActionStatus {
   waiting
   executing
   finish

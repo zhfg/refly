@@ -8,7 +8,12 @@ import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { safeStringifyJSON } from '@refly-packages/utils';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
+import {
+  ActionStepMeta,
+  Icon,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+} from '@refly-packages/openapi-schema';
 import { createSkillTemplateInventory } from '../inventory';
 
 // types
@@ -22,6 +27,13 @@ import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils
 
 // prompts
 import * as commonQnA from '../scheduler/module/commonQnA';
+
+const stepTitleDict = {
+  commonQnA: {
+    en: 'Question Answering',
+    'zh-CN': '问题回答',
+  },
+};
 
 export class CommonQnA extends BaseSkill {
   name = 'common_qna';
@@ -169,7 +181,12 @@ export class CommonQnA extends BaseSkill {
   callCommonQnA = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     this.emitEvent({ event: 'log', content: `Start to call common qna...` }, config);
 
-    const { currentSkill } = config.configurable;
+    const { currentSkill, uiLocale = 'en' } = config.configurable;
+
+    const stepMeta: ActionStepMeta = {
+      name: 'commonQnA',
+      title: stepTitleDict.commonQnA[uiLocale],
+    };
 
     // common preprocess
     const module = {
@@ -187,6 +204,7 @@ export class CommonQnA extends BaseSkill {
       metadata: {
         ...config.metadata,
         ...currentSkill,
+        step: stepMeta,
       },
     });
 

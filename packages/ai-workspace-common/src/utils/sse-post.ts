@@ -17,9 +17,9 @@ export const ssePost = async ({
   onSkillArtifact,
   onSkillStructedData,
   onSkillCreateNode,
+  onSkillTokenUsage,
   onError,
   onCompleted,
-  onSkillUsage,
 }: {
   controller: AbortController;
   token: string;
@@ -32,9 +32,9 @@ export const ssePost = async ({
   onSkillStructedData: (event: SkillEvent) => void;
   onSkillCreateNode: (event: SkillEvent) => void;
   onSkillArtifact: (event: SkillEvent) => void;
+  onSkillTokenUsage?: (event: SkillEvent) => void;
   onError?: (error: BaseResponse) => void;
   onCompleted?: (val?: boolean) => void;
-  onSkillUsage?: (event: SkillEvent) => void;
 }) => {
   let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
 
@@ -105,8 +105,8 @@ export const ssePost = async ({
                 onSkillStructedData(skillEvent);
               } else if (skillEvent?.event === 'create_node') {
                 onSkillCreateNode(skillEvent);
-              } else if (skillEvent?.event === 'usage') {
-                onSkillUsage(skillEvent);
+              } else if (skillEvent?.event === 'token_usage') {
+                onSkillTokenUsage?.(skillEvent);
               } else if (skillEvent?.event === 'error') {
                 onError?.(JSON.parse(skillEvent.content));
               }

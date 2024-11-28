@@ -122,7 +122,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
                 </div>
               </div>
               <p className="text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis text-xs">
-                {result?.content ?? ''}
+                {result?.steps?.map((step) => step.content)?.join('\n') ?? ''}
               </p>
             </div>
           ))
