@@ -1,13 +1,16 @@
-import { Button, Divider } from 'antd';
+import { Button, Divider, Tooltip, Avatar } from 'antd';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useTranslation } from 'react-i18next';
 import { FC } from 'react';
+
+import { MdOutlineHideImage } from 'react-icons/md';
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
+import { IconMoreHorizontal } from '@refly-packages/ai-workspace-common/components/common/icon';
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
 import { BsLayoutWtf } from 'react-icons/bs';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import Logo from '../../../../../../apps/web/src/assets/logo.svg';
-import { Avatar } from 'antd';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 interface TopToolbarProps {}
 
@@ -18,6 +21,10 @@ export const TopToolbar: FC<TopToolbarProps> = ({}) => {
     setCollapse: state.setCollapse,
   }));
   const { onLayout } = useCanvasControl();
+  const { showPreview, setShowPreview } = useCanvasStoreShallow((state) => ({
+    showPreview: state.showPreview,
+    setShowPreview: state.setShowPreview,
+  }));
 
   return (
     <div
@@ -60,7 +67,19 @@ export const TopToolbar: FC<TopToolbarProps> = ({}) => {
         </Button>
       </div>
 
-      <div className="flex items-center gap-2">action buttons</div>
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 bg-[#FCFCF9] rounded-lg px-2 py-1 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
+          <Tooltip title={showPreview ? 'Hide Preview' : 'Show Preview'}>
+            <Button
+              type="text"
+              icon={<MdOutlineHideImage style={{ color: showPreview ? '#9CA3AF' : '#000' }} />}
+              onClick={() => setShowPreview(!showPreview)}
+            />
+          </Tooltip>
+          <Divider type="vertical" />
+          <Button type="text" icon={<IconMoreHorizontal />} />
+        </div>
+      </div>
     </div>
   );
 };

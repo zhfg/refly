@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Button, Dropdown } from 'antd';
+import { Button, Dropdown, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   FileText,
@@ -168,13 +168,15 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
       {/* Right: Action Buttons */}
       <div className="flex items-center gap-1">
         {onPin && (
-          <Button
-            type="text"
-            className={`p-1.5 hover:bg-gray-100 ${isPinned ? 'text-blue-600' : 'text-gray-500'}`}
-            onClick={onPin}
-          >
-            <Pin className="w-4 h-4" />
-          </Button>
+          <Tooltip title={isPinned ? 'Unpin' : 'Pin'}>
+            <Button
+              type="text"
+              className={`p-1.5 hover:bg-gray-100 ${isPinned ? 'text-blue-600' : 'text-gray-500'}`}
+              onClick={onPin}
+            >
+              <Pin className="w-4 h-4" />
+            </Button>
+          </Tooltip>
         )}
         {onMaximize && (
           <Button
