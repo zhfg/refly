@@ -972,6 +972,10 @@ export type ActionStep = {
     structuredData?: {
         [key: string]: unknown;
     };
+    /**
+     * Token usage
+     */
+    tokenUsage?: Array<TokenUsageItem>;
 };
 
 /**
@@ -1014,10 +1018,6 @@ export type ActionResult = {
      * Errors
      */
     errors?: Array<(string)>;
-    /**
-     * Token usage
-     */
-    tokenUsage?: Array<TokenUsageItem>;
     /**
      * Skill invocation parameters
      */

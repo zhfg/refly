@@ -19,6 +19,7 @@ import {
   useActionResultStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
+import { aggregateTokenUsage } from '@refly-packages/utils/index';
 
 export const useInvokeAction = () => {
   const { addNode } = useCanvasControl();
@@ -49,24 +50,22 @@ export const useInvokeAction = () => {
     onUpdateResult(skillEvent.resultId, updatedResult);
   };
 
-  const onSkillUsage = (skillEvent: SkillEvent) => {
+  const onSkillTokenUsage = (skillEvent: SkillEvent) => {
+    const { resultId, step, tokenUsage } = skillEvent;
     const { resultMap } = useActionResultStore.getState();
-    const result = resultMap[skillEvent.resultId];
+    const result = resultMap[resultId];
 
     if (!result) {
       return;
     }
 
-    const tokenUsage = safeParseJSON(skillEvent.content);
-    if (!tokenUsage?.token.length) {
-      return;
-    }
+    const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
+    updatedStep.tokenUsage = aggregateTokenUsage([...(updatedStep.tokenUsage ?? []), tokenUsage]);
 
-    const updatedResult = {
+    onUpdateResult(resultId, {
       ...result,
-      tokenUsage: tokenUsage.token,
-    };
-    onUpdateResult(skillEvent.resultId, updatedResult);
+      steps: getUpdatedSteps(result.steps ?? [], updatedStep),
+    });
   };
 
   const findOrCreateStep = (steps: ActionStep[], stepMeta: ActionStepMeta) => {
@@ -100,12 +99,11 @@ export const useInvokeAction = () => {
     const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
     updatedStep.content += content;
 
-    const updatedResult = {
+    onUpdateResult(resultId, {
       ...result,
       status: 'executing' as const,
       steps: getUpdatedSteps(result.steps ?? [], updatedStep),
-    };
-    onUpdateResult(skillEvent.resultId, updatedResult);
+    });
   };
 
   const onSkillStructedData = (skillEvent: SkillEvent) => {
@@ -241,7 +239,6 @@ export const useInvokeAction = () => {
       logs: [],
       status: 'waiting',
       steps: [],
-      tokenUsage: [],
       errors: [],
     });
 
@@ -287,7 +284,7 @@ export const useInvokeAction = () => {
       onSkillEnd,
       onCompleted,
       onError,
-      onSkillUsage,
+      onSkillTokenUsage,
     });
   };
 

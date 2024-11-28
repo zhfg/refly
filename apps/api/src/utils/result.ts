@@ -1,14 +1,16 @@
 import { SkillEvent } from '@refly-packages/common-types';
 import { Prisma } from '@prisma/client';
-import { ActionStepMeta, Artifact } from '@refly-packages/openapi-schema';
+import { ActionStepMeta, Artifact, TokenUsageItem } from '@refly-packages/openapi-schema';
 import { SkillRunnableMeta } from '@refly-packages/skill-template';
 
+import { aggregateTokenUsage } from '@refly-packages/utils';
 interface StepData {
   name: string;
   title: string;
   content: string;
   structuredData: Record<string, unknown>;
   artifacts: Record<string, Artifact>;
+  usageItems: TokenUsageItem[];
 }
 
 export class ResultAggregator {
@@ -47,6 +49,7 @@ export class ResultAggregator {
       content: '',
       structuredData: {},
       artifacts: {},
+      usageItems: [],
     };
   }
 
@@ -75,6 +78,12 @@ export class ResultAggregator {
     this.data[event.step.name] = step;
   }
 
+  addUsageItem(meta: SkillRunnableMeta, usage: TokenUsageItem) {
+    const step = this.getOrInitData(meta.step);
+    step.usageItems.push(usage);
+    this.data[meta.step.name] = step;
+  }
+
   handleStreamContent(meta: SkillRunnableMeta, content: string) {
     if (this.aborted) {
       return;
@@ -89,7 +98,8 @@ export class ResultAggregator {
 
   getSteps({ resultId }: { resultId: string }): Prisma.ActionStepCreateManyInput[] {
     return this.stepNames.map((stepName, order) => {
-      const { name, title, content, structuredData, artifacts } = this.data[stepName];
+      const { name, title, content, structuredData, artifacts, usageItems } = this.data[stepName];
+      const aggregatedUsage = aggregateTokenUsage(usageItems);
 
       return {
         name,
@@ -99,6 +109,7 @@ export class ResultAggregator {
         order,
         structuredData: JSON.stringify(structuredData),
         artifacts: JSON.stringify(Object.values(artifacts)),
+        tokenUsage: JSON.stringify(aggregatedUsage),
       };
     });
   }

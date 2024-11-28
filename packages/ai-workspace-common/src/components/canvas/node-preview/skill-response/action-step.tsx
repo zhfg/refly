@@ -9,6 +9,7 @@ import { genUniqueId } from '@refly-packages/utils/id';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { SelectionContext } from '@refly-packages/ai-workspace-common/components/selection-context';
 import { FileText, Sparkles } from 'lucide-react';
+import { ActionContainer } from './action-container';
 
 const getArtifactIcon = (artifact: Artifact) => {
   switch (artifact.type) {
@@ -66,7 +67,8 @@ export const ActionStepCard = ({ result, step, index }: { result: ActionResult; 
 
       {step.artifacts?.map((artifact) => (
         <div
-          className="border border-solid border-gray-200 rounded-lg m-6 px-4 py-2 h-12 flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
+          key={artifact.entityId}
+          className="mx-6 my-3 px-4 py-2 h-12 border border-solid border-gray-200 rounded-lg flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
           onClick={() => {
             setSelectedNodeByEntity({ type: artifact.type, entityId: artifact.entityId });
           }}
@@ -96,6 +98,8 @@ export const ActionStepCard = ({ result, step, index }: { result: ActionResult; 
           </div>
         </div>
       ))}
+
+      <ActionContainer result={result} step={step} />
     </div>
   );
 };

@@ -17,6 +17,7 @@ export function actionStepPO2DTO(step: ActionStepModel): ActionStep {
     ...pick(step, ['title', 'content']),
     artifacts: JSON.parse(step.artifacts || '[]'),
     structuredData: JSON.parse(step.structuredData || '{}'),
+    tokenUsage: JSON.parse(step.tokenUsage || '[]'),
   };
 }
 
@@ -29,7 +30,6 @@ export function actionResultPO2DTO(
     actionMeta: JSON.parse(result.actionMeta || '{}'),
     logs: JSON.parse(result.logs || '[]'),
     errors: JSON.parse(result.errors || '[]'),
-    tokenUsage: JSON.parse(result.tokenUsage || '[]'),
     invokeParam: JSON.parse(result.invokeParam || '{}'),
     createdAt: result.createdAt.toJSON(),
     updatedAt: result.updatedAt.toJSON(),

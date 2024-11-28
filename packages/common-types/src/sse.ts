@@ -1,10 +1,10 @@
-import { CanvasNode, SkillMeta, Artifact, ActionStepMeta } from '@refly-packages/openapi-schema';
+import { CanvasNode, SkillMeta, Artifact, ActionStepMeta, TokenUsageItem } from '@refly-packages/openapi-schema';
 
 export interface SkillEvent {
   /**
    * The event type
    */
-  event: 'start' | 'end' | 'stream' | 'log' | 'artifact' | 'structured_data' | 'usage' | 'create_node' | 'error';
+  event: 'start' | 'end' | 'stream' | 'log' | 'artifact' | 'structured_data' | 'token_usage' | 'create_node' | 'error';
   /**
    * The action step metadata
    */
@@ -23,6 +23,10 @@ export interface SkillEvent {
    * - For `error` events, `content` will be the serialized BaseResponse object.
    */
   content?: string;
+  /**
+   * Token usage data. Only present when `event` is `token_usage`.
+   */
+  tokenUsage?: TokenUsageItem;
   /**
    * Skill metadata
    */

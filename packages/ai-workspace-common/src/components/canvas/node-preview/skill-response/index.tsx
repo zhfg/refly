@@ -10,7 +10,6 @@ import { cn } from '@refly-packages/utils/cn';
 import { ContextItem } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/context-item';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { ActionStepCard } from './action-step';
-import { ActionContainer } from './action-container';
 
 import './index.scss';
 
@@ -149,11 +148,10 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
       )}
 
       {result?.steps?.map((step, index) => (
-        <ActionStepCard key={step.name} result={result} step={step} index={index + 1} />
+        <div key={index}>
+          <ActionStepCard result={result} step={step} index={index + 1} />
+        </div>
       ))}
-
-      <Divider />
-      <ActionContainer result={result} resultId={resultId} />
     </div>
   );
 };

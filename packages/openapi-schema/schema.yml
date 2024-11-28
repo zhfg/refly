@@ -2619,6 +2619,11 @@ components:
           example:
             sources: [Source]
             relatedQuestions: [string]
+        tokenUsage:
+          type: array
+          description: Token usage
+          items:
+            $ref: '#/components/schemas/TokenUsageItem'
     ActionResult:
       type: object
       description: Action result
@@ -2663,11 +2668,6 @@ components:
           description: Errors
           items:
             type: string
-        tokenUsage:
-          type: array
-          description: Token usage
-          items:
-            $ref: '#/components/schemas/TokenUsageItem'
         invokeParam:
           description: Skill invocation parameters
           $ref: '#/components/schemas/InvokeSkillRequest'

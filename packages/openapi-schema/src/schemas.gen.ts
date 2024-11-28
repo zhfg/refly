@@ -1184,6 +1184,13 @@ export const ActionStepSchema = {
         relatedQuestions: ['string'],
       },
     },
+    tokenUsage: {
+      type: 'array',
+      description: 'Token usage',
+      items: {
+        $ref: '#/components/schemas/TokenUsageItem',
+      },
+    },
   },
 } as const;
 
@@ -1240,13 +1247,6 @@ export const ActionResultSchema = {
       description: 'Errors',
       items: {
         type: 'string',
-      },
-    },
-    tokenUsage: {
-      type: 'array',
-      description: 'Token usage',
-      items: {
-        $ref: '#/components/schemas/TokenUsageItem',
       },
     },
     invokeParam: {

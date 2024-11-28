@@ -166,8 +166,6 @@ model ActionResult {
   logs        String       @default("[]") @map("logs")
   /// Errors
   errors      String?      @map("errors")
-  /// Token usage summary
-  tokenUsage  String?      @map("token_usage")
   /// Skill invocation parameters (JSON of `InvokeSkillRequest`)
   invokeParam String?      @map("invoke_param")
   /// Locale setting
@@ -200,6 +198,8 @@ model ActionStep {
   structuredData String   @default("{}") @map("structured_data")
   /// Action artifacts (JSON array)
   artifacts      String   @default("[]") @map("artifacts")
+  /// Token usage summary (JSON array)
+  tokenUsage     String   @default("[]") @map("token_usage")
   /// Create timestamp
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp

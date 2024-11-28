@@ -815,14 +815,23 @@ export class SkillService {
                 inputTokens: chunk.usage_metadata?.input_tokens ?? 0,
                 outputTokens: chunk.usage_metadata?.output_tokens ?? 0,
               };
+              resultAggregator.addUsageItem(runMeta, usage);
+
+              if (res) {
+                writeSSEResponse(res, {
+                  event: 'token_usage',
+                  resultId,
+                  tokenUsage: usage,
+                  step: runMeta?.step,
+                });
+              }
+
               const tokenUsage: SyncTokenUsageJobData = {
                 ...basicUsageData,
                 usage,
                 timestamp: new Date(),
               };
               await this.usageReportQueue.add(tokenUsage);
-
-              result.tokenUsage = [usage];
             }
             break;
         }
@@ -837,14 +846,6 @@ export class SkillService {
       }
       result.errors.push(err.message);
     } finally {
-      if (res) {
-        writeSSEResponse(res, {
-          event: 'usage',
-          resultId,
-          content: JSON.stringify({ token: result.tokenUsage }),
-        });
-      }
-
       const steps = resultAggregator.getSteps({ resultId });
 
       await this.prisma.$transaction([
@@ -854,7 +855,6 @@ export class SkillService {
             status: result.errors.length > 0 ? 'failed' : 'finish',
             logs: JSON.stringify(result.logs),
             errors: JSON.stringify(result.errors),
-            tokenUsage: JSON.stringify(result.tokenUsage),
           },
         }),
         this.prisma.actionStep.createMany({ data: steps }),
