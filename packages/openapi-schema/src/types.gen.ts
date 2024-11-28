@@ -964,10 +964,6 @@ export type ActionStep = {
    */
   name?: string;
   /**
-   * Step order
-   */
-  order: number;
-  /**
    * Step content
    */
   content?: string;

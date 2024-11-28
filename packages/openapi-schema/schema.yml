@@ -2597,7 +2597,6 @@ components:
       description: Action step
       required:
         - title
-        - order
         - status
       properties:
         title:
@@ -2606,9 +2605,6 @@ components:
         name:
           type: string
           description: Step name
-        order:
-          type: number
-          description: Step order
         content:
           type: string
           description: Step content

@@ -1155,7 +1155,7 @@ export const ActionStepMetaSchema = {
 export const ActionStepSchema = {
   type: 'object',
   description: 'Action step',
-  required: ['title', 'order', 'status'],
+  required: ['title', 'status'],
   properties: {
     title: {
       type: 'string',
@@ -1164,10 +1164,6 @@ export const ActionStepSchema = {
     name: {
       type: 'string',
       description: 'Step name',
-    },
-    order: {
-      type: 'number',
-      description: 'Step order',
     },
     content: {
       type: 'string',
