@@ -21,6 +21,7 @@ import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasNode } from '../nodes/types';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
+import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 // Define background colors for different node types
 const NODE_COLORS: Record<CanvasNodeType, string> = {
@@ -160,7 +161,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
           className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0"
           style={{ backgroundColor: nodeColor }}
         >
-          <IconComponent className="w-4 h-4 text-white" />
+          <IconCanvas className="w-4 h-4 text-white" />
         </div>
         <span className="text-lg font-semibold text-gray-900">{nodeTitle}</span>
       </div>

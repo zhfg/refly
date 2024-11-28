@@ -6,21 +6,19 @@ import { useTranslation } from 'react-i18next';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useMatch, useSearchParams, useParams } from '@refly-packages/ai-workspace-common/utils/router';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import {
+  CanvasNode,
+  DocumentNodeProps,
+  ResourceNodeProps,
+  SkillResponseNodeProps,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import {
+  DocumentNode,
+  ResourceNode,
+  SkillResponseNode,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
-export const ContextPreview = ({
-  item,
-  canNotRemove,
-  onClose,
-  onRemove,
-  onOpenUrl,
-}: {
-  item: CanvasNode;
-  canNotRemove?: boolean;
-  onClose: () => void;
-  onRemove?: (item: CanvasNode) => void;
-  onOpenUrl: (url: string | (() => string) | (() => void)) => void;
-}) => {
+export const ContextPreview = ({ item }: { item: CanvasNode }) => {
   const { t } = useTranslation();
   const isShare = useMatch('/share/:shareCode');
   const { shareCode } = useParams();
@@ -97,55 +95,29 @@ export const ContextPreview = ({
     }
   }, [item.id]);
 
-  return (
-    <div className="context-preview border border-solid border-yellow-500">
-      {isLoading ? (
-        <Spin
-          style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-        />
-      ) : (
-        <>
-          <div className="preview-action-container">
-            <div className="preview-actions">
-              {!(isShare && item.type === 'document') && (
-                <Button
-                  className="preview-action-btn"
-                  icon={<IconLink />}
-                  type="outline"
-                  size="mini"
-                  onClick={() => {
-                    if (isShare) {
-                      handleShareCanvasChange(item.id);
-                    } else {
-                      onOpenUrl(item?.data?.metadata?.url as any);
-                    }
-                  }}
-                >
-                  {t('common.open')}
-                </Button>
-              )}
+  const renderPreviewNode = () => {
+    const commonProps = {
+      isPreview: true,
+      hideActions: true,
+      hideHandles: true,
+      data: item.data,
+      selected: false,
+      id: item.id,
+    };
 
-              {!canNotRemove && (
-                <Button
-                  className="preview-action-btn"
-                  icon={<IconDelete />}
-                  type="outline"
-                  size="mini"
-                  onClick={() => onRemove && onRemove(item)}
-                >
-                  {t('common.delete')}
-                </Button>
-              )}
-              <Button className="preview-action-btn" icon={<IconClose />} type="outline" size="mini" onClick={onClose}>
-                {t('common.close')}
-              </Button>
-            </div>
-          </div>
-          <div className="preview-content">
-            {content ? <Markdown content={content} /> : <Empty description={t('common.empty')} />}
-          </div>
-        </>
-      )}
+    switch (item.type) {
+      case 'document':
+        return <DocumentNode {...(commonProps as DocumentNodeProps)} />;
+      case 'resource':
+        return <ResourceNode {...(commonProps as ResourceNodeProps)} />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="preview-content bg-transparent flex flex-1 justify-center items-center p-4">
+      {renderPreviewNode()}
     </div>
   );
 };

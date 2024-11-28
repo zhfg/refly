@@ -1,4 +1,4 @@
-import { Node } from '@xyflow/react';
+import { Node, NodeProps } from '@xyflow/react';
 import { CanvasNodeType } from '@refly/openapi-schema';
 
 export type CanvasNodeData<T = Record<string, unknown>> = {
@@ -44,3 +44,17 @@ export type NodeMetadataMap = {
   tool: ToolNodeMeta;
   response: ResponseNodeMeta;
 } & Record<string, Record<string, unknown>>;
+
+// Add new common props interface
+export interface CommonNodeProps {
+  isPreview?: boolean; // Control preview mode
+  hideActions?: boolean; // Control action buttons visibility
+  hideHandles?: boolean; // Control handles visibility
+  onNodeClick?: () => void; // Optional click handler
+}
+
+// Update existing node props
+export type DocumentNodeProps = NodeProps<Node<CanvasNodeData<DocumentNodeMeta>, 'document'>> & CommonNodeProps;
+export type ResourceNodeProps = NodeProps<Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>> & CommonNodeProps;
+export type SkillResponseNodeProps = NodeProps<Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>> &
+  CommonNodeProps;

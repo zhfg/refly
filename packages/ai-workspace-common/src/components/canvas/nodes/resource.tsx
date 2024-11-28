@@ -1,7 +1,6 @@
 import { Position, NodeProps, useReactFlow } from '@xyflow/react';
-import { CanvasNodeData, ResourceNodeMeta, CanvasNode } from './types';
+import { CanvasNodeData, ResourceNodeMeta, CanvasNode, ResourceNodeProps } from './types';
 import { Node } from '@xyflow/react';
-import { FileText, Link2, MoreHorizontal } from 'lucide-react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
@@ -10,14 +9,23 @@ import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
+import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
-export const ResourceNode = ({ data, selected, id }: NodeProps<ResourceNode>) => {
+export const ResourceNode = ({
+  data,
+  selected,
+  id,
+  isPreview = false,
+  hideActions = false,
+  hideHandles = false,
+  onNodeClick,
+}: ResourceNodeProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();
-  const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? Link2 : FileText;
+  const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
 
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
@@ -86,14 +94,16 @@ export const ResourceNode = ({ data, selected, id }: NodeProps<ResourceNode>) =>
 
   return (
     <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      <ActionButtons
-        type="resource"
-        onAddToContext={handleAddToContext}
-        onDelete={handleDelete}
-        onHelpLink={handleHelpLink}
-        onAbout={handleAbout}
-        isProcessing={false}
-      />
+      {!isPreview && !hideActions && (
+        <ActionButtons
+          type="resource"
+          onAddToContext={handleAddToContext}
+          onDelete={handleDelete}
+          onHelpLink={handleHelpLink}
+          onAbout={handleAbout}
+          isProcessing={false}
+        />
+      )}
 
       <div
         className={`
@@ -102,20 +112,24 @@ export const ResourceNode = ({ data, selected, id }: NodeProps<ResourceNode>) =>
           ${getNodeCommonStyles({ selected, isHovered })}
         `}
       >
-        <CustomHandle
-          type="target"
-          position={Position.Left}
-          isConnected={isTargetConnected}
-          isNodeHovered={isHovered}
-          nodeType="resource"
-        />
-        <CustomHandle
-          type="source"
-          position={Position.Right}
-          isConnected={isSourceConnected}
-          isNodeHovered={isHovered}
-          nodeType="resource"
-        />
+        {!isPreview && !hideHandles && (
+          <>
+            <CustomHandle
+              type="target"
+              position={Position.Left}
+              isConnected={isTargetConnected}
+              isNodeHovered={isHovered}
+              nodeType="resource"
+            />
+            <CustomHandle
+              type="source"
+              position={Position.Right}
+              isConnected={isSourceConnected}
+              isNodeHovered={isHovered}
+              nodeType="resource"
+            />
+          </>
+        )}
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">

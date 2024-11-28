@@ -1,7 +1,6 @@
 import { Position, NodeProps, useReactFlow } from '@xyflow/react';
-import { CanvasNode, CanvasNodeData, DocumentNodeMeta } from './types';
+import { CanvasNode, CanvasNodeData, DocumentNodeMeta, DocumentNodeProps } from './types';
 import { Node } from '@xyflow/react';
-import { FileText, MoreHorizontal } from 'lucide-react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
@@ -11,10 +10,19 @@ import { ActionButtons } from './action-buttons';
 import { useTranslation } from 'react-i18next';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
+import { HiOutlineDocumentText } from 'react-icons/hi2';
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
-export const DocumentNode = ({ data, selected, id }: NodeProps<DocumentNode>) => {
+export const DocumentNode = ({
+  data,
+  selected,
+  id,
+  isPreview = false,
+  hideActions = false,
+  hideHandles = false,
+  onNodeClick,
+}: DocumentNodeProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const { edges, onEdgesChange } = useCanvasControl();
   const { setEdges } = useReactFlow();
@@ -88,37 +96,47 @@ export const DocumentNode = ({ data, selected, id }: NodeProps<DocumentNode>) =>
   }, []);
 
   return (
-    <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      <ActionButtons
-        type="document"
-        onAddToContext={handleAddToContext}
-        onDelete={handleDelete}
-        onHelpLink={handleHelpLink}
-        onAbout={handleAbout}
-      />
+    <div
+      className={`relative group ${onNodeClick ? 'cursor-pointer' : ''}`}
+      onMouseEnter={!isPreview ? handleMouseEnter : undefined}
+      onMouseLeave={!isPreview ? handleMouseLeave : undefined}
+      onClick={onNodeClick}
+    >
+      {!isPreview && !hideActions && (
+        <ActionButtons
+          type="document"
+          onAddToContext={handleAddToContext}
+          onDelete={handleDelete}
+          onHelpLink={handleHelpLink}
+          onAbout={handleAbout}
+        />
+      )}
 
-      {/* Main Card Container */}
       <div
         className={`
-          w-[170px]
-          h-[186px]
-          ${getNodeCommonStyles({ selected, isHovered })}
-        `}
+        w-[170px]
+        h-[186px]
+        ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
+      `}
       >
-        <CustomHandle
-          type="target"
-          position={Position.Left}
-          isConnected={isTargetConnected}
-          isNodeHovered={isHovered}
-          nodeType="document"
-        />
-        <CustomHandle
-          type="source"
-          position={Position.Right}
-          isConnected={isSourceConnected}
-          isNodeHovered={isHovered}
-          nodeType="document"
-        />
+        {!isPreview && !hideHandles && (
+          <>
+            <CustomHandle
+              type="target"
+              position={Position.Left}
+              isConnected={isTargetConnected}
+              isNodeHovered={isHovered}
+              nodeType="document"
+            />
+            <CustomHandle
+              type="source"
+              position={Position.Right}
+              isConnected={isSourceConnected}
+              isNodeHovered={isHovered}
+              nodeType="document"
+            />
+          </>
+        )}
 
         <div className="flex flex-col gap-2">
           {/* Header with Icon and Type */}
@@ -136,7 +154,7 @@ export const DocumentNode = ({ data, selected, id }: NodeProps<DocumentNode>) =>
                 flex-shrink-0
               "
             >
-              <FileText className="w-4 h-4 text-white" />
+              <HiOutlineDocumentText className="w-4 h-4 text-white" />
             </div>
 
             {/* Node Type */}

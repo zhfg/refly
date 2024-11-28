@@ -6,15 +6,16 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { Artifact } from '@refly/openapi-schema';
 import { FileText, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import './skill-response.scss';
 import { IconCheckCircle, IconLoading } from '@arco-design/web-react/icon';
 import { cn } from '@refly-packages/utils/cn';
 import { ContextItem } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/context-item';
-import { useProcessContextItems } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-process-context-items';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { SelectionContext } from '@refly-packages/ai-workspace-common/components/selection-context';
+
+import { ActionContainer } from './action-container';
+import './index.scss';
 
 interface SkillResponseNodePreviewProps {
   resultId: string;
@@ -214,18 +215,8 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
         </div>
       ))}
 
-      {result?.tokenUsage?.length > 0 && (
-        <>
-          <Divider />
-          <div className="flex items-center space-x-2 text-gray-500 text-sm m-6">
-            {result?.tokenUsage?.map((usage) => (
-              <span key={usage.modelName}>
-                {usage.modelName}: {usage.inputTokens + usage.outputTokens} Tokens
-              </span>
-            ))}
-          </div>
-        </>
-      )}
+      <Divider />
+      <ActionContainer result={result} resultId={resultId} />
     </div>
   );
 };
