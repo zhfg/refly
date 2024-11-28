@@ -4,7 +4,7 @@ import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { HumanMessage, AssistantMessage } from '../../copilot/message';
 import { ChatMessage } from '@refly/openapi-schema';
-import './skill-response.scss';
+// import './skill-response.scss';
 
 interface ToolResponseNodePreviewProps {
   resultId: string;

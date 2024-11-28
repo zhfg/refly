@@ -100,8 +100,6 @@ export const ContextManager = () => {
     initMessageListener();
   }, []);
 
-  const activeItem = selectedContextItems?.find((item) => item.id === activeItemId);
-
   return (
     <div className="flex flex-col h-full p-2 px-3 launchpad-context-manager">
       <div className="flex flex-col context-content">

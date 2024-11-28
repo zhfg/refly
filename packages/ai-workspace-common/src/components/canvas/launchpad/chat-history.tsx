@@ -1,77 +1,57 @@
 import React, { useEffect } from 'react';
 import { Button, Divider, Empty } from 'antd';
 import { useTranslation } from 'react-i18next';
-import {
-  useContextPanelStore,
-  useContextPanelStoreShallow,
-} from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-import { useActionResultStore } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { IconDelete, IconResponse } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { ChevronDown, Pin, PinOff } from 'lucide-react';
-import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
-import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { ActionResult } from '@refly/openapi-schema';
 
-export const ChatHistory: React.FC = () => {
+// Define props interface
+interface ChatHistoryProps {
+  // Display control
+  isOpen: boolean;
+  onClose: () => void;
+
+  // Data
+  items: (ActionResult & { isPreview?: boolean })[];
+
+  // Mode control
+  readonly?: boolean;
+
+  // Cleanup
+  onCleanup?: () => void;
+
+  // Actions
+  onItemClick?: (resultId: string) => void;
+  onItemPin?: (item: ActionResult & { isPreview?: boolean }) => void;
+  onItemDelete?: (resultId: string) => void;
+}
+
+export const ChatHistory: React.FC<ChatHistoryProps> = ({
+  isOpen,
+  onClose,
+  items,
+  readonly = false,
+  onCleanup,
+  onItemClick,
+  onItemPin,
+  onItemDelete,
+}) => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
-  const { chatHistoryOpen, setChatHistoryOpen } = useLaunchpadStoreShallow((state) => ({
-    chatHistoryOpen: state.chatHistoryOpen,
-    setChatHistoryOpen: state.setChatHistoryOpen,
-  }));
+  // Sync selected nodes with history items
 
-  const { selectedResultItems, setResultItems, removeResultItem, updateResultItem, clearResultItems } =
-    useContextPanelStoreShallow((state) => ({
-      selectedResultItems: state.selectedResultItems,
-      setResultItems: state.setResultItems,
-      removeResultItem: state.removeResultItem,
-      updateResultItem: state.updateResultItem,
-      clearResultItems: state.clearResultItems,
-    }));
-
-  const { nodes, setSelectedNodeByEntity } = useCanvasControl();
-  const selectedResultNodes = nodes.filter((node) => node.selected && node.type === 'skillResponse');
-  const selectedNodeIds = selectedResultNodes.map((node) => node.id);
-
+  // Cleanup on unmount
   useEffect(() => {
-    const { selectedResultItems } = useContextPanelStore.getState();
-    const { resultMap } = useActionResultStore.getState();
-    const newResultItems = [
-      ...selectedResultNodes
-        .filter((node) => !selectedResultItems.some((item) => item.resultId === node.data.entityId))
-        .map((node) => ({ ...resultMap[node.data.entityId], isPreview: true })),
-      ...selectedResultItems.filter((item) => !item.isPreview),
-    ];
-    setResultItems(newResultItems);
-  }, [JSON.stringify(selectedNodeIds)]);
-
-  useEffect(() => {
-    const handleResultUpdate = (payload: { resultId: string; payload: ActionResult }) => {
-      const { selectedResultItems } = useContextPanelStore.getState();
-      const index = selectedResultItems.findIndex((item) => item.resultId === payload.resultId);
-      if (index >= 0) {
-        updateResultItem({ ...selectedResultItems[index], ...payload.payload });
-      }
-    };
-    actionEmitter.on('updateResult', handleResultUpdate);
-
     return () => {
-      actionEmitter.off('updateResult', handleResultUpdate);
+      onCleanup?.();
     };
   }, []);
 
-  useEffect(() => {
-    return () => {
-      clearResultItems();
-    };
-  }, []);
-
-  if (!chatHistoryOpen) {
+  if (!isOpen) {
     return null;
   }
 
@@ -82,17 +62,12 @@ export const ChatHistory: React.FC = () => {
           <span>{t('copilot.chatHistory.title')}</span>
         </div>
         <div>
-          <Button
-            type="text"
-            size="small"
-            icon={<ChevronDown className="w-4 h-4 text-gray-400" />}
-            onClick={() => setChatHistoryOpen(false)}
-          />
+          <Button type="text" size="small" icon={<ChevronDown className="w-4 h-4 text-gray-400" />} onClick={onClose} />
         </div>
       </div>
       <div className="max-h-[200px] overflow-y-auto">
-        {selectedResultItems?.length > 0 ? (
-          selectedResultItems?.map((result, index) => (
+        {items?.length > 0 ? (
+          items.map((result, index) => (
             <div
               key={index}
               className={cn(
@@ -102,7 +77,7 @@ export const ChatHistory: React.FC = () => {
                   'border-solid bg-gray-100': !result.isPreview,
                 },
               )}
-              onClick={() => setSelectedNodeByEntity({ type: 'skillResponse', entityId: result.resultId })}
+              onClick={() => onItemClick(result.resultId)}
             >
               <div className="text-gray-800 font-medium mb-1 flex items-center justify-between text-xs">
                 <span className="flex items-center whitespace-nowrap overflow-hidden text-ellipsis">
@@ -112,28 +87,38 @@ export const ChatHistory: React.FC = () => {
                 <div className="flex items-center space-x-1">
                   <span className="text-gray-400 text-xs mr-1">
                     {time(result?.createdAt, language as LOCALE)
-                      .utc()
-                      .fromNow()}
+                      ?.utc()
+                      ?.fromNow()}
                   </span>
-                  <Divider type="vertical" className="h-4" />
-                  <Button
-                    type="text"
-                    size="small"
-                    onClick={() => updateResultItem({ ...result, isPreview: !result.isPreview })}
-                    icon={
-                      result.isPreview ? (
-                        <Pin className="w-4 h-4 text-gray-400" />
-                      ) : (
-                        <PinOff className="w-4 h-4 text-gray-400" />
-                      )
-                    }
-                  />
-                  <Button
-                    type="text"
-                    size="small"
-                    onClick={() => removeResultItem(result.resultId)}
-                    icon={<IconDelete className="w-4 h-4 text-gray-400" />}
-                  />
+                  {!readonly && (
+                    <>
+                      <Divider type="vertical" className="h-4" />
+                      <Button
+                        type="text"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onItemPin?.(result);
+                        }}
+                        icon={
+                          result?.isPreview ? (
+                            <Pin className="w-4 h-4 text-gray-400" />
+                          ) : (
+                            <PinOff className="w-4 h-4 text-gray-400" />
+                          )
+                        }
+                      />
+                      <Button
+                        type="text"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onItemDelete?.(result?.resultId);
+                        }}
+                        icon={<IconDelete className="w-4 h-4 text-gray-400" />}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
               <p className="text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis text-xs">
