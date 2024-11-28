@@ -4,7 +4,6 @@ import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { HumanMessage, AssistantMessage } from '../../copilot/message';
 import { ChatMessage } from '@refly/openapi-schema';
-import './skill-response.scss';
 
 interface ToolResponseNodePreviewProps {
   resultId: string;
@@ -51,7 +50,7 @@ export const ToolResponseNodePreview = ({ resultId }: ToolResponseNodePreviewPro
   const assistantMessage: Partial<ChatMessage> = {
     msgId: `${resultId}-assistant`,
     type: 'ai',
-    content: result.content ?? '',
+    content: result.output ?? '',
     skillMeta: {
       displayName: result.actionMeta?.name ?? 'AI Response',
       icon: result.actionMeta?.icon,

@@ -3,32 +3,20 @@ import { useTranslation } from 'react-i18next';
 import { Button, Divider, Steps } from 'antd';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { Artifact } from '@refly/openapi-schema';
-import { FileText, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
-import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { IconCheckCircle, IconLoading } from '@arco-design/web-react/icon';
+import { ActionResult } from '@refly/openapi-schema';
+import { ChevronDown, ChevronUp } from 'lucide-react';
+import { IconCheckCircle } from '@arco-design/web-react/icon';
 import { cn } from '@refly-packages/utils/cn';
 import { ContextItem } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/context-item';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-import { genUniqueId } from '@refly-packages/utils/id';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { SelectionContext } from '@refly-packages/ai-workspace-common/components/selection-context';
-
+import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
+import { ActionStepCard } from './action-step';
 import { ActionContainer } from './action-container';
+
 import './index.scss';
 
 interface SkillResponseNodePreviewProps {
   resultId: string;
 }
-
-const getArtifactIcon = (artifact: Artifact) => {
-  switch (artifact.type) {
-    case 'document':
-      return <FileText className="w-4 h-4" />;
-    default:
-      return <Sparkles className="w-4 h-4" />;
-  }
-};
 
 export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewProps) => {
   const { t } = useTranslation();
@@ -37,7 +25,6 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     updateActionResult: state.updateActionResult,
   }));
   const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
-  const { setSelectedNodeByEntity } = useCanvasControl();
 
   const fetchActionResult = async (resultId: string) => {
     const { data, error } = await getClient().getActionResult({
@@ -51,46 +38,33 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     updateActionResult(resultId, data.data);
   };
 
-  const buildNodeData = (text: string) => {
-    const id = genUniqueId();
-
-    const node: CanvasNode = {
-      id,
-      type: 'skillResponse',
-      position: { x: 0, y: 0 },
-      data: {
-        entityId: result.resultId ?? '',
-        title: result.title ?? 'Selected Content',
-        metadata: {
-          contentPreview: text,
-          selectedContent: text,
-          xPath: id,
-          sourceEntityId: result.resultId ?? '',
-          sourceEntityType: 'skillResponse',
-          sourceType: 'skillResponseSelection',
-        },
-      },
-    };
-
-    return node;
-  };
-
   useEffect(() => {
     if (!result) {
       fetchActionResult(resultId);
     }
   }, [resultId]);
 
-  useEffect(() => {
+  const scrollToBottom = (event: { resultId: string; payload: ActionResult }) => {
+    if (event.resultId !== resultId || event.payload.status !== 'executing') {
+      return;
+    }
+
     const container = document.body.querySelector('.preview-container');
-    if (result?.status === 'executing' && container) {
+    if (container) {
       const { scrollHeight, clientHeight } = container;
       container.scroll({
         behavior: 'smooth',
         top: scrollHeight - clientHeight + 50,
       });
     }
-  }, [result?.status, result?.content]);
+  };
+
+  useEffect(() => {
+    actionEmitter.on('updateResult', scrollToBottom);
+    return () => {
+      actionEmitter.off('updateResult', scrollToBottom);
+    };
+  }, []);
 
   useEffect(() => {
     if (result?.status === 'finish') {
@@ -133,86 +107,49 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
         <div>{input?.query}</div>
       </div>
 
-      <div
-        className={cn('m-6 p-4 border border-solid border-gray-200 rounded-lg transition-all', {
-          'px-4 py-2 cursor-pointer hover:bg-gray-50': logBoxCollapsed,
-          'relative pb-0': !logBoxCollapsed,
-        })}
-      >
-        {logBoxCollapsed ? (
-          <div
-            className="text-gray-500 text-sm flex items-center justify-between"
-            onClick={() => setLogBoxCollapsed(false)}
-          >
-            <div>
-              <IconCheckCircle /> {t('canvas.skillResponse.skillCompleted')}
+      {result?.logs?.length > 0 && (
+        <div
+          className={cn('m-6 p-4 border border-solid border-gray-200 rounded-lg transition-all', {
+            'px-4 py-2 cursor-pointer hover:bg-gray-50': logBoxCollapsed,
+            'relative pb-0': !logBoxCollapsed,
+          })}
+        >
+          {logBoxCollapsed ? (
+            <div
+              className="text-gray-500 text-sm flex items-center justify-between"
+              onClick={() => setLogBoxCollapsed(false)}
+            >
+              <div>
+                <IconCheckCircle /> {t('canvas.skillResponse.skillCompleted')}
+              </div>
+              <div className="flex items-center">
+                <ChevronDown className="w-6 h-6" />
+              </div>
             </div>
-            <div className="flex items-center">
-              <ChevronDown className="w-6 h-6" />
-            </div>
-          </div>
-        ) : (
-          <>
-            <Steps
-              direction="vertical"
-              current={logs?.length ?? 0}
-              size="small"
-              items={logs?.map((log, index) => ({
-                title: log,
-                description: 'This is a description.',
-              }))}
-            />
-            <Button
-              type="text"
-              icon={<ChevronUp />}
-              onClick={() => setLogBoxCollapsed(true)}
-              className="absolute right-2 top-2"
-            />
-          </>
-        )}
-      </div>
-
-      {result?.content && (
-        <div className="m-6 text-gray-600 text-base skill-response-content">
-          <Markdown content={result.content} />
-          <SelectionContext
-            containerClass="skill-response-content"
-            getNodeData={(text) => buildNodeData(text)}
-          ></SelectionContext>
+          ) : (
+            <>
+              <Steps
+                direction="vertical"
+                current={logs?.length ?? 0}
+                size="small"
+                items={logs?.map((log, index) => ({
+                  title: log,
+                  description: 'This is a description.',
+                }))}
+              />
+              <Button
+                type="text"
+                icon={<ChevronUp />}
+                onClick={() => setLogBoxCollapsed(true)}
+                className="absolute right-2 top-2"
+              />
+            </>
+          )}
         </div>
       )}
 
-      {result?.artifacts?.map((artifact) => (
-        <div
-          className="border border-solid border-gray-200 rounded-lg m-6 px-4 py-2 h-12 flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
-          onClick={() => {
-            setSelectedNodeByEntity({ type: artifact.type, entityId: artifact.entityId });
-          }}
-        >
-          <div className="flex items-center space-x-2">
-            {getArtifactIcon(artifact)}
-            <span className="text-gray-600 max-w-[200px] truncate inline-block">{artifact.title}</span>
-          </div>
-          <div
-            className={cn('flex items-center space-x-1 text-xs', {
-              'text-yellow-500': artifact.status === 'generating',
-              'text-green-500': artifact.status === 'finish',
-            })}
-          >
-            {artifact.status === 'generating' && (
-              <>
-                <IconLoading />
-                <span>{t('artifact.generating')}</span>
-              </>
-            )}
-            {artifact.status === 'finish' && (
-              <>
-                <IconCheckCircle />
-                <span>{t('artifact.completed')}</span>
-              </>
-            )}
-          </div>
-        </div>
+      {result?.steps?.map((step, index) => (
+        <ActionStepCard key={step.name} result={result} step={step} index={index + 1} />
       ))}
 
       <Divider />

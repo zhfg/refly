@@ -50,7 +50,7 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
 
   // Get query and response content from result
   const query = result?.invokeParam?.input?.query ?? 'Loading...';
-  const content = result?.content ?? 'Loading response...';
+  const content = result?.steps?.[0]?.content ?? 'Loading response...';
   const modelName = result?.actionMeta?.name ?? 'AI Assistant';
 
   // Check if node has any connections
