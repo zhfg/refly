@@ -35,10 +35,11 @@ export const ContextItem = ({
       className={cn(
         'max-w-[200px] h-6 px-1 flex items-center border border-gray-200 rounded transition-all duration-300',
         {
-          'border-green-500': isActive || isPreview,
+          'border-green-500': isActive,
+          'border-yellow-500': isPreview,
           'border-red-300 bg-red-50 text-red-500': isLimit,
           'bg-gray-100 border-gray-200': disabled,
-          'border-dashed': item?.isPreview && !isPreview,
+          'border-dashed': item?.isPreview,
         },
       )}
       onClick={() => onPreview?.(item)}

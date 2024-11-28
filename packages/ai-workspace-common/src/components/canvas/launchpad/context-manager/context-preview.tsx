@@ -98,7 +98,7 @@ export const ContextPreview = ({
   }, [item.id]);
 
   return (
-    <div className="context-preview">
+    <div className="context-preview border border-solid border-yellow-500">
       {isLoading ? (
         <Spin
           style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}

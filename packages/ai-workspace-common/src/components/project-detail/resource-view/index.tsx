@@ -232,8 +232,7 @@ export const ResourceView = (props: { resourceId: string; projectId?: string }) 
                     action={
                       ['index_failed', 'parse_failed'].includes(resourceDetail?.indexStatus) ? (
                         <Button
-                          size="mini"
-                          type="outline"
+                          size="small"
                           loading={isReindexing}
                           icon={<IconRefresh />}
                           className="retry-btn"
