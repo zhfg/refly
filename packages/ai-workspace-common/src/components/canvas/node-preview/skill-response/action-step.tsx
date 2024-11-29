@@ -51,12 +51,12 @@ export const ActionStepCard = ({ result, step, index }: { result: ActionResult; 
   return (
     <div>
       <Divider className="my-2" />
-      <div className="mx-6 my-3 text-gray-600 text-sm">
+      <div className="my-3 text-gray-600 text-sm">
         {t('canvas.skillResponse.stepTitle', { index })} {' - ' + step.title}
       </div>
 
       {step.content && (
-        <div className="mx-6 my-3 text-gray-600 text-base skill-response-content">
+        <div className="my-3 text-gray-600 text-base skill-response-content">
           <Markdown content={step.content} />
           <SelectionContext
             containerClass="skill-response-content"
@@ -68,7 +68,7 @@ export const ActionStepCard = ({ result, step, index }: { result: ActionResult; 
       {step.artifacts?.map((artifact) => (
         <div
           key={artifact.entityId}
-          className="mx-6 my-3 px-4 py-2 h-12 border border-solid border-gray-200 rounded-lg flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
+          className="my-3 px-4 py-2 h-12 border border-solid border-gray-200 rounded-lg flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
           onClick={() => {
             setSelectedNodeByEntity({ type: artifact.type, entityId: artifact.entityId });
           }}
