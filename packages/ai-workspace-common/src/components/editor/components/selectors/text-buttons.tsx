@@ -55,7 +55,7 @@ export const TextButtons = () => {
             item.command(editor);
           }}
         >
-          <Button ghost type="text" className="rounded-none px-1">
+          <Button ghost type="text" className="rounded-none px-2">
             <item.icon
               className={cn('h-4 w-4', {
                 'text-green-500': item.isActive(editor),

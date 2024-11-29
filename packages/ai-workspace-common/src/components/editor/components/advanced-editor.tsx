@@ -60,12 +60,12 @@ export const CollabGenAIMenuSwitch: React.FC<CollabGenAIMenuSwitchProps> = (prop
     <GenerativeMenuSwitch open={openAI} onOpenChange={setOpenAI}>
       <AIBtnSelector open={openAI} onOpenChange={setOpenAI} />
       <ContentSelectorButtons text={contentSelector?.text} handleClick={contentSelector?.handleClick} />
-      <Divider type="vertical" />
+      <Divider className="mx-0 h-8" type="vertical" />
       <NodeSelector open={openNode} onOpenChange={setOpenNode} />
-      <Divider type="vertical" />
+      <Divider className="mx-0 h-8" type="vertical" />
       <TextButtons />
       <LinkSelector open={openLink} onOpenChange={setOpenLink} />
-      <Divider type="vertical" />
+      <Divider className="mx-0 h-8" type="vertical" />
       <ColorSelector open={openColor} onOpenChange={setOpenColor} />
     </GenerativeMenuSwitch>
   );

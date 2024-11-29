@@ -16,6 +16,7 @@ import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/componen
 import { AISettingsDropdown } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/chat-actions/ai-settings';
 
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 //TODO: I think it makes more sense to create a custom Tiptap extension for this functionality https://tiptap.dev/docs/editor/ai/introduction
 
 interface AISelectorProps {
@@ -166,7 +167,14 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   }, []);
 
   return (
-    <div className="w-[500px]" ref={ref}>
+    <div className="w-[500px] z-50" ref={ref}>
+      {true && (
+        <div className="flex max-h-[400px] overflow-y-auto">
+          <div className="prose p-2 px-4 prose-sm">
+            <Markdown content={'- hello\n- world'} />
+          </div>
+        </div>
+      )}
       {isLoading && (
         <div className="flex items-center px-4 w-full h-12 text-sm font-medium text-primary-600 text-muted-foreground">
           <Magic className="mr-2 w-4 h-4 shrink-0" />
