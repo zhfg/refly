@@ -41,13 +41,17 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
     return { success: res?.data?.success, data };
   },
   skill: async (queryPayload) => {
-    const res = await getClient().listSkillInstances({
+    const res = await getClient().listSkills({
       query: queryPayload,
     });
     const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
-      id: item?.skillId,
+      id: item?.name,
       title: item?.displayName,
       domain: 'skill',
+      metadata: {
+        configSchema: item?.configSchema,
+        description: item?.description,
+      },
     }));
     return { success: res?.data?.success, data };
   },
