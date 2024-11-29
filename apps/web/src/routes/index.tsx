@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react"
-import { Navigate, Route, Routes, useMatch } from "react-router-dom"
+import { Route, Routes, useMatch } from "react-router-dom"
 import { useEffect } from "react"
 import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
@@ -12,7 +12,7 @@ import {
 } from "@refly-packages/ai-workspace-common/components/request-access/protected-route"
 import { useHandlePaymentCallback } from "@refly-packages/ai-workspace-common/hooks/use-handle-payment-callback"
 import { SuspenseLoading } from "@refly-packages/ai-workspace-common/components/common/loading"
-
+import { HomeRedirect } from "@refly-packages/ai-workspace-common/components/home-redirect"
 // Lazy load components
 const Home = lazy(() => import("@/pages/home"))
 const Canvas = lazy(() => import("@/pages/canvas"))
@@ -100,22 +100,11 @@ export const AppRouter = (props: { layout?: any }) => {
     ? userStore?.userProfile?.hasBetaAccess || false
     : true
 
-  const handleHomeRedirect = () => {
-    if (userStore?.isLogin) {
-      const savedCanvasId = localStorage.getItem("currentCanvasId")
-
-      if (savedCanvasId) {
-        return <Navigate to={`/canvas/${savedCanvasId}`} replace />
-      }
-    }
-    return <BetaProtectedRoute component={Home} hasBetaAccess={hasBetaAccess} />
-  }
-
   return (
     <Suspense fallback={<SuspenseLoading />}>
       <Layout>
         <Routes>
-          <Route path="/" element={handleHomeRedirect()} />
+          <Route path="/" element={<HomeRedirect defaultNode={<Home />} />} />
 
           <Route
             path="/canvas/:canvasId"

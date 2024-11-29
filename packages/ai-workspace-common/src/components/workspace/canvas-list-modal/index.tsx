@@ -63,6 +63,12 @@ export const CanvasListModal = (props: CanvasListProps) => {
           },
         });
         if (data?.success) {
+          // Check and remove canvasId from localStorage if matches
+          const storedCanvasId = localStorage.getItem('currentCanvasId');
+          if (storedCanvasId === canvas.canvasId) {
+            localStorage.removeItem('currentCanvasId');
+          }
+
           message.success(t('common.putSuccess'));
           setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId));
           getCanvasList();
