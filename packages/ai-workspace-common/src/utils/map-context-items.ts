@@ -101,7 +101,7 @@ const convertContextItemsToContext = (items: IContextItem[]) => {
     documents: items
       .filter((item) => item.type === 'document')
       .map((item) => ({
-        documentId: item.data?.entityId || item.id,
+        docId: item.data?.entityId || item.id,
         isCurrent: item.isCurrentContext,
         metadata: {
           ...item.data?.metadata,
