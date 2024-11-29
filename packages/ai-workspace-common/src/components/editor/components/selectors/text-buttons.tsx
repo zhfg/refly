@@ -45,8 +45,9 @@ export const TextButtons = () => {
       icon: CodeIcon,
     },
   ];
+
   return (
-    <div className="flex">
+    <div className="flex items-center">
       {items.map((item) => (
         <EditorBubbleItem
           key={item.name}
@@ -54,10 +55,10 @@ export const TextButtons = () => {
             item.command(editor);
           }}
         >
-          <Button size="small" className="rounded-none" type="text">
+          <Button ghost size="small" type="text" className="rounded-none">
             <item.icon
-              className={cn('h-3.5 w-3.5', {
-                'text-blue-500': item.isActive(editor),
+              className={cn('h-4 w-4', {
+                'text-green-500': item.isActive(editor),
               })}
             />
           </Button>

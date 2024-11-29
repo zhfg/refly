@@ -25,9 +25,9 @@ export const AIBtnSelector = ({ open, onOpenChange }: AIBtnSelectorProps) => {
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <Button
+        ghost
         className="gap-1 rounded-none text-primary text-primary-600"
         type="text"
-        size="small"
         onClick={() => onOpenChange(true)}
       >
         <Magic className="w-4 h-4" />

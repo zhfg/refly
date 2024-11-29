@@ -8,14 +8,14 @@ interface ContentSelectorButtonsProps {
 }
 
 export const ContentSelectorButtons: React.FC<ContentSelectorButtonsProps> = (props) => {
-  const { text, handleClick } = props;
+  const { handleClick } = props;
   const { t } = useTranslation();
 
   return (
     <Tooltip title={t('knowledgeBase.canvas.editor.toolbar.quote')}>
-      <div className="flex">
-        <Button size="small" type="text" className="rounded-none" onClick={handleClick}>
-          <BsChatLeftQuote style={{ color: '#00968F' }} />
+      <div className="flex items-center">
+        <Button ghost type="text" size="small" className="rounded-none" onClick={handleClick}>
+          <BsChatLeftQuote className="w-4 h-4" />
         </Button>
       </div>
     </Tooltip>
