@@ -34,7 +34,6 @@ const convertContextToItems = (context?: any): IContextItem[] => {
           ...(metadata?.url && { url: metadata.url }),
         },
       },
-      isPreview: true,
     });
   });
 
@@ -49,7 +48,7 @@ const convertContextToItems = (context?: any): IContextItem[] => {
         title: resource.resource?.title ?? 'Resource',
         metadata: resource.metadata ?? {},
       },
-      isPreview: true,
+      isPreview: resource.isCurrent ? true : false,
       isCurrentContext: resource.isCurrent,
     });
   });
@@ -65,7 +64,7 @@ const convertContextToItems = (context?: any): IContextItem[] => {
         title: doc.document?.title ?? 'Document',
         metadata: doc.metadata ?? {},
       },
-      isPreview: true,
+      isPreview: doc.isCurrent ? true : false,
       isCurrentContext: doc.isCurrent,
     });
   });

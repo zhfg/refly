@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { ContextItem } from './context-item';
 import { useTranslation } from 'react-i18next';
-import { Message } from '@arco-design/web-react';
 
 // components
 import { AddBaseMarkContext } from './components/add-base-mark-context';
@@ -32,7 +31,7 @@ export const ContextManager = () => {
       clearContextItems: state.clearContextItems,
       filterErrorInfo: state.filterErrorInfo,
     }));
-  const { nodes, setSelectedNode } = useCanvasControl();
+  const { nodes } = useCanvasControl();
   const selectedContextNodes = nodes.filter(
     (node) => node.selected && (node.type === 'resource' || node.type === 'document'),
   );
@@ -45,38 +44,6 @@ export const ContextManager = () => {
   const { selectedResultItems } = useContextPanelStoreShallow((state) => ({
     selectedResultItems: state.selectedResultItems,
   }));
-
-  const handleItemClick = useCallback(
-    async (item: CanvasNode<any>) => {
-      const isSelectionNode = item.data?.metadata?.sourceType?.includes('Selection');
-
-      if (isSelectionNode) {
-        const sourceEntityId = item.data?.metadata?.sourceEntityId;
-        const sourceEntityType = item.data?.metadata?.sourceEntityType;
-
-        if (!sourceEntityId || !sourceEntityType) {
-          console.warn('Missing source entity information for selection node');
-          return;
-        }
-
-        const sourceNode = nodes.find(
-          (node) => node.data?.entityId === sourceEntityId && node.type === sourceEntityType,
-        );
-
-        if (!sourceNode) {
-          Message.warning({
-            content: t('canvas.contextManager.nodeNotFound'),
-          });
-          return;
-        }
-
-        setSelectedNode(sourceNode);
-      } else {
-        setSelectedNode(item);
-      }
-    },
-    [nodes, setSelectedNode, t],
-  );
 
   const handleRemoveItem = (item: CanvasNode<any>) => {
     removeContextItem(item.id);
@@ -124,17 +91,7 @@ export const ContextManager = () => {
               item={item}
               isLimit={!!filterErrorInfo?.[mapSelectionTypeToContentList(item?.type)]}
               isActive={selectedContextNodes.some((node) => node.id === item.id)}
-              onClick={() => handleItemClick(item)}
               onRemove={handleRemoveItem}
-              onOpenUrl={(url) => {
-                if (typeof url === 'function') {
-                  url();
-                } else if (typeof url === 'string') {
-                  window.open(url, '_blank');
-                } else {
-                  handleItemClick(item);
-                }
-              }}
             />
           ))}
         </div>

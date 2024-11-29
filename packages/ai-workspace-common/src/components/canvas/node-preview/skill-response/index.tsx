@@ -9,12 +9,12 @@ import { IconCheckCircle } from '@arco-design/web-react/icon';
 import { cn } from '@refly-packages/utils/cn';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { ActionStepCard } from './action-step';
+import { convertContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+
+import { PreviewChatInput } from './preview-chat-input';
+import { ChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-history';
 
 import './index.scss';
-import { convertContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
-import { ContextItem } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/context-item';
-import { ChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-history';
-import { ChatHistorySwitch } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/components/chat-history-switch';
 
 interface SkillResponseNodePreviewProps {
   resultId: string;
@@ -79,9 +79,9 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
 
   const { invokeParam, actionMeta, logs } = result ?? {};
   const { input, context } = invokeParam ?? {};
-
-  // Convert context to items
   const contextItems = convertContextToItems(context);
+
+  // Convert context to
   const selectedResultItems = [];
 
   return (
@@ -91,41 +91,28 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
         {actionMeta?.name}
       </div>
 
-      <div className="m-6 border border-solid border-gray-200 rounded-lg p-2 flex items-center space-x-2">
-        <ChatHistorySwitch
-          chatHistoryOpen={chatHistoryOpen}
-          setChatHistoryOpen={setChatHistoryOpen}
-          items={selectedResultItems}
-        />
-        <div>
-          {contextItems.length > 0 && (
-            <div className="context-items-container">
-              {contextItems.map((item) => (
-                <ContextItem
-                  canNotRemove={true}
-                  key={item.id}
-                  item={item}
-                  isLimit={false}
-                  isActive={false}
-                  onToggle={() => {}}
-                />
-              ))}
-            </div>
-          )}
+      <div className="ai-copilot-operation-container">
+        <div className="ai-copilot-operation-body">
+          <PreviewChatInput
+            contextItems={contextItems}
+            resultItems={selectedResultItems}
+            chatHistoryOpen={chatHistoryOpen}
+            setChatHistoryOpen={setChatHistoryOpen}
+            query={input?.query}
+          />
+          <div className="h-[4px]"></div>
+          <ChatHistory
+            readonly
+            isOpen={chatHistoryOpen}
+            onClose={() => setChatHistoryOpen(false)}
+            items={selectedResultItems}
+          />
         </div>
-        <div>{input?.query}</div>
       </div>
-
-      <ChatHistory
-        readonly
-        isOpen={chatHistoryOpen}
-        onClose={() => setChatHistoryOpen(false)}
-        items={selectedResultItems}
-      />
 
       {result?.logs?.length > 0 && (
         <div
-          className={cn('m-6 p-4 border border-solid border-gray-200 rounded-lg transition-all', {
+          className={cn('p-4 border border-solid border-gray-200 rounded-lg transition-all', {
             'px-4 py-2 cursor-pointer hover:bg-gray-50': logBoxCollapsed,
             'relative pb-0': !logBoxCollapsed,
           })}
