@@ -24,7 +24,7 @@ export const useCreateCanvas = () => {
         });
 
         if (data?.success) {
-          message.success(t('common.putSuccess'));
+          message.success(t('canvas.action.addSuccess'));
           navigate(`/canvas/${data?.data?.canvasId}`);
           getCanvasList();
         }

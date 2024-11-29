@@ -125,7 +125,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   return (
     <div className="w-full h-screen relative flex flex-col overflow-hidden">
       <CanvasToolbar onToolSelect={handleToolSelect} />
-      <TopToolbar />
+      <TopToolbar canvasId={canvasId} />
       <div className="flex-grow relative">
         <style>{selectionStyles}</style>
         <ReactFlow

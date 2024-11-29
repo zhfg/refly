@@ -25,7 +25,7 @@ export const useDeleteCanvas = () => {
 
       if (data?.success) {
         success = true;
-        message.success(t('common.putSuccess'));
+        message.success(t('canvas.action.deleteSuccess'));
 
         // Check and remove canvasId from localStorage if matches
         const storedCanvasId = localStorage.getItem('currentCanvasId');

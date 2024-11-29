@@ -378,6 +378,10 @@
       "addTool": "添加工具",
       "addDocument": "添加文档"
     },
+    "action": {
+      "deleteSuccess": "删除画布成功",
+      "addSuccess": "画布添加好啦，开始创作吧~"
+    },
     "skillResponse": {
       "skillCompleted": "技能执行完成",
       "stepTitle": "步骤 {{index}}"
