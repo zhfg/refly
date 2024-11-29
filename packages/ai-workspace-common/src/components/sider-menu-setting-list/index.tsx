@@ -19,7 +19,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
     setShowSettingModal: state.setShowSettingModal,
   }));
   const [modal, contextHolder] = Modal.useModal();
-  const [deleteCookie] = useCookie('_refly_ai_sid');
+  const [token, updateCookie, deleteCookie] = useCookie('_refly_ai_sid');
 
   const handleLogout = () => {
     modal.confirm?.({

@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react"
-import { Route, Routes, useMatch } from "react-router-dom"
+import { Navigate, Route, Routes, useMatch } from "react-router-dom"
 import { useEffect } from "react"
 import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
@@ -16,15 +16,8 @@ import { SuspenseLoading } from "@refly-packages/ai-workspace-common/components/
 // Lazy load components
 const Home = lazy(() => import("@/pages/home"))
 const Canvas = lazy(() => import("@/pages/canvas"))
-const Library = lazy(() => import("@/pages/library"))
-const Resource = lazy(() => import("@/pages/resource"))
-const ConvLibrary = lazy(() => import("@/pages/conv-library"))
-const ConvItem = lazy(() => import("@/pages/conv-item"))
-const Project = lazy(() => import("@/pages/project"))
-const Skill = lazy(() => import("@/pages/skill"))
-const SkillDetailPage = lazy(() => import("@/pages/skill-detail"))
-const Settings = lazy(() => import("@/pages/settings"))
-const ShareContent = lazy(() => import("@/pages/share-content"))
+
+// const ShareContent = lazy(() => import("@/pages/share-content"))
 
 const prefetchRoutes = () => {
   // Prefetch common routes
@@ -107,19 +100,22 @@ export const AppRouter = (props: { layout?: any }) => {
     ? userStore?.userProfile?.hasBetaAccess || false
     : true
 
+  const handleHomeRedirect = () => {
+    if (userStore?.isLogin) {
+      const savedCanvasId = localStorage.getItem("currentCanvasId")
+
+      if (savedCanvasId) {
+        return <Navigate to={`/canvas/${savedCanvasId}`} replace />
+      }
+    }
+    return <BetaProtectedRoute component={Home} hasBetaAccess={hasBetaAccess} />
+  }
+
   return (
     <Suspense fallback={<SuspenseLoading />}>
       <Layout>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <BetaProtectedRoute
-                component={Home}
-                hasBetaAccess={hasBetaAccess}
-              />
-            }
-          />
+          <Route path="/" element={handleHomeRedirect()} />
 
           <Route
             path="/canvas/:canvasId"
@@ -130,83 +126,12 @@ export const AppRouter = (props: { layout?: any }) => {
               />
             }
           />
-          <Route
-            path="/library"
-            element={
-              <BetaProtectedRoute
-                component={Library}
-                hasBetaAccess={hasBetaAccess}
-              />
-            }
-          />
-          <Route
-            path="/resource/:resId"
-            element={
-              <BetaProtectedRoute
-                component={Resource}
-                hasBetaAccess={hasBetaAccess}
-              />
-            }
-          />
-          <Route
-            path="/project/:projectId"
-            element={
-              <BetaProtectedRoute
-                component={Project}
-                hasBetaAccess={hasBetaAccess}
-              />
-            }
-          />
-          <Route
-            path="/thread"
-            element={
-              <BetaProtectedRoute
-                component={ConvLibrary}
-                hasBetaAccess={hasBetaAccess}
-              />
-            }
-          />
-          <Route
-            path="/thread/:convId"
-            element={
-              <BetaProtectedRoute
-                component={ConvItem}
-                hasBetaAccess={hasBetaAccess}
-              />
-            }
-          />
-          <Route
-            path="/skill"
-            element={
-              <BetaProtectedRoute
-                component={Skill}
-                hasBetaAccess={hasBetaAccess}
-              />
-            }
-          />
-          <Route
-            path="/skill-detail"
-            element={
-              <BetaProtectedRoute
-                component={SkillDetailPage}
-                hasBetaAccess={hasBetaAccess}
-              />
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <BetaProtectedRoute
-                component={Settings}
-                hasBetaAccess={hasBetaAccess}
-              />
-            }
-          />
+
           <Route
             path="/request-access"
             element={<RequestAccessRoute hasBetaAccess={hasBetaAccess} />}
           />
-          <Route path="/share/:shareCode" element={<ShareContent />} />
+          {/* <Route path="/share/:shareCode" element={<ShareContent />} /> */}
         </Routes>
       </Layout>
     </Suspense>
