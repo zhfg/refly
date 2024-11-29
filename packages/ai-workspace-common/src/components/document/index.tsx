@@ -986,6 +986,7 @@ export const DocumentEditor = (props: { docId: string }) => {
       <CanvasStatusBar />
       <div className="overflow-auto flex-grow">
         <Spin
+          className="document-editor-spin"
           tip={t('knowledgeBase.note.connecting')}
           loading={!document || isRequesting || documentServerStatus !== 'connected'}
           style={{ height: '100%', width: '100%' }}
