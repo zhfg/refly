@@ -137,7 +137,6 @@ Examples of query rewriting with context and chat history:
        "type": "selectedContent",
        "entityId": "content-2",
        "title": "AI Trends 2023",
-       "url": "https://example.com/ai-trends",
        "useWholeContent": true
      }
    ]
@@ -266,7 +265,6 @@ Expected JSON Structure:
     "type": "canvas" | "resource" | "selectedContent",
     "entityId": string,
     "title": string,
-    "url": string,
     "useWholeContent": boolean
   }],
   "intent": "SEARCH_QA" | "WRITING" | "READING_COMPREHENSION" | "OTHER",
@@ -311,7 +309,6 @@ Please analyze the query, focusing primarily on the current query and available 
           type: z.enum(['canvas', 'resource', 'selectedContent']),
           entityId: z.string().optional(),
           title: z.string(),
-          url: z.string().optional(),
           useWholeContent: z.boolean(),
         }),
       ),
@@ -321,7 +318,10 @@ Please analyze the query, focusing primarily on the current query and available 
     }),
   );
 
-  const result = await runnable.invoke([new SystemMessage(systemPrompt), new HumanMessage(userMessage)]);
+  const result = await runnable.invoke([new SystemMessage(systemPrompt), new HumanMessage(userMessage)], {
+    ...ctx.config,
+    metadata: ctx.config.metadata,
+  });
 
   ctx.ctxThis.engine.logger.log(`- Rewritten Query: ${result.rewrittenQuery}
     - Mentioned Context: ${safeStringifyJSON(result.mentionedContext)}

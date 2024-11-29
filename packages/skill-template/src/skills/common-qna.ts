@@ -29,6 +29,10 @@ import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils
 import * as commonQnA from '../scheduler/module/commonQnA';
 
 const stepTitleDict = {
+  analyzeContext: {
+    en: 'Context Analysis',
+    'zh-CN': '上下文分析',
+  },
   commonQnA: {
     en: 'Question Answering',
     'zh-CN': '问题回答',
@@ -78,7 +82,14 @@ export class CommonQnA extends BaseSkill {
       documents,
       contentList,
       projects,
+      uiLocale,
     } = config.configurable;
+
+    // set current step
+    config.metadata.step = {
+      name: 'analyzeContext',
+      title: stepTitleDict.analyzeContext[uiLocale],
+    };
 
     const { tplConfig } = config?.configurable || {};
     const enableWebSearch = tplConfig?.enableWebSearch?.value as boolean;
@@ -183,11 +194,6 @@ export class CommonQnA extends BaseSkill {
 
     const { currentSkill, uiLocale = 'en' } = config.configurable;
 
-    const stepMeta: ActionStepMeta = {
-      name: 'commonQnA',
-      title: stepTitleDict.commonQnA[uiLocale],
-    };
-
     // common preprocess
     const module = {
       buildSystemPrompt: commonQnA.buildCommonQnASystemPrompt,
@@ -198,13 +204,18 @@ export class CommonQnA extends BaseSkill {
 
     this.emitEvent({ event: 'log', content: `Start to generate an answer...` }, config);
 
+    // set current step
+    config.metadata.step = {
+      name: 'commonQnA',
+      title: stepTitleDict.commonQnA[uiLocale],
+    };
+
     const model = this.engine.chatModel({ temperature: 0.1 });
     const responseMessage = await model.invoke(requestMessages, {
       ...config,
       metadata: {
         ...config.metadata,
         ...currentSkill,
-        step: stepMeta,
       },
     });
 

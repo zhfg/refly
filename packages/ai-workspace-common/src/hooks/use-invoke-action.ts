@@ -69,7 +69,7 @@ export const useInvokeAction = () => {
   };
 
   const findOrCreateStep = (steps: ActionStep[], stepMeta: ActionStepMeta) => {
-    const existingStep = steps?.find((s) => s.name === stepMeta.name);
+    const existingStep = steps?.find((s) => s.name === stepMeta?.name);
     return existingStep
       ? { ...existingStep }
       : {
