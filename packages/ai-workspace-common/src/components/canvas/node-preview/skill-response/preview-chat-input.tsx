@@ -1,3 +1,4 @@
+import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
 import { Input, FormInstance, Form } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import { IContextItem, IResultItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
@@ -6,19 +7,32 @@ import { PreviewContextManager } from './preview-context-manager';
 
 const TextArea = Input.TextArea;
 
-export const PreviewChatInput = (props: {
+interface PreviewChatInputProps {
   contextItems: IContextItem[];
   resultItems: IResultItem[];
   chatHistoryOpen: boolean;
   setChatHistoryOpen: (open: boolean) => void;
   query: string;
-}) => {
-  const { contextItems, resultItems, chatHistoryOpen, setChatHistoryOpen, query } = props;
+  actionMeta?: {
+    icon?: any;
+    name?: string;
+  };
+}
+
+export const PreviewChatInput = (props: PreviewChatInputProps) => {
+  const { contextItems, resultItems, chatHistoryOpen, setChatHistoryOpen, query, actionMeta } = props;
   const { t } = useTranslation();
 
   return (
     <div className="ai-copilot-chat-container">
       <div className="chat-input-container">
+        <SelectedSkillHeader
+          readonly
+          skill={{
+            icon: actionMeta?.icon,
+            displayName: actionMeta?.name,
+          }}
+        />
         <PreviewContextManager
           contextItems={contextItems}
           resultItems={resultItems}
