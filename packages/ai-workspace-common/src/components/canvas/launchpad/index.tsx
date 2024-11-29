@@ -8,17 +8,13 @@ import { ChatHistory } from './chat-history';
 
 // stores
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
-import {
-  useContextPanelStore,
-  useContextPanelStoreShallow,
-} from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import {
   useChatStore,
   MessageIntentContext,
   useChatStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 
 // types
 import { editorEmitter, InPlaceSendMessagePayload } from '@refly-packages/utils/event-emitter/editor';
@@ -26,13 +22,11 @@ import { LOCALE } from '@refly/common-types';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
 import { useContextFilterErrorTip } from './context-manager/hooks/use-context-filter-errror-tip';
-import { ActionResult, InvokeSkillRequest } from '@refly/openapi-schema';
+import { InvokeSkillRequest } from '@refly/openapi-schema';
 import { genActionResultID } from '@refly-packages/utils/id';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { useActionResultStore } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { useChatHistory } from './hooks/use-chat-history';
+import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 export const LaunchPad = () => {
   const { t } = useTranslation();
@@ -92,22 +86,7 @@ export const LaunchPad = () => {
         query: userInput || newQAText.trim(),
       },
       modelName: selectedModel?.name,
-      context: {
-        resources: selectedContextItems
-          .filter((item) => item.type === 'resource')
-          .map((item) => ({
-            resourceId: item.data?.entityId || item.id,
-            isCurrent: item.isCurrentContext,
-            metadata: item.data?.metadata,
-          })),
-        documents: selectedContextItems
-          .filter((item) => item.type === 'document')
-          .map((item) => ({
-            documentId: item.data?.entityId || item.id,
-            isCurrent: item.isCurrentContext,
-            metadata: item.data?.metadata,
-          })),
-      },
+      context: convertContextItemsToContext(selectedContextItems),
       resultHistory: selectedResultItems.map((item) => ({
         resultId: item.resultId,
       })),

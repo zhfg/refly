@@ -7,11 +7,12 @@ import { ActionResult } from '@refly/openapi-schema';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { IconCheckCircle } from '@arco-design/web-react/icon';
 import { cn } from '@refly-packages/utils/cn';
-import { ContextItem } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/context-item';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { ActionStepCard } from './action-step';
 
 import './index.scss';
+import { convertContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { ContextItem } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/context-item';
 
 interface SkillResponseNodePreviewProps {
   resultId: string;
@@ -76,8 +77,8 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
   const { invokeParam, actionMeta, logs } = result ?? {};
   const { input, context } = invokeParam ?? {};
 
-  // TODO: fill context items
-  const contextItems = [];
+  // Convert context to items
+  const contextItems = convertContextToItems(context);
 
   return (
     <div className="flex flex-col space-y-4 p-4">
