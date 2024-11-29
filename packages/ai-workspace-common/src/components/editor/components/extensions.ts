@@ -14,8 +14,8 @@ import {
   SpaceAICommand,
   DoublePlusAICommand,
   Placeholder,
-} from '@refly-packages/editor-core/extensions';
-import { UploadImagesPlugin } from '@refly-packages/editor-core/plugins';
+} from '@refly-packages/ai-workspace-common/components/editor/core/extensions';
+import { UploadImagesPlugin } from '@refly-packages/ai-workspace-common/components/editor/core/plugins';
 
 import { cx } from 'class-variance-authority';
 import { common, createLowlight } from 'lowlight';

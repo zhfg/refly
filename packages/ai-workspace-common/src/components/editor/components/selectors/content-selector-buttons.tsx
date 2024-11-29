@@ -1,5 +1,4 @@
-import { Tooltip } from '@arco-design/web-react';
-import { Button } from '../ui/button';
+import { Button, Tooltip } from 'antd';
 import { BsChatLeftQuote } from 'react-icons/bs';
 import { useTranslation } from 'react-i18next';
 
@@ -13,9 +12,9 @@ export const ContentSelectorButtons: React.FC<ContentSelectorButtonsProps> = (pr
   const { t } = useTranslation();
 
   return (
-    <Tooltip content={t('knowledgeBase.canvas.editor.toolbar.quote')}>
+    <Tooltip title={t('knowledgeBase.canvas.editor.toolbar.quote')}>
       <div className="flex">
-        <Button size="sm" variant="ghost" className="rounded-none" onClick={handleClick}>
+        <Button size="small" type="text" className="rounded-none" onClick={handleClick}>
           <BsChatLeftQuote style={{ color: '#00968F' }} />
         </Button>
       </div>

@@ -1,16 +1,11 @@
-import {
-  EditorCommand,
-  EditorCommandEmpty,
-  EditorCommandItem,
-  EditorCommandList,
-} from '@refly-packages/editor-core/components';
+import { EditorCommand, EditorCommandEmpty, EditorCommandItem, EditorCommandList } from '../core/components';
 import { useState } from 'react';
+import { Divider } from 'antd';
 import { ColorSelector } from './selectors/color-selector';
 import { LinkSelector } from './selectors/link-selector';
 import { NodeSelector } from './selectors/node-selector';
 import { ContentSelectorButtons } from './selectors/content-selector-buttons';
 import { AIBtnSelector } from './selectors/ai-btn-selector';
-import { Separator } from './ui/separator';
 
 import GenerativeMenuSwitch from './generative/inline/generative-menu-switch';
 import GenerativeBlockMenuSwitch from './generative/block/generative-block-menu-switch';
@@ -65,12 +60,12 @@ export const CollabGenAIMenuSwitch: React.FC<CollabGenAIMenuSwitchProps> = (prop
     <GenerativeMenuSwitch open={openAI} onOpenChange={setOpenAI}>
       <AIBtnSelector open={openAI} onOpenChange={setOpenAI} />
       <ContentSelectorButtons text={contentSelector?.text} handleClick={contentSelector?.handleClick} />
-      <Separator orientation="vertical" />
+      <Divider type="vertical" />
       <NodeSelector open={openNode} onOpenChange={setOpenNode} />
-      <Separator orientation="vertical" />
+      <Divider type="vertical" />
       <TextButtons />
       <LinkSelector open={openLink} onOpenChange={setOpenLink} />
-      <Separator orientation="vertical" />
+      <Divider type="vertical" />
       <ColorSelector open={openColor} onOpenChange={setOpenColor} />
     </GenerativeMenuSwitch>
   );

@@ -15,18 +15,28 @@ import {
   CollabEditorCommand,
   CollabGenAIMenuSwitch,
   CollabGenAIBlockMenu,
-} from '@refly-packages/editor-component/advanced-editor';
-import { EditorRoot } from '@refly-packages/editor-core/components';
-import { EditorContent, EditorInstance } from '@refly-packages/editor-core/components';
+} from '@refly-packages/ai-workspace-common/components/editor/components/advanced-editor';
+import {
+  EditorRoot,
+  EditorContent,
+  EditorInstance,
+} from '@refly-packages/ai-workspace-common/components/editor/core/components';
 
-import { configureHighlightJs, ImageResizer, handleCommandNavigation } from '@refly-packages/editor-core/extensions';
-import { defaultExtensions, Placeholder } from '@refly-packages/editor-component/extensions';
-import { createUploadFn } from '@refly-packages/editor-component/image-upload';
-import { configureSlashCommand } from '@refly-packages/editor-component/slash-command';
+import {
+  configureHighlightJs,
+  ImageResizer,
+  handleCommandNavigation,
+} from '@refly-packages/ai-workspace-common/components/editor/core/extensions';
+import {
+  defaultExtensions,
+  Placeholder,
+} from '@refly-packages/ai-workspace-common/components/editor/components/extensions';
+import { createUploadFn } from '@refly-packages/ai-workspace-common/components/editor/components/image-upload';
+import { configureSlashCommand } from '@refly-packages/ai-workspace-common/components/editor/components/slash-command';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import Collaboration from '@tiptap/extension-collaboration';
 import { useDebouncedCallback } from 'use-debounce';
-import { handleImageDrop, handleImagePaste } from '@refly-packages/editor-core/plugins';
+import { handleImageDrop, handleImagePaste } from '@refly-packages/ai-workspace-common/components/editor/core/plugins';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
 
@@ -37,7 +47,6 @@ import { useDocumentStore, useDocumentStoreShallow } from '@refly-packages/ai-wo
 import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 
 // content selector
-import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector';
 import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
 import classNames from 'classnames';
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
@@ -49,9 +58,8 @@ import { Button, Divider, message, Modal } from 'antd';
 import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
-import { useBlocker, useSearchParams } from 'react-router-dom';
+import { useBlocker } from 'react-router-dom';
 import { genUniqueId } from '@refly-packages/utils/id';
-import { getSelectionNodesMarkdown } from '@refly-packages/ai-workspace-common/modules/content-selector/utils/highlight-selection';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/hooks/use-selection-context';
 
 class TokenStreamProcessor {
@@ -452,9 +460,9 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
       Collaboration.configure({
         document: websocketProvider.document,
       }),
-      CollaborationCursor.configure({
-        provider: websocketProvider,
-      }),
+      // CollaborationCursor.configure({
+      //   provider: websocketProvider,
+      // }),
       TableOfContents.configure({
         getIndex: getHierarchicalIndexes,
         onUpdate(content) {

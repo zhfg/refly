@@ -46,14 +46,6 @@ export default defineConfig(() => {
           __dirname,
           "../../packages/ai-workspace-common/src",
         ),
-        "@refly-packages/editor-component": path.resolve(
-          __dirname,
-          "../../packages/editor-common/src/components",
-        ),
-        "@refly-packages/editor-core": path.resolve(
-          __dirname,
-          "../../packages/editor-common/src/headless-core",
-        ),
         "@refly/utils": path.resolve(__dirname, "../../packages/utils/src"),
       },
     },

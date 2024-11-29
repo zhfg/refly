@@ -1,6 +1,6 @@
 import { ArrowDownWideNarrow, CheckCheck, RefreshCcwDot, StepForward, WrapText } from 'lucide-react';
-import { useEditor } from '@refly-packages/editor-core/components';
-import { getPrevText } from '@refly-packages/editor-core/utils';
+import { useEditor } from '@refly-packages/ai-workspace-common/components/editor/core/components';
+import { getPrevText } from '@refly-packages/ai-workspace-common/components/editor/core/utils';
 import { CommandGroup, CommandItem, CommandList, CommandSeparator } from '../../ui/command';
 
 const options = [

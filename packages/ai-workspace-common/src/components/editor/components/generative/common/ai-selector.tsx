@@ -1,11 +1,6 @@
-'use client';
-
-import { ArrowUp } from 'lucide-react';
-import { useEditor } from '@refly-packages/editor-core/components';
-import { addAIHighlight } from '@refly-packages/editor-core/extensions';
+import { useEditor } from '../../../core/components';
+import { addAIHighlight } from '../../../core/extensions';
 import { memo, useEffect, useRef, useState } from 'react';
-import Markdown from 'react-markdown';
-import { toast } from 'sonner';
 import CrazySpinner from '../../ui/icons/crazy-spinner';
 import Magic from '../../ui/icons/magic';
 import { ScrollArea } from '../../ui/scroll-area';
@@ -15,8 +10,8 @@ import { LOCALE } from '@refly/common-types';
 import { editorEmitter, InPlaceEditType, InPlaceActionType } from '@refly/utils/event-emitter/editor';
 import { Input } from '@arco-design/web-react';
 import { Button } from 'antd';
-import { cn } from '@refly-packages/editor-component/utils';
-import { getOsType } from '@refly-packages/utils/env';
+import { cn } from '@refly/utils/cn';
+import { getOsType } from '@refly/utils/env';
 import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/components/add-base-mark-context';
 import { AISettingsDropdown } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/chat-actions/ai-settings';
 

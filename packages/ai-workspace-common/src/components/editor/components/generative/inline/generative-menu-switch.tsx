@@ -1,5 +1,5 @@
-import { EditorBubble, useEditor } from '@refly-packages/editor-core/components';
-import { removeAIHighlight } from '@refly-packages/editor-core/extensions';
+import { EditorBubble, useEditor } from '../../../core/components';
+import { removeAIHighlight } from '../../../core/extensions';
 import { Fragment, type ReactNode, useEffect, useRef } from 'react';
 import type { Instance } from 'tippy.js';
 

@@ -1,11 +1,8 @@
-import { PopoverContent } from '../ui/popover';
-import { Popover, PopoverTrigger } from '@radix-ui/react-popover';
-import { useEditor } from '@refly-packages/editor-core/components';
+import { Popover } from 'antd';
+import { useEditor } from '../../core/components';
 import { useEffect, useRef } from 'react';
 import Magic from '../ui/icons/magic';
-import { Button } from '../ui/button';
-
-import { AISelector } from '../generative/common/ai-selector';
+import { Button } from 'antd';
 
 interface AIBtnSelectorProps {
   open: boolean;
@@ -26,18 +23,16 @@ export const AIBtnSelector = ({ open, onOpenChange }: AIBtnSelectorProps) => {
   if (!editor) return null;
 
   return (
-    <Popover modal={true} open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          className="gap-1 rounded-none text-primary text-primary-600"
-          variant="ghost"
-          size="sm"
-          onClick={() => onOpenChange(true)}
-        >
-          <Magic className="w-4 h-4" />
-          Ask AI
-        </Button>
-      </PopoverTrigger>
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <Button
+        className="gap-1 rounded-none text-primary text-primary-600"
+        type="text"
+        size="small"
+        onClick={() => onOpenChange(true)}
+      >
+        <Magic className="w-4 h-4" />
+        Ask AI
+      </Button>
       {/* {open && (
         <PopoverContent
           align="start"

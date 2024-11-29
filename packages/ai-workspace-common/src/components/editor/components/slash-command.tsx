@@ -10,10 +10,9 @@ import {
   Text,
   TextQuote,
 } from 'lucide-react';
-import { createSuggestionItems } from '@refly-packages/editor-core/extensions';
-import { Command, renderItems } from '@refly-packages/editor-core/extensions';
+import { createSuggestionItems, Command, renderItems } from '../core/extensions';
 import { createUploadFn } from './image-upload';
-import Magic from '@refly-packages/editor-component/ui/icons/magic';
+import Magic from './ui/icons/magic';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { Editor, Range } from '@tiptap/core';
 

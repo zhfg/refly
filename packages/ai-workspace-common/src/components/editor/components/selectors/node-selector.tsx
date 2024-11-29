@@ -1,12 +1,10 @@
-import { SVGProps, useEffect } from 'react';
+import { SVGProps } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
-import { EditorBubbleItem, useEditor } from '@refly-packages/editor-core/components';
+import { EditorBubbleItem, useEditor } from '../../core/components';
 import { LuCode, LuList, LuListOrdered, LuListTodo } from 'react-icons/lu';
 import { RiH1, RiH2, RiH3, RiQuoteText, RiText } from 'react-icons/ri';
 
-import { Button } from '../ui/button';
-import { PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Popover } from '@radix-ui/react-popover';
+import { Button, Popover } from 'antd';
 
 export type SelectorItem = {
   name: string;
@@ -84,34 +82,42 @@ export const NodeSelector = ({ open, onOpenChange }: NodeSelectorProps) => {
   if (!editor) return null;
   const activeItem = items.filter((item) => item.isActive(editor)).pop() ?? items[0];
 
-  return (
-    <Popover modal={true} open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger asChild className="gap-2 rounded-none border-none hover:bg-accent focus:ring-0">
-        <Button size="sm" variant="ghost" className="gap-2">
-          <activeItem.icon className="h-4 w-4" />
-          <ChevronDown className="h-3 w-3" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent sideOffset={5} align="start" className="w-48 p-1">
-        {items.map((item) => (
-          <EditorBubbleItem
-            key={item.name}
-            onSelect={(editor) => {
-              item.command(editor);
-              onOpenChange(false);
-            }}
-            className="flex cursor-pointer items-center justify-between rounded-sm px-2 py-1 text-sm hover:bg-accent"
-          >
-            <div className="flex items-center space-x-2">
-              <div className="rounded-sm border p-1 flex items-center justify-center">
-                <item.icon className="h-4 w-4" />
-              </div>
-              <span className="text-xs">{item.name}</span>
+  const content = (
+    <div className="w-48 p-1">
+      {items.map((item) => (
+        <EditorBubbleItem
+          key={item.name}
+          onSelect={(editor) => {
+            item.command(editor);
+            onOpenChange(false);
+          }}
+          className="flex cursor-pointer items-center justify-between rounded-sm px-2 py-1 text-sm hover:bg-gray-100"
+        >
+          <div className="flex items-center space-x-2">
+            <div className="rounded-sm border p-1 flex items-center justify-center">
+              <item.icon className="h-4 w-4" />
             </div>
-            {activeItem.name === item.name && <Check className="h-4 w-4" />}
-          </EditorBubbleItem>
-        ))}
-      </PopoverContent>
+            <span className="text-xs">{item.name}</span>
+          </div>
+          {activeItem.name === item.name && <Check className="h-4 w-4" />}
+        </EditorBubbleItem>
+      ))}
+    </div>
+  );
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={onOpenChange}
+      content={content}
+      trigger="click"
+      placement="bottom"
+      overlayClassName="editor-node-selector-popover"
+    >
+      <Button size="small" type="text" className="gap-2 flex items-center">
+        <activeItem.icon className="h-4 w-4" />
+        <ChevronDown className="h-3 w-3" />
+      </Button>
     </Popover>
   );
 };

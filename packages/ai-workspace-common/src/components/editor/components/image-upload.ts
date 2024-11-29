@@ -1,6 +1,6 @@
-import { createImageUpload } from '@refly-packages/editor-core/plugins';
+import { createImageUpload } from '@refly-packages/ai-workspace-common/components/editor/core/plugins';
 import { getServerOrigin } from '@refly-packages/utils/url';
-import { toast } from 'sonner';
+import { message } from 'antd';
 
 export const uploadFn = createImageUpload({
   onUpload: async (file: File) => {
@@ -13,7 +13,7 @@ export const uploadFn = createImageUpload({
       ?.split('=')[1];
 
     if (!token) {
-      toast.error('No token found');
+      message.error('No token found');
       return false;
     }
 
@@ -26,7 +26,7 @@ export const uploadFn = createImageUpload({
     });
 
     if (!response.ok) {
-      toast.error('Upload failed');
+      message.error('Upload failed');
       return false;
     }
 
@@ -35,11 +35,11 @@ export const uploadFn = createImageUpload({
   },
   validateFn: (file) => {
     if (!file.type.includes('image/')) {
-      toast.error('File type not supported.');
+      message.error('File type not supported.');
       return false;
     }
     if (file.size / 1024 / 1024 > 20) {
-      toast.error('File size too big (max 20MB).');
+      message.error('File size too big (max 20MB).');
       return false;
     }
     return true;
@@ -60,7 +60,7 @@ export const createUploadFn = (param: { entityId: string; entityType: string }) 
         ?.split('=')[1];
 
       if (!token) {
-        toast.error('No token found');
+        message.error('No token found');
         return false;
       }
 
@@ -73,7 +73,7 @@ export const createUploadFn = (param: { entityId: string; entityType: string }) 
       });
 
       if (!response.ok) {
-        toast.error('Upload failed');
+        message.error('Upload failed');
         return false;
       }
 
@@ -82,11 +82,11 @@ export const createUploadFn = (param: { entityId: string; entityType: string }) 
     },
     validateFn: (file) => {
       if (!file.type.includes('image/')) {
-        toast.error('File type not supported.');
+        message.error('File type not supported.');
         return false;
       }
       if (file.size / 1024 / 1024 > 20) {
-        toast.error('File size too big (max 20MB).');
+        message.error('File size too big (max 20MB).');
         return false;
       }
       return true;
