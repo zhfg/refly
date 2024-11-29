@@ -38,6 +38,7 @@ import { useHandleSiderData } from "@refly-packages/ai-workspace-common/hooks/us
 import { useSiderStoreShallow } from "@refly-packages/ai-workspace-common/stores/sider"
 import getClient from "@refly-packages/ai-workspace-common/requests/proxiedRequest"
 import { useDebouncedCallback } from "use-debounce"
+import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/use-create-canvas"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -127,7 +128,9 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     setLoginModalVisible: state.setLoginModalVisible,
   }))
 
-  const { getCanvasList, getLibraryList } = useHandleSiderData(true)
+  const { getLibraryList } = useHandleSiderData(true)
+  const { debouncedCreateCanvas, isCreating: createCanvasLoading } =
+    useCreateCanvas()
 
   const { t } = useTranslation()
 
@@ -206,25 +209,6 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     ],
   ]
 
-  const [createCanvasLoading, setcreateCanvasLoading] = useState(false)
-  const handleNewCanvas = useDebouncedCallback(async () => {
-    if (createCanvasLoading) return
-
-    setcreateCanvasLoading(true)
-    const { data } = await getClient().createCanvas({
-      body: {
-        title: t("common.newCanvas"),
-      },
-    })
-    if (data?.success) {
-      message.success(t("common.putSuccess"))
-      navigate(`/canvas/${data?.data?.canvasId}`)
-      getCanvasList()
-    }
-
-    setcreateCanvasLoading(false)
-  }, 300)
-
   const [createDocumentLoading, setCreateDocumentLoading] = useState(false)
 
   const handleNewDocument = useDebouncedCallback(async () => {
@@ -279,7 +263,9 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                       }>
                       {item.key === "Canvas" && (
                         <>
-                          <MenuItem key="newCanvas" onClick={handleNewCanvas}>
+                          <MenuItem
+                            key="newCanvas"
+                            onClick={debouncedCreateCanvas}>
                             <Button
                               loading={createCanvasLoading}
                               type="text"
