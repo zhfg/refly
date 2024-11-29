@@ -34,12 +34,14 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
             displayName: actionMeta?.name,
           }}
         />
-        <PreviewContextManager
-          contextItems={contextItems}
-          resultItems={resultItems}
-          chatHistoryOpen={chatHistoryOpen}
-          setChatHistoryOpen={setChatHistoryOpen}
-        />
+        {contextItems?.length === 0 && resultItems?.length === 0 ? null : (
+          <PreviewContextManager
+            contextItems={contextItems}
+            resultItems={resultItems}
+            chatHistoryOpen={chatHistoryOpen}
+            setChatHistoryOpen={setChatHistoryOpen}
+          />
+        )}
         <div className="chat-input-body">
           <div className="ai-copilot-chat-input-container">
             <div className="ai-copilot-chat-input-body">
