@@ -16,6 +16,7 @@ import {
   Globe,
   FilePlus,
   Trash2,
+  PinOff,
 } from 'lucide-react';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasNode } from '../nodes/types';
@@ -176,7 +177,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
               className={`p-1.5 hover:bg-gray-100 ${isPinned ? 'text-primary-600' : 'text-gray-500'}`}
               onClick={onPin}
             >
-              <Pin className="w-4 h-4" />
+              {isPinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
             </Button>
           </Tooltip>
         )}
