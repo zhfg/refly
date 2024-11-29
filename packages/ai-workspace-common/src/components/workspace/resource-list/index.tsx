@@ -6,7 +6,6 @@ import {
   IconNotePencil,
   IconDelete,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { GrView } from 'react-icons/gr';
 
 import { useEffect, useState } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -18,15 +17,18 @@ import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/wo
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { Resource } from '@refly/openapi-schema';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
 const { Meta } = Card;
 
 export const ResourceList = () => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
-  const { showLibraryModal } = useSiderStoreShallow((state) => ({
+  const { showLibraryModal, setShowLibraryModal } = useSiderStoreShallow((state) => ({
     showLibraryModal: state.showLibraryModal,
+    setShowLibraryModal: state.setShowLibraryModal,
   }));
+  const { addNode } = useCanvasControl();
 
   const { getLibraryList } = useHandleSiderData();
   const { dataList, setDataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
@@ -39,8 +41,21 @@ export const ResourceList = () => {
     pageSize: 20,
   });
 
-  const ActionView = () => {
-    return <Button type="text" icon={<GrView />} />;
+  const handleEdit = (entityId: string, title: string) => {
+    addNode({
+      type: 'resource',
+      data: {
+        title,
+        entityId,
+      },
+    });
+    setShowLibraryModal(false);
+  };
+
+  const ActionView = ({ resource }: { resource: Resource }) => {
+    return (
+      <Button type="text" icon={<IconNotePencil />} onClick={() => handleEdit(resource.resourceId, resource.title)} />
+    );
   };
 
   const ActionDropdown = ({ resource }: { resource: Resource }) => {
@@ -130,7 +145,7 @@ export const ResourceList = () => {
               <Card
                 hoverable
                 cover={<div className="h-[100px] bg-gray-200"></div>}
-                actions={[<ActionView key="view" />, <ActionDropdown resource={item} key="ellipsis" />]}
+                actions={[<ActionView key="view" resource={item} />, <ActionDropdown resource={item} key="ellipsis" />]}
               >
                 <Meta
                   title={item.title}

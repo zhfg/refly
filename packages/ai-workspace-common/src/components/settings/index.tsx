@@ -53,7 +53,7 @@ export const SettingModal = (props: SettingModalProps) => {
       open={visible}
       onCancel={() => setVisible(false)}
     >
-      <Tabs size="large" tabPosition="left" items={tabs} />
+      <Tabs size="small" tabPosition="left" items={tabs} />
     </Modal>
   );
 };

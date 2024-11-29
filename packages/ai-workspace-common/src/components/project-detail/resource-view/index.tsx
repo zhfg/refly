@@ -35,17 +35,14 @@ import { SelectionContext } from '@refly-packages/ai-workspace-common/components
 
 interface ResourceViewProps {
   resourceId: string;
+  deckSize: number;
+  setDeckSize: (size: number) => void;
 }
 
 export const ResourceView = (props: ResourceViewProps) => {
-  const { resourceId } = props;
+  const { resourceId, deckSize, setDeckSize } = props;
 
   const { t } = useTranslation();
-
-  const { deckSize, setDeckSize } = useReferencesStoreShallow((state) => ({
-    deckSize: state.deckSize,
-    setDeckSize: state.setDeckSize,
-  }));
 
   const resourceStore = useResourceStoreShallow((state) => ({
     resource: state.resource,
@@ -195,7 +192,7 @@ export const ResourceView = (props: ResourceViewProps) => {
           style={{ color: deckSize ? 'rgb(var(--primary-6))' : '#000' }}
           icon={<IconQuote />}
           onClick={() => {
-            setDeckSize(deckSize ? 0 : 300);
+            setDeckSize(deckSize ? 0 : 200);
           }}
         ></Button>
       </div>

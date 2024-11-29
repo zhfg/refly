@@ -3,6 +3,7 @@ import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { useTranslation } from 'react-i18next';
 import { FC } from 'react';
 
+import { PiShootingStar } from 'react-icons/pi';
 import { MdOutlineHideImage } from 'react-icons/md';
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
 import { IconMoreHorizontal } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -68,7 +69,9 @@ export const TopToolbar: FC<TopToolbarProps> = ({}) => {
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2 bg-[#FCFCF9] rounded-lg px-2 py-1 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
+        <div className="flex items-center bg-[#FCFCF9] rounded-lg px-2 py-1 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
+          <Button type="text" icon={<PiShootingStar />} />
+          <Divider type="vertical" />
           <Tooltip title={showPreview ? 'Hide Preview' : 'Show Preview'}>
             <Button
               type="text"
@@ -76,9 +79,9 @@ export const TopToolbar: FC<TopToolbarProps> = ({}) => {
               onClick={() => setShowPreview(!showPreview)}
             />
           </Tooltip>
-          <Divider type="vertical" />
-          <Button type="text" icon={<IconMoreHorizontal />} />
         </div>
+
+        <Button type="text" icon={<IconMoreHorizontal />} />
       </div>
     </div>
   );
