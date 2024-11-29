@@ -33,6 +33,7 @@ export const ChatInput = (props: ChatInputProps) => {
 
   const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
+    setSelectedSkill: state.setSelectedSkill,
   }));
   useEffect(() => {
     if (!skillStore.selectedSkill?.configSchema?.items?.length) {
@@ -89,7 +90,7 @@ export const ChatInput = (props: ChatInputProps) => {
   return (
     <div className="ai-copilot-chat-container">
       <div className="chat-input-container">
-        <SelectedSkillHeader />
+        <SelectedSkillHeader skill={skillStore.selectedSkill} onClose={() => skillStore.setSelectedSkill(null)} />
         <ContextManager />
         <div className="chat-input-body">
           <div className="ai-copilot-chat-input-container">

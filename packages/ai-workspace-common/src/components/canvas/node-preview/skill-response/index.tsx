@@ -86,11 +86,6 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
 
   return (
     <div className="flex flex-col space-y-4 p-4">
-      <div>
-        {actionMeta?.icon?.value}
-        {actionMeta?.name}
-      </div>
-
       <div className="ai-copilot-operation-container">
         <div className="ai-copilot-operation-body">
           <PreviewChatInput
@@ -99,6 +94,7 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
             chatHistoryOpen={chatHistoryOpen}
             setChatHistoryOpen={setChatHistoryOpen}
             query={input?.query}
+            actionMeta={actionMeta}
           />
           <div className="h-[4px]"></div>
           <ChatHistory
