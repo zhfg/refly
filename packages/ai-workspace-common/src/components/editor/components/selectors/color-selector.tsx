@@ -158,7 +158,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
       placement="bottom"
       overlayClassName="editor-color-popover"
     >
-      <Button ghost size="small" type="text" className="gap-2 rounded-none">
+      <Button ghost type="text" className="gap-0.5 rounded-none pl-1 pr-2">
         <span
           className="rounded-sm px-1 text-sm font-normal"
           style={{

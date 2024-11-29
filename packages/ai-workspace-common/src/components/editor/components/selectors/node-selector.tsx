@@ -115,12 +115,10 @@ export const NodeSelector = ({ open, onOpenChange }: NodeSelectorProps) => {
       className="flex items-center"
       overlayClassName="editor-node-selector-popover"
     >
-      <div className="flex items-center">
-        <Button ghost size="small" type="text" className="gap-2 flex items-center">
-          <activeItem.icon className="h-4 w-4" />
-          <ChevronDown className="h-3 w-3" />
-        </Button>
-      </div>
+      <Button ghost type="text" className="gap-0.5 flex items-center px-1 rounded-none">
+        <activeItem.icon className="h-4 w-4" />
+        <ChevronDown className="h-3 w-3" />
+      </Button>
     </Popover>
   );
 };

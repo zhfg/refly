@@ -26,7 +26,7 @@ export const AIBtnSelector = ({ open, onOpenChange }: AIBtnSelectorProps) => {
     <Popover open={open} onOpenChange={onOpenChange}>
       <Button
         ghost
-        className="gap-1 rounded-none text-primary text-primary-600"
+        className="gap-1 rounded-none text-primary text-primary-600 px-2"
         type="text"
         onClick={() => onOpenChange(true)}
       >
