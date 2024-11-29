@@ -25,8 +25,10 @@ const CanvasPage = () => {
     } else if (canvasId === "empty") {
       if (canvasList.length > 0) {
         navigate(`/canvas/${canvasList[0].id}`, { replace: true })
+        localStorage.setItem("currentCanvasId", canvasList[0].id)
+      } else {
+        localStorage.removeItem("currentCanvasId")
       }
-      localStorage.removeItem("currentCanvasId")
     }
   }, [canvasId, canvasList, navigate])
 
