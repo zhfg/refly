@@ -1,5 +1,5 @@
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { List, Card, Dropdown, Button, Popconfirm, message, Empty } from 'antd';
+import { List, Card, Dropdown, Button, Popconfirm, message, Empty, Tooltip } from 'antd';
 import type { MenuProps, DropdownProps } from 'antd';
 import {
   IconMoreHorizontal,
@@ -54,7 +54,9 @@ export const ResourceList = () => {
 
   const ActionView = ({ resource }: { resource: Resource }) => {
     return (
-      <Button type="text" icon={<IconNotePencil />} onClick={() => handleEdit(resource.resourceId, resource.title)} />
+      <Tooltip title={t('workspace.addToCanvas')}>
+        <Button type="text" icon={<IconNotePencil />} onClick={() => handleEdit(resource.resourceId, resource.title)} />
+      </Tooltip>
     );
   };
 
@@ -148,7 +150,7 @@ export const ResourceList = () => {
                 actions={[<ActionView key="view" resource={item} />, <ActionDropdown resource={item} key="ellipsis" />]}
               >
                 <Meta
-                  title={item.title}
+                  title={item.title || t('common.unTitle')}
                   description={
                     <div className="text-xs text-black/40">
                       {time(item.updatedAt, language as LOCALE)
