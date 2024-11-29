@@ -19,16 +19,8 @@ const CanvasPage = () => {
   }))
 
   useEffect(() => {
-    // Store canvasId in localStorage if it exists
-    if (canvasId && canvasId !== "empty") {
-      localStorage.setItem("currentCanvasId", canvasId)
-    } else if (canvasId === "empty") {
-      if (canvasList.length > 0) {
-        navigate(`/canvas/${canvasList[0].id}`, { replace: true })
-        localStorage.setItem("currentCanvasId", canvasList[0].id)
-      } else {
-        localStorage.removeItem("currentCanvasId")
-      }
+    if (canvasId === "empty" && canvasList.length > 0) {
+      navigate(`/canvas/${canvasList[0].id}`, { replace: true })
     }
   }, [canvasId, canvasList, navigate])
 

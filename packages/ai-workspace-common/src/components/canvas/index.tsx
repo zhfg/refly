@@ -232,6 +232,14 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
 export const Canvas = (props: { canvasId: string }) => {
   const { canvasId } = props;
 
+  useEffect(() => {
+    if (canvasId && canvasId !== 'empty') {
+      localStorage.setItem('currentCanvasId', canvasId);
+    } else {
+      localStorage.removeItem('currentCanvasId');
+    }
+  }, [canvasId]);
+
   return (
     <CanvasProvider canvasId={canvasId}>
       <ReactFlowProvider>
