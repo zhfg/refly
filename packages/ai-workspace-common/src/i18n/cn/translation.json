@@ -186,10 +186,6 @@
         "project": "新项目"
       }
     },
-    "resourceProjectList": {
-      "addToCollection": "添加到项目",
-      "removeConfirmText": "确认要从此项目移除吗?"
-    },
     "labelGroup": {
       "addLabel": "点击添加标签",
       "addLabelTitle": "添加标签",

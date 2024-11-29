@@ -18,7 +18,7 @@ import {
 } from '@refly-packages/editor-component/advanced-editor';
 import { EditorRoot } from '@refly-packages/editor-core/components';
 import { EditorContent, EditorInstance } from '@refly-packages/editor-core/components';
-import { DeleteDropdownMenu } from '@refly-packages/ai-workspace-common/components/project-detail/delete-dropdown-menu';
+
 import { configureHighlightJs, ImageResizer, handleCommandNavigation } from '@refly-packages/editor-core/extensions';
 import { defaultExtensions, Placeholder } from '@refly-packages/editor-component/extensions';
 import { createUploadFn } from '@refly-packages/editor-component/image-upload';
@@ -30,6 +30,7 @@ import { handleImageDrop, handleImagePaste } from '@refly-packages/editor-core/p
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
 
+import { DeleteDropdownMenu } from './dropdown';
 import { AiOutlineWarning, AiOutlineFileWord } from 'react-icons/ai';
 import { getClientOrigin, getWsServerOrigin } from '@refly-packages/utils/url';
 import { useDocumentStore, useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';

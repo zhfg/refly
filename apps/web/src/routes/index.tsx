@@ -17,10 +17,8 @@ import { SuspenseLoading } from "@refly-packages/ai-workspace-common/components/
 const Home = lazy(() => import("@/pages/home"))
 const Canvas = lazy(() => import("@/pages/canvas"))
 const Library = lazy(() => import("@/pages/library"))
-const Resource = lazy(() => import("@/pages/resource"))
 const ConvLibrary = lazy(() => import("@/pages/conv-library"))
 const ConvItem = lazy(() => import("@/pages/conv-item"))
-const Project = lazy(() => import("@/pages/project"))
 const Skill = lazy(() => import("@/pages/skill"))
 const SkillDetailPage = lazy(() => import("@/pages/skill-detail"))
 const Settings = lazy(() => import("@/pages/settings"))
@@ -32,8 +30,6 @@ const prefetchRoutes = () => {
   import("@/pages/home")
   import("@/pages/canvas")
   import("@/pages/library")
-  import("@/pages/resource")
-  import("@/pages/project")
   import("@/pages/conv-library")
   import("@/pages/conv-item")
   import("@/pages/skill")
@@ -135,24 +131,6 @@ export const AppRouter = (props: { layout?: any }) => {
             element={
               <BetaProtectedRoute
                 component={Library}
-                hasBetaAccess={hasBetaAccess}
-              />
-            }
-          />
-          <Route
-            path="/resource/:resId"
-            element={
-              <BetaProtectedRoute
-                component={Resource}
-                hasBetaAccess={hasBetaAccess}
-              />
-            }
-          />
-          <Route
-            path="/project/:projectId"
-            element={
-              <BetaProtectedRoute
-                component={Project}
                 hasBetaAccess={hasBetaAccess}
               />
             }

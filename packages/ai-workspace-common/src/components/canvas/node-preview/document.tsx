@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Splitter } from 'antd';
-import { DocumentEditor } from '../../project-detail/document';
-import ResourceDeck from '../../project-detail/resource-view/resource-deck';
+import { DocumentEditor } from '@refly-packages/ai-workspace-common/components/document';
+import ResourceDeck from '@refly-packages/ai-workspace-common/components/resource-view/resource-deck';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
 
 interface DocumentNodePreviewProps {

@@ -185,10 +185,6 @@
         "project": "New Project"
       }
     },
-    "resourceProjectList": {
-      "addToCollection": "Add to Project",
-      "removeConfirmText": "Are you sure to remove this resource from the project?"
-    },
     "labelGroup": {
       "addLabel": "Click to add labels",
       "addLabelTitle": "Add labels",
