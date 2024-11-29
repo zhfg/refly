@@ -17,17 +17,18 @@ interface PreviewChatInputProps {
     icon?: any;
     name?: string;
   };
+  readonly?: boolean;
 }
 
 export const PreviewChatInput = (props: PreviewChatInputProps) => {
-  const { contextItems, resultItems, chatHistoryOpen, setChatHistoryOpen, query, actionMeta } = props;
+  const { contextItems, resultItems, chatHistoryOpen, setChatHistoryOpen, query, actionMeta, readonly } = props;
   const { t } = useTranslation();
 
   return (
     <div className="ai-copilot-chat-container">
       <div className="chat-input-container">
         <SelectedSkillHeader
-          readonly
+          readonly={readonly}
           skill={{
             icon: actionMeta?.icon,
             displayName: actionMeta?.name,
@@ -44,7 +45,7 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
             <div className="ai-copilot-chat-input-body">
               <TextArea
                 value={query}
-                disabled
+                disabled={readonly}
                 style={{
                   borderRadius: 8,
                   resize: 'none',

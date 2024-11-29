@@ -86,9 +86,10 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
 
   return (
     <div className="flex flex-col space-y-4 p-4">
-      <div className="ai-copilot-operation-container">
+      <div className="ai-copilot-operation-container readonly">
         <div className="ai-copilot-operation-body">
           <PreviewChatInput
+            readonly
             contextItems={contextItems}
             resultItems={selectedResultItems}
             chatHistoryOpen={chatHistoryOpen}
