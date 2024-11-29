@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { IContextItem, IResultItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 import { PreviewContextManager } from './preview-context-manager';
+import { useState } from 'react';
 
 const TextArea = Input.TextArea;
 
@@ -23,29 +24,36 @@ interface PreviewChatInputProps {
 export const PreviewChatInput = (props: PreviewChatInputProps) => {
   const { contextItems, resultItems, chatHistoryOpen, setChatHistoryOpen, query, actionMeta, readonly } = props;
   const { t } = useTranslation();
+  const [userQuery, setUserQuery] = useState(query);
+
+  const hideSelectedSkillHeader = !actionMeta || actionMeta?.name === 'common_qna' || !actionMeta?.name;
 
   return (
     <div className="ai-copilot-chat-container">
       <div className="chat-input-container">
-        <SelectedSkillHeader
-          readonly={readonly}
-          skill={{
-            icon: actionMeta?.icon,
-            displayName: actionMeta?.name,
-          }}
-        />
-        <PreviewContextManager
-          contextItems={contextItems}
-          resultItems={resultItems}
-          chatHistoryOpen={chatHistoryOpen}
-          setChatHistoryOpen={setChatHistoryOpen}
-        />
+        {!hideSelectedSkillHeader && (
+          <SelectedSkillHeader
+            readonly={readonly}
+            skill={{
+              icon: actionMeta?.icon,
+              displayName: actionMeta?.name,
+            }}
+          />
+        )}
+        {contextItems?.length === 0 && resultItems?.length === 0 ? null : (
+          <PreviewContextManager
+            contextItems={contextItems}
+            resultItems={resultItems}
+            chatHistoryOpen={chatHistoryOpen}
+            setChatHistoryOpen={setChatHistoryOpen}
+          />
+        )}
         <div className="chat-input-body">
           <div className="ai-copilot-chat-input-container">
             <div className="ai-copilot-chat-input-body">
               <TextArea
-                value={query}
-                disabled={readonly}
+                value={userQuery}
+                onChange={(value) => setUserQuery(query)}
                 style={{
                   borderRadius: 8,
                   resize: 'none',

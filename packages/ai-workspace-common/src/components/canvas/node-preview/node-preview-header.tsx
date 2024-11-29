@@ -16,6 +16,7 @@ import {
   Globe,
   FilePlus,
   Trash2,
+  PinOff,
 } from 'lucide-react';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasNode } from '../nodes/types';
@@ -155,7 +156,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
   ];
 
   return (
-    <div className="flex justify-between items-center p-4 border-b border-[#EAECF0]">
+    <div className="flex justify-between items-center py-2 px-4 border-b border-[#EAECF0]">
       {/* Left: Icon and Title */}
       <div className="flex items-center gap-2">
         <div
@@ -173,17 +174,17 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
           <Tooltip title={isPinned ? 'Unpin' : 'Pin'}>
             <Button
               type="text"
-              className={`p-1.5 hover:bg-gray-100 ${isPinned ? 'text-blue-600' : 'text-gray-500'}`}
+              className={`p-1.5 hover:bg-gray-100 ${isPinned ? 'text-primary-600' : 'text-gray-500'}`}
               onClick={onPin}
             >
-              <Pin className="w-4 h-4" />
+              {isPinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
             </Button>
           </Tooltip>
         )}
         {onMaximize && (
           <Button
             type="text"
-            className={`p-1.5 hover:bg-gray-100 ${isMaximized ? 'text-blue-600' : 'text-gray-500'}`}
+            className={`p-1.5 hover:bg-gray-100 ${isMaximized ? 'text-primary-600' : 'text-gray-500'}`}
             onClick={onMaximize}
           >
             <Maximize2 className="w-4 h-4" />

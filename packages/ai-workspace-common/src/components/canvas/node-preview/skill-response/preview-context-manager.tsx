@@ -18,14 +18,18 @@ export const PreviewContextManager = (props: {
     <div className="flex flex-col h-full p-2 px-3 launchpad-context-manager">
       <div className="flex flex-col context-content">
         <div className="flex flex-wrap content-start gap-1 w-full context-items-container">
-          <ChatHistorySwitch
-            chatHistoryOpen={chatHistoryOpen}
-            setChatHistoryOpen={setChatHistoryOpen}
-            items={resultItems}
-          />
-          {contextItems?.map((item) => (
-            <ContextItem canNotRemove={true} key={item.id} item={item} isLimit={false} isActive={false} />
-          ))}
+          {resultItems?.length > 0 ? (
+            <ChatHistorySwitch
+              chatHistoryOpen={chatHistoryOpen}
+              setChatHistoryOpen={setChatHistoryOpen}
+              items={resultItems}
+            />
+          ) : null}
+          {contextItems?.length > 0
+            ? contextItems?.map((item) => (
+                <ContextItem canNotRemove={true} key={item.id} item={item} isLimit={false} isActive={false} />
+              ))
+            : null}
         </div>
       </div>
     </div>
