@@ -377,6 +377,10 @@
       "addTool": "Add Tool",
       "addDocument": "Add Document"
     },
+    "action": {
+      "deleteSuccess": "Canvas deleted successfully",
+      "addSuccess": "Canvas added successfully, start creating!"
+    },
     "skillResponse": {
       "skillCompleted": "Skill Completed",
       "stepTitle": "Step {{index}}"

@@ -17,7 +17,7 @@ import { ScrollLoading } from '../scroll-loading';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { LOCALE } from '@refly/common-types';
 import './index.scss';
-import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/use-delete-canvas';
 interface CanvasListProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
@@ -37,7 +37,7 @@ export const CanvasListModal = (props: CanvasListProps) => {
     },
     pageSize: 20,
   });
-  const { getCanvasList } = useHandleSiderData();
+  const { deleteCanvas } = useDeleteCanvas();
 
   useEffect(() => {
     if (visible) {
@@ -57,15 +57,9 @@ export const CanvasListModal = (props: CanvasListProps) => {
       const [popupVisible, setPopupVisible] = useState(false);
 
       const handleDelete = async () => {
-        const { data } = await getClient().deleteCanvas({
-          body: {
-            canvasId: canvas.canvasId,
-          },
-        });
-        if (data?.success) {
-          message.success(t('common.putSuccess'));
+        const success = await deleteCanvas(canvas.canvasId);
+        if (success) {
           setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId));
-          getCanvasList();
         }
       };
 
