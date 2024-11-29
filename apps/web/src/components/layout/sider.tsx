@@ -30,8 +30,6 @@ import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/
 import { SearchQuickOpenBtn } from "@refly-packages/ai-workspace-common/components/search-quick-open-btn"
 import { useTranslation } from "react-i18next"
 import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/components/sider-menu-setting-list"
-import { CanvasListModal } from "@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal"
-import { LibraryModal } from "@refly-packages/ai-workspace-common/components/workspace/library-modal"
 import { SettingModal } from "@refly-packages/ai-workspace-common/components/settings"
 // hooks
 import { useHandleSiderData } from "@refly-packages/ai-workspace-common/hooks/use-handle-sider-data"
