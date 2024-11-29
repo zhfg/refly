@@ -88,6 +88,12 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     <div className="flex flex-col space-y-4 p-4">
       <div className="ai-copilot-operation-container readonly">
         <div className="ai-copilot-operation-body">
+          <ChatHistory
+            readonly
+            isOpen={chatHistoryOpen}
+            onClose={() => setChatHistoryOpen(false)}
+            items={selectedResultItems}
+          />
           <PreviewChatInput
             readonly
             contextItems={contextItems}
@@ -96,13 +102,6 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
             setChatHistoryOpen={setChatHistoryOpen}
             query={input?.query}
             actionMeta={actionMeta}
-          />
-          <div className="h-[4px]"></div>
-          <ChatHistory
-            readonly
-            isOpen={chatHistoryOpen}
-            onClose={() => setChatHistoryOpen(false)}
-            items={selectedResultItems}
           />
         </div>
       </div>
