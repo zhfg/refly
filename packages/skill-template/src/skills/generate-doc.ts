@@ -26,6 +26,10 @@ import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils
 import * as generateDocument from '../scheduler/module/generateDocument';
 
 const stepTitleDict = {
+  analyzeContext: {
+    en: 'Context Analysis',
+    'zh-CN': '上下文分析',
+  },
   generateDocument: {
     en: 'Generate Document',
     'zh-CN': '生成文档',
@@ -68,7 +72,14 @@ export class GenerateDoc extends BaseSkill {
       documents,
       contentList,
       projects,
+      uiLocale,
     } = config.configurable;
+
+    // set current step
+    config.metadata.step = {
+      name: 'analyzeContext',
+      title: stepTitleDict.analyzeContext[uiLocale],
+    };
 
     const { tplConfig } = config?.configurable || {};
     const enableWebSearch = tplConfig?.enableWebSearch?.value as boolean;
@@ -180,11 +191,6 @@ export class GenerateDoc extends BaseSkill {
       initialContent: '',
     });
 
-    const stepMeta: ActionStepMeta = {
-      name: 'generateDocument',
-      title: stepTitleDict.generateDocument[uiLocale],
-    };
-
     const artifact: Artifact = {
       type: 'document',
       entityId: res.data?.docId || '',
@@ -194,7 +200,6 @@ export class GenerateDoc extends BaseSkill {
       {
         event: 'artifact',
         artifact: { ...artifact, status: 'generating' },
-        step: stepMeta,
       },
       config,
     );
@@ -208,7 +213,13 @@ export class GenerateDoc extends BaseSkill {
     };
     const { requestMessages } = await this.commonPreprocess(state, config, module);
 
-    this.emitEvent({ event: 'log', content: `Start to generate canvas...` }, config);
+    this.emitEvent({ event: 'log', content: `Start to generate document...` }, config);
+
+    // set current step
+    config.metadata.step = {
+      name: 'generateDocument',
+      title: stepTitleDict.generateDocument[uiLocale],
+    };
 
     const responseMessage = await model.invoke(requestMessages, {
       ...config,
@@ -216,7 +227,6 @@ export class GenerateDoc extends BaseSkill {
         ...config.metadata,
         ...currentSkill,
         artifact,
-        step: stepMeta,
       },
     });
 
@@ -227,7 +237,6 @@ export class GenerateDoc extends BaseSkill {
       {
         event: 'artifact',
         artifact: { ...artifact, status: 'finish' },
-        step: stepMeta,
       },
       config,
     );

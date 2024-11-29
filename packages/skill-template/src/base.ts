@@ -64,6 +64,7 @@ export abstract class BaseSkill extends StructuredTool {
 
     const eventData: SkillEvent = {
       event: data.event!,
+      step: config.metadata?.step,
       resultId,
       ...data,
     };
@@ -156,6 +157,7 @@ export interface SkillRunnableConfig extends RunnableConfig {
     modelName?: string;
     selectedSkill?: SkillMeta;
     currentSkill?: SkillMeta;
+    currentStep?: ActionStepMeta;
     chatHistory?: BaseMessage[];
     installedSkills?: SkillMeta[];
     tplConfig?: SkillTemplateConfig;
