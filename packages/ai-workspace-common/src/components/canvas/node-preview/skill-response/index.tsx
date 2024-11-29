@@ -13,6 +13,8 @@ import { ActionStepCard } from './action-step';
 import './index.scss';
 import { convertContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { ContextItem } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/context-item';
+import { ChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-history';
+import { ChatHistorySwitch } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/components/chat-history-switch';
 
 interface SkillResponseNodePreviewProps {
   resultId: string;
@@ -25,6 +27,7 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     updateActionResult: state.updateActionResult,
   }));
   const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
+  const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
 
   const fetchActionResult = async (resultId: string) => {
     const { data, error } = await getClient().getActionResult({
@@ -79,6 +82,7 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
 
   // Convert context to items
   const contextItems = convertContextToItems(context);
+  const selectedResultItems = [];
 
   return (
     <div className="flex flex-col space-y-4 p-4">
@@ -88,6 +92,11 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
       </div>
 
       <div className="m-6 border border-solid border-gray-200 rounded-lg p-2 flex items-center space-x-2">
+        <ChatHistorySwitch
+          chatHistoryOpen={chatHistoryOpen}
+          setChatHistoryOpen={setChatHistoryOpen}
+          items={selectedResultItems}
+        />
         <div>
           {contextItems.length > 0 && (
             <div className="context-items-container">
@@ -106,6 +115,13 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
         </div>
         <div>{input?.query}</div>
       </div>
+
+      <ChatHistory
+        readonly
+        isOpen={chatHistoryOpen}
+        onClose={() => setChatHistoryOpen(false)}
+        items={selectedResultItems}
+      />
 
       {result?.logs?.length > 0 && (
         <div

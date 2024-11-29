@@ -20,6 +20,7 @@ import { ChatHistorySwitch } from './components/chat-history-switch';
 import { ContextPreview } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/context-preview';
 
 import './index.scss';
+import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 
 export const ContextManager = () => {
   const { t } = useTranslation();
@@ -35,8 +36,15 @@ export const ContextManager = () => {
   const selectedContextNodes = nodes.filter(
     (node) => node.selected && (node.type === 'resource' || node.type === 'document'),
   );
-  const { initMessageListener } = useSelectedMark();
+  // const { initMessageListener } = useSelectedMark();
   const [activeItemId, setActiveItemId] = useState(null);
+  const { chatHistoryOpen, setChatHistoryOpen } = useLaunchpadStoreShallow((state) => ({
+    chatHistoryOpen: state.chatHistoryOpen,
+    setChatHistoryOpen: state.setChatHistoryOpen,
+  }));
+  const { selectedResultItems } = useContextPanelStoreShallow((state) => ({
+    selectedResultItems: state.selectedResultItems,
+  }));
 
   const handleItemClick = useCallback(
     async (item: CanvasNode<any>) => {
@@ -96,15 +104,19 @@ export const ContextManager = () => {
     };
   }, []);
 
-  useEffect(() => {
-    initMessageListener();
-  }, []);
+  // useEffect(() => {
+  //   initMessageListener();
+  // }, []);
 
   return (
     <div className="flex flex-col h-full p-2 px-3 launchpad-context-manager">
       <div className="flex flex-col context-content">
         <div className="flex flex-wrap content-start gap-1 w-full context-items-container">
-          <ChatHistorySwitch />
+          <ChatHistorySwitch
+            chatHistoryOpen={chatHistoryOpen}
+            setChatHistoryOpen={setChatHistoryOpen}
+            items={selectedResultItems}
+          />
           <AddBaseMarkContext />
           {selectedContextItems?.map((item) => (
             <ContextItem
