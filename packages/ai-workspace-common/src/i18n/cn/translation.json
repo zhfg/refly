@@ -53,7 +53,8 @@
     },
     "login": "登录",
     "share": "分享",
-    "noMoreText": "已经到底啦~"
+    "noMoreText": "已经到底啦~",
+    "unTitle": "未命名"
   },
   "systemMaintenanceShutdown": {
     "title": "尊敬的用户，您好！",
@@ -170,6 +171,7 @@
     "login": "开始用 Refly 写作"
   },
   "workspace": {
+    "addToCanvas": "添加到画布",
     "canvasListModal": {
       "continue": "继续对话"
     },

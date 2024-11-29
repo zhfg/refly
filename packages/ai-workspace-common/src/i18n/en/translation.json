@@ -53,7 +53,8 @@
     },
     "login": "Login",
     "share": "Share",
-    "noMoreText": "No more~"
+    "noMoreText": "No more~",
+    "unTitle": "Untitled"
   },
   "systemMaintenanceShutdown": {
     "title": "Dear Valued Users,",
@@ -169,6 +170,7 @@
     "login": "Start Writing with Refly"
   },
   "workspace": {
+    "addToCanvas": "Add to Canvas",
     "canvasListModal": {
       "continue": "Continue Conversation"
     },

@@ -8,7 +8,7 @@ interface ResourceNodePreviewProps {
 
 export const ResourceNodePreview = ({ resourceId }: ResourceNodePreviewProps) => {
   // Track deck size state locally
-  const [deckSize, setDeckSize] = useState<number>(200);
+  const [deckSize, setDeckSize] = useState<number>(0);
 
   // If no resourceId provided, show placeholder
   if (!resourceId) {
@@ -23,7 +23,7 @@ export const ResourceNodePreview = ({ resourceId }: ResourceNodePreviewProps) =>
     <div className="h-full bg-white rounded">
       <Splitter layout="vertical" onResize={(sizes) => setDeckSize(sizes[1])}>
         <Splitter.Panel className="min-h-[200px]">
-          <ResourceView resourceId={resourceId} />
+          <ResourceView resourceId={resourceId} deckSize={deckSize} setDeckSize={setDeckSize} />
         </Splitter.Panel>
         <Splitter.Panel size={deckSize} max={'80%'} collapsible>
           <ResourceDeck domain="resource" id={resourceId} />

@@ -1,5 +1,5 @@
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { List, Card, Dropdown, Button, Popconfirm, message, Empty } from 'antd';
+import { List, Card, Dropdown, Button, Popconfirm, message, Empty, Tooltip } from 'antd';
 import type { MenuProps, DropdownProps } from 'antd';
 
 import {
@@ -18,14 +18,18 @@ import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
 const { Meta } = Card;
 
 export const DocumentList = () => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
-  const { showLibraryModal } = useSiderStoreShallow((state) => ({
+  const { addNode } = useCanvasControl();
+
+  const { showLibraryModal, setShowLibraryModal } = useSiderStoreShallow((state) => ({
     showLibraryModal: state.showLibraryModal,
+    setShowLibraryModal: state.setShowLibraryModal,
   }));
   const { getLibraryList } = useHandleSiderData();
   const { dataList, setDataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
@@ -38,8 +42,23 @@ export const DocumentList = () => {
     pageSize: 20,
   });
 
-  const ActionEdit = () => {
-    return <Button type="text" icon={<IconNotePencil />} />;
+  const handleEdit = (entityId: string, title: string) => {
+    addNode({
+      type: 'document',
+      data: {
+        title,
+        entityId,
+      },
+    });
+    setShowLibraryModal(false);
+  };
+
+  const ActionEdit = ({ doc }: { doc: Document }) => {
+    return (
+      <Tooltip title={t('workspace.addToCanvas')}>
+        <Button type="text" icon={<IconNotePencil />} onClick={() => handleEdit(doc.docId, doc.title)} />
+      </Tooltip>
+    );
   };
 
   const ActionDropdown = ({ doc }: { doc: Document }) => {
@@ -129,10 +148,10 @@ export const DocumentList = () => {
               <Card
                 hoverable
                 cover={<div className="h-[100px] bg-gray-200"></div>}
-                actions={[<ActionEdit key="edit" />, <ActionDropdown doc={item} key="ellipsis" />]}
+                actions={[<ActionEdit key="edit" doc={item} />, <ActionDropdown doc={item} key="ellipsis" />]}
               >
                 <Meta
-                  title={item.title}
+                  title={item.title || t('common.unTitle')}
                   description={
                     <div className="text-xs text-black/40">
                       {time(item.updatedAt, language as LOCALE)

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Splitter } from 'antd';
 import { DocumentEditor } from '../../project-detail/document';
 import ResourceDeck from '../../project-detail/resource-view/resource-deck';
@@ -13,15 +13,7 @@ interface DocumentNodePreviewProps {
 
 export const DocumentNodePreview = ({ nodeData }: DocumentNodePreviewProps) => {
   // Get deck size from references store
-  const { deckSize, setDeckSize } = useReferencesStoreShallow((state) => ({
-    deckSize: state.deckSize,
-    setDeckSize: state.setDeckSize,
-  }));
-
-  // Reset deck size when component mounts
-  useEffect(() => {
-    setDeckSize(0);
-  }, []);
+  const [deckSize, setDeckSize] = useState<number>(0);
 
   // Early return if no node data
   if (!nodeData?.entityId || !nodeData?.entityType) {
@@ -39,7 +31,7 @@ export const DocumentNodePreview = ({ nodeData }: DocumentNodePreviewProps) => {
         }}
       >
         <Splitter.Panel>
-          <DocumentEditor docId={entityId} />
+          <DocumentEditor docId={entityId} deckSize={deckSize} setDeckSize={setDeckSize} />
         </Splitter.Panel>
 
         {/* Only render deck panel if we have valid entity */}

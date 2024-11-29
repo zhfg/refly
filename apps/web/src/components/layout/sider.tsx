@@ -105,16 +105,12 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     collapse,
     libraryList,
     canvasList,
-    showCanvasListModal,
-    showLibraryModal,
     setShowLibraryModal,
     setShowCanvasListModal,
     showSettingModal,
     setShowSettingModal,
   } = useSiderStoreShallow(state => ({
     showSettingModal: state.showSettingModal,
-    showLibraryModal: state.showLibraryModal,
-    showCanvasListModal: state.showCanvasListModal,
     collapse: state.collapse,
     libraryList: state.libraryList,
     canvasList: state.canvasList,
@@ -376,16 +372,6 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
             )}
           </div>
         </Menu>
-
-        <CanvasListModal
-          visible={showCanvasListModal}
-          setVisible={setShowCanvasListModal}
-        />
-
-        <LibraryModal
-          visible={showLibraryModal}
-          setVisible={setShowLibraryModal}
-        />
 
         <SettingModal
           visible={showSettingModal}
