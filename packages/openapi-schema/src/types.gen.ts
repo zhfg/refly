@@ -328,7 +328,7 @@ export type LabelInstance = {
 /**
  * Data input mode
  */
-export type InputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect' | 'radio';
+export type InputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect' | 'radio' | 'switch';
 
 /**
  * Config scope

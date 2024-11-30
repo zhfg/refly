@@ -45,7 +45,7 @@ export class WebSearch extends BaseSkill {
     items: [
       {
         key: 'enableDeepReasonWebSearch',
-        inputMode: 'radio',
+        inputMode: 'switch',
         defaultValue: false,
         labelDict: {
           en: 'Enable Deep Search',

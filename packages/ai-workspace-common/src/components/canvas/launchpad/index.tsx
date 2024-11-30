@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { notification } from 'antd';
+import { Form } from '@arco-design/web-react';
 
 import { ChatInput } from './chat-input';
 import { SkillDisplay } from './skill-display';
@@ -40,6 +41,8 @@ export const LaunchPad = () => {
     setMessageIntentContext: state.setMessageIntentContext,
   }));
 
+  const [form] = Form.useForm();
+
   // hooks
   const { handleFilterErrorTip } = useContextFilterErrorTip();
   const { invokeAction, abortAction } = useInvokeAction();
@@ -74,6 +77,8 @@ export const LaunchPad = () => {
       return;
     }
 
+    const tplConfig = form?.getFieldValue('tplConfig');
+
     const { localSettings } = useUserStore.getState();
     const { newQAText, selectedModel } = useChatStore.getState();
     const { selectedContextItems, selectedResultItems } = useContextPanelStore.getState();
@@ -92,7 +97,7 @@ export const LaunchPad = () => {
       })),
       skillName: skillStore.selectedSkill?.name || 'common_qna',
       locale: localSettings?.outputLocale,
-      tplConfig: {}, // TODO: add tplConfig
+      tplConfig,
     };
 
     chatStore.setNewQAText('');
@@ -161,7 +166,7 @@ export const LaunchPad = () => {
           onItemPin={handleItemPin}
           onItemDelete={handleItemDelete}
         />
-        <ChatInput handleSendMessage={handleSendMessage} handleAbort={handleAbort} />
+        <ChatInput form={form} handleSendMessage={handleSendMessage} handleAbort={handleAbort} />
       </div>
     </div>
   );
