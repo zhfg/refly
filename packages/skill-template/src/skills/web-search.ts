@@ -110,19 +110,6 @@ export class WebSearch extends BaseSkill {
       { config, ctxThis: this, state, tplConfig: config.configurable.tplConfig },
     );
 
-    // Set current step for answer generation
-    config.metadata.step = {
-      name: 'answerGeneration',
-      title: stepTitleDict.answerGeneration[uiLocale],
-    };
-
-    // Build messages for the model
-    const module = {
-      buildSystemPrompt: webSearch.buildWebSearchSystemPrompt,
-      buildContextUserPrompt: webSearch.buildWebSearchContextUserPrompt,
-      buildUserPrompt: webSearch.buildWebSearchUserPrompt,
-    };
-
     const mergedContext = {
       mentionedContext: null,
       lowerPriorityContext: null,
@@ -145,6 +132,19 @@ export class WebSearch extends BaseSkill {
       },
       config,
     );
+
+    // Set current step for answer generation
+    config.metadata.step = {
+      name: 'answerGeneration',
+      title: stepTitleDict.answerGeneration[uiLocale],
+    };
+
+    // Build messages for the model
+    const module = {
+      buildSystemPrompt: webSearch.buildWebSearchSystemPrompt,
+      buildContextUserPrompt: webSearch.buildWebSearchContextUserPrompt,
+      buildUserPrompt: webSearch.buildWebSearchUserPrompt,
+    };
 
     this.emitEvent({ event: 'log', content: `Prepared context successfully!` }, config);
     this.engine.logger.log(`Prepared context successfully! ${safeStringifyJSON(webSearchContext)}`);
