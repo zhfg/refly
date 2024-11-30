@@ -215,10 +215,6 @@ export const AICopilot = memo((props: AICopilotProps) => {
       {knowledgeBaseStore?.convModalVisible ? (
         <ConvListModal source={source} title={t('copilot.convListModal.title')} classNames="conv-list-modal" />
       ) : null}
-      {knowledgeBaseStore?.sourceListDrawerVisible && !isWeb ? (
-        <SourceListModal classNames="source-list-modal" />
-      ) : null}
-
       <SkillManagementModal />
     </div>
   );

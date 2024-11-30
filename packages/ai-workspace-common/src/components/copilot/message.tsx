@@ -329,13 +329,7 @@ export const AssistantMessage = memo(
                       <p>{t('threadDetail.item.session.source')}</p>
                     </div>
                   ) : null}
-                  <SourceList
-                    isPendingFirstToken={isPendingFirstToken}
-                    sources={sources || []}
-                    isLastSession={isLastSession}
-                    humanMessage={humanMessage}
-                    aiMessage={message}
-                  />
+                  <SourceList sources={sources || []} query={humanMessage?.content} />
                 </div>
                 {(sources || [])?.length > 0 ? (
                   <Divider

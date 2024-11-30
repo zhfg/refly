@@ -20,10 +20,7 @@ import { TranslationWrapper } from '@refly-packages/ai-workspace-common/componen
 
 interface SourceListProps {
   sources: Source[];
-  isPendingFirstToken: boolean;
-  isLastSession: boolean;
-  humanMessage?: Partial<ClientChatMessage>;
-  aiMessage?: Partial<ClientChatMessage>;
+  query?: string;
 }
 
 const SourceItem = ({ source, index }: { source: Source; index: number }) => {
@@ -147,7 +144,6 @@ const ViewMoreItem = ({
 };
 
 export const SourceList = (props: SourceListProps) => {
-  const { isPendingFirstToken = false, isLastSession = false } = props;
   const [scrollLoading] = useState(<Skeleton animation></Skeleton>);
 
   const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
@@ -158,8 +154,7 @@ export const SourceList = (props: SourceListProps) => {
     knowledgeBaseStore.updateSourceListDrawer({
       visible: true,
       sources: props?.sources,
-      currentHumanMessage: props?.humanMessage as ClientChatMessage,
-      currentAIMessage: props?.aiMessage as ClientChatMessage,
+      query: props?.query,
     });
   };
 
