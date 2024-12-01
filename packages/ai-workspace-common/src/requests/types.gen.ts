@@ -613,6 +613,10 @@ export type ActionMeta = {
      */
     name?: string;
     /**
+     * Action display name
+     */
+    displayName?: string;
+    /**
      * Action icon
      */
     icon?: Icon;
@@ -1011,6 +1015,18 @@ export type ActionResult = {
      */
     actionMeta?: ActionMeta;
     /**
+     * Action context
+     */
+    context?: SkillContext;
+    /**
+     * Action template config
+     */
+    tplConfig?: SkillTemplateConfig;
+    /**
+     * Action result history
+     */
+    history?: Array<ActionResult>;
+    /**
      * Action steps
      */
     steps?: Array<ActionStep>;
@@ -1022,10 +1038,6 @@ export type ActionResult = {
      * Errors
      */
     errors?: Array<(string)>;
-    /**
-     * Skill invocation parameters
-     */
-    invokeParam?: InvokeSkillRequest;
     /**
      * Message creation time
      */

@@ -94,6 +94,8 @@ export const LaunchPad = () => {
       context: convertContextItemsToContext(selectedContextItems),
       resultHistory: selectedResultItems.map((item) => ({
         resultId: item.resultId,
+        title: item.title,
+        steps: item.steps,
       })),
       skillName: skillStore.selectedSkill?.name || 'common_qna',
       locale: localSettings?.outputLocale,

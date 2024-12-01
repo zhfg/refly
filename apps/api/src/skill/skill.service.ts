@@ -94,7 +94,7 @@ import { throttle } from 'lodash';
 import { ResultAggregator } from '@/utils/result';
 
 export function createLangchainMessage(result: ActionResult, steps: ActionStep[]): BaseMessage[] {
-  const query = result.invokeParam?.input?.query;
+  const query = result.title;
 
   return [
     new HumanMessage({ content: query }),
@@ -422,12 +422,31 @@ export class SkillService {
 
     param.input ??= { query: '' };
     param.skillName ??= 'common_qna';
-    param.context ??= {};
+
+    if (param.context) {
+      param.context = await this.populateSkillContext(user, param.context);
+    }
+    if (param.resultHistory) {
+      param.resultHistory = await this.populateSkillResultHistory(user, param.resultHistory);
+    }
 
     const skill = this.skillInventory.find((s) => s.name === param.skillName);
     if (!skill) {
       throw new SkillNotFoundError(`skill ${param.skillName} not found`);
     }
+
+    const purgeContext = (context: SkillContext) => {
+      // remove actual content from context to save storage
+      const contextCopy: SkillContext = JSON.parse(JSON.stringify(context ?? {}));
+      contextCopy.resources?.forEach(({ resource }) => (resource.content = ''));
+      contextCopy.documents?.forEach(({ document }) => (document.content = ''));
+      return contextCopy;
+    };
+
+    const purgeResultHistory = (resultHistory: ActionResult[]) => {
+      // remove extra unnecessary fields from result history to save storage
+      return resultHistory.map((r) => pick(r, ['resultId', 'title', 'steps']));
+    };
 
     const result = await this.prisma.actionResult.create({
       data: {
@@ -443,7 +462,8 @@ export class SkillService {
           name: param.skillName,
           icon: skill.icon,
         } as ActionMeta),
-        invokeParam: JSON.stringify(param),
+        context: JSON.stringify(purgeContext(param.context)),
+        history: JSON.stringify(purgeResultHistory(param.resultHistory)),
       },
     });
 
@@ -453,10 +473,6 @@ export class SkillService {
       result: actionResultPO2DTO(result),
       rawParam: JSON.stringify(param),
     };
-    data.context = await this.populateSkillContext(user, data.context);
-    if (data.resultHistory?.length > 0) {
-      data.resultHistory = await this.populateSkillResultHistory(user, data.resultHistory);
-    }
 
     return data;
   }
