@@ -433,7 +433,8 @@ export class SkillService {
       data: {
         resultId,
         uid,
-        canvasId: param.canvasId,
+        targetId: param.target?.entityId,
+        targetType: param.target?.entityType,
         title: param.input?.query,
         type: 'skill',
         status: 'executing',
@@ -897,6 +898,7 @@ export class SkillService {
 
     const param: InvokeSkillRequest = {
       input: JSON.parse(trigger.input || '{}'),
+      target: {},
       context: JSON.parse(trigger.context || '{}'),
       tplConfig: JSON.parse(trigger.tplConfig || '{}'),
       skillId: trigger.skillId,

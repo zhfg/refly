@@ -36,7 +36,7 @@ const getModules = (documentContext: { document: Document; selectedContent: High
   };
 };
 
-export const getEditCanvasModule = (
+export const getEditDocumentModule = (
   type: InPlaceEditType,
   documentContext: {
     document: Document;

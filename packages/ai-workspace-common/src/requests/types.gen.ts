@@ -1003,6 +1003,14 @@ export type ActionResult = {
      */
     type?: ActionType;
     /**
+     * Action target type
+     */
+    targetType?: EntityType;
+    /**
+     * Action target ID
+     */
+    targetId?: string;
+    /**
      * Action metadata
      */
     actionMeta?: ActionMeta;
@@ -2201,7 +2209,7 @@ export type InvokeSkillRequest = {
     /**
      * Skill input
      */
-    input?: SkillInput;
+    input: SkillInput;
     /**
      * Skill invocation context
      */
@@ -2215,17 +2223,13 @@ export type InvokeSkillRequest = {
      */
     tplConfig?: SkillTemplateConfig;
     /**
-     * Project ID (if not provided, new project will be created)
-     */
-    projectId?: string;
-    /**
      * Skill name (if not provided, common_qna will be used)
      */
     skillName?: string;
     /**
-     * Canvas ID
+     * Skill invocation target
      */
-    canvasId?: string;
+    target: Entity;
     /**
      * Result ID (will be generated if not provided)
      */
@@ -2246,10 +2250,6 @@ export type InvokeSkillRequest = {
      * Selected model
      */
     modelName?: string;
-    /**
-     * Create conversation parameters
-     */
-    createConvParam?: CreateConversationRequest;
     /**
      * Skill job ID (if not provided, a new job will be created)
      */

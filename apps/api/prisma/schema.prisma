@@ -152,14 +152,16 @@ model ActionResult {
   pk          BigInt       @id @default(autoincrement())
   /// Action result id
   resultId    String       @unique @map("result_id")
-  /// Canvas ID
-  canvasId    String?      @map("canvas_id")
   /// Action type
   type        String       @map("type")
   /// UID
   uid         String       @default("") @map("uid")
   /// Result title
   title       String       @default("") @map("title")
+  /// Action target type
+  targetType  String?      @map("target_type")
+  /// Action target ID
+  targetId    String?      @map("target_id")
   /// Action metadata
   actionMeta  String       @default("{}") @map("action_meta")
   /// Result logs
@@ -177,7 +179,7 @@ model ActionResult {
   /// Update timestamp
   updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
 
-  @@index([canvasId])
+  @@index([targetType, targetId])
   @@map("action_results")
 }
 

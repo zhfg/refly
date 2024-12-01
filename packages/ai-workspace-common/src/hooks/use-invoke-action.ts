@@ -242,31 +242,33 @@ export const useInvokeAction = () => {
       errors: [],
     });
 
-    const connectTo = [
-      ...(Array.isArray(payload.context?.documents) ? payload.context.documents : []).map((document) => ({
-        type: 'document' as const,
-        entityId: document.docId,
-      })),
-      ...(payload.context?.resources ?? []).map((resource) => ({
-        type: 'resource' as const,
-        entityId: resource.resourceId,
-      })),
-      ...(payload.resultHistory ?? []).map((result) => ({
-        type: 'skillResponse' as const,
-        entityId: result.resultId,
-      })),
-    ].filter(Boolean);
+    if (payload.target.entityType === 'canvas') {
+      const connectTo = [
+        ...(Array.isArray(payload.context?.documents) ? payload.context.documents : []).map((document) => ({
+          type: 'document' as const,
+          entityId: document.docId,
+        })),
+        ...(payload.context?.resources ?? []).map((resource) => ({
+          type: 'resource' as const,
+          entityId: resource.resourceId,
+        })),
+        ...(payload.resultHistory ?? []).map((result) => ({
+          type: 'skillResponse' as const,
+          entityId: result.resultId,
+        })),
+      ].filter(Boolean);
 
-    addNode(
-      {
-        type: 'skillResponse',
-        data: {
-          title: input?.query,
-          entityId: resultId,
+      addNode(
+        {
+          type: 'skillResponse',
+          data: {
+            title: input?.query,
+            entityId: resultId,
+          },
         },
-      },
-      connectTo,
-    );
+        connectTo,
+      );
+    }
 
     globalAbortControllerRef.current = new AbortController();
 

@@ -105,6 +105,7 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
     }
 
     return () => {
+      removeAIHighlight(editor);
       handleBubbleHide();
     };
   }, [editor]);

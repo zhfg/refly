@@ -8,7 +8,6 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { CanvasEditConfig, safeStringifyJSON } from '@refly-packages/utils';
 import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
-import { CanvasIntentType } from '@refly-packages/common-types';
 // types
 import { GraphState, IContext } from '../scheduler/types';
 // utils
@@ -70,8 +69,6 @@ export class EditDoc extends BaseSkill {
     } = config.configurable;
 
     const { tplConfig } = config?.configurable || {};
-    const enableWebSearch = tplConfig?.enableWebSearch?.value as boolean;
-    const enableKnowledgeBaseSearch = tplConfig?.enableKnowledgeBaseSearch?.value as boolean;
 
     let optimizedQuery = '';
     let mentionedContext: IContext;
@@ -115,7 +112,7 @@ export class EditDoc extends BaseSkill {
       queryTokens < LONG_QUERY_TOKENS_THRESHOLD && // 只有短查询才需要重写
       (hasContext || chatHistoryTokens > 0); // 保持原有的上下文相关判断
 
-    const needPrepareContext = (hasContext && remainingTokens > 0) || enableWebSearch || enableKnowledgeBaseSearch;
+    const needPrepareContext = hasContext && remainingTokens > 0;
     this.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`);
 
     if (needRewriteQuery) {
@@ -132,22 +129,22 @@ export class EditDoc extends BaseSkill {
     this.engine.logger.log(`optimizedQuery: ${optimizedQuery}`);
     this.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
 
-    if (needPrepareContext) {
-      context = await prepareContext(
-        {
-          query: optimizedQuery,
-          mentionedContext,
-          maxTokens: remainingTokens,
-          hasContext,
-        },
-        {
-          config: config,
-          ctxThis: this,
-          state: state,
-          tplConfig,
-        },
-      );
-    }
+    // if (needPrepareContext) {
+    //   context = await prepareContext(
+    //     {
+    //       query: optimizedQuery,
+    //       mentionedContext,
+    //       maxTokens: remainingTokens,
+    //       hasContext,
+    //     },
+    //     {
+    //       config: config,
+    //       ctxThis: this,
+    //       state: state,
+    //       tplConfig,
+    //     },
+    //   );
+    // }
 
     this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
 
@@ -203,31 +200,13 @@ export class EditDoc extends BaseSkill {
     //   : undefined;
     const highlightSelection = canvasEditConfig?.selection as HighlightSelection;
 
-    // Emit intent matcher event
-    this.emitEvent(
-      {
-        event: 'structured_data',
-        structuredDataKey: 'intentMatcher',
-        content: JSON.stringify({
-          type: CanvasIntentType.EditDocument,
-          docId: currentDoc.docId,
-          metadata: {
-            selectedRange,
-            inPlaceEditType,
-            highlightSelection,
-          },
-        }),
-      },
-      config,
-    );
-
     const model = this.engine.chatModel({
       temperature: 0.1,
       maxTokens: 4096,
     });
 
     // Get module based on edit type
-    const module: SkillPromptModule = editCanvas.getEditCanvasModule(inPlaceEditType, {
+    const module: SkillPromptModule = editCanvas.getEditDocumentModule(inPlaceEditType, {
       document: currentDoc.document,
       selectedContent: highlightSelection,
     });

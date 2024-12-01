@@ -280,10 +280,7 @@ export const buildInlineEditCanvasCoreInstructionsPrompt = (locale: string) => `
    - Follow specified tag structure
 
 ### Response Structure
-1. Initial Analysis
-2. Thinking Process
-3. Content Modification
-4. Brief Summary
+Only output the content within <reflyCanvas> section, don't include the tags.
 
 ### Tag Formats
 
@@ -301,11 +298,7 @@ export const buildInlineEditCanvasCoreInstructionsPrompt = (locale: string) => `
 
 ### Important Notes
 1. The <response> tags in examples are for demonstration purposes only
-2. Your actual response should only include:
-   - Initial content analysis
-   - <reflyThinking> section
-   - <reflyCanvas> section
-   - Brief summary
+2. Your actual response should only include <reflyThinking> section, don't include the tags
 3. Remember to generate all content in ${locale} while preserving technical terms, including initial analysis, thinking process, content modification, and brief summary
 `;
 

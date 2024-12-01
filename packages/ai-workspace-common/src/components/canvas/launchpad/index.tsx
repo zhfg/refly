@@ -85,10 +85,13 @@ export const LaunchPad = () => {
 
     const resultId = genActionResultID();
     const param: InvokeSkillRequest = {
-      canvasId,
       resultId,
       input: {
         query: userInput || newQAText.trim(),
+      },
+      target: {
+        entityId: canvasId,
+        entityType: 'canvas',
       },
       modelName: selectedModel?.name,
       context: convertContextItemsToContext(selectedContextItems),

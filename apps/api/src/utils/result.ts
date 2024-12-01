@@ -75,13 +75,13 @@ export class ResultAggregator {
         }
         break;
     }
-    this.data[event.step.name] = step;
+    this.data[step.name] = step;
   }
 
   addUsageItem(meta: SkillRunnableMeta, usage: TokenUsageItem) {
     const step = this.getOrInitData(meta.step);
     step.usageItems.push(usage);
-    this.data[meta.step.name] = step;
+    this.data[step.name] = step;
   }
 
   handleStreamContent(meta: SkillRunnableMeta, content: string) {
@@ -93,7 +93,7 @@ export class ResultAggregator {
 
     step.content += content;
 
-    this.data[meta.step.name] = step;
+    this.data[step.name] = step;
   }
 
   getSteps({ resultId }: { resultId: string }): Prisma.ActionStepCreateManyInput[] {

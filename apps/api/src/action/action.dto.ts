@@ -3,6 +3,7 @@ import {
   ActionResult,
   ActionStep,
   ActionType,
+  EntityType,
 } from '@refly-packages/openapi-schema';
 import { ActionResult as ActionResultModel, ActionStep as ActionStepModel } from '@prisma/client';
 import { pick } from '@/utils';
@@ -25,8 +26,9 @@ export function actionResultPO2DTO(
   result: ActionResultModel & { steps?: ActionStepModel[] },
 ): ActionResult {
   return {
-    ...pick(result, ['resultId', 'title', 'canvasId', 'status']),
+    ...pick(result, ['resultId', 'title', 'targetId', 'status']),
     type: result.type as ActionType,
+    targetType: result.targetType as EntityType,
     actionMeta: JSON.parse(result.actionMeta || '{}'),
     logs: JSON.parse(result.logs || '[]'),
     errors: JSON.parse(result.errors || '[]'),

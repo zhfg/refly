@@ -51,6 +51,7 @@ export class EventService {
 
           return this.skillService.sendInvokeSkillTask(user, {
             input: JSON.parse(trigger.input ?? '{}'),
+            target: {},
             skillId: skill.skillId,
             context: skillContext,
             triggerId: trigger.triggerId,

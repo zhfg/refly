@@ -307,10 +307,7 @@ export const buildBlockEditCanvasCoreInstructionsPrompt = (locale: string) => `
    - Preserve document style and tone
 
 ### Response Structure
-1. Initial Analysis: before <reflyThinking>, brief overview of planned content
-2. Thinking Process: in <reflyThinking>, detailed thinking process
-3. Content Modification: in <reflyCanvas>, generated content
-4. Brief Summary: after <reflyCanvas>, brief summary of generated content
+Only output the content within <reflyCanvas> section, don't include the tags.
 
 ### Tag Formats
 1. Thinking Process:
@@ -327,11 +324,7 @@ export const buildBlockEditCanvasCoreInstructionsPrompt = (locale: string) => `
 
 ### Important Notes
 1. The <response> tags in examples are for demonstration purposes only
-2. Your actual response should only include:
-   - Initial analysis
-   - <reflyThinking> section
-   - <reflyCanvas> section
-   - Brief summary
+2. Your actual response should only include <reflyThinking> section, don't include the tags
 3. Remember to generate all content in ${locale} while preserving technical terms, including initial analysis, thinking process, content modification, and brief summary
 `;
 
