@@ -9,7 +9,7 @@ import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { safeStringifyJSON } from '@refly-packages/utils';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
+import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition, Source } from '@refly-packages/openapi-schema';
 import { CanvasIntentType } from '@refly-packages/common-types';
 // types
 import { GraphState, IContext } from '../scheduler/types';
@@ -72,7 +72,7 @@ export class RewriteDoc extends BaseSkill {
     let optimizedQuery = '';
     let mentionedContext: IContext;
     let context: string = '';
-
+    let sources: Source[] = [];
     // preprocess query, ensure query is not too long
     const query = preprocessQuery(originalQuery, {
       config: config,
@@ -129,12 +129,13 @@ export class RewriteDoc extends BaseSkill {
     this.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
 
     if (needPrepareContext) {
-      context = await prepareContext(
+      const preparedRes = await prepareContext(
         {
           query: optimizedQuery,
           mentionedContext,
           maxTokens: remainingTokens,
-          hasContext,
+          enableMentionedContext: hasContext,
+          enableLowerPriorityContext: hasContext,
         },
         {
           config: config,
@@ -143,9 +144,21 @@ export class RewriteDoc extends BaseSkill {
           tplConfig,
         },
       );
+
+      context = preparedRes.contextStr;
+      sources = preparedRes.sources;
     }
 
     this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
+
+    this.emitEvent(
+      {
+        event: 'structured_data',
+        content: JSON.stringify(sources),
+        structuredDataKey: 'sources',
+      },
+      config,
+    );
 
     const requestMessages = buildFinalRequestMessages({
       module,
