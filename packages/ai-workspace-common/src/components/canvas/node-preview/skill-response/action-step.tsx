@@ -8,19 +8,10 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { genUniqueId } from '@refly-packages/utils/id';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { SelectionContext } from '@refly-packages/ai-workspace-common/components/selection-context';
-import { FileText, Sparkles } from 'lucide-react';
 import { ActionContainer } from './action-container';
 import { safeParseJSON } from '@refly-packages/utils/parse';
 import { SourceViewer } from './source-viewer';
-
-const getArtifactIcon = (artifact: Artifact) => {
-  switch (artifact.type) {
-    case 'document':
-      return <FileText className="w-4 h-4" />;
-    default:
-      return <Sparkles className="w-4 h-4" />;
-  }
-};
+import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 export const ActionStepCard = ({
   result,
@@ -93,7 +84,7 @@ export const ActionStepCard = ({
           }}
         >
           <div className="flex items-center space-x-2">
-            {getArtifactIcon(artifact)}
+            {getArtifactIcon(artifact, 'w-4 h-4')}
             <span className="text-gray-600 max-w-[200px] truncate inline-block">{artifact.title}</span>
           </div>
           <div

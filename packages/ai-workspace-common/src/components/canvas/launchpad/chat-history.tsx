@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Button, Divider, Empty } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { IconDelete, IconResponse } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { getArtifactIcon, IconDelete, IconResponse } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { ChevronDown, Pin, PinOff } from 'lucide-react';
@@ -28,6 +28,25 @@ interface ChatHistoryProps {
   onItemPin?: (item: ActionResult & { isPreview?: boolean }) => void;
   onItemDelete?: (resultId: string) => void;
 }
+
+const getResultDisplayContent = (result: ActionResult) => {
+  const content = result.steps?.map((step) => step.content)?.join('\n');
+  if (content) return <span>{content}</span>;
+
+  // If content is empty, find the first artifact
+  for (const step of result.steps ?? []) {
+    if (step.artifacts?.length) {
+      const artifact = step.artifacts[0];
+      return (
+        <span className="flex items-center">
+          {getArtifactIcon(artifact, 'w-3 h-3 mr-1')} {artifact.title}
+        </span>
+      );
+    }
+  }
+
+  return '';
+};
 
 export const ChatHistory: React.FC<ChatHistoryProps> = ({
   isOpen,
@@ -121,9 +140,9 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
                   )}
                 </div>
               </div>
-              <p className="text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis text-xs">
-                {result?.steps?.map((step) => step.content)?.join('\n') ?? ''}
-              </p>
+              <div className="text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis text-xs">
+                {getResultDisplayContent(result)}
+              </div>
             </div>
           ))
         ) : (
