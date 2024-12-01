@@ -114,8 +114,6 @@ export const NodePreview = ({
   );
 
   useEffect(() => {
-    const scrollContainer = previewRef.current?.parentElement?.parentElement;
-    console.log('scrollContainer', scrollContainer);
     if (isPinned && selected) {
       setTimeout(() => {
         previewRef.current?.scrollIntoView({
