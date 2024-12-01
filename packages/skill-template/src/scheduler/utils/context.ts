@@ -35,15 +35,17 @@ export async function prepareContext(
     query,
     mentionedContext,
     maxTokens,
-    hasContext,
+    enableMentionedContext,
+    enableLowerPriorityContext,
   }: {
     query: string;
     mentionedContext: IContext;
     maxTokens: number;
-    hasContext: boolean;
+    enableMentionedContext: boolean;
+    enableLowerPriorityContext: boolean;
   },
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
-): Promise<string> {
+): Promise<{ contextStr: string; sources: Source[] }> {
   ctx.ctxThis.emitEvent({ event: 'log', content: `Start to prepare context...` }, ctx.config);
 
   const enableWebSearch = ctx.tplConfig?.enableWebSearch?.value;
@@ -82,7 +84,7 @@ export async function prepareContext(
     documents: [],
     projects: [],
   };
-  if (hasContext) {
+  if (enableMentionedContext) {
     const mentionContextRes = await prepareMentionedContext(
       {
         query,
@@ -103,7 +105,7 @@ export async function prepareContext(
     documents: [],
     projects: [],
   };
-  if (remainingTokens > 0 && (hasContext || enableKnowledgeBaseSearch)) {
+  if (remainingTokens > 0 && (enableMentionedContext || enableKnowledgeBaseSearch)) {
     const { contentList = [], resources = [], documents = [], projects = [] } = ctx.config.configurable;
     // prev remove overlapping items in mentioned context
     ctx.ctxThis.engine.logger.log(
@@ -167,19 +169,10 @@ export async function prepareContext(
      - sources: ${safeStringifyJSON(sources)}`,
   );
 
-  ctx.ctxThis.emitEvent(
-    {
-      event: 'structured_data',
-      content: JSON.stringify(sources),
-      structuredDataKey: 'sources',
-    },
-    ctx.config,
-  );
-
   ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared context successfully!` }, ctx.config);
   ctx.ctxThis.engine.logger.log(`Prepared context successfully! ${safeStringifyJSON(mergedContext)}`);
 
-  return contextStr;
+  return { contextStr, sources };
 }
 
 export async function prepareWebSearchContext(

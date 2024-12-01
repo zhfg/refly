@@ -12,6 +12,7 @@ import {
   Icon,
   SkillInvocationConfig,
   SkillTemplateConfigDefinition,
+  Source,
 } from '@refly-packages/openapi-schema';
 // types
 import { GraphState, IContext } from '../scheduler/types';
@@ -88,6 +89,7 @@ export class GenerateDoc extends BaseSkill {
     let optimizedQuery = '';
     let mentionedContext: IContext;
     let context: string = '';
+    let sources: Source[] = [];
 
     // preprocess query, ensure query is not too long
     const query = preprocessQuery(originalQuery, {
@@ -145,12 +147,13 @@ export class GenerateDoc extends BaseSkill {
     this.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
 
     if (needPrepareContext) {
-      context = await prepareContext(
+      const preparedRes = await prepareContext(
         {
           query: optimizedQuery,
           mentionedContext,
           maxTokens: remainingTokens,
-          hasContext,
+          enableMentionedContext: hasContext,
+          enableLowerPriorityContext: hasContext,
         },
         {
           config: config,
@@ -159,9 +162,21 @@ export class GenerateDoc extends BaseSkill {
           tplConfig,
         },
       );
+
+      context = preparedRes.contextStr;
+      sources = preparedRes.sources;
     }
 
     this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
+
+    this.emitEvent(
+      {
+        event: 'structured_data',
+        content: JSON.stringify(sources),
+        structuredDataKey: 'sources',
+      },
+      config,
+    );
 
     const requestMessages = buildFinalRequestMessages({
       module,

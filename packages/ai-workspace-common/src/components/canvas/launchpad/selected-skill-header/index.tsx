@@ -1,4 +1,4 @@
-import { Button } from '@arco-design/web-react';
+import { Button } from 'antd';
 // styles
 import './index.scss';
 import { IconClose } from '@arco-design/web-react/icon';
@@ -34,6 +34,7 @@ export const SelectedSkillHeader = ({ readonly, skill, onClose }: SelectedSkillH
       {!readonly && (
         <div className="selected-skill-manage">
           <Button
+            type="text"
             icon={<IconClose />}
             onClick={() => {
               onClose?.();
