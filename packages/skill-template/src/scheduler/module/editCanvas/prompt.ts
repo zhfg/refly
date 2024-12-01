@@ -2,17 +2,17 @@ import { Document } from '@refly-packages/openapi-schema';
 import { HighlightSelection } from './types';
 import { InPlaceEditType } from '@refly-packages/utils';
 import {
-  buildBlockEditCanvasSystemPrompt,
-  buildBlockEditCanvasUserPrompt,
-  buildContextualBlockEditCanvasContextUserPrompt,
+  buildBlockEditDocumentSystemPrompt,
+  buildBlockEditDocumentUserPrompt,
+  buildContextualBlockEditDocumentContextUserPrompt,
 } from './blockPrompt';
 import {
-  buildInlineEditCanvasSystemPrompt,
-  buildInlineEditCanvasUserPrompt,
-  buildContextualInlineEditCanvasContextUserPrompt,
+  buildInlineEditDocumentSystemPrompt,
+  buildInlineEditDocumentUserPrompt,
+  buildContextualInlineEditDocumentContextUserPrompt,
 } from './inlinePrompt';
 
-interface EditCanvasModule {
+interface EditDocumentModule {
   buildSystemPrompt: (locale: string, needPrepareContext: boolean) => string;
   buildUserPrompt: (params: { originalQuery: string; rewrittenQuery: string }) => string;
   buildContextUserPrompt: (documentContext: {
@@ -24,14 +24,14 @@ interface EditCanvasModule {
 const getModules = (documentContext: { document: Document; selectedContent: HighlightSelection }) => {
   return {
     block: {
-      buildSystemPrompt: buildBlockEditCanvasSystemPrompt,
-      buildUserPrompt: buildBlockEditCanvasUserPrompt,
-      buildContextUserPrompt: buildContextualBlockEditCanvasContextUserPrompt(documentContext),
+      buildSystemPrompt: buildBlockEditDocumentSystemPrompt,
+      buildUserPrompt: buildBlockEditDocumentUserPrompt,
+      buildContextUserPrompt: buildContextualBlockEditDocumentContextUserPrompt(documentContext),
     },
     inline: {
-      buildSystemPrompt: buildInlineEditCanvasSystemPrompt,
-      buildUserPrompt: buildInlineEditCanvasUserPrompt,
-      buildContextUserPrompt: buildContextualInlineEditCanvasContextUserPrompt(documentContext),
+      buildSystemPrompt: buildInlineEditDocumentSystemPrompt,
+      buildUserPrompt: buildInlineEditDocumentUserPrompt,
+      buildContextUserPrompt: buildContextualInlineEditDocumentContextUserPrompt(documentContext),
     },
   };
 };

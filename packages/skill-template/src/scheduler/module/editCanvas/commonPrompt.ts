@@ -21,14 +21,8 @@ export const commonQueryAndContextPriorityRules = (locale: string) => `
 export const commonImportantNotes = (locale: string) => `
 ## Important Notes
  1. The <response> tags in examples are for demonstration purposes only
- 2. Your actual response should only include these four parts in sequence:
-    - Initial content analysis (no labels or prefixes)
-    - <reflyThinking> section
-    - <reflyCanvas> section
-    - Brief summary (no labels or prefixes)
- 3. Keep minimum content length of 2000 words
- 4. Remember to generate all content in ${locale} while preserving technical terms
- 5. IMPORTANT: Never include labels like "Initial Analysis:", "Brief Summary:", or their translations in any language`;
+ 2. Keep minimum content length of 2000 words
+ 3. Remember to generate all content in ${locale} while preserving technical terms`;
 
 export const referenceContextHandlingPrompt = `
 ## Reference Context Handling Instructions
@@ -40,27 +34,23 @@ export const referenceContextHandlingPrompt = `
 4. Generate original content that builds upon context
 
 ### Context Handling Guidelines
-1. Prioritize context in order: MentionedContext > WebSearchContext > OtherContext
+1. Prioritize context in order: MentionedContext > OtherContext
 2. Connect information across different context sources
 3. Use context to enrich examples and explanations
 
 ### Context Structure Guidelines
-You will be provided with context in XML format. This context is structured hierarchically and may include web search results, mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, canvases, and projects. Always consider all relevant context when formulating your responses. The context is structured as follows:
+You will be provided with context in XML format. This context is structured hierarchically and may include mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, documents. Always consider all relevant context when formulating your responses. The context is structured as follows:
 
 <referenceContext>
-   <WebSearchContext>
-      <ContextItem citationIndex='[[citation:x]]' type='webSearchSource' url={url} title={title}>content</ContextItem>
-      ...
-   </WebSearchContext>
    <MentionedContext>
       <UserSelectedContent>
          <ContextItem citationIndex='[[citation:x]]' type='selectedContent' from={domain} entityId={id} title={title} weblinkUrl={url}>content</ContextItem>
          ...
       </UserSelectedContent>
-      <KnowledgeBaseCanvases>
-         <ContextItem citationIndex='[[citation:x]]' type='canvas' entityId={id} title={title}>content</ContextItem>
+      <KnowledgeBaseDocuments>
+         <ContextItem citationIndex='[[citation:x]]' type='document' entityId={id} title={title}>content</ContextItem>
          ...
-      </KnowledgeBaseCanvases>
+      </KnowledgeBaseDocuments>
       <KnowledgeBaseResources>
          <ContextItem citationIndex='[[citation:x]]' type='resource' entityId={id} title={title}>content</ContextItem>
          ...
