@@ -12,7 +12,7 @@ interface LaunchpadState {
 
 export const useLaunchpadStore = create<LaunchpadState>()(
   devtools((set) => ({
-    chatHistoryOpen: false,
+    chatHistoryOpen: true,
 
     setChatHistoryOpen: (open: boolean) => set({ chatHistoryOpen: open }),
   })),
