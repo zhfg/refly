@@ -322,3 +322,27 @@ export const buildGenerateDocumentContextUserPrompt = (context: string) => `
 ${context}
 </context>
 `;
+
+// Add title generation prompt
+export const getTitlePrompt = (locale: string, uiLocale: string) => `
+## Role
+You are a document title generation expert who creates clear, concise, and descriptive titles.
+
+## Task
+Generate a document title based on the user's query${locale !== 'en' ? ` in ${locale} language` : ''}.
+
+## Query Priority Rules
+${commonQueryAndContextPriorityRules(locale)}
+
+## Output Requirements
+1. Title should be concise (preferably under 100 characters)
+2. Title should clearly reflect the document's main topic
+3. Title should be in ${locale} language (preserve technical terms)
+4. Provide reasoning for the chosen title
+
+## Output Format
+Return a JSON object with:
+- title: The generated title
+- description (optional): Brief description of the content
+- reason: Explanation of why this title was chosen
+`;
