@@ -13,6 +13,7 @@ export const PreviewContextManager = (props: {
   setChatHistoryOpen: (open: boolean) => void;
 }) => {
   const { contextItems, resultItems, chatHistoryOpen, setChatHistoryOpen } = props;
+  console.log('chatHistoryOpen', chatHistoryOpen);
 
   return (
     <div className="flex flex-col h-full p-2 px-3 launchpad-context-manager">

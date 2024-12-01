@@ -8,8 +8,9 @@ import {
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { useActionResultStore } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
-export const useChatHistory = (selectedResultNodes: CanvasNode[], setSelectedNodeByEntity: Function) => {
+export const useChatHistory = () => {
   // Get chat history state and actions
   const { chatHistoryOpen, setChatHistoryOpen } = useLaunchpadStoreShallow((state) => ({
     chatHistoryOpen: state.chatHistoryOpen,
@@ -41,6 +42,9 @@ export const useChatHistory = (selectedResultNodes: CanvasNode[], setSelectedNod
     };
   }, []);
 
+  const { nodes, setSelectedNodeByEntity } = useCanvasControl();
+  const selectedResultNodes = nodes?.filter((node) => node?.selected && node?.type === 'skillResponse');
+
   // Sync nodes with history items
   useEffect(() => {
     const { selectedResultItems } = useContextPanelStore.getState();
@@ -48,7 +52,9 @@ export const useChatHistory = (selectedResultNodes: CanvasNode[], setSelectedNod
 
     const newResultItems = [
       ...(selectedResultNodes
-        ?.filter((node) => !selectedResultItems?.some((item) => item?.resultId === node?.data?.entityId))
+        ?.filter(
+          (node) => !selectedResultItems?.some((item) => !item?.isPreview && item?.resultId === node?.data?.entityId),
+        )
         ?.map((node) => ({ ...resultMap[node?.data?.entityId], isPreview: true })) ?? []),
       ...(selectedResultItems?.filter((item) => !item?.isPreview) ?? []),
     ];

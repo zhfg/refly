@@ -49,7 +49,7 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
   }, [data.entityId]);
 
   // Get query and response content from result
-  const query = result?.invokeParam?.input?.query ?? 'Loading...';
+  const query = result?.title ?? 'Loading...';
   const content = result?.steps?.[0]?.content ?? 'Loading response...';
   const modelName = result?.actionMeta?.name ?? 'AI Assistant';
 

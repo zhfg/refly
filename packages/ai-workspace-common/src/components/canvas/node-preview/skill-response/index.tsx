@@ -82,30 +82,21 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     }
   }, [result?.status]);
 
-  const { invokeParam, actionMeta, logs } = result ?? {};
-  const { input, context } = invokeParam ?? {};
+  const { title, steps = [], context, history = [], actionMeta, logs } = result ?? {};
   const contextItems = convertContextToItems(context);
-
-  // Convert context to
-  const selectedResultItems = [];
 
   return (
     <div className="flex flex-col space-y-4 p-4">
       <div className="ai-copilot-operation-container readonly">
         <div className="ai-copilot-operation-body">
-          <ChatHistory
-            readonly
-            isOpen={chatHistoryOpen}
-            onClose={() => setChatHistoryOpen(false)}
-            items={selectedResultItems}
-          />
+          <ChatHistory readonly isOpen={chatHistoryOpen} onClose={() => setChatHistoryOpen(false)} items={history} />
           <PreviewChatInput
             readonly
             contextItems={contextItems}
-            resultItems={selectedResultItems}
+            resultItems={history}
             chatHistoryOpen={chatHistoryOpen}
             setChatHistoryOpen={setChatHistoryOpen}
-            query={input?.query}
+            query={title}
             actionMeta={actionMeta}
           />
         </div>
@@ -152,9 +143,9 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
         </div>
       )}
 
-      {result?.steps?.map((step, index) => (
+      {steps?.map((step, index) => (
         <div key={index}>
-          <ActionStepCard result={result} step={step} index={index + 1} query={input?.query} />
+          <ActionStepCard result={result} step={step} index={index + 1} query={title} />
         </div>
       ))}
 

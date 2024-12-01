@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Button, Divider, Empty } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { IconDelete, IconResponse } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { getArtifactIcon, IconDelete, IconResponse } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { ChevronDown, Pin, PinOff } from 'lucide-react';
@@ -29,6 +29,25 @@ interface ChatHistoryProps {
   onItemDelete?: (resultId: string) => void;
 }
 
+const getResultDisplayContent = (result: ActionResult) => {
+  const content = result.steps?.map((step) => step.content)?.join('\n');
+  if (content) return <span>{content}</span>;
+
+  // If content is empty, find the first artifact
+  for (const step of result.steps ?? []) {
+    if (step.artifacts?.length) {
+      const artifact = step.artifacts[0];
+      return (
+        <span className="flex items-center">
+          {getArtifactIcon(artifact, 'w-3 h-3 mr-1')} {artifact.title}
+        </span>
+      );
+    }
+  }
+
+  return '';
+};
+
 export const ChatHistory: React.FC<ChatHistoryProps> = ({
   isOpen,
   onClose,
@@ -51,12 +70,12 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
     };
   }, []);
 
-  if (!isOpen) {
+  if (!isOpen || items?.length === 0) {
     return null;
   }
 
   return (
-    <div className="w-full border border-solid border-black/10 shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)] max-w-4xl mx-auto p-3 pb-1 space-y-2 rounded-lg bg-white mb-1">
+    <div className="w-full border border-solid border-black/10 shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)] max-w-4xl mx-auto p-3 pb-1 space-y-1 rounded-lg bg-white mb-1">
       <div className="text-gray-800 font-bold flex items-center justify-between">
         <div className="flex items-center space-x-1 pl-1">
           <span>{t('copilot.chatHistory.title')}</span>
@@ -121,9 +140,9 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
                   )}
                 </div>
               </div>
-              <p className="text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis text-xs">
-                {result?.steps?.map((step) => step.content)?.join('\n') ?? ''}
-              </p>
+              <div className="text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis text-xs">
+                {getResultDisplayContent(result)}
+              </div>
             </div>
           ))
         ) : (

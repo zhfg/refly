@@ -41,22 +41,17 @@ export const ToolResponseNodePreview = ({ resultId }: ToolResponseNodePreviewPro
   const humanMessage: Partial<ChatMessage> = {
     msgId: `${resultId}-human`,
     type: 'human',
-    content: result.invokeParam?.input?.query ?? '',
-    invokeParam: {
-      context: result.invokeParam?.context,
-    },
+    content: result.title ?? '',
   };
 
   const assistantMessage: Partial<ChatMessage> = {
     msgId: `${resultId}-assistant`,
     type: 'ai',
-    content: result.output ?? '',
+    content: '',
     skillMeta: {
       displayName: result.actionMeta?.name ?? 'AI Response',
       icon: result.actionMeta?.icon,
     },
-    tokenUsage: result.tokenUsage,
-    structuredData: result.structuredData,
   };
 
   return (

@@ -22,9 +22,9 @@ export const ChatHistorySwitch = (props: {
 
   const buttonClassName = useMemo(() => {
     return cn('text-xs h-6 rounded border text-gray-500 gap-1', {
-      'border-green-500 text-green-500': chatHistoryOpen,
+      'border-green-500 text-green-500': chatHistoryOpen && items?.length > 0,
     });
-  }, [chatHistoryOpen]);
+  }, [chatHistoryOpen, items?.length]);
 
   const handleClick = useMemo(() => {
     return () => setChatHistoryOpen(!chatHistoryOpen);

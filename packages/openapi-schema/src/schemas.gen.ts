@@ -779,6 +779,10 @@ export const ActionMetaSchema = {
       type: 'string',
       description: 'Action name',
     },
+    displayName: {
+      type: 'string',
+      description: 'Action display name',
+    },
     icon: {
       description: 'Action icon',
       $ref: '#/components/schemas/Icon',
@@ -1205,11 +1209,6 @@ export const ActionResultSchema = {
       description: 'Action result ID',
       example: 'ar-g30e1b80b5g1itbemc0g5jj3',
     },
-    canvasId: {
-      type: 'string',
-      description: 'Canvas ID',
-      example: 'c-g30e1b80b5g1itbemc0g5jj3',
-    },
     title: {
       type: 'string',
       description: 'Action result title',
@@ -1236,6 +1235,23 @@ export const ActionResultSchema = {
       description: 'Action metadata',
       $ref: '#/components/schemas/ActionMeta',
     },
+    context: {
+      type: 'object',
+      description: 'Action context',
+      $ref: '#/components/schemas/SkillContext',
+    },
+    tplConfig: {
+      type: 'object',
+      description: 'Action template config',
+      $ref: '#/components/schemas/SkillTemplateConfig',
+    },
+    history: {
+      type: 'array',
+      description: 'Action result history',
+      items: {
+        $ref: '#/components/schemas/ActionResult',
+      },
+    },
     steps: {
       type: 'array',
       description: 'Action steps',
@@ -1256,10 +1272,6 @@ export const ActionResultSchema = {
       items: {
         type: 'string',
       },
-    },
-    invokeParam: {
-      description: 'Skill invocation parameters',
-      $ref: '#/components/schemas/InvokeSkillRequest',
     },
     createdAt: {
       type: 'string',

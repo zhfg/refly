@@ -48,9 +48,6 @@ export const LaunchPad = () => {
   const { invokeAction, abortAction } = useInvokeAction();
   const { canvasId } = useCanvasContext();
 
-  const { nodes, setSelectedNodeByEntity } = useCanvasControl();
-  const selectedResultNodes = nodes?.filter((node) => node?.selected && node?.type === 'skillResponse');
-
   // Replace chat history related code with hook
   const {
     chatHistoryOpen,
@@ -60,7 +57,7 @@ export const LaunchPad = () => {
     handleItemClick,
     handleItemPin,
     handleItemDelete,
-  } = useChatHistory(selectedResultNodes, setSelectedNodeByEntity);
+  } = useChatHistory();
 
   const handleSendMessage = (userInput?: string) => {
     const error = handleFilterErrorTip();
@@ -97,6 +94,8 @@ export const LaunchPad = () => {
       context: convertContextItemsToContext(selectedContextItems),
       resultHistory: selectedResultItems.map((item) => ({
         resultId: item.resultId,
+        title: item.title,
+        steps: item.steps,
       })),
       skillName: skillStore.selectedSkill?.name || 'common_qna',
       locale: localSettings?.outputLocale,
