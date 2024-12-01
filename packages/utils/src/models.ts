@@ -5,6 +5,8 @@ export enum LLMType {
   GPT4o = 'openai/gpt-4o-2024-08-06',
   Claude35Sonnet = 'anthropic/claude-3.5-sonnet',
   Claude3Haiku = 'anthropic/claude-3-haiku',
+  Gemini15Flash = 'google/gemini-1.5-flash',
+  Gemini15Pro = 'google/gemini-1.5-pro',
 }
 
 export const ModelContextLimitMap = {
@@ -12,6 +14,8 @@ export const ModelContextLimitMap = {
   [LLMType.GPT4o]: 128 * 1024,
   [LLMType.Claude35Sonnet]: 200 * 1024,
   [LLMType.Claude3Haiku]: 200 * 1024,
+  [LLMType.Gemini15Flash]: 1024 * 1024,
+  [LLMType.Gemini15Pro]: 1024 * 1024,
 };
 
 export const modelMap: Record<string, ModelInfo> = {
@@ -42,6 +46,20 @@ export const modelMap: Record<string, ModelInfo> = {
     provider: 'anthropic',
     tier: 't2',
     contextLimit: 200 * 1024,
+  },
+  [LLMType.Gemini15Flash]: {
+    name: LLMType.Gemini15Flash,
+    label: 'Gemini 1.5 Flash',
+    provider: 'google',
+    tier: 't2',
+    contextLimit: 1024 * 1024,
+  },
+  [LLMType.Gemini15Pro]: {
+    name: LLMType.Gemini15Pro,
+    label: 'Gemini 1.5 Pro',
+    provider: 'google',
+    tier: 't1',
+    contextLimit: 1024 * 1024,
   },
 };
 
