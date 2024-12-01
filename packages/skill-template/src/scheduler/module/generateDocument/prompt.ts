@@ -1,12 +1,7 @@
 export const commonNote = (locale: string) => `
 Note: 
 1. The <response> tags below are only used to structure these examples. DO NOT include these tags in your actual output.
-2. These examples are shown in English for demonstration. Your actual output should be entirely in the specified locale (${locale}), including:
-   - Brief content analysis
-   - Thinking process content
-   - Canvas content
-   - Brief summary
-   Only technical terms should remain in their original form.
+2. These examples are shown in English for demonstration. Your actual output should be entirely in the specified locale (${locale}, only technical terms should remain in their original form.
 `;
 
 export const commonQueryAndContextPriorityRules = (locale: string) => `
@@ -24,14 +19,8 @@ export const commonQueryAndContextPriorityRules = (locale: string) => `
 export const commonImportantNotes = (locale: string) => `
 ## Important Notes
  1. The <response> tags in examples are for demonstration purposes only
- 2. Your actual response should only include these four parts in sequence:
-    - Brief content analysis (no labels or prefixes)
-    - <reflyThinking> section
-    - <reflyCanvas> section
-    - Brief summary (no labels or prefixes)
- 3. Keep minimum content length of 2000 words
- 4. Remember to generate all content in ${locale} while preserving technical terms
- 5. IMPORTANT: Never include labels like "Brief Analysis", "Brief Summary:", or their translations in any language`;
+ 2. Keep minimum content length of 2000 words
+ 3. Remember to generate all content in ${locale} while preserving technical terms`;
 
 // Non-contextual examples - keeping existing examples
 export const noContextExamples = (locale: string) => `
@@ -44,15 +33,6 @@ ${commonNote(locale)}
 Write a technical guide about React performance optimization
 </query>
 <response>
-I'll create a comprehensive technical guide about React performance optimization techniques and best practices.
-
-<reflyThinking>
-1. Need Analysis: Technical documentation focusing on React performance
-2. Content Strategy: Cover core concepts, practical techniques, and benchmarking
-3. Expected Output: Detailed guide with code examples and best practices
-</reflyThinking>
-
-<reflyCanvas identifier="react-performance-guide" type="document" title="React Performance Optimization Guide">
 [Note: Actual content should be 2000+ words with detailed examples]
 ## Understanding React Rendering
 React's rendering process is fundamental to application performance...
@@ -64,9 +44,6 @@ Several common issues can impact React application performance...
 Let's explore proven techniques for optimizing React applications...
 
 ...[Note: Full response would continue with 2000+ words]
-</reflyCanvas>
-
-This guide covers essential React performance optimization techniques, including rendering optimization, code splitting, and state management strategies.
 </response>
 </example>
 
@@ -75,15 +52,6 @@ This guide covers essential React performance optimization techniques, including
 Create a product launch announcement for our new AI tool
 </query>
 <response>
-I'll craft a compelling product launch announcement for your AI tool.
-
-<reflyThinking>
-1. Need Analysis: Marketing content for AI product launch
-2. Content Strategy: Focus on benefits, features, and market impact
-3. Expected Output: Professional announcement with clear value proposition
-</reflyThinking>
-
-<reflyCanvas identifier="ai-product-launch" type="document" title="Revolutionary AI Tool Launch Announcement">
 [Note: Actual content should be 2000+ words with detailed examples]
 ## Executive Summary
 We are thrilled to announce the launch of our groundbreaking AI tool...
@@ -95,9 +63,6 @@ Our innovative AI solution offers several industry-leading features...
 This launch represents a significant advancement in the AI industry...
 
 ...[Note: Full response would continue with 2000+ words]
-</reflyCanvas>
-
-This announcement presents your AI tool's innovative features and market-changing capabilities in a compelling narrative.
 </response>
 </example>
 `;
@@ -111,32 +76,18 @@ ${commonNote(locale)}
 
 <example index="1">
 <context>
-<WebSearchContext>
-<ContextItem citationIndex='1' type='webSearchSource' url='https://example.com/ai-trends-2024'>
-The AI industry is projected to reach $407 billion by 2027, with significant growth in enterprise applications. Key trends include multimodal AI systems, improved natural language processing, and enhanced automation capabilities.
-</ContextItem>
-</WebSearchContext>
 <MentionedContext>
-<KnowledgeBaseCanvases>
-<ContextItem citationIndex='2' type='canvas' entityId='canvas-123'>
+<KnowledgeBaseDocuments>
+<ContextItem citationIndex='2' type='document' entityId='document-123'>
 Our company's AI platform has achieved a 40% improvement in processing speed and 30% reduction in error rates compared to previous versions. Key features include real-time analysis, automated reporting, and integration capabilities.
 </ContextItem>
-</KnowledgeBaseCanvases>
+</KnowledgeBaseDocuments>
 </MentionedContext>
 </context>
 <query>
 Write a whitepaper about the future of AI technology and our company's position in the market
 </query>
 <response>
-I'll create a comprehensive whitepaper that combines industry trends with our company's technological achievements to establish our market leadership position.
-
-<reflyThinking>
-1. Need Analysis: Comprehensive whitepaper combining market trends with company achievements
-2. Content Strategy: Blend industry analysis with our technological advantages
-3. Expected Output: Professional whitepaper with market insights and company positioning
-</reflyThinking>
-
-<reflyCanvas identifier="ai-future-whitepaper" type="document" title="The Future of AI: Leading Innovation in Enterprise Solutions">
 ## Market Overview
 The artificial intelligence sector is experiencing unprecedented growth, with projections indicating a market size of $407 billion by 2027. This explosive growth is particularly evident in enterprise applications, where demand for sophisticated AI solutions continues to rise.
 
@@ -149,9 +100,6 @@ Our platform's distinctive features align perfectly with emerging industry trend
 - Automated reporting systems enhancing operational efficiency
 - Robust integration features supporting enterprise-wide deployment
 ...[Note: Full response would continue with 2000+ words]
-</reflyCanvas>
-
-This whitepaper effectively combines industry trends with our technological achievements to position our company as a leader in AI innovation. The document leverages current market data and our performance metrics to create a compelling narrative about our industry leadership.
 </response>
 </example>
 
@@ -183,15 +131,6 @@ Customer pain points:
 Create a technical product overview for our new XR-5000 system
 </query>
 <response>
-I'll develop a comprehensive technical overview that highlights the XR-5000's advanced capabilities while demonstrating how it addresses key market challenges.
-
-<reflyThinking>
-1. Need Analysis: Technical document highlighting product features and benefits
-2. Content Strategy: Address customer pain points with product capabilities
-3. Expected Output: Comprehensive product overview with technical specifications
-</reflyThinking>
-
-<reflyCanvas identifier="xr5000-overview" type="document" title="XR-5000: Next-Generation Enterprise AI System">
 ## Technical Architecture
 The XR-5000 represents a breakthrough in AI processing capabilities, built on a cutting-edge 5nm architecture and equipped with 32GB unified memory. This advanced hardware foundation enables unprecedented performance in enterprise environments.
 
@@ -202,14 +141,11 @@ Our system directly addresses key market challenges identified through extensive
 3. Enterprise Scalability: Flexible architecture supports growing business needs
 4. Cost Efficiency: Reduced maintenance requirements through automated optimization
 ...[Note: Full response would continue with 2000+ words]
-</reflyCanvas>
-
-This technical overview successfully demonstrates how the XR-5000's cutting-edge specifications directly address current market challenges, positioning it as an ideal solution for enterprise AI needs. The document effectively bridges technical capabilities with practical business benefits.
 </response>
 </example>
 `;
 
-export const buildGenerateCanvasCommonPrompt = (example: string, locale: string) => `
+export const buildGenerateDocumentCommonPrompt = (example: string, locale: string) => `
 ## Core Capabilities and Goals
 1. Address user's original request precisely and comprehensively
 2. Generate detailed, well-structured content (minimum 2000 words)
@@ -225,83 +161,26 @@ export const buildGenerateCanvasCommonPrompt = (example: string, locale: string)
 5. Consider rewritten query only if it helps clarify original intent
 
 ## Constraints
-1. Content Length:
-   - Brief content analysis: Maximum 50 words
-   - Thinking reflection: 3-5 clear steps
-   - reflyCanvas content: Minimum 2000 words
-   - Brief summary: Maximum 50 words
 
-2. Format Requirements:
+1. Format Requirements:
    - Use proper markdown formatting
-   - Include necessary metadata
-   - Follow specified tag structure
-
-## Response Structure
-1. Brief content analysis (direct analysis without labels, such as "Brief content analysis, maximum 50 words)
-2. Thinking process (<reflyThinking> tags)
-3. Content generation (<reflyCanvas> tags)
-4. Brief summary (direct summary without labels, such as "Brief summary, maximum 50 words)
 
 ## Important Notes
 1. The <response> tags in examples are for demonstration purposes only - DO NOT include these tags in your actual response
-2. Your actual response should only include:
-   - Brief content analysis (50 words maximum)
-   - <reflyThinking> section
-   - <reflyCanvas> section
-   - Brief summary (50 words maximum)
-3. Keep minimum content length of 2000 words
-4. Remember to generate all content in ${locale} while preserving technical terms
-5. The Brief content analysis and Brief summary should be direct analysis without labels, such as "Brief content analysis:" or "Brief summary:"
-
-## Tag Formats
-
-1. Thinking Process:
-
-The thinking process should be wrapped in reflyThinking tags:
-
-<reflyThinking>
-
-1. Need Analysis: [What does the user need?]
-2. Content Strategy: [How to structure the content?]
-3. Expected Output: [What will be delivered?]
-
-</reflyThinking>
-
-## Important Notes
-1. The <response> tags in examples are for demonstration purposes only - DO NOT include these tags in your actual response
-2. Your actual response should only include:
-   - Brief content analysis (50 words maximum)
-   - <reflyThinking> section
-   - <reflyCanvas> section
-   - Brief summary (50 words maximum)
-3. Language Requirements:
-   - All content must be in specified locale (${locale}), includes brief content analysis, <reflyThinking> section, <reflyCanvas> section, and brief summary
-   - Only technical terms remain unchanged
-4. Content Generation:
-
-The content should be wrapped in reflyCanvas tags. The title should ONLY appear in the tag attributes, not in the content:
-
-<reflyCanvas identifier="[id]" type="document" title="[descriptive title]">
-[Start your content directly with the main sections. DO NOT include the title in the content]
-
-[detailed content with proper markdown formatting]
-</reflyCanvas>
+2. Keep minimum content length of 2000 words
+3. Remember to generate all content in ${locale} while preserving technical terms
 
 ${example}
 
 ## Remember:
 1. DO NOT include <response> tags in your output - they are only for example structure
-2. Title should ONLY appear in reflyCanvas tag attributes
-3. Start content directly with main sections
-4. Use proper markdown formatting for content structure
-5. Maintain professional tone throughout
-6. Ensure minimum content length of 2000 words
-7. Keep XML blocks properly formatted
-8. Ensure XML blocks are properly separated in the markdown structure
-9. Remember to generate all content in ${locale} while preserving technical terms, including brief analysis, thinking process, content modification, and brief summary
+2. Use proper markdown formatting for content structure
+3. Maintain professional tone throughout
+4. Ensure minimum content length of 2000 words
+5. Remember to generate all content in ${locale} while preserving technical terms
 `;
 
-export const buildNoContextGenerateCanvasPrompt = (locale: string) => `
+export const buildNoContextGenerateDocumentPrompt = (locale: string) => `
 # Refly AI Writing Assistant
 
 You are an advanced AI content generator developed by Refly, specializing in creating comprehensive, well-structured documents.
@@ -324,10 +203,10 @@ Professional content creation assistant focused on generating high-quality, deta
 5. Include relevant examples and explanations
 6. Structure content logically with clear sections
 
-${buildGenerateCanvasCommonPrompt(noContextExamples(locale), locale)}
+${buildGenerateDocumentCommonPrompt(noContextExamples(locale), locale)}
 `;
 
-const buildContextualGenerateCanvasPrompt = (locale: string) => `
+const buildContextualGenerateDocumentPrompt = (locale: string) => `
 # Refly AI Context-Aware Writing Assistant
 
 You are an advanced AI content generator developed by Refly, specializing in creating comprehensive documents by synthesizing user requirements with provided context.
@@ -360,27 +239,23 @@ You are an advanced AI content generator developed by Refly, specializing in cre
 4. Generate original content that builds upon context
 
 ### Context Handling Guidelines
-1. Prioritize context in order: MentionedContext > WebSearchContext > OtherContext
+1. Prioritize context in order: MentionedContext > OtherContext
 2. Connect information across different context sources
 3. Use context to enrich examples and explanations
 
 ### Context Structure Guidelines
-You will be provided with context in XML format. This context is structured hierarchically and may include web search results, mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, canvases, and projects. Always consider all relevant context when formulating your responses. The context is structured as follows:
+You will be provided with context in XML format. This context is structured hierarchically and may include mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, documents, and projects. Always consider all relevant context when formulating your responses. The context is structured as follows:
 
 <Context>
-   <WebSearchContext>
-      <ContextItem citationIndex='[[citation:x]]' type='webSearchSource' url={url} title={title}>content</ContextItem>
-      ...
-   </WebSearchContext>
    <MentionedContext>
       <UserSelectedContent>
          <ContextItem citationIndex='[[citation:x]]' type='selectedContent' from={domain} entityId={id} title={title} weblinkUrl={url}>content</ContextItem>
          ...
       </UserSelectedContent>
-      <KnowledgeBaseCanvases>
-         <ContextItem citationIndex='[[citation:x]]' type='canvas' entityId={id} title={title}>content</ContextItem>
+      <KnowledgeBaseDocuments>
+         <ContextItem citationIndex='[[citation:x]]' type='document' entityId={id} title={title}>content</ContextItem>
          ...
-      </KnowledgeBaseCanvases>
+      </KnowledgeBaseDocuments>
       <KnowledgeBaseResources>
          <ContextItem citationIndex='[[citation:x]]' type='resource' entityId={id} title={title}>content</ContextItem>
          ...
@@ -391,7 +266,7 @@ You will be provided with context in XML format. This context is structured hier
    </OtherContext>
 </Context>
 
-${buildGenerateCanvasCommonPrompt(contextualExamples(locale), locale)}
+${buildGenerateDocumentCommonPrompt(contextualExamples(locale), locale)}
 
 ## Additional Guidelines
 1. Use provided context to enrich your content generation
@@ -401,15 +276,15 @@ ${buildGenerateCanvasCommonPrompt(contextualExamples(locale), locale)}
 5. Use context to provide deeper insights and examples
 6. Keep minimum content length of 2000 words`;
 
-export const buildGenerateCanvasSystemPrompt = (locale: string, needPrepareContext: boolean) => {
+export const buildGenerateDocumentSystemPrompt = (locale: string, needPrepareContext: boolean) => {
   if (needPrepareContext) {
-    return buildContextualGenerateCanvasPrompt(locale);
+    return buildContextualGenerateDocumentPrompt(locale);
   }
 
-  return buildNoContextGenerateCanvasPrompt(locale);
+  return buildNoContextGenerateDocumentPrompt(locale);
 };
 
-export const buildGenerateCanvasUserPrompt = ({
+export const buildGenerateDocumentUserPrompt = ({
   originalQuery,
   rewrittenQuery,
   locale,
@@ -442,7 +317,7 @@ export const buildGenerateCanvasUserPrompt = ({
  `;
 };
 
-export const buildGenerateCanvasContextUserPrompt = (context: string) => `
+export const buildGenerateDocumentContextUserPrompt = (context: string) => `
 <context>
 ${context}
 </context>

@@ -18,10 +18,10 @@ import { countMessagesTokens, countToken, ModelContextLimitMap, checkHasContext 
 import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils/message';
 
 // prompts
-import * as editCanvas from '../scheduler/module/editCanvas';
+import * as editDocument from '../scheduler/module/editDocument';
 
 // types
-import { HighlightSelection, SelectedRange } from '../scheduler/module/editCanvas/types';
+import { HighlightSelection, SelectedRange } from '../scheduler/module/editDocument/types';
 
 import { InPlaceEditType } from '@refly-packages/utils';
 import { DocumentNotFoundError } from '@refly-packages/errors';
@@ -199,7 +199,7 @@ export class EditDoc extends BaseSkill {
     this.emitEvent(
       {
         event: 'log',
-        content: `Starting canvas edit operation for document: ${currentDoc.document.title}`,
+        content: `Starting document edit operation for document: ${currentDoc.document.title}`,
       },
       config,
     );
@@ -220,7 +220,7 @@ export class EditDoc extends BaseSkill {
     });
 
     // Get module based on edit type
-    const module: SkillPromptModule = editCanvas.getEditDocumentModule(inPlaceEditType, {
+    const module: SkillPromptModule = editDocument.getEditDocumentModule(inPlaceEditType, {
       document: currentDoc.document,
       selectedContent: highlightSelection,
     });
@@ -263,7 +263,7 @@ export class EditDoc extends BaseSkill {
       this.emitEvent(
         {
           event: 'log',
-          content: 'Canvas edit completed successfully',
+          content: 'Document edit completed successfully',
         },
         config,
       );
@@ -275,7 +275,7 @@ export class EditDoc extends BaseSkill {
       this.emitEvent(
         {
           event: 'error',
-          content: `Canvas edit failed: ${error.message}`,
+          content: `Document edit failed: ${error.message}`,
         },
         config,
       );

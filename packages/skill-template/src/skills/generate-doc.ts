@@ -222,9 +222,9 @@ export class GenerateDoc extends BaseSkill {
     const model = this.engine.chatModel({ temperature: 0.1 });
 
     const module = {
-      buildSystemPrompt: generateDocument.buildGenerateCanvasSystemPrompt,
-      buildUserPrompt: generateDocument.buildGenerateCanvasUserPrompt,
-      buildContextUserPrompt: generateDocument.buildGenerateCanvasContextUserPrompt,
+      buildSystemPrompt: generateDocument.buildGenerateDocumentSystemPrompt,
+      buildUserPrompt: generateDocument.buildGenerateDocumentUserPrompt,
+      buildContextUserPrompt: generateDocument.buildGenerateDocumentContextUserPrompt,
     };
     const { requestMessages } = await this.commonPreprocess(state, config, module);
 
@@ -246,7 +246,7 @@ export class GenerateDoc extends BaseSkill {
     });
 
     this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
-    this.emitEvent({ event: 'log', content: `Generated canvas successfully!` }, config);
+    this.emitEvent({ event: 'log', content: `Generated document successfully!` }, config);
 
     this.emitEvent(
       {
