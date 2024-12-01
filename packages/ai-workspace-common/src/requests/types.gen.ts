@@ -987,10 +987,6 @@ export type ActionResult = {
      */
     readonly resultId: string;
     /**
-     * Canvas ID
-     */
-    canvasId?: string;
-    /**
      * Action result title
      */
     title?: string;

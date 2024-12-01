@@ -1205,11 +1205,6 @@ export const ActionResultSchema = {
       description: 'Action result ID',
       example: 'ar-g30e1b80b5g1itbemc0g5jj3',
     },
-    canvasId: {
-      type: 'string',
-      description: 'Canvas ID',
-      example: 'c-g30e1b80b5g1itbemc0g5jj3',
-    },
     title: {
       type: 'string',
       description: 'Action result title',
