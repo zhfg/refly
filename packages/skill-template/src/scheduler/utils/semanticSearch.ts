@@ -50,7 +50,7 @@ export async function sortContentBySimilarity(
   });
 
   // 2. index documents
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.configurable.user, {
     content: documents,
     query,
     k: documents.length,
@@ -86,7 +86,7 @@ export async function sortCanvasesBySimilarity(
   });
 
   // 2. index documents
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.configurable.user, {
     content: documents,
     query,
     k: documents.length,
@@ -119,7 +119,7 @@ export async function sortResourcesBySimilarity(
   });
 
   // 2. index documents
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.configurable.user, {
     content: documents,
     query,
     k: documents.length,
@@ -526,7 +526,7 @@ export async function knowledgeBaseSearchGetRelevantChunks(
 ): Promise<DocumentInterface[]> {
   // 1. search relevant chunks
   const res = await ctx.ctxThis.engine.service.search(
-    ctx.config.user,
+    ctx.config.configurable.user,
     {
       query,
       entities: metadata.entities,
@@ -564,10 +564,10 @@ export async function inMemoryGetRelevantChunks(
       entityType: metadata.entityType,
       title: metadata.title,
       entityId: metadata.entityId,
-      tenantId: ctx.config.user.uid,
+      tenantId: ctx.config.configurable.user.uid,
     },
   };
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.configurable.user, {
     content: doc,
     query,
     k: 10,

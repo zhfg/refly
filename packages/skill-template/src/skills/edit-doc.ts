@@ -8,7 +8,6 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { CanvasEditConfig, safeStringifyJSON } from '@refly-packages/utils';
 import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition, Source } from '@refly-packages/openapi-schema';
-import { CanvasIntentType } from '@refly-packages/common-types';
 // types
 import { GraphState, IContext } from '../scheduler/types';
 // utils
@@ -19,10 +18,10 @@ import { countMessagesTokens, countToken, ModelContextLimitMap, checkHasContext 
 import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils/message';
 
 // prompts
-import * as editCanvas from '../scheduler/module/editCanvas';
+import * as editDocument from '../scheduler/module/editDocument';
 
 // types
-import { HighlightSelection, SelectedRange } from '../scheduler/module/editCanvas/types';
+import { HighlightSelection, SelectedRange } from '../scheduler/module/editDocument/types';
 
 import { InPlaceEditType } from '@refly-packages/utils';
 import { DocumentNotFoundError } from '@refly-packages/errors';
@@ -70,8 +69,6 @@ export class EditDoc extends BaseSkill {
     } = config.configurable;
 
     const { tplConfig } = config?.configurable || {};
-    const enableWebSearch = tplConfig?.enableWebSearch?.value as boolean;
-    const enableKnowledgeBaseSearch = tplConfig?.enableKnowledgeBaseSearch?.value as boolean;
 
     let optimizedQuery = '';
     let mentionedContext: IContext;
@@ -116,7 +113,7 @@ export class EditDoc extends BaseSkill {
       queryTokens < LONG_QUERY_TOKENS_THRESHOLD && // 只有短查询才需要重写
       (hasContext || chatHistoryTokens > 0); // 保持原有的上下文相关判断
 
-    const needPrepareContext = (hasContext && remainingTokens > 0) || enableWebSearch || enableKnowledgeBaseSearch;
+    const needPrepareContext = hasContext && remainingTokens > 0;
     this.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`);
 
     if (needRewriteQuery) {
@@ -202,7 +199,7 @@ export class EditDoc extends BaseSkill {
     this.emitEvent(
       {
         event: 'log',
-        content: `Starting canvas edit operation for document: ${currentDoc.document.title}`,
+        content: `Starting document edit operation for document: ${currentDoc.document.title}`,
       },
       config,
     );
@@ -217,31 +214,13 @@ export class EditDoc extends BaseSkill {
     //   : undefined;
     const highlightSelection = canvasEditConfig?.selection as HighlightSelection;
 
-    // Emit intent matcher event
-    this.emitEvent(
-      {
-        event: 'structured_data',
-        structuredDataKey: 'intentMatcher',
-        content: JSON.stringify({
-          type: CanvasIntentType.EditDocument,
-          docId: currentDoc.docId,
-          metadata: {
-            selectedRange,
-            inPlaceEditType,
-            highlightSelection,
-          },
-        }),
-      },
-      config,
-    );
-
     const model = this.engine.chatModel({
       temperature: 0.1,
       maxTokens: 4096,
     });
 
     // Get module based on edit type
-    const module: SkillPromptModule = editCanvas.getEditCanvasModule(inPlaceEditType, {
+    const module: SkillPromptModule = editDocument.getEditDocumentModule(inPlaceEditType, {
       document: currentDoc.document,
       selectedContent: highlightSelection,
     });
@@ -284,7 +263,7 @@ export class EditDoc extends BaseSkill {
       this.emitEvent(
         {
           event: 'log',
-          content: 'Canvas edit completed successfully',
+          content: 'Document edit completed successfully',
         },
         config,
       );
@@ -296,7 +275,7 @@ export class EditDoc extends BaseSkill {
       this.emitEvent(
         {
           event: 'error',
-          content: `Canvas edit failed: ${error.message}`,
+          content: `Document edit failed: ${error.message}`,
         },
         config,
       );

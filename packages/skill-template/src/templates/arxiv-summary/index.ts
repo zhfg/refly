@@ -150,7 +150,7 @@ export class ArxivSummarySkill extends BaseSkill {
     this.emitEvent({ event: 'log', content: '获取 pdf 内容成功' }, config);
     // add to resource for knowledge qa
     if (data?.data?.content?.length > 0) {
-      const { user } = config;
+      const { user } = config.configurable;
       const websiteUrl = url.includes('abs') ? url : url.replace('pdf', 'abs');
 
       // add to resource for knowledge qa

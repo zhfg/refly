@@ -1223,6 +1223,14 @@ export const ActionResultSchema = {
       description: 'Action type',
       $ref: '#/components/schemas/ActionType',
     },
+    targetType: {
+      description: 'Action target type',
+      $ref: '#/components/schemas/EntityType',
+    },
+    targetId: {
+      type: 'string',
+      description: 'Action target ID',
+    },
     actionMeta: {
       type: 'object',
       description: 'Action metadata',
@@ -3127,6 +3135,7 @@ export const InvokeActionResponseSchema = {
 
 export const InvokeSkillRequestSchema = {
   type: 'object',
+  required: ['input', 'target'],
   properties: {
     input: {
       description: 'Skill input',
@@ -3147,18 +3156,14 @@ export const InvokeSkillRequestSchema = {
       description: 'Skill template config',
       $ref: '#/components/schemas/SkillTemplateConfig',
     },
-    projectId: {
-      type: 'string',
-      description: 'Project ID (if not provided, new project will be created)',
-    },
     skillName: {
       type: 'string',
       description: 'Skill name (if not provided, common_qna will be used)',
       default: 'common_qna',
     },
-    canvasId: {
-      type: 'string',
-      description: 'Canvas ID',
+    target: {
+      description: 'Skill invocation target',
+      $ref: '#/components/schemas/Entity',
     },
     resultId: {
       type: 'string',
@@ -3179,10 +3184,6 @@ export const InvokeSkillRequestSchema = {
     modelName: {
       type: 'string',
       description: 'Selected model',
-    },
-    createConvParam: {
-      description: 'Create conversation parameters',
-      $ref: '#/components/schemas/CreateConversationRequest',
     },
     jobId: {
       description: 'Skill job ID (if not provided, a new job will be created)',

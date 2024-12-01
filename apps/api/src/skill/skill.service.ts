@@ -433,7 +433,8 @@ export class SkillService {
       data: {
         resultId,
         uid,
-        canvasId: param.canvasId,
+        targetId: param.target?.entityId,
+        targetType: param.target?.entityType,
         title: param.input?.query,
         type: 'skill',
         status: 'executing',
@@ -600,6 +601,7 @@ export class SkillService {
     const config: SkillRunnableConfig = {
       configurable: {
         ...context,
+        user: pick(user, ['uid', 'uiLocale', 'outputLocale']),
         modelName,
         locale: displayLocale,
         uiLocale: user.uiLocale,
@@ -607,7 +609,6 @@ export class SkillService {
         tplConfig,
         resultId: data.result?.resultId,
       },
-      user: pick(user, ['uid', 'uiLocale', 'outputLocale']),
     };
 
     if (resultHistory?.length > 0) {
@@ -897,6 +898,7 @@ export class SkillService {
 
     const param: InvokeSkillRequest = {
       input: JSON.parse(trigger.input || '{}'),
+      target: {},
       context: JSON.parse(trigger.context || '{}'),
       tplConfig: JSON.parse(trigger.tplConfig || '{}'),
       skillId: trigger.skillId,

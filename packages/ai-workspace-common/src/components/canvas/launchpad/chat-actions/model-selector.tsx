@@ -13,11 +13,13 @@ import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common
 import { PiWarningCircleBold } from 'react-icons/pi';
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
 import AnthropicIcon from '@refly-packages/ai-workspace-common/assets/anthropic.svg';
+import GeminiIcon from '@refly-packages/ai-workspace-common/assets/google-gemini-icon.svg';
 import { ModelInfo, TokenUsageMeter } from '@refly/openapi-schema';
 
 const providerIcons = {
   openai: OpenAIIcon,
   anthropic: AnthropicIcon,
+  google: GeminiIcon,
 };
 
 interface ModelSelectorProps {

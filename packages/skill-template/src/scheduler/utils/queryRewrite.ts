@@ -8,6 +8,7 @@ import { ModelContextLimitMap } from './token';
 import { MAX_CONTEXT_RATIO, MAX_QUERY_TOKENS_RATIO } from './constants';
 import { truncateText } from './truncator';
 import { safeStringifyJSON } from '@refly-packages/utils';
+import { extractStructuredData } from './extractor';
 
 // simplify context entityId for better extraction
 export const preprocessContext = (context: IContext): IContext => {
@@ -183,7 +184,24 @@ Examples of query rewriting with context and chat history:
    `;
 };
 
-// TODO: build chatHistory and context related system prompt
+// Add schema for query analysis
+const queryAnalysisSchema = z.object({
+  rewrittenQuery: z.string().describe('The query after entity clarification, keeping original intent intact'),
+  mentionedContext: z
+    .array(
+      z.object({
+        type: z.enum(['canvas', 'resource', 'selectedContent']),
+        entityId: z.string().optional(),
+        title: z.string(),
+        useWholeContent: z.boolean(),
+      }),
+    )
+    .describe('Array of referenced context items'),
+  intent: z.enum(['SEARCH_QA', 'WRITING', 'READING_COMPREHENSION', 'OTHER']).describe("The query's primary purpose"),
+  confidence: z.number().min(0).max(1).describe('Confidence score for the analysis'),
+  reasoning: z.string().describe('Explanation of why the query was kept or modified'),
+});
+
 export async function analyzeQueryAndContext(
   query: string,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
@@ -198,12 +216,12 @@ export async function analyzeQueryAndContext(
 
   ctx.ctxThis.emitEvent({ event: 'log', content: 'Analyzing query and context...' }, ctx.config);
 
-  // preprocess context for better extract mentioned context
+  // Preprocess context for better extract mentioned context
   const preprocessedContext = preprocessContext(context);
   const maxContextTokens = ModelContextLimitMap[modelName] * MAX_CONTEXT_RATIO;
   const summarizedContext = summarizeContext(preprocessedContext, maxContextTokens);
 
-  // summarize chat history
+  // Summarize chat history
   const summarizedChatHistory = summarizeChatHistory(chatHistory || []);
 
   const systemPrompt = `You are an AI query analyzer that preserves the original query intent while only clarifying referenced entities when necessary.
@@ -300,44 +318,41 @@ ${summarizedChatHistory}
 Please analyze the query, focusing primarily on the current query and available context. Only consider the chat history if it's directly relevant to understanding the current query.`;
 
   const model = ctx.ctxThis.engine.chatModel({ temperature: 0.3 });
-  // TODO: add property `useWholeContent` for check use whole content or use embedding similarity, 决定后续使用 context 时，是否截断
-  const runnable = model.withStructuredOutput(
-    z.object({
-      rewrittenQuery: z.string(),
-      mentionedContext: z.array(
-        z.object({
-          type: z.enum(['canvas', 'resource', 'selectedContent']),
-          entityId: z.string().optional(),
-          title: z.string(),
-          useWholeContent: z.boolean(),
-        }),
-      ),
-      intent: z.enum(['SEARCH_QA', 'WRITING', 'READING_COMPREHENSION', 'OTHER']),
-      confidence: z.number().min(0).max(1),
-      reasoning: z.string(),
-    }),
-  );
 
-  const result = await runnable.invoke([new SystemMessage(systemPrompt), new HumanMessage(userMessage)], {
-    ...ctx.config,
-    metadata: ctx.config.metadata,
-  });
+  try {
+    const result = await extractStructuredData(
+      model,
+      queryAnalysisSchema,
+      systemPrompt + '\n\n' + userMessage,
+      3, // maxRetries
+    );
 
-  ctx.ctxThis.engine.logger.log(`- Rewritten Query: ${result.rewrittenQuery}
+    ctx.ctxThis.engine.logger.log(`- Rewritten Query: ${result.rewrittenQuery}
     - Mentioned Context: ${safeStringifyJSON(result.mentionedContext)}
     - Intent: ${result.intent} (confidence: ${result.confidence})
     - Reasoning: ${result.reasoning}
     `);
 
-  ctx.ctxThis.emitEvent({ event: 'log', content: `Analyzed query and context successfully!` }, ctx.config);
+    ctx.ctxThis.emitEvent({ event: 'log', content: `Analyzed query and context successfully!` }, ctx.config);
 
-  return {
-    optimizedQuery: result.rewrittenQuery,
-    mentionedContext: postprocessContext(result.mentionedContext, context),
-    intent: result.intent,
-    confidence: result.confidence,
-    reasoning: result.reasoning,
-  };
+    return {
+      optimizedQuery: result?.rewrittenQuery || query,
+      mentionedContext: postprocessContext(result?.mentionedContext, context),
+      intent: result?.intent,
+      confidence: result?.confidence,
+      reasoning: result?.reasoning,
+    };
+  } catch (error) {
+    ctx.ctxThis.engine.logger.error(`Failed to analyze query: ${error}`);
+    // Return original query if analysis fails
+    return {
+      optimizedQuery: query,
+      mentionedContext: { resources: [], documents: [], contentList: [], projects: [] },
+      intent: 'OTHER',
+      confidence: 0,
+      reasoning: 'Analysis failed, using original query',
+    };
+  }
 }
 
 export const preprocessQuery = (

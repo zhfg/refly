@@ -105,7 +105,7 @@ export class FindRelatedContent extends BaseSkill {
    * @returns - The updated state with the new message added to the list of messages.
    */
   retrieve = async (state: GraphState, config: SkillRunnableConfig) => {
-    const { user } = config;
+    const { user } = config.configurable;
 
     const { resources, documents: contextDocuments, contentList, tplConfig = {} } = config?.configurable || {};
 

@@ -17,7 +17,6 @@
     "@redux-devtools/extension": "^3.3.0",
     "@refly/ai-workspace-common": "workspace:*",
     "@refly/common-types": "workspace:*",
-    "@refly/editor-common": "workspace:*",
     "@refly/errors": "workspace:*",
     "@refly/openapi-schema": "workspace:*",
     "@sentry/react": "^7.113.0",

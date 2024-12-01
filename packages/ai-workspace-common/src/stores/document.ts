@@ -3,7 +3,7 @@ import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Document } from '@refly/openapi-schema';
-import { EditorInstance } from '@refly-packages/editor-core/components';
+import { EditorInstance } from '@refly-packages/ai-workspace-common/components/editor/core/components';
 
 export enum ActionSource {
   KnowledgeBase = 'knowledge-base',

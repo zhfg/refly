@@ -144,7 +144,7 @@ export class WebsiteSummarySkill extends BaseSkill {
 
     // add to resource for knowledge qa
     if (data?.data?.content?.length > 0) {
-      const { user } = config;
+      const { user } = config.configurable;
 
       // add to resource for knowledge qa
       try {

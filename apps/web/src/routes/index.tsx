@@ -17,16 +17,12 @@ import { HomeRedirect } from "@refly-packages/ai-workspace-common/components/hom
 const Home = lazy(() => import("@/pages/home"))
 const Canvas = lazy(() => import("@/pages/canvas"))
 
-// const ShareContent = lazy(() => import("@/pages/share-content"))
-
 const prefetchRoutes = () => {
   // Prefetch common routes
   import("@/pages/login")
   import("@/pages/home")
   import("@/pages/canvas")
   import("@/pages/library")
-  import("@/pages/resource")
-  import("@/pages/project")
   import("@/pages/conv-library")
   import("@/pages/conv-item")
   import("@/pages/skill")
@@ -115,7 +111,6 @@ export const AppRouter = (props: { layout?: any }) => {
               />
             }
           />
-
           <Route
             path="/request-access"
             element={<RequestAccessRoute hasBetaAccess={hasBetaAccess} />}

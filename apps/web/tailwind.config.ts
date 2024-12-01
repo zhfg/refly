@@ -7,7 +7,6 @@ export default {
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
     "../../packages/ai-workspace-common/src/**/*.{js,jsx,ts,tsx}",
-    "../../packages/editor-common/src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {

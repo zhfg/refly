@@ -2,13 +2,11 @@ import { Layout } from "@arco-design/web-react"
 import { useMatch } from "react-router-dom"
 import { SiderLayout } from "./sider"
 import { useBindCommands } from "@refly-packages/ai-workspace-common/hooks/use-bind-commands"
-import { useImportProjectModalShallow } from "@refly-packages/ai-workspace-common/stores/import-project-modal"
 import { useNewCanvasModalStoreShallow } from "@refly-packages/ai-workspace-common/stores/new-canvas-modal"
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 
 import { LoginModal } from "@/components/login-modal"
 import { BigSearchModal } from "@refly-packages/ai-workspace-common/components/search/modal"
-import { NewProjectModal } from "@refly-packages/ai-workspace-common/components/project-detail/new-project-modal"
 import { SubscribeModal } from "@refly-packages/ai-workspace-common/components/settings/subscribe-modal"
 import { NewCanvasModal } from "@/components/new-canvas-modal"
 
@@ -28,9 +26,6 @@ export const AppLayout = (props: AppLayoutProps) => {
   }))
   const newCanvasModalStore = useNewCanvasModalStoreShallow(state => ({
     newCanvasModalVisible: state.newCanvasModalVisible,
-  }))
-  const importProjectModal = useImportProjectModalShallow(state => ({
-    showNewProjectModal: state.showNewProjectModal,
   }))
 
   const matchShare = useMatch("/share/:shareCode")
@@ -55,7 +50,6 @@ export const AppLayout = (props: AppLayoutProps) => {
       {userStore.loginModalVisible ? <LoginModal /> : null}
       <BigSearchModal />
       {newCanvasModalStore.newCanvasModalVisible ? <NewCanvasModal /> : null}
-      {importProjectModal.showNewProjectModal && <NewProjectModal />}
       <SubscribeModal />
     </Layout>
   )

@@ -7,7 +7,6 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { safeStringifyJSON } from '@refly-packages/utils';
 import {
-  ActionStepMeta,
   Artifact,
   Icon,
   SkillInvocationConfig,
@@ -25,11 +24,26 @@ import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils
 
 // prompts
 import * as generateDocument from '../scheduler/module/generateDocument';
+import { extractStructuredData } from '../scheduler/utils/extractor';
+import { BaseMessage, HumanMessage } from '@langchain/core/dist/messages';
+import { truncateText } from '../scheduler/utils/truncator';
 
+// Add title schema with reason
+const titleSchema = z.object({
+  title: z.string().describe('The document title based on user query and context'),
+  description: z.string().optional().describe('A brief description of the document content'),
+  reason: z.string().describe('The reasoning process for generating this title'),
+});
+
+// Add to stepTitleDict
 const stepTitleDict = {
   analyzeContext: {
     en: 'Context Analysis',
     'zh-CN': '上下文分析',
+  },
+  generateTitle: {
+    en: 'Generate Title',
+    'zh-CN': '生成标题',
   },
   generateDocument: {
     en: 'Generate Document',
@@ -191,20 +205,124 @@ export class GenerateDoc extends BaseSkill {
 
     this.engine.logger.log(`requestMessages: ${safeStringifyJSON(requestMessages)}`);
 
-    return { requestMessages };
+    return { requestMessages, context, usedChatHistory };
+  };
+
+  // Add new method to generate title
+  generateTitle = async (
+    state: GraphState,
+    config: SkillRunnableConfig,
+    { context, chatHistory }: { context: string; chatHistory: BaseMessage[] },
+  ): Promise<string> => {
+    const { query = '' } = state;
+    const { locale = 'en', uiLocale = 'en' } = config.configurable;
+
+    const model = this.engine.chatModel({ temperature: 0.1 });
+
+    // Prepare context snippet if available
+    let contextSnippet = '';
+    if (context) {
+      const maxContextTokens = 300; // Target for ~200-400 tokens
+      const tokens = countToken(context);
+      if (tokens > maxContextTokens) {
+        // Take first part of context up to token limit
+        contextSnippet = truncateText(context, maxContextTokens);
+      } else {
+        contextSnippet = context;
+      }
+    }
+
+    // Prepare recent chat history
+    const recentHistory = truncateMessages(chatHistory); // Limit chat history tokens
+
+    const titlePrompt = `${generateDocument.getTitlePrompt(locale, uiLocale)}
+
+USER QUERY:
+${query}
+
+${
+  contextSnippet
+    ? `RELEVANT CONTEXT:
+${contextSnippet}`
+    : ''
+}
+
+${
+  recentHistory.length > 0
+    ? `RECENT CHAT HISTORY:
+${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.content}`).join('\n')}`
+    : ''
+}`;
+
+    try {
+      const result = await extractStructuredData(
+        model,
+        titleSchema,
+        titlePrompt,
+        3, // Max retries
+      );
+
+      // Log the reasoning process
+      this.engine.logger.log(`Title generation reason: ${result.reason}`);
+
+      // Emit structured data for UI
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify({
+            title: result.title,
+            description: result.description,
+            reason: result.reason,
+          }),
+          structuredDataKey: 'titleGeneration',
+        },
+        config,
+      );
+
+      return result.title;
+    } catch (error) {
+      this.engine.logger.error(`Failed to generate title: ${error}`);
+      return locale === 'zh-CN' ? '新文档' : 'New Document';
+    }
   };
 
   callGenerateDoc = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     this.emitEvent({ event: 'log', content: `Start to call generate document...` }, config);
 
     const { currentSkill, uiLocale = 'en' } = config?.configurable || {};
-    const { user } = config;
+    const { user } = config.configurable;
 
-    // Create document first
+    const model = this.engine.chatModel({ temperature: 0.1 });
+
+    const module = {
+      buildSystemPrompt: generateDocument.buildGenerateDocumentSystemPrompt,
+      buildUserPrompt: generateDocument.buildGenerateDocumentUserPrompt,
+      buildContextUserPrompt: generateDocument.buildGenerateDocumentContextUserPrompt,
+    };
+    const { requestMessages, context, usedChatHistory } = await this.commonPreprocess(state, config, module);
+
+    // Generate title first
+    config.metadata.step = {
+      name: 'generateTitle',
+      title: stepTitleDict.generateTitle[uiLocale],
+    };
+
+    const documentTitle = await this.generateTitle(state, config, {
+      context,
+      chatHistory: usedChatHistory,
+    });
+
+    // Create document with generated title
     const res = await this.engine.service.createDocument(user, {
-      title: 'New Document',
+      title: documentTitle,
       initialContent: '',
     });
+
+    // set current step
+    config.metadata.step = {
+      name: 'generateDocument',
+      title: stepTitleDict.generateDocument[uiLocale],
+    };
 
     const artifact: Artifact = {
       type: 'document',
@@ -219,22 +337,7 @@ export class GenerateDoc extends BaseSkill {
       config,
     );
 
-    const model = this.engine.chatModel({ temperature: 0.1 });
-
-    const module = {
-      buildSystemPrompt: generateDocument.buildGenerateCanvasSystemPrompt,
-      buildUserPrompt: generateDocument.buildGenerateCanvasUserPrompt,
-      buildContextUserPrompt: generateDocument.buildGenerateCanvasContextUserPrompt,
-    };
-    const { requestMessages } = await this.commonPreprocess(state, config, module);
-
     this.emitEvent({ event: 'log', content: `Start to generate document...` }, config);
-
-    // set current step
-    config.metadata.step = {
-      name: 'generateDocument',
-      title: stepTitleDict.generateDocument[uiLocale],
-    };
 
     const responseMessage = await model.invoke(requestMessages, {
       ...config,
@@ -246,7 +349,7 @@ export class GenerateDoc extends BaseSkill {
     });
 
     this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
-    this.emitEvent({ event: 'log', content: `Generated canvas successfully!` }, config);
+    this.emitEvent({ event: 'log', content: `Generated document successfully!` }, config);
 
     this.emitEvent(
       {
