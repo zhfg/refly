@@ -129,22 +129,22 @@ export class EditDoc extends BaseSkill {
     this.engine.logger.log(`optimizedQuery: ${optimizedQuery}`);
     this.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
 
-    // if (needPrepareContext) {
-    //   context = await prepareContext(
-    //     {
-    //       query: optimizedQuery,
-    //       mentionedContext,
-    //       maxTokens: remainingTokens,
-    //       hasContext,
-    //     },
-    //     {
-    //       config: config,
-    //       ctxThis: this,
-    //       state: state,
-    //       tplConfig,
-    //     },
-    //   );
-    // }
+    if (needPrepareContext) {
+      context = await prepareContext(
+        {
+          query: optimizedQuery,
+          mentionedContext,
+          maxTokens: remainingTokens,
+          hasContext,
+        },
+        {
+          config: config,
+          ctxThis: this,
+          state: state,
+          tplConfig,
+        },
+      );
+    }
 
     this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
 

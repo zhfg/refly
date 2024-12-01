@@ -150,6 +150,7 @@ export interface SkillRunnableMeta extends Record<string, unknown>, SkillMeta {
 
 export interface SkillRunnableConfig extends RunnableConfig {
   configurable?: SkillContext & {
+    user: User;
     resultId?: string;
     canvasId?: string;
     locale?: string;
@@ -163,6 +164,5 @@ export interface SkillRunnableConfig extends RunnableConfig {
     tplConfig?: SkillTemplateConfig;
     emitter?: EventEmitter<SkillEventMap>;
   };
-  user: User;
   metadata?: SkillRunnableMeta;
 }

@@ -601,6 +601,7 @@ export class SkillService {
     const config: SkillRunnableConfig = {
       configurable: {
         ...context,
+        user: pick(user, ['uid', 'uiLocale', 'outputLocale']),
         modelName,
         locale: displayLocale,
         uiLocale: user.uiLocale,
@@ -608,7 +609,6 @@ export class SkillService {
         tplConfig,
         resultId: data.result?.resultId,
       },
-      user: pick(user, ['uid', 'uiLocale', 'outputLocale']),
     };
 
     if (resultHistory?.length > 0) {

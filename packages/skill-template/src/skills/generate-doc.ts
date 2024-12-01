@@ -183,7 +183,7 @@ export class GenerateDoc extends BaseSkill {
     this.emitEvent({ event: 'log', content: `Start to call generate document...` }, config);
 
     const { currentSkill, uiLocale = 'en' } = config?.configurable || {};
-    const { user } = config;
+    const { user } = config.configurable;
 
     // Create document first
     const res = await this.engine.service.createDocument(user, {
