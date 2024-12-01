@@ -1991,6 +1991,7 @@ components:
         - select
         - multiSelect
         - radio
+        - switch
     ConfigScope:
       type: array
       description: Config scope

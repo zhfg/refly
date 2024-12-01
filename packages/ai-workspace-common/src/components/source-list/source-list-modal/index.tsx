@@ -122,9 +122,7 @@ export const SourceListModal = (props: SourceListModalProps) => {
               </div>
             </div>
           </div>
-          <div className="source-list-modal-header-title-message">
-            {knowledgeBaseStore?.sourceListDrawer?.currentHumanMessage?.content}
-          </div>
+          <div className="source-list-modal-header-title-message">{knowledgeBaseStore?.sourceListDrawer?.query}</div>
         </div>
       }
       visible={knowledgeBaseStore.sourceListDrawer.visible}

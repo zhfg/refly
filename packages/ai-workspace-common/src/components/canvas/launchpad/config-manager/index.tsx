@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 // 自定义样式
 import './index.scss';
 
-import { Button, Checkbox, Radio, InputNumber, Input, Form, FormInstance } from '@arco-design/web-react';
+import { Button, Checkbox, Radio, InputNumber, Input, Form, FormInstance, Switch } from '@arco-design/web-react';
 import { IconFile, IconRefresh } from '@arco-design/web-react/icon';
 import { GrDocumentConfig } from 'react-icons/gr';
 import { PiEyeSlash } from 'react-icons/pi';
@@ -33,6 +33,7 @@ const ConfigItem = (props: {
   field: string;
   locale: string;
   configValue?: DynamicConfigValue;
+  onValueChange: (field?: string, val?: any, displayValue?: string) => void;
 }): React.ReactNode => {
   const { item, form, field, locale, configValue } = props;
 
@@ -60,6 +61,8 @@ const ConfigItem = (props: {
       label,
       displayValue,
     } as DynamicConfigValue);
+
+    props.onValueChange();
   };
 
   if (item.inputMode === 'input') {
@@ -145,6 +148,19 @@ const ConfigItem = (props: {
     );
   }
 
+  if (item.inputMode === 'switch') {
+    return (
+      <Switch
+        size="small"
+        type="round"
+        defaultChecked={Boolean(configValue?.value)}
+        onChange={(checked) => {
+          onValueChange(checked, String(checked));
+        }}
+      />
+    );
+  }
+
   return null;
 };
 
@@ -176,7 +192,7 @@ export const ConfigManager = (props: ConfigManagerProps) => {
 
   const validateField = (field: string, value: any) => {
     const { formErrors: prevFormErrors } = useContextPanelStore.getState();
-    const schemaItem = schema.items.find((item) => getFormField(fieldPrefix, item.key) === field);
+    const schemaItem = schema.items?.find((item) => getFormField(fieldPrefix, item.key) === field);
     if (isConfigItemRequired(schemaItem)) {
       const value_ = value?.value;
       if ((!value_ && value_ !== 0) || (Array.isArray(value_) && !value_.length)) {
@@ -209,18 +225,18 @@ export const ConfigManager = (props: ConfigManagerProps) => {
   };
 
   useEffect(() => {
-    if (tplConfig) {
-      form.setFieldValue(fieldPrefix, tplConfig);
-    } else {
-      form.setFieldValue(fieldPrefix, {});
-    }
+    const initialConfig = tplConfig ?? {};
+    form.setFieldValue(fieldPrefix, initialConfig);
 
     setResetCounter((prev) => prev + 1);
     setShowConfig(false);
     setActiveConfig(undefined);
-    const errors = validateTplConfig(tplConfig);
-    setFormErrors(errors);
-  }, [tplConfig]);
+
+    if (Object.keys(initialConfig).length > 0) {
+      const errors = validateTplConfig(initialConfig);
+      setFormErrors(errors);
+    }
+  }, [JSON.stringify(tplConfig)]);
 
   const handleConfigItemClick = (item: DynamicConfigItem) => {
     if (activeConfig?.key === item.key) {
@@ -233,7 +249,18 @@ export const ConfigManager = (props: ConfigManagerProps) => {
   };
 
   const handleReset = (key: string) => {
-    const resetValue = tplConfig?.[key];
+    const schemaItem = schema.items?.find((item) => item.key === key);
+    const defaultValue = schemaItem?.defaultValue;
+
+    const resetValue =
+      defaultValue !== undefined
+        ? {
+            value: defaultValue,
+            label: getDictValue(schemaItem.labelDict, locale),
+            displayValue: String(defaultValue),
+          }
+        : undefined;
+
     form.setFieldValue(getFormField(fieldPrefix, key), resetValue);
     setResetCounter((prev) => prev + 1);
   };
@@ -322,6 +349,9 @@ export const ConfigManager = (props: ConfigManagerProps) => {
                         field={field}
                         locale={locale}
                         configValue={form.getFieldValue(field)}
+                        onValueChange={() => {
+                          setResetCounter((prev) => prev + 1);
+                        }}
                       />
                     </Form.Item>
                   </div>

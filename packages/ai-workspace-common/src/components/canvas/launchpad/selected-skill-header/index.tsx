@@ -29,11 +29,7 @@ export const SelectedSkillHeader = ({ readonly, skill, onClose }: SelectedSkillH
     <div className="selected-skill">
       <div className="selected-skill-profile">
         <SkillAvatar size={20} shape="circle" icon={selectedSkill?.icon} displayName={selectedSkill?.displayName} />
-        <p>
-          {t('copilot.selectedSkillHeader.title', {
-            name: selectedSkill?.displayName,
-          })}
-        </p>
+        <p>{selectedSkill?.displayName}</p>
       </div>
       {!readonly && (
         <div className="selected-skill-manage">

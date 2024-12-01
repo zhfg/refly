@@ -33,49 +33,60 @@ export const concatChatHistoryToStr = (messages: BaseMessage[]) => {
 };
 
 export const concatMergedContextToStr = (mergedContext: {
-  mentionedContext: IContext;
-  lowerPriorityContext: IContext;
+  mentionedContext: IContext | null;
+  lowerPriorityContext: IContext | null;
   webSearchSources: Source[];
 }) => {
   const { mentionedContext, lowerPriorityContext, webSearchSources } = mergedContext || {};
   let contextStr = '';
   let currentIndex = 1; // Start index
 
+  // Handle web search sources
   const webSearchContexConcatRes = concatContextToStr({ webSearchSources }, currentIndex);
-  const mentionedContextConcatRes = concatContextToStr(mentionedContext, webSearchContexConcatRes.nextIndex);
-  const lowerPriorityContextConcatRes = concatContextToStr(lowerPriorityContext, mentionedContextConcatRes.nextIndex);
 
+  // Only process mentioned and lower priority contexts if they exist
+  const mentionedContextConcatRes = mentionedContext
+    ? concatContextToStr(mentionedContext, webSearchContexConcatRes.nextIndex)
+    : { contextStr: '', nextIndex: webSearchContexConcatRes.nextIndex };
+
+  const lowerPriorityContextConcatRes = lowerPriorityContext
+    ? concatContextToStr(lowerPriorityContext, mentionedContextConcatRes.nextIndex)
+    : { contextStr: '', nextIndex: mentionedContextConcatRes.nextIndex };
+
+  // Only add sections that have content
   if (webSearchContexConcatRes.contextStr?.length > 0) {
-    contextStr += `\n\n<WebSearchContext>\n${webSearchContexConcatRes.contextStr}\n</WebSearchContext>\n\n`;
+    contextStr += `<WebSearchContext>\n${webSearchContexConcatRes.contextStr}\n</WebSearchContext>\n\n`;
   }
 
   if (mentionedContextConcatRes.contextStr?.length > 0) {
-    contextStr += `\n\n<MentionedContext>\n${mentionedContextConcatRes.contextStr}\n</MentionedContext>\n\n`;
+    contextStr += `<MentionedContext>\n${mentionedContextConcatRes.contextStr}\n</MentionedContext>\n\n`;
   }
 
   if (lowerPriorityContextConcatRes.contextStr?.length > 0) {
-    contextStr += `\n\n<OtherContext>\n${lowerPriorityContextConcatRes.contextStr}\n</OtherContext>\n\n`;
+    contextStr += `<OtherContext>\n${lowerPriorityContextConcatRes.contextStr}\n</OtherContext>\n\n`;
   }
 
-  return contextStr;
+  return contextStr.trim();
 };
 
 export const flattenMergedContextToSources = (mergedContext: {
-  mentionedContext: IContext;
-  lowerPriorityContext: IContext;
+  mentionedContext: IContext | null;
+  lowerPriorityContext: IContext | null;
   webSearchSources: Source[];
 }) => {
-  const { mentionedContext, lowerPriorityContext, webSearchSources } = mergedContext || {};
+  const { mentionedContext, lowerPriorityContext, webSearchSources = [] } = mergedContext || {};
 
   const sources = [
+    // Always include web search sources
     ...flattenContextToSources({
       webSearchSources,
     }),
-    ...flattenContextToSources(mentionedContext),
-    ...flattenContextToSources(lowerPriorityContext),
+    // Only include other contexts if they exist
+    ...(mentionedContext ? flattenContextToSources(mentionedContext) : []),
+    ...(lowerPriorityContext ? flattenContextToSources(lowerPriorityContext) : []),
   ];
 
-  // Remove duplicates
+  // Remove duplicates while preserving order
   const uniqueSources = sources.filter(
     (source, index, self) =>
       index ===

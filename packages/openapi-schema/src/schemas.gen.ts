@@ -402,7 +402,7 @@ export const LabelInstanceSchema = {
 export const InputModeSchema = {
   type: 'string',
   description: 'Data input mode',
-  enum: ['input', 'inputNumber', 'inputTextArea', 'select', 'multiSelect', 'radio'],
+  enum: ['input', 'inputNumber', 'inputTextArea', 'select', 'multiSelect', 'radio', 'switch'],
 } as const;
 
 export const ConfigScopeSchema = {

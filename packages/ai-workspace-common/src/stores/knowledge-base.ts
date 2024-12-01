@@ -21,8 +21,7 @@ export interface KnowledgeBaseTab {
 export interface SourceListDrawer {
   visible: boolean;
   sources?: Source[];
-  currentHumanMessage?: ClientChatMessage;
-  currentAIMessage?: ClientChatMessage;
+  query?: string;
 }
 
 export interface KnowledgeBaseState {
@@ -84,8 +83,7 @@ export const defaultState = {
   sourceListDrawer: {
     visible: false,
     sources: [],
-    currentHumanMessage: undefined,
-    currentAIMessage: undefined,
+    query: '',
   },
   actionSource: ActionSource.Conv,
   currentKnowledgeBase: null,

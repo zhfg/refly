@@ -15,6 +15,8 @@ import { PreviewChatInput } from './preview-chat-input';
 import { ChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-history';
 
 import './index.scss';
+import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
+import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 
 interface SkillResponseNodePreviewProps {
   resultId: string;
@@ -25,6 +27,9 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
   const { result, updateActionResult } = useActionResultStoreShallow((state) => ({
     result: state.resultMap[resultId],
     updateActionResult: state.updateActionResult,
+  }));
+  const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
+    sourceListDrawerVisible: state.sourceListDrawer.visible,
   }));
   const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
   const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
@@ -149,9 +154,11 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
 
       {result?.steps?.map((step, index) => (
         <div key={index}>
-          <ActionStepCard result={result} step={step} index={index + 1} />
+          <ActionStepCard result={result} step={step} index={index + 1} query={input?.query} />
         </div>
       ))}
+
+      {knowledgeBaseStore?.sourceListDrawerVisible ? <SourceListModal classNames="source-list-modal" /> : null}
     </div>
   );
 };

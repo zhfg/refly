@@ -181,7 +181,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
     if (!skillStore.selectedSkill?.configSchema?.items?.length) {
       form.setFieldValue('tplConfig', undefined);
     }
-  }, [skillStore.selectedSkill?.name, skillStore.selectedSkill?.configSchema?.items]);
+  }, [skillStore.selectedSkill?.name, skillStore.selectedSkill?.configSchema?.items?.length]);
 
   return (
     <>
