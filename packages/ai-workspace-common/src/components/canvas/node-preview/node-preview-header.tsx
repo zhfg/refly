@@ -16,12 +16,14 @@ import {
   Globe,
   FilePlus,
   Trash2,
+  PinOff,
 } from 'lucide-react';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasNode } from '../nodes/types';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { HiOutlineDocumentText, HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 
 // Define background colors for different node types
 const NODE_COLORS: Record<CanvasNodeType, string> = {
@@ -37,13 +39,13 @@ const NODE_COLORS: Record<CanvasNodeType, string> = {
 const getNodeIcon = (node: CanvasNode<any>) => {
   switch (node.type) {
     case 'document':
-      return FileText;
+      return HiOutlineDocumentText;
     case 'resource':
-      return node.data?.metadata?.resourceType === 'weblink' ? Link2 : FileText;
+      return node.data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
     case 'skillResponse':
-      return MessageSquare;
+      return IconCanvas;
     case 'toolResponse':
-      return MessageSquare;
+      return IconCanvas;
     case 'skill':
       switch (node.data?.metadata?.skillType) {
         case 'prompt':
@@ -154,14 +156,14 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
   ];
 
   return (
-    <div className="flex justify-between items-center p-4 border-b border-[#EAECF0]">
+    <div className="flex justify-between items-center py-2 px-4 border-b border-[#EAECF0]">
       {/* Left: Icon and Title */}
       <div className="flex items-center gap-2">
         <div
           className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0"
           style={{ backgroundColor: nodeColor }}
         >
-          <IconCanvas className="w-4 h-4 text-white" />
+          <IconComponent className="w-4 h-4 text-white" />
         </div>
         <span className="text-lg font-semibold text-gray-900">{nodeTitle}</span>
       </div>
@@ -172,17 +174,17 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
           <Tooltip title={isPinned ? 'Unpin' : 'Pin'}>
             <Button
               type="text"
-              className={`p-1.5 hover:bg-gray-100 ${isPinned ? 'text-blue-600' : 'text-gray-500'}`}
+              className={`p-1.5 hover:bg-gray-100 ${isPinned ? 'text-primary-600' : 'text-gray-500'}`}
               onClick={onPin}
             >
-              <Pin className="w-4 h-4" />
+              {isPinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
             </Button>
           </Tooltip>
         )}
         {onMaximize && (
           <Button
             type="text"
-            className={`p-1.5 hover:bg-gray-100 ${isMaximized ? 'text-blue-600' : 'text-gray-500'}`}
+            className={`p-1.5 hover:bg-gray-100 ${isMaximized ? 'text-primary-600' : 'text-gray-500'}`}
             onClick={onMaximize}
           >
             <Maximize2 className="w-4 h-4" />

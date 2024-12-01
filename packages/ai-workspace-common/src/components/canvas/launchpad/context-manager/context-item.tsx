@@ -5,29 +5,62 @@ import { getNodeIcon } from './utils/icon';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import cn from 'classnames';
 import { ContextPreview } from './context-preview';
+import { useCallback } from 'react';
+import { Message } from '@arco-design/web-react';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
 export const ContextItem = ({
   item,
   isLimit,
   isActive,
   disabled,
-  onClick,
   onRemove,
   canNotRemove,
-  onOpenUrl,
 }: {
   canNotRemove?: boolean;
   item: IContextItem;
   isActive: boolean;
   isLimit?: boolean;
   disabled?: boolean;
-  onClick: (item: IContextItem) => void;
   onRemove?: (item: IContextItem) => void;
-  onOpenUrl: (url: string | (() => string) | (() => void)) => void;
 }) => {
   const { t } = useTranslation();
   const { data } = item ?? {};
   const icon = getNodeIcon(item?.type);
+  const { nodes, setSelectedNode } = useCanvasControl();
+
+  const handleItemClick = useCallback(
+    async (item: CanvasNode<any>) => {
+      const isSelectionNode = item.data?.metadata?.sourceType?.includes('Selection');
+
+      if (isSelectionNode) {
+        const sourceEntityId = item.data?.metadata?.sourceEntityId;
+        const sourceEntityType = item.data?.metadata?.sourceEntityType;
+
+        if (!sourceEntityId || !sourceEntityType) {
+          console.warn('Missing source entity information for selection node');
+          return;
+        }
+
+        const sourceNode = nodes.find(
+          (node) => node.data?.entityId === sourceEntityId && node.type === sourceEntityType,
+        );
+
+        if (!sourceNode) {
+          Message.warning({
+            content: t('canvas.contextManager.nodeNotFound'),
+          });
+          return;
+        }
+
+        setSelectedNode(sourceNode);
+      } else {
+        setSelectedNode(item);
+      }
+    },
+    [nodes, setSelectedNode, t],
+  );
 
   const content = (
     <div>
@@ -53,7 +86,7 @@ export const ContextItem = ({
             'border-dashed': item?.isPreview,
           },
         )}
-        onClick={() => onClick?.(item)}
+        onClick={() => handleItemClick?.(item)}
       >
         <div className="h-[18px] flex items-center w-full text-xs">
           <span className="flex items-center flex-shrink-0 mr-1">{icon}</span>

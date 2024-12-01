@@ -1,4 +1,4 @@
-import { Input, FormInstance, Form } from '@arco-design/web-react';
+import { FormInstance, Input } from '@arco-design/web-react';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
@@ -7,38 +7,38 @@ import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/
 // styles
 import './index.scss';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
-import { ChatActions } from './chat-actions';
 import { ContextManager } from './context-manager';
 import { SelectedSkillHeader } from './selected-skill-header';
-import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import {
+  useContextPanelStore,
+  useContextPanelStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
+import { ConfigManager } from './config-manager';
+import { ChatActions } from './chat-actions';
 
 const TextArea = Input.TextArea;
 
 interface ChatInputProps {
   handleSendMessage: () => void;
   handleAbort: () => void;
+  form: FormInstance;
 }
 
 export const ChatInput = (props: ChatInputProps) => {
-  const { handleSendMessage, handleAbort } = props;
+  const { handleSendMessage, handleAbort, form } = props;
   const { t } = useTranslation();
   const inputRef = useRef<RefTextAreaType>(null);
 
-  const [form] = Form.useForm();
-  const { formErrors, setFormErrors } = useContextPanelStoreShallow((state) => ({
+  const { formErrors, setFormErrors } = useContextPanelStore((state) => ({
     formErrors: state.formErrors,
     setFormErrors: state.setFormErrors,
   }));
 
   const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
+    setSelectedSkill: state.setSelectedSkill,
   }));
-  useEffect(() => {
-    if (!skillStore.selectedSkill?.configSchema?.items?.length) {
-      form.setFieldValue('tplConfig', undefined);
-    }
-  }, [skillStore.selectedSkill?.name, skillStore.selectedSkill?.configSchema?.items]);
 
   const chatStore = useChatStoreShallow((state) => ({
     newQAText: state.newQAText,
@@ -86,10 +86,32 @@ export const ChatInput = (props: ChatInputProps) => {
     }
   };
 
+  useEffect(() => {
+    if (!skillStore.selectedSkill?.configSchema?.items?.length) {
+      form.setFieldValue('tplConfig', undefined);
+    } else {
+      // Create default config from schema if no config exists
+      const defaultConfig = {};
+      skillStore.selectedSkill?.configSchema?.items?.forEach((item) => {
+        if (item.defaultValue !== undefined) {
+          defaultConfig[item.key] = {
+            value: item.defaultValue,
+            label: item.labelDict?.['en'] ?? item.key,
+            displayValue: String(item.defaultValue),
+          };
+        }
+      });
+
+      // Use existing config or fallback to default config
+      const initialConfig = skillStore.selectedSkill?.tplConfig ?? defaultConfig;
+      form.setFieldValue('tplConfig', initialConfig);
+    }
+  }, [skillStore.selectedSkill?.name]);
+
   return (
     <div className="ai-copilot-chat-container">
       <div className="chat-input-container">
-        <SelectedSkillHeader />
+        <SelectedSkillHeader skill={skillStore.selectedSkill} onClose={() => skillStore.setSelectedSkill(null)} />
         <ContextManager />
         <div className="chat-input-body">
           <div className="ai-copilot-chat-input-container">
@@ -116,20 +138,22 @@ export const ChatInput = (props: ChatInputProps) => {
           </div>
         </div>
 
-        {/* {skillStore.selectedSkill?.configSchema?.items?.length > 0 && (
+        {skillStore.selectedSkill?.configSchema?.items?.length > 0 && (
           <ConfigManager
+            key={skillStore.selectedSkill?.name}
             form={form}
             formErrors={formErrors}
             setFormErrors={setFormErrors}
             schema={skillStore.selectedSkill?.configSchema}
-            tplConfig={skillStore.selectedSkill?.config}
+            tplConfig={skillStore.selectedSkill?.tplConfig}
             fieldPrefix="tplConfig"
             configScope="runtime"
             resetConfig={() => {
-              form.setFieldValue('tplConfig', skillStore.selectedSkill?.tplConfig || {});
+              const defaultConfig = skillStore.selectedSkill?.tplConfig ?? {};
+              form.setFieldValue('tplConfig', defaultConfig);
             }}
           />
-        )} */}
+        )}
 
         <ChatActions form={form} handleSendMessage={handleSendMessage} handleAbort={handleAbort} />
       </div>

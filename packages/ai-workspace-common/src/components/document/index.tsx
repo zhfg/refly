@@ -730,7 +730,13 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
   );
 };
 
-export const CanvasStatusBar = () => {
+export const CanvasStatusBar = ({
+  deckSize,
+  setDeckSize,
+}: {
+  deckSize: number;
+  setDeckSize: (size: number) => void;
+}) => {
   const {
     currentDocument,
     updateCurrentDocument,
@@ -750,10 +756,6 @@ export const CanvasStatusBar = () => {
   }));
   const { handleDeleteTab } = useCanvasTabs();
   const { t } = useTranslation();
-  const { deckSize, setDeckSize } = useReferencesStoreShallow((state) => ({
-    deckSize: state.deckSize,
-    setDeckSize: state.setDeckSize,
-  }));
 
   const { createShare } = useHandleShare();
   const [shareLoading, setShareLoading] = useState(false);
@@ -817,7 +819,7 @@ export const CanvasStatusBar = () => {
           style={{ color: deckSize ? '#00968F' : '' }}
           icon={<IconQuote />}
           onClick={() => {
-            setDeckSize(deckSize ? 0 : 300);
+            setDeckSize(deckSize ? 0 : 200);
           }}
         ></Button>
         <Divider type="vertical" />
@@ -906,8 +908,8 @@ export const DocumentEditorHeader = () => {
   );
 };
 
-export const DocumentEditor = (props: { docId: string }) => {
-  const { docId } = props;
+export const DocumentEditor = (props: { docId: string; deckSize: number; setDeckSize: (size: number) => void }) => {
+  const { docId, deckSize, setDeckSize } = props;
 
   const { t } = useTranslation();
 
@@ -983,7 +985,7 @@ export const DocumentEditor = (props: { docId: string }) => {
 
   return (
     <div className="flex flex-col ai-note-container">
-      <CanvasStatusBar />
+      <CanvasStatusBar deckSize={deckSize} setDeckSize={setDeckSize} />
       <div className="overflow-auto flex-grow">
         <Spin
           className="document-editor-spin"

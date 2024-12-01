@@ -160,7 +160,7 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
   );
 
   return (
-    <div className="mx-4 mt-2 flex items-center justify-between">
+    <div className="mt-2 flex items-center justify-between">
       <div className="-ml-1">
         {step?.tokenUsage?.length > 0 && (
           <Dropdown droplist={tokenUsageDropdownList}>

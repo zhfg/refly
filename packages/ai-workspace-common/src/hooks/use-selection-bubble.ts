@@ -21,16 +21,16 @@ export const useSelectionBubble = ({ containerClass, onSelect, enabled = true }:
 
     if (!selection || !container) return;
 
-    const range = selection.getRangeAt(0);
-    const text = selection.toString().trim();
+    const range = selection?.getRangeAt?.(0);
+    const text = selection?.toString?.()?.trim?.();
 
-    if (!text || selection.isCollapsed) {
+    if (!text || selection?.isCollapsed) {
       setIsVisible(false);
       return;
     }
 
     // Check if selection is within the target container
-    if (!container.contains(range.commonAncestorContainer)) {
+    if (!container?.contains?.(range?.commonAncestorContainer)) {
       setIsVisible(false);
       return;
     }

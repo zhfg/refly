@@ -90,5 +90,5 @@ export const useHandleSiderData = (initData?: boolean) => {
     }
   }, []);
 
-  return { loadSiderData, getLibraryList, getCanvasList };
+  return { loadSiderData, getLibraryList, getCanvasList, canvasList, libraryList };
 };

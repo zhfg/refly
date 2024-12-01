@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Divider } from 'antd';
-import { ActionResult, ActionStep, Artifact } from '@refly/openapi-schema';
+import { ActionResult, ActionStep, Artifact, Source } from '@refly/openapi-schema';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { IconCheckCircle, IconLoading } from '@arco-design/web-react/icon';
 import { cn } from '@refly-packages/utils/cn';
@@ -10,6 +10,8 @@ import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canva
 import { SelectionContext } from '@refly-packages/ai-workspace-common/components/selection-context';
 import { FileText, Sparkles } from 'lucide-react';
 import { ActionContainer } from './action-container';
+import { safeParseJSON } from '@refly-packages/utils/parse';
+import { SourceViewer } from './source-viewer';
 
 const getArtifactIcon = (artifact: Artifact) => {
   switch (artifact.type) {
@@ -20,7 +22,17 @@ const getArtifactIcon = (artifact: Artifact) => {
   }
 };
 
-export const ActionStepCard = ({ result, step, index }: { result: ActionResult; step: ActionStep; index: number }) => {
+export const ActionStepCard = ({
+  result,
+  step,
+  index,
+  query,
+}: {
+  result: ActionResult;
+  step: ActionStep;
+  index: number;
+  query: string;
+}) => {
   const { t } = useTranslation();
   const { setSelectedNodeByEntity } = useCanvasControl();
 
@@ -48,15 +60,22 @@ export const ActionStepCard = ({ result, step, index }: { result: ActionResult; 
     return node;
   };
 
+  let sources =
+    typeof step?.structuredData?.['sources'] === 'string'
+      ? safeParseJSON(step?.structuredData?.['sources'])
+      : (step?.structuredData?.['sources'] as Source[]);
+
   return (
     <div>
       <Divider className="my-2" />
-      <div className="mx-6 my-3 text-gray-600 text-sm">
+      <div className="my-3 text-gray-600 text-sm">
         {t('canvas.skillResponse.stepTitle', { index })} {' - ' + step.title}
       </div>
 
+      {sources && <SourceViewer sources={sources} query={query} />}
+
       {step.content && (
-        <div className="mx-6 my-3 text-gray-600 text-base skill-response-content">
+        <div className="my-3 text-gray-600 text-base skill-response-content">
           <Markdown content={step.content} />
           <SelectionContext
             containerClass="skill-response-content"
@@ -68,7 +87,7 @@ export const ActionStepCard = ({ result, step, index }: { result: ActionResult; 
       {step.artifacts?.map((artifact) => (
         <div
           key={artifact.entityId}
-          className="mx-6 my-3 px-4 py-2 h-12 border border-solid border-gray-200 rounded-lg flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
+          className="my-3 px-4 py-2 h-12 border border-solid border-gray-200 rounded-lg flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
           onClick={() => {
             setSelectedNodeByEntity({ type: artifact.type, entityId: artifact.entityId });
           }}

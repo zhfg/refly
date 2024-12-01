@@ -6,36 +6,42 @@ import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 import { useTranslation } from 'react-i18next';
 
-export const SelectedSkillHeader = () => {
+interface SelectedSkillHeaderProps {
+  // Add readonly and controlled props
+  readonly?: boolean;
+  skill?: {
+    icon?: any;
+    displayName?: string;
+  };
+  onClose?: () => void;
+}
+
+export const SelectedSkillHeader = ({ readonly, skill, onClose }: SelectedSkillHeaderProps) => {
   const { t } = useTranslation();
   const skillStore = useSkillStoreShallow((state) => ({
-    selectedSkill: state.selectedSkill,
+    selectedSkill: skill ?? state.selectedSkill,
     setSelectedSkill: state.setSelectedSkill,
   }));
 
-  return skillStore?.selectedSkill ? (
+  const selectedSkill = skill ?? skillStore.selectedSkill;
+
+  return selectedSkill ? (
     <div className="selected-skill">
       <div className="selected-skill-profile">
-        <SkillAvatar
-          size={20}
-          shape="circle"
-          icon={skillStore?.selectedSkill?.icon}
-          displayName={skillStore?.selectedSkill?.displayName}
-        />
-        <p>
-          {t('copilot.selectedSkillHeader.title', {
-            name: skillStore?.selectedSkill?.displayName,
-          })}
-        </p>
+        <SkillAvatar size={20} shape="circle" icon={selectedSkill?.icon} displayName={selectedSkill?.displayName} />
+        <p>{selectedSkill?.displayName}</p>
       </div>
-      <div className="selected-skill-manage">
-        <Button
-          icon={<IconClose />}
-          onClick={() => {
-            skillStore.setSelectedSkill(null);
-          }}
-        ></Button>
-      </div>
+      {!readonly && (
+        <div className="selected-skill-manage">
+          <Button
+            icon={<IconClose />}
+            onClick={() => {
+              onClose?.();
+              skillStore.setSelectedSkill(null);
+            }}
+          />
+        </div>
+      )}
     </div>
   ) : null;
 };

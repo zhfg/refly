@@ -1,38 +1,46 @@
 import { Badge, Button, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { IResultItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { IconHistory } from '@arco-design/web-react/icon';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
+import { useMemo } from 'react';
 
-export const ChatHistorySwitch = () => {
+export const ChatHistorySwitch = (props: {
+  chatHistoryOpen: boolean;
+  setChatHistoryOpen: (open: boolean) => void;
+  items: IResultItem[];
+}) => {
+  const { chatHistoryOpen, setChatHistoryOpen, items = [] } = props;
   const { t } = useTranslation();
 
-  const { selectedResultItems } = useContextPanelStoreShallow((state) => ({
-    selectedResultItems: state.selectedResultItems,
-  }));
-  const { chatHistoryOpen, setChatHistoryOpen } = useLaunchpadStoreShallow((state) => ({
-    chatHistoryOpen: state.chatHistoryOpen,
-    setChatHistoryOpen: state.setChatHistoryOpen,
-  }));
+  const popupContainer = useMemo(() => getPopupContainer(), []);
+
+  const tooltipTitle = useMemo(() => {
+    return items?.length > 0 ? t('copilot.chatHistory.title') : '';
+  }, [items?.length, t]);
+
+  const buttonClassName = useMemo(() => {
+    return cn('text-xs h-6 rounded border text-gray-500 gap-1', {
+      'border-green-500 text-green-500': chatHistoryOpen,
+    });
+  }, [chatHistoryOpen]);
+
+  const handleClick = useMemo(() => {
+    return () => setChatHistoryOpen(!chatHistoryOpen);
+  }, [chatHistoryOpen, setChatHistoryOpen]);
 
   return (
-    <Badge count={(selectedResultItems || []).length} size="small" color="#00968F" style={{ zIndex: 1000 }}>
-      <Tooltip
-        title={selectedResultItems?.length > 0 ? t('copilot.chatHistory.title') : ''}
-        getPopupContainer={getPopupContainer}
-      >
+    <Tooltip title={tooltipTitle} mouseEnterDelay={0.1} mouseLeaveDelay={0.1} placement="top" destroyTooltipOnHide>
+      <Badge count={items?.length ?? 0} size="small" color="#00968F" style={{ zIndex: 1000 }}>
         <Button
           icon={<IconHistory className="w-4 h-4" />}
           size="small"
           type="default"
-          className={cn('text-xs h-6 rounded border text-gray-500 gap-1', {
-            'border-green-500 text-green-500': chatHistoryOpen,
-          })}
-          onClick={() => setChatHistoryOpen(!chatHistoryOpen)}
+          className={buttonClassName}
+          onClick={handleClick}
         />
-      </Tooltip>
-    </Badge>
+      </Badge>
+    </Tooltip>
   );
 };

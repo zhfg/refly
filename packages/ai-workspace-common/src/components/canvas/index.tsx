@@ -19,7 +19,10 @@ import '@xyflow/react/dist/style.css';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasProvider } from '@refly-packages/ai-workspace-common/context/canvas';
 import { EDGE_STYLES } from './constants';
+import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { CanvasListModal } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal';
+import { LibraryModal } from '@refly-packages/ai-workspace-common/components/workspace/library-modal';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -42,6 +45,15 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     showPreview: state.showPreview,
   }));
 
+  const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } = useSiderStoreShallow(
+    (state) => ({
+      showCanvasListModal: state.showCanvasListModal,
+      showLibraryModal: state.showLibraryModal,
+      setShowCanvasListModal: state.setShowCanvasListModal,
+      setShowLibraryModal: state.setShowLibraryModal,
+    }),
+  );
+
   const reactFlowInstance = useReactFlow();
 
   useEffect(() => {
@@ -52,7 +64,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           padding: 0.2,
           duration: 200,
           minZoom: 0.1,
-          maxZoom: 2
+          maxZoom: 2,
         });
       }
     }, 100);
@@ -113,7 +125,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   return (
     <div className="w-full h-screen relative flex flex-col overflow-hidden">
       <CanvasToolbar onToolSelect={handleToolSelect} />
-      <TopToolbar />
+      <TopToolbar canvasId={canvasId} />
       <div className="flex-grow relative">
         <style>{selectionStyles}</style>
         <ReactFlow
@@ -210,12 +222,23 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           </div>
         </div>
       )}
+
+      <CanvasListModal visible={showCanvasListModal} setVisible={setShowCanvasListModal} />
+      <LibraryModal visible={showLibraryModal} setVisible={setShowLibraryModal} />
     </div>
   );
 };
 
 export const Canvas = (props: { canvasId: string }) => {
   const { canvasId } = props;
+
+  useEffect(() => {
+    if (canvasId && canvasId !== 'empty') {
+      localStorage.setItem('currentCanvasId', canvasId);
+    } else {
+      localStorage.removeItem('currentCanvasId');
+    }
+  }, [canvasId]);
 
   return (
     <CanvasProvider canvasId={canvasId}>
