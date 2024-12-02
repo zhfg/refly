@@ -2,7 +2,7 @@ import { Button, Popover } from 'antd';
 import { IconClose } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 import { getNodeIcon } from './utils/icon';
-import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import cn from 'classnames';
 import { ContextPreview } from './context-preview';
 import { useCallback } from 'react';
@@ -19,11 +19,11 @@ export const ContextItem = ({
   canNotRemove,
 }: {
   canNotRemove?: boolean;
-  item: IContextItem;
+  item: NodeItem;
   isActive: boolean;
   isLimit?: boolean;
   disabled?: boolean;
-  onRemove?: (item: IContextItem) => void;
+  onRemove?: (item: NodeItem) => void;
 }) => {
   const { t } = useTranslation();
   const { data } = item ?? {};

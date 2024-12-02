@@ -18,7 +18,7 @@ export const AddBaseMarkContext = () => {
   const { addNode, removeNode, selectedNodes } = useContextPanelStoreShallow((state) => ({
     addNode: state.addContextItem,
     removeNode: state.removeContextItem,
-    selectedNodes: state.selectedContextItems,
+    selectedNodes: state.contextItems,
   }));
 
   const handleVisibleChange = (visible: boolean) => {
@@ -30,7 +30,7 @@ export const AddBaseMarkContext = () => {
   };
 
   const handleSelect = (node: CanvasNode) => {
-    const selectedNodes = useContextPanelStore.getState().selectedContextItems;
+    const selectedNodes = useContextPanelStore.getState().contextItems;
 
     if (!selectedNodes.find((item) => item.id === node.id)) {
       addNode(node);

@@ -21,7 +21,7 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
     clearContextItems,
     filterErrorInfo,
   } = useContextPanelStoreShallow((state) => ({
-    selectedContextItems: state.selectedContextItems,
+    selectedContextItems: state.contextItems,
     addContextItem: state.addContextItem,
     removeContextItem: state.removeContextItem,
     removePreviewContextItem: state.removePreviewContextItem,

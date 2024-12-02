@@ -9,11 +9,11 @@ export const ChatHistory: React.FC = () => {
   const { t } = useTranslation();
   const { selectedResultItems, addResultItem, removeResultItem, removePreviewResultItem, clearResultItems } =
     useContextPanelStoreShallow((state) => ({
-      selectedResultItems: state.selectedResultItems,
-      addResultItem: state.addResultItem,
-      removeResultItem: state.removeResultItem,
-      removePreviewResultItem: state.removePreviewResultItem,
-      clearResultItems: state.clearResultItems,
+      selectedResultItems: state.historyItems,
+      addResultItem: state.addHistoryItem,
+      removeResultItem: state.removeHistoryItem,
+      removePreviewResultItem: state.removePreviewHistoryItem,
+      clearResultItems: state.clearHistoryItems,
     }));
   const { nodes } = useCanvasControl();
   const selectedResultNodes = nodes.filter((node) => node.type === 'skillResponse');

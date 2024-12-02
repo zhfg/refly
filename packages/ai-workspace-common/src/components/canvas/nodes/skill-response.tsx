@@ -1,9 +1,8 @@
 import { Position, NodeProps, useReactFlow } from '@xyflow/react';
+import { Spin } from 'antd';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode } from './types';
 import { Node } from '@xyflow/react';
-import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { useEffect, useState, useCallback } from 'react';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { CustomHandle } from './custom-handle';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { EDGE_STYLES } from '../constants';
@@ -15,43 +14,24 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/use-add-to-chat-history';
 import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
-export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillResponseNode>) => {
+export const SkillResponseNode = (props: NodeProps<SkillResponseNode>) => {
+  const { data, selected, id } = props;
   const [isHovered, setIsHovered] = useState(false);
   const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();
 
-  // Get result from store
-  const { result, updateActionResult } = useActionResultStoreShallow((state) => ({
-    result: state.resultMap[data.entityId],
-    updateActionResult: state.updateActionResult,
-  }));
+  // console.log('data', data);
 
-  // Fetch result if not available
-  const fetchActionResult = async (resultId: string) => {
-    const { data, error } = await getClient().getActionResult({
-      query: { resultId },
-    });
-
-    if (error || !data?.success) {
-      return;
-    }
-
-    updateActionResult(resultId, data.data);
-  };
-
-  useEffect(() => {
-    if (!result && data.entityId) {
-      fetchActionResult(data.entityId);
-    }
-  }, [data.entityId]);
+  const { title, contentPreview, metadata } = data;
+  const { status, modelName, steps } = metadata ?? {};
 
   // Get query and response content from result
-  const query = result?.title ?? 'Loading...';
-  const content = result?.steps?.[0]?.content ?? 'Loading response...';
-  const modelName = result?.actionMeta?.name ?? 'AI Assistant';
+  const query = title ?? 'Loading...';
+  const content = contentPreview || steps?.map((step) => step.content).join('\n');
 
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
@@ -88,7 +68,8 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
     );
   }, [id, setEdges]);
 
-  const handleAddToChatHistory = useAddToChatHistory(result);
+  const { getNode } = useReactFlow();
+  const handleAddToChatHistory = useAddToChatHistory(getNode(id) as NodeItem);
 
   const handleRerun = useCallback(() => {
     // Implement rerun logic
@@ -122,7 +103,8 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
   const { debouncedCreateDocument, isCreating } = useCreateDocument();
 
   const handleCreateDocument = useCallback(async () => {
-    await debouncedCreateDocument(data?.title ?? modelName, content, {
+    // TODO: fix actual content
+    await debouncedCreateDocument(data?.title ?? modelName, String(content), {
       sourceNodeId: data.entityId,
       addToCanvas: true,
     });
@@ -140,7 +122,7 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
           onDelete={handleDelete}
           onHelpLink={handleHelpLink}
           onAbout={handleAbout}
-          isCompleted={result?.status === 'finish'}
+          isCompleted={metadata?.status === 'finish'}
           isCreatingDocument={isCreating}
         />
       )}
@@ -153,26 +135,27 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
           ${getNodeCommonStyles({ selected, isHovered })}
         `}
       >
-        <CustomHandle
-          type="target"
-          position={Position.Left}
-          isConnected={isTargetConnected}
-          isNodeHovered={isHovered}
-          nodeType="response"
-        />
-        <CustomHandle
-          type="source"
-          position={Position.Right}
-          isConnected={isSourceConnected}
-          isNodeHovered={isHovered}
-          nodeType="response"
-        />
+        <Spin spinning={status === 'executing' && !contentPreview}>
+          <CustomHandle
+            type="target"
+            position={Position.Left}
+            isConnected={isTargetConnected}
+            isNodeHovered={isHovered}
+            nodeType="response"
+          />
+          <CustomHandle
+            type="source"
+            position={Position.Right}
+            isConnected={isSourceConnected}
+            isNodeHovered={isHovered}
+            nodeType="response"
+          />
 
-        <div className="flex flex-col gap-2">
-          {/* Header with Icon and Type */}
-          <div className="flex items-center gap-2">
-            <div
-              className="
+          <div className="flex flex-col gap-2">
+            {/* Header with Icon and Type */}
+            <div className="flex items-center gap-2">
+              <div
+                className="
                 w-6 
                 h-6 
                 rounded 
@@ -183,12 +166,12 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
                 justify-center
                 flex-shrink-0
               "
-            >
-              <IconCanvas className="w-4 h-4 text-white" />
-            </div>
+              >
+                <IconCanvas className="w-4 h-4 text-white" />
+              </div>
 
-            <span
-              className="
+              <span
+                className="
                 text-[13px]
                 font-medium
                 leading-normal
@@ -196,14 +179,14 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
                 font-['PingFang_SC']
                 truncate
               "
-            >
-              {modelName}
-            </span>
-          </div>
+              >
+                {modelName}
+              </span>
+            </div>
 
-          {/* User Query Title */}
-          <div
-            className="
+            {/* User Query Title */}
+            <div
+              className="
               text-[13px]
               font-medium
               leading-normal
@@ -213,13 +196,13 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
               overflow-hidden
               text-ellipsis
             "
-          >
-            {query}
-          </div>
+            >
+              {query}
+            </div>
 
-          {/* Response Content Preview */}
-          <div
-            className="
+            {/* Response Content Preview */}
+            <div
+              className="
               text-[10px]
               leading-3
               text-[rgba(0,0,0,0.8)]
@@ -228,10 +211,11 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
               overflow-hidden
               text-ellipsis
             "
-          >
-            {content}
+            >
+              {content}
+            </div>
           </div>
-        </div>
+        </Spin>
       </div>
     </div>
   );
