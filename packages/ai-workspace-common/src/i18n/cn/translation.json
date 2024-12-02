@@ -407,6 +407,18 @@
     },
     "contextManager": {
       "nodeNotFound": "源节点未找到或已被删除，请先添加到画布"
+    },
+    "nodeActions": {
+        "addToContext": "添加到上下文",
+        "processingVector": "处理向量",
+        "rerun": "重新运行",
+        "insertToDoc": "插入文档",
+        "addToChatHistory": "添加到对话历史上下文",
+        "moreOptions": "更多选项"
+      },
+    "nodeStatus": {
+      "isCreatingDocument": "创建中...",
+      "createDocument": "创建文档"
     }
   },
   "resource": {

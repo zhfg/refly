@@ -402,6 +402,18 @@
     },
     "contextManager": {
       "nodeNotFound": "Source node not found or has been deleted. Please add it to the canvas first."
+    },
+    "nodeActions": {
+      "addToContext": "Add to Context",
+      "processingVector": "Processing Vector",
+      "rerun": "Rerun",
+      "insertToDoc": "Insert to Document",
+      "addToChatHistory": "Add to Chat History Context",
+      "moreOptions": "More Options"
+    },
+    "nodeStatus": {
+      "isCreatingDocument": "Creating Document...",
+      "createDocument": "Create Document"
     }
   },
   "resource": {
