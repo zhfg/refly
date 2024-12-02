@@ -1152,7 +1152,8 @@
       "send": "Send",
       "directChat": "Direct Chat",
       "noContextChat": "No Context Chat",
-      "wholeSpaceChat": "Whole Space Chat"
+      "wholeSpaceChat": "Whole Space Chat",
+      "recommendQuestions": "Recommend Questions"
     },
     "configManager": {
       "title": "Skill Configuration",
@@ -1197,6 +1198,11 @@
       "installSkillHint": "You haven't added any assistants, click me to add",
       "installSkillHintTitle": "Add Assistant",
       "openCanvas": "Open Canvas"
+    },
+    "recommendQuestions": {
+      "title": "Recommended Questions",
+      "refresh": "Refresh",
+      "empty": "No recommended questions"
     },
     "contextItem": {
       "current": "Current ",

@@ -73,7 +73,7 @@ export class RecommendQuestions extends BaseSkill {
 You are an expert at analyzing conversations and generating relevant follow-up questions.
 
 ## Task
-Generate 3-6 highly relevant follow-up questions based on the provided context (if any) or initial query.
+Generate 3 highly relevant follow-up questions based on the provided context (if any) or initial query.
 Each question should:
 - Be concise (30-100 characters)
 - Be contextually relevant
@@ -92,8 +92,13 @@ Generate questions with reasoning in JSON format:
 - Avoid repetitive or overly general questions
 - Ensure questions naturally flow from the conversation or initial query
 - Provide clear reasoning for the questions' relevance
+- IMPORTANT: Generate NEW questions based on the actual context, DO NOT copy from examples
+- Each question should be unique and specifically tailored to the current conversation
 
-## Examples
+## Examples (For Format Reference Only)
+IMPORTANT: These examples are only to demonstrate the expected format. 
+DO NOT reuse or modify these example questions. 
+Always generate completely new questions based on the actual conversation context.
 
 ### Example 1: With Conversation History
 Input:
@@ -106,13 +111,12 @@ Output:
   "recommended_questions": [
     "How does React.memo work?",
     "When to use useCallback?",
-    "Best practices for keys?",
-    "Common re-render issues?"
+    "Best practices for keys?"
   ],
-  "reasoning": "These questions dive deeper into specific performance optimization techniques mentioned in the conversation, helping users understand implementation details and common pitfalls."
+  "reasoning": "These questions dive deeper into specific performance optimization techniques mentioned in the conversation."
 }
 
-### Example 2: Without Conversation History (Initial Query)
+### Example 2: Without Conversation History
 Input:
 human: How to get started with TypeScript?
 
@@ -121,11 +125,16 @@ Output:
   "recommended_questions": [
     "TypeScript vs JavaScript?",
     "Essential TS features?",
-    "Setup TS project?",
-    "Type inference basics?"
+    "Setup TS project?"
   ],
-  "reasoning": "These questions cover fundamental aspects of TypeScript that beginners need to understand, from basic comparisons to practical setup and core concepts."
-}`;
+  "reasoning": "These questions cover fundamental aspects that beginners need to understand."
+}
+
+## IMPORTANT REMINDER:
+- The examples above are for format reference ONLY
+- Generate completely new and relevant questions based on the current context
+- Do not copy or paraphrase questions from the examples
+- Focus on the actual conversation content to create targeted, meaningful questions`;
 
     try {
       // Prepare messages for context

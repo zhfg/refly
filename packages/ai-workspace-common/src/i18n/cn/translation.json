@@ -1169,7 +1169,8 @@
       "send": "发送",
       "directChat": "直接聊天",
       "noContextChat": "不带上下文聊天",
-      "wholeSpaceChat": "在整个空间聊天"
+      "wholeSpaceChat": "在整个空间聊天",
+      "recommendQuestions": "推荐问题"
     },
     "configManager": {
       "title": "技能配置",
@@ -1214,6 +1215,11 @@
       "installSkillHint": "你还未添加任何助手，点我添加",
       "installSkillHintTitle": "添加助手",
       "openCanvas": "打开稿布"
+    },
+    "recommendQuestions": {
+      "title": "推荐问题",
+      "refresh": "换一批",
+      "empty": "暂无推荐问题"
     },
     "contextItem": {
       "current": "当前",
