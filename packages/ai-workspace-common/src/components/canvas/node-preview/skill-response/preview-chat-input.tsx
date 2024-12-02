@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { IContextItem, IResultItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 import { PreviewContextManager } from './preview-context-manager';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const TextArea = Input.TextArea;
 
@@ -25,6 +25,10 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
   const { contextItems, resultItems, chatHistoryOpen, setChatHistoryOpen, query, actionMeta, readonly } = props;
   const { t } = useTranslation();
   const [userQuery, setUserQuery] = useState(query);
+
+  useEffect(() => {
+    setUserQuery(query);
+  }, [query]);
 
   const hideSelectedSkillHeader = !actionMeta || actionMeta?.name === 'common_qna' || !actionMeta?.name;
 
@@ -53,7 +57,10 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
             <div className="ai-copilot-chat-input-body">
               <TextArea
                 value={userQuery}
-                onChange={(value) => setUserQuery(query)}
+                onChange={(value) => {
+                  console.log('setUserQuery', value);
+                  setUserQuery(value);
+                }}
                 style={{
                   borderRadius: 8,
                   resize: 'none',
