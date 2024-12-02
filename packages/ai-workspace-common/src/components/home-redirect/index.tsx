@@ -4,10 +4,8 @@ import { SuspenseLoading } from '@refly-packages/ai-workspace-common/components/
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
-import { useTranslation } from 'react-i18next';
 
 export const HomeRedirect = ({ defaultNode }: { defaultNode: ReactNode }) => {
-  const { t } = useTranslation();
   const [element, setElement] = useState<ReactNode | null>(null);
   const { isLogin } = useUserStoreShallow((state) => ({
     isLogin: state.isLogin,
