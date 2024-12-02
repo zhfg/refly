@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import { Button, Divider, Empty } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { getArtifactIcon, IconDelete, IconResponse } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconDelete, IconResponse } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { ChevronDown, Pin, PinOff } from 'lucide-react';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
-import { ActionResult, ActionStep } from '@refly/openapi-schema';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { getResultDisplayContent } from '@refly-packages/ai-workspace-common/components/common/result-display';
 
 // Define props interface
 interface ChatHistoryProps {
@@ -29,26 +29,6 @@ interface ChatHistoryProps {
   onItemPin?: (item: NodeItem) => void;
   onItemDelete?: (resultId: string) => void;
 }
-
-const getResultDisplayContent = (result: NodeItem) => {
-  const steps: ActionStep[] = result.data.metadata?.steps ?? [];
-  const content = steps?.map((step) => step.content)?.join('\n');
-  if (content) return <span>{content}</span>;
-
-  // If content is empty, find the first artifact
-  for (const step of result.data.metadata?.steps ?? []) {
-    if (step.artifacts?.length) {
-      const artifact = step.artifacts[0];
-      return (
-        <span className="flex items-center">
-          {getArtifactIcon(artifact, 'w-3 h-3 mr-1')} {artifact.title}
-        </span>
-      );
-    }
-  }
-
-  return '';
-};
 
 export const ChatHistory: React.FC<ChatHistoryProps> = ({
   isOpen,
@@ -143,7 +123,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
                 </div>
               </div>
               <div className="text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis text-xs">
-                {item.data.contentPreview}
+                {getResultDisplayContent(item.data)}
               </div>
             </div>
           ))
