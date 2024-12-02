@@ -39,7 +39,7 @@ export const SkillResponseNode = (props: NodeProps<SkillResponseNode>) => {
   const content = steps
     ?.map((step) => step.content)
     ?.filter(Boolean)
-    .join('\n');
+    .join('\n\n');
   const artifacts = steps?.flatMap((step) => step.artifacts);
 
   // Check if node has any connections
@@ -112,8 +112,7 @@ export const SkillResponseNode = (props: NodeProps<SkillResponseNode>) => {
   const { debouncedCreateDocument, isCreating } = useCreateDocument();
 
   const handleCreateDocument = useCallback(async () => {
-    // TODO: fix actual content
-    await debouncedCreateDocument(data?.title ?? modelName, String(content), {
+    await debouncedCreateDocument(data?.title ?? modelName, content, {
       sourceNodeId: data.entityId,
       addToCanvas: true,
     });
@@ -127,7 +126,7 @@ export const SkillResponseNode = (props: NodeProps<SkillResponseNode>) => {
           onAddToChatHistory={handleAddToChatHistory}
           onRerun={handleRerun}
           onInsertToDoc={() => handleInsertToDoc('insertBlow')}
-          onCreateDocument={handleCreateDocument}
+          onCreateDocument={content ? handleCreateDocument : undefined}
           onDelete={handleDelete}
           onHelpLink={handleHelpLink}
           onAbout={handleAbout}
