@@ -12,6 +12,7 @@ import { ActionContainer } from './action-container';
 import { safeParseJSON } from '@refly-packages/utils/parse';
 import { SourceViewer } from './source-viewer';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
+import { RecommendQuestions } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/recommend-questions';
 
 export const ActionStepCard = ({
   result,
@@ -51,10 +52,16 @@ export const ActionStepCard = ({
     return node;
   };
 
+  console.log('step', step);
+
   let sources =
     typeof step?.structuredData?.['sources'] === 'string'
       ? safeParseJSON(step?.structuredData?.['sources'])
       : (step?.structuredData?.['sources'] as Source[]);
+  let recommendedQuestions =
+    typeof step?.structuredData?.['recommendedQuestions'] === 'string'
+      ? safeParseJSON(step?.structuredData?.['recommendedQuestions'])
+      : (step?.structuredData?.['recommendedQuestions'] as Array<string>);
 
   return (
     <div>
@@ -108,6 +115,8 @@ export const ActionStepCard = ({
           </div>
         </div>
       ))}
+
+      <RecommendQuestions relatedQuestions={recommendedQuestions?.questions || []} />
 
       <ActionContainer result={result} step={step} />
     </div>

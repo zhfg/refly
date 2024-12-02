@@ -1169,7 +1169,8 @@
       "send": "发送",
       "directChat": "直接聊天",
       "noContextChat": "不带上下文聊天",
-      "wholeSpaceChat": "在整个空间聊天"
+      "wholeSpaceChat": "在整个空间聊天",
+      "recommendQuestions": "推荐问题"
     },
     "configManager": {
       "title": "技能配置",
@@ -1200,19 +1201,25 @@
     "message": {
       "copy": "复制",
       "copySuccess": "复制成功",
-      "insertBlow": "插入稿布",
+      "insertBlow": "插入文档",
       "replaceSelection": "替换选中",
       "createDocument": "保存为新文档",
       "createNewNote": "创建新文档",
       "skillRunSuccess": "技能已完成，共 {{count}} 条日志",
       "skillRunning": "技能运行中...",
-      "relatedQuestion": "你可能还想问",
+      "relatedQuestion": "推荐问题",
+      "askFollowingSuccess": "问题已添加到输入框",
       "summarySelectedContent": "总结选中内容要点",
       "brainstormIdeas": "脑暴写作灵感",
       "writeTwitterArticle": "写一篇 Twitter 原创文章",
       "installSkillHint": "你还未添加任何助手，点我添加",
       "installSkillHintTitle": "添加助手",
       "openCanvas": "打开稿布"
+    },
+    "recommendQuestions": {
+      "title": "推荐问题",
+      "refresh": "换一批",
+      "empty": "暂无推荐问题"
     },
     "contextItem": {
       "current": "当前",

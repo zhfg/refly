@@ -287,7 +287,7 @@ export const useInvokeAction = () => {
       errors: [],
     });
 
-    if (payload.target.entityType === 'canvas') {
+    if (payload?.target?.entityType === 'canvas') {
       const connectTo = [
         ...(Array.isArray(payload.context?.documents) ? payload.context.documents : []).map((document) => ({
           type: 'document' as const,

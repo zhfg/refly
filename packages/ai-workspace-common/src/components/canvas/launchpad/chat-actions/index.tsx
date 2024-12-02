@@ -1,13 +1,14 @@
-import { Button, Dropdown, MenuProps, Switch } from 'antd';
+import { Button, Dropdown, MenuProps, Switch, Tooltip } from 'antd';
 import { FormInstance } from '@arco-design/web-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { IconDown, IconPause, IconSend, IconSettings } from '@arco-design/web-react/icon';
+import { IconDown, IconPause, IconSend, IconSettings, IconQuestionCircle } from '@arco-design/web-react/icon';
 import { useMessageStateStoreShallow } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useTranslation } from 'react-i18next';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 
 // components
 import { AISettingsDropdown } from './ai-settings';
@@ -15,7 +16,7 @@ import { AISettingsDropdown } from './ai-settings';
 import './index.scss';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
-import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { PiMagicWand } from 'react-icons/pi';
 
 interface ChatActionsProps {
   form?: FormInstance;
@@ -67,6 +68,11 @@ export const ChatActions = (props: ChatActionsProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const COLLAPSE_WIDTH = 600; // Adjust this threshold as needed
 
+  const { setRecommendQuestionsOpen, recommendQuestionsOpen } = useLaunchpadStoreShallow((state) => ({
+    setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
+    recommendQuestionsOpen: state.recommendQuestionsOpen,
+  }));
+
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -89,15 +95,15 @@ export const ChatActions = (props: ChatActionsProps) => {
         <AISettingsDropdown collapsed={containerWidth < COLLAPSE_WIDTH} briefMode={false} />
       </div>
       <div className="right-actions">
-        {messageStateStore?.pending ? (
+        {messageStateStore?.pending ? <Button size="small" icon={<IconPause />} onClick={handleAbort} /> : null}
+        <Tooltip title={t('copilot.chatActions.recommendQuestions')}>
           <Button
             size="small"
-            icon={<IconPause />}
-            onClick={() => {
-              handleAbort();
-            }}
-          ></Button>
-        ) : null}
+            icon={<PiMagicWand />}
+            onClick={() => setRecommendQuestionsOpen(!recommendQuestionsOpen)}
+            className="mr-0"
+          />
+        </Tooltip>
         {messageStateStore?.pending && !isWeb ? null : (
           <Button
             size="small"
@@ -106,9 +112,7 @@ export const ChatActions = (props: ChatActionsProps) => {
             loading={messageStateStore?.pending}
             disabled={!canSendMessage}
             className="text-xs gap-1"
-            onClick={() => {
-              handleSendMessage();
-            }}
+            onClick={handleSendMessage}
           >
             {t('copilot.chatActions.send')}
           </Button>

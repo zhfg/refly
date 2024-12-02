@@ -16,6 +16,7 @@ import {
   useChatStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 
 // types
 import { editorEmitter, InPlaceSendMessagePayload } from '@refly-packages/utils/event-emitter/editor';
@@ -28,6 +29,7 @@ import { genActionResultID } from '@refly-packages/utils/id';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useChatHistory } from './hooks/use-chat-history';
 import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { RecommendQuestionsPanel } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/recommend-questions-panel';
 
 export const LaunchPad = () => {
   const { t } = useTranslation();
@@ -58,6 +60,11 @@ export const LaunchPad = () => {
     handleItemPin,
     handleItemDelete,
   } = useChatHistory();
+
+  const { recommendQuestionsOpen, setRecommendQuestionsOpen } = useLaunchpadStoreShallow((state) => ({
+    recommendQuestionsOpen: state.recommendQuestionsOpen,
+    setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
+  }));
 
   const handleSendMessage = (userInput?: string) => {
     const error = handleFilterErrorTip();
@@ -168,6 +175,7 @@ export const LaunchPad = () => {
           onItemPin={handleItemPin}
           onItemDelete={handleItemDelete}
         />
+        <RecommendQuestionsPanel isOpen={recommendQuestionsOpen} onClose={() => setRecommendQuestionsOpen(false)} />
         <ChatInput form={form} handleSendMessage={handleSendMessage} handleAbort={handleAbort} />
       </div>
     </div>
