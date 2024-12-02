@@ -18,7 +18,7 @@ import {
   MakeShorterSkill,
   MakeLongerSkill,
 } from './templates';
-import { CommonQnA, GenerateDoc, EditDoc, RewriteDoc, WebSearch, LibrarySearch } from './skills';
+import { CommonQnA, GenerateDoc, EditDoc, RewriteDoc, WebSearch, LibrarySearch, RecommendQuestions } from './skills';
 
 export const createSkillTemplateInventory = (engine: SkillEngine): BaseSkill[] => {
   return [
@@ -43,6 +43,7 @@ export const createSkillTemplateInventory = (engine: SkillEngine): BaseSkill[] =
 
 export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
   return [
+    new RecommendQuestions(engine),
     new WebSearch(engine),
     new GenerateDoc(engine),
     new LibrarySearch(engine),

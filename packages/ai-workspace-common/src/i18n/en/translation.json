@@ -1152,7 +1152,8 @@
       "send": "Send",
       "directChat": "Direct Chat",
       "noContextChat": "No Context Chat",
-      "wholeSpaceChat": "Whole Space Chat"
+      "wholeSpaceChat": "Whole Space Chat",
+      "recommendQuestions": "Recommend Questions"
     },
     "configManager": {
       "title": "Skill Configuration",
@@ -1183,19 +1184,25 @@
     "message": {
       "copy": "Copy",
       "copySuccess": "Copy Success",
-      "insertBlow": "Insert Canvas",
+      "insertBlow": "Insert Document",
       "replaceSelection": "Replace Selection",
       "createNewNote": "Create New Document",
       "createDocument": "Save as New Document",
       "skillRunSuccess": "Skill Completed, {{count}} Logs",
       "skillRunning": "Skill Running...",
-      "relatedQuestion": "You may also ask",
+      "relatedQuestion": "Recommended Questions",
+      "askFollowingSuccess": "Question Added to Input Box",
       "summarySelectedContent": "Summarize the Selected Content",
       "brainstormIdeas": "Brainstorm Ideas",
       "writeTwitterArticle": "Write a Twitter Original Article",
       "installSkillHint": "You haven't added any assistants, click me to add",
       "installSkillHintTitle": "Add Assistant",
       "openCanvas": "Open Canvas"
+    },
+    "recommendQuestions": {
+      "title": "Recommended Questions",
+      "refresh": "Refresh",
+      "empty": "No recommended questions"
     },
     "contextItem": {
       "current": "Current ",

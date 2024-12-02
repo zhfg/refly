@@ -46,7 +46,7 @@ import {
   createSkillInventory,
 } from '@refly-packages/skill-template';
 import {
-  // detectLanguage,
+  detectLanguage,
   genActionResultID,
   genSkillID,
   genSkillTriggerID,
@@ -612,7 +612,10 @@ export class SkillService {
       icon: JSON.parse(s.icon),
     }));
 
-    const displayLocale = data?.locale || user?.uiLocale || 'en';
+    const displayLocale =
+      (data?.locale === 'auto' ? await detectLanguage(data?.input?.query) : data?.locale) ||
+      user?.uiLocale ||
+      'en';
 
     const config: SkillRunnableConfig = {
       configurable: {
