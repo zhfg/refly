@@ -92,7 +92,6 @@ export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = (
                   style: {
                     height: '12px',
                     marginBottom: 0,
-                    backgroundColor: '#e6f7f7', // 使用接近 #00968f 的浅色作为骨架屏背景
                   },
                 }}
               />
@@ -121,7 +120,10 @@ export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = (
           'cursor-pointer transition-all duration-200',
           'hover:bg-gray-50 hover:border-gray-200 hover:shadow-sm',
         )}
-        onClick={() => handleQuestionClick(question)}
+        onClick={() => {
+          handleQuestionClick(question);
+          message.success(t('copilot.message.askFollowingSuccess'));
+        }}
       >
         <div className="flex-1 min-w-0">
           <span className="text-[12px] text-[#00968f] font-medium block truncate">{question}</span>
