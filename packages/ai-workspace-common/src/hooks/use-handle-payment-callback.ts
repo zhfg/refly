@@ -1,17 +1,22 @@
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Modal } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 export const useHandlePaymentCallback = () => {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const isLogin = useUserStore.getState().isLogin;
+  const [showModal, setShowModal] = useState(false);
   // 添加支付状态检查
   useEffect(() => {
+    if (!isLogin || showModal) return;
     const paySuccess = searchParams.get('paySuccess');
     const payCancel = searchParams.get('payCancel');
     if (paySuccess || payCancel) {
+      setShowModal(true);
       setTimeout(() => {
         const title = paySuccess ? t('settings.action.paySuccessNotify') : t('settings.action.payCancelNotify');
         const description = paySuccess
@@ -21,11 +26,23 @@ export const useHandlePaymentCallback = () => {
           Modal.success({
             title,
             content: description,
+            onOk: () => {
+              setShowModal(false);
+            },
+            onCancel: () => {
+              setShowModal(false);
+            },
           });
         } else {
           Modal.error({
             title,
             content: description,
+            onOk: () => {
+              setShowModal(false);
+            },
+            onCancel: () => {
+              setShowModal(false);
+            },
           });
         }
 
@@ -37,5 +54,5 @@ export const useHandlePaymentCallback = () => {
         });
       }, 1);
     }
-  }, [searchParams, t, navigate]);
+  }, [searchParams, t, navigate, isLogin, showModal]);
 };
