@@ -12,6 +12,8 @@ import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-a
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 import { HiOutlineDocumentText } from 'react-icons/hi2';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
+import { time } from '@refly-packages/ai-workspace-common/utils/time';
+import { LOCALE } from '@refly/common-types';
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
@@ -25,9 +27,10 @@ export const DocumentNode = ({
   onNodeClick,
 }: DocumentNodeProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const { edges, onEdgesChange } = useCanvasControl();
+  const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  const language = i18n.languages?.[0];
 
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
@@ -117,6 +120,7 @@ export const DocumentNode = ({
         className={`
         w-[170px]
         h-[186px]
+        relative
         ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
       `}
       >
@@ -177,6 +181,12 @@ export const DocumentNode = ({
               {data.contentPreview}
             </div>
           </Spin>
+
+          <div className="absolute bottom-2 left-3 text-[10px] text-gray-400">
+            {time(data.createdAt, language as LOCALE)
+              ?.utc()
+              ?.fromNow()}
+          </div>
         </div>
       </div>
     </div>

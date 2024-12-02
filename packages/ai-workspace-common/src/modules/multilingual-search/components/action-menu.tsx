@@ -72,6 +72,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
         id: resource.resourceId,
         title: resource.title,
         domain: 'resource',
+        contentPreview: resource.contentPreview,
       }));
       resources.forEach((resource) => {
         addNode({
@@ -79,6 +80,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
           data: {
             title: resource.title,
             entityId: resource.id,
+            contentPreview: resource.contentPreview,
           },
         });
       });
