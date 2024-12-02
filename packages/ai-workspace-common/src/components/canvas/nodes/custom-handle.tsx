@@ -61,7 +61,6 @@ export const CustomHandle = ({ type, position, isConnected, isNodeHovered, nodeT
         after:absolute
         after:top-[24px]
         after:bottom-[24px]
-        after:w-[1px]
         after:bg-[#D0D5DD]
         after:opacity-20
         ${position === Position.Left ? 'after:left-0' : 'after:right-0'}

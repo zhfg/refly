@@ -85,15 +85,30 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
   const { title, steps = [], context, history = [], actionMeta, logs } = result ?? {};
   const contextItems = convertContextToItems(context);
 
+  const historyItems = history.map((item) => ({
+    id: item.resultId,
+    position: { x: 0, y: 0 },
+    data: {
+      entityId: item.resultId,
+      contentPreview: item.steps?.map((step) => step.content)?.join('\n\n'),
+      title: item.title,
+    },
+  }));
+
   return (
     <div className="flex flex-col space-y-4 p-4">
       <div className="ai-copilot-operation-container readonly">
         <div className="ai-copilot-operation-body">
-          <ChatHistory readonly isOpen={chatHistoryOpen} onClose={() => setChatHistoryOpen(false)} items={history} />
+          <ChatHistory
+            readonly
+            isOpen={chatHistoryOpen}
+            onClose={() => setChatHistoryOpen(false)}
+            items={historyItems}
+          />
           <PreviewChatInput
             readonly
             contextItems={contextItems}
-            resultItems={history}
+            historyItems={historyItems}
             chatHistoryOpen={chatHistoryOpen}
             setChatHistoryOpen={setChatHistoryOpen}
             query={title}

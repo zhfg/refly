@@ -20,9 +20,10 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { aggregateTokenUsage } from '@refly-packages/utils/index';
+import { ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 export const useInvokeAction = () => {
-  const { addNode } = useCanvasControl();
+  const { addNode, setNodeDataByEntity } = useCanvasControl();
   const updateActionResult = useActionResultStoreShallow((state) => state.updateActionResult);
 
   const globalAbortControllerRef = { current: null as AbortController | null };
@@ -31,6 +32,23 @@ export const useInvokeAction = () => {
   const onUpdateResult = (resultId: string, payload: ActionResult) => {
     actionEmitter.emit('updateResult', { resultId, payload });
     updateActionResult(resultId, payload);
+
+    // Update canvas node data
+    if (payload.targetType === 'canvas') {
+      const { title, steps = [] } = payload ?? {};
+      setNodeDataByEntity<ResponseNodeMeta>(
+        { type: 'skillResponse', entityId: resultId },
+        {
+          title,
+          entityId: resultId,
+          contentPreview: steps.map((s) => s.content).join('\n'),
+          metadata: {
+            steps,
+            status: payload.status,
+          },
+        },
+      );
+    }
   };
 
   const onSkillStart = (skillEvent: SkillEvent) => {};
@@ -166,7 +184,13 @@ export const useInvokeAction = () => {
     addNode(
       {
         type: node.type,
-        data: node.data as CanvasNodeData,
+        data: {
+          ...node.data,
+          metadata: {
+            status: 'executing',
+            ...node.data?.metadata,
+          },
+        } as CanvasNodeData,
       },
       [
         {
@@ -190,6 +214,23 @@ export const useInvokeAction = () => {
       status: 'finish' as const,
     };
     onUpdateResult(skillEvent.resultId, updatedResult);
+
+    const artifacts = result.steps?.flatMap((s) => s.artifacts);
+    if (artifacts?.length) {
+      artifacts.forEach((artifact) => {
+        setNodeDataByEntity(
+          {
+            type: artifact.type,
+            entityId: artifact.entityId,
+          },
+          {
+            metadata: {
+              status: 'finish',
+            },
+          },
+        );
+      });
+    }
   };
 
   const onError = (error?: BaseResponse) => {
@@ -235,11 +276,13 @@ export const useInvokeAction = () => {
       type: 'skill',
       actionMeta: {},
       title: input?.query,
+      targetId: payload.target?.entityId,
+      targetType: payload.target?.entityType,
       context: payload.context,
       history: payload.resultHistory,
       tplConfig: payload.tplConfig,
       logs: [],
-      status: 'waiting',
+      status: 'executing',
       steps: [],
       errors: [],
     });

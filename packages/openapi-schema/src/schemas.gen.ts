@@ -4174,6 +4174,15 @@ export const CanvasNodeDataSchema = {
       type: 'string',
       description: 'Node entity ID',
     },
+    contentPreview: {
+      type: 'string',
+      description: 'Node content preview',
+    },
+    metadata: {
+      type: 'object',
+      additionalProperties: true,
+      description: 'Node metadata',
+    },
   },
 } as const;
 

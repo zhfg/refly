@@ -1,6 +1,6 @@
 import { Badge, Button, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { IResultItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { IconHistory } from '@arco-design/web-react/icon';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 export const ChatHistorySwitch = (props: {
   chatHistoryOpen: boolean;
   setChatHistoryOpen: (open: boolean) => void;
-  items: IResultItem[];
+  items: NodeItem[];
 }) => {
   const { chatHistoryOpen, setChatHistoryOpen, items = [] } = props;
   const { t } = useTranslation();

@@ -32,7 +32,6 @@ import {
 } from '@refly-packages/ai-workspace-common/components/editor/components/extensions';
 import { createUploadFn } from '@refly-packages/ai-workspace-common/components/editor/components/image-upload';
 import { configureSlashCommand } from '@refly-packages/ai-workspace-common/components/editor/components/slash-command';
-import { HocuspocusProvider } from '@hocuspocus/provider';
 import Collaboration from '@tiptap/extension-collaboration';
 import { useDebouncedCallback } from 'use-debounce';
 import { handleImageDrop, handleImagePaste } from '@refly-packages/ai-workspace-common/components/editor/core/plugins';
@@ -59,6 +58,7 @@ import { useBlocker } from 'react-router-dom';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/hooks/use-selection-context';
 import { DocumentProvider, useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
 const MemorizedToC = memo(ToC);
 
@@ -192,9 +192,22 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
     return new XMLSerializer().serializeToString(doc);
   };
 
+  const { setNodeDataByEntity } = useCanvasControl();
+
   const debouncedUpdates = useDebouncedCallback(async (editor: EditorInstance) => {
     const json = editor.getJSON();
     const markdown = editor.storage.markdown.getMarkdown();
+
+    setNodeDataByEntity(
+      {
+        entityId: docId,
+        type: 'document',
+      },
+      {
+        contentPreview: markdown?.slice(0, 1000),
+      },
+    );
+
     documentStore.updateDocumentCharsCount(wordsCount(markdown));
     window.localStorage.setItem('html-content', await highlightCodeblocks(editor.getHTML()));
     window.localStorage.setItem('novel-content', JSON.stringify(json));

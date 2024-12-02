@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Empty, Message as message, Spin } from '@arco-design/web-react';
-import { IconClose, IconDelete, IconLink } from '@arco-design/web-react/icon';
-import { Mark } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -10,13 +7,8 @@ import {
   CanvasNode,
   DocumentNodeProps,
   ResourceNodeProps,
-  SkillResponseNodeProps,
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import {
-  DocumentNode,
-  ResourceNode,
-  SkillResponseNode,
-} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { DocumentNode, ResourceNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 export const ContextPreview = ({ item }: { item: CanvasNode }) => {
   const { t } = useTranslation();

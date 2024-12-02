@@ -1,16 +1,16 @@
 import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
-import { Input, FormInstance, Form } from '@arco-design/web-react';
+import { Input } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { IContextItem, IResultItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 import { PreviewContextManager } from './preview-context-manager';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const TextArea = Input.TextArea;
 
 interface PreviewChatInputProps {
-  contextItems: IContextItem[];
-  resultItems: IResultItem[];
+  contextItems: NodeItem[];
+  historyItems: NodeItem[];
   chatHistoryOpen: boolean;
   setChatHistoryOpen: (open: boolean) => void;
   query: string;
@@ -22,9 +22,13 @@ interface PreviewChatInputProps {
 }
 
 export const PreviewChatInput = (props: PreviewChatInputProps) => {
-  const { contextItems, resultItems, chatHistoryOpen, setChatHistoryOpen, query, actionMeta, readonly } = props;
+  const { contextItems, historyItems, chatHistoryOpen, setChatHistoryOpen, query, actionMeta, readonly } = props;
   const { t } = useTranslation();
   const [userQuery, setUserQuery] = useState(query);
+
+  useEffect(() => {
+    setUserQuery(query);
+  }, [query]);
 
   const hideSelectedSkillHeader = !actionMeta || actionMeta?.name === 'common_qna' || !actionMeta?.name;
 
@@ -40,10 +44,10 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
             }}
           />
         )}
-        {contextItems?.length === 0 && resultItems?.length === 0 ? null : (
+        {contextItems?.length === 0 && historyItems?.length === 0 ? null : (
           <PreviewContextManager
             contextItems={contextItems}
-            resultItems={resultItems}
+            historyItems={historyItems}
             chatHistoryOpen={chatHistoryOpen}
             setChatHistoryOpen={setChatHistoryOpen}
           />
@@ -53,7 +57,9 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
             <div className="ai-copilot-chat-input-body">
               <TextArea
                 value={userQuery}
-                onChange={(value) => setUserQuery(query)}
+                onChange={(event) => {
+                  setUserQuery(event.target.value);
+                }}
                 style={{
                   borderRadius: 8,
                   resize: 'none',

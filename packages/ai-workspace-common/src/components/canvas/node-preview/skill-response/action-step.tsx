@@ -11,7 +11,7 @@ import { SelectionContext } from '@refly-packages/ai-workspace-common/components
 import { ActionContainer } from './action-container';
 import { safeParseJSON } from '@refly-packages/utils/parse';
 import { SourceViewer } from './source-viewer';
-import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { RecommendQuestions } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/recommend-questions';
 
 export const ActionStepCard = ({

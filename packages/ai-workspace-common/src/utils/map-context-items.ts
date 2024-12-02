@@ -3,13 +3,13 @@ import { SkillContextDocumentItem } from '@refly-packages/ai-workspace-common/re
 import { SkillContextResourceItem } from '@refly-packages/ai-workspace-common/requests/types.gen';
 
 import { SkillContextContentItem } from '@refly-packages/ai-workspace-common/requests/types.gen';
-import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genUniqueId } from '@refly-packages/utils/id';
 
-const convertContextToItems = (context?: any): IContextItem[] => {
+const convertContextToItems = (context?: any): NodeItem[] => {
   if (!context) return [];
 
-  const items: IContextItem[] = [];
+  const items: NodeItem[] = [];
 
   // Convert contentList
   context.contentList?.forEach((content: SkillContextContentItem) => {
@@ -72,7 +72,7 @@ const convertContextToItems = (context?: any): IContextItem[] => {
   return items;
 };
 
-const convertContextItemsToContext = (items: IContextItem[]) => {
+const convertContextItemsToContext = (items: NodeItem[]) => {
   return {
     contentList: items
       ?.filter((item) => item?.data?.metadata?.sourceType)
