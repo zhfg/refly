@@ -1,9 +1,24 @@
-import { WriteGuide } from "@refly-packages/ai-workspace-common/components/home-page/write-guide"
+import Header from "@/components/landing-page-partials/Header"
+import HeroHome from "@/components/landing-page-partials/HeroHome"
+import FeaturesBlocks from "@/components/landing-page-partials/FeaturesBlocks"
+import Footer from "@/components/landing-page-partials/Footer"
 
-import "./index.scss"
+function Home() {
+  return (
+    <div className="flex min-h-screen flex-col overflow-hidden bg-[#FCFCF9]">
+      {/*  Site header */}
+      <Header />
 
-const Home = () => {
-  return <WriteGuide />
+      {/*  Page content */}
+      <main className="grow">
+        <HeroHome />
+        <FeaturesBlocks />
+      </main>
+
+      {/*  Site footer */}
+      <Footer />
+    </div>
+  )
 }
 
 export default Home

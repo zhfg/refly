@@ -242,7 +242,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
           defaultSelectedKeys={["Home"]}
           className="sider-menu-nav"
           selectedKeys={[selectedKey]}
-          autoOpen={true}>
+          defaultOpenKeys={["Canvas", "Library"]}>
           <div className="sider-menu-inner">
             {siderSections.map((section, index) => (
               <div key={`section-${index}`} className="sider-section">
