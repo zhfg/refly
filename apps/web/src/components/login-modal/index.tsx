@@ -89,7 +89,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
         <Typography.Paragraph className="text-xs font-bold text-gray-400">
           {t("landingPage.loginModal.utilText")}
           <Link
-            to={`${getClientOrigin(true)}/terms`}
+            to={`/terms`}
             className="mx-1"
             onClick={() => {
               userStore.setLoginModalVisible(false)
@@ -100,7 +100,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
           </Link>
           {t("landingPage.loginModal.and")}
           <Link
-            to={`${getClientOrigin(true)}/privacy`}
+            to={`/privacy`}
             className="mx-1"
             onClick={() => {
               userStore.setLoginModalVisible(false)

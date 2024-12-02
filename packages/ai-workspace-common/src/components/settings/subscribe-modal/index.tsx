@@ -235,11 +235,11 @@ export const SubscribeModal = () => {
 
     //   <div className="subscribe-content-description">
     //     {t('settings.subscription.subscribe.description')}
-    //     <a href={`${getClientOrigin(true)}/privacy`} target="_blank" rel="noreferrer">
+    //     <a href={`/privacy`} target="_blank" rel="noreferrer">
     //       {t('settings.subscription.subscribe.privacy')}
     //     </a>
     //     {t('settings.subscription.subscribe.and')}
-    //     <a href={`${getClientOrigin(true)}/terms`} target="_blank" rel="noreferrer">
+    //     <a href={`/terms`} target="_blank" rel="noreferrer">
     //       {t('settings.subscription.subscribe.terms')}
     //     </a>
     //   </div>
