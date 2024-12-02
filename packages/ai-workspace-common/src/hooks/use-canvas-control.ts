@@ -135,7 +135,14 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const { nodes } = useCanvasStore.getState().data[canvasId];
       const node = nodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId);
       if (node) {
-        setNodeData(node.id, data);
+        setNodeData(node.id, {
+          ...node.data,
+          ...data,
+          metadata: {
+            ...node.data?.metadata,
+            ...data?.metadata,
+          },
+        });
       }
     },
     [canvasId, setNodeData],

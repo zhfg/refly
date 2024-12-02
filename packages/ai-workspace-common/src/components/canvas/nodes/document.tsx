@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 import { HiOutlineDocumentText } from 'react-icons/hi2';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
@@ -160,45 +161,22 @@ export const DocumentNode = ({
             {/* Node Type */}
             <span
               className="
-                text-[13px]
+                text-sm
                 font-medium
                 leading-normal
                 text-[rgba(0,0,0,0.8)]
-                font-['PingFang_SC']
                 truncate
               "
             >
-              Document
+              {data.title}
             </span>
           </div>
 
-          {/* Document Title */}
-          <div
-            className="
-              text-[13px]
-              font-medium
-              leading-normal
-              text-[rgba(0,0,0,0.8)]
-              font-['PingFang_SC']
-            "
-          >
-            {data.title}
-          </div>
-
-          {/* Document Content Preview */}
-          <div
-            className="
-              text-[10px]
-              leading-3
-              text-[rgba(0,0,0,0.8)]
-              font-['PingFang_SC']
-              line-clamp-2
-              overflow-hidden
-              text-ellipsis
-            "
-          >
-            {data.metadata.contentPreview || '暂无内容预览...'}
-          </div>
+          <Spin spinning={status === 'executing' && !data.contentPreview} style={{ height: 100 }}>
+            <div className="text-xs leading-4 text-gray-500 line-clamp-6 overflow-hidden text-ellipsis">
+              {data.contentPreview}
+            </div>
+          </Spin>
         </div>
       </div>
     </div>

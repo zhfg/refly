@@ -14,7 +14,9 @@ export type CanvasNodeData<T = Record<string, unknown>> = {
 export type CanvasNode<T = Record<string, unknown>> = Node<CanvasNodeData<T>, CanvasNodeType>;
 
 // Node specific metadata types
-export type DocumentNodeMeta = {};
+export type DocumentNodeMeta = {
+  status: ActionStatus;
+};
 
 export type ResourceNodeMeta = {
   resourceType: string;

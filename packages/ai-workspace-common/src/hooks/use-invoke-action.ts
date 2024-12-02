@@ -184,7 +184,13 @@ export const useInvokeAction = () => {
     addNode(
       {
         type: node.type,
-        data: node.data as CanvasNodeData,
+        data: {
+          ...node.data,
+          metadata: {
+            status: 'executing',
+            ...node.data?.metadata,
+          },
+        } as CanvasNodeData,
       },
       [
         {
@@ -208,6 +214,23 @@ export const useInvokeAction = () => {
       status: 'finish' as const,
     };
     onUpdateResult(skillEvent.resultId, updatedResult);
+
+    const artifacts = result.steps?.flatMap((s) => s.artifacts);
+    if (artifacts?.length) {
+      artifacts.forEach((artifact) => {
+        setNodeDataByEntity(
+          {
+            type: artifact.type,
+            entityId: artifact.entityId,
+          },
+          {
+            metadata: {
+              status: 'finish',
+            },
+          },
+        );
+      });
+    }
   };
 
   const onError = (error?: BaseResponse) => {
