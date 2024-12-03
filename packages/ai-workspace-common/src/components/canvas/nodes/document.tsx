@@ -11,6 +11,9 @@ import { useTranslation } from 'react-i18next';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 import { HiOutlineDocumentText } from 'react-icons/hi2';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
+import { time } from '@refly-packages/ai-workspace-common/utils/time';
+import { LOCALE } from '@refly/common-types';
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
@@ -24,9 +27,10 @@ export const DocumentNode = ({
   onNodeClick,
 }: DocumentNodeProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const { edges, onEdgesChange } = useCanvasControl();
+  const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  const language = i18n.languages?.[0];
 
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
@@ -116,6 +120,7 @@ export const DocumentNode = ({
         className={`
         w-[170px]
         h-[186px]
+        relative
         ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
       `}
       >
@@ -160,44 +165,27 @@ export const DocumentNode = ({
             {/* Node Type */}
             <span
               className="
-                text-[13px]
+                text-sm
                 font-medium
                 leading-normal
                 text-[rgba(0,0,0,0.8)]
-                font-['PingFang_SC']
                 truncate
               "
             >
-              Document
+              {data.title}
             </span>
           </div>
 
-          {/* Document Title */}
-          <div
-            className="
-              text-[13px]
-              font-medium
-              leading-normal
-              text-[rgba(0,0,0,0.8)]
-              font-['PingFang_SC']
-            "
-          >
-            {data.title}
-          </div>
+          <Spin spinning={status === 'executing' && !data.contentPreview} style={{ height: 100 }}>
+            <div className="text-xs leading-4 text-gray-500 line-clamp-6 overflow-hidden text-ellipsis">
+              {data.contentPreview}
+            </div>
+          </Spin>
 
-          {/* Document Content Preview */}
-          <div
-            className="
-              text-[10px]
-              leading-3
-              text-[rgba(0,0,0,0.8)]
-              font-['PingFang_SC']
-              line-clamp-2
-              overflow-hidden
-              text-ellipsis
-            "
-          >
-            {data.metadata.contentPreview || '暂无内容预览...'}
+          <div className="absolute bottom-2 left-3 text-[10px] text-gray-400">
+            {time(data.createdAt, language as LOCALE)
+              ?.utc()
+              ?.fromNow()}
           </div>
         </div>
       </div>

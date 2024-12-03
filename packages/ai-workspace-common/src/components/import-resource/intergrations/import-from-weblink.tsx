@@ -134,6 +134,7 @@ export const ImportFromWeblink = () => {
       id: resource.resourceId,
       title: resource.title,
       domain: 'resource',
+      contentPreview: resource.contentPreview,
     }));
     resources.forEach((resource) => {
       addNode({
@@ -141,6 +142,7 @@ export const ImportFromWeblink = () => {
         data: {
           title: resource.title,
           entityId: resource.id,
+          contentPreview: resource.contentPreview,
         },
       });
     });

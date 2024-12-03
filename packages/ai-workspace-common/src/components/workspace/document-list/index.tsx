@@ -42,12 +42,13 @@ export const DocumentList = () => {
     pageSize: 20,
   });
 
-  const handleEdit = (entityId: string, title: string) => {
+  const handleEdit = (doc: Document) => {
     addNode({
       type: 'document',
       data: {
-        title,
-        entityId,
+        title: doc.title,
+        entityId: doc.docId,
+        contentPreview: doc.contentPreview,
       },
     });
     setShowLibraryModal(false);
@@ -56,7 +57,7 @@ export const DocumentList = () => {
   const ActionEdit = ({ doc }: { doc: Document }) => {
     return (
       <Tooltip title={t('workspace.addToCanvas')}>
-        <Button type="text" icon={<IconNotePencil />} onClick={() => handleEdit(doc.docId, doc.title)} />
+        <Button type="text" icon={<IconNotePencil />} onClick={() => handleEdit(doc)} />
       </Tooltip>
     );
   };

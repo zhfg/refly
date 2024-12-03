@@ -25,7 +25,7 @@ export const ContextManager = () => {
   const { t } = useTranslation();
   const { selectedContextItems, removeContextItem, setContextItems, clearContextItems, filterErrorInfo } =
     useContextPanelStoreShallow((state) => ({
-      selectedContextItems: state.selectedContextItems,
+      selectedContextItems: state.contextItems,
       removeContextItem: state.removeContextItem,
       setContextItems: state.setContextItems,
       clearContextItems: state.clearContextItems,
@@ -41,8 +41,8 @@ export const ContextManager = () => {
     chatHistoryOpen: state.chatHistoryOpen,
     setChatHistoryOpen: state.setChatHistoryOpen,
   }));
-  const { selectedResultItems } = useContextPanelStoreShallow((state) => ({
-    selectedResultItems: state.selectedResultItems,
+  const { historyItems } = useContextPanelStoreShallow((state) => ({
+    historyItems: state.historyItems,
   }));
 
   const handleRemoveItem = (item: CanvasNode<any>) => {
@@ -55,7 +55,7 @@ export const ContextManager = () => {
   const selectedNodeIds = selectedContextNodes?.map((node) => node.id) ?? [];
 
   useEffect(() => {
-    const { selectedContextItems } = useContextPanelStore.getState();
+    const { contextItems: selectedContextItems } = useContextPanelStore.getState();
     const newContextItems = [
       ...selectedContextItems.filter((item) => !item.isPreview),
       ...selectedContextNodes
@@ -82,7 +82,7 @@ export const ContextManager = () => {
           <ChatHistorySwitch
             chatHistoryOpen={chatHistoryOpen}
             setChatHistoryOpen={setChatHistoryOpen}
-            items={selectedResultItems}
+            items={historyItems}
           />
           <AddBaseMarkContext />
           {selectedContextItems?.map((item) => (

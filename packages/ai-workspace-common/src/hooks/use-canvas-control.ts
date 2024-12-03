@@ -67,7 +67,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     setNodes: state.setNodes,
     setEdges: state.setEdges,
     setMode: state.setMode,
-    setSelectedNodes: state.setSelectedNodes,
   }));
 
   const { nodes = [], edges = [], mode = 'hand' } = data ?? {};
@@ -97,7 +96,10 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     (filter: CanvasNodeFilter) => {
       const { type, entityId } = filter;
       const { nodes } = useCanvasStore.getState().data[canvasId];
-      setSelectedNode(nodes.find((node) => node.type === type && node.data?.entityId === entityId));
+      const node = nodes.find((node) => node.type === type && node.data?.entityId === entityId);
+      if (node) {
+        setSelectedNode(node);
+      }
     },
     [canvasId, setSelectedNode],
   );
@@ -114,6 +116,36 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       });
     },
     [ydoc, yNodes],
+  );
+
+  const setNodeData = useCallback(
+    <T = any>(nodeId: string, data: Partial<CanvasNodeData<T>>) => {
+      const updatedNodes = yNodes.toJSON().map((n) => ({
+        ...n,
+        data: n.id === nodeId ? { ...n.data, ...data } : n.data,
+      }));
+      yNodes.delete(0, yNodes.length);
+      yNodes.push(updatedNodes);
+    },
+    [ydoc, yNodes],
+  );
+
+  const setNodeDataByEntity = useCallback(
+    <T = any>(filter: CanvasNodeFilter, data: Partial<CanvasNodeData<T>>) => {
+      const { nodes } = useCanvasStore.getState().data[canvasId];
+      const node = nodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId);
+      if (node) {
+        setNodeData(node.id, {
+          ...node.data,
+          ...data,
+          metadata: {
+            ...node.data?.metadata,
+            ...data?.metadata,
+          },
+        });
+      }
+    },
+    [canvasId, setNodeData],
   );
 
   const observersSet = useRef(false);
@@ -144,7 +176,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     };
   }, [canvasId, yNodes, yEdges, setNodes, setEdges]);
 
-  const { fitView, getNodes, setNodes: setReactFlowNodes, setCenter, getNode } = useReactFlow();
+  const { fitView, setCenter, getNode } = useReactFlow();
 
   const onLayout = useCallback(
     (direction: 'TB' | 'LR') => {
@@ -231,6 +263,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       }
 
       const enrichedData = {
+        createdAt: new Date().toISOString(),
         ...node.data,
         metadata: {
           ...getNodeDefaultMetadata(node.type),
@@ -307,6 +340,8 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     edges,
     setSelectedNode,
     setSelectedNodeByEntity,
+    setNodeData,
+    setNodeDataByEntity,
     onNodesChange,
     onEdgesChange,
     onConnect,

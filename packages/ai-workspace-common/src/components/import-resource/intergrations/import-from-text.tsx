@@ -54,6 +54,7 @@ export const ImportFromText = () => {
         data: {
           title: data?.data?.title || 'Untitled',
           entityId: data?.data?.resourceId,
+          contentPreview: data?.data?.contentPreview,
         },
       });
     }

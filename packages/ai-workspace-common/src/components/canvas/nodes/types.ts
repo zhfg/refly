@@ -1,9 +1,11 @@
 import { Node, NodeProps } from '@xyflow/react';
-import { CanvasNodeType } from '@refly/openapi-schema';
+import { ActionMeta, ActionStatus, ActionStep, CanvasNodeType } from '@refly/openapi-schema';
 
 export type CanvasNodeData<T = Record<string, unknown>> = {
   title: string;
   entityId: string;
+  createdAt?: string;
+  contentPreview?: string | React.ReactNode;
   metadata?: T;
   targetHandle?: string;
   sourceHandle?: string;
@@ -13,12 +15,11 @@ export type CanvasNode<T = Record<string, unknown>> = Node<CanvasNodeData<T>, Ca
 
 // Node specific metadata types
 export type DocumentNodeMeta = {
-  contentPreview: string;
+  status: ActionStatus;
 };
 
 export type ResourceNodeMeta = {
   resourceType: string;
-  contentPreview: string;
 };
 
 export type SkillNodeMeta = {
@@ -33,7 +34,10 @@ export type ToolNodeMeta = {
 };
 
 export type ResponseNodeMeta = {
+  status: ActionStatus;
   modelName?: string;
+  actionMeta?: ActionMeta;
+  steps?: ActionStep[];
 };
 
 // Type mapping for node metadata

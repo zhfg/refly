@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
 import { ActionResult } from '@refly/openapi-schema';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import {
+  NodeItem,
   useContextPanelStore,
   useContextPanelStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
-import { useActionResultStore } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
@@ -17,22 +16,22 @@ export const useChatHistory = () => {
     setChatHistoryOpen: state.setChatHistoryOpen,
   }));
 
-  const { selectedResultItems, setResultItems, updateResultItem, removeResultItem, clearResultItems } =
+  const { historyItems, setHistoryItems, updateHistoryItem, removeHistoryItem, clearHistoryItems } =
     useContextPanelStoreShallow((state) => ({
-      selectedResultItems: state.selectedResultItems,
-      setResultItems: state.setResultItems,
-      updateResultItem: state.updateResultItem,
-      removeResultItem: state.removeResultItem,
-      clearResultItems: state.clearResultItems,
+      historyItems: state.historyItems,
+      setHistoryItems: state.setHistoryItems,
+      updateHistoryItem: state.updateHistoryItem,
+      removeHistoryItem: state.removeHistoryItem,
+      clearHistoryItems: state.clearHistoryItems,
     }));
 
   // Handle result updates
   useEffect(() => {
     const handleResultUpdate = (payload: { resultId: string; payload: ActionResult }) => {
-      const { selectedResultItems } = useContextPanelStore.getState();
-      const index = selectedResultItems?.findIndex((item) => item?.resultId === payload?.resultId);
+      const { historyItems } = useContextPanelStore.getState();
+      const index = historyItems?.findIndex((item) => item?.data.entityId === payload?.resultId);
       if (index >= 0) {
-        updateResultItem({ ...selectedResultItems[index], ...payload.payload });
+        updateHistoryItem({ ...historyItems[index], ...payload.payload });
       }
     };
 
@@ -47,38 +46,35 @@ export const useChatHistory = () => {
 
   // Sync nodes with history items
   useEffect(() => {
-    const { selectedResultItems } = useContextPanelStore.getState();
-    const { resultMap } = useActionResultStore.getState();
+    const { historyItems } = useContextPanelStore.getState();
 
-    const newResultItems = [
+    const newHistoryItems = [
       ...(selectedResultNodes
-        ?.filter(
-          (node) => !selectedResultItems?.some((item) => !item?.isPreview && item?.resultId === node?.data?.entityId),
-        )
-        ?.map((node) => ({ ...resultMap[node?.data?.entityId], isPreview: true })) ?? []),
-      ...(selectedResultItems?.filter((item) => !item?.isPreview) ?? []),
+        ?.filter((node) => !historyItems?.some((item) => !item?.isPreview && item?.id === node?.id))
+        ?.map((node) => ({ ...node, isPreview: true })) ?? []),
+      ...(historyItems?.filter((item) => !item?.isPreview) ?? []),
     ];
 
-    setResultItems(newResultItems);
-  }, [JSON.stringify(selectedResultNodes?.map((node) => node?.id))]);
+    setHistoryItems(newHistoryItems);
+  }, [JSON.stringify(selectedResultNodes?.map((node) => node?.data.contentPreview))]);
 
   const handleItemClick = (resultId: string) => {
     setSelectedNodeByEntity({ type: 'skillResponse', entityId: resultId });
   };
 
-  const handleItemPin = (item: ActionResult & { isPreview?: boolean }) => {
-    updateResultItem({ ...item, isPreview: !item?.isPreview });
+  const handleItemPin = (item: NodeItem) => {
+    updateHistoryItem({ ...item, isPreview: !item?.isPreview });
   };
 
   const handleItemDelete = (resultId: string) => {
-    removeResultItem(resultId);
+    removeHistoryItem(resultId);
   };
 
   return {
     chatHistoryOpen,
     setChatHistoryOpen,
-    selectedResultItems,
-    clearResultItems,
+    historyItems,
+    clearHistoryItems,
     handleItemClick,
     handleItemPin,
     handleItemDelete,

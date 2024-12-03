@@ -2860,6 +2860,16 @@ export type CanvasNodeData = {
    * Node entity ID
    */
   entityId: string;
+  /**
+   * Node content preview
+   */
+  contentPreview?: string;
+  /**
+   * Node metadata
+   */
+  metadata?: {
+    [key: string]: unknown;
+  };
 };
 
 export type CanvasNode = {

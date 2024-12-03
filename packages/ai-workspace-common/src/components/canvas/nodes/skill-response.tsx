@@ -1,9 +1,8 @@
 import { Position, NodeProps, useReactFlow } from '@xyflow/react';
+import { useTranslation } from 'react-i18next';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode } from './types';
 import { Node } from '@xyflow/react';
-import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
-import { useEffect, useState, useCallback } from 'react';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useState, useCallback } from 'react';
 import { CustomHandle } from './custom-handle';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { EDGE_STYLES } from '../constants';
@@ -15,43 +14,33 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/use-add-to-chat-history';
 import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
+import { time } from '@refly-packages/ai-workspace-common/utils/time';
+import { LOCALE } from '@refly/common-types';
+import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
-export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillResponseNode>) => {
+export const SkillResponseNode = (props: NodeProps<SkillResponseNode>) => {
+  const { data, selected, id } = props;
   const [isHovered, setIsHovered] = useState(false);
   const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();
 
-  // Get result from store
-  const { result, updateActionResult } = useActionResultStoreShallow((state) => ({
-    result: state.resultMap[data.entityId],
-    updateActionResult: state.updateActionResult,
-  }));
+  const { t, i18n } = useTranslation();
+  const language = i18n.languages?.[0];
 
-  // Fetch result if not available
-  const fetchActionResult = async (resultId: string) => {
-    const { data, error } = await getClient().getActionResult({
-      query: { resultId },
-    });
-
-    if (error || !data?.success) {
-      return;
-    }
-
-    updateActionResult(resultId, data.data);
-  };
-
-  useEffect(() => {
-    if (!result && data.entityId) {
-      fetchActionResult(data.entityId);
-    }
-  }, [data.entityId]);
+  const { title, contentPreview, metadata, createdAt } = data;
+  const { status, modelName, steps } = metadata ?? {};
 
   // Get query and response content from result
-  const query = result?.title ?? 'Loading...';
-  const content = result?.steps?.[0]?.content ?? 'Loading response...';
-  const modelName = result?.actionMeta?.name ?? 'AI Assistant';
+  const query = title || t('copilot.chatHistory.loading');
+  const content = steps
+    ?.map((step) => step.content)
+    ?.filter(Boolean)
+    .join('\n\n');
+  const artifacts = steps?.flatMap((step) => step.artifacts);
 
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
@@ -88,7 +77,8 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
     );
   }, [id, setEdges]);
 
-  const handleAddToChatHistory = useAddToChatHistory(result);
+  const { getNode } = useReactFlow();
+  const handleAddToChatHistory = useAddToChatHistory(getNode(id) as NodeItem);
 
   const handleRerun = useCallback(() => {
     // Implement rerun logic
@@ -136,11 +126,11 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
           onAddToChatHistory={handleAddToChatHistory}
           onRerun={handleRerun}
           onInsertToDoc={() => handleInsertToDoc('insertBlow')}
-          onCreateDocument={handleCreateDocument}
+          onCreateDocument={content ? handleCreateDocument : undefined}
           onDelete={handleDelete}
           onHelpLink={handleHelpLink}
           onAbout={handleAbout}
-          isCompleted={result?.status === 'finish'}
+          isCompleted={metadata?.status === 'finish'}
           isCreatingDocument={isCreating}
         />
       )}
@@ -150,6 +140,7 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
         className={`
           w-[170px]
           h-[186px]
+          relative
           ${getNodeCommonStyles({ selected, isHovered })}
         `}
       >
@@ -169,7 +160,6 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
         />
 
         <div className="flex flex-col gap-2">
-          {/* Header with Icon and Type */}
           <div className="flex items-center gap-2">
             <div
               className="
@@ -187,49 +177,39 @@ export const SkillResponseNode = ({ data, selected, id }: NodeProps<SkillRespons
               <IconCanvas className="w-4 h-4 text-white" />
             </div>
 
-            <span
+            <span className="text-sm font-medium leading-normal truncate">{query}</span>
+          </div>
+
+          <Spin spinning={status === 'executing' && !contentPreview} style={{ height: 100 }}>
+            <div
               className="
-                text-[13px]
-                font-medium
-                leading-normal
-                text-[rgba(0,0,0,0.8)]
-                font-['PingFang_SC']
-                truncate
-              "
+              text-xs
+              text-gray-500
+              leading-4
+              line-clamp-6
+              overflow-hidden
+              text-ellipsis
+            "
             >
-              {modelName}
-            </span>
-          </div>
+              {content}
+            </div>
+            <div className="flex items-center gap-2">
+              {artifacts?.map((artifact) => (
+                <div
+                  key={artifact.entityId}
+                  className="border border-solid border-gray-300 rounded-sm px-2 py-1 w-full flex items-center gap-1"
+                >
+                  {getArtifactIcon(artifact, 'text-gray-500')}
+                  <span className="text-xs text-gray-500">{artifact.title}</span>
+                </div>
+              ))}
+            </div>
+          </Spin>
 
-          {/* User Query Title */}
-          <div
-            className="
-              text-[13px]
-              font-medium
-              leading-normal
-              text-[rgba(0,0,0,0.8)]
-              font-['PingFang_SC']
-              line-clamp-2
-              overflow-hidden
-              text-ellipsis
-            "
-          >
-            {query}
-          </div>
-
-          {/* Response Content Preview */}
-          <div
-            className="
-              text-[10px]
-              leading-3
-              text-[rgba(0,0,0,0.8)]
-              font-['PingFang_SC']
-              line-clamp-3
-              overflow-hidden
-              text-ellipsis
-            "
-          >
-            {content}
+          <div className="absolute bottom-2 left-3 text-[10px] text-gray-400">
+            {time(createdAt, language as LOCALE)
+              ?.utc()
+              ?.fromNow()}
           </div>
         </div>
       </div>

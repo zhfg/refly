@@ -2,7 +2,7 @@ import { Button } from 'antd';
 import { IconClose } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 import { getNodeIcon } from './utils/icon';
-import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import cn from 'classnames';
 
 export const ContextItem = ({
@@ -15,12 +15,12 @@ export const ContextItem = ({
   canNotRemove,
 }: {
   canNotRemove?: boolean;
-  item: IContextItem;
+  item: NodeItem;
   isActive: boolean;
   isLimit?: boolean;
   disabled?: boolean;
-  onToggle: (item: IContextItem) => void;
-  onRemove?: (item: IContextItem) => void;
+  onToggle: (item: NodeItem) => void;
+  onRemove?: (item: NodeItem) => void;
 }) => {
   const { t } = useTranslation();
   const { data } = item ?? {};

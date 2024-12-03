@@ -44,9 +44,7 @@ export const useCreateDocument = () => {
               data: {
                 entityId: data.data.docId,
                 title: data.data.title ?? title,
-                metadata: {
-                  contentPreview: content,
-                },
+                contentPreview: content,
               },
             };
 

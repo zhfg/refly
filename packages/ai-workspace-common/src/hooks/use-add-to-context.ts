@@ -10,7 +10,7 @@ export const useAddToContext = (node: CanvasNode, nodeType: CanvasNodeType) => {
 
   return useCallback(() => {
     const contextStore = useContextPanelStore.getState();
-    const selectedContextItems = contextStore.selectedContextItems;
+    const selectedContextItems = contextStore.contextItems;
 
     // Check if item is already in context
     const isAlreadyAdded = selectedContextItems.some((item) => {

@@ -90,7 +90,7 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
 
     const { localSettings } = useUserStore.getState();
     const { newQAText, selectedModel } = useChatStore.getState();
-    const { selectedContextItems, selectedResultItems } = useContextPanelStore.getState();
+    const { contextItems: selectedContextItems, historyItems: selectedResultItems } = useContextPanelStore.getState();
 
     const resultId = genActionResultID();
     const param: InvokeSkillRequest = {

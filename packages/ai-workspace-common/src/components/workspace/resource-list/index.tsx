@@ -41,12 +41,13 @@ export const ResourceList = () => {
     pageSize: 20,
   });
 
-  const handleEdit = (entityId: string, title: string) => {
+  const handleEdit = (resource: Resource) => {
     addNode({
       type: 'resource',
       data: {
-        title,
-        entityId,
+        title: resource.title,
+        entityId: resource.resourceId,
+        contentPreview: resource.contentPreview,
       },
     });
     setShowLibraryModal(false);
@@ -55,7 +56,7 @@ export const ResourceList = () => {
   const ActionView = ({ resource }: { resource: Resource }) => {
     return (
       <Tooltip title={t('workspace.addToCanvas')}>
-        <Button type="text" icon={<IconNotePencil />} onClick={() => handleEdit(resource.resourceId, resource.title)} />
+        <Button type="text" icon={<IconNotePencil />} onClick={() => handleEdit(resource)} />
       </Tooltip>
     );
   };

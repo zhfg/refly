@@ -54,8 +54,8 @@ export const LaunchPad = () => {
   const {
     chatHistoryOpen,
     setChatHistoryOpen,
-    selectedResultItems,
-    clearResultItems,
+    historyItems,
+    clearHistoryItems,
     handleItemClick,
     handleItemPin,
     handleItemDelete,
@@ -85,7 +85,7 @@ export const LaunchPad = () => {
 
     const { localSettings } = useUserStore.getState();
     const { newQAText, selectedModel } = useChatStore.getState();
-    const { selectedContextItems, selectedResultItems } = useContextPanelStore.getState();
+    const { contextItems, historyItems } = useContextPanelStore.getState();
 
     const resultId = genActionResultID();
     const param: InvokeSkillRequest = {
@@ -98,11 +98,11 @@ export const LaunchPad = () => {
         entityType: 'canvas',
       },
       modelName: selectedModel?.name,
-      context: convertContextItemsToContext(selectedContextItems),
-      resultHistory: selectedResultItems.map((item) => ({
-        resultId: item.resultId,
-        title: item.title,
-        steps: item.steps,
+      context: convertContextItemsToContext(contextItems),
+      resultHistory: historyItems.map((item) => ({
+        resultId: item.data.entityId,
+        title: item.data.title,
+        steps: item.data.metadata?.steps,
       })),
       skillName: skillStore.selectedSkill?.name || 'common_qna',
       locale: localSettings?.outputLocale,
@@ -169,8 +169,8 @@ export const LaunchPad = () => {
         <ChatHistory
           isOpen={chatHistoryOpen}
           onClose={() => setChatHistoryOpen(false)}
-          items={selectedResultItems}
-          onCleanup={clearResultItems}
+          items={historyItems}
+          onCleanup={clearHistoryItems}
           onItemClick={handleItemClick}
           onItemPin={handleItemPin}
           onItemDelete={handleItemDelete}

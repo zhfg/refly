@@ -151,6 +151,7 @@ Please generate relevant follow-up questions in ${locale} language.`;
         model,
         recommendQuestionsSchema,
         prompt,
+        config,
         3, // Max retries
       );
 

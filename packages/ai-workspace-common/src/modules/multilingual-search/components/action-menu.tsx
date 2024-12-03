@@ -81,6 +81,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
           id: resource.resourceId,
           title: resource.title,
           domain: 'resource',
+          contentPreview: resource.contentPreview,
         }));
         resources.forEach((resource) => {
           addNode({
@@ -99,6 +100,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
           data: {
             title: item.title,
             entityId: item.metadata?.entityId,
+            contentPreview: item.pageContent,
           },
         });
       });

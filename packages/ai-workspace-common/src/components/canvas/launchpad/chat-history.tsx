@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { Button, Divider, Empty } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { getArtifactIcon, IconDelete, IconResponse } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconDelete, IconResponse } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { ChevronDown, Pin, PinOff } from 'lucide-react';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
-import { ActionResult } from '@refly/openapi-schema';
+import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { getResultDisplayContent } from '@refly-packages/ai-workspace-common/components/common/result-display';
 
 // Define props interface
 interface ChatHistoryProps {
@@ -15,7 +16,7 @@ interface ChatHistoryProps {
   onClose: () => void;
 
   // Data
-  items: (ActionResult & { isPreview?: boolean })[];
+  items: NodeItem[];
 
   // Mode control
   readonly?: boolean;
@@ -25,28 +26,9 @@ interface ChatHistoryProps {
 
   // Actions
   onItemClick?: (resultId: string) => void;
-  onItemPin?: (item: ActionResult & { isPreview?: boolean }) => void;
+  onItemPin?: (item: NodeItem) => void;
   onItemDelete?: (resultId: string) => void;
 }
-
-const getResultDisplayContent = (result: ActionResult) => {
-  const content = result.steps?.map((step) => step.content)?.join('\n');
-  if (content) return <span>{content}</span>;
-
-  // If content is empty, find the first artifact
-  for (const step of result.steps ?? []) {
-    if (step.artifacts?.length) {
-      const artifact = step.artifacts[0];
-      return (
-        <span className="flex items-center">
-          {getArtifactIcon(artifact, 'w-3 h-3 mr-1')} {artifact.title}
-        </span>
-      );
-    }
-  }
-
-  return '';
-};
 
 export const ChatHistory: React.FC<ChatHistoryProps> = ({
   isOpen,
@@ -86,26 +68,26 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
       </div>
       <div className="max-h-[200px] overflow-y-auto">
         {items?.length > 0 ? (
-          items.map((result, index) => (
+          items.map((item, index) => (
             <div
               key={index}
               className={cn(
                 'space-y-1 m-1 py-2 px-3 rounded-lg mb-2 cursor-pointer border-gray-100 hover:bg-gray-100',
                 {
-                  'border-dashed': result.isPreview,
-                  'border-solid bg-gray-100': !result.isPreview,
+                  'border-dashed': item.isPreview,
+                  'border-solid bg-gray-100': !item.isPreview,
                 },
               )}
-              onClick={() => onItemClick(result.resultId)}
+              onClick={() => onItemClick(item.data.entityId)}
             >
               <div className="text-gray-800 font-medium mb-1 flex items-center justify-between text-xs">
                 <span className="flex items-center whitespace-nowrap overflow-hidden text-ellipsis">
                   <IconResponse className="h-4 w-4 mr-1" />
-                  {result?.title}
+                  {item.data.title}
                 </span>
                 <div className="flex items-center space-x-1">
                   <span className="text-gray-400 text-xs mr-1">
-                    {time(result?.createdAt, language as LOCALE)
+                    {time(item.data.createdAt, language as LOCALE)
                       ?.utc()
                       ?.fromNow()}
                   </span>
@@ -117,10 +99,10 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onItemPin?.(result);
+                          onItemPin?.(item);
                         }}
                         icon={
-                          result?.isPreview ? (
+                          item?.isPreview ? (
                             <Pin className="w-4 h-4 text-gray-400" />
                           ) : (
                             <PinOff className="w-4 h-4 text-gray-400" />
@@ -132,7 +114,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onItemDelete?.(result?.resultId);
+                          onItemDelete?.(item.data.entityId);
                         }}
                         icon={<IconDelete className="w-4 h-4 text-gray-400" />}
                       />
@@ -141,7 +123,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
                 </div>
               </div>
               <div className="text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis text-xs">
-                {getResultDisplayContent(result)}
+                {getResultDisplayContent(item.data)}
               </div>
             </div>
           ))
