@@ -1,6 +1,6 @@
 import { Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
-import { CanvasNodeData, ResponseNodeMeta, CanvasNode } from './types';
+import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './types';
 import { Node } from '@xyflow/react';
 import { useState, useCallback } from 'react';
 import { CustomHandle } from './custom-handle';
@@ -22,8 +22,8 @@ import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
-export const SkillResponseNode = (props: NodeProps<SkillResponseNode>) => {
-  const { data, selected, id } = props;
+export const SkillResponseNode = (props: SkillResponseNodeProps) => {
+  const { data, selected, id, onNodeClick } = props;
   const [isHovered, setIsHovered] = useState(false);
   const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();
@@ -119,7 +119,12 @@ export const SkillResponseNode = (props: NodeProps<SkillResponseNode>) => {
   }, [content, debouncedCreateDocument, data.entityId, data?.title, modelName]);
 
   return (
-    <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+    <div
+      className="relative group"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={onNodeClick}
+    >
       {isWeb && (
         <ActionButtons
           type="skill-response"
@@ -191,7 +196,7 @@ export const SkillResponseNode = (props: NodeProps<SkillResponseNode>) => {
               text-ellipsis
             "
             >
-              {content}
+              {content || t('canvas.nodePreview.skillResponse.noContentPreview')}
             </div>
             <div className="flex items-center gap-2">
               {artifacts?.map((artifact) => (

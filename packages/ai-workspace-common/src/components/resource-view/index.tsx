@@ -4,7 +4,7 @@ import { IconQuote } from '@refly-packages/ai-workspace-common/components/common
 
 // 自定义样式
 import './index.scss';
-import { Skeleton, Message as message, Empty, Alert, Tooltip } from '@arco-design/web-react';
+import { Skeleton, Message as message, Empty, Alert } from '@arco-design/web-react';
 import { Button } from 'antd';
 import { useResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/resource';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
@@ -17,19 +17,15 @@ import { getClientOrigin, safeParseURL } from '@refly/utils/url';
 import { useReloadListState } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
 
 // content selector
-import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector';
 import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
 import classNames from 'classnames';
 import { useContentSelectorStoreShallow } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import { useTranslation } from 'react-i18next';
 
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
-import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
 import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
-import { SelectionBubble } from '@refly-packages/ai-workspace-common/components/selection-bubble';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genUniqueId } from '@refly-packages/utils/id';
-import { convertMarkToNode } from '@refly-packages/ai-workspace-common/utils/mark-to-node';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { SelectionContext } from '@refly-packages/ai-workspace-common/components/selection-context';
 

@@ -30,7 +30,9 @@ export const ResourceNode = ({
   const { setEdges } = useReactFlow();
   const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
 
-  const { i18n } = useTranslation();
+  console.log('resource', data);
+
+  const { i18n, t } = useTranslation();
   const language = i18n.languages?.[0];
 
   // Check if node has any connections
@@ -99,7 +101,12 @@ export const ResourceNode = ({
   }, []);
 
   return (
-    <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+    <div
+      className="relative group"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={onNodeClick}
+    >
       {!isPreview && !hideActions && (
         <ActionButtons
           type="resource"
@@ -170,7 +177,7 @@ export const ResourceNode = ({
           </div>
 
           <div className="text-xs leading-4 text-gray-500 line-clamp-6 overflow-hidden text-ellipsis">
-            {data.contentPreview || 'No content preview available...'}
+            {data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
           </div>
 
           <div className="absolute bottom-2 left-3 text-[10px] text-gray-400">

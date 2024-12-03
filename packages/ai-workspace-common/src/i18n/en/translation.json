@@ -345,6 +345,7 @@
       },
       "alreadyAddedWithTitle": "[{{type}}] {{title}} is already in context",
       "addSuccessWithTitle": "[{{type}}] {{title}} added to context",
+      "addToContextSuccess": "Successfully added to context",
       "untitled": "Untitled",
       "deleteSuccessWithTitle": "Successfully deleted [{{type}}] \"{{title}}\"",
       "nodeTypes": {
@@ -415,6 +416,20 @@
     "nodeStatus": {
       "isCreatingDocument": "Creating Document...",
       "createDocument": "Create Document"
+    },
+    "nodePreview": {
+      "document": {
+        "contentPreview": "Loading document content...",
+        "noContentPreview": "No content preview available..."
+      },
+      "resource": {
+        "contentPreview": "Loading resource content...",
+        "noContentPreview": "No content preview available..."
+      },
+      "skillResponse": {
+        "contentPreview": "Loading skill response content...",
+        "noContentPreview": "No content preview available..."
+      }
     }
   },
   "resource": {

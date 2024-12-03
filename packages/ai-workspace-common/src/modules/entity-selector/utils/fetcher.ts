@@ -15,6 +15,11 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
       id: item?.resourceId,
       title: item?.title,
       domain: 'resource',
+      snippets: [
+        {
+          text: item?.contentPreview,
+        },
+      ],
     }));
     return { success: res?.data?.success, data };
   },
@@ -26,6 +31,11 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
       id: item?.docId,
       title: item?.title,
       domain: 'document',
+      snippets: [
+        {
+          text: item?.contentPreview,
+        },
+      ],
     }));
     return { success: res?.data?.success, data };
   },
