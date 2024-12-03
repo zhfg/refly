@@ -1,8 +1,7 @@
 import { Button, Tooltip } from 'antd';
 import { FaArrowPointer } from 'react-icons/fa6';
 import { RiUploadCloud2Line } from 'react-icons/ri';
-import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
-import { HiOutlineDocumentText } from 'react-icons/hi2';
+import { HiOutlineDocumentText, HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { FC } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';

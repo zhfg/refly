@@ -259,6 +259,7 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
         model,
         titleSchema,
         titlePrompt,
+        config,
         3, // Max retries
       );
 

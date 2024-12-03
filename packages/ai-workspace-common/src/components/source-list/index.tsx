@@ -48,23 +48,28 @@ const SourceItem = ({ source, index }: { source: Source; index: number }) => {
     }
   };
 
-  // Popover content with translation support
+  // Popover content with title, domain, icon and content
   const renderPopoverContent = () => (
     <div className="search-result-popover-content">
-      <h4>
-        <TranslationWrapper
-          content={source.title || ''}
-          targetLanguage={currentUiLocale}
-          originalLocale={source.metadata?.originalLocale}
-        />
-      </h4>
-      <div className="content-body">
-        <TranslationWrapper
-          content={source.pageContent}
-          targetLanguage={currentUiLocale}
-          originalLocale={source.metadata?.originalLocale}
-        />
+      {/* Title section */}
+      <div className="flex items-center gap-2 mb-2">
+        <h4 className="font-medium text-base m-0 break-words">{source?.title ?? ''}</h4>
       </div>
+
+      {/* Domain section */}
+      {source?.url ? (
+        <div className="flex items-center gap-2 mb-2 px-4">
+          <img
+            className="w-4 h-4 flex-shrink-0"
+            alt={domain}
+            src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
+          />
+          <div className="text-zinc-400 text-sm break-all">{domain}</div>
+        </div>
+      ) : null}
+
+      {/* Content section */}
+      <div className="content-body pt-0">{source.pageContent}</div>
     </div>
   );
 
@@ -76,29 +81,32 @@ const SourceItem = ({ source, index }: { source: Source; index: number }) => {
       overlayClassName="search-result-popover"
     >
       <div
-        className="flex relative flex-col text-xs rounded-lg source-list-item cursor-pointer hover:bg-gray-50"
+        className="flex relative flex-col text-xs rounded-lg source-list-item cursor-pointer hover:bg-gray-50 border border-solid border-black/10 transition-all p-2"
         key={index}
         onClick={handleClick}
       >
-        <div className="overflow-hidden font-medium whitespace-nowrap break-words text-ellipsis text-zinc-950 flex items-center flex-row gap-1">
-          <span>{index + 1} ·</span>
-          <TranslationWrapper
-            content={source.title || ''}
-            targetLanguage={currentUiLocale}
-            originalLocale={source.metadata?.originalLocale}
-          />
-        </div>
-        <div className="overflow-hidden flex-1 pl-2">
-          <div className="overflow-hidden w-full whitespace-nowrap break-all text-ellipsis text-zinc-400">{domain}</div>
-        </div>
-        <div className="flex gap-2 items-center">
-          <div className="flex flex-none items-center">
-            <img
-              className="w-3 h-3"
-              alt={domain}
-              src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
-            />
+        <div className="flex items-center gap-2 w-full">
+          {/* Left section with number and title */}
+          <div className="flex items-center gap-1 min-w-0 flex-1">
+            <span className="flex-shrink-0">{index + 1} ·</span>
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap font-medium text-zinc-950">
+              {source?.title ?? ''}
+            </span>
           </div>
+
+          {/* Right section with domain and icon */}
+          {source?.url ? (
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap text-zinc-400 max-w-[120px]">
+                {domain}
+              </span>
+              <img
+                className="w-3 h-3 flex-shrink-0"
+                alt={domain}
+                src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
+              />
+            </div>
+          ) : null}
         </div>
       </div>
     </Popover>
@@ -118,7 +126,7 @@ const ViewMoreItem = ({
 
   return (
     <div
-      className="flex relative flex-col flex-wrap gap-2 justify-start items-start px-3 py-3 text-xs rounded-lg source-list-item view-more-item"
+      className="flex relative flex-col flex-wrap gap-2 justify-start items-start px-3 py-3 text-xs rounded-lg cursor-pointer hover:bg-gray-50 source-list-item view-more-item border border-solid border-black/10 transition-all"
       onClick={() => {
         onClick?.();
       }}
@@ -129,6 +137,10 @@ const ViewMoreItem = ({
       {sources?.slice(sources.length - extraCnt)?.map((item, index) => {
         const url = item?.url;
         const domain = safeParseURL(url || '');
+
+        if (!url) {
+          return null;
+        }
 
         return (
           <img

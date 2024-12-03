@@ -17,8 +17,6 @@ import { IoLibraryOutline } from "react-icons/io5"
 import {
   IconCanvas,
   IconCanvasFill,
-  IconDocument,
-  IconResource,
   IconPlus,
 } from "@refly-packages/ai-workspace-common/components/common/icon"
 
@@ -37,6 +35,10 @@ import { useSiderStoreShallow } from "@refly-packages/ai-workspace-common/stores
 import getClient from "@refly-packages/ai-workspace-common/requests/proxiedRequest"
 import { useDebouncedCallback } from "use-debounce"
 import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/use-create-canvas"
+import { useCanvasNodesStore } from "@refly-packages/ai-workspace-common/stores/canvas-nodes"
+import { CanvasNodeType } from "@refly-packages/ai-workspace-common/requests/types.gen"
+// icons
+import { HiOutlineDocumentText, HiOutlineSquare3Stack3D } from "react-icons/hi2"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -132,6 +134,8 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
 
   const { t } = useTranslation()
 
+  const { setPendingNode } = useCanvasNodesStore()
+
   const MenuItemContent = (props: {
     icon?: React.ReactNode
     title?: string
@@ -209,19 +213,55 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
 
   const [createDocumentLoading, setCreateDocumentLoading] = useState(false)
 
+  const getCurrentCanvasId = () => {
+    const pathname = location.pathname
+    if (pathname.startsWith("/canvas")) {
+      const arr = pathname?.split("?")[0]?.split("/")
+      return arr[arr.length - 1]
+    }
+    return null
+  }
+
   const handleNewDocument = useDebouncedCallback(async () => {
     if (createDocumentLoading) return
-    const { data } = await getClient().createDocument({
-      body: {
-        title: `Document-${new Date().toISOString()}`,
-        initialContent: "# Document\n\n hello world",
-      },
-    })
-    if (data?.success) {
-      message.success(t("common.putSuccess"))
-      getLibraryList()
+    setCreateDocumentLoading(true)
+
+    try {
+      const { data } = await getClient().createDocument({
+        body: {
+          title: `Document-${new Date().toISOString()}`,
+          initialContent: "# Document\n\n hello world",
+        },
+      })
+
+      if (data?.success) {
+        message.success(t("common.putSuccess"))
+        await getLibraryList()
+
+        const currentCanvasId = getCurrentCanvasId()
+
+        if (currentCanvasId && currentCanvasId !== "empty") {
+          const newNode = {
+            type: "document" as CanvasNodeType,
+            data: {
+              title: data.data?.title || "",
+              entityId: data.data?.docId || "",
+              metadata: {
+                contentPreview: data.data?.contentPreview || "",
+              },
+            },
+            position: { x: 100, y: 100 },
+          }
+
+          setPendingNode(newNode)
+        }
+      }
+    } catch (error) {
+      console.error("Error creating document:", error)
+      message.error(t("common.error"))
+    } finally {
+      setCreateDocumentLoading(false)
     }
-    setCreateDocumentLoading(false)
   }, 300)
 
   return (
@@ -314,10 +354,10 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                           {libraryList.map(library => (
                             <MenuItem key={library.id}>
                               {library.type === "document" && (
-                                <IconDocument className="arco-icon" />
+                                <HiOutlineDocumentText className="arco-icon" />
                               )}
                               {library.type === "resource" && (
-                                <IconResource className="arco-icon" />
+                                <HiOutlineSquare3Stack3D className="arco-icon" />
                               )}
                               {library.name}
                             </MenuItem>

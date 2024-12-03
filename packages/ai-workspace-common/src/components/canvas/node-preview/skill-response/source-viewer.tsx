@@ -10,7 +10,7 @@ export const SourceViewer = (props: { sources: Source[]; query: string }) => {
   return (
     <div className="session-source">
       {(sources || [])?.length > 0 ? (
-        <div className="session-title-icon">
+        <div className="session-title-icon mb-[8px]">
           <p>{t('threadDetail.item.session.source')}</p>
         </div>
       ) : null}

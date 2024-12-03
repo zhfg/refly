@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Spin } from 'antd';
 
 import './index.scss';
 import { IconLoading } from '@arco-design/web-react/icon';
 
-// Add translation cache
-const translationCache: Record<string, string> = {};
+// Enhance cache with pending promises to prevent duplicate requests
+const translationCache: Record<string, string | Promise<string>> = {};
 const getCacheKey = (text: string, source: string, target: string) => `${source}:${target}:${text}`;
 
 interface TranslationWrapperProps {
@@ -13,71 +13,66 @@ interface TranslationWrapperProps {
   targetLanguage: string;
   originalLocale?: string;
   className?: string;
+  enableTranslation?: boolean;
 }
 
 // 限制请求频率的延迟时间（毫秒）
 const THROTTLE_DELAY = 200;
 
-// 翻译文本的队列和状态管理
-let translationQueue: (() => Promise<void>)[] = [];
-let isProcessing = false;
+// Create a debounced queue processor
+const debouncedProcessQueue = debounce(async () => {
+  if (pendingTranslations.size === 0) return;
 
-const processQueue = async () => {
-  if (isProcessing || translationQueue.length === 0) return;
+  // Process all pending translations in one batch
+  const currentBatch = new Set(pendingTranslations);
+  pendingTranslations.clear();
 
-  isProcessing = true;
-  const task = translationQueue.shift();
-  if (task) {
+  for (const task of currentBatch) {
     await task();
     await new Promise((resolve) => setTimeout(resolve, THROTTLE_DELAY));
   }
-  isProcessing = false;
-  processQueue();
-};
+}, 100);
+
+// Track pending translations
+const pendingTranslations = new Set<() => Promise<void>>();
 
 export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
   content,
   targetLanguage,
   originalLocale,
   className,
+  enableTranslation = true,
 }) => {
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const shouldTranslate = useMemo(() => {
-    if (targetLanguage === 'auto') return false;
-    if (!originalLocale) return true;
-    return originalLocale !== targetLanguage;
-  }, [targetLanguage, originalLocale]);
+  // Memoize key computation and translation check
+  const { shouldTranslate, cacheKey } = useMemo(
+    () => ({
+      shouldTranslate:
+        enableTranslation && targetLanguage !== 'auto' && (!originalLocale || originalLocale !== targetLanguage),
+      cacheKey: getCacheKey(content, originalLocale || 'auto', targetLanguage),
+    }),
+    [content, originalLocale, targetLanguage, enableTranslation],
+  );
 
-  const cacheKey = useMemo(() => {
-    return getCacheKey(content, originalLocale || 'auto', targetLanguage);
-  }, [content, originalLocale, targetLanguage]);
-
-  const translateText = async (text: string) => {
-    // Check cache first
-    const cached = translationCache[cacheKey];
-    if (cached) {
-      return cached;
-    }
-
-    try {
-      const response = await fetch(
-        `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=${
-          originalLocale || 'auto'
-        }&tl=${targetLanguage}&q=${encodeURIComponent(text)}`,
-      );
-      const data = await response.json();
-      const translated = data[0][0][0];
-
-      // Store in cache
-      translationCache[cacheKey] = translated;
-      return translated;
-    } catch (error) {
-      console.error('Translation failed:', error);
-      return text;
-    }
-  };
+  const translateText = useCallback(
+    async (text: string): Promise<string> => {
+      try {
+        const response = await fetch(
+          `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=${
+            originalLocale || 'auto'
+          }&tl=${targetLanguage}&q=${encodeURIComponent(text)}`,
+        );
+        const data = await response.json();
+        return data[0][0][0];
+      } catch (error) {
+        console.error('Translation failed:', error);
+        return text;
+      }
+    },
+    [originalLocale, targetLanguage],
+  );
 
   useEffect(() => {
     if (!shouldTranslate || !content) {
@@ -85,36 +80,50 @@ export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
       return;
     }
 
-    // Check cache first
-    const cached = translationCache[cacheKey];
-    if (cached) {
-      setTranslatedContent(cached);
-      return;
-    }
+    let isMounted = true;
 
-    setIsLoading(true);
+    const performTranslation = async () => {
+      // Check if there's a cached result or pending promise
+      let result = translationCache[cacheKey];
 
-    const translationTask = async () => {
-      const translated = await translateText(content);
-      setTranslatedContent(translated);
-      setIsLoading(false);
+      if (!result) {
+        // Create new translation promise
+        setIsLoading(true);
+        const translationPromise = translateText(content);
+        translationCache[cacheKey] = translationPromise;
+
+        result = await translationPromise;
+        // Cache the final result
+        translationCache[cacheKey] = result;
+      } else if (result instanceof Promise) {
+        // Wait for pending translation
+        result = await result;
+      }
+
+      // Only update state if component is still mounted
+      if (isMounted) {
+        setTranslatedContent(result);
+        setIsLoading(false);
+      }
     };
 
-    translationQueue.push(translationTask);
-    processQueue();
+    // Add translation task to pending queue
+    pendingTranslations.add(performTranslation);
+    debouncedProcessQueue();
 
     return () => {
-      translationQueue = translationQueue.filter((task) => task !== translationTask);
+      isMounted = false;
+      pendingTranslations.delete(performTranslation);
     };
-  }, [content, shouldTranslate, cacheKey]);
+  }, [content, shouldTranslate, cacheKey, translateText]);
 
-  // 如果不需要翻译或翻译完成但结果与原文相同
+  // Early return for unchanged content
   if (!shouldTranslate || translatedContent === content) {
     return <span className={className}>{content}</span>;
   }
 
   return (
-    <div className={`translation-wrapper ${className || ''}`}>
+    <div className={`translation-wrapper ${className ?? ''}`}>
       <div className="translation-content">
         {isLoading ? (
           <>
@@ -122,9 +131,18 @@ export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
             <Spin indicator={<IconLoading style={{ fontSize: 12, marginLeft: 4 }} spin />} />
           </>
         ) : (
-          <span>{translatedContent || content}</span>
+          <span>{translatedContent ?? content}</span>
         )}
       </div>
     </div>
   );
 };
+
+// Utility function for debouncing
+function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}

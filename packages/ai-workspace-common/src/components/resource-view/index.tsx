@@ -212,7 +212,7 @@ export const ResourceView = (props: ResourceViewProps) => {
             </div>
           ) : (
             <>
-              <TopBar />
+              {/* <TopBar /> */}
               <div className="knowledge-base-resource-meta">
                 {['wait_parse', 'parse_failed', 'wait_index', 'index_failed'].includes(resourceDetail?.indexStatus) && (
                   <Alert

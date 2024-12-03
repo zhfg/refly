@@ -14,6 +14,7 @@ import {
 import { useState } from 'react';
 import { Button, Dropdown, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 // Action button types
 type ActionButtonProps = {
@@ -86,6 +87,8 @@ export const ActionButtons = ({
   onCreateDocument,
   isCreatingDocument,
 }: ActionButtonsProps) => {
+  const { t } = useTranslation();
+
   // Define dropdown menu items
   const menuItems: MenuProps['items'] = [
     {
@@ -99,26 +102,26 @@ export const ActionButtons = ({
       onClick: onDelete,
       className: 'hover:bg-red-50',
     },
-    {
-      key: 'helpLink',
-      label: (
-        <div className="flex items-center gap-2 whitespace-nowrap">
-          <HelpCircle className="w-4 h-4 flex-shrink-0" />
-          Help Link
-        </div>
-      ),
-      onClick: onHelpLink,
-    },
-    {
-      key: 'about',
-      label: (
-        <div className="flex items-center gap-2 whitespace-nowrap">
-          <Info className="w-4 h-4 flex-shrink-0" />
-          About
-        </div>
-      ),
-      onClick: onAbout,
-    },
+    // {
+    //   key: 'helpLink',
+    //   label: (
+    //     <div className="flex items-center gap-2 whitespace-nowrap">
+    //       <HelpCircle className="w-4 h-4 flex-shrink-0" />
+    //       Help Link
+    //     </div>
+    //   ),
+    //   onClick: onHelpLink,
+    // },
+    // {
+    //   key: 'about',
+    //   label: (
+    //     <div className="flex items-center gap-2 whitespace-nowrap">
+    //       <Info className="w-4 h-4 flex-shrink-0" />
+    //       About
+    //     </div>
+    //   ),
+    //   onClick: onAbout,
+    // },
   ];
 
   return (
@@ -152,7 +155,7 @@ export const ActionButtons = ({
         <ActionButton
           icon={<MessageSquareDiff className="w-4 h-4" />}
           onClick={onAddToContext}
-          tooltip="Add to Context"
+          tooltip={t('canvas.nodeActions.addToContext')}
         />
       )}
 
@@ -163,7 +166,7 @@ export const ActionButtons = ({
             <ActionButton
               icon={<MessageSquareDiff className="w-4 h-4" />}
               onClick={onAddToContext}
-              tooltip="Add to Context"
+              tooltip={t('canvas.nodeActions.addToContext')}
             />
           )}
           {isProcessing && (
@@ -171,7 +174,7 @@ export const ActionButtons = ({
               icon={<Loader2 className="w-4 h-4" />}
               onClick={() => {}}
               loading={true}
-              tooltip="Processing Vector"
+              tooltip={t('canvas.nodeActions.processingVector')}
             />
           )}
         </>
@@ -180,26 +183,27 @@ export const ActionButtons = ({
       {/* Skill Response specific buttons */}
       {type === 'skill-response' && (
         <>
-          {onRerun && (
-            <ActionButton
-              icon={<PlayCircle className="w-4 h-4" />}
-              onClick={onRerun}
-              loading={!isCompleted}
-              tooltip="Rerun"
-            />
-          )}
+          {onRerun &&
+            (isCompleted ? null : (
+              <ActionButton
+                icon={<PlayCircle className="w-4 h-4" />}
+                onClick={onRerun}
+                loading={!isCompleted}
+                tooltip={t('canvas.nodeActions.rerun')}
+              />
+            ))}
           {onInsertToDoc && (
             <ActionButton
               icon={<FileInput className="w-4 h-4" />}
               onClick={onInsertToDoc}
-              tooltip="Insert to Document"
+              tooltip={t('canvas.nodeActions.insertToDoc')}
             />
           )}
           {onAddToChatHistory && (
             <ActionButton
               icon={<MessageSquareDiff className="w-4 h-4" />}
               onClick={onAddToChatHistory}
-              tooltip="Add to Chat History"
+              tooltip={t('canvas.nodeActions.addToChatHistory')}
             />
           )}
           {onCreateDocument && (
@@ -207,7 +211,9 @@ export const ActionButtons = ({
               icon={<FilePlus className="w-4 h-4" />}
               onClick={onCreateDocument}
               loading={isCreatingDocument}
-              tooltip={isCreatingDocument ? 'Creating Document...' : 'Create Document'}
+              tooltip={
+                isCreatingDocument ? t('canvas.nodeStatus.isCreatingDocument') : t('canvas.nodeStatus.createDocument')
+              }
             />
           )}
         </>
@@ -232,7 +238,7 @@ export const ActionButtons = ({
         <ActionButton
           icon={<MoreHorizontal className="w-4 h-4" />}
           onClick={(e) => e.preventDefault()}
-          tooltip="More Options"
+          tooltip={t('canvas.nodeActions.moreOptions')}
           withTooltip={false}
         />
       </Dropdown>

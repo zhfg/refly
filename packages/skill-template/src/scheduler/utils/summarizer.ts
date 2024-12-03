@@ -236,7 +236,7 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
   // Knowledge base documents
   documents.forEach((document: SkillContextDocumentItem) => {
     sources.push({
-      url: `${baseUrl}/project/${document.document?.docId}?docId=${document.document?.docId}`, // TODO: fix this
+      url: '', // TODO: fix this
       title: document.document?.title,
       pageContent: document.document?.content || '',
       metadata: {
@@ -244,7 +244,7 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
         title: document.document?.title,
         entityId: document.document?.docId,
         entityType: 'document',
-        source: `${baseUrl}/project/${document.document?.docId}?docId=${document.document?.docId}`, // TODO: fix this
+        source: '', // TODO: fix this
         sourceType: 'library', // Add source type for knowledge base documents
       },
     });
@@ -253,14 +253,14 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
   // Knowledge base resources
   resources.forEach((resource: SkillContextResourceItem) => {
     sources.push({
-      url: `${baseUrl}/resource/${resource.resource?.resourceId}`,
+      url: resource?.resource?.data?.url, // TODO: fix this
       title: resource.resource?.title,
       pageContent: resource.resource?.content || '',
       metadata: {
         title: resource.resource?.title,
         entityId: resource.resource?.resourceId,
         entityType: 'resource',
-        source: `${baseUrl}/resource/${resource.resource?.resourceId}`,
+        source: resource?.resource?.data?.url, // TODO: fix this
         sourceType: 'library', // Add source type for knowledge base resources
       },
     });
