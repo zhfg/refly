@@ -2909,6 +2909,14 @@ export type CreateCanvasResponse = UpsertCanvasResponse;
 
 export type CreateCanvasError = unknown;
 
+export type UpdateCanvasData = {
+  body: UpsertCanvasRequest;
+};
+
+export type UpdateCanvasResponse = UpsertCanvasResponse;
+
+export type UpdateCanvasError = unknown;
+
 export type DeleteCanvasData = {
   body: DeleteCanvasRequest;
 };

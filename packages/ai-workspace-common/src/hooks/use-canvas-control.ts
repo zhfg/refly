@@ -9,6 +9,8 @@ import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-worksp
 import { CanvasNodeData, getNodeDefaultMetadata } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { EDGE_STYLES } from '../components/canvas/constants';
+import { message } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: { direction: 'TB' | 'LR' }) => {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -53,6 +55,8 @@ export interface CanvasNodeFilter {
 export const useCanvasControl = (selectedCanvasId?: string) => {
   const { canvasId: contextCanvasId, provider, yNodes, yEdges } = useCanvasContext();
   const ydoc = provider.document;
+
+  const { t } = useTranslation();
 
   const { canvasId: routeCanvasId } = useParams();
   const canvasId = selectedCanvasId ?? contextCanvasId ?? routeCanvasId;
@@ -258,7 +262,8 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
 
       // Check if node with the same entity already exists
       if (currentNodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId)) {
-        console.warn('Node with the same entity already exists');
+        message.warning(t('canvas.action.nodeAlreadyExists', { type: t(`common.${node.type}`) }));
+        setSelectedNode(currentNodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId));
         return;
       }
 

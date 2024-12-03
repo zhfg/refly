@@ -61,6 +61,7 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
       metadata: {
         configSchema: item?.configSchema,
         description: item?.description,
+        originalItem: item,
       },
     }));
     return { success: res?.data?.success, data };

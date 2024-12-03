@@ -1,18 +1,39 @@
-import { Button, Divider, Tooltip, Avatar, Dropdown, MenuProps, Popconfirm, DropdownProps } from 'antd';
-import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+import React, { useEffect } from 'react';
+import {
+  Button,
+  Divider,
+  Tooltip,
+  Avatar,
+  Dropdown,
+  MenuProps,
+  Popconfirm,
+  DropdownProps,
+  Input,
+  Modal,
+  Skeleton,
+} from 'antd';
+import { useSiderStore, useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useTranslation } from 'react-i18next';
 import { FC, useState } from 'react';
 
 import { PiShootingStar } from 'react-icons/pi';
 import { MdOutlineHideImage } from 'react-icons/md';
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
-import { IconDelete, IconMoreHorizontal } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconCanvas,
+  IconEdit,
+  IconDelete,
+  IconMoreHorizontal,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
 import { BsLayoutWtf } from 'react-icons/bs';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import Logo from '../../../../../../apps/web/src/assets/logo.svg';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/use-delete-canvas';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { LuCheck, LuX } from 'react-icons/lu';
+import { useUpdateCanvas } from '@refly-packages/ai-workspace-common/queries/queries';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -24,12 +45,48 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
     collapse: state.collapse,
     setCollapse: state.setCollapse,
   }));
-  const { onLayout } = useCanvasControl();
+  const { provider } = useCanvasContext();
+  const ydoc = provider?.document;
+  const canvasTitle = ydoc?.getText('title');
+
+  // const { onLayout } = useCanvasControl();
   const { showPreview, setShowPreview } = useCanvasStoreShallow((state) => ({
     showPreview: state.showPreview,
     setShowPreview: state.setShowPreview,
   }));
   const { deleteCanvas } = useDeleteCanvas();
+
+  const [editedTitle, setEditedTitle] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleEditClick = () => {
+    setEditedTitle(canvasTitle?.toJSON() ?? '');
+    setIsModalOpen(true);
+  };
+
+  const { mutate, status } = useUpdateCanvas();
+  const setCanvasList = useSiderStoreShallow((state) => state.setCanvasList);
+
+  useEffect(() => {
+    const { canvasList } = useSiderStore.getState();
+    setCanvasList(
+      canvasList.map((canvas) => (canvas.id === canvasId ? { ...canvas, name: canvasTitle?.toJSON() } : canvas)),
+    );
+  }, [canvasId, canvasTitle?.toJSON()]);
+
+  const handleModalOk = () => {
+    if (ydoc && editedTitle?.trim()) {
+      ydoc.transact(() => {
+        canvasTitle?.delete(0, canvasTitle?.length ?? 0);
+        canvasTitle?.insert(0, editedTitle);
+      });
+      mutate({ body: { canvasId, title: editedTitle } }, { onSuccess: () => setIsModalOpen(false) });
+    }
+  };
+
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
+  };
 
   const ActionDropdown = () => {
     const [popupVisible, setPopupVisible] = useState(false);
@@ -116,18 +173,49 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
           />
         )}
         <Divider type="vertical" className="pr-[4px]" />
-        <div className="text-sm font-bold text-gray-500">Canvas Name: xxxx</div>
-        <Divider type="vertical" className="pr-[4px]" />
+        <div
+          className="group flex items-center gap-2 text-sm font-bold text-gray-500 cursor-pointer hover:text-gray-700"
+          onClick={handleEditClick}
+        >
+          <IconCanvas />
+          {provider.status === 'connecting' ? (
+            <Skeleton className="w-28" active paragraph={false} />
+          ) : (
+            canvasTitle?.toJSON() || t('common.untitled')
+          )}
+          <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+
+        <Modal
+          centered
+          title={t('canvas.toolbar.editTitle')}
+          open={isModalOpen}
+          okText={t('common.confirm')}
+          cancelText={t('common.cancel')}
+          confirmLoading={status === 'pending'}
+          onOk={handleModalOk}
+          onCancel={handleModalCancel}
+          okButtonProps={{ disabled: !editedTitle?.trim() }}
+        >
+          <Input
+            autoFocus
+            value={editedTitle}
+            onChange={(e) => setEditedTitle(e.target.value)}
+            placeholder={t('canvas.toolbar.editTitlePlaceholder')}
+            onPressEnter={handleModalOk}
+          />
+        </Modal>
+        {/* <Divider type="vertical" className="pr-[4px]" />
         <Button type="text" icon={<BsLayoutWtf />} onClick={() => onLayout('LR')}>
           Layout
-        </Button>
+        </Button> */}
       </div>
 
       <div className="flex items-center gap-2">
         <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
           <Button type="text" icon={<PiShootingStar />} className="w-8 h-6 flex items-center justify-center" />
           <Divider type="vertical" />
-          <Tooltip title={showPreview ? 'Hide Preview' : 'Show Preview'}>
+          <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)}>
             <Button
               type="text"
               icon={<MdOutlineHideImage style={{ color: showPreview ? '#9CA3AF' : '#000' }} />}

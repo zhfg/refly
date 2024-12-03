@@ -92,8 +92,6 @@ export const NodePreview = ({
       width: isMaximized ? 'calc(100vw)' : '420px',
       top: isMaximized ? 0 : null,
       right: isMaximized ? 0 : null,
-      transform: isMaximized ? 'translate3d(0, 0, 0)' : 'translate3d(0, 64px, 0)',
-      '--tw-transform': 'none !important',
       zIndex: isMaximized ? 50 : 10,
       transition: isMaximized ? 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)' : 'all 50ms cubic-bezier(0.4, 0, 0.2, 1)',
     }),

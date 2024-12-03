@@ -17,6 +17,7 @@
     "saveToCanvas": "添加到画布",
     "add": "添加",
     "remove": "移除",
+    "untitled": "未命名",
     "loading": "加载中...",
     "loadMore": "加载更多",
     "appStarting": "应用启动中",
@@ -382,9 +383,14 @@
       "addResource": "添加资源",
       "addSkill": "添加技能",
       "addTool": "添加工具",
-      "addDocument": "添加文档"
+      "addDocument": "添加文档",
+      "hidePreview": "隐藏节点预览",
+      "showPreview": "显示节点预览",
+      "editTitle": "编辑画布标题",
+      "editTitlePlaceholder": "请输入画布标题"
     },
     "action": {
+      "nodeAlreadyExists": "该{{type}}已存在于当前画布中",
       "deleteSuccess": "删除画布成功",
       "addSuccess": "画布添加好啦，开始创作吧~"
     },
@@ -411,13 +417,13 @@
       "nodeNotFound": "源节点未找到或已被删除，请先添加到画布"
     },
     "nodeActions": {
-        "addToContext": "添加到上下文",
-        "processingVector": "处理向量",
-        "rerun": "重新运行",
-        "insertToDoc": "插入文档",
-        "addToChatHistory": "添加到对话历史上下文",
-        "moreOptions": "更多选项"
-      },
+      "addToContext": "添加到上下文",
+      "processingVector": "处理向量",
+      "rerun": "重新运行",
+      "insertToDoc": "插入文档",
+      "addToChatHistory": "添加到对话历史上下文",
+      "moreOptions": "更多选项"
+    },
     "nodeStatus": {
       "isCreatingDocument": "创建中...",
       "createDocument": "创建文档"
