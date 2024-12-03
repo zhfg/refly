@@ -39,6 +39,13 @@ export class CanvasController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('update')
+  async updateCanvas(@User() user: UserType, @Body() body: UpsertCanvasRequest) {
+    const canvas = await this.canvasService.updateCanvas(user, body);
+    return buildSuccessResponse(canvasPO2DTO(canvas));
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('delete')
   async deleteCanvas(@User() user: UserType, @Body() body: DeleteCanvasRequest) {
     await this.canvasService.deleteCanvas(user, body);

@@ -2,11 +2,7 @@ import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { List, Card, Dropdown, Button, Popconfirm, message, Empty, Tooltip } from 'antd';
 import type { MenuProps, DropdownProps } from 'antd';
 
-import {
-  IconMoreHorizontal,
-  IconNotePencil,
-  IconDelete,
-} from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconMoreHorizontal, IconEdit, IconDelete } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 import { useEffect, useState } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -57,7 +53,7 @@ export const DocumentList = () => {
   const ActionEdit = ({ doc }: { doc: Document }) => {
     return (
       <Tooltip title={t('workspace.addToCanvas')}>
-        <Button type="text" icon={<IconNotePencil />} onClick={() => handleEdit(doc)} />
+        <Button type="text" icon={<IconEdit />} onClick={() => handleEdit(doc)} />
       </Tooltip>
     );
   };

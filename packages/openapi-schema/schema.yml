@@ -84,6 +84,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpsertCanvasResponse'
+  /canvas/update:
+    post:
+      tags:
+        - canvas
+      summary: Update canvas
+      description: Update an existing canvas
+      operationId: updateCanvas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertCanvasRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertCanvasResponse'
   /canvas/delete:
     post:
       tags:
