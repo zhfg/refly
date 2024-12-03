@@ -263,7 +263,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       // Check if node with the same entity already exists
       if (currentNodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId)) {
         message.warning(t('canvas.action.nodeAlreadyExists', { type: t(`common.${node.type}`) }));
-        setSelectedNodeByEntity({ type: node.type, entityId: node.data?.entityId });
+        setSelectedNode(currentNodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId));
         return;
       }
 
