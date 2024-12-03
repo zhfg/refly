@@ -73,14 +73,18 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
           items,
         }}
       >
-        <Button type="text" icon={<IconMoreHorizontal />} />
+        <div className="flex items-center gap-2">
+          <div className="flex items-center bg-[#ffffff] rounded-lg px-2 py-1 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
+            <Button type="text" icon={<IconMoreHorizontal />} />
+          </div>
+        </div>
       </Dropdown>
     );
   };
 
   return (
     <div
-      className={`absolute h-16 top-0 left-0 right-0  box-border flex justify-between items-center py-2 px-4 z-10 bg-transparent ${
+      className={`absolute h-16 top-0 left-0 right-0  box-border flex justify-between items-center py-2 px-4 pr-0 z-10 bg-transparent ${
         collapse ? 'w-[calc(100vw-12px)]' : 'w-[calc(100vw-232px)]'
       }`}
     >
@@ -120,7 +124,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="flex items-center bg-[#FCFCF9] rounded-lg px-2 py-1 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
+        <div className="flex items-center bg-[#ffffff] rounded-lg px-2 py-1 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
           <Button type="text" icon={<PiShootingStar />} />
           <Divider type="vertical" />
           <Tooltip title={showPreview ? 'Hide Preview' : 'Show Preview'}>

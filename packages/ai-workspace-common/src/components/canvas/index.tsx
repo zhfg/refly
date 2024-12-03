@@ -23,6 +23,7 @@ import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CanvasListModal } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal';
 import { LibraryModal } from '@refly-packages/ai-workspace-common/components/workspace/library-modal';
+import { useCanvasNodesStore } from '@refly-packages/ai-workspace-common/stores/canvas-nodes';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -37,7 +38,7 @@ const selectionStyles = `
 `;
 
 const Flow = ({ canvasId }: { canvasId: string }) => {
-  const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, onSelectionChange } =
+  const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, onSelectionChange, addNode } =
     useCanvasControl(canvasId);
 
   const { pinnedNodes, showPreview } = useCanvasStoreShallow((state) => ({
@@ -55,6 +56,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   );
 
   const reactFlowInstance = useReactFlow();
+
+  const { pendingNode, clearPendingNode } = useCanvasNodesStore();
 
   useEffect(() => {
     // Only run fitView if we have nodes and this is the initial render
@@ -121,6 +124,14 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     // Handle tool selection
     console.log('Selected tool:', tool);
   };
+
+  // Handle pending node
+  useEffect(() => {
+    if (pendingNode) {
+      addNode(pendingNode);
+      clearPendingNode();
+    }
+  }, [pendingNode, addNode, setSelectedNode, clearPendingNode]);
 
   return (
     <div className="w-full h-screen relative flex flex-col overflow-hidden">

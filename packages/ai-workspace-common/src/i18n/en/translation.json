@@ -14,6 +14,7 @@
     "delete": "Delete",
     "edit": "Edit",
     "save": "Save",
+    "saveToCanvas": "Add to Canvas",
     "add": "Add",
     "remove": "Remove",
     "loading": "Loading...",
@@ -402,6 +403,18 @@
     },
     "contextManager": {
       "nodeNotFound": "Source node not found or has been deleted. Please add it to the canvas first."
+    },
+    "nodeActions": {
+      "addToContext": "Add to Context",
+      "processingVector": "Processing Vector",
+      "rerun": "Rerun",
+      "insertToDoc": "Insert to Document",
+      "addToChatHistory": "Add to Chat History Context",
+      "moreOptions": "More Options"
+    },
+    "nodeStatus": {
+      "isCreatingDocument": "Creating Document...",
+      "createDocument": "Create Document"
     }
   },
   "resource": {
@@ -925,7 +938,7 @@
       },
       "session": {
         "content": "Content",
-        "source": "Source",
+        "source": "Search Results",
         "relatedQuestions": "Related Questions"
       },
       "webLink": {
@@ -973,7 +986,7 @@
       },
       "session": {
         "answer": "Answer",
-        "source": "Source",
+        "source": "Search Results",
         "relatedQuestions": "Related Questions"
       },
       "input": {
@@ -1242,12 +1255,13 @@
     },
     "sourceListModal": {
       "title": "Result Sources",
-      "moreSources": "View More and Import as Resource",
+      "moreSources": "View More and Import to Canvas",
       "searchPlaceholder": "Search Sources...",
       "openOriginWebsite": "Open Origin Website",
       "openKnowledgeBaseLink": "Open Knowledge Base Link",
       "webSearchTab": "Web Search",
-      "libraryTab": "Library Search"
+      "libraryTab": "Library Search",
+      "noUrl": "This source does not have a link, you can select it and import to canvas"
     }
   },
   "hooks": {
