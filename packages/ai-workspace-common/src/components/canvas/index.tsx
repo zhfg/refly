@@ -21,6 +21,7 @@ import { CanvasProvider } from '@refly-packages/ai-workspace-common/context/canv
 import { EDGE_STYLES } from './constants';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { BigSearchModal } from '@refly-packages/ai-workspace-common/components/search/modal';
 import { CanvasListModal } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal';
 import { LibraryModal } from '@refly-packages/ai-workspace-common/components/workspace/library-modal';
 import { useCanvasNodesStore } from '@refly-packages/ai-workspace-common/stores/canvas-nodes';
@@ -292,6 +293,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
 
       <CanvasListModal visible={showCanvasListModal} setVisible={setShowCanvasListModal} />
       <LibraryModal visible={showLibraryModal} setVisible={setShowLibraryModal} />
+      <BigSearchModal />
     </div>
   );
 };

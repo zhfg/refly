@@ -38,7 +38,10 @@ import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/use-c
 import { useCanvasNodesStore } from "@refly-packages/ai-workspace-common/stores/canvas-nodes"
 import { CanvasNodeType } from "@refly-packages/ai-workspace-common/requests/types.gen"
 // icons
-import { HiOutlineDocumentText, HiOutlineSquare3Stack3D } from "react-icons/hi2"
+import {
+  IconDocument,
+  IconResource,
+} from "@refly-packages/ai-workspace-common/components/common/icon"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -354,10 +357,10 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                           {libraryList.map(library => (
                             <MenuItem key={library.id}>
                               {library.type === "document" && (
-                                <HiOutlineDocumentText className="arco-icon" />
+                                <IconDocument className="arco-icon" />
                               )}
                               {library.type === "resource" && (
-                                <HiOutlineSquare3Stack3D className="arco-icon" />
+                                <IconResource className="arco-icon" />
                               )}
                               {library.name}
                             </MenuItem>
