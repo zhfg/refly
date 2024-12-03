@@ -27,5 +27,5 @@ export const IconPlus = HiPlus;
 export const IconPlay = HiMiniPlayCircle;
 export const IconMoreVertical = LuMoreVertical;
 export const IconMoreHorizontal = LuMoreHorizontal;
-export const IconNotePencil = PiNotePencil;
+export const IconEdit = PiNotePencil;
 export const IconDelete = RiDeleteBinLine;

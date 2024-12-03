@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
+import * as Y from 'yjs';
 import { Queue } from 'bull';
 import { MINIO_INTERNAL } from '@/common/minio.service';
 import { MinioService } from '@/common/minio.service';
@@ -39,14 +40,39 @@ export class CanvasService {
     });
   }
 
-  async createCanvas(user: User, canvas: UpsertCanvasRequest) {
-    return this.prisma.canvas.create({
+  async createCanvas(user: User, param: UpsertCanvasRequest) {
+    const canvasId = genCanvasID();
+    const stateStorageKey = `state/${canvasId}`;
+    const canvas = await this.prisma.canvas.create({
       data: {
         uid: user.uid,
-        canvasId: genCanvasID(),
-        ...canvas,
+        canvasId,
+        stateStorageKey,
+        ...param,
       },
     });
+
+    const ydoc = new Y.Doc();
+    ydoc.getText('title').insert(0, param.title);
+
+    await this.minio.client.putObject(stateStorageKey, Buffer.from(Y.encodeStateAsUpdate(ydoc)));
+
+    return canvas;
+  }
+
+  async updateCanvas(user: User, param: UpsertCanvasRequest) {
+    const { canvasId, title = '' } = param;
+
+    const updatedCanvas = await this.prisma.canvas.update({
+      where: { canvasId, uid: user.uid, deletedAt: null },
+      data: { title },
+    });
+
+    if (!updatedCanvas) {
+      throw new CanvasNotFoundError();
+    }
+
+    return updatedCanvas;
   }
 
   async deleteCanvas(user: User, param: DeleteCanvasRequest) {

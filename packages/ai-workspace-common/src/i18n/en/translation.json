@@ -17,6 +17,7 @@
     "saveToCanvas": "Add to Canvas",
     "add": "Add",
     "remove": "Remove",
+    "untitled": "Untitled",
     "loading": "Loading...",
     "loadMore": "Load More",
     "appStarting": "Application is starting",
@@ -382,7 +383,9 @@
       "addTool": "Add Tool",
       "addDocument": "Add Document",
       "hidePreview": "Hide Node Preview",
-      "showPreview": "Show Node Preview"
+      "showPreview": "Show Node Preview",
+      "editTitle": "Edit Canvas Title",
+      "editTitlePlaceholder": "Please enter the title of the canvas"
     },
     "action": {
       "nodeAlreadyExists": "The {{type}} with the same entity already exists",

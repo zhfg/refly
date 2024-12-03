@@ -8,6 +8,9 @@ import type {
   CreateCanvasData,
   CreateCanvasError,
   CreateCanvasResponse,
+  UpdateCanvasData,
+  UpdateCanvasError,
+  UpdateCanvasResponse,
   DeleteCanvasData,
   DeleteCanvasError,
   DeleteCanvasResponse,
@@ -231,6 +234,19 @@ export const createCanvas = <ThrowOnError extends boolean = false>(
   return (options?.client ?? client).post<CreateCanvasResponse, CreateCanvasError, ThrowOnError>({
     ...options,
     url: '/canvas/create',
+  });
+};
+
+/**
+ * Update canvas
+ * Update an existing canvas
+ */
+export const updateCanvas = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateCanvasData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<UpdateCanvasResponse, UpdateCanvasError, ThrowOnError>({
+    ...options,
+    url: '/canvas/update',
   });
 };
 

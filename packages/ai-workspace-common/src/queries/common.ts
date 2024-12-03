@@ -2,7 +2,7 @@
 
 import { type Options } from "@hey-api/client-fetch";
 import { UseQueryResult } from "@tanstack/react-query";
-import { addReferences, batchCreateResource, batchUpdateDocument, bindProjectResources, checkSettingsField, createCanvas, createCheckoutSession, createDocument, createLabelClass, createLabelInstance, createPortalSession, createProject, createResource, createShare, createSkillInstance, createSkillTrigger, deleteCanvas, deleteDocument, deleteLabelClass, deleteLabelInstance, deleteProject, deleteReferences, deleteResource, deleteShare, deleteSkillInstance, deleteSkillTrigger, getActionResult, getConversationDetail, getDocumentDetail, getProjectDetail, getResourceDetail, getSettings, getShareContent, getSkillJobDetail, getSubscriptionPlan, getSubscriptionUsage, invokeAction, invokeSkill, listActions, listCanvases, listConversations, listDocuments, listLabelClasses, listLabelInstances, listModels, listProjects, listResources, listSkillInstances, listSkillJobs, listSkills, listSkillTriggers, multiLingualWebSearch, pinSkillInstance, queryReferences, reindexResource, scrape, search, serveStatic, streamInvokeAction, streamInvokeSkill, unpinSkillInstance, updateDocument, updateLabelClass, updateLabelInstance, updateProject, updateResource, updateSettings, updateSkillInstance, updateSkillTrigger, upload } from "../requests/services.gen";
+import { addReferences, batchCreateResource, batchUpdateDocument, bindProjectResources, checkSettingsField, createCanvas, createCheckoutSession, createDocument, createLabelClass, createLabelInstance, createPortalSession, createProject, createResource, createShare, createSkillInstance, createSkillTrigger, deleteCanvas, deleteDocument, deleteLabelClass, deleteLabelInstance, deleteProject, deleteReferences, deleteResource, deleteShare, deleteSkillInstance, deleteSkillTrigger, getActionResult, getConversationDetail, getDocumentDetail, getProjectDetail, getResourceDetail, getSettings, getShareContent, getSkillJobDetail, getSubscriptionPlan, getSubscriptionUsage, invokeAction, invokeSkill, listActions, listCanvases, listConversations, listDocuments, listLabelClasses, listLabelInstances, listModels, listProjects, listResources, listSkillInstances, listSkillJobs, listSkills, listSkillTriggers, multiLingualWebSearch, pinSkillInstance, queryReferences, reindexResource, scrape, search, serveStatic, streamInvokeAction, streamInvokeSkill, unpinSkillInstance, updateCanvas, updateDocument, updateLabelClass, updateLabelInstance, updateProject, updateResource, updateSettings, updateSkillInstance, updateSkillTrigger, upload } from "../requests/services.gen";
 export type ListCanvasesDefaultResponse = Awaited<ReturnType<typeof listCanvases>>["data"];
 export type ListCanvasesQueryResult<TData = ListCanvasesDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
 export const useListCanvasesKey = "ListCanvases";
@@ -106,6 +106,9 @@ export const UseServeStaticKeyFn = (clientOptions: Options<unknown, true> = {}, 
 export type CreateCanvasMutationResult = Awaited<ReturnType<typeof createCanvas>>;
 export const useCreateCanvasKey = "CreateCanvas";
 export const UseCreateCanvasKeyFn = (mutationKey?: Array<unknown>) => [useCreateCanvasKey, ...(mutationKey ?? [])];
+export type UpdateCanvasMutationResult = Awaited<ReturnType<typeof updateCanvas>>;
+export const useUpdateCanvasKey = "UpdateCanvas";
+export const UseUpdateCanvasKeyFn = (mutationKey?: Array<unknown>) => [useUpdateCanvasKey, ...(mutationKey ?? [])];
 export type DeleteCanvasMutationResult = Awaited<ReturnType<typeof deleteCanvas>>;
 export const useDeleteCanvasKey = "DeleteCanvas";
 export const UseDeleteCanvasKeyFn = (mutationKey?: Array<unknown>) => [useDeleteCanvasKey, ...(mutationKey ?? [])];
