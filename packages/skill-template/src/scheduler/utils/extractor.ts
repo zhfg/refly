@@ -1,3 +1,5 @@
+import { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import { SkillRunnableConfig } from '../../base';
 import { z } from 'zod';
 
 // Helper function to extract JSON from markdown code blocks
@@ -16,9 +18,10 @@ function extractJsonFromMarkdown(content: string): any {
 }
 
 export async function extractStructuredData<T extends z.ZodType>(
-  model: any,
+  model: BaseChatModel,
   schema: T,
   prompt: string,
+  config: SkillRunnableConfig,
   maxRetries: number = 3,
 ): Promise<z.infer<T>> {
   let lastError = '';
@@ -34,7 +37,13 @@ export async function extractStructuredData<T extends z.ZodType>(
         name: schema.description ?? 'structured_output',
       });
 
-      const result = await structuredLLM.invoke(fullPrompt);
+      const result = await structuredLLM.invoke(fullPrompt, {
+        ...config,
+        metadata: {
+          ...config.metadata,
+          suppressOutput: true,
+        },
+      });
 
       // First try to use parsed data if available
       if (result?.parsed) {
@@ -43,7 +52,7 @@ export async function extractStructuredData<T extends z.ZodType>(
 
       // If parsed is not available, try to extract from raw content
       if (result?.raw?.content) {
-        const extractedJson = extractJsonFromMarkdown(result.raw.content);
+        const extractedJson = extractJsonFromMarkdown(String(result.raw.content));
         // Validate extracted JSON against schema
         const validated = schema.parse(extractedJson);
         return validated;
