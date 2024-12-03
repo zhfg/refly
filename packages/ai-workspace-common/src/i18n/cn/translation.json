@@ -380,9 +380,12 @@
       "addResource": "添加资源",
       "addSkill": "添加技能",
       "addTool": "添加工具",
-      "addDocument": "添加文档"
+      "addDocument": "添加文档",
+      "hidePreview": "隐藏节点预览",
+      "showPreview": "显示节点预览"
     },
     "action": {
+      "nodeAlreadyExists": "该{{type}}已存在于当前画布中",
       "deleteSuccess": "删除画布成功",
       "addSuccess": "画布添加好啦，开始创作吧~"
     },

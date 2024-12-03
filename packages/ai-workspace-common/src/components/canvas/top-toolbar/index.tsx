@@ -123,7 +123,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
         <div className="flex items-center bg-[#FCFCF9] rounded-lg px-2 py-1 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
           <Button type="text" icon={<PiShootingStar />} />
           <Divider type="vertical" />
-          <Tooltip title={showPreview ? 'Hide Preview' : 'Show Preview'}>
+          <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)}>
             <Button
               type="text"
               icon={<MdOutlineHideImage style={{ color: showPreview ? '#9CA3AF' : '#000' }} />}
