@@ -11,15 +11,12 @@ import { Tooltip, message } from "antd"
 import {
   useLocation,
   useNavigate,
-  useParams,
 } from "@refly-packages/ai-workspace-common/utils/router"
 import { IoLibraryOutline } from "react-icons/io5"
 
 import {
   IconCanvas,
   IconCanvasFill,
-  IconDocument,
-  IconResource,
   IconPlus,
 } from "@refly-packages/ai-workspace-common/components/common/icon"
 
@@ -40,6 +37,8 @@ import { useDebouncedCallback } from "use-debounce"
 import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/use-create-canvas"
 import { useCanvasNodesStore } from "@refly-packages/ai-workspace-common/stores/canvas-nodes"
 import { CanvasNodeType } from "@refly-packages/ai-workspace-common/requests/types.gen"
+// icons
+import { HiOutlineDocumentText, HiOutlineSquare3Stack3D } from "react-icons/hi2"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -132,8 +131,6 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
   const { getLibraryList } = useHandleSiderData(true)
   const { debouncedCreateCanvas, isCreating: createCanvasLoading } =
     useCreateCanvas()
-
-  const { canvasId = "" } = useParams()
 
   const { t } = useTranslation()
 
@@ -357,10 +354,10 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                           {libraryList.map(library => (
                             <MenuItem key={library.id}>
                               {library.type === "document" && (
-                                <IconDocument className="arco-icon" />
+                                <HiOutlineDocumentText className="arco-icon" />
                               )}
                               {library.type === "resource" && (
-                                <IconResource className="arco-icon" />
+                                <HiOutlineSquare3Stack3D className="arco-icon" />
                               )}
                               {library.name}
                             </MenuItem>

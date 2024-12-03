@@ -104,7 +104,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
             {t('common.cancel')}
           </Button>
           <Button type="primary" onClick={handleSave} disabled={selectedItems.length === 0} loading={saveLoading}>
-            {t('common.save')}
+            {t('common.saveToCanvas')}
           </Button>
         </div>
       </div>

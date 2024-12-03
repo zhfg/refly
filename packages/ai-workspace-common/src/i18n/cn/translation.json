@@ -14,6 +14,7 @@
     "delete": "删除",
     "edit": "编辑",
     "save": "保存",
+    "saveToCanvas": "添加到画布",
     "add": "添加",
     "remove": "移除",
     "loading": "加载中...",

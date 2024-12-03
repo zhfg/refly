@@ -97,7 +97,7 @@ export const SourceListModal = (props: SourceListModalProps) => {
       width={width}
       style={{
         zIndex: 66,
-        background: '#FCFCF9',
+        background: '#ffffff',
         height: height,
       }}
       getPopupContainer={() => {

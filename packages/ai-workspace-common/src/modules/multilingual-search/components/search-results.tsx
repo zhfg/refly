@@ -75,20 +75,8 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
   const renderPopoverContent = (item: Source) => (
     <div className="search-result-popover-content">
-      <h4>
-        <TranslationWrapper
-          content={item.title || ''}
-          targetLanguage={outputLocale.code === 'auto' ? item.metadata?.translatedDisplayLocale : outputLocale.code}
-          originalLocale={item.metadata?.originalLocale}
-        />
-      </h4>
-      <div className="content-body">
-        <TranslationWrapper
-          content={item.pageContent}
-          targetLanguage={outputLocale.code === 'auto' ? item.metadata?.translatedDisplayLocale : outputLocale.code}
-          originalLocale={item.metadata?.originalLocale}
-        />
-      </div>
+      <h4>{item.title || ''}</h4>
+      <div className="content-body">{item.pageContent}</div>
     </div>
   );
 
@@ -184,29 +172,8 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                           )}
                         </div>
                         <div className="result-content">
-                          <div className="result-title">
-                            <TranslationWrapper
-                              className="site-title"
-                              content={item.title || ''}
-                              targetLanguage={
-                                outputLocale.code === 'auto'
-                                  ? item.metadata?.translatedDisplayLocale
-                                  : outputLocale.code
-                              }
-                              originalLocale={item.metadata?.originalLocale}
-                            />
-                          </div>
-                          <div className="result-content">
-                            <TranslationWrapper
-                              content={item.pageContent}
-                              targetLanguage={
-                                outputLocale.code === 'auto'
-                                  ? item.metadata?.translatedDisplayLocale
-                                  : outputLocale.code
-                              }
-                              originalLocale={item.metadata?.originalLocale}
-                            />
-                          </div>
+                          <div className="result-title">{item.title || ''}</div>
+                          <div className="result-content">{item.pageContent}</div>
                         </div>
                       </div>
                     </div>

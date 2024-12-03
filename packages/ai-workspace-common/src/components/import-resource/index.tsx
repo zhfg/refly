@@ -52,7 +52,7 @@ export const ImportResourceModal = () => {
             collapsible
             defaultSize={210}
             max={210}
-            style={{ backgroundColor: '#f3f3ee', borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+            style={{ backgroundColor: '#fff', borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
           >
             {isWeb ? (
               <div className="import-resource-left-panel">
@@ -93,7 +93,7 @@ export const ImportResourceModal = () => {
               </div>
             ) : null}
           </Splitter.Panel>
-          <Splitter.Panel style={{ backgroundColor: '#fcfcf9' }}>
+          <Splitter.Panel style={{ backgroundColor: '#fff' }}>
             <div className="import-resource-right-panel">
               {importResourceStore.selectedMenuItem === 'import-from-weblink' ? <ImportFromWeblink /> : null}
               {importResourceStore.selectedMenuItem === 'import-from-paste-text' ? <ImportFromText /> : null}
