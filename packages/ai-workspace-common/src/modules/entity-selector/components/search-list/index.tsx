@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Button, Input, Popover, Empty, Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { SearchDomain } from '@refly/openapi-schema';
@@ -136,19 +136,21 @@ export const SearchList = (props: SearchListProps) => {
   };
 
   const renderItemIcon = (option: ContextItem) => {
-    const IconComponent = getDomainIcon(domain as SearchDomain, option.metadata);
+    const IconComponent = getDomainIcon(domain as SearchDomain, option.metadata) as React.ComponentType<{
+      className?: string;
+    }>;
     const backgroundColor = DOMAIN_COLORS[domain as SearchDomain];
-    const isFunction = typeof IconComponent === 'function';
+    const isReactElement = React.isValidElement(IconComponent);
 
     return (
       <div
         className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
         style={{
-          backgroundColor: isFunction ? backgroundColor : 'transparent',
-          border: isFunction ? 'none' : `0.5px solid ${backgroundColor}`,
+          backgroundColor: isReactElement ? 'transparent' : backgroundColor,
+          border: isReactElement ? `0.5px solid ${backgroundColor}` : 'none',
         }}
       >
-        {isFunction ? <IconComponent className="w-3 h-3 text-white" /> : IconComponent}
+        {isReactElement ? IconComponent : <IconComponent className="w-3 h-3 text-white" />}
       </div>
     );
   };
