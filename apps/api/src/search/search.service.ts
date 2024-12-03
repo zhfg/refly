@@ -220,6 +220,7 @@ export class SearchService {
       domain: 'resource',
       title: result.title,
       highlightedTitle: result.title,
+      contentPreview: result.contentPreview,
       snippets: [{ text: result.contentPreview, highlightedText: result.contentPreview }],
       metadata: {
         resourceType: result.resourceType as ResourceType,
@@ -240,6 +241,7 @@ export class SearchService {
       domain: 'resource',
       title: hit._source.title,
       highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
+      contentPreview: hit._source.content?.slice(0, 500) + '...',
       snippets: [
         {
           text: hit._source.content,
@@ -283,6 +285,7 @@ export class SearchService {
       domain: 'resource',
       title: node.title,
       highlightedTitle: node.title,
+      contentPreview: node.content?.slice(0, 500) + '...',
       snippets: [{ text: node.content, highlightedText: node.content }],
       metadata: {
         resourceMeta: resourceMap.get(node.resourceId),
@@ -326,6 +329,7 @@ export class SearchService {
       domain: 'document',
       title: document.title,
       highlightedTitle: document.title,
+      contentPreview: document.contentPreview,
       snippets: [
         {
           text: document.contentPreview ? document.contentPreview.slice(0, 250) + '...' : '',
@@ -348,6 +352,7 @@ export class SearchService {
       domain: 'document',
       title: hit._source.title,
       highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
+      contentPreview: hit._source.content?.slice(0, 500) + '...',
       snippets: [
         {
           text: hit._source.content,
@@ -377,6 +382,7 @@ export class SearchService {
       domain: 'document',
       title: node.title,
       highlightedTitle: node.title,
+      contentPreview: node.content?.slice(0, 500) + '...',
       snippets: [{ text: node.content, highlightedText: node.content }],
     }));
   }

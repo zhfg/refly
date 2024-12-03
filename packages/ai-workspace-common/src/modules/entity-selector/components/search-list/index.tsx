@@ -71,12 +71,11 @@ export const SearchList = (props: SearchListProps) => {
   const { t } = useTranslation();
   const { domain, fetchData, defaultValue, children, handleConfirm, mode = 'multiple', offset, ...selectProps } = props;
 
-  const { loadMore, dataList, setDataList, isRequesting, handleValueChange, resetState, hasMore } =
-    useFetchOrSearchList({
-      domain,
-      fetchData,
-      pageSize: 20,
-    });
+  const { loadMore, dataList, isRequesting, handleValueChange, resetState, hasMore } = useFetchOrSearchList({
+    domain,
+    fetchData,
+    pageSize: 20,
+  });
 
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState<any>(defaultValue);

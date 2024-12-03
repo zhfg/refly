@@ -107,10 +107,11 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
   const handleConfirm = (selectedItems: ContextItem[]) => {
     if (selectedItems.length > 0) {
       const domain = selectedItems[0]?.domain;
+      console.log('selectedItems', selectedItems);
       selectedItems.forEach((item) => {
         addNode({
           type: domain as CanvasNodeType,
-          data: { title: item.title, entityId: item.id },
+          data: { title: item.title, entityId: item.id, contentPreview: item.contentPreview },
         });
       });
     }
