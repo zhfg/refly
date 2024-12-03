@@ -211,8 +211,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             <div className="flex gap-2 h-full">
               {/* Left shadow and arrow indicator */}
               {showLeftIndicator && (
-                <div className="sticky left-0 top-0 w-[48px] h-full bg-gradient-to-r from-white to-transparent z-50 flex items-center justify-start pointer-events-none absolute">
-                  <div className="text-gray-400 ml-2">
+                <div className="sticky left-0 top-0 h-full bg-gradient-to-r from-white to-transparent z-50 flex items-center justify-start pointer-events-none absolute">
+                  <div className="text-gray-400 mx-3">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                       <path
                         d="M15 19l-7-7 7-7"
@@ -251,8 +251,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
 
               {/* Right shadow and arrow indicator */}
               {showRightIndicator && (
-                <div className="sticky right-0 top-0 w-12 h-full bg-gradient-to-l from-white to-transparent z-50 flex items-center justify-end pointer-events-none absolute">
-                  <div className="text-gray-400 mr-2">
+                <div className="sticky right-0 top-0 h-full bg-gradient-to-l from-white to-transparent z-50 flex items-center justify-end pointer-events-none absolute">
+                  <div className="text-gray-400 mx-3">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                       <path
                         d="M9 5l7 7-7 7"
