@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect } from 'react';
+import { useCallback, useMemo, useEffect, useState } from 'react';
 import {
   ReactFlow,
   Background,
@@ -122,6 +122,16 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     console.log('Selected tool:', tool);
   };
 
+  // Add scroll position state and handler
+  const [showLeftIndicator, setShowLeftIndicator] = useState(false);
+  const [showRightIndicator, setShowRightIndicator] = useState(false);
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget;
+    setShowLeftIndicator(container.scrollLeft > 48);
+    setShowRightIndicator(container.scrollLeft < container.scrollWidth - container.clientWidth - 48);
+  }, []);
+
   return (
     <div className="w-full h-screen relative flex flex-col overflow-hidden">
       <CanvasToolbar onToolSelect={handleToolSelect} />
@@ -196,29 +206,66 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
       </div>
 
       {showPreview && (
-        <div className="absolute top-0 bottom-0 right-2 overflow-x-auto max-w-[900px]">
-          <div className="flex gap-2">
-            {selectedNodes?.map((node) =>
-              isPinned(node) ? null : (
+        <div className="absolute top-[64px] bottom-0 right-2 overflow-x-auto max-w-[900px]" onScroll={handleScroll}>
+          <div className="relative h-full">
+            <div className="flex gap-2 h-full">
+              {/* Left shadow and arrow indicator */}
+              {showLeftIndicator && (
+                <div className="sticky left-0 top-0 w-[48px] h-full bg-gradient-to-r from-white to-transparent z-50 flex items-center justify-start pointer-events-none absolute">
+                  <div className="text-gray-400 ml-2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M15 19l-7-7 7-7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              )}
+
+              {/* Preview Cards */}
+              {selectedNodes?.map((node) =>
+                isPinned(node) ? null : (
+                  <NodePreview
+                    key={node?.id}
+                    node={node}
+                    canvasId={canvasId}
+                    isPinned={isPinned(node)}
+                    selected={isSelected(node)}
+                  />
+                ),
+              )}
+
+              {pinnedNodes?.map((node) => (
                 <NodePreview
-                  key={node.id}
+                  key={node?.id}
                   node={node}
                   canvasId={canvasId}
                   isPinned={isPinned(node)}
                   selected={isSelected(node)}
                 />
-              ),
-            )}
+              ))}
 
-            {pinnedNodes?.map((node) => (
-              <NodePreview
-                key={node.id}
-                node={node}
-                canvasId={canvasId}
-                isPinned={isPinned(node)}
-                selected={isSelected(node)}
-              />
-            ))}
+              {/* Right shadow and arrow indicator */}
+              {showRightIndicator && (
+                <div className="sticky right-0 top-0 w-12 h-full bg-gradient-to-l from-white to-transparent z-50 flex items-center justify-end pointer-events-none absolute">
+                  <div className="text-gray-400 mr-2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M9 5l7 7-7 7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
