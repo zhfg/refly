@@ -1,15 +1,15 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Button, Input, Popover, Empty, Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { SearchDomain } from '@refly/openapi-schema';
 import { DataFetcher } from '@refly-packages/ai-workspace-common/modules/entity-selector/utils';
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/hooks';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
-import { IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 import throttle from 'lodash.throttle';
 import { IconCheck } from '@arco-design/web-react/icon';
 import { FileText, Link2, MessageSquare, Sparkles, Wrench, Cpu, Code2, Globe } from 'lucide-react';
+import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 
 interface SearchListProps {
   domain: SearchDomain;
@@ -49,7 +49,16 @@ const getDomainIcon = (domain: SearchDomain, metadata?: any) => {
         case 'http':
           return Globe;
         default:
-          return Sparkles;
+          const skill = metadata?.originalItem;
+          return (
+            <SkillAvatar
+              noBorder
+              size={20}
+              icon={skill?.icon}
+              displayName={skill?.displayName}
+              background="transparent"
+            />
+          );
       }
     case 'tool':
       return Wrench;
@@ -127,12 +136,21 @@ export const SearchList = (props: SearchListProps) => {
   };
 
   const renderItemIcon = (option: ContextItem) => {
-    const IconComponent = getDomainIcon(domain as SearchDomain, option.metadata);
+    const IconComponent = getDomainIcon(domain as SearchDomain, option.metadata) as React.ComponentType<{
+      className?: string;
+    }>;
     const backgroundColor = DOMAIN_COLORS[domain as SearchDomain];
+    const isReactElement = React.isValidElement(IconComponent);
 
     return (
-      <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0" style={{ backgroundColor }}>
-        <IconComponent className="w-3 h-3 text-white" />
+      <div
+        className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
+        style={{
+          backgroundColor: isReactElement ? 'transparent' : backgroundColor,
+          border: isReactElement ? `0.5px solid ${backgroundColor}` : 'none',
+        }}
+      >
+        {isReactElement ? IconComponent : <IconComponent className="w-3 h-3 text-white" />}
       </div>
     );
   };

@@ -380,9 +380,12 @@
       "addResource": "Add Resource",
       "addSkill": "Add Skill",
       "addTool": "Add Tool",
-      "addDocument": "Add Document"
+      "addDocument": "Add Document",
+      "hidePreview": "Hide Node Preview",
+      "showPreview": "Show Node Preview"
     },
     "action": {
+      "nodeAlreadyExists": "The {{type}} with the same entity already exists",
       "deleteSuccess": "Canvas deleted successfully",
       "addSuccess": "Canvas added successfully, start creating!"
     },

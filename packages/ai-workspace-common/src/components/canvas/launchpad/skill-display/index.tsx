@@ -54,7 +54,15 @@ export const SkillDisplay = () => {
 
   const searchListComponent = useMemo(
     () => (
-      <SearchList domain={'skill'} trigger="hover" mode="single">
+      <SearchList
+        domain={'skill'}
+        trigger="hover"
+        mode="single"
+        handleConfirm={(items) => {
+          console.log('items', items);
+          skillStore.setSelectedSkill(items[0].metadata?.originalItem);
+        }}
+      >
         <div
           key="more"
           className="skill-item group"
