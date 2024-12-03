@@ -324,6 +324,7 @@ Please analyze the query, focusing primarily on the current query and available 
       model,
       queryAnalysisSchema,
       systemPrompt + '\n\n' + userMessage,
+      ctx.config,
       3, // maxRetries
     );
 

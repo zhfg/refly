@@ -789,7 +789,7 @@ export class SkillService {
         switch (event.event) {
           case 'on_chat_model_stream':
             const content = chunk.content.toString();
-            if (content && res) {
+            if (content && res && !runMeta?.suppressOutput) {
               if (runMeta?.artifact) {
                 const { entityId } = runMeta.artifact;
                 const artifact = artifactMap[entityId];

@@ -146,6 +146,7 @@ export interface SkillEventMap {
 export interface SkillRunnableMeta extends Record<string, unknown>, SkillMeta {
   step?: ActionStepMeta;
   artifact?: Artifact;
+  suppressOutput?: boolean;
 }
 
 export interface SkillRunnableConfig extends RunnableConfig {
