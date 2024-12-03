@@ -938,7 +938,7 @@
       },
       "session": {
         "content": "Content",
-        "source": "Source",
+        "source": "Search Results",
         "relatedQuestions": "Related Questions"
       },
       "webLink": {
@@ -986,7 +986,7 @@
       },
       "session": {
         "answer": "Answer",
-        "source": "Source",
+        "source": "Search Results",
         "relatedQuestions": "Related Questions"
       },
       "input": {
@@ -1255,7 +1255,7 @@
     },
     "sourceListModal": {
       "title": "Result Sources",
-      "moreSources": "View More and Import as Resource",
+      "moreSources": "View More and Import to Canvas",
       "searchPlaceholder": "Search Sources...",
       "openOriginWebsite": "Open Origin Website",
       "openKnowledgeBaseLink": "Open Knowledge Base Link",

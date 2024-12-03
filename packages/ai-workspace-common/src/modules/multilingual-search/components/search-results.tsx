@@ -73,12 +73,31 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     }
   };
 
-  const renderPopoverContent = (item: Source) => (
-    <div className="search-result-popover-content">
-      <h4>{item.title || ''}</h4>
-      <div className="content-body">{item.pageContent}</div>
-    </div>
-  );
+  const renderPopoverContent = (item: Source) => {
+    const domain = safeParseURL(item.url);
+    const source = item;
+    return (
+      <div className="search-result-popover-content">
+        {/* Title section */}
+        <div className="flex items-center gap-2 mb-2">
+          <h4 className="font-medium text-base m-0 break-words">{source?.title ?? ''}</h4>
+        </div>
+
+        {/* Domain section */}
+        <div className="flex items-center gap-2 mb-2 px-4">
+          <img
+            className="w-4 h-4 flex-shrink-0"
+            alt={domain}
+            src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
+          />
+          <div className="text-zinc-400 text-sm break-all">{domain}</div>
+        </div>
+
+        {/* Content section */}
+        <div className="content-body pt-0">{source.pageContent}</div>
+      </div>
+    );
+  };
 
   const renderSkeletonItem = () => (
     <List.Item className="result-item">
@@ -137,7 +156,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     align={{ offset: [-50, 0] }}
                     mouseEnterDelay={0.5}
                   >
-                    <div className="result-details" onClick={() => config.handleItemClick?.(item)}>
+                    <div className="result-details" onClick={() => {}}>
                       {config.showIndex && (
                         <div className="w-5">
                           <span className="h-8 w-8 inline-flex items-center justify-center origin-top-left scale-[60%] transform cursor-pointer rounded-full bg-zinc-100 text-center text-base font-medium no-underline hover:bg-zinc-300">

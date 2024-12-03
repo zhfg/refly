@@ -942,7 +942,7 @@
       },
       "session": {
         "content": "正文内容",
-        "source": "来源",
+        "source": "搜索结果",
         "relatedQuestions": "相关问题"
       },
       "webLink": {
@@ -990,7 +990,7 @@
       },
       "session": {
         "answer": "答案",
-        "source": "来源",
+        "source": "搜索结果",
         "relatedQuestions": "相关问题"
       },
       "input": {
@@ -1272,7 +1272,7 @@
     },
     "sourceListModal": {
       "title": "结果来源",
-      "moreSources": "查看更多并导入为资源",
+      "moreSources": "查看更多并导入画布",
       "searchPlaceholder": "搜索来源...",
       "openOriginWebsite": "打开来源链接",
       "openKnowledgeBaseLink": "打开项目链接",
