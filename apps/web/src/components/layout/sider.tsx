@@ -230,7 +230,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
       const { data } = await getClient().createDocument({
         body: {
           title: `Document-${new Date().toISOString()}`,
-          initialContent: "# Document\n\n hello world",
+          initialContent: "\n hello world",
         },
       })
 
@@ -351,7 +351,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                             </span>
                           </MenuItem>
 
-                          {libraryList.map(library => (
+                          {/* {libraryList.map(library => (
                             <MenuItem key={library.id}>
                               {library.type === "document" && (
                                 <HiOutlineDocumentText className="arco-icon" />
@@ -361,7 +361,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                               )}
                               {library.name}
                             </MenuItem>
-                          ))}
+                          ))} */}
                         </>
                       )}
                     </SubMenu>
