@@ -183,14 +183,15 @@ export const ActionButtons = ({
       {/* Skill Response specific buttons */}
       {type === 'skill-response' && (
         <>
-          {onRerun && (
-            <ActionButton
-              icon={<PlayCircle className="w-4 h-4" />}
-              onClick={onRerun}
-              loading={!isCompleted}
-              tooltip={t('canvas.nodeActions.rerun')}
-            />
-          )}
+          {onRerun &&
+            (isCompleted ? null : (
+              <ActionButton
+                icon={<PlayCircle className="w-4 h-4" />}
+                onClick={onRerun}
+                loading={!isCompleted}
+                tooltip={t('canvas.nodeActions.rerun')}
+              />
+            ))}
           {onInsertToDoc && (
             <ActionButton
               icon={<FileInput className="w-4 h-4" />}

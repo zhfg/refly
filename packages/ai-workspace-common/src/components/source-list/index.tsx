@@ -57,14 +57,16 @@ const SourceItem = ({ source, index }: { source: Source; index: number }) => {
       </div>
 
       {/* Domain section */}
-      <div className="flex items-center gap-2 mb-2 px-4">
-        <img
-          className="w-4 h-4 flex-shrink-0"
-          alt={domain}
-          src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
-        />
-        <div className="text-zinc-400 text-sm break-all">{domain}</div>
-      </div>
+      {source?.url ? (
+        <div className="flex items-center gap-2 mb-2 px-4">
+          <img
+            className="w-4 h-4 flex-shrink-0"
+            alt={domain}
+            src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
+          />
+          <div className="text-zinc-400 text-sm break-all">{domain}</div>
+        </div>
+      ) : null}
 
       {/* Content section */}
       <div className="content-body pt-0">{source.pageContent}</div>
@@ -93,16 +95,18 @@ const SourceItem = ({ source, index }: { source: Source; index: number }) => {
           </div>
 
           {/* Right section with domain and icon */}
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="overflow-hidden text-ellipsis whitespace-nowrap text-zinc-400 max-w-[120px]">
-              {domain}
-            </span>
-            <img
-              className="w-3 h-3 flex-shrink-0"
-              alt={domain}
-              src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
-            />
-          </div>
+          {source?.url ? (
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap text-zinc-400 max-w-[120px]">
+                {domain}
+              </span>
+              <img
+                className="w-3 h-3 flex-shrink-0"
+                alt={domain}
+                src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
+              />
+            </div>
+          ) : null}
         </div>
       </div>
     </Popover>
@@ -133,6 +137,10 @@ const ViewMoreItem = ({
       {sources?.slice(sources.length - extraCnt)?.map((item, index) => {
         const url = item?.url;
         const domain = safeParseURL(url || '');
+
+        if (!url) {
+          return null;
+        }
 
         return (
           <img

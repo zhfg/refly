@@ -1260,7 +1260,8 @@
       "openOriginWebsite": "Open Origin Website",
       "openKnowledgeBaseLink": "Open Knowledge Base Link",
       "webSearchTab": "Web Search",
-      "libraryTab": "Library Search"
+      "libraryTab": "Library Search",
+      "noUrl": "This source does not have a link, you can select it and import to canvas"
     }
   },
   "hooks": {

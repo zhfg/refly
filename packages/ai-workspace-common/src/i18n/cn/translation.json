@@ -1277,7 +1277,8 @@
       "openOriginWebsite": "打开来源链接",
       "openKnowledgeBaseLink": "打开项目链接",
       "webSearchTab": "全网搜索",
-      "libraryTab": "知识库搜索"
+      "libraryTab": "知识库搜索",
+      "noUrl": "该来源没有链接，可选中之后导入画布"
     }
   },
   "title": "欢迎 {{name}}，使用 react-i18next 完全类型安全的 React",

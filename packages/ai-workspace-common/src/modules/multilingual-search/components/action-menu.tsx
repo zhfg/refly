@@ -9,9 +9,17 @@ import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+
+export enum ImportActionMode {
+  CREATE_RESOURCE = 'createResource',
+  ADD_NODE = 'addNode',
+  NONE = 'none',
+}
+
 interface ActionMenuProps {
   getTarget: () => HTMLElement;
   sourceType: 'multilingualSearch' | 'sourceListModal';
+  importActionMode: ImportActionMode;
 }
 
 export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
@@ -51,37 +59,51 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
     }
     setSaveLoading(true);
 
-    const batchCreateResourceData: UpsertResourceRequest[] = selectedItems.map((item) => ({
-      resourceType: 'weblink',
-      title: item.title,
-      data: {
-        url: item.url,
+    if (props.importActionMode === ImportActionMode.CREATE_RESOURCE) {
+      const batchCreateResourceData: UpsertResourceRequest[] = selectedItems.map((item) => ({
+        resourceType: 'weblink',
         title: item.title,
-      },
-    }));
-
-    const { data } = await getClient().batchCreateResource({
-      body: batchCreateResourceData,
-    });
-
-    if (data.success) {
-      getLibraryList();
-      message.success(t('common.putSuccess'));
-      setSelectedItems([]);
-      const resources = (Array.isArray(data?.data) ? data?.data : []).map((resource) => ({
-        id: resource.resourceId,
-        title: resource.title,
-        domain: 'resource',
+        data: {
+          url: item.url,
+          title: item.title,
+        },
       }));
-      resources.forEach((resource) => {
+
+      const { data } = await getClient().batchCreateResource({
+        body: batchCreateResourceData,
+      });
+
+      if (data.success) {
+        getLibraryList();
+        message.success(t('common.putSuccess'));
+        setSelectedItems([]);
+        const resources = (Array.isArray(data?.data) ? data?.data : []).map((resource) => ({
+          id: resource.resourceId,
+          title: resource.title,
+          domain: 'resource',
+        }));
+        resources.forEach((resource) => {
+          addNode({
+            type: 'resource',
+            data: {
+              title: resource.title,
+              entityId: resource.id,
+            },
+          });
+        });
+      }
+    } else if (props.importActionMode === ImportActionMode.ADD_NODE) {
+      selectedItems.forEach((item) => {
         addNode({
           type: 'resource',
           data: {
-            title: resource.title,
-            entityId: resource.id,
+            title: item.title,
+            entityId: item.metadata?.entityId,
           },
         });
       });
+      message.success(t('common.putSuccess'));
+      setSelectedItems([]);
     }
 
     setSaveLoading(false);

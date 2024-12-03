@@ -16,10 +16,11 @@ interface SearchResultsProps {
   className?: string;
   outputLocale: SearchLocale;
   config?: {
-    showCheckbox?: boolean; // 是否显示复选框
-    startIndex?: number; // 序号起始值
-    showIndex?: boolean; // 是否显示序号
-    handleItemClick?: (item: Source) => void; // 自定义点击处理
+    showCheckbox?: boolean;
+    startIndex?: number;
+    showIndex?: boolean;
+    handleItemClick?: (item: Source) => void;
+    enableTranslation?: boolean;
   };
 }
 
@@ -31,6 +32,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     startIndex: 1,
     showIndex: true,
     handleItemClick: (item) => window.open(item.url, '_blank'),
+    enableTranslation: false,
   },
 }) => {
   const { t, i18n } = useTranslation();
@@ -80,21 +82,37 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
       <div className="search-result-popover-content">
         {/* Title section */}
         <div className="flex items-center gap-2 mb-2">
-          <h4 className="font-medium text-base m-0 break-words">{source?.title ?? ''}</h4>
+          <h4 className="font-medium text-base m-0 break-words">
+            <TranslationWrapper
+              content={item.title || ''}
+              targetLanguage={outputLocale.code === 'auto' ? item.metadata?.translatedDisplayLocale : outputLocale.code}
+              originalLocale={item.metadata?.originalLocale}
+              enableTranslation={config.enableTranslation}
+            />
+          </h4>
         </div>
 
         {/* Domain section */}
-        <div className="flex items-center gap-2 mb-2 px-4">
-          <img
-            className="w-4 h-4 flex-shrink-0"
-            alt={domain}
-            src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
-          />
-          <div className="text-zinc-400 text-sm break-all">{domain}</div>
-        </div>
+        {item?.url ? (
+          <div className="flex items-center gap-2 mb-2 px-4">
+            <img
+              className="w-4 h-4 flex-shrink-0"
+              alt={domain}
+              src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
+            />
+            <div className="text-zinc-400 text-sm break-all">{domain}</div>
+          </div>
+        ) : null}
 
         {/* Content section */}
-        <div className="content-body pt-0">{source.pageContent}</div>
+        <div className="content-body pt-0">
+          <TranslationWrapper
+            content={item.pageContent}
+            targetLanguage={outputLocale.code === 'auto' ? item.metadata?.translatedDisplayLocale : outputLocale.code}
+            originalLocale={item.metadata?.originalLocale}
+            enableTranslation={config.enableTranslation}
+          />
+        </div>
       </div>
     );
   };
@@ -156,7 +174,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                     align={{ offset: [-50, 0] }}
                     mouseEnterDelay={0.5}
                   >
-                    <div className="result-details" onClick={() => {}}>
+                    <div className="result-details" onClick={() => config.handleItemClick?.(item)}>
                       {config.showIndex && (
                         <div className="w-5">
                           <span className="h-8 w-8 inline-flex items-center justify-center origin-top-left scale-[60%] transform cursor-pointer rounded-full bg-zinc-100 text-center text-base font-medium no-underline hover:bg-zinc-300">
@@ -164,35 +182,63 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                           </span>
                         </div>
                       )}
-                      <div className="result-body">
-                        <div className="result-header">
-                          <div className="site-info">
-                            <img
-                              className="site-icon"
-                              src={`https://www.google.com/s2/favicons?domain=${safeParseURL(item.url)}&sz=32`}
-                              alt=""
-                            />
-                            <div className="site-meta">
-                              <a className="site-url" href={item.url} target="_blank" rel="noreferrer">
-                                {item.url}
-                              </a>
-                            </div>
+                      <div className="result-body w-full">
+                        {item.metadata?.translatedDisplayLocale || item?.url ? (
+                          <div className="result-header">
+                            {item?.url ? (
+                              <div className="site-info">
+                                <img
+                                  className="site-icon"
+                                  src={`https://www.google.com/s2/favicons?domain=${safeParseURL(item.url)}&sz=32`}
+                                  alt=""
+                                />
+                                <div className="site-meta">
+                                  <a className="site-url" href={item.url} target="_blank" rel="noreferrer">
+                                    {item.url}
+                                  </a>
+                                </div>
+                              </div>
+                            ) : null}
+                            {item.metadata?.translatedDisplayLocale && (
+                              <Tag className="locale-tag">
+                                <span>
+                                  <AiOutlineGlobal /> {getLocaleName(item.metadata.originalLocale)}
+                                </span>{' '}
+                                →{' '}
+                                <span>
+                                  <AiOutlineTranslation /> {getLocaleName(item.metadata.translatedDisplayLocale)}
+                                </span>
+                              </Tag>
+                            )}
                           </div>
-                          {item.metadata?.translatedDisplayLocale && (
-                            <Tag className="locale-tag">
-                              <span>
-                                <AiOutlineGlobal /> {getLocaleName(item.metadata.originalLocale)}
-                              </span>{' '}
-                              →{' '}
-                              <span>
-                                <AiOutlineTranslation /> {getLocaleName(item.metadata.translatedDisplayLocale)}
-                              </span>
-                            </Tag>
-                          )}
-                        </div>
+                        ) : null}
+
                         <div className="result-content">
-                          <div className="result-title">{item.title || ''}</div>
-                          <div className="result-content">{item.pageContent}</div>
+                          <div className="result-title">
+                            <TranslationWrapper
+                              className="site-title"
+                              content={item.title || ''}
+                              targetLanguage={
+                                outputLocale.code === 'auto'
+                                  ? item.metadata?.translatedDisplayLocale
+                                  : outputLocale.code
+                              }
+                              originalLocale={item.metadata?.originalLocale}
+                              enableTranslation={config.enableTranslation}
+                            />
+                          </div>
+                          <div className="result-content">
+                            <TranslationWrapper
+                              content={item.pageContent}
+                              targetLanguage={
+                                outputLocale.code === 'auto'
+                                  ? item.metadata?.translatedDisplayLocale
+                                  : outputLocale.code
+                              }
+                              originalLocale={item.metadata?.originalLocale}
+                              enableTranslation={config.enableTranslation}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -13,6 +13,7 @@ interface TranslationWrapperProps {
   targetLanguage: string;
   originalLocale?: string;
   className?: string;
+  enableTranslation?: boolean;
 }
 
 // 限制请求频率的延迟时间（毫秒）
@@ -40,6 +41,7 @@ export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
   targetLanguage,
   originalLocale,
   className,
+  enableTranslation = true,
 }) => {
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,10 +49,11 @@ export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
   // Memoize key computation and translation check
   const { shouldTranslate, cacheKey } = useMemo(
     () => ({
-      shouldTranslate: targetLanguage !== 'auto' && (!originalLocale || originalLocale !== targetLanguage),
+      shouldTranslate:
+        enableTranslation && targetLanguage !== 'auto' && (!originalLocale || originalLocale !== targetLanguage),
       cacheKey: getCacheKey(content, originalLocale || 'auto', targetLanguage),
     }),
-    [content, originalLocale, targetLanguage],
+    [content, originalLocale, targetLanguage, enableTranslation],
   );
 
   const translateText = useCallback(
