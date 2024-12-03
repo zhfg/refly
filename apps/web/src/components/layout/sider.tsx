@@ -12,7 +12,6 @@ import {
   useLocation,
   useNavigate,
 } from "@refly-packages/ai-workspace-common/utils/router"
-import { IoLibraryOutline } from "react-icons/io5"
 
 import {
   IconCanvas,
@@ -41,6 +40,7 @@ import { CanvasNodeType } from "@refly-packages/ai-workspace-common/requests/typ
 import {
   IconDocument,
   IconResource,
+  IconLibrary,
 } from "@refly-packages/ai-workspace-common/components/common/icon"
 
 const Sider = Layout.Sider
@@ -207,9 +207,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
       {
         key: "Library",
         name: "library",
-        icon: (
-          <IoLibraryOutline className="arco-icon" style={{ fontSize: 20 }} />
-        ),
+        icon: <IconLibrary className="arco-icon" style={{ fontSize: 20 }} />,
       },
     ],
   ]

@@ -1,6 +1,5 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Skeleton } from '@arco-design/web-react';
+import { Button, Skeleton } from 'antd';
 
 export interface ScrollLoadingProps {
   isRequesting: boolean;
@@ -24,8 +23,8 @@ export const ScrollLoading = (props: ScrollLoadingProps) => {
   if (isRequesting) {
     return (
       <div className="w-full flex flex-col mt-6">
-        <Skeleton animation style={{ width: '100%' }}></Skeleton>
-        <Skeleton animation style={{ width: '100%', marginTop: 24 }}></Skeleton>
+        <Skeleton active style={{ width: '100%' }}></Skeleton>
+        <Skeleton active style={{ width: '100%', marginTop: 24 }}></Skeleton>
       </div>
     );
   }

@@ -121,7 +121,7 @@ export const DocumentList = () => {
   }, [showLibraryModal]);
 
   return (
-    <div className="w-full px-[8px] h-[calc(80vh-60px)] overflow-y-auto">
+    <div className="w-full px-[8px] h-[calc(50vh-60px)] overflow-y-auto">
       {isRequesting || dataList.length > 0 ? (
         <List
           grid={{
