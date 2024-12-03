@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Button,
   Divider,
@@ -67,14 +67,19 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   const { mutate, status } = useUpdateCanvas();
   const setCanvasList = useSiderStoreShallow((state) => state.setCanvasList);
 
+  useEffect(() => {
+    const { canvasList } = useSiderStore.getState();
+    setCanvasList(
+      canvasList.map((canvas) => (canvas.id === canvasId ? { ...canvas, name: canvasTitle?.toJSON() } : canvas)),
+    );
+  }, [canvasId, canvasTitle?.toJSON()]);
+
   const handleModalOk = () => {
     if (ydoc && editedTitle?.trim()) {
       ydoc.transact(() => {
         canvasTitle?.delete(0, canvasTitle?.length ?? 0);
         canvasTitle?.insert(0, editedTitle);
       });
-      const { canvasList } = useSiderStore.getState();
-      setCanvasList(canvasList.map((canvas) => (canvas.id === canvasId ? { ...canvas, name: editedTitle } : canvas)));
       mutate({ body: { canvasId, title: editedTitle } }, { onSuccess: () => setIsModalOpen(false) });
     }
   };
