@@ -1,6 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
-import * as Y from 'yjs';
 import { Queue } from 'bull';
 import { MINIO_INTERNAL } from '@/common/minio.service';
 import { MinioService } from '@/common/minio.service';
@@ -16,11 +15,15 @@ import {
   User,
 } from '@refly-packages/openapi-schema';
 import { genCanvasID } from '@refly-packages/utils';
+import { CollabService } from '@/collab/collab.service';
 
 @Injectable()
 export class CanvasService {
+  private logger = new Logger(CanvasService.name);
+
   constructor(
     private prisma: PrismaService,
+    private collabService: CollabService,
     private miscService: MiscService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
@@ -52,10 +55,24 @@ export class CanvasService {
       },
     });
 
-    const ydoc = new Y.Doc();
-    ydoc.getText('title').insert(0, param.title);
+    const { document } = await this.collabService.openDirectConnection(canvasId, {
+      user,
+      entity: canvas,
+      entityType: 'canvas',
+    });
 
-    await this.minio.client.putObject(stateStorageKey, Buffer.from(Y.encodeStateAsUpdate(ydoc)));
+    document.transact(() => {
+      document.getText('title').insert(0, param.title);
+
+      // We have to add a dummy node and then remove it to make sure the yjs document
+      // can be connected. The reason is still unclear.
+      document
+        .getArray('nodes')
+        .insert(0, [{ id: '1', position: { x: 0, y: 0 }, data: { label: '1' } }]);
+      document.getArray('nodes').delete(0, 1);
+    });
+
+    this.logger.log(`updated canvas data: ${JSON.stringify(document.toJSON())}`);
 
     return canvas;
   }

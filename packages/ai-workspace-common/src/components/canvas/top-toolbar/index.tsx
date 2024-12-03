@@ -48,8 +48,6 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   const { provider } = useCanvasContext();
   const ydoc = provider?.document;
   const canvasTitle = ydoc?.getText('title');
-  console.log('provider status', provider.status);
-  console.log('canvasTitle', canvasTitle?.toJSON());
 
   // const { onLayout } = useCanvasControl();
   const { showPreview, setShowPreview } = useCanvasStoreShallow((state) => ({
