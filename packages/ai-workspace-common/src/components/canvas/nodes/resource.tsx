@@ -30,8 +30,6 @@ export const ResourceNode = ({
   const { setEdges } = useReactFlow();
   const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
 
-  console.log('resource', data);
-
   const { i18n, t } = useTranslation();
   const language = i18n.languages?.[0];
 
