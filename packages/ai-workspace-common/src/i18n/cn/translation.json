@@ -17,6 +17,7 @@
     "saveToCanvas": "添加到画布",
     "add": "添加",
     "remove": "移除",
+    "library": "知识库",
     "untitled": "未命名",
     "loading": "加载中...",
     "loadMore": "加载更多",
@@ -531,24 +532,19 @@
     "searchEverything": "搜索任何内容",
     "quickSearch": {
       "skills": "技能",
-      "canvas": "稿布",
-      "newCanvas": "创建新稿布",
+      "canvas": "画布",
+      "newCanvas": "创建新画布",
       "resource": "资源",
       "newResource": "添加资源",
-      "project": "项目",
-      "newProject": "创建新项目",
-      "thread": "会话",
-      "newThread": "创建新会话",
-      "placeholderForHome": "直接提问或搜索稿布，资源，项目，会话...",
+      "document": "文档",
+      "newDocument": "创建新文档",
+      "placeholderForHome": "搜索画布、文档或资源...",
       "placeholderForSkillExecute": "输入你想要提问的问题，并基于此问题执行技能",
       "placeholderForWeblink": "搜索 {{domain}}...",
       "home": {
         "heading": "建议",
-        "askAI": "问问知识管家",
         "showAll": "查看所有{{heading}}"
       },
-      "basedOn": "基于",
-      "execute": "内容执行",
       "skill": "技能"
     },
     "homePage": {

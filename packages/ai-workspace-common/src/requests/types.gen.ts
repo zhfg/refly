@@ -2695,6 +2695,10 @@ export type SearchResult = {
      */
     highlightedTitle?: string;
     /**
+     * Search result content preview
+     */
+    contentPreview?: string;
+    /**
      * Search result content list with highlight marks
      */
     snippets?: Array<SearchResultSnippet>;

@@ -68,11 +68,13 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   const setCanvasList = useSiderStoreShallow((state) => state.setCanvasList);
 
   useEffect(() => {
-    const { canvasList } = useSiderStore.getState();
-    setCanvasList(
-      canvasList.map((canvas) => (canvas.id === canvasId ? { ...canvas, name: canvasTitle?.toJSON() } : canvas)),
-    );
-  }, [canvasId, canvasTitle?.toJSON()]);
+    if (provider?.status === 'connected') {
+      const { canvasList } = useSiderStore.getState();
+      setCanvasList(
+        canvasList.map((canvas) => (canvas.id === canvasId ? { ...canvas, name: canvasTitle?.toJSON() } : canvas)),
+      );
+    }
+  }, [canvasId, provider?.status, canvasTitle?.toJSON()]);
 
   const handleModalOk = () => {
     if (ydoc && editedTitle?.trim()) {

@@ -15,6 +15,7 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
       id: item?.resourceId,
       title: item?.title,
       domain: 'resource',
+      contentPreview: item?.contentPreview,
     }));
     return { success: res?.data?.success, data };
   },
@@ -26,6 +27,7 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
       id: item?.docId,
       title: item?.title,
       domain: 'document',
+      contentPreview: item?.contentPreview,
     }));
     return { success: res?.data?.success, data };
   },
@@ -49,9 +51,9 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
       title: item?.displayName,
       domain: 'skill',
       metadata: {
-        configSchema: item?.configSchema,
-        description: item?.description,
-        originalItem: item,
+        // configSchema: item?.configSchema,
+        // description: item?.description,
+        // originalItem: item,
       },
     }));
     return { success: res?.data?.success, data };

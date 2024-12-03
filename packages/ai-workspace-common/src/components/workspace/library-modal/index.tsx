@@ -3,11 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { DocumentList } from '../document-list';
 import { ResourceList } from '../resource-list';
 
-import { PiNotePencil } from 'react-icons/pi';
-import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
-
 import { Modal, Tabs } from 'antd';
 import './index.scss';
+import { IconDocument, IconLibrary, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 interface LibraryModalProps {
   visible: boolean;
@@ -21,13 +19,13 @@ export const LibraryModal = (props: LibraryModalProps) => {
     {
       key: 'document',
       label: t('common.document'),
-      icon: <PiNotePencil style={{ transform: 'translateY(2px)' }} />,
+      icon: <IconDocument style={{ transform: 'translateY(2px)' }} />,
       children: <DocumentList />,
     },
     {
       key: 'resource',
       label: t('common.resource'),
-      icon: <HiOutlineSquare3Stack3D style={{ transform: 'translateY(2px)' }} />,
+      icon: <IconResource style={{ transform: 'translateY(2px)' }} />,
       children: <ResourceList />,
     },
   ];
@@ -36,10 +34,16 @@ export const LibraryModal = (props: LibraryModalProps) => {
     <Modal
       className="library-modal"
       centered
+      title={
+        <span className="flex items-center gap-2 text-lg font-medium">
+          <IconLibrary /> {t('common.library')}
+        </span>
+      }
       width={1000}
       footer={null}
       open={visible}
       onCancel={() => setVisible(false)}
+      focusTriggerAfterClose={false}
     >
       <Tabs items={tabs} />
     </Modal>

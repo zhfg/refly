@@ -3934,6 +3934,10 @@ export const SearchResultSchema = {
       type: 'string',
       description: 'Search result highlighted title with em html tags',
     },
+    contentPreview: {
+      type: 'string',
+      description: 'Search result content preview',
+    },
     snippets: {
       type: 'array',
       description: 'Search result content list with highlight marks',

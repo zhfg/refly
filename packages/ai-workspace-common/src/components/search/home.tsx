@@ -1,14 +1,11 @@
 import { useEffect } from 'react';
 import { Command } from 'cmdk';
-import { useSearchStore, useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
-import { IconMessage, IconApps, IconFolderAdd } from '@arco-design/web-react/icon';
+import { IconApps, IconFolderAdd } from '@arco-design/web-react/icon';
 
 import './index.scss';
 import { Item } from './item';
 
-import { useBigSearchQuickAction } from '@refly-packages/ai-workspace-common/hooks/use-big-search-quick-action';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
-import { useSkillStore, useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { useTranslation } from 'react-i18next';
 
 export function Home({
@@ -28,9 +25,6 @@ export function Home({
   searchValue: string;
   setValue: (val: string) => void;
 }) {
-  const { triggerSkillQuickAction } = useBigSearchQuickAction();
-  const setIsSearchOpen = useSearchStoreShallow((state) => state.setIsSearchOpen);
-  const setSelectedSkill = useSkillStoreShallow((state) => state.setSelectedSkill);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -39,21 +33,6 @@ export function Home({
 
   return (
     <>
-      <Command.Group heading={t('loggedHomePage.quickSearch.home.heading')}>
-        <Item
-          value="refly-built-in-ask-ai"
-          keywords={['NewConv']}
-          activeValue={activeValue}
-          onSelect={() => {
-            triggerSkillQuickAction(searchValue);
-            setIsSearchOpen(false);
-            setSelectedSkill(null);
-          }}
-        >
-          <IconMessage style={{ fontSize: 12 }} />
-          {t('loggedHomePage.quickSearch.home.askAI')}
-        </Item>
-      </Command.Group>
       {data
         .filter((item) => item?.data?.length > 0)
         .map((renderItem, index) => (

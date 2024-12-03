@@ -122,6 +122,32 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     [ydoc, yNodes],
   );
 
+  const deselectNode = useCallback(
+    (node: CanvasNode) => {
+      ydoc.transact(() => {
+        const updatedNodes = yNodes.toJSON().map((n) => ({
+          ...n,
+          selected: n.id === node.id ? false : n.selected,
+        }));
+        yNodes.delete(0, yNodes.length);
+        yNodes.push(updatedNodes);
+      });
+    },
+    [ydoc, yNodes],
+  );
+
+  const deselectNodeByEntity = useCallback(
+    (filter: CanvasNodeFilter) => {
+      const { type, entityId } = filter;
+      const { nodes } = useCanvasStore.getState().data[canvasId];
+      const node = nodes.find((n) => n.type === type && n.data?.entityId === entityId);
+      if (node) {
+        deselectNode(node);
+      }
+    },
+    [canvasId, deselectNode],
+  );
+
   const setNodeData = useCallback(
     <T = any>(nodeId: string, data: Partial<CanvasNodeData<T>>) => {
       const updatedNodes = yNodes.toJSON().map((n) => ({
@@ -345,6 +371,8 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     edges,
     setSelectedNode,
     setSelectedNodeByEntity,
+    deselectNode,
+    deselectNodeByEntity,
     setNodeData,
     setNodeDataByEntity,
     onNodesChange,
