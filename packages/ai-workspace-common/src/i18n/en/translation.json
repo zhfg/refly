@@ -90,8 +90,16 @@
     }
   },
   "landingPage": {
-    "slogan": "Where knowledge thrives",
-    "description": "Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower",
+    "slogan": "The AI Creation Engine",
+    "simplySlogan": "Creation Engine",
+    "description": "Refly is the best way to transforms ideas into quality content through multi-threaded dialogue, knowledge integration, context memory, and intelligent search.",
+    "simplyDescription": {
+      "first": "Powered by multi-thread dialogue, knowledge integration, context memory, and intelligent search, ",
+      "second": "Refly is the best way to transforms ideas into quality content."
+    },
+    "messageText": "Experience AI Free Canvas and ignite your creativity!",
+    "tryForFree": "Get Started",
+    "contactUs": "Contact us",
     "joinBtn": "Join for free",
     "downloadBtn": "Download Extension",
     "loginBtn": "Login",
@@ -109,6 +117,11 @@
       "description": " Automatically and tag, search and review at any time. Build a knowledge system through labels & timelines"
     },
     "footer": {
+      "cta": {
+        "title": "Ready to experience AI free canvas and ignite your creativity?",
+        "getStarted": "Get Started",
+        "contactUs": "Contact us"
+      },
       "description": "Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower",
       "right": "Refly.ai. All rights reserved.",
       "product": {

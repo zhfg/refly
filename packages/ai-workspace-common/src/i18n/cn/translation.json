@@ -90,8 +90,16 @@
     }
   },
   "landingPage": {
-    "slogan": "知识，在此繁茂",
-    "description": "快速总结与形成洞察、自动化归档以及智能语义搜索——Refly 能够为你打造第二大脑，拓展你的知识视野，并赋予你超乎寻常的能力。",
+    "slogan": "AI 创作引擎",
+    "simplySlogan": "创作引擎",
+    "description": "基于自由画布的创作平台，通过多线程对话、知识整合、上下文记忆和智能搜索，将想法转化为优质内容。",
+    "simplyDescrption": {
+      "first": "Refly 是一个基于自由画布的 AI 内容创作引擎。",
+      "second": "通过多线程对话、知识库集成、场景记忆和智能检索，帮助将创意转化为优质内容。"
+    },
+    "messageText": "立即体验 AI 自由画布，激发创作灵感！",
+    "tryForFree": "开始使用",
+    "contactUs": "联系我们",
     "joinBtn": "免费使用",
     "downloadBtn": "下载插件",
     "loginBtn": "登录",
@@ -109,6 +117,11 @@
       "description": "自动标记、随时搜索和回顾。通过标签和时间线构建知识体系"
     },
     "footer": {
+      "cta": {
+        "title": "准备好立即体验 AI 自由画布，激发创作灵感了吗？",
+        "getStarted": "立即体验",
+        "contactUs": "联系我们"
+      },
       "description": "快速总结与形成洞察、自动化归档以及智能语义搜索——Refly 能够为你打造第二大脑，拓展你的知识视野，并赋予你超乎寻常的能力。",
       "right": "Refly.ai 版权所有。",
       "product": {

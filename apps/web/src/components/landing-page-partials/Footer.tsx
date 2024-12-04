@@ -2,138 +2,166 @@ import { Link } from "react-router-dom"
 import Logo from "@/assets/logo.svg"
 import { useTranslation } from "react-i18next"
 import "./footer.scss"
+import { Button } from "antd"
 
 function Footer() {
   const { t } = useTranslation()
 
   return (
-    <footer className="px-6 sm:px-6 md:px-6 lg:px-0">
+    <footer className="px-6">
       <div className="py-12 md:py-16">
-        <div className="mx-auto max-w-4xl">
-          {/* Top area: Blocks */}
-          <div className="mb-8 grid gap-8 md:mb-12 md:grid-cols-12 lg:gap-20">
-            {/* 1st block */}
-            <div className="md:col-span-4 lg:col-span-5">
-              <div className="mb-2">
-                {/* Logo */}
-                <Link to="/" className="inline-block" aria-label="Cruip">
-                  <div className="logo">
-                    <img
-                      className="logo-img"
-                      src={Logo}
-                      alt=""
-                      style={{ width: 34, height: 34 }}
-                    />
-                    <span className="title">Refly</span>
-                  </div>
-                </Link>
-              </div>
-              <div className="text-gray-400">
-                {t("landingPage.footer.description")}
-              </div>
-            </div>
-
-            {/* 2nd, 3rd and 4th blocks */}
-            <div className="grid gap-8 sm:grid-cols-3 md:col-span-8 lg:col-span-7">
-              {/* 2nd block */}
-              <div className="text-sm">
-                <h6 className="mb-1 font-medium">
-                  {t("landingPage.footer.product.title")}
-                </h6>
-                <ul>
-                  <li className="mb-1">
-                    <Link
-                      target="_blank"
-                      to="https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd"
-                      className="text-gray-400 transition duration-150 ease-in-out hover:text-gray-100">
-                      {t("landingPage.footer.product.one")}
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              {/* 3rd block */}
-              <div className="text-sm">
-                <h6 className="mb-1 font-medium">
-                  {t("landingPage.footer.resource.title")}
-                </h6>
-                <ul>
-                  <li className="mb-1">
-                    <Link
-                      to="https://twitter.com/tuturetom"
-                      target="_blank"
-                      className="text-gray-400 transition duration-150 ease-in-out hover:text-gray-100">
-                      {t("landingPage.footer.resource.one")}
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              {/* 5th block */}
-              <div className="text-sm">
-                <h6 className="mb-1 font-medium">
-                  {t("landingPage.footer.about.title")}
-                </h6>
-                <ul>
-                  <li className="mb-1">
-                    <Link
-                      to="/privacy"
-                      className="text-gray-400 transition duration-150 ease-in-out hover:text-gray-100">
-                      {t("landingPage.footer.about.one")}
-                    </Link>
-                  </li>
-                  <li className="mb-1">
-                    <Link
-                      to="/terms"
-                      className="text-gray-400 transition duration-150 ease-in-out hover:text-gray-100">
-                      {t("landingPage.footer.about.two")}
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="text-sm">
-                <h6 className="mb-1 font-medium">
-                  {t("landingPage.footer.contactUs.title")}
-                </h6>
-                <ul>
-                  <li className="mb-1">
-                    <Link
-                      to="mailto:pftom@qq.com"
-                      className="text-gray-400 transition duration-150 ease-in-out hover:text-gray-100">
-                      {t("landingPage.footer.contactUs.one")}
-                    </Link>
-                  </li>
-                </ul>
-              </div>
+        <div className="mx-6">
+          {/* CTA Block */}
+          <div
+            className="mb-[72px] flex h-[432px] w-full flex-col items-center justify-center rounded-[20px] border border-[#E3E3E3] p-12 text-center"
+            style={{
+              backgroundImage:
+                "linear-gradient(180deg, #F8E2D3 0%, #FCFBFA 95%, #FCFAF9 100%, #FCFCFC 100%, #FFFFFF 100%)",
+            }}>
+            <h2 className="mb-6 text-3xl font-bold md:text-4xl">
+              {t("landingPage.footer.cta.title")}
+            </h2>
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Button
+                size="large"
+                className="rounded-md bg-[#00968F] px-8 py-3 text-white transition hover:bg-[#007A74]"
+                target="_blank">
+                {t("landingPage.footer.cta.getStarted")}
+              </Button>
+              <Button
+                size="large"
+                className="rounded-md bg-white px-8 py-3 text-[#00968F] shadow-sm transition hover:bg-gray-50"
+                target="_blank">
+                {t("landingPage.footer.cta.contactUs")}
+              </Button>
             </div>
           </div>
 
-          {/* Bottom area */}
-          <div className="md:flex md:items-center md:justify-between">
-            {/* Social links */}
-            <ul className="mb-4 flex md:order-1 md:mb-0 md:ml-4">
-              <li>
-                <Link
-                  target="_blank"
-                  to="https://twitter.com/tuturetom"
-                  className="flex items-center justify-center rounded-full bg-gray-800 text-green-600 transition duration-150 ease-in-out hover:bg-green-600 hover:text-gray-100"
-                  aria-label="Twitter">
-                  <svg
-                    color="#fff"
-                    fill="#00968F"
-                    className="h-8 w-8 fill-current"
-                    viewBox="0 0 32 32"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path d="M24 11.5c-.6.3-1.2.4-1.9.5.7-.4 1.2-1 1.4-1.8-.6.4-1.3.6-2.1.8-.6-.6-1.5-1-2.4-1-1.7 0-3.2 1.5-3.2 3.3 0 .3 0 .5.1.7-2.7-.1-5.2-1.4-6.8-3.4-.3.5-.4 1-.4 1.7 0 1.1.6 2.1 1.5 2.7-.5 0-1-.2-1.5-.4 0 1.6 1.1 2.9 2.6 3.2-.3.1-.6.1-.9.1-.2 0-.4 0-.6-.1.4 1.3 1.6 2.3 3.1 2.3-1.1.9-2.5 1.4-4.1 1.4H8c1.5.9 3.2 1.5 5 1.5 6 0 9.3-5 9.3-9.3v-.4c.7-.5 1.3-1.1 1.7-1.8z" />
-                  </svg>
+          {/* Main Footer Content */}
+          <div
+            className="w-full rounded-[20px] border border-[#E3E3E3] p-12"
+            style={{
+              backgroundImage:
+                "linear-gradient(180deg, #FAF8F4 0%, #FCFBFA 95%, #FCFAF9 100%, #FCFCFC 100%, #FFFFFF 100%)",
+            }}>
+            {/* Updated Footer Layout */}
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[460px_1fr]">
+              {/* Left Column - Logo, Description, Social */}
+              <div className="max-w-[460px]">
+                <Link to="/" className="mb-4 inline-block" aria-label="Refly">
+                  <div className="flex items-center gap-2">
+                    <img src={Logo} alt="" className="h-8 w-8" />
+                    <span className="text-xl font-bold">Refly</span>
+                  </div>
                 </Link>
-              </li>
-            </ul>
+                <p className="mb-6 max-w-[320px] text-base leading-relaxed text-gray-600">
+                  {t("landingPage.description")}
+                </p>
+                <div className="flex items-center gap-4">
+                  <Link
+                    to="https://twitter.com/tuturetom"
+                    target="_blank"
+                    className="rounded-full bg-gray-100 p-2 transition hover:bg-gray-200"
+                    aria-label="Twitter">
+                    <svg
+                      className="h-5 w-5 fill-current text-gray-600"
+                      viewBox="0 0 32 32">
+                      <path d="M24 11.5c-.6.3-1.2.4-1.9.5.7-.4 1.2-1 1.4-1.8-.6.4-1.3.6-2.1.8-.6-.6-1.5-1-2.4-1-1.7 0-3.2 1.5-3.2 3.3 0 .3 0 .5.1.7-2.7-.1-5.2-1.4-6.8-3.4-.3.5-.4 1-.4 1.7 0 1.1.6 2.1 1.5 2.7-.5 0-1-.2-1.5-.4 0 1.6 1.1 2.9 2.6 3.2-.3.1-.6.1-.9.1-.2 0-.4 0-.6-.1.4 1.3 1.6 2.3 3.1 2.3-1.1.9-2.5 1.4-4.1 1.4H8c1.5.9 3.2 1.5 5 1.5 6 0 9.3-5 9.3-9.3v-.4c.7-.5 1.3-1.1 1.7-1.8z" />
+                    </svg>
+                  </Link>
+                  <Link
+                    to="https://github.com/pftom/refly"
+                    target="_blank"
+                    className="rounded-full bg-gray-100 p-2 transition hover:bg-gray-200"
+                    aria-label="GitHub">
+                    <svg
+                      className="h-5 w-5 fill-current text-gray-600"
+                      viewBox="0 0 24 24">
+                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                    </svg>
+                  </Link>
+                </div>
+                <div className="mt-6">
+                  <p className="text-sm text-gray-500">
+                    © {new Date().getFullYear()} Powerformer, Inc.
+                  </p>
+                </div>
+              </div>
 
-            {/* Copyrights note */}
-            <div className="mr-4 text-sm text-gray-400">
-              &copy; {t("landingPage.footer.right")}
+              {/* Right Column - Navigation Links */}
+              <div className="grid gap-8 sm:grid-cols-4">
+                {/* 2nd block */}
+                <div className="text-sm">
+                  <h6 className="mb-1 font-medium">
+                    {t("landingPage.footer.product.title")}
+                  </h6>
+                  <ul className="list-none">
+                    <li className="mb-1">
+                      <Link
+                        target="_blank"
+                        to="https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd"
+                        className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                        {t("landingPage.footer.product.one")}
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* 3rd block */}
+                <div className="text-sm">
+                  <h6 className="mb-1 font-medium">
+                    {t("landingPage.footer.resource.title")}
+                  </h6>
+                  <ul className="list-none">
+                    <li className="mb-1">
+                      <Link
+                        to="https://twitter.com/tuturetom"
+                        target="_blank"
+                        className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                        {t("landingPage.footer.resource.one")}
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* 5th block */}
+                <div className="text-sm">
+                  <h6 className="mb-1 font-medium">
+                    {t("landingPage.footer.about.title")}
+                  </h6>
+                  <ul className="list-none">
+                    <li className="mb-1">
+                      <Link
+                        to="/privacy"
+                        className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                        {t("landingPage.footer.about.one")}
+                      </Link>
+                    </li>
+                    <li className="mb-1">
+                      <Link
+                        to="/terms"
+                        className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                        {t("landingPage.footer.about.two")}
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="text-sm">
+                  <h6 className="mb-1 font-medium">
+                    {t("landingPage.footer.contactUs.title")}
+                  </h6>
+                  <ul className="list-none">
+                    <li className="mb-1">
+                      <Link
+                        to="mailto:pftom@qq.com"
+                        className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                        {t("landingPage.footer.contactUs.one")}
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </div>
