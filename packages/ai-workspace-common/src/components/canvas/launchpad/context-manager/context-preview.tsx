@@ -20,7 +20,7 @@ export const ContextPreview = ({ item }: { item: CanvasNode }) => {
 
   console.log('item', item);
 
-  const [content, setContent] = useState(item?.data?.metadata?.contentPreview as string);
+  const [content, setContent] = useState<string>((item?.data?.metadata?.contentPreview as string) || '');
   const [isLoading, setIsLoading] = useState(false);
 
   const getDocumentDetail = async (docId: string) => {
