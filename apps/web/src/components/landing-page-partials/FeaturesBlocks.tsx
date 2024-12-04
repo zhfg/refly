@@ -1,10 +1,14 @@
-import React from "react"
+import React, { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { AiOutlineAppstore, AiOutlineExperiment } from "react-icons/ai"
+import { FaRegPaperPlane } from "react-icons/fa"
+import { LuSearch } from "react-icons/lu"
+import { MdOutlineNoteAlt } from "react-icons/md"
 
 // Feature type definition for better type safety
 interface Feature {
   tag: string
-  tagIcon?: string
+  tagIcon?: string | ReactNode
   title: string
   description: string
   bulletPoints: string[]
@@ -51,11 +55,15 @@ const FeatureCard = ({
 
         {/* Content Section */}
         <div className="flex flex-col justify-center md:w-1/2">
-          <span className="mb-3 inline-block w-fit rounded-lg border border-solid border-black/10 bg-white px-4 py-1 text-sm font-medium shadow-[0_3px_20px_0_rgba(0,0,0,0.10)]">
+          <span className="mb-3 inline-flex w-fit items-center rounded-lg border border-solid border-black/10 bg-white px-4 py-1 text-sm font-medium shadow-[0_3px_20px_0_rgba(0,0,0,0.10)]">
             {feature?.tagIcon && (
-              <span className="mr-2">{feature.tagIcon}</span>
+              <span className="mr-2 flex items-center">
+                {typeof feature.tagIcon === "string"
+                  ? feature.tagIcon
+                  : feature.tagIcon}
+              </span>
             )}
-            {feature?.tag}
+            <span>{feature?.tag}</span>
           </span>
           <h2 className="mb-4 text-2xl font-bold md:text-3xl">
             {feature?.title}
@@ -80,7 +88,7 @@ function FeaturesBlocks() {
   const { t } = useTranslation()
   const header = {
     tag: t("landingPage.features.tag"),
-    tagIcon: "⚛️",
+    tagIcon: <AiOutlineAppstore />,
     title: t("landingPage.features.title"),
   }
 
@@ -88,7 +96,7 @@ function FeaturesBlocks() {
   const features: Feature[] = [
     {
       tag: "Plan",
-      tagIcon: "⚛️",
+      tagIcon: <FaRegPaperPlane className="inline-block" />,
       title: t("landingPage.features.featureOne.title"),
       description: t("landingPage.features.featureOne.description"),
       bulletPoints: t("landingPage.features.featureOne.bulletPoints", {
@@ -100,7 +108,7 @@ function FeaturesBlocks() {
     },
     {
       tag: t("landingPage.features.featureTwo.tag"),
-      tagIcon: "⚛️",
+      tagIcon: <LuSearch className="inline-block" />,
       title: t("landingPage.features.featureTwo.title"),
       description: t("landingPage.features.featureTwo.description"),
       bulletPoints: t("landingPage.features.featureTwo.bulletPoints", {
@@ -112,7 +120,7 @@ function FeaturesBlocks() {
     },
     {
       tag: "Research",
-      tagIcon: "⚛️",
+      tagIcon: <AiOutlineExperiment className="inline-block" />,
       title: t("landingPage.features.featureThree.title"),
       description: t("landingPage.features.featureThree.description"),
       bulletPoints: t("landingPage.features.featureThree.bulletPoints", {
@@ -124,7 +132,7 @@ function FeaturesBlocks() {
     },
     {
       tag: "Thinking & Creation",
-      tagIcon: "⚛️",
+      tagIcon: <MdOutlineNoteAlt className="inline-block" />,
       title: t("landingPage.features.featureFour.title"),
       description: t("landingPage.features.featureFour.description"),
       bulletPoints: t("landingPage.features.featureFour.bulletPoints", {
@@ -140,9 +148,15 @@ function FeaturesBlocks() {
     <section className="mt-[98px] px-6 sm:px-6 md:px-6 lg:px-0">
       {/* Header Section */}
       <div className="mb-16 text-center">
-        <span className="mb-8 inline-block rounded-lg border border-solid border-black/10 bg-white px-6 py-2 text-sm font-medium shadow-[0_3px_20px_0_rgba(0,0,0,0.10)]">
-          {header?.tagIcon && <span className="mr-2">{header.tagIcon}</span>}
-          {header?.tag}
+        <span className="mb-8 inline-flex items-center justify-center rounded-lg border border-solid border-black/10 bg-white px-6 py-2 text-sm font-medium shadow-[0_3px_20px_0_rgba(0,0,0,0.10)]">
+          {header?.tagIcon && (
+            <span className="mr-2 flex items-center">
+              {typeof header.tagIcon === "string"
+                ? header.tagIcon
+                : header.tagIcon}
+            </span>
+          )}
+          <span>{header?.tag}</span>
         </span>
         <section className="text-center">
           <h1 className="text-3xl font-bold md:text-4xl">
