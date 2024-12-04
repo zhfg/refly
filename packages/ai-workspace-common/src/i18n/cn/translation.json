@@ -309,7 +309,7 @@
       "contentSelector": "内容划线选择器",
       "addContext": "添加上下文",
       "clearContext": "清空",
-      "addToContext": "引用",
+      "addToContext": "引用提问",
       "resource": "资源",
       "resources": "资源",
       "canvas": "稿布",
@@ -352,6 +352,7 @@
       },
       "alreadyAddedWithTitle": "[{{type}}] {{title}} 已添加到上下文",
       "addSuccessWithTitle": "[{{type}}] {{title}} 已成功添加到上下文",
+      "addToContextSuccess": "已成功添加到上下文",
       "untitled": "未命名",
       "deleteSuccessWithTitle": "已成功删除 [{{type}}] \"{{title}}\"",
       "nodeTypes": {
@@ -431,6 +432,20 @@
     "nodeStatus": {
       "isCreatingDocument": "创建中...",
       "createDocument": "创建文档"
+    },
+    "nodePreview": {
+      "document": {
+        "contentPreview": "加载文档内容中...",
+        "noContentPreview": "暂无内容预览"
+      },
+      "resource": {
+        "contentPreview": "加载资源内容中...",
+        "noContentPreview": "暂无内容预览"
+      },
+      "skillResponse": {
+        "contentPreview": "技能响应内容加载中...",
+        "noContentPreview": "暂无内容预览"
+      }
     }
   },
   "resource": {

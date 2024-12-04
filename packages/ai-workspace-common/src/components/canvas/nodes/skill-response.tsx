@@ -23,7 +23,7 @@ import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
 export const SkillResponseNode = (props: SkillResponseNodeProps) => {
-  const { data, selected, id, hideActions = false, isPreview = false, hideHandles = false } = props;
+  const { data, selected, id, hideActions = false, isPreview = false, hideHandles = false, onNodeClick } = props;
   const [isHovered, setIsHovered] = useState(false);
   const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();
@@ -119,7 +119,12 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   }, [content, debouncedCreateDocument, data.entityId, data?.title, modelName]);
 
   return (
-    <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+    <div
+      className="relative group"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={onNodeClick}
+    >
       {isWeb && !hideActions && (
         <ActionButtons
           type="skill-response"
@@ -195,7 +200,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
               text-ellipsis
             "
             >
-              {isPreview ? contentPreview : content}
+              {(isPreview ? contentPreview : content) || t('canvas.nodePreview.skillResponse.noContentPreview')}
             </div>
             <div className="flex items-center gap-2">
               {artifacts?.map((artifact) => (
