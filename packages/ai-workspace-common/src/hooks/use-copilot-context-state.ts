@@ -4,7 +4,7 @@ import { ChatMessage } from '@refly/openapi-schema';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 const checkShowRelatedQuestion = (messsages: ChatMessage[] = []) => {
@@ -31,7 +31,7 @@ export const useCopilotContextState = () => {
     currentResource: state.currentResource,
     resourcePanelVisible: state.resourcePanelVisible,
   }));
-  const canvasStore = useCanvasStoreShallow((state) => ({
+  const canvasStore = useDocumentStoreShallow((state) => ({
     currentCanvas: state.currentCanvas,
   }));
 

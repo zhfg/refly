@@ -38,14 +38,12 @@ export const useProcessContextItems = () => {
         return t('knowledgeBase.context.resource');
       case 'canvas':
         return t('knowledgeBase.context.canvas');
-      case 'project':
-        return t('knowledgeBase.context.project');
       case 'extensionWeblink':
         return t('knowledgeBase.context.extensionWeblink');
       case 'extensionWeblinkSelection':
         return t('knowledgeBase.context.extensionWeblinkSelection');
-      case 'canvasSelection':
-        return t('knowledgeBase.context.canvasSelection');
+      case 'documentSelection':
+        return t('knowledgeBase.context.documentSelection');
       case 'resourceSelection':
         return t('knowledgeBase.context.resourceSelection');
     }
@@ -59,7 +57,7 @@ export const useProcessContextItems = () => {
       return mark.url;
     }
 
-    if (mark.type === 'canvas' || mark.type === 'canvasSelection') {
+    if (mark.type === 'canvas' || mark.type === 'documentSelection') {
       if (isWebRuntime) {
         const currentId = mark.type === 'canvas' ? mark.id : mark.parentId;
         return () => {
@@ -92,14 +90,6 @@ export const useProcessContextItems = () => {
         };
       } else {
         return `${baseUrl}/resource/${mark.id}`;
-      }
-    }
-
-    if (mark.type === 'project') {
-      if (isWebRuntime) {
-        return () => jumpToProject({ projectId: mark.id });
-      } else {
-        return `${baseUrl}/knowledge-base?kbId=${mark.id}`;
       }
     }
   };
@@ -205,10 +195,10 @@ export const useProcessContextItems = () => {
           id = metadata.entityId;
           typeKey = metadata.domain;
           const queryParams = getQueryParams(metadata.url || '') || {};
-          if (typeKey === 'noteSelection') {
-            parentId = queryParams.noteId;
+          if (typeKey === 'documentSelection') {
+            parentId = queryParams?.noteId || queryParams?.docId;
           } else if (typeKey === 'resourceSelection') {
-            parentId = queryParams.resId;
+            parentId = queryParams?.resId;
           }
         }
 

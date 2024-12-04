@@ -213,8 +213,8 @@ export class RAGService {
   async indexDocument(user: User, doc: Document<NodeMeta>): Promise<{ size: number }> {
     const { uid } = user;
     const { pageContent, metadata } = doc;
-    const { nodeType, canvasId, resourceId } = metadata;
-    const docId = nodeType === 'canvas' ? canvasId : resourceId;
+    const { nodeType, docId: canvasId, resourceId } = metadata;
+    const docId = nodeType === 'document' ? canvasId : resourceId;
 
     const chunks = await this.chunkText(pageContent);
     const chunkEmbeds = await this.embeddings.embedDocuments(chunks);
@@ -281,10 +281,10 @@ export class RAGService {
         match: { any: param.filter?.urls },
       });
     }
-    if (param.filter?.canvasIds?.length > 0) {
+    if (param.filter?.docIds?.length > 0) {
       conditions.push({
         key: 'canvasId',
-        match: { any: param.filter?.canvasIds },
+        match: { any: param.filter?.docIds },
       });
     }
     if (param.filter?.resourceIds?.length > 0) {

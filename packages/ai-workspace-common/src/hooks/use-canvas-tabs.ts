@@ -1,9 +1,9 @@
 import { Canvas } from '@refly/openapi-schema';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { CanvasTab, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { CanvasTab, useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 
 export const useCanvasTabs = () => {
-  const noteStore = useCanvasStoreShallow((state) => ({
+  const noteStore = useDocumentStoreShallow((state) => ({
     tabs: state.tabs,
     activeTab: state.activeTab,
     updateTabs: state.updateTabs,

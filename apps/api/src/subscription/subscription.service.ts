@@ -553,7 +553,7 @@ export class SubscriptionService implements OnModuleInit {
   }
 
   async syncTokenUsage(data: SyncTokenUsageJobData) {
-    const { uid, usage, skill, timestamp } = data;
+    const { uid, usage, timestamp } = data;
     const user = await this.prisma.user.findUnique({ where: { uid } });
     if (!user) {
       this.logger.warn(`No user found for uid ${uid}`);
@@ -563,11 +563,8 @@ export class SubscriptionService implements OnModuleInit {
     await this.prisma.$transaction([
       this.prisma.tokenUsage.create({
         data: {
-          ...pick(data, ['uid', 'convId', 'jobId', 'spanId']),
+          ...pick(data, ['uid', 'resultId']),
           ...pick(usage, ['tier', 'modelProvider', 'modelName', 'inputTokens', 'outputTokens']),
-          skillId: skill.skillId,
-          skillTplName: skill.tplName,
-          skillDisplayName: skill.displayName || '',
         },
       }),
       this.prisma.tokenUsageMeter.updateMany({
@@ -596,7 +593,7 @@ export class SubscriptionService implements OnModuleInit {
       return;
     }
 
-    this.logger.log(`Syncing storage usage for user ${uid}`);
+    // this.logger.log(`Syncing storage usage for user ${uid}`);
 
     const activeMeter = await this.getOrCreateStorageUsageMeter(user);
 
@@ -607,7 +604,7 @@ export class SubscriptionService implements OnModuleInit {
     }
 
     await this.prisma.$transaction(async (prisma) => {
-      const [resourceSizeSum, canvasSizeSum, fileSizeSum] = await Promise.all([
+      const [resourceSizeSum, docSizeSum, fileSizeSum] = await Promise.all([
         prisma.resource.aggregate({
           _sum: {
             storageSize: true,
@@ -615,7 +612,7 @@ export class SubscriptionService implements OnModuleInit {
           },
           where: { uid, deletedAt: null },
         }),
-        prisma.canvas.aggregate({
+        prisma.document.aggregate({
           _sum: {
             storageSize: true,
             vectorSize: true,
@@ -634,17 +631,17 @@ export class SubscriptionService implements OnModuleInit {
         where: { meterId: activeMeter.meterId },
         data: {
           resourceSize: resourceSizeSum._sum.storageSize || 0,
-          canvasSize: canvasSizeSum._sum.storageSize || 0,
+          canvasSize: docSizeSum._sum.storageSize || 0,
           fileSize: fileSizeSum._sum.storageSize || 0,
           vectorStorageUsed:
             (resourceSizeSum._sum.vectorSize || BigInt(0)) +
-            (canvasSizeSum._sum.vectorSize || BigInt(0)),
+            (docSizeSum._sum.vectorSize || BigInt(0)),
           syncedAt: timestamp,
         },
       });
     });
 
-    this.logger.log(`Storage usage for user ${uid} synced at ${timestamp}`);
+    // this.logger.log(`Storage usage for user ${uid} synced at ${timestamp}`);
   }
 
   async getModelList() {

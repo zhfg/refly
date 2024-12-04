@@ -1,26 +1,25 @@
 import { useTranslation } from 'react-i18next';
 import { useCookie } from 'react-use';
 import Cookies from 'js-cookie';
-import { getWebLogin, getCookieOrigin, getExtensionId } from '@refly/utils/url';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-
-import { Dropdown, Menu, Modal, Avatar } from '@arco-design/web-react';
+import { getCookieOrigin, getExtensionId } from '@refly/utils/url';
+import { Menu, Modal, Avatar } from '@arco-design/web-react';
+import { Popover } from 'antd';
 import { LuSettings, LuLogOut } from 'react-icons/lu';
-import { useState } from 'react';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 
 // styles
 import './index.scss';
+import { AiOutlineTwitter } from 'react-icons/ai';
 
 export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const location = useLocation();
   const userStore = useUserStore();
+  const { setShowSettingModal } = useSiderStoreShallow((state) => ({
+    setShowSettingModal: state.setShowSettingModal,
+  }));
   const [modal, contextHolder] = Modal.useModal();
   const [token, updateCookie, deleteCookie] = useCookie('_refly_ai_sid');
-  const [dropdownVisible, setDropdownVisible] = useState(false);
 
   const handleLogout = () => {
     modal.confirm?.({
@@ -51,11 +50,10 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
 
   const handleMenuClick = (key: string) => {
     if (key === 'settings') {
-      navigate('/settings');
+      setShowSettingModal(true);
     } else if (key === 'logout') {
       handleLogout();
     }
-    setDropdownVisible(false);
   };
 
   const dropList = (
@@ -72,7 +70,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
         </div>
         <Menu
           className={'sider-menu-setting-list-menu'}
-          defaultSelectedKeys={location.pathname === '/settings' ? ['settings'] : []}
+          selectedKeys={[]}
           onClickMenuItem={(key) => handleMenuClick(key)}
         >
           <Menu.Item key="settings">
@@ -83,6 +81,21 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
             <LuLogOut style={{ transform: 'translateY(2px)', marginRight: 8 }} />
             {t('loggedHomePage.siderMenu.logout')}
           </Menu.Item>
+          <Menu.Item
+            key="getHelp"
+            onClick={() => {
+              window.open(`https://twitter.com/tuturetom`, '_blank');
+            }}
+          >
+            <AiOutlineTwitter
+              style={{
+                fontSize: 16,
+                transform: 'translateY(3px)',
+                marginRight: 8,
+              }}
+            />
+            {t('loggedHomePage.siderMenu.getHelp')}
+          </Menu.Item>
         </Menu>
       </div>
     </div>
@@ -90,15 +103,15 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
 
   return (
     <div className="sider-menu-setting-list">
-      <Dropdown
-        droplist={dropList}
-        trigger="click"
-        position="top"
-        popupVisible={dropdownVisible}
-        onVisibleChange={setDropdownVisible}
+      <Popover
+        zIndex={12}
+        overlayInnerStyle={{ padding: 0, backgroundColor: 'transparent', boxShadow: 'none' }}
+        arrow={false}
+        placement="bottom"
+        content={dropList}
       >
         {props.children}
-      </Dropdown>
+      </Popover>
       {contextHolder}
     </div>
   );

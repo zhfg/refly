@@ -1,127 +1,74 @@
 import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
+import { Edge } from '@xyflow/react';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
-import { Canvas } from '@refly/openapi-schema';
-import { EditorInstance } from '@refly-packages/editor-core/components';
-
-export enum ActionSource {
-  KnowledgeBase = 'knowledge-base',
-  Conv = 'conv',
-  Canvas = 'canvas',
+interface CanvasData {
+  nodes: CanvasNode<any>[];
+  edges: Edge[];
+  mode: 'pointer' | 'hand';
+  pinnedNodes: CanvasNode<any>[];
 }
 
-export interface CanvasTab {
-  title: string;
-  key: string;
-  content: string;
-  canvasId: string;
-  projectId: string;
+export interface CanvasState {
+  data: Record<string, CanvasData>;
+  showPreview: boolean;
+
+  setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
+  setEdges: (canvasId: string, edges: Edge[]) => void;
+  setMode: (canvasId: string, mode: 'pointer' | 'hand') => void;
+  addPinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
+  removePinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
+  setShowPreview: (show: boolean) => void;
 }
 
-export type CanvasServerStatus = 'disconnected' | 'connected';
-export type CanvasSaveStatus = 'Saved' | 'Unsaved';
+const defaultState: () => CanvasData = () => ({
+  nodes: [],
+  edges: [],
+  selectedNode: null,
+  mode: 'hand',
+  selectedNodes: [],
+  pinnedNodes: [],
+});
 
-export interface TableOfContentsItem {
-  isActive: boolean;
-  isScrolledOver: boolean;
-  id: string;
-  itemIndex: number;
-  textContent: string;
-}
+export const useCanvasStore = create<CanvasState>()(
+  immer((set) => ({
+    data: {},
+    showPreview: true,
 
-interface CanvasBaseState {
-  currentCanvas: Canvas | null;
-  isRequesting: boolean;
-  newCanvasCreating: boolean;
-  isAiEditing: boolean;
-  isCreatingNewCanvasOnHumanMessage: boolean;
-
-  // tabs
-  tabs: CanvasTab[];
-  activeTab: string;
-  canvasPanelVisible: boolean;
-
-  // canvas
-  editor: EditorInstance | null;
-  canvasServerStatus: CanvasServerStatus;
-  canvasCharsCount: number;
-  canvasSaveStatus: CanvasSaveStatus;
-
-  lastCursorPosRef: number | null;
-
-  // tocItems
-  tocItems: TableOfContentsItem[];
-
-  updateCurrentCanvas: (canvas: Canvas) => void;
-  updateIsRequesting: (isRequesting: boolean) => void;
-  updateNewCanvasCreating: (creating: boolean) => void;
-  updateIsCreatingNewCanvasOnHumanMessage: (creating: boolean) => void;
-  updateIsAiEditing: (editing: boolean) => void;
-  updateTabs: (tabs: CanvasTab[]) => void;
-  updateActiveTab: (key: string) => void;
-  updateCanvasPanelVisible: (visible: boolean) => void;
-  updateCanvasServerStatus: (status: CanvasServerStatus) => void;
-  updateCanvasSaveStatus: (status: CanvasSaveStatus) => void;
-  updateCanvasCharsCount: (count: number) => void;
-  updateEditor: (editor: EditorInstance) => void;
-
-  updateLastCursorPosRef: (pos: number) => void;
-  updateTocItems: (items: TableOfContentsItem[]) => void;
-
-  resetState: () => void;
-}
-
-export const defaultState = {
-  currentCanvas: null as null | Canvas,
-  tabs: [],
-  activeTab: 'key1',
-  canvasPanelVisible: false,
-  isRequesting: false,
-  newCanvasCreating: false,
-  isCreatingNewCanvasOnHumanMessage: false,
-  isAiEditing: false,
-  tocItems: [],
-
-  // canvases
-  editor: null,
-  canvasServerStatus: 'disconnected' as CanvasServerStatus,
-  canvasCharsCount: 0,
-  canvasSaveStatus: 'Unsaved' as CanvasSaveStatus,
-
-  // canvas selection status content, main for skill consume
-  lastCursorPosRef: null,
-};
-
-export const useCanvasStore = create<CanvasBaseState>()(
-  devtools((set) => ({
-    ...defaultState,
-
-    updateCurrentCanvas: (canvas) => set((state) => ({ ...state, currentCanvas: canvas })),
-    updateIsRequesting: (isRequesting: boolean) => set((state) => ({ ...state, isRequesting })),
-    updateTabs: (tabs: CanvasTab[]) => set((state) => ({ ...state, tabs })),
-    updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
-    updateNewCanvasCreating: (creating: boolean) => set((state) => ({ ...state, newCanvasCreating: creating })),
-    updateIsCreatingNewCanvasOnHumanMessage: (creating: boolean) =>
-      set((state) => ({ ...state, isCreatingNewCanvasOnHumanMessage: creating })),
-    updateIsAiEditing: (editing: boolean) => set((state) => ({ ...state, isAiEditing: editing })),
-
-    // tabs
-    updateCanvasPanelVisible: (visible: boolean) => set((state) => ({ ...state, canvasPanelVisible: visible })),
-
-    // canvases
-    updateEditor: (editor: EditorInstance) => set((state) => ({ ...state, editor })),
-    updateCanvasServerStatus: (status: CanvasServerStatus) =>
-      set((state) => ({ ...state, canvasServerStatus: status })),
-    updateCanvasSaveStatus: (status: CanvasSaveStatus) => set((state) => ({ ...state, canvasSaveStatus: status })),
-    updateCanvasCharsCount: (count: number) => set((state) => ({ ...state, canvasCharsCount: count })),
-    updateLastCursorPosRef: (pos: number) => set((state) => ({ ...state, lastCursorPosRef: pos })),
-    updateTocItems: (items: TableOfContentsItem[]) => set((state) => ({ ...state, tocItems: items })),
-
-    resetState: () => set((state) => ({ ...state, ...defaultState })),
+    setShowPreview: (show) =>
+      set((state) => {
+        state.showPreview = show;
+      }),
+    setNodes: (canvasId, nodes) =>
+      set((state) => {
+        state.data[canvasId] ??= defaultState();
+        state.data[canvasId].nodes = nodes;
+      }),
+    setEdges: (canvasId, edges) =>
+      set((state) => {
+        state.data[canvasId] ??= defaultState();
+        state.data[canvasId].edges = edges;
+      }),
+    setMode: (canvasId, mode) =>
+      set((state) => {
+        state.data[canvasId] ??= defaultState();
+        state.data[canvasId].mode = mode;
+      }),
+    addPinnedNode: (canvasId, node) =>
+      set((state) => {
+        state.data[canvasId] ??= defaultState();
+        state.data[canvasId].pinnedNodes.unshift(node);
+      }),
+    removePinnedNode: (canvasId, node) =>
+      set((state) => {
+        state.data[canvasId] ??= defaultState();
+        state.data[canvasId].pinnedNodes = state.data[canvasId].pinnedNodes.filter((n) => n.id !== node.id);
+      }),
   })),
 );
 
-export const useCanvasStoreShallow = <T>(selector: (state: CanvasBaseState) => T) => {
+export const useCanvasStoreShallow = <T>(selector: (state: CanvasState) => T) => {
   return useCanvasStore(useShallow(selector));
 };

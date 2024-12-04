@@ -5,7 +5,7 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
+import { SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -21,7 +21,7 @@ export class BasicSummarySkill extends BaseSkill {
     'zh-CN': '基础总结',
   };
 
-  configSchema: SkillTemplateConfigSchema = {
+  configSchema: SkillTemplateConfigDefinition = {
     items: [],
   };
 
@@ -30,11 +30,11 @@ export class BasicSummarySkill extends BaseSkill {
       relation: 'mutuallyExclusive',
       rules: [
         { key: 'resources', limit: 1 },
-        { key: 'canvases', limit: 1 },
+        { key: 'documents', limit: 1 },
         {
           key: 'contentList',
           limit: 1,
-          preferredSelectionKeys: ['resourceSelection', 'canvasSelection', 'extensionWeblinkSelection'],
+          preferredSelectionKeys: ['resourceSelection', 'documentSelection', 'extensionWeblinkSelection'],
         },
       ],
     },
@@ -62,7 +62,12 @@ export class BasicSummarySkill extends BaseSkill {
     this.engine.logger.log('---GENERATE---');
 
     const { documents } = state;
-    const { locale = 'en', canvases = [], resources = [], contentList = [] } = config?.configurable || {};
+    const {
+      locale = 'en',
+      documents: contextDocuments = [],
+      resources = [],
+      contentList = [],
+    } = config?.configurable || {};
 
     // 1. build context text
     const contextToCitationText = documents.reduce((total, cur) => {
@@ -75,8 +80,8 @@ export class BasicSummarySkill extends BaseSkill {
     let contentListText = '';
     if (resources?.length > 0) {
       contentListText = resources[0].resource?.content;
-    } else if (canvases?.length > 0) {
-      contentListText = canvases[0].canvas?.content;
+    } else if (contextDocuments?.length > 0) {
+      contentListText = contextDocuments[0].document?.content;
     } else if (contentList?.length > 0) {
       contentListText = contentList.map((item, index) => `${index + 1}. ${item.content}`).join('\n\n');
     }

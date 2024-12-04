@@ -33,7 +33,7 @@ import { getCanvasContent } from '@refly-packages/ai-workspace-common/components
 import { IntentResult, useHandleAICanvas } from './use-handle-ai-canvas';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useMultilingualSearchStoreShallow } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
-import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useDocumentStore, useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import throttle from 'lodash.throttle';
 import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 
@@ -43,7 +43,7 @@ const globalIsAbortedRef = { current: false as boolean };
 let uniqueId = genUniqueId();
 
 export const useBuildTask = () => {
-  const canvasStore = useCanvasStoreShallow((state) => ({
+  const canvasStore = useDocumentStoreShallow((state) => ({
     updateIsAiEditing: state.updateIsAiEditing,
   }));
   const chatStore = useChatStoreShallow((state) => ({
@@ -122,7 +122,7 @@ export const useBuildTask = () => {
     chatStore.setIsFirstStreamContent(true);
   };
 
-  const onSkillThoughout = (skillEvent: SkillEvent) => {
+  const onSkillLog = (skillEvent: SkillEvent) => {
     const { messages = [] } = useChatStore.getState();
     const lastRelatedMessage = findLastRelatedMessage(messages, skillEvent);
     const lastRelatedMessageIndex = messages.findIndex((item) => item.msgId === lastRelatedMessage?.msgId);
@@ -194,11 +194,11 @@ export const useBuildTask = () => {
 
     if (lastRelatedMessage.content.match(/<reflyCanvas[^>]*>/)) {
       if (lastRelatedMessage.content.includes('</reflyCanvas>')) {
-        if (useCanvasStore.getState().isAiEditing) {
+        if (useDocumentStore.getState().isAiEditing) {
           canvasStore.updateIsAiEditing(false);
         }
       } else {
-        if (!useCanvasStore.getState().isAiEditing) {
+        if (!useDocumentStore.getState().isAiEditing) {
           canvasStore.updateIsAiEditing(true);
         }
       }
@@ -234,16 +234,16 @@ export const useBuildTask = () => {
     // If it is canvas content and has incremental content, send it to the editor
     const intentMatcher = lastRelatedMessage?.structuredData?.intentMatcher as IntentResult;
     if (
-      [CanvasIntentType.GenerateCanvas, CanvasIntentType.EditCanvas].includes(intentMatcher?.type) &&
+      [CanvasIntentType.GenerateDocument, CanvasIntentType.EditDocument].includes(intentMatcher?.type) &&
       incrementalContent
     ) {
-      if (intentMatcher?.type === CanvasIntentType.GenerateCanvas && incrementalContent) {
+      if (intentMatcher?.type === CanvasIntentType.GenerateDocument && incrementalContent) {
         editorEmitter.emit('streamCanvasContent', {
           canvasId: intentMatcher?.canvasId,
           isFirst: isFirstStreamContent,
           content: incrementalContent,
         });
-      } else if (intentMatcher?.type === CanvasIntentType.EditCanvas && incrementalContent) {
+      } else if (intentMatcher?.type === CanvasIntentType.EditDocument && incrementalContent) {
         editorEmitter.emit('streamEditCanvasContent', {
           canvasId: intentMatcher?.canvasId,
           isFirst: isFirstStreamContent,
@@ -486,7 +486,7 @@ export const useBuildTask = () => {
       onStart,
       onSkillStart,
       onSkillStream,
-      onSkillThoughout,
+      onSkillLog,
       onSkillStructedData,
       onSkillEnd,
       onCompleted,
@@ -508,7 +508,7 @@ export const useBuildTask = () => {
       case 'skill-start':
         return onSkillStart(msg?.message);
       case 'skill-thought':
-        return onSkillThoughout(msg?.message);
+        return onSkillLog(msg?.message);
       case 'skill-stream':
         return onSkillStream(msg?.message);
       case 'skill-end':

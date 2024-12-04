@@ -25,15 +25,31 @@ export class UnauthorizedError extends BaseError {
 }
 
 export class ParamsError extends BaseError {
-  code = 'E1001';
+  code = 'E0003';
   messageDict = {
     en: 'System parameter error. The Refly team is working quickly to address it. Please try again later.',
     'zh-CN': '系统参数错误，Refly 团队正在火速处理中，请稍后重试。',
   };
 }
 
-export class ProjectNotFoundError extends BaseError {
+export class OAuthError extends BaseError {
+  code = 'E0004';
+  messageDict = {
+    en: 'Authorization process failed, please try again',
+    'zh-CN': '授权过程失败，请重试',
+  };
+}
+
+export class CanvasNotFoundError extends BaseError {
   code = 'E1000';
+  messageDict = {
+    en: 'Canvas not found, please refresh',
+    'zh-CN': '画布不存在，请刷新重试',
+  };
+}
+
+export class ProjectNotFoundError extends BaseError {
+  code = 'E1001';
   messageDict = {
     en: 'Project not found, please refresh',
     'zh-CN': '项目不存在，请刷新重试',
@@ -48,11 +64,11 @@ export class ResourceNotFoundError extends BaseError {
   };
 }
 
-export class CanvasNotFoundError extends BaseError {
+export class DocumentNotFoundError extends BaseError {
   code = 'E1003';
   messageDict = {
-    en: 'Canvas not found, please refresh',
-    'zh-CN': '稿布不存在，请刷新重试',
+    en: 'Document not found, please refresh',
+    'zh-CN': '文档不存在，请刷新重试',
   };
 }
 
@@ -112,6 +128,14 @@ export class ConversationNotFoundError extends BaseError {
   };
 }
 
+export class ActionResultNotFoundError extends BaseError {
+  code = 'E1011';
+  messageDict = {
+    en: 'Action result not found, please refresh',
+    'zh-CN': '执行结果不存在，请刷新重试',
+  };
+}
+
 export class StorageQuotaExceeded extends BaseError {
   code = 'E2001';
   messageDict = {
@@ -141,10 +165,12 @@ const errorMap = {
   E0000: UnknownError,
   E0001: ConnectionError,
   E0002: UnauthorizedError,
-  E1000: ProjectNotFoundError,
-  E1001: ParamsError,
+  E0003: ParamsError,
+  E0004: OAuthError,
+  E1000: CanvasNotFoundError,
+  E1001: ProjectNotFoundError,
   E1002: ResourceNotFoundError,
-  E1003: CanvasNotFoundError,
+  E1003: DocumentNotFoundError,
   E1004: ReferenceNotFoundError,
   E1005: ReferenceObjectMissingError,
   E1006: SkillNotFoundError,
@@ -152,6 +178,7 @@ const errorMap = {
   E1008: LabelInstanceNotFoundError,
   E1009: ShareNotFoundError,
   E1010: ConversationNotFoundError,
+  E1011: ActionResultNotFoundError,
   E2001: StorageQuotaExceeded,
   E2002: ModelUsageQuotaExceeded,
   E2003: ModelNotSupportedError,

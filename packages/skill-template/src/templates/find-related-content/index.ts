@@ -8,7 +8,7 @@ import {
   SearchResponse,
   Source,
   SkillInvocationConfig,
-  SkillTemplateConfigSchema,
+  SkillTemplateConfigDefinition,
   SearchDomain,
   Icon,
 } from '@refly-packages/openapi-schema';
@@ -31,7 +31,7 @@ export class FindRelatedContent extends BaseSkill {
 
   icon: Icon = { type: 'emoji', value: '🔍' };
 
-  configSchema: SkillTemplateConfigSchema = {
+  configSchema: SkillTemplateConfigDefinition = {
     items: [
       {
         key: 'domains',
@@ -73,7 +73,7 @@ export class FindRelatedContent extends BaseSkill {
     context: {
       rules: [
         { key: 'resources', limit: 1 },
-        { key: 'canvases', limit: 1 },
+        { key: 'documents', limit: 1 },
         { key: 'contentList', limit: 1 },
       ],
       relation: 'mutuallyExclusive',
@@ -105,16 +105,16 @@ export class FindRelatedContent extends BaseSkill {
    * @returns - The updated state with the new message added to the list of messages.
    */
   retrieve = async (state: GraphState, config: SkillRunnableConfig) => {
-    const { user } = config;
+    const { user } = config.configurable;
 
-    const { resources, canvases, contentList, tplConfig = {} } = config?.configurable || {};
+    const { resources, documents: contextDocuments, contentList, tplConfig = {} } = config?.configurable || {};
 
     let content = '';
 
     if (resources?.length > 0) {
       content = resources[0].resource?.content;
-    } else if (canvases?.length > 0) {
-      content = canvases[0].canvas?.content;
+    } else if (contextDocuments?.length > 0) {
+      content = contextDocuments[0].document?.content;
     } else if (contentList?.length > 0) {
       content = contentList.join('\n\n');
     }
@@ -141,7 +141,7 @@ export class FindRelatedContent extends BaseSkill {
     }
 
     const sources: Source[] = searchResp.data?.map((result) => ({
-      url: result.metadata?.resourceMeta?.url,
+      url: (result.metadata?.['resourceMeta']?.['url'] as string) || '',
       title: result.title,
       pageContent: result.snippets.map((s) => s.text).join('\n\n'),
       metadata: {

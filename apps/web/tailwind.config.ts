@@ -7,7 +7,6 @@ export default {
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
     "../../packages/ai-workspace-common/src/**/*.{js,jsx,ts,tsx}",
-    "../../packages/editor-common/src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {
@@ -108,6 +107,7 @@ export default {
       fontFamily: {
         inter: ["Inter", "sans-serif"],
         "architects-daughter": ['"Architects Daughter"', "sans-serif"],
+        alibaba: ["Alibaba PuHuiTi", "sans-serif"],
       },
       fontSize: {
         xs: "0.75rem",

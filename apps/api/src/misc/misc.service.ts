@@ -21,8 +21,8 @@ import {
   CanvasNotFoundError,
   StorageQuotaExceeded,
   ParamsError,
-  ProjectNotFoundError,
   ResourceNotFoundError,
+  DocumentNotFoundError,
 } from '@refly-packages/errors';
 
 @Injectable()
@@ -76,17 +76,6 @@ export class MiscService {
       if (!resource) {
         throw new ResourceNotFoundError();
       }
-    } else if (entityType === 'project') {
-      const project = await this.prisma.project.findUnique({
-        where: {
-          projectId: entityId,
-          uid: user.uid,
-          deletedAt: null,
-        },
-      });
-      if (!project) {
-        throw new ProjectNotFoundError();
-      }
     } else if (entityType === 'canvas') {
       const canvas = await this.prisma.canvas.findUnique({
         where: {
@@ -97,6 +86,17 @@ export class MiscService {
       });
       if (!canvas) {
         throw new CanvasNotFoundError();
+      }
+    } else if (entityType === 'document') {
+      const document = await this.prisma.document.findUnique({
+        where: {
+          docId: entityId,
+          uid: user.uid,
+          deletedAt: null,
+        },
+      });
+      if (!document) {
+        throw new DocumentNotFoundError();
       }
     } else {
       throw new ParamsError(`Invalid entity type: ${entityType}`);
@@ -173,19 +173,24 @@ export class MiscService {
         deletedAt: null,
       },
     });
-    await this.minio.client.removeObjects(files.map((file) => file.storageKey));
-    this.logger.log(`Removed files: ${files.map((file) => file.storageKey).join(',')}`);
 
-    await this.prisma.staticFile.updateMany({
-      where: {
-        uid: user.uid,
-        entityId,
-        entityType,
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-    });
+    this.logger.log(`Files to remove: ${files.map((file) => file.storageKey).join(',')}`);
+
+    if (files.length > 0) {
+      await Promise.all([
+        this.minio.client.removeObjects(files.map((file) => file.storageKey)),
+        this.prisma.staticFile.updateMany({
+          where: {
+            uid: user.uid,
+            entityId,
+            entityType,
+          },
+          data: {
+            deletedAt: new Date(),
+          },
+        }),
+      ]);
+    }
   }
 
   async compareAndRemoveFiles(

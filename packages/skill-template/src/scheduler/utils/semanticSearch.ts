@@ -1,7 +1,7 @@
 import {
   SkillContextContentItem,
   SkillContextResourceItem,
-  SkillContextCanvasItem,
+  SkillContextDocumentItem,
   SearchDomain,
   SkillContextProjectItem,
   Entity,
@@ -50,7 +50,7 @@ export async function sortContentBySimilarity(
   });
 
   // 2. index documents
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.configurable.user, {
     content: documents,
     query,
     k: documents.length,
@@ -69,24 +69,24 @@ export async function sortContentBySimilarity(
 
 export async function sortCanvasesBySimilarity(
   query: string,
-  canvases: SkillContextCanvasItem[],
+  canvases: SkillContextDocumentItem[],
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
-): Promise<SkillContextCanvasItem[]> {
+): Promise<SkillContextDocumentItem[]> {
   // 1. construct documents
   const documents: Document<NodeMeta>[] = canvases.map((item) => {
     return {
-      pageContent: truncateText(item.canvas?.content || '', MAX_NEED_RECALL_TOKEN),
+      pageContent: truncateText(item.document?.content || '', MAX_NEED_RECALL_TOKEN),
       metadata: {
         ...item.metadata,
-        title: item.canvas?.title as string,
+        title: item.document?.title as string,
         nodeType: 'canvas' as ContentNodeType,
-        canvasId: item.canvas?.canvasId,
+        docId: item.document?.docId,
       },
     };
   });
 
   // 2. index documents
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.configurable.user, {
     content: documents,
     query,
     k: documents.length,
@@ -96,8 +96,8 @@ export async function sortCanvasesBySimilarity(
 
   // 4. return sorted canvases
   return sortedCanvases
-    .map((item) => canvases.find((canvas) => canvas.canvas?.canvasId === item.metadata.canvasId))
-    .filter((canvas): canvas is SkillContextCanvasItem => canvas !== undefined);
+    .map((item) => canvases.find((canvas) => canvas.document?.docId === item.metadata.docId))
+    .filter((canvas): canvas is SkillContextDocumentItem => canvas !== undefined);
 }
 
 export async function sortResourcesBySimilarity(
@@ -119,7 +119,7 @@ export async function sortResourcesBySimilarity(
   });
 
   // 2. index documents
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.configurable.user, {
     content: documents,
     query,
     k: documents.length,
@@ -226,10 +226,10 @@ export async function processSelectedContentWithSimilarity(
 
 export async function processCanvasesWithSimilarity(
   query: string,
-  canvases: SkillContextCanvasItem[] = [],
+  canvases: SkillContextDocumentItem[] = [],
   maxTokens: number,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
-): Promise<SkillContextCanvasItem[]> {
+): Promise<SkillContextDocumentItem[]> {
   const MAX_RAG_RELEVANT_CANVASES_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_CANVASES_RATIO);
   const MAX_SHORT_CANVASES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_CANVASES_RATIO);
 
@@ -238,19 +238,19 @@ export async function processCanvasesWithSimilarity(
   }
 
   // 1. calculate similarity and sort
-  let sortedCanvases: SkillContextCanvasItem[] = [];
+  let sortedCanvases: SkillContextDocumentItem[] = [];
   if (canvases.length > 1) {
     sortedCanvases = await sortCanvasesBySimilarity(query, canvases, ctx);
   } else {
     sortedCanvases = canvases;
   }
 
-  let result: SkillContextCanvasItem[] = [];
+  let result: SkillContextDocumentItem[] = [];
   let usedTokens = 0;
 
   // 2. 按相关度顺序处理 canvas
   for (const canvas of sortedCanvases) {
-    const canvasTokens = countToken(canvas?.canvas?.content || '');
+    const canvasTokens = countToken(canvas?.document?.content || '');
 
     if (canvasTokens > MAX_NEED_RECALL_TOKEN || !canvas.metadata?.useWholeContent) {
       // 1.1 大内容，直接走召回
@@ -259,17 +259,17 @@ export async function processCanvasesWithSimilarity(
         {
           entities: [
             {
-              entityId: canvas?.canvas?.canvasId,
-              entityType: 'canvas',
+              entityId: canvas?.document?.docId,
+              entityType: 'document',
             },
           ],
-          domains: ['canvas'],
+          domains: ['document'],
           limit: 10,
         },
         ctx,
       );
       const relevantContent = assembleChunks(relevantChunks);
-      result.push({ ...canvas, canvas: { ...canvas.canvas!, content: relevantContent } });
+      result.push({ ...canvas, document: { ...canvas.document!, content: relevantContent } });
       usedTokens += countToken(relevantContent);
     } else if (usedTokens + canvasTokens <= MAX_RAG_RELEVANT_CANVASES_MAX_TOKENS) {
       // 1.2 小内容，直接添加
@@ -286,7 +286,7 @@ export async function processCanvasesWithSimilarity(
   // 3. 处理剩余的 canvas
   for (let i = result.length; i < sortedCanvases.length; i++) {
     const remainingCanvas = sortedCanvases[i];
-    const canvasTokens = countToken(remainingCanvas?.canvas?.content || '');
+    const canvasTokens = countToken(remainingCanvas?.document?.content || '');
 
     // 所有的短内容直接添加
     if (canvasTokens < SHORT_CONTENT_THRESHOLD) {
@@ -300,18 +300,18 @@ export async function processCanvasesWithSimilarity(
         {
           entities: [
             {
-              entityId: remainingCanvas?.canvas?.canvasId,
-              entityType: 'canvas',
+              entityId: remainingCanvas?.document?.docId,
+              entityType: 'document',
             },
           ],
-          domains: ['canvas'],
+          domains: ['document'],
           limit: 10,
         },
         ctx,
       );
       relevantChunks = truncateChunks(relevantChunks, remainingTokens);
       const relevantContent = assembleChunks(relevantChunks);
-      result.push({ ...remainingCanvas, canvas: { ...remainingCanvas.canvas!, content: relevantContent } });
+      result.push({ ...remainingCanvas, document: { ...remainingCanvas.document!, content: relevantContent } });
       usedTokens += countToken(relevantContent);
     }
   }
@@ -448,7 +448,7 @@ export async function processMentionedContextWithSimilarity(
   // 处理 canvases
   const processedCanvases = await processCanvasesWithSimilarity(
     query,
-    mentionedContext.canvases,
+    mentionedContext.documents,
     MAX_CANVAS_RAG_RELEVANT_MAX_TOKENS,
     ctx,
   );
@@ -458,86 +458,20 @@ export async function processMentionedContextWithSimilarity(
     ...mentionedContext,
     contentList: processedContentList,
     resources: processedResources,
-    canvases: processedCanvases,
+    documents: processedCanvases,
   };
-}
-
-// lower priority, if out of maxTokens, prior to cut off
-export async function processProjectsWithSimilarity(
-  query: string,
-  projects: SkillContextProjectItem[] = [],
-  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
-): Promise<(SkillContextResourceItem | SkillContextCanvasItem)[]> {
-  if (projects?.length === 0) {
-    return [];
-  }
-
-  // 1. scope projects for get relevant chunks
-  const entities: Entity[] = projects.map((project) => ({
-    entityId: project?.project?.projectId,
-    entityType: 'project',
-  }));
-  const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
-    query,
-    {
-      entities,
-      domains: ['project'],
-      limit: 10,
-    },
-    ctx,
-  );
-
-  // 2. 按照 domain 和 id 进行分类
-  const groupedChunks: { [key: string]: DocumentInterface[] } = {};
-  relevantChunks.forEach((chunk) => {
-    const key = `${chunk.metadata.domain}_${chunk.id}`;
-    if (!groupedChunks[key]) {
-      groupedChunks[key] = [];
-    }
-    groupedChunks[key].push(chunk);
-  });
-
-  // 3. 组装结果
-  const result: (SkillContextResourceItem | SkillContextCanvasItem)[] = [];
-  for (const key in groupedChunks) {
-    const [domain, id] = key.split('_');
-    const assembledContent = assembleChunks(groupedChunks[key]);
-
-    if (domain === 'resource') {
-      result.push({
-        resource: {
-          resourceId: id,
-          content: assembledContent,
-          title: groupedChunks[key][0].metadata.title,
-          // 其他必要的字段需要根据实际情况填充
-        },
-      } as SkillContextResourceItem);
-    } else if (domain === 'canvas') {
-      result.push({
-        canvas: {
-          canvasId: id,
-          content: assembledContent,
-          title: groupedChunks[key][0].metadata.title,
-          // 其他必要的字段需要根据实际情况填充
-        },
-      } as SkillContextCanvasItem);
-    }
-    // 如果还有其他类型，可以在这里继续添加
-  }
-
-  return result;
 }
 
 export async function processWholeSpaceWithSimilarity(
   query: string,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
-): Promise<(SkillContextResourceItem | SkillContextCanvasItem)[]> {
+): Promise<(SkillContextResourceItem | SkillContextDocumentItem)[]> {
   // 1. scope projects for get relevant chunks
   const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
     query,
     {
       entities: [],
-      domains: ['resource', 'canvas'],
+      domains: ['resource', 'document'],
       limit: 10,
     },
     ctx,
@@ -554,7 +488,7 @@ export async function processWholeSpaceWithSimilarity(
   });
 
   // 3. 组装结果
-  const result: (SkillContextResourceItem | SkillContextCanvasItem)[] = [];
+  const result: (SkillContextResourceItem | SkillContextDocumentItem)[] = [];
   for (const key in groupedChunks) {
     const [domain, id] = key.split('_');
     const assembledContent = assembleChunks(groupedChunks[key]);
@@ -576,7 +510,7 @@ export async function processWholeSpaceWithSimilarity(
           title: groupedChunks[key][0].metadata.title,
           // 其他必要的字段需要根据实际情况填充
         },
-      } as SkillContextCanvasItem);
+      } as SkillContextDocumentItem);
     }
     // 如果还有其他类型，可以在这里继续添加
   }
@@ -592,7 +526,7 @@ export async function knowledgeBaseSearchGetRelevantChunks(
 ): Promise<DocumentInterface[]> {
   // 1. search relevant chunks
   const res = await ctx.ctxThis.engine.service.search(
-    ctx.config.user,
+    ctx.config.configurable.user,
     {
       query,
       entities: metadata.entities,
@@ -630,10 +564,10 @@ export async function inMemoryGetRelevantChunks(
       entityType: metadata.entityType,
       title: metadata.title,
       entityId: metadata.entityId,
-      tenantId: ctx.config.user.uid,
+      tenantId: ctx.config.configurable.user.uid,
     },
   };
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.user, {
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.configurable.user, {
     content: doc,
     query,
     k: 10,

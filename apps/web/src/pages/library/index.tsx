@@ -4,6 +4,7 @@ import { PanelGroup, Panel } from "react-resizable-panels"
 
 // 自定义组件
 import { ContentPanel } from "@refly-packages/ai-workspace-common/components/workspace/content-panel"
+import PageTitle from "@/pages/page-title"
 // utils
 // 自定义方法
 // stores
@@ -67,10 +68,13 @@ const Library = () => {
         </title>
         <meta name="description" content={t("landingPage.description")} />
       </Helmet>
-      <div className="workspace-inner-container">
+      <div className="workspace-inner-container flex flex-col">
+        <div className="px-4">
+          <PageTitle title={t("loggedHomePage.siderMenu.library")} />
+        </div>
         <PanelGroup
           direction="horizontal"
-          className="workspace-panel-container">
+          className="workspace-panel-container flex-grow">
           <Panel minSize={50} className="workspace-content-panel">
             <ContentPanel />
           </Panel>

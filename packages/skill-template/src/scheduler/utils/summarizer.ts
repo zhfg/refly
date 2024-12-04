@@ -1,10 +1,10 @@
 import { IContext, SelectedContentDomain, SkillContextContentItemMetadata } from '../types';
 import {
   SkillContextContentItem,
-  SkillContextCanvasItem,
   SkillContextResourceItem,
   Source,
   ResourceType,
+  SkillContextDocumentItem,
 } from '@refly-packages/openapi-schema';
 import { truncateContext, truncateMessages } from './truncator';
 import { BaseMessage } from '@langchain/core/messages';
@@ -33,49 +33,60 @@ export const concatChatHistoryToStr = (messages: BaseMessage[]) => {
 };
 
 export const concatMergedContextToStr = (mergedContext: {
-  mentionedContext: IContext;
-  lowerPriorityContext: IContext;
+  mentionedContext: IContext | null;
+  lowerPriorityContext: IContext | null;
   webSearchSources: Source[];
 }) => {
   const { mentionedContext, lowerPriorityContext, webSearchSources } = mergedContext || {};
   let contextStr = '';
   let currentIndex = 1; // Start index
 
+  // Handle web search sources
   const webSearchContexConcatRes = concatContextToStr({ webSearchSources }, currentIndex);
-  const mentionedContextConcatRes = concatContextToStr(mentionedContext, webSearchContexConcatRes.nextIndex);
-  const lowerPriorityContextConcatRes = concatContextToStr(lowerPriorityContext, mentionedContextConcatRes.nextIndex);
 
+  // Only process mentioned and lower priority contexts if they exist
+  const mentionedContextConcatRes = mentionedContext
+    ? concatContextToStr(mentionedContext, webSearchContexConcatRes.nextIndex)
+    : { contextStr: '', nextIndex: webSearchContexConcatRes.nextIndex };
+
+  const lowerPriorityContextConcatRes = lowerPriorityContext
+    ? concatContextToStr(lowerPriorityContext, mentionedContextConcatRes.nextIndex)
+    : { contextStr: '', nextIndex: mentionedContextConcatRes.nextIndex };
+
+  // Only add sections that have content
   if (webSearchContexConcatRes.contextStr?.length > 0) {
-    contextStr += `\n\n<WebSearchContext>\n${webSearchContexConcatRes.contextStr}\n</WebSearchContext>\n\n`;
+    contextStr += `<WebSearchContext>\n${webSearchContexConcatRes.contextStr}\n</WebSearchContext>\n\n`;
   }
 
   if (mentionedContextConcatRes.contextStr?.length > 0) {
-    contextStr += `\n\n<MentionedContext>\n${mentionedContextConcatRes.contextStr}\n</MentionedContext>\n\n`;
+    contextStr += `<MentionedContext>\n${mentionedContextConcatRes.contextStr}\n</MentionedContext>\n\n`;
   }
 
   if (lowerPriorityContextConcatRes.contextStr?.length > 0) {
-    contextStr += `\n\n<OtherContext>\n${lowerPriorityContextConcatRes.contextStr}\n</OtherContext>\n\n`;
+    contextStr += `<OtherContext>\n${lowerPriorityContextConcatRes.contextStr}\n</OtherContext>\n\n`;
   }
 
-  return contextStr;
+  return contextStr.trim();
 };
 
 export const flattenMergedContextToSources = (mergedContext: {
-  mentionedContext: IContext;
-  lowerPriorityContext: IContext;
+  mentionedContext: IContext | null;
+  lowerPriorityContext: IContext | null;
   webSearchSources: Source[];
 }) => {
-  const { mentionedContext, lowerPriorityContext, webSearchSources } = mergedContext || {};
+  const { mentionedContext, lowerPriorityContext, webSearchSources = [] } = mergedContext || {};
 
   const sources = [
+    // Always include web search sources
     ...flattenContextToSources({
       webSearchSources,
     }),
-    ...flattenContextToSources(mentionedContext),
-    ...flattenContextToSources(lowerPriorityContext),
+    // Only include other contexts if they exist
+    ...(mentionedContext ? flattenContextToSources(mentionedContext) : []),
+    ...(lowerPriorityContext ? flattenContextToSources(lowerPriorityContext) : []),
   ];
 
-  // Remove duplicates
+  // Remove duplicates while preserving order
   const uniqueSources = sources.filter(
     (source, index, self) =>
       index ===
@@ -88,7 +99,7 @@ export const flattenMergedContextToSources = (mergedContext: {
 // TODO: should replace id with `type-index` for better llm extraction
 // citationIndex for each context item is used for LLM to cite the context item in the final answer
 export const concatContextToStr = (context: Partial<IContext>, startIndex: number = 1) => {
-  const { contentList = [], resources = [], canvases = [], webSearchSources = [] } = context || {};
+  const { contentList = [], resources = [], documents = [], webSearchSources = [] } = context || {};
 
   let contextStr = '';
   let index = startIndex; // Use passed in startIndex
@@ -125,14 +136,14 @@ export const concatContextToStr = (context: Partial<IContext>, startIndex: numbe
     contextStr += `\n\n<UserSelectedContent>\n${contentStr}\n</UserSelectedContent>\n\n`;
   }
 
-  if (canvases.length > 0) {
+  if (documents.length > 0) {
     // contextStr += 'Following are the knowledge base canvases: \n';
     const concatCanvas = (id: string, title: string, content: string) => {
       return `<ContextItem citationIndex='[[citation:${index++}]]' type='canvas' entityId='${id}' title='${title}'>${content}</ContextItem>`;
     };
 
-    const canvasStr = canvases
-      .map((n) => concatCanvas(n.canvas?.canvasId!, n.canvas?.title!, n.canvas?.content!))
+    const canvasStr = documents
+      .map((n) => concatCanvas(n.document?.docId!, n.document?.title!, n.document?.content!))
       .join('\n\n');
 
     contextStr += `\n\n<KnowledgeBaseCanvases>\n${canvasStr}\n</KnowledgeBaseCanvases>\n\n`;
@@ -157,15 +168,15 @@ export const concatContextToStr = (context: Partial<IContext>, startIndex: numbe
 };
 
 export const summarizeContext = (context: IContext, maxContextTokens: number): string => {
-  const { contentList = [], resources = [], canvases = [] } = context || {};
+  const { contentList = [], resources = [], documents = [] } = context || {};
   const previewedContext: IContext = {
     resources: resources.map((r) => ({
       ...r,
       content: r?.resource?.contentPreview || r.resource?.content?.slice(0, 50) + '...',
     })),
-    canvases: canvases.map((n) => ({
+    documents: documents.map((n) => ({
       ...n,
-      content: n?.canvas?.contentPreview || n.canvas?.content?.slice(0, 50) + '...',
+      content: n?.document?.contentPreview || n.document?.content?.slice(0, 50) + '...',
     })),
     contentList: contentList.map((c) => ({ ...c, content: c.content?.slice(0, 50) + '...' })),
   };
@@ -183,7 +194,7 @@ export const summarizeChatHistory = (messages: BaseMessage[]): string => {
 };
 
 export function flattenContextToSources(context: Partial<IContext>): Source[] {
-  const { webSearchSources = [], contentList = [], resources = [], canvases = [] } = context || {};
+  const { webSearchSources = [], contentList = [], resources = [], documents = [] } = context || {};
   const sources: Source[] = [];
 
   // Web search sources
@@ -222,19 +233,19 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
     });
   });
 
-  // Knowledge base canvases
-  canvases.forEach((canvas: SkillContextCanvasItem) => {
+  // Knowledge base documents
+  documents.forEach((document: SkillContextDocumentItem) => {
     sources.push({
-      url: `${baseUrl}/project/${canvas.canvas?.projectId}?canvasId=${canvas.canvas?.canvasId}`,
-      title: canvas.canvas?.title,
-      pageContent: canvas.canvas?.content || '',
+      url: '', // TODO: fix this
+      title: document.document?.title,
+      pageContent: document.document?.content || '',
       metadata: {
-        projectId: canvas.canvas?.projectId,
-        title: canvas.canvas?.title,
-        entityId: canvas.canvas?.canvasId,
-        entityType: 'canvas',
-        source: `${baseUrl}/project/${canvas.canvas?.projectId}?canvasId=${canvas.canvas?.canvasId}`,
-        sourceType: 'library', // Add source type for knowledge base canvases
+        projectId: document.document?.docId,
+        title: document.document?.title,
+        entityId: document.document?.docId,
+        entityType: 'document',
+        source: '', // TODO: fix this
+        sourceType: 'library', // Add source type for knowledge base documents
       },
     });
   });
@@ -242,14 +253,14 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
   // Knowledge base resources
   resources.forEach((resource: SkillContextResourceItem) => {
     sources.push({
-      url: `${baseUrl}/resource/${resource.resource?.resourceId}`,
+      url: resource?.resource?.data?.url, // TODO: fix this
       title: resource.resource?.title,
       pageContent: resource.resource?.content || '',
       metadata: {
         title: resource.resource?.title,
         entityId: resource.resource?.resourceId,
         entityType: 'resource',
-        source: `${baseUrl}/resource/${resource.resource?.resourceId}`,
+        source: resource?.resource?.data?.url, // TODO: fix this
         sourceType: 'library', // Add source type for knowledge base resources
       },
     });

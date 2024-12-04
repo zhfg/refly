@@ -237,7 +237,7 @@ export const callMultiLingualWebSearch = async (
       queryMap,
       searchLimit,
       concurrencyLimit: webSearchConcurrencyLimit,
-      user: config.user,
+      user: config.configurable.user,
       engine: engine,
       enableTranslateQuery,
     });

@@ -1,9 +1,9 @@
 import {
   SkillContextContentItem,
+  SkillContextDocumentItem,
   SkillContextResourceItem,
   SkillContextProjectItem,
   Source,
-  SkillContextCanvasItem,
 } from '@refly-packages/openapi-schema';
 import { BaseMessage } from '@langchain/core/messages';
 import { LOCALE } from '@refly-packages/common-types';
@@ -19,7 +19,7 @@ export interface SkillContextContentItemMetadata {
   projectId?: string;
 }
 
-export type SelectedContentDomain = 'resourceSelection' | 'canvasSelection' | 'extensionWeblinkSelection';
+export type SelectedContentDomain = 'resourceSelection' | 'documentSelection' | 'extensionWeblinkSelection';
 
 export interface Chunk {
   content: string;
@@ -48,7 +48,7 @@ export interface QueryAnalysis {
 export interface IContext {
   contentList: SkillContextContentItem[];
   resources: SkillContextResourceItem[];
-  canvases: SkillContextCanvasItem[];
+  documents: SkillContextDocumentItem[];
   projects?: SkillContextProjectItem[];
   messages?: BaseMessage[];
   webSearchSources?: Source[];
@@ -60,9 +60,4 @@ export interface GraphState extends BaseSkillState {
    * Accumulated messages.
    */
   messages: BaseMessage[];
-  /**
-   * Skill calls to run.
-   */
-  skillCalls: ToolCall[];
-  contextualUserQuery: string; // 基于上下文改写 userQuery
 }

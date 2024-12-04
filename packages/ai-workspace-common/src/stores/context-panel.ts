@@ -1,20 +1,10 @@
 import { TreeProps } from '@arco-design/web-react';
-import { SearchDomain, SearchResult } from '@refly/openapi-schema';
+import { ActionResult, SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 import { Mark, ContextDomain, SelectedTextDomain } from '@refly/common-types';
-
-export interface LinkMeta {
-  key: string;
-  url: string;
-  title?: string;
-  image?: string;
-  description?: string;
-  html?: string;
-  isHandled?: boolean; // 已经爬取
-  isError?: boolean; // 处理失败
-}
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 export const selectedTextCardDomainWeb = [
   {
@@ -25,31 +15,31 @@ export const selectedTextCardDomainWeb = [
     },
   },
   {
-    key: 'noteSelection',
+    key: 'documentSelection',
     labelDict: {
-      en: 'Note',
-      'zh-CN': '笔记选中',
+      en: 'Document',
+      'zh-CN': '文档选中',
     },
   },
   {
-    key: 'noteCursorSelection',
+    key: 'documentCursorSelection',
     labelDict: {
-      en: 'Note Cursor Selection',
-      'zh-CN': '笔记光标选中文本',
+      en: 'Document Cursor Selection',
+      'zh-CN': '文档光标选中文本',
     },
   },
   {
-    key: 'noteBeforeCursorSelection',
+    key: 'documentBeforeCursorSelection',
     labelDict: {
-      en: 'Note Before Cursor Selection',
-      'zh-CN': '笔记光标选中前文本',
+      en: 'Document Before Cursor Selection',
+      'zh-CN': '文档光标选中前文本',
     },
   },
   {
-    key: 'noteAfterCursorSelection',
+    key: 'documentAfterCursorSelection',
     labelDict: {
-      en: 'Note After Cursor Selection',
-      'zh-CN': '笔记光标选中后文本',
+      en: 'Document After Cursor Selection',
+      'zh-CN': '文档光标选中后文本',
     },
   },
 ];
@@ -71,23 +61,19 @@ export const defaultSelectedTextCardDomainKeysExtension: SelectedTextDomain[] = 
   (item) => item.key as SelectedTextDomain,
 );
 
+export interface NodeItem extends CanvasNode<any> {
+  isPreview?: boolean; // is preview mode
+  isCurrentContext?: boolean;
+}
+
 interface ContextPanelState {
   envContextInitMap: { resource: boolean; collection: boolean; note: boolean };
 
-  contextPanelPopoverVisible: boolean;
-  importPopoverVisible: boolean;
+  // Canvas selected context items
+  contextItems: NodeItem[];
 
-  // context 选中内容
-  selectedResources: TreeProps['treeData'];
-  selectedCollections: TreeProps['treeData'];
-  selectedNotes: TreeProps['treeData'];
-  // extension only
-  selectedWeblinks: TreeProps['treeData'];
-
-  // 处理记录去重后的选择 id
-  treeData: TreeProps['treeData'];
-  checkedKeys: string[];
-  expandedKeys: string[];
+  // Canvas selected history items
+  historyItems: NodeItem[];
 
   // context card 的处理
   nowSelectedContextDomain: SearchDomain;
@@ -98,6 +84,7 @@ interface ContextPanelState {
   currentSelectedMark: Mark;
   selectedDomain: SelectedTextDomain;
   enableMultiSelect: boolean; // 支持多选
+
   currentSelectedMarks: Mark[]; // 作为唯一的 context items 来源
   filterIdsOfCurrentSelectedMarks: string[]; // 作为 context items 的过滤
   filterErrorInfo: { [key: string]: { limit: number; currentCount: number; required?: boolean } }; // 作为 context items 的过滤错误信息
@@ -112,14 +99,6 @@ interface ContextPanelState {
   afterSelectionNoteContent: string;
   currentSelectionContent: string;
 
-  setEnvContextInitMap: (envContextInitMap: Partial<{ resource: boolean; collection: boolean; note: boolean }>) => void;
-  setContextPanelPopoverVisible: (visible: boolean) => void;
-  setImportPopoverVisible: (visible: boolean) => void;
-  setSelectedResources: (resources: TreeProps['treeData']) => void;
-  setSelectedCollections: (collections: TreeProps['treeData']) => void;
-  setSelectedNotes: (notes: TreeProps['treeData']) => void;
-  setSelectedWeblinks: (weblinks: TreeProps['treeData']) => void;
-  setTreeData: (treeData: TreeProps['treeData']) => void;
   setCheckedKeys: (keys: string[]) => void;
   setExpandedKeys: (keys: string[]) => void;
 
@@ -154,6 +133,19 @@ interface ContextPanelState {
   toggleMarkActive: (id: string) => void;
   clearMarks: () => void;
   updateMark: (mark: Mark) => void;
+
+  addContextItem: (node: NodeItem) => void;
+  setContextItems: (nodes: NodeItem[]) => void;
+  removeContextItem: (id: string) => void;
+  clearContextItems: () => void;
+  updateContextItem: (node: NodeItem) => void;
+
+  addHistoryItem: (item: NodeItem) => void;
+  setHistoryItems: (items: NodeItem[]) => void;
+  removeHistoryItem: (id: string) => void;
+  removePreviewHistoryItem: () => void;
+  clearHistoryItems: () => void;
+  updateHistoryItem: (item: NodeItem) => void;
 }
 
 export const defaultSelectedTextCardState = {
@@ -183,12 +175,8 @@ export const defaultState = {
   nowSelectedContextDomain: 'resource' as SearchDomain,
   contextPanelPopoverVisible: false,
   importPopoverVisible: false,
-  selectedResources: [],
-  selectedCollections: [],
-  selectedNotes: [],
-  selectedWeblinks: [],
-  allSelectedIds: [],
-  treeData: [],
+  contextItems: [],
+  historyItems: [],
   checkedKeys: [],
   expandedKeys: [],
 
@@ -203,17 +191,6 @@ export const useContextPanelStore = create<ContextPanelState>()(
   devtools((set) => ({
     ...defaultState,
 
-    setEnvContextInitMap: (envContextInitMap: { resource: boolean; collection: boolean; note: boolean }) =>
-      set((state) => ({ ...state, envContextInitMap: { ...state.envContextInitMap, ...envContextInitMap } })),
-    setContextPanelPopoverVisible: (visible: boolean) =>
-      set((state) => ({ ...state, contextPanelPopoverVisible: visible })),
-    setImportPopoverVisible: (visible: boolean) => set((state) => ({ ...state, importPopoverVisible: visible })),
-    setSelectedResources: (resources: SearchResult[]) => set((state) => ({ ...state, selectedResources: resources })),
-    setSelectedCollections: (collections: SearchResult[]) =>
-      set((state) => ({ ...state, selectedCollections: collections })),
-    setSelectedWeblinks: (weblinks: SearchResult[]) => set((state) => ({ ...state, selectedWeblinks: weblinks })),
-    setSelectedNotes: (notes: SearchResult[]) => set((state) => ({ ...state, selectedNotes: notes })),
-    setAllSelectedIds: (ids: string[]) => set((state) => ({ ...state, allSelectedIds: ids })),
     setTreeData: (treeData: TreeProps['treeData']) => set((state) => ({ ...state, treeData })),
     setCheckedKeys: (keys: string[]) => set((state) => ({ ...state, checkedKeys: keys })),
     setExpandedKeys: (keys: string[]) => set((state) => ({ ...state, expandedKeys: keys })),
@@ -252,6 +229,78 @@ export const useContextPanelStore = create<ContextPanelState>()(
         ...state,
         currentSelectedMarks: state.currentSelectedMarks.map((item) =>
           item.id === mark.id ? { ...item, ...mark } : item,
+        ),
+      })),
+
+    addContextItem: (node: CanvasNode) =>
+      set((state) => {
+        const existingIndex = state.contextItems.findIndex((item) => item.id === node.id);
+
+        if (existingIndex >= 0) {
+          // Update existing item
+          const updatedItems = [...state.contextItems];
+          updatedItems[existingIndex] = node;
+          return {
+            ...state,
+            contextItems: updatedItems,
+          };
+        }
+
+        // Add new item to end
+        return {
+          ...state,
+          contextItems: [...state.contextItems, node],
+        };
+      }),
+    setContextItems: (nodes: CanvasNode[]) => set((state) => ({ ...state, contextItems: nodes })),
+    removeContextItem: (id: string) =>
+      set((state) => ({
+        ...state,
+        contextItems: state.contextItems.filter((node) => node.id !== id),
+      })),
+    clearContextItems: () => set((state) => ({ ...state, contextItems: [] })),
+    updateContextItem: (node: CanvasNode) =>
+      set((state) => ({
+        ...state,
+        contextItems: state.contextItems.map((item) => (item.id === node.id ? { ...item, ...node } : item)),
+      })),
+
+    addHistoryItem: (item: NodeItem) =>
+      set((state) => {
+        const existingIndex = state.historyItems.findIndex((existing) => existing.id === item.id);
+
+        if (existingIndex >= 0) {
+          // Update existing item
+          const updatedItems = [...state.historyItems];
+          updatedItems[existingIndex] = item;
+          return {
+            ...state,
+            historyItems: updatedItems,
+          };
+        }
+
+        return {
+          ...state,
+          historyItems: item.isPreview ? [item, ...state.historyItems] : [...state.historyItems, item],
+        };
+      }),
+    setHistoryItems: (items: NodeItem[]) => set((state) => ({ ...state, historyItems: items })),
+    removeHistoryItem: (id: string) =>
+      set((state) => ({
+        ...state,
+        historyItems: state.historyItems.filter((node) => node.id !== id),
+      })),
+    removePreviewHistoryItem: () =>
+      set((state) => ({
+        ...state,
+        historyItems: state.historyItems.filter((node) => !node.isPreview),
+      })),
+    clearHistoryItems: () => set((state) => ({ ...state, historyItems: [] })),
+    updateHistoryItem: (item: NodeItem) =>
+      set((state) => ({
+        ...state,
+        historyItems: state.historyItems.map((historyItem) =>
+          historyItem.id === item.id ? { ...historyItem, ...item } : historyItem,
         ),
       })),
 

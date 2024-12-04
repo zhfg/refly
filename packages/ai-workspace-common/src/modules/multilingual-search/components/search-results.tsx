@@ -16,10 +16,11 @@ interface SearchResultsProps {
   className?: string;
   outputLocale: SearchLocale;
   config?: {
-    showCheckbox?: boolean; // 是否显示复选框
-    startIndex?: number; // 序号起始值
-    showIndex?: boolean; // 是否显示序号
-    handleItemClick?: (item: Source) => void; // 自定义点击处理
+    showCheckbox?: boolean;
+    startIndex?: number;
+    showIndex?: boolean;
+    handleItemClick?: (item: Source) => void;
+    enableTranslation?: boolean;
   };
 }
 
@@ -31,6 +32,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     startIndex: 1,
     showIndex: true,
     handleItemClick: (item) => window.open(item.url, '_blank'),
+    enableTranslation: false,
   },
 }) => {
   const { t, i18n } = useTranslation();
@@ -73,24 +75,47 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     }
   };
 
-  const renderPopoverContent = (item: Source) => (
-    <div className="search-result-popover-content">
-      <h4>
-        <TranslationWrapper
-          content={item.title || ''}
-          targetLanguage={outputLocale.code === 'auto' ? item.metadata?.translatedDisplayLocale : outputLocale.code}
-          originalLocale={item.metadata?.originalLocale}
-        />
-      </h4>
-      <div className="content-body">
-        <TranslationWrapper
-          content={item.pageContent}
-          targetLanguage={outputLocale.code === 'auto' ? item.metadata?.translatedDisplayLocale : outputLocale.code}
-          originalLocale={item.metadata?.originalLocale}
-        />
+  const renderPopoverContent = (item: Source) => {
+    const domain = safeParseURL(item.url);
+    const source = item;
+    return (
+      <div className="search-result-popover-content">
+        {/* Title section */}
+        <div className="flex items-center gap-2 mb-2">
+          <h4 className="font-medium text-base m-0 break-words">
+            <TranslationWrapper
+              content={item.title || ''}
+              targetLanguage={outputLocale.code === 'auto' ? item.metadata?.translatedDisplayLocale : outputLocale.code}
+              originalLocale={item.metadata?.originalLocale}
+              enableTranslation={config.enableTranslation}
+            />
+          </h4>
+        </div>
+
+        {/* Domain section */}
+        {item?.url ? (
+          <div className="flex items-center gap-2 mb-2 px-4">
+            <img
+              className="w-4 h-4 flex-shrink-0"
+              alt={domain}
+              src={`https://www.google.com/s2/favicons?domain=${domain}&sz=${16}`}
+            />
+            <div className="text-zinc-400 text-sm break-all">{domain}</div>
+          </div>
+        ) : null}
+
+        {/* Content section */}
+        <div className="content-body pt-0">
+          <TranslationWrapper
+            content={item.pageContent}
+            targetLanguage={outputLocale.code === 'auto' ? item.metadata?.translatedDisplayLocale : outputLocale.code}
+            originalLocale={item.metadata?.originalLocale}
+            enableTranslation={config.enableTranslation}
+          />
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderSkeletonItem = () => (
     <List.Item className="result-item">
@@ -157,32 +182,37 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                           </span>
                         </div>
                       )}
-                      <div className="result-body">
-                        <div className="result-header">
-                          <div className="site-info">
-                            <img
-                              className="site-icon"
-                              src={`https://www.google.com/s2/favicons?domain=${safeParseURL(item.url)}&sz=32`}
-                              alt=""
-                            />
-                            <div className="site-meta">
-                              <a className="site-url" href={item.url} target="_blank" rel="noreferrer">
-                                {item.url}
-                              </a>
-                            </div>
+                      <div className="result-body w-full">
+                        {item.metadata?.translatedDisplayLocale || item?.url ? (
+                          <div className="result-header">
+                            {item?.url ? (
+                              <div className="site-info">
+                                <img
+                                  className="site-icon"
+                                  src={`https://www.google.com/s2/favicons?domain=${safeParseURL(item.url)}&sz=32`}
+                                  alt=""
+                                />
+                                <div className="site-meta">
+                                  <a className="site-url" href={item.url} target="_blank" rel="noreferrer">
+                                    {item.url}
+                                  </a>
+                                </div>
+                              </div>
+                            ) : null}
+                            {item.metadata?.translatedDisplayLocale && (
+                              <Tag className="locale-tag">
+                                <span>
+                                  <AiOutlineGlobal /> {getLocaleName(item.metadata.originalLocale)}
+                                </span>{' '}
+                                →{' '}
+                                <span>
+                                  <AiOutlineTranslation /> {getLocaleName(item.metadata.translatedDisplayLocale)}
+                                </span>
+                              </Tag>
+                            )}
                           </div>
-                          {item.metadata?.translatedDisplayLocale && (
-                            <Tag className="locale-tag">
-                              <span>
-                                <AiOutlineGlobal /> {getLocaleName(item.metadata.originalLocale)}
-                              </span>{' '}
-                              →{' '}
-                              <span>
-                                <AiOutlineTranslation /> {getLocaleName(item.metadata.translatedDisplayLocale)}
-                              </span>
-                            </Tag>
-                          )}
-                        </div>
+                        ) : null}
+
                         <div className="result-content">
                           <div className="result-title">
                             <TranslationWrapper
@@ -194,6 +224,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                                   : outputLocale.code
                               }
                               originalLocale={item.metadata?.originalLocale}
+                              enableTranslation={config.enableTranslation}
                             />
                           </div>
                           <div className="result-content">
@@ -205,6 +236,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                                   : outputLocale.code
                               }
                               originalLocale={item.metadata?.originalLocale}
+                              enableTranslation={config.enableTranslation}
                             />
                           </div>
                         </div>

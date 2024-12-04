@@ -20,6 +20,9 @@ import { MiscModule } from './misc/misc.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { StripeModule } from '@golevelup/nestjs-stripe';
 import { ShareModule } from './share/share.module';
+import { CanvasModule } from './canvas/canvas.module';
+import { CollabModule } from './collab/collab.module';
+import { ActionModule } from './action/action.module';
 
 @Module({
   imports: [
@@ -34,6 +37,7 @@ import { ShareModule } from './share/share.module';
           paths: ['pid', 'hostname', 'req.headers'],
           remove: true,
         },
+        autoLogging: false,
         genReqId: () => api.trace.getSpan(api.context.active())?.spanContext()?.traceId,
         customSuccessObject: (req) => ({
           env: process.env.NODE_ENV,
@@ -79,6 +83,9 @@ import { ShareModule } from './share/share.module';
     MiscModule,
     SubscriptionModule,
     ShareModule,
+    CanvasModule,
+    CollabModule,
+    ActionModule,
   ],
   controllers: [AppController],
 })

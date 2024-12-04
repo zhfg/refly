@@ -1,8 +1,14 @@
 .app-sider {
   padding: 0;
-  background-color: #f3f3ee;
-  height: 100vh;
+  background-color: #fff;
+  height: calc(100vh - 16px);
   box-sizing: border-box;
+  margin: 8px 0;
+  border-radius: 0 8px 8px 0;
+
+  &--popover {
+    height: calc(100vh - 75px);
+  }
 
   .sider-header {
     height: 100%;
@@ -37,14 +43,8 @@
       cursor: pointer;
     }
   }
-  .sider-header-collapse {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
 
   .arco-menu-selected {
-    background-color: #e8e8e2 !important;
     &.setting-menu-item {
       .subscription-status {
         background-color: #faf9f9;
@@ -66,49 +66,6 @@
       height: 32px; // 设置每个元素高度为 32px
       line-height: 32px;
       font-size: 14px; // 设置字体大小为 14px
-    }
-
-    .recent-section {
-      color: rgba(0, 0, 0, 0.5);
-      font-size: 13px;
-
-      .arco-menu-item {
-        margin-bottom: 0;
-        font-size: 13px;
-        height: 32px;
-        line-height: 32px;
-      }
-
-      .recent-section-title {
-        padding-left: 12px;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        height: 28px;
-        box-sizing: border-box;
-
-        .recent-section-title-text {
-          font-weight: 500;
-        }
-      }
-
-      .arco-menu-item {
-        padding-left: 12px; // 调整缩进
-      }
-
-      .recent-section-title-more {
-        font-size: 12px;
-        display: flex;
-        height: 32px;
-        align-items: center;
-        // color: #00968f;
-        cursor: pointer;
-        padding-left: 12px;
-        &:hover {
-          font-weight: 600;
-        }
-      }
     }
   }
 
@@ -166,22 +123,16 @@
     background-color: transparent;
   }
 
-  .arco-menu-collapse {
-    .custom-menu-item {
-      padding: 0 0 0 10px;
-    }
-  }
-
   .custom-menu-item {
     &:hover {
-      background-color: rgba(232, 232, 227) !important;
+      background-color: rgb(238, 243, 245) !important;
       border-radius: 4px;
     }
   }
 
   .setting-menu-item {
     &:hover {
-      background-color: rgba(232, 232, 227) !important;
+      background-color: rgb(238, 243, 245) !important;
       border-radius: 4px;
       .subscription-status {
         background-color: #faf9f9;
@@ -209,12 +160,6 @@
         background-color: rgba(232, 232, 227) !important;
         border-radius: 4px;
       }
-    }
-  }
-  .setting-menu-item-collapse {
-    .menu-settings {
-      padding: 0;
-      margin-left: -8px;
     }
   }
 
@@ -251,35 +196,6 @@
       }
     }
   }
-  .more-info-menu-item-collapse {
-    &:hover {
-      background-color: rgba(232, 232, 227) !important;
-    }
-  }
-
-  .more-info {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 40px;
-    .more-info-btn {
-      font-size: 13px;
-      height: 40px;
-      min-width: 40px;
-      background-color: transparent;
-      padding: 0 4px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      span {
-        margin-left: 4px;
-      }
-      &:hover {
-        background-color: rgba(232, 232, 227) !important;
-      }
-    }
-  }
 
   .arco-menu-light .arco-menu-item.arco-menu-selected,
   .arco-menu-light .arco-menu-group-title.arco-menu-selected,
@@ -295,28 +211,15 @@
     color: rgba(0, 0, 0, 0.9) !important;
   }
 
-  .arco-menu-light .arco-menu-item,
-  .arco-menu-light .arco-menu-group-title,
-  .arco-menu-light .arco-menu-pop-header,
-  .arco-menu-light .arco-menu-inline-header {
-    background-color: transparent;
-  }
-
   .sider-menu-inner {
-    height: calc(100% - 118px);
-    overflow-y: auto;
-  }
-
-  .sider-menu-inner-collapse {
-    height: calc(100% - 118px - 36px);
+    height: calc(100% - 68px);
     overflow-y: auto;
   }
 
   .sider-footer {
     position: absolute;
     bottom: 0;
-    width: calc(100%); // 根据 sider 宽度调整
-    background-color: #f3f3ee;
+    width: calc(100% - 16px); // 根据 sider 宽度调整
     padding: 8px 0;
     border-top: 1px solid #e8e8e2;
 
@@ -334,7 +237,6 @@
         background-color: var(--semi-color-text-0);
         color: #fff;
         transition: background-color 0.5s;
-        // transition: color 0.5s;
       }
     }
   }

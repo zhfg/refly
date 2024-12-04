@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import hotKeys from 'hotkeys-js';
 import { useIsLogin } from './use-is-login';
-import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
+import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 
 export const useBindCommands = () => {
-  const searchStore = useSearchStore();
+  const searchStore = useSearchStoreShallow((state) => ({
+    setIsSearchOpen: state.setIsSearchOpen,
+  }));
   const { isLoggedRef } = useIsLogin();
 
   const handleBindHotkey = () => {

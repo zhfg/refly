@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Command } from 'cmdk';
-import { useSearchStore } from '@refly-packages/ai-workspace-common/stores/search';
-import { IconMessage, IconRobot } from '@arco-design/web-react/icon';
+import { useSearchStore, useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 import { useDebouncedCallback } from 'use-debounce';
 
 import './index.scss';
@@ -12,17 +12,13 @@ import { Skill } from './skill';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { SearchDomain, SearchResult, SkillMeta } from '@refly/openapi-schema';
-import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { useAINote } from '@refly-packages/ai-workspace-common/hooks/use-ai-note';
-import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
 import classNames from 'classnames';
 
 import { useTranslation } from 'react-i18next';
-import { useKnowledgeBaseTabs } from '@refly-packages/ai-workspace-common/hooks/use-knowledge-base-tabs';
-import { Message, Spin } from '@arco-design/web-react';
-import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
-import { IconCanvas, IconProject, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
+import { IconCanvas, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
 export interface SearchProps extends React.ComponentProps<'div'> {
   showList?: boolean;
@@ -33,10 +29,21 @@ export interface SearchProps extends React.ComponentProps<'div'> {
 export const Search = (props: SearchProps) => {
   const { showList, onClickOutside, onSearchValueChange, ...divProps } = props;
 
+  const navigate = useNavigate();
+  const { addNode } = useCanvasControl();
+
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [searchValue, setSearchValue] = useState('');
   const [value, setValue] = React.useState('');
-  const searchStore = useSearchStore();
+  const searchStore = useSearchStoreShallow((state) => ({
+    pages: state.pages,
+    setPages: state.setPages,
+    setSearchedRes: state.setSearchedRes,
+    setIsSearchOpen: state.setIsSearchOpen,
+    searchedCanvases: state.searchedCanvases,
+    searchedDocuments: state.searchedDocuments,
+    searchedResources: state.searchedResources,
+  }));
   const [displayMode, setDisplayMode] = useState<'search' | 'list'>('list');
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const [isComposing, setIsComposing] = useState(false);
@@ -44,12 +51,6 @@ export const Search = (props: SearchProps) => {
 
   // skill
   const [selectedSkill, setSelectedSkill] = useState<SkillMeta>();
-  // notes
-  const { handleInitEmptyNote } = useAINote();
-  const { handleAddTab: handleAddNoteTab } = useCanvasTabs();
-  const { handleAddTab: handleAddResourceTab } = useKnowledgeBaseTabs();
-
-  const { jumpToProject, jumpToCanvas, jumpToResource, jumpToConv } = useJumpNewPath();
 
   const pages = searchStore.pages;
   const setPages = searchStore.setPages;
@@ -112,19 +113,19 @@ export const Search = (props: SearchProps) => {
   const handleBigSearchValueChange = (searchVal: string, activePage: string) => {
     const domain = getMappedPageToDomain(activePage);
 
-    // searchVal 为空的时候获取正常列表的内容
+    // when searchVal is empty, get the normal list content
     if (!searchVal) {
       setDisplayMode('list');
       debouncedSearch({
         searchVal: '',
-        domains: domain ? [domain] : undefined,
+        domains: domain ? [domain as SearchDomain] : undefined,
       });
     } else {
-      // searchVal 不为空的时候获取搜索的内容
+      // when searchVal is not empty, get the search content
       setDisplayMode('search');
       debouncedSearch({
         searchVal,
-        domains: domain ? [domain] : undefined,
+        domains: domain ? [domain as SearchDomain] : undefined,
       });
     }
   };
@@ -150,16 +151,14 @@ export const Search = (props: SearchProps) => {
       const resData = data?.data || [];
 
       const canvases = resData.filter((item) => item?.domain === 'canvas') || [];
-      const readResources = resData.filter((item) => item?.domain === 'resource') || [];
-      const projects = resData.filter((item) => item?.domain === 'project') || [];
-      const convs = resData.filter((item) => item?.domain === 'conversation') || [];
+      const resources = resData.filter((item) => item?.domain === 'resource') || [];
+      const documents = resData.filter((item) => item?.domain === 'document') || [];
       const skills = resData.filter((item) => item?.domain === 'skill') || [];
 
       searchStore.setSearchedRes({
         canvases,
-        readResources,
-        projects,
-        convs,
+        resources,
+        documents,
         skills,
       });
     },
@@ -187,113 +186,61 @@ export const Search = (props: SearchProps) => {
   }, []);
 
   const renderData: RenderItem[] = [
-    // {
-    //   domain: 'skill',
-    //   heading: t('loggedHomePage.quickSearch.skills'),
-    //   action: false,
-    //   data: searchStore.searchedSkills || [],
-    //   icon: <IconRobot style={{ fontSize: 12 }} />,
-    //   onItemClick: (item: SearchResult) => {
-    //     const skill: SkillMeta = {
-    //       displayName: item?.title,
-    //       tplName: item?.title,
-    //       skillId: item?.id,
-    //     };
-    //     setSelectedSkill(skill);
-    //     setPages([...pages, 'skill-execute']);
-    //   },
-    // },
     {
-      domain: 'note',
+      domain: 'canvas',
       heading: t('loggedHomePage.quickSearch.canvas'),
-      action: true,
+      action: false,
+      data: searchStore.searchedCanvases || [],
       actionHeading: {
         create: t('loggedHomePage.quickSearch.newCanvas'),
       },
-      data: searchStore.searchedCanvases || [],
       icon: <IconCanvas style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
-        jumpToCanvas({
-          canvasId: item?.id,
-          projectId: item?.metadata?.projectId,
-        });
-        handleAddNoteTab({
-          title: item?.title,
-          key: item?.id,
-          content: '',
-          canvasId: item?.id,
-          projectId: item?.metadata?.projectId,
-        });
         searchStore.setIsSearchOpen(false);
-      },
-      onCreateClick: async () => {
-        await handleInitEmptyNote({ content: '' });
-        searchStore.setIsSearchOpen(false);
+        navigate(`/canvas/${item.id}`);
       },
     },
     {
-      domain: 'readResources',
+      domain: 'document',
+      heading: t('loggedHomePage.quickSearch.document'),
+      action: false,
+      actionHeading: {
+        create: t('loggedHomePage.quickSearch.newDocument'),
+      },
+      data: searchStore.searchedDocuments || [],
+      icon: <IconDocument style={{ fontSize: 12 }} />,
+      onItemClick: (item: SearchResult) => {
+        searchStore.setIsSearchOpen(false);
+        addNode({
+          type: 'document',
+          data: {
+            entityId: item.id,
+            title: item.title,
+            contentPreview: item.contentPreview,
+          },
+        });
+      },
+    },
+    {
+      domain: 'resource',
       heading: t('loggedHomePage.quickSearch.resource'),
-      action: true,
+      action: false,
       actionHeading: {
         create: t('loggedHomePage.quickSearch.newResource'),
       },
-      data: searchStore.searchedReadResources || [],
+      data: searchStore.searchedResources || [],
       icon: <IconResource style={{ fontSize: 12 }} />,
       onItemClick: (item: SearchResult) => {
-        jumpToResource({
-          resId: item?.id,
-        });
-        handleAddResourceTab({
-          title: item?.title,
-          key: item?.id,
-          content: '',
-          resourceId: item?.id,
-        });
         searchStore.setIsSearchOpen(false);
-      },
-      onCreateClick: async () => {},
-    },
-    {
-      domain: 'knowledgeBases',
-      heading: t('loggedHomePage.quickSearch.project'),
-      action: true,
-      actionHeading: {
-        create: t('loggedHomePage.quickSearch.newProject'),
-      },
-      data: searchStore.searchedProjects || [],
-      icon: <IconProject style={{ fontSize: 12 }} />,
-      onItemClick: (item: SearchResult) => {
-        jumpToProject({
-          projectId: item?.id,
-        });
-        searchStore.setIsSearchOpen(false);
-      },
-      onCreateClick: async () => {},
-    },
-    {
-      domain: 'convs',
-      heading: t('loggedHomePage.quickSearch.thread'),
-      action: true,
-      actionHeading: {
-        create: t('loggedHomePage.quickSearch.newThread'),
-      },
-      data: searchStore.searchedConvs || [],
-      icon: <IconMessage style={{ fontSize: 12 }} />,
-      onItemClick: (item: SearchResult) => {
-        jumpToConv({
-          convId: item?.id,
-          projectId: item?.metadata?.projectId,
-          state: {
-            navigationContext: {
-              shouldFetchDetail: true,
-              source: MessageIntentSource.Search,
-            },
+        addNode({
+          type: 'resource',
+          data: {
+            entityId: item.id,
+            title: item.title,
+            contentPreview: item.contentPreview,
           },
         });
-        searchStore.setIsSearchOpen(false);
       },
-      onCreateClick: async () => {},
     },
   ];
 
@@ -362,7 +309,7 @@ export const Search = (props: SearchProps) => {
           }}
         />
         {showList && (
-          <Spin loading={loading} className="w-full h-full">
+          <Spin spinning={loading} className="w-full h-full">
             <Command.List>
               <Command.Empty>No results found.</Command.Empty>
               {activePage === 'home' && (

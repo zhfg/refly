@@ -1,10 +1,7 @@
 import { IconLoading } from '@arco-design/web-react/icon';
 import { memo, useEffect, useRef, useState, lazy, Suspense, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Message as message } from '@arco-design/web-react';
-import { Popover, PopoverContent, PopoverTrigger } from './plugins/link/popover';
 
-import copyToClipboard from 'copy-to-clipboard';
 import RemarkBreaks from 'remark-breaks';
 import RemarkGfm from 'remark-gfm';
 
@@ -79,7 +76,7 @@ export const Markdown = memo(
     );
 
     return (
-      <div className="markdown-body" style={{ fontSize: `${props.fontSize ?? 15}px` }} ref={mdRef}>
+      <div className="markdown-body" ref={mdRef}>
         {shouldLoading ? (
           <IconLoading />
         ) : (
@@ -99,7 +96,7 @@ export const Markdown = memo(
                   ],
                 ]}
                 components={{
-                  ...canvasComponents,
+                  // ...canvasComponents,
                   pre: CodeElement.Component,
                   a: (args) => LinkElement.Component(args, props?.sources || []),
                 }}

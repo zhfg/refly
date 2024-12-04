@@ -1,27 +1,22 @@
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { GraphState, IContext, MentionedContextItem, QueryAnalysis } from '../types';
 import { summarizeChatHistory, summarizeContext } from './summarizer';
 import { z } from 'zod';
-import { SkillEngine } from '../../engine';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { SkillTemplateConfig } from '@refly-packages/openapi-schema';
 import { ModelContextLimitMap } from './token';
 import { MAX_CONTEXT_RATIO, MAX_QUERY_TOKENS_RATIO } from './constants';
 import { truncateText } from './truncator';
 import { safeStringifyJSON } from '@refly-packages/utils';
+import { extractStructuredData } from './extractor';
 
 // simplify context entityId for better extraction
 export const preprocessContext = (context: IContext): IContext => {
-  const { resources, canvases, contentList, projects } = context;
+  const { resources = [], documents = [], contentList = [] } = context;
 
   const preprocessedContext = {
     resources: resources.map((r, index) => ({ ...r, resource: { ...r.resource, resourceId: `resource-${index}` } })),
-    canvases: canvases.map((c, index) => ({ ...c, canvas: { ...c.canvas, canvasId: `canvas-${index}` } })),
+    documents: documents.map((c, index) => ({ ...c, document: { ...c.document, docId: `document-${index}` } })),
     contentList: contentList.map((c, index) => ({ ...c, metadata: { ...c.metadata, entityId: `content-${index}` } })),
-    projects: projects.map((c, index) => ({
-      ...c,
-      project: { ...c.project, projectId: `project-${index}` },
-    })),
   };
 
   return preprocessedContext;
@@ -33,7 +28,7 @@ export const postprocessContext = (
 ): IContext => {
   let context: IContext = {
     resources: [],
-    canvases: [],
+    documents: [],
     contentList: [],
     projects: [],
   };
@@ -41,9 +36,9 @@ export const postprocessContext = (
   mentionedContextList.forEach((item) => {
     if (item.type === 'canvas') {
       // 这里需要根据entityId在originalContext中找到对应的canvas
-      const originalCanvas = originalContext.canvases.find((c, index) => `canvas-${index}` === item.entityId);
+      const originalCanvas = originalContext.documents.find((c, index) => `document-${index}` === item.entityId);
       if (originalCanvas) {
-        context.canvases.push({
+        context.documents.push({
           ...originalCanvas,
           metadata: { ...originalCanvas.metadata, useWholeContent: item?.useWholeContent },
         });
@@ -142,7 +137,6 @@ Examples of query rewriting with context and chat history:
        "type": "selectedContent",
        "entityId": "content-2",
        "title": "AI Trends 2023",
-       "url": "https://example.com/ai-trends",
        "useWholeContent": true
      }
    ]
@@ -189,27 +183,47 @@ Examples of query rewriting with context and chat history:
    `;
 };
 
-// TODO: build chatHistory and context related system prompt
+// Add schema for query analysis
+const queryAnalysisSchema = z.object({
+  rewrittenQuery: z.string().describe('The query after entity clarification, keeping original intent intact'),
+  mentionedContext: z
+    .array(
+      z.object({
+        type: z.enum(['canvas', 'resource', 'selectedContent']),
+        entityId: z.string().optional(),
+        title: z.string(),
+        useWholeContent: z.boolean(),
+      }),
+    )
+    .describe('Array of referenced context items'),
+  intent: z.enum(['SEARCH_QA', 'WRITING', 'READING_COMPREHENSION', 'OTHER']).describe("The query's primary purpose"),
+  confidence: z.number().min(0).max(1).describe('Confidence score for the analysis'),
+  reasoning: z.string().describe('Explanation of why the query was kept or modified'),
+});
+
 export async function analyzeQueryAndContext(
   query: string,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<QueryAnalysis> {
-  const { chatHistory, resources, canvases, contentList, projects, modelName } = ctx.config.configurable;
+  // set current step
+  ctx.config.metadata.step = { name: 'analyzeContext' };
+
+  const { chatHistory, resources, documents, contentList, projects, modelName } = ctx.config.configurable;
   const context: IContext = {
     resources,
-    canvases,
+    documents,
     contentList,
     projects,
   };
 
   ctx.ctxThis.emitEvent({ event: 'log', content: 'Analyzing query and context...' }, ctx.config);
 
-  // preprocess context for better extract mentioned context
+  // Preprocess context for better extract mentioned context
   const preprocessedContext = preprocessContext(context);
   const maxContextTokens = ModelContextLimitMap[modelName] * MAX_CONTEXT_RATIO;
   const summarizedContext = summarizeContext(preprocessedContext, maxContextTokens);
 
-  // summarize chat history
+  // Summarize chat history
   const summarizedChatHistory = summarizeChatHistory(chatHistory || []);
 
   const systemPrompt = `You are an AI query analyzer that preserves the original query intent while only clarifying referenced entities when necessary.
@@ -271,7 +285,6 @@ Expected JSON Structure:
     "type": "canvas" | "resource" | "selectedContent",
     "entityId": string,
     "title": string,
-    "url": string,
     "useWholeContent": boolean
   }],
   "intent": "SEARCH_QA" | "WRITING" | "READING_COMPREHENSION" | "OTHER",
@@ -307,42 +320,42 @@ ${summarizedChatHistory}
 Please analyze the query, focusing primarily on the current query and available context. Only consider the chat history if it's directly relevant to understanding the current query.`;
 
   const model = ctx.ctxThis.engine.chatModel({ temperature: 0.3 });
-  // TODO: add property `useWholeContent` for check use whole content or use embedding similarity, 决定后续使用 context 时，是否截断
-  const runnable = model.withStructuredOutput(
-    z.object({
-      rewrittenQuery: z.string(),
-      mentionedContext: z.array(
-        z.object({
-          type: z.enum(['canvas', 'resource', 'selectedContent']),
-          entityId: z.string().optional(),
-          title: z.string(),
-          url: z.string().optional(),
-          useWholeContent: z.boolean(),
-        }),
-      ),
-      intent: z.enum(['SEARCH_QA', 'WRITING', 'READING_COMPREHENSION', 'OTHER']),
-      confidence: z.number().min(0).max(1),
-      reasoning: z.string(),
-    }),
-  );
 
-  const result = await runnable.invoke([new SystemMessage(systemPrompt), new HumanMessage(userMessage)]);
+  try {
+    const result = await extractStructuredData(
+      model,
+      queryAnalysisSchema,
+      systemPrompt + '\n\n' + userMessage,
+      ctx.config,
+      3, // maxRetries
+    );
 
-  ctx.ctxThis.engine.logger.log(`- Rewritten Query: ${result.rewrittenQuery}
+    ctx.ctxThis.engine.logger.log(`- Rewritten Query: ${result.rewrittenQuery}
     - Mentioned Context: ${safeStringifyJSON(result.mentionedContext)}
     - Intent: ${result.intent} (confidence: ${result.confidence})
     - Reasoning: ${result.reasoning}
     `);
 
-  ctx.ctxThis.emitEvent({ event: 'log', content: `Analyzed query and context successfully!` }, ctx.config);
+    ctx.ctxThis.emitEvent({ event: 'log', content: `Analyzed query and context successfully!` }, ctx.config);
 
-  return {
-    optimizedQuery: result.rewrittenQuery,
-    mentionedContext: postprocessContext(result.mentionedContext, context),
-    intent: result.intent,
-    confidence: result.confidence,
-    reasoning: result.reasoning,
-  };
+    return {
+      optimizedQuery: result?.rewrittenQuery || query,
+      mentionedContext: postprocessContext(result?.mentionedContext, context),
+      intent: result?.intent,
+      confidence: result?.confidence,
+      reasoning: result?.reasoning,
+    };
+  } catch (error) {
+    ctx.ctxThis.engine.logger.error(`Failed to analyze query: ${error}`);
+    // Return original query if analysis fails
+    return {
+      optimizedQuery: query,
+      mentionedContext: { resources: [], documents: [], contentList: [], projects: [] },
+      intent: 'OTHER',
+      confidence: 0,
+      reasoning: 'Analysis failed, using original query',
+    };
+  }
 }
 
 export const preprocessQuery = (

@@ -1,47 +1,51 @@
 .ai-copilot-operation-container {
-  position: absolute;
   bottom: 0;
   width: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 1024px;
+  box-shadow: 0px 4px 6px 0px rgba(16, 24, 40, 0.03);
+  max-width: 444px;
   max-height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
 
   box-sizing: border-box;
-  overflow-y: scroll;
 
   .ai-copilot-operation-body {
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    margin: 12px;
-    background-color: #fcfcf9;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
   }
 
   .skill-container {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 0px 0px 8px;
+    padding: 0px 0px 4px;
     gap: 8px;
+    position: relative;
 
     .skill-item {
       height: 24px;
       padding: 0 4px;
       border-radius: 8px;
       border: 1px solid rgba(0, 0, 0, 0.12);
+      background-color: #fff;
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: center;
       font-size: 12px;
+      transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease;
+      opacity: 1;
+      visibility: visible;
 
       &.hide {
         position: absolute;
-        top: -100px;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
       }
 
       .skill-title {
@@ -65,8 +69,9 @@
 
   .ai-copilot-chat-container {
     position: relative;
-    background-color: #fcfcf9;
+    background-color: #fff;
     z-index: 1;
+    border-radius: 8px;
 
     .chat-setting-container {
       width: 100%;
@@ -96,9 +101,6 @@
 
   .chat-input-container {
     // height: 125px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
 
     textarea {
       border-radius: 8px;

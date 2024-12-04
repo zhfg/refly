@@ -17,6 +17,7 @@
     },
     "lint:ci": {},
     "lint": {},
+    "codegen": {},
     "clean": {
       "cache": false,
       "outputs": ["packages/*/build"]

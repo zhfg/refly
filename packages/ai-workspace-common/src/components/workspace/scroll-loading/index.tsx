@@ -1,6 +1,5 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Skeleton } from '@arco-design/web-react';
+import { Button, Skeleton } from 'antd';
 
 export interface ScrollLoadingProps {
   isRequesting: boolean;
@@ -14,27 +13,25 @@ export const ScrollLoading = (props: ScrollLoadingProps) => {
   const { t } = useTranslation();
 
   if (!hasMore) {
-    return <span style={{ marginBottom: 120 }}>{t('knowledgeLibrary.archive.item.noMoreText')}</span>;
+    return (
+      <div className="w-full flex justify-center my-6">
+        <span>{t('knowledgeLibrary.archive.item.noMoreText')}</span>
+      </div>
+    );
   }
 
   if (isRequesting) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          width: '100%',
-        }}
-      >
-        <Skeleton animation style={{ width: '100%' }}></Skeleton>
-        <Skeleton animation style={{ width: '100%', marginTop: 24 }}></Skeleton>
+      <div className="w-full flex flex-col mt-6">
+        <Skeleton active style={{ width: '100%' }}></Skeleton>
+        <Skeleton active style={{ width: '100%', marginTop: 24 }}></Skeleton>
       </div>
     );
   }
 
   return (
-    <Button onClick={() => loadMore()} style={{ marginBottom: 120 }}>
-      {t('common.loadMore')}
-    </Button>
+    <div className="w-full flex justify-center my-6">
+      <Button onClick={() => loadMore()}>{t('common.loadMore')}</Button>
+    </div>
   );
 };

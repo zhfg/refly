@@ -6,7 +6,12 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { Icon, SearchResponse, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SearchResponse,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+} from '@refly-packages/openapi-schema';
 import { TokenTextSplitter } from 'langchain/text_splitter';
 import { LLMChain, loadSummarizationChain } from 'langchain/chains';
 import { PromptTemplate } from '@langchain/core/prompts';
@@ -46,7 +51,7 @@ export class ArxivSummarySkill extends BaseSkill {
 
   icon: Icon = { type: 'emoji', value: '📚' };
 
-  configSchema: SkillTemplateConfigSchema = {
+  configSchema: SkillTemplateConfigDefinition = {
     items: [],
   };
 
@@ -145,7 +150,7 @@ export class ArxivSummarySkill extends BaseSkill {
     this.emitEvent({ event: 'log', content: '获取 pdf 内容成功' }, config);
     // add to resource for knowledge qa
     if (data?.data?.content?.length > 0) {
-      const { user } = config;
+      const { user } = config.configurable;
       const websiteUrl = url.includes('abs') ? url : url.replace('pdf', 'abs');
 
       // add to resource for knowledge qa

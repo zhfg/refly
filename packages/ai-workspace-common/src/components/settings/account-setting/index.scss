@@ -1,5 +1,7 @@
 .account-setting {
   padding: 0 24px;
+  box-sizing: border-box;
+  overflow: auto;
   &-title {
     font-size: 20px;
     margin-bottom: 16px;

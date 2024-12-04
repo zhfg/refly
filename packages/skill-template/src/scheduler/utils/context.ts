@@ -2,7 +2,6 @@ import { GraphState, IContext, SkillContextContentItemMetadata } from '../types'
 import {
   countContentTokens,
   countContextTokens,
-  countCanvasTokens,
   countResourceTokens,
   countToken,
   countWebSearchContextTokens,
@@ -13,7 +12,6 @@ import {
   processSelectedContentWithSimilarity,
   processCanvasesWithSimilarity,
   processResourcesWithSimilarity,
-  processProjectsWithSimilarity,
   processWholeSpaceWithSimilarity,
   processMentionedContextWithSimilarity,
 } from './semanticSearch';
@@ -22,7 +20,7 @@ import { mergeAndTruncateContexts, truncateContext, truncateText } from './trunc
 import { flattenMergedContextToSources, concatMergedContextToStr } from './summarizer';
 import {
   SkillContextContentItem,
-  SkillContextCanvasItem,
+  SkillContextDocumentItem,
   SkillContextResourceItem,
   SkillTemplateConfig,
   Source,
@@ -37,15 +35,17 @@ export async function prepareContext(
     query,
     mentionedContext,
     maxTokens,
-    hasContext,
+    enableMentionedContext,
+    enableLowerPriorityContext,
   }: {
     query: string;
     mentionedContext: IContext;
     maxTokens: number;
-    hasContext: boolean;
+    enableMentionedContext: boolean;
+    enableLowerPriorityContext: boolean;
   },
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
-): Promise<string> {
+): Promise<{ contextStr: string; sources: Source[] }> {
   ctx.ctxThis.emitEvent({ event: 'log', content: `Start to prepare context...` }, ctx.config);
 
   const enableWebSearch = ctx.tplConfig?.enableWebSearch?.value;
@@ -62,7 +62,7 @@ export async function prepareContext(
   let processedWebSearchContext: IContext = {
     contentList: [],
     resources: [],
-    canvases: [],
+    documents: [],
     webSearchSources: [],
   };
   if (enableWebSearch) {
@@ -81,10 +81,10 @@ export async function prepareContext(
   let processedMentionedContext: IContext = {
     contentList: [],
     resources: [],
-    canvases: [],
+    documents: [],
     projects: [],
   };
-  if (hasContext) {
+  if (enableMentionedContext) {
     const mentionContextRes = await prepareMentionedContext(
       {
         query,
@@ -102,11 +102,11 @@ export async function prepareContext(
   let lowerPriorityContext: IContext = {
     contentList: [],
     resources: [],
-    canvases: [],
+    documents: [],
     projects: [],
   };
-  if (remainingTokens > 0 && (hasContext || enableKnowledgeBaseSearch)) {
-    const { contentList = [], resources = [], canvases = [], projects = [] } = ctx.config.configurable;
+  if (remainingTokens > 0 && (enableMentionedContext || enableKnowledgeBaseSearch)) {
+    const { contentList = [], resources = [], documents = [], projects = [] } = ctx.config.configurable;
     // prev remove overlapping items in mentioned context
     ctx.ctxThis.engine.logger.log(
       `Remove Overlapping Items In Mentioned Context...
@@ -114,7 +114,7 @@ export async function prepareContext(
       - context: ${safeStringifyJSON({
         contentList,
         resources,
-        canvases,
+        documents,
         projects,
       })}
       `,
@@ -123,8 +123,8 @@ export async function prepareContext(
     const context = removeOverlappingContextItems(processedMentionedContext, {
       contentList,
       resources,
-      canvases,
-      projects: projects,
+      documents,
+      projects,
     });
 
     lowerPriorityContext = await prepareLowerPriorityContext(
@@ -169,19 +169,10 @@ export async function prepareContext(
      - sources: ${safeStringifyJSON(sources)}`,
   );
 
-  ctx.ctxThis.emitEvent(
-    {
-      event: 'structured_data',
-      content: JSON.stringify(sources),
-      structuredDataKey: 'sources',
-    },
-    ctx.config,
-  );
-
   ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared context successfully!` }, ctx.config);
   ctx.ctxThis.engine.logger.log(`Prepared context successfully! ${safeStringifyJSON(mergedContext)}`);
 
-  return contextStr;
+  return { contextStr, sources };
 }
 
 export async function prepareWebSearchContext(
@@ -218,7 +209,7 @@ export async function prepareWebSearchContext(
   const processedWebSearchContext: IContext = {
     contentList: [],
     resources: [],
-    canvases: [],
+    documents: [],
     webSearchSources: [],
   };
 
@@ -279,7 +270,7 @@ export async function prepareMentionedContext(
   let processedMentionedContext: IContext = {
     contentList: [],
     resources: [],
-    canvases: [],
+    documents: [],
     projects: [],
     ...mentionedContext,
   };
@@ -294,11 +285,11 @@ export async function prepareMentionedContext(
     };
   } else {
     // if mentioned context is not empty, we need to mutate the metadata of the mentioned context
-    const { contentList = [], resources = [], canvases = [] } = ctx.config.configurable;
+    const { contentList = [], resources = [], documents = [] } = ctx.config.configurable;
     const context: IContext = {
       contentList,
       resources,
-      canvases,
+      documents,
     };
 
     ctx.ctxThis.engine.logger.log(`Mutate Context Metadata...`);
@@ -396,11 +387,11 @@ export async function prepareRelevantContext(
   },
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<IContext> {
-  const { contentList = [], resources = [], canvases = [] } = context;
+  const { contentList = [], resources = [], documents = [] } = context;
   let relevantContexts: IContext = {
     contentList: [],
     resources: [],
-    canvases: [],
+    documents: [],
   };
 
   ctx.ctxThis.engine.logger.log(`Prepare Relevant Context..., ${safeStringifyJSON(context)}`);
@@ -409,9 +400,9 @@ export async function prepareRelevantContext(
   relevantContexts.contentList =
     contentList.length > 0 ? await processSelectedContentWithSimilarity(query, contentList, Infinity, ctx) : [];
 
-  // 2. canvases context
-  relevantContexts.canvases =
-    canvases.length > 0 ? await processCanvasesWithSimilarity(query, canvases, Infinity, ctx) : [];
+  // 2. documents context
+  relevantContexts.documents =
+    documents.length > 0 ? await processCanvasesWithSimilarity(query, documents, Infinity, ctx) : [];
 
   // 3. resources context
   relevantContexts.resources =
@@ -438,7 +429,7 @@ export async function prepareContainerLevelContext(
   const processedContext: IContext = {
     contentList: [],
     resources: [],
-    canvases: [],
+    documents: [],
     projects: [],
   };
 
@@ -452,9 +443,6 @@ export async function prepareContainerLevelContext(
      - processedContext: ${safeStringifyJSON(processedContext)}`,
   );
 
-  // 1. projects context, mainly for knowledge base search meat filter
-  const relevantResourcesOrCanvasesFromProjects = await processProjectsWithSimilarity(query, projects, ctx);
-
   // 2. whole space search context
   const relevantResourcesOrCanvasesFromWholeSpace = enableSearchWholeSpace
     ? await processWholeSpaceWithSimilarity(query, ctx)
@@ -462,26 +450,23 @@ export async function prepareContainerLevelContext(
 
   // 3. Group by resource and canvas, deduplicate, and place in processedContext
   const uniqueResourceIds = new Set<string>();
-  const uniqueCanvasIds = new Set<string>();
+  const uniqueDocIds = new Set<string>();
 
-  const addUniqueItem = (item: SkillContextResourceItem | SkillContextCanvasItem) => {
+  const addUniqueItem = (item: SkillContextResourceItem | SkillContextDocumentItem) => {
     if ('resource' in item && item.resource) {
       const resourceId = item.resource.resourceId;
       if (!uniqueResourceIds.has(resourceId)) {
         uniqueResourceIds.add(resourceId);
         processedContext.resources.push(item);
       }
-    } else if ('canvas' in item && item.canvas) {
-      const canvasId = item.canvas.canvasId;
-      if (!uniqueCanvasIds.has(canvasId)) {
-        uniqueCanvasIds.add(canvasId);
-        processedContext.canvases.push(item);
+    } else if ('document' in item && item.document) {
+      const docId = item.document.docId;
+      if (!uniqueDocIds.has(docId)) {
+        uniqueDocIds.add(docId);
+        processedContext.documents.push(item);
       }
     }
   };
-
-  // Add items from projects first
-  relevantResourcesOrCanvasesFromProjects.forEach(addUniqueItem);
 
   // Then add items from whole space
   relevantResourcesOrCanvasesFromWholeSpace.forEach(addUniqueItem);
@@ -500,7 +485,7 @@ export function deduplicateContexts(context: IContext): IContext {
   return {
     contentList: uniqBy(context.contentList || [], 'content'),
     resources: uniqBy(context.resources || [], (item) => item.resource?.content),
-    canvases: uniqBy(context.canvases || [], (item) => item.canvas?.content),
+    documents: uniqBy(context.documents || [], (item) => item.document?.content),
     webSearchSources: uniqBy(context.webSearchSources || [], (item) => item?.pageContent),
   };
 }
@@ -509,7 +494,7 @@ export function removeOverlappingContextItems(context: IContext, originalContext
   const deduplicatedContext: IContext = {
     contentList: [],
     resources: [],
-    canvases: [],
+    documents: [],
     projects: [],
   };
 
@@ -534,12 +519,12 @@ export function removeOverlappingContextItems(context: IContext, originalContext
   );
 
   // Deduplicate canvases
-  deduplicatedContext.canvases = (originalContext?.canvases || []).filter(
+  deduplicatedContext.documents = (originalContext?.documents || []).filter(
     (item) =>
       !itemExistsInContext(
-        item.canvas,
-        (context?.canvases || []).map((n) => n.canvas),
-        'canvasId',
+        item.document,
+        (context?.documents || []).map((n) => n.document),
+        'docId',
       ),
   );
 
@@ -553,13 +538,13 @@ export function removeOverlappingContextItems(context: IContext, originalContext
 
 export const mutateContextMetadata = (mentionedContext: IContext, originalContext: IContext): IContext => {
   // Process canvases
-  mentionedContext.canvases.forEach((mentionedCanvas) => {
-    const index = originalContext.canvases.findIndex((n) => n.canvas.canvasId === mentionedCanvas.canvas.canvasId);
+  mentionedContext.documents.forEach((mentionedCanvas) => {
+    const index = originalContext.documents.findIndex((n) => n.document.docId === mentionedCanvas.document.docId);
     if (index !== -1) {
-      originalContext.canvases[index] = {
-        ...originalContext.canvases[index],
+      originalContext.documents[index] = {
+        ...originalContext.documents[index],
         metadata: {
-          ...originalContext.canvases[index].metadata,
+          ...originalContext.documents[index].metadata,
           useWholeContent: mentionedCanvas.metadata?.useWholeContent,
         },
       };

@@ -4,7 +4,7 @@ import {
   DynamicConfigItem,
   DynamicConfigValue,
   SkillTemplateConfig,
-  SkillTemplateConfigSchema,
+  SkillTemplateConfigDefinition,
   ConfigScope,
 } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
@@ -135,7 +135,7 @@ const ConfigItem = (props: {
 };
 
 export const TemplateConfigFormItems = (props: {
-  schema: SkillTemplateConfigSchema;
+  schema: SkillTemplateConfigDefinition;
   form: FormInstance;
   tplConfig?: SkillTemplateConfig;
   fieldPrefix?: string;

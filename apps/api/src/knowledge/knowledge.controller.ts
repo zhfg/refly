@@ -20,11 +20,6 @@ import {
   DeleteProjectRequest,
   DeleteResourceRequest,
   DeleteResourceResponse,
-  ListCanvasResponse,
-  GetCanvasDetailResponse,
-  UpsertCanvasResponse,
-  UpsertCanvasRequest,
-  DeleteCanvasRequest,
   ResourceType,
   BatchCreateResourceResponse,
   ReindexResourceRequest,
@@ -35,13 +30,18 @@ import {
   DeleteReferencesRequest,
   ListOrder,
   DeleteProjectResponse,
+  ListDocumentResponse,
+  GetDocumentDetailResponse,
+  UpsertDocumentRequest,
+  UpsertDocumentResponse,
+  DeleteDocumentRequest,
 } from '@refly-packages/openapi-schema';
-import { User as UserModel } from '@prisma/client';
+import { User as UserType } from '@prisma/client';
 import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { buildSuccessResponse } from '@/utils';
 import { User } from '@/utils/decorators/user.decorator';
-import { canvasPO2DTO, resourcePO2DTO, projectPO2DTO, referencePO2DTO } from './knowledge.dto';
+import { documentPO2DTO, resourcePO2DTO, projectPO2DTO, referencePO2DTO } from './knowledge.dto';
 import { ParamsError, ProjectNotFoundError } from '@refly-packages/errors';
 
 @Controller('v1/knowledge')
@@ -51,7 +51,7 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Get('project/list')
   async listProjects(
-    @User() user: UserModel,
+    @User() user: UserType,
     @Query('projectId') projectId: string,
     @Query('resourceId') resourceId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -71,7 +71,7 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Get('project/detail')
   async getProjectDetail(
-    @User() user: UserModel,
+    @User() user: UserType,
     @Query('projectId') projectId: string,
   ): Promise<GetProjectDetailResponse> {
     const project = await this.knowledgeService.getProjectDetail(user, { projectId });
@@ -81,7 +81,7 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Post('project/update')
   async updateProject(
-    @User() user: UserModel,
+    @User() user: UserType,
     @Body() body: UpsertProjectRequest,
   ): Promise<UpsertProjectResponse> {
     const { projectId } = body;
@@ -100,7 +100,7 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Post('project/create')
   async createProject(
-    @User() user: UserModel,
+    @User() user: UserType,
     @Body() body: UpsertProjectRequest,
   ): Promise<UpsertProjectResponse> {
     if (body.projectId) {
@@ -113,7 +113,7 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Post('project/delete')
   async deleteProject(
-    @User() user: UserModel,
+    @User() user: UserType,
     @Body() body: DeleteProjectRequest,
   ): Promise<DeleteProjectResponse> {
     if (!body.projectId) {
@@ -125,7 +125,7 @@ export class KnowledgeController {
 
   @UseGuards(JwtAuthGuard)
   @Post('project/bindRes')
-  async bindProjectResources(@User() user: UserModel, @Body() body: BindProjectResourceRequest[]) {
+  async bindProjectResources(@User() user: UserType, @Body() body: BindProjectResourceRequest[]) {
     await this.knowledgeService.bindProjectResources(user, body);
     return buildSuccessResponse({});
   }
@@ -133,7 +133,7 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Get('resource/list')
   async listResources(
-    @User() user: UserModel,
+    @User() user: UserType,
     @Query('projectId') projectId: string,
     @Query('resourceId') resourceId: string,
     @Query('resourceType') resourceType: ResourceType,
@@ -155,7 +155,7 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Get('resource/detail')
   async showResourceDetail(
-    @User() user: UserModel,
+    @User() user: UserType,
     @Query('resourceId') resourceId: string,
   ): Promise<GetResourceDetailResponse> {
     const resource = await this.knowledgeService.getResourceDetail(user, { resourceId });
@@ -165,7 +165,7 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Post('resource/create')
   async createResource(
-    @User() user: UserModel,
+    @User() user: UserType,
     @Body() body: UpsertResourceRequest,
   ): Promise<UpsertResourceResponse> {
     const resource = await this.knowledgeService.createResource(user, body, {
@@ -177,7 +177,7 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Post('resource/batchCreate')
   async importResource(
-    @User() user: UserModel,
+    @User() user: UserType,
     @Body() body: UpsertResourceRequest[],
   ): Promise<BatchCreateResourceResponse> {
     const resources = await this.knowledgeService.batchCreateResource(user, body);
@@ -187,7 +187,7 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Post('resource/update')
   async updateResource(
-    @User() user: UserModel,
+    @User() user: UserType,
     @Body() body: UpsertResourceRequest,
   ): Promise<UpsertResourceResponse> {
     const { resourceId } = body;
@@ -205,7 +205,7 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Post('resource/reindex')
   async reindexResource(
-    @User() user: UserModel,
+    @User() user: UserType,
     @Body() body: ReindexResourceRequest,
   ): Promise<ReindexResourceResponse> {
     const resources = await this.knowledgeService.reindexResource(user, body);
@@ -215,7 +215,7 @@ export class KnowledgeController {
   @UseGuards(JwtAuthGuard)
   @Post('resource/delete')
   async deleteResource(
-    @User() user: UserModel,
+    @User() user: UserType,
     @Body() body: DeleteResourceRequest,
   ): Promise<DeleteResourceResponse> {
     if (!body.resourceId) {
@@ -226,90 +226,88 @@ export class KnowledgeController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('canvas/list')
-  async listCanvases(
-    @User() user: UserModel,
-    @Query('projectId') projectId: string,
+  @Get('document/list')
+  async listDocuments(
+    @User() user: UserType,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
     @Query('order', new DefaultValuePipe('creationDesc')) order: ListOrder,
-  ): Promise<ListCanvasResponse> {
-    const canvases = await this.knowledgeService.listCanvases(user, {
-      projectId,
+  ): Promise<ListDocumentResponse> {
+    const documents = await this.knowledgeService.listDocuments(user, {
       page,
       pageSize,
       order,
     });
-    return buildSuccessResponse((canvases ?? []).map(canvasPO2DTO));
+    return buildSuccessResponse((documents ?? []).map(documentPO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('canvas/detail')
-  async getCanvasDetail(
-    @User() user: UserModel,
-    @Query('canvasId') canvasId: string,
-  ): Promise<GetCanvasDetailResponse> {
-    const canvas = await this.knowledgeService.getCanvasDetail(user, { canvasId });
-    return buildSuccessResponse(canvasPO2DTO(canvas));
+  @Get('document/detail')
+  async getDocumentDetail(
+    @User() user: UserType,
+    @Query('docId') docId: string,
+  ): Promise<GetDocumentDetailResponse> {
+    const document = await this.knowledgeService.getDocumentDetail(user, { docId });
+    return buildSuccessResponse(documentPO2DTO(document));
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('canvas/create')
-  async createCanvas(
-    @User() user: UserModel,
-    @Body() body: UpsertCanvasRequest,
-  ): Promise<UpsertCanvasResponse> {
-    const canvas = await this.knowledgeService.createCanvas(user, body);
-    return buildSuccessResponse(canvasPO2DTO(canvas));
+  @Post('document/create')
+  async createDocument(
+    @User() user: UserType,
+    @Body() body: UpsertDocumentRequest,
+  ): Promise<UpsertDocumentResponse> {
+    const document = await this.knowledgeService.createDocument(user, body);
+    return buildSuccessResponse(documentPO2DTO(document));
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('canvas/update')
-  async updateCanvas(
-    @User() user: UserModel,
-    @Body() body: UpsertCanvasRequest,
-  ): Promise<UpsertCanvasResponse> {
-    if (!body.canvasId) {
-      throw new ParamsError('Canvas ID is required');
+  @Post('document/update')
+  async updateDocument(
+    @User() user: UserType,
+    @Body() body: UpsertDocumentRequest,
+  ): Promise<UpsertDocumentResponse> {
+    if (!body.docId) {
+      throw new ParamsError('Document ID is required');
     }
-    const canvases = await this.knowledgeService.batchUpdateCanvas(user, [body]);
-    return buildSuccessResponse(canvasPO2DTO(canvases?.[0]));
+    const documents = await this.knowledgeService.batchUpdateDocument(user, [body]);
+    return buildSuccessResponse(documentPO2DTO(documents?.[0]));
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('canvas/batchUpdate')
-  async batchUpdateCanvas(@User() user: UserModel, @Body() body: UpsertCanvasRequest[]) {
-    await this.knowledgeService.batchUpdateCanvas(user, body);
+  @Post('document/batchUpdate')
+  async batchUpdateDocument(@User() user: UserType, @Body() body: UpsertDocumentRequest[]) {
+    await this.knowledgeService.batchUpdateDocument(user, body);
     return buildSuccessResponse({});
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('canvas/delete')
-  async deleteCanvas(@User() user: UserModel, @Body() body: DeleteCanvasRequest) {
-    if (!body.canvasId) {
-      throw new ParamsError('Canvas ID is required');
+  @Post('document/delete')
+  async deleteDocument(@User() user: UserType, @Body() body: DeleteDocumentRequest) {
+    if (!body.docId) {
+      throw new ParamsError('Document ID is required');
     }
-    await this.knowledgeService.deleteCanvas(user, body.canvasId);
+    await this.knowledgeService.deleteDocument(user, body);
     return buildSuccessResponse({});
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('reference/query')
-  async queryReferences(@User() user: UserModel, @Body() body: QueryReferencesRequest) {
+  async queryReferences(@User() user: UserType, @Body() body: QueryReferencesRequest) {
     const references = await this.knowledgeService.queryReferences(user, body);
     return buildSuccessResponse(references.map(referencePO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('reference/add')
-  async addReferences(@User() user: UserModel, @Body() body: AddReferencesRequest) {
+  async addReferences(@User() user: UserType, @Body() body: AddReferencesRequest) {
     const references = await this.knowledgeService.addReferences(user, body);
     return buildSuccessResponse(references.map(referencePO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('reference/delete')
-  async deleteReferences(@User() user: UserModel, @Body() body: DeleteReferencesRequest) {
+  async deleteReferences(@User() user: UserType, @Body() body: DeleteReferencesRequest) {
     await this.knowledgeService.deleteReferences(user, body);
     return buildSuccessResponse({});
   }

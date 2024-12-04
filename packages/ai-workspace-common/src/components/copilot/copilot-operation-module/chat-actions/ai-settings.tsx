@@ -41,7 +41,7 @@ export const AISettingsDropdown = ({
       ? [
           {
             key: 'webSearch',
-            label: !skillStore?.selectedSkill?.skillId ? (
+            label: !skillStore?.selectedSkill?.name ? (
               <div
                 className="text-xs flex items-center gap-2"
                 onClick={(e) => {
@@ -56,7 +56,7 @@ export const AISettingsDropdown = ({
           },
           {
             key: 'knowledgeBase',
-            label: !skillStore?.selectedSkill?.skillId ? (
+            label: !skillStore?.selectedSkill?.name ? (
               <div
                 className="text-xs flex items-center gap-2"
                 onClick={(e) => {
@@ -103,13 +103,13 @@ export const AISettingsDropdown = ({
   return (
     <>
       {!briefMode && <ModelSelector placement={modelSelectorPlacement} />}
-      {!collapsed && !briefMode && !skillStore?.selectedSkill?.skillId ? (
+      {!collapsed && !briefMode && !skillStore?.selectedSkill?.name ? (
         <div className="chat-action-item" onClick={() => chatStore.setEnableWebSearch(!chatStore.enableWebSearch)}>
           <Switch size="small" checked={chatStore.enableWebSearch} />
           <span className="chat-action-item-text">{t('copilot.webSearch.title')}</span>
         </div>
       ) : null}
-      {!collapsed && !briefMode && !skillStore?.selectedSkill?.skillId ? (
+      {!collapsed && !briefMode && !skillStore?.selectedSkill?.name ? (
         <div
           className="chat-action-item"
           onClick={() => chatStore.setEnableKnowledgeBaseSearch(!chatStore.enableKnowledgeBaseSearch)}

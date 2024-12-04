@@ -7,17 +7,6 @@ export type DataFetcher = (queryPayload: {
 }) => Promise<{ success: boolean; data?: SearchResult[] }>;
 
 export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
-  project: async (queryPayload) => {
-    const res = await getClient().listProjects({
-      query: queryPayload,
-    });
-    const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
-      id: item?.projectId,
-      title: item?.title,
-      domain: 'project',
-    }));
-    return { success: res?.data?.success, data };
-  },
   resource: async (queryPayload) => {
     const res = await getClient().listResources({
       query: queryPayload,
@@ -26,11 +15,34 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
       id: item?.resourceId,
       title: item?.title,
       domain: 'resource',
+      snippets: [
+        {
+          text: item?.contentPreview,
+        },
+      ],
+      contentPreview: item?.contentPreview,
+    }));
+    return { success: res?.data?.success, data };
+  },
+  document: async (queryPayload) => {
+    const res = await getClient().listDocuments({
+      query: queryPayload,
+    });
+    const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
+      id: item?.docId,
+      title: item?.title,
+      domain: 'document',
+      snippets: [
+        {
+          text: item?.contentPreview,
+        },
+      ],
+      contentPreview: item?.contentPreview,
     }));
     return { success: res?.data?.success, data };
   },
   canvas: async (queryPayload) => {
-    const res = await getClient().listCanvas({
+    const res = await getClient().listCanvases({
       query: queryPayload,
     });
     const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
@@ -40,25 +52,49 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
     }));
     return { success: res?.data?.success, data };
   },
-  conversation: async (queryPayload) => {
-    const res = await getClient().listConversations({
+  skill: async (queryPayload) => {
+    const res = await getClient().listSkills({
       query: queryPayload,
     });
     const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
-      id: item?.convId,
-      title: item?.title,
-      domain: 'conversation',
+      id: item?.name,
+      title: item?.displayName,
+      domain: 'skill',
+      metadata: {
+        // configSchema: item?.configSchema,
+        // description: item?.description,
+        originalItem: item,
+      },
     }));
     return { success: res?.data?.success, data };
   },
-  skill: async (queryPayload) => {
-    const res = await getClient().listSkillInstances({
-      query: queryPayload,
-    });
+  tool: async (queryPayload) => {
+    // const res = await getClient().listTools({
+    //   query: queryPayload,
+    // });
+    const res = {
+      data: {
+        success: true,
+        data: [
+          {
+            toolId: 'webSearch',
+            displayName: 'Web Search',
+          },
+          {
+            toolId: 'librarySearch',
+            displayName: 'Library Search',
+          },
+          {
+            toolId: 'multilingualSearch',
+            displayName: 'Multilingual Search',
+          },
+        ],
+      },
+    };
     const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
-      id: item?.skillId,
+      id: item?.toolId,
       title: item?.displayName,
-      domain: 'skill',
+      domain: 'tool',
     }));
     return { success: res?.data?.success, data };
   },

@@ -9,23 +9,19 @@ import { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
 import {
   SkillContext,
   SkillInput,
-  SkillTemplateConfigSchema,
+  SkillTemplateConfigDefinition,
   SkillInvocationConfig,
   SkillMeta,
   User,
   SkillTemplateConfig,
   Icon,
-  Project,
+  Artifact,
+  ActionStepMeta,
 } from '@refly-packages/openapi-schema';
 import { EventEmitter } from 'node:stream';
-import { randomUUID } from 'node:crypto';
 import { SkillEvent } from '@refly-packages/common-types';
 
 export abstract class BaseSkill extends StructuredTool {
-  /**
-   * Skill display name
-   */
-  abstract displayName: Record<string, string>;
   /**
    * Skill template icon
    */
@@ -33,7 +29,7 @@ export abstract class BaseSkill extends StructuredTool {
   /**
    * Skill template config schema
    */
-  abstract configSchema: SkillTemplateConfigSchema;
+  abstract configSchema: SkillTemplateConfigDefinition;
   /**
    * Skill invocation config
    */
@@ -56,7 +52,7 @@ export abstract class BaseSkill extends StructuredTool {
    * Emit a skill event.
    */
   emitEvent(data: Partial<SkillEvent>, config: SkillRunnableConfig) {
-    const { emitter, currentSkill, spanId } = config?.configurable || {};
+    const { emitter, resultId } = config?.configurable || {};
 
     if (!emitter) {
       return;
@@ -64,8 +60,8 @@ export abstract class BaseSkill extends StructuredTool {
 
     const eventData: SkillEvent = {
       event: data.event!,
-      spanId,
-      skillMeta: currentSkill,
+      step: config.metadata?.step,
+      resultId,
       ...data,
     };
 
@@ -86,22 +82,23 @@ export abstract class BaseSkill extends StructuredTool {
 
     // Ensure currentSkill is not empty.
     config.configurable.currentSkill ??= {
-      tplName: this.name,
-      displayName: this.displayName[config.configurable.uiLocale || 'en'],
+      name: this.name,
       icon: this.icon,
     };
 
-    // Ensure spanId is not empty.
-    config.configurable.spanId ??= randomUUID();
+    this.emitEvent({ event: 'start' }, config);
 
     const response = await this.toRunnable().invoke(input, {
       ...config,
       metadata: {
         ...config.metadata,
         ...config.configurable.currentSkill,
-        spanId: config.configurable.spanId,
+        resultId: config.configurable.resultId,
       },
     });
+
+    this.emitEvent({ event: 'end' }, config);
+
     return response;
   }
 }
@@ -134,31 +131,32 @@ export interface SkillEventMap {
   end: [data: SkillEvent];
   log: [data: SkillEvent];
   stream: [data: SkillEvent];
+  create_node: [data: SkillEvent];
+  artifact: [data: SkillEvent];
   structured_data: [data: SkillEvent];
-  usage: [data: SkillEvent];
+  token_usage: [data: SkillEvent];
   error: [data: SkillEvent];
 }
 
 export interface SkillRunnableMeta extends Record<string, unknown>, SkillMeta {
-  spanId: string;
+  step?: ActionStepMeta;
+  artifact?: Artifact;
+  suppressOutput?: boolean;
 }
 
 export interface SkillRunnableConfig extends RunnableConfig {
   configurable?: SkillContext & {
-    spanId?: string;
-    convId?: string;
-    projectId?: string;
-    project?: Project;
+    user: User;
+    resultId?: string;
+    canvasId?: string;
     locale?: string;
     uiLocale?: string;
     modelName?: string;
-    selectedSkill?: SkillMeta;
     currentSkill?: SkillMeta;
+    currentStep?: ActionStepMeta;
     chatHistory?: BaseMessage[];
-    installedSkills?: SkillMeta[];
     tplConfig?: SkillTemplateConfig;
     emitter?: EventEmitter<SkillEventMap>;
   };
-  user: User;
   metadata?: SkillRunnableMeta;
 }

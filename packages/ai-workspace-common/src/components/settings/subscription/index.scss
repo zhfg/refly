@@ -1,6 +1,8 @@
 .subscription {
   padding: 8px 24px;
   width: 700px;
+  box-sizing: border-box;
+  overflow: auto;
 
   &-plan {
     padding: 20px 24px 40px 24px;

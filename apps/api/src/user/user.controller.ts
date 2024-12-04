@@ -24,7 +24,6 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get('settings')
   async getSettings(@User() user: UserModel): Promise<GetUserSettingsResponse> {
-    this.logger.log('getSettings for user');
     const settings: UserSettings = {
       ...pick(user, [
         'uid',

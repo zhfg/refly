@@ -19,8 +19,6 @@ import { useSkillStore } from '@refly-packages/ai-workspace-common/stores/skill'
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { useBuildSkillContext } from './use-build-skill-context';
 import { useTranslation } from 'react-i18next';
-import { useMatch } from '@refly-packages/ai-workspace-common/utils/router';
-import { useHandleRecents } from '@refly-packages/ai-workspace-common/hooks/use-handle-rencents';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useContextFilterErrorTip } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/hooks/use-context-filter-errror-tip';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
@@ -56,9 +54,7 @@ export const useBuildThreadAndRun = () => {
   }));
   const { buildTaskAndGenReponse, buildShutdownTaskAndGenResponse } = useBuildTask();
   const { jumpToConv } = useJumpNewPath();
-  const { addRecentConversation } = useHandleRecents();
   const { handleFilterErrorTip } = useContextFilterErrorTip();
-  const isHomePage = useMatch('/');
 
   // TODO: temp not need this function
   const emptyConvRunSkill = (
@@ -87,8 +83,6 @@ export const useBuildThreadAndRun = () => {
         },
       },
     });
-
-    addRecentConversation(newConv);
   };
 
   // TODO: 这里考虑针对 homePage 来的会话请求，需要清除 conv，重新处理
@@ -112,33 +106,29 @@ export const useBuildThreadAndRun = () => {
   const runSkill = (comingQuestion: string, invokeParams?: InvokeParams) => {
     // support ask follow up question
     const { messages = [], selectedModel, messageIntentContext } = useChatStore.getState();
-    const { selectedSkill } = useSkillStore.getState();
+    const { selectedSkillInstance: selectedSkill } = useSkillStore.getState();
     const { localSettings } = useUserStore.getState();
 
     let question = comingQuestion.trim();
     const canvasEditConfig = messageIntentContext?.canvasEditConfig;
     const projectId = messageIntentContext?.projectContext?.projectId;
+    const canvasId = messageIntentContext?.canvasContext?.canvasId;
     const forceNewConv = messageIntentContext?.isNewConversation;
     const enableWebSearch = messageIntentContext?.enableWebSearch;
     const enableKnowledgeBaseSearch = messageIntentContext?.enableKnowledgeBaseSearch;
     const enableDeepReasonWebSearch = messageIntentContext?.enableDeepReasonWebSearch;
 
-    const conv = ensureConversationExist(projectId, forceNewConv);
+    // const conv = ensureConversationExist(projectId, forceNewConv);
     const skillContext = invokeParams?.skillContext || buildSkillContext();
 
     // set convId info to messageIntentContext
     const newMessageIntentContext: Partial<MessageIntentContext> = {
       ...(messageIntentContext || {}),
-      convId: conv?.convId,
+      // convId: conv?.convId,
     };
 
     if (forceNewConv) {
       resetState();
-    }
-
-    // Restore the question text when the user is on the home page
-    if (isHomePage) {
-      chatStore.setNewQAText(comingQuestion);
     }
 
     chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
@@ -186,25 +176,20 @@ export const useBuildThreadAndRun = () => {
     const task: InvokeSkillRequest = {
       skillId: selectedSkill?.skillId,
       projectId,
+      canvasId,
       input: {
         query: question,
       },
       modelName: selectedModel?.name,
       context: skillContext,
-      convId: conv?.convId || '',
+      skillName: 'common_qna', // TODO: allow select skill
       locale: localSettings?.outputLocale as OutputLocale,
       tplConfig,
-      ...{ createConvParam: getConversation({ ...conv, title: question }) },
     };
     taskStore.setTask(task);
 
     // Start asking
-    buildTaskAndGenReponse(task as InvokeSkillRequest);
-
-    // Clean the chat input when the user is not on the home page
-    if (!isHomePage) {
-      chatStore.setNewQAText('');
-    }
+    buildTaskAndGenReponse(task);
   };
 
   const sendChatMessage = (params: InvokeParams) => {

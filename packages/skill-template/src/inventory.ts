@@ -2,11 +2,9 @@ import { BaseSkill } from './base';
 import { SkillEngine } from './engine';
 import {
   CreateFormalEmailSkill,
-  CreateGitDiffCommitSkill,
   BasicSummarySkill,
   ExplainTermsSkill,
   TranslateSkill,
-  FindRelatedContent,
   BrainstormIdeasSkill,
   ChangeToneSkill,
   ContinueWritingSkill,
@@ -19,18 +17,15 @@ import {
   LanguageSimplificationSkill,
   MakeShorterSkill,
   MakeLongerSkill,
-  ArxivSummarySkill,
-  WebsiteSummarySkill,
 } from './templates';
+import { CommonQnA, GenerateDoc, EditDoc, RewriteDoc, WebSearch, LibrarySearch, RecommendQuestions } from './skills';
 
-export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
+export const createSkillTemplateInventory = (engine: SkillEngine): BaseSkill[] => {
   return [
     new CreateFormalEmailSkill(engine),
-    // new CreateGitDiffCommitSkill(engine),
     new BasicSummarySkill(engine),
     new ExplainTermsSkill(engine),
     new TranslateSkill(engine),
-    // new FindRelatedContent(engine),
     new BrainstormIdeasSkill(engine),
     new ChangeToneSkill(engine),
     new ContinueWritingSkill(engine),
@@ -43,7 +38,17 @@ export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
     new LanguageSimplificationSkill(engine),
     new MakeShorterSkill(engine),
     new MakeLongerSkill(engine),
-    // new ArxivSummarySkill(engine),
-    // new WebsiteSummarySkill(engine),
+  ];
+};
+
+export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
+  return [
+    new RecommendQuestions(engine),
+    new WebSearch(engine),
+    new GenerateDoc(engine),
+    new LibrarySearch(engine),
+    new CommonQnA(engine),
+    new RewriteDoc(engine),
+    new EditDoc(engine),
   ];
 };

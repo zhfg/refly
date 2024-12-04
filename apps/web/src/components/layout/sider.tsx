@@ -1,123 +1,67 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import {
   Avatar,
+  Button,
   Divider,
   Layout,
   Menu,
   Tag,
-  Tooltip,
-  Button,
 } from "@arco-design/web-react"
+import { Tooltip, message } from "antd"
 import {
   useLocation,
   useNavigate,
 } from "@refly-packages/ai-workspace-common/utils/router"
-import { HiOutlineBookOpen } from "react-icons/hi"
-import { LuMoreHorizontal } from "react-icons/lu"
-import { RiHistoryLine } from "react-icons/ri"
-import {
-  AiOutlineMenuFold,
-  AiOutlineMenuUnfold,
-  AiFillChrome,
-} from "react-icons/ai"
-import { IconCanvas } from "@refly-packages/ai-workspace-common/components/common/icon"
 
 import {
-  IconLanguage,
-  IconImport,
-  IconRight,
-} from "@arco-design/web-react/icon"
+  IconCanvas,
+  IconCanvasFill,
+  IconPlus,
+} from "@refly-packages/ai-workspace-common/components/common/icon"
+
 // 静态资源
 import Logo from "@/assets/logo.svg"
 import "./sider.scss"
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
-import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
 // components
 import { SearchQuickOpenBtn } from "@refly-packages/ai-workspace-common/components/search-quick-open-btn"
 import { useTranslation } from "react-i18next"
-import { openGetStartDocument } from "@refly-packages/ai-workspace-common/utils"
-import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
-import { useImportResourceStore } from "@refly-packages/ai-workspace-common/stores/import-resource"
 import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/components/sider-menu-setting-list"
-import { SiderMenuMoreList } from "@refly-packages/ai-workspace-common/components/sider-menu-more-list"
+import { SettingModal } from "@refly-packages/ai-workspace-common/components/settings"
 // hooks
-import { useJumpNewPath } from "@refly-packages/ai-workspace-common/hooks/use-jump-new-path"
-import { useRecentsStoreShallow } from "@refly-packages/ai-workspace-common/stores/recents"
-import { useHandleRecents } from "@refly-packages/ai-workspace-common/hooks/use-handle-rencents"
-import { MessageIntentSource } from "@refly-packages/ai-workspace-common/types/copilot"
-import { useProjectStoreShallow } from "@refly-packages/ai-workspace-common/stores/project"
+import { useHandleSiderData } from "@refly-packages/ai-workspace-common/hooks/use-handle-sider-data"
+import { useSiderStoreShallow } from "@refly-packages/ai-workspace-common/stores/sider"
+import getClient from "@refly-packages/ai-workspace-common/requests/proxiedRequest"
+import { useDebouncedCallback } from "use-debounce"
+import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/use-create-canvas"
+import { useCanvasNodesStore } from "@refly-packages/ai-workspace-common/stores/canvas-nodes"
+import { CanvasNodeType } from "@refly-packages/ai-workspace-common/requests/types.gen"
+// icons
+import {
+  IconDocument,
+  IconResource,
+  IconLibrary,
+} from "@refly-packages/ai-workspace-common/components/common/icon"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
+const SubMenu = Menu.SubMenu
 
-const getNavSelectedKeys = (pathname = "") => {
-  if (pathname.includes("settings")) {
-    return "Settings"
-  } else if (pathname.includes("thread")) {
-    return "ThreadLibrary"
-  } else if (pathname.includes("skill")) {
-    return "Skill"
-  } else if (
-    pathname.startsWith("/library") ||
-    pathname.startsWith("/resource")
-  ) {
-    return "Library"
-  } else if (pathname.startsWith("/project")) {
-    return "Project"
-  }
-
-  return "Home"
+const newItemStyle = {
+  color: "#00968F",
+  fontWeight: "500",
 }
 
-const SiderLogo = (props: {
-  collapse: boolean
-  navigate: (path: string) => void
-  setCollapse: (collapse: boolean) => void
-}) => {
-  const { navigate, collapse, setCollapse } = props
-  const { t } = useTranslation()
+const SiderLogo = (props: { navigate: (path: string) => void }) => {
+  const { navigate } = props
   return (
     <div className="logo-box">
       <div className="logo" onClick={() => navigate("/")}>
         <img src={Logo} alt="Refly" />
-        {!collapse && (
-          <>
-            <span>Refly </span>
-            <Tag color="#00968F" className="logo-beta" size="small">
-              Beta
-            </Tag>
-          </>
-        )}
-      </div>
-      {!collapse && (
-        <div className="collapse-btn" onClick={() => setCollapse(true)}>
-          <Tooltip
-            position="right"
-            content={t("loggedHomePage.siderMenu.collapse")}>
-            <AiOutlineMenuFold
-              className="arco-icon"
-              style={{ fontSize: 20, color: "#666666" }}
-            />
-          </Tooltip>
-        </div>
-      )}
-    </div>
-  )
-}
-
-const MenuItemContent = (props: {
-  icon?: React.ReactNode
-  title?: string
-  collapse?: boolean
-  position?: "left" | "right"
-}) => {
-  const { position = "left" } = props
-  return (
-    <div className="flex">
-      <div className="flex flex-1 flex-nowrap items-center">
-        {position === "left" && props.icon}
-        <span className="sider-menu-title">{props.title}</span>
-        {position === "right" && props.icon}
+        <span>Refly </span>
+        <Tag color="#00968F" className="logo-beta" size="small">
+          Beta
+        </Tag>
       </div>
     </div>
   )
@@ -127,7 +71,7 @@ const MenuItemTooltipContent = (props: { title: string }) => {
   return <div>{props.title}</div>
 }
 
-const SettingItem = (props: { collapse: boolean }) => {
+const SettingItem = () => {
   const userStore = useUserStoreShallow(state => ({
     userProfile: state.userProfile,
   }))
@@ -143,70 +87,42 @@ const SettingItem = (props: { collapse: boolean }) => {
                 alt="user-avatar"
               />
             </Avatar>
-            {!props.collapse && (
-              <span className="username">
-                <span>{userStore?.userProfile?.nickname}</span>
-              </span>
+            <span className="username">
+              <span>{userStore?.userProfile?.nickname}</span>
+            </span>
+          </div>
+
+          <div className="subscription-status">
+            {t(
+              `settings.subscription.subscriptionStatus.${userStore?.userProfile?.subscription?.planType || "free"}`,
             )}
           </div>
-          {!props.collapse && (
-            <div className="subscription-status">
-              {t(
-                `settings.subscription.subscriptionStatus.${userStore?.userProfile?.subscription?.planType || "free"}`,
-              )}
-            </div>
-          )}
         </div>
       </SiderMenuSettingList>
     </div>
   )
 }
 
-const MoreInfo = (props: { collapse: boolean }) => {
-  const { t } = useTranslation()
-  const { collapse } = props
-  return (
-    <div className="more-info">
-      {!collapse && (
-        <Tooltip content={t("loggedHomePage.siderMenu.downloadExtension")}>
-          <Button
-            className="more-info-btn"
-            icon={<AiFillChrome style={{ fontSize: 16 }} />}
-            onClick={() => {
-              window.open(
-                `https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd`,
-                "_blank",
-              )
-            }}>
-            {t("loggedHomePage.siderMenu.download")}
-          </Button>
-        </Tooltip>
-      )}
-      <div className="flex items-center">
-        {!collapse && (
-          <UILocaleList>
-            <Button className="more-info-btn" iconOnly>
-              <IconLanguage style={{ fontSize: 18, marginRight: 0 }} />
-            </Button>
-          </UILocaleList>
-        )}
-        <SiderMenuMoreList>
-          <Button
-            className="more-info-btn"
-            iconOnly
-            icon={
-              <LuMoreHorizontal
-                style={{ fontSize: 18, marginLeft: collapse ? "-24px" : 0 }}
-              />
-            }></Button>
-        </SiderMenuMoreList>
-      </div>
-    </div>
-  )
-}
+export const SiderLayout = (props: { source: "sider" | "popover" }) => {
+  const { source = "sider" } = props
+  const {
+    collapse,
+    libraryList,
+    canvasList,
+    setShowLibraryModal,
+    setShowCanvasListModal,
+    showSettingModal,
+    setShowSettingModal,
+  } = useSiderStoreShallow(state => ({
+    showSettingModal: state.showSettingModal,
+    collapse: state.collapse,
+    libraryList: state.libraryList,
+    canvasList: state.canvasList,
+    setShowSettingModal: state.setShowSettingModal,
+    setShowLibraryModal: state.setShowLibraryModal,
+    setShowCanvasListModal: state.setShowCanvasListModal,
+  }))
 
-export const SiderLayout = () => {
-  const [collapse, setCollapse] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const userStore = useUserStoreShallow(state => ({
@@ -214,73 +130,63 @@ export const SiderLayout = () => {
     loginModalVisible: state.loginModalVisible,
     setLoginModalVisible: state.setLoginModalVisible,
   }))
-  const importResourceStore = useImportResourceStore(state => ({
-    setImportResourceModalVisible: state.setImportResourceModalVisible,
-    setSelectedMenuItem: state.setSelectedMenuItem,
-  }))
 
-  const isGuideDetail = location.pathname.includes("guide/")
-
-  const { jumpToConv } = useJumpNewPath()
-  const { projectActiveConvId } = useProjectStoreShallow(state => ({
-    projectActiveConvId: state.projectActiveConvId,
-  }))
-  const [currentProjectId, setCurrentProjectId] = useState("")
+  const { getLibraryList } = useHandleSiderData(true)
+  const { debouncedCreateCanvas, isCreating: createCanvasLoading } =
+    useCreateCanvas()
 
   const { t } = useTranslation()
 
-  // 获取 storage user profile
-  const storageUserProfile = safeParseJSON(
-    localStorage.getItem("refly-user-profile"),
-  )
-  const notShowLoginBtn = storageUserProfile?.uid || userStore?.userProfile?.uid
+  const { setPendingNode } = useCanvasNodesStore()
 
-  const selectedKey = getNavSelectedKeys(location.pathname)
-  const handleNavClick = (itemKey: string) => {
-    switch (itemKey) {
-      case "Home": {
-        if (!notShowLoginBtn) {
-          userStore.setLoginModalVisible(true)
-        } else {
-          navigate(`/`)
-        }
-        break
-      }
+  const MenuItemContent = (props: {
+    icon?: React.ReactNode
+    title?: string
+    type: string
+    collapse?: boolean
+    position?: "left" | "right"
+  }) => {
+    const { position = "left", type } = props
 
-      case "Settings": {
-        break
-      }
-
-      case "getStart": {
-        openGetStartDocument()
-        break
-      }
-
-      case "Skill": {
-        navigate(`/skill`)
-        break
-      }
-
-      case "Library": {
-        navigate(`/library`)
-        break
-      }
-
-      case "ThreadLibrary": {
-        navigate(`/thread`)
-        break
-      }
-
-      case "Expand": {
-        setCollapse(false)
-        break
-      }
-
-      default: {
-        break
+    const handleNavClick = (e: React.MouseEvent) => {
+      e.stopPropagation()
+      if (type === "Canvas") {
+        setShowCanvasListModal(true)
+      } else if (type === "Library") {
+        setShowLibraryModal(true)
       }
     }
+    return (
+      <>
+        <Tooltip title={t(`loggedHomePage.siderMenu.viewMore`)}>
+          <div
+            className="flex"
+            onClick={e => {
+              handleNavClick(e)
+            }}>
+            <div className="flex flex-1 flex-nowrap items-center">
+              {position === "left" && props.icon}
+              <span className="sider-menu-title">{props.title}</span>
+              {position === "right" && props.icon}
+            </div>
+          </div>
+        </Tooltip>
+      </>
+    )
   }
+
+  const getNavSelectedKeys = () => {
+    const pathname = location.pathname
+    if (pathname.startsWith("/canvas")) {
+      const arr = pathname?.split("?")[0]?.split("/")
+      const canvasId = arr[arr.length - 1]
+      return canvasId
+    }
+
+    return "Home"
+  }
+
+  const selectedKey = getNavSelectedKeys()
 
   interface SiderCenterProps {
     key: string
@@ -291,86 +197,82 @@ export const SiderLayout = () => {
   }
 
   const siderSections: SiderCenterProps[][] = [
+    [],
     [
       {
-        key: "Import",
-        name: "newResource",
-        icon: <IconImport style={{ fontSize: 20 }} />,
-        showDivider: true,
-        onClick: () => {
-          importResourceStore.setImportResourceModalVisible(true)
-          importResourceStore.setSelectedMenuItem("import-from-web-search")
-        },
-      },
-    ],
-    [
-      {
-        key: "Home",
-        name: "homePage",
+        key: "Canvas",
+        name: "canvas",
         icon: <IconCanvas className="arco-icon" style={{ fontSize: 20 }} />,
       },
       {
         key: "Library",
         name: "library",
-        icon: (
-          <HiOutlineBookOpen className="arco-icon" style={{ fontSize: 20 }} />
-        ),
-      },
-      // {
-      //   key: "Skill",
-      //   name: "skill",
-      //   icon: <RiRobot2Line className="arco-icon" style={{ fontSize: 20 }} />,
-      // },
-      {
-        key: "ThreadLibrary",
-        name: "threadLibrary",
-        icon: <RiHistoryLine className="arco-icon" style={{ fontSize: 20 }} />,
+        icon: <IconLibrary className="arco-icon" style={{ fontSize: 20 }} />,
       },
     ],
   ]
 
-  const { recentProjects } = useRecentsStoreShallow(state => ({
-    recentProjects: state.recentProjects,
-  }))
+  const [createDocumentLoading, setCreateDocumentLoading] = useState(false)
 
-  useHandleRecents(true)
-
-  const handleClickProject = (projectId: string) => {
-    const activeConvId = projectActiveConvId[projectId] as string
-    jumpToConv({
-      convId: activeConvId || "",
-      projectId,
-      state: {
-        navigationContext: {
-          shouldFetchDetail: true,
-          clearSearchParams: true,
-          source: MessageIntentSource.Project,
-        },
-      },
-    })
+  const getCurrentCanvasId = () => {
+    const pathname = location.pathname
+    if (pathname.startsWith("/canvas")) {
+      const arr = pathname?.split("?")[0]?.split("/")
+      return arr[arr.length - 1]
+    }
+    return null
   }
 
-  useEffect(() => {
-    const projectId = location.pathname.startsWith("/project/")
-      ? location.pathname.split("/")[2]
-      : ""
+  const handleNewDocument = useDebouncedCallback(async () => {
+    if (createDocumentLoading) return
+    setCreateDocumentLoading(true)
 
-    setCurrentProjectId(projectId)
-  }, [location.pathname])
+    try {
+      const { data } = await getClient().createDocument({
+        body: {
+          title: `Document-${new Date().toISOString()}`,
+          initialContent: "\n hello world",
+        },
+      })
+
+      if (data?.success) {
+        message.success(t("common.putSuccess"))
+        await getLibraryList()
+
+        const currentCanvasId = getCurrentCanvasId()
+
+        if (currentCanvasId && currentCanvasId !== "empty") {
+          const newNode = {
+            type: "document" as CanvasNodeType,
+            data: {
+              title: data.data?.title || "",
+              entityId: data.data?.docId || "",
+              metadata: {
+                contentPreview: data.data?.contentPreview || "",
+              },
+            },
+            position: { x: 100, y: 100 },
+          }
+
+          setPendingNode(newNode)
+        }
+      }
+    } catch (error) {
+      console.error("Error creating document:", error)
+      message.error(t("common.error"))
+    } finally {
+      setCreateDocumentLoading(false)
+    }
+  }, 300)
 
   return (
     <Sider
-      className={`app-sider ${isGuideDetail ? "fixed" : ""}`}
-      width={collapse ? 64 : 220}>
-      <div
-        className={`sider-header ${collapse ? "sider-header-collapse" : ""}`}>
-        <SiderLogo
-          navigate={path => navigate(path)}
-          collapse={collapse}
-          setCollapse={() => setCollapse(!collapse)}
-        />
+      className={`app-sider app-sider--${source}`}
+      width={source === "sider" ? (collapse ? 0 : 220) : 220}>
+      <div className="sider-header">
+        <SiderLogo navigate={path => navigate(path)} />
 
-        <SearchQuickOpenBtn collapse={collapse} />
+        <SearchQuickOpenBtn />
 
         <Menu
           style={{
@@ -378,126 +280,128 @@ export const SiderLayout = () => {
             backgroundColor: "transparent",
             borderRight: "none",
           }}
-          collapse={collapse}
           defaultSelectedKeys={["Home"]}
           className="sider-menu-nav"
           selectedKeys={[selectedKey]}
-          tooltipProps={{}}
-          onClickMenuItem={handleNavClick}>
-          <div className={`sider-menu-inner${collapse ? "-collapse" : ""}`}>
+          defaultOpenKeys={["Canvas", "Library"]}>
+          <div className="sider-menu-inner">
             {siderSections.map((section, index) => (
               <div key={`section-${index}`} className="sider-section">
-                {section.map(item => (
-                  <MenuItem
-                    key={item.key}
-                    className="custom-menu-item"
-                    renderItemInTooltip={() => (
-                      <MenuItemTooltipContent
-                        title={t(`loggedHomePage.siderMenu.${item.name}`)}
+                {section.map((item, itemIndex) => (
+                  <>
+                    <SubMenu
+                      key={item.key}
+                      title={
+                        <>
+                          <MenuItemContent
+                            type={item.key}
+                            icon={item.icon}
+                            title={t(`loggedHomePage.siderMenu.${item.name}`)}
+                          />
+                        </>
+                      }>
+                      {item.key === "Canvas" && (
+                        <>
+                          <MenuItem
+                            key="newCanvas"
+                            onClick={debouncedCreateCanvas}>
+                            <Button
+                              loading={createCanvasLoading}
+                              type="text"
+                              icon={
+                                <IconPlus className="arco-icon !text-[#00968F]" />
+                              }
+                              style={newItemStyle}
+                            />
+
+                            <span style={newItemStyle}>
+                              {t("loggedHomePage.siderMenu.newCanvas")}
+                            </span>
+                          </MenuItem>
+
+                          {canvasList.map(canvas => (
+                            <MenuItem
+                              key={canvas.id}
+                              onClick={() => {
+                                if (canvas.id !== selectedKey)
+                                  navigate(`/canvas/${canvas.id}`)
+                              }}>
+                              <IconCanvasFill className="arco-icon" />
+                              {canvas.name}
+                            </MenuItem>
+                          ))}
+                        </>
+                      )}
+
+                      {item.key === "Library" && (
+                        <>
+                          <MenuItem
+                            key="newDocument"
+                            onClick={handleNewDocument}>
+                            <Button
+                              loading={createDocumentLoading}
+                              type="text"
+                              icon={
+                                <IconPlus className="arco-icon !text-[#00968F]" />
+                              }
+                              style={newItemStyle}
+                            />
+
+                            <span style={newItemStyle}>
+                              {t("loggedHomePage.siderMenu.newDocument")}
+                            </span>
+                          </MenuItem>
+
+                          {/* {libraryList.map(library => (
+                            <MenuItem key={library.id}>
+                              {library.type === "document" && (
+                                <IconDocument className="arco-icon" />
+                              )}
+                              {library.type === "resource" && (
+                                <IconResource className="arco-icon" />
+                              )}
+                              {library.name}
+                            </MenuItem>
+                          ))} */}
+                        </>
+                      )}
+                    </SubMenu>
+                    {itemIndex < siderSections.length - 1 && (
+                      <Divider
+                        key={`divider-${itemIndex}`}
+                        style={{
+                          margin: "8px 0",
+                          borderBottom: "1px dashed #e8e8e8",
+                        }}
                       />
                     )}
-                    onClick={item.onClick}>
-                    <MenuItemContent
-                      icon={item.icon}
-                      title={t(`loggedHomePage.siderMenu.${item.name}`)}
-                    />
-                  </MenuItem>
+                  </>
                 ))}
-                {index < siderSections.length - 1 && (
-                  <Divider style={{ margin: "8px 0" }} />
-                )}
               </div>
             ))}
-
-            {recentProjects.length > 0 && !collapse && (
-              <Divider style={{ margin: "8px 0" }} />
-            )}
-
-            {!collapse ? (
-              <div className="recent-section">
-                {recentProjects.length > 0 && (
-                  <div className="recent-projects">
-                    {!collapse && (
-                      <div className="recent-section-title">
-                        <div className="recent-section-title-text">
-                          {t("loggedHomePage.siderMenu.recentProjects")}
-                        </div>
-                      </div>
-                    )}
-
-                    {recentProjects.map(project => (
-                      <MenuItem
-                        className={`custom-menu-item ${currentProjectId === project.projectId ? "arco-menu-selected" : ""}`}
-                        key={project.projectId}
-                        onClick={() => {
-                          handleClickProject(project.projectId)
-                        }}>
-                        {project.title}
-                      </MenuItem>
-                    ))}
-                  </div>
-                )}
-                {recentProjects.length > 0 && (
-                  <div
-                    className="recent-section-title-more"
-                    onClick={() => {
-                      navigate(`/library?tab=project`)
-                    }}>
-                    {t("loggedHomePage.siderMenu.viewMore")}
-                    <IconRight className="arco-icon" style={{ fontSize: 12 }} />
-                  </div>
-                )}
-              </div>
-            ) : null}
           </div>
 
           <div className="sider-footer">
-            {collapse && (
-              <MenuItem
-                key="Expand"
-                className="custom-menu-item"
-                renderItemInTooltip={() => (
-                  <MenuItemTooltipContent
-                    title={t("loggedHomePage.siderMenu.expand")}
-                  />
-                )}>
-                <MenuItemContent
-                  icon={
-                    <AiOutlineMenuUnfold
-                      className="arco-icon"
-                      style={{ fontSize: 20 }}
-                    />
-                  }
-                  title={t("loggedHomePage.siderMenu.expand")}
-                />
-              </MenuItem>
-            )}
-
             {!!userStore.userProfile?.uid && (
               <MenuItem
                 key="Settings"
                 style={{ height: 40 }}
-                className={`menu-setting-container setting-menu-item ${collapse ? "setting-menu-item-collapse" : ""}`}
+                className={`menu-setting-container setting-menu-item`}
                 renderItemInTooltip={() => (
                   <MenuItemTooltipContent
                     title={t("loggedHomePage.siderMenu.settings")}
                   />
                 )}>
-                <SettingItem collapse={collapse}></SettingItem>
+                <SettingItem></SettingItem>
               </MenuItem>
             )}
-
-            <Divider style={{ margin: "8px 0" }} />
-
-            <MenuItem
-              style={{ height: 40 }}
-              key="MoreInfo"
-              className={`${collapse ? "more-info-menu-item-collapse" : ""}`}
-              renderItemInTooltip={() => null}>
-              <MoreInfo collapse={collapse} />
-            </MenuItem>
           </div>
         </Menu>
+
+        <SettingModal
+          visible={showSettingModal}
+          setVisible={setShowSettingModal}
+        />
       </div>
     </Sider>
   )

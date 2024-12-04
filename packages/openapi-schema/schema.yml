@@ -11,12 +11,16 @@ externalDocs:
 servers:
   - url: /v1
 tags:
+  - name: canvas
+    description: Canvas management endpoints
   - name: knowledge
     description: Knowledge base management endpoints
   - name: share
     description: Share management endpoints
   - name: label
     description: Label management endpoints
+  - name: action
+    description: Action management endpoints
   - name: skill
     description: Skill management endpoints
   - name: chat
@@ -28,6 +32,98 @@ tags:
   - name: misc
     description: Miscellaneous endpoints
 paths:
+  /canvas/list:
+    get:
+      tags:
+        - canvas
+      summary: List user canvases
+      description: List all canvases for a user
+      operationId: listCanvases
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
+        - name: order
+          in: query
+          description: Order
+          schema:
+            $ref: '#/components/schemas/ListOrder'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCanvasResponse'
+  /canvas/create:
+    post:
+      tags:
+        - canvas
+      summary: Create canvas
+      description: Create a new canvas
+      operationId: createCanvas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertCanvasRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertCanvasResponse'
+  /canvas/update:
+    post:
+      tags:
+        - canvas
+      summary: Update canvas
+      description: Update an existing canvas
+      operationId: updateCanvas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertCanvasRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertCanvasResponse'
+  /canvas/delete:
+    post:
+      tags:
+        - canvas
+      summary: Delete canvas
+      description: Delete an existing canvas
+      operationId: deleteCanvas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteCanvasRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
   /knowledge/resource/list:
     get:
       tags:
@@ -219,20 +315,14 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /knowledge/canvas/list:
+  /knowledge/document/list:
     get:
       tags:
         - knowledge
-      summary: List user canvases
-      description: List all canvases for a user
-      operationId: listCanvas
+      summary: List user documents
+      description: List all documents for a user
+      operationId: listDocuments
       parameters:
-        - name: projectId
-          in: query
-          description: Project ID
-          required: false
-          schema:
-            type: string
         - name: page
           in: query
           description: Page number
@@ -259,88 +349,88 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListCanvasResponse'
-  /knowledge/canvas/detail:
+                $ref: '#/components/schemas/ListDocumentResponse'
+  /knowledge/document/detail:
     get:
       tags:
         - knowledge
       summary: Get canvas detail
-      description: Return canvas detail
-      operationId: getCanvasDetail
+      description: Return document detail
+      operationId: getDocumentDetail
       parameters:
-        - name: canvasId
+        - name: docId
           in: query
-          description: Canvas ID to retrieve
+          description: Document ID to retrieve
           required: true
           schema:
             type: string
-            example: c-g30e1b80b5g1itbemc0g5jj3
+            example: d-g30e1b80b5g1itbemc0g5jj3
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetCanvasDetailResponse'
-  /knowledge/canvas/update:
+                $ref: '#/components/schemas/GetDocumentDetailResponse'
+  /knowledge/document/update:
     post:
       tags:
         - knowledge
       summary: Update canvas
-      description: Update an existing canvas
-      operationId: updateCanvas
+      description: Update an existing document
+      operationId: updateDocument
       requestBody:
-        description: Canvas update request
+        description: Document update request
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertCanvasRequest'
+              $ref: '#/components/schemas/UpsertDocumentRequest'
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpsertCanvasResponse'
+                $ref: '#/components/schemas/UpsertDocumentResponse'
       security:
         - api_key: []
-  /knowledge/canvas/create:
+  /knowledge/document/create:
     post:
       tags:
         - knowledge
       summary: Create new canvas
-      description: Create a new canvas
-      operationId: createCanvas
+      description: Create a new document
+      operationId: createDocument
       requestBody:
-        description: Canvas creation request
+        description: Document creation request
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpsertCanvasRequest'
+              $ref: '#/components/schemas/UpsertDocumentRequest'
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpsertCanvasResponse'
+                $ref: '#/components/schemas/UpsertDocumentResponse'
       security:
         - api_key: []
-  /knowledge/canvas/delete:
+  /knowledge/document/delete:
     post:
       tags:
         - knowledge
       summary: Delete canvas
-      description: Delete an existing canvas
-      operationId: deleteCanvas
+      description: Delete an existing document
+      operationId: deleteDocument
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DeleteCanvasRequest'
+              $ref: '#/components/schemas/DeleteDocumentRequest'
       responses:
         '200':
           description: Successful operation
@@ -350,13 +440,13 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /knowledge/canvas/batchUpdate:
+  /knowledge/document/batchUpdate:
     post:
       tags:
         - knowledge
-      summary: Batch update canvases
-      description: Batch update existing canvases
-      operationId: batchUpdateCanvas
+      summary: Batch update documents
+      description: Batch update existing documents
+      operationId: batchUpdateDocument
       requestBody:
         required: true
         content:
@@ -364,7 +454,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/UpsertCanvasRequest'
+                $ref: '#/components/schemas/UpsertDocumentRequest'
       responses:
         '200':
           description: Successful operation
@@ -645,12 +735,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: canvasId
-          in: query
-          description: Canvas ID, by default the first canvas will be selected
-          required: false
-          schema:
-            type: string
       responses:
         '200':
           description: Successful operation
@@ -862,33 +946,139 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BaseResponse'
-  /skill/template/list:
+  /action/list:
     get:
       tags:
-        - skill
-      summary: List skill templates
-      description: List all skill templates
-      operationId: listSkillTemplates
-      parameters:
-        - name: page
-          in: query
-          description: Page number
-          schema:
-            type: number
-            default: 1
-        - name: pageSize
-          in: query
-          description: Page size
-          schema:
-            type: number
-            default: 10
+        - action
+      summary: List actions
+      description: List all actions
+      operationId: listActions
       responses:
         '200':
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListSkillTemplateResponse'
+                $ref: '#/components/schemas/ListActionResponse'
+  /action/invoke:
+    post:
+      tags:
+        - action
+      summary: Invoke action
+      description: Invoke an action asynchronously
+      operationId: invokeAction
+      requestBody:
+        description: Action invocation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvokeActionRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvokeActionResponse'
+  /action/streamInvoke:
+    post:
+      tags:
+        - action
+      summary: Stream invoke action
+      description: Invoke an action and return SSE stream
+      operationId: streamInvokeAction
+      requestBody:
+        description: Skill invocation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvokeActionRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/event-stream:
+              schema:
+                type: string
+  /action/result:
+    get:
+      tags:
+        - action
+      summary: Get action result
+      description: Get action result by result ID
+      operationId: getActionResult
+      parameters:
+        - name: resultId
+          in: query
+          description: Action result ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetActionResultResponse'
+  /skill/list:
+    get:
+      tags:
+        - skill
+      summary: List skills
+      description: List all skills
+      operationId: listSkills
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSkillResponse'
+  /skill/invoke:
+    post:
+      tags:
+        - skill
+      summary: Invoke skill
+      description: Invoke a skill
+      operationId: invokeSkill
+      requestBody:
+        description: Skill invocation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvokeSkillRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvokeSkillResponse'
+  /skill/streamInvoke:
+    post:
+      tags:
+        - skill
+      summary: Stream invoke skill
+      description: Invoke a skill and return SSE stream
+      operationId: streamInvokeSkill
+      requestBody:
+        description: Skill invocation request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvokeSkillRequest'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/event-stream:
+              schema:
+                type: string
   /skill/instance/list:
     get:
       tags:
@@ -1031,48 +1221,6 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /skill/invoke:
-    post:
-      tags:
-        - skill
-      summary: Invoke skill
-      description: Invoke a skill
-      operationId: invokeSkill
-      requestBody:
-        description: Skill invocation request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvokeSkillRequest'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InvokeSkillResponse'
-  /skill/streamInvoke:
-    post:
-      tags:
-        - skill
-      summary: Stream invoke skill
-      description: Invoke a skill and return SSE stream
-      operationId: streamInvokeSkill
-      requestBody:
-        description: Skill invocation request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvokeSkillRequest'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            text/event-stream:
-              schema:
-                type: string
   /skill/trigger/list:
     get:
       tags:
@@ -1583,6 +1731,36 @@ components:
         targetId:
           type: string
           description: Target entity ID
+    Canvas:
+      type: object
+      required:
+        - canvasId
+        - title
+        - createdAt
+        - updatedAt
+      properties:
+        canvasId:
+          type: string
+          description: Canvas ID
+          example: c-g30e1b80b5g1itbemc0g5jj3
+        title:
+          type: string
+          description: Canvas title
+          example: My canvas
+        shareCode:
+          type: string
+          description: Share code
+        readOnly:
+          type: boolean
+          description: Whether this canvas is read-only
+        createdAt:
+          type: string
+          format: date-time
+          description: Canvas creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Canvas update time
     Reference:
       allOf:
         - $ref: '#/components/schemas/BaseReference'
@@ -1676,53 +1854,45 @@ components:
       type: string
       description: Reference type
       enum:
-        - canvas
+        - document
         - resource
-    Canvas:
+    Document:
       type: object
       required:
-        - canvasId
-        - projectId
+        - docId
         - title
         - readOnly
         - createdAt
         - updatedAt
       properties:
-        canvasId:
+        docId:
           type: string
-          description: Canvas ID
-          example: c-g30e1b80b5g1itbemc0g5jj3
-        projectId:
-          type: string
-          description: Project ID
-          example: p-g30e1b80b5g1itbemc0g5jj3
-        order:
-          type: number
-          description: Canvas order in project
+          description: Document ID
+          example: d-g30e1b80b5g1itbemc0g5jj3
         title:
           type: string
-          description: Canvas title
-          example: My canvas
+          description: Document title
+          example: My document
         contentPreview:
           type: string
-          description: Canvas content preview
+          description: Document content preview
         content:
           type: string
-          description: Full canvas content (only returned in detail api)
+          description: Full document content (only returned in detail api)
         shareCode:
           type: string
           description: Share code
         readOnly:
           type: boolean
-          description: Whether this canvas is read-only
+          description: Whether this document is read-only
         createdAt:
           type: string
           format: date-time
-          description: Canvas creation time
+          description: Document creation time
         updatedAt:
           type: string
           format: date-time
-          description: Canvas update time
+          description: Document update time
     Project:
       type: object
       required:
@@ -1758,9 +1928,9 @@ components:
       type: string
       description: Entity type
       enum:
-        - canvas
+        - document
         - resource
-        - project
+        - canvas
     Entity:
       type: object
       description: Entity
@@ -1841,6 +2011,7 @@ components:
         - select
         - multiSelect
         - radio
+        - switch
     ConfigScope:
       type: array
       description: Config scope
@@ -1946,7 +2117,7 @@ components:
         configScope:
           description: The contexts in which the requirement applies
           $ref: '#/components/schemas/ConfigScope'
-    SkillTemplateConfigSchema:
+    SkillTemplateConfigDefinition:
       type: object
       description: Skill template config schema
       required:
@@ -1976,28 +2147,24 @@ components:
         value:
           type: string
           description: Icon value
-    SkillTemplate:
+    Skill:
       type: object
-      description: Skill template
+      description: Skill
       required:
         - name
-        - displayName
       properties:
         name:
           type: string
-          description: Skill template name
-        displayName:
-          type: string
-          description: Skill template display name
+          description: Skill name
         description:
           type: string
-          description: Skill template description
+          description: Skill description
         icon:
-          description: Skill template icon
+          description: Skill icon
           $ref: '#/components/schemas/Icon'
         configSchema:
-          description: Skill template config schema
-          $ref: '#/components/schemas/SkillTemplateConfigSchema'
+          description: Skill config schema
+          $ref: '#/components/schemas/SkillTemplateConfigDefinition'
     SkillTriggerType:
       type: string
       description: Skill trigger type
@@ -2106,24 +2273,37 @@ components:
       type: object
       description: Skill metadata
       required:
-        - displayName
+        - name
       properties:
-        displayName:
+        name:
           type: string
-          description: Skill display name
-        tplName:
-          type: string
-          description: Skill template name
-        skillId:
-          type: string
-          description: Skill ID
-          example: sk-g30e1b80b5g1itbemc0g5jj3
+          description: Skill name
         icon:
           description: Skill icon
+          $ref: '#/components/schemas/Icon'
+    ActionMeta:
+      type: object
+      description: Action metadata
+      properties:
+        type:
+          type: string
+          description: Action type
+          $ref: '#/components/schemas/ActionType'
+        name:
+          type: string
+          description: Action name
+        icon:
+          description: Action icon
           $ref: '#/components/schemas/Icon'
     SkillTemplateConfig:
       type: object
       description: Skill template config (key is config item key, value is config value)
+      additionalProperties:
+        description: Skill template config value
+        $ref: '#/components/schemas/DynamicConfigValue'
+    ActionConfig:
+      type: object
+      description: Action config (key is config item key, value is config value)
       additionalProperties:
         description: Skill template config value
         $ref: '#/components/schemas/DynamicConfigValue'
@@ -2149,7 +2329,7 @@ components:
               $ref: '#/components/schemas/SkillTemplateConfig'
             tplConfigSchema:
               description: Skill template config schema
-              $ref: '#/components/schemas/SkillTemplateConfigSchema'
+              $ref: '#/components/schemas/SkillTemplateConfigDefinition'
             invocationConfig:
               description: Skill invocation config
               $ref: '#/components/schemas/SkillInvocationConfig'
@@ -2234,7 +2414,7 @@ components:
         publishedTime:
           type: string
           format: date-time
-          description: Source publish time
+          description: Source publish timesss
         entityId:
           type: string
           description: Related entity ID
@@ -2367,6 +2547,153 @@ components:
         outputTokens:
           type: number
           description: Output tokens
+    ActionStatus:
+      type: string
+      description: Action status
+      enum:
+        - waiting
+        - executing
+        - finish
+        - failed
+    ArtifactType:
+      type: string
+      description: Artifact type
+      enum:
+        - document
+    ArtifactStatus:
+      type: string
+      description: Artifact status
+      enum:
+        - waiting
+        - generating
+        - finish
+        - failed
+    Artifact:
+      type: object
+      description: Artifact
+      required:
+        - type
+        - entityId
+        - title
+      properties:
+        type:
+          type: string
+          description: Artifact type
+          $ref: '#/components/schemas/ArtifactType'
+        entityId:
+          type: string
+          description: Entity ID
+        title:
+          type: string
+          description: Artifact title
+        status:
+          description: Artifact status
+          $ref: '#/components/schemas/ArtifactStatus'
+    ActionStepMeta:
+      type: object
+      description: Action step metadata
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Step name
+    ActionStep:
+      type: object
+      description: Action step
+      required:
+        - name
+        - status
+      properties:
+        name:
+          type: string
+          description: Step name
+        content:
+          type: string
+          description: Step content
+        artifacts:
+          type: array
+          description: Step artifacts
+          items:
+            $ref: '#/components/schemas/Artifact'
+        structuredData:
+          type: object
+          description: Step structured data output
+          example:
+            sources: [Source]
+            relatedQuestions: [string]
+        tokenUsage:
+          type: array
+          description: Token usage
+          items:
+            $ref: '#/components/schemas/TokenUsageItem'
+    ActionResult:
+      type: object
+      description: Action result
+      required:
+        - resultId
+      properties:
+        resultId:
+          type: string
+          readOnly: true
+          description: Action result ID
+          example: ar-g30e1b80b5g1itbemc0g5jj3
+        title:
+          type: string
+          description: Action result title
+        status:
+          type: string
+          description: Step status
+          $ref: '#/components/schemas/ActionStatus'
+        type:
+          description: Action type
+          $ref: '#/components/schemas/ActionType'
+        targetType:
+          description: Action target type
+          $ref: '#/components/schemas/EntityType'
+        targetId:
+          type: string
+          description: Action target ID
+        actionMeta:
+          type: object
+          description: Action metadata
+          $ref: '#/components/schemas/ActionMeta'
+        context:
+          type: object
+          description: Action context
+          $ref: '#/components/schemas/SkillContext'
+        tplConfig:
+          type: object
+          description: Action template config
+          $ref: '#/components/schemas/SkillTemplateConfig'
+        history:
+          type: array
+          description: Action result history
+          items:
+            $ref: '#/components/schemas/ActionResult'
+        steps:
+          type: array
+          description: Action steps
+          items:
+            $ref: '#/components/schemas/ActionStep'
+        logs:
+          type: array
+          description: Action step logs
+          items:
+            type: string
+        errors:
+          type: array
+          description: Errors
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+          description: Message creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Message update time
     ChatMessage:
       type: object
       description: Chat message
@@ -2411,18 +2738,6 @@ components:
           description: Errors
           items:
             type: string
-        relatedQuestions:
-          type: array
-          description: Related questions
-          items:
-            type: string
-          deprecated: true
-        sources:
-          type: array
-          description: Related sources
-          items:
-            $ref: '#/components/schemas/Source'
-          deprecated: true
         tokenUsage:
           type: array
           description: Token usage
@@ -2431,9 +2746,6 @@ components:
         invokeParam:
           description: Skill invocation parameters
           $ref: '#/components/schemas/InvokeSkillRequest'
-        selectedWeblinkConfig:
-          type: string
-          description: Selected weblink config (JSON)
         createdAt:
           type: string
           format: date-time
@@ -2731,6 +3043,52 @@ components:
         stack:
           type: string
           description: Error stack (only returned in development environment)
+    ListCanvasResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Canvas list
+              items:
+                $ref: '#/components/schemas/Canvas'
+    GetCanvasDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              description: Canvas data
+              $ref: '#/components/schemas/Canvas'
+    UpsertCanvasRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Canvas title
+          example: My Canvas
+        canvasId:
+          type: string
+          description: Canvas ID (only used for update)
+          example: c-g30e1b80b5g1itbemc0g5jj3
+    UpsertCanvasResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Canvas'
+    DeleteCanvasRequest:
+      type: object
+      required:
+        - canvasId
+      properties:
+        canvasId:
+          type: string
+          description: Canvas ID to delete
+          example: c-g30e1b80b5g1itbemc0g5jj3
     UpsertResourceRequest:
       type: object
       required:
@@ -2823,7 +3181,7 @@ components:
               type: object
               description: Resource data
               $ref: '#/components/schemas/Resource'
-    ListCanvasResponse:
+    ListDocumentResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
@@ -2832,57 +3190,57 @@ components:
               type: array
               description: Canvas list
               items:
-                $ref: '#/components/schemas/Canvas'
-    GetCanvasDetailResponse:
+                $ref: '#/components/schemas/Document'
+    GetDocumentDetailResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
               type: object
-              description: Canvas data
-              $ref: '#/components/schemas/Canvas'
-    UpsertCanvasRequest:
+              description: Document data
+              $ref: '#/components/schemas/Document'
+    UpsertDocumentRequest:
       type: object
       properties:
         title:
           type: string
           description: Canvas title
           example: My Canvas
-        canvasId:
+        docId:
           type: string
-          description: Canvas ID (only used for update)
-          example: c-g30e1b80b5g1itbemc0g5jj3
-        order:
-          type: number
-          description: Canvas order in project
-        projectId:
-          type: string
-          description: Project ID (will add to the project if given)
-          example: p-g30e1b80b5g1itbemc0g5jj3
+          description: Document ID (only used for update)
+          example: d-g30e1b80b5g1itbemc0g5jj3
         readOnly:
           type: boolean
-          description: Whether this canvas is read-only
+          description: Whether this document is read-only
           default: false
         initialContent:
           type: string
-          description: Canvas initial content
-    UpsertCanvasResponse:
+          description: Document initial content
+    UpsertDocumentResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/Canvas'
-    DeleteCanvasRequest:
+              $ref: '#/components/schemas/Document'
+    DeleteDocumentRequest:
       type: object
       required:
-        - canvasId
+        - docId
       properties:
-        canvasId:
+        docId:
           type: string
-          description: Canvas ID to delete
-          example: c-g30e1b80b5g1itbemc0g5jj3
+          description: Document ID to delete
+          example: d-g30e1b80b5g1itbemc0g5jj3
+    GetActionResultResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ActionResult'
     QueryReferencesRequest:
       type: object
       properties:
@@ -3058,20 +3416,13 @@ components:
           description: User avatar
     SharedContent:
       type: object
-      required:
-        - selectedCanvas
       properties:
-        project:
-          description: Shared project data
-          $ref: '#/components/schemas/Project'
-        canvasList:
-          type: array
-          description: Shared canvas list
-          items:
-            $ref: '#/components/schemas/Canvas'
         canvas:
-          description: Selected canvas detail
+          description: Shared canvas data
           $ref: '#/components/schemas/Canvas'
+        document:
+          description: Selected document detail
+          $ref: '#/components/schemas/Document'
         users:
           type: array
           description: Share users
@@ -3220,16 +3571,42 @@ components:
           type: string
           description: Label ID to delete
           example: lb-g30e1b80b5g1itbemc0g5jj3
-    ListSkillTemplateResponse:
+    Action:
+      type: object
+      required:
+        - actionType
+        - actionName
+      properties:
+        actionType:
+          type: string
+          description: Action type
+          $ref: '#/components/schemas/ActionType'
+        actionName:
+          type: string
+          description: Action name
+        icon:
+          description: Action icon
+          $ref: '#/components/schemas/Icon'
+    ListActionResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
             data:
               type: array
-              description: Skill template list
+              description: Action list
               items:
-                $ref: '#/components/schemas/SkillTemplate'
+                $ref: '#/components/schemas/Action'
+    ListSkillResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Skill list
+              items:
+                $ref: '#/components/schemas/Skill'
     ListSkillInstanceResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3375,19 +3752,19 @@ components:
         metadata:
           type: object
           description: Project context metadata
-    SkillContextCanvasItem:
+    SkillContextDocumentItem:
       type: object
-      description: Skill context canvas item
+      description: Skill context document item
       properties:
-        canvasId:
+        docId:
           type: string
-          description: Canvas ID
-        canvas:
-          description: Canvas
-          $ref: '#/components/schemas/Canvas'
+          description: Document ID
+        document:
+          description: Document
+          $ref: '#/components/schemas/Document'
         isCurrent:
           type: boolean
-          description: Whether this canvas is current
+          description: Whether this document is current
         metadata:
           type: object
           description: Canvas context metadata
@@ -3429,11 +3806,11 @@ components:
           description: Context projects
           items:
             $ref: '#/components/schemas/SkillContextProjectItem'
-        canvases:
+        documents:
           type: array
-          description: Context canvases
+          description: Context documents
           items:
-            $ref: '#/components/schemas/SkillContextCanvasItem'
+            $ref: '#/components/schemas/SkillContextDocumentItem'
         contentList:
           type: array
           description: Context content list
@@ -3449,18 +3826,18 @@ components:
       enum:
         - resources
         - projects
-        - canvases
+        - documents
         - contentList
         - urls
     SelectionKey:
       type: string
       enum:
-        - canvasSelection
+        - documentSelection
         - resourceSelection
         - extensionWeblinkSelection
-        - canvasCursorSelection
-        - canvasBeforeCursorSelection
-        - canvasAfterCursorSelection
+        - documentCursorSelection
+        - documentBeforeCursorSelection
+        - documentAfterCursorSelection
     SkillContextRule:
       type: object
       required:
@@ -3522,8 +3899,88 @@ components:
         - running
         - finish
         - failed
+    ActionType:
+      type: string
+      enum:
+        - skill
+        - tool
+    ActionContextType:
+      type: string
+      enum:
+        - resource
+        - document
+    ActionContextEntity:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Entity title
+        content:
+          type: string
+          description: Entity content
+    ActionContextItem:
+      type: object
+      properties:
+        type:
+          description: Context item type
+          $ref: '#/components/schemas/ActionContextType'
+        entityId:
+          type: string
+          description: Entity ID
+        entityData:
+          description: Entity data (will be auto populated if not provided)
+          $ref: '#/components/schemas/ActionContextEntity'
+        metadata:
+          type: object
+          description: Context metadata
+    InvokeActionRequest:
+      type: object
+      properties:
+        actionType:
+          description: Action type
+          $ref: '#/components/schemas/ActionType'
+        actionName:
+          type: string
+          description: Action name
+        input:
+          description: Action input
+          $ref: '#/components/schemas/SkillInput'
+        context:
+          type: array
+          description: Action invocation context
+          items:
+            $ref: '#/components/schemas/ActionContextItem'
+        config:
+          description: Action config
+          $ref: '#/components/schemas/ActionConfig'
+        canvasId:
+          description: Canvas ID
+          type: string
+        locale:
+          type: string
+          description: Selected output locale
+        modelName:
+          type: string
+          description: Selected model
+        jobId:
+          description: Skill job ID (if not provided, a new job will be created)
+          type: string
+        triggerId:
+          description: Trigger ID (typically you don't need to provide this)
+          type: string
+    InvokeActionResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            jobId:
+              type: string
+              description: Skill job ID
     InvokeSkillRequest:
       type: object
+      required:
+        - input
+        - target
       properties:
         input:
           description: Skill input
@@ -3531,12 +3988,24 @@ components:
         context:
           description: Skill invocation context
           $ref: '#/components/schemas/SkillContext'
+        resultHistory:
+          type: array
+          description: Skill result history
+          items:
+            $ref: '#/components/schemas/ActionResult'
         tplConfig:
           description: Skill template config
           $ref: '#/components/schemas/SkillTemplateConfig'
-        projectId:
+        skillName:
           type: string
-          description: Project ID (if not provided, new project will be created)
+          description: Skill name (if not provided, commonQnA will be used)
+          default: commonQnA
+        target:
+          description: Skill invocation target
+          $ref: '#/components/schemas/Entity'
+        resultId:
+          type: string
+          description: Result ID (will be generated if not provided)
         skillId:
           type: string
           description: Skill instance ID to invoke (if not provided, skill scheduler will be used)
@@ -3549,9 +4018,6 @@ components:
         modelName:
           type: string
           description: Selected model
-        createConvParam:
-          description: Create conversation parameters
-          $ref: '#/components/schemas/CreateConversationRequest'
         jobId:
           description: Skill job ID (if not provided, a new job will be created)
           type: string
@@ -3563,9 +4029,9 @@ components:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
-            jobId:
+            resultId:
               type: string
-              description: Skill job ID
+              description: Skill result ID
     ListSkillTriggerResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3948,10 +4414,10 @@ components:
       type: string
       enum:
         - resource
+        - document
         - canvas
-        - project
-        - conversation
         - skill
+        - tool
     SearchMode:
       type: string
       enum:
@@ -3985,20 +4451,6 @@ components:
           type: number
           description: Search result limit for each domain
           default: 5
-    SearchResultMeta:
-      type: object
-      properties:
-        resourceType:
-          type: string
-          description: Resource type
-          $ref: '#/components/schemas/ResourceType'
-        resourceMeta:
-          type: object
-          description: Resource metadata
-          $ref: '#/components/schemas/ResourceMeta'
-        projectId:
-          type: string
-          description: Project ID
     SearchResultSnippet:
       type: object
       properties:
@@ -4027,6 +4479,9 @@ components:
         highlightedTitle:
           type: string
           description: Search result highlighted title with em html tags
+        contentPreview:
+          type: string
+          description: Search result content preview
         snippets:
           type: array
           description: Search result content list with highlight marks
@@ -4036,8 +4491,9 @@ components:
           type: number
           description: Search result relevance score
         metadata:
+          type: object
           description: Search result metadata
-          $ref: '#/components/schemas/SearchResultMeta'
+          additionalProperties: true
         createdAt:
           type: string
           format: date-time
@@ -4168,7 +4624,46 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/DocumentInterface'
-
+    CanvasNodeType:
+      type: string
+      enum:
+        - document
+        - resource
+        - skill
+        - tool
+        - skillResponse
+        - toolResponse
+    CanvasNodeData:
+      type: object
+      required:
+        - title
+        - entityId
+      properties:
+        title:
+          type: string
+          description: Node title
+        entityId:
+          type: string
+          description: Node entity ID
+        contentPreview:
+          type: string
+          description: Node content preview
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Node metadata
+    CanvasNode:
+      type: object
+      required:
+        - type
+        - data
+      properties:
+        type:
+          description: Node type
+          $ref: '#/components/schemas/CanvasNodeType'
+        data:
+          type: object
+          $ref: '#/components/schemas/CanvasNodeData'
   securitySchemes:
     api_key:
       type: apiKey

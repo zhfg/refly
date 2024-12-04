@@ -67,6 +67,33 @@ export type BaseReference = {
   targetId: string;
 };
 
+export type Canvas = {
+  /**
+   * Canvas ID
+   */
+  canvasId: string;
+  /**
+   * Canvas title
+   */
+  title: string;
+  /**
+   * Share code
+   */
+  shareCode?: string;
+  /**
+   * Whether this canvas is read-only
+   */
+  readOnly?: boolean;
+  /**
+   * Canvas creation time
+   */
+  createdAt: string;
+  /**
+   * Canvas update time
+   */
+  updatedAt: string;
+};
+
 export type Reference = BaseReference & {
   /**
    * Reference ID
@@ -159,31 +186,23 @@ export type Resource = {
 /**
  * Reference type
  */
-export type ReferenceType = 'canvas' | 'resource';
+export type ReferenceType = 'document' | 'resource';
 
-export type Canvas = {
+export type Document = {
   /**
-   * Canvas ID
+   * Document ID
    */
-  canvasId: string;
+  docId: string;
   /**
-   * Project ID
-   */
-  projectId: string;
-  /**
-   * Canvas order in project
-   */
-  order?: number;
-  /**
-   * Canvas title
+   * Document title
    */
   title: string;
   /**
-   * Canvas content preview
+   * Document content preview
    */
   contentPreview?: string;
   /**
-   * Full canvas content (only returned in detail api)
+   * Full document content (only returned in detail api)
    */
   content?: string;
   /**
@@ -191,15 +210,15 @@ export type Canvas = {
    */
   shareCode?: string;
   /**
-   * Whether this canvas is read-only
+   * Whether this document is read-only
    */
   readOnly: boolean;
   /**
-   * Canvas creation time
+   * Document creation time
    */
   createdAt: string;
   /**
-   * Canvas update time
+   * Document update time
    */
   updatedAt: string;
 };
@@ -234,7 +253,7 @@ export type Project = {
 /**
  * Entity type
  */
-export type EntityType = 'canvas' | 'resource' | 'project';
+export type EntityType = 'document' | 'resource' | 'canvas';
 
 /**
  * Entity
@@ -309,7 +328,7 @@ export type LabelInstance = {
 /**
  * Data input mode
  */
-export type InputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect' | 'radio';
+export type InputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect' | 'radio' | 'switch';
 
 /**
  * Config scope
@@ -415,7 +434,7 @@ export type DynamicConfigValue = {
 /**
  * Skill template config schema
  */
-export type SkillTemplateConfigSchema = {
+export type SkillTemplateConfigDefinition = {
   /**
    * Config items
    */
@@ -442,29 +461,25 @@ export type Icon = {
 };
 
 /**
- * Skill template
+ * Skill
  */
-export type SkillTemplate = {
+export type Skill = {
   /**
-   * Skill template name
+   * Skill name
    */
   name: string;
   /**
-   * Skill template display name
-   */
-  displayName: string;
-  /**
-   * Skill template description
+   * Skill description
    */
   description?: string;
   /**
-   * Skill template icon
+   * Skill icon
    */
   icon?: Icon;
   /**
-   * Skill template config schema
+   * Skill config schema
    */
-  configSchema?: SkillTemplateConfigSchema;
+  configSchema?: SkillTemplateConfigDefinition;
 };
 
 /**
@@ -569,19 +584,29 @@ export type SkillTrigger = {
  */
 export type SkillMeta = {
   /**
-   * Skill display name
+   * Skill name
    */
-  displayName: string;
-  /**
-   * Skill template name
-   */
-  tplName?: string;
-  /**
-   * Skill ID
-   */
-  skillId?: string;
+  name: string;
   /**
    * Skill icon
+   */
+  icon?: Icon;
+};
+
+/**
+ * Action metadata
+ */
+export type ActionMeta = {
+  /**
+   * Action type
+   */
+  type?: ActionType;
+  /**
+   * Action name
+   */
+  name?: string;
+  /**
+   * Action icon
    */
   icon?: Icon;
 };
@@ -590,6 +615,13 @@ export type SkillMeta = {
  * Skill template config (key is config item key, value is config value)
  */
 export type SkillTemplateConfig = {
+  [key: string]: DynamicConfigValue;
+};
+
+/**
+ * Action config (key is config item key, value is config value)
+ */
+export type ActionConfig = {
   [key: string]: DynamicConfigValue;
 };
 
@@ -612,7 +644,7 @@ export type SkillInstance = SkillMeta & {
   /**
    * Skill template config schema
    */
-  tplConfigSchema?: SkillTemplateConfigSchema;
+  tplConfigSchema?: SkillTemplateConfigDefinition;
   /**
    * Skill invocation config
    */
@@ -700,7 +732,7 @@ export type SourceMeta = {
    */
   title?: string;
   /**
-   * Source publish time
+   * Source publish timesss
    */
   publishedTime?: string;
   /**
@@ -857,6 +889,147 @@ export type TokenUsageItem = {
 };
 
 /**
+ * Action status
+ */
+export type ActionStatus = 'waiting' | 'executing' | 'finish' | 'failed';
+
+/**
+ * Artifact type
+ */
+export type ArtifactType = 'document';
+
+/**
+ * Artifact status
+ */
+export type ArtifactStatus = 'waiting' | 'generating' | 'finish' | 'failed';
+
+/**
+ * Artifact
+ */
+export type Artifact = {
+  /**
+   * Artifact type
+   */
+  type: ArtifactType;
+  /**
+   * Entity ID
+   */
+  entityId: string;
+  /**
+   * Artifact title
+   */
+  title: string;
+  /**
+   * Artifact status
+   */
+  status?: ArtifactStatus;
+};
+
+/**
+ * Action step metadata
+ */
+export type ActionStepMeta = {
+  /**
+   * Step name
+   */
+  name: string;
+};
+
+/**
+ * Action step
+ */
+export type ActionStep = {
+  /**
+   * Step name
+   */
+  name: string;
+  /**
+   * Step content
+   */
+  content?: string;
+  /**
+   * Step artifacts
+   */
+  artifacts?: Array<Artifact>;
+  /**
+   * Step structured data output
+   */
+  structuredData?: {
+    [key: string]: unknown;
+  };
+  /**
+   * Token usage
+   */
+  tokenUsage?: Array<TokenUsageItem>;
+};
+
+/**
+ * Action result
+ */
+export type ActionResult = {
+  /**
+   * Action result ID
+   */
+  readonly resultId: string;
+  /**
+   * Action result title
+   */
+  title?: string;
+  /**
+   * Step status
+   */
+  status?: ActionStatus;
+  /**
+   * Action type
+   */
+  type?: ActionType;
+  /**
+   * Action target type
+   */
+  targetType?: EntityType;
+  /**
+   * Action target ID
+   */
+  targetId?: string;
+  /**
+   * Action metadata
+   */
+  actionMeta?: ActionMeta;
+  /**
+   * Action context
+   */
+  context?: SkillContext;
+  /**
+   * Action template config
+   */
+  tplConfig?: SkillTemplateConfig;
+  /**
+   * Action result history
+   */
+  history?: Array<ActionResult>;
+  /**
+   * Action steps
+   */
+  steps?: Array<ActionStep>;
+  /**
+   * Action step logs
+   */
+  logs?: Array<string>;
+  /**
+   * Errors
+   */
+  errors?: Array<string>;
+  /**
+   * Message creation time
+   */
+  createdAt?: string;
+  /**
+   * Message update time
+   */
+  updatedAt?: string;
+};
+
+/**
  * Chat message
  */
 export type ChatMessage = {
@@ -895,16 +1068,6 @@ export type ChatMessage = {
    */
   errors?: Array<string>;
   /**
-   * Related questions
-   * @deprecated
-   */
-  relatedQuestions?: Array<string>;
-  /**
-   * Related sources
-   * @deprecated
-   */
-  sources?: Array<Source>;
-  /**
    * Token usage
    */
   tokenUsage?: Array<TokenUsageItem>;
@@ -912,10 +1075,6 @@ export type ChatMessage = {
    * Skill invocation parameters
    */
   invokeParam?: InvokeSkillRequest;
-  /**
-   * Selected weblink config (JSON)
-   */
-  selectedWeblinkConfig?: string;
   /**
    * Message creation time
    */
@@ -1192,6 +1351,42 @@ export type BaseResponse = {
   stack?: string;
 };
 
+export type ListCanvasResponse = BaseResponse & {
+  /**
+   * Canvas list
+   */
+  data?: Array<Canvas>;
+};
+
+export type GetCanvasDetailResponse = BaseResponse & {
+  /**
+   * Canvas data
+   */
+  data?: Canvas;
+};
+
+export type UpsertCanvasRequest = {
+  /**
+   * Canvas title
+   */
+  title?: string;
+  /**
+   * Canvas ID (only used for update)
+   */
+  canvasId?: string;
+};
+
+export type UpsertCanvasResponse = BaseResponse & {
+  data?: Canvas;
+};
+
+export type DeleteCanvasRequest = {
+  /**
+   * Canvas ID to delete
+   */
+  canvasId: string;
+};
+
 export type UpsertResourceRequest = {
   /**
    * Resource title
@@ -1265,56 +1460,52 @@ export type GetResourceDetailResponse = BaseResponse & {
   data?: Resource;
 };
 
-export type ListCanvasResponse = BaseResponse & {
+export type ListDocumentResponse = BaseResponse & {
   /**
    * Canvas list
    */
-  data?: Array<Canvas>;
+  data?: Array<Document>;
 };
 
-export type GetCanvasDetailResponse = BaseResponse & {
+export type GetDocumentDetailResponse = BaseResponse & {
   /**
-   * Canvas data
+   * Document data
    */
-  data?: Canvas;
+  data?: Document;
 };
 
-export type UpsertCanvasRequest = {
+export type UpsertDocumentRequest = {
   /**
    * Canvas title
    */
   title?: string;
   /**
-   * Canvas ID (only used for update)
+   * Document ID (only used for update)
    */
-  canvasId?: string;
+  docId?: string;
   /**
-   * Canvas order in project
-   */
-  order?: number;
-  /**
-   * Project ID (will add to the project if given)
-   */
-  projectId?: string;
-  /**
-   * Whether this canvas is read-only
+   * Whether this document is read-only
    */
   readOnly?: boolean;
   /**
-   * Canvas initial content
+   * Document initial content
    */
   initialContent?: string;
 };
 
-export type UpsertCanvasResponse = BaseResponse & {
-  data?: Canvas;
+export type UpsertDocumentResponse = BaseResponse & {
+  data?: Document;
 };
 
-export type DeleteCanvasRequest = {
+export type DeleteDocumentRequest = {
   /**
-   * Canvas ID to delete
+   * Document ID to delete
    */
-  canvasId: string;
+  docId: string;
+};
+
+export type GetActionResultResponse = BaseResponse & {
+  data?: ActionResult;
 };
 
 export type QueryReferencesRequest = {
@@ -1471,17 +1662,13 @@ export type ShareUser = {
 
 export type SharedContent = {
   /**
-   * Shared project data
-   */
-  project?: Project;
-  /**
-   * Shared canvas list
-   */
-  canvasList?: Array<Canvas>;
-  /**
-   * Selected canvas detail
+   * Shared canvas data
    */
   canvas?: Canvas;
+  /**
+   * Selected document detail
+   */
+  document?: Document;
   /**
    * Share users
    */
@@ -1609,11 +1796,33 @@ export type DeleteLabelInstanceRequest = {
   labelId: string;
 };
 
-export type ListSkillTemplateResponse = BaseResponse & {
+export type Action = {
   /**
-   * Skill template list
+   * Action type
    */
-  data?: Array<SkillTemplate>;
+  actionType: ActionType;
+  /**
+   * Action name
+   */
+  actionName: string;
+  /**
+   * Action icon
+   */
+  icon?: Icon;
+};
+
+export type ListActionResponse = BaseResponse & {
+  /**
+   * Action list
+   */
+  data?: Array<Action>;
+};
+
+export type ListSkillResponse = BaseResponse & {
+  /**
+   * Skill list
+   */
+  data?: Array<Skill>;
 };
 
 export type ListSkillInstanceResponse = BaseResponse & {
@@ -1770,19 +1979,19 @@ export type SkillContextProjectItem = {
 };
 
 /**
- * Skill context canvas item
+ * Skill context document item
  */
-export type SkillContextCanvasItem = {
+export type SkillContextDocumentItem = {
   /**
-   * Canvas ID
+   * Document ID
    */
-  canvasId?: string;
+  docId?: string;
   /**
-   * Canvas
+   * Document
    */
-  canvas?: Canvas;
+  document?: Document;
   /**
-   * Whether this canvas is current
+   * Whether this document is current
    */
   isCurrent?: boolean;
   /**
@@ -1838,9 +2047,9 @@ export type SkillContext = {
    */
   projects?: Array<SkillContextProjectItem>;
   /**
-   * Context canvases
+   * Context documents
    */
-  canvases?: Array<SkillContextCanvasItem>;
+  documents?: Array<SkillContextDocumentItem>;
   /**
    * Context content list
    */
@@ -1851,15 +2060,15 @@ export type SkillContext = {
   urls?: Array<SkillContextUrlItem>;
 };
 
-export type SkillContextKey = 'resources' | 'projects' | 'canvases' | 'contentList' | 'urls';
+export type SkillContextKey = 'resources' | 'projects' | 'documents' | 'contentList' | 'urls';
 
 export type SelectionKey =
-  | 'canvasSelection'
+  | 'documentSelection'
   | 'resourceSelection'
   | 'extensionWeblinkSelection'
-  | 'canvasCursorSelection'
-  | 'canvasBeforeCursorSelection'
-  | 'canvasAfterCursorSelection';
+  | 'documentCursorSelection'
+  | 'documentBeforeCursorSelection'
+  | 'documentAfterCursorSelection';
 
 export type SkillContextRule = {
   /**
@@ -1909,23 +2118,121 @@ export type SkillInvocationConfig = {
  */
 export type SkillJobStatus = 'scheduling' | 'running' | 'finish' | 'failed';
 
+export type ActionType = 'skill' | 'tool';
+
+export type ActionContextType = 'resource' | 'document';
+
+export type ActionContextEntity = {
+  /**
+   * Entity title
+   */
+  title?: string;
+  /**
+   * Entity content
+   */
+  content?: string;
+};
+
+export type ActionContextItem = {
+  /**
+   * Context item type
+   */
+  type?: ActionContextType;
+  /**
+   * Entity ID
+   */
+  entityId?: string;
+  /**
+   * Entity data (will be auto populated if not provided)
+   */
+  entityData?: ActionContextEntity;
+  /**
+   * Context metadata
+   */
+  metadata?: {
+    [key: string]: unknown;
+  };
+};
+
+export type InvokeActionRequest = {
+  /**
+   * Action type
+   */
+  actionType?: ActionType;
+  /**
+   * Action name
+   */
+  actionName?: string;
+  /**
+   * Action input
+   */
+  input?: SkillInput;
+  /**
+   * Action invocation context
+   */
+  context?: Array<ActionContextItem>;
+  /**
+   * Action config
+   */
+  config?: ActionConfig;
+  /**
+   * Canvas ID
+   */
+  canvasId?: string;
+  /**
+   * Selected output locale
+   */
+  locale?: string;
+  /**
+   * Selected model
+   */
+  modelName?: string;
+  /**
+   * Skill job ID (if not provided, a new job will be created)
+   */
+  jobId?: string;
+  /**
+   * Trigger ID (typically you don't need to provide this)
+   */
+  triggerId?: string;
+};
+
+export type InvokeActionResponse = BaseResponse & {
+  /**
+   * Skill job ID
+   */
+  jobId?: string;
+};
+
 export type InvokeSkillRequest = {
   /**
    * Skill input
    */
-  input?: SkillInput;
+  input: SkillInput;
   /**
    * Skill invocation context
    */
   context?: SkillContext;
   /**
+   * Skill result history
+   */
+  resultHistory?: Array<ActionResult>;
+  /**
    * Skill template config
    */
   tplConfig?: SkillTemplateConfig;
   /**
-   * Project ID (if not provided, new project will be created)
+   * Skill name (if not provided, commonQnA will be used)
    */
-  projectId?: string;
+  skillName?: string;
+  /**
+   * Skill invocation target
+   */
+  target: Entity;
+  /**
+   * Result ID (will be generated if not provided)
+   */
+  resultId?: string;
   /**
    * Skill instance ID to invoke (if not provided, skill scheduler will be used)
    */
@@ -1943,10 +2250,6 @@ export type InvokeSkillRequest = {
    */
   modelName?: string;
   /**
-   * Create conversation parameters
-   */
-  createConvParam?: CreateConversationRequest;
-  /**
    * Skill job ID (if not provided, a new job will be created)
    */
   jobId?: string;
@@ -1958,9 +2261,9 @@ export type InvokeSkillRequest = {
 
 export type InvokeSkillResponse = BaseResponse & {
   /**
-   * Skill job ID
+   * Skill result ID
    */
-  jobId?: string;
+  resultId?: string;
 };
 
 export type ListSkillTriggerResponse = BaseResponse & {
@@ -2312,7 +2615,7 @@ export type SearchOptions = {
   enableReranker?: boolean;
 };
 
-export type SearchDomain = 'resource' | 'canvas' | 'project' | 'conversation' | 'skill';
+export type SearchDomain = 'resource' | 'document' | 'canvas' | 'skill' | 'tool';
 
 export type SearchMode = 'keyword' | 'vector' | 'hybrid';
 
@@ -2337,21 +2640,6 @@ export type SearchRequest = {
    * Search result limit for each domain
    */
   limit?: number;
-};
-
-export type SearchResultMeta = {
-  /**
-   * Resource type
-   */
-  resourceType?: ResourceType;
-  /**
-   * Resource metadata
-   */
-  resourceMeta?: ResourceMeta;
-  /**
-   * Project ID
-   */
-  projectId?: string;
 };
 
 export type SearchResultSnippet = {
@@ -2383,6 +2671,10 @@ export type SearchResult = {
    */
   highlightedTitle?: string;
   /**
+   * Search result content preview
+   */
+  contentPreview?: string;
+  /**
    * Search result content list with highlight marks
    */
   snippets?: Array<SearchResultSnippet>;
@@ -2393,7 +2685,9 @@ export type SearchResult = {
   /**
    * Search result metadata
    */
-  metadata?: SearchResultMeta;
+  metadata?: {
+    [key: string]: unknown;
+  };
   /**
    * Data creation time
    */
@@ -2518,6 +2812,82 @@ export type InMemorySearchResponse = BaseResponse & {
   data?: Array<DocumentInterface>;
 };
 
+export type CanvasNodeType = 'document' | 'resource' | 'skill' | 'tool' | 'skillResponse' | 'toolResponse';
+
+export type CanvasNodeData = {
+  /**
+   * Node title
+   */
+  title: string;
+  /**
+   * Node entity ID
+   */
+  entityId: string;
+  /**
+   * Node content preview
+   */
+  contentPreview?: string;
+  /**
+   * Node metadata
+   */
+  metadata?: {
+    [key: string]: unknown;
+  };
+};
+
+export type CanvasNode = {
+  /**
+   * Node type
+   */
+  type: CanvasNodeType;
+  data: CanvasNodeData;
+};
+
+export type ListCanvasesData = {
+  query?: {
+    /**
+     * Order
+     */
+    order?: ListOrder;
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    pageSize?: number;
+  };
+};
+
+export type ListCanvasesResponse = ListCanvasResponse;
+
+export type ListCanvasesError = unknown;
+
+export type CreateCanvasData = {
+  body: UpsertCanvasRequest;
+};
+
+export type CreateCanvasResponse = UpsertCanvasResponse;
+
+export type CreateCanvasError = unknown;
+
+export type UpdateCanvasData = {
+  body: UpsertCanvasRequest;
+};
+
+export type UpdateCanvasResponse = UpsertCanvasResponse;
+
+export type UpdateCanvasError = unknown;
+
+export type DeleteCanvasData = {
+  body: DeleteCanvasRequest;
+};
+
+export type DeleteCanvasResponse = BaseResponse;
+
+export type DeleteCanvasError = unknown;
+
 export type ListResourcesData = {
   query?: {
     /**
@@ -2613,7 +2983,7 @@ export type DeleteResourceResponse = BaseResponse;
 
 export type DeleteResourceError = unknown;
 
-export type ListCanvasData = {
+export type ListDocumentsData = {
   query?: {
     /**
      * Order by
@@ -2627,67 +2997,63 @@ export type ListCanvasData = {
      * Page size
      */
     pageSize?: number;
-    /**
-     * Project ID
-     */
-    projectId?: string;
   };
 };
 
-export type ListCanvasResponse2 = ListCanvasResponse;
+export type ListDocumentsResponse = ListDocumentResponse;
 
-export type ListCanvasError = unknown;
+export type ListDocumentsError = unknown;
 
-export type GetCanvasDetailData = {
+export type GetDocumentDetailData = {
   query: {
     /**
-     * Canvas ID to retrieve
+     * Document ID to retrieve
      */
-    canvasId: string;
+    docId: string;
   };
 };
 
-export type GetCanvasDetailResponse2 = GetCanvasDetailResponse;
+export type GetDocumentDetailResponse2 = GetDocumentDetailResponse;
 
-export type GetCanvasDetailError = unknown;
+export type GetDocumentDetailError = unknown;
 
-export type UpdateCanvasData = {
+export type UpdateDocumentData = {
   /**
-   * Canvas update request
+   * Document update request
    */
-  body: UpsertCanvasRequest;
+  body: UpsertDocumentRequest;
 };
 
-export type UpdateCanvasResponse = UpsertCanvasResponse;
+export type UpdateDocumentResponse = UpsertDocumentResponse;
 
-export type UpdateCanvasError = unknown;
+export type UpdateDocumentError = unknown;
 
-export type CreateCanvasData = {
+export type CreateDocumentData = {
   /**
-   * Canvas creation request
+   * Document creation request
    */
-  body: UpsertCanvasRequest;
+  body: UpsertDocumentRequest;
 };
 
-export type CreateCanvasResponse = UpsertCanvasResponse;
+export type CreateDocumentResponse = UpsertDocumentResponse;
 
-export type CreateCanvasError = unknown;
+export type CreateDocumentError = unknown;
 
-export type DeleteCanvasData = {
-  body: DeleteCanvasRequest;
+export type DeleteDocumentData = {
+  body: DeleteDocumentRequest;
 };
 
-export type DeleteCanvasResponse = BaseResponse;
+export type DeleteDocumentResponse = BaseResponse;
 
-export type DeleteCanvasError = unknown;
+export type DeleteDocumentError = unknown;
 
-export type BatchUpdateCanvasData = {
-  body: Array<UpsertCanvasRequest>;
+export type BatchUpdateDocumentData = {
+  body: Array<UpsertDocumentRequest>;
 };
 
-export type BatchUpdateCanvasResponse = BaseResponse;
+export type BatchUpdateDocumentResponse = BaseResponse;
 
-export type BatchUpdateCanvasError = unknown;
+export type BatchUpdateDocumentError = unknown;
 
 export type QueryReferencesData = {
   body: QueryReferencesRequest;
@@ -2812,10 +3178,6 @@ export type DeleteShareError = unknown;
 export type GetShareContentData = {
   query: {
     /**
-     * Canvas ID, by default the first canvas will be selected
-     */
-    canvasId?: string;
-    /**
      * Share code
      */
     shareCode: string;
@@ -2936,22 +3298,70 @@ export type DeleteLabelInstanceResponse = BaseResponse;
 
 export type DeleteLabelInstanceError = unknown;
 
-export type ListSkillTemplatesData = {
-  query?: {
+export type ListActionsResponse = ListActionResponse;
+
+export type ListActionsError = unknown;
+
+export type InvokeActionData = {
+  /**
+   * Action invocation request
+   */
+  body: InvokeActionRequest;
+};
+
+export type InvokeActionResponse2 = InvokeActionResponse;
+
+export type InvokeActionError = unknown;
+
+export type StreamInvokeActionData = {
+  /**
+   * Skill invocation request
+   */
+  body: InvokeActionRequest;
+};
+
+export type StreamInvokeActionResponse = string;
+
+export type StreamInvokeActionError = unknown;
+
+export type GetActionResultData = {
+  query: {
     /**
-     * Page number
+     * Action result ID
      */
-    page?: number;
-    /**
-     * Page size
-     */
-    pageSize?: number;
+    resultId: string;
   };
 };
 
-export type ListSkillTemplatesResponse = ListSkillTemplateResponse;
+export type GetActionResultResponse2 = GetActionResultResponse;
 
-export type ListSkillTemplatesError = unknown;
+export type GetActionResultError = unknown;
+
+export type ListSkillsResponse = ListSkillResponse;
+
+export type ListSkillsError = unknown;
+
+export type InvokeSkillData = {
+  /**
+   * Skill invocation request
+   */
+  body: InvokeSkillRequest;
+};
+
+export type InvokeSkillResponse2 = InvokeSkillResponse;
+
+export type InvokeSkillError = unknown;
+
+export type StreamInvokeSkillData = {
+  /**
+   * Skill invocation request
+   */
+  body: InvokeSkillRequest;
+};
+
+export type StreamInvokeSkillResponse = string;
+
+export type StreamInvokeSkillError = unknown;
 
 export type ListSkillInstancesData = {
   query?: {
@@ -3023,28 +3433,6 @@ export type DeleteSkillInstanceData = {
 export type DeleteSkillInstanceResponse = BaseResponse;
 
 export type DeleteSkillInstanceError = unknown;
-
-export type InvokeSkillData = {
-  /**
-   * Skill invocation request
-   */
-  body: InvokeSkillRequest;
-};
-
-export type InvokeSkillResponse2 = InvokeSkillResponse;
-
-export type InvokeSkillError = unknown;
-
-export type StreamInvokeSkillData = {
-  /**
-   * Skill invocation request
-   */
-  body: InvokeSkillRequest;
-};
-
-export type StreamInvokeSkillResponse = string;
-
-export type StreamInvokeSkillError = unknown;
 
 export type ListSkillTriggersData = {
   query?: {
@@ -3250,7 +3638,9 @@ export type ScrapeResponse = ScrapeWeblinkResponse;
 
 export type ScrapeError = unknown;
 
-export type UploadData = unknown;
+export type UploadData = {
+  body: UploadRequest;
+};
 
 export type UploadResponse2 = UploadResponse;
 
@@ -3259,691 +3649,3 @@ export type UploadError = unknown;
 export type ServeStaticResponse = unknown;
 
 export type ServeStaticError = unknown;
-
-export type $OpenApiTs = {
-  '/knowledge/resource/list': {
-    get: {
-      req: ListResourcesData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': ListResourceResponse;
-      };
-    };
-  };
-  '/knowledge/resource/detail': {
-    get: {
-      req: GetResourceDetailData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetResourceDetailResponse;
-      };
-    };
-  };
-  '/knowledge/resource/update': {
-    post: {
-      req: UpdateResourceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertResourceResponse;
-      };
-    };
-  };
-  '/knowledge/resource/create': {
-    post: {
-      req: CreateResourceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertResourceResponse;
-      };
-    };
-  };
-  '/knowledge/resource/batchCreate': {
-    post: {
-      req: BatchCreateResourceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertResourceResponse;
-      };
-    };
-  };
-  '/knowledge/resource/reindex': {
-    post: {
-      req: ReindexResourceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ReindexResourceResponse;
-      };
-    };
-  };
-  '/knowledge/resource/delete': {
-    post: {
-      req: DeleteResourceData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/knowledge/canvas/list': {
-    get: {
-      req: ListCanvasData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': ListCanvasResponse;
-      };
-    };
-  };
-  '/knowledge/canvas/detail': {
-    get: {
-      req: GetCanvasDetailData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': GetCanvasDetailResponse;
-      };
-    };
-  };
-  '/knowledge/canvas/update': {
-    post: {
-      req: UpdateCanvasData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertCanvasResponse;
-      };
-    };
-  };
-  '/knowledge/canvas/create': {
-    post: {
-      req: CreateCanvasData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertCanvasResponse;
-      };
-    };
-  };
-  '/knowledge/canvas/delete': {
-    post: {
-      req: DeleteCanvasData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/knowledge/canvas/batchUpdate': {
-    post: {
-      req: BatchUpdateCanvasData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/knowledge/reference/query': {
-    post: {
-      req: QueryReferencesData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': unknown;
-      };
-    };
-  };
-  '/knowledge/reference/add': {
-    post: {
-      req: AddReferencesData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/knowledge/reference/delete': {
-    post: {
-      req: DeleteReferencesData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': unknown;
-      };
-    };
-  };
-  '/knowledge/project/list': {
-    get: {
-      req: ListProjectsData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': ListProjectResponse;
-      };
-    };
-  };
-  '/knowledge/project/detail': {
-    get: {
-      req: GetProjectDetailData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetProjectDetailResponse;
-      };
-    };
-  };
-  '/knowledge/project/update': {
-    post: {
-      req: UpdateProjectData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertProjectResponse;
-      };
-    };
-  };
-  '/knowledge/project/create': {
-    post: {
-      req: CreateProjectData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertProjectResponse;
-      };
-    };
-  };
-  '/knowledge/project/bindRes': {
-    post: {
-      req: BindProjectResourcesData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/knowledge/project/delete': {
-    post: {
-      req: DeleteProjectData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/share/new': {
-    post: {
-      req: CreateShareData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': CreateShareResponse;
-      };
-    };
-  };
-  '/share/delete': {
-    post: {
-      req: DeleteShareData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/share/content': {
-    get: {
-      req: GetShareContentData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': GetShareContentResponse;
-      };
-    };
-  };
-  '/label/class/list': {
-    get: {
-      req: ListLabelClassesData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListLabelClassesResponse;
-      };
-    };
-  };
-  '/label/class/new': {
-    post: {
-      req: CreateLabelClassData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertLabelClassResponse;
-      };
-    };
-  };
-  '/label/class/update': {
-    post: {
-      req: UpdateLabelClassData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertLabelClassResponse;
-      };
-    };
-  };
-  '/label/class/delete': {
-    post: {
-      req: DeleteLabelClassData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/label/instance/list': {
-    get: {
-      req: ListLabelInstancesData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListLabelInstancesResponse;
-      };
-    };
-  };
-  '/label/instance/new': {
-    post: {
-      req: CreateLabelInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertLabelInstanceResponse;
-      };
-    };
-  };
-  '/label/instance/update': {
-    post: {
-      req: UpdateLabelInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpsertLabelInstanceResponse;
-      };
-    };
-  };
-  '/label/instance/delete': {
-    post: {
-      req: DeleteLabelInstanceData;
-      res: {
-        /**
-         * Successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/skill/template/list': {
-    get: {
-      req: ListSkillTemplatesData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListSkillTemplateResponse;
-      };
-    };
-  };
-  '/skill/instance/list': {
-    get: {
-      req: ListSkillInstancesData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListSkillInstanceResponse;
-      };
-    };
-  };
-  '/skill/instance/new': {
-    post: {
-      req: CreateSkillInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': CreateSkillInstanceResponse;
-      };
-    };
-  };
-  '/skill/instance/update': {
-    post: {
-      req: UpdateSkillInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpdateSkillInstanceResponse;
-      };
-    };
-  };
-  '/skill/instance/pin': {
-    post: {
-      req: PinSkillInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/skill/instance/unpin': {
-    post: {
-      req: UnpinSkillInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/skill/instance/delete': {
-    post: {
-      req: DeleteSkillInstanceData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/skill/invoke': {
-    post: {
-      req: InvokeSkillData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': InvokeSkillResponse;
-      };
-    };
-  };
-  '/skill/streamInvoke': {
-    post: {
-      req: StreamInvokeSkillData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': string;
-      };
-    };
-  };
-  '/skill/trigger/list': {
-    get: {
-      req: ListSkillTriggersData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListSkillTriggerResponse;
-      };
-    };
-  };
-  '/skill/trigger/new': {
-    post: {
-      req: CreateSkillTriggerData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': CreateSkillTriggerResponse;
-      };
-    };
-  };
-  '/skill/trigger/update': {
-    post: {
-      req: UpdateSkillTriggerData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UpdateSkillTriggerResponse;
-      };
-    };
-  };
-  '/skill/trigger/delete': {
-    post: {
-      req: DeleteSkillTriggerData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/skill/job/list': {
-    get: {
-      req: ListSkillJobsData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListSkillJobsResponse;
-      };
-    };
-  };
-  '/skill/job/detail': {
-    get: {
-      req: GetSkillJobDetailData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetSkillJobDetailResponse;
-      };
-    };
-  };
-  '/conversation/list': {
-    get: {
-      req: ListConversationsData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListConversationResponse;
-      };
-    };
-  };
-  '/conversation/{convId}': {
-    get: {
-      req: GetConversationDetailData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetConversationDetailResponse;
-      };
-    };
-  };
-  '/user/settings': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetUserSettingsResponse;
-      };
-    };
-    put: {
-      req: UpdateSettingsData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': BaseResponse;
-      };
-    };
-  };
-  '/user/checkSettingsField': {
-    get: {
-      req: CheckSettingsFieldData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': CheckSettingsFieldResponse;
-      };
-    };
-  };
-  '/subscription/plan': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': unknown;
-      };
-    };
-  };
-  '/subscription/usage': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': GetSubscriptionUsageResponse;
-      };
-    };
-  };
-  '/subscription/modelList': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ListModelsResponse;
-      };
-    };
-  };
-  '/subscription/createCheckoutSession': {
-    post: {
-      req: CreateCheckoutSessionData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': CreateCheckoutSessionResponse;
-      };
-    };
-  };
-  '/subscription/createPortalSession': {
-    post: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': CreatePortalSessionResponse;
-      };
-    };
-  };
-  '/search': {
-    post: {
-      req: SearchData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': SearchResponse;
-      };
-    };
-  };
-  '/search/multilingualSearch': {
-    post: {
-      req: MultiLingualWebSearchData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': MultiLingualWebSearchResponse;
-      };
-    };
-  };
-  '/misc/scrape': {
-    post: {
-      req: ScrapeData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': ScrapeWeblinkResponse;
-      };
-    };
-  };
-  '/misc/upload': {
-    post: {
-      req: UploadData;
-      res: {
-        /**
-         * successful operation
-         */
-        '200': UploadResponse;
-      };
-    };
-  };
-  '/misc/static/{fileName}': {
-    get: {
-      res: {
-        /**
-         * successful operation
-         */
-        '200': unknown;
-      };
-    };
-  };
-};

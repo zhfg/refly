@@ -106,9 +106,8 @@ export const useBuildSkillContext = () => {
 
     let context: SkillContext = {
       contentList: getContentList(),
-      projects: getDatabaseEntities('project'),
       resources: getDatabaseEntities('resource'),
-      canvases: getDatabaseEntities('canvas'),
+      documents: getDatabaseEntities('document'),
       urls: getUrls(),
     };
 

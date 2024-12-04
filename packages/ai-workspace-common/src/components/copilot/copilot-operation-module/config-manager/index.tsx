@@ -11,7 +11,7 @@ import {
   DynamicConfigItem,
   DynamicConfigValue,
   SkillTemplateConfig,
-  SkillTemplateConfigSchema,
+  SkillTemplateConfigDefinition,
 } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
@@ -149,7 +149,7 @@ const ConfigItem = (props: {
 };
 
 interface ConfigManagerProps {
-  schema: SkillTemplateConfigSchema;
+  schema: SkillTemplateConfigDefinition;
   form: FormInstance;
   tplConfig?: SkillTemplateConfig;
   fieldPrefix?: string;

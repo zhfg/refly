@@ -25,11 +25,8 @@ export class ShareController {
   }
 
   @Get('content')
-  async getShareContent(
-    @Query('shareCode') shareCode: string,
-    @Query('canvasId') canvasId?: string,
-  ) {
-    const result = await this.shareService.getShareDetail({ shareCode, canvasId });
+  async getShareContent(@Query('shareCode') shareCode: string) {
+    const result = await this.shareService.getShareDetail({ shareCode });
     return buildSuccessResponse(result);
   }
 }

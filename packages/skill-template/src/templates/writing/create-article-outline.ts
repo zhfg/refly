@@ -5,7 +5,7 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigSchema } from '@refly-packages/openapi-schema';
+import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -22,7 +22,7 @@ export class CreateArticleOutlineSkill extends BaseSkill {
 
   icon: Icon = { type: 'emoji', value: '📄' };
 
-  configSchema: SkillTemplateConfigSchema = {
+  configSchema: SkillTemplateConfigDefinition = {
     items: [],
   };
 
@@ -35,9 +35,9 @@ export class CreateArticleOutlineSkill extends BaseSkill {
         {
           key: 'contentList',
           preferredSelectionKeys: [
-            'canvasBeforeCursorSelection',
-            'canvasCursorSelection',
-            'canvasAfterCursorSelection',
+            'documentBeforeCursorSelection',
+            'documentCursorSelection',
+            'documentAfterCursorSelection',
           ],
         },
       ],

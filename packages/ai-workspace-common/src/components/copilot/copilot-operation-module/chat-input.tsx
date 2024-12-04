@@ -73,7 +73,7 @@ export const ChatInput = (props: ChatInputProps) => {
         <TextArea
           ref={inputRef}
           autoFocus
-          value={chatStore?.newQAText || ''}
+          value={chatStore?.newQAText === '' ? '' : chatStore?.newQAText}
           onChange={(value) => {
             chatStore.setNewQAText(value);
           }}

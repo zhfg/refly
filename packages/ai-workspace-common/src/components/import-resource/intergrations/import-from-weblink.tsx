@@ -6,32 +6,33 @@ import { useEffect, useState } from 'react';
 // utils
 import { isUrl } from '@refly/utils/isUrl';
 import { genUniqueId } from '@refly-packages/utils/id';
-import { LinkMeta, useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
+import {
+  LinkMeta,
+  useImportResourceStore,
+  useImportResourceStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/import-resource';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
-import { SearchSelect } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
-import { useReloadListStateShallow } from '@refly-packages/ai-workspace-common/stores/reload-list-state';
-import { useMatch } from '@refly-packages/ai-workspace-common/utils/router';
 import { useTranslation } from 'react-i18next';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 
 const { TextArea } = Input;
 
 export const ImportFromWeblink = () => {
   const { t } = useTranslation();
   const [linkStr, setLinkStr] = useState('');
-  const importResourceStore = useImportResourceStore();
-  const reloadListState = useReloadListStateShallow((state) => ({
-    setReloadProjectList: state.setReloadProjectList,
-    setReloadResourceList: state.setReloadResourceList,
-    setReloadDirectoryResourceList: state.setReloadDirectoryResourceList,
+  const { scrapeLinks, setScrapeLinks, setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
+    scrapeLinks: state.scrapeLinks,
+    setScrapeLinks: state.setScrapeLinks,
+    setImportResourceModalVisible: state.setImportResourceModalVisible,
   }));
 
-  const projectId = useMatch('/project/:projectId')?.params?.projectId;
-
-  const { selectedProjectId, scrapeLinks = [] } = importResourceStore;
+  const { addNode } = useCanvasControl();
 
   const [saveLoading, setSaveLoading] = useState(false);
+  const { getLibraryList } = useHandleSiderData();
 
   const scrapeSingleUrl = async (key: string, url: string) => {
     const { scrapeLinks } = useImportResourceStore.getState();
@@ -54,7 +55,7 @@ export const ImportFromWeblink = () => {
 
         return link;
       });
-      importResourceStore.setScrapeLinks(newLinks);
+      setScrapeLinks(newLinks);
     } catch (err) {
       console.log('fetch url error, silent ignore');
       const newLinks = scrapeLinks.map((link) => {
@@ -64,7 +65,7 @@ export const ImportFromWeblink = () => {
 
         return link;
       });
-      importResourceStore.setScrapeLinks(newLinks);
+      setScrapeLinks(newLinks);
     }
   };
 
@@ -84,7 +85,8 @@ export const ImportFromWeblink = () => {
         return;
       }
 
-      importResourceStore.setScrapeLinks(scrapeLinks.concat(links));
+      const { scrapeLinks } = useImportResourceStore.getState();
+      setScrapeLinks(scrapeLinks.concat(links));
       setLinkStr('');
 
       // Scrape the link information
@@ -95,7 +97,7 @@ export const ImportFromWeblink = () => {
   };
 
   const handleSave = async () => {
-    const { scrapeLinks, selectedProjectId } = useImportResourceStore.getState();
+    const { scrapeLinks } = useImportResourceStore.getState();
 
     if (scrapeLinks?.length === 0) {
       message.warning(t('resource.import.emptyLink'));
@@ -110,38 +112,41 @@ export const ImportFromWeblink = () => {
           url: link?.url,
           title: link?.title,
         },
-        projectId: selectedProjectId,
       };
     });
 
     setSaveLoading(true);
-    const res = await getClient().batchCreateResource({
+    const { data } = await getClient().batchCreateResource({
       body: batchCreateResourceData,
     });
     setSaveLoading(false);
 
-    if (!res?.data?.success) {
+    if (!data?.success) {
       return;
     }
-
+    getLibraryList();
     message.success(t('common.putSuccess'));
-    importResourceStore.setScrapeLinks([]);
-    importResourceStore.setImportResourceModalVisible(false);
-    if (!projectId || (projectId && selectedProjectId === projectId)) {
-      reloadListState.setReloadProjectList(true);
-      reloadListState.setReloadResourceList(true);
-      reloadListState.setReloadDirectoryResourceList(true);
-    }
+    setScrapeLinks([]);
+    setImportResourceModalVisible(false);
     setLinkStr('');
-  };
 
-  useEffect(() => {
-    importResourceStore.setSelectedProjectId(projectId);
-    return () => {
-      /* reset selectedProjectId after modal hide */
-      importResourceStore.setSelectedProjectId('');
-    };
-  }, []);
+    const resources = (Array.isArray(data?.data) ? data?.data : []).map((resource) => ({
+      id: resource.resourceId,
+      title: resource.title,
+      domain: 'resource',
+      contentPreview: resource.contentPreview,
+    }));
+    resources.forEach((resource) => {
+      addNode({
+        type: 'resource',
+        data: {
+          title: resource.title,
+          entityId: resource.id,
+          contentPreview: resource.contentPreview,
+        },
+      });
+    });
+  };
 
   return (
     <div className="h-full flex flex-col min-w-[500px] box-border intergation-import-from-weblink">
@@ -203,24 +208,10 @@ export const ImportFromWeblink = () => {
           <p className="font-bold whitespace-nowrap text-md text-[#00968f]">
             {t('resource.import.linkCount', { count: scrapeLinks?.length || 0 })}
           </p>
-
-          <div className="flex items-center gap-x-[8px]">
-            <p className="whitespace-nowrap">{t('resource.import.saveTo')}</p>
-            <SearchSelect
-              defaultValue={selectedProjectId}
-              domain="project"
-              className="min-w-[200px] max-w-[220px] flex-1"
-              allowCreateNewEntity
-              onChange={(value) => {
-                if (!value) return;
-                importResourceStore.setSelectedProjectId(value);
-              }}
-            />
-          </div>
         </div>
 
         <div className="flex items-center gap-x-[8px] flex-shrink-0">
-          <Button style={{ marginRight: 8 }} onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
+          <Button style={{ marginRight: 8 }} onClick={() => setImportResourceModalVisible(false)}>
             {t('common.cancel')}
           </Button>
           <Button type="primary" onClick={handleSave} disabled={scrapeLinks.length === 0} loading={saveLoading}>

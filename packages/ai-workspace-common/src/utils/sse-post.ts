@@ -10,27 +10,31 @@ export const ssePost = async ({
   token,
   payload,
   onStart,
-  onSkillThoughout,
+  onSkillLog,
   onSkillStart,
   onSkillStream,
   onSkillEnd,
+  onSkillArtifact,
   onSkillStructedData,
+  onSkillCreateNode,
+  onSkillTokenUsage,
   onError,
   onCompleted,
-  onSkillUsage,
 }: {
   controller: AbortController;
   token: string;
   payload: InvokeSkillRequest;
   onStart: () => void;
-  onSkillThoughout: (event: SkillEvent) => void;
+  onSkillLog: (event: SkillEvent) => void;
   onSkillStart: (event: SkillEvent) => void;
   onSkillStream: (event: SkillEvent) => void;
   onSkillEnd: (event: SkillEvent) => void;
   onSkillStructedData: (event: SkillEvent) => void;
+  onSkillCreateNode: (event: SkillEvent) => void;
+  onSkillArtifact: (event: SkillEvent) => void;
+  onSkillTokenUsage?: (event: SkillEvent) => void;
   onError?: (error: BaseResponse) => void;
   onCompleted?: (val?: boolean) => void;
-  onSkillUsage?: (event: SkillEvent) => void;
 }) => {
   let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
 
@@ -89,16 +93,20 @@ export const ssePost = async ({
                   onSkillStart(skillEvent);
                 }
               } else if (skillEvent?.event === 'log') {
-                onSkillThoughout(skillEvent);
+                onSkillLog(skillEvent);
               } else if (skillEvent?.event === 'end') {
                 onSkillEnd(skillEvent);
                 isSkillFirstMessage = true;
               } else if (skillEvent?.event === 'stream') {
                 onSkillStream(skillEvent);
+              } else if (skillEvent?.event === 'artifact') {
+                onSkillArtifact(skillEvent);
               } else if (skillEvent?.event === 'structured_data') {
                 onSkillStructedData(skillEvent);
-              } else if (skillEvent?.event === 'usage') {
-                onSkillUsage(skillEvent);
+              } else if (skillEvent?.event === 'create_node') {
+                onSkillCreateNode(skillEvent);
+              } else if (skillEvent?.event === 'token_usage') {
+                onSkillTokenUsage?.(skillEvent);
               } else if (skillEvent?.event === 'error') {
                 onError?.(JSON.parse(skillEvent.content));
               }

@@ -1,6 +1,7 @@
 import { forwardRef, ForwardRefRenderFunction, memo, useEffect } from 'react';
 import { Form } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
+import { notification } from 'antd';
 
 import './index.scss';
 
@@ -10,25 +11,30 @@ import { ContextManager } from './context-manager';
 import { ChatActions } from './chat-actions';
 import { SelectedSkillHeader } from './selected-skill-header';
 import { ConfigManager } from './config-manager';
+import { ChatHistory } from './chat-history';
 
 // stores
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import {
+  useContextPanelStore,
+  useContextPanelStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 import {
   useChatStore,
   MessageIntentContext,
   useChatStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-// hooks
-import { useBuildThreadAndRun } from '@refly-packages/ai-workspace-common/hooks/use-build-thread-and-run';
-import { useProjectContext } from '@refly-packages/ai-workspace-common/components/project-detail/context-provider';
+import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 // types
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { editorEmitter, InPlaceSendMessagePayload } from '@refly-packages/utils/event-emitter/editor';
-import { LOCALE, MarkType } from '@refly/common-types';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { LOCALE } from '@refly/common-types';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
+import { useContextFilterErrorTip } from './context-manager/hooks/use-context-filter-errror-tip';
+import { InvokeSkillRequest } from '@refly/openapi-schema';
+import { genActionResultID } from '@refly-packages/utils/id';
 
 interface CopilotInputModuleProps {
   source: MessageIntentSource;
@@ -39,75 +45,92 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
   const { t } = useTranslation();
 
   // stores
+  const { setLoginModalVisible, isLogin } = useUserStoreShallow((state) => ({
+    setLoginModalVisible: state.setLoginModalVisible,
+    isLogin: state.isLogin,
+  }));
   const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
   }));
   const chatStore = useChatStoreShallow((state) => ({
+    setNewQAText: state.setNewQAText,
     setMessageIntentContext: state.setMessageIntentContext,
   }));
 
   // hooks
-  const { buildShutdownTaskAndGenResponse, sendChatMessage } = useBuildThreadAndRun();
-  const { projectId } = useProjectContext();
+  const { handleFilterErrorTip } = useContextFilterErrorTip();
+  const { invokeAction, abortAction } = useInvokeAction();
+  const { canvasId } = useCanvasContext();
 
   const [form] = Form.useForm();
-  const { formErrors, setFormErrors } = useContextPanelStore((state) => ({
+  const { formErrors, setFormErrors } = useContextPanelStoreShallow((state) => ({
     formErrors: state.formErrors,
     setFormErrors: state.setFormErrors,
   }));
 
   const handleSendMessage = (userInput?: string) => {
-    const tplConfig = form?.getFieldValue('tplConfig');
-    const {
-      messageIntentContext,
-      selectedProject,
-      enableWebSearch,
-      enableDeepReasonWebSearch,
-      enableKnowledgeBaseSearch,
-    } = useChatStore.getState();
-    const finalProjectId = selectedProject?.projectId || projectId;
-    const { currentSelectedMarks } = useContextPanelStore.getState();
+    if (!isLogin) {
+      setLoginModalVisible(true);
+      return;
+    }
 
-    const currentCanvas = currentSelectedMarks?.find(
-      (mark) => (mark.type as MarkType) === 'canvas' && mark.isCurrentContext,
-    );
-    const currentResource = currentSelectedMarks?.find(
-      (mark) => (mark.type as MarkType) === 'resource' && mark.isCurrentContext,
-    );
+    const error = handleFilterErrorTip();
+    if (error) {
+      return;
+    }
 
-    // TODO: later may add more source
-    const forceNewConv = [MessageIntentSource.HomePage, MessageIntentSource.Search].includes(source);
+    const { formErrors } = useContextPanelStore.getState();
+    if (formErrors && Object.keys(formErrors).length > 0) {
+      notification.error({
+        message: t('copilot.configManager.errorTipTitle'),
+        description: t('copilot.configManager.errorTip'),
+      });
+      return;
+    }
 
-    const newMessageIntentContext: Partial<MessageIntentContext> = {
-      ...(messageIntentContext || {}),
-      isNewConversation: messageIntentContext?.isNewConversation || forceNewConv,
-      projectContext: {
-        projectId: finalProjectId,
-        canvasId: currentCanvas?.entityId || currentCanvas?.id,
+    const { localSettings } = useUserStore.getState();
+    const { newQAText, selectedModel } = useChatStore.getState();
+    const { contextItems: selectedContextItems, historyItems: selectedResultItems } = useContextPanelStore.getState();
+
+    const resultId = genActionResultID();
+    const param: InvokeSkillRequest = {
+      canvasId,
+      resultId,
+      input: {
+        query: userInput || newQAText.trim(),
       },
-      resourceContext: {
-        resourceId: currentResource?.entityId || currentResource?.id,
+      modelName: selectedModel?.name,
+      context: {
+        resources: selectedContextItems
+          .filter((item) => item.type === 'resource')
+          .map((item) => ({
+            resourceId: item.data?.entityId || item.id,
+            isCurrent: item.isCurrentContext,
+            metadata: item.data?.metadata,
+          })),
+        documents: selectedContextItems
+          .filter((item) => item.type === 'document')
+          .map((item) => ({
+            docId: item.data?.entityId || item.id,
+            isCurrent: item.isCurrentContext,
+            metadata: item.data?.metadata,
+          })),
       },
-      enableWebSearch,
-      enableDeepReasonWebSearch,
-      enableKnowledgeBaseSearch,
-      env: {
-        runtime: getRuntime(),
-        source, // may edit from other side,
-      },
+      resultHistory: selectedResultItems.map((item) => ({
+        resultId: item.resultId,
+      })),
+      skillName: skillStore.selectedSkill?.name || 'common_qna',
+      locale: localSettings?.outputLocale,
+      tplConfig: {}, // TODO: add tplConfig
     };
 
-    chatStore.setMessageIntentContext(newMessageIntentContext as MessageIntentContext);
+    chatStore.setNewQAText('');
 
-    sendChatMessage({
-      tplConfig,
-      userInput,
-      messageIntentContext: newMessageIntentContext as MessageIntentContext,
-    });
+    invokeAction(param);
   };
 
   const handleAbort = () => {
-    buildShutdownTaskAndGenResponse();
+    abortAction();
   };
 
   const handleInPlaceEditSendMessage = (data: InPlaceSendMessagePayload) => {
@@ -153,17 +176,19 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
       editorEmitter.off('inPlaceSendMessage', handleInPlaceEditSendMessage);
     };
   }, []);
+
   useEffect(() => {
-    if (!skillStore.selectedSkill?.tplConfigSchema?.items?.length) {
+    if (!skillStore.selectedSkill?.configSchema?.items?.length) {
       form.setFieldValue('tplConfig', undefined);
     }
-  }, [skillStore.selectedSkill?.skillId, skillStore.selectedSkill?.tplConfigSchema?.items]);
+  }, [skillStore.selectedSkill?.name, skillStore.selectedSkill?.configSchema?.items?.length]);
 
   return (
     <>
       <div ref={ref} className="ai-copilot-operation-container">
         <div className="ai-copilot-operation-body">
-          {/* <SkillDisplay source={source} /> */}
+          <SkillDisplay source={source} />
+          <ChatHistory />
           <div className="ai-copilot-chat-container">
             <div className="chat-input-container">
               <SelectedSkillHeader />
@@ -177,20 +202,20 @@ const CopilotOperationModuleInner: ForwardRefRenderFunction<HTMLDivElement, Copi
                 />
               </div>
 
-              {skillStore.selectedSkill?.tplConfigSchema?.items?.length > 0 && (
+              {/* {skillStore.selectedSkill?.configSchema?.items?.length > 0 && (
                 <ConfigManager
                   form={form}
                   formErrors={formErrors}
                   setFormErrors={setFormErrors}
-                  schema={skillStore.selectedSkill?.tplConfigSchema}
-                  tplConfig={skillStore.selectedSkill?.tplConfig}
+                  schema={skillStore.selectedSkill?.configSchema}
+                  tplConfig={skillStore.selectedSkill?.config}
                   fieldPrefix="tplConfig"
                   configScope="runtime"
                   resetConfig={() => {
                     form.setFieldValue('tplConfig', skillStore.selectedSkill?.tplConfig || {});
                   }}
                 />
-              )}
+              )} */}
 
               <ChatActions
                 form={form}
