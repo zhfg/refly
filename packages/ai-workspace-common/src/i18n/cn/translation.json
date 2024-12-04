@@ -130,6 +130,10 @@
         "one": "support@refly.ai"
       }
     },
+    "loginFailed": {
+      "title": "登录失败",
+      "content": "登录失败，请重新登录"
+    },
     "loginModal": {
       "title": "欢迎来到 Refly, 登录以继续使用",
       "loginBtn": {
