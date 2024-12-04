@@ -10,10 +10,10 @@ function Footer() {
   return (
     <footer className="px-6">
       <div className="py-12 md:py-16">
-        <div className="mx-6">
+        <div className="mx-auto w-full md:w-[70%]">
           {/* CTA Block */}
           <div
-            className="mb-[72px] flex h-[432px] w-full flex-col items-center justify-center rounded-[20px] border border-[#E3E3E3] p-12 text-center"
+            className="mb-[72px] flex h-[380px] w-full flex-col items-center justify-center rounded-[20px] border border-[#E3E3E3] p-12 text-center"
             style={{
               backgroundImage:
                 "linear-gradient(180deg, #F8E2D3 0%, #FCFBFA 95%, #FCFAF9 100%, #FCFCFC 100%, #FFFFFF 100%)",
@@ -39,15 +39,15 @@ function Footer() {
 
           {/* Main Footer Content */}
           <div
-            className="w-full rounded-[20px] border border-[#E3E3E3] p-12"
+            className="w-full rounded-[20px] border border-[#E3E3E3] p-8 md:p-12"
             style={{
               backgroundImage:
                 "linear-gradient(180deg, #FAF8F4 0%, #FCFBFA 95%, #FCFAF9 100%, #FCFCFC 100%, #FFFFFF 100%)",
             }}>
             {/* Updated Footer Layout */}
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[460px_1fr]">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[360px_1fr]">
               {/* Left Column - Logo, Description, Social */}
-              <div className="max-w-[460px]">
+              <div className="max-w-[360px]">
                 <Link to="/" className="mb-4 inline-block" aria-label="Refly">
                   <div className="flex items-center gap-2">
                     <img src={Logo} alt="" className="h-8 w-8" />
@@ -89,77 +89,84 @@ function Footer() {
               </div>
 
               {/* Right Column - Navigation Links */}
-              <div className="grid gap-8 sm:grid-cols-4">
-                {/* 2nd block */}
-                <div className="text-sm">
-                  <h6 className="mb-1 font-medium">
-                    {t("landingPage.footer.product.title")}
-                  </h6>
-                  <ul className="list-none">
-                    <li className="mb-1">
-                      <Link
-                        target="_blank"
-                        to="https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd"
-                        className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
-                        {t("landingPage.footer.product.one")}
-                      </Link>
-                    </li>
-                  </ul>
+              <div className="grid gap-8 sm:grid-cols-2">
+                {/* First Row */}
+                <div className="grid gap-8">
+                  {/* Products */}
+                  <div className="text-sm">
+                    <h6 className="mb-1 font-medium">
+                      {t("landingPage.footer.product.title")}
+                    </h6>
+                    <ul className="list-none">
+                      <li className="mb-1">
+                        <Link
+                          target="_blank"
+                          to="https://chromewebstore.google.com/detail/lecbjbapfkinmikhadakbclblnemmjpd"
+                          className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                          {t("landingPage.footer.product.one")}
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Resources */}
+                  <div className="text-sm">
+                    <h6 className="mb-1 font-medium">
+                      {t("landingPage.footer.resource.title")}
+                    </h6>
+                    <ul className="list-none">
+                      <li className="mb-1">
+                        <Link
+                          to="https://twitter.com/tuturetom"
+                          target="_blank"
+                          className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                          {t("landingPage.footer.resource.one")}
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
 
-                {/* 3rd block */}
-                <div className="text-sm">
-                  <h6 className="mb-1 font-medium">
-                    {t("landingPage.footer.resource.title")}
-                  </h6>
-                  <ul className="list-none">
-                    <li className="mb-1">
-                      <Link
-                        to="https://twitter.com/tuturetom"
-                        target="_blank"
-                        className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
-                        {t("landingPage.footer.resource.one")}
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
+                {/* Second Row */}
+                <div className="grid gap-8">
+                  {/* About */}
+                  <div className="text-sm">
+                    <h6 className="mb-1 font-medium">
+                      {t("landingPage.footer.about.title")}
+                    </h6>
+                    <ul className="list-none">
+                      <li className="mb-1">
+                        <Link
+                          to="/privacy"
+                          className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                          {t("landingPage.footer.about.one")}
+                        </Link>
+                      </li>
+                      <li className="mb-1">
+                        <Link
+                          to="/terms"
+                          className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                          {t("landingPage.footer.about.two")}
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
 
-                {/* 5th block */}
-                <div className="text-sm">
-                  <h6 className="mb-1 font-medium">
-                    {t("landingPage.footer.about.title")}
-                  </h6>
-                  <ul className="list-none">
-                    <li className="mb-1">
-                      <Link
-                        to="/privacy"
-                        className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
-                        {t("landingPage.footer.about.one")}
-                      </Link>
-                    </li>
-                    <li className="mb-1">
-                      <Link
-                        to="/terms"
-                        className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
-                        {t("landingPage.footer.about.two")}
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="text-sm">
-                  <h6 className="mb-1 font-medium">
-                    {t("landingPage.footer.contactUs.title")}
-                  </h6>
-                  <ul className="list-none">
-                    <li className="mb-1">
-                      <Link
-                        to="mailto:pftom@qq.com"
-                        className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
-                        {t("landingPage.footer.contactUs.one")}
-                      </Link>
-                    </li>
-                  </ul>
+                  {/* Contact Us */}
+                  <div className="text-sm">
+                    <h6 className="mb-1 font-medium">
+                      {t("landingPage.footer.contactUs.title")}
+                    </h6>
+                    <ul className="list-none">
+                      <li className="mb-1">
+                        <Link
+                          to="mailto:pftom@qq.com"
+                          className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                          {t("landingPage.footer.contactUs.one")}
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>

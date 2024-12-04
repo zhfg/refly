@@ -161,7 +161,7 @@ function HeroHome() {
             <div className="border-[rgba(0, 0, 0, .8)] mx-auto w-[100%] rounded-[12px] border border-solid bg-[rgba(242,246,253,0.92)] p-1 shadow-[0px_0.602187px_0.602187px_-0.833333px_rgba(23,35,100,0.06),0px_2.28853px_2.28853px_-1.66667px_rgba(23,35,100,0.06),0px_10px_10px_-2.5px_rgba(23,35,100,0.06)] sm:p-2">
               <img
                 className="shadow-heroImageInner mx-auto w-full rounded-md"
-                src="https://static.refly.ai/landing/hero-image.png"
+                src="https://static.refly.ai/landing/generateArticle.png"
                 alt="Hero"
               />
             </div>
