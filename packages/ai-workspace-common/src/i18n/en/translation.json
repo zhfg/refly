@@ -104,17 +104,46 @@
     "downloadBtn": "Download Extension",
     "loginBtn": "Login",
     "dashboard": "Dashboard",
-    "featureOne": {
-      "title": "Quick Action with Extension",
-      "description": "Quick summary for any website, continuous questioning, and conduct in-depth research on your favorite content"
-    },
-    "featureTwo": {
-      "title": "All-in-one Search Engine",
-      "description": " All in one search engine supports natural language search for all your memories and builds your second brain"
-    },
-    "featureThree": {
-      "title": "Auto tag and Timeline",
-      "description": " Automatically and tag, search and review at any time. Build a knowledge system through labels & timelines"
+    "features": {
+      "tag": "Features",
+      "title": "An Overview of Refly's Primary Features",
+      "featureOne": {
+        "tag": "Planning",
+        "title": "Brainstorming, Outlining, and Turning Ideas into Actionable Plans",
+        "bulletPoints": [
+          "20+ scenarios, suitable for academic papers, competitive analysis, technical articles, self-media writing, projects, OKRs",
+          "AI generates content outlines with one click",
+          "Based on historical knowledge to recommend and associate memories"
+        ]
+      },
+      "featureTwo": {
+        "tag": "Exploration & Import",
+        "title": "Connect Any Data and Add It as Writable Material",
+        "bulletPoints": [
+          "AI discovery smartly",
+          "Browser plugin imports private data",
+          "Refly webpage imports any public data or text",
+          "Automatic semantic processing and use knowledge base search to obtain key insights"
+        ]
+      },
+      "featureThree": {
+        "tag": "Research",
+        "title": "Quickly Dig into Knowledge Bases, Resources, and Text Lines to Unveil Insights",
+        "bulletPoints": [
+          "AI search for real-time answers",
+          "Get answers based on the most relevant context",
+          "Study details through browser plugins and context selectors"
+        ]
+      },
+      "featureFour": {
+        "tag": "Thinking & Creation",
+        "title": "Write Target Articles Based on Your Contextual Context with the Most Powerful Models",
+        "bulletPoints": [
+          "Select resources, notes, or any text to ask",
+          "30+ AI skills for writing, reading, and reviewing",
+          "Insert AI-written content sources through AI Apply"
+        ]
+      }
     },
     "footer": {
       "cta": {

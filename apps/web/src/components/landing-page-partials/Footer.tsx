@@ -3,6 +3,7 @@ import Logo from "@/assets/logo.svg"
 import { useTranslation } from "react-i18next"
 import "./footer.scss"
 import { Button } from "antd"
+import { IconGithub, IconTwitter } from "@arco-design/web-react/icon"
 
 function Footer() {
   const { t } = useTranslation()
@@ -48,10 +49,13 @@ function Footer() {
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[360px_1fr]">
               {/* Left Column - Logo, Description, Social */}
               <div className="max-w-[360px]">
-                <Link to="/" className="mb-4 inline-block" aria-label="Refly">
+                <Link
+                  to="/"
+                  className="mb-4 inline-block no-underline"
+                  aria-label="Refly">
                   <div className="flex items-center gap-2">
                     <img src={Logo} alt="" className="h-8 w-8" />
-                    <span className="text-xl font-bold">Refly</span>
+                    <span className="text-xl font-bold text-black">Refly</span>
                   </div>
                 </Link>
                 <p className="mb-6 max-w-[320px] text-base leading-relaxed text-gray-600">
@@ -61,24 +65,16 @@ function Footer() {
                   <Link
                     to="https://twitter.com/tuturetom"
                     target="_blank"
-                    className="rounded-full bg-gray-100 p-2 transition hover:bg-gray-200"
+                    className="rounded-md bg-gray-100 px-4 py-1 text-gray-600 no-underline transition hover:bg-gray-200"
                     aria-label="Twitter">
-                    <svg
-                      className="h-5 w-5 fill-current text-gray-600"
-                      viewBox="0 0 32 32">
-                      <path d="M24 11.5c-.6.3-1.2.4-1.9.5.7-.4 1.2-1 1.4-1.8-.6.4-1.3.6-2.1.8-.6-.6-1.5-1-2.4-1-1.7 0-3.2 1.5-3.2 3.3 0 .3 0 .5.1.7-2.7-.1-5.2-1.4-6.8-3.4-.3.5-.4 1-.4 1.7 0 1.1.6 2.1 1.5 2.7-.5 0-1-.2-1.5-.4 0 1.6 1.1 2.9 2.6 3.2-.3.1-.6.1-.9.1-.2 0-.4 0-.6-.1.4 1.3 1.6 2.3 3.1 2.3-1.1.9-2.5 1.4-4.1 1.4H8c1.5.9 3.2 1.5 5 1.5 6 0 9.3-5 9.3-9.3v-.4c.7-.5 1.3-1.1 1.7-1.8z" />
-                    </svg>
+                    <IconTwitter />
                   </Link>
                   <Link
                     to="https://github.com/pftom/refly"
                     target="_blank"
-                    className="rounded-full bg-gray-100 p-2 transition hover:bg-gray-200"
+                    className="rounded-md bg-gray-100 px-4 py-1 text-gray-600 no-underline transition hover:bg-gray-200"
                     aria-label="GitHub">
-                    <svg
-                      className="h-5 w-5 fill-current text-gray-600"
-                      viewBox="0 0 24 24">
-                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                    </svg>
+                    <IconGithub />
                   </Link>
                 </div>
                 <div className="mt-6">
@@ -93,11 +89,11 @@ function Footer() {
                 {/* First Row */}
                 <div className="grid gap-8">
                   {/* Products */}
-                  <div className="text-sm">
-                    <h6 className="mb-1 font-medium">
+                  <div>
+                    <h6 className="mb-1 text-[14px] font-medium">
                       {t("landingPage.footer.product.title")}
                     </h6>
-                    <ul className="list-none">
+                    <ul className="list-none text-sm">
                       <li className="mb-1">
                         <Link
                           target="_blank"
@@ -110,11 +106,11 @@ function Footer() {
                   </div>
 
                   {/* Resources */}
-                  <div className="text-sm">
-                    <h6 className="mb-1 font-medium">
+                  <div>
+                    <h6 className="mb-1 text-[14px] font-medium">
                       {t("landingPage.footer.resource.title")}
                     </h6>
-                    <ul className="list-none">
+                    <ul className="list-none text-sm">
                       <li className="mb-1">
                         <Link
                           to="https://twitter.com/tuturetom"
@@ -130,11 +126,11 @@ function Footer() {
                 {/* Second Row */}
                 <div className="grid gap-8">
                   {/* About */}
-                  <div className="text-sm">
-                    <h6 className="mb-1 font-medium">
+                  <div>
+                    <h6 className="mb-1 text-[14px] font-medium">
                       {t("landingPage.footer.about.title")}
                     </h6>
-                    <ul className="list-none">
+                    <ul className="list-none text-sm">
                       <li className="mb-1">
                         <Link
                           to="/privacy"
@@ -153,11 +149,11 @@ function Footer() {
                   </div>
 
                   {/* Contact Us */}
-                  <div className="text-sm">
-                    <h6 className="mb-1 font-medium">
+                  <div>
+                    <h6 className="mb-1 text-[14px] font-medium">
                       {t("landingPage.footer.contactUs.title")}
                     </h6>
-                    <ul className="list-none">
+                    <ul className="list-none text-sm">
                       <li className="mb-1">
                         <Link
                           to="mailto:pftom@qq.com"

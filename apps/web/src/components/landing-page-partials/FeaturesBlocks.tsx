@@ -1,4 +1,5 @@
 import React from "react"
+import { useTranslation } from "react-i18next"
 
 // Feature type definition for better type safety
 interface Feature {
@@ -57,7 +58,7 @@ const FeatureCard = ({
             {feature?.tag}
           </span>
           <h2 className="mb-4 text-2xl font-bold md:text-3xl">
-            {feature?.description}
+            {feature?.title}
           </h2>
           <ul className="space-y-3">
             {feature?.bulletPoints?.map((point, index) => (
@@ -76,10 +77,11 @@ const FeatureCard = ({
 )
 
 function FeaturesBlocks() {
+  const { t } = useTranslation()
   const header = {
-    tag: "Features",
+    tag: t("landingPage.features.tag"),
     tagIcon: "⚛️",
-    title: "An Overview of Refly's Primary Features",
+    title: t("landingPage.features.title"),
   }
 
   // Sample feature data
@@ -87,28 +89,23 @@ function FeaturesBlocks() {
     {
       tag: "Plan",
       tagIcon: "⚛️",
-      title: "An Overview of Refly's Primary Features",
-      description: "头脑风暴、梳理大纲、将想法转为可落地的行动",
-      bulletPoints: [
-        "20+ 场景，适配学术论文、竞品调研、技术文章、自媒体撰文、项目、OKR",
-        "AI 一键生成内容大纲",
-        "基于历史知识进行推荐、关联记忆",
-      ],
+      title: t("landingPage.features.featureOne.title"),
+      description: t("landingPage.features.featureOne.description"),
+      bulletPoints: t("landingPage.features.featureOne.bulletPoints", {
+        returnObjects: true,
+      }) as string[],
       imageSrc: "https://static.refly.ai/landing/generateOutline.png",
       isReversed: false,
       background: "linear-gradient(180deg, #F3EEFC 0%, #FFFFFF 100%)",
     },
     {
-      tag: "Explore & Import",
+      tag: t("landingPage.features.featureTwo.tag"),
       tagIcon: "⚛️",
-      title: "An Overview of Refly's Primary Features",
-      description: "连接任何数据，并添加为可写作的素材",
-      bulletPoints: [
-        "AI 搜索智能发现",
-        "浏览器插件导入私有数据",
-        "Refly 网页导入任何公有数据或文本",
-        "自动语义处理并使用知识库搜索获取关键洞见",
-      ],
+      title: t("landingPage.features.featureTwo.title"),
+      description: t("landingPage.features.featureTwo.description"),
+      bulletPoints: t("landingPage.features.featureTwo.bulletPoints", {
+        returnObjects: true,
+      }) as string[],
       imageSrc: "https://static.refly.ai/landing/importResource.png",
       isReversed: true,
       background: "linear-gradient(180deg, #EAF6FF 0%, #FFFFFF 100%)",
@@ -116,13 +113,11 @@ function FeaturesBlocks() {
     {
       tag: "Research",
       tagIcon: "⚛️",
-      title: "An Overview of Refly's Primary Features",
-      description: "快速从每一个知识库、资源和每一行文字挖掘洞见",
-      bulletPoints: [
-        "AI 搜索进行实时回答",
-        "基于你最相关的上下文得到答案",
-        "通过浏览器插件和上下文选择器研究细节",
-      ],
+      title: t("landingPage.features.featureThree.title"),
+      description: t("landingPage.features.featureThree.description"),
+      bulletPoints: t("landingPage.features.featureThree.bulletPoints", {
+        returnObjects: true,
+      }) as string[],
       imageSrc: "https://static.refly.ai/landing/research.png",
       isReversed: false,
       background: "linear-gradient(180deg, #FFF3F3 0%, #FFFFFF 100%)",
@@ -130,13 +125,11 @@ function FeaturesBlocks() {
     {
       tag: "Thinking & Creation",
       tagIcon: "⚛️",
-      title: "An Overview of Refly's Primary Features",
-      description: "基于你的上下文语境，使用最强大的模型愉快的撰写目标文章",
-      bulletPoints: [
-        "选择资源、笔记或划线任意内容进行提问",
-        "30+ 撰写写作、阅读、审稿而生的 AI 技能",
-        "通过 AI Apply 一键插入，引用溯源 AI 撰写内容来源",
-      ],
+      title: t("landingPage.features.featureFour.title"),
+      description: t("landingPage.features.featureFour.description"),
+      bulletPoints: t("landingPage.features.featureFour.bulletPoints", {
+        returnObjects: true,
+      }) as string[],
       imageSrc: "https://static.refly.ai/landing/generateArticle.png",
       isReversed: true,
       background: "linear-gradient(180deg, #F3FFF3 0%, #FFFFFF 100%)",
