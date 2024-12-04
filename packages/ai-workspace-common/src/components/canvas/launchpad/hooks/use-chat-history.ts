@@ -58,16 +58,16 @@ export const useChatHistory = () => {
     setHistoryItems(newHistoryItems);
   }, [JSON.stringify(selectedResultNodes?.map((node) => node?.data.contentPreview))]);
 
-  const handleItemClick = (resultId: string) => {
-    setSelectedNodeByEntity({ type: 'skillResponse', entityId: resultId });
+  const handleItemClick = (item: NodeItem) => {
+    setSelectedNodeByEntity({ type: 'skillResponse', entityId: item.data.entityId });
   };
 
   const handleItemPin = (item: NodeItem) => {
     updateHistoryItem({ ...item, isPreview: !item?.isPreview });
   };
 
-  const handleItemDelete = (resultId: string) => {
-    removeHistoryItem(resultId);
+  const handleItemDelete = (item: NodeItem) => {
+    removeHistoryItem(item.id);
   };
 
   return {

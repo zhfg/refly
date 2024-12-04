@@ -174,7 +174,7 @@ export const WriteGuide = () => {
                   .createDocument({
                     body: {
                       title: `Document-${new Date().toISOString()}`,
-                      initialContent: '# Document\n\n hello world',
+                      initialContent: '\n hello world',
                     },
                   })
                   .then((res) => {

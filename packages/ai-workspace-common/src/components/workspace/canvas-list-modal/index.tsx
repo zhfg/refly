@@ -107,11 +107,10 @@ export const CanvasListModal = (props: CanvasListProps) => {
       <div className="px-4 py-3 min-w-[600px] flex items-center justify-between border-b border-solid border-1 border-x-0 border-t-0 border-black/5">
         <div>
           <div className="flex items-center gap-2">
-            <IconCanvas style={{ fontSize: 20 }} />
             <div className="font-medium">{canvas.title}</div>
           </div>
 
-          <div className="mt-1 ml-7">
+          <div className="mt-1">
             <div className="text-xs text-black/40">
               {time(canvas.updatedAt, language as LOCALE)
                 .utc()
@@ -141,11 +140,16 @@ export const CanvasListModal = (props: CanvasListProps) => {
     <Modal
       className="canvas-list"
       centered
-      title={t('common.canvas')}
+      title={
+        <span className="flex items-center gap-2 text-lg font-medium">
+          <IconCanvas /> {t('common.canvas')}
+        </span>
+      }
       width={1000}
       footer={null}
       open={visible}
       onCancel={() => setVisible(false)}
+      focusTriggerAfterClose={false}
     >
       {isRequesting || dataList.length > 0 ? (
         <List

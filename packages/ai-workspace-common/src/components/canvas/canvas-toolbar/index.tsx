@@ -1,7 +1,6 @@
 import { Button, Tooltip } from 'antd';
 import { FaArrowPointer } from 'react-icons/fa6';
 import { RiUploadCloud2Line } from 'react-icons/ri';
-import { HiOutlineDocumentText, HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { FC } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
@@ -14,6 +13,7 @@ import { ImportResourceModal } from '@refly-packages/ai-workspace-common/compone
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -60,7 +60,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
       tooltip: t('canvas.toolbar.importResource'),
     },
     {
-      icon: HiOutlineSquare3Stack3D,
+      icon: IconResource,
       value: 'addResource',
       type: 'popover',
       domain: 'resource',
@@ -74,7 +74,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     //   tooltip: t('canvas.toolbar.addSkill'),
     // },
     {
-      icon: HiOutlineDocumentText,
+      icon: IconDocument,
       value: 'addDocument',
       type: 'popover',
       domain: 'document',
@@ -107,11 +107,12 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
   const handleConfirm = (selectedItems: ContextItem[]) => {
     if (selectedItems.length > 0) {
       const domain = selectedItems[0]?.domain;
+      console.log('selectedItems', selectedItems);
       selectedItems.forEach((item) => {
         const contentPreview = item?.snippets?.map((snippet) => snippet?.text || '').join('\n');
         addNode({
           type: domain as CanvasNodeType,
-          data: { title: item.title, entityId: item.id, contentPreview },
+          data: { title: item.title, entityId: item.id, contentPreview: item?.contentPreview || contentPreview },
         });
       });
     }

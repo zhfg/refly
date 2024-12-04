@@ -61,7 +61,8 @@ export const ChatActions = (props: ChatActionsProps) => {
     setLoginModalVisible: state.setLoginModalVisible,
   }));
 
-  const canSendEmptyMessage = skillStore?.selectedSkill || (!skillStore?.selectedSkill && chatStore.newQAText?.trim());
+  // const canSendEmptyMessage = skillStore?.selectedSkill || (!skillStore?.selectedSkill && chatStore.newQAText?.trim());
+  const canSendEmptyMessage = chatStore.newQAText?.trim();
   const canSendMessage = !userStore.isLogin || (!messageStateStore?.pending && tokenAvailable && canSendEmptyMessage);
 
   const [containerWidth, setContainerWidth] = useState<number>(0);

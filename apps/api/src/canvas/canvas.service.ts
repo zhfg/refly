@@ -5,6 +5,8 @@ import { MINIO_INTERNAL } from '@/common/minio.service';
 import { MinioService } from '@/common/minio.service';
 import { PrismaService } from '@/common/prisma.service';
 import { MiscService } from '@/misc/misc.service';
+import { CollabService } from '@/collab/collab.service';
+import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
 import { QUEUE_SYNC_STORAGE_USAGE } from '@/utils/const';
 import { CanvasNotFoundError } from '@refly-packages/errors';
@@ -15,7 +17,6 @@ import {
   User,
 } from '@refly-packages/openapi-schema';
 import { genCanvasID } from '@refly-packages/utils';
-import { CollabService } from '@/collab/collab.service';
 
 @Injectable()
 export class CanvasService {
@@ -23,6 +24,7 @@ export class CanvasService {
 
   constructor(
     private prisma: PrismaService,
+    private elasticsearch: ElasticsearchService,
     private collabService: CollabService,
     private miscService: MiscService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
@@ -74,6 +76,14 @@ export class CanvasService {
 
     this.logger.log(`updated canvas data: ${JSON.stringify(document.toJSON())}`);
 
+    await this.elasticsearch.upsertCanvas({
+      id: canvas.canvasId,
+      title: canvas.title,
+      createdAt: canvas.createdAt.toJSON(),
+      updatedAt: canvas.updatedAt.toJSON(),
+      uid: canvas.uid,
+    });
+
     return canvas;
   }
 
@@ -88,6 +98,13 @@ export class CanvasService {
     if (!updatedCanvas) {
       throw new CanvasNotFoundError();
     }
+
+    await this.elasticsearch.upsertCanvas({
+      id: updatedCanvas.canvasId,
+      title: updatedCanvas.title,
+      updatedAt: updatedCanvas.updatedAt.toJSON(),
+      uid: updatedCanvas.uid,
+    });
 
     return updatedCanvas;
   }
@@ -112,6 +129,7 @@ export class CanvasService {
         entityId: canvas.canvasId,
         entityType: 'canvas',
       }),
+      this.elasticsearch.deleteCanvas(canvas.canvasId),
     ];
 
     if (canvas.stateStorageKey) {

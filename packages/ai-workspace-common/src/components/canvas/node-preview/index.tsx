@@ -53,9 +53,8 @@ export const NodePreview = ({
   const handleClose = useCallback(() => {
     if (isPinned) {
       removePinnedNode(canvasId, node);
-    } else {
-      unselectNode(node);
     }
+    unselectNode(node);
   }, [node, removePinnedNode, isPinned, unselectNode]);
 
   const previewComponent = useMemo(() => {

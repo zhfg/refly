@@ -1,4 +1,5 @@
 import { Tabs, Modal } from 'antd';
+import { useEffect } from 'react';
 
 // components
 import { useTranslation } from 'react-i18next';
@@ -12,6 +13,7 @@ import { HiOutlineLanguage } from 'react-icons/hi2';
 import { MdOutlineSubscriptions } from 'react-icons/md';
 
 import './index.scss';
+import { IconSettings } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 const iconStyle = { fontSize: 16, transform: 'translateY(3px)' };
 
@@ -21,7 +23,7 @@ interface SettingModalProps {
 }
 export const SettingModal = (props: SettingModalProps) => {
   const { visible, setVisible } = props;
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const tabs = [
     {
@@ -43,17 +45,25 @@ export const SettingModal = (props: SettingModalProps) => {
       children: <LanguageSetting />,
     },
   ];
+  useEffect(() => {
+    console.log('useEffect', i18n.language);
+  }, [i18n.language]);
 
   return (
     <Modal
       className="settings-modal"
       centered
-      width={950}
+      title={
+        <span className="flex items-center gap-2 text-lg font-medium ml-5">
+          <IconSettings /> {t('tabMeta.settings.title')}
+        </span>
+      }
+      width={i18n.language === 'zh-CN' ? 850 : 910}
       footer={null}
       open={visible}
       onCancel={() => setVisible(false)}
     >
-      <Tabs size="small" tabPosition="left" items={tabs} />
+      <Tabs size="small" className="pt-2" tabPosition="left" items={tabs} />
     </Modal>
   );
 };

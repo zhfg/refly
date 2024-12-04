@@ -49,35 +49,54 @@ export const ChatInput = (props: ChatInputProps) => {
   }));
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (!chatStore?.newQAText) {
+    if (!chatStore?.newQAText?.trim()) {
+      if (e.keyCode === 13) {
+        e.preventDefault(); // Prevent empty lines when text is empty
+        return;
+      }
       return;
     }
 
-    if (e.keyCode === 13 && (e.ctrlKey || e.shiftKey || e.metaKey)) {
+    const preventEmptyLine = () => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
         e.preventDefault();
 
-        // Get cursor position
-        const cursorPos = e.target.selectionStart;
-        // Create new value with newline
-        const newValue =
-          chatStore.newQAText.slice(0, cursorPos as number) + '\n' + chatStore.newQAText.slice(cursorPos as number);
+        const cursorPos = e.target.selectionStart ?? 0;
+        const text = chatStore.newQAText;
 
-        // Update store to trigger re-render
-        chatStore.setNewQAText(newValue);
+        // Check if current line is empty
+        const beforeCursor = text.slice(0, cursorPos);
+        const afterCursor = text.slice(cursorPos);
+        const currentLineIsEmpty = /\n\s*$/.test(beforeCursor) || beforeCursor.trim() === '';
+        const nextLineIsEmpty = /^\s*\n/.test(afterCursor) || afterCursor.trim() === '';
 
-        // Restore cursor position after state update
-        setTimeout(() => {
-          if (e.target instanceof HTMLTextAreaElement) {
-            e.target.selectionStart = e.target.selectionEnd = (cursorPos as number) + 1;
-          }
-        }, 0);
+        // Only add new line if not creating empty lines
+        if (!currentLineIsEmpty || !nextLineIsEmpty) {
+          const newValue = text.slice(0, cursorPos) + '\n' + text.slice(cursorPos);
+          // Remove any consecutive blank lines
+          const cleanedValue = newValue.replace(/\n\s*\n\s*\n/g, '\n\n');
+
+          chatStore.setNewQAText(cleanedValue);
+
+          // Restore cursor position
+          setTimeout(() => {
+            if (e.target instanceof HTMLTextAreaElement) {
+              e.target.selectionStart = e.target.selectionEnd = cursorPos + 1;
+            }
+          }, 0);
+        }
       }
-    }
+    };
 
-    if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
-      e.preventDefault();
-      handleSendMessage();
+    if (e.keyCode === 13) {
+      if (e.ctrlKey || e.shiftKey || e.metaKey) {
+        preventEmptyLine();
+      } else {
+        e.preventDefault();
+        if (chatStore?.newQAText?.trim()) {
+          handleSendMessage();
+        }
+      }
     }
 
     if (e.keyCode === 75 && (e.metaKey || e.ctrlKey)) {

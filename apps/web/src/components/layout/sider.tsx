@@ -12,7 +12,6 @@ import {
   useLocation,
   useNavigate,
 } from "@refly-packages/ai-workspace-common/utils/router"
-import { IoLibraryOutline } from "react-icons/io5"
 
 import {
   IconCanvas,
@@ -38,7 +37,11 @@ import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/use-c
 import { useCanvasNodesStore } from "@refly-packages/ai-workspace-common/stores/canvas-nodes"
 import { CanvasNodeType } from "@refly-packages/ai-workspace-common/requests/types.gen"
 // icons
-import { HiOutlineDocumentText, HiOutlineSquare3Stack3D } from "react-icons/hi2"
+import {
+  IconDocument,
+  IconResource,
+  IconLibrary,
+} from "@refly-packages/ai-workspace-common/components/common/icon"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -204,9 +207,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
       {
         key: "Library",
         name: "library",
-        icon: (
-          <IoLibraryOutline className="arco-icon" style={{ fontSize: 20 }} />
-        ),
+        icon: <IconLibrary className="arco-icon" style={{ fontSize: 20 }} />,
       },
     ],
   ]
@@ -230,7 +231,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
       const { data } = await getClient().createDocument({
         body: {
           title: `Document-${new Date().toISOString()}`,
-          initialContent: "# Document\n\n hello world",
+          initialContent: "\n hello world",
         },
       })
 
@@ -351,17 +352,17 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                             </span>
                           </MenuItem>
 
-                          {libraryList.map(library => (
+                          {/* {libraryList.map(library => (
                             <MenuItem key={library.id}>
                               {library.type === "document" && (
-                                <HiOutlineDocumentText className="arco-icon" />
+                                <IconDocument className="arco-icon" />
                               )}
                               {library.type === "resource" && (
-                                <HiOutlineSquare3Stack3D className="arco-icon" />
+                                <IconResource className="arco-icon" />
                               )}
                               {library.name}
                             </MenuItem>
-                          ))}
+                          ))} */}
                         </>
                       )}
                     </SubMenu>
