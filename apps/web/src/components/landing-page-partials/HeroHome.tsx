@@ -69,7 +69,7 @@ function HeroHome() {
                 </div>
               </div>
 
-              <h1 className="mb-5 flex max-w-4xl flex-col font-['Alibaba_PuHuiTi_Bold'] text-[3rem] leading-[0.9] !tracking-[-0.2rem] sm:mb-6 sm:text-[5rem]">
+              <h1 className="mb-5 flex max-w-4xl flex-col font-['Alibaba_PuHuiTi_Bold',system-ui,-apple-system,sans-serif] text-[3rem] leading-[0.9] !tracking-[-0.2rem] sm:mb-6 sm:text-[5rem]">
                 <span className="span-wrap-styles">
                   The{" "}
                   <span
@@ -123,7 +123,7 @@ function HeroHome() {
                   </svg>
                 </span>
               </h1>
-              <p className="flex max-w-[18rem] flex-col items-center gap-0.5 font-['Alibaba_PuHuiTi_Light'] text-base !leading-[1.3] !tracking-[-0.02rem] sm:max-w-xl sm:text-lg">
+              <p className="flex max-w-[18rem] flex-col items-center gap-0.5 font-['Alibaba_PuHuiTi_Light',system-ui,-apple-system,sans-serif] text-base !leading-[1.3] !tracking-[-0.02rem] sm:max-w-xl sm:text-lg">
                 <span className="span-wrap-styles text-[rgba(0, 0, 0, .5)]">
                   {t("landingPage.simplyDescription.first")}
                 </span>
