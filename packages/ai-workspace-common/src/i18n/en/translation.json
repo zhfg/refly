@@ -130,6 +130,10 @@
         "one": "support@refly.ai"
       }
     },
+    "loginFailed": {
+      "title": "Login Failed",
+      "content": "Login failed, please try again"
+    },
     "loginModal": {
       "title": "Welcome to Refly, sign in to continue",
       "loginBtn": {
