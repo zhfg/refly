@@ -202,7 +202,7 @@ export const ResourceView = (props: ResourceViewProps) => {
                 {/* {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />} */}
               </div>
               <div
-                className={classNames('knowledge-base-resource-content', {
+                className={classNames(`knowledge-base-resource-content resource-content-${resourceId}`, {
                   'refly-selector-mode-active': showContentSelector,
                   'refly-block-selector-mode': scope === 'block',
                   'refly-inline-selector-mode': scope === 'inline',
@@ -212,7 +212,7 @@ export const ResourceView = (props: ResourceViewProps) => {
                 <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>
                 <Markdown content={resourceDetail?.content || ''}></Markdown>
                 <SelectionContext
-                  containerClass="knowledge-base-resource-content"
+                  containerClass={`resource-content-${resourceId}`}
                   getNodeData={(text) => buildNodeData(text)}
                 ></SelectionContext>
               </div>
