@@ -20,11 +20,8 @@ export const ContextPreview = ({ item }: { item: CanvasNode }) => {
 
   console.log('item', item);
 
+  const [content, setContent] = useState(item?.data?.metadata?.contentPreview as string);
   const [isLoading, setIsLoading] = useState(false);
-
-  const setContent = (content: string) => {
-    item.data.contentPreview = content;
-  };
 
   const getDocumentDetail = async (docId: string) => {
     setIsLoading(true);
@@ -81,20 +78,21 @@ export const ContextPreview = ({ item }: { item: CanvasNode }) => {
   const fetchContent = async () => {
     if (!item?.data?.entityId || (item?.data?.metadata?.sourceType as string)?.includes('Selection')) {
       setContent((item?.data?.metadata?.contentPreview as string) ?? '');
+      return;
     }
-    // try {
-    //   if (item.type === 'document') {
-    //     if (isShare) {
-    //       await getShareDocument(item.data.entityId);
-    //     } else {
-    //       await getDocumentDetail(item.data.entityId);
-    //     }
-    //   } else if (item.type === 'resource') {
-    //     await getResourceDetail(item.data.entityId);
-    //   }
-    // } catch (error) {
-    //   console.error('Failed to fetch content:', error);
-    // }
+    try {
+      if (item.type === 'document') {
+        if (isShare) {
+          await getShareDocument(item.data.entityId);
+        } else {
+          await getDocumentDetail(item.data.entityId);
+        }
+      } else if (item.type === 'resource') {
+        await getResourceDetail(item.data.entityId);
+      }
+    } catch (error) {
+      console.error('Failed to fetch content:', error);
+    }
   };
 
   useEffect(() => {
@@ -106,7 +104,7 @@ export const ContextPreview = ({ item }: { item: CanvasNode }) => {
       isPreview: true,
       hideActions: true,
       hideHandles: true,
-      data: item.data,
+      data: { ...item.data, contentPreview: content },
       selected: false,
       id: item.id,
     };
