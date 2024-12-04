@@ -17,6 +17,7 @@
     "saveToCanvas": "Add to Canvas",
     "add": "Add",
     "remove": "Remove",
+    "library": "Library",
     "untitled": "Untitled",
     "loading": "Loading...",
     "loadMore": "Load More",
@@ -128,6 +129,10 @@
         "title": "Contact us",
         "one": "support@refly.ai"
       }
+    },
+    "loginFailed": {
+      "title": "Login Failed",
+      "content": "Login failed, please try again"
     },
     "loginModal": {
       "title": "Welcome to Refly, sign in to continue",
@@ -545,11 +550,9 @@
       "newCanvas": "Create New Canvas",
       "resource": "Resources",
       "newResource": "Add Resource",
-      "project": "Projects",
-      "newProject": "Create New Project",
-      "thread": "Threads",
-      "newThread": "New Thread",
-      "placeholderForHome": "Ask a question or search for canvases, resources, projects, and threads...",
+      "document": "Documents",
+      "newDocument": "Create New Document",
+      "placeholderForHome": "Search for canvases, documents, or resources...",
       "placeholderForSkillExecute": "Enter the question you want to ask and execute the skill based on this question",
       "placeholderForWeblink": "Search {{domain}}...",
       "home": {

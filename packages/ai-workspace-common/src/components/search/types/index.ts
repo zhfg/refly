@@ -1,7 +1,7 @@
-import { SearchResult } from '@refly/openapi-schema';
+import { SearchDomain, SearchResult } from '@refly/openapi-schema';
 
 export interface RenderItem {
-  domain: string;
+  domain: SearchDomain;
   heading: string;
   data: SearchResult[];
   icon: React.ReactNode;

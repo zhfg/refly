@@ -20,6 +20,7 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
           text: item?.contentPreview,
         },
       ],
+      contentPreview: item?.contentPreview,
     }));
     return { success: res?.data?.success, data };
   },
@@ -36,6 +37,7 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
           text: item?.contentPreview,
         },
       ],
+      contentPreview: item?.contentPreview,
     }));
     return { success: res?.data?.success, data };
   },
@@ -59,8 +61,8 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
       title: item?.displayName,
       domain: 'skill',
       metadata: {
-        configSchema: item?.configSchema,
-        description: item?.description,
+        // configSchema: item?.configSchema,
+        // description: item?.description,
         originalItem: item,
       },
     }));

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Project, Conversation, Resource, SearchResult, SkillMeta } from '@refly/openapi-schema';
+import { Document, Resource, SearchResult, SkillMeta } from '@refly/openapi-schema';
 import { Mark } from '@refly/common-types';
 
 type SearchPage = 'notes' | 'readResources' | 'knowledgeBases' | 'convs' | 'skills';
@@ -11,11 +11,9 @@ export interface SearchState {
   // state
   isSearchOpen: boolean;
 
-  // 所有列表资源
   canvases: Resource[];
-  readResources: Resource[];
-  projects: Project[];
-  convs: Conversation[];
+  resources: Resource[];
+  documents: Document[];
   skills: SkillMeta[];
 
   // no category  big search res
@@ -26,29 +24,25 @@ export interface SearchState {
 
   // 所有可搜索的资源
   searchedCanvases: SearchResult[];
-  searchedReadResources: SearchResult[];
-  searchedProjects: SearchResult[];
-  searchedConvs: SearchResult[];
+  searchedResources: SearchResult[];
+  searchedDocuments: SearchResult[];
   searchedSkills: SearchResult[];
 
   // method
   setIsSearchOpen: (isSearchOpen: boolean) => void;
   setNotes: (notes: Resource[]) => void;
-  setReadResources: (readResources: Resource[]) => void;
-  setProjects: (knowledgeBases: Project[]) => void;
-  setConvs: (convs: Conversation[]) => void;
+  setResources: (resources: Resource[]) => void;
+  setDocuments: (documents: Document[]) => void;
   setSkills: (skills: SkillMeta[]) => void;
   setSearchedRes: ({
     canvases,
-    readResources,
-    projects,
-    convs,
+    resources,
+    documents,
     skills,
   }: {
     canvases: SearchResult[];
-    readResources: SearchResult[];
-    projects: SearchResult[];
-    convs: SearchResult[];
+    resources: SearchResult[];
+    documents: SearchResult[];
     skills: SearchResult[];
   }) => void;
   setNoCategoryBigSearchRes: (noCategoryBigSearchRes: Mark[]) => void;
@@ -60,17 +54,15 @@ export const defaultState = {
   isSearchOpen: false,
   canvases: [],
   pages: ['home'],
-  readResources: [],
-  projects: [],
-  convs: [],
+  resources: [],
+  documents: [],
   skills: [],
 
   noCategoryBigSearchRes: [],
 
   searchedCanvases: [],
-  searchedReadResources: [],
-  searchedProjects: [],
-  searchedConvs: [],
+  searchedResources: [],
+  searchedDocuments: [],
   searchedSkills: [],
 };
 
@@ -80,17 +72,15 @@ export const useSearchStore = create<SearchState>()(
 
     setIsSearchOpen: (isSearchOpen: boolean) => set((state) => ({ ...state, isSearchOpen })),
     setNotes: (notes: Resource[]) => set((state) => ({ ...state, canvases: notes })),
-    setReadResources: (readResources: Resource[]) => set((state) => ({ ...state, readResources })),
-    setProjects: (knowledgeBases: Project[]) => set((state) => ({ ...state, knowledgeBases })),
-    setConvs: (convs: Conversation[]) => set((state) => ({ ...state, convs })),
+    setResources: (resources: Resource[]) => set((state) => ({ ...state, resources })),
+    setDocuments: (documents: Document[]) => set((state) => ({ ...state, documents })),
     setSkills: (skills: SkillMeta[]) => set((state) => ({ ...state, skills })),
     setSearchedRes: (data) =>
       set((state) => ({
         ...state,
-        searchedConvs: data?.convs,
         searchedCanvases: data?.canvases,
-        searchedReadResources: data?.readResources,
-        searchedProjects: data?.projects,
+        searchedResources: data?.resources,
+        searchedDocuments: data?.documents,
         searchedSkills: data?.skills,
       })),
     setNoCategoryBigSearchRes: (noCategoryBigSearchRes: Mark[]) =>

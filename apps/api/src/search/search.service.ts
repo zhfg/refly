@@ -100,7 +100,7 @@ export class SearchService {
       // Currently only resource and document are supported for vector search
       req.domains ??= ['resource', 'document'];
     } else {
-      req.domains ??= ['resource', 'document', 'skill'];
+      req.domains ??= ['resource', 'document', 'canvas'];
     }
 
     if (req.entities?.length > 0) {
@@ -220,6 +220,7 @@ export class SearchService {
       domain: 'resource',
       title: result.title,
       highlightedTitle: result.title,
+      contentPreview: result.contentPreview,
       snippets: [{ text: result.contentPreview, highlightedText: result.contentPreview }],
       metadata: {
         resourceType: result.resourceType as ResourceType,
@@ -240,6 +241,7 @@ export class SearchService {
       domain: 'resource',
       title: hit._source.title,
       highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
+      contentPreview: hit._source.content?.slice(0, 500) + '...',
       snippets: [
         {
           text: hit._source.content,
@@ -283,6 +285,7 @@ export class SearchService {
       domain: 'resource',
       title: node.title,
       highlightedTitle: node.title,
+      contentPreview: node.content?.slice(0, 500) + '...',
       snippets: [{ text: node.content, highlightedText: node.content }],
       metadata: {
         resourceMeta: resourceMap.get(node.resourceId),
@@ -326,10 +329,11 @@ export class SearchService {
       domain: 'document',
       title: document.title,
       highlightedTitle: document.title,
+      contentPreview: document.contentPreview,
       snippets: [
         {
-          text: document.contentPreview ? document.contentPreview.slice(0, 250) + '...' : '',
-          highlightedText: '',
+          text: document.contentPreview,
+          highlightedText: document.contentPreview,
         },
       ],
       createdAt: document.createdAt.toJSON(),
@@ -348,6 +352,7 @@ export class SearchService {
       domain: 'document',
       title: hit._source.title,
       highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
+      contentPreview: hit._source.content?.slice(0, 500) + '...',
       snippets: [
         {
           text: hit._source.content,
@@ -377,6 +382,7 @@ export class SearchService {
       domain: 'document',
       title: node.title,
       highlightedTitle: node.title,
+      contentPreview: node.content?.slice(0, 500) + '...',
       snippets: [{ text: node.content, highlightedText: node.content }],
     }));
   }
@@ -396,6 +402,54 @@ export class SearchService {
       default:
         return this.searchDocumentsByKeywords(user, req);
     }
+  }
+
+  async emptySearchCanvases(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const canvases = await this.prisma.canvas.findMany({
+      select: {
+        canvasId: true,
+        title: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      where: { uid: user.uid, deletedAt: null },
+      orderBy: { updatedAt: 'desc' },
+      take: req.limit ?? 5,
+    });
+
+    return canvases.map((canvas) => ({
+      id: canvas.canvasId,
+      domain: 'canvas',
+      title: canvas.title ?? '',
+      highlightedTitle: canvas.title ?? '',
+      contentPreview: '',
+      snippets: [],
+      createdAt: canvas.createdAt.toJSON(),
+      updatedAt: canvas.updatedAt.toJSON(),
+    }));
+  }
+
+  async searchCanvasesByKeywords(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    const hits = await this.elasticsearch.searchCanvases(req.user ?? user, req);
+
+    return hits.map((hit) => ({
+      id: hit._id,
+      domain: 'canvas',
+      title: hit._source.title ?? '',
+      highlightedTitle: hit.highlight?.title?.[0] ?? hit._source.title ?? '',
+      contentPreview: '',
+      snippets: [],
+      createdAt: hit._source.createdAt,
+      updatedAt: hit._source.updatedAt,
+    }));
+  }
+
+  async searchCanvases(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
+    if (!req.query?.length) {
+      return this.emptySearchCanvases(user, req);
+    }
+
+    return this.searchCanvasesByKeywords(user, req);
   }
 
   async emptySearchSkills(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
@@ -544,6 +598,8 @@ export class SearchService {
             return this.searchResources(user, req);
           case 'document':
             return this.searchDocuments(user, req);
+          case 'canvas':
+            return this.searchCanvases(user, req);
           case 'skill':
             return this.searchSkills(user, req);
           default:

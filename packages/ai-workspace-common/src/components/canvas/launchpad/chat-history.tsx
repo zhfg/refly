@@ -25,9 +25,9 @@ interface ChatHistoryProps {
   onCleanup?: () => void;
 
   // Actions
-  onItemClick?: (resultId: string) => void;
+  onItemClick?: (item: NodeItem) => void;
   onItemPin?: (item: NodeItem) => void;
-  onItemDelete?: (resultId: string) => void;
+  onItemDelete?: (item: NodeItem) => void;
 }
 
 export const ChatHistory: React.FC<ChatHistoryProps> = ({
@@ -56,6 +56,8 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
     return null;
   }
 
+  console.log('items', items);
+
   return (
     <div className="w-full border border-solid border-black/10 shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)] max-w-4xl mx-auto p-3 pb-1 space-y-1 rounded-lg bg-white mb-1">
       <div className="text-gray-800 font-bold flex items-center justify-between">
@@ -78,7 +80,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
                   'border-solid bg-gray-100': !item.isPreview,
                 },
               )}
-              onClick={() => onItemClick(item.data.entityId)}
+              onClick={() => onItemClick(item)}
             >
               <div className="text-gray-800 font-medium mb-1 flex items-center justify-between text-xs">
                 <span className="flex items-center whitespace-nowrap overflow-hidden text-ellipsis">
@@ -114,7 +116,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onItemDelete?.(item.data.entityId);
+                          onItemDelete?.(item);
                         }}
                         icon={<IconDelete className="w-4 h-4 text-gray-400" />}
                       />
