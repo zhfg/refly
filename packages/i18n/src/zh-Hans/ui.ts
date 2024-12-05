@@ -155,7 +155,7 @@ const translations = {
       right: 'Refly.ai 版权所有。',
       product: {
         title: '产品',
-        list: ['多线层会话自由画布', '知识库集成', '上下文记忆', '智能检索', 'AI 文档'],
+        list: ['自由画布', '多线程会话', '知识库集成', '上下文记忆', '智能检索', 'AI 文档'],
       },
       resource: {
         title: '资源',

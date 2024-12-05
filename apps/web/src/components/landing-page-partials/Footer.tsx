@@ -24,12 +24,12 @@ function Footer() {
         <div className="mx-auto w-full md:w-[70%]">
           {/* CTA Block */}
           <div
-            className="mb-[72px] flex h-[380px] w-full flex-col items-center justify-center rounded-[20px] border border-[#E3E3E3] p-12 text-center"
+            className="mb-[72px] flex h-[380px] w-full flex-col items-center justify-center rounded-[20px] border border-[#E3E3E3] p-12 text-center font-['Alibaba_PuHuiTi_Bold',system-ui,-apple-system,sans-serif]"
             style={{
               backgroundImage:
                 "linear-gradient(180deg, #F8E2D3 0%, #FCFBFA 95%, #FCFAF9 100%, #FCFCFC 100%, #FFFFFF 100%)",
             }}>
-            <h2 className="mb-6 text-3xl font-bold md:text-4xl">
+            <h2 className="mb-6 font-['Alibaba_PuHuiTi_Bold',system-ui,-apple-system,sans-serif] text-3xl font-bold md:text-4xl">
               {t("landingPage.footer.cta.title")}
             </h2>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
