@@ -41,17 +41,17 @@ const FeatureCard = ({
         className={`flex h-full flex-col gap-6 p-6 md:flex-row ${
           isReversed ? "md:flex-row-reverse" : ""
         }`}>
-        {/* Image Section */}
-        <div className="relative h-[260px] md:h-auto md:w-1/2">
+        {/* Image Section - Updated with hover animation */}
+        <div className="relative h-[260px] cursor-pointer overflow-visible transition-transform duration-300 ease-out hover:scale-95 md:h-auto md:w-1/2">
           <img
             src={feature?.imageSrc ?? "/fallback-image.png"}
             alt={`${feature?.title ?? "Feature"} visualization`}
-            className="absolute h-full w-[130%] object-contain"
+            className="absolute h-full w-[130%] rounded-[20px] object-contain"
             style={{
               [isReversed ? "right" : "left"]: "-30%",
-              borderRadius: "20px",
               opacity: 1,
               boxSizing: "border-box",
+              transformOrigin: "center",
             }}
           />
         </div>

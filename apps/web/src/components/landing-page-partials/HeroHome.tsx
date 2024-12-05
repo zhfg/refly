@@ -60,13 +60,13 @@ function HeroHome() {
                       // userStore.setWaitingListModalVisible(true)
                     }}
                     className={cn(
-                      "group rounded-md border border-black/5 bg-black text-base text-white transition-all ease-in hover:cursor-pointer hover:bg-neutral-900 dark:border-white/5",
+                      "group rounded-lg border border-black/5 bg-white text-base transition-all ease-in hover:cursor-pointer hover:bg-neutral-50 dark:border-white/5",
                     )}>
-                    <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 transition ease-out hover:text-neutral-200">
-                      <span className="text-white">
+                    <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 transition ease-out">
+                      <span className="text-[#00968F]">
                         ✨ {t("landingPage.messageText")}
                       </span>
-                      <ArrowRightIcon className="ml-1 size-3 text-white transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
+                      <ArrowRightIcon className="ml-1 size-3 text-[#00968F] transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
                     </AnimatedShinyText>
                   </div>
                 </div>
@@ -218,7 +218,11 @@ function HeroHome() {
 
           {/* Hero image */}
           <div className="relative mt-12 flex justify-center overflow-visible sm:mt-10">
-            <div className="border-[rgba(0, 0, 0, .8)] mx-auto w-[100%] rounded-[12px] border border-solid bg-[rgba(242,246,253,0.92)] p-1 shadow-[0px_0.602187px_0.602187px_-0.833333px_rgba(23,35,100,0.06),0px_2.28853px_2.28853px_-1.66667px_rgba(23,35,100,0.06),0px_10px_10px_-2.5px_rgba(23,35,100,0.06)] sm:p-2">
+            <div
+              className="border-[rgba(0, 0, 0, .8)] mx-auto w-[100%] cursor-pointer rounded-[12px] border border-solid bg-[rgba(242,246,253,0.92)] p-1 shadow-[0px_0.602187px_0.602187px_-0.833333px_rgba(23,35,100,0.06),0px_2.28853px_2.28853px_-1.66667px_rgba(23,35,100,0.06),0px_10px_10px_-2.5px_rgba(23,35,100,0.06)] transition-transform duration-300 ease-out hover:scale-95 sm:p-2"
+              style={{
+                transformOrigin: "center", // 确保围绕中心点缩放
+              }}>
               <BlurImage
                 className="shadow-heroImageInner mx-auto w-full rounded-md"
                 src="https://static.refly.ai/landing/generateArticle.png"
