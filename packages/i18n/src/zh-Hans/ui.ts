@@ -95,7 +95,7 @@ const translations = {
   landingPage: {
     slogan: 'AI Native 创作引擎',
     simplySlogan: '创作引擎',
-    description: '基于自由画布的创作平台，通过多线程对话、知识整合、上下文记忆和智能搜索，将想法转化为优质内容。',
+    description: '基于自由画布的创作平台，通过多线程对话、知识库整合、上下文记忆和智能搜索，将想法转化为优质内容。',
     simplyDescription: {
       first: '由多线程对话、知识库集成、上下文记忆和智能搜索驱动，',
       second: 'Refly 是将创意转化为优质内容的最佳方式。',
