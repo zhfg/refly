@@ -96,6 +96,21 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     [ydoc, yNodes],
   );
 
+  const addSelectedNode = useCallback(
+    (node: CanvasNode<any> | null) => {
+      ydoc.transact(() => {
+        const updatedNodes = yNodes.toJSON().map((n) => ({
+          ...n,
+          // Set selected to true if node id matches, keep original selected state otherwise
+          selected: n.id === node?.id ? true : n.selected,
+        }));
+        yNodes.delete(0, yNodes.length);
+        yNodes.push(updatedNodes);
+      });
+    },
+    [ydoc, yNodes],
+  );
+
   const setSelectedNodeByEntity = useCallback(
     (filter: CanvasNodeFilter) => {
       const { type, entityId } = filter;
@@ -106,6 +121,18 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       }
     },
     [canvasId, setSelectedNode],
+  );
+
+  const addSelectedNodeByEntity = useCallback(
+    (filter: CanvasNodeFilter) => {
+      const { type, entityId } = filter;
+      const { nodes } = useCanvasStore.getState().data[canvasId];
+      const node = nodes.find((node) => node.type === type && node.data?.entityId === entityId);
+      if (node) {
+        addSelectedNode(node);
+      }
+    },
+    [canvasId, addSelectedNode],
   );
 
   const setSelectedNodes = useCallback(
@@ -384,5 +411,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     mode,
     setMode,
     setSelectedNodes,
+    addSelectedNode,
+    addSelectedNodeByEntity,
   };
 };
