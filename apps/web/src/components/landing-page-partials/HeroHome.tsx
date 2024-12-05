@@ -48,7 +48,7 @@ function HeroHome() {
         {/* Hero content */}
         <div className="relative pb-10 pt-32 md:pb-16 md:pt-24">
           {/* Section header */}
-          <div className="mx-auto max-w-3xl pb-8 text-center">
+          <div className="scroll-tag mx-auto max-w-3xl pb-8 text-center">
             <div className="mb-7 flex flex-col items-center text-center sm:mb-6">
               <div className="mb-5">
                 <div className="z-10 flex items-center justify-center">

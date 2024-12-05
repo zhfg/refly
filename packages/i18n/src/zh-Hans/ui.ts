@@ -96,7 +96,7 @@ const translations = {
     slogan: 'AI 创作引擎',
     simplySlogan: '创作引擎',
     description: '基于自由画布的创作平台，通过多线程对话、知识整合、上下文记忆和智能搜索，将想法转化为优质内容。',
-    simplyDescrption: {
+    simplyDescription: {
       first: 'Refly 是一个基于自由画布的 AI 内容创作引擎。',
       second: '通过多线程对话、知识库集成、场景记忆和智能检索，帮助将创意转化为优质内容。',
     },
@@ -155,20 +155,19 @@ const translations = {
       right: 'Refly.ai 版权所有。',
       product: {
         title: '产品',
-        one: 'Refly AI 浏览器插件',
+        list: ['多线层会话自由画布', '知识库集成', '上下文记忆', '智能检索', 'AI 文档'],
       },
       resource: {
         title: '资源',
-        one: '推特',
+        list: ['推特'],
       },
       about: {
         title: '关于',
-        one: '隐私政策',
-        two: '服务条款',
+        list: ['隐私政策', '服务条款'],
       },
       contactUs: {
         title: '联系我们',
-        one: 'support@refly.ai',
+        list: ['support@refly.ai'],
       },
     },
     loginFailed: {

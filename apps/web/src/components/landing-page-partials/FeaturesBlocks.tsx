@@ -95,7 +95,7 @@ function FeaturesBlocks() {
   // Sample feature data
   const features: Feature[] = [
     {
-      tag: "Plan",
+      tag: t("landingPage.features.featureOne.tag"),
       tagIcon: <FaRegPaperPlane className="inline-block" />,
       title: t("landingPage.features.featureOne.title"),
       description: t("landingPage.features.featureOne.description"),
@@ -119,7 +119,7 @@ function FeaturesBlocks() {
       background: "linear-gradient(180deg, #EAF6FF 0%, #FFFFFF 100%)",
     },
     {
-      tag: "Research",
+      tag: t("landingPage.features.featureThree.tag"),
       tagIcon: <AiOutlineExperiment className="inline-block" />,
       title: t("landingPage.features.featureThree.title"),
       description: t("landingPage.features.featureThree.description"),
@@ -131,7 +131,7 @@ function FeaturesBlocks() {
       background: "linear-gradient(180deg, #FFF3F3 0%, #FFFFFF 100%)",
     },
     {
-      tag: "Thinking & Creation",
+      tag: t("landingPage.features.featureFour.tag"),
       tagIcon: <MdOutlineNoteAlt className="inline-block" />,
       title: t("landingPage.features.featureFour.title"),
       description: t("landingPage.features.featureFour.description"),
