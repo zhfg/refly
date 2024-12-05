@@ -134,9 +134,9 @@ const translations = {
       },
       featureThree: {
         tag: 'Research',
-        title: 'Spark insights through multi-threaded conversations, making research more illuminating',
+        title: 'Spark insights through multi-threaded dialogues, making research more illuminating',
         bulletPoints: [
-          'Freely explore ideas through canvas-based conversations',
+          'Freely explore ideas through canvas-based dialogues',
           'Smart context management for precise research direction',
           'Flexible knowledge base integration for accelerated breakthroughs',
         ],
