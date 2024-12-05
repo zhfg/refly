@@ -58,7 +58,7 @@ export const domainToFetchData: Record<SearchDomain, DataFetcher> = {
     });
     const data: SearchResult[] = (res?.data?.data || []).map((item) => ({
       id: item?.name,
-      title: item?.displayName,
+      title: item?.name,
       domain: 'skill',
       metadata: {
         // configSchema: item?.configSchema,

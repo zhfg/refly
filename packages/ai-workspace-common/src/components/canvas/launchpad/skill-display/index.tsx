@@ -7,6 +7,7 @@ import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skil
 import { useEffect, useRef, useMemo } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 import { useListSkills } from '@refly-packages/ai-workspace-common/queries';
+import { Skill } from '@refly-packages/ai-workspace-common/requests/types.gen';
 
 export const SkillDisplay = () => {
   const { t } = useTranslation();
@@ -67,8 +68,7 @@ export const SkillDisplay = () => {
         trigger="hover"
         mode="single"
         handleConfirm={(items) => {
-          console.log('items', items);
-          skillStore.setSelectedSkill(items[0].metadata?.originalItem);
+          skillStore.setSelectedSkill(items[0].metadata?.originalItem as Skill);
         }}
       >
         <div

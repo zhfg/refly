@@ -40,7 +40,7 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
             readonly={readonly}
             skill={{
               icon: actionMeta?.icon,
-              displayName: actionMeta?.name,
+              name: actionMeta?.name,
             }}
           />
         )}
