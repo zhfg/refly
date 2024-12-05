@@ -43,10 +43,10 @@ export const createSkillTemplateInventory = (engine: SkillEngine): BaseSkill[] =
 
 export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
   return [
-    new RecommendQuestions(engine),
     new WebSearch(engine),
-    new GenerateDoc(engine),
     new LibrarySearch(engine),
+    new GenerateDoc(engine),
+    new RecommendQuestions(engine),
     new CommonQnA(engine),
     new RewriteDoc(engine),
     new EditDoc(engine),
