@@ -145,7 +145,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   return (
     <>
       <Helmet>
-        <title>{canvasTitle?.toString() ?? t('common.untitled')}</title>
+        <title>{canvasTitle?.toString() || t('common.untitled')} · Refly</title>
       </Helmet>
       <div
         className={`absolute h-16 top-0 left-0 right-0  box-border flex justify-between items-center py-2 px-4 pr-0 z-10 bg-transparent ${
