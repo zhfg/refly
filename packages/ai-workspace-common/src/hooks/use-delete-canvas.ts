@@ -38,9 +38,9 @@ export const useDeleteCanvas = () => {
         if (storedCanvasId === canvasId) {
           const firstCanvas = canvasList?.find((canvas) => canvas.id !== canvasId);
           if (firstCanvas?.id) {
-            navigate(`/canvas/${firstCanvas?.id}`);
+            navigate(`/canvas/${firstCanvas?.id}`, { replace: true });
           } else {
-            navigate('/canvas/empty');
+            navigate('/canvas/empty', { replace: true });
           }
         }
       }
