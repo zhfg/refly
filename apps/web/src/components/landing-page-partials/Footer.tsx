@@ -88,14 +88,14 @@ function Footer() {
                     <Link
                       to="https://twitter.com/tuturetom"
                       target="_blank"
-                      className="rounded-md bg-gray-100 px-4 py-1 text-gray-600 no-underline transition hover:bg-gray-200"
+                      className="rounded-md px-2 py-1 text-gray-600 no-underline transition hover:bg-gray-200"
                       aria-label="Twitter">
                       <IconTwitter />
                     </Link>
                     <Link
                       to="https://github.com/pftom/refly"
                       target="_blank"
-                      className="rounded-md bg-gray-100 px-4 py-1 text-gray-600 no-underline transition hover:bg-gray-200"
+                      className="rounded-md px-2 py-1 text-gray-600 no-underline transition hover:bg-gray-200"
                       aria-label="GitHub">
                       <IconGithub />
                     </Link>
