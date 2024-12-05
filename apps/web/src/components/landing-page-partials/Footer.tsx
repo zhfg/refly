@@ -80,7 +80,7 @@ function Footer() {
                   </div>
                 </Link>
                 <p className="mb-6 max-w-[320px] text-base leading-relaxed text-gray-600">
-                  {t("landingPage.description")}
+                  {t("landingPage.anotherDescription")}
                 </p>
                 <div className="flex items-center justify-start gap-8">
                   {/* Social Media Links */}
