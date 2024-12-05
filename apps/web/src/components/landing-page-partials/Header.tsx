@@ -23,7 +23,13 @@ function Header() {
           <Button type="primary" onClick={() => setLoginModalVisible(true)}>
             {t("landingPage.tryForFree")}
           </Button>
-          <Button onClick={() => setLoginModalVisible(true)}>
+          <Button
+            onClick={() => {
+              window.open(
+                "https://powerformer.feishu.cn/share/base/form/shrcnaVXPlMWxOC6cJDa7q3cPzd",
+                "_blank",
+              )
+            }}>
             {t("landingPage.contactUs")}
           </Button>
         </div>

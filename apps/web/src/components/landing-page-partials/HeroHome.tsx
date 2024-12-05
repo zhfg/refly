@@ -6,9 +6,14 @@ import AnimatedShinyText from "@/components/magicui/animated-shiny-text"
 import { ArrowRightIcon } from "lucide-react"
 import { Button } from "antd"
 import BlurImage from "@/components/common/BlurImage"
+import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 
 function HeroHome() {
   const { t, i18n } = useTranslation()
+  const { setLoginModalVisible } = useUserStoreShallow(state => ({
+    setLoginModalVisible: state.setLoginModalVisible,
+  }))
+
   const isZhCN = i18n.language === "zh-CN"
 
   return (
@@ -56,11 +61,9 @@ function HeroHome() {
               <div className="mb-5">
                 <div className="z-10 flex items-center justify-center">
                   <div
-                    onClick={() => {
-                      // userStore.setWaitingListModalVisible(true)
-                    }}
+                    onClick={() => setLoginModalVisible(true)}
                     className={cn(
-                      "group rounded-lg border border-black/5 bg-white text-base transition-all ease-in hover:cursor-pointer hover:bg-neutral-50 dark:border-white/5",
+                      "group rounded-lg border border-black/5 bg-white text-base hover:cursor-pointer hover:bg-neutral-50 dark:border-white/5",
                     )}>
                     <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 transition ease-out">
                       <span className="text-[#00968F]">
@@ -164,7 +167,7 @@ function HeroHome() {
                 <span
                   className="span-wrap-styles relative"
                   style={{
-                    marginTop: isZhCN ? 0 : 12, // 为中文增加更多的顶部间距
+                    marginTop: isZhCN ? 0 : 12, // 为中文增加更多���顶部间距
                     fontSize: isZhCN ? "0.95em" : "1em", // 稍微调整中文字体大小
                   }}>
                   <span>{isZhCN ? "创作引擎" : "Creation Engine"}</span>
@@ -196,33 +199,38 @@ function HeroHome() {
             {/* Add buttons after the description paragraph */}
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
               <Button
-                onClick={() => {
-                  // Add your free trial logic here
-                }}
+                onClick={() => setLoginModalVisible(true)}
                 size="large"
                 type="primary"
-                className="group inline-flex cursor-pointer items-center justify-center rounded-md px-6 py-3 text-base font-medium text-white transition-all duration-200 hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 dark:bg-white dark:text-black dark:hover:bg-neutral-200">
+                className="cursor-pointer">
                 {t("landingPage.tryForFree")}
               </Button>
 
               <Button
                 onClick={() => {
                   // Add your contact logic here
+                  window.open(
+                    "https://powerformer.feishu.cn/share/base/form/shrcnaVXPlMWxOC6cJDa7q3cPzd",
+                    "_blank",
+                  )
                 }}
                 size="large"
-                className="group inline-flex cursor-pointer items-center justify-center rounded-md border border-black/10 bg-white px-6 py-3 text-base font-medium text-black transition-all duration-200 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 dark:border-white dark:bg-black dark:text-white dark:hover:bg-neutral-900">
+                className="cursor-pointer">
                 {t("landingPage.contactUs")}
               </Button>
             </div>
           </div>
 
           {/* Hero image */}
-          <div className="relative mt-12 flex justify-center overflow-visible sm:mt-10">
+          <div className="relative mt-6 flex justify-center overflow-hidden sm:mt-10">
             <div
-              className="border-[rgba(0, 0, 0, .8)] mx-auto w-[100%] cursor-pointer rounded-[12px] border border-solid bg-[rgba(242,246,253,0.92)] p-1 shadow-[0px_0.602187px_0.602187px_-0.833333px_rgba(23,35,100,0.06),0px_2.28853px_2.28853px_-1.66667px_rgba(23,35,100,0.06),0px_10px_10px_-2.5px_rgba(23,35,100,0.06)] transition-transform duration-300 ease-out hover:scale-95 sm:p-2"
-              style={{
-                transformOrigin: "center", // 确保围绕中心点缩放
-              }}>
+              className={cn(
+                "mx-auto w-[100%] cursor-pointer rounded-[12px] border border-solid border-black/5",
+                "bg-[rgba(242,246,253,0.92)] p-1 sm:p-2",
+                "will-change-transform",
+                "scale-100 transition-[transform] duration-200 ease-out",
+                "hover:scale-[0.95]",
+              )}>
               <BlurImage
                 className="shadow-heroImageInner mx-auto w-full rounded-md"
                 src="https://static.refly.ai/landing/generateArticle.png"

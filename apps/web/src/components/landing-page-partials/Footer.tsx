@@ -5,9 +5,13 @@ import "./footer.scss"
 import { Button } from "antd"
 import { IconDown, IconGithub, IconTwitter } from "@arco-design/web-react/icon"
 import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
+import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 
 function Footer() {
   const { t } = useTranslation()
+  const { setLoginModalVisible } = useUserStoreShallow(state => ({
+    setLoginModalVisible: state.setLoginModalVisible,
+  }))
 
   // Add scroll to top function
   const scrollToTop = (e: React.MouseEvent) => {
@@ -34,15 +38,22 @@ function Footer() {
             </h2>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button
+                type="primary"
+                onClick={() => setLoginModalVisible(true)}
                 size="large"
-                className="rounded-md bg-[#00968F] px-8 py-3 text-white transition hover:bg-[#007A74]"
-                target="_blank">
+                className="cursor-pointer">
                 {t("landingPage.footer.cta.getStarted")}
               </Button>
               <Button
                 size="large"
-                className="rounded-md bg-white px-8 py-3 text-[#00968F] shadow-sm transition hover:bg-gray-50"
-                target="_blank">
+                onClick={() => {
+                  // Add your contact logic here
+                  window.open(
+                    "https://powerformer.feishu.cn/share/base/form/shrcnaVXPlMWxOC6cJDa7q3cPzd",
+                    "_blank",
+                  )
+                }}
+                className="cursor-pointer">
                 {t("landingPage.footer.cta.contactUs")}
               </Button>
             </div>
