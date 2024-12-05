@@ -6,6 +6,8 @@ import {
   CanvasNodeData,
   InvokeSkillRequest,
 } from '@refly/openapi-schema';
+import { message } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
 import { SkillEvent, LOCALE } from '@refly/common-types';
@@ -21,6 +23,7 @@ import {
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { aggregateTokenUsage } from '@refly-packages/utils/index';
 import { ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { useListSkills } from '@refly-packages/ai-workspace-common/queries/queries';
 
 export const useInvokeAction = () => {
   const { addNode, setNodeDataByEntity } = useCanvasControl();
@@ -28,6 +31,8 @@ export const useInvokeAction = () => {
 
   const globalAbortControllerRef = { current: null as AbortController | null };
   const globalIsAbortedRef = { current: false as boolean };
+
+  const { t } = useTranslation();
 
   const onUpdateResult = (resultId: string, payload: ActionResult) => {
     actionEmitter.emit('updateResult', { resultId, payload });
@@ -274,13 +279,24 @@ export const useInvokeAction = () => {
 
   const onStart = () => {};
 
+  const { data } = useListSkills();
+
   const invokeAction = (payload: InvokeSkillRequest) => {
     const { resultId, input } = payload;
+
+    payload.skillName ||= 'commonQnA';
+    const skill = data?.data?.find((s) => s.name === payload.skillName);
+    if (!skill) {
+      message.warning(t('canvas.launchpad.skillNotFound'));
+      return;
+    }
+
     onUpdateResult(resultId, {
       resultId,
       type: 'skill',
       actionMeta: {
-        name: payload.skillName || 'commonQnA',
+        name: skill.name,
+        icon: skill.icon,
       },
       title: input?.query,
       targetId: payload.target?.entityId,

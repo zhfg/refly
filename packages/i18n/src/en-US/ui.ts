@@ -447,6 +447,9 @@ const translations = {
       editTitle: 'Edit Canvas Title',
       editTitlePlaceholder: 'Please enter the title of the canvas',
     },
+    launchpad: {
+      skillNotFound: 'Skill not found, please refresh the page and try again',
+    },
     action: {
       nodeAlreadyExists: 'The {{type}} with the same entity already exists',
       deleteSuccess: 'Canvas deleted successfully',
