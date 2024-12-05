@@ -12,7 +12,7 @@ const convertContextToItems = (context?: any): NodeItem[] => {
   const items: NodeItem[] = [];
 
   // Convert contentList
-  context.contentList?.forEach((content: SkillContextContentItem) => {
+  context?.contentList?.forEach((content: SkillContextContentItem) => {
     const metadata = content.metadata as any;
     items.push({
       id: metadata?.nodeId ?? genUniqueId(),
@@ -38,7 +38,7 @@ const convertContextToItems = (context?: any): NodeItem[] => {
   });
 
   // Convert resources
-  context.resources?.forEach((resource: SkillContextResourceItem) => {
+  context?.resources?.forEach((resource: SkillContextResourceItem) => {
     items.push({
       id: resource.metadata?.nodeId ?? genUniqueId(),
       type: 'resource',
@@ -54,7 +54,7 @@ const convertContextToItems = (context?: any): NodeItem[] => {
   });
 
   // Convert documents
-  context.documents?.forEach((doc: SkillContextDocumentItem) => {
+  context?.documents?.forEach((doc: SkillContextDocumentItem) => {
     items.push({
       id: doc.metadata?.nodeId ?? genUniqueId(),
       type: 'document',
@@ -74,40 +74,43 @@ const convertContextToItems = (context?: any): NodeItem[] => {
 
 const convertContextItemsToContext = (items: NodeItem[]) => {
   return {
-    contentList: items
-      ?.filter((item) => item?.data?.metadata?.sourceType)
-      .map((item) => ({
-        content: item.data?.metadata?.selectedContent ?? '',
-        metadata: {
-          domain: item.data?.metadata?.sourceType ?? '',
-          entityId: item.data?.entityId ?? '',
-          title: item.data?.title ?? '',
-          nodeId: item.id,
-          ...(item.data?.metadata?.sourceType === 'extensionWeblinkSelection' && {
-            url: item.data?.metadata?.url,
-          }),
-        },
-      })),
-    resources: items
-      .filter((item) => item.type === 'resource')
-      .map((item) => ({
-        resourceId: item.data?.entityId || item.id,
-        isCurrent: item.isCurrentContext,
-        metadata: {
-          ...item.data?.metadata,
-          nodeId: item.id,
-        },
-      })),
-    documents: items
-      .filter((item) => item.type === 'document')
-      .map((item) => ({
-        docId: item.data?.entityId || item.id,
-        isCurrent: item.isCurrentContext,
-        metadata: {
-          ...item.data?.metadata,
-          nodeId: item.id,
-        },
-      })),
+    contentList:
+      items
+        ?.filter((item) => item?.data?.metadata?.sourceType)
+        ?.map((item) => ({
+          content: item.data?.metadata?.selectedContent ?? '',
+          metadata: {
+            domain: item.data?.metadata?.sourceType ?? '',
+            entityId: item.data?.entityId ?? '',
+            title: item.data?.title ?? '',
+            nodeId: item.id,
+            ...(item.data?.metadata?.sourceType === 'extensionWeblinkSelection' && {
+              url: item.data?.metadata?.url,
+            }),
+          },
+        })) || [],
+    resources:
+      items
+        ?.filter((item) => item.type === 'resource')
+        ?.map((item) => ({
+          resourceId: item.data?.entityId || item.id,
+          isCurrent: item.isCurrentContext,
+          metadata: {
+            ...item.data?.metadata,
+            nodeId: item.id,
+          },
+        })) || [],
+    documents:
+      items
+        ?.filter((item) => item.type === 'document')
+        ?.map((item) => ({
+          docId: item.data?.entityId || item.id,
+          isCurrent: item.isCurrentContext,
+          metadata: {
+            ...item.data?.metadata,
+            nodeId: item.id,
+          },
+        })) || [],
   };
 };
 

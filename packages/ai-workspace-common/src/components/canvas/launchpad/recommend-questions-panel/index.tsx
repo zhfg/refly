@@ -25,26 +25,34 @@ export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = (
   const { invokeAction } = useInvokeAction();
   const { setNewQAText } = useChatStore();
 
-  const fetchRecommendQuestions = async () => {
+  const fetchRecommendQuestions = async (refresh = false) => {
     setLoading(true);
     const resultId = genActionResultID();
-    const { selectedModel } = useChatStore.getState();
-    const { selectedContextItems, selectedResultItems } = useContextPanelStore.getState();
+    const { selectedModel, newQAText } = useChatStore.getState();
+    const { historyItems, contextItems } = useContextPanelStore.getState();
 
     const param: InvokeSkillRequest = {
       resultId,
       input: {
-        query: '',
+        query: newQAText,
       },
       target: null,
-      context: convertContextItemsToContext(selectedContextItems),
-      skillName: 'recommend_questions',
+      context: convertContextItemsToContext(contextItems),
+      skillName: 'recommendQuestions',
       modelName: selectedModel?.name,
-      resultHistory: selectedResultItems.map((item) => ({
-        resultId: item.resultId,
-        title: item.title,
-        steps: item.steps,
+      resultHistory: historyItems.map((item) => ({
+        resultId: item?.data?.entityId,
+        title: item?.data?.title,
+        steps: item?.data?.metadata?.steps,
       })),
+      tplConfig: {
+        refresh: {
+          value: refresh,
+          label: t('copilot.recommendQuestions.refresh'),
+          displayValue: refresh ? t('copilot.recommendQuestions.refresh') : '',
+          configScope: ['runtime'],
+        },
+      },
     };
 
     invokeAction(param);
@@ -147,7 +155,7 @@ export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = (
               type="text"
               size="small"
               icon={<IconRefresh className="w-4 h-4 text-gray-400 text-[12px]" />}
-              onClick={fetchRecommendQuestions}
+              onClick={() => fetchRecommendQuestions(true)}
               loading={loading}
               className="text-[12px] text-[rgba(0,0,0,0.5)]"
             >
