@@ -75,7 +75,7 @@ export const ActionStepCard = ({
       ? safeParseJSON(step?.structuredData?.['recommendedQuestions'])
       : (step?.structuredData?.['recommendedQuestions'] as Array<string>);
 
-  const logs = step?.logs?.filter((log) => log.key);
+  const logs = step?.logs?.filter((log) => log?.key);
 
   const skillName = result.actionMeta?.name;
 
