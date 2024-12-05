@@ -202,12 +202,24 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
       {
         key: "Canvas",
         name: "canvas",
-        icon: <IconCanvas className="arco-icon" style={{ fontSize: 20 }} />,
+        icon: (
+          <IconCanvas
+            key="canvas"
+            className="arco-icon"
+            style={{ fontSize: 20 }}
+          />
+        ),
       },
       {
         key: "Library",
         name: "library",
-        icon: <IconLibrary className="arco-icon" style={{ fontSize: 20 }} />,
+        icon: (
+          <IconLibrary
+            key="library"
+            className="arco-icon"
+            style={{ fontSize: 20 }}
+          />
+        ),
       },
     ],
   ]
