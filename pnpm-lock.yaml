@@ -351,6 +351,9 @@ importers:
       '@refly/common-types':
         specifier: workspace:*
         version: link:../../packages/common-types
+      '@refly/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../../packages/openapi-schema
@@ -845,6 +848,9 @@ importers:
       '@refly/errors':
         specifier: workspace:*
         version: link:../errors
+      '@refly/i18n':
+        specifier: workspace:*
+        version: link:../i18n
       '@refly/openapi-schema':
         specifier: workspace:*
         version: link:../openapi-schema
@@ -1239,6 +1245,8 @@ importers:
         version: 18.3.0
 
   packages/errors: {}
+
+  packages/i18n: {}
 
   packages/openapi-schema:
     dependencies:
