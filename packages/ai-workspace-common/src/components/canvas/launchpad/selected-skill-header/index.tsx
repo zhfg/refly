@@ -11,7 +11,7 @@ interface SelectedSkillHeaderProps {
   readonly?: boolean;
   skill?: {
     icon?: any;
-    displayName?: string;
+    name?: string;
   };
   onClose?: () => void;
 }
@@ -28,8 +28,13 @@ export const SelectedSkillHeader = ({ readonly, skill, onClose }: SelectedSkillH
   return selectedSkill ? (
     <div className="selected-skill">
       <div className="selected-skill-profile">
-        <SkillAvatar size={20} shape="circle" icon={selectedSkill?.icon} displayName={selectedSkill?.displayName} />
-        <p>{selectedSkill?.displayName}</p>
+        <SkillAvatar
+          size={20}
+          shape="circle"
+          icon={selectedSkill?.icon}
+          displayName={t(`${selectedSkill?.name}.name`, { ns: 'skill' })}
+        />
+        <p>{t(`${selectedSkill?.name}.name`, { ns: 'skill' })}</p>
       </div>
       {!readonly && (
         <div className="selected-skill-manage">

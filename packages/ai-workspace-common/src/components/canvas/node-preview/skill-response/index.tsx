@@ -17,7 +17,8 @@ import { ChatHistory } from '@refly-packages/ai-workspace-common/components/canv
 import './index.scss';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-
+import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 interface SkillResponseNodePreviewProps {
   resultId: string;
 }
@@ -33,6 +34,8 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
   }));
   const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
   const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
+
+  const { addSelectedNodeByEntity } = useCanvasControl();
 
   const fetchActionResult = async (resultId: string) => {
     const { data, error } = await getClient().getActionResult({
@@ -95,6 +98,10 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     },
   }));
 
+  const handleItemClick = (item: NodeItem) => {
+    addSelectedNodeByEntity({ type: 'skillResponse', entityId: item.data.entityId });
+  };
+
   return (
     <div className="flex flex-col space-y-4 p-4">
       <div className="ai-copilot-operation-container readonly">
@@ -103,6 +110,7 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
             readonly
             isOpen={chatHistoryOpen}
             onClose={() => setChatHistoryOpen(false)}
+            onItemClick={(item) => handleItemClick(item)}
             items={historyItems}
           />
           <PreviewChatInput

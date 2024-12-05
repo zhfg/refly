@@ -34,6 +34,7 @@ import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/use-d
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { LuCheck, LuX } from 'react-icons/lu';
 import { useUpdateCanvas } from '@refly-packages/ai-workspace-common/queries/queries';
+import { Helmet } from 'react-helmet';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -142,93 +143,98 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   };
 
   return (
-    <div
-      className={`absolute h-16 top-0 left-0 right-0  box-border flex justify-between items-center py-2 px-4 pr-0 z-10 bg-transparent ${
-        collapse ? 'w-[calc(100vw-12px)]' : 'w-[calc(100vw-232px)]'
-      }`}
-    >
-      <div className="flex items-center">
-        {collapse ? (
-          <>
-            <SiderPopover>
-              <Button
-                type="text"
-                icon={<AiOutlineMenuUnfold size={20} />}
-                onClick={() => {
-                  setCollapse(!collapse);
-                }}
-              />
-            </SiderPopover>
-            <Divider type="vertical" className="pr-[4px]" />
-            <div className="flex items-center justify-center">
-              <Avatar size={32} src={Logo} />
-              <span className="text-sm font-bold ml-2">Refly</span>
-            </div>
-          </>
-        ) : (
-          <Button
-            type="text"
-            icon={<AiOutlineMenuFold size={20} />}
-            onClick={() => {
-              setCollapse(!collapse);
-            }}
-          />
-        )}
-        <Divider type="vertical" className="pr-[4px]" />
-        <div
-          className="group flex items-center gap-2 text-sm font-bold text-gray-500 cursor-pointer hover:text-gray-700"
-          onClick={handleEditClick}
-        >
-          <IconCanvas />
-          {provider.status === 'connecting' ? (
-            <Skeleton className="w-28" active paragraph={false} />
+    <>
+      <Helmet>
+        <title>{canvasTitle?.toString() ?? t('common.untitled')}</title>
+      </Helmet>
+      <div
+        className={`absolute h-16 top-0 left-0 right-0  box-border flex justify-between items-center py-2 px-4 pr-0 z-10 bg-transparent ${
+          collapse ? 'w-[calc(100vw-12px)]' : 'w-[calc(100vw-232px)]'
+        }`}
+      >
+        <div className="flex items-center">
+          {collapse ? (
+            <>
+              <SiderPopover>
+                <Button
+                  type="text"
+                  icon={<AiOutlineMenuUnfold size={20} />}
+                  onClick={() => {
+                    setCollapse(!collapse);
+                  }}
+                />
+              </SiderPopover>
+              <Divider type="vertical" className="pr-[4px]" />
+              <div className="flex items-center justify-center">
+                <Avatar size={32} src={Logo} />
+                <span className="text-sm font-bold ml-2">Refly</span>
+              </div>
+            </>
           ) : (
-            canvasTitle?.toJSON() || t('common.untitled')
+            <Button
+              type="text"
+              icon={<AiOutlineMenuFold size={20} />}
+              onClick={() => {
+                setCollapse(!collapse);
+              }}
+            />
           )}
-          <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
-        </div>
+          <Divider type="vertical" className="pr-[4px]" />
+          <div
+            className="group flex items-center gap-2 text-sm font-bold text-gray-500 cursor-pointer hover:text-gray-700"
+            onClick={handleEditClick}
+          >
+            <IconCanvas />
+            {provider.status === 'connecting' ? (
+              <Skeleton className="w-28" active paragraph={false} />
+            ) : (
+              canvasTitle?.toJSON() || t('common.untitled')
+            )}
+            <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
 
-        <Modal
-          centered
-          title={t('canvas.toolbar.editTitle')}
-          open={isModalOpen}
-          okText={t('common.confirm')}
-          cancelText={t('common.cancel')}
-          confirmLoading={status === 'pending'}
-          onOk={handleModalOk}
-          onCancel={handleModalCancel}
-          okButtonProps={{ disabled: !editedTitle?.trim() }}
-        >
-          <Input
-            autoFocus
-            value={editedTitle}
-            onChange={(e) => setEditedTitle(e.target.value)}
-            placeholder={t('canvas.toolbar.editTitlePlaceholder')}
-            onPressEnter={handleModalOk}
-          />
-        </Modal>
-        {/* <Divider type="vertical" className="pr-[4px]" />
+          <Modal
+            centered
+            title={t('canvas.toolbar.editTitle')}
+            open={isModalOpen}
+            okText={t('common.confirm')}
+            cancelText={t('common.cancel')}
+            confirmLoading={status === 'pending'}
+            onOk={handleModalOk}
+            onCancel={handleModalCancel}
+            okButtonProps={{ disabled: !editedTitle?.trim() }}
+          >
+            <Input
+              autoFocus
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              placeholder={t('canvas.toolbar.editTitlePlaceholder')}
+              onPressEnter={handleModalOk}
+            />
+          </Modal>
+          {/* <Divider type="vertical" className="pr-[4px]" />
         <Button type="text" icon={<BsLayoutWtf />} onClick={() => onLayout('LR')}>
           Layout
         </Button> */}
-      </div>
-
-      <div className="flex items-center gap-2">
-        <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
-          <Button type="text" icon={<PiShootingStar />} className="w-8 h-6 flex items-center justify-center" />
-          <Divider type="vertical" />
-          <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)}>
-            <Button
-              type="text"
-              icon={<MdOutlineHideImage style={{ color: showPreview ? '#9CA3AF' : '#000' }} />}
-              onClick={() => setShowPreview(!showPreview)}
-              className="w-8 h-6 flex items-center justify-center"
-            />
-          </Tooltip>
         </div>
 
-        <ActionDropdown />
+        <div className="flex items-center gap-2">
+          <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
+            <Button type="text" icon={<PiShootingStar />} className="w-8 h-6 flex items-center justify-center" />
+            <Divider type="vertical" />
+            <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)}>
+              <Button
+                type="text"
+                icon={<MdOutlineHideImage style={{ color: showPreview ? '#9CA3AF' : '#000' }} />}
+                onClick={() => setShowPreview(!showPreview)}
+                className="w-8 h-6 flex items-center justify-center"
+              />
+            </Tooltip>
+          </div>
+
+          <ActionDropdown />
+        </div>
       </div>
-    </div>
+    </>
   );
 };

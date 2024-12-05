@@ -28,7 +28,7 @@ export const ContextItem = ({
   const { t } = useTranslation();
   const { data } = item ?? {};
   const icon = getNodeIcon(item?.type);
-  const { nodes, setSelectedNode } = useCanvasControl();
+  const { nodes, addSelectedNode } = useCanvasControl();
 
   const handleItemClick = useCallback(
     async (item: CanvasNode<any>) => {
@@ -54,12 +54,12 @@ export const ContextItem = ({
           return;
         }
 
-        setSelectedNode(sourceNode);
+        addSelectedNode(sourceNode);
       } else {
-        setSelectedNode(item);
+        addSelectedNode(item);
       }
     },
-    [nodes, setSelectedNode, t],
+    [nodes, addSelectedNode, t],
   );
 
   const content = (
