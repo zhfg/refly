@@ -76,7 +76,7 @@ const translations = {
     landingPage: {
       title: 'The AI Native Creation Engine',
       description:
-        'Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower',
+        'Refly is a free-form canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, intelligent search and WYSIWYG AI editor, easily transforms ideas into quality content.',
     },
     digestTopics: {
       title: 'All Topics',
@@ -158,7 +158,7 @@ const translations = {
         contactUs: 'Contact us',
       },
       description:
-        'Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower',
+        'Refly is a free-form canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, intelligent search and WYSIWYG AI editor, easily transforms ideas into quality content.',
       right: 'Refly.ai. All rights reserved.',
       product: {
         title: 'Products',
