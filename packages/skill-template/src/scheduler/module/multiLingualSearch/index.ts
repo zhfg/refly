@@ -94,8 +94,13 @@ export const callMultiLingualWebSearch = async (
     engine.logger.log(`Rewrite queries completed in ${rewriteDuration}ms`);
     ctxThis.emitEvent(
       {
-        event: 'log',
-        content: `Rewrite queries completed in ${rewriteDuration}ms, rewrittenQueries: ${rewriteResult.queries.rewrittenQueries}`,
+        log: {
+          key: 'rewriteQuery',
+          descriptionArgs: {
+            duration: rewriteDuration,
+            rewrittenQueries: rewriteResult.queries.rewrittenQueries.join(', '),
+          },
+        },
       },
       config,
     );
@@ -108,26 +113,6 @@ export const callMultiLingualWebSearch = async (
 
     engine.logger.log(`Search analysis: ${JSON.stringify(rewriteResult.analysis)}`);
     engine.logger.log(`Recommended display locale: ${displayLocale}`);
-
-    ctxThis.emitEvent(
-      {
-        event: 'structured_data',
-        content: JSON.stringify([
-          {
-            step: 'rewriteQuery',
-            duration: rewriteDuration,
-            result: {
-              rewrittenQueries: rewriteResult?.queries?.rewrittenQueries || [],
-              outputLocale: displayLocale,
-              searchLocales: searchLocaleList,
-              enableDeepReasonWebSearch,
-            },
-          },
-        ]),
-        structuredDataKey: 'multiLingualSearchStepUpdate',
-      },
-      config,
-    );
 
     // Step 2: Translate query (if enabled)
     const queryMap: Record<string, string[]> = {};
@@ -160,24 +145,14 @@ export const callMultiLingualWebSearch = async (
         engine.logger.log(`Translate query completed in ${translateQueryDuration}ms`);
 
         ctxThis.emitEvent(
-          { event: 'log', content: `Translate query completed in ${translateQueryDuration}ms` },
-          config,
-        );
-
-        ctxThis.emitEvent(
           {
-            event: 'structured_data',
-            content: JSON.stringify([
-              {
-                step: 'translateQuery',
+            log: {
+              key: 'translateQuery',
+              descriptionArgs: {
                 duration: translateQueryDuration,
-                result: {
-                  translatedQueries: queryMap,
-                  enableTranslateQuery: true,
-                },
+                translatedQueries: Object.values(queryMap).join(', '),
               },
-            ]),
-            structuredDataKey: 'multiLingualSearchStepUpdate',
+            },
           },
           config,
         );
@@ -187,48 +162,12 @@ export const callMultiLingualWebSearch = async (
         for (const locale of searchLocaleList) {
           queryMap[locale] = rewriteResult.queries.rewrittenQueries;
         }
-
-        ctxThis.emitEvent(
-          {
-            event: 'structured_data',
-            content: JSON.stringify([
-              {
-                step: 'translateQuery',
-                duration: 0,
-                result: {
-                  translatedQueries: queryMap,
-                  enableTranslateQuery: false,
-                },
-              },
-            ]),
-            structuredDataKey: 'multiLingualSearchStepUpdate',
-          },
-          config,
-        );
       }
     } else {
       // If translation is disabled, use original queries for all locales
       for (const locale of searchLocaleList) {
         queryMap[locale] = rewriteResult.queries.rewrittenQueries;
       }
-
-      ctxThis.emitEvent(
-        {
-          event: 'structured_data',
-          content: JSON.stringify([
-            {
-              step: 'translateQuery',
-              duration: 0,
-              result: {
-                translatedQueries: queryMap,
-                enableTranslateQuery: false,
-              },
-            },
-          ]),
-          structuredDataKey: 'multiLingualSearchStepUpdate',
-        },
-        config,
-      );
     }
 
     // Step 3: Perform concurrent web search
@@ -243,33 +182,20 @@ export const callMultiLingualWebSearch = async (
     });
     const webSearchDuration = timeTracker.endStep('webSearch');
     engine.logger.log(`Web search completed in ${webSearchDuration}ms`);
-    ctxThis.emitEvent({ event: 'log', content: `Web search completed in ${webSearchDuration}ms` }, config);
+
     const mergedResults = mergeSearchResults(allResults);
 
     finalResults = mergedResults;
 
     ctxThis.emitEvent(
       {
-        event: 'structured_data',
-        content: JSON.stringify([
-          {
-            step: 'webSearch',
+        log: {
+          key: 'webSearchCompleted',
+          descriptionArgs: {
             duration: webSearchDuration,
-            result: {
-              length: mergedResults?.length,
-              localeLength: searchLocaleList?.length,
-            },
+            totalResults: mergedResults?.length,
           },
-        ]),
-        structuredDataKey: 'multiLingualSearchStepUpdate',
-      },
-      config,
-    );
-
-    ctxThis.emitEvent(
-      {
-        event: 'log',
-        content: `Web search completed in ${webSearchDuration}ms, total results: ${mergedResults?.length}`,
+        },
       },
       config,
     );
@@ -288,24 +214,14 @@ export const callMultiLingualWebSearch = async (
       const translateResultsDuration = timeTracker.endStep('translateResults');
       engine.logger.log(`Translate results completed in ${translateResultsDuration}ms`);
       ctxThis.emitEvent(
-        { event: 'log', content: `Translate results completed in ${translateResultsDuration}ms` },
-        config,
-      );
-
-      ctxThis.emitEvent(
         {
-          event: 'structured_data',
-          content: JSON.stringify([
-            {
-              step: 'translateResults',
+          log: {
+            key: 'translateResults',
+            descriptionArgs: {
               duration: translateResultsDuration,
-              result: {
-                length: mergedResults?.length,
-                localeLength: searchLocaleList?.length,
-              },
+              totalResults: mergedResults?.length,
             },
-          ]),
-          structuredDataKey: 'multiLingualSearchStepUpdate',
+          },
         },
         config,
       );
@@ -349,21 +265,15 @@ export const callMultiLingualWebSearch = async (
       }
       const rerankDuration = timeTracker.endStep('rerank');
       engine.logger.log(`Rerank completed in ${rerankDuration}ms`);
-      ctxThis.emitEvent({ event: 'log', content: `Rerank completed in ${rerankDuration}ms` }, config);
-
       ctxThis.emitEvent(
         {
-          event: 'structured_data',
-          content: JSON.stringify([
-            {
-              step: 'rerank',
+          log: {
+            key: 'rerankResults',
+            descriptionArgs: {
               duration: rerankDuration,
-              result: {
-                length: finalResults?.length,
-              },
+              totalResults: finalResults.length,
             },
-          ]),
-          structuredDataKey: 'multiLingualSearchStepUpdate',
+          },
         },
         config,
       );
@@ -372,29 +282,10 @@ export const callMultiLingualWebSearch = async (
     const stepSummary = timeTracker.getSummary();
     const totalDuration = stepSummary.totalDuration;
     engine.logger.log(`Total duration: ${totalDuration}`);
-    ctxThis.emitEvent({ event: 'log', content: `Total duration: ${totalDuration}` }, config);
-
-    ctxThis.emitEvent(
-      {
-        event: 'structured_data',
-        content: JSON.stringify([
-          {
-            step: 'finish',
-            duration: totalDuration,
-            result: {},
-          },
-        ]),
-        structuredDataKey: 'multiLingualSearchStepUpdate',
-      },
-      config,
-    );
-
     engine.logger.log(`Reranked results count: before: ${finalResults.length}`);
 
     // Deduplicate sources by title
     finalResults = deduplicateSourcesByTitle(finalResults);
-
-    engine.logger.log(`Deduplicated results count: ${finalResults.length}`);
 
     ctxThis.emitEvent(
       {

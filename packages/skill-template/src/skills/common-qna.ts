@@ -174,8 +174,6 @@ export class CommonQnA extends BaseSkill {
   };
 
   callCommonQnA = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    this.emitEvent({ event: 'log', content: `Start to call common qna...` }, config);
-
     const { currentSkill } = config.configurable;
 
     // common preprocess
@@ -185,8 +183,6 @@ export class CommonQnA extends BaseSkill {
       buildUserPrompt: commonQnA.buildCommonQnAUserPrompt,
     };
     const { requestMessages } = await this.commonPreprocess(state, config, module);
-
-    this.emitEvent({ event: 'log', content: `Start to generate an answer...` }, config);
 
     // set current step
     config.metadata.step = { name: 'answerQuestion' };
@@ -201,8 +197,6 @@ export class CommonQnA extends BaseSkill {
     });
 
     this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
-
-    this.emitEvent({ event: 'log', content: `Generated an answer successfully!` }, config);
 
     return { messages: [responseMessage] };
   };

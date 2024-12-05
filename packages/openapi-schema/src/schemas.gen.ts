@@ -1135,6 +1135,26 @@ export const ActionStepMetaSchema = {
   },
 } as const;
 
+export const ActionLogSchema = {
+  type: 'object',
+  description: 'Action log',
+  required: ['key'],
+  properties: {
+    key: {
+      type: 'string',
+      description: 'Log key',
+    },
+    titleArgs: {
+      type: 'object',
+      description: 'Log title arguments',
+    },
+    descriptionArgs: {
+      type: 'object',
+      description: 'Log description arguments',
+    },
+  },
+} as const;
+
 export const ActionStepSchema = {
   type: 'object',
   description: 'Action step',
@@ -1161,6 +1181,13 @@ export const ActionStepSchema = {
       example: {
         sources: ['Source'],
         relatedQuestions: ['string'],
+      },
+    },
+    logs: {
+      type: 'array',
+      description: 'Action step logs',
+      items: {
+        $ref: '#/components/schemas/ActionLog',
       },
     },
     tokenUsage: {
@@ -1232,13 +1259,6 @@ export const ActionResultSchema = {
       description: 'Action steps',
       items: {
         $ref: '#/components/schemas/ActionStep',
-      },
-    },
-    logs: {
-      type: 'array',
-      description: 'Action step logs',
-      items: {
-        type: 'string',
       },
     },
     errors: {

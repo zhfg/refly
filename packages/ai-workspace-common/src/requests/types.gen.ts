@@ -931,6 +931,28 @@ export type ActionStepMeta = {
 };
 
 /**
+ * Action log
+ */
+export type ActionLog = {
+    /**
+     * Log key
+     */
+    key: string;
+    /**
+     * Log title arguments
+     */
+    titleArgs?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Log description arguments
+     */
+    descriptionArgs?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Action step
  */
 export type ActionStep = {
@@ -952,6 +974,10 @@ export type ActionStep = {
     structuredData?: {
         [key: string]: unknown;
     };
+    /**
+     * Action step logs
+     */
+    logs?: Array<ActionLog>;
     /**
      * Token usage
      */
@@ -1006,10 +1032,6 @@ export type ActionResult = {
      * Action steps
      */
     steps?: Array<ActionStep>;
-    /**
-     * Action step logs
-     */
-    logs?: Array<(string)>;
     /**
      * Errors
      */

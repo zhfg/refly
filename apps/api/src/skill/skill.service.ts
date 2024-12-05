@@ -700,10 +700,12 @@ export class SkillService {
           writeSSEResponse(res, data);
         }
 
-        const { event, content, structuredDataKey, artifact } = data;
+        const { event, structuredDataKey, artifact, log } = data;
         switch (event) {
           case 'log':
-            result.logs.push(content);
+            if (log) {
+              resultAggregator.addSkillEvent(data);
+            }
             return;
           case 'structured_data':
             if (structuredDataKey) {
@@ -861,7 +863,6 @@ export class SkillService {
           where: { resultId },
           data: {
             status: result.errors.length > 0 ? 'failed' : 'finish',
-            logs: JSON.stringify(result.logs),
             errors: JSON.stringify(result.errors),
           },
         }),

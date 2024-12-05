@@ -2598,6 +2598,21 @@ components:
         name:
           type: string
           description: Step name
+    ActionLog:
+      type: object
+      description: Action log
+      required:
+        - key
+      properties:
+        key:
+          type: string
+          description: Log key
+        titleArgs:
+          type: object
+          description: Log title arguments
+        descriptionArgs:
+          type: object
+          description: Log description arguments
     ActionStep:
       type: object
       description: Action step
@@ -2622,6 +2637,11 @@ components:
           example:
             sources: [Source]
             relatedQuestions: [string]
+        logs:
+          type: array
+          description: Action step logs
+          items:
+            $ref: '#/components/schemas/ActionLog'
         tokenUsage:
           type: array
           description: Token usage
@@ -2676,11 +2696,6 @@ components:
           description: Action steps
           items:
             $ref: '#/components/schemas/ActionStep'
-        logs:
-          type: array
-          description: Action step logs
-          items:
-            type: string
         errors:
           type: array
           description: Errors

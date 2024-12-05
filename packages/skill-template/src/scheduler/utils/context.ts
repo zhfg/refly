@@ -185,7 +185,6 @@ export async function prepareWebSearchContext(
 ): Promise<{
   processedWebSearchContext: IContext;
 }> {
-  ctx.ctxThis.emitEvent({ event: 'log', content: `Prepare Web Search Context...` }, ctx.config);
   ctx.ctxThis.engine.logger.log(`Prepare Web Search Context...`);
 
   // two searchMode
@@ -240,7 +239,6 @@ export async function prepareWebSearchContext(
 
   processedWebSearchContext.webSearchSources = webSearchSources;
 
-  ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared Web Search Context successfully!` }, ctx.config);
   ctx.ctxThis.engine.logger.log(
     `Prepared Web Search Context successfully! ${safeStringifyJSON(processedWebSearchContext)}`,
   );

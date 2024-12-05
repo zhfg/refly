@@ -216,8 +216,6 @@ export async function analyzeQueryAndContext(
     projects,
   };
 
-  ctx.ctxThis.emitEvent({ event: 'log', content: 'Analyzing query and context...' }, ctx.config);
-
   // Preprocess context for better extract mentioned context
   const preprocessedContext = preprocessContext(context);
   const maxContextTokens = ModelContextLimitMap[modelName] * MAX_CONTEXT_RATIO;

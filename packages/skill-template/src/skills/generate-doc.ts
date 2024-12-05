@@ -254,14 +254,12 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
       return result.title;
     } catch (error) {
       this.engine.logger.error(`Failed to generate title: ${error}`);
-      return locale === 'zh-CN' ? '新文档' : 'New Document';
+      return '';
     }
   };
 
   callGenerateDoc = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    this.emitEvent({ event: 'log', content: `Start to call generate document...` }, config);
-
-    const { currentSkill, uiLocale = 'en' } = config?.configurable || {};
+    const { currentSkill } = config?.configurable || {};
     const { user } = config.configurable;
 
     const model = this.engine.chatModel({ temperature: 0.1 });
@@ -280,6 +278,7 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
       context,
       chatHistory: usedChatHistory,
     });
+    this.emitEvent({ log: { key: 'generateTitle', titleArgs: { title: documentTitle } } }, config);
 
     // Create document with generated title
     const res = await this.engine.service.createDocument(user, {
@@ -303,8 +302,6 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
       config,
     );
 
-    this.emitEvent({ event: 'log', content: `Start to generate document...` }, config);
-
     const responseMessage = await model.invoke(requestMessages, {
       ...config,
       metadata: {
@@ -315,7 +312,6 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
     });
 
     this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
-    this.emitEvent({ event: 'log', content: `Generated document successfully!` }, config);
 
     this.emitEvent(
       {

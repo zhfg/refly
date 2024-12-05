@@ -38,8 +38,6 @@ export class LibrarySearch extends BaseSkill {
   };
 
   callLibrarySearch = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    this.emitEvent({ event: 'log', content: `Start library search...` }, config);
-
     const { messages = [], query: originalQuery } = state;
     const { locale = 'en', chatHistory = [], modelName, currentSkill } = config.configurable;
 
