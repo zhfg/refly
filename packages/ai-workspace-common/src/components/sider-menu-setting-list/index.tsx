@@ -7,6 +7,7 @@ import { Popover } from 'antd';
 import { LuSettings, LuLogOut } from 'react-icons/lu';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+import { useLogout } from '@refly-packages/ai-workspace-common/hooks/useLogout';
 
 // styles
 import './index.scss';
@@ -18,35 +19,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
   const { setShowSettingModal } = useSiderStoreShallow((state) => ({
     setShowSettingModal: state.setShowSettingModal,
   }));
-  const [modal, contextHolder] = Modal.useModal();
-  const [token, updateCookie, deleteCookie] = useCookie('_refly_ai_sid');
-
-  const handleLogout = () => {
-    modal.confirm?.({
-      okText: t('common.confirm'),
-      cancelText: t('common.cancel'),
-      title: t('settings.account.logoutConfirmation.title'),
-      content: t('settings.account.logoutConfirmation.message'),
-      onOk() {
-        console.log('delete cookie');
-        localStorage.removeItem('refly-user-profile');
-        localStorage.removeItem('refly-local-settings');
-
-        // 给插件发消息
-        chrome.runtime?.sendMessage(getExtensionId(), {
-          name: 'external-refly-logout-notify',
-        });
-
-        deleteCookie();
-        Cookies.remove('_refly_ai_sid', { domain: getCookieOrigin() });
-
-        window.location.reload();
-
-        userStore.resetState();
-      },
-      onConfirm() {},
-    });
-  };
+  const { handleLogout, contextHolder } = useLogout();
 
   const handleMenuClick = (key: string) => {
     if (key === 'settings') {

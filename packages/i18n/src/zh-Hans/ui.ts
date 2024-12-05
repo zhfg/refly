@@ -74,7 +74,7 @@ const translations = {
   },
   tabMeta: {
     landingPage: {
-      title: '知识，在此繁茂',
+      title: 'AI 原生创作引擎',
       description:
         '快速总结与形成洞察、自动化归档以及智能语义搜索——Refly 能够为你打造第二大脑，拓展你的知识视野，并赋予你超乎寻常的能力。',
     },
@@ -93,12 +93,14 @@ const translations = {
     },
   },
   landingPage: {
-    slogan: 'AI 创作引擎',
+    slogan: 'AI Native 创作引擎',
     simplySlogan: '创作引擎',
-    description: '基于自由画布的创作平台，通过多线程对话、知识整合、上下文记忆和智能搜索，将想法转化为优质内容。',
-    simplyDescrption: {
-      first: 'Refly 是一个基于自由画布的 AI 内容创作引擎。',
-      second: '通过多线程对话、知识库集成、场景记忆和智能检索，帮助将创意转化为优质内容。',
+    description: '基于自由画布的创作平台，通过多线程对话、知识库整合、上下文记忆和智能搜索，轻松将想法转化为优质内容。',
+    anotherDescription:
+      '基于自由画布的创作平台，通过多线程对话、知识库整合、上下文记忆和智能搜索，轻松将想法转化为优质内容。',
+    simplyDescription: {
+      first: '由多线程对话、知识库集成、上下文记忆和智能搜索驱动，',
+      second: 'Refly 是将创意转化为优质内容的最佳方式。',
     },
     messageText: '立即体验 AI 自由画布，激发创作灵感！',
     tryForFree: '开始使用',
@@ -112,35 +114,38 @@ const translations = {
       title: 'Refly 的主要功能总览',
       featureOne: {
         tag: '规划',
-        title: '头脑风暴、梳理大纲、将想法转为可落地的行动',
+        title: '在自由画布中梳理思路，让专业创作从混沌到有序',
         bulletPoints: [
-          '20+ 场景，适配学术论文、竞品调研、技术文章、自媒体撰文、项目、OKR',
-          'AI 一键生成内容大纲',
-          '基于历史知识进行推荐、关联记忆',
+          '覆盖学术研究、技术文档等 20+ 专业场景模板',
+          'AI 协助分析主题，智能构建研究框架',
+          '基于个人知识库持续积累，建立深度思维链接',
         ],
       },
       featureTwo: {
         tag: '探索与导入',
-        title: '连接任何数据，并添加为可写作的素材',
+        title: '打通知识壁垒，让零散资料化为创作养分',
         bulletPoints: [
-          'AI 搜索智能发现',
-          '浏览器插件导入私有数据',
-          'Refly 网页导入任何公有数据或文本',
-          '自动语义处理并使用知识库搜索获取关键洞见',
+          '一键导入论文、网页等多源专业资料',
+          'AI 智能检索，快速定位核心参考内容',
+          '自动建立知识关联，激发跨领域洞见',
         ],
       },
       featureThree: {
         tag: '研究',
-        title: '快速从每一个知识库、资源和每一行文字挖掘洞见',
-        bulletPoints: ['AI 搜索进行实时回答', '基于你最相关的上下文得到答案', '通过浏览器插件和上下文选择器研究细节'],
+        title: '多线程对话激发思维，让研究过程更富启发',
+        bulletPoints: [
+          '在画布中自由发散对话，深入探索观点',
+          '智能上下文管理，确保研究方向精准',
+          '灵活调用知识库，加速研究突破',
+        ],
       },
       featureFour: {
-        tag: '自动标签与时间线',
-        title: '基于你的上下文语境，使用最强大的模型愉快的撰写目标文章',
+        tag: '思考与创作',
+        title: '从构思到成稿，让专业创作更具洞察力',
         bulletPoints: [
-          '选择资源、笔记或划线任意内容进行提问',
-          '30+ 撰写写作、阅读、审稿而生的 AI 技能',
-          '通过 AI Apply 一键插入，引用溯源 AI 撰写内容来源',
+          '自由选择上下文，打造个性化写作环境',
+          'N+ 专业写作辅助工具，提升学术/技术写作效率',
+          'AI 编辑助手，确保专业输出质量',
         ],
       },
     },
@@ -155,20 +160,19 @@ const translations = {
       right: 'Refly.ai 版权所有。',
       product: {
         title: '产品',
-        one: 'Refly AI 浏览器插件',
+        list: ['自由画布', '多线程会话', '知识库集成', '上下文记忆', '智能检索', 'AI 文档'],
       },
       resource: {
         title: '资源',
-        one: '推特',
+        list: ['推特'],
       },
       about: {
         title: '关于',
-        one: '隐私政策',
-        two: '服务条款',
+        list: ['隐私政策', '服务条款'],
       },
       contactUs: {
         title: '联系我们',
-        one: 'support@refly.ai',
+        list: ['support@refly.ai'],
       },
     },
     loginFailed: {
@@ -608,7 +612,7 @@ const translations = {
       skill: '技能',
     },
     homePage: {
-      title: '知识，在此繁茂',
+      title: 'AI 原生创作引擎',
       searchPlaceholder: '输入搜索内容...',
       selectedWeblink: {
         title: '基于选中网页提问：',

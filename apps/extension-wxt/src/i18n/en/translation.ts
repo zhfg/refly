@@ -19,7 +19,7 @@ export const translation = {
     loggedHomePage: {
       newThreadText: 'New Thread',
       homePage: {
-        title: 'Where knowledge thrives',
+        title: 'The AI Native Creation Engine',
         header: {
           fullscreen: 'Fullscreen',
           settings: 'Settings',

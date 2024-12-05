@@ -1,6 +1,7 @@
 import { Result, Button, Modal, Typography } from '@arco-design/web-react';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useTranslation } from 'react-i18next';
+import { useLogout } from '@refly-packages/ai-workspace-common/hooks/useLogout';
 
 import './index.scss';
 
@@ -9,6 +10,7 @@ const RequestAccess = () => {
     userProfile: state.userProfile,
   }));
   const { t } = useTranslation();
+  const { handleLogout, contextHolder } = useLogout();
 
   const visible = true;
 
@@ -42,17 +44,23 @@ const RequestAccess = () => {
             </div>
           }
           extra={
-            <Button
-              type="primary"
-              onClick={() => {
-                window.open('https://powerformer.feishu.cn/share/base/form/shrcnaVXPlMWxOC6cJDa7q3cPzd', '_blank');
-              }}
-            >
-              {t('requestAccess.apply')}
-            </Button>
+            <>
+              <Button
+                type="primary"
+                onClick={() => {
+                  window.open('https://powerformer.feishu.cn/share/base/form/shrcnaVXPlMWxOC6cJDa7q3cPzd', '_blank');
+                }}
+              >
+                {t('requestAccess.apply')}
+              </Button>
+              <Button className="ml-4" onClick={handleLogout}>
+                {t('loggedHomePage.siderMenu.logout')}
+              </Button>
+            </>
           }
         ></Result>
       </div>
+      {contextHolder}
     </Modal>
   );
 };

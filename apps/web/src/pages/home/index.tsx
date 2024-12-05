@@ -30,7 +30,7 @@ function Home() {
   return (
     <div className="flex min-h-screen flex-col overflow-hidden bg-[#FFFFFF]">
       <Helmet>
-        <title>{t("landingPage.slogan")}</title>
+        <title>{t("landingPage.slogan")} | Refly</title>
         <meta name="description" content={t("landingPage.description")} />
       </Helmet>
 

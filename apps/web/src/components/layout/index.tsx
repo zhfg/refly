@@ -19,6 +19,7 @@ export const AppLayout = (props: AppLayoutProps) => {
   // stores
   const userStore = useUserStoreShallow(state => ({
     userProfile: state.userProfile,
+    isLogin: state.isLogin,
     loginModalVisible: state.loginModalVisible,
   }))
 
@@ -26,11 +27,15 @@ export const AppLayout = (props: AppLayoutProps) => {
 
   useBindCommands()
 
+  const hasBetaAccess = userStore.isLogin
+    ? userStore.userProfile?.hasBetaAccess || false
+    : true
+
   const showSider = !matchShare && !!userStore.userProfile
 
   return (
     <Layout className="app-layout main">
-      {showSider ? <SiderLayout source="sider" /> : null}
+      {showSider && hasBetaAccess ? <SiderLayout source="sider" /> : null}
       <Layout
         className="content-layout"
         style={{
