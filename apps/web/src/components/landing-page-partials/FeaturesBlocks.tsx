@@ -124,7 +124,7 @@ function FeaturesBlocks() {
       bulletPoints: t("landingPage.features.featureOne.bulletPoints", {
         returnObjects: true,
       }) as string[],
-      imageSrc: "https://static.refly.ai/landing/generateOutline.png",
+      imageSrc: "https://static.refly.ai/landing/generateOutline.webp",
       isReversed: false,
       background: "linear-gradient(180deg, #F3EEFC 0%, #FFFFFF 100%)",
       color: "#6E3FF3",
@@ -139,7 +139,7 @@ function FeaturesBlocks() {
       bulletPoints: t("landingPage.features.featureTwo.bulletPoints", {
         returnObjects: true,
       }) as string[],
-      imageSrc: "https://static.refly.ai/landing/importResource.png",
+      imageSrc: "https://static.refly.ai/landing/importResource.webp",
       isReversed: true,
       background: "linear-gradient(180deg, #EAF6FF 0%, #FFFFFF 100%)",
       color: "#3B82F6",
@@ -154,7 +154,7 @@ function FeaturesBlocks() {
       bulletPoints: t("landingPage.features.featureThree.bulletPoints", {
         returnObjects: true,
       }) as string[],
-      imageSrc: "https://static.refly.ai/landing/research.png",
+      imageSrc: "https://static.refly.ai/landing/research.webp",
       isReversed: false,
       background: "linear-gradient(180deg, #FFF3F3 0%, #FFFFFF 100%)",
       color: "#F17B2C",
@@ -169,7 +169,7 @@ function FeaturesBlocks() {
       bulletPoints: t("landingPage.features.featureFour.bulletPoints", {
         returnObjects: true,
       }) as string[],
-      imageSrc: "https://static.refly.ai/landing/generateArticle.png",
+      imageSrc: "https://static.refly.ai/landing/generateArticle.webp",
       isReversed: true,
       background:
         "linear-gradient(180deg, #FCEDCE 0%, #FCFCFC 74%, #FFFFFF 100%)",

@@ -235,7 +235,7 @@ function HeroHome() {
               )}>
               <BlurImage
                 className="shadow-heroImageInner mx-auto w-full rounded-md"
-                src="https://static.refly.ai/landing/generateArticle.png"
+                src="https://static.refly.ai/landing/generateArticle.webp"
                 alt="Hero"
                 aspectRatio="4/3"
               />
