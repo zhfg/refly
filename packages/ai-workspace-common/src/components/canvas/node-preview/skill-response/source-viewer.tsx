@@ -8,7 +8,7 @@ export const SourceViewer = (props: { sources: Source[]; query: string }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="session-source">
+    <div className="w-full my-2">
       {(sources || [])?.length > 0 ? (
         <div className="session-title-icon mb-[8px]">
           <p>{t('threadDetail.item.session.source')}</p>

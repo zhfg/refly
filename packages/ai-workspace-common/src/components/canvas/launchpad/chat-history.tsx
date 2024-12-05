@@ -56,8 +56,6 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
     return null;
   }
 
-  console.log('items', items);
-
   return (
     <div className="w-full border border-solid border-black/10 shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)] max-w-4xl mx-auto p-3 pb-1 space-y-1 rounded-lg bg-white mb-1">
       <div className="text-gray-800 font-bold flex items-center justify-between">

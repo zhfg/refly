@@ -446,6 +446,7 @@ const translations = {
     },
     skillResponse: {
       skillCompleted: '技能执行完成',
+      stepCompleted: '步骤执行完成',
       stepTitle: '步骤 {{index}}',
     },
     chatHistory: {

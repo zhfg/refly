@@ -1,6 +1,6 @@
 import { Spin as AntdSpin, SpinProps } from 'antd';
-import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { IconLoading } from './icon';
 
 export const Spin = (props: SpinProps) => {
-  return <AntdSpin indicator={<AiOutlineLoading3Quarters className="animate-spin" />} {...props} />;
+  return <AntdSpin indicator={<IconLoading className="animate-spin" />} {...props} />;
 };

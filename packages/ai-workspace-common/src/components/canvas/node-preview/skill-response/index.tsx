@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button, Divider, Steps } from 'antd';
+import { Divider, Skeleton } from 'antd';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { ActionResult } from '@refly/openapi-schema';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { IconCheckCircle } from '@arco-design/web-react/icon';
-import { cn } from '@refly-packages/utils/cn';
+
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { ActionStepCard } from './action-step';
 import { convertContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
@@ -24,7 +21,6 @@ interface SkillResponseNodePreviewProps {
 }
 
 export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewProps) => {
-  const { t } = useTranslation();
   const { result, updateActionResult } = useActionResultStoreShallow((state) => ({
     result: state.resultMap[resultId],
     updateActionResult: state.updateActionResult,
@@ -32,7 +28,7 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     sourceListDrawerVisible: state.sourceListDrawer.visible,
   }));
-  const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
+
   const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
 
   const { addSelectedNodeByEntity } = useCanvasControl();
@@ -77,15 +73,7 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     };
   }, []);
 
-  useEffect(() => {
-    if (result?.status === 'finish') {
-      setLogBoxCollapsed(true);
-    } else if (result?.status === 'executing') {
-      setLogBoxCollapsed(false);
-    }
-  }, [result?.status]);
-
-  const { title, steps = [], context, history = [], actionMeta, logs } = result ?? {};
+  const { title, steps = [], context, history = [], actionMeta } = result ?? {};
   const contextItems = convertContextToItems(context);
 
   const historyItems = history.map((item) => ({
@@ -125,50 +113,18 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
         </div>
       </div>
 
-      {result?.logs?.length > 0 && (
-        <div
-          className={cn('p-4 border border-solid border-gray-200 rounded-lg transition-all', {
-            'px-4 py-2 cursor-pointer hover:bg-gray-50': logBoxCollapsed,
-            'relative pb-0': !logBoxCollapsed,
-          })}
-        >
-          {logBoxCollapsed ? (
-            <div
-              className="text-gray-500 text-sm flex items-center justify-between"
-              onClick={() => setLogBoxCollapsed(false)}
-            >
-              <div>
-                <IconCheckCircle /> {t('canvas.skillResponse.skillCompleted')}
-              </div>
-              <div className="flex items-center">
-                <ChevronDown className="w-6 h-6" />
-              </div>
-            </div>
-          ) : (
-            <>
-              <Steps
-                direction="vertical"
-                current={logs?.length ?? 0}
-                size="small"
-                items={logs?.map((log, index) => ({
-                  title: log,
-                  description: 'This is a description.',
-                }))}
-              />
-              <Button
-                type="text"
-                icon={<ChevronUp />}
-                onClick={() => setLogBoxCollapsed(true)}
-                className="absolute right-2 top-2"
-              />
-            </>
-          )}
-        </div>
-      )}
+      {steps.length === 0 && result?.status === 'executing' && <Skeleton active className="w-full h-10" />}
 
-      {steps?.map((step, index) => (
+      {steps.map((step, index) => (
         <div key={index}>
-          <ActionStepCard result={result} step={step} index={index + 1} query={title} />
+          <Divider className="my-2" />
+          <ActionStepCard
+            result={result}
+            step={step}
+            stepStatus={result.status === 'executing' && index === steps?.length - 1 ? 'executing' : 'finish'}
+            index={index + 1}
+            query={title}
+          />
         </div>
       ))}
 

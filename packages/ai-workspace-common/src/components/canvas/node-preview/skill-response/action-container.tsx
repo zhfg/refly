@@ -26,8 +26,7 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
   }));
   const { debouncedCreateDocument, isCreating } = useCreateDocument();
 
-  const { invokeParam } = result ?? {};
-  const { input } = invokeParam ?? {};
+  const { title } = result ?? {};
   const isPending = result?.status === 'executing';
 
   // Track editor selection state
@@ -87,7 +86,7 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
           .run();
       }
     } else if (type === 'createDocument') {
-      await debouncedCreateDocument(input?.query ?? 'New Document', content, {
+      await debouncedCreateDocument(title ?? t('common.newDocument'), content, {
         sourceNodeId: result.resultId,
         addToCanvas: true,
       });
@@ -160,7 +159,7 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
   );
 
   return (
-    <div className="mt-2 flex items-center justify-between">
+    <div className="flex items-center justify-between">
       <div className="-ml-1">
         {step?.tokenUsage?.length > 0 && (
           <Dropdown droplist={tokenUsageDropdownList}>

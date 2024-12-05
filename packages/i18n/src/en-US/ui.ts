@@ -454,6 +454,7 @@ const translations = {
     },
     skillResponse: {
       skillCompleted: 'Skill Completed',
+      stepCompleted: 'Step Completed',
       stepTitle: 'Step {{index}}',
     },
     contextList: {

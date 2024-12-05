@@ -54,16 +54,21 @@ export const useInvokeAction = () => {
   const onSkillStart = (skillEvent: SkillEvent) => {};
 
   const onSkillLog = (skillEvent: SkillEvent) => {
+    const { resultId, step, log } = skillEvent;
     const { resultMap } = useActionResultStore.getState();
-    const result = resultMap[skillEvent.resultId];
+    const result = resultMap[resultId];
 
-    if (!result) {
+    if (!result || !step) {
       return;
     }
 
+    const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
+    updatedStep.logs = [...(updatedStep.logs || []), log];
+
     const updatedResult = {
       ...result,
-      logs: [...(result.logs || []), skillEvent.content],
+      status: 'executing' as const,
+      steps: getUpdatedSteps(result.steps ?? [], updatedStep),
     };
     onUpdateResult(skillEvent.resultId, updatedResult);
   };
@@ -73,7 +78,7 @@ export const useInvokeAction = () => {
     const { resultMap } = useActionResultStore.getState();
     const result = resultMap[resultId];
 
-    if (!result) {
+    if (!result || !step) {
       return;
     }
 
@@ -283,7 +288,6 @@ export const useInvokeAction = () => {
       context: payload.context,
       history: payload.resultHistory,
       tplConfig: payload.tplConfig,
-      logs: [],
       status: 'executing',
       steps: [],
       errors: [],
