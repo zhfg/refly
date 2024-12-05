@@ -97,12 +97,12 @@ const translations = {
     slogan: 'The AI Native Creation Engine',
     simplySlogan: 'Creation Engine',
     description:
-      'Refly is the best way to transforms ideas into quality content through multi-threaded dialogue, knowledge integration, context memory, and intelligent search.',
+      'Refly is the best way to transform ideas into quality content through multi-threaded dialogue, knowledge integration, context memory, and intelligent search.',
     anotherDescription:
       'A free-form canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, easily transforms ideas into quality content.',
     simplyDescription: {
-      first: 'Powered by multi-thread dialogue, knowledge integration, context memory, and intelligent search, ',
-      second: 'Refly is the best way to transforms ideas into quality content.',
+      first: 'Powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, ',
+      second: 'Refly is the best way to transform ideas into quality content.',
     },
     messageText: 'Experience AI Free-form Canvas and ignite your creativity!',
     tryForFree: 'Get Started',
