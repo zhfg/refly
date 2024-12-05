@@ -278,7 +278,7 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
       context,
       chatHistory: usedChatHistory,
     });
-    this.emitEvent({ log: { key: 'generateTitle', titleArgs: { title: documentTitle } } }, config);
+    this.emitEvent({ log: { key: 'generateTitle', descriptionArgs: { title: documentTitle } } }, config);
 
     // Create document with generated title
     const res = await this.engine.service.createDocument(user, {

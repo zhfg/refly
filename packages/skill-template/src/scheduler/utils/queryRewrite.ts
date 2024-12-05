@@ -334,8 +334,6 @@ Please analyze the query, focusing primarily on the current query and available 
     - Reasoning: ${result.reasoning}
     `);
 
-    ctx.ctxThis.emitEvent({ event: 'log', content: `Analyzed query and context successfully!` }, ctx.config);
-
     return {
       optimizedQuery: result?.rewrittenQuery || query,
       mentionedContext: postprocessContext(result?.mentionedContext, context),

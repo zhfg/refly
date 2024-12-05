@@ -93,8 +93,8 @@ export const ActionStepCard = ({
 
       {logs?.length > 0 && (
         <div
-          className={cn('p-4 border border-solid border-gray-200 rounded-lg transition-all', {
-            'px-4 py-2 cursor-pointer hover:bg-gray-50': logBoxCollapsed,
+          className={cn('my-2 p-4 border border-solid border-gray-200 rounded-lg transition-all', {
+            'px-4 py-3 cursor-pointer hover:bg-gray-50': logBoxCollapsed,
             'relative pb-0': !logBoxCollapsed,
           })}
         >
@@ -155,7 +155,7 @@ export const ActionStepCard = ({
       {step.artifacts?.map((artifact) => (
         <div
           key={artifact.entityId}
-          className="my-3 px-4 py-2 h-12 border border-solid border-gray-200 rounded-lg flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
+          className="my-2 px-4 py-2 h-12 border border-solid border-gray-200 rounded-lg flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
           onClick={() => {
             setSelectedNodeByEntity({ type: artifact.type, entityId: artifact.entityId });
           }}

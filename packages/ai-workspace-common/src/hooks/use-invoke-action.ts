@@ -315,6 +315,9 @@ export const useInvokeAction = () => {
           data: {
             title: input?.query,
             entityId: resultId,
+            metadata: {
+              status: 'executing',
+            },
           },
         },
         connectTo,

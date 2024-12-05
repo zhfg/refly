@@ -46,8 +46,6 @@ export async function prepareContext(
   },
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<{ contextStr: string; sources: Source[] }> {
-  ctx.ctxThis.emitEvent({ event: 'log', content: `Start to prepare context...` }, ctx.config);
-
   const enableWebSearch = ctx.tplConfig?.enableWebSearch?.value;
   const enableKnowledgeBaseSearch = ctx.tplConfig?.enableKnowledgeBaseSearch?.value;
   ctx.ctxThis.engine.logger.log(`Enable Web Search: ${enableWebSearch}`);
@@ -169,7 +167,6 @@ export async function prepareContext(
      - sources: ${safeStringifyJSON(sources)}`,
   );
 
-  ctx.ctxThis.emitEvent({ event: 'log', content: `Prepared context successfully!` }, ctx.config);
   ctx.ctxThis.engine.logger.log(`Prepared context successfully! ${safeStringifyJSON(mergedContext)}`);
 
   return { contextStr, sources };

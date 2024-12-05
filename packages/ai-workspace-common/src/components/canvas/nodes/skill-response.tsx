@@ -200,11 +200,11 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
                   className="border border-solid border-gray-300 rounded-sm px-2 py-1 w-full flex items-center gap-1"
                 >
                   {getArtifactIcon(artifact, 'text-gray-500')}
-                  <span className="text-xs text-gray-500">{artifact.title}</span>
+                  <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">{artifact.title}</span>
                 </div>
               ))}
             </div>
-            {!contentPreview && !artifacts?.length && (
+            {!contentPreview && !artifacts?.length && status !== 'executing' && (
               <div className="text-xs text-gray-500">{t('canvas.nodePreview.skillResponse.noContentPreview')}</div>
             )}
           </Spin>
