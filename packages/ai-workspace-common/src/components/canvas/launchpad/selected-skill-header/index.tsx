@@ -5,14 +5,12 @@ import { IconClose } from '@arco-design/web-react/icon';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 import { useTranslation } from 'react-i18next';
+import { Skill } from '@refly/openapi-schema';
 
 interface SelectedSkillHeaderProps {
   // Add readonly and controlled props
   readonly?: boolean;
-  skill?: {
-    icon?: any;
-    name?: string;
-  };
+  skill?: Skill;
   onClose?: () => void;
 }
 
@@ -24,17 +22,13 @@ export const SelectedSkillHeader = ({ readonly, skill, onClose }: SelectedSkillH
   }));
 
   const selectedSkill = skill ?? skillStore.selectedSkill;
+  const skillDisplayName = selectedSkill ? t(`${selectedSkill?.name}.name`, { ns: 'skill' }) : '';
 
   return selectedSkill ? (
     <div className="selected-skill">
       <div className="selected-skill-profile">
-        <SkillAvatar
-          size={20}
-          shape="circle"
-          icon={selectedSkill?.icon}
-          displayName={t(`${selectedSkill?.name}.name`, { ns: 'skill' })}
-        />
-        <p>{t(`${selectedSkill?.name}.name`, { ns: 'skill' })}</p>
+        <SkillAvatar size={20} shape="circle" icon={selectedSkill?.icon} displayName={skillDisplayName} />
+        <p>{skillDisplayName}</p>
       </div>
       {!readonly && (
         <div className="selected-skill-manage">

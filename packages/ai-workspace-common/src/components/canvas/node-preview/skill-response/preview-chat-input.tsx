@@ -5,6 +5,7 @@ import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-pan
 
 import { PreviewContextManager } from './preview-context-manager';
 import { useEffect, useState } from 'react';
+import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 
 const TextArea = Input.TextArea;
 
@@ -34,7 +35,7 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
 
   return (
     <div className="ai-copilot-chat-container">
-      <div className="chat-input-container">
+      <div className={cn('border border-solid border-gray-200 rounded-lg')}>
         {!hideSelectedSkillHeader && (
           <SelectedSkillHeader
             readonly={readonly}
@@ -52,27 +53,7 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
             setChatHistoryOpen={setChatHistoryOpen}
           />
         )}
-        <div className="chat-input-body">
-          <div className="ai-copilot-chat-input-container">
-            <div className="ai-copilot-chat-input-body">
-              <TextArea
-                value={userQuery}
-                onChange={(event) => {
-                  setUserQuery(event.target.value);
-                }}
-                style={{
-                  borderRadius: 8,
-                  resize: 'none',
-                }}
-                placeholder={t('copilot.chatInput.placeholder')}
-                autoSize={{
-                  minRows: 1,
-                  maxRows: 3,
-                }}
-              ></TextArea>
-            </div>
-          </div>
-        </div>
+        <div className="text-base mx-4 my-3">{userQuery}</div>
 
         {/* {skillStore.selectedSkill?.configSchema?.items?.length > 0 && (
       <ConfigManager

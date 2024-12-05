@@ -439,6 +439,9 @@ const translations = {
       editTitle: '编辑画布标题',
       editTitlePlaceholder: '请输入画布标题',
     },
+    launchpad: {
+      skillNotFound: '技能不存在，请刷新页面后重试',
+    },
     action: {
       nodeAlreadyExists: '该{{type}}已存在于当前画布中',
       deleteSuccess: '删除画布成功',
@@ -446,6 +449,7 @@ const translations = {
     },
     skillResponse: {
       skillCompleted: '技能执行完成',
+      stepCompleted: '步骤执行完成',
       stepTitle: '步骤 {{index}}',
     },
     chatHistory: {

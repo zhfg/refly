@@ -216,8 +216,6 @@ export async function analyzeQueryAndContext(
     projects,
   };
 
-  ctx.ctxThis.emitEvent({ event: 'log', content: 'Analyzing query and context...' }, ctx.config);
-
   // Preprocess context for better extract mentioned context
   const preprocessedContext = preprocessContext(context);
   const maxContextTokens = ModelContextLimitMap[modelName] * MAX_CONTEXT_RATIO;
@@ -335,8 +333,6 @@ Please analyze the query, focusing primarily on the current query and available 
     - Intent: ${result.intent} (confidence: ${result.confidence})
     - Reasoning: ${result.reasoning}
     `);
-
-    ctx.ctxThis.emitEvent({ event: 'log', content: `Analyzed query and context successfully!` }, ctx.config);
 
     return {
       optimizedQuery: result?.rewrittenQuery || query,

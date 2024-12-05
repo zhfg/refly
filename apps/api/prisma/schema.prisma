@@ -170,8 +170,6 @@ model ActionResult {
   tplConfig  String?      @map("tpl_config")
   /// Result history (JSON array of `ActionResult`)
   history    String?      @map("history")
-  /// Result logs
-  logs       String?      @map("logs")
   /// Errors
   errors     String?      @map("errors")
   /// Locale setting
@@ -200,6 +198,8 @@ model ActionStep {
   content        String   @map("content")
   /// Structured data output (JSON)
   structuredData String   @default("{}") @map("structured_data")
+  /// Action logs
+  logs           String   @default("[]") @map("logs")
   /// Action artifacts (JSON array)
   artifacts      String   @default("[]") @map("artifacts")
   /// Token usage summary (JSON array)

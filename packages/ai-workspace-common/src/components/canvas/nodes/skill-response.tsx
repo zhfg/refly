@@ -190,17 +190,8 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           </div>
 
           <Spin spinning={status === 'executing' && !contentPreview} style={{ height: 100 }}>
-            <div
-              className="
-              text-xs
-              text-gray-500
-              leading-4
-              line-clamp-6
-              overflow-hidden
-              text-ellipsis
-            "
-            >
-              {(isPreview ? contentPreview : content) || t('canvas.nodePreview.skillResponse.noContentPreview')}
+            <div className="text-xs text-gray-500 leading-4 line-clamp-6 overflow-hidden text-ellipsis">
+              {isPreview ? contentPreview : content}
             </div>
             <div className="flex items-center gap-2">
               {artifacts?.map((artifact) => (
@@ -209,10 +200,13 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
                   className="border border-solid border-gray-300 rounded-sm px-2 py-1 w-full flex items-center gap-1"
                 >
                   {getArtifactIcon(artifact, 'text-gray-500')}
-                  <span className="text-xs text-gray-500">{artifact.title}</span>
+                  <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">{artifact.title}</span>
                 </div>
               ))}
             </div>
+            {!contentPreview && !artifacts?.length && status !== 'executing' && (
+              <div className="text-xs text-gray-500">{t('canvas.nodePreview.skillResponse.noContentPreview')}</div>
+            )}
           </Spin>
 
           <div className="absolute bottom-2 left-3 text-[10px] text-gray-400">

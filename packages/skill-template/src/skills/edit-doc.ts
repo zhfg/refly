@@ -196,14 +196,6 @@ export class EditDoc extends BaseSkill {
       throw new DocumentNotFoundError('No current document found for editing');
     }
 
-    this.emitEvent(
-      {
-        event: 'log',
-        content: `Starting document edit operation for document: ${currentDoc.document.title}`,
-      },
-      config,
-    );
-
     // Get selected range from metadata
     const selectedRange = canvasEditConfig.selectedRange as SelectedRange;
     const inPlaceEditType = canvasEditConfig.inPlaceEditType as InPlaceEditType;
@@ -239,34 +231,6 @@ export class EditDoc extends BaseSkill {
           inPlaceEditType,
         },
       });
-
-      // Extract edit sections from response, passing selectedContent if it exists
-      // const editSections = editCanvas.extractEditSections(responseMessage.content as string, selectedContent);
-
-      // Extract thinking process for logging/debugging
-      // const thinking = editCanvas.extractThinking(responseMessage.content as string);
-
-      // Emit edit sections
-      // this.emitEvent(
-      //   {
-      //     event: 'structured_data',
-      //     structuredDataKey: 'editSections',
-      //     content: JSON.stringify({
-      //       sections: editSections,
-      //       thinking,
-      //       mode: selectedContent ? 'selection' : 'verbal',
-      //     }),
-      //   },
-      //   config,
-      // );
-
-      this.emitEvent(
-        {
-          event: 'log',
-          content: 'Document edit completed successfully',
-        },
-        config,
-      );
 
       return {
         messages: [responseMessage],

@@ -177,8 +177,6 @@ export class RewriteDoc extends BaseSkill {
 
     const { chatHistory = [], currentSkill, documents } = config.configurable;
 
-    this.emitEvent({ event: 'log', content: `Start to rewrite canvas...` }, config);
-
     const currentDoc = documents?.find((canvas) => canvas?.metadata?.isCurrentContext);
 
     // send intent matcher event
@@ -215,8 +213,6 @@ export class RewriteDoc extends BaseSkill {
     });
 
     this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
-
-    this.emitEvent({ event: 'log', content: `Rewrite canvas successfully!` }, config);
 
     return { messages: [responseMessage] };
   };

@@ -59,13 +59,25 @@ export abstract class BaseSkill extends StructuredTool {
     }
 
     const eventData: SkillEvent = {
-      event: data.event!,
+      event: data.event,
       step: config.metadata?.step,
       resultId,
       ...data,
     };
 
-    emitter.emit(data.event, eventData);
+    if (!eventData.event) {
+      if (eventData.log) {
+        eventData.event = 'log';
+      } else if (eventData.tokenUsage) {
+        eventData.event = 'token_usage';
+      } else if (eventData.structuredDataKey) {
+        eventData.event = 'structured_data';
+      } else if (eventData.artifact) {
+        eventData.event = 'artifact';
+      }
+    }
+
+    emitter.emit(eventData.event, eventData);
   }
 
   async _call(

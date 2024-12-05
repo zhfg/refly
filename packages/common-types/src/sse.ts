@@ -1,10 +1,14 @@
-import { CanvasNode, SkillMeta, Artifact, ActionStepMeta, TokenUsageItem } from '@refly-packages/openapi-schema';
+import { CanvasNode, SkillMeta, Artifact, ActionLog, ActionStepMeta, TokenUsageItem } from '@refly-packages/openapi-schema';
 
 export interface SkillEvent {
   /**
    * The event type
    */
   event: 'start' | 'end' | 'stream' | 'log' | 'artifact' | 'structured_data' | 'token_usage' | 'create_node' | 'error';
+  /**
+   * Skill metadata
+   */
+  skillMeta?: SkillMeta;
   /**
    * The action step name
    */
@@ -18,7 +22,6 @@ export interface SkillEvent {
    *
    * - For `start` and `end` events, `content` will be empty.
    * - For `stream` events, `content` will typically be a single token chunk.
-   * - For `log` events, `content` will be the log message.
    * - For `structured_data` events, `content` will be serialized JSON data.
    * - For `error` events, `content` will be the serialized BaseResponse object.
    */
@@ -28,9 +31,9 @@ export interface SkillEvent {
    */
   tokenUsage?: TokenUsageItem;
   /**
-   * Skill metadata
+   * Log data. Only present when `event` is `log`.
    */
-  skillMeta?: SkillMeta;
+  log?: ActionLog;
   /**
    * Key for structured data, such as `relatedQuestions` and `sources`.
    * Only present when `event` is `structured_data`.

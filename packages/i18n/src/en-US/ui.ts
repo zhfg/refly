@@ -76,7 +76,7 @@ const translations = {
     landingPage: {
       title: 'The AI Native Creation Engine',
       description:
-        'Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower',
+        'Refly is a free-form canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, intelligent search and WYSIWYG AI editor, easily transforms ideas into quality content.',
     },
     digestTopics: {
       title: 'All Topics',
@@ -97,12 +97,12 @@ const translations = {
     slogan: 'The AI Native Creation Engine',
     simplySlogan: 'Creation Engine',
     description:
-      'Refly is the best way to transforms ideas into quality content through multi-threaded dialogue, knowledge integration, context memory, and intelligent search.',
+      'Refly is the best way to transform ideas into quality content through multi-threaded dialogue, knowledge integration, context memory, and intelligent search.',
     anotherDescription:
       'A free-form canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, easily transforms ideas into quality content.',
     simplyDescription: {
-      first: 'Powered by multi-thread dialogue, knowledge integration, context memory, and intelligent search, ',
-      second: 'Refly is the best way to transforms ideas into quality content.',
+      first: 'Powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, ',
+      second: 'Refly is the best way to transform ideas into quality content.',
     },
     messageText: 'Experience AI Free-form Canvas and ignite your creativity!',
     tryForFree: 'Get Started',
@@ -158,7 +158,7 @@ const translations = {
         contactUs: 'Contact us',
       },
       description:
-        'Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower',
+        'Refly is a free-form canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, intelligent search and WYSIWYG AI editor, easily transforms ideas into quality content.',
       right: 'Refly.ai. All rights reserved.',
       product: {
         title: 'Products',
@@ -447,6 +447,9 @@ const translations = {
       editTitle: 'Edit Canvas Title',
       editTitlePlaceholder: 'Please enter the title of the canvas',
     },
+    launchpad: {
+      skillNotFound: 'Skill not found, please refresh the page and try again',
+    },
     action: {
       nodeAlreadyExists: 'The {{type}} with the same entity already exists',
       deleteSuccess: 'Canvas deleted successfully',
@@ -454,6 +457,7 @@ const translations = {
     },
     skillResponse: {
       skillCompleted: 'Skill Completed',
+      stepCompleted: 'Step Completed',
       stepTitle: 'Step {{index}}',
     },
     contextList: {

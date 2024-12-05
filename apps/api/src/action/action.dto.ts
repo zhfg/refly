@@ -16,6 +16,7 @@ export interface InvokeActionJobData extends InvokeActionRequest {
 export function actionStepPO2DTO(step: ActionStepModel): ActionStep {
   return {
     ...pick(step, ['name', 'content']),
+    logs: JSON.parse(step.logs || '[]'),
     artifacts: JSON.parse(step.artifacts || '[]'),
     structuredData: JSON.parse(step.structuredData || '{}'),
     tokenUsage: JSON.parse(step.tokenUsage || '[]'),
@@ -33,7 +34,6 @@ export function actionResultPO2DTO(
     context: JSON.parse(result.context || '{}'),
     tplConfig: JSON.parse(result.tplConfig || '{}'),
     history: JSON.parse(result.history || '[]'),
-    logs: JSON.parse(result.logs || '[]'),
     errors: JSON.parse(result.errors || '[]'),
     createdAt: result.createdAt.toJSON(),
     updatedAt: result.updatedAt.toJSON(),

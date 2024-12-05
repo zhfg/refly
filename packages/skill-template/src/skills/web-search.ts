@@ -54,8 +54,6 @@ export class WebSearch extends BaseSkill {
   };
 
   callWebSearch = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    this.emitEvent({ event: 'log', content: `Start web search...` }, config);
-
     const { messages = [], query: originalQuery } = state;
     const { locale = 'en', chatHistory = [], modelName, currentSkill } = config.configurable;
 
@@ -122,7 +120,6 @@ export class WebSearch extends BaseSkill {
       buildUserPrompt: webSearch.buildWebSearchUserPrompt,
     };
 
-    this.emitEvent({ event: 'log', content: `Prepared context successfully!` }, config);
     this.engine.logger.log(`Prepared context successfully! ${safeStringifyJSON(webSearchContext)}`);
 
     const requestMessages = buildFinalRequestMessages({

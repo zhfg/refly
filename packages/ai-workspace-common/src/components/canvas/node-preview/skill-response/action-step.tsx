@@ -1,9 +1,12 @@
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Divider } from 'antd';
-import { ActionResult, ActionStep, Artifact, Source } from '@refly/openapi-schema';
+import { Steps, Button } from 'antd';
+import { ActionResult, ActionStep, Source } from '@refly/openapi-schema';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { IconCheckCircle, IconLoading } from '@arco-design/web-react/icon';
+import { IconCheckCircle } from '@arco-design/web-react/icon';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@refly-packages/utils/cn';
+import { IconCheck, IconLoading } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
@@ -17,16 +20,27 @@ import { RecommendQuestions } from '@refly-packages/ai-workspace-common/componen
 export const ActionStepCard = ({
   result,
   step,
+  stepStatus,
   index,
   query,
 }: {
   result: ActionResult;
   step: ActionStep;
+  stepStatus: 'executing' | 'finish';
   index: number;
   query: string;
 }) => {
   const { t } = useTranslation();
   const { setSelectedNodeByEntity } = useCanvasControl();
+  const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (result?.status === 'finish') {
+      setLogBoxCollapsed(true);
+    } else if (result?.status === 'executing') {
+      setLogBoxCollapsed(false);
+    }
+  }, [result?.status]);
 
   const buildNodeData = (text: string) => {
     const id = genUniqueId();
@@ -52,24 +66,79 @@ export const ActionStepCard = ({
     return node;
   };
 
-  let sources =
+  const sources =
     typeof step?.structuredData?.['sources'] === 'string'
       ? safeParseJSON(step?.structuredData?.['sources'])
       : (step?.structuredData?.['sources'] as Source[]);
-  let recommendedQuestions =
+  const recommendedQuestions =
     typeof step?.structuredData?.['recommendedQuestions'] === 'string'
       ? safeParseJSON(step?.structuredData?.['recommendedQuestions'])
       : (step?.structuredData?.['recommendedQuestions'] as Array<string>);
 
-  console.log('result', result);
+  const logs = step?.logs?.filter((log) => log?.key);
+
+  const skillName = result.actionMeta?.name;
 
   return (
-    <div>
-      <Divider className="my-2" />
-      <div className="my-3 text-gray-600 text-sm">
+    <div className="flex flex-col gap-1">
+      <div className="my-1 text-gray-600 text-sm flex items-center gap-2 font-medium">
+        {stepStatus === 'executing' ? (
+          <IconLoading className="h-3 w-3 animate-spin text-green-500" />
+        ) : (
+          <IconCheck className="h-4 w-4 text-green-500" />
+        )}
         {t('canvas.skillResponse.stepTitle', { index })}{' '}
-        {' - ' + t(`${result.actionMeta?.name}.steps.${step.name}.name`, { ns: 'skill', defaultValue: step.name })}
+        {' · ' + t(`${skillName}.steps.${step.name}.name`, { ns: 'skill', defaultValue: step.name })}
       </div>
+
+      {logs?.length > 0 && (
+        <div
+          className={cn('my-2 p-4 border border-solid border-gray-200 rounded-lg transition-all', {
+            'px-4 py-3 cursor-pointer hover:bg-gray-50': logBoxCollapsed,
+            'relative pb-0': !logBoxCollapsed,
+          })}
+        >
+          {logBoxCollapsed ? (
+            <div
+              className="text-gray-500 text-sm flex items-center justify-between"
+              onClick={() => setLogBoxCollapsed(false)}
+            >
+              <div>
+                <IconCheckCircle /> {t('canvas.skillResponse.stepCompleted')}
+              </div>
+              <div className="flex items-center">
+                <ChevronDown className="w-4 h-4 text-gray-500" />
+              </div>
+            </div>
+          ) : (
+            <>
+              <Steps
+                direction="vertical"
+                current={logs?.length ?? 0}
+                size="small"
+                items={logs.map((log) => ({
+                  title: t(`${log.key}.title`, {
+                    ...log.titleArgs,
+                    ns: 'skillLog',
+                    defaultValue: log.key,
+                  }),
+                  description: t(`${log.key}.description`, {
+                    ...log.descriptionArgs,
+                    ns: 'skillLog',
+                    defaultValue: '',
+                  }),
+                }))}
+              />
+              <Button
+                type="text"
+                icon={<ChevronUp className="w-4 h-4 text-gray-500" />}
+                onClick={() => setLogBoxCollapsed(true)}
+                className="absolute right-2 top-2"
+              />
+            </>
+          )}
+        </div>
+      )}
 
       {sources && <SourceViewer sources={sources} query={query} />}
 
@@ -86,7 +155,7 @@ export const ActionStepCard = ({
       {step.artifacts?.map((artifact) => (
         <div
           key={artifact.entityId}
-          className="my-3 px-4 py-2 h-12 border border-solid border-gray-200 rounded-lg flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
+          className="my-2 px-4 py-2 h-12 border border-solid border-gray-200 rounded-lg flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
           onClick={() => {
             setSelectedNodeByEntity({ type: artifact.type, entityId: artifact.entityId });
           }}
