@@ -1379,7 +1379,7 @@ export const ConversationSchema = {
     originPageTitle: {
       type: 'string',
       description: 'Origin page title',
-      example: 'Refly | Where knowledge thrives',
+      example: 'Refly | The AI Native Creation Engine',
     },
     originPageUrl: {
       type: 'string',
@@ -3404,7 +3404,7 @@ export const CreateConversationRequestSchema = {
     originPageTitle: {
       type: 'string',
       description: 'Origin page title',
-      example: 'Refly | Where knowledge thrives',
+      example: 'Refly | The AI Native Creation Engine',
     },
     originPageUrl: {
       type: 'string',

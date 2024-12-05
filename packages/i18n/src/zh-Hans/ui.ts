@@ -74,7 +74,7 @@ const translations = {
   },
   tabMeta: {
     landingPage: {
-      title: '知识，在此繁茂',
+      title: 'AI 原生创作引擎',
       description:
         '快速总结与形成洞察、自动化归档以及智能语义搜索——Refly 能够为你打造第二大脑，拓展你的知识视野，并赋予你超乎寻常的能力。',
     },
@@ -607,7 +607,7 @@ const translations = {
       skill: '技能',
     },
     homePage: {
-      title: '知识，在此繁茂',
+      title: 'AI 原生创作引擎',
       searchPlaceholder: '输入搜索内容...',
       selectedWeblink: {
         title: '基于选中网页提问：',

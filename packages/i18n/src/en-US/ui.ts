@@ -74,7 +74,7 @@ const translations = {
   },
   tabMeta: {
     landingPage: {
-      title: 'Where knowledge thrives',
+      title: 'The AI Native Creation Engine',
       description:
         'Quick summaries, Insights, Auto tag and AI Search. Refly can build your second brain, extend knowledge and give you superpower',
     },
@@ -619,7 +619,7 @@ const translations = {
       skill: 'skill',
     },
     homePage: {
-      title: 'Where knowledge thrives',
+      title: 'The AI Native Creation Engine',
       searchPlaceholder: 'Search for Refly',
       selectedWeblink: {
         title: 'Ask a Question Based on the Selected Web Page:',

@@ -6,7 +6,7 @@ info:
     email: team@refly.ai
   version: 0.2.0
 externalDocs:
-  description: Where knowledge thrives
+  description: The AI Native Creation Engine
   url: https://refly.ai
 servers:
   - url: /v1
@@ -2789,7 +2789,7 @@ components:
         originPageTitle:
           type: string
           description: Origin page title
-          example: Refly | Where knowledge thrives
+          example: Refly | The AI Native Creation Engine
         originPageUrl:
           type: string
           description: Origin page url
@@ -4164,7 +4164,7 @@ components:
         originPageTitle:
           type: string
           description: Origin page title
-          example: Refly | Where knowledge thrives
+          example: Refly | The AI Native Creation Engine
         originPageUrl:
           type: string
           description: Origin page url

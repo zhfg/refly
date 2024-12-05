@@ -19,7 +19,7 @@ export const translation = {
     loggedHomePage: {
       newThreadText: '新会话',
       homePage: {
-        title: '知识，在此繁茂',
+        title: 'AI 原生创作引擎',
         header: {
           fullscreen: '全屏',
           settings: '设置',
