@@ -93,12 +93,12 @@ const translations = {
     },
   },
   landingPage: {
-    slogan: 'AI 创作引擎',
+    slogan: 'AI Native 创作引擎',
     simplySlogan: '创作引擎',
     description: '基于自由画布的创作平台，通过多线程对话、知识整合、上下文记忆和智能搜索，将想法转化为优质内容。',
     simplyDescription: {
-      first: 'Refly 是一个基于自由画布的 AI 内容创作引擎。',
-      second: '通过多线程对话、知识库集成、场景记忆和智能检索，帮助将创意转化为优质内容。',
+      first: '由多线程对话、知识库集成、上下文记忆和智能搜索驱动，',
+      second: 'Refly 是将创意转化为优质内容的最佳方式。',
     },
     messageText: '立即体验 AI 自由画布，激发创作灵感！',
     tryForFree: '开始使用',

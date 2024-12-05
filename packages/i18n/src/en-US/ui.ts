@@ -94,7 +94,7 @@ const translations = {
     },
   },
   landingPage: {
-    slogan: 'The AI Creation Engine',
+    slogan: 'The AI Native Creation Engine',
     simplySlogan: 'Creation Engine',
     description:
       'Refly is the best way to transforms ideas into quality content through multi-threaded dialogue, knowledge integration, context memory, and intelligent search.',

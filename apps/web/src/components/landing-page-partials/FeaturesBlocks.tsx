@@ -104,11 +104,14 @@ const FeatureCard = ({
 )
 
 function FeaturesBlocks() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const header = {
     tag: t("landingPage.features.tag"),
     tagIcon: <AiOutlineAppstore />,
     title: t("landingPage.features.title"),
+    color: "#000000",
+    tagShadow:
+      "0 3px 20px 0 rgba(0,0,0,0.10), 0 2px 4px 0 rgba(0,0,0,0.10), inset 0 -4px 0 0 rgba(227,227,227,0.50)",
   }
 
   // Sample feature data
@@ -180,9 +183,16 @@ function FeaturesBlocks() {
     <section className="mt-[98px] px-6 sm:px-6 md:px-6 lg:px-0">
       {/* Header Section */}
       <div className="mb-16 text-center">
-        <span className="mb-8 inline-flex items-center justify-center rounded-lg border border-solid border-black/10 bg-white px-6 py-2 font-['Alibaba_PuHuiTi_Bold',system-ui,-apple-system,sans-serif] text-sm">
+        <span
+          className="mb-8 inline-flex items-center justify-center rounded-lg border border-solid border-black/10 bg-white px-6 py-2 font-['Alibaba_PuHuiTi_Bold',system-ui,-apple-system,sans-serif] text-sm"
+          style={{
+            color: header?.color ?? "#000000",
+            boxShadow: header?.tagShadow ?? "0 3px 20px 0 rgba(0,0,0,0.10)",
+          }}>
           {header?.tagIcon && (
-            <span className="mr-2 flex items-center">
+            <span
+              className="mr-2 flex items-center"
+              style={{ color: header?.color ?? "#000000" }}>
               {typeof header.tagIcon === "string"
                 ? header.tagIcon
                 : header.tagIcon}
@@ -192,14 +202,27 @@ function FeaturesBlocks() {
         </span>
         <section className="text-center">
           <h1 className="font-['Alibaba_PuHuiTi_Bold',system-ui,-apple-system,sans-serif] text-3xl md:text-4xl">
-            {header?.title?.split("Primary Features")[0] ??
-              "An Overview of Refly's"}
-            <div className="mt-2">
-              <span className="relative text-[#F17B2C]">
-                Primary Features
-                <span className="absolute bottom-0 left-0 h-1 w-full bg-[#F17B2C]"></span>
-              </span>
-            </div>
+            {i18n.language === "zh-CN" ? (
+              <>
+                Refly 的
+                <div className="mt-2">
+                  <span className="relative text-[#F17B2C]">
+                    主要功能总览
+                    <span className="absolute bottom-0 left-0 h-1 w-full bg-[#F17B2C]"></span>
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                {header?.title?.split("Primary Features")[0]}
+                <div className="mt-2">
+                  <span className="relative text-[#F17B2C]">
+                    Primary Features
+                    <span className="absolute bottom-0 left-0 h-1 w-full bg-[#F17B2C]"></span>
+                  </span>
+                </div>
+              </>
+            )}
           </h1>
         </section>
       </div>
