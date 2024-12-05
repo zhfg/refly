@@ -204,7 +204,7 @@ function FeaturesBlocks() {
           <h1 className="font-['Alibaba_PuHuiTi_Bold',system-ui,-apple-system,sans-serif] text-3xl md:text-4xl">
             {i18n.language === "zh-CN" ? (
               <>
-                Refly 的
+                Refly
                 <div className="mt-2">
                   <span className="relative text-[#F17B2C]">
                     主要功能总览

@@ -63,14 +63,16 @@ function HeroHome() {
                   <div
                     onClick={() => setLoginModalVisible(true)}
                     className={cn(
-                      "group rounded-lg border border-black/5 bg-white text-base hover:cursor-pointer hover:bg-neutral-50 dark:border-white/5",
+                      "group inline-flex items-center justify-center rounded-lg border border-black/5 bg-white text-base hover:cursor-pointer hover:bg-neutral-50 dark:border-white/5",
+                      "px-4",
+                      "py-2",
                     )}>
-                    <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 transition ease-out">
-                      <span className="text-[#00968F]">
+                    <AnimatedShinyText className="inline-flex items-center justify-center transition ease-out">
+                      <span className="whitespace-nowrap text-[#00968F]">
                         ✨ {t("landingPage.messageText")}
                       </span>
-                      <ArrowRightIcon className="ml-1 size-3 text-[#00968F] transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
                     </AnimatedShinyText>
+                    <ArrowRightIcon className="ml-2 h-4 w-4 text-[#00968F] transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
                   </div>
                 </div>
               </div>

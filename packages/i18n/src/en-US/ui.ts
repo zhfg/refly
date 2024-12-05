@@ -99,12 +99,12 @@ const translations = {
     description:
       'Refly is the best way to transforms ideas into quality content through multi-threaded dialogue, knowledge integration, context memory, and intelligent search.',
     anotherDescription:
-      'A free canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, easily transforms ideas into quality content.',
+      'A free-form canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, easily transforms ideas into quality content.',
     simplyDescription: {
       first: 'Powered by multi-thread dialogue, knowledge integration, context memory, and intelligent search, ',
       second: 'Refly is the best way to transforms ideas into quality content.',
     },
-    messageText: 'Experience AI Free Canvas and ignite your creativity!',
+    messageText: 'Experience AI Free-form Canvas and ignite your creativity!',
     tryForFree: 'Get Started',
     contactUs: 'Contact us',
     joinBtn: 'Join for free',
@@ -116,45 +116,44 @@ const translations = {
       title: "An Overview of Refly's Primary Features",
       featureOne: {
         tag: 'Planning',
-        title: 'Brainstorming, Outlining, and Turning Ideas into Actionable Plans',
+        title: 'Transform chaos into clarity with our free-form canvas for professional content creation',
         bulletPoints: [
-          '20+ scenarios, suitable for academic papers, competitive analysis, technical articles, self-media writing, projects, OKRs',
-          'AI generates content outlines with one click',
-          'Based on historical knowledge to recommend and associate memories',
+          'Coverage of 20+ professional templates for academic research, technical documentation, and more',
+          'AI-powered topic analysis and intelligent research framework generation',
+          'Build deep thought connections through your growing personal knowledge base',
         ],
       },
       featureTwo: {
-        tag: 'Exploration & Import',
-        title: 'Connect Any Data and Add It as Writable Material',
+        tag: 'Explore & Import',
+        title: 'Break down knowledge barriers, turning fragmented information into creative resources',
         bulletPoints: [
-          'AI discovery smartly',
-          'Browser plugin imports private data',
-          'Refly webpage imports any public data or text',
-          'Automatic semantic processing and use knowledge base search to obtain key insights',
+          'One-click import of papers, web pages, and various professional materials',
+          'AI-powered search for swift identification of key references',
+          'Automatic knowledge linking for cross-domain insights',
         ],
       },
       featureThree: {
         tag: 'Research',
-        title: 'Quickly Dig into Knowledge Bases, Resources, and Text Lines to Unveil Insights',
+        title: 'Spark insights through multi-threaded conversations, making research more illuminating',
         bulletPoints: [
-          'AI search for real-time answers',
-          'Get answers based on the most relevant context',
-          'Study details through browser plugins and context selectors',
+          'Freely explore ideas through canvas-based conversations',
+          'Smart context management for precise research direction',
+          'Flexible knowledge base integration for accelerated breakthroughs',
         ],
       },
       featureFour: {
         tag: 'Thinking & Creation',
-        title: 'Write Target Articles Based on Your Contextual Context with the Most Powerful Models',
+        title: 'From ideation to completion, elevate your professional content with deeper insights',
         bulletPoints: [
-          'Select resources, notes, or any text to ask',
-          '30+ AI skills for writing, reading, and reviewing',
-          'Insert AI-written content sources through AI Apply',
+          'Customize your writing environment with flexible context selection',
+          'N+ professional writing tools to enhance academic/technical writing efficiency',
+          'AI editing assistant for quality professional output',
         ],
       },
     },
     footer: {
       cta: {
-        title: 'Ready to experience AI free canvas and ignite your creativity?',
+        title: 'Ready to experience AI free-form canvas and ignite your creativity?',
         getStarted: 'Get Started',
         contactUs: 'Contact us',
       },
@@ -164,7 +163,7 @@ const translations = {
       product: {
         title: 'Products',
         list: [
-          'Free Canvas',
+          'Free-form Canvas',
           'Multi-threaded Dialogue',
           'Knowledge Base Integration',
           'Context Memory',
