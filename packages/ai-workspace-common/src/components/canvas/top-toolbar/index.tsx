@@ -240,7 +240,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
                 type="text"
                 icon={<MdOutlineHideImage style={{ color: showPreview ? '#9CA3AF' : '#000' }} />}
                 onClick={() => setShowPreview(!showPreview)}
-                className="w-8 h-6 flex items-center justify-center"
+                className="w-8 h-6 flex items-center justify-center mr-1"
               />
             </Tooltip>
             <Tooltip title={t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`)}>
