@@ -5,6 +5,7 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 import { IconHistory } from '@arco-design/web-react/icon';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { useMemo } from 'react';
+import { IconReply } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 export const ChatHistorySwitch = (props: {
   chatHistoryOpen: boolean;
@@ -34,7 +35,7 @@ export const ChatHistorySwitch = (props: {
     <Tooltip title={tooltipTitle} mouseEnterDelay={0.1} mouseLeaveDelay={0.1} placement="top" destroyTooltipOnHide>
       <Badge count={items?.length ?? 0} size="small" color="#00968F" style={{ zIndex: 1000 }}>
         <Button
-          icon={<IconHistory className="w-4 h-4" />}
+          icon={<IconReply className="w-4 h-4" />}
           size="small"
           type="default"
           className={buttonClassName}

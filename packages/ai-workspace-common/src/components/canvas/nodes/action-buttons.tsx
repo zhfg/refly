@@ -1,20 +1,8 @@
-import {
-  MoreHorizontal,
-  PlayCircle,
-  FileInput,
-  Link,
-  HelpCircle,
-  Info,
-  Trash2,
-  Loader2,
-  MessageSquareDiff,
-  FileText,
-  FilePlus,
-} from 'lucide-react';
-import { useState } from 'react';
+import { MoreHorizontal, PlayCircle, FileInput, Trash2, Loader2, MessageSquareDiff, FilePlus } from 'lucide-react';
 import { Button, Dropdown, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { IconReply } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 // Action button types
 type ActionButtonProps = {
@@ -201,9 +189,9 @@ export const ActionButtons = ({
           )}
           {onAddToChatHistory && (
             <ActionButton
-              icon={<MessageSquareDiff className="w-4 h-4" />}
+              icon={<IconReply className="w-4 h-4" />}
               onClick={onAddToChatHistory}
-              tooltip={t('canvas.nodeActions.addToChatHistory')}
+              tooltip={t('canvas.nodeActions.askFollowUp')}
             />
           )}
           {onCreateDocument && (

@@ -62,12 +62,6 @@ export const ResourceView = (props: ResourceViewProps) => {
     refetchResourceDetail();
   };
 
-  const { handleInitContentSelectorListener } = useSelectedMark();
-
-  const { addContextItem } = useContextPanelStore((state) => ({
-    addContextItem: state.addContextItem,
-  }));
-
   const buildNodeData = (text: string) => {
     const id = genUniqueId();
 
@@ -91,19 +85,6 @@ export const ResourceView = (props: ResourceViewProps) => {
 
     return node;
   };
-
-  // 初始化块选择
-  // useEffect(() => {
-  //   setDeckSize(0);
-  //   if (resource.loading) {
-  //     return;
-  //   }
-  //   const remove = initMessageListener();
-  //   handleInitContentSelectorListener();
-  //   return () => {
-  //     remove();
-  //   };
-  // }, [resourceId, resource.loading]);
 
   // refresh every 2 seconds if resource is waiting to be parsed or indexed
   useEffect(() => {
@@ -206,7 +187,7 @@ export const ResourceView = (props: ResourceViewProps) => {
               >
                 {/* {initContentSelectorElem()} */}
                 <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>
-                <Markdown content={resourceDetail?.content || ''}></Markdown>
+                <Markdown content={resourceDetail?.content || ''} className="text-base"></Markdown>
                 <SelectionContext
                   containerClass={`resource-content-${resourceId}`}
                   getNodeData={(text) => buildNodeData(text)}

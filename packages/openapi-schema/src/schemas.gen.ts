@@ -160,7 +160,7 @@ export const ResourceTypeSchema = {
 
 export const ResourceSchema = {
   type: 'object',
-  required: ['resourceId', 'resourceType', 'title', 'createdAt', 'updatedAt'],
+  required: ['resourceId', 'resourceType', 'title'],
   properties: {
     resourceId: {
       type: 'string',
@@ -232,7 +232,7 @@ export const ReferenceTypeSchema = {
 
 export const DocumentSchema = {
   type: 'object',
-  required: ['docId', 'title', 'readOnly', 'createdAt', 'updatedAt'],
+  required: ['docId', 'title'],
   properties: {
     docId: {
       type: 'string',

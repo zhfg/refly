@@ -1,8 +1,4 @@
-import { SkillContextDocumentItem } from '@refly-packages/ai-workspace-common/requests/types.gen';
-
-import { SkillContextResourceItem } from '@refly-packages/ai-workspace-common/requests/types.gen';
-
-import { SkillContextContentItem } from '@refly-packages/ai-workspace-common/requests/types.gen';
+import { SkillContextContentItem, SkillContextDocumentItem, SkillContextResourceItem } from '@refly/openapi-schema';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genUniqueId } from '@refly-packages/utils/id';
 
@@ -92,6 +88,11 @@ const convertContextItemsToContext = (items: NodeItem[]) => {
       .filter((item) => item.type === 'resource')
       .map((item) => ({
         resourceId: item.data?.entityId || item.id,
+        resource: {
+          resourceId: item.data?.entityId,
+          resourceType: item.data?.metadata?.resourceType,
+          title: item.data?.title,
+        },
         isCurrent: item.isCurrentContext,
         metadata: {
           ...item.data?.metadata,
@@ -102,6 +103,10 @@ const convertContextItemsToContext = (items: NodeItem[]) => {
       .filter((item) => item.type === 'document')
       .map((item) => ({
         docId: item.data?.entityId || item.id,
+        document: {
+          docId: item.data?.entityId,
+          title: item.data?.title,
+        },
         isCurrent: item.isCurrentContext,
         metadata: {
           ...item.data?.metadata,

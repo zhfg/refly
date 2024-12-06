@@ -50,17 +50,6 @@ export const LaunchPad = () => {
   const { invokeAction, abortAction } = useInvokeAction();
   const { canvasId } = useCanvasContext();
 
-  // Replace chat history related code with hook
-  const {
-    chatHistoryOpen,
-    setChatHistoryOpen,
-    historyItems,
-    clearHistoryItems,
-    handleItemClick,
-    handleItemPin,
-    handleItemDelete,
-  } = useChatHistory();
-
   const { recommendQuestionsOpen, setRecommendQuestionsOpen } = useLaunchpadStoreShallow((state) => ({
     recommendQuestionsOpen: state.recommendQuestionsOpen,
     setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
@@ -166,15 +155,6 @@ export const LaunchPad = () => {
     <div className="ai-copilot-operation-container">
       <div className="ai-copilot-operation-body">
         <SkillDisplay />
-        <ChatHistory
-          isOpen={chatHistoryOpen}
-          onClose={() => setChatHistoryOpen(false)}
-          items={historyItems}
-          onCleanup={clearHistoryItems}
-          onItemClick={handleItemClick}
-          onItemPin={handleItemPin}
-          onItemDelete={handleItemDelete}
-        />
         <RecommendQuestionsPanel isOpen={recommendQuestionsOpen} onClose={() => setRecommendQuestionsOpen(false)} />
         <ChatInput form={form} handleSendMessage={handleSendMessage} handleAbort={handleAbort} />
       </div>

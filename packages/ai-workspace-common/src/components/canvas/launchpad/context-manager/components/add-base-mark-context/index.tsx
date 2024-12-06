@@ -8,7 +8,6 @@ import {
   useContextPanelStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 export const AddBaseMarkContext = () => {
