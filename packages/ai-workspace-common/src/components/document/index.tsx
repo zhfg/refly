@@ -2,11 +2,17 @@ import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import wordsCount from 'words-count';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { CanvasNodeType, Document } from '@refly/openapi-schema';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 import './index.scss';
 import { Input, Popover, Spin } from '@arco-design/web-react';
 import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock, HiOutlineShare } from 'react-icons/hi2';
-import { IconQuote } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconMoreHorizontal,
+  IconQuote,
+  IconDelete,
+  IconCopy,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useTranslation } from 'react-i18next';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 
@@ -37,11 +43,9 @@ import { useDebouncedCallback } from 'use-debounce';
 import { handleImageDrop, handleImagePaste } from '@refly-packages/ai-workspace-common/components/editor/core/plugins';
 import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
 
-import { DeleteDropdownMenu } from './dropdown';
 import { AiOutlineWarning } from 'react-icons/ai';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
 import { useDocumentStore, useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
-import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 
 // content selector
 import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
@@ -50,8 +54,7 @@ import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/mod
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 // componets
 import { ToC } from './ToC';
-import { IconBook } from '@arco-design/web-react/icon';
-import { Button, Divider, message, Modal } from 'antd';
+import { Button, Divider, Dropdown, DropdownProps, MenuProps, message, Modal, Popconfirm } from 'antd';
 import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
 import { useBlocker } from 'react-router-dom';
@@ -60,6 +63,8 @@ import { useSelectionContext } from '@refly-packages/ai-workspace-common/hooks/u
 import { DocumentProvider, useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useGetDocumentDetail } from '@refly-packages/ai-workspace-common/queries';
+import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 const MemorizedToC = memo(ToC);
 
 const CollaborativeEditor = ({ docId }: { docId: string }) => {
@@ -71,7 +76,6 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
     currentDocument: state.documentStates[docId]?.currentDocument,
     documentServerStatus: state.documentStates[docId]?.documentServerStatus,
     updateIsAiEditing: state.updateIsAiEditing,
-    updateCurrentDocument: state.updateCurrentDocument,
     updateDocumentCharsCount: state.updateDocumentCharsCount,
     updateDocumentSaveStatus: state.updateDocumentSaveStatus,
     updateEditor: state.updateEditor,
@@ -351,7 +355,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
             extensions={extensions}
             onCreate={({ editor }) => {
               editorRef.current = editor;
-              documentStore.updateEditor(editor);
+              documentStore.updateEditor(docId, editor);
             }}
             editable={!readOnly}
             className="w-full h-full border-muted sm:rounded-lg"
@@ -387,31 +391,103 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
   );
 };
 
+export const ActionDropdown = ({ doc, node }: { doc: Document; node?: CanvasNode }) => {
+  const { editor } = useDocumentStoreShallow((state) => ({
+    editor: state.documentStates[doc?.docId]?.editor,
+  }));
+  const { t } = useTranslation();
+  const [popupVisible, setPopupVisible] = useState(false);
+  const handleDeleteNode = node ? useDeleteNode(node, node.type) : undefined;
+
+  const handleDelete = async () => {
+    const { data } = await getClient().deleteDocument({
+      body: {
+        docId: doc.docId,
+      },
+    });
+    if (data?.success) {
+      if (handleDeleteNode) {
+        handleDeleteNode();
+      } else {
+        message.success(t('common.putSuccess'));
+      }
+    }
+  };
+
+  const handleCopy = () => {
+    const markdown = editor?.storage.markdown.getMarkdown();
+    copyToClipboard(markdown);
+    message.success({ content: t('contentDetail.item.copySuccess') });
+  };
+
+  const items: MenuProps['items'] = [
+    {
+      key: 'copy',
+      label: (
+        <div className="flex items-center" onClick={handleCopy}>
+          <IconCopy size={16} className="mr-2" />
+          {t('contentDetail.item.copyContent')}
+        </div>
+      ),
+    },
+    {
+      label: (
+        <Popconfirm
+          title={t('workspace.deleteDropdownMenu.deleteConfirmForDocument')}
+          onConfirm={handleDelete}
+          onCancel={() => setPopupVisible(false)}
+          okText={t('common.confirm')}
+          cancelText={t('common.cancel')}
+        >
+          <div className="flex items-center text-red-600">
+            <IconDelete size={16} className="mr-2" />
+            {t('workspace.deleteDropdownMenu.delete')}
+          </div>
+        </Popconfirm>
+      ),
+      key: 'delete',
+    },
+  ];
+
+  const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
+    if (info.source === 'trigger') {
+      setPopupVisible(open);
+    }
+  };
+
+  return (
+    <Dropdown
+      trigger={['click']}
+      open={popupVisible}
+      onOpenChange={handleOpenChange}
+      menu={{
+        items,
+      }}
+    >
+      <Button type="text" icon={<IconMoreHorizontal />} />
+    </Dropdown>
+  );
+};
+
 export const CanvasStatusBar = ({
   deckSize,
   setDeckSize,
   docId,
+  node,
 }: {
   deckSize: number;
   setDeckSize: (size: number) => void;
   docId: string;
+  node?: CanvasNode;
 }) => {
-  const {
-    currentDocument,
-    updateCurrentDocument,
-    documentServerStatus,
-    documentCharsCount,
-    documentSaveStatus,
-    tocItems,
-  } = useDocumentStoreShallow((state) => ({
-    currentDocument: state.documentStates[docId]?.currentDocument,
-    updateCurrentDocument: state.updateCurrentDocument,
-    documentServerStatus: state.documentStates[docId]?.documentServerStatus,
-    documentCharsCount: state.documentStates[docId]?.documentCharsCount,
-    documentSaveStatus: state.documentStates[docId]?.documentSaveStatus,
-    tocItems: state.documentStates[docId]?.tocItems,
-  }));
-  const { handleDeleteTab } = useCanvasTabs();
+  const { currentDocument, updateCurrentDocument, documentServerStatus, documentCharsCount, documentSaveStatus } =
+    useDocumentStoreShallow((state) => ({
+      currentDocument: state.documentStates[docId]?.currentDocument,
+      updateCurrentDocument: state.updateCurrentDocument,
+      documentServerStatus: state.documentStates[docId]?.documentServerStatus,
+      documentCharsCount: state.documentStates[docId]?.documentCharsCount,
+      documentSaveStatus: state.documentStates[docId]?.documentSaveStatus,
+    }));
   const { t } = useTranslation();
 
   const { createShare } = useHandleShare();
@@ -514,12 +590,7 @@ export const CanvasStatusBar = ({
 
         <div className="note-status-bar-item">
           <Divider type="vertical" />
-          <DeleteDropdownMenu
-            type="document"
-            canCopy={true}
-            data={currentDocument}
-            postDeleteList={(document: Document) => handleDeleteTab(document.docId)}
-          />
+          <ActionDropdown doc={currentDocument} node={node} />
         </div>
       </div>
     </div>
@@ -567,8 +638,13 @@ export const DocumentEditorHeader = ({ docId }: { docId: string }) => {
   );
 };
 
-export const DocumentEditor = (props: { docId: string; deckSize: number; setDeckSize: (size: number) => void }) => {
-  const { docId, deckSize, setDeckSize } = props;
+export const DocumentEditor = (props: {
+  docId: string;
+  deckSize: number;
+  setDeckSize: (size: number) => void;
+  node?: CanvasNode;
+}) => {
+  const { docId, deckSize, setDeckSize, node } = props;
 
   const { t } = useTranslation();
 
@@ -588,9 +664,11 @@ export const DocumentEditor = (props: { docId: string; deckSize: number; setDeck
 
   const { data: documentDetail, isLoading } = useGetDocumentDetail({ query: { docId } });
 
-  if (documentDetail?.data) {
-    updateCurrentDocument(docId, documentDetail.data);
-  }
+  useEffect(() => {
+    if (documentDetail?.data) {
+      updateCurrentDocument(docId, documentDetail.data);
+    }
+  }, [documentDetail?.data, docId]);
 
   useEffect(() => {
     return () => {
@@ -622,7 +700,7 @@ export const DocumentEditor = (props: { docId: string; deckSize: number; setDeck
   return (
     <DocumentProvider docId={docId}>
       <div className="flex flex-col ai-note-container">
-        <CanvasStatusBar deckSize={deckSize} setDeckSize={setDeckSize} docId={docId} />
+        <CanvasStatusBar deckSize={deckSize} setDeckSize={setDeckSize} docId={docId} node={node} />
         <div className="overflow-auto flex-grow">
           <Spin
             className="document-editor-spin"

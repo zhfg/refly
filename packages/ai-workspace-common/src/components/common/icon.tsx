@@ -10,7 +10,7 @@ import {
 } from 'react-icons/hi2';
 import { IoIosMore } from 'react-icons/io';
 import { HiOutlineReply } from 'react-icons/hi';
-import { LuSearch, LuSettings, LuCheck } from 'react-icons/lu';
+import { LuSearch, LuSettings, LuCheck, LuCopy } from 'react-icons/lu';
 
 import { RiDoubleQuotesL, RiDeleteBinLine } from 'react-icons/ri';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
@@ -38,3 +38,4 @@ export const IconDelete = RiDeleteBinLine;
 export const IconSearch = LuSearch;
 export const IconLoading = AiOutlineLoading3Quarters;
 export const IconSettings = LuSettings;
+export const IconCopy = LuCopy;

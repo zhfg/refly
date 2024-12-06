@@ -84,7 +84,7 @@ export const ActionButtons = ({
       label: (
         <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
           <Trash2 className="w-4 h-4 flex-shrink-0" />
-          Delete
+          {t('canvas.nodeActions.delete')}
         </div>
       ),
       onClick: onDelete,

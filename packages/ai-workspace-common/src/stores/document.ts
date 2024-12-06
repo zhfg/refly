@@ -23,6 +23,7 @@ export interface TableOfContentsItem {
 }
 
 interface DocumentState {
+  editor: EditorInstance | null;
   documentServerStatus: DocumentServerStatus;
   documentCharsCount: number;
   documentSaveStatus: DocumentSaveStatus;
@@ -40,7 +41,6 @@ interface DocumentBaseState {
   newDocumentCreating: boolean;
   isAiEditing: boolean;
   isCreatingNewDocumentOnHumanMessage: boolean;
-  editor: EditorInstance | null;
 
   // Canvas specific states stored by docId
   documentStates: Record<string, DocumentState>;
@@ -54,7 +54,7 @@ interface DocumentBaseState {
   updateNewDocumentCreating: (creating: boolean) => void;
   updateIsCreatingNewDocumentOnHumanMessage: (creating: boolean) => void;
   updateIsAiEditing: (editing: boolean) => void;
-  updateEditor: (editor: EditorInstance) => void;
+  updateEditor: (docId: string, editor: EditorInstance) => void;
 
   resetState: (docId: string) => void;
 }
@@ -83,7 +83,11 @@ export const useDocumentStore = create<DocumentBaseState>()(
       })),
 
     // canvases
-    updateEditor: (editor: EditorInstance) => set((state) => ({ ...state, editor })),
+    updateEditor: (docId: string, editor: EditorInstance) =>
+      set((state) => ({
+        ...state,
+        documentStates: { ...state.documentStates, [docId]: { ...state.documentStates[docId], editor } },
+      })),
     updateDocumentServerStatus: (docId: string, status: DocumentServerStatus) =>
       set((state) => ({
         ...state,
