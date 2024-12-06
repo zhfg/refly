@@ -1,13 +1,12 @@
-import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
-import { Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 import { PreviewContextManager } from './preview-context-manager';
 import { useEffect, useState } from 'react';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
-
-const TextArea = Input.TextArea;
+import { ChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-history';
+import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
 interface PreviewChatInputProps {
   contextItems: NodeItem[];
@@ -53,7 +52,8 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
             setChatHistoryOpen={setChatHistoryOpen}
           />
         )}
-        <div className="text-base mx-4 my-3">{userQuery}</div>
+        <ChatHistory readonly items={historyItems} />
+        <div className="text-base mx-4 my-2">{userQuery}</div>
 
         {/* {skillStore.selectedSkill?.configSchema?.items?.length > 0 && (
       <ConfigManager

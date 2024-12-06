@@ -453,6 +453,9 @@ const translations = {
     },
     launchpad: {
       skillNotFound: 'Skill not found, please refresh the page and try again',
+      pinChat: 'Pin chat',
+      unpinChat: 'Unpin chat',
+      removeChat: 'Remove chat',
     },
     action: {
       nodeAlreadyExists: 'The {{type}} with the same entity already exists',
@@ -483,7 +486,7 @@ const translations = {
       processingVector: 'Processing Vector',
       rerun: 'Rerun',
       insertToDoc: 'Insert to Document',
-      addToChatHistory: 'Add to Chat History Context',
+      askFollowUp: 'Ask Follow-up',
       moreOptions: 'More Options',
     },
     nodeStatus: {

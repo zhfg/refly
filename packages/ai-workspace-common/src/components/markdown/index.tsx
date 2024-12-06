@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import RemarkBreaks from 'remark-breaks';
 import RemarkGfm from 'remark-gfm';
 
-import { markdownCitationParse } from '@refly/utils';
+import { cn, markdownCitationParse } from '@refly/utils';
 
 // plugins
 import { markdownElements } from './plugins';
@@ -25,9 +25,9 @@ export const Markdown = memo(
     props: {
       content: string;
       loading?: boolean;
-      fontSize?: number;
       sources?: Source[];
       msgId?: string;
+      className?: string;
     } & React.DOMAttributes<HTMLDivElement>,
   ) => {
     const { msgId } = props;
@@ -76,7 +76,7 @@ export const Markdown = memo(
     );
 
     return (
-      <div className="markdown-body" ref={mdRef}>
+      <div className={cn('markdown-body', props.className)} ref={mdRef}>
         {shouldLoading ? (
           <IconLoading />
         ) : (

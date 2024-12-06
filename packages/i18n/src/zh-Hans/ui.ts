@@ -445,6 +445,9 @@ const translations = {
     },
     launchpad: {
       skillNotFound: '技能不存在，请刷新页面后重试',
+      pinChat: '固定对话',
+      unpinChat: '取消固定对话',
+      removeChat: '移除对话',
     },
     action: {
       nodeAlreadyExists: '该{{type}}已存在于当前画布中',
@@ -479,7 +482,7 @@ const translations = {
       processingVector: '处理向量',
       rerun: '重新运行',
       insertToDoc: '插入文档',
-      addToChatHistory: '添加到对话历史上下文',
+      askFollowUp: '继续提问',
       moreOptions: '更多选项',
     },
     nodeStatus: {

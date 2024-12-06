@@ -16,6 +16,7 @@ import {
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { ConfigManager } from './config-manager';
 import { ChatActions } from './chat-actions';
+import { ChatHistory } from './chat-history';
 
 const TextArea = Input.TextArea;
 
@@ -132,6 +133,7 @@ export const ChatInput = (props: ChatInputProps) => {
       <div className="chat-input-container">
         <SelectedSkillHeader skill={skillStore.selectedSkill} onClose={() => skillStore.setSelectedSkill(null)} />
         <ContextManager />
+        <ChatHistory />
         <div className="chat-input-body">
           <div className="ai-copilot-chat-input-container">
             <div className="ai-copilot-chat-input-body">

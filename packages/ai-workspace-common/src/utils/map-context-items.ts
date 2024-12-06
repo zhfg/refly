@@ -1,8 +1,4 @@
-import { SkillContextDocumentItem } from '@refly-packages/ai-workspace-common/requests/types.gen';
-
-import { SkillContextResourceItem } from '@refly-packages/ai-workspace-common/requests/types.gen';
-
-import { SkillContextContentItem } from '@refly-packages/ai-workspace-common/requests/types.gen';
+import { SkillContextContentItem, SkillContextDocumentItem, SkillContextResourceItem } from '@refly/openapi-schema';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genUniqueId } from '@refly-packages/utils/id';
 
@@ -74,43 +70,49 @@ const convertContextToItems = (context?: any): NodeItem[] => {
 
 const convertContextItemsToContext = (items: NodeItem[]) => {
   return {
-    contentList:
-      items
-        ?.filter((item) => item?.data?.metadata?.sourceType)
-        ?.map((item) => ({
-          content: item.data?.metadata?.selectedContent ?? '',
-          metadata: {
-            domain: item.data?.metadata?.sourceType ?? '',
-            entityId: item.data?.entityId ?? '',
-            title: item.data?.title ?? '',
-            nodeId: item.id,
-            ...(item.data?.metadata?.sourceType === 'extensionWeblinkSelection' && {
-              url: item.data?.metadata?.url,
-            }),
-          },
-        })) || [],
-    resources:
-      items
-        ?.filter((item) => item.type === 'resource')
-        ?.map((item) => ({
-          resourceId: item.data?.entityId || item.id,
-          isCurrent: item.isCurrentContext,
-          metadata: {
-            ...item.data?.metadata,
-            nodeId: item.id,
-          },
-        })) || [],
-    documents:
-      items
-        ?.filter((item) => item.type === 'document')
-        ?.map((item) => ({
-          docId: item.data?.entityId || item.id,
-          isCurrent: item.isCurrentContext,
-          metadata: {
-            ...item.data?.metadata,
-            nodeId: item.id,
-          },
-        })) || [],
+    contentList: items
+      ?.filter((item) => item?.data?.metadata?.sourceType)
+      ?.map((item) => ({
+        content: item.data?.metadata?.selectedContent ?? '',
+        metadata: {
+          domain: item.data?.metadata?.sourceType ?? '',
+          entityId: item.data?.entityId ?? '',
+          title: item.data?.title ?? '',
+          nodeId: item.id,
+          ...(item.data?.metadata?.sourceType === 'extensionWeblinkSelection' && {
+            url: item.data?.metadata?.url,
+          }),
+        },
+      })),
+    resources: items
+      ?.filter((item) => item.type === 'resource')
+      .map((item) => ({
+        resourceId: item.data?.entityId || item.id,
+        resource: {
+          resourceId: item.data?.entityId,
+          resourceType: item.data?.metadata?.resourceType,
+          title: item.data?.title,
+        },
+        isCurrent: item.isCurrentContext,
+        metadata: {
+          ...item.data?.metadata,
+          nodeId: item.id,
+        },
+      })),
+    documents: items
+      ?.filter((item) => item.type === 'document')
+      .map((item) => ({
+        docId: item.data?.entityId || item.id,
+        document: {
+          docId: item.data?.entityId,
+          title: item.data?.title,
+        },
+        isCurrent: item.isCurrentContext,
+        metadata: {
+          ...item.data?.metadata,
+          nodeId: item.id,
+        },
+      })),
   };
 };
 

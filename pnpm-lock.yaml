@@ -451,8 +451,8 @@ importers:
         specifier: ^14.1.0
         version: 14.1.3(i18next@23.15.1)(react-dom@18.3.1)(react@18.3.1)
       react-icons:
-        specifier: ~5.2.1
-        version: 5.2.1(react@18.3.1)
+        specifier: ~5.4.0
+        version: 5.4.0(react@18.3.1)
       react-infinite-scroll-component:
         specifier: ~6.1.0
         version: 6.1.0(react@18.3.1)
@@ -680,8 +680,8 @@ importers:
         specifier: ^14.1.0
         version: 14.1.3(i18next@23.15.1)(react-dom@18.3.1)(react@18.3.1)
       react-icons:
-        specifier: ~5.2.1
-        version: 5.2.1(react@18.3.1)
+        specifier: ~5.4.0
+        version: 5.4.0(react@18.3.1)
       react-infinite-scroll-component:
         specifier: ~6.1.0
         version: 6.1.0(react@18.3.1)
@@ -1050,8 +1050,8 @@ importers:
         specifier: ^14.1.0
         version: 14.1.3(i18next@23.15.1)(react-dom@18.3.1)(react@18.3.1)
       react-icons:
-        specifier: ~5.2.1
-        version: 5.2.1(react@18.3.1)
+        specifier: ~5.4.0
+        version: 5.4.0(react@18.3.1)
       react-infinite-scroll-component:
         specifier: ~6.1.0
         version: 6.1.0(react@18.3.1)
@@ -17974,8 +17974,8 @@ packages:
       react-dom: 18.3.1(react@18.3.1)
     dev: false
 
-  /react-icons@5.2.1(react@18.3.1):
-    resolution: {integrity: sha512-zdbW5GstTzXaVKvGSyTaBalt7HSfuK5ovrzlpyiWHAFXndXTdd/1hdDHI4xBM1Mn7YriT6aqESucFl9kEXzrdw==}
+  /react-icons@5.4.0(react@18.3.1):
+    resolution: {integrity: sha512-7eltJxgVt7X64oHh6wSWNwwbKTCtMfK35hcjvJS0yxEAhPM8oUKdS3+kqaW1vicIltw+kR2unHaa12S9pPALoQ==}
     peerDependencies:
       react: '*'
     dependencies:
