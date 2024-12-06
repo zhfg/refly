@@ -140,7 +140,7 @@ export const defaultExtensions = [
   characterCount,
   SpaceAICommand,
   DoublePlusAICommand,
-  GlobalDragHandle,
+  // GlobalDragHandle,
 ];
 
 export { Placeholder };
