@@ -59,7 +59,7 @@ import { genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/hooks/use-selection-context';
 import { DocumentProvider, useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-
+import { useGetDocumentDetail } from '@refly-packages/ai-workspace-common/queries';
 const MemorizedToC = memo(ToC);
 
 const CollaborativeEditor = ({ docId }: { docId: string }) => {
@@ -68,13 +68,12 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
 
   const documentStore = useDocumentStoreShallow((state) => ({
     isAiEditing: state.isAiEditing,
-    currentDocument: state.currentDocument,
-    documentServerStatus: state.documentServerStatus,
+    currentDocument: state.documentStates[docId]?.currentDocument,
+    documentServerStatus: state.documentStates[docId]?.documentServerStatus,
     updateIsAiEditing: state.updateIsAiEditing,
     updateCurrentDocument: state.updateCurrentDocument,
     updateDocumentCharsCount: state.updateDocumentCharsCount,
     updateDocumentSaveStatus: state.updateDocumentSaveStatus,
-    updateDocumentServerStatus: state.updateDocumentServerStatus,
     updateEditor: state.updateEditor,
     updateTocItems: state.updateTocItems,
     updateLastCursorPosRef: state.updateLastCursorPosRef,
@@ -128,7 +127,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
   });
 
   const buildNodeData = (text: string) => {
-    const { currentDocument } = useDocumentStore.getState();
+    const { currentDocument } = useDocumentStore.getState().documentStates[docId];
 
     return {
       id: genUniqueId(),
@@ -173,7 +172,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
       TableOfContents.configure({
         getIndex: getHierarchicalIndexes,
         onUpdate(content) {
-          documentStore.updateTocItems(content);
+          documentStore.updateTocItems(docId, content);
         },
       }),
     ],
@@ -208,11 +207,11 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
       },
     );
 
-    documentStore.updateDocumentCharsCount(wordsCount(markdown));
+    documentStore.updateDocumentCharsCount(docId, wordsCount(markdown));
     window.localStorage.setItem('html-content', await highlightCodeblocks(editor.getHTML()));
     window.localStorage.setItem('novel-content', JSON.stringify(json));
     window.localStorage.setItem('markdown', editor.storage.markdown.getMarkdown());
-    documentStore.updateDocumentSaveStatus('Saved');
+    documentStore.updateDocumentSaveStatus(docId, 'Saved');
   }, 500);
 
   useEffect(() => {
@@ -243,7 +242,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
         const afterSelectionContent = getMarkdownSlice(to, editor?.state?.doc?.content?.size);
         const selectedContent = getMarkdownSlice(from, to);
 
-        documentStore.updateLastCursorPosRef(lastCursorPosRef.current);
+        documentStore.updateLastCursorPosRef(docId, lastCursorPosRef.current);
         contextPanelStore.updateCurrentSelectionContent(selectedContent);
         contextPanelStore.updateBeforeSelectionNoteContent(prevSelectionContent);
         contextPanelStore.updateAfterSelectionNoteContent(afterSelectionContent);
@@ -368,7 +367,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
             }}
             onUpdate={({ editor }) => {
               debouncedUpdates(editor);
-              documentStore.updateDocumentSaveStatus('Unsaved');
+              documentStore.updateDocumentSaveStatus(docId, 'Unsaved');
             }}
             slotAfter={<ImageResizer />}
           >
@@ -391,9 +390,11 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
 export const CanvasStatusBar = ({
   deckSize,
   setDeckSize,
+  docId,
 }: {
   deckSize: number;
   setDeckSize: (size: number) => void;
+  docId: string;
 }) => {
   const {
     currentDocument,
@@ -401,16 +402,14 @@ export const CanvasStatusBar = ({
     documentServerStatus,
     documentCharsCount,
     documentSaveStatus,
-    editor,
     tocItems,
   } = useDocumentStoreShallow((state) => ({
-    currentDocument: state.currentDocument,
+    currentDocument: state.documentStates[docId]?.currentDocument,
     updateCurrentDocument: state.updateCurrentDocument,
-    documentServerStatus: state.documentServerStatus,
-    documentCharsCount: state.documentCharsCount,
-    documentSaveStatus: state.documentSaveStatus,
-    editor: state.editor,
-    tocItems: state.tocItems,
+    documentServerStatus: state.documentStates[docId]?.documentServerStatus,
+    documentCharsCount: state.documentStates[docId]?.documentCharsCount,
+    documentSaveStatus: state.documentStates[docId]?.documentSaveStatus,
+    tocItems: state.documentStates[docId]?.tocItems,
   }));
   const { handleDeleteTab } = useCanvasTabs();
   const { t } = useTranslation();
@@ -497,7 +496,7 @@ export const CanvasStatusBar = ({
           <div
             className="note-status-bar-item"
             onClick={() => {
-              updateCurrentDocument({ ...currentDocument, readOnly: !currentDocument?.readOnly });
+              updateCurrentDocument(docId, { ...currentDocument, readOnly: !currentDocument?.readOnly });
               currentDocument?.readOnly
                 ? message.success(t('knowledgeBase.note.edit'))
                 : message.warning(t('knowledgeBase.note.readOnly'));
@@ -527,20 +526,20 @@ export const CanvasStatusBar = ({
   );
 };
 
-export const DocumentEditorHeader = () => {
+export const DocumentEditorHeader = ({ docId }: { docId: string }) => {
   const { currentDocument, updateCurrentDocument } = useDocumentStoreShallow((state) => ({
-    currentDocument: state.currentDocument,
+    currentDocument: state.documentStates[docId]?.currentDocument,
     updateCurrentDocument: state.updateCurrentDocument,
   }));
 
   const onTitleChange = (newTitle: string) => {
-    const currentDocument = useDocumentStore.getState().currentDocument;
+    const currentDocument = useDocumentStore.getState().documentStates[docId]?.currentDocument;
 
     if (!currentDocument) {
       return;
     }
 
-    updateCurrentDocument({ ...currentDocument, title: newTitle });
+    updateCurrentDocument(docId, { ...currentDocument, title: newTitle });
   };
 
   useEffect(() => {
@@ -575,52 +574,29 @@ export const DocumentEditor = (props: { docId: string; deckSize: number; setDeck
 
   const {
     currentDocument: document,
-    isRequesting,
     documentServerStatus,
     updateCurrentDocument,
-    updateIsRequesting,
-    updateDocumentServerStatus,
     resetState,
   } = useDocumentStoreShallow((state) => ({
-    currentDocument: state.currentDocument,
-    isRequesting: state.isRequesting,
+    currentDocument: state.documentStates[docId]?.currentDocument,
+    documentServerStatus: state.documentStates[docId]?.documentServerStatus,
     newDocumentCreating: state.newDocumentCreating,
-    documentServerStatus: state.documentServerStatus,
     updateCurrentDocument: state.updateCurrentDocument,
-    updateIsRequesting: state.updateIsRequesting,
-    updateDocumentServerStatus: state.updateDocumentServerStatus,
     resetState: state.resetState,
   }));
   const prevNote = useRef<Document>();
 
+  const { data: documentDetail, isLoading } = useGetDocumentDetail({ query: { docId } });
+
+  if (documentDetail?.data) {
+    updateCurrentDocument(docId, documentDetail.data);
+  }
+
   useEffect(() => {
     return () => {
-      resetState();
+      resetState(docId);
     };
   }, []);
-
-  useEffect(() => {
-    // updateCurrentCanvas(null);
-
-    const fetchData = async () => {
-      updateIsRequesting(true);
-      const { data } = await getClient().getDocumentDetail({
-        query: { docId },
-      });
-      const document = data?.data;
-      if (document) {
-        updateCurrentDocument(document);
-        updateIsRequesting(false);
-      }
-    };
-    if (docId && document?.docId !== docId) {
-      fetchData();
-    }
-
-    return () => {
-      updateIsRequesting(false);
-    };
-  }, [docId, document?.docId]);
 
   const debouncedUpdateDocument = useDebouncedCallback(async (document: Document) => {
     const res = await getClient().updateDocument({
@@ -646,17 +622,17 @@ export const DocumentEditor = (props: { docId: string; deckSize: number; setDeck
   return (
     <DocumentProvider docId={docId}>
       <div className="flex flex-col ai-note-container">
-        <CanvasStatusBar deckSize={deckSize} setDeckSize={setDeckSize} />
+        <CanvasStatusBar deckSize={deckSize} setDeckSize={setDeckSize} docId={docId} />
         <div className="overflow-auto flex-grow">
           <Spin
             className="document-editor-spin"
             tip={t('knowledgeBase.note.connecting')}
-            loading={!document || isRequesting || documentServerStatus !== 'connected'}
+            loading={!document || isLoading || documentServerStatus !== 'connected'}
             style={{ height: '100%', width: '100%' }}
           >
             <div className="ai-note-editor">
               <div className="ai-note-editor-container">
-                <DocumentEditorHeader />
+                <DocumentEditorHeader docId={docId} />
                 <CollaborativeEditor docId={docId} />
               </div>
             </div>

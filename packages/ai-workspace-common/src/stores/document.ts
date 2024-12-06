@@ -11,14 +11,6 @@ export enum ActionSource {
   Canvas = 'canvas',
 }
 
-export interface CanvasTab {
-  title: string;
-  key: string;
-  content: string;
-  canvasId: string;
-  projectId: string;
-}
-
 export type DocumentServerStatus = 'disconnected' | 'connected';
 export type DocumentSaveStatus = 'Saved' | 'Unsaved';
 
@@ -30,96 +22,116 @@ export interface TableOfContentsItem {
   textContent: string;
 }
 
-interface DocumentBaseState {
-  currentDocument: Document | null;
-  isRequesting: boolean;
-  newDocumentCreating: boolean;
-  isAiEditing: boolean;
-  isCreatingNewDocumentOnHumanMessage: boolean;
-
-  // tabs
-  tabs: CanvasTab[];
-  activeTab: string;
-  canvasPanelVisible: boolean;
-
-  // canvas
-  editor: EditorInstance | null;
+interface DocumentState {
   documentServerStatus: DocumentServerStatus;
   documentCharsCount: number;
   documentSaveStatus: DocumentSaveStatus;
-
   lastCursorPosRef: number | null;
-
-  // tocItems
   tocItems: TableOfContentsItem[];
+  currentDocument: Document | null;
+}
 
-  updateCurrentDocument: (document: Document) => void;
-  updateIsRequesting: (isRequesting: boolean) => void;
+const defaultDocumentState = {
+  documentServerStatus: 'disconnected' as DocumentServerStatus,
+  documentSaveStatus: 'Unsaved' as DocumentSaveStatus,
+};
+
+interface DocumentBaseState {
+  newDocumentCreating: boolean;
+  isAiEditing: boolean;
+  isCreatingNewDocumentOnHumanMessage: boolean;
+  editor: EditorInstance | null;
+
+  // Canvas specific states stored by docId
+  documentStates: Record<string, DocumentState>;
+
+  updateCurrentDocument: (docId: string, document: Document) => void;
+  updateDocumentServerStatus: (docId: string, status: DocumentServerStatus) => void;
+  updateDocumentSaveStatus: (docId: string, status: DocumentSaveStatus) => void;
+  updateDocumentCharsCount: (docId: string, count: number) => void;
+  updateLastCursorPosRef: (docId: string, pos: number) => void;
+  updateTocItems: (docId: string, items: TableOfContentsItem[]) => void;
   updateNewDocumentCreating: (creating: boolean) => void;
   updateIsCreatingNewDocumentOnHumanMessage: (creating: boolean) => void;
   updateIsAiEditing: (editing: boolean) => void;
-  updateTabs: (tabs: CanvasTab[]) => void;
-  updateActiveTab: (key: string) => void;
-  updateCanvasPanelVisible: (visible: boolean) => void;
-  updateDocumentServerStatus: (status: DocumentServerStatus) => void;
-  updateDocumentSaveStatus: (status: DocumentSaveStatus) => void;
-  updateDocumentCharsCount: (count: number) => void;
   updateEditor: (editor: EditorInstance) => void;
 
-  updateLastCursorPosRef: (pos: number) => void;
-  updateTocItems: (items: TableOfContentsItem[]) => void;
-
-  resetState: () => void;
+  resetState: (docId: string) => void;
 }
 
 export const defaultState = {
-  currentDocument: null as null | Document,
-  tabs: [],
-  activeTab: 'key1',
-  canvasPanelVisible: false,
-  isRequesting: false,
   newDocumentCreating: false,
   isCreatingNewDocumentOnHumanMessage: false,
   isAiEditing: false,
-  tocItems: [],
-
-  // canvases
   editor: null,
-  documentServerStatus: 'disconnected' as DocumentServerStatus,
-  documentCharsCount: 0,
-  documentSaveStatus: 'Unsaved' as DocumentSaveStatus,
 
-  // canvas selection status content, main for skill consume
-  lastCursorPosRef: null,
+  // documents
+  documentStates: {},
 };
 
 export const useDocumentStore = create<DocumentBaseState>()(
   devtools((set) => ({
     ...defaultState,
 
-    updateCurrentDocument: (document: Document) => set((state) => ({ ...state, currentDocument: document })),
-    updateIsRequesting: (isRequesting: boolean) => set((state) => ({ ...state, isRequesting })),
-    updateTabs: (tabs: CanvasTab[]) => set((state) => ({ ...state, tabs })),
-    updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
+    updateCurrentDocument: (docId: string, document: Document) =>
+      set((state) => ({
+        ...state,
+        documentStates: {
+          ...state.documentStates,
+          [docId]: { ...state.documentStates[docId], currentDocument: document },
+        },
+      })),
+
+    // canvases
+    updateEditor: (editor: EditorInstance) => set((state) => ({ ...state, editor })),
+    updateDocumentServerStatus: (docId: string, status: DocumentServerStatus) =>
+      set((state) => ({
+        ...state,
+        documentStates: {
+          ...state.documentStates,
+          [docId]: { ...state.documentStates[docId], documentServerStatus: status },
+        },
+      })),
+    updateDocumentSaveStatus: (docId: string, status: DocumentSaveStatus) =>
+      set((state) => ({
+        ...state,
+        documentStates: {
+          ...state.documentStates,
+          [docId]: { ...state.documentStates[docId], documentSaveStatus: status },
+        },
+      })),
+    updateDocumentCharsCount: (docId: string, count: number) =>
+      set((state) => ({
+        ...state,
+        documentStates: {
+          ...state.documentStates,
+          [docId]: { ...state.documentStates[docId], documentCharsCount: count },
+        },
+      })),
+    updateLastCursorPosRef: (docId: string, pos: number) =>
+      set((state) => ({
+        ...state,
+        documentStates: { ...state.documentStates, [docId]: { ...state.documentStates[docId], lastCursorPosRef: pos } },
+      })),
+    updateTocItems: (docId: string, items: TableOfContentsItem[]) =>
+      set((state) => ({
+        ...state,
+        documentStates: { ...state.documentStates, [docId]: { ...state.documentStates[docId], tocItems: items } },
+      })),
+
     updateNewDocumentCreating: (creating: boolean) => set((state) => ({ ...state, newDocumentCreating: creating })),
     updateIsCreatingNewDocumentOnHumanMessage: (creating: boolean) =>
       set((state) => ({ ...state, isCreatingNewDocumentOnHumanMessage: creating })),
     updateIsAiEditing: (editing: boolean) => set((state) => ({ ...state, isAiEditing: editing })),
 
-    // tabs
-    updateCanvasPanelVisible: (visible: boolean) => set((state) => ({ ...state, canvasPanelVisible: visible })),
-
-    // canvases
-    updateEditor: (editor: EditorInstance) => set((state) => ({ ...state, editor })),
-    updateDocumentServerStatus: (status: DocumentServerStatus) =>
-      set((state) => ({ ...state, documentServerStatus: status })),
-    updateDocumentSaveStatus: (status: DocumentSaveStatus) =>
-      set((state) => ({ ...state, documentSaveStatus: status })),
-    updateDocumentCharsCount: (count: number) => set((state) => ({ ...state, documentCharsCount: count })),
-    updateLastCursorPosRef: (pos: number) => set((state) => ({ ...state, lastCursorPosRef: pos })),
-    updateTocItems: (items: TableOfContentsItem[]) => set((state) => ({ ...state, tocItems: items })),
-
-    resetState: () => set((state) => ({ ...state, ...defaultState })),
+    resetState: (docId: string) =>
+      set((state) => ({
+        ...state,
+        documentStates: {
+          ...state.documentStates,
+          [docId]: { ...state.documentStates[docId], ...defaultDocumentState },
+        },
+      })),
   })),
 );
 
