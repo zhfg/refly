@@ -2,11 +2,17 @@ import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import wordsCount from 'words-count';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { CanvasNodeType, Document } from '@refly/openapi-schema';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 import './index.scss';
 import { Input, Popover, Spin } from '@arco-design/web-react';
 import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock, HiOutlineShare } from 'react-icons/hi2';
-import { IconQuote } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconMoreHorizontal,
+  IconQuote,
+  IconDelete,
+  IconCopy,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useTranslation } from 'react-i18next';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 
@@ -37,11 +43,9 @@ import { useDebouncedCallback } from 'use-debounce';
 import { handleImageDrop, handleImagePaste } from '@refly-packages/ai-workspace-common/components/editor/core/plugins';
 import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
 
-import { DeleteDropdownMenu } from './dropdown';
 import { AiOutlineWarning } from 'react-icons/ai';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
 import { useDocumentStore, useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
-import { useCanvasTabs } from '@refly-packages/ai-workspace-common/hooks/use-canvas-tabs';
 
 // content selector
 import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
@@ -50,8 +54,7 @@ import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/mod
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 // componets
 import { ToC } from './ToC';
-import { IconBook } from '@arco-design/web-react/icon';
-import { Button, Divider, message, Modal } from 'antd';
+import { Button, Divider, Dropdown, DropdownProps, MenuProps, message, Modal, Popconfirm } from 'antd';
 import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
 import { useBlocker } from 'react-router-dom';
@@ -59,7 +62,9 @@ import { genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/hooks/use-selection-context';
 import { DocumentProvider, useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-
+import { useGetDocumentDetail } from '@refly-packages/ai-workspace-common/queries';
+import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 const MemorizedToC = memo(ToC);
 
 const CollaborativeEditor = ({ docId }: { docId: string }) => {
@@ -68,13 +73,11 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
 
   const documentStore = useDocumentStoreShallow((state) => ({
     isAiEditing: state.isAiEditing,
-    currentDocument: state.currentDocument,
-    documentServerStatus: state.documentServerStatus,
+    currentDocument: state.documentStates[docId]?.currentDocument,
+    documentServerStatus: state.documentStates[docId]?.documentServerStatus,
     updateIsAiEditing: state.updateIsAiEditing,
-    updateCurrentDocument: state.updateCurrentDocument,
     updateDocumentCharsCount: state.updateDocumentCharsCount,
     updateDocumentSaveStatus: state.updateDocumentSaveStatus,
-    updateDocumentServerStatus: state.updateDocumentServerStatus,
     updateEditor: state.updateEditor,
     updateTocItems: state.updateTocItems,
     updateLastCursorPosRef: state.updateLastCursorPosRef,
@@ -128,7 +131,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
   });
 
   const buildNodeData = (text: string) => {
-    const { currentDocument } = useDocumentStore.getState();
+    const { currentDocument } = useDocumentStore.getState().documentStates[docId];
 
     return {
       id: genUniqueId(),
@@ -173,7 +176,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
       TableOfContents.configure({
         getIndex: getHierarchicalIndexes,
         onUpdate(content) {
-          documentStore.updateTocItems(content);
+          documentStore.updateTocItems(docId, content);
         },
       }),
     ],
@@ -208,11 +211,11 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
       },
     );
 
-    documentStore.updateDocumentCharsCount(wordsCount(markdown));
+    documentStore.updateDocumentCharsCount(docId, wordsCount(markdown));
     window.localStorage.setItem('html-content', await highlightCodeblocks(editor.getHTML()));
     window.localStorage.setItem('novel-content', JSON.stringify(json));
     window.localStorage.setItem('markdown', editor.storage.markdown.getMarkdown());
-    documentStore.updateDocumentSaveStatus('Saved');
+    documentStore.updateDocumentSaveStatus(docId, 'Saved');
   }, 500);
 
   useEffect(() => {
@@ -243,7 +246,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
         const afterSelectionContent = getMarkdownSlice(to, editor?.state?.doc?.content?.size);
         const selectedContent = getMarkdownSlice(from, to);
 
-        documentStore.updateLastCursorPosRef(lastCursorPosRef.current);
+        documentStore.updateLastCursorPosRef(docId, lastCursorPosRef.current);
         contextPanelStore.updateCurrentSelectionContent(selectedContent);
         contextPanelStore.updateBeforeSelectionNoteContent(prevSelectionContent);
         contextPanelStore.updateAfterSelectionNoteContent(afterSelectionContent);
@@ -352,7 +355,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
             extensions={extensions}
             onCreate={({ editor }) => {
               editorRef.current = editor;
-              documentStore.updateEditor(editor);
+              documentStore.updateEditor(docId, editor);
             }}
             editable={!readOnly}
             className="w-full h-full border-muted sm:rounded-lg"
@@ -368,7 +371,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
             }}
             onUpdate={({ editor }) => {
               debouncedUpdates(editor);
-              documentStore.updateDocumentSaveStatus('Unsaved');
+              documentStore.updateDocumentSaveStatus(docId, 'Unsaved');
             }}
             slotAfter={<ImageResizer />}
           >
@@ -388,31 +391,103 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
   );
 };
 
+export const ActionDropdown = ({ doc, node }: { doc: Document; node?: CanvasNode }) => {
+  const { editor } = useDocumentStoreShallow((state) => ({
+    editor: state.documentStates[doc?.docId]?.editor,
+  }));
+  const { t } = useTranslation();
+  const [popupVisible, setPopupVisible] = useState(false);
+  const handleDeleteNode = node ? useDeleteNode(node, node.type) : undefined;
+
+  const handleDelete = async () => {
+    const { data } = await getClient().deleteDocument({
+      body: {
+        docId: doc.docId,
+      },
+    });
+    if (data?.success) {
+      if (handleDeleteNode) {
+        handleDeleteNode();
+      } else {
+        message.success(t('common.putSuccess'));
+      }
+    }
+  };
+
+  const handleCopy = () => {
+    const markdown = editor?.storage.markdown.getMarkdown();
+    copyToClipboard(markdown);
+    message.success({ content: t('contentDetail.item.copySuccess') });
+  };
+
+  const items: MenuProps['items'] = [
+    {
+      key: 'copy',
+      label: (
+        <div className="flex items-center" onClick={handleCopy}>
+          <IconCopy size={16} className="mr-2" />
+          {t('contentDetail.item.copyContent')}
+        </div>
+      ),
+    },
+    {
+      label: (
+        <Popconfirm
+          title={t('workspace.deleteDropdownMenu.deleteConfirmForDocument')}
+          onConfirm={handleDelete}
+          onCancel={() => setPopupVisible(false)}
+          okText={t('common.confirm')}
+          cancelText={t('common.cancel')}
+        >
+          <div className="flex items-center text-red-600">
+            <IconDelete size={16} className="mr-2" />
+            {t('workspace.deleteDropdownMenu.delete')}
+          </div>
+        </Popconfirm>
+      ),
+      key: 'delete',
+    },
+  ];
+
+  const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
+    if (info.source === 'trigger') {
+      setPopupVisible(open);
+    }
+  };
+
+  return (
+    <Dropdown
+      trigger={['click']}
+      open={popupVisible}
+      onOpenChange={handleOpenChange}
+      menu={{
+        items,
+      }}
+    >
+      <Button type="text" icon={<IconMoreHorizontal />} />
+    </Dropdown>
+  );
+};
+
 export const CanvasStatusBar = ({
   deckSize,
   setDeckSize,
+  docId,
+  node,
 }: {
   deckSize: number;
   setDeckSize: (size: number) => void;
+  docId: string;
+  node?: CanvasNode;
 }) => {
-  const {
-    currentDocument,
-    updateCurrentDocument,
-    documentServerStatus,
-    documentCharsCount,
-    documentSaveStatus,
-    editor,
-    tocItems,
-  } = useDocumentStoreShallow((state) => ({
-    currentDocument: state.currentDocument,
-    updateCurrentDocument: state.updateCurrentDocument,
-    documentServerStatus: state.documentServerStatus,
-    documentCharsCount: state.documentCharsCount,
-    documentSaveStatus: state.documentSaveStatus,
-    editor: state.editor,
-    tocItems: state.tocItems,
-  }));
-  const { handleDeleteTab } = useCanvasTabs();
+  const { currentDocument, updateCurrentDocument, documentServerStatus, documentCharsCount, documentSaveStatus } =
+    useDocumentStoreShallow((state) => ({
+      currentDocument: state.documentStates[docId]?.currentDocument,
+      updateCurrentDocument: state.updateCurrentDocument,
+      documentServerStatus: state.documentStates[docId]?.documentServerStatus,
+      documentCharsCount: state.documentStates[docId]?.documentCharsCount,
+      documentSaveStatus: state.documentStates[docId]?.documentSaveStatus,
+    }));
   const { t } = useTranslation();
 
   const { createShare } = useHandleShare();
@@ -497,7 +572,7 @@ export const CanvasStatusBar = ({
           <div
             className="note-status-bar-item"
             onClick={() => {
-              updateCurrentDocument({ ...currentDocument, readOnly: !currentDocument?.readOnly });
+              updateCurrentDocument(docId, { ...currentDocument, readOnly: !currentDocument?.readOnly });
               currentDocument?.readOnly
                 ? message.success(t('knowledgeBase.note.edit'))
                 : message.warning(t('knowledgeBase.note.readOnly'));
@@ -515,32 +590,27 @@ export const CanvasStatusBar = ({
 
         <div className="note-status-bar-item">
           <Divider type="vertical" />
-          <DeleteDropdownMenu
-            type="document"
-            canCopy={true}
-            data={currentDocument}
-            postDeleteList={(document: Document) => handleDeleteTab(document.docId)}
-          />
+          <ActionDropdown doc={currentDocument} node={node} />
         </div>
       </div>
     </div>
   );
 };
 
-export const DocumentEditorHeader = () => {
+export const DocumentEditorHeader = ({ docId }: { docId: string }) => {
   const { currentDocument, updateCurrentDocument } = useDocumentStoreShallow((state) => ({
-    currentDocument: state.currentDocument,
+    currentDocument: state.documentStates[docId]?.currentDocument,
     updateCurrentDocument: state.updateCurrentDocument,
   }));
 
   const onTitleChange = (newTitle: string) => {
-    const currentDocument = useDocumentStore.getState().currentDocument;
+    const currentDocument = useDocumentStore.getState().documentStates[docId]?.currentDocument;
 
     if (!currentDocument) {
       return;
     }
 
-    updateCurrentDocument({ ...currentDocument, title: newTitle });
+    updateCurrentDocument(docId, { ...currentDocument, title: newTitle });
   };
 
   useEffect(() => {
@@ -568,59 +638,43 @@ export const DocumentEditorHeader = () => {
   );
 };
 
-export const DocumentEditor = (props: { docId: string; deckSize: number; setDeckSize: (size: number) => void }) => {
-  const { docId, deckSize, setDeckSize } = props;
+export const DocumentEditor = (props: {
+  docId: string;
+  deckSize: number;
+  setDeckSize: (size: number) => void;
+  node?: CanvasNode;
+}) => {
+  const { docId, deckSize, setDeckSize, node } = props;
 
   const { t } = useTranslation();
 
   const {
     currentDocument: document,
-    isRequesting,
     documentServerStatus,
     updateCurrentDocument,
-    updateIsRequesting,
-    updateDocumentServerStatus,
     resetState,
   } = useDocumentStoreShallow((state) => ({
-    currentDocument: state.currentDocument,
-    isRequesting: state.isRequesting,
+    currentDocument: state.documentStates[docId]?.currentDocument,
+    documentServerStatus: state.documentStates[docId]?.documentServerStatus,
     newDocumentCreating: state.newDocumentCreating,
-    documentServerStatus: state.documentServerStatus,
     updateCurrentDocument: state.updateCurrentDocument,
-    updateIsRequesting: state.updateIsRequesting,
-    updateDocumentServerStatus: state.updateDocumentServerStatus,
     resetState: state.resetState,
   }));
   const prevNote = useRef<Document>();
 
+  const { data: documentDetail, isLoading } = useGetDocumentDetail({ query: { docId } });
+
+  useEffect(() => {
+    if (documentDetail?.data) {
+      updateCurrentDocument(docId, documentDetail.data);
+    }
+  }, [documentDetail?.data, docId]);
+
   useEffect(() => {
     return () => {
-      resetState();
+      resetState(docId);
     };
   }, []);
-
-  useEffect(() => {
-    // updateCurrentCanvas(null);
-
-    const fetchData = async () => {
-      updateIsRequesting(true);
-      const { data } = await getClient().getDocumentDetail({
-        query: { docId },
-      });
-      const document = data?.data;
-      if (document) {
-        updateCurrentDocument(document);
-        updateIsRequesting(false);
-      }
-    };
-    if (docId && document?.docId !== docId) {
-      fetchData();
-    }
-
-    return () => {
-      updateIsRequesting(false);
-    };
-  }, [docId, document?.docId]);
 
   const debouncedUpdateDocument = useDebouncedCallback(async (document: Document) => {
     const res = await getClient().updateDocument({
@@ -646,17 +700,17 @@ export const DocumentEditor = (props: { docId: string; deckSize: number; setDeck
   return (
     <DocumentProvider docId={docId}>
       <div className="flex flex-col ai-note-container">
-        <CanvasStatusBar deckSize={deckSize} setDeckSize={setDeckSize} />
+        <CanvasStatusBar deckSize={deckSize} setDeckSize={setDeckSize} docId={docId} node={node} />
         <div className="overflow-auto flex-grow">
           <Spin
             className="document-editor-spin"
             tip={t('knowledgeBase.note.connecting')}
-            loading={!document || isRequesting || documentServerStatus !== 'connected'}
+            loading={!document || isLoading || documentServerStatus !== 'connected'}
             style={{ height: '100%', width: '100%' }}
           >
             <div className="ai-note-editor">
               <div className="ai-note-editor-container">
-                <DocumentEditorHeader />
+                <DocumentEditorHeader docId={docId} />
                 <CollaborativeEditor docId={docId} />
               </div>
             </div>

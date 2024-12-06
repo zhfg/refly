@@ -24,6 +24,7 @@ import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-a
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { HiOutlineDocumentText, HiOutlineSquare3Stack3D } from 'react-icons/hi2';
+import { useTranslation } from 'react-i18next';
 
 // Define background colors for different node types
 const NODE_COLORS: Record<CanvasNodeType, string> = {
@@ -125,6 +126,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
   const IconComponent = getNodeIcon(node);
   const nodeColor = NODE_COLORS[node.type];
   const nodeTitle = getNodeTitle(node);
+  const { t } = useTranslation();
 
   // Add hooks for context and delete actions
   const handleAddToContext = useAddToContext(node, node.type);
@@ -137,7 +139,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
       label: (
         <div className="flex items-center gap-2 whitespace-nowrap">
           <FilePlus className="w-4 h-4 flex-shrink-0" />
-          Add to Context
+          {t('canvas.nodeActions.addToContext')}
         </div>
       ),
       onClick: handleAddToContext,
@@ -147,7 +149,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
       label: (
         <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
           <Trash2 className="w-4 h-4 flex-shrink-0" />
-          Delete
+          {t('canvas.nodeActions.delete')}
         </div>
       ),
       onClick: handleDelete,
@@ -171,7 +173,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
       {/* Right: Action Buttons */}
       <div className="flex items-center gap-1">
         {onPin && (
-          <Tooltip title={isPinned ? 'Unpin' : 'Pin'}>
+          <Tooltip title={isPinned ? t('canvas.nodePreview.unpin') : t('canvas.nodePreview.pin')}>
             <Button
               type="text"
               className={`p-1.5 hover:bg-gray-100 ${isPinned ? 'text-primary-600' : 'text-gray-500'}`}
