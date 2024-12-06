@@ -79,11 +79,13 @@ export const ContextManager = () => {
     <div className="flex flex-col h-full p-2 px-3 launchpad-context-manager">
       <div className="flex flex-col context-content">
         <div className="flex flex-wrap content-start gap-1 w-full context-items-container">
-          <ChatHistorySwitch
-            chatHistoryOpen={chatHistoryOpen}
-            setChatHistoryOpen={setChatHistoryOpen}
-            items={historyItems}
-          />
+          {historyItems?.length > 0 && (
+            <ChatHistorySwitch
+              chatHistoryOpen={chatHistoryOpen}
+              setChatHistoryOpen={setChatHistoryOpen}
+              items={historyItems}
+            />
+          )}
           <AddBaseMarkContext />
           {selectedContextItems?.map((item) => (
             <ContextItem

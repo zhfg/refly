@@ -8,7 +8,9 @@ import {
   HiMiniPlayCircle,
   HiPlus,
 } from 'react-icons/hi2';
-import { LuMoreVertical, LuMoreHorizontal, LuSearch, LuSettings, LuCheck } from 'react-icons/lu';
+import { IoIosMore } from 'react-icons/io';
+import { HiOutlineReply } from 'react-icons/hi';
+import { LuSearch, LuSettings, LuCheck } from 'react-icons/lu';
 
 import { RiDoubleQuotesL, RiDeleteBinLine } from 'react-icons/ri';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
@@ -29,8 +31,8 @@ export const IconText = BiText;
 export const IconPlus = HiPlus;
 export const IconCheck = LuCheck;
 export const IconPlay = HiMiniPlayCircle;
-export const IconMoreVertical = LuMoreVertical;
-export const IconMoreHorizontal = LuMoreHorizontal;
+export const IconReply = HiOutlineReply;
+export const IconMoreHorizontal = IoIosMore;
 export const IconEdit = PiNotePencil;
 export const IconDelete = RiDeleteBinLine;
 export const IconSearch = LuSearch;
