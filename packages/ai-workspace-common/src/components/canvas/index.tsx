@@ -150,7 +150,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
       addNode(pendingNode);
       clearPendingNode();
     }
-  }, [pendingNode, addNode, setSelectedNode, clearPendingNode]);
+  }, [pendingNode]);
 
   return (
     <div className="w-full h-screen relative flex flex-col overflow-hidden">
