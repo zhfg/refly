@@ -42,9 +42,11 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, onSelectionChange, addNode } =
     useCanvasControl(canvasId);
 
-  const { pinnedNodes, showPreview } = useCanvasStoreShallow((state) => ({
+  const { pinnedNodes, showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow((state) => ({
     pinnedNodes: state.data[canvasId]?.pinnedNodes,
     showPreview: state.showPreview,
+    showLaunchpad: state.showLaunchpad,
+    showMaxRatio: state.showMaxRatio,
   }));
 
   const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } = useSiderStoreShallow(
@@ -218,14 +220,19 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           />
         </ReactFlow>
 
-        <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
-          <LaunchPad />
-        </div>
+        {showLaunchpad && (
+          <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
+            <LaunchPad />
+          </div>
+        )}
       </div>
 
       {showPreview && (
         <div
-          className="absolute top-[64px] bottom-0 right-2 overflow-x-auto max-w-[900px] preview-container"
+          className={`absolute top-[64px] bottom-0 right-2 overflow-x-auto preview-container`}
+          style={{
+            maxWidth: showMaxRatio ? '900px' : '440px',
+          }}
           onScroll={(e) => updateIndicators(e.currentTarget)}
         >
           <div className="relative h-full">
