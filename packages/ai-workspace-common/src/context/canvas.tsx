@@ -1,16 +1,14 @@
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
-import * as Y from 'yjs';
 import { useCookie } from 'react-use';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/types';
 import { Edge } from 'node_modules/@xyflow/react/dist/esm/types';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
+import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 interface CanvasContextType {
   canvasId: string;
   provider: HocuspocusProvider;
-  yNodes: Y.Array<CanvasNode>;
-  yEdges: Y.Array<Edge>;
 }
 
 const CanvasContext = createContext<CanvasContextType | null>(null);
@@ -26,26 +24,61 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     });
   }, [canvasId, token]);
 
-  useEffect(() => {
-    return () => {
-      if (provider) {
-        provider.forceSync();
-        provider.destroy();
-      }
-    };
-  }, [canvasId, token]);
+  const { setNodes, setEdges, setNodesSynced, setEdgesSynced } = useCanvasStoreShallow((state) => ({
+    setNodes: state.setNodes,
+    setEdges: state.setEdges,
+    setNodesSynced: state.setNodesSynced,
+    setEdgesSynced: state.setEdgesSynced,
+  }));
 
-  // Safely access provider after initialization
-  const ydoc = provider?.document;
-  const yNodes = ydoc?.getArray<CanvasNode<any>>('nodes');
-  const yEdges = ydoc?.getArray<Edge>('edges');
+  // Subscribe to yjs document changes
+  useEffect(() => {
+    const ydoc = provider?.document;
+    if (!ydoc) return;
+
+    const nodesArray = ydoc.getArray<CanvasNode<any>>('nodes');
+    const edgesArray = ydoc.getArray<Edge>('edges');
+
+    // Initial state
+    setNodes(canvasId, nodesArray.toJSON());
+    setEdges(canvasId, edgesArray.toJSON());
+
+    const nodesObserverCallback = () => {
+      const { data } = useCanvasStore.getState();
+      if (data[canvasId]?.nodesSynced) return;
+
+      setNodes(canvasId, nodesArray.toJSON());
+      setNodesSynced(canvasId, true);
+      nodesArray.unobserve(nodesObserverCallback);
+    };
+
+    const edgesObserverCallback = () => {
+      const { data } = useCanvasStore.getState();
+      if (data[canvasId]?.edgesSynced) return;
+
+      setEdges(canvasId, edgesArray.toJSON());
+      setEdgesSynced(canvasId, true);
+      edgesArray.unobserve(edgesObserverCallback);
+    };
+
+    nodesArray.observe(nodesObserverCallback);
+    edgesArray.observe(edgesObserverCallback);
+
+    return () => {
+      setNodesSynced(canvasId, false);
+      setEdgesSynced(canvasId, false);
+
+      provider.forceSync();
+      provider.destroy();
+    };
+  }, [provider, canvasId, setNodes, setEdges, setNodesSynced, setEdgesSynced]);
 
   // Add null check before rendering
-  if (!provider || !yNodes || !yEdges) {
+  if (!provider) {
     return null;
   }
 
-  return <CanvasContext.Provider value={{ canvasId, provider, yNodes, yEdges }}>{children}</CanvasContext.Provider>;
+  return <CanvasContext.Provider value={{ canvasId, provider }}>{children}</CanvasContext.Provider>;
 };
 
 export const useCanvasContext = () => {

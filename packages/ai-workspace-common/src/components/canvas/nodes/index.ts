@@ -1,5 +1,4 @@
 import { NodeTypes } from '@xyflow/react';
-import { v4 as UUIDV4 } from 'uuid';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { DocumentNode } from './document';
 import { ResourceNode } from './resource';
@@ -17,6 +16,7 @@ import {
   ResponseNodeMeta,
 } from './types';
 import { t } from 'i18next';
+import { genUniqueId } from '@refly-packages/utils/id';
 
 // Export all components and types
 export * from './types';
@@ -52,7 +52,7 @@ export const prepareNodeData = <T extends CanvasNodeType>({
   selected?: boolean;
 }) => {
   return {
-    id: `node-${UUIDV4()}`,
+    id: `node-${genUniqueId()}`,
     type,
     position,
     data,

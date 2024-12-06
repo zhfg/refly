@@ -39,7 +39,7 @@ const selectionStyles = `
 `;
 
 const Flow = ({ canvasId }: { canvasId: string }) => {
-  const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, onSelectionChange, addNode } =
+  const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, addNode } =
     useCanvasControl(canvasId);
 
   const { pinnedNodes, showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow((state) => ({
@@ -173,7 +173,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           onConnect={onConnect}
           onNodeClick={onNodeClick}
           nodeDragThreshold={10}
-          // onSelectionChange={onSelectionChange}
         >
           <Background />
           <MiniMap

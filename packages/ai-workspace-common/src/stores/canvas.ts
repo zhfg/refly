@@ -6,7 +6,9 @@ import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canva
 
 interface CanvasData {
   nodes: CanvasNode<any>[];
+  nodesSynced: boolean;
   edges: Edge[];
+  edgesSynced: boolean;
   mode: 'pointer' | 'hand';
   pinnedNodes: CanvasNode<any>[];
 }
@@ -18,7 +20,9 @@ export interface CanvasState {
   showLaunchpad: boolean;
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
+  setNodesSynced: (canvasId: string, synced: boolean) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
+  setEdgesSynced: (canvasId: string, synced: boolean) => void;
   setMode: (canvasId: string, mode: 'pointer' | 'hand') => void;
   addPinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
   removePinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
@@ -27,16 +31,15 @@ export interface CanvasState {
   setShowLaunchpad: (show: boolean) => void;
 }
 
-const defaultState: () => CanvasData = () => ({
+const defaultCanvasState: () => CanvasData = () => ({
   nodes: [],
+  nodesSynced: false,
   edges: [],
+  edgesSynced: false,
   selectedNode: null,
   mode: 'hand',
   selectedNodes: [],
   pinnedNodes: [],
-  showPreview: true,
-  showMaxRatio: true,
-  showLaunchpad: true,
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -60,27 +63,37 @@ export const useCanvasStore = create<CanvasState>()(
       }),
     setNodes: (canvasId, nodes) =>
       set((state) => {
-        state.data[canvasId] ??= defaultState();
+        state.data[canvasId] ??= defaultCanvasState();
         state.data[canvasId].nodes = nodes;
+      }),
+    setNodesSynced: (canvasId, synced) =>
+      set((state) => {
+        state.data[canvasId] ??= defaultCanvasState();
+        state.data[canvasId].nodesSynced = synced;
       }),
     setEdges: (canvasId, edges) =>
       set((state) => {
-        state.data[canvasId] ??= defaultState();
+        state.data[canvasId] ??= defaultCanvasState();
         state.data[canvasId].edges = edges;
+      }),
+    setEdgesSynced: (canvasId, synced) =>
+      set((state) => {
+        state.data[canvasId] ??= defaultCanvasState();
+        state.data[canvasId].edgesSynced = synced;
       }),
     setMode: (canvasId, mode) =>
       set((state) => {
-        state.data[canvasId] ??= defaultState();
+        state.data[canvasId] ??= defaultCanvasState();
         state.data[canvasId].mode = mode;
       }),
     addPinnedNode: (canvasId, node) =>
       set((state) => {
-        state.data[canvasId] ??= defaultState();
+        state.data[canvasId] ??= defaultCanvasState();
         state.data[canvasId].pinnedNodes.unshift(node);
       }),
     removePinnedNode: (canvasId, node) =>
       set((state) => {
-        state.data[canvasId] ??= defaultState();
+        state.data[canvasId] ??= defaultCanvasState();
         state.data[canvasId].pinnedNodes = state.data[canvasId].pinnedNodes.filter((n) => n.id !== node.id);
       }),
   })),
