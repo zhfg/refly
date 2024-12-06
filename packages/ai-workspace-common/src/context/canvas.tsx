@@ -36,12 +36,8 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     const ydoc = provider?.document;
     if (!ydoc) return;
 
-    const nodesArray = ydoc.getArray<CanvasNode<any>>('nodes');
+    const nodesArray = ydoc.getArray<CanvasNode>('nodes');
     const edgesArray = ydoc.getArray<Edge>('edges');
-
-    // Initial state
-    setNodes(canvasId, nodesArray.toJSON());
-    setEdges(canvasId, edgesArray.toJSON());
 
     const nodesObserverCallback = () => {
       const { data } = useCanvasStore.getState();
