@@ -14,6 +14,8 @@ interface CanvasData {
 export interface CanvasState {
   data: Record<string, CanvasData>;
   showPreview: boolean;
+  showMaxRatio: boolean;
+  showLaunchpad: boolean;
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -21,6 +23,8 @@ export interface CanvasState {
   addPinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
   removePinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
   setShowPreview: (show: boolean) => void;
+  setShowMaxRatio: (show: boolean) => void;
+  setShowLaunchpad: (show: boolean) => void;
 }
 
 const defaultState: () => CanvasData = () => ({
@@ -30,16 +34,29 @@ const defaultState: () => CanvasData = () => ({
   mode: 'hand',
   selectedNodes: [],
   pinnedNodes: [],
+  showPreview: true,
+  showMaxRatio: true,
+  showLaunchpad: true,
 });
 
 export const useCanvasStore = create<CanvasState>()(
   immer((set) => ({
     data: {},
     showPreview: true,
+    showMaxRatio: true,
+    showLaunchpad: true,
 
     setShowPreview: (show) =>
       set((state) => {
         state.showPreview = show;
+      }),
+    setShowMaxRatio: (show) =>
+      set((state) => {
+        state.showMaxRatio = show;
+      }),
+    setShowLaunchpad: (show) =>
+      set((state) => {
+        state.showLaunchpad = show;
       }),
     setNodes: (canvasId, nodes) =>
       set((state) => {

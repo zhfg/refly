@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { FC, useState } from 'react';
 
 import { PiShootingStar } from 'react-icons/pi';
-import { MdOutlineHideImage } from 'react-icons/md';
+import { MdOutlineHideImage, MdOutlineAspectRatio } from 'react-icons/md';
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
 import {
   IconCanvas,
@@ -51,10 +51,15 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   const canvasTitle = ydoc?.getText('title');
 
   // const { onLayout } = useCanvasControl();
-  const { showPreview, setShowPreview } = useCanvasStoreShallow((state) => ({
-    showPreview: state.showPreview,
-    setShowPreview: state.setShowPreview,
-  }));
+  const { showPreview, setShowPreview, showMaxRatio, setShowMaxRatio, showLaunchpad, setShowLaunchpad } =
+    useCanvasStoreShallow((state) => ({
+      showPreview: state.showPreview,
+      setShowPreview: state.setShowPreview,
+      showMaxRatio: state.showMaxRatio,
+      setShowMaxRatio: state.setShowMaxRatio,
+      showLaunchpad: state.showLaunchpad,
+      setShowLaunchpad: state.setShowLaunchpad,
+    }));
   const { deleteCanvas } = useDeleteCanvas();
 
   const [editedTitle, setEditedTitle] = useState('');
@@ -220,13 +225,29 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
 
         <div className="flex items-center gap-2">
           <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
-            <Button type="text" icon={<PiShootingStar />} className="w-8 h-6 flex items-center justify-center" />
+            <Tooltip title={t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`)}>
+              <Button
+                type="text"
+                icon={<IconCanvas />}
+                className="w-8 h-6 flex items-center justify-center"
+                style={{ color: showLaunchpad ? '#000' : '#9CA3AF' }}
+                onClick={() => setShowLaunchpad(!showLaunchpad)}
+              />
+            </Tooltip>
             <Divider type="vertical" />
             <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)}>
               <Button
                 type="text"
                 icon={<MdOutlineHideImage style={{ color: showPreview ? '#9CA3AF' : '#000' }} />}
                 onClick={() => setShowPreview(!showPreview)}
+                className="w-8 h-6 flex items-center justify-center mr-1"
+              />
+            </Tooltip>
+            <Tooltip title={t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`)}>
+              <Button
+                type="text"
+                icon={<MdOutlineAspectRatio style={{ color: showMaxRatio ? '#000' : '#9CA3AF' }} />}
+                onClick={() => setShowMaxRatio(!showMaxRatio)}
                 className="w-8 h-6 flex items-center justify-center"
               />
             </Tooltip>

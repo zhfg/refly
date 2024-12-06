@@ -444,6 +444,10 @@ const translations = {
       addDocument: 'Add Document',
       hidePreview: 'Hide Node Preview',
       showPreview: 'Show Node Preview',
+      hideMaxRatio: 'Cancel Preview Max Ratio',
+      showMaxRatio: 'Use Preview Max Ratio',
+      hideLaunchpad: 'Hide Ask AI',
+      showLaunchpad: 'Show Ask AI',
       editTitle: 'Edit Canvas Title',
       editTitlePlaceholder: 'Please enter the title of the canvas',
     },
@@ -1135,6 +1139,9 @@ const translations = {
     quickActions: 'Quick Actions',
     selectedSkillHeader: {
       title: 'Chat with {{name}}',
+    },
+    recommendQuestions: {
+      refresh: 'Refresh',
     },
     greeting: 'Hello, {{name}}',
     addContext: 'Add Context',

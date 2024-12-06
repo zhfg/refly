@@ -11,10 +11,10 @@ import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@ref
 // Schema for recommended questions with reasoning
 const recommendQuestionsSchema = z.object({
   recommended_questions: z
-    .array(z.string().describe('A concise follow-up question (10-30 characters)'))
+    .array(z.string().describe('A concise recommended question (10-30 characters)'))
     .min(3)
     .max(6)
-    .describe('List of recommended follow-up questions'),
+    .describe('List of recommended questions'),
   reasoning: z.string().describe('Brief explanation of why these questions are recommended'),
 });
 
@@ -23,10 +23,24 @@ export class RecommendQuestions extends BaseSkill {
 
   icon: Icon = { type: 'emoji', value: '❓' };
 
-  description = 'Generate relevant follow-up questions based on conversation context';
+  description = 'Generate relevant recommended questions based on conversation context';
 
   configSchema: SkillTemplateConfigDefinition = {
-    items: [],
+    items: [
+      {
+        key: 'refresh',
+        inputMode: 'switch',
+        defaultValue: false,
+        labelDict: {
+          en: 'Refresh',
+          'zh-CN': '刷新',
+        },
+        descriptionDict: {
+          en: 'Refresh the recommended questions',
+          'zh-CN': '刷新推荐的提问',
+        },
+      },
+    ],
   };
 
   invocationConfig: SkillInvocationConfig = {};
@@ -41,8 +55,10 @@ export class RecommendQuestions extends BaseSkill {
 
   // Main method to generate related questions
   genRecommendQuestions = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { messages = [] } = state;
-    const { locale = 'en', chatHistory = [] } = config.configurable || {};
+    const { messages = [], query } = state;
+    const { locale = 'en', chatHistory = [], tplConfig } = config.configurable || {};
+
+    const isRefresh = tplConfig?.refresh?.value;
 
     // Generate title first
     config.metadata.step = { name: 'recommendQuestions' };
@@ -53,10 +69,14 @@ export class RecommendQuestions extends BaseSkill {
     const model = this.engine.chatModel({ temperature: 0.1 });
 
     const systemPrompt = `## Role
-You are an expert at analyzing conversations and generating relevant follow-up questions.
+You are an expert at analyzing conversations and generating relevant recommended questions.
 
 ## Task
-Generate 3 highly relevant follow-up questions based on the provided context (if any) or initial query.
+Generate 3 highly relevant recommended questions based on:
+- Current query (if provided)
+- Conversation history (if available)
+- Previous recommendations feedback (if refresh requested)
+
 Each question should:
 - Be concise (30-100 characters)
 - Be contextually relevant
@@ -73,51 +93,20 @@ Generate questions with reasoning in JSON format:
 ## Guidelines
 - Questions should be specific and focused
 - Avoid repetitive or overly general questions
-- Ensure questions naturally flow from the conversation or initial query
+- Ensure questions naturally flow from the conversation or query
 - Provide clear reasoning for the questions' relevance
-- IMPORTANT: Generate NEW questions based on the actual context, DO NOT copy from examples
-- Each question should be unique and specifically tailored to the current conversation
-
-## Examples (For Format Reference Only)
-IMPORTANT: These examples are only to demonstrate the expected format. 
-DO NOT reuse or modify these example questions. 
-Always generate completely new questions based on the actual conversation context.
-
-### Example 1: With Conversation History
-Input:
-CONVERSATION HISTORY:
-human: What are the best practices for React performance optimization?
-assistant: The key practices include using React.memo for component memoization, proper key usage in lists, and avoiding unnecessary re-renders through useCallback and useMemo hooks.
-
-Output:
-{
-  "recommended_questions": [
-    "How does React.memo work?",
-    "When to use useCallback?",
-    "Best practices for keys?"
-  ],
-  "reasoning": "These questions dive deeper into specific performance optimization techniques mentioned in the conversation."
+- Each question should be unique and specifically tailored
+${
+  isRefresh
+    ? '- Generate completely different questions from previous ones as user requested refresh\n- Focus on alternative angles and perspectives'
+    : ''
 }
 
-### Example 2: Without Conversation History
-Input:
-human: How to get started with TypeScript?
-
-Output:
-{
-  "recommended_questions": [
-    "TypeScript vs JavaScript?",
-    "Essential TS features?",
-    "Setup TS project?"
-  ],
-  "reasoning": "These questions cover fundamental aspects that beginners need to understand."
-}
-
-## IMPORTANT REMINDER:
-- The examples above are for format reference ONLY
-- Generate completely new and relevant questions based on the current context
-- Do not copy or paraphrase questions from the examples
-- Focus on the actual conversation content to create targeted, meaningful questions`;
+## Context Analysis Strategy
+1. If query exists: Focus on exploring related aspects and diving deeper into the query topic
+2. If chat history exists: Analyze conversation flow and suggest natural follow-up questions
+3. If both exist: Combine insights from query and conversation to generate comprehensive questions
+4. If neither exists: Generate engaging questions about general knowledge topics (e.g., technology, science, culture, daily life, current trends)`;
 
     try {
       // Prepare messages for context
@@ -125,15 +114,27 @@ Output:
         .map((msg) => `${msg?.getType?.()}: ${msg.content}`)
         .join('\n');
 
-      const prompt = `${systemPrompt}
+      const contextPrompt = `${systemPrompt}
 
+${query ? `CURRENT QUERY:\n${query}\n` : ''}
 ${contextMessages ? `CONVERSATION HISTORY:\n${contextMessages}\n` : ''}
-Please generate relevant follow-up questions in ${locale} language.`;
+${
+  isRefresh
+    ? 'NOTE: User requested new recommendations. Please generate completely different questions from previous ones.\n'
+    : ''
+}
+${
+  !query && !contextMessages
+    ? 'NOTE: No context or query provided. Generate interesting general knowledge questions that could spark engaging conversations.\n'
+    : ''
+}
+
+Please generate relevant recommended questions in ${locale} language.`;
 
       const result = await extractStructuredData(
         model,
         recommendQuestionsSchema,
-        prompt,
+        contextPrompt,
         config,
         3, // Max retries
       );

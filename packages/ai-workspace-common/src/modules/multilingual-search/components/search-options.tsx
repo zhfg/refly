@@ -82,7 +82,6 @@ export const SearchOptions = () => {
           maxTagTextLength={10}
           maxTagPlaceholder={(omittedValues) => `+${omittedValues.length} more`}
           popupClassName="search-language-dropdown"
-          showArrow
           filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
         />
       </div>
@@ -102,7 +101,6 @@ export const SearchOptions = () => {
           }}
           options={outputLanguageOptions}
           popupClassName="display-language-dropdown"
-          showArrow
           filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
         />
       </div>

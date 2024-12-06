@@ -42,9 +42,11 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, onSelectionChange, addNode } =
     useCanvasControl(canvasId);
 
-  const { pinnedNodes, showPreview } = useCanvasStoreShallow((state) => ({
+  const { pinnedNodes, showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow((state) => ({
     pinnedNodes: state.data[canvasId]?.pinnedNodes,
     showPreview: state.showPreview,
+    showLaunchpad: state.showLaunchpad,
+    showMaxRatio: state.showMaxRatio,
   }));
 
   const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } = useSiderStoreShallow(
@@ -148,7 +150,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
       addNode(pendingNode);
       clearPendingNode();
     }
-  }, [pendingNode, addNode, setSelectedNode, clearPendingNode]);
+  }, [pendingNode]);
 
   return (
     <div className="w-full h-screen relative flex flex-col overflow-hidden">
@@ -218,20 +220,25 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           />
         </ReactFlow>
 
-        <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
-          <LaunchPad />
-        </div>
+        {showLaunchpad && (
+          <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
+            <LaunchPad />
+          </div>
+        )}
       </div>
 
       {showPreview && (
         <div
-          className="absolute top-[64px] bottom-0 right-2 overflow-x-auto max-w-[900px] preview-container"
+          className={`absolute top-[64px] bottom-0 right-2 overflow-x-auto preview-container`}
+          style={{
+            maxWidth: showMaxRatio ? '900px' : '440px',
+          }}
           onScroll={(e) => updateIndicators(e.currentTarget)}
         >
           <div className="relative h-full">
             <div className="flex gap-2 h-full">
               {/* Left shadow and arrow indicator */}
-              {showLeftIndicator && (
+              {/* {showLeftIndicator && (
                 <div className="sticky left-0 top-0 w-12 h-full bg-gradient-to-r from-white to-transparent z-10 flex items-center justify-start pointer-events-none absolute">
                   <div className="text-gray-400 ml-2">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -245,7 +252,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
                     </svg>
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Preview Cards */}
               {selectedNodes?.map((node) =>
@@ -271,7 +278,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
               ))}
 
               {/* Right shadow and arrow indicator */}
-              {showRightIndicator && (
+              {/* {showRightIndicator && (
                 <div className="sticky right-0 top-0 w-12 h-full bg-gradient-to-l from-white to-transparent z-10 flex items-center justify-end pointer-events-none absolute">
                   <div className="text-gray-400 mr-2">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -285,7 +292,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
                     </svg>
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         </div>

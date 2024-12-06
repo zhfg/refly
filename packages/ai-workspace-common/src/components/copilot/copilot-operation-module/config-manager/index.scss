@@ -1,7 +1,7 @@
 .config-manager {
   padding: 12px 0 4px 0;
   margin: 8px 12px 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.15);
+  border-top: 1px dashed rgba(0, 0, 0, 0.15);
 
   &__items {
     display: flex;
