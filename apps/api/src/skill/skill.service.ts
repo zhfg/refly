@@ -481,14 +481,8 @@ export class SkillService {
   async populateSkillContext(user: User, context: SkillContext): Promise<SkillContext> {
     // Populate resources
     if (context.resources?.length > 0) {
-      // Query resources which are not populated
       const resourceIds = [
-        ...new Set(
-          context.resources
-            .filter((item) => !item.resource)
-            .map((item) => item.resourceId)
-            .filter((id) => id),
-        ),
+        ...new Set(context.resources.map((item) => item.resourceId).filter((id) => id)),
       ];
       const limit = pLimit(5);
       const resources = await Promise.all(
@@ -500,21 +494,13 @@ export class SkillService {
       resources.forEach((r) => resourceMap.set(r.resourceId, resourcePO2DTO(r)));
 
       context.resources.forEach((item) => {
-        if (item.resource) return;
         item.resource = resourceMap.get(item.resourceId);
       });
     }
 
     // Populate documents
     if (context.documents?.length > 0) {
-      const docIds = [
-        ...new Set(
-          context.documents
-            .filter((item) => !item.document)
-            .map((item) => item.docId)
-            .filter((id) => id),
-        ),
-      ];
+      const docIds = [...new Set(context.documents.map((item) => item.docId).filter((id) => id))];
       const limit = pLimit(5);
       const docs = await Promise.all(
         docIds.map((id) => limit(() => this.knowledge.getDocumentDetail(user, { docId: id }))),
@@ -523,7 +509,6 @@ export class SkillService {
       docs.forEach((d) => docMap.set(d.docId, documentPO2DTO(d)));
 
       context.documents.forEach((item) => {
-        if (item.document) return;
         item.document = docMap.get(item.docId);
       });
     }

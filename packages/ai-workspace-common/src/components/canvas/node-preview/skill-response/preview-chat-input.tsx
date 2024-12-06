@@ -32,8 +32,6 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
 
   const hideSelectedSkillHeader = !actionMeta || actionMeta?.name === 'commonQnA' || !actionMeta?.name;
 
-  console.log('historyItems', historyItems);
-
   return (
     <div className="ai-copilot-chat-container">
       <div className={cn('border border-solid border-gray-200 rounded-lg')}>

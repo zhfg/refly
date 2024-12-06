@@ -168,11 +168,11 @@ export type Resource = {
     /**
      * Resource creation time
      */
-    createdAt: string;
+    createdAt?: string;
     /**
      * Resource update time
      */
-    updatedAt: string;
+    updatedAt?: string;
     /**
      * Preview content for this resource
      */
@@ -212,15 +212,15 @@ export type Document = {
     /**
      * Whether this document is read-only
      */
-    readOnly: boolean;
+    readOnly?: boolean;
     /**
      * Document creation time
      */
-    createdAt: string;
+    createdAt?: string;
     /**
      * Document update time
      */
-    updatedAt: string;
+    updatedAt?: string;
 };
 
 export type Project = {

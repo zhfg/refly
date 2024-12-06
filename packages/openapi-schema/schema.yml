@@ -1802,8 +1802,6 @@ components:
         - resourceId
         - resourceType
         - title
-        - createdAt
-        - updatedAt
       properties:
         resourceId:
           type: string
@@ -1861,9 +1859,6 @@ components:
       required:
         - docId
         - title
-        - readOnly
-        - createdAt
-        - updatedAt
       properties:
         docId:
           type: string

@@ -78,7 +78,7 @@ export const ContextItem = ({
     >
       <Button
         className={cn(
-          'max-w-[200px] h-6 px-1 flex items-center border border-gray-200 rounded transition-all duration-300',
+          'max-w-40 h-6 px-1 flex items-center border border-gray-200 rounded transition-all duration-300',
           {
             'border-green-500': isActive,
             'border-red-300 bg-red-50 text-red-500': isLimit,
