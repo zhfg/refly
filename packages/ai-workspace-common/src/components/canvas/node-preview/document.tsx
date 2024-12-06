@@ -26,7 +26,7 @@ export const DocumentNodePreview = ({ nodeData }: DocumentNodePreviewProps) => {
 
   return (
     <div className="h-full overflow-hidden">
-      <DocumentEditor docId={entityId} deckSize={deckSize} setDeckSize={setDeckSize} node={nodeData.node} />
+      <DocumentEditor docId={entityId} deckSize={deckSize} setDeckSize={setDeckSize} node={node} />
       {/* <Splitter
         layout="vertical"
         onResize={(sizes) => {

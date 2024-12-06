@@ -82,12 +82,12 @@ export const useDocumentStore = create<DocumentBaseState>()(
         },
       })),
 
-    // canvases
     updateEditor: (docId: string, editor: EditorInstance) =>
       set((state) => ({
         ...state,
         documentStates: { ...state.documentStates, [docId]: { ...state.documentStates[docId], editor } },
       })),
+
     updateDocumentServerStatus: (docId: string, status: DocumentServerStatus) =>
       set((state) => ({
         ...state,
@@ -96,6 +96,7 @@ export const useDocumentStore = create<DocumentBaseState>()(
           [docId]: { ...state.documentStates[docId], documentServerStatus: status },
         },
       })),
+
     updateDocumentSaveStatus: (docId: string, status: DocumentSaveStatus) =>
       set((state) => ({
         ...state,
@@ -104,6 +105,7 @@ export const useDocumentStore = create<DocumentBaseState>()(
           [docId]: { ...state.documentStates[docId], documentSaveStatus: status },
         },
       })),
+
     updateDocumentCharsCount: (docId: string, count: number) =>
       set((state) => ({
         ...state,
@@ -112,11 +114,13 @@ export const useDocumentStore = create<DocumentBaseState>()(
           [docId]: { ...state.documentStates[docId], documentCharsCount: count },
         },
       })),
+
     updateLastCursorPosRef: (docId: string, pos: number) =>
       set((state) => ({
         ...state,
         documentStates: { ...state.documentStates, [docId]: { ...state.documentStates[docId], lastCursorPosRef: pos } },
       })),
+
     updateTocItems: (docId: string, items: TableOfContentsItem[]) =>
       set((state) => ({
         ...state,
@@ -124,8 +128,10 @@ export const useDocumentStore = create<DocumentBaseState>()(
       })),
 
     updateNewDocumentCreating: (creating: boolean) => set((state) => ({ ...state, newDocumentCreating: creating })),
+
     updateIsCreatingNewDocumentOnHumanMessage: (creating: boolean) =>
       set((state) => ({ ...state, isCreatingNewDocumentOnHumanMessage: creating })),
+
     updateIsAiEditing: (editing: boolean) => set((state) => ({ ...state, isAiEditing: editing })),
 
     resetState: (docId: string) =>

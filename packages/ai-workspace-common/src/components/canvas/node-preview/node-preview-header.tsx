@@ -145,7 +145,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
       onClick: handleAddToContext,
     },
     {
-      key: 'remove',
+      key: 'delete',
       label: (
         <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
           <Trash2 className="w-4 h-4 flex-shrink-0" />
