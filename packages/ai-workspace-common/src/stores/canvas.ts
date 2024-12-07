@@ -8,6 +8,7 @@ import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canva
 interface CanvasData {
   nodes: CanvasNode<any>[];
   edges: Edge[];
+  title: string;
   mode: 'pointer' | 'hand';
   pinnedNodes: CanvasNode<any>[];
 }
@@ -21,6 +22,7 @@ export interface CanvasState {
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
+  setTitle: (canvasId: string, title: string) => void;
   setCurrentCanvasId: (canvasId: string) => void;
   setMode: (canvasId: string, mode: 'pointer' | 'hand') => void;
   addPinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
@@ -32,12 +34,9 @@ export interface CanvasState {
 
 const defaultCanvasState: () => CanvasData = () => ({
   nodes: [],
-  nodesSynced: false,
   edges: [],
-  edgesSynced: false,
-  selectedNode: null,
+  title: '',
   mode: 'hand',
-  selectedNodes: [],
   pinnedNodes: [],
 });
 
@@ -75,6 +74,11 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.data[canvasId] ??= defaultCanvasState();
           state.data[canvasId].edges = edges;
+        }),
+      setTitle: (canvasId, title) =>
+        set((state) => {
+          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId].title = title;
         }),
       setMode: (canvasId, mode) =>
         set((state) => {

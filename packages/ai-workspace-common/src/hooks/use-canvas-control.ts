@@ -63,14 +63,31 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   const { canvasId: routeCanvasId } = useParams();
   const canvasId = selectedCanvasId ?? contextCanvasId ?? routeCanvasId;
 
-  const { data, setNodes, setEdges, setModeRaw } = useCanvasStoreShallow((state) => ({
+  const { data, setNodes, setEdges, setTitleRaw, setModeRaw } = useCanvasStoreShallow((state) => ({
     data: state.data,
     setNodes: state.setNodes,
     setEdges: state.setEdges,
+    setTitleRaw: state.setTitle,
     setModeRaw: state.setMode,
   }));
 
-  const debouncedSyncNodes = useDebouncedCallback((nodes: CanvasNode<any>[]) => {
+  const syncTitleToYDoc = useCallback((title: string) => {
+    ydoc?.transact(() => {
+      const yTitle = ydoc?.getText('title');
+      yTitle?.delete(0, yTitle?.length ?? 0);
+      yTitle?.insert(0, title);
+    });
+  }, []);
+
+  const setTitle = useCallback(
+    (title: string) => {
+      setTitleRaw(canvasId, title);
+      syncTitleToYDoc(title);
+    },
+    [canvasId, setTitleRaw, syncTitleToYDoc],
+  );
+
+  const syncNodesToYDoc = useDebouncedCallback((nodes: CanvasNode<any>[]) => {
     ydoc?.transact(() => {
       const yNodes = ydoc?.getArray('nodes');
       yNodes?.delete(0, yNodes?.length ?? 0);
@@ -78,7 +95,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     });
   }, 100);
 
-  const debouncedSyncEdges = useDebouncedCallback((edges: Edge[]) => {
+  const syncEdgesToYDoc = useDebouncedCallback((edges: Edge[]) => {
     ydoc?.transact(() => {
       const yEdges = ydoc?.getArray('edges');
       yEdges?.delete(0, yEdges?.length ?? 0);
@@ -220,8 +237,8 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
 
       setNodes(canvasId, layouted.nodes);
       setEdges(canvasId, layouted.edges);
-      debouncedSyncNodes(layouted.nodes);
-      debouncedSyncEdges(layouted.edges);
+      syncNodesToYDoc(layouted.nodes);
+      syncEdgesToYDoc(layouted.edges);
 
       window.requestAnimationFrame(() => {
         fitView({
@@ -240,9 +257,9 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const nodes = data[canvasId]?.nodes ?? [];
       const updatedNodes = applyNodeChanges(changes, nodes);
       setNodes(canvasId, updatedNodes);
-      debouncedSyncNodes(updatedNodes);
+      syncNodesToYDoc(updatedNodes);
     },
-    [canvasId, setNodes, debouncedSyncNodes],
+    [canvasId, setNodes, syncNodesToYDoc],
   );
 
   const onEdgesChange = useCallback(
@@ -251,9 +268,9 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const edges = data[canvasId]?.edges ?? [];
       const updatedEdges = applyEdgeChanges(changes, edges);
       setEdges(canvasId, updatedEdges);
-      debouncedSyncEdges(updatedEdges);
+      syncEdgesToYDoc(updatedEdges);
     },
-    [canvasId, setEdges, debouncedSyncEdges],
+    [canvasId, setEdges, syncEdgesToYDoc],
   );
 
   const onConnect = useCallback(
@@ -274,9 +291,9 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const edges = data[canvasId]?.edges ?? [];
       const updatedEdges = [...edges, newEdge];
       setEdges(canvasId, updatedEdges);
-      debouncedSyncEdges(updatedEdges);
+      syncEdgesToYDoc(updatedEdges);
     },
-    [canvasId, setEdges, debouncedSyncEdges],
+    [canvasId, setEdges, syncEdgesToYDoc],
   );
 
   const addNode = useCallback(
@@ -392,6 +409,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     addNode,
     mode,
     setMode,
+    setTitle,
     setSelectedNodes,
     addSelectedNode,
     addSelectedNodeByEntity,
