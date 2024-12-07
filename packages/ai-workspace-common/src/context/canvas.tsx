@@ -38,13 +38,17 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     const edgesArray = ydoc.getArray<Edge>('edges');
 
     const nodesObserverCallback = () => {
-      console.log('nodesObserverCallback', nodesArray.toJSON());
-      setNodes(canvasId, nodesArray.toJSON());
+      const nodes = nodesArray.toJSON();
+      const uniqueNodesMap = new Map();
+      nodes.forEach((node) => uniqueNodesMap.set(node.id, node));
+      setNodes(canvasId, Array.from(uniqueNodesMap.values()));
     };
 
     const edgesObserverCallback = () => {
-      console.log('edgesObserverCallback', edgesArray.toJSON());
-      setEdges(canvasId, edgesArray.toJSON());
+      const edges = edgesArray.toJSON();
+      const uniqueEdgesMap = new Map();
+      edges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
+      setEdges(canvasId, Array.from(uniqueEdgesMap.values()));
     };
 
     nodesArray.observe(nodesObserverCallback);

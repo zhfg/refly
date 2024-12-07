@@ -193,8 +193,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   const setNodeDataByEntity = useCallback(
     <T = any>(filter: CanvasNodeFilter, nodeData: Partial<CanvasNodeData<T>>) => {
       const { data } = useCanvasStore.getState();
-      console.log('setNodeDataByEntity canvasId', canvasId);
-      console.log('setNodeDataByEntity data', nodeData);
       const nodes = data[canvasId]?.nodes ?? [];
       const node = nodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId);
       if (node) {
@@ -291,8 +289,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const edges = data[canvasId]?.edges ?? [];
 
       const currentNodes = nodes;
-      console.log('addNode canvasId', canvasId);
-      console.log('addNode currentNodes', currentNodes);
 
       if (!node?.type || !node?.data) {
         console.warn('Invalid node data provided');
