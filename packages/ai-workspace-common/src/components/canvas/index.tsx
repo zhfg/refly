@@ -70,13 +70,13 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           padding: 0.2,
           duration: 200,
           minZoom: 0.1,
-          maxZoom: 2,
+          maxZoom: 1,
         });
       }
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, []); // Run only once on mount
+  }, [canvasId]); // Run only once on mount
 
   const defaultEdgeOptions = {
     style: EDGE_STYLES.default,
@@ -306,12 +306,13 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
 
 export const Canvas = (props: { canvasId: string }) => {
   const { canvasId } = props;
+  const setCurrentCanvasId = useCanvasStoreShallow((state) => state.setCurrentCanvasId);
 
   useEffect(() => {
     if (canvasId && canvasId !== 'empty') {
-      localStorage.setItem('currentCanvasId', canvasId);
+      setCurrentCanvasId(canvasId);
     } else {
-      localStorage.removeItem('currentCanvasId');
+      setCurrentCanvasId(null);
     }
   }, [canvasId]);
 

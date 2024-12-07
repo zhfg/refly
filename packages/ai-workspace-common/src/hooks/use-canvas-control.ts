@@ -71,7 +71,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   }));
 
   const debouncedSyncNodes = useDebouncedCallback((nodes: CanvasNode<any>[]) => {
-    console.log('sync nodes', nodes);
     ydoc?.transact(() => {
       const yNodes = ydoc?.getArray('nodes');
       yNodes?.delete(0, yNodes?.length ?? 0);
@@ -80,7 +79,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   }, 100);
 
   const debouncedSyncEdges = useDebouncedCallback((edges: Edge[]) => {
-    console.log('sync edges', edges);
     ydoc?.transact(() => {
       const yEdges = ydoc?.getArray('edges');
       yEdges?.delete(0, yEdges?.length ?? 0);
@@ -195,6 +193,8 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   const setNodeDataByEntity = useCallback(
     <T = any>(filter: CanvasNodeFilter, nodeData: Partial<CanvasNodeData<T>>) => {
       const { data } = useCanvasStore.getState();
+      console.log('setNodeDataByEntity canvasId', canvasId);
+      console.log('setNodeDataByEntity data', nodeData);
       const nodes = data[canvasId]?.nodes ?? [];
       const node = nodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId);
       if (node) {
@@ -203,7 +203,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
           ...nodeData,
           metadata: {
             ...node.data?.metadata,
-            ...data?.metadata,
+            ...nodeData?.metadata,
           },
         });
       }
@@ -289,7 +289,10 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
       const edges = data[canvasId]?.edges ?? [];
+
       const currentNodes = nodes;
+      console.log('addNode canvasId', canvasId);
+      console.log('addNode currentNodes', currentNodes);
 
       if (!node?.type || !node?.data) {
         console.warn('Invalid node data provided');
@@ -363,7 +366,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         });
       });
     },
-    [setNodes, setEdges, debouncedSyncNodes, debouncedSyncEdges],
+    [canvasId, setNodes, setEdges],
   );
 
   const nodes = data[canvasId]?.nodes ?? [];

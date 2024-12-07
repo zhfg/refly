@@ -4,7 +4,7 @@ import { HocuspocusProvider } from '@hocuspocus/provider';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/types';
 import { Edge } from 'node_modules/@xyflow/react/dist/esm/types';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
-import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 interface CanvasContextType {
   canvasId: string;
@@ -24,11 +24,9 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     });
   }, [canvasId, token]);
 
-  const { setNodes, setEdges, setNodesSynced, setEdgesSynced } = useCanvasStoreShallow((state) => ({
+  const { setNodes, setEdges } = useCanvasStoreShallow((state) => ({
     setNodes: state.setNodes,
     setEdges: state.setEdges,
-    setNodesSynced: state.setNodesSynced,
-    setEdgesSynced: state.setEdgesSynced,
   }));
 
   // Subscribe to yjs document changes
@@ -40,34 +38,26 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     const edgesArray = ydoc.getArray<Edge>('edges');
 
     const nodesObserverCallback = () => {
-      const { data } = useCanvasStore.getState();
-      if (data[canvasId]?.nodesSynced) return;
-
+      console.log('nodesObserverCallback', nodesArray.toJSON());
       setNodes(canvasId, nodesArray.toJSON());
-      setNodesSynced(canvasId, true);
-      nodesArray.unobserve(nodesObserverCallback);
     };
 
     const edgesObserverCallback = () => {
-      const { data } = useCanvasStore.getState();
-      if (data[canvasId]?.edgesSynced) return;
-
+      console.log('edgesObserverCallback', edgesArray.toJSON());
       setEdges(canvasId, edgesArray.toJSON());
-      setEdgesSynced(canvasId, true);
-      edgesArray.unobserve(edgesObserverCallback);
     };
 
     nodesArray.observe(nodesObserverCallback);
     edgesArray.observe(edgesObserverCallback);
 
     return () => {
-      setNodesSynced(canvasId, false);
-      setEdgesSynced(canvasId, false);
+      nodesArray.unobserve(nodesObserverCallback);
+      edgesArray.unobserve(edgesObserverCallback);
 
       provider.forceSync();
       provider.destroy();
     };
-  }, [provider, canvasId, setNodes, setEdges, setNodesSynced, setEdgesSynced]);
+  }, [provider, canvasId, setNodes, setEdges]);
 
   // Add null check before rendering
   if (!provider) {

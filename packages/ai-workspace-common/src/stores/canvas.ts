@@ -7,23 +7,21 @@ import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canva
 
 interface CanvasData {
   nodes: CanvasNode<any>[];
-  nodesSynced: boolean;
   edges: Edge[];
-  edgesSynced: boolean;
   mode: 'pointer' | 'hand';
   pinnedNodes: CanvasNode<any>[];
 }
 
 export interface CanvasState {
   data: Record<string, CanvasData>;
+  currentCanvasId: string | null;
   showPreview: boolean;
   showMaxRatio: boolean;
   showLaunchpad: boolean;
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
-  setNodesSynced: (canvasId: string, synced: boolean) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
-  setEdgesSynced: (canvasId: string, synced: boolean) => void;
+  setCurrentCanvasId: (canvasId: string) => void;
   setMode: (canvasId: string, mode: 'pointer' | 'hand') => void;
   addPinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
   removePinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
@@ -47,10 +45,15 @@ export const useCanvasStore = create<CanvasState>()(
   persist(
     immer((set) => ({
       data: {},
+      currentCanvasId: null,
       showPreview: true,
       showMaxRatio: true,
       showLaunchpad: true,
 
+      setCurrentCanvasId: (canvasId) =>
+        set((state) => {
+          state.currentCanvasId = canvasId;
+        }),
       setShowPreview: (show) =>
         set((state) => {
           state.showPreview = show;
@@ -68,20 +71,10 @@ export const useCanvasStore = create<CanvasState>()(
           state.data[canvasId] ??= defaultCanvasState();
           state.data[canvasId].nodes = nodes;
         }),
-      setNodesSynced: (canvasId, synced) =>
-        set((state) => {
-          state.data[canvasId] ??= defaultCanvasState();
-          state.data[canvasId].nodesSynced = synced;
-        }),
       setEdges: (canvasId, edges) =>
         set((state) => {
           state.data[canvasId] ??= defaultCanvasState();
           state.data[canvasId].edges = edges;
-        }),
-      setEdgesSynced: (canvasId, synced) =>
-        set((state) => {
-          state.data[canvasId] ??= defaultCanvasState();
-          state.data[canvasId].edgesSynced = synced;
         }),
       setMode: (canvasId, mode) =>
         set((state) => {
@@ -101,7 +94,7 @@ export const useCanvasStore = create<CanvasState>()(
     })),
     {
       name: 'canvas-storage',
-      partialize: (state) => ({ data: state.data }),
+      partialize: (state) => ({ data: state.data, currentCanvasId: state.currentCanvasId }),
     },
   ),
 );

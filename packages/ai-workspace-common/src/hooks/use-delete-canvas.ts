@@ -5,6 +5,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { useDebouncedCallback } from 'use-debounce';
 import { useNavigate } from 'react-router-dom';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 export const useDeleteCanvas = () => {
   const [isRemoving, setIsRemoving] = useState(false);
@@ -28,14 +29,14 @@ export const useDeleteCanvas = () => {
         message.success(t('canvas.action.deleteSuccess'));
 
         // Check and remove canvasId from localStorage if matches
-        const storedCanvasId = localStorage.getItem('currentCanvasId');
-        if (storedCanvasId === canvasId) {
-          localStorage.removeItem('currentCanvasId');
+        const { currentCanvasId, setCurrentCanvasId } = useCanvasStore.getState();
+        if (currentCanvasId === canvasId) {
+          setCurrentCanvasId(null);
         }
 
         getCanvasList();
 
-        if (storedCanvasId === canvasId) {
+        if (currentCanvasId === canvasId) {
           const firstCanvas = canvasList?.find((canvas) => canvas.id !== canvasId);
           if (firstCanvas?.id) {
             navigate(`/canvas/${firstCanvas?.id}`, { replace: true });
