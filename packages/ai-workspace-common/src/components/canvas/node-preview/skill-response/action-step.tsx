@@ -31,7 +31,7 @@ export const ActionStepCard = ({
   query: string;
 }) => {
   const { t } = useTranslation();
-  const { setSelectedNodeByEntity } = useCanvasControl();
+  const { addSelectedNodeByEntity } = useCanvasControl();
   const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
 
   useEffect(() => {
@@ -157,7 +157,7 @@ export const ActionStepCard = ({
           key={artifact.entityId}
           className="my-2 px-4 py-2 h-12 border border-solid border-gray-200 rounded-lg flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
           onClick={() => {
-            setSelectedNodeByEntity({ type: artifact.type, entityId: artifact.entityId });
+            addSelectedNodeByEntity({ type: artifact.type, entityId: artifact.entityId });
           }}
         >
           <div className="flex items-center space-x-2">

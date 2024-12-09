@@ -94,15 +94,41 @@ export const BaseSearchAndSelector = ({
     ...(selectedItems || []),
     ...(targetNodes?.filter((item) => !selectedItems.some((selected) => selected.id === item.id)) || []),
   ];
-  const sortedRenderData: RenderItem[] = sortedNodes.map((item) => ({
-    data: item,
-    type: item.type,
-    icon: getNodeIcon(item.type, { width: 12, height: 12 }),
-    isSelected: selectedItems.some((selected) => selected.id === item.id),
-    onItemClick: (item: CanvasNode) => {
-      onSelect(item);
-    },
-  }));
+  // const sortedRenderData: RenderItem[] = sortedNodes.map((item) => ({
+  //   data: item,
+  //   type: item.type,
+  //   icon: getNodeIcon(item.type, { width: 12, height: 12 }),
+  //   isSelected: selectedItems.some((selected) => selected.id === item.id),
+  //   onItemClick: (item: CanvasNode) => {
+  //     onSelect(item);
+  //   },
+  // }));
+
+  const [sortedRenderData, setSortedRenderData] = useState([]);
+
+  useEffect(() => {
+    const filteredNodes =
+      sortedNodes?.filter((node) => node?.data?.title?.toLowerCase().includes(searchValue.toLowerCase())) ?? [];
+
+    // Update sorted nodes with filtered results
+    const newSortedNodes = [
+      ...(selectedItems ?? []),
+      ...(filteredNodes?.filter((item) => !selectedItems?.some((selected) => selected?.id === item?.id)) ?? []),
+    ];
+
+    // Update sorted render data
+    const newSortedRenderData: RenderItem[] = newSortedNodes.map((item) => ({
+      data: item,
+      type: item?.type,
+      icon: getNodeIcon(item?.type, { width: 12, height: 12 }),
+      isSelected: selectedItems?.some((selected) => selected?.id === item?.id),
+      onItemClick: (item: CanvasNode) => {
+        onSelect?.(item);
+      },
+    }));
+
+    setSortedRenderData(newSortedRenderData);
+  }, [sortedNodes, searchValue, selectedItems]);
 
   return (
     <Command
@@ -141,7 +167,7 @@ export const BaseSearchAndSelector = ({
         />
       </div>
       <Command.List>
-        <Command.Empty>No results found.</Command.Empty>
+        <Command.Empty>{t('common.empty')}</Command.Empty>
         <Home
           showItemDetail={false}
           key={'search'}
