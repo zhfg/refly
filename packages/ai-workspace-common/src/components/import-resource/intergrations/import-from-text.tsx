@@ -24,18 +24,18 @@ export const ImportFromText = () => {
   const { getLibraryList } = useHandleSiderData();
 
   const handleSave = async () => {
-    if (!copiedTextPayload?.content || !copiedTextPayload?.title) {
+    if (!copiedTextPayload?.content) {
       message.warning(t('resource.import.emptyText'));
       return;
     }
 
     const createResourceData: UpsertResourceRequest = {
       resourceType: 'text',
-      title: copiedTextPayload?.title,
-      content: copiedTextPayload?.content,
+      title: copiedTextPayload?.title || 'Untitled',
+      content: copiedTextPayload?.content || '',
       data: {
-        url: copiedTextPayload?.url,
-        title: copiedTextPayload?.title,
+        url: copiedTextPayload?.url || 'https://www.refly.ai',
+        title: copiedTextPayload?.title || 'Untitled',
       },
     };
     setSaveLoading(true);
@@ -88,7 +88,7 @@ export const ImportFromText = () => {
       {/* content */}
       <div className="flex-grow overflow-y-auto px-[12px] box-border">
         <Form>
-          <FormItem required layout="vertical" label={t('resource.import.textTitlePlaceholder')}>
+          <FormItem layout="vertical" label={t('resource.import.textTitlePlaceholder')}>
             <Input
               // placeholder={t('resource.import.textTitlePlaceholder')}
               value={importResourceStore.copiedTextPayload?.title}
@@ -126,12 +126,7 @@ export const ImportFromText = () => {
           <Button style={{ marginRight: 8 }} onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
             {t('common.cancel')}
           </Button>
-          <Button
-            type="primary"
-            loading={saveLoading}
-            disabled={!copiedTextPayload?.content || !copiedTextPayload?.title}
-            onClick={handleSave}
-          >
+          <Button type="primary" loading={saveLoading} disabled={!copiedTextPayload?.content} onClick={handleSave}>
             {t('common.save')}
           </Button>
         </div>

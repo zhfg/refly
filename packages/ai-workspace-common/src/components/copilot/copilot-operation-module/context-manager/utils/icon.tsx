@@ -22,8 +22,6 @@ export const getTypeIcon = (markType: MarkType, style?: any) => {
 
 export const getNodeIcon = (node: CanvasNodeType, style?: any) => {
   switch (node) {
-    case 'resource':
-      return <IconResource style={style} />;
     case 'document':
       return <IconDocument style={style} />;
     case 'resource':
