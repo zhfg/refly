@@ -238,8 +238,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     try {
       const { data } = await getClient().createDocument({
         body: {
-          title: `Document-${new Date().toISOString()}`,
-          initialContent: "\n hello world",
+          title: t("common.newDocument"),
         },
       })
 
