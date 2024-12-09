@@ -214,7 +214,14 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
               value={editedTitle}
               onChange={(e) => setEditedTitle(e.target.value)}
               placeholder={t('canvas.toolbar.editTitlePlaceholder')}
-              onPressEnter={handleModalOk}
+              onKeyDown={(e) => {
+                if (e.keyCode === 13 && !e.nativeEvent.isComposing) {
+                  e.preventDefault();
+                  if (editedTitle?.trim()) {
+                    handleModalOk();
+                  }
+                }
+              }}
             />
           </Modal>
           {/* <Divider type="vertical" className="pr-[4px]" />
