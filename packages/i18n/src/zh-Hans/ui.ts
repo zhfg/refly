@@ -445,7 +445,6 @@ const translations = {
       editTitlePlaceholder: '请输入画布标题',
     },
     launchpad: {
-      skillNotFound: '技能不存在，请刷新页面后重试',
       pinChat: '固定对话',
       unpinChat: '取消固定对话',
       removeChat: '移除对话',

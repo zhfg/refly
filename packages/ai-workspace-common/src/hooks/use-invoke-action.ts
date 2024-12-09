@@ -6,7 +6,6 @@ import {
   CanvasNodeData,
   InvokeSkillRequest,
 } from '@refly/openapi-schema';
-import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
@@ -289,17 +288,13 @@ export const useInvokeAction = () => {
 
     payload.skillName ||= 'commonQnA';
     const skill = data?.data?.find((s) => s.name === payload.skillName);
-    if (!skill) {
-      message.warning(t('canvas.launchpad.skillNotFound'));
-      return;
-    }
 
     onUpdateResult(resultId, {
       resultId,
       type: 'skill',
       actionMeta: {
-        name: skill.name,
-        icon: skill.icon,
+        name: skill?.name,
+        icon: skill?.icon,
       },
       title: input?.query,
       targetId: payload.target?.entityId,

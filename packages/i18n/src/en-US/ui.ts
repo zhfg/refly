@@ -453,7 +453,6 @@ const translations = {
       editTitlePlaceholder: 'Please enter the title of the canvas',
     },
     launchpad: {
-      skillNotFound: 'Skill not found, please refresh the page and try again',
       pinChat: 'Pin chat',
       unpinChat: 'Unpin chat',
       removeChat: 'Remove chat',
