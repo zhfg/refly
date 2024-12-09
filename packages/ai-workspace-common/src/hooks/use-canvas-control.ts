@@ -365,19 +365,19 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       }
 
       // Use RAF for layout and centering
-      requestAnimationFrame(() => {
-        onLayout('LR');
+      // requestAnimationFrame(() => {
+      // onLayout('LR');
 
-        // requestAnimationFrame(() => {
-        //   const node = getNode(newNode.id);
-        //   if (node) {
-        //     setCenter(node.position.x, node.position.y, {
-        //       duration: 500,
-        //       zoom: 1,
-        //     });
-        //   }
-        // });
-      });
+      // requestAnimationFrame(() => {
+      //   const node = getNode(newNode.id);
+      //   if (node) {
+      //     setCenter(node.position.x, node.position.y, {
+      //       duration: 500,
+      //       zoom: 1,
+      //     });
+      //   }
+      // });
+      // });
     },
     [canvasId, setNodes, setEdges],
   );
