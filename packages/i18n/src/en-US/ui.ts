@@ -1143,9 +1143,6 @@ const translations = {
     selectedSkillHeader: {
       title: 'Chat with {{name}}',
     },
-    recommendQuestions: {
-      refresh: 'Refresh',
-    },
     greeting: 'Hello, {{name}}',
     addContext: 'Add Context',
     moreSettings: 'More Settings',
