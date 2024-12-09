@@ -8,7 +8,9 @@ import tsconfigPaths from "vite-tsconfig-paths"
 import { codeInspectorPlugin } from "code-inspector-plugin"
 
 // https://vitejs.dev/config/
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  const isDev = mode === "development"
+
   return {
     plugins: [
       react(),
@@ -53,7 +55,7 @@ export default defineConfig(() => {
       commonjsOptions: {
         transformMixedEsModules: true,
       },
-      sourcemap: true,
+      sourcemap: false,
       minify: "terser",
       terserOptions: {
         compress: {
@@ -67,9 +69,14 @@ export default defineConfig(() => {
     // },
     server: {
       fs: {
-        strict: false, // TODO：这里需要添加限制，allow 需要处理，目前先临时解决
+        strict: false,
         allow: [searchForWorkspaceRoot(process.cwd())],
       },
     },
+    ...(isDev && {
+      build: {
+        sourcemap: true,
+      },
+    }),
   } as UserConfig
 })
