@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Button,
   Divider,
@@ -60,6 +60,8 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
 
   const [editedTitle, setEditedTitle] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const inputRef = useRef(null);
 
   const handleEditClick = () => {
     setEditedTitle(data[canvasId]?.title ?? '');
@@ -199,9 +201,15 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
             onOk={handleModalOk}
             onCancel={handleModalCancel}
             okButtonProps={{ disabled: !editedTitle?.trim() }}
+            afterOpenChange={(open) => {
+              if (open) {
+                inputRef.current?.focus();
+              }
+            }}
           >
             <Input
               autoFocus
+              ref={inputRef}
               value={editedTitle}
               onChange={(e) => setEditedTitle(e.target.value)}
               placeholder={t('canvas.toolbar.editTitlePlaceholder')}
@@ -215,8 +223,6 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
               }}
             />
           </Modal>
-          {/* <Divider type="vertical" className="pr-[4px]" />
-          <Button type="text" icon={<AiOutlineLayout />} onClick={() => onLayout('LR')}></Button> */}
         </div>
 
         <div className="flex items-center gap-2">

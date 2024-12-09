@@ -147,10 +147,14 @@ export const ChatInput = (props: ChatInputProps) => {
                   borderRadius: 8,
                   resize: 'none',
                 }}
-                placeholder={t(`${selectedSkill?.name}.placeholder`, {
-                  ns: 'skill',
-                  defaultValue: t(`commonQnA.placeholder`, { ns: 'skill' }),
-                })}
+                placeholder={
+                  selectedSkill
+                    ? t(`${selectedSkill?.name}.placeholder`, {
+                        ns: 'skill',
+                        defaultValue: t(`commonQnA.placeholder`, { ns: 'skill' }),
+                      })
+                    : t(`commonQnA.placeholder`, { ns: 'skill' })
+                }
                 autoSize={{
                   minRows: 1,
                   maxRows: 6,
