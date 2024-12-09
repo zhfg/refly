@@ -17,8 +17,8 @@ const enc_cl100k_base = get_encoding('cl100k_base');
 // https://github.com/niieani/gpt-tokenizer
 // type TokenizerType = 'chat' | 'text-only' | 'code' | 'edit' | 'embeddings' | 'turbo' | 'gpt3' | 'codex';
 
-export const countToken = (text: string) => {
-  return enc_cl100k_base.encode(text).length;
+export const countToken = (text: string = '') => {
+  return enc_cl100k_base.encode(text || '').length;
 };
 
 export const isTokenOverflow = (content: string, model: string, reservation = 1024) => {
