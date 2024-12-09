@@ -58,10 +58,10 @@ export class FindRelatedContent extends BaseSkill {
             },
           },
           {
-            value: 'canvas',
+            value: 'document',
             labelDict: {
-              en: 'Canvas',
-              'zh-CN': '稿布',
+              en: 'Document',
+              'zh-CN': '文档',
             },
           },
         ],

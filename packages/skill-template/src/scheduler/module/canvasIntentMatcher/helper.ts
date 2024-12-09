@@ -1,4 +1,4 @@
-import { CanvasIntentType } from '@refly-packages/common-types';
+import { DocumentIntentType } from '@refly-packages/common-types';
 import { Document } from '@refly-packages/openapi-schema';
 import { CanvasEditConfig } from '@refly-packages/utils';
 
@@ -9,19 +9,19 @@ export const prepareIntentMatcherTypeDomain = (
   projectId?: string,
 ) => {
   if (projectId && currentDocument && canvasEditConfig) {
-    return [CanvasIntentType.EditDocument];
+    return [DocumentIntentType.EditDocument];
   }
 
   if (projectId && currentDocument && !canvasEditConfig) {
-    return [CanvasIntentType.RewriteDocument, CanvasIntentType.GenerateDocument, CanvasIntentType.Other];
+    return [DocumentIntentType.RewriteDocument, DocumentIntentType.GenerateDocument, DocumentIntentType.Other];
   }
 
-  return [CanvasIntentType.GenerateDocument, CanvasIntentType.Other];
+  return [DocumentIntentType.GenerateDocument, DocumentIntentType.Other];
 };
 
 export const allIntentMatcherTypeDomain = [
-  CanvasIntentType.EditDocument,
-  CanvasIntentType.RewriteDocument,
-  CanvasIntentType.GenerateDocument,
-  CanvasIntentType.Other,
+  DocumentIntentType.EditDocument,
+  DocumentIntentType.RewriteDocument,
+  DocumentIntentType.GenerateDocument,
+  DocumentIntentType.Other,
 ];

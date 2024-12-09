@@ -250,6 +250,7 @@ export class SearchService {
       ],
       metadata: {
         // TODO: confirm if metadata is used
+        url: hit._source.url,
       },
       createdAt: hit._source.createdAt,
       updatedAt: hit._source.updatedAt,
@@ -288,6 +289,7 @@ export class SearchService {
       contentPreview: node.content?.slice(0, 500) + '...',
       snippets: [{ text: node.content, highlightedText: node.content }],
       metadata: {
+        url: node?.url,
         resourceMeta: resourceMap.get(node.resourceId),
         resourceType: node.resourceType,
       },

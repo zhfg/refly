@@ -14,7 +14,7 @@ import { getCanvasContent } from '@refly-packages/ai-workspace-common/components
 import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
-import { CanvasIntentType } from '@refly/common-types';
+import { DocumentIntentType } from '@refly/common-types';
 import './render.scss';
 import { safeParseJSON } from '@refly-packages/utils/parse';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
@@ -65,7 +65,7 @@ const Render = memo<CanvasProps>(({ identifier, title, type, children, id }) => 
   const saveMetadata = () => {
     const { intentMatcher } = useChatStore.getState();
 
-    if (intentMatcher?.type === CanvasIntentType.GenerateCanvas) {
+    if (intentMatcher?.type === DocumentIntentType.GenerateDocument) {
       editorEmitter.emit('updateCanvasTitle', title);
     }
   };

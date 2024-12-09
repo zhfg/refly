@@ -7,7 +7,7 @@ import {
   useMessageStateStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useConversationStoreShallow } from '@refly-packages/ai-workspace-common/stores/conversation';
-import { CanvasIntentType, TASK_STATUS } from '@refly/common-types';
+import { DocumentIntentType, TASK_STATUS } from '@refly/common-types';
 import { BaseResponse, InvokeSkillRequest, SkillMeta } from '@refly/openapi-schema';
 import { buildQuestionMessage, buildReplyMessage } from '@refly-packages/ai-workspace-common/utils/message';
 
@@ -234,16 +234,16 @@ export const useBuildTask = () => {
     // If it is canvas content and has incremental content, send it to the editor
     const intentMatcher = lastRelatedMessage?.structuredData?.intentMatcher as IntentResult;
     if (
-      [CanvasIntentType.GenerateDocument, CanvasIntentType.EditDocument].includes(intentMatcher?.type) &&
+      [DocumentIntentType.GenerateDocument, DocumentIntentType.EditDocument].includes(intentMatcher?.type) &&
       incrementalContent
     ) {
-      if (intentMatcher?.type === CanvasIntentType.GenerateDocument && incrementalContent) {
+      if (intentMatcher?.type === DocumentIntentType.GenerateDocument && incrementalContent) {
         editorEmitter.emit('streamCanvasContent', {
           canvasId: intentMatcher?.canvasId,
           isFirst: isFirstStreamContent,
           content: incrementalContent,
         });
-      } else if (intentMatcher?.type === CanvasIntentType.EditDocument && incrementalContent) {
+      } else if (intentMatcher?.type === DocumentIntentType.EditDocument && incrementalContent) {
         editorEmitter.emit('streamEditCanvasContent', {
           canvasId: intentMatcher?.canvasId,
           isFirst: isFirstStreamContent,
@@ -258,7 +258,7 @@ export const useBuildTask = () => {
         handleAICanvasBeforeStreamHook();
         editorEmitter.emit('exitFullScreen');
       }
-    } else if ([CanvasIntentType.Other].includes(intentMatcher?.type)) {
+    } else if ([DocumentIntentType.Other].includes(intentMatcher?.type)) {
       if (isFirstStreamContent) {
         const newIsFirstStreamContent = !isFirstStreamContent;
         chatStore.setIsFirstStreamContent(newIsFirstStreamContent);

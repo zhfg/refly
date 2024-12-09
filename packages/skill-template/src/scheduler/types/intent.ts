@@ -1,6 +1,6 @@
-export enum CanvasIntent {
-  GenerateCanvas = 'generateCanvas',
-  UpdateCanvas = 'updateCanvas',
-  RewriteCanvas = 'rewriteCanvas',
+export enum DocumentIntent {
+  GenerateDocument = 'generateDocument',
+  UpdateDocument = 'updateDocument',
+  RewriteDocument = 'rewriteDocument',
   QnA = 'qna',
 }

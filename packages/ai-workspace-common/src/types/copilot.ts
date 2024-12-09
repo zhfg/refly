@@ -1,4 +1,4 @@
-import { CanvasIntentType } from '@refly/common-types';
+import { DocumentIntentType } from '@refly/common-types';
 
 export enum MessageIntentSource {
   HomePage = 'homePage', // for qa and generateCanvas
@@ -20,6 +20,6 @@ export enum MessageIntentSource {
 export interface NavigationContext {
   source: MessageIntentSource;
   shouldFetchDetail: boolean;
-  intentType?: CanvasIntentType;
+  intentType?: DocumentIntentType;
   clearSearchParams?: boolean;
 }

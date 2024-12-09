@@ -10,7 +10,7 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { safeStringifyJSON } from '@refly-packages/utils';
 import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition, Source } from '@refly-packages/openapi-schema';
-import { CanvasIntentType } from '@refly-packages/common-types';
+import { DocumentIntentType } from '@refly-packages/common-types';
 // types
 import { GraphState, IContext } from '../scheduler/types';
 // utils
@@ -185,7 +185,7 @@ export class RewriteDoc extends BaseSkill {
         event: 'structured_data',
         structuredDataKey: 'intentMatcher',
         content: JSON.stringify({
-          type: CanvasIntentType.RewriteDocument,
+          type: DocumentIntentType.RewriteDocument,
           docId: currentDoc?.docId || '',
         }),
       },

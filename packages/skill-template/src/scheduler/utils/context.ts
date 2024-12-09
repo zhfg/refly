@@ -10,7 +10,7 @@ import {
 import { ModelContextLimitMap } from './token';
 import {
   processSelectedContentWithSimilarity,
-  processCanvasesWithSimilarity,
+  processDocumentsWithSimilarity,
   processResourcesWithSimilarity,
   processWholeSpaceWithSimilarity,
   processMentionedContextWithSimilarity,
@@ -397,7 +397,7 @@ export async function prepareRelevantContext(
 
   // 2. documents context
   relevantContexts.documents =
-    documents.length > 0 ? await processCanvasesWithSimilarity(query, documents, Infinity, ctx) : [];
+    documents.length > 0 ? await processDocumentsWithSimilarity(query, documents, Infinity, ctx) : [];
 
   // 3. resources context
   relevantContexts.resources =
@@ -439,11 +439,11 @@ export async function prepareContainerLevelContext(
   );
 
   // 2. whole space search context
-  const relevantResourcesOrCanvasesFromWholeSpace = enableSearchWholeSpace
+  const relevantResourcesOrDocumentsFromWholeSpace = enableSearchWholeSpace
     ? await processWholeSpaceWithSimilarity(query, ctx)
     : [];
 
-  // 3. Group by resource and canvas, deduplicate, and place in processedContext
+  // 3. Group by resource and document, deduplicate, and place in processedContext
   const uniqueResourceIds = new Set<string>();
   const uniqueDocIds = new Set<string>();
 
@@ -464,7 +464,7 @@ export async function prepareContainerLevelContext(
   };
 
   // Then add items from whole space
-  relevantResourcesOrCanvasesFromWholeSpace.forEach(addUniqueItem);
+  relevantResourcesOrDocumentsFromWholeSpace.forEach(addUniqueItem);
 
   // Keep original projects
   processedContext.projects = projects;
@@ -513,7 +513,7 @@ export function removeOverlappingContextItems(context: IContext, originalContext
       ),
   );
 
-  // Deduplicate canvases
+  // Deduplicate documents
   deduplicatedContext.documents = (originalContext?.documents || []).filter(
     (item) =>
       !itemExistsInContext(
@@ -532,15 +532,15 @@ export function removeOverlappingContextItems(context: IContext, originalContext
 }
 
 export const mutateContextMetadata = (mentionedContext: IContext, originalContext: IContext): IContext => {
-  // Process canvases
-  mentionedContext.documents.forEach((mentionedCanvas) => {
-    const index = originalContext.documents.findIndex((n) => n.document.docId === mentionedCanvas.document.docId);
+  // Process documents
+  mentionedContext.documents.forEach((mentionedDocument) => {
+    const index = originalContext.documents.findIndex((n) => n.document.docId === mentionedDocument.document.docId);
     if (index !== -1) {
       originalContext.documents[index] = {
         ...originalContext.documents[index],
         metadata: {
           ...originalContext.documents[index].metadata,
-          useWholeContent: mentionedCanvas.metadata?.useWholeContent,
+          useWholeContent: mentionedDocument.metadata?.useWholeContent,
         },
       };
     }

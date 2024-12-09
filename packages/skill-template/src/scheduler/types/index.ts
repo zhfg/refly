@@ -30,7 +30,7 @@ export interface Chunk {
 }
 
 export interface MentionedContextItem {
-  type?: 'canvas' | 'resource' | 'selectedContent';
+  type?: 'document' | 'resource' | 'selectedContent';
   entityId?: string;
   url?: string;
   title?: string;

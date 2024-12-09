@@ -70,7 +70,7 @@ export const truncateContext = (context: IContext, maxTokens: number): IContext 
   let remainingTokens = maxTokens;
   const truncatedContext: IContext = { ...context };
 
-  // Helper function to truncate a list of items, truncate priority is resource > canvas > contentList
+  // Helper function to truncate a list of items, truncate priority is resource > document > contentList
   const truncateItems = <T extends SkillContextContentItem | SkillContextResourceItem | SkillContextDocumentItem>(
     items: T[],
     getContent: (item: T) => string,
@@ -138,7 +138,7 @@ export async function mergeAndTruncateContexts(
     sortedContentList = uniqueContentList;
   }
 
-  // 2. Merge resources and canvases into one array
+  // 2. Merge resources and documents into one array
   const combinedItems: (SkillContextResourceItem | SkillContextDocumentItem)[] = [
     ...relevantContext.resources,
     ...relevantContext.documents,
@@ -225,7 +225,7 @@ function truncateContextWithPriority(
     }
   }
 
-  // Then, add combined items (resources and canvases)
+  // Then, add combined items (resources and documents)
   for (const item of combinedItems) {
     const content = 'resource' in item ? item.resource?.content : item.document?.content;
     const tokens = countToken(content);

@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { useJumpNewPath } from './use-jump-new-path';
 
 // types
-import { CanvasIntentType } from '@refly/common-types';
+import { DocumentIntentType } from '@refly/common-types';
 import { ChatMessage } from '@refly/openapi-schema';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
@@ -14,7 +14,7 @@ import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/route
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 
 export interface IntentResult {
-  type: CanvasIntentType;
+  type: DocumentIntentType;
   confidence: number;
   projectId?: string;
   canvasId?: string;
@@ -130,16 +130,16 @@ export const useHandleAICanvas = () => {
   const handleIntentBasedNavigation = useCallback(
     async (intent: IntentResult) => {
       switch (intent.type) {
-        case CanvasIntentType.GenerateCanvas:
+        case DocumentIntentType.GenerateDocument:
           await handleGenerateCanvas(intent);
           break;
-        case CanvasIntentType.EditCanvas:
+        case DocumentIntentType.EditDocument:
           await handleEditCanvas(intent);
           break;
-        case CanvasIntentType.RewriteCanvas:
+        case DocumentIntentType.RewriteDocument:
           await handleRewriteCanvas(intent);
           break;
-        case CanvasIntentType.Other:
+        case DocumentIntentType.Other:
           await handleOther(intent);
           break;
       }
