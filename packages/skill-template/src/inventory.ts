@@ -48,7 +48,7 @@ export const createSkillInventory = (engine: SkillEngine): BaseSkill[] => {
     new GenerateDoc(engine),
     new RecommendQuestions(engine),
     new CommonQnA(engine),
-    new RewriteDoc(engine),
+    // new RewriteDoc(engine),
     new EditDoc(engine),
   ];
 };

@@ -9,10 +9,7 @@ import './index.scss';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
 import { ContextManager } from './context-manager';
 import { SelectedSkillHeader } from './selected-skill-header';
-import {
-  useContextPanelStore,
-  useContextPanelStoreShallow,
-} from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { ConfigManager } from './config-manager';
 import { ChatActions } from './chat-actions';
@@ -40,6 +37,7 @@ export const ChatInput = (props: ChatInputProps) => {
     selectedSkill: state.selectedSkill,
     setSelectedSkill: state.setSelectedSkill,
   }));
+  const selectedSkill = skillStore.selectedSkill;
 
   const chatStore = useChatStoreShallow((state) => ({
     newQAText: state.newQAText,
@@ -107,12 +105,12 @@ export const ChatInput = (props: ChatInputProps) => {
   };
 
   useEffect(() => {
-    if (!skillStore.selectedSkill?.configSchema?.items?.length) {
+    if (!selectedSkill?.configSchema?.items?.length) {
       form.setFieldValue('tplConfig', undefined);
     } else {
       // Create default config from schema if no config exists
       const defaultConfig = {};
-      skillStore.selectedSkill?.configSchema?.items?.forEach((item) => {
+      selectedSkill?.configSchema?.items?.forEach((item) => {
         if (item.defaultValue !== undefined) {
           defaultConfig[item.key] = {
             value: item.defaultValue,
@@ -123,15 +121,15 @@ export const ChatInput = (props: ChatInputProps) => {
       });
 
       // Use existing config or fallback to default config
-      const initialConfig = skillStore.selectedSkill?.tplConfig ?? defaultConfig;
+      const initialConfig = selectedSkill?.tplConfig ?? defaultConfig;
       form.setFieldValue('tplConfig', initialConfig);
     }
-  }, [skillStore.selectedSkill?.name]);
+  }, [selectedSkill?.name]);
 
   return (
     <div className="ai-copilot-chat-container">
       <div className="chat-input-container">
-        <SelectedSkillHeader skill={skillStore.selectedSkill} onClose={() => skillStore.setSelectedSkill(null)} />
+        <SelectedSkillHeader skill={selectedSkill} onClose={() => skillStore.setSelectedSkill(null)} />
         <ContextManager />
         <ChatHistory />
         <div className="chat-input-body">
@@ -149,7 +147,10 @@ export const ChatInput = (props: ChatInputProps) => {
                   borderRadius: 8,
                   resize: 'none',
                 }}
-                placeholder={t('copilot.chatInput.placeholder')}
+                placeholder={t(`${selectedSkill?.name}.placeholder`, {
+                  ns: 'skill',
+                  defaultValue: t(`commonQnA.placeholder`, { ns: 'skill' }),
+                })}
                 autoSize={{
                   minRows: 1,
                   maxRows: 6,
@@ -159,18 +160,18 @@ export const ChatInput = (props: ChatInputProps) => {
           </div>
         </div>
 
-        {skillStore.selectedSkill?.configSchema?.items?.length > 0 && (
+        {selectedSkill?.configSchema?.items?.length > 0 && (
           <ConfigManager
-            key={skillStore.selectedSkill?.name}
+            key={selectedSkill?.name}
             form={form}
             formErrors={formErrors}
             setFormErrors={setFormErrors}
-            schema={skillStore.selectedSkill?.configSchema}
-            tplConfig={skillStore.selectedSkill?.tplConfig}
+            schema={selectedSkill?.configSchema}
+            tplConfig={selectedSkill?.tplConfig}
             fieldPrefix="tplConfig"
             configScope="runtime"
             resetConfig={() => {
-              const defaultConfig = skillStore.selectedSkill?.tplConfig ?? {};
+              const defaultConfig = selectedSkill?.tplConfig ?? {};
               form.setFieldValue('tplConfig', defaultConfig);
             }}
           />
