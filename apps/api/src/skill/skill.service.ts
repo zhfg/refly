@@ -244,12 +244,15 @@ export class SkillService {
   };
 
   listSkills(): Skill[] {
-    const skills = this.skillInventory.map((skill) => ({
-      name: skill.name,
-      icon: skill.icon,
-      description: skill.description,
-      configSchema: skill.configSchema,
-    }));
+    const skills = this.skillInventory
+      .map((skill) => ({
+        name: skill.name,
+        icon: skill.icon,
+        description: skill.description,
+        configSchema: skill.configSchema,
+      }))
+      // TODO: figure out a better way to filter applicable skills
+      .filter((skill) => !['commonQnA', 'editDoc'].includes(skill.name));
 
     return skills;
   }
