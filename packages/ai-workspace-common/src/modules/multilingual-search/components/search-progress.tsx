@@ -98,10 +98,17 @@ export const SearchProgress: React.FC = () => {
     }),
   );
 
+  // 添加折叠面板的状态控制
+  const [activeKeys, setActiveKeys] = useState<string[]>([]);
+
+  // 监听 isSearching 变化，自动展开/折叠
   useEffect(() => {
     if (isSearching) {
+      setActiveKeys(['1']);
       clearSearchSteps();
       setProcessingStep();
+    } else {
+      setActiveKeys([]); // 搜索结束后自动折叠
     }
   }, [isSearching, clearSearchSteps]);
 
@@ -110,11 +117,17 @@ export const SearchProgress: React.FC = () => {
     ? t('resource.multilingualSearch.progress.summary', { count: results.length, duration: finishStep.duration })
     : t('resource.multilingualSearch.steps.processing');
 
+  // 处理折叠面板变化
+  const handleCollapseChange = (keys: string | string[]) => {
+    setActiveKeys(typeof keys === 'string' ? [keys] : keys);
+  };
+
   return (
     <div className="search-progress">
       <Collapse
         ghost
-        defaultActiveKey={isSearching ? ['1'] : []}
+        activeKey={activeKeys}
+        onChange={handleCollapseChange}
         items={[
           {
             key: '1',

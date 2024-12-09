@@ -72,7 +72,10 @@ function MultilingualSearch() {
           <>
             <SearchBox />
             {isSearching || results?.length > 0 ? <SearchProgress /> : null}
-            <SearchResults outputLocale={outputLocale} config={{ enableTranslation: true }} />
+            <SearchResults
+              outputLocale={outputLocale}
+              config={{ enableTranslation: true, showCheckbox: true, showIndex: true }}
+            />
           </>
         )}
       </div>
