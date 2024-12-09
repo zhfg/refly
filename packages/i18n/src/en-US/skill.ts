@@ -1,6 +1,7 @@
 const translations = {
   commonQnA: {
     name: 'Common Question Answering',
+    placeholder: 'Ask AI a question, select canvas nodes to specify context...',
     steps: {
       analyzeContext: {
         name: 'Context Analysis',
@@ -12,6 +13,7 @@ const translations = {
   },
   generateDoc: {
     name: 'Generate Document',
+    placeholder: 'Let AI help you generate a document...',
     steps: {
       analyzeContext: {
         name: 'Context Analysis',
@@ -26,6 +28,7 @@ const translations = {
   },
   editDoc: {
     name: 'Edit Document',
+    placeholder: 'Let AI help you edit the document...',
     steps: {},
   },
   rewriteDoc: {
@@ -34,6 +37,7 @@ const translations = {
   },
   webSearch: {
     name: 'Web Search',
+    placeholder: 'Search the web and get answers...',
     steps: {
       webSearch: {
         name: 'Web Search',
@@ -45,6 +49,7 @@ const translations = {
   },
   librarySearch: {
     name: 'Library Search',
+    placeholder: 'Search the library and get answers...',
     steps: {
       librarySearch: {
         name: 'Library Search',
@@ -56,6 +61,7 @@ const translations = {
   },
   recommendQuestions: {
     name: 'Recommend Questions',
+    placeholder: 'Let AI recommend questions for you...',
     steps: {
       recommendQuestions: {
         name: 'Generate Recommended Questions',
