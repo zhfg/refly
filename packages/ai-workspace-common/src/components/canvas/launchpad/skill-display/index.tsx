@@ -25,7 +25,7 @@ export const SkillDisplay = () => {
     getResizeSelector: () => popupContainer.querySelectorAll('.skill-item') as NodeListOf<HTMLElement>,
     initialContainCnt: 3,
     paddingSize: 0,
-    placeholderWidth: 95,
+    placeholderWidth: 25,
   });
 
   const { data } = useListSkills();
