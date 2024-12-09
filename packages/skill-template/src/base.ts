@@ -27,6 +27,10 @@ export abstract class BaseSkill extends StructuredTool {
    */
   icon: Icon = { type: 'emoji', value: '🔧' };
   /**
+   * Skill placeholder
+   */
+  placeholder: string = '🔧';
+  /**
    * Skill template config schema
    */
   abstract configSchema: SkillTemplateConfigDefinition;

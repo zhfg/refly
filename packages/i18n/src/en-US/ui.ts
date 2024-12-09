@@ -441,6 +441,7 @@ const translations = {
       addResource: 'Add Resource',
       addSkill: 'Add Skill',
       addTool: 'Add Tool',
+      autoLayout: 'Auto Layout',
       addDocument: 'Add Document',
       hidePreview: 'Hide Node Preview',
       showPreview: 'Show Node Preview',
@@ -1143,9 +1144,6 @@ const translations = {
     selectedSkillHeader: {
       title: 'Chat with {{name}}',
     },
-    recommendQuestions: {
-      refresh: 'Refresh',
-    },
     greeting: 'Hello, {{name}}',
     addContext: 'Add Context',
     moreSettings: 'More Settings',
@@ -1266,6 +1264,7 @@ const translations = {
     },
     chatInput: {
       placeholder: 'Let Refly write something for you, or search anything you are interested in...',
+      editPlaceholder: 'Ask AI to edit...',
       defaultQuestion: '[Call Skill: {{name}}]',
       chatWithReflyAssistant: 'Chat with Refly Assistant',
     },
@@ -1275,6 +1274,8 @@ const translations = {
       noContextChat: 'No Context Chat',
       wholeSpaceChat: 'Whole Space Chat',
       recommendQuestions: 'Recommend Questions',
+      replace: 'Replace Selection',
+      reject: 'Reject',
     },
     configManager: {
       title: 'Skill Configuration',

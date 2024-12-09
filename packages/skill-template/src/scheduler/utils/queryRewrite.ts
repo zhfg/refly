@@ -34,13 +34,13 @@ export const postprocessContext = (
   };
 
   mentionedContextList.forEach((item) => {
-    if (item.type === 'canvas') {
-      // 这里需要根据entityId在originalContext中找到对应的canvas
-      const originalCanvas = originalContext.documents.find((c, index) => `document-${index}` === item.entityId);
-      if (originalCanvas) {
+    if (item.type === 'document') {
+      // 这里需要根据entityId在originalContext中找到对应的document
+      const originalDocument = originalContext.documents.find((c, index) => `document-${index}` === item.entityId);
+      if (originalDocument) {
         context.documents.push({
-          ...originalCanvas,
-          metadata: { ...originalCanvas.metadata, useWholeContent: item?.useWholeContent },
+          ...originalDocument,
+          metadata: { ...originalDocument.metadata, useWholeContent: item?.useWholeContent },
         });
       }
     } else if (item.type === 'resource') {
@@ -75,7 +75,7 @@ Examples of query rewriting with context and chat history:
 
 1. Context:
    <Context>
-   <ContextItem type='selectedContent' from='canvas' entityId='content-1'  title='AI in Knowledge Management'>This indeed allows more people to efficiently access specialized knowledge. Combined with its paper collection and management functions, it essentially achieves a one-stop service from search acquisition, query dialogue for knowledge acquisition, to knowledge management, rather than just being a simple AI tool product.</ContextItem>
+   <ContextItem type='selectedContent' from='document' entityId='content-1'  title='AI in Knowledge Management'>This indeed allows more people to efficiently access specialized knowledge. Combined with its paper collection and management functions, it essentially achieves a one-stop service from search acquisition, query dialogue for knowledge acquisition, to knowledge management, rather than just being a simple AI tool product.</ContextItem>
    </Context>
 
    Chat History:
@@ -98,7 +98,7 @@ Examples of query rewriting with context and chat history:
 
 2. Context:
    <Context>
-   <ContextItem type='canvas' entityId='canvas-1' title='Meeting Minutes - Engineering Team'>Discussed the need for additional backend developers to support the new microservices architecture. The team agreed on hiring at least three senior developers with experience in distributed systems.</ContextItem>
+   <ContextItem type='document' entityId='document-1' title='Meeting Minutes - Engineering Team'>Discussed the need for additional backend developers to support the new microservices architecture. The team agreed on hiring at least three senior developers with experience in distributed systems.</ContextItem>
    </Context>
 
    Chat History:
@@ -111,8 +111,8 @@ Examples of query rewriting with context and chat history:
    Rewritten query: "Please summarize the main points from the meeting minutes about the need for additional backend developers and the hiring plans for the microservices architecture."
    mentionedContext: [
      {
-       "type": "canvas",
-       "entityId": "canvas-1",
+       "type": "document",
+       "entityId": "document-1",
        "title": "Meeting Minutes - Engineering Team",
        "useWholeContent": true
      }
@@ -189,7 +189,7 @@ const queryAnalysisSchema = z.object({
   mentionedContext: z
     .array(
       z.object({
-        type: z.enum(['canvas', 'resource', 'selectedContent']),
+        type: z.enum(['document', 'resource', 'selectedContent']),
         entityId: z.string().optional(),
         title: z.string(),
         useWholeContent: z.boolean(),
@@ -280,7 +280,7 @@ Expected JSON Structure:
 {
   "rewrittenQuery": string,
   "mentionedContext": [{
-    "type": "canvas" | "resource" | "selectedContent",
+    "type": "document" | "resource" | "selectedContent",
     "entityId": string,
     "title": string,
     "useWholeContent": boolean

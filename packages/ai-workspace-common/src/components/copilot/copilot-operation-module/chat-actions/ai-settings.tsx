@@ -1,7 +1,7 @@
 import { Dropdown, DropdownProps, MenuProps, Switch } from 'antd';
 import { IconDown, IconSettings } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
-import { ModelSelector } from './model-selector';
+import { ModelSelector } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions/model-selector';
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 
@@ -89,35 +89,15 @@ export const AISettingsDropdown = ({
   ].filter((item) => item.label !== null);
 
   // If collapsed, add model selector to dropdown items
-  const dropdownItems = briefMode
-    ? [
-        {
-          key: 'modelSelector',
-          label: <ModelSelector dropdownMode={false} placement={modelSelectorPlacement} />,
-        },
-        { type: 'divider' as const },
-        ...settingsItems,
-      ]
-    : settingsItems;
+  const dropdownItems = [
+    {
+      key: 'modelSelector',
+      label: <ModelSelector dropdownMode={false} placement={modelSelectorPlacement} />,
+    },
+  ];
 
   return (
     <>
-      {!briefMode && <ModelSelector placement={modelSelectorPlacement} />}
-      {!collapsed && !briefMode && !skillStore?.selectedSkill?.name ? (
-        <div className="chat-action-item" onClick={() => chatStore.setEnableWebSearch(!chatStore.enableWebSearch)}>
-          <Switch size="small" checked={chatStore.enableWebSearch} />
-          <span className="chat-action-item-text">{t('copilot.webSearch.title')}</span>
-        </div>
-      ) : null}
-      {!collapsed && !briefMode && !skillStore?.selectedSkill?.name ? (
-        <div
-          className="chat-action-item"
-          onClick={() => chatStore.setEnableKnowledgeBaseSearch(!chatStore.enableKnowledgeBaseSearch)}
-        >
-          <Switch size="small" checked={chatStore.enableKnowledgeBaseSearch} />
-          <span className="chat-action-item-text">{t('copilot.knowledgeBaseSearch.title')}</span>
-        </div>
-      ) : null}
       <Dropdown
         className="chat-action-item"
         trigger={['click']}

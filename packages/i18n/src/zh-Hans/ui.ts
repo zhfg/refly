@@ -433,6 +433,7 @@ const translations = {
       addResource: '添加资源',
       addSkill: '添加技能',
       addTool: '添加工具',
+      autoLayout: '自动布局',
       addDocument: '添加文档',
       hidePreview: '隐藏节点预览',
       showPreview: '显示节点预览',
@@ -1139,9 +1140,6 @@ const translations = {
     selectedSkillHeader: {
       title: '和 {{name}} 聊聊',
     },
-    recommendQuestions: {
-      refresh: '刷新',
-    },
     greeting: '嗨，{{name}}',
     addContext: '添加上下文',
     moreSettings: '更多设置',
@@ -1263,6 +1261,7 @@ const translations = {
     chatInput: {
       placeholder: '让 Refly 帮你写点什么，或者搜索任何感兴趣的内容...',
       defaultQuestion: '[调用技能: {{name}}]',
+      editPlaceholder: '让 AI 帮你编辑...',
       chatWithReflyAssistant: '和「知识管家」聊聊',
     },
     chatActions: {
@@ -1271,6 +1270,8 @@ const translations = {
       noContextChat: '不带上下文聊天',
       wholeSpaceChat: '在整个空间聊天',
       recommendQuestions: '推荐问题',
+      replace: '替换选中',
+      reject: '拒绝',
     },
     configManager: {
       title: '技能配置',

@@ -93,15 +93,6 @@ export class LibrarySearch extends BaseSkill {
 
     const { contextStr, sources } = librarySearchContext;
 
-    this.emitEvent(
-      {
-        event: 'structured_data',
-        content: JSON.stringify(sources),
-        structuredDataKey: 'sources',
-      },
-      config,
-    );
-
     // Set current step for answer generation
     config.metadata.step = { name: 'answerGeneration' };
 
@@ -111,6 +102,15 @@ export class LibrarySearch extends BaseSkill {
       buildContextUserPrompt: librarySearch.buildLibrarySearchContextUserPrompt,
       buildUserPrompt: librarySearch.buildLibrarySearchUserPrompt,
     };
+
+    this.emitEvent(
+      {
+        event: 'structured_data',
+        content: JSON.stringify(sources),
+        structuredDataKey: 'sources',
+      },
+      config,
+    );
 
     const requestMessages = buildFinalRequestMessages({
       module,

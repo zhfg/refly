@@ -16,8 +16,8 @@ import { truncateText } from './truncator';
 import {
   MAX_RAG_RELEVANT_CONTENT_RATIO,
   MAX_SHORT_CONTENT_RATIO,
-  MAX_RAG_RELEVANT_CANVASES_RATIO,
-  MAX_SHORT_CANVASES_RATIO,
+  MAX_RAG_RELEVANT_DOCUMENTS_RATIO,
+  MAX_SHORT_DOCUMENTS_RATIO,
   MAX_RAG_RELEVANT_RESOURCES_RATIO,
   MAX_SHORT_RESOURCES_RATIO,
 } from './constants';
@@ -67,19 +67,19 @@ export async function sortContentBySimilarity(
   }));
 }
 
-export async function sortCanvasesBySimilarity(
+export async function sortDocumentsBySimilarity(
   query: string,
-  canvases: SkillContextDocumentItem[],
+  comingDocuments: SkillContextDocumentItem[],
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextDocumentItem[]> {
   // 1. construct documents
-  const documents: Document<NodeMeta>[] = canvases.map((item) => {
+  const documents: Document<NodeMeta>[] = comingDocuments.map((item) => {
     return {
       pageContent: truncateText(item.document?.content || '', MAX_NEED_RECALL_TOKEN),
       metadata: {
         ...item.metadata,
         title: item.document?.title as string,
-        nodeType: 'canvas' as ContentNodeType,
+        nodeType: 'document' as ContentNodeType,
         docId: item.document?.docId,
       },
     };
@@ -92,12 +92,12 @@ export async function sortCanvasesBySimilarity(
     k: documents.length,
     filter: undefined,
   });
-  const sortedCanvases = res.data;
+  const sortedDocuments = res.data;
 
-  // 4. return sorted canvases
-  return sortedCanvases
-    .map((item) => canvases.find((canvas) => canvas.document?.docId === item.metadata.docId))
-    .filter((canvas): canvas is SkillContextDocumentItem => canvas !== undefined);
+  // 4. return sorted documents
+  return sortedDocuments
+    .map((item) => comingDocuments.find((document) => document.document?.docId === item.metadata.docId))
+    .filter((document): document is SkillContextDocumentItem => document !== undefined);
 }
 
 export async function sortResourcesBySimilarity(
@@ -224,42 +224,42 @@ export async function processSelectedContentWithSimilarity(
   return result;
 }
 
-export async function processCanvasesWithSimilarity(
+export async function processDocumentsWithSimilarity(
   query: string,
-  canvases: SkillContextDocumentItem[] = [],
+  comingDocuments: SkillContextDocumentItem[] = [],
   maxTokens: number,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextDocumentItem[]> {
-  const MAX_RAG_RELEVANT_CANVASES_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_CANVASES_RATIO);
-  const MAX_SHORT_CANVASES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_CANVASES_RATIO);
+  const MAX_RAG_RELEVANT_DOCUMENTS_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_DOCUMENTS_RATIO);
+  const MAX_SHORT_DOCUMENTS_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_DOCUMENTS_RATIO);
 
-  if (canvases.length === 0) {
+  if (comingDocuments.length === 0) {
     return [];
   }
 
   // 1. calculate similarity and sort
-  let sortedCanvases: SkillContextDocumentItem[] = [];
-  if (canvases.length > 1) {
-    sortedCanvases = await sortCanvasesBySimilarity(query, canvases, ctx);
+  let sortedDocuments: SkillContextDocumentItem[] = [];
+  if (comingDocuments.length > 1) {
+    sortedDocuments = await sortDocumentsBySimilarity(query, comingDocuments, ctx);
   } else {
-    sortedCanvases = canvases;
+    sortedDocuments = comingDocuments;
   }
 
   let result: SkillContextDocumentItem[] = [];
   let usedTokens = 0;
 
-  // 2. 按相关度顺序处理 canvas
-  for (const canvas of sortedCanvases) {
-    const canvasTokens = countToken(canvas?.document?.content || '');
+  // 2. 按相关度顺序处理 document
+  for (const document of sortedDocuments) {
+    const documentTokens = countToken(document?.document?.content || '');
 
-    if (canvasTokens > MAX_NEED_RECALL_TOKEN || !canvas.metadata?.useWholeContent) {
+    if (documentTokens > MAX_NEED_RECALL_TOKEN || !document.metadata?.useWholeContent) {
       // 1.1 大内容，直接走召回
       const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
         {
           entities: [
             {
-              entityId: canvas?.document?.docId,
+              entityId: document?.document?.docId,
               entityType: 'document',
             },
           ],
@@ -269,29 +269,29 @@ export async function processCanvasesWithSimilarity(
         ctx,
       );
       const relevantContent = assembleChunks(relevantChunks);
-      result.push({ ...canvas, document: { ...canvas.document!, content: relevantContent } });
+      result.push({ ...document, document: { ...document.document!, content: relevantContent } });
       usedTokens += countToken(relevantContent);
-    } else if (usedTokens + canvasTokens <= MAX_RAG_RELEVANT_CANVASES_MAX_TOKENS) {
+    } else if (usedTokens + documentTokens <= MAX_RAG_RELEVANT_DOCUMENTS_MAX_TOKENS) {
       // 1.2 小内容，直接添加
-      result.push(canvas);
-      usedTokens += canvasTokens;
+      result.push(document);
+      usedTokens += documentTokens;
     } else {
-      // 1.3 达到 MAX_RAG_RELEVANT_CANVASES_MAX_TOKENS，处理剩余内容
+      // 1.3 达到 MAX_RAG_RELEVANT_DOCUMENTS_MAX_TOKENS，处理剩余内容
       break;
     }
 
-    if (usedTokens >= MAX_RAG_RELEVANT_CANVASES_MAX_TOKENS) break;
+    if (usedTokens >= MAX_RAG_RELEVANT_DOCUMENTS_MAX_TOKENS) break;
   }
 
-  // 3. 处理剩余的 canvas
-  for (let i = result.length; i < sortedCanvases.length; i++) {
-    const remainingCanvas = sortedCanvases[i];
-    const canvasTokens = countToken(remainingCanvas?.document?.content || '');
+  // 3. 处理剩余的 document
+  for (let i = result.length; i < sortedDocuments.length; i++) {
+    const remainingDocument = sortedDocuments[i];
+    const documentTokens = countToken(remainingDocument?.document?.content || '');
 
     // 所有的短内容直接添加
-    if (canvasTokens < SHORT_CONTENT_THRESHOLD) {
-      result.push(remainingCanvas);
-      usedTokens += canvasTokens;
+    if (documentTokens < SHORT_CONTENT_THRESHOLD) {
+      result.push(remainingDocument);
+      usedTokens += documentTokens;
     } else {
       // 剩下的长内容走召回
       const remainingTokens = maxTokens - usedTokens;
@@ -300,7 +300,7 @@ export async function processCanvasesWithSimilarity(
         {
           entities: [
             {
-              entityId: remainingCanvas?.document?.docId,
+              entityId: remainingDocument?.document?.docId,
               entityType: 'document',
             },
           ],
@@ -311,7 +311,7 @@ export async function processCanvasesWithSimilarity(
       );
       relevantChunks = truncateChunks(relevantChunks, remainingTokens);
       const relevantContent = assembleChunks(relevantChunks);
-      result.push({ ...remainingCanvas, document: { ...remainingCanvas.document!, content: relevantContent } });
+      result.push({ ...remainingDocument, document: { ...remainingDocument.document!, content: relevantContent } });
       usedTokens += countToken(relevantContent);
     }
   }
@@ -423,11 +423,11 @@ export async function processMentionedContextWithSimilarity(
 ): Promise<IContext> {
   const MAX_CONTENT_RAG_RELEVANT_RATIO = 0.4;
   const MAX_RESOURCE_RAG_RELEVANT_RATIO = 0.3;
-  const MAX_CANVAS_RAG_RELEVANT_RATIO = 0.3;
+  const MAX_DOCUMENT_RAG_RELEVANT_RATIO = 0.3;
 
   const MAX_CONTENT_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_CONTENT_RAG_RELEVANT_RATIO);
   const MAX_RESOURCE_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_RESOURCE_RAG_RELEVANT_RATIO);
-  const MAX_CANVAS_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_CANVAS_RAG_RELEVANT_RATIO);
+  const MAX_DOCUMENT_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_DOCUMENT_RAG_RELEVANT_RATIO);
 
   // 处理 contentList
   const processedContentList = await processSelectedContentWithSimilarity(
@@ -445,11 +445,11 @@ export async function processMentionedContextWithSimilarity(
     ctx,
   );
 
-  // 处理 canvases
-  const processedCanvases = await processCanvasesWithSimilarity(
+  // 处理 documents
+  const processedDocuments = await processDocumentsWithSimilarity(
     query,
     mentionedContext.documents,
-    MAX_CANVAS_RAG_RELEVANT_MAX_TOKENS,
+    MAX_DOCUMENT_RAG_RELEVANT_MAX_TOKENS,
     ctx,
   );
 
@@ -458,7 +458,7 @@ export async function processMentionedContextWithSimilarity(
     ...mentionedContext,
     contentList: processedContentList,
     resources: processedResources,
-    documents: processedCanvases,
+    documents: processedDocuments,
   };
 }
 
@@ -498,16 +498,22 @@ export async function processWholeSpaceWithSimilarity(
         resource: {
           resourceId: id,
           content: assembledContent,
-          title: groupedChunks[key][0].metadata.title,
+          title: groupedChunks[key][0]?.metadata?.title,
+          data: {
+            url: groupedChunks[key][0]?.metadata?.url,
+          },
           // 其他必要的字段需要根据实际情况填充
         },
       } as SkillContextResourceItem);
-    } else if (domain === 'canvas') {
+    } else if (domain === 'document') {
       result.push({
-        canvas: {
-          canvasId: id,
+        document: {
+          docId: id,
           content: assembledContent,
-          title: groupedChunks[key][0].metadata.title,
+          title: groupedChunks[key][0]?.metadata?.title,
+          data: {
+            url: groupedChunks[key][0]?.metadata?.url,
+          },
           // 其他必要的字段需要根据实际情况填充
         },
       } as SkillContextDocumentItem);
@@ -542,7 +548,7 @@ export async function knowledgeBaseSearchGetRelevantChunks(
     metadata: {
       ...item.metadata,
       title: item.title,
-      domain: item.domain, // project, resource, canvas
+      domain: item.domain, // project, resource, document
     },
   }));
 

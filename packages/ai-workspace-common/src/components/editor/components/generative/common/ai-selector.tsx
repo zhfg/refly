@@ -111,7 +111,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
           },
         ],
       },
-      skillName: 'edit_doc',
+      skillName: 'editDoc',
       tplConfig: {
         canvasEditConfig: {
           value: canvasEditConfig as { [key: string]: unknown },
@@ -240,45 +240,35 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
     editor.chain().focus().insertContentAt(selection, resultContent).run();
   };
 
+  console.log('resultStatus', resultStatus);
   return (
-    <div className="w-[500px] z-50" ref={ref}>
-      {resultId && (
+    <div className="w-[405px] z-50" ref={ref}>
+      {(resultId && ['waiting', 'executing'].includes(resultStatus)) || isLoading ? (
+        <div className="flex items-center px-4 w-full h-12 text-sm font-medium text-primary-600 text-muted-foreground">
+          <Magic className="mr-2 w-4 h-4 shrink-0" />
+          {t('editor.aiSelector.thinking')}
+          <div className="mt-1 ml-2">
+            <CrazySpinner />
+          </div>
+        </div>
+      ) : null}
+      {resultId && !isLoading && (
         <div className="flex flex-col">
-          {resultStatus === 'waiting' ? (
-            <div className="flex items-center px-4 w-full h-12 text-sm font-medium text-primary-600 text-muted-foreground">
-              <Magic className="mr-2 w-4 h-4 shrink-0" />
-              {t('editor.aiSelector.thinking')}
-              <div className="mt-1 ml-2">
-                <CrazySpinner />
-              </div>
+          <>
+            <div className="max-h-[400px] overflow-y-auto prose p-2 px-4 prose-sm">
+              <Markdown content={resultContent} />
             </div>
-          ) : (
-            <>
-              <div className="max-h-[400px] overflow-y-auto prose p-2 px-4 prose-sm">
-                <Markdown content={resultContent} />
+            {resultStatus === 'finish' && (
+              <div className="flex flex-row gap-1 px-4">
+                <Button size="small" icon={<HiCheck className="text-primary-600" />} onClick={handleReplace}>
+                  {t('copilot.chatActions.replace')}
+                </Button>
+                <Button size="small" icon={<HiXMark className="text-red-600" />} onClick={() => onOpenChange(false)}>
+                  {t('copilot.chatActions.reject')}
+                </Button>
               </div>
-              {resultStatus === 'finish' && (
-                <div className="flex flex-row gap-1 px-4">
-                  <Button
-                    size="small"
-                    type="text"
-                    icon={<HiCheck className="text-primary-600" />}
-                    onClick={handleReplace}
-                  >
-                    Replace
-                  </Button>
-                  <Button
-                    size="small"
-                    type="text"
-                    icon={<HiXMark className="text-red-600" />}
-                    onClick={() => onOpenChange(false)}
-                  >
-                    Reject
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
+            )}
+          </>
         </div>
       )}
 
@@ -320,22 +310,13 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                 className={cn(
                   'flex py-3 mx-0.5 w-full h-11 text-sm border-none outline-none calc-width-64px important-outline-none important-box-shadow-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 !bg-transparent',
                 )}
-                placeholder={'Ask AI to edit or chat...'}
+                placeholder={t('copilot.chatInput.editPlaceholder')}
                 onFocus={() => {
                   addAIHighlight(editor);
                 }}
               />
             </div>
             <div className="flex flex-row gap-1 mr-2">
-              <Button
-                size="small"
-                disabled={!inputValue}
-                onClick={() => {
-                  handleEdit('chat');
-                }}
-              >
-                <span>Chat</span> <span>{shortcutSymbols.chat}</span>
-              </Button>
               <Button
                 type="primary"
                 size="small"
@@ -344,7 +325,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                   handleEdit('edit');
                 }}
               >
-                <span>Edit</span> <span>{shortcutSymbols.edit}</span>
+                <span>{t('copilot.chatActions.send')}</span> <span>{shortcutSymbols.edit}</span>
               </Button>
             </div>
           </div>

@@ -178,7 +178,7 @@ export class EditDoc extends BaseSkill {
     return { requestMessages };
   };
 
-  // TODO: 将实际的 canvas 的内容发送给模型，拼接为 prompt 处理
+  // TODO: 将实际的 document 的内容发送给模型，拼接为 prompt 处理
   /**
    * Update canvas：更新的形态
    * 1. 口头模糊指明（可能涉及处理多个）：直接口头指明模糊更新的内容（需要模型扫描并给出待操作的模块和对应的 startIndex 和 endIndex），则只需要优化这些内容，其他保持原样，并且发送给前端流式写入

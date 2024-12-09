@@ -171,7 +171,11 @@ export const ResourceView = (props: ResourceViewProps) => {
                   </div>
                   <div className="site-intro-content">
                     <p className="site-intro-site-name">{resourceDetail?.data?.title}</p>
-                    <a className="site-intro-site-url" href={resourceDetail?.data?.url} target="_blank">
+                    <a
+                      className="site-intro-site-url no-underline text-[#00968F]"
+                      href={resourceDetail?.data?.url}
+                      target="_blank"
+                    >
                       {resourceDetail?.data?.url}
                     </a>
                   </div>

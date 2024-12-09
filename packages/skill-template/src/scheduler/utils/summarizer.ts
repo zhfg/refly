@@ -114,7 +114,7 @@ export const concatContextToStr = (context: Partial<IContext>, startIndex: numbe
     contextStr += '\n\n';
   }
 
-  // TODO: prior handle mentioned context, includes mentioned contentList, canvases, and resources
+  // TODO: prior handle mentioned context, includes mentioned contentList, documents, and resources
   // TODO: otherwise, the context more front will be more priority, should be most focused in the prompt
 
   if (contentList.length > 0) {
@@ -137,16 +137,16 @@ export const concatContextToStr = (context: Partial<IContext>, startIndex: numbe
   }
 
   if (documents.length > 0) {
-    // contextStr += 'Following are the knowledge base canvases: \n';
-    const concatCanvas = (id: string, title: string, content: string) => {
-      return `<ContextItem citationIndex='[[citation:${index++}]]' type='canvas' entityId='${id}' title='${title}'>${content}</ContextItem>`;
+    // contextStr += 'Following are the knowledge base documents: \n';
+    const concatDocument = (id: string, title: string, content: string) => {
+      return `<ContextItem citationIndex='[[citation:${index++}]]' type='document' entityId='${id}' title='${title}'>${content}</ContextItem>`;
     };
 
-    const canvasStr = documents
-      .map((n) => concatCanvas(n.document?.docId!, n.document?.title!, n.document?.content!))
+    const documentStr = documents
+      .map((n) => concatDocument(n.document?.docId!, n.document?.title!, n.document?.content!))
       .join('\n\n');
 
-    contextStr += `\n\n<KnowledgeBaseCanvases>\n${canvasStr}\n</KnowledgeBaseCanvases>\n\n`;
+    contextStr += `\n\n<KnowledgeBaseDocuments>\n${documentStr}\n</KnowledgeBaseDocuments>\n\n`;
   }
 
   if (resources.length > 0) {

@@ -144,7 +144,7 @@ export const ActionStepCard = ({
 
       {step.content && (
         <div className="my-3 text-gray-600 text-base skill-response-content">
-          <Markdown content={step.content} />
+          <Markdown content={step.content} sources={sources} />
           <SelectionContext
             containerClass="skill-response-content"
             getNodeData={(text) => buildNodeData(text)}

@@ -57,7 +57,7 @@ export const buildContextualCommonQnASystemPrompt = (locale: string) => {
   ## Context Handling:
   IMPORTANT: Before processing any context, always verify its relevance to the user's original query. Irrelevant context should be completely ignored.
 
-  You will be provided with context in XML format. This context is structured hierarchically and may include web search results, mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, canvases, and projects. Always consider all relevant context when formulating your responses. The context is structured as follows:
+  You will be provided with context in XML format. This context is structured hierarchically and may include web search results, mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, documents, and projects. Always consider all relevant context when formulating your responses. The context is structured as follows:
 
   <Context>
     <WebSearchContext>
@@ -69,10 +69,10 @@ export const buildContextualCommonQnASystemPrompt = (locale: string) => {
         <ContextItem citationIndex='[[citation:x]]' type='selectedContent' from={domain} entityId={id} title={title} weblinkUrl={url}>content</ContextItem>
         ...
       </UserSelectedContent>
-      <KnowledgeBaseCanvases>
-        <ContextItem citationIndex='[[citation:x]]' type='canvas' entityId={id} title={title}>content</ContextItem>
+      <KnowledgeBaseDocuments>
+        <ContextItem citationIndex='[[citation:x]]' type='document' entityId={id} title={title}>content</ContextItem>
         ...
-      </KnowledgeBaseCanvases>
+      </KnowledgeBaseDocuments>
       <KnowledgeBaseResources>
         <ContextItem citationIndex='[[citation:x]]' type='resource' entityId={id} title={title}>content</ContextItem>
         ...

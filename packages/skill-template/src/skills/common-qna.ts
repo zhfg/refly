@@ -76,7 +76,7 @@ export class CommonQnA extends BaseSkill {
     this.engine.logger.log(`preprocess query: ${query}`);
 
     // preprocess chat history, ensure chat history is not too long
-    const usedChatHistory = truncateMessages(chatHistory);
+    const usedChatHistory = truncateMessages(chatHistory, 20, 1000, 10000);
 
     // check if there is any context
     const hasContext = checkHasContext({
@@ -144,17 +144,6 @@ export class CommonQnA extends BaseSkill {
 
       this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
       this.engine.logger.log(`sources: ${safeStringifyJSON(sources)}`);
-
-      if (sources.length > 0) {
-        this.emitEvent(
-          {
-            event: 'structured_data',
-            content: JSON.stringify(sources),
-            structuredDataKey: 'sources',
-          },
-          config,
-        );
-      }
     }
 
     const requestMessages = buildFinalRequestMessages({
@@ -170,7 +159,7 @@ export class CommonQnA extends BaseSkill {
 
     this.engine.logger.log(`requestMessages: ${safeStringifyJSON(requestMessages)}`);
 
-    return { requestMessages };
+    return { requestMessages, sources };
   };
 
   callCommonQnA = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
@@ -182,10 +171,21 @@ export class CommonQnA extends BaseSkill {
       buildContextUserPrompt: commonQnA.buildCommonQnAContextUserPrompt,
       buildUserPrompt: commonQnA.buildCommonQnAUserPrompt,
     };
-    const { requestMessages } = await this.commonPreprocess(state, config, module);
+    const { requestMessages, sources } = await this.commonPreprocess(state, config, module);
 
     // set current step
     config.metadata.step = { name: 'answerQuestion' };
+
+    if (sources.length > 0) {
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify(sources),
+          structuredDataKey: 'sources',
+        },
+        config,
+      );
+    }
 
     const model = this.engine.chatModel({ temperature: 0.1 });
     const responseMessage = await model.invoke(requestMessages, {
