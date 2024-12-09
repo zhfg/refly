@@ -441,6 +441,7 @@ const translations = {
       addResource: 'Add Resource',
       addSkill: 'Add Skill',
       addTool: 'Add Tool',
+      autoLayout: 'Auto Layout',
       addDocument: 'Add Document',
       hidePreview: 'Hide Node Preview',
       showPreview: 'Show Node Preview',
