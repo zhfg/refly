@@ -101,15 +101,6 @@ export class WebSearch extends BaseSkill {
        - sources: ${safeStringifyJSON(sources)}`,
     );
 
-    this.emitEvent(
-      {
-        event: 'structured_data',
-        content: JSON.stringify(sources),
-        structuredDataKey: 'sources',
-      },
-      config,
-    );
-
     // Set current step for answer generation
     config.metadata.step = { name: 'answerGeneration' };
 
@@ -121,6 +112,15 @@ export class WebSearch extends BaseSkill {
     };
 
     this.engine.logger.log(`Prepared context successfully! ${safeStringifyJSON(webSearchContext)}`);
+
+    this.emitEvent(
+      {
+        event: 'structured_data',
+        content: JSON.stringify(sources),
+        structuredDataKey: 'sources',
+      },
+      config,
+    );
 
     const requestMessages = buildFinalRequestMessages({
       module,

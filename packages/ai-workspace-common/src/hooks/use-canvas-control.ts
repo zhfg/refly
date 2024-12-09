@@ -369,15 +369,15 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       requestAnimationFrame(() => {
         onLayout('LR');
 
-        requestAnimationFrame(() => {
-          const node = getNode(newNode.id);
-          if (node) {
-            setCenter(node.position.x, node.position.y, {
-              duration: 500,
-              zoom: 1,
-            });
-          }
-        });
+        // requestAnimationFrame(() => {
+        //   const node = getNode(newNode.id);
+        //   if (node) {
+        //     setCenter(node.position.x, node.position.y, {
+        //       duration: 500,
+        //       zoom: 1,
+        //     });
+        //   }
+        // });
       });
     },
     [canvasId, ydoc, yNodes, yEdges, onLayout, getNode, setCenter],
