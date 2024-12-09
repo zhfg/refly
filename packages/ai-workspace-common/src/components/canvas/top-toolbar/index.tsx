@@ -16,7 +16,6 @@ import { useSiderStore, useSiderStoreShallow } from '@refly-packages/ai-workspac
 import { useTranslation } from 'react-i18next';
 import { FC, useState } from 'react';
 
-import { PiShootingStar } from 'react-icons/pi';
 import { MdOutlineHideImage, MdOutlineAspectRatio } from 'react-icons/md';
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
 import {
@@ -26,15 +25,12 @@ import {
   IconMoreHorizontal,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
-import { BsLayoutWtf } from 'react-icons/bs';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import Logo from '../../../../../../apps/web/src/assets/logo.svg';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/use-delete-canvas';
-import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { LuCheck, LuX } from 'react-icons/lu';
 import { useUpdateCanvas } from '@refly-packages/ai-workspace-common/queries/queries';
 import { Helmet } from 'react-helmet';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -46,13 +42,10 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
     collapse: state.collapse,
     setCollapse: state.setCollapse,
   }));
-  const { provider } = useCanvasContext();
-  const ydoc = provider?.document;
-  const canvasTitle = ydoc?.getText('title');
 
-  // const { onLayout } = useCanvasControl();
-  const { showPreview, setShowPreview, showMaxRatio, setShowMaxRatio, showLaunchpad, setShowLaunchpad } =
+  const { data, showPreview, setShowPreview, showMaxRatio, setShowMaxRatio, showLaunchpad, setShowLaunchpad } =
     useCanvasStoreShallow((state) => ({
+      data: state.data,
       showPreview: state.showPreview,
       setShowPreview: state.setShowPreview,
       showMaxRatio: state.showMaxRatio,
@@ -60,13 +53,16 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
       showLaunchpad: state.showLaunchpad,
       setShowLaunchpad: state.setShowLaunchpad,
     }));
+  const canvasTitle = data[canvasId]?.title;
+  const { setTitle } = useCanvasControl();
+
   const { deleteCanvas } = useDeleteCanvas();
 
   const [editedTitle, setEditedTitle] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleEditClick = () => {
-    setEditedTitle(canvasTitle?.toJSON() ?? '');
+    setEditedTitle(data[canvasId]?.title ?? '');
     setIsModalOpen(true);
   };
 
@@ -74,20 +70,15 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   const setCanvasList = useSiderStoreShallow((state) => state.setCanvasList);
 
   useEffect(() => {
-    if (provider?.status === 'connected') {
-      const { canvasList } = useSiderStore.getState();
-      setCanvasList(
-        canvasList.map((canvas) => (canvas.id === canvasId ? { ...canvas, name: canvasTitle?.toJSON() } : canvas)),
-      );
-    }
-  }, [canvasId, provider?.status, canvasTitle?.toJSON()]);
+    const { canvasList } = useSiderStore.getState();
+    setCanvasList(
+      canvasList.map((canvas) => (canvas.id === canvasId && canvasTitle ? { ...canvas, name: canvasTitle } : canvas)),
+    );
+  }, [canvasId, canvasTitle]);
 
   const handleModalOk = () => {
-    if (ydoc && editedTitle?.trim()) {
-      ydoc.transact(() => {
-        canvasTitle?.delete(0, canvasTitle?.length ?? 0);
-        canvasTitle?.insert(0, editedTitle);
-      });
+    if (editedTitle?.trim()) {
+      setTitle(editedTitle);
       mutate({ body: { canvasId, title: editedTitle } }, { onSuccess: () => setIsModalOpen(false) });
     }
   };
@@ -190,10 +181,10 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
             onClick={handleEditClick}
           >
             <IconCanvas />
-            {provider.status === 'connecting' ? (
+            {!data[canvasId] ? (
               <Skeleton className="w-28" active paragraph={false} />
             ) : (
-              canvasTitle?.toJSON() || t('common.untitled')
+              canvasTitle || t('common.untitled')
             )}
             <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>

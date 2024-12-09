@@ -3,11 +3,13 @@ import { Splitter } from 'antd';
 import { DocumentEditor } from '@refly-packages/ai-workspace-common/components/document';
 import ResourceDeck from '@refly-packages/ai-workspace-common/components/resource-view/resource-deck';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 interface DocumentNodePreviewProps {
   nodeData?: {
     entityId?: string;
     entityType?: 'document' | 'resource';
+    node: CanvasNode<any>;
   };
 }
 
@@ -20,11 +22,11 @@ export const DocumentNodePreview = ({ nodeData }: DocumentNodePreviewProps) => {
     return <div className="h-full flex items-center justify-center text-gray-500">No document data available</div>;
   }
 
-  const { entityId, entityType } = nodeData;
+  const { entityId, entityType, node } = nodeData;
 
   return (
     <div className="h-full overflow-hidden">
-      <DocumentEditor docId={entityId} deckSize={deckSize} setDeckSize={setDeckSize} />
+      <DocumentEditor docId={entityId} deckSize={deckSize} setDeckSize={setDeckSize} node={node} />
       {/* <Splitter
         layout="vertical"
         onResize={(sizes) => {

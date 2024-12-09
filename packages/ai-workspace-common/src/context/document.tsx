@@ -25,7 +25,7 @@ export const DocumentProvider = ({ docId, children }: { docId: string; children:
       token,
     });
     provider.on('status', (event) => {
-      updateDocumentServerStatus(event.status);
+      updateDocumentServerStatus(docId, event.status);
     });
 
     // Add synced event listener

@@ -27,7 +27,10 @@ import { useListSkills } from '@refly-packages/ai-workspace-common/queries/queri
 
 export const useInvokeAction = () => {
   const { addNode, setNodeDataByEntity } = useCanvasControl();
-  const updateActionResult = useActionResultStoreShallow((state) => state.updateActionResult);
+  const { resultMap, updateActionResult } = useActionResultStoreShallow((state) => ({
+    resultMap: state.resultMap,
+    updateActionResult: state.updateActionResult,
+  }));
 
   const globalAbortControllerRef = { current: null as AbortController | null };
   const globalIsAbortedRef = { current: false as boolean };

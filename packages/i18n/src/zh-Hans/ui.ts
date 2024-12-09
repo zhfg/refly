@@ -484,12 +484,15 @@ const translations = {
       insertToDoc: '插入文档',
       askFollowUp: '继续提问',
       moreOptions: '更多选项',
+      delete: '删除节点',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',
       createDocument: '创建文档',
     },
     nodePreview: {
+      pin: '固定',
+      unpin: '取消固定',
       document: {
         contentPreview: '加载文档内容中...',
         noContentPreview: '暂无内容预览',

@@ -69,6 +69,7 @@ export const NodePreview = ({
             nodeData={{
               entityId: node.data?.entityId,
               entityType: 'document',
+              node: node,
             }}
           />
         );

@@ -37,11 +37,7 @@ import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/use-c
 import { useCanvasNodesStore } from "@refly-packages/ai-workspace-common/stores/canvas-nodes"
 import { CanvasNodeType } from "@refly-packages/ai-workspace-common/requests/types.gen"
 // icons
-import {
-  IconDocument,
-  IconResource,
-  IconLibrary,
-} from "@refly-packages/ai-workspace-common/components/common/icon"
+import { IconLibrary } from "@refly-packages/ai-workspace-common/components/common/icon"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item

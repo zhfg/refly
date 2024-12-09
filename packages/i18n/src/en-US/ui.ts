@@ -488,12 +488,15 @@ const translations = {
       insertToDoc: 'Insert to Document',
       askFollowUp: 'Ask Follow-up',
       moreOptions: 'More Options',
+      delete: 'Delete Node From Canvas',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',
       createDocument: 'Create Document',
     },
     nodePreview: {
+      pin: 'Pin',
+      unpin: 'Unpin',
       document: {
         contentPreview: 'Loading document content...',
         noContentPreview: 'No content preview available...',
