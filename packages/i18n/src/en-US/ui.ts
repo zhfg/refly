@@ -1266,6 +1266,7 @@ const translations = {
     },
     chatInput: {
       placeholder: 'Let Refly write something for you, or search anything you are interested in...',
+      editPlaceholder: 'Ask AI to edit...',
       defaultQuestion: '[Call Skill: {{name}}]',
       chatWithReflyAssistant: 'Chat with Refly Assistant',
     },
@@ -1275,6 +1276,8 @@ const translations = {
       noContextChat: 'No Context Chat',
       wholeSpaceChat: 'Whole Space Chat',
       recommendQuestions: 'Recommend Questions',
+      replace: 'Replace Selection',
+      reject: 'Reject',
     },
     configManager: {
       title: 'Skill Configuration',

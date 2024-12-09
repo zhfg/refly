@@ -1263,6 +1263,7 @@ const translations = {
     chatInput: {
       placeholder: '让 Refly 帮你写点什么，或者搜索任何感兴趣的内容...',
       defaultQuestion: '[调用技能: {{name}}]',
+      editPlaceholder: '让 AI 帮你编辑...',
       chatWithReflyAssistant: '和「知识管家」聊聊',
     },
     chatActions: {
@@ -1271,6 +1272,8 @@ const translations = {
       noContextChat: '不带上下文聊天',
       wholeSpaceChat: '在整个空间聊天',
       recommendQuestions: '推荐问题',
+      replace: '替换选中',
+      reject: '拒绝',
     },
     configManager: {
       title: '技能配置',

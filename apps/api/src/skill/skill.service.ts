@@ -440,9 +440,9 @@ export class SkillService {
       return contextCopy;
     };
 
-    const purgeResultHistory = (resultHistory: ActionResult[]) => {
+    const purgeResultHistory = (resultHistory: ActionResult[] = []) => {
       // remove extra unnecessary fields from result history to save storage
-      return resultHistory.map((r) => pick(r, ['resultId', 'title', 'steps']));
+      return resultHistory?.map((r) => pick(r, ['resultId', 'title', 'steps']));
     };
 
     const result = await this.prisma.actionResult.create({
