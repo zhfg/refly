@@ -148,7 +148,7 @@ export const useGetUserSettings = () => {
     } else {
       userStore.setIsCheckingLoginStatus(false);
       userStore.setIsLogin(true);
-      // Authentication successful, redirect to app.refly.ai
+      // Authentication successful, redirect to home
       navigate('/');
     }
   };
