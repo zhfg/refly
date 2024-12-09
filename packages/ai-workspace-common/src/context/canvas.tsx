@@ -40,9 +40,11 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     const edgesArray = ydoc.getArray<Edge>('edges');
 
     const titleObserverCallback = () => {
-      if (provider.status === 'connected') {
-        setTitle(canvasId, title.toJSON());
-      }
+      // TODO: figure out how to sync title from ydoc to local state
+      // The following code is not working as expected (title will be duplicated like 'titletitletitletitle')
+      // if (provider.status === 'connected') {
+      //   setTitle(canvasId, title.toJSON());
+      // }
     };
 
     const nodesObserverCallback = () => {
