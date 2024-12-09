@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Connection, useReactFlow, Node, XYPosition } from '@xyflow/react';
 import Dagre from '@dagrejs/dagre';
@@ -63,28 +63,36 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   const { canvasId: routeCanvasId } = useParams();
   const canvasId = selectedCanvasId ?? contextCanvasId ?? routeCanvasId;
 
-  const { data, setNodes, setEdges, setTitleRaw, setModeRaw } = useCanvasStoreShallow((state) => ({
+  const { data, setNodes, setEdges, setTitle, setModeRaw } = useCanvasStoreShallow((state) => ({
     data: state.data,
     setNodes: state.setNodes,
     setEdges: state.setEdges,
-    setTitleRaw: state.setTitle,
+    setTitle: state.setTitle,
     setModeRaw: state.setMode,
   }));
 
-  const syncTitleToYDoc = useCallback((title: string) => {
+  const syncTitleToYDoc = useDebouncedCallback((title: string) => {
     ydoc?.transact(() => {
       const yTitle = ydoc?.getText('title');
       yTitle?.delete(0, yTitle?.length ?? 0);
       yTitle?.insert(0, title);
     });
-  }, []);
+  }, 100);
 
-  const setTitle = useCallback(
-    (title: string) => {
-      setTitleRaw(canvasId, title);
+  const canvasTitle = data[canvasId]?.title;
+
+  useEffect(() => {
+    if (canvasTitle) {
+      syncTitleToYDoc(canvasTitle);
+    }
+  }, [canvasTitle]);
+
+  const setCanvasTitle = useCallback(
+    (title: string, targetCanvasId?: string) => {
+      setTitle(targetCanvasId ?? canvasId, title);
       syncTitleToYDoc(title);
     },
-    [canvasId, setTitleRaw, syncTitleToYDoc],
+    [canvasId, setTitle, syncTitleToYDoc],
   );
 
   const syncNodesToYDoc = useDebouncedCallback((nodes: CanvasNode<any>[]) => {
@@ -409,7 +417,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     addNode,
     mode,
     setMode,
-    setTitle,
+    setCanvasTitle,
     setSelectedNodes,
     addSelectedNode,
     addSelectedNodeByEntity,

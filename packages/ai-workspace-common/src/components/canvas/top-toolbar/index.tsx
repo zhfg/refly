@@ -54,7 +54,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
       setShowLaunchpad: state.setShowLaunchpad,
     }));
   const canvasTitle = data[canvasId]?.title;
-  const { setTitle, onLayout } = useCanvasControl();
+  const { setCanvasTitle, onLayout } = useCanvasControl();
 
   const { deleteCanvas } = useDeleteCanvas();
 
@@ -78,7 +78,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
 
   const handleModalOk = () => {
     if (editedTitle?.trim()) {
-      setTitle(editedTitle);
+      setCanvasTitle(editedTitle, canvasId);
       mutate({ body: { canvasId, title: editedTitle } }, { onSuccess: () => setIsModalOpen(false) });
     }
   };
