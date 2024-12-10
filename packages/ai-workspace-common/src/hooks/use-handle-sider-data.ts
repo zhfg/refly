@@ -91,7 +91,6 @@ export const useHandleSiderData = (initData?: boolean) => {
 
   const loadSiderData = async () => {
     getCanvasList();
-    getLibraryList();
   };
 
   useEffect(() => {

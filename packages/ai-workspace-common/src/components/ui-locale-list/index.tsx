@@ -1,12 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { Dropdown, Menu, Message as message } from '@arco-design/web-react';
+import { Dropdown, MenuProps, message } from 'antd';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { safeParseJSON, safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { LOCALE } from '@refly/common-types';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-// styles
-import './index.scss';
 
 export const UILocaleList = (props: { children: React.ReactNode; width?: number }) => {
   // i18n
@@ -36,24 +34,24 @@ export const UILocaleList = (props: { children: React.ReactNode; width?: number 
     }
   };
 
-  const dropList = (
-    <Menu
-      className={'ui-locale-list-menu'}
-      onClickMenuItem={(key) => changeLang(key as LOCALE)}
-      style={{ width: props?.width || 120 }}
-    >
-      <Menu.Item key="zh-CN" className={`ui-locale-list-menu-item ${i18n.languages?.[0] === 'zh-CN' ? 'active' : ''}`}>
-        简体中文
-      </Menu.Item>
-      <Menu.Item key="en" className={`ui-locale-list-menu-item ${i18n.languages?.[0] === 'en' ? 'active' : ''}`}>
-        English
-      </Menu.Item>
-    </Menu>
-  );
+  const dropList: MenuProps['items'] = [
+    {
+      key: 'zh-CN',
+      label: <div onClick={() => changeLang('zh-CN' as LOCALE)}>简体中文</div>,
+    },
+    {
+      key: 'en',
+      label: <div onClick={() => changeLang('en' as LOCALE)}>English</div>,
+    },
+  ];
 
   return (
-    <div className="ui-locale-list">
-      <Dropdown droplist={dropList} trigger="click" position="bl">
+    <div>
+      <Dropdown
+        menu={{ selectedKeys: [i18n.languages?.[0]], items: dropList, style: { width: props?.width } }}
+        trigger={['click']}
+        placement="bottomLeft"
+      >
         {props.children}
       </Dropdown>
     </div>
