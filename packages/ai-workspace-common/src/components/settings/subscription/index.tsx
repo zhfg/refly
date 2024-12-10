@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Button, Progress, Tooltip, Tag, Spin, Space } from '@arco-design/web-react';
+import { Button, Progress, Tooltip, Tag, Spin, Space } from 'antd';
 import { HiOutlineQuestionMarkCircle } from 'react-icons/hi2';
 import { HiOutlineExternalLink } from 'react-icons/hi';
 import { RiBillLine } from 'react-icons/ri';
@@ -85,7 +85,7 @@ export const Subscription = () => {
           <div className="title">
             <div className="title-left">
               {title}
-              <Tooltip mini color="white" content={<div style={{ color: '#000' }}>{description}</div>}>
+              <Tooltip color="white" title={<div style={{ color: '#000' }}>{description}</div>}>
                 <HiOutlineQuestionMarkCircle className="info-icon" />
               </Tooltip>
             </div>
@@ -102,9 +102,9 @@ export const Subscription = () => {
         <div className="subscription-usage-item-progress">
           <Progress
             strokeWidth={10}
-            color={!quota ? '#C9CDD4' : '#00968F'}
+            strokeColor={!quota ? '#C9CDD4' : '#00968F'}
             percent={(used / quota) * 100}
-            showText={false}
+            showInfo={false}
           />
         </div>
       </div>
@@ -148,9 +148,8 @@ export const Subscription = () => {
           <span className="title-left">
             {t('settings.subscription.subscribe.fileStorage')}
             <Tooltip
-              mini
               color="white"
-              content={<div style={{ color: '#000' }}>{t('settings.subscription.subscribe.tooltip.fileStorage')}</div>}
+              title={<div style={{ color: '#000' }}>{t('settings.subscription.subscribe.tooltip.fileStorage')}</div>}
             >
               <HiOutlineQuestionMarkCircle className="info-icon" />
             </Tooltip>
@@ -167,7 +166,7 @@ export const Subscription = () => {
             />
           ))}
         </div>
-        <Space size="medium" style={{ marginTop: '8px' }}>
+        <Space size="middle" style={{ marginTop: '8px' }}>
           {categories.map((category, index) => (
             <div key={index} className="file-storage-usage-bar-category">
               <div
@@ -193,7 +192,7 @@ export const Subscription = () => {
   }, []);
 
   return (
-    <Spin loading={isRequest}>
+    <Spin spinning={isRequest}>
       <div className="subscription">
         <div className={`subscription-plan ${subscriptionStatus === 'free' ? 'free' : ''}`}>
           <div className="subscription-plan-info">
@@ -243,7 +242,7 @@ export const Subscription = () => {
 
         {userStore.userProfile?.customerId && (
           <div className="subscription-management-wrapper">
-            <Spin loading={loading} style={{ width: '100%' }}>
+            <Spin spinning={loading} style={{ width: '100%' }}>
               <div className="subscription-management" onClick={createPortalSession}>
                 <div className="subscription-management-left">
                   <RiBillLine style={{ marginRight: 8 }} />

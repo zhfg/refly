@@ -1,4 +1,4 @@
-import { Button, Typography } from '@arco-design/web-react';
+import { Button, Typography } from 'antd';
 
 // styles
 import './index.scss';
@@ -22,21 +22,21 @@ export const LanguageSetting = () => {
     <div className="language-setting">
       <div className="language-setting-content">
         <div className="language-setting-content-item">
-          <Typography.Title heading={6}>{t('settings.language.uiLocale.title')}</Typography.Title>
+          <Typography.Title level={5}>{t('settings.language.uiLocale.title')}</Typography.Title>
           <UILocaleList width={600}>
-            <Button className="setting-page-language-btn">
+            <Button>
               {t('language')} <IconDown />
             </Button>
           </UILocaleList>
         </div>
 
         <div className="language-setting-content-item">
-          <Typography.Title heading={6}>{t('settings.language.outputLocale.title')}</Typography.Title>
+          <Typography.Title level={5}>{t('settings.language.outputLocale.title')}</Typography.Title>
           <Typography.Paragraph type="secondary">
             {t('settings.language.outputLocale.description')}
           </Typography.Paragraph>
           <OutputLocaleList width={600} position="bl">
-            <Button className="setting-page-language-btn">
+            <Button>
               {localeToLanguageName?.[uiLocale]?.[outputLocale]} <IconDown />
             </Button>
           </OutputLocaleList>
