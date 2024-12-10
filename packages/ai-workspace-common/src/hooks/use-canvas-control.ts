@@ -296,6 +296,22 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     [canvasId, setEdges, syncEdgesToYDoc],
   );
 
+  const setNodeCenter = useCallback(
+    (nodeId: string) => {
+      // Center view on new node after it's rendered
+      requestAnimationFrame(() => {
+        const renderedNode = getNode(nodeId);
+        if (renderedNode) {
+          setCenter(renderedNode.position.x, renderedNode.position.y, {
+            duration: 500,
+            zoom: 1,
+          });
+        }
+      });
+    },
+    [setCenter],
+  );
+
   const addNode = useCallback(
     (
       node: { type: CanvasNodeType; data: CanvasNodeData<any>; position?: XYPosition },
@@ -305,18 +321,63 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const nodes = data[canvasId]?.nodes ?? [];
       const edges = data[canvasId]?.edges ?? [];
 
-      const currentNodes = nodes;
-
       if (!node?.type || !node?.data) {
         console.warn('Invalid node data provided');
         return;
       }
 
-      // Check if node with the same entity already exists
-      if (currentNodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId)) {
+      let needSetCenter = false;
+
+      // Check for existing node
+      const existingNode = nodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId);
+      if (existingNode) {
         message.warning(t('canvas.action.nodeAlreadyExists', { type: t(`common.${node.type}`) }));
-        setSelectedNode(currentNodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId));
+        setSelectedNode(existingNode);
         return;
+      }
+
+      // Find source nodes
+      const sourceNodes = connectTo
+        ?.map((filter) => nodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId))
+        .filter(Boolean);
+
+      // Calculate new node position
+      let newPosition: XYPosition;
+
+      if (sourceNodes?.length) {
+        // Get all existing target nodes that are connected to any of the source nodes
+        const existingTargetNodeIds = new Set(
+          edges.filter((edge) => sourceNodes.some((source) => source.id === edge.source)).map((edge) => edge.target),
+        );
+
+        const existingTargetNodes = nodes.filter((n) => existingTargetNodeIds.has(n.id));
+
+        if (existingTargetNodes.length) {
+          // Position based on existing target nodes
+          const minTargetX = Math.min(...existingTargetNodes.map((n) => n.position.x));
+          const maxTargetY = Math.max(...existingTargetNodes.map((n) => n.position.y + (n.measured?.height ?? 100)));
+
+          newPosition = {
+            x: minTargetX,
+            y: maxTargetY + 40,
+          };
+        } else {
+          // First connection - position based on source nodes
+          const avgSourceX = sourceNodes.reduce((sum, n) => sum + n.position.x, 0) / sourceNodes.length;
+          const maxSourceY = Math.max(...sourceNodes.map((n) => n.position.y + (n.measured?.height ?? 100)));
+
+          newPosition = {
+            x: avgSourceX + 200, // Offset to the right of source nodes
+            y: maxSourceY + 40,
+          };
+        }
+      } else {
+        // Default position if no source nodes
+        newPosition = {
+          x: Math.max(...nodes.map((n) => n.position.x), 0) + 200,
+          y: Math.max(...nodes.map((n) => n.position.y), 0),
+        };
+        needSetCenter = true;
       }
 
       const enrichedData = {
@@ -331,55 +392,35 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const newNode = prepareNodeData({
         type: node.type,
         data: enrichedData,
-        position: node.position ?? {
-          x: Math.max(...currentNodes.map((n) => n.position.x), 0) + 200,
-          y: Math.max(...currentNodes.map((n) => n.position.y), 0),
-        },
+        position: newPosition,
         selected: true,
       });
 
-      const updatedNodes = [...currentNodes, newNode];
+      // Create new edges
+      const newEdges: Edge[] =
+        sourceNodes?.map((sourceNode) => ({
+          id: `edge-${genUniqueId()}`,
+          source: sourceNode.id,
+          target: newNode.id,
+          style: EDGE_STYLES.default,
+          type: 'default',
+        })) ?? [];
+
+      // Update state
+      const updatedNodes = [...nodes, newNode];
+      const updatedEdges = [...edges, ...newEdges];
+
       setNodes(canvasId, updatedNodes);
 
-      if (connectTo?.length > 0) {
-        const newEdges: Edge[] = connectTo
-          .map((filter) => {
-            const sourceNode = currentNodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId);
-            if (sourceNode) {
-              return {
-                id: `edge-${genUniqueId()}`,
-                source: sourceNode.id,
-                target: newNode.id,
-                style: EDGE_STYLES.default,
-                type: 'default',
-              };
-            }
-            return null;
-          })
-          .filter(Boolean);
-
-        if (newEdges.length > 0) {
-          const updatedEdges = [...edges, ...newEdges];
-          setEdges(canvasId, updatedEdges);
-        }
+      if (newEdges.length) {
+        setEdges(canvasId, updatedEdges);
       }
 
-      // Use RAF for layout and centering
-      // requestAnimationFrame(() => {
-      // onLayout('LR');
-
-      // requestAnimationFrame(() => {
-      //   const node = getNode(newNode.id);
-      //   if (node) {
-      //     setCenter(node.position.x, node.position.y, {
-      //       duration: 500,
-      //       zoom: 1,
-      //     });
-      //   }
-      // });
-      // });
+      if (needSetCenter) {
+        setNodeCenter(newNode.id);
+      }
     },
-    [canvasId, setNodes, setEdges],
+    [canvasId, setNodes, setEdges, getNode, setCenter, setSelectedNode, t],
   );
 
   const nodes = data[canvasId]?.nodes ?? [];
