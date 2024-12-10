@@ -414,7 +414,8 @@ const translations = {
         skillResponse: 'Skill Response',
       },
       noContent: 'No content available to insert',
-      noEditor: 'No active document editor',
+      noEditor: 'No opened document',
+      noActiveDocument: 'No opened document',
       insertSuccess: 'Successfully inserted content',
       replaceSuccess: 'Successfully replaced content',
       createNoteSuccess: 'Successfully created new note',
@@ -466,6 +467,10 @@ const translations = {
       skillCompleted: 'Skill Completed',
       stepCompleted: 'Step Completed',
       stepTitle: 'Step {{index}}',
+    },
+    chatHistory: {
+      alreadyAdded: 'Already added to chat history',
+      addSuccess: 'Successfully added to chat history',
     },
     contextList: {
       placeholder: 'Search {{domain}}...',

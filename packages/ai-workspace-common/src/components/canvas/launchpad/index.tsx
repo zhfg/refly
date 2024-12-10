@@ -9,7 +9,10 @@ import { ChatHistory } from './chat-history';
 
 // stores
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import {
+  useContextPanelStore,
+  useContextPanelStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 import {
   useChatStore,
   MessageIntentContext,
@@ -31,16 +34,24 @@ import { useChatHistory } from './hooks/use-chat-history';
 import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { RecommendQuestionsPanel } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/recommend-questions-panel';
 
-export const LaunchPad = () => {
+interface LaunchPadProps {
+  visible?: boolean;
+}
+
+export const LaunchPad: React.FC<LaunchPadProps> = ({ visible = true }) => {
   const { t } = useTranslation();
 
   // stores
+  const { clearContextItems } = useContextPanelStoreShallow((state) => ({
+    clearContextItems: state.clearContextItems,
+  }));
   const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
   }));
   const chatStore = useChatStoreShallow((state) => ({
     setNewQAText: state.setNewQAText,
     setMessageIntentContext: state.setMessageIntentContext,
+    resetState: state.resetState,
   }));
 
   const [form] = Form.useForm();
@@ -54,6 +65,19 @@ export const LaunchPad = () => {
     recommendQuestionsOpen: state.recommendQuestionsOpen,
     setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
   }));
+
+  // Add new method to clear state
+  const clearLaunchpadState = () => {
+    chatStore.resetState();
+    clearContextItems();
+  };
+
+  // Handle canvas ID changes
+  useEffect(() => {
+    if (canvasId) {
+      clearLaunchpadState();
+    }
+  }, [canvasId]);
 
   const handleSendMessage = (userInput?: string) => {
     const error = handleFilterErrorTip();
@@ -150,6 +174,10 @@ export const LaunchPad = () => {
       editorEmitter.off('inPlaceSendMessage', handleInPlaceEditSendMessage);
     };
   }, []);
+
+  if (!visible) {
+    return null;
+  }
 
   return (
     <div className="ai-copilot-operation-container">

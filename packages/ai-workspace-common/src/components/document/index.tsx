@@ -81,6 +81,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
     updateEditor: state.updateEditor,
     updateTocItems: state.updateTocItems,
     updateLastCursorPosRef: state.updateLastCursorPosRef,
+    setActiveDocumentId: state.setActiveDocumentId,
   }));
 
   const contextPanelStore = useContextPanelStore((state) => ({
@@ -331,6 +332,39 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [documentStore.isAiEditing]);
+
+  // Handle editor focus/blur to manage active document
+  useEffect(() => {
+    const handleFocus = () => {
+      documentStore.setActiveDocumentId(docId);
+    };
+
+    const handleBlur = () => {
+      // Don't clear activeDocumentId on blur to maintain last active state
+      // Only update if user switches to another document
+    };
+
+    editorRef.current?.on('focus', handleFocus);
+    editorRef.current?.on('blur', handleBlur);
+
+    // Set initial active document if editor is focused
+    if (editorRef.current?.isFocused) {
+      documentStore.setActiveDocumentId(docId);
+    }
+
+    return () => {
+      editorRef.current?.off('focus', handleFocus);
+      editorRef.current?.off('blur', handleBlur);
+    };
+  }, [docId, documentStore.setActiveDocumentId, editorRef.current, readOnly]);
+
+  // Handle component unmount
+  useEffect(() => {
+    return () => {
+      // Only clear activeDocumentId if this document was the active one
+      useDocumentStore.getState().activeDocumentId === docId && documentStore.setActiveDocumentId(undefined);
+    };
+  }, [docId]);
 
   return (
     <div

@@ -46,7 +46,7 @@ export const useCanvasStore = create<CanvasState>()(
       data: {},
       currentCanvasId: null,
       showPreview: true,
-      showMaxRatio: true,
+      showMaxRatio: false,
       showLaunchpad: true,
 
       setCurrentCanvasId: (canvasId) =>

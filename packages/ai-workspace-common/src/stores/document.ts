@@ -43,6 +43,7 @@ interface DocumentBaseState {
   isCreatingNewDocumentOnHumanMessage: boolean;
 
   // Canvas specific states stored by docId
+  activeDocumentId: string;
   documentStates: Record<string, DocumentState>;
 
   updateCurrentDocument: (docId: string, document: Document) => void;
@@ -55,6 +56,7 @@ interface DocumentBaseState {
   updateIsCreatingNewDocumentOnHumanMessage: (creating: boolean) => void;
   updateIsAiEditing: (editing: boolean) => void;
   updateEditor: (docId: string, editor: EditorInstance) => void;
+  setActiveDocumentId: (docId: string) => void;
 
   resetState: (docId: string) => void;
 }
@@ -67,6 +69,7 @@ export const defaultState = {
 
   // documents
   documentStates: {},
+  activeDocumentId: '',
 };
 
 export const useDocumentStore = create<DocumentBaseState>()(
@@ -133,6 +136,8 @@ export const useDocumentStore = create<DocumentBaseState>()(
       set((state) => ({ ...state, isCreatingNewDocumentOnHumanMessage: creating })),
 
     updateIsAiEditing: (editing: boolean) => set((state) => ({ ...state, isAiEditing: editing })),
+
+    setActiveDocumentId: (docId: string) => set((state) => ({ ...state, activeDocumentId: docId })),
 
     resetState: (docId: string) =>
       set((state) => ({
