@@ -29,10 +29,11 @@ export const useDeleteCanvas = () => {
         message.success(t('canvas.action.deleteSuccess'));
 
         // Check and remove canvasId from localStorage if matches
-        const { currentCanvasId, setCurrentCanvasId } = useCanvasStore.getState();
+        const { currentCanvasId, setCurrentCanvasId, deleteCanvasData } = useCanvasStore.getState();
         if (currentCanvasId === canvasId) {
           setCurrentCanvasId(null);
         }
+        deleteCanvasData(canvasId);
 
         getCanvasList();
 

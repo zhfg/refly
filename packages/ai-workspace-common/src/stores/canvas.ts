@@ -23,6 +23,7 @@ export interface CanvasState {
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
   setTitle: (canvasId: string, title: string) => void;
+  deleteCanvasData: (canvasId: string) => void;
   setCurrentCanvasId: (canvasId: string) => void;
   setMode: (canvasId: string, mode: 'pointer' | 'hand') => void;
   addPinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
@@ -49,6 +50,10 @@ export const useCanvasStore = create<CanvasState>()(
       showMaxRatio: false,
       showLaunchpad: true,
 
+      deleteCanvasData: (canvasId) =>
+        set((state) => {
+          delete state.data[canvasId];
+        }),
       setCurrentCanvasId: (canvasId) =>
         set((state) => {
           state.currentCanvasId = canvasId;
