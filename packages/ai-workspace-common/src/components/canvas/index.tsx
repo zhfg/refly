@@ -219,11 +219,9 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           />
         </ReactFlow>
 
-        {showLaunchpad && (
-          <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
-            <LaunchPad />
-          </div>
-        )}
+        <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
+          <LaunchPad visible={showLaunchpad} />
+        </div>
       </div>
 
       {showPreview && (

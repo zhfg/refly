@@ -18,17 +18,17 @@ import { ChatHistorySwitch } from './components/chat-history-switch';
 
 import './index.scss';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 export const ContextManager = () => {
-  const { t } = useTranslation();
-  const { contextItems, removeContextItem, setContextItems, clearContextItems, filterErrorInfo } =
-    useContextPanelStoreShallow((state) => ({
+  const { contextItems, removeContextItem, setContextItems, filterErrorInfo } = useContextPanelStoreShallow(
+    (state) => ({
       contextItems: state.contextItems,
       removeContextItem: state.removeContextItem,
       setContextItems: state.setContextItems,
-      clearContextItems: state.clearContextItems,
       filterErrorInfo: state.filterErrorInfo,
-    }));
+    }),
+  );
   const { nodes } = useCanvasControl();
   const selectedContextNodes = nodes.filter(
     (node) => node.selected && (node.type === 'resource' || node.type === 'document'),
@@ -62,12 +62,6 @@ export const ContextManager = () => {
     ];
     setContextItems(newContextItems);
   }, [JSON.stringify(selectedNodeIds)]);
-
-  useEffect(() => {
-    return () => {
-      clearContextItems();
-    };
-  }, []);
 
   return (
     <div className="flex flex-col h-full p-2 px-3">

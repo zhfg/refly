@@ -51,11 +51,11 @@ export const ContextManager = (props: { source: MessageIntentSource }) => {
     }
   }, [selectedNode]);
 
-  useEffect(() => {
-    return () => {
-      clearContextItems();
-    };
-  }, []);
+  // useEffect(() => {
+  //   return () => {
+  //     clearContextItems();
+  //   };
+  // }, []);
 
   return (
     <div className="flex flex-col h-full p-2 px-3">
