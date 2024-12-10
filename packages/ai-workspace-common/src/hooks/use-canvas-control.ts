@@ -12,6 +12,7 @@ import { EDGE_STYLES } from '../components/canvas/constants';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { genUniqueId } from '@refly-packages/utils/id';
+import { useThrottledCallback } from 'use-debounce';
 
 const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: { direction: 'TB' | 'LR' }) => {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -151,6 +152,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
 
   const setSelectedNodes = useCallback(
     (nodes: CanvasNode<any>[]) => {
+      console.log('setSelectedNodes', nodes);
       const yNodes = ydoc.getArray('nodes');
       ydoc.transact(() => {
         const updatedNodes = yNodes.toJSON().map((n) => ({
@@ -166,6 +168,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
 
   const deselectNode = useCallback(
     (node: CanvasNode) => {
+      console.log('deselectNode', node);
       const yNodes = ydoc.getArray('nodes');
       ydoc.transact(() => {
         const updatedNodes = yNodes.toJSON().map((n) => ({
@@ -181,6 +184,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
 
   const deselectNodeByEntity = useCallback(
     (filter: CanvasNodeFilter) => {
+      console.log('deselectNodeByEntity');
       const { type, entityId } = filter;
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
@@ -192,20 +196,18 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     [canvasId, deselectNode],
   );
 
-  const setNodeData = useCallback(
-    <T = any>(nodeId: string, data: Partial<CanvasNodeData<T>>) => {
-      const yNodes = ydoc.getArray('nodes');
-      ydoc.transact(() => {
-        const updatedNodes = yNodes.toJSON().map((n) => ({
-          ...n,
-          data: n.id === nodeId ? { ...n.data, ...data } : n.data,
-        }));
-        yNodes.delete(0, yNodes.length);
-        yNodes.push(deduplicateNodes(updatedNodes));
-      });
-    },
-    [ydoc],
-  );
+  const setNodeData = useThrottledCallback(<T = any>(nodeId: string, data: Partial<CanvasNodeData<T>>) => {
+    console.log('setNodeData', nodeId, data);
+    const yNodes = ydoc.getArray('nodes');
+    ydoc.transact(() => {
+      const updatedNodes = yNodes.toJSON().map((n) => ({
+        ...n,
+        data: n.id === nodeId ? { ...n.data, ...data } : n.data,
+      }));
+      yNodes.delete(0, yNodes.length);
+      yNodes.push(deduplicateNodes(updatedNodes));
+    });
+  }, 300);
 
   const setNodeDataByEntity = useCallback(
     <T = any>(filter: CanvasNodeFilter, nodeData: Partial<CanvasNodeData<T>>) => {

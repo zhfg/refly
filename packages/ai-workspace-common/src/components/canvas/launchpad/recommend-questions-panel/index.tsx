@@ -66,7 +66,7 @@ export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = (
   useEffect(() => {
     const handleUpdate = (update: { resultId: string; payload: any }) => {
       const { structuredData } = update?.payload?.steps?.[0] || {};
-      console.log('structuredData', structuredData, update?.payload);
+      // console.log('structuredData', structuredData, update?.payload);
       if (structuredData?.recommendedQuestions) {
         setLoading(false);
         const data = structuredData?.recommendedQuestions?.questions || [];
