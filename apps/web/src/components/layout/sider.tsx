@@ -7,7 +7,7 @@ import {
   Menu,
   Tag,
 } from "@arco-design/web-react"
-import { Tooltip, message } from "antd"
+import { Skeleton, Tooltip, message } from "antd"
 import {
   useLocation,
   useNavigate,
@@ -125,7 +125,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     setLoginModalVisible: state.setLoginModalVisible,
   }))
 
-  const { getLibraryList } = useHandleSiderData(true)
+  const { getLibraryList, isLoadingCanvas } = useHandleSiderData(true)
   const { debouncedCreateCanvas, isCreating: createCanvasLoading } =
     useCreateCanvas()
 
@@ -324,17 +324,37 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                             </span>
                           </MenuItem>
 
-                          {canvasList.map(canvas => (
-                            <MenuItem
-                              key={canvas.id}
-                              onClick={() => {
-                                if (canvas.id !== selectedKey)
-                                  navigate(`/canvas/${canvas.id}`)
-                              }}>
-                              <IconCanvasFill className="arco-icon" />
-                              {canvas.name}
-                            </MenuItem>
-                          ))}
+                          {isLoadingCanvas ? (
+                            <>
+                              <Skeleton.Input
+                                active
+                                size="small"
+                                style={{ width: 204 }}
+                              />
+                              <Skeleton.Input
+                                active
+                                size="small"
+                                style={{ marginTop: 8, width: 204 }}
+                              />
+                              <Skeleton.Input
+                                active
+                                size="small"
+                                style={{ marginTop: 8, width: 204 }}
+                              />
+                            </>
+                          ) : (
+                            canvasList.map(canvas => (
+                              <MenuItem
+                                key={canvas.id}
+                                onClick={() => {
+                                  if (canvas.id !== selectedKey)
+                                    navigate(`/canvas/${canvas.id}`)
+                                }}>
+                                <IconCanvasFill className="arco-icon" />
+                                {canvas.name}
+                              </MenuItem>
+                            ))
+                          )}
                         </>
                       )}
 

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
@@ -13,14 +13,19 @@ export const useHandleSiderData = (initData?: boolean) => {
     updateLibraryList: state.setLibraryList,
   }));
 
+  const [isLoadingCanvas, setIsLoadingCanvas] = useState(false);
+
   const { setTitle } = useCanvasStoreShallow((state) => ({
     setTitle: state.setTitle,
   }));
 
   const getCanvasList = async () => {
+    if (isLoadingCanvas) return;
+    setIsLoadingCanvas(true);
     const { data: res, error } = await getClient().listCanvases({
       query: { page: 1, pageSize: DATA_NUM },
     });
+    setIsLoadingCanvas(false);
     if (error) {
       console.error('getCanvasList error', error);
       return;
@@ -99,5 +104,5 @@ export const useHandleSiderData = (initData?: boolean) => {
     }
   }, []);
 
-  return { loadSiderData, getLibraryList, getCanvasList, canvasList, libraryList };
+  return { loadSiderData, getLibraryList, getCanvasList, canvasList, isLoadingCanvas, libraryList };
 };
