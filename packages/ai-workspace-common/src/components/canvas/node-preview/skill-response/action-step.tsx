@@ -77,7 +77,7 @@ export const ActionStepCard = ({
 
   const logs = step?.logs?.filter((log) => log?.key);
 
-  const skillName = result.actionMeta?.name;
+  const skillName = result.actionMeta?.name || 'commonQnA';
 
   return (
     <div className="flex flex-col gap-1">

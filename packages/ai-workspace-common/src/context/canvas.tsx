@@ -1,10 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { useCookie } from 'react-use';
 import { HocuspocusProvider } from '@hocuspocus/provider';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/types';
-import { Edge } from 'node_modules/@xyflow/react/dist/esm/types';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 interface CanvasContextType {
   canvasId: string;
@@ -24,60 +21,14 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     });
   }, [canvasId, token]);
 
-  const { setNodes, setEdges, setTitle } = useCanvasStoreShallow((state) => ({
-    setNodes: state.setNodes,
-    setEdges: state.setEdges,
-    setTitle: state.setTitle,
-  }));
-
-  // Subscribe to yjs document changes
   useEffect(() => {
-    const ydoc = provider?.document;
-    if (!ydoc) return;
-
-    const title = ydoc.getText('title');
-    const nodesArray = ydoc.getArray<CanvasNode>('nodes');
-    const edgesArray = ydoc.getArray<Edge>('edges');
-
-    const titleObserverCallback = () => {
-      // TODO: figure out how to sync title from ydoc to local state
-      // The following code is not working as expected (title will be duplicated like 'titletitletitletitle')
-      // if (provider.status === 'connected') {
-      //   setTitle(canvasId, title.toJSON());
-      // }
-    };
-
-    const nodesObserverCallback = () => {
-      if (provider.status === 'connected') {
-        const nodes = nodesArray.toJSON();
-        const uniqueNodesMap = new Map();
-        nodes.forEach((node) => uniqueNodesMap.set(node.id, node));
-        setNodes(canvasId, Array.from(uniqueNodesMap.values()));
-      }
-    };
-
-    const edgesObserverCallback = () => {
-      if (provider.status === 'connected') {
-        const edges = edgesArray.toJSON();
-        const uniqueEdgesMap = new Map();
-        edges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
-        setEdges(canvasId, Array.from(uniqueEdgesMap.values()));
-      }
-    };
-
-    title.observe(titleObserverCallback);
-    nodesArray.observe(nodesObserverCallback);
-    edgesArray.observe(edgesObserverCallback);
-
     return () => {
-      title.unobserve(titleObserverCallback);
-      nodesArray.unobserve(nodesObserverCallback);
-      edgesArray.unobserve(edgesObserverCallback);
-
-      provider.forceSync();
-      provider.destroy();
+      if (provider) {
+        provider.forceSync();
+        provider.destroy();
+      }
     };
-  }, [provider, canvasId, setNodes, setEdges, setTitle]);
+  }, [canvasId, token]);
 
   // Add null check before rendering
   if (!provider) {
