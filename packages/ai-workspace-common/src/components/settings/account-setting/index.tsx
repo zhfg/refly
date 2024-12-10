@@ -1,15 +1,12 @@
-import { Button, Form, Input, Upload, Modal, Message as message } from '@arco-design/web-react';
+import { Button, Form, Input, Upload, Modal, message } from 'antd';
 import { useEffect, useState } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { AiOutlineInfoCircle } from 'react-icons/ai';
 
-// styles
-import './index.scss';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 // components
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
-
-const FormItem = Form.Item;
 
 export const AccountSetting = () => {
   const [form] = Form.useForm();
@@ -66,7 +63,7 @@ export const AccountSetting = () => {
     if (nameStatus === 'error') {
       return;
     }
-    form.validate().then(async (values) => {
+    form.validateFields().then(async (values) => {
       const { name, nickname } = values;
       if (loading) return;
       setLoading(true);
@@ -101,37 +98,38 @@ export const AccountSetting = () => {
   }, [userStore.userProfile]);
 
   return (
-    <div className="account-setting">
-      <div className="account-setting-content">
-        <Form form={form} style={{ width: 600 }} layout="vertical" size="large">
-          <FormItem label={t('settings.account.avatar')} field="avatar" triggerPropName="fileList" initialValue={[]}>
+    <div className="w-full">
+      <div className="max-w-[600px] mx-auto">
+        <Form form={form} layout="vertical">
+          <Form.Item label={t('settings.account.avatar')} name="avatar" valuePropName="fileList" initialValue={[]}>
             <Upload
-              listType="picture-card"
+              listType="picture-circle"
               disabled
               name="files"
               action="/"
-              limit={1}
+              maxCount={1}
               onPreview={(file) => {
                 Modal.info({
                   title: t('settings.account.avatar'),
+                  okButtonProps: { style: { backgroundColor: '#00968F' } },
+                  icon: <AiOutlineInfoCircle size={22} className="mr-1" />,
                   content: (
-                    <div style={{ textAlign: 'center' }}>
+                    <div className="text-center">
                       <img
-                        src={file.url || URL.createObjectURL(file.originFile)}
-                        style={{
-                          maxWidth: '100%',
-                        }}
-                      ></img>
+                        src={file?.url ?? URL.createObjectURL(file?.originFileObj)}
+                        className="max-w-full"
+                        alt="avatar"
+                      />
                     </div>
                   ),
                 });
               }}
             />
-          </FormItem>
+          </Form.Item>
 
-          <FormItem
+          <Form.Item
             label={t('settings.account.name')}
-            field="name"
+            name="name"
             required
             validateStatus={nameStatus}
             help={nameMessage}
@@ -139,35 +137,34 @@ export const AccountSetting = () => {
           >
             <Input
               maxLength={30}
-              showWordLimit
-              addBefore="@"
+              showCount
+              prefix="@"
               placeholder={t('settings.account.namePlaceholder')}
-              onChange={(value) => {
-                debouncedValidateField(value, 'name');
+              onChange={(e) => {
+                debouncedValidateField(e.target.value, 'name');
               }}
             />
-          </FormItem>
+          </Form.Item>
 
-          <FormItem
+          <Form.Item
             label={t('settings.account.nickname')}
-            field="nickname"
+            name="nickname"
             required
             rules={[{ required: true, message: t('settings.account.nicknamePlaceholder') }]}
           >
-            <Input maxLength={30} showWordLimit placeholder={t('settings.account.nicknamePlaceholder')} />
-          </FormItem>
+            <Input maxLength={30} showCount placeholder={t('settings.account.nicknamePlaceholder')} />
+          </Form.Item>
 
-          <FormItem
+          <Form.Item
             label={t('settings.account.email')}
-            field="email"
+            name="email"
             required
-            disabled
             rules={[{ required: true, message: t('settings.account.nicknamePlaceholder') }]}
           >
-            <Input placeholder={t('settings.account.emailPlaceholder')} />
-          </FormItem>
+            <Input disabled placeholder={t('settings.account.emailPlaceholder')} />
+          </Form.Item>
 
-          <div className="account-setting-update">
+          <div className="flex justify-end mt-6">
             <Button type="primary" onClick={handleUpdate} loading={loading}>
               {t('settings.account.update')}
             </Button>

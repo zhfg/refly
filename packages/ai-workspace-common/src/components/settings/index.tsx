@@ -1,5 +1,4 @@
 import { Tabs, Modal } from 'antd';
-import { useEffect } from 'react';
 
 // components
 import { useTranslation } from 'react-i18next';
@@ -45,9 +44,6 @@ export const SettingModal = (props: SettingModalProps) => {
       children: <LanguageSetting />,
     },
   ];
-  useEffect(() => {
-    console.log('useEffect', i18n.language);
-  }, [i18n.language]);
 
   return (
     <Modal
