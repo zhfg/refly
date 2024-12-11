@@ -19,6 +19,7 @@ export interface CanvasState {
   showPreview: boolean;
   showMaxRatio: boolean;
   showLaunchpad: boolean;
+  interactionMode: 'mouse' | 'touchpad';
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -31,6 +32,7 @@ export interface CanvasState {
   setShowPreview: (show: boolean) => void;
   setShowMaxRatio: (show: boolean) => void;
   setShowLaunchpad: (show: boolean) => void;
+  setInteractionMode: (mode: 'mouse' | 'touchpad') => void;
 }
 
 const defaultCanvasState: () => CanvasData = () => ({
@@ -39,6 +41,7 @@ const defaultCanvasState: () => CanvasData = () => ({
   title: '',
   mode: 'hand',
   pinnedNodes: [],
+  interactionMode: 'touchpad',
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -49,6 +52,7 @@ export const useCanvasStore = create<CanvasState>()(
       showPreview: true,
       showMaxRatio: false,
       showLaunchpad: true,
+      interactionMode: 'touchpad',
 
       deleteCanvasData: (canvasId) =>
         set((state) => {
@@ -100,10 +104,18 @@ export const useCanvasStore = create<CanvasState>()(
           state.data[canvasId] ??= defaultCanvasState();
           state.data[canvasId].pinnedNodes = state.data[canvasId].pinnedNodes.filter((n) => n.id !== node.id);
         }),
+      setInteractionMode: (mode) =>
+        set((state) => {
+          state.interactionMode = mode;
+        }),
     })),
     {
       name: 'canvas-storage',
-      partialize: (state) => ({ data: state.data, currentCanvasId: state.currentCanvasId }),
+      partialize: (state) => ({
+        data: state.data,
+        currentCanvasId: state.currentCanvasId,
+        interactionMode: state.interactionMode,
+      }),
     },
   ),
 );

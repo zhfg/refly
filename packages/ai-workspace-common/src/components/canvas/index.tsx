@@ -1,14 +1,5 @@
 import { useCallback, useMemo, useEffect, useState } from 'react';
-import {
-  ReactFlow,
-  Background,
-  Controls,
-  MiniMap,
-  ReactFlowProvider,
-  Node,
-  SelectionMode,
-  useReactFlow,
-} from '@xyflow/react';
+import { ReactFlow, Background, MiniMap, ReactFlowProvider, Node, SelectionMode, useReactFlow } from '@xyflow/react';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
@@ -42,12 +33,15 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, addNode } =
     useCanvasControl(canvasId);
 
-  const { pinnedNodes, showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow((state) => ({
-    pinnedNodes: state.data[canvasId]?.pinnedNodes,
-    showPreview: state.showPreview,
-    showLaunchpad: state.showLaunchpad,
-    showMaxRatio: state.showMaxRatio,
-  }));
+  const { pinnedNodes, showPreview, showLaunchpad, showMaxRatio, interactionMode, setInteractionMode } =
+    useCanvasStoreShallow((state) => ({
+      pinnedNodes: state.data[canvasId]?.pinnedNodes,
+      showPreview: state.showPreview,
+      showLaunchpad: state.showLaunchpad,
+      showMaxRatio: state.showMaxRatio,
+      interactionMode: state.interactionMode,
+      setInteractionMode: state.setInteractionMode,
+    }));
 
   const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } = useSiderStoreShallow(
     (state) => ({
@@ -62,7 +56,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
 
-  const [interactionMode, setInteractionMode] = useState<'mouse' | 'touchpad'>('touchpad');
   const toggleInteractionMode = (mode: 'mouse' | 'touchpad') => {
     setInteractionMode(mode);
   };
@@ -196,7 +189,9 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             // nodeStrokeWidth={3}
           />
         </ReactFlow>
+
         <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} />
+
         <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
           <LaunchPad visible={showLaunchpad} />
         </div>
