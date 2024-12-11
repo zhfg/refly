@@ -25,7 +25,7 @@ import { BigSearchModal } from '@refly-packages/ai-workspace-common/components/s
 import { CanvasListModal } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal';
 import { LibraryModal } from '@refly-packages/ai-workspace-common/components/workspace/library-modal';
 import { useCanvasNodesStore } from '@refly-packages/ai-workspace-common/stores/canvas-nodes';
-
+import { LayoutControl } from './layout-control';
 const selectionStyles = `
   .react-flow__selection {
     background: rgba(0, 150, 143, 0.03) !important;
@@ -61,6 +61,11 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const reactFlowInstance = useReactFlow();
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
+
+  const [interactionMode, setInteractionMode] = useState<'mouse' | 'touchpad'>('touchpad');
+  const toggleInteractionMode = (mode: 'mouse' | 'touchpad') => {
+    setInteractionMode(mode);
+  };
 
   useEffect(() => {
     // Only run fitView if we have nodes and this is the initial render
@@ -160,11 +165,13 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         <style>{selectionStyles}</style>
         <ReactFlow
           {...flowConfig}
-          panOnScroll={mode !== 'pointer'}
+          panOnScroll={interactionMode === 'mouse'}
+          panOnDrag={mode !== 'pointer' && interactionMode === 'touchpad'}
+          zoomOnScroll={interactionMode === 'mouse'}
+          zoomOnPinch={interactionMode === 'touchpad'}
           selectNodesOnDrag={mode === 'pointer'}
           selectionMode={mode === 'pointer' ? SelectionMode.Partial : SelectionMode.Full}
           selectionOnDrag={mode === 'pointer'}
-          panOnDrag={mode !== 'pointer'}
           nodeTypes={nodeTypes}
           nodes={nodes}
           edges={edges}
@@ -188,37 +195,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             // nodeColor="#333"
             // nodeStrokeWidth={3}
           />
-          <Controls
-            position="bottom-left"
-            style={{
-              marginBottom: '8px',
-              marginLeft: '10px',
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '2px',
-              padding: '2px',
-              border: '1px solid rgba(16, 24, 40, 0.0784)',
-              boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              height: '36px',
-            }}
-            className="[&>button]:border-0 [&>button]:border-r [&>button]:border-gray-200 [&>button:last-child]:border-0 [&>button]:w-[32px] [&>button]:h-[32px] [&>button]:rounded-lg [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:transition-colors [&>button]:duration-200"
-            showZoom={true}
-            showFitView={true}
-            showInteractive={true}
-            fitViewOptions={{
-              padding: 10,
-              minZoom: 0.1,
-              maxZoom: 2,
-              duration: 200,
-            }}
-          />
         </ReactFlow>
-
+        <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} />
         <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
           <LaunchPad visible={showLaunchpad} />
         </div>
