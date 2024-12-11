@@ -13,6 +13,7 @@ import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-del
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
+import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
@@ -119,12 +120,21 @@ export const ResourceNode = ({
 
       <div
         className={`
-          w-[170px]
-          h-[186px]
+          w-72
+          max-h-96
           relative
           ${getNodeCommonStyles({ selected, isHovered })}
         `}
       >
+        <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
+        <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10">
+          <div className="absolute bottom-2 left-3 text-[10px] text-gray-400 z-20">
+            {time(data.createdAt, language as LOCALE)
+              ?.utc()
+              ?.fromNow()}
+          </div>
+        </div>
+
         {!isPreview && !hideHandles && (
           <>
             <CustomHandle
@@ -144,7 +154,7 @@ export const ResourceNode = ({
           </>
         )}
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 relative">
           <div className="flex items-center gap-2">
             <div
               className="
@@ -175,15 +185,10 @@ export const ResourceNode = ({
             </span>
           </div>
 
-          <div className="text-xs leading-4 text-gray-500 line-clamp-6 overflow-hidden text-ellipsis">
-            {data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
-          </div>
-
-          <div className="absolute bottom-2 left-3 text-[10px] text-gray-400">
-            {time(data.createdAt, language as LOCALE)
-              ?.utc()
-              ?.fromNow()}
-          </div>
+          <Markdown
+            className="text-xs"
+            content={data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
+          />
         </div>
       </div>
     </div>

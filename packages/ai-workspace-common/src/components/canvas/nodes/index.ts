@@ -133,6 +133,7 @@ export const getNodeCommonStyles = ({ selected, isHovered }: { selected: boolean
   duration-200
   border-[2px]
   border-solid
+  overflow-hidden
   ${selected ? 'border-[#00968F]' : 'border-transparent'}
   ${
     isHovered

@@ -14,6 +14,7 @@ import { HiOutlineDocumentText } from 'react-icons/hi2';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
+import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
@@ -119,12 +120,14 @@ export const DocumentNode = ({
 
       <div
         className={`
-        w-[170px]
-        h-[186px]
+        w-72
+        max-h-96
         relative
         ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
       `}
       >
+        <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
+
         {!isPreview && !hideHandles && (
           <>
             <CustomHandle
@@ -177,13 +180,14 @@ export const DocumentNode = ({
             </span>
           </div>
 
-          <Spin spinning={status === 'executing' && !data.contentPreview} style={{ height: 100 }}>
-            <div className="text-xs leading-4 text-gray-500 line-clamp-6 overflow-hidden text-ellipsis">
-              {data.contentPreview || t('canvas.nodePreview.document.noContentPreview')}
-            </div>
+          <Spin spinning={status === 'executing' && !data.contentPreview}>
+            <Markdown
+              className="text-xs min-h-8"
+              content={data.contentPreview || t('canvas.nodePreview.document.noContentPreview')}
+            />
           </Spin>
 
-          <div className="absolute bottom-2 left-3 text-[10px] text-gray-400">
+          <div className="absolute bottom-2 left-3 text-[10px] text-gray-400 z-20">
             {time(data.createdAt, language as LOCALE)
               ?.utc()
               ?.fromNow()}

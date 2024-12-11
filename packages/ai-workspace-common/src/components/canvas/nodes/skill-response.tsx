@@ -138,13 +138,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
       )}
 
       {/* Main Card Container */}
-      <div
-        className={`
-          relative
-          w-[280px]
-          ${getNodeCommonStyles({ selected, isHovered })}
-        `}
-      >
+      <div className={`relative w-72 ${getNodeCommonStyles({ selected, isHovered })}`}>
         {!isPreview && !hideHandles && (
           <>
             <CustomHandle
