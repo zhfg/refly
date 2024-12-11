@@ -87,29 +87,46 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   const edges = data[canvasId]?.edges ?? [];
   const mode = data[canvasId]?.mode ?? 'hand';
 
-  const syncTitleToYDoc = useCallback((title: string) => {
-    ydoc?.transact(() => {
-      const yTitle = ydoc?.getText('title');
-      yTitle?.delete(0, yTitle?.length ?? 0);
-      yTitle?.insert(0, title);
-    });
-  }, []);
+  const syncTitleToYDoc = useCallback(
+    (title: string) => {
+      ydoc?.transact(() => {
+        const yTitle = ydoc?.getText('title');
+        yTitle?.delete(0, yTitle?.length ?? 0);
+        yTitle?.insert(0, title);
+      });
+    },
+    [ydoc],
+  );
 
-  const syncNodesToYDoc = useThrottledCallback((nodes: CanvasNode<any>[]) => {
-    ydoc?.transact(() => {
-      const yNodes = ydoc?.getArray('nodes');
-      yNodes?.delete(0, yNodes?.length ?? 0);
-      yNodes?.push(nodes);
-    });
-  }, 300);
+  const syncNodesToYDoc = useCallback(
+    (nodes: CanvasNode<any>[]) => {
+      ydoc?.transact(() => {
+        const yNodes = ydoc?.getArray('nodes');
+        yNodes?.delete(0, yNodes?.length ?? 0);
+        yNodes?.push(nodes);
+      });
+    },
+    [ydoc],
+  );
+  const throttledSyncNodesToYDoc = useThrottledCallback(syncNodesToYDoc, 300, {
+    leading: true,
+    trailing: true,
+  });
 
-  const syncEdgesToYDoc = useThrottledCallback((edges: Edge[]) => {
-    ydoc?.transact(() => {
-      const yEdges = ydoc?.getArray('edges');
-      yEdges?.delete(0, yEdges?.length ?? 0);
-      yEdges?.push(edges);
-    });
-  }, 300);
+  const syncEdgesToYDoc = useCallback(
+    (edges: Edge[]) => {
+      ydoc?.transact(() => {
+        const yEdges = ydoc?.getArray('edges');
+        yEdges?.delete(0, yEdges?.length ?? 0);
+        yEdges?.push(edges);
+      });
+    },
+    [ydoc],
+  );
+  const throttledSyncEdgesToYDoc = useThrottledCallback(syncEdgesToYDoc, 300, {
+    leading: true,
+    trailing: true,
+  });
 
   const setCanvasTitle = useCallback(
     (title: string) => {
@@ -272,9 +289,9 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const nodes = data[canvasId]?.nodes ?? [];
       const updatedNodes = applyNodeChanges(changes, nodes);
       setNodes(canvasId, updatedNodes);
-      syncNodesToYDoc(updatedNodes);
+      throttledSyncNodesToYDoc(updatedNodes);
     },
-    [canvasId, setNodes, applyNodeChanges, syncNodesToYDoc],
+    [canvasId, setNodes, throttledSyncNodesToYDoc],
   );
 
   const onEdgesChange = useCallback(
@@ -283,9 +300,9 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const edges = data[canvasId]?.edges ?? [];
       const updatedEdges = applyEdgeChanges(changes, edges);
       setEdges(canvasId, updatedEdges);
-      syncEdgesToYDoc(updatedEdges);
+      throttledSyncEdgesToYDoc(updatedEdges);
     },
-    [canvasId, setEdges, applyEdgeChanges, syncEdgesToYDoc],
+    [canvasId, setEdges, throttledSyncEdgesToYDoc],
   );
 
   const onConnect = useCallback(
@@ -306,6 +323,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const edges = data[canvasId]?.edges ?? [];
       const updatedEdges = [...edges, newEdge];
       setEdges(canvasId, updatedEdges);
+      syncEdgesToYDoc(updatedEdges);
     },
     [canvasId, setEdges, syncEdgesToYDoc],
   );
@@ -412,6 +430,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const updatedNodes = deduplicateNodes([...nodes, newNode]);
 
       setNodes(canvasId, updatedNodes);
+      syncNodesToYDoc(updatedNodes);
 
       if (connectTo?.length > 0) {
         const newEdges: Edge[] =
@@ -426,6 +445,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         if (newEdges.length > 0) {
           const updatedEdges = deduplicateEdges([...edges, ...newEdges]);
           setEdges(canvasId, updatedEdges);
+          syncEdgesToYDoc(updatedEdges);
         }
       }
 
