@@ -490,6 +490,7 @@ const translations = {
       addToContext: 'Add to Context',
       processingVector: 'Processing Vector',
       rerun: 'Rerun',
+      preview: 'Open Preview',
       insertToDoc: 'Insert to Document',
       askFollowUp: 'Ask Follow-up',
       moreOptions: 'More Options',

@@ -1,8 +1,13 @@
-import { MoreHorizontal, PlayCircle, FileInput, Trash2, Loader2, MessageSquareDiff, FilePlus } from 'lucide-react';
+import { MoreHorizontal, PlayCircle, FileInput, Loader2, MessageSquareDiff, FilePlus } from 'lucide-react';
 import { Button, Dropdown, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { IconReply } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconReply, IconDelete, IconPreview } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { useReactFlow } from '@xyflow/react';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 // Action button types
 type ActionButtonProps = {
@@ -47,6 +52,7 @@ const ActionButton = ({ icon, onClick, loading, tooltip, withTooltip = true }: A
 };
 
 type ActionButtonsProps = {
+  nodeId: string;
   type: 'document' | 'resource' | 'skill-response';
   onAddToContext?: () => void;
   onAddToChatHistory?: () => void;
@@ -63,6 +69,7 @@ type ActionButtonsProps = {
 
 export const ActionButtons = ({
   type,
+  nodeId,
   onAddToContext,
   onAddToChatHistory,
   onRerun,
@@ -77,13 +84,18 @@ export const ActionButtons = ({
 }: ActionButtonsProps) => {
   const { t } = useTranslation();
 
+  const { canvasId } = useCanvasContext();
+  const addPinnedNode = useCanvasStoreShallow((state) => state.addPinnedNode);
+
+  const { getNode } = useReactFlow();
+
   // Define dropdown menu items
   const menuItems: MenuProps['items'] = [
     {
       key: 'delete',
       label: (
         <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
-          <Trash2 className="w-4 h-4 flex-shrink-0" />
+          <IconDelete className="w-4 h-4 flex-shrink-0" />
           {t('canvas.nodeActions.delete')}
         </div>
       ),
@@ -138,6 +150,14 @@ export const ActionButtons = ({
         e.preventDefault();
       }}
     >
+      <ActionButton
+        icon={<IconPreview className="w-4 h-4" />}
+        onClick={() => {
+          addPinnedNode(canvasId, getNode(nodeId) as CanvasNode<any>);
+        }}
+        tooltip={t('canvas.nodeActions.preview')}
+      />
+
       {/* Document specific buttons */}
       {type === 'document' && onAddToContext && (
         <ActionButton

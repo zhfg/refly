@@ -15,7 +15,7 @@ export const useAddToContext = (node: CanvasNode, nodeType: CanvasNodeType) => {
     // Check if item is already in context
     const isAlreadyAdded = selectedContextItems.some((item) => {
       if ('id' in node) {
-        return item.id === node.id;
+        return item.id === node.id && !item.isPreview;
       }
     });
 

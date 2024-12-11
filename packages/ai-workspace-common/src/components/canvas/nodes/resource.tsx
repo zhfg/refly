@@ -108,6 +108,7 @@ export const ResourceNode = ({
       {!isPreview && !hideActions && (
         <ActionButtons
           type="resource"
+          nodeId={id}
           onAddToContext={handleAddToContext}
           onDelete={handleDelete}
           onHelpLink={handleHelpLink}

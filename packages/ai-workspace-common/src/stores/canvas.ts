@@ -92,7 +92,10 @@ export const useCanvasStore = create<CanvasState>()(
         }),
       addPinnedNode: (canvasId, node) =>
         set((state) => {
+          if (!node) return;
           state.data[canvasId] ??= defaultCanvasState();
+
+          if (state.data[canvasId].pinnedNodes.some((n) => n.id === node.id)) return;
           state.data[canvasId].pinnedNodes.unshift(node);
         }),
       removePinnedNode: (canvasId, node) =>

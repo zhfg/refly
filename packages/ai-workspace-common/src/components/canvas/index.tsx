@@ -115,14 +115,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
 
   const selectedNodes = nodes?.filter((node) => node.selected);
 
-  const isPinned = (node: CanvasNode<any>) => {
-    return pinnedNodes?.some((n) => n.id === node.id);
-  };
-
-  const isSelected = (node: CanvasNode<any>) => {
-    return selectedNodes?.some((n) => n.id === node.id);
-  };
-
   const handleToolSelect = (tool: string) => {
     // Handle tool selection
     console.log('Selected tool:', tool);
@@ -182,11 +174,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
               boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
             }}
             className="bg-white/80 w-[140px] h-[92px] !mb-[46px] !ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
-            // zoomable
-            // pannable
-            // maskColor="rgb(0, 0, 0, 0.1)"
-            // nodeColor="#333"
-            // nodeStrokeWidth={3}
           />
           <Controls
             position="bottom-left"
@@ -251,28 +238,9 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
                 </div>
               )} */}
 
-              {/* Preview Cards */}
-              {selectedNodes?.map((node) =>
-                isPinned(node) ? null : (
-                  <NodePreview
-                    key={node?.id}
-                    node={node}
-                    canvasId={canvasId}
-                    isPinned={isPinned(node)}
-                    selected={isSelected(node)}
-                  />
-                ),
-              )}
-
-              {pinnedNodes?.map((node) => (
-                <NodePreview
-                  key={node?.id}
-                  node={node}
-                  canvasId={canvasId}
-                  isPinned={isPinned(node)}
-                  selected={isSelected(node)}
-                />
-              ))}
+              {pinnedNodes
+                ?.filter(Boolean)
+                ?.map((node) => <NodePreview key={node?.id} node={node} canvasId={canvasId} />)}
 
               {/* Right shadow and arrow indicator */}
               {/* {showRightIndicator && (

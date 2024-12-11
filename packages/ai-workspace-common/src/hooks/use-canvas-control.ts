@@ -74,12 +74,13 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   const { canvasId: routeCanvasId } = useParams();
   const canvasId = selectedCanvasId ?? contextCanvasId ?? routeCanvasId;
 
-  const { data, setNodes, setEdges, setTitle, setModeRaw } = useCanvasStoreShallow((state) => ({
+  const { data, setNodes, setEdges, setTitle, setModeRaw, addPinnedNode } = useCanvasStoreShallow((state) => ({
     data: state.data,
     setNodes: state.setNodes,
     setEdges: state.setEdges,
     setTitle: state.setTitle,
     setModeRaw: state.setMode,
+    addPinnedNode: state.addPinnedNode,
   }));
 
   const setCanvasTitle = useCallback(
@@ -464,8 +465,12 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       if (needSetCenter) {
         setNodeCenter(newNode.id);
       }
+
+      if (newNode.type === 'document' || newNode.type === 'resource') {
+        addPinnedNode(canvasId, newNode);
+      }
     },
-    [canvasId, ydoc, setSelectedNode],
+    [canvasId, ydoc, setSelectedNode, addPinnedNode],
   );
 
   const nodes = data[canvasId]?.nodes ?? [];

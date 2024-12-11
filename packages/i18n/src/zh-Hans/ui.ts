@@ -482,6 +482,7 @@ const translations = {
       addToContext: '添加到上下文',
       processingVector: '处理向量',
       rerun: '重新运行',
+      preview: '打开预览',
       insertToDoc: '插入文档',
       askFollowUp: '继续提问',
       moreOptions: '更多选项',

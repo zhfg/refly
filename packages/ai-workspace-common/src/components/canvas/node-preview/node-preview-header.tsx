@@ -3,11 +3,8 @@ import { Button, Dropdown, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   FileText,
-  Link2,
-  MessageSquare,
   Sparkles,
   Wrench,
-  Pin,
   Maximize2,
   MoreHorizontal,
   X,
@@ -16,14 +13,13 @@ import {
   Globe,
   FilePlus,
   Trash2,
-  PinOff,
 } from 'lucide-react';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasNode } from '../nodes/types';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
-import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { HiOutlineDocumentText, HiOutlineSquare3Stack3D } from 'react-icons/hi2';
+import { IconCanvas, IconDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 
 // Define background colors for different node types
@@ -40,7 +36,7 @@ const NODE_COLORS: Record<CanvasNodeType, string> = {
 const getNodeIcon = (node: CanvasNode<any>) => {
   switch (node.type) {
     case 'document':
-      return HiOutlineDocumentText;
+      return IconDocument;
     case 'resource':
       return node.data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
     case 'skillResponse':
@@ -109,20 +105,11 @@ const getNodeTitle = (node: CanvasNode<any>) => {
 interface NodePreviewHeaderProps {
   node: CanvasNode<any>;
   onClose: () => void;
-  onPin?: () => void;
   onMaximize?: () => void;
-  isPinned?: boolean;
   isMaximized?: boolean;
 }
 
-export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
-  node,
-  onClose,
-  onPin,
-  onMaximize,
-  isPinned = false,
-  isMaximized = false,
-}) => {
+export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, onMaximize, isMaximized = false }) => {
   const IconComponent = getNodeIcon(node);
   const nodeColor = NODE_COLORS[node.type];
   const nodeTitle = getNodeTitle(node);
@@ -172,17 +159,6 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
 
       {/* Right: Action Buttons */}
       <div className="flex items-center gap-1">
-        {onPin && (
-          <Tooltip title={isPinned ? t('canvas.nodePreview.unpin') : t('canvas.nodePreview.pin')}>
-            <Button
-              type="text"
-              className={`p-1.5 hover:bg-gray-100 ${isPinned ? 'text-primary-600' : 'text-gray-500'}`}
-              onClick={onPin}
-            >
-              {isPinned ? <PinOff className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
-            </Button>
-          </Tooltip>
-        )}
         {onMaximize && (
           <Button
             type="text"

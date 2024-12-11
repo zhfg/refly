@@ -109,6 +109,7 @@ export const DocumentNode = ({
       {!isPreview && !hideActions && (
         <ActionButtons
           type="document"
+          nodeId={id}
           onAddToContext={handleAddToContext}
           onDelete={handleDelete}
           onHelpLink={handleHelpLink}

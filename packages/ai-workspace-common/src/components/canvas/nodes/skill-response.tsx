@@ -129,6 +129,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
       {isWeb && !hideActions && (
         <ActionButtons
           type="skill-response"
+          nodeId={id}
           onAddToChatHistory={handleAddToChatHistory}
           onRerun={handleRerun}
           onInsertToDoc={() => handleInsertToDoc('insertBlow')}

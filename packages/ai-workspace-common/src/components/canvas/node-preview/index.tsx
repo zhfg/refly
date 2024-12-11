@@ -7,55 +7,19 @@ import { ToolNodePreview } from './tool';
 import { DocumentNodePreview } from './document';
 import { NodePreviewHeader } from './node-preview-header';
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-export const NodePreview = ({
-  node,
-  canvasId,
-  isPinned,
-  selected,
-}: {
-  node: CanvasNode<any>;
-  canvasId: string;
-  isPinned: boolean;
-  selected: boolean;
-}) => {
+
+export const NodePreview = ({ node, canvasId }: { node: CanvasNode<any>; canvasId: string }) => {
   const [isMaximized, setIsMaximized] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
-  const { onNodesChange } = useCanvasControl();
-  const { addPinnedNode, removePinnedNode } = useCanvasStoreShallow((state) => ({
-    addPinnedNode: state.addPinnedNode,
+  const { removePinnedNode } = useCanvasStoreShallow((state) => ({
     removePinnedNode: state.removePinnedNode,
   }));
 
-  const unselectNode = useCallback(
-    (node: CanvasNode<any>) => {
-      onNodesChange([
-        {
-          id: node.id,
-          type: 'select',
-          selected: false,
-        },
-      ]);
-    },
-    [onNodesChange],
-  );
-
-  const handlePin = useCallback(() => {
-    if (isPinned) {
-      removePinnedNode(canvasId, node);
-    } else {
-      addPinnedNode(canvasId, node);
-    }
-  }, [node, addPinnedNode, removePinnedNode, isPinned]);
-
   const handleClose = useCallback(() => {
-    if (isPinned) {
-      removePinnedNode(canvasId, node);
-    }
-    unselectNode(node);
-  }, [node, removePinnedNode, isPinned, unselectNode]);
+    removePinnedNode(canvasId, node);
+  }, [node, removePinnedNode]);
 
   const previewComponent = useMemo(() => {
     if (!node?.type) return null;
@@ -111,18 +75,6 @@ export const NodePreview = ({
     [isMaximized],
   );
 
-  useEffect(() => {
-    if (isPinned && selected) {
-      setTimeout(() => {
-        previewRef.current?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-          inline: 'end',
-        });
-      }, 100);
-    }
-  }, [selected]);
-
   return (
     <div className="pointer-events-none" ref={previewRef}>
       <div className={previewClassName} style={previewStyles}>
@@ -130,9 +82,7 @@ export const NodePreview = ({
           <NodePreviewHeader
             node={node}
             onClose={handleClose}
-            onPin={handlePin}
             onMaximize={() => setIsMaximized(!isMaximized)}
-            isPinned={isPinned}
             isMaximized={isMaximized}
           />
         </div>
