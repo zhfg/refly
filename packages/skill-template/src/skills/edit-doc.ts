@@ -153,14 +153,7 @@ export class EditDoc extends BaseSkill {
       this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
 
       if (sources.length > 0) {
-        this.emitEvent(
-          {
-            event: 'structured_data',
-            content: JSON.stringify(truncateSource(sources)),
-            structuredDataKey: 'sources',
-          },
-          config,
-        );
+        this.emitEvent({ structuredData: { sources: truncateSource(sources) } }, config);
       }
     }
 

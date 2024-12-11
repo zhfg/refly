@@ -124,6 +124,9 @@ const ViewMoreItem = ({
 }) => {
   const { t } = useTranslation();
 
+  // Ensure we have a valid array and safely get the last items
+  const extraSources = Array.isArray(sources) ? sources.slice(Math.max(sources.length - extraCnt, 0)) : [];
+
   return (
     <div
       className="flex relative flex-col flex-wrap gap-2 justify-start items-start px-3 py-3 text-xs rounded-lg cursor-pointer hover:bg-gray-50 source-list-item view-more-item border border-solid border-black/10 transition-all"
@@ -134,7 +137,7 @@ const ViewMoreItem = ({
       <div className="overflow-hidden font-medium whitespace-nowrap break-all text-ellipsis text-zinc-500">
         {t('copilot.sourceListModal.moreSources', { count: extraCnt })} <IconRight />
       </div>
-      {sources?.slice(sources.length - extraCnt)?.map((item, index) => {
+      {extraSources.map((item, index) => {
         const url = item?.url;
         const domain = safeParseURL(url || '');
 
@@ -165,27 +168,22 @@ export const SourceList = (props: SourceListProps) => {
   const handleViewMore = () => {
     knowledgeBaseStore.updateSourceListDrawer({
       visible: true,
-      sources: props?.sources,
+      sources: props?.sources ?? [],
       query: props?.query,
     });
   };
 
-  return (props?.sources || []).length > 0 ? (
+  const sources = props?.sources ?? [];
+
+  return sources.length > 0 ? (
     <div className="session-source-content">
       <div className="session-source-list">
-        {[
-          props?.sources
-            ?.slice(0, 3)
-            .map((item, index) => <SourceItem key={index} index={index} source={item}></SourceItem>),
-          props?.sources?.length > 3 ? (
-            <ViewMoreItem
-              onClick={handleViewMore}
-              key="view-more"
-              sources={props?.sources || []}
-              extraCnt={props?.sources?.slice(3)?.length || 0}
-            />
-          ) : null,
-        ]}
+        {sources.slice(0, 3).map((item, index) => (
+          <SourceItem key={index} index={index} source={item} />
+        ))}
+        {sources.length > 3 && (
+          <ViewMoreItem onClick={handleViewMore} key="view-more" sources={sources} extraCnt={sources.slice(3).length} />
+        )}
       </div>
     </div>
   ) : null;

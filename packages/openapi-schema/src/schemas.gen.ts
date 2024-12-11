@@ -2246,6 +2246,59 @@ export const GetProjectDetailResponseSchema = {
   ],
 } as const;
 
+export const SkillEventTypeSchema = {
+  type: 'string',
+  description: 'Skill event type',
+  enum: ['start', 'end', 'stream', 'log', 'artifact', 'structured_data', 'token_usage', 'create_node', 'error'],
+} as const;
+
+export const SkillEventSchema = {
+  type: 'object',
+  required: ['event'],
+  properties: {
+    event: {
+      description: 'Event type',
+      $ref: '#/components/schemas/SkillEventType',
+    },
+    skillMeta: {
+      description: 'Skill metadata',
+      $ref: '#/components/schemas/SkillMeta',
+    },
+    step: {
+      description: 'Action step metadata',
+      $ref: '#/components/schemas/ActionStepMeta',
+    },
+    resultId: {
+      type: 'string',
+      description: 'Result ID',
+    },
+    content: {
+      type: 'string',
+      description: 'Event content. Only present when `event` is `stream`.',
+    },
+    tokenUsage: {
+      description: 'Token usage data. Only present when `event` is `token_usage`.',
+      $ref: '#/components/schemas/TokenUsageItem',
+    },
+    log: {
+      description: 'Log data. Only present when `event` is `log`.',
+      $ref: '#/components/schemas/ActionLog',
+    },
+    structuredData: {
+      type: 'object',
+      description: 'Structured data. Only present when `event` is `structured_data`.',
+    },
+    artifact: {
+      description: 'Artifact data. Only present when `event` is `artifact`.',
+      $ref: '#/components/schemas/Artifact',
+    },
+    node: {
+      description: 'Canvas node data. Only present when `event` is `create_node`.',
+      $ref: '#/components/schemas/CanvasNode',
+    },
+  },
+} as const;
+
 export const CreateShareRequestSchema = {
   type: 'object',
   required: ['entityType', 'entityId'],

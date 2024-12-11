@@ -17,6 +17,12 @@ import { SourceViewer } from './source-viewer';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { RecommendQuestions } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/recommend-questions';
 
+const parseStructuredData = (structuredData: Record<string, unknown>, field: string) => {
+  return typeof structuredData[field] === 'string'
+    ? safeParseJSON(structuredData[field])
+    : (structuredData[field] as Source[]);
+};
+
 export const ActionStepCard = ({
   result,
   step,
@@ -66,14 +72,8 @@ export const ActionStepCard = ({
     return node;
   };
 
-  const sources =
-    typeof step?.structuredData?.['sources'] === 'string'
-      ? safeParseJSON(step?.structuredData?.['sources'])
-      : (step?.structuredData?.['sources'] as Source[]);
-  const recommendedQuestions =
-    typeof step?.structuredData?.['recommendedQuestions'] === 'string'
-      ? safeParseJSON(step?.structuredData?.['recommendedQuestions'])
-      : (step?.structuredData?.['recommendedQuestions'] as Array<string>);
+  const sources = parseStructuredData(step?.structuredData, 'sources');
+  const recommendedQuestions = parseStructuredData(step?.structuredData, 'recommendedQuestions');
 
   const logs = step?.logs?.filter((log) => log?.key);
 

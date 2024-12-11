@@ -1641,6 +1641,65 @@ export type GetProjectDetailResponse = BaseResponse & {
   data?: Project;
 };
 
+/**
+ * Skill event type
+ */
+export type SkillEventType =
+  | 'start'
+  | 'end'
+  | 'stream'
+  | 'log'
+  | 'artifact'
+  | 'structured_data'
+  | 'token_usage'
+  | 'create_node'
+  | 'error';
+
+export type SkillEvent = {
+  /**
+   * Event type
+   */
+  event: SkillEventType;
+  /**
+   * Skill metadata
+   */
+  skillMeta?: SkillMeta;
+  /**
+   * Action step metadata
+   */
+  step?: ActionStepMeta;
+  /**
+   * Result ID
+   */
+  resultId?: string;
+  /**
+   * Event content. Only present when `event` is `stream`.
+   */
+  content?: string;
+  /**
+   * Token usage data. Only present when `event` is `token_usage`.
+   */
+  tokenUsage?: TokenUsageItem;
+  /**
+   * Log data. Only present when `event` is `log`.
+   */
+  log?: ActionLog;
+  /**
+   * Structured data. Only present when `event` is `structured_data`.
+   */
+  structuredData?: {
+    [key: string]: unknown;
+  };
+  /**
+   * Artifact data. Only present when `event` is `artifact`.
+   */
+  artifact?: Artifact;
+  /**
+   * Canvas node data. Only present when `event` is `create_node`.
+   */
+  node?: CanvasNode;
+};
+
 export type CreateShareRequest = {
   entityType: EntityType;
   /**

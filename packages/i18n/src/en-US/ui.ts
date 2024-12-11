@@ -467,6 +467,7 @@ const translations = {
       skillCompleted: 'Skill Completed',
       stepCompleted: 'Step Completed',
       stepTitle: 'Step {{index}}',
+      aiThinking: 'AI is thinking ...',
     },
     chatHistory: {
       alreadyAdded: 'Already added to chat history',

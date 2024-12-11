@@ -104,14 +104,7 @@ export class LibrarySearch extends BaseSkill {
     };
 
     if (sources.length > 0) {
-      this.emitEvent(
-        {
-          event: 'structured_data',
-          content: JSON.stringify(truncateSource(sources)),
-          structuredDataKey: 'sources',
-        },
-        config,
-      );
+      this.emitEvent({ structuredData: { sources: truncateSource(sources) } }, config);
     }
 
     const requestMessages = buildFinalRequestMessages({

@@ -459,6 +459,7 @@ const translations = {
       skillCompleted: '技能执行完成',
       stepCompleted: '步骤执行完成',
       stepTitle: '步骤 {{index}}',
+      aiThinking: 'AI 正在思考中...',
     },
     chatHistory: {
       alreadyAdded: '已添加到对话历史',

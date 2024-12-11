@@ -145,14 +145,7 @@ export class RewriteDoc extends BaseSkill {
       this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
 
       if (sources.length > 0) {
-        this.emitEvent(
-          {
-            event: 'structured_data',
-            content: JSON.stringify(truncateSource(sources)),
-            structuredDataKey: 'sources',
-          },
-          config,
-        );
+        this.emitEvent({ structuredData: { sources: truncateSource(sources) } }, config);
       }
     }
 
@@ -178,19 +171,6 @@ export class RewriteDoc extends BaseSkill {
     const { chatHistory = [], currentSkill, documents } = config.configurable;
 
     const currentDoc = documents?.find((canvas) => canvas?.metadata?.isCurrentContext);
-
-    // send intent matcher event
-    this.emitEvent(
-      {
-        event: 'structured_data',
-        structuredDataKey: 'intentMatcher',
-        content: JSON.stringify({
-          type: DocumentIntentType.RewriteDocument,
-          docId: currentDoc?.docId || '',
-        }),
-      },
-      config,
-    );
 
     const model = this.engine.chatModel({ temperature: 0.1 });
 

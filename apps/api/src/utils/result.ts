@@ -1,6 +1,5 @@
-import { SkillEvent } from '@refly-packages/common-types';
 import { Prisma } from '@prisma/client';
-import { ActionLog, Artifact, TokenUsageItem } from '@refly-packages/openapi-schema';
+import { ActionLog, Artifact, SkillEvent, TokenUsageItem } from '@refly-packages/openapi-schema';
 import { SkillRunnableMeta } from '@refly-packages/skill-template';
 
 import { aggregateTokenUsage } from '@refly-packages/utils';
@@ -68,8 +67,8 @@ export class ResultAggregator {
         }
         break;
       case 'structured_data':
-        if (event.structuredDataKey) {
-          step.structuredData[event.structuredDataKey] = event.content;
+        if (event.structuredData) {
+          step.structuredData = { ...step.structuredData, ...event.structuredData };
         }
         break;
       case 'log':

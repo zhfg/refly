@@ -109,7 +109,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     },
     [ydoc],
   );
-  const throttledSyncNodesToYDoc = useThrottledCallback(syncNodesToYDoc, 300, {
+  const throttledSyncNodesToYDoc = useThrottledCallback(syncNodesToYDoc, 100, {
     leading: true,
     trailing: true,
   });
@@ -124,7 +124,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     },
     [ydoc],
   );
-  const throttledSyncEdgesToYDoc = useThrottledCallback(syncEdgesToYDoc, 300, {
+  const throttledSyncEdgesToYDoc = useThrottledCallback(syncEdgesToYDoc, 100, {
     leading: true,
     trailing: true,
   });
@@ -238,8 +238,9 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         data: n.id === nodeId ? { ...n.data, ...nodeData } : n.data,
       }));
       setNodes(canvasId, updatedNodes);
+      syncNodesToYDoc(updatedNodes);
     },
-    [canvasId, setNodes],
+    [canvasId, setNodes, syncNodesToYDoc],
   );
 
   const setNodeDataByEntity = useCallback(

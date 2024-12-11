@@ -20,6 +20,7 @@ import {
   PinSkillInstanceRequest,
   Resource,
   SkillContext,
+  SkillEvent,
   Skill,
   SkillTriggerCreateParam,
   TimerInterval,
@@ -69,7 +70,6 @@ import {
   referencePO2DTO,
 } from '@/knowledge/knowledge.dto';
 import { ConversationService } from '@/conversation/conversation.service';
-import { SkillEvent } from '@refly-packages/common-types';
 import { ConfigService } from '@nestjs/config';
 import { SearchService } from '@/search/search.service';
 import { RAGService } from '@/rag/rag.service';
@@ -688,7 +688,7 @@ export class SkillService {
           writeSSEResponse(res, data);
         }
 
-        const { event, structuredDataKey, artifact, log } = data;
+        const { event, structuredData, artifact, log } = data;
         switch (event) {
           case 'log':
             if (log) {
@@ -696,7 +696,7 @@ export class SkillService {
             }
             return;
           case 'structured_data':
-            if (structuredDataKey) {
+            if (structuredData) {
               resultAggregator.addSkillEvent(data);
             }
             return;

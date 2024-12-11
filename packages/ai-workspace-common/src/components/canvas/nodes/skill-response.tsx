@@ -13,9 +13,8 @@ import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/u
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/use-add-to-chat-history';
-import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconCanvas, IconLoading } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
@@ -33,7 +32,22 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const language = i18n.languages?.[0];
 
   const { title, contentPreview: content, metadata, createdAt } = data;
-  const { status, modelName, artifacts } = metadata ?? {};
+  const { status, modelName, artifacts, currentLog: log } = metadata ?? {};
+
+  const logTitle = log
+    ? t(`${log.key}.title`, {
+        ...log.titleArgs,
+        ns: 'skillLog',
+        defaultValue: log.key,
+      })
+    : '';
+  const logDescription = log
+    ? t(`${log.key}.description`, {
+        ...log.descriptionArgs,
+        ns: 'skillLog',
+        defaultValue: '',
+      })
+    : '';
 
   // Get query and response content from result
   const query = title || t('copilot.chatHistory.loading');
@@ -179,21 +193,35 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
             <span className="text-sm font-medium leading-normal truncate">{query}</span>
           </div>
 
-          <Spin className="min-h-4" spinning={status === 'executing' && !content && !artifacts}>
-            <div className="flex items-center gap-2 mt-1">
-              {artifacts?.map((artifact) => (
-                <div
-                  key={artifact.entityId}
-                  className="border border-solid border-gray-300 rounded-sm px-2 py-1 w-full flex items-center gap-1"
-                >
-                  {getArtifactIcon(artifact, 'text-gray-500')}
-                  <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">{artifact.title}</span>
-                </div>
-              ))}
+          {status !== 'finish' && !content && !artifacts?.length && (
+            <div className="flex items-center gap-2 mt-1 bg-gray-100 rounded-sm p-2">
+              <IconLoading className="h-3 w-3 animate-spin text-green-500" />
+              <span className="text-xs text-gray-500 max-w-64 truncate">
+                {log ? (
+                  <>
+                    <span className="text-green-500">{logTitle + ' '}</span>
+                    <span className="text-gray-500">{logDescription}</span>
+                  </>
+                ) : (
+                  t('canvas.skillResponse.aiThinking')
+                )}
+              </span>
             </div>
+          )}
 
-            <Markdown content={content} className="text-xs"></Markdown>
-          </Spin>
+          <div className="flex items-center gap-2">
+            {artifacts?.map((artifact) => (
+              <div
+                key={artifact.entityId}
+                className="border border-solid border-gray-300 rounded-sm px-2 py-1 w-full flex items-center gap-1"
+              >
+                {getArtifactIcon(artifact, 'text-gray-500')}
+                <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">{artifact.title}</span>
+              </div>
+            ))}
+          </div>
+
+          <Markdown content={content} className="text-xs"></Markdown>
 
           <div className="text-xs text-gray-400">
             {time(createdAt, language as LOCALE)
