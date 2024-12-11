@@ -28,8 +28,8 @@ const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: {
   nodes.forEach((node) =>
     g.setNode(node.id, {
       ...node,
-      width: node.measured?.width ?? 0,
-      height: node.measured?.height ?? 0,
+      width: node.measured?.width ?? 288,
+      height: node.measured?.height ?? 320,
     }),
   );
 
@@ -37,13 +37,11 @@ const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: {
 
   return {
     nodes: nodes.map((node) => {
-      const position = g.node(node.id);
-      // We are shifting the dagre node position (anchor=center center) to the top left
-      // so it matches the React Flow node anchor point (top left).
-      const x = position.x - (node.measured?.width ?? 0) / 2;
-      const y = position.y - (node.measured?.height ?? 0) / 2;
-
-      return { ...node, position: { x, y } };
+      const nodeWithPosition = g.node(node.id);
+      return {
+        ...node,
+        position: { x: nodeWithPosition.x, y: nodeWithPosition.y },
+      };
     }),
     edges,
   };
@@ -291,7 +289,12 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     (changes: NodeChange<CanvasNode<any>>[]) => {
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
-      const updatedNodes = applyNodeChanges(changes, nodes);
+      const mutableNodes = nodes.map((node) => ({
+        ...node,
+        measured: node.measured ? { ...node.measured } : undefined,
+      }));
+
+      const updatedNodes = applyNodeChanges(changes, mutableNodes);
       setNodes(canvasId, updatedNodes);
       throttledSyncNodesToYDoc(updatedNodes);
     },
