@@ -14,23 +14,16 @@ export const getArtifactIcon = (artifact: Artifact, className?: string) => {
 };
 
 export const getResultDisplayContent = (data: CanvasNodeData<ResponseNodeMeta>, className?: string) => {
-  const steps: ActionStep[] = data.metadata?.steps ?? [];
-  const content = steps
-    ?.map((step) => step.content)
-    ?.filter(Boolean)
-    .join('\n');
-  if (content) return <span className={className}>{content}</span>;
+  if (data.contentPreview) return <span className={className}>{data.contentPreview}</span>;
 
   // If content is empty, find the first artifact
-  for (const step of data.metadata?.steps ?? []) {
-    if (step.artifacts?.length) {
-      const artifact = step.artifacts[0];
-      return (
-        <span className={cn('flex items-center', className)}>
-          {getArtifactIcon(artifact, 'w-3 h-3 mr-1')} {artifact.title}
-        </span>
-      );
-    }
+  if (data.metadata?.artifacts?.length) {
+    const artifact = data.metadata?.artifacts[0];
+    return (
+      <span className={cn('flex items-center', className)}>
+        {getArtifactIcon(artifact, 'w-3 h-3 mr-1')} {artifact.title}
+      </span>
+    );
   }
 
   return '';
