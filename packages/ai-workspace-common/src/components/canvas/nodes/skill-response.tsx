@@ -19,6 +19,7 @@ import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
+import { SkillResponseNodePreview } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -143,9 +144,8 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
       {/* Main Card Container */}
       <div
         className={`
-          w-[170px]
-          h-[186px]
           relative
+          w-[350px]
           ${getNodeCommonStyles({ selected, isHovered })}
         `}
       >
@@ -190,23 +190,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           </div>
 
           <Spin spinning={status === 'executing' && !contentPreview} style={{ height: 100 }}>
-            <div className="text-xs text-gray-500 leading-4 line-clamp-6 overflow-hidden text-ellipsis">
-              {isPreview ? contentPreview : content}
-            </div>
-            <div className="flex items-center gap-2">
-              {artifacts?.map((artifact) => (
-                <div
-                  key={artifact.entityId}
-                  className="border border-solid border-gray-300 rounded-sm px-2 py-1 w-full flex items-center gap-1"
-                >
-                  {getArtifactIcon(artifact, 'text-gray-500')}
-                  <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">{artifact.title}</span>
-                </div>
-              ))}
-            </div>
-            {!contentPreview && !artifacts?.length && status !== 'executing' && (
-              <div className="text-xs text-gray-500">{t('canvas.nodePreview.skillResponse.noContentPreview')}</div>
-            )}
+            <SkillResponseNodePreview resultId={data.entityId} />
           </Spin>
 
           <div className="absolute bottom-2 left-3 text-[10px] text-gray-400">
