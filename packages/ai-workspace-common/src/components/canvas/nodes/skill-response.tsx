@@ -4,6 +4,7 @@ import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } 
 import { Node } from '@xyflow/react';
 import { useState, useCallback } from 'react';
 import { CustomHandle } from './custom-handle';
+import { LuChevronRight } from 'react-icons/lu';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { EDGE_STYLES } from '../constants';
 import { getNodeCommonStyles } from './index';
@@ -13,12 +14,13 @@ import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/u
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/use-add-to-chat-history';
-import { IconCanvas, IconLoading } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconCanvas, IconLoading, IconSearch } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
+import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -32,7 +34,8 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const language = i18n.languages?.[0];
 
   const { title, contentPreview: content, metadata, createdAt } = data;
-  const { status, modelName, artifacts, currentLog: log } = metadata ?? {};
+  const { status, modelName, artifacts, currentLog: log, structuredData } = metadata ?? {};
+  const sources = Array.isArray(structuredData?.sources) ? structuredData?.sources : [];
 
   const logTitle = log
     ? t(`${log.key}.title`, {
@@ -128,6 +131,18 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
     });
   }, [content, debouncedCreateDocument, data.entityId, data?.title, modelName]);
 
+  const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
+    updateSourceListDrawer: state.updateSourceListDrawer,
+  }));
+
+  const handleClickSources = useCallback(() => {
+    knowledgeBaseStore.updateSourceListDrawer({
+      visible: true,
+      sources: sources,
+      query: query,
+    });
+  }, [sources, query]);
+
   return (
     <div
       className="relative group"
@@ -172,7 +187,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           </>
         )}
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <div
               className="
@@ -196,10 +211,10 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           {status !== 'finish' && !content && !artifacts?.length && (
             <div className="flex items-center gap-2 mt-1 bg-gray-100 rounded-sm p-2">
               <IconLoading className="h-3 w-3 animate-spin text-green-500" />
-              <span className="text-xs text-gray-500 max-w-64 truncate">
+              <span className="text-xs text-gray-500 max-w-48 truncate">
                 {log ? (
                   <>
-                    <span className="text-green-500">{logTitle + ' '}</span>
+                    <span className="text-green-500 font-medium">{logTitle + ' '}</span>
                     <span className="text-gray-500">{logDescription}</span>
                   </>
                 ) : (
@@ -209,17 +224,32 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
             </div>
           )}
 
-          <div className="flex items-center gap-2">
-            {artifacts?.map((artifact) => (
-              <div
-                key={artifact.entityId}
-                className="border border-solid border-gray-300 rounded-sm px-2 py-1 w-full flex items-center gap-1"
-              >
-                {getArtifactIcon(artifact, 'text-gray-500')}
-                <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">{artifact.title}</span>
-              </div>
-            ))}
-          </div>
+          {sources.length > 0 && (
+            <div
+              className="flex items-center justify-between gap-2 border-gray-100 border-solid rounded-sm p-2 hover:bg-gray-50 cursor-pointer"
+              onClick={handleClickSources}
+            >
+              <span className="flex items-center gap-1 text-xs text-gray-500">
+                <IconSearch className="h-3 w-3 text-gray-500" />
+                {t('canvas.skillResponse.sourcesCnt', { count: sources.length })}
+              </span>
+              <LuChevronRight className="h-3 w-3 text-gray-500" />
+            </div>
+          )}
+
+          {artifacts?.length > 0 && (
+            <div className="flex items-center gap-2">
+              {artifacts.map((artifact) => (
+                <div
+                  key={artifact.entityId}
+                  className="border border-solid border-gray-300 rounded-sm px-2 py-1 w-full flex items-center gap-1"
+                >
+                  {getArtifactIcon(artifact, 'text-gray-500')}
+                  <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">{artifact.title}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           <Markdown content={content} className="text-xs"></Markdown>
 

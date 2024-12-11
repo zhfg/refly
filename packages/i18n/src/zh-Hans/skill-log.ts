@@ -5,23 +5,23 @@ const translations = {
   },
   rewriteQuery: {
     title: '分解问题',
-    description: '耗时 {{duration}} 毫秒，子查询：{{rewrittenQueries}}',
+    description: '子查询：{{rewrittenQueries}}, 耗时 {{duration}} 毫秒',
   },
   translateQuery: {
     title: '翻译查询',
-    description: '耗时 {{duration}} 毫秒，翻译后的查询：{{translatedQueries}}',
+    description: '翻译后的查询：{{translatedQueries}}, 耗时 {{duration}} 毫秒',
   },
   webSearchCompleted: {
     title: '网页搜索完成',
-    description: '耗时 {{duration}} 毫秒，总共 {{totalResults}} 个结果',
+    description: '总共 {{totalResults}} 个结果, 耗时 {{duration}} 毫秒',
   },
   translateResults: {
     title: '翻译结果',
-    description: '耗时 {{duration}} 毫秒，总共 {{totalResults}} 个结果',
+    description: '总共 {{totalResults}} 个结果, 耗时 {{duration}} 毫秒',
   },
   rerankResults: {
     title: '选择关联结果',
-    description: '耗时 {{duration}} 毫秒，总共 {{totalResults}} 个结果',
+    description: '总共 {{totalResults}} 个结果, 耗时 {{duration}} 毫秒',
   },
 };
 

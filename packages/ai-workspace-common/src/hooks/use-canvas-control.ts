@@ -403,14 +403,14 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
           const maxSourceY = Math.max(...sourceNodes.map((n) => n.position.y + (n.measured?.height ?? 100)));
 
           newPosition = {
-            x: avgSourceX + 200, // Offset to the right of source nodes
+            x: avgSourceX + 400, // Offset to the right of source nodes
             y: maxSourceY + 40,
           };
         }
       } else {
         // Default position if no source nodes
         newPosition = {
-          x: Math.max(...nodes.map((n) => n.position.x), 0) + 200,
+          x: Math.max(...nodes.map((n) => n.position.x), 0) + 400,
           y: Math.max(...nodes.map((n) => n.position.y), 0),
         };
         needSetCenter = true;

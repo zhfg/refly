@@ -460,6 +460,7 @@ const translations = {
       stepCompleted: '步骤执行完成',
       stepTitle: '步骤 {{index}}',
       aiThinking: 'AI 正在思考中...',
+      sourcesCnt: '共找到 {{count}} 个来源',
     },
     chatHistory: {
       alreadyAdded: '已添加到对话历史',

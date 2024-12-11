@@ -1,17 +1,13 @@
-import {
-  useKnowledgeBaseStore,
-  useKnowledgeBaseStoreShallow,
-} from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useEffect, useMemo, useState } from 'react';
 import { Drawer } from '@arco-design/web-react';
 import { message, Tabs } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { SourceDetailList } from '@refly-packages/ai-workspace-common/components/source-list/source-detail-list';
 import { Source } from '@refly/openapi-schema';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import './index.scss';
-import { IconLink, IconMessage } from '@arco-design/web-react/icon';
+import { IconLink } from '@arco-design/web-react/icon';
 import { SearchResults } from '@refly-packages/ai-workspace-common/modules/multilingual-search/components/search-results';
 import {
   ActionMenu,
@@ -22,9 +18,6 @@ import {
   SearchLocale,
   useMultilingualSearchStoreShallow,
 } from '@refly-packages/ai-workspace-common/modules/multilingual-search/stores/multilingual-search';
-import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-
-const TabPane = Tabs.TabPane;
 
 interface SourceListModalProps {
   classNames: string;
@@ -41,7 +34,6 @@ export const SourceListModal = (props: SourceListModalProps) => {
     sourceListDrawer: state.sourceListDrawer,
     updateSourceListDrawer: state.updateSourceListDrawer,
   }));
-  const { jumpToResource, jumpToCanvas } = useJumpNewPath();
 
   const outputLocale: SearchLocale = useMemo(
     () => ({

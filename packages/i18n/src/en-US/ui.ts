@@ -468,6 +468,7 @@ const translations = {
       stepCompleted: 'Step Completed',
       stepTitle: 'Step {{index}}',
       aiThinking: 'AI is thinking ...',
+      sourcesCnt: 'Total of {{count}} source(s) found',
     },
     chatHistory: {
       alreadyAdded: 'Already added to chat history',
