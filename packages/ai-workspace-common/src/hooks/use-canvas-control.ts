@@ -271,6 +271,8 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
 
       setNodes(canvasId, layouted.nodes);
       setEdges(canvasId, layouted.edges);
+      syncNodesToYDoc(layouted.nodes);
+      syncEdgesToYDoc(layouted.edges);
 
       window.requestAnimationFrame(() => {
         fitView({
