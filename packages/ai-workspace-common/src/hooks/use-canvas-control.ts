@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Connection, useReactFlow, Node, XYPosition } from '@xyflow/react';
 import Dagre from '@dagrejs/dagre';
@@ -82,6 +82,10 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     setTitle: state.setTitle,
     setModeRaw: state.setMode,
   }));
+
+  const nodes = data[canvasId]?.nodes ?? [];
+  const edges = data[canvasId]?.edges ?? [];
+  const mode = data[canvasId]?.mode ?? 'hand';
 
   const setCanvasTitle = useCallback(
     (title: string) => {
@@ -230,6 +234,10 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
 
   const observersSet = useRef(false);
 
+  const throttledSetNodes = useThrottledCallback((id: string, nodes: any) => setNodes(id, nodes), 300);
+  const throttledSetEdges = useThrottledCallback((id: string, edges: any) => setEdges(id, edges), 300);
+  const throttledSetTitle = useThrottledCallback((id: string, title: string) => setTitle(id, title), 300);
+
   useEffect(() => {
     if (!canvasId || !ydoc || observersSet.current) return;
 
@@ -238,15 +246,15 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     const yEdges = ydoc.getArray('edges');
 
     const nodesObserver = () => {
-      setNodes(canvasId, yNodes.toJSON());
+      throttledSetNodes(canvasId, yNodes.toJSON());
     };
 
     const edgesObserver = () => {
-      setEdges(canvasId, yEdges.toJSON());
+      throttledSetEdges(canvasId, yEdges.toJSON());
     };
 
     const titleObserver = () => {
-      setTitle(canvasId, yTitle.toString());
+      throttledSetTitle(canvasId, yTitle.toString());
     };
 
     yNodes.observe(nodesObserver);
@@ -260,7 +268,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       yTitle.unobserve(titleObserver);
       observersSet.current = false;
     };
-  }, [canvasId, ydoc, setNodes, setEdges]);
+  }, [canvasId, ydoc, throttledSetNodes, throttledSetEdges, throttledSetTitle]);
 
   const { fitView, getNode, setCenter } = useReactFlow();
 
@@ -292,51 +300,73 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     [canvasId, fitView],
   );
 
+  const throttledNodesChange = useThrottledCallback((changes: NodeChange[]) => {
+    const yNodes = ydoc.getArray('nodes');
+    ydoc.transact(() => {
+      const updatedNodes = applyNodeChanges(changes, yNodes.toJSON());
+      yNodes.delete(0, yNodes.length);
+      yNodes.push(deduplicateNodes(updatedNodes));
+    });
+  }, 300);
+
+  const throttledEdgesChange = useThrottledCallback((changes: EdgeChange[]) => {
+    const yEdges = ydoc.getArray('edges');
+    ydoc.transact(() => {
+      const updatedEdges = applyEdgeChanges(changes, yEdges.toJSON());
+      yEdges.delete(0, yEdges.length);
+      yEdges.push(deduplicateEdges(updatedEdges));
+    });
+  }, 300);
+
+  const throttledConnect = useThrottledCallback((params: Connection) => {
+    if (!params?.source || !params?.target) {
+      console.warn('Invalid connection parameters');
+      return;
+    }
+
+    const yEdges = ydoc.getArray('edges');
+    ydoc.transact(() => {
+      const newEdge = {
+        ...params,
+        id: `edge-${genUniqueId()}`,
+        animated: false,
+        style: EDGE_STYLES.default,
+      };
+
+      yEdges.delete(0, yEdges.length);
+      yEdges.push(deduplicateEdges([...edges, newEdge]));
+    });
+  }, 300);
+
   const onNodesChange = useCallback(
-    (changes: NodeChange<CanvasNode<any>>[]) => {
-      const yNodes = ydoc.getArray('nodes');
-      ydoc.transact(() => {
-        const updatedNodes = applyNodeChanges(changes, yNodes.toJSON());
-        yNodes.delete(0, yNodes.length);
-        yNodes.push(deduplicateNodes(updatedNodes));
-      });
+    (changes: NodeChange[]) => {
+      // Apply changes locally first
+      const updatedNodes = applyNodeChanges(changes, nodes) as CanvasNode<any>[];
+      setNodes(canvasId, updatedNodes);
+
+      // Synchronize with ydoc asynchronously
+      throttledNodesChange(changes);
     },
-    [ydoc],
+    [canvasId, nodes, setNodes, applyNodeChanges, throttledNodesChange],
   );
 
   const onEdgesChange = useCallback(
-    (changes: EdgeChange<Edge>[]) => {
-      const yEdges = ydoc.getArray('edges');
-      ydoc.transact(() => {
-        const updatedEdges = applyEdgeChanges(changes, yEdges.toJSON());
-        yEdges.delete(0, yEdges.length);
-        yEdges.push(deduplicateEdges(updatedEdges));
-      });
+    (changes: EdgeChange[]) => {
+      // Apply changes locally first
+      const updatedEdges = applyEdgeChanges(changes, edges);
+      setEdges(canvasId, updatedEdges);
+
+      // Synchronize with ydoc asynchronously
+      throttledEdgesChange(changes);
     },
-    [ydoc],
+    [canvasId, edges, setEdges, throttledEdgesChange],
   );
 
   const onConnect = useCallback(
     (params: Connection) => {
-      if (!params?.source || !params?.target) {
-        console.warn('Invalid connection parameters');
-        return;
-      }
-
-      const yEdges = ydoc.getArray('edges');
-      ydoc.transact(() => {
-        const newEdge = {
-          ...params,
-          id: `edge-${genUniqueId()}`,
-          animated: false,
-          style: EDGE_STYLES.default,
-        };
-
-        yEdges.delete(0, yEdges.length);
-        yEdges.push(deduplicateEdges([...edges, newEdge]));
-      });
+      throttledConnect(params);
     },
-    [ydoc],
+    [throttledConnect],
   );
 
   const setNodeCenter = useCallback(
@@ -469,10 +499,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     },
     [canvasId, ydoc, setSelectedNode],
   );
-
-  const nodes = data[canvasId]?.nodes ?? [];
-  const edges = data[canvasId]?.edges ?? [];
-  const mode = data[canvasId]?.mode ?? 'hand';
 
   const setMode = useCallback(
     (mode: 'hand' | 'pointer') => {

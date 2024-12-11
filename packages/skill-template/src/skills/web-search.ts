@@ -15,7 +15,7 @@ import * as webSearch from '../scheduler/module/webSearch/index';
 import { concatMergedContextToStr, flattenMergedContextToSources } from '../scheduler/utils/summarizer';
 import { preprocessQuery } from '../scheduler/utils/queryRewrite';
 import { countMessagesTokens } from '../scheduler/utils/token';
-import { truncateMessages } from '../scheduler/utils/truncator';
+import { truncateMessages, truncateSource } from '../scheduler/utils/truncator';
 import { countToken } from '../scheduler/utils/token';
 
 export class WebSearch extends BaseSkill {
@@ -113,15 +113,16 @@ export class WebSearch extends BaseSkill {
 
     this.engine.logger.log(`Prepared context successfully! ${safeStringifyJSON(webSearchContext)}`);
 
-    this.emitEvent(
-      {
-        event: 'structured_data',
-        content: JSON.stringify(sources),
-        structuredDataKey: 'sources',
-      },
-      config,
-    );
-
+    if (sources.length > 0) {
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify(truncateSource(sources)),
+          structuredDataKey: 'sources',
+        },
+        config,
+      );
+    }
     const requestMessages = buildFinalRequestMessages({
       module,
       locale,
