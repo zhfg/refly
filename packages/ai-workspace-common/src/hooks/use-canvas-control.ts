@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { Connection, useReactFlow, Node, XYPosition } from '@xyflow/react';
+import { Connection, useReactFlow, XYPosition } from '@xyflow/react';
 import Dagre from '@dagrejs/dagre';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { applyEdgeChanges, applyNodeChanges, Edge, EdgeChange, NodeChange } from '@xyflow/react';
@@ -87,45 +87,62 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   const edges = data[canvasId]?.edges ?? [];
   const mode = data[canvasId]?.mode ?? 'hand';
 
+  const syncTitleToYDoc = useCallback((title: string) => {
+    ydoc?.transact(() => {
+      const yTitle = ydoc?.getText('title');
+      yTitle?.delete(0, yTitle?.length ?? 0);
+      yTitle?.insert(0, title);
+    });
+  }, []);
+
+  const syncNodesToYDoc = useThrottledCallback((nodes: CanvasNode<any>[]) => {
+    ydoc?.transact(() => {
+      const yNodes = ydoc?.getArray('nodes');
+      yNodes?.delete(0, yNodes?.length ?? 0);
+      yNodes?.push(nodes);
+    });
+  }, 300);
+
+  const syncEdgesToYDoc = useThrottledCallback((edges: Edge[]) => {
+    ydoc?.transact(() => {
+      const yEdges = ydoc?.getArray('edges');
+      yEdges?.delete(0, yEdges?.length ?? 0);
+      yEdges?.push(edges);
+    });
+  }, 300);
+
   const setCanvasTitle = useCallback(
     (title: string) => {
-      const yTitle = ydoc.getText('title');
-      ydoc.transact(() => {
-        yTitle?.delete(0, yTitle?.length ?? 0);
-        yTitle?.insert(0, title);
-      });
+      setTitle(canvasId, title);
+      syncTitleToYDoc(title);
     },
-    [ydoc],
+    [canvasId, setTitle, syncTitleToYDoc],
   );
 
   const setSelectedNode = useCallback(
     (node: CanvasNode<any> | null) => {
-      const yNodes = ydoc.getArray('nodes');
-      ydoc.transact(() => {
-        const updatedNodes = yNodes.toJSON().map((n) => ({
-          ...n,
-          selected: n.id === node?.id,
-        }));
-        yNodes.delete(0, yNodes.length);
-        yNodes.push(deduplicateNodes(updatedNodes));
-      });
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
+      const updatedNodes = nodes.map((n) => ({
+        ...n,
+        selected: n.id === node?.id,
+      }));
+      setNodes(canvasId, updatedNodes);
     },
-    [ydoc],
+    [canvasId, setNodes],
   );
 
   const addSelectedNode = useCallback(
     (node: CanvasNode<any> | null) => {
-      const yNodes = ydoc.getArray('nodes');
-      ydoc.transact(() => {
-        const updatedNodes = yNodes.toJSON().map((n) => ({
-          ...n,
-          selected: n.id === node?.id ? true : n.selected,
-        }));
-        yNodes.delete(0, yNodes.length);
-        yNodes.push(deduplicateNodes(updatedNodes));
-      });
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
+      const updatedNodes = nodes.map((n) => ({
+        ...n,
+        selected: n.id === node?.id ? true : n.selected,
+      }));
+      setNodes(canvasId, updatedNodes);
     },
-    [ydoc],
+    [canvasId, setNodes],
   );
 
   const setSelectedNodeByEntity = useCallback(
@@ -155,35 +172,29 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   );
 
   const setSelectedNodes = useCallback(
-    (nodes: CanvasNode<any>[]) => {
-      console.log('setSelectedNodes', nodes);
-      const yNodes = ydoc.getArray('nodes');
-      ydoc.transact(() => {
-        const updatedNodes = yNodes.toJSON().map((n) => ({
-          ...n,
-          selected: nodes.some((node) => node.id === n.id),
-        }));
-        yNodes.delete(0, yNodes.length);
-        yNodes.push(deduplicateNodes(updatedNodes));
-      });
+    (selectedNodes: CanvasNode<any>[]) => {
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
+      const updatedNodes = nodes.map((n) => ({
+        ...n,
+        selected: selectedNodes.some((node) => node.id === n.id),
+      }));
+      setNodes(canvasId, updatedNodes);
     },
-    [ydoc],
+    [canvasId, setNodes],
   );
 
   const deselectNode = useCallback(
     (node: CanvasNode) => {
-      console.log('deselectNode', node);
-      const yNodes = ydoc.getArray('nodes');
-      ydoc.transact(() => {
-        const updatedNodes = yNodes.toJSON().map((n) => ({
-          ...n,
-          selected: n.id === node.id ? false : n.selected,
-        }));
-        yNodes.delete(0, yNodes.length);
-        yNodes.push(deduplicateNodes(updatedNodes));
-      });
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
+      const updatedNodes = nodes.map((n) => ({
+        ...n,
+        selected: n.id === node.id ? false : n.selected,
+      }));
+      setNodes(canvasId, updatedNodes);
     },
-    [ydoc],
+    [canvasId, setNodes],
   );
 
   const deselectNodeByEntity = useCallback(
@@ -200,18 +211,18 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     [canvasId, deselectNode],
   );
 
-  const setNodeData = useThrottledCallback(<T = any>(nodeId: string, data: Partial<CanvasNodeData<T>>) => {
-    console.log('setNodeData', nodeId, data);
-    const yNodes = ydoc.getArray('nodes');
-    ydoc.transact(() => {
-      const updatedNodes = yNodes.toJSON().map((n) => ({
+  const setNodeData = useCallback(
+    <T = any>(nodeId: string, nodeData: Partial<CanvasNodeData<T>>) => {
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
+      const updatedNodes = nodes.map((n) => ({
         ...n,
-        data: n.id === nodeId ? { ...n.data, ...data } : n.data,
+        data: n.id === nodeId ? { ...n.data, ...nodeData } : n.data,
       }));
-      yNodes.delete(0, yNodes.length);
-      yNodes.push(deduplicateNodes(updatedNodes));
-    });
-  }, 300);
+      setNodes(canvasId, updatedNodes);
+    },
+    [canvasId, setNodes],
+  );
 
   const setNodeDataByEntity = useCallback(
     <T = any>(filter: CanvasNodeFilter, nodeData: Partial<CanvasNodeData<T>>) => {
@@ -232,44 +243,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     [canvasId, setNodeData],
   );
 
-  const observersSet = useRef(false);
-
-  const throttledSetNodes = useThrottledCallback((id: string, nodes: any) => setNodes(id, nodes), 300);
-  const throttledSetEdges = useThrottledCallback((id: string, edges: any) => setEdges(id, edges), 300);
-  const throttledSetTitle = useThrottledCallback((id: string, title: string) => setTitle(id, title), 300);
-
-  useEffect(() => {
-    if (!canvasId || !ydoc || observersSet.current) return;
-
-    const yTitle = ydoc.getText('title');
-    const yNodes = ydoc.getArray('nodes');
-    const yEdges = ydoc.getArray('edges');
-
-    const nodesObserver = () => {
-      throttledSetNodes(canvasId, yNodes.toJSON());
-    };
-
-    const edgesObserver = () => {
-      throttledSetEdges(canvasId, yEdges.toJSON());
-    };
-
-    const titleObserver = () => {
-      throttledSetTitle(canvasId, yTitle.toString());
-    };
-
-    yNodes.observe(nodesObserver);
-    yEdges.observe(edgesObserver);
-    yTitle.observe(titleObserver);
-    observersSet.current = true;
-
-    return () => {
-      yNodes.unobserve(nodesObserver);
-      yEdges.unobserve(edgesObserver);
-      yTitle.unobserve(titleObserver);
-      observersSet.current = false;
-    };
-  }, [canvasId, ydoc, throttledSetNodes, throttledSetEdges, throttledSetTitle]);
-
   const { fitView, getNode, setCenter } = useReactFlow();
 
   const onLayout = useCallback(
@@ -279,15 +252,8 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const edges = data[canvasId]?.edges ?? [];
       const layouted = getLayoutedElements(nodes, edges, { direction });
 
-      const yNodes = ydoc.getArray('nodes');
-      const yEdges = ydoc.getArray('edges');
-
-      ydoc.transact(() => {
-        yNodes.delete(0, yNodes.length);
-        yNodes.push(deduplicateNodes(layouted.nodes));
-        yEdges.delete(0, yEdges.length);
-        yEdges.push(deduplicateEdges(layouted.edges));
-      });
+      setNodes(canvasId, layouted.nodes);
+      setEdges(canvasId, layouted.edges);
 
       window.requestAnimationFrame(() => {
         fitView({
@@ -300,32 +266,35 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     [canvasId, fitView],
   );
 
-  const throttledNodesChange = useThrottledCallback((changes: NodeChange[]) => {
-    const yNodes = ydoc.getArray('nodes');
-    ydoc.transact(() => {
-      const updatedNodes = applyNodeChanges(changes, yNodes.toJSON());
-      yNodes.delete(0, yNodes.length);
-      yNodes.push(deduplicateNodes(updatedNodes));
-    });
-  }, 300);
+  const onNodesChange = useCallback(
+    (changes: NodeChange<CanvasNode<any>>[]) => {
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
+      const updatedNodes = applyNodeChanges(changes, nodes);
+      setNodes(canvasId, updatedNodes);
+      syncNodesToYDoc(updatedNodes);
+    },
+    [canvasId, setNodes, applyNodeChanges, syncNodesToYDoc],
+  );
 
-  const throttledEdgesChange = useThrottledCallback((changes: EdgeChange[]) => {
-    const yEdges = ydoc.getArray('edges');
-    ydoc.transact(() => {
-      const updatedEdges = applyEdgeChanges(changes, yEdges.toJSON());
-      yEdges.delete(0, yEdges.length);
-      yEdges.push(deduplicateEdges(updatedEdges));
-    });
-  }, 300);
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange<Edge>[]) => {
+      const { data } = useCanvasStore.getState();
+      const edges = data[canvasId]?.edges ?? [];
+      const updatedEdges = applyEdgeChanges(changes, edges);
+      setEdges(canvasId, updatedEdges);
+      syncEdgesToYDoc(updatedEdges);
+    },
+    [canvasId, setEdges, applyEdgeChanges, syncEdgesToYDoc],
+  );
 
-  const throttledConnect = useThrottledCallback((params: Connection) => {
-    if (!params?.source || !params?.target) {
-      console.warn('Invalid connection parameters');
-      return;
-    }
+  const onConnect = useCallback(
+    (params: Connection) => {
+      if (!params?.source || !params?.target) {
+        console.warn('Invalid connection parameters');
+        return;
+      }
 
-    const yEdges = ydoc.getArray('edges');
-    ydoc.transact(() => {
       const newEdge = {
         ...params,
         id: `edge-${genUniqueId()}`,
@@ -333,40 +302,12 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         style: EDGE_STYLES.default,
       };
 
-      yEdges.delete(0, yEdges.length);
-      yEdges.push(deduplicateEdges([...edges, newEdge]));
-    });
-  }, 300);
-
-  const onNodesChange = useCallback(
-    (changes: NodeChange[]) => {
-      // Apply changes locally first
-      const updatedNodes = applyNodeChanges(changes, nodes) as CanvasNode<any>[];
-      setNodes(canvasId, updatedNodes);
-
-      // Synchronize with ydoc asynchronously
-      throttledNodesChange(changes);
-    },
-    [canvasId, nodes, setNodes, applyNodeChanges, throttledNodesChange],
-  );
-
-  const onEdgesChange = useCallback(
-    (changes: EdgeChange[]) => {
-      // Apply changes locally first
-      const updatedEdges = applyEdgeChanges(changes, edges);
+      const { data } = useCanvasStore.getState();
+      const edges = data[canvasId]?.edges ?? [];
+      const updatedEdges = [...edges, newEdge];
       setEdges(canvasId, updatedEdges);
-
-      // Synchronize with ydoc asynchronously
-      throttledEdgesChange(changes);
     },
-    [canvasId, edges, setEdges, throttledEdgesChange],
-  );
-
-  const onConnect = useCallback(
-    (params: Connection) => {
-      throttledConnect(params);
-    },
-    [throttledConnect],
+    [canvasId, setEdges, syncEdgesToYDoc],
   );
 
   const setNodeCenter = useCallback(
@@ -468,36 +409,31 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         position: newPosition,
         selected: true,
       });
+      const updatedNodes = deduplicateNodes([...nodes, newNode]);
 
-      const yNodes = ydoc.getArray('nodes');
-      const yEdges = ydoc.getArray('edges');
+      setNodes(canvasId, updatedNodes);
 
-      ydoc.transact(() => {
-        yNodes.delete(0, yNodes.length);
-        yNodes.push(deduplicateNodes([...nodes, newNode]));
+      if (connectTo?.length > 0) {
+        const newEdges: Edge[] =
+          sourceNodes?.map((sourceNode) => ({
+            id: `edge-${genUniqueId()}`,
+            source: sourceNode.id,
+            target: newNode.id,
+            style: EDGE_STYLES.default,
+            type: 'default',
+          })) ?? [];
 
-        if (connectTo?.length > 0) {
-          const newEdges: Edge[] =
-            sourceNodes?.map((sourceNode) => ({
-              id: `edge-${genUniqueId()}`,
-              source: sourceNode.id,
-              target: newNode.id,
-              style: EDGE_STYLES.default,
-              type: 'default',
-            })) ?? [];
-
-          if (newEdges.length > 0) {
-            yEdges.delete(0, yEdges.length);
-            yEdges.push(deduplicateEdges([...edges, ...newEdges]));
-          }
+        if (newEdges.length > 0) {
+          const updatedEdges = deduplicateEdges([...edges, ...newEdges]);
+          setEdges(canvasId, updatedEdges);
         }
-      });
+      }
 
       if (needSetCenter) {
         setNodeCenter(newNode.id);
       }
     },
-    [canvasId, ydoc, setSelectedNode],
+    [canvasId, setSelectedNode],
   );
 
   const setMode = useCallback(
