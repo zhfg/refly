@@ -5,7 +5,7 @@ import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { SkillTemplateConfig } from '@refly-packages/openapi-schema';
 import { ModelContextLimitMap } from './token';
 import { MAX_CONTEXT_RATIO, MAX_QUERY_TOKENS_RATIO } from './constants';
-import { truncateText } from './truncator';
+import { truncateTextWithToken } from './truncator';
 import { safeStringifyJSON } from '@refly-packages/utils';
 import { extractStructuredData } from './extractor';
 
@@ -361,5 +361,5 @@ export const preprocessQuery = (
   const { modelName } = ctx.config.configurable;
   const maxQueryTokens = ModelContextLimitMap[modelName] * MAX_QUERY_TOKENS_RATIO;
 
-  return truncateText(query, maxQueryTokens);
+  return truncateTextWithToken(query, maxQueryTokens);
 };

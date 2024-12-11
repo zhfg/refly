@@ -2,6 +2,7 @@ import {
   SkillContextContentItem,
   SkillContextDocumentItem,
   SkillContextResourceItem,
+  Source,
 } from '@refly-packages/openapi-schema';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { sortContentBySimilarity } from './semanticSearch';
@@ -30,7 +31,7 @@ export const truncateMessages = (
     let tokens = countToken(content);
 
     if (tokens > maxMessageTokens) {
-      content = truncateText(content, maxMessageTokens);
+      content = truncateTextWithToken(content, maxMessageTokens);
       tokens = maxMessageTokens;
     }
 
@@ -46,7 +47,7 @@ export const truncateMessages = (
   return truncatedMessages;
 };
 
-export const truncateText = (text: string, maxTokens: number): string => {
+export const truncateTextWithToken = (text: string, maxTokens: number): string => {
   if (!text || typeof text !== 'string') return '';
 
   const words = text.split(' ');
@@ -84,7 +85,7 @@ export const truncateContext = (context: IContext, maxTokens: number): IContext 
         truncatedItems.push(item);
         remainingTokens -= tokens;
       } else if (remainingTokens > 0) {
-        const truncatedContent = truncateText(content, remainingTokens);
+        const truncatedContent = truncateTextWithToken(content, remainingTokens);
         truncatedItems.push(setContent(item, truncatedContent));
         remainingTokens = 0;
       } else {
@@ -242,4 +243,66 @@ function truncateContextWithPriority(
   }
 
   return truncatedContext;
+}
+
+/**
+ * Truncate text to a maximum length, considering both character count and word count
+ * @param text Text to truncate
+ * @param maxChars Maximum number of characters (default: 170)
+ * @param maxWords Maximum number of words (default: 30)
+ * @returns Truncated text with ellipsis if needed
+ */
+function truncateTextWithWord(text: string, maxChars = 170, maxWords = 30): string {
+  // First check word count
+  const words = text.split(/\s+/);
+  if (words.length > maxWords) {
+    text = words.slice(0, maxWords).join(' ');
+  }
+
+  // Then check character count
+  if (text.length > maxChars) {
+    text = text.slice(0, maxChars);
+    // Ensure we don't cut in the middle of a word
+    const lastSpace = text.lastIndexOf(' ');
+    if (lastSpace > maxChars * 0.8) {
+      // Only trim to last space if it's not too far back
+      text = text.slice(0, lastSpace);
+    }
+  }
+
+  // Add ellipsis if text was truncated
+  if (text.length < text.length) {
+    text = text.trim() + '...';
+  }
+
+  return text;
+}
+
+/**
+ * Truncate source by limiting pageContent length to improve performance
+ * @param sources Array of sources or single source object
+ * @returns Truncated source(s) with limited content length
+ */
+export function truncateSource<T extends Source | Source[]>(sources: T): T {
+  if (Array.isArray(sources)) {
+    return sources.map((source) => ({
+      ...source,
+      pageContent: truncateTextWithWord(source.pageContent),
+      // Also truncate selections if they exist
+      selections: source.selections?.map((selection) => ({
+        ...selection,
+        content: selection.content ? truncateTextWithWord(selection.content) : '',
+      })),
+    })) as T;
+  }
+
+  return {
+    ...sources,
+    pageContent: truncateTextWithWord(sources.pageContent),
+    // Also truncate selections if they exist
+    selections: sources.selections?.map((selection) => ({
+      ...selection,
+      content: selection.content ? truncateTextWithWord(selection.content) : '',
+    })),
+  } as T;
 }

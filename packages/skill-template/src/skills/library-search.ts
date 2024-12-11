@@ -12,7 +12,7 @@ import { buildFinalRequestMessages } from '../scheduler/utils/message';
 import { prepareContext } from '../scheduler/utils/context';
 import { preprocessQuery } from '../scheduler/utils/queryRewrite';
 import { countMessagesTokens } from '../scheduler/utils/token';
-import { truncateMessages } from '../scheduler/utils/truncator';
+import { truncateMessages, truncateSource } from '../scheduler/utils/truncator';
 import { countToken } from '../scheduler/utils/token';
 import * as librarySearch from '../scheduler/module/librarySearch';
 
@@ -103,14 +103,16 @@ export class LibrarySearch extends BaseSkill {
       buildUserPrompt: librarySearch.buildLibrarySearchUserPrompt,
     };
 
-    this.emitEvent(
-      {
-        event: 'structured_data',
-        content: JSON.stringify(sources),
-        structuredDataKey: 'sources',
-      },
-      config,
-    );
+    if (sources.length > 0) {
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify(truncateSource(sources)),
+          structuredDataKey: 'sources',
+        },
+        config,
+      );
+    }
 
     const requestMessages = buildFinalRequestMessages({
       module,

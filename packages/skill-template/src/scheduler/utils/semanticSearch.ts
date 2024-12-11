@@ -12,7 +12,7 @@ import { countToken, ModelContextLimitMap } from './token';
 import { MAX_NEED_RECALL_TOKEN, SHORT_CONTENT_THRESHOLD, MIN_RELEVANCE_SCORE } from './constants';
 import { DocumentInterface, Document } from '@langchain/core/documents';
 import { ContentNodeType, NodeMeta } from '../../engine';
-import { truncateText } from './truncator';
+import { truncateTextWithToken } from './truncator';
 import {
   MAX_RAG_RELEVANT_CONTENT_RATIO,
   MAX_SHORT_CONTENT_RATIO,
@@ -40,7 +40,7 @@ export async function sortContentBySimilarity(
   // 1. construct documents
   const documents: Document<NodeMeta>[] = contentList.map((item) => {
     return {
-      pageContent: truncateText(item.content, MAX_NEED_RECALL_TOKEN),
+      pageContent: truncateTextWithToken(item.content, MAX_NEED_RECALL_TOKEN),
       metadata: {
         ...item.metadata,
         title: item.metadata?.title as string,
@@ -75,7 +75,7 @@ export async function sortDocumentsBySimilarity(
   // 1. construct documents
   const documents: Document<NodeMeta>[] = comingDocuments.map((item) => {
     return {
-      pageContent: truncateText(item.document?.content || '', MAX_NEED_RECALL_TOKEN),
+      pageContent: truncateTextWithToken(item.document?.content || '', MAX_NEED_RECALL_TOKEN),
       metadata: {
         ...item.metadata,
         title: item.document?.title as string,
@@ -108,7 +108,7 @@ export async function sortResourcesBySimilarity(
   // 1. construct documents
   const documents: Document<NodeMeta>[] = resources.map((item) => {
     return {
-      pageContent: truncateText(item.resource?.content || '', MAX_NEED_RECALL_TOKEN),
+      pageContent: truncateTextWithToken(item.resource?.content || '', MAX_NEED_RECALL_TOKEN),
       metadata: {
         ...item.metadata,
         title: item.resource?.title as string,

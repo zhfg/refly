@@ -1,7 +1,10 @@
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { useCookie } from 'react-use';
 import { HocuspocusProvider } from '@hocuspocus/provider';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/types';
+import { Edge } from '@xyflow/react';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 interface CanvasContextType {
   canvasId: string;
@@ -21,14 +24,58 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     });
   }, [canvasId, token]);
 
+  const { setNodes, setEdges, setTitle } = useCanvasStoreShallow((state) => ({
+    setNodes: state.setNodes,
+    setEdges: state.setEdges,
+    setTitle: state.setTitle,
+  }));
+
+  // Subscribe to yjs document changes
   useEffect(() => {
-    return () => {
-      if (provider) {
-        provider.forceSync();
-        provider.destroy();
+    const ydoc = provider?.document;
+    if (!ydoc) return;
+
+    const title = ydoc.getText('title');
+    const nodesArray = ydoc.getArray<CanvasNode>('nodes');
+    const edgesArray = ydoc.getArray<Edge>('edges');
+
+    const titleObserverCallback = () => {
+      if (provider.status === 'connected') {
+        setTitle(canvasId, title.toJSON());
       }
     };
-  }, [canvasId, token]);
+
+    const nodesObserverCallback = () => {
+      if (provider.status === 'connected') {
+        const nodes = nodesArray.toJSON();
+        const uniqueNodesMap = new Map();
+        nodes.forEach((node) => uniqueNodesMap.set(node.id, node));
+        setNodes(canvasId, Array.from(uniqueNodesMap.values()));
+      }
+    };
+
+    const edgesObserverCallback = () => {
+      if (provider.status === 'connected') {
+        const edges = edgesArray.toJSON();
+        const uniqueEdgesMap = new Map();
+        edges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
+        setEdges(canvasId, Array.from(uniqueEdgesMap.values()));
+      }
+    };
+
+    title.observe(titleObserverCallback);
+    nodesArray.observe(nodesObserverCallback);
+    edgesArray.observe(edgesObserverCallback);
+
+    return () => {
+      title.unobserve(titleObserverCallback);
+      nodesArray.unobserve(nodesObserverCallback);
+      edgesArray.unobserve(edgesObserverCallback);
+
+      provider.forceSync();
+      provider.destroy();
+    };
+  }, [provider, canvasId, setNodes, setEdges, setTitle]);
 
   // Add null check before rendering
   if (!provider) {

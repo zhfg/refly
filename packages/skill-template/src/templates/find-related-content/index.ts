@@ -4,6 +4,7 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { AIMessage, BaseMessage, SystemMessage } from '@langchain/core/messages';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 import { ReflySearch } from '../../tools/refly-search';
+import { truncateSource } from '../../scheduler/utils/truncator';
 import {
   SearchResponse,
   Source,
@@ -151,14 +152,16 @@ export class FindRelatedContent extends BaseSkill {
       },
     }));
 
-    this.emitEvent(
-      {
-        event: 'structured_data',
-        content: JSON.stringify(sources),
-        structuredDataKey: 'sources',
-      },
-      config,
-    );
+    if (sources.length > 0) {
+      this.emitEvent(
+        {
+          event: 'structured_data',
+          content: JSON.stringify(truncateSource(sources)),
+          structuredDataKey: 'sources',
+        },
+        config,
+      );
+    }
 
     return { sources };
   };
