@@ -271,10 +271,11 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
       const updatedNodes = applyNodeChanges(changes, nodes);
+
       setNodes(canvasId, updatedNodes);
       syncNodesToYDoc(updatedNodes);
     },
-    [canvasId, setNodes, applyNodeChanges, syncNodesToYDoc],
+    [canvasId],
   );
 
   const onEdgesChange = useCallback(

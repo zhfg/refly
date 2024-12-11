@@ -1,6 +1,5 @@
 import { IconDown } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
-import { useResizeBox } from '@refly-packages/ai-workspace-common/hooks/use-resize-box';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
@@ -20,25 +19,10 @@ export const SkillDisplay = () => {
 
   const popupContainer = useMemo(() => getPopupContainer(), []);
 
-  const [containCnt, updateContainCnt] = useResizeBox({
-    getGroupSelector: () => skillDisplayRef.current,
-    getResizeSelector: () => popupContainer.querySelectorAll('.skill-item') as NodeListOf<HTMLElement>,
-    initialContainCnt: 3,
-    paddingSize: 0,
-    placeholderWidth: 25,
-  });
-
   const { data } = useListSkills();
   const { data: skills } = data || {};
 
-  useEffect(() => {
-    if (skills?.length > 0) {
-      const timer = setTimeout(() => {
-        updateContainCnt();
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [skills?.length, updateContainCnt]);
+  const containCnt = 3;
 
   const skillItems = useMemo(() => {
     return skills?.map((item, index) => (
