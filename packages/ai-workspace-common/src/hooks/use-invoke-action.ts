@@ -26,8 +26,7 @@ import { useListSkills } from '@refly-packages/ai-workspace-common/queries/queri
 
 export const useInvokeAction = () => {
   const { addNode, setNodeDataByEntity } = useCanvasControl();
-  const { resultMap, updateActionResult } = useActionResultStoreShallow((state) => ({
-    resultMap: state.resultMap,
+  const { updateActionResult } = useActionResultStoreShallow((state) => ({
     updateActionResult: state.updateActionResult,
   }));
 
@@ -48,10 +47,13 @@ export const useInvokeAction = () => {
         {
           title,
           entityId: resultId,
-          contentPreview: steps.map((s) => s.content).join('\n'),
+          contentPreview: steps
+            .map((s) => s.content)
+            ?.filter(Boolean)
+            ?.join('\n'),
           metadata: {
-            steps,
             status: payload.status,
+            artifacts: payload.steps?.flatMap((s) => s.artifacts),
           },
         },
       );

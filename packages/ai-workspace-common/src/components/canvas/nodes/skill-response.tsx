@@ -18,8 +18,8 @@ import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-pan
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
+import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
-import { SkillResponseNodePreview } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -32,16 +32,11 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
-  const { title, contentPreview, metadata, createdAt } = data;
-  const { status, modelName, steps } = metadata ?? {};
+  const { title, contentPreview: content, metadata, createdAt } = data;
+  const { status, modelName, artifacts } = metadata ?? {};
 
   // Get query and response content from result
   const query = title || t('copilot.chatHistory.loading');
-  const content = steps
-    ?.map((step) => step.content)
-    ?.filter(Boolean)
-    .join('\n\n');
-  const artifacts = steps?.flatMap((step) => step.artifacts);
 
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
@@ -146,7 +141,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
       <div
         className={`
           relative
-          w-[350px]
+          w-[280px]
           ${getNodeCommonStyles({ selected, isHovered })}
         `}
       >
@@ -190,11 +185,23 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
             <span className="text-sm font-medium leading-normal truncate">{query}</span>
           </div>
 
-          <Spin spinning={status === 'executing' && !contentPreview} style={{ height: 100 }}>
-            <SkillResponseNodePreview resultId={data.entityId} />
+          <Spin className="min-h-4" spinning={status === 'executing' && !content && !artifacts}>
+            <div className="flex items-center gap-2 mt-1">
+              {artifacts?.map((artifact) => (
+                <div
+                  key={artifact.entityId}
+                  className="border border-solid border-gray-300 rounded-sm px-2 py-1 w-full flex items-center gap-1"
+                >
+                  {getArtifactIcon(artifact, 'text-gray-500')}
+                  <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">{artifact.title}</span>
+                </div>
+              ))}
+            </div>
+
+            <Markdown content={content} className="text-xs"></Markdown>
           </Spin>
 
-          <div className="absolute bottom-2 left-3 text-[10px] text-gray-400">
+          <div className="text-xs text-gray-400">
             {time(createdAt, language as LOCALE)
               ?.utc()
               ?.fromNow()}
