@@ -444,6 +444,16 @@ const translations = {
       showLaunchpad: '显示 AI 提问框',
       editTitle: '编辑画布标题',
       editTitlePlaceholder: '请输入画布标题',
+      mouse: '鼠标模式',
+      touchpad: '触控板模式',
+      tooltip: {
+        zoom: '缩放百分比',
+        zoomIn: '放大',
+        zoomOut: '缩小',
+        fitView: '适应画布',
+        layout: '自动布局',
+        mode: '交互模式',
+      },
     },
     launchpad: {
       pinChat: '固定对话',

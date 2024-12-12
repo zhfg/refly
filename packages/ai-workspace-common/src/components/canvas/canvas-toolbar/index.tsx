@@ -14,6 +14,7 @@ import { SourceListModal } from '@refly-packages/ai-workspace-common/components/
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
+import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -128,14 +129,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     >
       {tools.map((tool, index) =>
         tool.type === 'button' ? (
-          <Tooltip
-            key={index}
-            title={tool.tooltip}
-            placement="right"
-            mouseEnterDelay={0.5}
-            overlayClassName="!px-2 !py-1"
-            arrow={false}
-          >
+          <TooltipWrapper key={index} tooltip={tool.tooltip}>
             <Button
               type="text"
               onClick={(event) => handleToolSelect(event, tool.value)}
@@ -149,16 +143,10 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
               `}
               icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
             />
-          </Tooltip>
+          </TooltipWrapper>
         ) : (
           <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm} offset={12}>
-            <Tooltip
-              title={tool.tooltip}
-              placement="right"
-              mouseEnterDelay={0.5}
-              overlayClassName="!px-2 !py-1"
-              arrow={false}
-            >
+            <TooltipWrapper key={index} tooltip={tool.tooltip}>
               <Button
                 type="text"
                 onClick={(event) => handleToolSelect(event, tool.value)}
@@ -172,7 +160,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
                 `}
                 icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
               />
-            </Tooltip>
+            </TooltipWrapper>
           </SearchList>
         ),
       )}

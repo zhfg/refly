@@ -298,7 +298,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       setNodes(canvasId, updatedNodes);
       throttledSyncNodesToYDoc(updatedNodes);
     },
-    [canvasId, setNodes, throttledSyncNodesToYDoc],
+    [canvasId],
   );
 
   const onEdgesChange = useCallback(

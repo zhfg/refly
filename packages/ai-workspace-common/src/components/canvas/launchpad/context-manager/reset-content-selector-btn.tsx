@@ -16,7 +16,7 @@ export const ResetContentSelectorBtn = () => {
   const { handleReset } = useSelectedMark();
 
   return (
-    <Tooltip title={t('knowledgeBase.context.clearContext')} getPopupContainer={getPopupContainer}>
+    <Tooltip title={t('knowledgeBase.context.clearContext')} getPopupContainer={getPopupContainer} destroyTooltipOnHide>
       <Button
         size="small"
         type="default"

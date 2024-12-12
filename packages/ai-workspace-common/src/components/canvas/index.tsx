@@ -1,14 +1,5 @@
 import { useCallback, useMemo, useEffect, useState } from 'react';
-import {
-  ReactFlow,
-  Background,
-  Controls,
-  MiniMap,
-  ReactFlowProvider,
-  Node,
-  SelectionMode,
-  useReactFlow,
-} from '@xyflow/react';
+import { ReactFlow, Background, MiniMap, ReactFlowProvider, Node, SelectionMode, useReactFlow } from '@xyflow/react';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
@@ -25,7 +16,7 @@ import { BigSearchModal } from '@refly-packages/ai-workspace-common/components/s
 import { CanvasListModal } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal';
 import { LibraryModal } from '@refly-packages/ai-workspace-common/components/workspace/library-modal';
 import { useCanvasNodesStore } from '@refly-packages/ai-workspace-common/stores/canvas-nodes';
-
+import { LayoutControl } from './layout-control';
 const selectionStyles = `
   .react-flow__selection {
     background: rgba(0, 150, 143, 0.03) !important;
@@ -42,12 +33,15 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, addNode } =
     useCanvasControl(canvasId);
 
-  const { pinnedNodes, showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow((state) => ({
-    pinnedNodes: state.data[canvasId]?.pinnedNodes,
-    showPreview: state.showPreview,
-    showLaunchpad: state.showLaunchpad,
-    showMaxRatio: state.showMaxRatio,
-  }));
+  const { pinnedNodes, showPreview, showLaunchpad, showMaxRatio, interactionMode, setInteractionMode } =
+    useCanvasStoreShallow((state) => ({
+      pinnedNodes: state.data[canvasId]?.pinnedNodes,
+      showPreview: state.showPreview,
+      showLaunchpad: state.showLaunchpad,
+      showMaxRatio: state.showMaxRatio,
+      interactionMode: state.interactionMode,
+      setInteractionMode: state.setInteractionMode,
+    }));
 
   const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } = useSiderStoreShallow(
     (state) => ({
@@ -61,6 +55,10 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const reactFlowInstance = useReactFlow();
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
+
+  const toggleInteractionMode = (mode: 'mouse' | 'touchpad') => {
+    setInteractionMode(mode);
+  };
 
   useEffect(() => {
     // Only run fitView if we have nodes and this is the initial render
@@ -82,15 +80,13 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     style: EDGE_STYLES.default,
   };
 
-  const defaultViewport = {
-    x: 0,
-    y: 0,
-    zoom: 0.75,
-  };
-
   const flowConfig = useMemo(
     () => ({
-      defaultViewport,
+      defaultViewport: {
+        x: 0,
+        y: 0,
+        zoom: 0.75,
+      },
       fitViewOptions: {
         padding: 0.2,
         minZoom: 0.1,
@@ -98,8 +94,9 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         duration: 200,
       },
       defaultEdgeOptions,
+      // elevateNodesOnSelect: false,
     }),
-    [],
+    [mode],
   );
 
   const onNodeClick = useCallback(
@@ -152,11 +149,13 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         <style>{selectionStyles}</style>
         <ReactFlow
           {...flowConfig}
-          panOnScroll={mode !== 'pointer'}
+          panOnScroll={interactionMode === 'mouse'}
+          panOnDrag={mode !== 'pointer' && interactionMode === 'touchpad'}
+          zoomOnScroll={interactionMode === 'mouse'}
+          zoomOnPinch={interactionMode === 'touchpad'}
           selectNodesOnDrag={mode === 'pointer'}
           selectionMode={mode === 'pointer' ? SelectionMode.Partial : SelectionMode.Full}
           selectionOnDrag={mode === 'pointer'}
-          panOnDrag={mode !== 'pointer'}
           nodeTypes={nodeTypes}
           nodes={nodes}
           edges={edges}
@@ -175,36 +174,9 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             }}
             className="bg-white/80 w-[140px] h-[92px] !mb-[46px] !ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
           />
-          <Controls
-            position="bottom-left"
-            style={{
-              marginBottom: '8px',
-              marginLeft: '10px',
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '2px',
-              padding: '2px',
-              border: '1px solid rgba(16, 24, 40, 0.0784)',
-              boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              height: '36px',
-            }}
-            className="[&>button]:border-0 [&>button]:border-r [&>button]:border-gray-200 [&>button:last-child]:border-0 [&>button]:w-[32px] [&>button]:h-[32px] [&>button]:rounded-lg [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:transition-colors [&>button]:duration-200"
-            showZoom={true}
-            showFitView={true}
-            showInteractive={true}
-            fitViewOptions={{
-              padding: 10,
-              minZoom: 0.1,
-              maxZoom: 2,
-              duration: 200,
-            }}
-          />
         </ReactFlow>
+
+        <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} />
 
         <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
           <LaunchPad visible={showLaunchpad} />

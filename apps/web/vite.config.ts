@@ -55,28 +55,23 @@ export default defineConfig(({ mode }) => {
       commonjsOptions: {
         transformMixedEsModules: true,
       },
-      sourcemap: false,
+      sourcemap: isDev,
       minify: "terser",
       terserOptions: {
         compress: {
-          drop_console: true,
-          drop_debugger: true,
+          drop_console: !isDev,
+          drop_debugger: !isDev,
         },
       },
     },
-    // esbuild: {
-    //   drop: ["console", "debugger"],
-    // },
+    esbuild: {
+      drop: isDev ? [] : ["console", "debugger"],
+    },
     server: {
       fs: {
         strict: false,
         allow: [searchForWorkspaceRoot(process.cwd())],
       },
     },
-    ...(isDev && {
-      build: {
-        sourcemap: true,
-      },
-    }),
   } as UserConfig
 })

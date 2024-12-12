@@ -80,7 +80,10 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
               {!readonly && (
                 <>
                   <Divider type="vertical" className="h-4" />
-                  <Tooltip title={item?.isPreview ? t('canvas.launchpad.pinChat') : t('canvas.launchpad.unpinChat')}>
+                  <Tooltip
+                    destroyTooltipOnHide
+                    title={item?.isPreview ? t('canvas.launchpad.pinChat') : t('canvas.launchpad.unpinChat')}
+                  >
                     <Button
                       type="text"
                       size="small"
@@ -98,7 +101,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
                     />
                   </Tooltip>
 
-                  <Tooltip title={t('canvas.launchpad.removeChat')}>
+                  <Tooltip destroyTooltipOnHide title={t('canvas.launchpad.removeChat')}>
                     <Button
                       type="text"
                       size="small"

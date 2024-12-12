@@ -452,6 +452,16 @@ const translations = {
       showLaunchpad: 'Show Ask AI',
       editTitle: 'Edit Canvas Title',
       editTitlePlaceholder: 'Please enter the title of the canvas',
+      mouse: 'Mouse Mode',
+      touchpad: 'Touchpad Mode',
+      tooltip: {
+        zoom: 'Zoom Percentage',
+        zoomIn: 'Zoom In',
+        zoomOut: 'Zoom Out',
+        fitView: 'Fit View',
+        layout: 'Auto Layout',
+        mode: 'Interaction Mode',
+      },
     },
     launchpad: {
       pinChat: 'Pin chat',
