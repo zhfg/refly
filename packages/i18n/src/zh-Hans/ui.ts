@@ -61,7 +61,7 @@ const translations = {
   },
   editor: {
     placeholder: {
-      default: "写点什么，或按空格键或 ++ 激活 AI，按 '/' 键激活命令",
+      default: "写点什么，或按空格键激活 AI，按 '/' 键激活命令",
     },
     aiSelector: {
       thinking: 'AI 思考中',
@@ -1339,6 +1339,7 @@ const translations = {
       current: '当前',
       documentSelection: '文档选中',
       resourceSelection: '资源选中',
+      selection: '已选中',
       skillResponseSelection: '技能响应选中',
       documentCursorSelection: '文档光标选中内容',
       documentBeforeCursorSelection: '文档光标前内容',

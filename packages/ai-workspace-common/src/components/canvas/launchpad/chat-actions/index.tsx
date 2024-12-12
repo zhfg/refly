@@ -96,26 +96,29 @@ export const ChatActions = (props: ChatActionsProps) => {
         <AISettingsDropdown collapsed={containerWidth < COLLAPSE_WIDTH} briefMode={false} />
       </div>
       <div className="right-actions">
-        {messageStateStore?.pending ? <Button size="small" icon={<IconPause />} onClick={handleAbort} /> : null}
+        {messageStateStore?.pending ? (
+          <Button size="small" onClick={handleAbort}>
+            <IconPause />
+          </Button>
+        ) : null}
+
         <Tooltip destroyTooltipOnHide title={t('copilot.chatActions.recommendQuestions')}>
-          <Button
-            size="small"
-            icon={<PiMagicWand />}
-            onClick={() => setRecommendQuestionsOpen(!recommendQuestionsOpen)}
-            className="mr-0"
-          />
+          <Button size="small" onClick={() => setRecommendQuestionsOpen(!recommendQuestionsOpen)} className="mr-0">
+            <PiMagicWand />
+          </Button>
         </Tooltip>
+
         {messageStateStore?.pending && !isWeb ? null : (
           <Button
             size="small"
             type="primary"
-            icon={<IconSend />}
             loading={messageStateStore?.pending}
             disabled={!canSendMessage}
             className="text-xs gap-1"
-            onClick={handleSendMessage}
+            onClick={() => handleSendMessage()}
           >
-            {t('copilot.chatActions.send')}
+            <IconSend />
+            <span>{t('copilot.chatActions.send')}</span>
           </Button>
         )}
       </div>

@@ -69,6 +69,10 @@ export const ContextItem = ({
     </div>
   );
 
+  const isSelection = item?.data?.metadata?.sourceType?.toLowerCase()?.includes('selection');
+  const sourceType = isSelection ? 'selection' : item?.type;
+  console.log('sourceType', sourceType, item, isSelection);
+
   return (
     <Popover
       arrow={false}
@@ -102,7 +106,7 @@ export const ContextItem = ({
           </span>
           <span className="item-type text-gray-500 mr-1">
             {item.isCurrentContext ? t('copilot.contextItem.current') : ''}
-            {/* {t(`copilot.contextItem.${item?.data?.metadata?.sourceType || item?.type}`)} */}
+            {t(`copilot.contextItem.${sourceType}`)}
           </span>
           {!canNotRemove && (
             <IconClose

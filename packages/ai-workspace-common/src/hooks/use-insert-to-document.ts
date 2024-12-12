@@ -24,10 +24,8 @@ export const useInsertToDocument = (resultId: string) => {
   };
 
   return useCallback(
-    async (operation: EditorOperation = 'insertBlow') => {
+    async (operation: EditorOperation = 'insertBlow', content?: string) => {
       const { activeDocumentId, documentStates } = useDocumentStore.getState();
-      const { resultMap } = useActionResultStore.getState();
-      const result = resultMap?.[resultId] || (await fetchActionResult(resultId));
 
       if (!activeDocumentId) {
         message.warning(t('knowledgeBase.context.noActiveDocument'));
@@ -40,18 +38,30 @@ export const useInsertToDocument = (resultId: string) => {
         return;
       }
 
-      const answerQuestionStep = result?.steps?.find((step) => step?.name === 'answerQuestion');
-      if (!answerQuestionStep?.content) {
-        message.warning(t('knowledgeBase.context.noContent'));
-        return;
-      }
+      let parsedContent = '';
 
-      // Parse content with citations
-      const sources =
-        typeof answerQuestionStep?.structuredData?.['sources'] === 'string'
-          ? safeParseJSON(answerQuestionStep?.structuredData?.['sources'])
-          : (answerQuestionStep?.structuredData?.['sources'] as Source[]);
-      const parsedContent = parseMarkdownCitationsAndCanvasTags(answerQuestionStep?.content || '', sources);
+      // If content is provided directly, use it
+      if (content) {
+        parsedContent = parseMarkdownCitationsAndCanvasTags(content, []);
+      } else {
+        // Fallback to fetching from API if no content provided
+        const { resultMap } = useActionResultStore.getState();
+        const result = resultMap?.[resultId] || (await fetchActionResult(resultId));
+
+        const answerQuestionStep = result?.steps?.find((step) =>
+          ['answerGeneration', 'answerQuestion'].includes(step?.name),
+        );
+        if (!answerQuestionStep?.content) {
+          message.warning(t('knowledgeBase.context.noContent'));
+          return;
+        }
+
+        const sources =
+          typeof answerQuestionStep?.structuredData?.['sources'] === 'string'
+            ? safeParseJSON(answerQuestionStep?.structuredData?.['sources'])
+            : (answerQuestionStep?.structuredData?.['sources'] as Source[]);
+        parsedContent = parseMarkdownCitationsAndCanvasTags(answerQuestionStep?.content || '', sources);
+      }
 
       // Handle insert or replace operations
       const selection = editor.view?.state?.selection;

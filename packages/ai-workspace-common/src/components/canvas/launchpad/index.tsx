@@ -184,7 +184,7 @@ export const LaunchPad: React.FC<LaunchPadProps> = ({ visible = true }) => {
       <div className="ai-copilot-operation-body">
         <SkillDisplay />
         <RecommendQuestionsPanel isOpen={recommendQuestionsOpen} onClose={() => setRecommendQuestionsOpen(false)} />
-        <ChatInput form={form} handleSendMessage={handleSendMessage} handleAbort={handleAbort} />
+        <ChatInput form={form} handleSendMessage={() => handleSendMessage()} handleAbort={handleAbort} />
       </div>
     </div>
   );
