@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Button, message } from 'antd';
-import { SelectionBubble } from '@refly-packages/ai-workspace-common/components/selection-bubble';
+import { SelectionBubble } from './selection-bubble';
 import { useTranslation } from 'react-i18next';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { useSelectionContext } from '@refly-packages/ai-workspace-common/hooks/use-selection-context';
+import { useSelectionContext } from './use-selection-context';
 import { MessageSquareDiff } from 'lucide-react';
 
 interface SelectionContextProps {
@@ -17,13 +17,15 @@ export const SelectionContext: React.FC<SelectionContextProps> = ({ containerCla
     containerClass,
   });
 
-  const handleAddToContext = (text: string) => {
-    // Create a mark object
-    const node: CanvasNode = getNodeData(text);
-
-    addToContext(node);
-    message.success(t('knowledgeBase.context.addToContextSuccess'));
-  };
+  const handleAddToContext = useCallback(
+    (text: string) => {
+      // Create a mark object
+      const node: CanvasNode = getNodeData(text);
+      addToContext(node);
+      message.success(t('knowledgeBase.context.addToContextSuccess'));
+    },
+    [getNodeData, addToContext, t],
+  );
 
   return (
     <SelectionBubble containerClass={containerClass} placement="top" offset={[0, 10]}>
@@ -36,13 +38,23 @@ export const SelectionContext: React.FC<SelectionContextProps> = ({ containerCla
           borderRadius: '8px',
           padding: '2px 4px',
         }}
-        onClick={() => handleAddToContext(selectedText)}
       >
         <Button
           type="text"
           size="small"
           className="text-[#00968F] hover:text-[#00968F]/80"
           icon={<MessageSquareDiff size={12} className="text-[#00968F]" />}
+          onMouseDown={(e) => {
+            // Prevent selection from being cleared
+            e.preventDefault();
+            e.stopPropagation();
+            handleAddToContext(selectedText);
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            // handleAddToContext(selectedText);
+          }}
         >
           <span className="font-medium text-xs text-[#00968F]">{t('knowledgeBase.context.addToContext')}</span>
         </Button>

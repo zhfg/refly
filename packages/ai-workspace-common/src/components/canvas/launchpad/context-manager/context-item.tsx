@@ -102,7 +102,7 @@ export const ContextItem = ({
           </span>
           <span className="item-type text-gray-500 mr-1">
             {item.isCurrentContext ? t('copilot.contextItem.current') : ''}
-            {t(`copilot.contextItem.${item?.data?.metadata?.sourceType || item?.type}`)}
+            {/* {t(`copilot.contextItem.${item?.data?.metadata?.sourceType || item?.type}`)} */}
           </span>
           {!canNotRemove && (
             <IconClose

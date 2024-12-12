@@ -22,7 +22,7 @@ import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/com
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { SelectionContext } from '@refly-packages/ai-workspace-common/components/selection-context';
+import { SelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/selection-context';
 import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
 
 interface ResourceViewProps {
