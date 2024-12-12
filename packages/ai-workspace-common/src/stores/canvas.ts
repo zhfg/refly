@@ -1,5 +1,7 @@
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
 import { useShallow } from 'zustand/react/shallow';
+import { persist } from 'zustand/middleware';
 import { Edge } from '@xyflow/react';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
@@ -39,110 +41,72 @@ const defaultCanvasState: () => CanvasData = () => ({
   pinnedNodes: [],
 });
 
-export const useCanvasStore = create<CanvasState>()((set) => ({
-  data: {},
-  currentCanvasId: null,
-  showPreview: true,
-  showMaxRatio: false,
-  showLaunchpad: true,
+export const useCanvasStore = create<CanvasState>()(
+  persist(
+    immer((set) => ({
+      data: {},
+      currentCanvasId: null,
+      showPreview: true,
+      showMaxRatio: false,
+      showLaunchpad: true,
 
-  deleteCanvasData: (canvasId) =>
-    set((state) => ({
-      data: Object.fromEntries(Object.entries(state.data).filter(([key]) => key !== canvasId)),
+      deleteCanvasData: (canvasId) =>
+        set((state) => {
+          delete state.data[canvasId];
+        }),
+      setCurrentCanvasId: (canvasId) =>
+        set((state) => {
+          state.currentCanvasId = canvasId;
+        }),
+      setShowPreview: (show) =>
+        set((state) => {
+          state.showPreview = show;
+        }),
+      setShowMaxRatio: (show) =>
+        set((state) => {
+          state.showMaxRatio = show;
+        }),
+      setShowLaunchpad: (show) =>
+        set((state) => {
+          state.showLaunchpad = show;
+        }),
+      setNodes: (canvasId, nodes) =>
+        set((state) => {
+          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId].nodes = nodes;
+        }),
+      setEdges: (canvasId, edges) =>
+        set((state) => {
+          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId].edges = edges;
+        }),
+      setTitle: (canvasId, title) =>
+        set((state) => {
+          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId].title = title;
+        }),
+      setMode: (canvasId, mode) =>
+        set((state) => {
+          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId].mode = mode;
+        }),
+      addPinnedNode: (canvasId, node) =>
+        set((state) => {
+          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId].pinnedNodes.unshift(node);
+        }),
+      removePinnedNode: (canvasId, node) =>
+        set((state) => {
+          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId].pinnedNodes = state.data[canvasId].pinnedNodes.filter((n) => n.id !== node.id);
+        }),
     })),
-
-  setCurrentCanvasId: (canvasId) =>
-    set(() => ({
-      currentCanvasId: canvasId,
-    })),
-
-  setShowPreview: (show) =>
-    set(() => ({
-      showPreview: show,
-    })),
-
-  setShowMaxRatio: (show) =>
-    set(() => ({
-      showMaxRatio: show,
-    })),
-
-  setShowLaunchpad: (show) =>
-    set(() => ({
-      showLaunchpad: show,
-    })),
-
-  setNodes: (canvasId, nodes) =>
-    set((state) => ({
-      data: {
-        ...state.data,
-        [canvasId]: {
-          ...(state.data[canvasId] ?? defaultCanvasState()),
-          nodes,
-        },
-      },
-    })),
-
-  setEdges: (canvasId, edges) =>
-    set((state) => ({
-      data: {
-        ...state.data,
-        [canvasId]: {
-          ...(state.data[canvasId] ?? defaultCanvasState()),
-          edges,
-        },
-      },
-    })),
-
-  setTitle: (canvasId, title) =>
-    set((state) => ({
-      data: {
-        ...state.data,
-        [canvasId]: {
-          ...(state.data[canvasId] ?? defaultCanvasState()),
-          title,
-        },
-      },
-    })),
-
-  setMode: (canvasId, mode) =>
-    set((state) => ({
-      data: {
-        ...state.data,
-        [canvasId]: {
-          ...(state.data[canvasId] ?? defaultCanvasState()),
-          mode,
-        },
-      },
-    })),
-
-  addPinnedNode: (canvasId, node) =>
-    set((state) => {
-      const currentData = state.data[canvasId] ?? defaultCanvasState();
-      return {
-        data: {
-          ...state.data,
-          [canvasId]: {
-            ...currentData,
-            pinnedNodes: [node, ...currentData.pinnedNodes],
-          },
-        },
-      };
-    }),
-
-  removePinnedNode: (canvasId, node) =>
-    set((state) => {
-      const currentData = state.data[canvasId] ?? defaultCanvasState();
-      return {
-        data: {
-          ...state.data,
-          [canvasId]: {
-            ...currentData,
-            pinnedNodes: currentData.pinnedNodes.filter((n) => n.id !== node.id),
-          },
-        },
-      };
-    }),
-}));
+    {
+      name: 'canvas-storage',
+      partialize: (state) => ({ currentCanvasId: state.currentCanvasId }),
+    },
+  ),
+);
 
 export const useCanvasStoreShallow = <T>(selector: (state: CanvasState) => T) => {
   return useCanvasStore(useShallow(selector));
