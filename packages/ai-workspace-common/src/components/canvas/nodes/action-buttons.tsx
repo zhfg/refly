@@ -220,6 +220,7 @@ export const ActionButtons = memo(
           }}
           trigger={['click', 'hover']}
           placement="bottomRight"
+          destroyPopupOnHide
           overlayClassName="min-w-[160px] w-max"
           getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
           dropdownRender={(menu) => (
