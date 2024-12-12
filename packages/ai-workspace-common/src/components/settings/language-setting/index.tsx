@@ -23,7 +23,7 @@ export const LanguageSetting = () => {
       <div className="language-setting-content">
         <div className="language-setting-content-item">
           <Typography.Title level={5}>{t('settings.language.uiLocale.title')}</Typography.Title>
-          <UILocaleList width={600}>
+          <UILocaleList width={200}>
             <Button>
               {t('language')} <IconDown />
             </Button>
@@ -35,7 +35,7 @@ export const LanguageSetting = () => {
           <Typography.Paragraph type="secondary">
             {t('settings.language.outputLocale.description')}
           </Typography.Paragraph>
-          <OutputLocaleList width={600} position="bl">
+          <OutputLocaleList width={200} position="bl">
             <Button>
               {localeToLanguageName?.[uiLocale]?.[outputLocale]} <IconDown />
             </Button>

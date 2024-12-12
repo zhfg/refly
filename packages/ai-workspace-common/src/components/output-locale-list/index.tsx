@@ -25,7 +25,6 @@ export const OutputLocaleList = (props: { children?: any; width?: number; positi
     userStore.setLocalSettings({ ...localSettings, outputLocale: lng });
     localStorage.setItem('refly-local-settings', safeStringifyJSON({ ...localSettings, outputLocale: lng }));
 
-    // 不阻塞写回用户配置
     const { data: res, error } = await getClient().updateSettings({
       body: { outputLocale: lng, uiLocale: localSettings.uiLocale },
     });
@@ -37,7 +36,8 @@ export const OutputLocaleList = (props: { children?: any; width?: number; positi
 
   const dropList: MenuProps['items'] = enLocale.map((item: OutputLocale) => ({
     key: item,
-    label: <div onClick={() => changeLang(item)}>{localeToLanguageName?.[uiLocale]?.[item]}</div>,
+    label: localeToLanguageName?.[uiLocale]?.[item],
+    onClick: () => changeLang(item),
   }));
 
   const displayLocale =
