@@ -22,29 +22,39 @@ export const useSelectionContext = ({ containerClass, containerRef, enabled = tr
     if (!enabled) return;
 
     const selection = window.getSelection();
-    if (!selection) return;
-
-    const range = selection.getRangeAt(0);
-    const text = getSelectionNodesMarkdown();
-
-    if (!text || selection.isCollapsed) {
+    if (!selection || !selection.rangeCount) {
       setIsSelecting(false);
       setSelectedText('');
       return;
     }
 
-    // 优先使用 ref 检查容器
-    const container =
-      containerRef?.current || (containerClass ? document.querySelector(`.${containerClass}`) : document.body);
+    try {
+      const range = selection.getRangeAt(0);
+      const text = getSelectionNodesMarkdown();
 
-    if (!container || !container.contains(range.commonAncestorContainer)) {
+      if (!text || selection.isCollapsed) {
+        setIsSelecting(false);
+        setSelectedText('');
+        return;
+      }
+
+      // 优先使用 ref 检查容器
+      const container =
+        containerRef?.current || (containerClass ? document.querySelector(`.${containerClass}`) : document.body);
+
+      if (!container || !container.contains(range.commonAncestorContainer)) {
+        setIsSelecting(false);
+        setSelectedText('');
+        return;
+      }
+
+      setSelectedText(text);
+      setIsSelecting(true);
+    } catch (error) {
+      console.error('Selection error:', error);
       setIsSelecting(false);
       setSelectedText('');
-      return;
     }
-
-    setSelectedText(text);
-    setIsSelecting(true);
   }, [containerClass, containerRef, enabled]);
 
   // Add selected text to context

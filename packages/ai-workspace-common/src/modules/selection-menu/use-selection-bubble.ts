@@ -26,7 +26,11 @@ export const useSelectionBubble = ({
     if (!enabled) return;
 
     const selection = window.getSelection();
-    if (!selection) return;
+    if (!selection || !selection.rangeCount) {
+      setIsVisible(false);
+      setSelectedText('');
+      return;
+    }
 
     const text = selection.toString().trim();
 
@@ -37,28 +41,33 @@ export const useSelectionBubble = ({
       return;
     }
 
-    const range = selection.getRangeAt(0);
-    const selectionContainer = range.commonAncestorContainer;
+    try {
+      const range = selection.getRangeAt(0);
+      const selectionContainer = range.commonAncestorContainer;
 
-    // 优先使用 ref，如果没有则使用 class 选择器
-    const targetContainer =
-      containerRef?.current || (containerClass ? document.querySelector(`.${containerClass}`) : document.body);
+      // 优先使用 ref，如果没有则使用 class 选择器
+      const targetContainer =
+        containerRef?.current || (containerClass ? document.querySelector(`.${containerClass}`) : document.body);
 
-    if (!targetContainer) return;
+      if (!targetContainer) return;
 
-    // 检查选择是否在目标容器内
-    const isWithinContainer = targetContainer.contains(selectionContainer);
-    console.log('Is within container:', isWithinContainer, 'Container:', targetContainer);
+      // 检查选择是否在目标容器内
+      const isWithinContainer = targetContainer.contains(selectionContainer);
 
-    if (!isWithinContainer) {
+      if (!isWithinContainer) {
+        setIsVisible(false);
+        setSelectedText('');
+        return;
+      }
+
+      setSelectedText(text);
+      setIsVisible(true);
+      onSelect?.(text);
+    } catch (error) {
+      console.error('Selection error:', error);
       setIsVisible(false);
       setSelectedText('');
-      return;
     }
-
-    setSelectedText(text);
-    setIsVisible(true);
-    onSelect?.(text);
   }, [containerClass, containerRef, enabled, onSelect]);
 
   // 处理点击外部
