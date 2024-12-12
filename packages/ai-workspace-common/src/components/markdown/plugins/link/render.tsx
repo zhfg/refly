@@ -9,13 +9,19 @@ function ATag({ ...props }, sources: Source[]) {
     try {
       const num = Number(props.href);
       if (!Number.isNaN(num) && num > sources.length) {
-        console.log('source not found', props);
+        // console.log('source not found', props);
         return <></>;
       }
     } catch (err) {}
 
+    // Add security check for href
+    const href = props.href.toLowerCase();
+    if (href.startsWith('javascript:')) {
+      return <span>{props.children}</span>;
+    }
+
     return (
-      <a href={props.href} target="_blank" className="no-underline text-[#00968F]">
+      <a href={props.href} target="_blank" rel="noopener noreferrer" className="no-underline text-[#00968F]">
         {props.children}
       </a>
     );

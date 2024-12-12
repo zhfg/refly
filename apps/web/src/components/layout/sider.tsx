@@ -1,4 +1,4 @@
-import { useState } from "react"
+import React, { useState } from "react"
 import {
   Avatar,
   Button,
@@ -293,17 +293,15 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
             {siderSections.map((section, index) => (
               <div key={`section-${index}`} className="sider-section">
                 {section.map((item, itemIndex) => (
-                  <>
+                  <React.Fragment key={item.key}>
                     <SubMenu
                       key={item.key}
                       title={
-                        <>
-                          <MenuItemContent
-                            type={item.key}
-                            icon={item.icon}
-                            title={t(`loggedHomePage.siderMenu.${item.name}`)}
-                          />
-                        </>
+                        <MenuItemContent
+                          type={item.key}
+                          icon={item.icon}
+                          title={t(`loggedHomePage.siderMenu.${item.name}`)}
+                        />
                       }>
                       {item.key === "Canvas" && (
                         <>
@@ -327,16 +325,19 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                           {isLoadingCanvas ? (
                             <>
                               <Skeleton.Input
+                                key="skeleton-1"
                                 active
                                 size="small"
                                 style={{ width: 204 }}
                               />
                               <Skeleton.Input
+                                key="skeleton-2"
                                 active
                                 size="small"
                                 style={{ marginTop: 8, width: 204 }}
                               />
                               <Skeleton.Input
+                                key="skeleton-3"
                                 active
                                 size="small"
                                 style={{ marginTop: 8, width: 204 }}
@@ -400,7 +401,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                         }}
                       />
                     )}
-                  </>
+                  </React.Fragment>
                 ))}
               </div>
             ))}

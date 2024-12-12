@@ -115,7 +115,7 @@ export const NodeSelector = ({ open, onOpenChange }: NodeSelectorProps) => {
       className="flex items-center"
       overlayClassName="editor-node-selector-popover"
     >
-      <Button ghost type="text" className="gap-0.5 flex items-center space-x-1 px-2 rounded-none">
+      <Button type="text" className="gap-0.5 flex items-center space-x-1 px-2 rounded-none">
         <activeItem.icon className="h-4 w-4" />
         <ChevronDown className="h-3 w-3" />
       </Button>

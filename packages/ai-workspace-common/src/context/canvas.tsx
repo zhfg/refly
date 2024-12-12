@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import { useCookie } from 'react-use';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/types';
@@ -15,16 +15,19 @@ const CanvasContext = createContext<CanvasContextType | null>(null);
 
 export const CanvasProvider = ({ canvasId, children }: { canvasId: string; children: React.ReactNode }) => {
   const [token] = useCookie('_refly_ai_sid');
+  // Use ref to store provider instance
+  const providerRef = useRef<HocuspocusProvider | null>(null);
 
   const provider = useMemo(() => {
-    return new HocuspocusProvider({
-      url: getWsServerOrigin(),
-      name: canvasId,
-      token,
-    });
+    if (!providerRef.current) {
+      providerRef.current = new HocuspocusProvider({
+        url: getWsServerOrigin(),
+        name: canvasId,
+        token,
+      });
+    }
+    return providerRef.current;
   }, [canvasId, token]);
-
-  console.log('provider', provider.status);
 
   const { setNodes, setEdges, setTitle } = useCanvasStoreShallow((state) => ({
     setNodes: state.setNodes,
@@ -34,8 +37,10 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
 
   // Subscribe to yjs document changes
   useEffect(() => {
-    const ydoc = provider?.document;
+    const currentProvider = providerRef.current;
+    if (!currentProvider) return;
 
+    const ydoc = currentProvider.document;
     if (!ydoc) return;
 
     const title = ydoc.getText('title');
@@ -59,15 +64,14 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
 
     // 设置观察者回调
     const titleObserverCallback = () => {
-      if (provider.status === 'connected') {
+      if (currentProvider.status === 'connected') {
         setTitle(canvasId, title.toJSON());
       }
     };
 
     const nodesObserverCallback = () => {
-      if (provider.status === 'connected') {
+      if (currentProvider.status === 'connected') {
         const nodes = nodesArray.toJSON();
-        console.log('nodes', nodes);
         const uniqueNodesMap = new Map();
         nodes.forEach((node) => uniqueNodesMap.set(node.id, node));
         setNodes(canvasId, Array.from(uniqueNodesMap.values()));
@@ -75,7 +79,7 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     };
 
     const edgesObserverCallback = () => {
-      if (provider.status === 'connected') {
+      if (currentProvider.status === 'connected') {
         const edges = edgesArray.toJSON();
         const uniqueEdgesMap = new Map();
         edges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
@@ -92,10 +96,11 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       nodesArray.unobserve(nodesObserverCallback);
       edgesArray.unobserve(edgesObserverCallback);
 
-      provider.forceSync();
-      provider.destroy();
+      currentProvider.forceSync();
+      currentProvider.destroy();
+      providerRef.current = null;
     };
-  }, [provider, canvasId, setNodes, setEdges, setTitle]);
+  }, [canvasId, setNodes, setEdges, setTitle]);
 
   // Add null check before rendering
   if (!provider) {

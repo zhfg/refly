@@ -125,20 +125,14 @@ export const LayoutControl: React.FC<LayoutControlProps> = ({ mode, changeMode }
   return (
     <div className="absolute bottom-2 left-2.5 px-1 h-[32px] border-box flex items-center justify-center bg-white rounded-md shadow-md">
       {buttons.map((button) => (
-        <>
-          <Tooltip key={button.key} title={t(`canvas.toolbar.tooltip.${button.key}`)} arrow={false}>
-            <Button
-              key={`button-${button.key}`}
-              type="text"
-              className={button.className}
-              onClick={button.onClick}
-              disabled={button.disabled}
-            >
+        <React.Fragment key={button.key}>
+          <Tooltip title={t(`canvas.toolbar.tooltip.${button.key}`)} arrow={false}>
+            <Button type="text" className={button.className} onClick={button.onClick} disabled={button.disabled}>
               {button.children}
             </Button>
           </Tooltip>
-          {button.key === 'zoomOut' && <Divider key={`divider-${button.key}`} type="vertical" className="h-full" />}
-        </>
+          {button.key === 'zoomOut' && <Divider type="vertical" className="h-full" />}
+        </React.Fragment>
       ))}
 
       <Dropdown
