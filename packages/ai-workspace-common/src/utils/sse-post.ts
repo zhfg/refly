@@ -1,6 +1,5 @@
 import { getServerOrigin } from '@refly/utils/url';
-import { BaseResponse, InvokeSkillRequest } from '@refly/openapi-schema';
-import { SkillEvent } from '@refly/common-types';
+import { BaseResponse, InvokeSkillRequest, SkillEvent } from '@refly/openapi-schema';
 import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
 import { extractBaseResp } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { ConnectionError } from '@refly/errors';

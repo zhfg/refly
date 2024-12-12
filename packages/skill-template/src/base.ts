@@ -13,13 +13,13 @@ import {
   SkillInvocationConfig,
   SkillMeta,
   User,
+  SkillEvent,
   SkillTemplateConfig,
   Icon,
   Artifact,
   ActionStepMeta,
 } from '@refly-packages/openapi-schema';
 import { EventEmitter } from 'node:stream';
-import { SkillEvent } from '@refly-packages/common-types';
 
 export abstract class BaseSkill extends StructuredTool {
   /**
@@ -74,7 +74,7 @@ export abstract class BaseSkill extends StructuredTool {
         eventData.event = 'log';
       } else if (eventData.tokenUsage) {
         eventData.event = 'token_usage';
-      } else if (eventData.structuredDataKey) {
+      } else if (eventData.structuredData) {
         eventData.event = 'structured_data';
       } else if (eventData.artifact) {
         eventData.event = 'artifact';

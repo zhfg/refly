@@ -142,12 +142,12 @@ Please generate relevant recommended questions in ${locale} language.`;
       // Emit structured data including both questions and reasoning
       this.emitEvent(
         {
-          event: 'structured_data',
-          content: JSON.stringify({
-            questions: result.recommended_questions,
-            locale,
-          }),
-          structuredDataKey: 'recommendedQuestions',
+          structuredData: {
+            recommendedQuestions: {
+              questions: result.recommended_questions,
+              locale,
+            },
+          },
         },
         config,
       );

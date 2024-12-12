@@ -3,15 +3,13 @@ import {
   ActionStep,
   ActionStepMeta,
   BaseResponse,
-  CanvasNodeData,
   InvokeSkillRequest,
+  SkillEvent,
 } from '@refly/openapi-schema';
-import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
-import { SkillEvent, LOCALE } from '@refly/common-types';
+import { LOCALE } from '@refly/common-types';
 import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/utils/request';
-import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -21,40 +19,59 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { aggregateTokenUsage } from '@refly-packages/utils/index';
-import { ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { CanvasNodeData, ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useListSkills } from '@refly-packages/ai-workspace-common/queries/queries';
 
 export const useInvokeAction = () => {
   const { addNode, setNodeDataByEntity } = useCanvasControl();
-  const { resultMap, updateActionResult } = useActionResultStoreShallow((state) => ({
-    resultMap: state.resultMap,
+  const { updateActionResult } = useActionResultStoreShallow((state) => ({
     updateActionResult: state.updateActionResult,
   }));
 
   const globalAbortControllerRef = { current: null as AbortController | null };
   const globalIsAbortedRef = { current: false as boolean };
 
-  const { t } = useTranslation();
-
-  const onUpdateResult = (resultId: string, payload: ActionResult) => {
+  const onUpdateResult = (resultId: string, payload: ActionResult, event?: SkillEvent) => {
     actionEmitter.emit('updateResult', { resultId, payload });
     updateActionResult(resultId, payload);
 
     // Update canvas node data
     if (payload.targetType === 'canvas') {
       const { title, steps = [] } = payload ?? {};
-      setNodeDataByEntity<ResponseNodeMeta>(
-        { type: 'skillResponse', entityId: resultId },
-        {
-          title,
-          entityId: resultId,
-          contentPreview: steps.map((s) => s.content).join('\n'),
-          metadata: {
-            steps,
-            status: payload.status,
-          },
+      const nodeData: Partial<CanvasNodeData<ResponseNodeMeta>> = {
+        title,
+        entityId: resultId,
+        metadata: {
+          status: payload.status,
         },
-      );
+      };
+
+      const { event: eventType, log } = event ?? {};
+
+      if (eventType === 'stream') {
+        nodeData.contentPreview = steps
+          .map((s) => s.content)
+          ?.filter(Boolean)
+          ?.join('\n');
+      } else if (eventType === 'artifact') {
+        nodeData.metadata = {
+          status: payload.status,
+          artifacts: steps.flatMap((s) => s.artifacts),
+        };
+      } else if (eventType === 'log') {
+        nodeData.metadata = {
+          status: payload.status,
+          currentLog: log,
+        };
+      } else if (eventType === 'structured_data') {
+        const structuredData = steps.reduce((acc, step) => ({ ...acc, ...step.structuredData }), {});
+        nodeData.metadata = {
+          status: payload.status,
+          structuredData: structuredData,
+        };
+      }
+
+      setNodeDataByEntity<ResponseNodeMeta>({ type: 'skillResponse', entityId: resultId }, nodeData);
     }
   };
 
@@ -77,7 +94,7 @@ export const useInvokeAction = () => {
       status: 'executing' as const,
       steps: getUpdatedSteps(result.steps ?? [], updatedStep),
     };
-    onUpdateResult(skillEvent.resultId, updatedResult);
+    onUpdateResult(skillEvent.resultId, updatedResult, skillEvent);
   };
 
   const onSkillTokenUsage = (skillEvent: SkillEvent) => {
@@ -92,10 +109,14 @@ export const useInvokeAction = () => {
     const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
     updatedStep.tokenUsage = aggregateTokenUsage([...(updatedStep.tokenUsage ?? []), tokenUsage]);
 
-    onUpdateResult(resultId, {
-      ...result,
-      steps: getUpdatedSteps(result.steps ?? [], updatedStep),
-    });
+    onUpdateResult(
+      resultId,
+      {
+        ...result,
+        steps: getUpdatedSteps(result.steps ?? [], updatedStep),
+      },
+      skillEvent,
+    );
   };
 
   const findOrCreateStep = (steps: ActionStep[], stepMeta: ActionStepMeta) => {
@@ -129,31 +150,30 @@ export const useInvokeAction = () => {
     const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
     updatedStep.content += content;
 
-    onUpdateResult(resultId, {
-      ...result,
-      status: 'executing' as const,
-      steps: getUpdatedSteps(result.steps ?? [], updatedStep),
-    });
+    onUpdateResult(
+      resultId,
+      {
+        ...result,
+        status: 'executing' as const,
+        steps: getUpdatedSteps(result.steps ?? [], updatedStep),
+      },
+      skillEvent,
+    );
   };
 
   const onSkillStructedData = (skillEvent: SkillEvent) => {
-    const { step, resultId, content = '', structuredDataKey = '' } = skillEvent;
+    const { step, resultId, structuredData = {} } = skillEvent;
     const { resultMap } = useActionResultStore.getState();
     const result = resultMap[resultId];
 
-    if (!result || !structuredDataKey || !step) {
-      return;
-    }
-
-    const structuredData = safeParseJSON(content);
-    if (!structuredData) {
+    if (!result || !structuredData || !step) {
       return;
     }
 
     const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
     updatedStep.structuredData = {
       ...updatedStep.structuredData,
-      [structuredDataKey]: structuredData,
+      ...structuredData,
     };
 
     const updatedResult = {
@@ -161,7 +181,7 @@ export const useInvokeAction = () => {
       status: 'executing' as const,
       steps: getUpdatedSteps(result.steps ?? [], updatedStep),
     };
-    onUpdateResult(skillEvent.resultId, updatedResult);
+    onUpdateResult(skillEvent.resultId, updatedResult, skillEvent);
   };
 
   const onSkillArtifact = (skillEvent: SkillEvent) => {
@@ -188,7 +208,7 @@ export const useInvokeAction = () => {
       steps: getUpdatedSteps(result.steps ?? [], updatedStep),
     };
 
-    onUpdateResult(skillEvent.resultId, updatedResult);
+    onUpdateResult(skillEvent.resultId, updatedResult, skillEvent);
   };
 
   const onSkillCreateNode = (skillEvent: SkillEvent) => {
@@ -225,7 +245,7 @@ export const useInvokeAction = () => {
       ...result,
       status: 'finish' as const,
     };
-    onUpdateResult(skillEvent.resultId, updatedResult);
+    onUpdateResult(skillEvent.resultId, updatedResult, skillEvent);
 
     const artifacts = result.steps?.flatMap((s) => s.artifacts);
     if (artifacts?.length) {
@@ -302,7 +322,7 @@ export const useInvokeAction = () => {
       context: payload.context,
       history: payload.resultHistory,
       tplConfig: payload.tplConfig,
-      status: 'executing',
+      status: 'waiting',
       steps: [],
       errors: [],
     });

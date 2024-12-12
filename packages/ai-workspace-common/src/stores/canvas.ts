@@ -10,16 +10,21 @@ interface CanvasData {
   edges: Edge[];
   title: string;
   mode: 'pointer' | 'hand';
+}
+
+interface CanvasConfig {
   pinnedNodes: CanvasNode<any>[];
 }
 
 export interface CanvasState {
   data: Record<string, CanvasData>;
+  config: Record<string, CanvasConfig>;
   currentCanvasId: string | null;
   showPreview: boolean;
   showMaxRatio: boolean;
   showLaunchpad: boolean;
   interactionMode: 'mouse' | 'touchpad';
+  operatingNodeId: string | null;
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -33,6 +38,7 @@ export interface CanvasState {
   setShowMaxRatio: (show: boolean) => void;
   setShowLaunchpad: (show: boolean) => void;
   setInteractionMode: (mode: 'mouse' | 'touchpad') => void;
+  setOperatingNodeId: (nodeId: string | null) => void;
 }
 
 const defaultCanvasState: () => CanvasData = () => ({
@@ -40,19 +46,23 @@ const defaultCanvasState: () => CanvasData = () => ({
   edges: [],
   title: '',
   mode: 'hand',
+});
+
+const defaultCanvasConfig: () => CanvasConfig = () => ({
   pinnedNodes: [],
-  interactionMode: 'touchpad',
 });
 
 export const useCanvasStore = create<CanvasState>()(
   persist(
     immer((set) => ({
       data: {},
+      config: {},
       currentCanvasId: null,
       showPreview: true,
       showMaxRatio: false,
       showLaunchpad: true,
       interactionMode: 'touchpad',
+      operatingNodeId: null,
 
       deleteCanvasData: (canvasId) =>
         set((state) => {
@@ -96,22 +106,27 @@ export const useCanvasStore = create<CanvasState>()(
         }),
       addPinnedNode: (canvasId, node) =>
         set((state) => {
-          state.data[canvasId] ??= defaultCanvasState();
-          state.data[canvasId].pinnedNodes.unshift(node);
+          if (!node) return;
+          state.config[canvasId] ??= defaultCanvasConfig();
+
+          if (state.config[canvasId].pinnedNodes.some((n) => n.id === node.id)) return;
+          state.config[canvasId].pinnedNodes.unshift(node);
         }),
       removePinnedNode: (canvasId, node) =>
         set((state) => {
-          state.data[canvasId] ??= defaultCanvasState();
-          state.data[canvasId].pinnedNodes = state.data[canvasId].pinnedNodes.filter((n) => n.id !== node.id);
+          state.config[canvasId] ??= defaultCanvasConfig();
+          state.config[canvasId].pinnedNodes = state.config[canvasId].pinnedNodes.filter((n) => n.id !== node.id);
         }),
       setInteractionMode: (mode) =>
         set((state) => {
           state.interactionMode = mode;
         }),
+      setOperatingNodeId: (nodeId) => set({ operatingNodeId: nodeId }),
     })),
     {
       name: 'canvas-storage',
       partialize: (state) => ({
+        config: state.config,
         currentCanvasId: state.currentCanvasId,
         interactionMode: state.interactionMode,
       }),

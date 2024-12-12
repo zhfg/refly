@@ -287,14 +287,7 @@ export const callMultiLingualWebSearch = async (
     // Deduplicate sources by title
     finalResults = deduplicateSourcesByTitle(finalResults);
 
-    ctxThis.emitEvent(
-      {
-        event: 'structured_data',
-        content: JSON.stringify(finalResults),
-        structuredDataKey: 'multiLingualSearchResult',
-      },
-      config,
-    );
+    ctxThis.emitEvent({ structuredData: { multiLingualSearchResult: finalResults } }, config);
 
     // Return results with analysis
     return {

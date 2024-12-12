@@ -28,8 +28,8 @@ const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: {
   nodes.forEach((node) =>
     g.setNode(node.id, {
       ...node,
-      width: node.measured?.width ?? 0,
-      height: node.measured?.height ?? 0,
+      width: node.measured?.width ?? 288,
+      height: node.measured?.height ?? 320,
     }),
   );
 
@@ -37,13 +37,11 @@ const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: {
 
   return {
     nodes: nodes.map((node) => {
-      const position = g.node(node.id);
-      // We are shifting the dagre node position (anchor=center center) to the top left
-      // so it matches the React Flow node anchor point (top left).
-      const x = position.x - (node.measured?.width ?? 0) / 2;
-      const y = position.y - (node.measured?.height ?? 0) / 2;
-
-      return { ...node, position: { x, y } };
+      const nodeWithPosition = g.node(node.id);
+      return {
+        ...node,
+        position: { x: nodeWithPosition.x, y: nodeWithPosition.y },
+      };
     }),
     edges,
   };
@@ -75,12 +73,13 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   const { canvasId: routeCanvasId } = useParams();
   const canvasId = selectedCanvasId ?? contextCanvasId ?? routeCanvasId;
 
-  const { data, setNodes, setEdges, setTitle, setModeRaw } = useCanvasStoreShallow((state) => ({
+  const { data, setNodes, setEdges, setTitle, setModeRaw, addPinnedNode } = useCanvasStoreShallow((state) => ({
     data: state.data,
     setNodes: state.setNodes,
     setEdges: state.setEdges,
     setTitle: state.setTitle,
     setModeRaw: state.setMode,
+    addPinnedNode: state.addPinnedNode,
   }));
 
   const nodes = data[canvasId]?.nodes ?? [];
@@ -108,7 +107,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     },
     [ydoc],
   );
-  const throttledSyncNodesToYDoc = useThrottledCallback(syncNodesToYDoc, 300, {
+  const throttledSyncNodesToYDoc = useThrottledCallback(syncNodesToYDoc, 100, {
     leading: true,
     trailing: true,
   });
@@ -123,7 +122,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     },
     [ydoc],
   );
-  const throttledSyncEdgesToYDoc = useThrottledCallback(syncEdgesToYDoc, 300, {
+  const throttledSyncEdgesToYDoc = useThrottledCallback(syncEdgesToYDoc, 100, {
     leading: true,
     trailing: true,
   });
@@ -237,8 +236,9 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         data: n.id === nodeId ? { ...n.data, ...nodeData } : n.data,
       }));
       setNodes(canvasId, updatedNodes);
+      syncNodesToYDoc(updatedNodes);
     },
-    [canvasId, setNodes],
+    [canvasId, setNodes, syncNodesToYDoc],
   );
 
   const setNodeDataByEntity = useCallback(
@@ -289,8 +289,12 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     (changes: NodeChange<CanvasNode<any>>[]) => {
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
-      const updatedNodes = applyNodeChanges(changes, nodes);
+      const mutableNodes = nodes.map((node) => ({
+        ...node,
+        measured: node.measured ? { ...node.measured } : undefined,
+      }));
 
+      const updatedNodes = applyNodeChanges(changes, mutableNodes);
       setNodes(canvasId, updatedNodes);
       throttledSyncNodesToYDoc(updatedNodes);
     },
@@ -338,7 +342,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         const renderedNode = getNode(nodeId);
         if (renderedNode) {
           setCenter(renderedNode.position.x, renderedNode.position.y, {
-            duration: 500,
+            duration: 300,
             zoom: 1,
           });
         }
@@ -402,14 +406,14 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
           const maxSourceY = Math.max(...sourceNodes.map((n) => n.position.y + (n.measured?.height ?? 100)));
 
           newPosition = {
-            x: avgSourceX + 200, // Offset to the right of source nodes
+            x: avgSourceX + 400, // Offset to the right of source nodes
             y: maxSourceY + 40,
           };
         }
       } else {
         // Default position if no source nodes
         newPosition = {
-          x: Math.max(...nodes.map((n) => n.position.x), 0) + 200,
+          x: Math.max(...nodes.map((n) => n.position.x), 0) + 400,
           y: Math.max(...nodes.map((n) => n.position.y), 0),
         };
         needSetCenter = true;
@@ -430,7 +434,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         position: newPosition,
         selected: true,
       });
-      const updatedNodes = deduplicateNodes([...nodes, newNode]);
+      const updatedNodes = deduplicateNodes([...nodes.map((n) => ({ ...n, selected: false })), newNode]);
 
       setNodes(canvasId, updatedNodes);
       syncNodesToYDoc(updatedNodes);
@@ -455,8 +459,12 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       if (needSetCenter) {
         setNodeCenter(newNode.id);
       }
+
+      if (newNode.type === 'document' || newNode.type === 'resource') {
+        addPinnedNode(canvasId, newNode);
+      }
     },
-    [canvasId, setSelectedNode],
+    [canvasId, setSelectedNode, addPinnedNode],
   );
 
   const setMode = useCallback(
@@ -483,6 +491,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     mode,
     setMode,
     setCanvasTitle,
+    setNodeCenter,
     setSelectedNodes,
     addSelectedNode,
     addSelectedNodeByEntity,

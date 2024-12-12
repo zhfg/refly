@@ -17,6 +17,12 @@ import { SourceViewer } from './source-viewer';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { RecommendQuestions } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/recommend-questions';
 
+const parseStructuredData = (structuredData: Record<string, unknown>, field: string) => {
+  return typeof structuredData[field] === 'string'
+    ? safeParseJSON(structuredData[field])
+    : (structuredData[field] as Source[]);
+};
+
 export const ActionStepCard = ({
   result,
   step,
@@ -31,7 +37,7 @@ export const ActionStepCard = ({
   query: string;
 }) => {
   const { t } = useTranslation();
-  const { addSelectedNodeByEntity } = useCanvasControl();
+  const { setSelectedNodeByEntity } = useCanvasControl();
   const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
 
   useEffect(() => {
@@ -66,14 +72,8 @@ export const ActionStepCard = ({
     return node;
   };
 
-  const sources =
-    typeof step?.structuredData?.['sources'] === 'string'
-      ? safeParseJSON(step?.structuredData?.['sources'])
-      : (step?.structuredData?.['sources'] as Source[]);
-  const recommendedQuestions =
-    typeof step?.structuredData?.['recommendedQuestions'] === 'string'
-      ? safeParseJSON(step?.structuredData?.['recommendedQuestions'])
-      : (step?.structuredData?.['recommendedQuestions'] as Array<string>);
+  const sources = parseStructuredData(step?.structuredData, 'sources');
+  const recommendedQuestions = parseStructuredData(step?.structuredData, 'recommendedQuestions');
 
   const logs = step?.logs?.filter((log) => log?.key);
 
@@ -157,7 +157,7 @@ export const ActionStepCard = ({
           key={artifact.entityId}
           className="my-2 px-4 py-2 h-12 border border-solid border-gray-200 rounded-lg flex items-center justify-between space-x-2 cursor-pointer hover:bg-gray-50"
           onClick={() => {
-            addSelectedNodeByEntity({ type: artifact.type, entityId: artifact.entityId });
+            setSelectedNodeByEntity({ type: artifact.type, entityId: artifact.entityId });
           }}
         >
           <div className="flex items-center space-x-2">

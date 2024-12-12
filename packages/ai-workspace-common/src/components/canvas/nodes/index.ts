@@ -108,7 +108,6 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
         modelName: 'Skill Response',
         status: 'waiting',
         executionTime: null,
-        contentPreview: t('canvas.nodePreview.skillResponse.contentPreview'),
       } as ResponseNodeMeta;
 
     case 'toolResponse':
@@ -133,6 +132,7 @@ export const getNodeCommonStyles = ({ selected, isHovered }: { selected: boolean
   duration-200
   border-[2px]
   border-solid
+  overflow-hidden
   ${selected ? 'border-[#00968F]' : 'border-transparent'}
   ${
     isHovered

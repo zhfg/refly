@@ -28,10 +28,11 @@ export const ContextItem = ({
   const { t } = useTranslation();
   const { data } = item ?? {};
   const icon = getNodeIcon(item?.type);
-  const { nodes, addSelectedNode } = useCanvasControl();
+  const { nodes, setSelectedNode, setNodeCenter } = useCanvasControl();
 
   const handleItemClick = useCallback(
     async (item: CanvasNode<any>) => {
+      setNodeCenter(item.id);
       const isSelectionNode = item.data?.metadata?.sourceType?.includes('Selection');
 
       if (isSelectionNode) {
@@ -54,12 +55,12 @@ export const ContextItem = ({
           return;
         }
 
-        addSelectedNode(sourceNode);
+        setSelectedNode(sourceNode);
       } else {
-        addSelectedNode(item);
+        setSelectedNode(item);
       }
     },
-    [nodes, addSelectedNode, t],
+    [nodes, setSelectedNode, t],
   );
 
   const content = (

@@ -177,14 +177,7 @@ export class CommonQnA extends BaseSkill {
     config.metadata.step = { name: 'answerQuestion' };
 
     if (sources.length > 0) {
-      this.emitEvent(
-        {
-          event: 'structured_data',
-          content: JSON.stringify(truncateSource(sources)),
-          structuredDataKey: 'sources',
-        },
-        config,
-      );
+      this.emitEvent({ structuredData: { sources: truncateSource(sources) } }, config);
     }
 
     const model = this.engine.chatModel({ temperature: 0.1 });

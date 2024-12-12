@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useMatch, useSearchParams, useParams } from '@refly-packages/ai-workspace-common/utils/router';
 import {

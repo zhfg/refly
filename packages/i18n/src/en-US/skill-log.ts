@@ -1,27 +1,27 @@
 const translations = {
   generateTitle: {
     title: 'Generate Title',
-    description: 'Title generated: {{title}}',
+    description: 'Title generated: {{title}}, completed in {{duration}}ms',
   },
   rewriteQuery: {
     title: 'Break Down Question',
-    description: 'Completed in {{duration}}ms, sub queries: {{rewrittenQueries}}',
+    description: 'Sub queries: {{rewrittenQueries}}, completed in {{duration}}ms',
   },
   translateQuery: {
     title: 'Translate Query',
-    description: 'Completed in {{duration}}ms, translated queries: {{translatedQueries}}',
+    description: 'Translated queries: {{translatedQueries}}, completed in {{duration}}ms',
   },
   webSearchCompleted: {
     title: 'Web Search Completed',
-    description: 'Completed in {{duration}}ms, total of {{totalResults}} results',
+    description: 'Total of {{totalResults}} results, completed in {{duration}}ms',
   },
   translateResults: {
     title: 'Translate Results',
-    description: 'Completed in {{duration}}ms, total of {{totalResults}} results',
+    description: 'Total of {{totalResults}} results, completed in {{duration}}ms',
   },
   rerankResults: {
     title: 'Select Related Results',
-    description: 'Completed in {{duration}}ms, total of {{totalResults}} results',
+    description: 'Total of {{totalResults}} results, completed in {{duration}}ms',
   },
 };
 

@@ -1,9 +1,12 @@
+import { Button, Dropdown, MenuProps } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { IconReply, IconPreview } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { useReactFlow } from '@xyflow/react';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { memo } from 'react';
 import { MoreHorizontal, PlayCircle, FileInput, Trash2, Loader2, MessageSquareDiff, FilePlus } from 'lucide-react';
-import { Button, Dropdown, Tooltip } from 'antd';
-import type { MenuProps } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { IconReply } from '@refly-packages/ai-workspace-common/components/common/icon';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
 
 // Action button types
@@ -50,6 +53,7 @@ const ActionButton = memo((props: ActionButtonProps) => {
 });
 
 type ActionButtonsProps = {
+  nodeId: string;
   type: 'document' | 'resource' | 'skill-response';
   onAddToContext?: () => void;
   onAddToChatHistory?: () => void;
@@ -68,6 +72,7 @@ type ActionButtonsProps = {
 export const ActionButtons = memo(
   ({
     type,
+    nodeId,
     onAddToContext,
     onAddToChatHistory,
     onRerun,
@@ -81,6 +86,12 @@ export const ActionButtons = memo(
     isCreatingDocument,
   }: ActionButtonsProps) => {
     const { t } = useTranslation();
+
+    const { addPinnedNode } = useCanvasStoreShallow((state) => ({
+      addPinnedNode: state.addPinnedNode,
+    }));
+    const { getNode } = useReactFlow();
+    const { canvasId } = useCanvasContext();
 
     // Define dropdown menu items
     const menuItems: MenuProps['items'] = [
@@ -143,6 +154,14 @@ export const ActionButtons = memo(
           e.preventDefault();
         }}
       >
+        <ActionButton
+          icon={<IconPreview className="w-4 h-4" />}
+          onClick={() => {
+            addPinnedNode(canvasId, getNode(nodeId) as CanvasNode<any>);
+          }}
+          tooltip={t('canvas.nodeActions.preview')}
+        />
+
         {/* Document specific buttons */}
         {type === 'document' && onAddToContext && (
           <ActionButton

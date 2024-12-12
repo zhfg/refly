@@ -469,6 +469,8 @@ const translations = {
       skillCompleted: '技能执行完成',
       stepCompleted: '步骤执行完成',
       stepTitle: '步骤 {{index}}',
+      aiThinking: 'AI 正在思考中...',
+      sourcesCnt: '共找到 {{count}} 个来源',
     },
     chatHistory: {
       alreadyAdded: '已添加到对话历史',
@@ -492,6 +494,7 @@ const translations = {
       addToContext: '添加到上下文',
       processingVector: '处理向量',
       rerun: '重新运行',
+      preview: '打开预览',
       insertToDoc: '插入文档',
       askFollowUp: '继续提问',
       moreOptions: '更多选项',

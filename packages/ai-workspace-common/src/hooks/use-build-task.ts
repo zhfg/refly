@@ -1,14 +1,14 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import type { MessageState, ClientChatMessage, OutputLocale, SkillEvent, LOCALE } from '@refly/common-types';
+import type { MessageState, ClientChatMessage, OutputLocale, LOCALE } from '@refly/common-types';
 import {
   useMessageStateStore,
   useMessageStateStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/message-state';
 import { useConversationStoreShallow } from '@refly-packages/ai-workspace-common/stores/conversation';
 import { DocumentIntentType, TASK_STATUS } from '@refly/common-types';
-import { BaseResponse, InvokeSkillRequest, SkillMeta } from '@refly/openapi-schema';
+import { BaseResponse, InvokeSkillRequest, SkillMeta, SkillEvent } from '@refly/openapi-schema';
 import { buildQuestionMessage, buildReplyMessage } from '@refly-packages/ai-workspace-common/utils/message';
 
 import { buildErrorMessage } from '@refly-packages/ai-workspace-common/utils/message';

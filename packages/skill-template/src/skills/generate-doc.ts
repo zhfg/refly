@@ -152,14 +152,7 @@ export class GenerateDoc extends BaseSkill {
       this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
 
       if (sources.length > 0) {
-        this.emitEvent(
-          {
-            event: 'structured_data',
-            content: JSON.stringify(truncateSource(sources)),
-            structuredDataKey: 'sources',
-          },
-          config,
-        );
+        this.emitEvent({ structuredData: { sources: truncateSource(sources) } }, config);
       }
     }
 
@@ -240,13 +233,13 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
       // Emit structured data for UI
       this.emitEvent(
         {
-          event: 'structured_data',
-          content: JSON.stringify({
-            title: result.title,
-            description: result.description,
-            reason: result.reason,
-          }),
-          structuredDataKey: 'titleGeneration',
+          structuredData: {
+            titleGeneration: {
+              title: result.title,
+              description: result.description,
+              reason: result.reason,
+            },
+          },
         },
         config,
       );

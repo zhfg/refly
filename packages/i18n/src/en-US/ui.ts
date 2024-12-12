@@ -477,6 +477,8 @@ const translations = {
       skillCompleted: 'Skill Completed',
       stepCompleted: 'Step Completed',
       stepTitle: 'Step {{index}}',
+      aiThinking: 'AI is thinking ...',
+      sourcesCnt: 'Total of {{count}} source(s) found',
     },
     chatHistory: {
       alreadyAdded: 'Already added to chat history',
@@ -500,6 +502,7 @@ const translations = {
       addToContext: 'Add to Context',
       processingVector: 'Processing Vector',
       rerun: 'Rerun',
+      preview: 'Open Preview',
       insertToDoc: 'Insert to Document',
       askFollowUp: 'Ask Follow-up',
       moreOptions: 'More Options',

@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { FC, useState } from 'react';
 
 import { MdOutlineHideImage, MdOutlineAspectRatio } from 'react-icons/md';
-import { AiOutlineLayout, AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
+import { AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
 import {
   IconCanvas,
   IconEdit,
@@ -57,7 +57,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
       setShowLaunchpad: state.setShowLaunchpad,
     }));
   const canvasTitle = data[canvasId]?.title;
-  const { setCanvasTitle, onLayout } = useCanvasControl();
+  const { setCanvasTitle } = useCanvasControl();
 
   const [editedTitle, setEditedTitle] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -265,17 +265,6 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
 
         <div className="flex items-center gap-2">
           <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
-            <Tooltip title={t(`canvas.toolbar.autoLayout`)} destroyTooltipOnHide>
-              <Button
-                type="text"
-                icon={<AiOutlineLayout />}
-                className="w-8 h-6 flex items-center justify-center"
-                style={{ color: showLaunchpad ? '#000' : '#9CA3AF' }}
-                onClick={() => {
-                  onLayout('LR');
-                }}
-              />
-            </Tooltip>
             <Tooltip
               title={t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`)}
               destroyTooltipOnHide

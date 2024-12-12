@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import { useCookie } from 'react-use';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/types';
@@ -32,13 +32,29 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
 
   // Subscribe to yjs document changes
   useEffect(() => {
-    const ydoc = provider?.document;
+    const ydoc = provider.document;
     if (!ydoc) return;
 
     const title = ydoc.getText('title');
     const nodesArray = ydoc.getArray<CanvasNode>('nodes');
     const edgesArray = ydoc.getArray<Edge>('edges');
 
+    // 立即设置初始数据
+    if (provider.status === 'connected') {
+      setTitle(canvasId, title.toJSON());
+
+      const initialNodes = nodesArray.toJSON();
+      const uniqueNodesMap = new Map();
+      initialNodes.forEach((node) => uniqueNodesMap.set(node.id, node));
+      setNodes(canvasId, Array.from(uniqueNodesMap.values()));
+
+      const initialEdges = edgesArray.toJSON();
+      const uniqueEdgesMap = new Map();
+      initialEdges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
+      setEdges(canvasId, Array.from(uniqueEdgesMap.values()));
+    }
+
+    // 设置观察者回调
     const titleObserverCallback = () => {
       if (provider.status === 'connected') {
         setTitle(canvasId, title.toJSON());
@@ -75,7 +91,7 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       provider.forceSync();
       provider.destroy();
     };
-  }, [provider, canvasId, setNodes, setEdges, setTitle]);
+  }, [canvasId, setNodes, setEdges, setTitle]);
 
   // Add null check before rendering
   if (!provider) {
