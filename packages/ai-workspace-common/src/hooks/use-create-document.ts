@@ -5,6 +5,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { useCanvasControl } from './use-canvas-control';
 import { CanvasNodeType } from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { useDebouncedCallback } from 'use-debounce';
+import { parseMarkdownCitationsAndCanvasTags } from '@refly-packages/utils/parse';
 
 export const useCreateDocument = () => {
   const [isCreating, setIsCreating] = useState(false);
@@ -18,11 +19,12 @@ export const useCreateDocument = () => {
       { sourceNodeId, addToCanvas }: { sourceNodeId?: string; addToCanvas?: boolean },
     ) => {
       try {
+        const parsedContent = parseMarkdownCitationsAndCanvasTags(content, []);
         setIsCreating(true);
         const { data } = await getClient().createDocument({
           body: {
             title: title ?? `Document-${new Date().toISOString()}`,
-            initialContent: content,
+            initialContent: parsedContent,
           },
         });
 
@@ -44,7 +46,7 @@ export const useCreateDocument = () => {
               data: {
                 entityId: data.data.docId,
                 title: data.data.title ?? title,
-                contentPreview: content,
+                contentPreview: parsedContent,
               },
             };
 
