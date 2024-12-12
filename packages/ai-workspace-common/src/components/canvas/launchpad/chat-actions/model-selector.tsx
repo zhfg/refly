@@ -111,7 +111,7 @@ export const ModelSelector = ({ placement = 'bottom' }: ModelSelectorProps) => {
     return {
       key: model.name,
       label: disabled ? (
-        <Tooltip placement="right" title={hintBtn} color="white">
+        <Tooltip destroyTooltipOnHide placement="right" title={hintBtn} color="white">
           {modelItem}
         </Tooltip>
       ) : (

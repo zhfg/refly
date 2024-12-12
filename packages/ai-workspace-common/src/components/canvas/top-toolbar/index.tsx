@@ -72,15 +72,18 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   const setCanvasList = useSiderStoreShallow((state) => state.setCanvasList);
 
   useEffect(() => {
-    const { canvasList } = useSiderStore.getState();
-    setCanvasList(
-      canvasList.map((canvas) => (canvas.id === canvasId && canvasTitle ? { ...canvas, name: canvasTitle } : canvas)),
-    );
+    if (canvasTitle && typeof canvasTitle === 'string') {
+      const { canvasList } = useSiderStore.getState();
+      const currentCanvas = canvasList.find((canvas) => canvas.id === canvasId);
+      if (currentCanvas && currentCanvas.name !== canvasTitle) {
+        setCanvasList(canvasList.map((canvas) => (canvas.id === canvasId ? { ...canvas, name: canvasTitle } : canvas)));
+      }
+    }
   }, [canvasId, canvasTitle]);
 
   const handleModalOk = () => {
     if (editedTitle?.trim()) {
-      setCanvasTitle(editedTitle, canvasId);
+      setCanvasTitle(editedTitle);
       mutate({ body: { canvasId, title: editedTitle } }, { onSuccess: () => setIsModalOpen(false) });
     }
   };
@@ -127,6 +130,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
         trigger={['click']}
         open={popupVisible}
         onOpenChange={handleOpenChange}
+        destroyPopupOnHide
         menu={{
           items,
         }}
@@ -227,7 +231,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
 
         <div className="flex items-center gap-2">
           <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
-            <Tooltip title={t(`canvas.toolbar.autoLayout`)}>
+            <Tooltip title={t(`canvas.toolbar.autoLayout`)} destroyTooltipOnHide>
               <Button
                 type="text"
                 icon={<AiOutlineLayout />}
@@ -238,7 +242,10 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
                 }}
               />
             </Tooltip>
-            <Tooltip title={t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`)}>
+            <Tooltip
+              title={t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`)}
+              destroyTooltipOnHide
+            >
               <Button
                 type="text"
                 icon={<IconCanvas />}
@@ -248,7 +255,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
               />
             </Tooltip>
             <Divider type="vertical" />
-            <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)}>
+            <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)} destroyTooltipOnHide>
               <Button
                 type="text"
                 icon={<MdOutlineHideImage style={{ color: showPreview ? '#9CA3AF' : '#000' }} />}
@@ -256,7 +263,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
                 className="w-8 h-6 flex items-center justify-center mr-1"
               />
             </Tooltip>
-            <Tooltip title={t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`)}>
+            <Tooltip title={t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`)} destroyTooltipOnHide>
               <Button
                 type="text"
                 icon={<MdOutlineAspectRatio style={{ color: showMaxRatio ? '#000' : '#9CA3AF' }} />}

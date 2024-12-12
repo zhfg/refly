@@ -1,11 +1,10 @@
 import { memo } from 'react';
 import { MoreHorizontal, PlayCircle, FileInput, Trash2, Loader2, MessageSquareDiff, FilePlus } from 'lucide-react';
-import { Button, Dropdown } from 'antd';
+import { Button, Dropdown, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { IconReply } from '@refly-packages/ai-workspace-common/components/common/icon';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
-import { Tooltip } from '@arco-design/web-react';
 
 // Action button types
 type ActionButtonProps = {
@@ -42,9 +41,9 @@ const ActionButton = memo((props: ActionButtonProps) => {
   );
 
   return withTooltip ? (
-    <Tooltip content={props.tooltip} position="top">
+    <TooltipWrapper tooltip={props.tooltip} placement="top">
       {button}
-    </Tooltip>
+    </TooltipWrapper>
   ) : (
     button
   );
