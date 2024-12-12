@@ -117,7 +117,7 @@ export const LayoutControl: React.FC<LayoutControlProps> = ({ mode, changeMode }
     {
       key: 'layout',
       children: <LuLayoutDashboard className={iconClass} size={16} />,
-      onClick: () => onLayout('TB'),
+      onClick: () => onLayout('LR'),
       className: `${buttonClass}`,
     },
   ];

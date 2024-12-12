@@ -149,13 +149,12 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         <style>{selectionStyles}</style>
         <ReactFlow
           {...flowConfig}
-          panOnScroll={interactionMode === 'mouse'}
-          panOnDrag={mode !== 'pointer' && interactionMode === 'touchpad'}
+          panOnScroll={interactionMode === 'touchpad'}
+          panOnDrag={interactionMode === 'mouse'}
           zoomOnScroll={interactionMode === 'mouse'}
           zoomOnPinch={interactionMode === 'touchpad'}
-          selectNodesOnDrag={mode === 'pointer'}
-          selectionMode={mode === 'pointer' ? SelectionMode.Partial : SelectionMode.Full}
-          selectionOnDrag={mode === 'pointer'}
+          selectNodesOnDrag={interactionMode === 'mouse'}
+          selectionOnDrag={interactionMode === 'touchpad'}
           nodeTypes={nodeTypes}
           nodes={nodes}
           edges={edges}
