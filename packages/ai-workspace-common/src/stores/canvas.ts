@@ -10,11 +10,15 @@ interface CanvasData {
   edges: Edge[];
   title: string;
   mode: 'pointer' | 'hand';
+}
+
+interface CanvasConfig {
   pinnedNodes: CanvasNode<any>[];
 }
 
 export interface CanvasState {
   data: Record<string, CanvasData>;
+  config: Record<string, CanvasConfig>;
   currentCanvasId: string | null;
   showPreview: boolean;
   showMaxRatio: boolean;
@@ -40,14 +44,17 @@ const defaultCanvasState: () => CanvasData = () => ({
   edges: [],
   title: '',
   mode: 'hand',
+});
+
+const defaultCanvasConfig: () => CanvasConfig = () => ({
   pinnedNodes: [],
-  interactionMode: 'touchpad',
 });
 
 export const useCanvasStore = create<CanvasState>()(
   persist(
     immer((set) => ({
       data: {},
+      config: {},
       currentCanvasId: null,
       showPreview: true,
       showMaxRatio: false,
@@ -97,15 +104,15 @@ export const useCanvasStore = create<CanvasState>()(
       addPinnedNode: (canvasId, node) =>
         set((state) => {
           if (!node) return;
-          state.data[canvasId] ??= defaultCanvasState();
+          state.config[canvasId] ??= defaultCanvasConfig();
 
-          if (state.data[canvasId].pinnedNodes.some((n) => n.id === node.id)) return;
-          state.data[canvasId].pinnedNodes.unshift(node);
+          if (state.config[canvasId].pinnedNodes.some((n) => n.id === node.id)) return;
+          state.config[canvasId].pinnedNodes.unshift(node);
         }),
       removePinnedNode: (canvasId, node) =>
         set((state) => {
-          state.data[canvasId] ??= defaultCanvasState();
-          state.data[canvasId].pinnedNodes = state.data[canvasId].pinnedNodes.filter((n) => n.id !== node.id);
+          state.config[canvasId] ??= defaultCanvasConfig();
+          state.config[canvasId].pinnedNodes = state.config[canvasId].pinnedNodes.filter((n) => n.id !== node.id);
         }),
       setInteractionMode: (mode) =>
         set((state) => {
@@ -115,6 +122,7 @@ export const useCanvasStore = create<CanvasState>()(
     {
       name: 'canvas-storage',
       partialize: (state) => ({
+        config: state.config,
         currentCanvasId: state.currentCanvasId,
         interactionMode: state.interactionMode,
       }),

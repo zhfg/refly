@@ -35,7 +35,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
 
   const { pinnedNodes, showPreview, showLaunchpad, showMaxRatio, interactionMode, setInteractionMode } =
     useCanvasStoreShallow((state) => ({
-      pinnedNodes: state.data[canvasId]?.pinnedNodes,
+      pinnedNodes: state.config[canvasId]?.pinnedNodes,
       showPreview: state.showPreview,
       showLaunchpad: state.showLaunchpad,
       showMaxRatio: state.showMaxRatio,
