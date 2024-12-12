@@ -342,7 +342,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         const renderedNode = getNode(nodeId);
         if (renderedNode) {
           setCenter(renderedNode.position.x, renderedNode.position.y, {
-            duration: 500,
+            duration: 300,
             zoom: 1,
           });
         }
@@ -434,7 +434,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         position: newPosition,
         selected: true,
       });
-      const updatedNodes = deduplicateNodes([...nodes, newNode]);
+      const updatedNodes = deduplicateNodes([...nodes.map((n) => ({ ...n, selected: false })), newNode]);
 
       setNodes(canvasId, updatedNodes);
       syncNodesToYDoc(updatedNodes);
@@ -491,6 +491,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     mode,
     setMode,
     setCanvasTitle,
+    setNodeCenter,
     setSelectedNodes,
     addSelectedNode,
     addSelectedNodeByEntity,
