@@ -59,7 +59,7 @@ import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-ha
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
 import { useBlocker } from 'react-router-dom';
 import { genUniqueId } from '@refly-packages/utils/id';
-import { useSelectionContext } from '@refly-packages/ai-workspace-common/hooks/use-selection-context';
+import { useSelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/use-selection-context';
 import { DocumentProvider, useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useGetDocumentDetail } from '@refly-packages/ai-workspace-common/queries';

@@ -107,8 +107,10 @@ function Footer() {
                   {/* Language Selector */}
                   <div className="flex cursor-pointer items-center text-gray-600 hover:text-[#00968f]">
                     <UILocaleList>
-                      {t("language")}{" "}
-                      <IconDown className="ml-1 transition-transform duration-200 group-hover:rotate-180" />
+                      <Button type="text" size="small">
+                        {t("language")}{" "}
+                        <IconDown className="ml-1 transition-transform duration-200 group-hover:rotate-180" />
+                      </Button>
                     </UILocaleList>
                   </div>
                 </div>

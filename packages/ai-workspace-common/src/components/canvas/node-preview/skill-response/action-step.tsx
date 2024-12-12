@@ -10,7 +10,7 @@ import { IconCheck, IconLoading } from '@refly-packages/ai-workspace-common/comp
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { SelectionContext } from '@refly-packages/ai-workspace-common/components/selection-context';
+import { SelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/selection-context';
 import { ActionContainer } from './action-container';
 import { safeParseJSON } from '@refly-packages/utils/parse';
 import { SourceViewer } from './source-viewer';

@@ -2,7 +2,7 @@ import { Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './types';
 import { Node } from '@xyflow/react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { CustomHandle } from './custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
@@ -22,12 +22,15 @@ import { Markdown } from '@refly-packages/ai-workspace-common/components/markdow
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { genUniqueId } from '@refly-packages/ai-workspace-common/utils';
+import { CanvasSelectionContext } from '../../../modules/selection-menu/canvas-selection-context';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
 export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { data, selected, id, hideActions = false, isPreview = false, hideHandles = false, onNodeClick } = props;
   const [isHovered, setIsHovered] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
   const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();
 
@@ -59,6 +62,30 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
   const isSourceConnected = edges?.some((edge) => edge.source === id);
+
+  const buildNodeData = (text: string) => {
+    const id = genUniqueId();
+
+    const node: CanvasNode = {
+      id,
+      type: 'skillResponse',
+      position: { x: 0, y: 0 },
+      data: {
+        entityId: data.entityId,
+        title: data.title || 'Selected Content',
+        metadata: {
+          contentPreview: text,
+          selectedContent: text,
+          xPath: id,
+          sourceEntityId: data.entityId,
+          sourceEntityType: 'skillResponse',
+          sourceType: 'skillResponseSelection',
+        },
+      },
+    };
+
+    return node;
+  };
 
   // Handle node hover events
   const handleMouseEnter = useCallback(() => {
@@ -147,7 +174,6 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { operatingNodeId } = useCanvasStoreShallow((state) => ({
     operatingNodeId: state.operatingNodeId,
   }));
-
   const isOperating = operatingNodeId === id;
 
   return (
@@ -262,10 +288,21 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
             </div>
           )}
 
-          <Markdown
-            content={content}
-            className={`text-xs ${isOperating ? 'pointer-events-auto' : 'pointer-events-none'}`}
-          />
+          <div ref={contentRef} className="skill-response-node-content relative">
+            <Markdown
+              content={content}
+              sources={sources}
+              className={`text-xs ${isOperating ? 'pointer-events-auto skill-response-node-content' : 'pointer-events-none'}`}
+            />
+            {/* {isOperating && contentRef.current && (
+              <CanvasSelectionContext
+                containerClass="skill-response-node-content"
+                containerRef={contentRef}
+                getNodeData={(text) => buildNodeData(text)}
+                nodeId={id}
+              />
+            )} */}
+          </div>
 
           <div className="text-xs text-gray-400">
             {time(createdAt, language as LOCALE)

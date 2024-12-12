@@ -63,27 +63,16 @@ export const ChatInput = (props: ChatInputProps) => {
         const cursorPos = e.target.selectionStart ?? 0;
         const text = chatStore.newQAText;
 
-        // Check if current line is empty
-        const beforeCursor = text.slice(0, cursorPos);
-        const afterCursor = text.slice(cursorPos);
-        const currentLineIsEmpty = /\n\s*$/.test(beforeCursor) || beforeCursor.trim() === '';
-        const nextLineIsEmpty = /^\s*\n/.test(afterCursor) || afterCursor.trim() === '';
+        // Simply insert newline at cursor position
+        const newValue = text.slice(0, cursorPos) + '\n' + text.slice(cursorPos);
+        chatStore.setNewQAText(newValue);
 
-        // Only add new line if not creating empty lines
-        if (!currentLineIsEmpty || !nextLineIsEmpty) {
-          const newValue = text.slice(0, cursorPos) + '\n' + text.slice(cursorPos);
-          // Remove any consecutive blank lines
-          const cleanedValue = newValue.replace(/\n\s*\n\s*\n/g, '\n\n');
-
-          chatStore.setNewQAText(cleanedValue);
-
-          // Restore cursor position
-          setTimeout(() => {
-            if (e.target instanceof HTMLTextAreaElement) {
-              e.target.selectionStart = e.target.selectionEnd = cursorPos + 1;
-            }
-          }, 0);
-        }
+        // Restore cursor position
+        setTimeout(() => {
+          if (e.target instanceof HTMLTextAreaElement) {
+            e.target.selectionStart = e.target.selectionEnd = cursorPos + 1;
+          }
+        }, 0);
       }
     };
 

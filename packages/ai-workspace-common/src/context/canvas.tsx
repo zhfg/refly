@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { useCookie } from 'react-use';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/types';
@@ -91,7 +91,7 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       provider.forceSync();
       provider.destroy();
     };
-  }, [canvasId, setNodes, setEdges, setTitle]);
+  }, [provider, canvasId, setNodes, setEdges, setTitle]);
 
   // Add null check before rendering
   if (!provider) {

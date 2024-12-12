@@ -48,7 +48,6 @@ export const UILocaleList = (props: { children: React.ReactNode; width?: number 
       <Dropdown
         menu={{ selectedKeys: [i18n.languages?.[0]], items: dropList, style: { width: props?.width } }}
         trigger={['click']}
-        placement="bottomLeft"
       >
         {props.children}
       </Dropdown>
