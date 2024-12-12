@@ -21,6 +21,7 @@ import { LOCALE } from '@refly/common-types';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -143,12 +144,22 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
     });
   }, [sources, query]);
 
+  const { operatingNodeId } = useCanvasStoreShallow((state) => ({
+    operatingNodeId: state.operatingNodeId,
+  }));
+
+  const isOperating = operatingNodeId === id;
+
   return (
     <div
       className="relative group"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={onNodeClick}
+      style={{
+        userSelect: isOperating ? 'text' : 'none',
+        cursor: isOperating ? 'text' : 'grab',
+      }}
     >
       {isWeb && !hideActions && (
         <ActionButtons
@@ -251,7 +262,10 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
             </div>
           )}
 
-          <Markdown content={content} className="text-xs"></Markdown>
+          <Markdown
+            content={content}
+            className={`text-xs ${isOperating ? 'pointer-events-auto' : 'pointer-events-none'}`}
+          />
 
           <div className="text-xs text-gray-400">
             {time(createdAt, language as LOCALE)

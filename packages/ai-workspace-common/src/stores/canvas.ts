@@ -24,6 +24,7 @@ export interface CanvasState {
   showMaxRatio: boolean;
   showLaunchpad: boolean;
   interactionMode: 'mouse' | 'touchpad';
+  operatingNodeId: string | null;
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -37,6 +38,7 @@ export interface CanvasState {
   setShowMaxRatio: (show: boolean) => void;
   setShowLaunchpad: (show: boolean) => void;
   setInteractionMode: (mode: 'mouse' | 'touchpad') => void;
+  setOperatingNodeId: (nodeId: string | null) => void;
 }
 
 const defaultCanvasState: () => CanvasData = () => ({
@@ -60,6 +62,7 @@ export const useCanvasStore = create<CanvasState>()(
       showMaxRatio: false,
       showLaunchpad: true,
       interactionMode: 'touchpad',
+      operatingNodeId: null,
 
       deleteCanvasData: (canvasId) =>
         set((state) => {
@@ -118,6 +121,7 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.interactionMode = mode;
         }),
+      setOperatingNodeId: (nodeId) => set({ operatingNodeId: nodeId }),
     })),
     {
       name: 'canvas-storage',

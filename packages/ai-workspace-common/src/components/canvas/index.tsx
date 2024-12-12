@@ -56,6 +56,11 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
 
+  const { operatingNodeId, setOperatingNodeId } = useCanvasStoreShallow((state) => ({
+    operatingNodeId: state.operatingNodeId,
+    setOperatingNodeId: state.setOperatingNodeId,
+  }));
+
   const toggleInteractionMode = (mode: 'mouse' | 'touchpad') => {
     setInteractionMode(mode);
   };
@@ -105,10 +110,28 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         console.warn('Invalid node clicked');
         return;
       }
-      setSelectedNode(node);
+
+      // If clicking the currently selected node, toggle operating mode
+      if (node.selected && node.id === operatingNodeId) {
+        // Already in operating mode, do nothing
+        return;
+      } else if (node.selected && !operatingNodeId) {
+        // Enter operating mode
+        setOperatingNodeId(node.id);
+        event.stopPropagation();
+      } else {
+        // Just select the node
+        setOperatingNodeId(null);
+        setSelectedNode(node);
+      }
     },
-    [setSelectedNode],
+    [setSelectedNode, operatingNodeId, setOperatingNodeId],
   );
+
+  // Handle clicking on the canvas background to exit operating mode
+  const onPaneClick = useCallback(() => {
+    setOperatingNodeId(null);
+  }, [setOperatingNodeId]);
 
   const selectedNodes = nodes?.filter((node) => node.selected);
 
@@ -153,8 +176,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           panOnDrag={interactionMode === 'mouse'}
           zoomOnScroll={interactionMode === 'mouse'}
           zoomOnPinch={interactionMode === 'touchpad'}
-          selectNodesOnDrag={interactionMode === 'mouse'}
-          selectionOnDrag={interactionMode === 'touchpad'}
+          selectNodesOnDrag={!operatingNodeId && interactionMode === 'mouse'}
+          selectionOnDrag={!operatingNodeId && interactionMode === 'touchpad'}
           nodeTypes={nodeTypes}
           nodes={nodes}
           edges={edges}
@@ -162,7 +185,9 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onNodeClick={onNodeClick}
+          onPaneClick={onPaneClick}
           nodeDragThreshold={10}
+          nodesDraggable={!operatingNodeId}
         >
           <Background />
           <MiniMap

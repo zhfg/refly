@@ -15,6 +15,7 @@ import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
@@ -32,6 +33,12 @@ export const DocumentNode = ({
   const { setEdges } = useReactFlow();
   const { i18n, t } = useTranslation();
   const language = i18n.languages?.[0];
+
+  const { operatingNodeId } = useCanvasStoreShallow((state) => ({
+    operatingNodeId: state.operatingNodeId,
+  }));
+
+  const isOperating = operatingNodeId === id;
 
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
@@ -106,6 +113,10 @@ export const DocumentNode = ({
       onMouseEnter={!isPreview ? handleMouseEnter : undefined}
       onMouseLeave={!isPreview ? handleMouseLeave : undefined}
       onClick={onNodeClick}
+      style={{
+        userSelect: isOperating ? 'text' : 'none',
+        cursor: isOperating ? 'text' : 'grab',
+      }}
     >
       {!isPreview && !hideActions && (
         <ActionButtons
@@ -182,7 +193,7 @@ export const DocumentNode = ({
 
           <Spin spinning={status === 'executing' && !data.contentPreview}>
             <Markdown
-              className="text-xs min-h-8"
+              className={`text-xs min-h-8 ${isOperating ? 'pointer-events-auto' : 'pointer-events-none'}`}
               content={data.contentPreview || t('canvas.nodePreview.document.noContentPreview')}
             />
           </Spin>
