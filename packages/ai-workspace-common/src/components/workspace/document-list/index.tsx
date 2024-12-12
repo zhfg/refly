@@ -135,6 +135,7 @@ export const DocumentList = () => {
           }}
           dataSource={dataList}
           locale={{ emptyText: t('common.empty') }}
+          loading={isRequesting}
           loadMore={
             dataList.length > 0 ? (
               <ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />

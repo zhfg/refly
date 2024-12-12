@@ -11,6 +11,7 @@ import {
   Input,
   Modal,
   Skeleton,
+  message,
 } from 'antd';
 import { useSiderStore, useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useTranslation } from 'react-i18next';
@@ -26,11 +27,13 @@ import {
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
 import Logo from '../../../../../../apps/web/src/assets/logo.svg';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/use-delete-canvas';
+import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useUpdateCanvas } from '@refly-packages/ai-workspace-common/queries/queries';
 import { Helmet } from 'react-helmet';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useNavigate } from 'react-router-dom';
+import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -55,8 +58,6 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
     }));
   const canvasTitle = data[canvasId]?.title;
   const { setCanvasTitle, onLayout } = useCanvasControl();
-
-  const { deleteCanvas } = useDeleteCanvas();
 
   const [editedTitle, setEditedTitle] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -94,9 +95,42 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
 
   const ActionDropdown = () => {
     const [popupVisible, setPopupVisible] = useState(false);
+    const [isRequest, setIsRequest] = useState(false);
+    const navigate = useNavigate();
+    const { getCanvasList, canvasList } = useHandleSiderData();
 
     const handleDelete = async () => {
-      await deleteCanvas(canvasId);
+      if (isRequest) return;
+      let success = false;
+      setIsRequest(true);
+      const { data } = await getClient().deleteCanvas({
+        body: {
+          canvasId,
+        },
+      });
+
+      setIsRequest(false);
+
+      if (data?.success) {
+        success = true;
+        message.success(t('canvas.action.deleteSuccess'));
+
+        // Check and remove canvasId from localStorage if matches
+        const { currentCanvasId, setCurrentCanvasId } = useCanvasStore.getState();
+        if (currentCanvasId === canvasId) {
+          setCurrentCanvasId(null);
+        }
+
+        await getCanvasList();
+        if (currentCanvasId === canvasId) {
+          const firstCanvas = canvasList?.find((canvas) => canvas.id !== canvasId);
+          if (firstCanvas?.id) {
+            navigate(`/canvas/${firstCanvas?.id}`, { replace: true });
+          } else {
+            navigate('/canvas/empty', { replace: true });
+          }
+        }
+      }
     };
 
     const items: MenuProps['items'] = [

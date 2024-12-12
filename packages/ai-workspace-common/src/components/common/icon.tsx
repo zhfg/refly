@@ -7,6 +7,7 @@ import {
   HiOutlineChatBubbleLeftRight,
   HiMiniPlayCircle,
   HiPlus,
+  HiMinus,
 } from 'react-icons/hi2';
 import { IoIosMore } from 'react-icons/io';
 import { HiOutlineReply } from 'react-icons/hi';
@@ -17,6 +18,7 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BiText } from 'react-icons/bi';
 import { PiNotePencil } from 'react-icons/pi';
 import { IoLibraryOutline } from 'react-icons/io5';
+import { HiOutlineChevronDown } from 'react-icons/hi';
 
 export const IconProject = IconFolder;
 export const IconCanvasFill = HiSparkles;
@@ -29,6 +31,7 @@ export const IconThread = HiOutlineChatBubbleLeftRight;
 export const IconQuote = RiDoubleQuotesL;
 export const IconText = BiText;
 export const IconPlus = HiPlus;
+export const IconMinus = HiMinus;
 export const IconCheck = LuCheck;
 export const IconPlay = HiMiniPlayCircle;
 export const IconReply = HiOutlineReply;
@@ -39,3 +42,4 @@ export const IconSearch = LuSearch;
 export const IconLoading = AiOutlineLoading3Quarters;
 export const IconSettings = LuSettings;
 export const IconCopy = LuCopy;
+export const IconDown = HiOutlineChevronDown;
