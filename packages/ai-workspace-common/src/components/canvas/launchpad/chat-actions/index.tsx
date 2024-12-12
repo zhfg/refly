@@ -1,5 +1,4 @@
-import { Button } from 'antd';
-import { Tooltip } from '@arco-design/web-react';
+import { Button, Tooltip } from 'antd';
 import { FormInstance } from '@arco-design/web-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -98,7 +97,7 @@ export const ChatActions = (props: ChatActionsProps) => {
       </div>
       <div className="right-actions">
         {messageStateStore?.pending ? <Button size="small" icon={<IconPause />} onClick={handleAbort} /> : null}
-        <Tooltip content={t('copilot.chatActions.recommendQuestions')}>
+        <Tooltip destroyTooltipOnHide title={t('copilot.chatActions.recommendQuestions')}>
           <Button
             size="small"
             icon={<PiMagicWand />}
