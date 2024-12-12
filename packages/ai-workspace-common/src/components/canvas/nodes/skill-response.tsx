@@ -2,7 +2,7 @@ import { Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './types';
 import { Node } from '@xyflow/react';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { CustomHandle } from './custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
@@ -23,7 +23,7 @@ import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { genUniqueId } from '@refly-packages/ai-workspace-common/utils';
-import { CanvasSelectionContext } from '../../../modules/selection-menu/canvas-selection-context';
+import { useGetActionResult } from '@refly-packages/ai-workspace-common/queries';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -37,7 +37,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
-  const { title, contentPreview: content, metadata, createdAt } = data;
+  const { title, contentPreview: content, metadata, createdAt, entityId } = data;
   const { status, modelName, artifacts, currentLog: log, structuredData } = metadata ?? {};
   const sources = Array.isArray(structuredData?.sources) ? structuredData?.sources : [];
 
@@ -55,6 +55,25 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
         defaultValue: '',
       })
     : '';
+
+  const { setNodeData } = useCanvasControl();
+  const { data: result } = useGetActionResult({ query: { resultId: entityId } }, null, {
+    enabled: !!entityId && status !== 'finish' && status !== 'failed',
+    refetchInterval: 2000,
+  });
+  const remoteStatus = result?.data?.status;
+
+  useEffect(() => {
+    if (remoteStatus !== status) {
+      setNodeData(id, {
+        ...data,
+        metadata: {
+          ...metadata,
+          status: remoteStatus,
+        },
+      });
+    }
+  }, [remoteStatus]);
 
   // Get query and response content from result
   const query = title || t('copilot.chatHistory.loading');
@@ -210,7 +229,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           onDelete={handleDelete}
           onHelpLink={handleHelpLink}
           onAbout={handleAbout}
-          isCompleted={metadata?.status === 'finish'}
+          isCompleted={status === 'finish'}
           isCreatingDocument={isCreating}
         />
       )}
