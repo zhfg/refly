@@ -176,6 +176,18 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   }));
   const isOperating = operatingNodeId === id;
 
+  const renderContent = () => {
+    if (!content) return null;
+
+    return (
+      <Markdown
+        content={String(content)}
+        sources={sources}
+        className={`text-xs ${isOperating ? 'pointer-events-auto skill-response-node-content' : 'pointer-events-none'}`}
+      />
+    );
+  };
+
   return (
     <div
       className="relative group"
@@ -267,8 +279,10 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
               onClick={handleClickSources}
             >
               <span className="flex items-center gap-1 text-xs text-gray-500">
-                <IconSearch className="h-3 w-3 text-gray-500" />
-                {t('canvas.skillResponse.sourcesCnt', { count: sources.length })}
+                <>
+                  <IconSearch className="h-3 w-3 text-gray-500" />
+                  {t('canvas.skillResponse.sourcesCnt', { count: sources.length })}
+                </>
               </span>
               <LuChevronRight className="h-3 w-3 text-gray-500" />
             </div>
@@ -289,19 +303,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           )}
 
           <div ref={contentRef} className="skill-response-node-content relative">
-            <Markdown
-              content={content}
-              sources={sources}
-              className={`text-xs ${isOperating ? 'pointer-events-auto skill-response-node-content' : 'pointer-events-none'}`}
-            />
-            {/* {isOperating && contentRef.current && (
-              <CanvasSelectionContext
-                containerClass="skill-response-node-content"
-                containerRef={contentRef}
-                getNodeData={(text) => buildNodeData(text)}
-                nodeId={id}
-              />
-            )} */}
+            {renderContent()}
           </div>
 
           <div className="text-xs text-gray-400">

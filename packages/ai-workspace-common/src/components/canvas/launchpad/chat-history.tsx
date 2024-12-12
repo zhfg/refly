@@ -47,31 +47,40 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
   }, []);
 
   const { setSelectedNodeByEntity } = useCanvasControl();
-  const handleItemClick = (item: NodeItem) => {
+  const handleItemClick = (item: NodeItem, event: React.MouseEvent) => {
+    event.preventDefault();
+    if (!item?.id || !item?.data?.entityId) return;
+
     setNodeCenter(item.id);
-    setSelectedNodeByEntity({ type: 'skillResponse', entityId: item.data.entityId });
+    setSelectedNodeByEntity({
+      type: 'skillResponse',
+      entityId: item.data.entityId,
+    });
   };
 
-  if (!chatHistoryOpen || renderItems?.length === 0) {
+  // Add validation for renderItems
+  const validItems = (renderItems || []).filter((item) => item && typeof item === 'object' && item.data);
+
+  if (!chatHistoryOpen || validItems.length === 0) {
     return null;
   }
 
   return (
     <div className="w-full px-2 space-y-1 rounded-lg max-h-[200px] overflow-y-auto">
-      {renderItems.map((item, index) => (
+      {validItems.map((item, index) => (
         <div
-          key={index}
+          key={`${item.id || index}`}
           className={cn('m-1 py-1 px-2 rounded-lg cursor-pointer border-gray-100 hover:bg-gray-100', {
             'border-dashed': item.isPreview,
             'border-solid bg-gray-100': !item.isPreview,
           })}
-          onClick={() => handleItemClick(item)}
+          onClick={(e) => handleItemClick(item, e)}
         >
           <div className="text-gray-800 font-medium flex items-center justify-between text-xs">
-            <span className="flex items-center whitespace-nowrap overflow-hidden">
+            <div className="flex items-center whitespace-nowrap overflow-hidden">
               <IconReply className="h-4 w-4 mr-1" />
               <div className="max-w-[200px] truncate">{item.data?.title}</div>
-            </span>
+            </div>
             <div className="flex items-center space-x-1">
               <span className="text-gray-400 text-xs mr-1">
                 {time(item.data.createdAt, language as LOCALE)
