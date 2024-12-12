@@ -16,7 +16,7 @@ import {
   processMentionedContextWithSimilarity,
 } from './semanticSearch';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
-import { mergeAndTruncateContexts, truncateContext, truncateText } from './truncator';
+import { mergeAndTruncateContexts, truncateContext } from './truncator';
 import { flattenMergedContextToSources, concatMergedContextToStr } from './summarizer';
 import {
   SkillContextContentItem,

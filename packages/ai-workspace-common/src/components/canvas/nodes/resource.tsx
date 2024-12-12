@@ -13,6 +13,7 @@ import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-del
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
+import { useThrottledCallback } from 'use-debounce';
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
@@ -38,35 +39,47 @@ export const ResourceNode = ({
   const isSourceConnected = edges?.some((edge) => edge.source === id);
 
   // Handle node hover events
-  const handleMouseEnter = useCallback(() => {
-    setIsHovered(true);
-    setEdges((eds) =>
-      eds.map((edge) => {
-        if (edge.source === id || edge.target === id) {
-          return {
-            ...edge,
-            style: EDGE_STYLES.hover,
-          };
-        }
-        return edge;
-      }),
-    );
-  }, [id, setEdges]);
+  const handleMouseEnter = useThrottledCallback(
+    () => {
+      if (!isHovered) {
+        setIsHovered(true);
+        setEdges((eds) =>
+          eds.map((edge) => {
+            if (edge.source === id || edge.target === id) {
+              return {
+                ...edge,
+                style: EDGE_STYLES.hover,
+              };
+            }
+            return edge;
+          }),
+        );
+      }
+    },
+    500,
+    { leading: true, trailing: false },
+  );
 
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false);
-    setEdges((eds) =>
-      eds.map((edge) => {
-        if (edge.source === id || edge.target === id) {
-          return {
-            ...edge,
-            style: EDGE_STYLES.default,
-          };
-        }
-        return edge;
-      }),
-    );
-  }, [id, setEdges]);
+  const handleMouseLeave = useThrottledCallback(
+    () => {
+      if (isHovered) {
+        setIsHovered(false);
+        setEdges((eds) =>
+          eds.map((edge) => {
+            if (edge.source === id || edge.target === id) {
+              return {
+                ...edge,
+                style: EDGE_STYLES.default,
+              };
+            }
+            return edge;
+          }),
+        );
+      }
+    },
+    500,
+    { leading: false, trailing: true },
+  );
 
   const handleAddToContext = useAddToContext(
     {

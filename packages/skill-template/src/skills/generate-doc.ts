@@ -16,7 +16,7 @@ import { GraphState, IContext } from '../scheduler/types';
 // utils
 import { prepareContext } from '../scheduler/utils/context';
 import { analyzeQueryAndContext, preprocessQuery } from '../scheduler/utils/queryRewrite';
-import { truncateMessages } from '../scheduler/utils/truncator';
+import { truncateMessages, truncateSource } from '../scheduler/utils/truncator';
 import { countMessagesTokens, countToken, ModelContextLimitMap, checkHasContext } from '../scheduler/utils/token';
 import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils/message';
 
@@ -24,7 +24,7 @@ import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils
 import * as generateDocument from '../scheduler/module/generateDocument';
 import { extractStructuredData } from '../scheduler/utils/extractor';
 import { BaseMessage, HumanMessage } from '@langchain/core/dist/messages';
-import { truncateText } from '../scheduler/utils/truncator';
+import { truncateTextWithToken } from '../scheduler/utils/truncator';
 
 // Add title schema with reason
 const titleSchema = z.object({
@@ -155,7 +155,7 @@ export class GenerateDoc extends BaseSkill {
         this.emitEvent(
           {
             event: 'structured_data',
-            content: JSON.stringify(sources),
+            content: JSON.stringify(truncateSource(sources)),
             structuredDataKey: 'sources',
           },
           config,
@@ -197,7 +197,7 @@ export class GenerateDoc extends BaseSkill {
       const tokens = countToken(context);
       if (tokens > maxContextTokens) {
         // Take first part of context up to token limit
-        contextSnippet = truncateText(context, maxContextTokens);
+        contextSnippet = truncateTextWithToken(context, maxContextTokens);
       } else {
         contextSnippet = context;
       }

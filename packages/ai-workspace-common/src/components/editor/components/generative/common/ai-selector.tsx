@@ -141,6 +141,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
 
   const updateResult = useCallback(
     (update: { resultId: string; payload: ActionResult }) => {
+      console.log('updateResult', update?.payload);
       if (update?.resultId === resultId) {
         if (isLoading) {
           setIsLoading(false);

@@ -13,7 +13,7 @@ import { GraphState, IContext } from '../scheduler/types';
 // utils
 import { prepareContext } from '../scheduler/utils/context';
 import { analyzeQueryAndContext, preprocessQuery } from '../scheduler/utils/queryRewrite';
-import { truncateMessages } from '../scheduler/utils/truncator';
+import { truncateMessages, truncateSource } from '../scheduler/utils/truncator';
 import { countMessagesTokens, countToken, ModelContextLimitMap, checkHasContext } from '../scheduler/utils/token';
 import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils/message';
 
@@ -152,14 +152,16 @@ export class EditDoc extends BaseSkill {
 
       this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
 
-      this.emitEvent(
-        {
-          event: 'structured_data',
-          content: JSON.stringify(sources),
-          structuredDataKey: 'sources',
-        },
-        config,
-      );
+      if (sources.length > 0) {
+        this.emitEvent(
+          {
+            event: 'structured_data',
+            content: JSON.stringify(truncateSource(sources)),
+            structuredDataKey: 'sources',
+          },
+          config,
+        );
+      }
     }
 
     const requestMessages = buildFinalRequestMessages({

@@ -80,15 +80,13 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     style: EDGE_STYLES.default,
   };
 
-  const defaultViewport = {
-    x: 0,
-    y: 0,
-    zoom: 0.75,
-  };
-
   const flowConfig = useMemo(
     () => ({
-      defaultViewport,
+      defaultViewport: {
+        x: 0,
+        y: 0,
+        zoom: 0.75,
+      },
       fitViewOptions: {
         padding: 0.2,
         minZoom: 0.1,
@@ -96,8 +94,9 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         duration: 200,
       },
       defaultEdgeOptions,
+      // elevateNodesOnSelect: false,
     }),
-    [],
+    [mode],
   );
 
   const onNodeClick = useCallback(

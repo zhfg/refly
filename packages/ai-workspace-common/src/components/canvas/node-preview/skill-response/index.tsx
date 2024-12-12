@@ -48,6 +48,7 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
   }, [resultId]);
 
   const scrollToBottom = (event: { resultId: string; payload: ActionResult }) => {
+    console.log('scrollToBottom', event);
     if (event.resultId !== resultId || event.payload.status !== 'executing') {
       return;
     }
