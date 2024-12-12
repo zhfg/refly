@@ -61,7 +61,7 @@ const translations = {
   },
   editor: {
     placeholder: {
-      default: "Write something, or press 'space' or '++' for AI, press '/' for commands",
+      default: "Write something, or press 'space' for AI, press '/' for commands",
     },
     aiSelector: {
       thinking: 'AI is thinking',
@@ -343,7 +343,7 @@ const translations = {
     canvas: {
       editor: {
         placeholder: {
-          default: "Write something, or press 'space' or '++' for AI, '/' for commands",
+          default: "Write something, or press 'space' for AI, '/' for commands",
           heading: 'Heading {{level}}',
         },
         toolbar: {
@@ -1347,6 +1347,7 @@ const translations = {
       current: 'Current ',
       documentSelection: 'Document Selection',
       resourceSelection: 'Resource Selection',
+      selection: 'Selected',
       skillResponseSelection: 'Skill Response Selection',
       documentCursorSelection: 'Document Cursor Selection',
       documentBeforeCursorSelection: 'Document Before Cursor Selection',
