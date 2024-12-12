@@ -32,8 +32,7 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
 
   // Subscribe to yjs document changes
   useEffect(() => {
-    const ydoc = provider?.document;
-
+    const ydoc = provider.document;
     if (!ydoc) return;
 
     const title = ydoc.getText('title');

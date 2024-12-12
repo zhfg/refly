@@ -45,6 +45,14 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
 
   // Define toolbar items
   const tools: ToolbarItem[] = [
+    // {
+    //   icon: FaArrowPointer,
+    //   value: 'changeMode',
+    //   type: 'button',
+    //   domain: 'changeMode',
+    //   tooltip: mode === 'pointer' ? t('canvas.toolbar.disablePointerMode') : t('canvas.toolbar.enablePointerMode'),
+    //   active: mode === 'pointer',
+    // },
     {
       icon: RiUploadCloud2Line,
       value: 'importResource',
