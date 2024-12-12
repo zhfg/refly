@@ -193,7 +193,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           nodeId={id}
           onAddToChatHistory={handleAddToChatHistory}
           onRerun={handleRerun}
-          onInsertToDoc={() => handleInsertToDoc('insertBlow')}
+          onInsertToDoc={() => handleInsertToDoc('insertBlow', content)}
           onCreateDocument={content ? handleCreateDocument : undefined}
           onDelete={handleDelete}
           onHelpLink={handleHelpLink}
