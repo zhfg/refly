@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { IconDelete, IconReply } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
-import { ChevronDown, Pin, PinOff } from 'lucide-react';
+import { Pin, PinOff } from 'lucide-react';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getResultDisplayContent } from '@refly-packages/ai-workspace-common/components/common/result-display';
@@ -32,8 +32,8 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
-  const { chatHistoryOpen, setChatHistoryOpen, historyItems, clearHistoryItems, handleItemPin, handleItemDelete } =
-    useChatHistory();
+  const { setNodeCenter } = useCanvasControl();
+  const { chatHistoryOpen, historyItems, clearHistoryItems, handleItemPin, handleItemDelete } = useChatHistory();
 
   const renderItems = items ?? historyItems;
 
@@ -46,9 +46,10 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
     };
   }, []);
 
-  const { addSelectedNodeByEntity } = useCanvasControl();
+  const { setSelectedNodeByEntity } = useCanvasControl();
   const handleItemClick = (item: NodeItem) => {
-    addSelectedNodeByEntity({ type: 'skillResponse', entityId: item.data.entityId });
+    setNodeCenter(item.id);
+    setSelectedNodeByEntity({ type: 'skillResponse', entityId: item.data.entityId });
   };
 
   if (!chatHistoryOpen || renderItems?.length === 0) {
