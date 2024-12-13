@@ -35,6 +35,7 @@ const translations = {
     selectContext: '选择待使用上下文',
     emptyInput: '内容为空，请填入或选择内容',
     retry: '重试',
+    connectionFailed: '连接失败，请重试',
     reset: '重置',
     apply: '应用',
     collapse: '折叠',

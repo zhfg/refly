@@ -35,6 +35,7 @@ const translations = {
     selectContext: 'Select Context',
     emptyInput: 'Content is empty, please fill in or select content',
     retry: 'Retry',
+    connectionFailed: 'Connection failed, please try again',
     reset: 'Reset',
     apply: 'Apply',
     collapse: 'Collapse',

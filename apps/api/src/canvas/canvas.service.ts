@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
+import * as Y from 'yjs';
 import { Queue } from 'bull';
 import { MINIO_INTERNAL } from '@/common/minio.service';
 import { MinioService } from '@/common/minio.service';
@@ -57,24 +58,12 @@ export class CanvasService {
       },
     });
 
-    const { document } = await this.collabService.openDirectConnection(canvasId, {
-      user,
-      entity: canvas,
-      entityType: 'canvas',
-    });
+    const ydoc = new Y.Doc();
+    ydoc.getText('title').insert(0, param.title);
 
-    document.transact(() => {
-      document.getText('title').insert(0, param.title);
+    await this.minio.client.putObject(stateStorageKey, Buffer.from(Y.encodeStateAsUpdate(ydoc)));
 
-      // We have to add a dummy node and then remove it to make sure the yjs document
-      // can be connected. The reason is still unclear.
-      document
-        .getArray('nodes')
-        .insert(0, [{ id: '1', position: { x: 0, y: 0 }, data: { label: '1' } }]);
-      document.getArray('nodes').delete(0, 1);
-    });
-
-    this.logger.log(`updated canvas data: ${JSON.stringify(document.toJSON())}`);
+    this.logger.log(`created canvas data: ${JSON.stringify(ydoc.toJSON())}`);
 
     await this.elasticsearch.upsertCanvas({
       id: canvas.canvasId,
