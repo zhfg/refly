@@ -2,7 +2,7 @@ import { Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './types';
 import { Node } from '@xyflow/react';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { CustomHandle } from './custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
@@ -44,6 +44,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
     width: node?.measured?.width ?? 288,
     height: node?.measured?.height ?? 'auto',
   });
+  const moveableRef = useRef<Moveable>(null);
 
   const { title, contentPreview: content, metadata, createdAt } = data;
   const { status, modelName, artifacts, currentLog: log, structuredData } = metadata ?? {};
@@ -195,6 +196,18 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
     );
   };
 
+  const resizeMoveable = useCallback((width: number, height: number) => {
+    moveableRef.current?.request('resizable', { width, height });
+  }, []);
+
+  // Update size when content changes
+  useEffect(() => {
+    if (!targetRef.current) return;
+
+    const { offsetWidth, offsetHeight } = targetRef.current;
+    resizeMoveable(offsetWidth, offsetHeight);
+  }, [content, artifacts?.length, sources.length]);
+
   return (
     <div
       className="relative group"
@@ -332,6 +345,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
 
       {!isPreview && selected && (
         <Moveable
+          ref={moveableRef}
           target={targetRef}
           resizable={true}
           edge={false}
