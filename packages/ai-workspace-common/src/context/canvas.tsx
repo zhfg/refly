@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useCookie } from 'react-use';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/types';
@@ -13,15 +13,26 @@ interface CanvasContextType {
 
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
+const providerCache = new Map<string, HocuspocusProvider>();
+
 export const CanvasProvider = ({ canvasId, children }: { canvasId: string; children: React.ReactNode }) => {
   const [token] = useCookie('_refly_ai_sid');
 
   const provider = useMemo(() => {
-    return new HocuspocusProvider({
+    const existingProvider = providerCache.get(canvasId);
+    if (existingProvider?.status === 'connected') {
+      return existingProvider;
+    }
+
+    const newProvider = new HocuspocusProvider({
       url: getWsServerOrigin(),
       name: canvasId,
       token,
+      connect: true,
     });
+
+    providerCache.set(canvasId, newProvider);
+    return newProvider;
   }, [canvasId, token]);
 
   const { setNodes, setEdges, setTitle } = useCanvasStoreShallow((state) => ({
@@ -30,65 +41,121 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     setTitle: state.setTitle,
   }));
 
+  // Add connection status management
+  const [connectionAttempts, setConnectionAttempts] = useState(0);
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 2000;
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const handleConnection = () => {
+      if (provider.status !== 'connected' && connectionAttempts < MAX_RETRIES) {
+        timeoutId = setTimeout(() => {
+          console.log(`Retrying connection attempt ${connectionAttempts + 1}/${MAX_RETRIES}`);
+          provider.connect();
+          setConnectionAttempts((prev) => prev + 1);
+        }, RETRY_DELAY);
+      }
+    };
+
+    provider.on('status', ({ status }) => {
+      if (status === 'connected') {
+        setConnectionAttempts(0);
+      } else {
+        handleConnection();
+      }
+    });
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [provider, connectionAttempts]);
+
   // Subscribe to yjs document changes
   useEffect(() => {
     const ydoc = provider.document;
     if (!ydoc) return;
 
+    let isDestroyed = false;
+
+    // Get references to the shared types
     const title = ydoc.getText('title');
     const nodesArray = ydoc.getArray<CanvasNode>('nodes');
     const edgesArray = ydoc.getArray<Edge>('edges');
 
-    // 立即设置初始数据
-    if (provider.status === 'connected') {
-      setTitle(canvasId, title.toJSON());
+    // Connect handler
+    const handleConnect = () => {
+      if (isDestroyed) return;
 
-      const initialNodes = nodesArray.toJSON();
-      const uniqueNodesMap = new Map();
-      initialNodes.forEach((node) => uniqueNodesMap.set(node.id, node));
-      setNodes(canvasId, Array.from(uniqueNodesMap.values()));
-
-      const initialEdges = edgesArray.toJSON();
-      const uniqueEdgesMap = new Map();
-      initialEdges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
-      setEdges(canvasId, Array.from(uniqueEdgesMap.values()));
-    }
-
-    // 设置观察者回调
-    const titleObserverCallback = () => {
+      // 立即设置初始数据
       if (provider.status === 'connected') {
         setTitle(canvasId, title.toJSON());
-      }
-    };
 
-    const nodesObserverCallback = () => {
-      if (provider.status === 'connected') {
-        const nodes = nodesArray.toJSON();
+        const initialNodes = nodesArray.toJSON();
         const uniqueNodesMap = new Map();
-        nodes.forEach((node) => uniqueNodesMap.set(node.id, node));
+        initialNodes.forEach((node) => uniqueNodesMap.set(node.id, node));
         setNodes(canvasId, Array.from(uniqueNodesMap.values()));
-      }
-    };
 
-    const edgesObserverCallback = () => {
-      if (provider.status === 'connected') {
-        const edges = edgesArray.toJSON();
+        const initialEdges = edgesArray.toJSON();
         const uniqueEdgesMap = new Map();
-        edges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
+        initialEdges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
         setEdges(canvasId, Array.from(uniqueEdgesMap.values()));
       }
+
+      // 设置观察者回调
+      const titleObserverCallback = () => {
+        if (provider.status === 'connected') {
+          setTitle(canvasId, title.toJSON());
+        }
+      };
+
+      const nodesObserverCallback = () => {
+        if (provider.status === 'connected') {
+          const nodes = nodesArray.toJSON();
+          const uniqueNodesMap = new Map();
+          nodes.forEach((node) => uniqueNodesMap.set(node.id, node));
+          setNodes(canvasId, Array.from(uniqueNodesMap.values()));
+        }
+      };
+
+      const edgesObserverCallback = () => {
+        if (provider.status === 'connected') {
+          const edges = edgesArray.toJSON();
+          const uniqueEdgesMap = new Map();
+          edges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
+          setEdges(canvasId, Array.from(uniqueEdgesMap.values()));
+        }
+      };
+
+      // Add observers
+      title.observe(titleObserverCallback);
+      nodesArray.observe(nodesObserverCallback);
+      edgesArray.observe(edgesObserverCallback);
+
+      // Store cleanup functions
+      return () => {
+        title.unobserve(titleObserverCallback);
+        nodesArray.unobserve(nodesObserverCallback);
+        edgesArray.unobserve(edgesObserverCallback);
+      };
     };
 
-    title.observe(titleObserverCallback);
-    nodesArray.observe(nodesObserverCallback);
-    edgesArray.observe(edgesObserverCallback);
+    const cleanup = handleConnect();
+    provider.on('connect', handleConnect);
 
     return () => {
-      title.unobserve(titleObserverCallback);
-      nodesArray.unobserve(nodesObserverCallback);
-      edgesArray.unobserve(edgesObserverCallback);
+      isDestroyed = true;
+      cleanup?.(); // Clean up observers
+      provider.off('connect', handleConnect);
 
-      provider.forceSync();
+      // Ensure clean disconnection
+      if (provider.status === 'connected') {
+        provider.forceSync();
+      }
+
+      // Remove from cache and destroy
+      providerCache.delete(canvasId);
       provider.destroy();
     };
   }, [provider, canvasId, setNodes, setEdges, setTitle]);

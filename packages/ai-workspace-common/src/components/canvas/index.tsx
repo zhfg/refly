@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow } from '@xyflow/react';
+import { Button } from 'antd';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
@@ -170,8 +171,29 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     }
   }, [pendingNode]);
 
+  const [connectionTimeout, setConnectionTimeout] = useState(false);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (provider.status !== 'connected') {
+        setConnectionTimeout(true);
+      }
+    }, 10000); // 10 seconds timeout
+
+    return () => clearTimeout(timeoutId);
+  }, [provider]);
+
   return (
-    <Spin className="w-full h-full" spinning={provider.status !== 'connected'} tip={t('common.loading')}>
+    <Spin
+      className="w-full h-full"
+      spinning={provider.status !== 'connected' && !connectionTimeout}
+      tip={connectionTimeout ? t('common.connectionFailed') : t('common.loading')}
+    >
+      {connectionTimeout && (
+        <div className="text-center">
+          <Button onClick={() => window.location.reload()}>{t('common.retry')}</Button>
+        </div>
+      )}
       <div className="w-full h-screen relative flex flex-col overflow-hidden">
         <CanvasToolbar onToolSelect={handleToolSelect} />
         <TopToolbar canvasId={canvasId} />
