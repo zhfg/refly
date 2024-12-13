@@ -467,6 +467,7 @@ const translations = {
       addSuccess: '画布添加好啦，开始创作吧~',
     },
     skillResponse: {
+      executionFailed: '执行失败，点击重试',
       skillCompleted: '技能执行完成',
       stepCompleted: '步骤执行完成',
       stepTitle: '步骤 {{index}}',

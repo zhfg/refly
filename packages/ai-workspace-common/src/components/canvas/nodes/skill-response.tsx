@@ -14,7 +14,12 @@ import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/u
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/use-add-to-chat-history';
-import { IconCanvas, IconLoading, IconSearch } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconCanvas,
+  IconError,
+  IconLoading,
+  IconSearch,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
@@ -229,7 +234,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           onDelete={handleDelete}
           onHelpLink={handleHelpLink}
           onAbout={handleAbout}
-          isCompleted={status === 'finish'}
+          isCompleted={status === 'finish' || status === 'failed'}
           isCreatingDocument={isCreating}
         />
       )}
@@ -276,8 +281,17 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
             <span className="text-sm font-medium leading-normal truncate">{query}</span>
           </div>
 
-          {status !== 'finish' && !content && !artifacts?.length && (
-            <div className="flex items-center gap-2 mt-1 bg-gray-100 rounded-sm p-2">
+          {status === 'failed' && (
+            <div className="flex items-center justify-center gap-1 mt-1 hover:bg-gray-50 rounded-sm p-2 cursor-pointer">
+              <IconError className="h-4 w-4 text-red-500" />
+              <span className="text-xs text-red-500 max-w-48 truncate">
+                {t('canvas.skillResponse.executionFailed')}
+              </span>
+            </div>
+          )}
+
+          {(status === 'waiting' || status === 'executing') && !content && !artifacts?.length && (
+            <div className="flex items-center gap-2 bg-gray-100 rounded-sm p-2">
               <IconLoading className="h-3 w-3 animate-spin text-green-500" />
               <span className="text-xs text-gray-500 max-w-48 truncate">
                 {log ? (

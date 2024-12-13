@@ -13,6 +13,7 @@ import { IoIosMore } from 'react-icons/io';
 import { HiOutlineReply } from 'react-icons/hi';
 import { LuSearch, LuSettings, LuCheck, LuCopy, LuTrash } from 'react-icons/lu';
 import { LuView } from 'react-icons/lu';
+import { RiErrorWarningLine } from 'react-icons/ri';
 
 import { RiDoubleQuotesL } from 'react-icons/ri';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
@@ -41,6 +42,7 @@ export const IconMoreHorizontal = IoIosMore;
 export const IconEdit = PiNotePencil;
 export const IconDelete = LuTrash;
 export const IconSearch = LuSearch;
+export const IconError = RiErrorWarningLine;
 export const IconLoading = AiOutlineLoading3Quarters;
 export const IconSettings = LuSettings;
 export const IconCopy = LuCopy;

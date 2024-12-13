@@ -475,6 +475,7 @@ const translations = {
       addSuccess: 'Canvas added successfully, start creating!',
     },
     skillResponse: {
+      executionFailed: 'Execution failed, click to retry',
       skillCompleted: 'Skill Completed',
       stepCompleted: 'Step Completed',
       stepTitle: 'Step {{index}}',
