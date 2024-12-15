@@ -180,6 +180,7 @@ export class CommonQnA extends BaseSkill {
       this.emitEvent({ structuredData: { sources: truncateSource(sources) } }, config);
     }
 
+    throw new Error('test');
     const model = this.engine.chatModel({ temperature: 0.1 });
     const responseMessage = await model.invoke(requestMessages, {
       ...config,

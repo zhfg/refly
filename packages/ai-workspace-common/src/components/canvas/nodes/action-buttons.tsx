@@ -1,12 +1,17 @@
 import { Button, Dropdown, MenuProps } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { IconReply, IconPreview } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconReply,
+  IconPreview,
+  IconRerun,
+  IconDelete,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useReactFlow } from '@xyflow/react';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { memo } from 'react';
-import { MoreHorizontal, PlayCircle, FileInput, Trash2, Loader2, MessageSquareDiff, FilePlus } from 'lucide-react';
+import { MoreHorizontal, FileInput, Loader2, MessageSquareDiff, FilePlus } from 'lucide-react';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
 
 // Action button types
@@ -99,7 +104,7 @@ export const ActionButtons = memo(
         key: 'delete',
         label: (
           <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
-            <Trash2 className="w-4 h-4 flex-shrink-0" />
+            <IconDelete className="w-4 h-4 flex-shrink-0" />
             {t('canvas.nodeActions.delete')}
           </div>
         ),
@@ -195,15 +200,13 @@ export const ActionButtons = memo(
         {/* Skill Response specific buttons */}
         {type === 'skill-response' && (
           <>
-            {onRerun &&
-              (isCompleted ? null : (
-                <ActionButton
-                  icon={<PlayCircle className="w-4 h-4" />}
-                  onClick={onRerun}
-                  loading={!isCompleted}
-                  tooltip={t('canvas.nodeActions.rerun')}
-                />
-              ))}
+            {onRerun && isCompleted && (
+              <ActionButton
+                icon={<IconRerun className="w-4 h-4" />}
+                onClick={onRerun}
+                tooltip={t('canvas.nodeActions.rerun')}
+              />
+            )}
             {onInsertToDoc && (
               <ActionButton
                 icon={<FileInput className="w-4 h-4" />}

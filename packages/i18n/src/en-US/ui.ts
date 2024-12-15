@@ -43,6 +43,7 @@ const translations = {
     close: 'Close',
     canvas: 'Canvas',
     newCanvas: 'New Canvas',
+    skillResponse: 'Skill Response',
     resource: 'Resource',
     document: 'Document',
     newDocument: 'New Document',

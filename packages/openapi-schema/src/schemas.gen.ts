@@ -3191,7 +3191,6 @@ export const InvokeActionResponseSchema = {
 
 export const InvokeSkillRequestSchema = {
   type: 'object',
-  required: ['input', 'target'],
   properties: {
     input: {
       description: 'Skill input',
@@ -3223,7 +3222,11 @@ export const InvokeSkillRequestSchema = {
     },
     resultId: {
       type: 'string',
-      description: 'Result ID (will be generated if not provided)',
+      description: `Result ID associated with this invocation.
+1) If not provided, a new resultId will be generated.
+2) If there is no existing result with this resultId, it will be created and run.
+3) If there is an existing result with this resultId, it will be rerun.
+`,
     },
     skillId: {
       type: 'string',

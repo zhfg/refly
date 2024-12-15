@@ -34,7 +34,7 @@ export class ActionService {
     }
 
     const steps = await this.prisma.actionStep.findMany({
-      where: { resultId },
+      where: { resultId, deletedAt: null },
       orderBy: { order: 'asc' },
     });
     return { ...result, steps };

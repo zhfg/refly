@@ -18,7 +18,7 @@ import {
   useActionResultStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
-import { aggregateTokenUsage } from '@refly-packages/utils/index';
+import { aggregateTokenUsage, genActionResultID } from '@refly-packages/utils/index';
 import { CanvasNodeData, ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useListSkills } from '@refly-packages/ai-workspace-common/queries/queries';
 
@@ -304,6 +304,8 @@ export const useInvokeAction = () => {
   const { data } = useListSkills();
 
   const invokeAction = (payload: InvokeSkillRequest) => {
+    payload.resultId ||= genActionResultID();
+
     const { resultId, input } = payload;
 
     payload.skillName ||= 'commonQnA';

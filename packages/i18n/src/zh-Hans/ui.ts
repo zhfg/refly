@@ -43,6 +43,7 @@ const translations = {
     close: '关闭',
     canvas: '画布',
     newCanvas: '新画布',
+    skillResponse: '技能响应',
     resource: '资源',
     document: '文档',
     newDocument: '新文档',
