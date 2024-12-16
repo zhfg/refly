@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CanvasNodeData, ResourceNodeMeta, CanvasNode, ResourceNodeProps } from './types';
 import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { EDGE_STYLES } from '../constants';
 import { getNodeCommonStyles } from './index';
@@ -16,6 +16,7 @@ import { LOCALE } from '@refly/common-types';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { useThrottledCallback } from 'use-debounce';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
 import Moveable from 'react-moveable';
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
@@ -31,7 +32,7 @@ export const ResourceNode = ({
 }: ResourceNodeProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
-  const { edges } = useCanvasControl();
+  const { edges, setNodeDataByEntity } = useCanvasControl();
   const { setEdges } = useReactFlow();
   const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
 
@@ -118,6 +119,40 @@ export const ResourceNode = ({
   }));
 
   const isOperating = operatingNodeId === id;
+
+  const [shouldPoll, setShouldPoll] = useState(false);
+  const { data: result } = useGetResourceDetail(
+    {
+      query: { resourceId: data?.entityId },
+    },
+    null,
+    {
+      enabled: shouldPoll,
+      refetchInterval: 2000,
+    },
+  );
+  const remoteResult = result?.data;
+
+  useEffect(() => {
+    if (!data.contentPreview) {
+      setNodeDataByEntity(
+        {
+          entityId: data.entityId,
+          type: 'resource',
+        },
+        {
+          contentPreview: remoteResult?.contentPreview,
+        },
+      );
+      if (remoteResult?.indexStatus === 'wait_parse') {
+        setShouldPoll(true);
+      } else {
+        setShouldPoll(false);
+      }
+    } else {
+      setShouldPoll(false);
+    }
+  }, [data.contentPreview, remoteResult]);
 
   return (
     <div>
