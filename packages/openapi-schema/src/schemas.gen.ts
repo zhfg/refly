@@ -3240,6 +3240,14 @@ export const InvokeSkillRequestSchema = {
       type: 'string',
       description: 'Selected model',
     },
+    skillId: {
+      type: 'string',
+      description: 'Skill ID',
+    },
+    triggerId: {
+      type: 'string',
+      description: 'Trigger ID',
+    },
   },
 } as const;
 

@@ -4074,6 +4074,12 @@ components:
         modelName:
           type: string
           description: Selected model
+        skillId:
+          type: string
+          description: Skill ID
+        triggerId:
+          type: string
+          description: Trigger ID
     InvokeSkillResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

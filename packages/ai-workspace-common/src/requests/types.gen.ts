@@ -2302,6 +2302,14 @@ export type InvokeSkillRequest = {
      * Selected model
      */
     modelName?: string;
+    /**
+     * Skill ID
+     */
+    skillId?: string;
+    /**
+     * Trigger ID
+     */
+    triggerId?: string;
 };
 
 export type InvokeSkillResponse = BaseResponse & {
