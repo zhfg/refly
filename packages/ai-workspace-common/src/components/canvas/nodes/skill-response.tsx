@@ -1,20 +1,27 @@
-import { Position, NodeProps, useReactFlow } from '@xyflow/react';
+import { Position, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
+import Moveable from 'react-moveable';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './types';
 import { Node } from '@xyflow/react';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { CustomHandle } from './custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { EDGE_STYLES } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
+import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/use-insert-to-document';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/use-add-to-chat-history';
-import { IconCanvas, IconLoading, IconSearch } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconCanvas,
+  IconError,
+  IconLoading,
+  IconSearch,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
@@ -22,9 +29,10 @@ import { Markdown } from '@refly-packages/ai-workspace-common/components/markdow
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useGetActionResult } from '@refly-packages/ai-workspace-common/queries';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { genUniqueId } from '@refly-packages/ai-workspace-common/utils';
 import { CanvasSelectionContext } from '../../../modules/selection-menu/canvas-selection-context';
-import Moveable from 'react-moveable';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -32,12 +40,15 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { data, selected, id, hideActions = false, isPreview = false, hideHandles = false, onNodeClick } = props;
   const [isHovered, setIsHovered] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
-  const { edges } = useCanvasControl();
+  const { edges, setNodeData } = useCanvasControl();
   const { setEdges, getNode } = useReactFlow();
 
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
+  const { canvasId } = useCanvasContext();
+
+  const { title, contentPreview: content, metadata, createdAt, entityId } = data;
   const node = getNode(id);
   const targetRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({
@@ -46,7 +57,6 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   });
   const moveableRef = useRef<Moveable>(null);
 
-  const { title, contentPreview: content, metadata, createdAt } = data;
   const { status, modelName, artifacts, currentLog: log, structuredData } = metadata ?? {};
   const sources = Array.isArray(structuredData?.sources) ? structuredData?.sources : [];
 
@@ -65,36 +75,64 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
       })
     : '';
 
+  const [shouldPoll, setShouldPoll] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShouldPoll(true);
+    }, 2000);
+
+    return () => {
+      clearTimeout(timer);
+      setShouldPoll(false);
+    };
+  }, [data]);
+
+  const { data: result } = useGetActionResult({ query: { resultId: entityId } }, null, {
+    enabled: Boolean(entityId) && (!status || status === 'executing' || status === 'waiting') && shouldPoll,
+    refetchInterval: 2000,
+  });
+  const remoteResult = result?.data;
+
+  useEffect(() => {
+    const remoteStatus = remoteResult?.status;
+    const nodeStatus = data?.metadata?.status;
+
+    if (shouldPoll && remoteStatus && (remoteStatus === 'finish' || remoteStatus === 'failed')) {
+      let shouldUpdate = false;
+      let newNodeData = { ...data };
+
+      if (nodeStatus !== remoteStatus) {
+        shouldUpdate = true;
+        newNodeData.metadata = {
+          ...data.metadata,
+          status: remoteStatus,
+        };
+      }
+
+      const remoteContent = remoteResult?.steps
+        ?.map((s) => s.content)
+        .filter(Boolean)
+        .join('\n');
+
+      if (remoteStatus === 'finish' && data?.contentPreview !== remoteContent) {
+        shouldUpdate = true;
+        newNodeData.contentPreview = remoteContent;
+      }
+
+      if (shouldUpdate) {
+        console.log(`[${new Date().toISOString()}] update node data: ${newNodeData}`);
+        setNodeData(id, newNodeData);
+      }
+    }
+  }, [shouldPoll, remoteResult, data]);
+
   // Get query and response content from result
-  const query = title || t('copilot.chatHistory.loading');
+  const query = title;
 
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
   const isSourceConnected = edges?.some((edge) => edge.source === id);
-
-  const buildNodeData = (text: string) => {
-    const id = genUniqueId();
-
-    const node: CanvasNode = {
-      id,
-      type: 'skillResponse',
-      position: { x: 0, y: 0 },
-      data: {
-        entityId: data.entityId,
-        title: data.title || 'Selected Content',
-        metadata: {
-          contentPreview: text,
-          selectedContent: text,
-          xPath: id,
-          sourceEntityId: data.entityId,
-          sourceEntityType: 'skillResponse',
-          sourceType: 'skillResponseSelection',
-        },
-      },
-    };
-
-    return node;
-  };
 
   // Handle node hover events
   const handleMouseEnter = useCallback(() => {
@@ -129,10 +167,27 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
 
   const handleAddToChatHistory = useAddToChatHistory(node as NodeItem);
 
+  const { invokeAction } = useInvokeAction();
+
   const handleRerun = useCallback(() => {
-    // Implement rerun logic
-    console.log('Rerun:', id);
-  }, [id]);
+    // Disable polling temporarily after rerun
+    setShouldPoll(false);
+    setTimeout(() => setShouldPoll(true), 2000);
+
+    setNodeData(id, {
+      ...data,
+      contentPreview: '',
+      metadata: {
+        ...metadata,
+        status: 'waiting',
+      },
+    });
+    invokeAction({
+      resultId: entityId,
+      input: { query: title },
+      target: { entityType: 'canvas', entityId: canvasId },
+    });
+  }, [entityId, invokeAction, setNodeData]);
 
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
@@ -183,18 +238,6 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
     operatingNodeId: state.operatingNodeId,
   }));
   const isOperating = operatingNodeId === id;
-
-  const renderContent = () => {
-    if (!content) return null;
-
-    return (
-      <Markdown
-        content={String(content)}
-        sources={sources}
-        className={`text-xs ${isOperating ? 'pointer-events-auto skill-response-node-content' : 'pointer-events-none'}`}
-      />
-    );
-  };
 
   const resizeMoveable = useCallback((width: number, height: number) => {
     moveableRef.current?.request('resizable', { width, height });
@@ -285,8 +328,20 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
               <span className="text-sm font-medium leading-normal truncate">{query}</span>
             </div>
 
-            {status !== 'finish' && !content && !artifacts?.length && (
-              <div className="flex items-center gap-2 mt-1 bg-gray-100 rounded-sm p-2">
+            {status === 'failed' && (
+              <div
+                className="flex items-center justify-center gap-1 mt-1 hover:bg-gray-50 rounded-sm p-2 cursor-pointer"
+                onClick={() => handleRerun()}
+              >
+                <IconError className="h-4 w-4 text-red-500" />
+                <span className="text-xs text-red-500 max-w-48 truncate">
+                  {t('canvas.skillResponse.executionFailed')}
+                </span>
+              </div>
+            )}
+
+            {(status === 'waiting' || status === 'executing') && !content && !artifacts?.length && (
+              <div className="flex items-center gap-2 bg-gray-100 rounded-sm p-2">
                 <IconLoading className="h-3 w-3 animate-spin text-green-500" />
                 <span className="text-xs text-gray-500 max-w-48 truncate">
                   {log ? (
@@ -330,9 +385,15 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
               </div>
             )}
 
-            <div ref={contentRef} className="skill-response-node-content relative">
-              {renderContent()}
-            </div>
+            {content && (
+              <div ref={contentRef} className="skill-response-node-content relative">
+                <Markdown
+                  content={String(content)}
+                  sources={sources}
+                  className={`text-xs ${isOperating ? 'pointer-events-auto skill-response-node-content' : 'pointer-events-none'}`}
+                />
+              </div>
+            )}
 
             <div className="text-xs text-gray-400">
               {time(createdAt, language as LOCALE)

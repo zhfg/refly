@@ -415,9 +415,19 @@ export class SkillService {
 
     const resultId = param.resultId || genActionResultID();
 
-    const existingResult = await this.prisma.actionResult.findFirst({ where: { resultId, uid } });
+    // Check if the result already exists
+    const existingResult = await this.prisma.actionResult.findFirst({ where: { resultId } });
     if (existingResult) {
-      throw new ParamsError('action result already exists');
+      if (existingResult.uid !== uid) {
+        throw new ParamsError(`action result ${resultId} already exists for another user`);
+      }
+
+      param.input ??= existingResult.input
+        ? JSON.parse(existingResult.input)
+        : { query: existingResult.title };
+      param.skillName ??= JSON.parse(existingResult.actionMeta ?? '{}').name;
+      param.context ??= JSON.parse(existingResult.context ?? '{}');
+      param.resultHistory ??= JSON.parse(existingResult.history ?? '[]');
     }
 
     param.input ??= { query: '' };
@@ -448,31 +458,61 @@ export class SkillService {
       return resultHistory?.map((r) => pick(r, ['resultId', 'title', 'steps']));
     };
 
-    const result = await this.prisma.actionResult.create({
-      data: {
-        resultId,
-        uid,
-        targetId: param.target?.entityId,
-        targetType: param.target?.entityType,
-        title: param.input?.query,
-        type: 'skill',
-        status: 'executing',
-        actionMeta: JSON.stringify({
-          type: 'skill',
-          name: param.skillName,
-          icon: skill.icon,
-        } as ActionMeta),
-        context: JSON.stringify(purgeContext(param.context)),
-        history: JSON.stringify(purgeResultHistory(param.resultHistory)),
-      },
-    });
-
     const data: InvokeSkillJobData = {
       ...param,
       uid,
-      result: actionResultPO2DTO(result),
       rawParam: JSON.stringify(param),
     };
+
+    if (existingResult) {
+      const [result] = await this.prisma.$transaction([
+        this.prisma.actionResult.update({
+          where: { resultId },
+          data: {
+            status: 'executing',
+            title: param.input.query,
+            targetId: param.target?.entityId,
+            targetType: param.target?.entityType,
+            actionMeta: JSON.stringify({
+              type: 'skill',
+              name: param.skillName,
+              icon: skill.icon,
+            } as ActionMeta),
+            errors: JSON.stringify([]),
+            input: JSON.stringify(param.input),
+            context: JSON.stringify(purgeContext(param.context)),
+            history: JSON.stringify(purgeResultHistory(param.resultHistory)),
+          },
+        }),
+        // Delete existing step data
+        this.prisma.actionStep.updateMany({
+          where: { resultId },
+          data: { deletedAt: new Date() },
+        }),
+      ]);
+      data.result = actionResultPO2DTO(result);
+    } else {
+      const result = await this.prisma.actionResult.create({
+        data: {
+          resultId,
+          uid,
+          targetId: param.target?.entityId,
+          targetType: param.target?.entityType,
+          title: param.input?.query,
+          type: 'skill',
+          status: 'executing',
+          actionMeta: JSON.stringify({
+            type: 'skill',
+            name: param.skillName,
+            icon: skill.icon,
+          } as ActionMeta),
+          input: JSON.stringify(param.input),
+          context: JSON.stringify(purgeContext(param.context)),
+          history: JSON.stringify(purgeResultHistory(param.resultHistory)),
+        },
+      });
+      data.result = actionResultPO2DTO(result);
+    }
 
     return data;
   }
@@ -839,7 +879,8 @@ export class SkillService {
       if (res) {
         writeSSEResponse(res, {
           event: 'error',
-          content: JSON.stringify(genBaseRespDataFromError(err)),
+          resultId,
+          error: genBaseRespDataFromError(err),
         });
       }
       result.errors.push(err.message);

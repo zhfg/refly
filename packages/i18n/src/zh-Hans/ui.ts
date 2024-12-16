@@ -43,6 +43,7 @@ const translations = {
     close: '关闭',
     canvas: '画布',
     newCanvas: '新画布',
+    skillResponse: '技能响应',
     resource: '资源',
     document: '文档',
     newDocument: '新文档',
@@ -467,6 +468,7 @@ const translations = {
       addSuccess: '画布添加好啦，开始创作吧~',
     },
     skillResponse: {
+      executionFailed: '执行失败，点击重试',
       skillCompleted: '技能执行完成',
       stepCompleted: '步骤执行完成',
       stepTitle: '步骤 {{index}}',

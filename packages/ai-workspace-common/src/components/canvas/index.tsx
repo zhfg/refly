@@ -61,7 +61,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
   const { provider } = useCanvasContext();
-  console.log('provider', canvasId, provider.status);
 
   const { operatingNodeId, setOperatingNodeId } = useCanvasStoreShallow((state) => ({
     operatingNodeId: state.operatingNodeId,

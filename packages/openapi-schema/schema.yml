@@ -3426,6 +3426,9 @@ components:
         node:
           description: Canvas node data. Only present when `event` is `create_node`.
           $ref: '#/components/schemas/CanvasNode'
+        error:
+          description: Error data. Only present when `event` is `error`.
+          $ref: '#/components/schemas/BaseResponse'
     CreateShareRequest:
       type: object
       required:
@@ -4036,9 +4039,6 @@ components:
               description: Skill job ID
     InvokeSkillRequest:
       type: object
-      required:
-        - input
-        - target
       properties:
         input:
           description: Skill input
@@ -4063,7 +4063,11 @@ components:
           $ref: '#/components/schemas/Entity'
         resultId:
           type: string
-          description: Result ID (will be generated if not provided)
+          description: |
+            Result ID associated with this invocation.
+            1) If not provided, a new resultId will be generated.
+            2) If there is no existing result with this resultId, it will be created and run.
+            3) If there is an existing result with this resultId, it will be rerun.
         skillId:
           type: string
           description: Skill instance ID to invoke (if not provided, skill scheduler will be used)

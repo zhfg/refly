@@ -1698,6 +1698,10 @@ export type SkillEvent = {
    * Canvas node data. Only present when `event` is `create_node`.
    */
   node?: CanvasNode;
+  /**
+   * Error data. Only present when `event` is `error`.
+   */
+  error?: BaseResponse;
 };
 
 export type CreateShareRequest = {
@@ -2289,7 +2293,7 @@ export type InvokeSkillRequest = {
   /**
    * Skill input
    */
-  input: SkillInput;
+  input?: SkillInput;
   /**
    * Skill invocation context
    */
@@ -2309,9 +2313,13 @@ export type InvokeSkillRequest = {
   /**
    * Skill invocation target
    */
-  target: Entity;
+  target?: Entity;
   /**
-   * Result ID (will be generated if not provided)
+   * Result ID associated with this invocation.
+   * 1) If not provided, a new resultId will be generated.
+   * 2) If there is no existing result with this resultId, it will be created and run.
+   * 3) If there is an existing result with this resultId, it will be rerun.
+   *
    */
   resultId?: string;
   /**
