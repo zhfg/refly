@@ -1676,6 +1676,10 @@ export type SkillEvent = {
      * Canvas node data. Only present when `event` is `create_node`.
      */
     node?: CanvasNode;
+    /**
+     * Error data. Only present when `event` is `error`.
+     */
+    error?: BaseResponse;
 };
 
 export type CreateShareRequest = {

@@ -879,7 +879,8 @@ export class SkillService {
       if (res) {
         writeSSEResponse(res, {
           event: 'error',
-          content: JSON.stringify(genBaseRespDataFromError(err)),
+          resultId,
+          error: genBaseRespDataFromError(err),
         });
       }
       result.errors.push(err.message);

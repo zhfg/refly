@@ -299,7 +299,10 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           </div>
 
           {status === 'failed' && (
-            <div className="flex items-center justify-center gap-1 mt-1 hover:bg-gray-50 rounded-sm p-2 cursor-pointer">
+            <div
+              className="flex items-center justify-center gap-1 mt-1 hover:bg-gray-50 rounded-sm p-2 cursor-pointer"
+              onClick={() => handleRerun()}
+            >
               <IconError className="h-4 w-4 text-red-500" />
               <span className="text-xs text-red-500 max-w-48 truncate">
                 {t('canvas.skillResponse.executionFailed')}

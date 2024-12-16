@@ -265,14 +265,28 @@ export const useInvokeAction = () => {
     }
   };
 
-  const onError = (error?: BaseResponse) => {
-    console.log('onError', error);
+  const onSkillError = (skillEvent: SkillEvent) => {
     const runtime = getRuntime();
     const { localSettings } = useUserStore.getState();
     const locale = localSettings?.uiLocale as LOCALE;
 
-    error ??= { success: false };
+    const { error, resultId } = skillEvent;
+    console.log('error', error);
     showErrorNotification(error, locale);
+
+    const { resultMap } = useActionResultStore.getState();
+    const result = resultMap[resultId];
+
+    if (!result) {
+      return;
+    }
+
+    const updatedResult = {
+      ...result,
+      status: 'failed' as const,
+      errors: [error?.errMsg],
+    };
+    onUpdateResult(skillEvent.resultId, updatedResult, skillEvent);
 
     if (runtime?.includes('extension')) {
       if (globalIsAbortedRef.current) {
@@ -375,7 +389,7 @@ export const useInvokeAction = () => {
       onSkillCreateNode,
       onSkillEnd,
       onCompleted,
-      onError,
+      onSkillError,
       onSkillTokenUsage,
     });
   };

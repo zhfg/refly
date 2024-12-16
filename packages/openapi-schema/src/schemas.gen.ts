@@ -2296,6 +2296,10 @@ export const SkillEventSchema = {
       description: 'Canvas node data. Only present when `event` is `create_node`.',
       $ref: '#/components/schemas/CanvasNode',
     },
+    error: {
+      description: 'Error data. Only present when `event` is `error`.',
+      $ref: '#/components/schemas/BaseResponse',
+    },
   },
 } as const;
 
