@@ -2,6 +2,8 @@ import Logo from "@/assets/logo.svg"
 import { Button } from "antd"
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 import { useTranslation } from "react-i18next"
+import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
+import { IconDown } from "@refly-packages/ai-workspace-common/components/common/icon"
 
 function Header() {
   const { t } = useTranslation()
@@ -20,6 +22,12 @@ function Header() {
         </div>
 
         <div className="flex items-center gap-2">
+          <UILocaleList>
+            <Button type="text" size="small">
+              {t("language")}{" "}
+              <IconDown className="ml-1 transition-transform duration-200 group-hover:rotate-180" />
+            </Button>
+          </UILocaleList>
           <Button type="primary" onClick={() => setLoginModalVisible(true)}>
             {t("landingPage.tryForFree")}
           </Button>
