@@ -223,7 +223,6 @@ export const DocumentNode = ({
           target={targetRef}
           resizable={true}
           edge={false}
-          zoom={1}
           throttleResize={1}
           renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
           onResizeStart={({ setOrigin, dragStart }) => {
