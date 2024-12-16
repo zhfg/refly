@@ -322,8 +322,8 @@ export const useInvokeAction = () => {
 
     const { resultId, input } = payload;
 
-    payload.skillName ||= 'commonQnA';
-    const skill = data?.data?.find((s) => s.name === payload.skillName);
+    const skillName = payload.skillName || 'commonQnA';
+    const skill = data?.data?.find((s) => s.name === skillName);
 
     onUpdateResult(resultId, {
       resultId,

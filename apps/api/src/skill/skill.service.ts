@@ -51,6 +51,7 @@ import {
   genSkillID,
   genSkillTriggerID,
   incrementalMarkdownUpdate,
+  safeParseJSON,
 } from '@refly-packages/utils';
 import { PrismaService } from '@/common/prisma.service';
 import {
@@ -397,22 +398,6 @@ export class SkillService {
   async skillInvokePreCheck(user: User, param: InvokeSkillRequest): Promise<InvokeSkillJobData> {
     const { uid } = user;
 
-    // Check for token quota
-    const usageResult = await this.subscription.checkTokenUsage(user);
-
-    const modelName = param.modelName || this.config.get('skill.defaultModel');
-    const modelInfo = await this.prisma.modelInfo.findUnique({ where: { name: modelName } });
-
-    if (!modelInfo) {
-      throw new ModelNotSupportedError(`model ${modelName} not supported`);
-    }
-
-    if (!usageResult[modelInfo.tier]) {
-      throw new ModelUsageQuotaExceeded(
-        `model ${modelName} (${modelInfo.tier}) not available for current plan`,
-      );
-    }
-
     const resultId = param.resultId || genActionResultID();
 
     // Check if the result already exists
@@ -425,12 +410,41 @@ export class SkillService {
       param.input ??= existingResult.input
         ? JSON.parse(existingResult.input)
         : { query: existingResult.title };
-      param.skillName ??= JSON.parse(existingResult.actionMeta ?? '{}').name;
-      param.context ??= JSON.parse(existingResult.context ?? '{}');
-      param.resultHistory ??= JSON.parse(existingResult.history ?? '[]');
+
+      if (existingResult.modelName) {
+        param.modelName = existingResult.modelName;
+      }
+      if (existingResult.actionMeta) {
+        param.skillName = safeParseJSON(existingResult.actionMeta).name;
+      }
+
+      if (existingResult.context) {
+        param.context = JSON.parse(existingResult.context);
+      }
+      if (existingResult.history) {
+        param.resultHistory = JSON.parse(existingResult.history);
+      }
     }
 
-    param.input ??= { query: '' };
+    param.input ||= { query: '' };
+    param.modelName ||= this.config.get('skill.defaultModel');
+    param.skillName ||= 'commonQnA';
+
+    // Check for token quota
+    const usageResult = await this.subscription.checkTokenUsage(user);
+
+    const modelName = param.modelName;
+    const modelInfo = await this.prisma.modelInfo.findUnique({ where: { name: modelName } });
+
+    if (!modelInfo) {
+      throw new ModelNotSupportedError(`model ${modelName} not supported`);
+    }
+
+    if (!usageResult[modelInfo.tier]) {
+      throw new ModelUsageQuotaExceeded(
+        `model ${modelName} (${modelInfo.tier}) not available for current plan`,
+      );
+    }
 
     if (param.context) {
       param.context = await this.populateSkillContext(user, param.context);
@@ -473,6 +487,7 @@ export class SkillService {
             title: param.input.query,
             targetId: param.target?.entityId,
             targetType: param.target?.entityType,
+            modelName,
             actionMeta: JSON.stringify({
               type: 'skill',
               name: param.skillName,
@@ -499,6 +514,7 @@ export class SkillService {
           targetId: param.target?.entityId,
           targetType: param.target?.entityType,
           title: param.input?.query,
+          modelName,
           type: 'skill',
           status: 'executing',
           actionMeta: JSON.stringify({

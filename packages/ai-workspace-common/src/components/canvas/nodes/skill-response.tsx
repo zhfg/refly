@@ -52,7 +52,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { title, contentPreview: content, metadata, createdAt, entityId } = data;
   const node = getNode(id);
   const targetRef = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState({
+  const [size, setSize] = useState<{ width: number | string; height: number | string }>({
     width: node?.measured?.width ?? 288,
     height: node?.measured?.height ?? 'auto',
   });
@@ -172,6 +172,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
 
   const handleRerun = useCallback(() => {
     // Disable polling temporarily after rerun
+    setSize({ width: 288, height: 'auto' });
     setShouldPoll(false);
     setTimeout(() => setShouldPoll(true), 2000);
 
@@ -179,7 +180,6 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
       ...data,
       contentPreview: '',
       metadata: {
-        ...metadata,
         status: 'waiting',
       },
     });
@@ -188,7 +188,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
       input: { query: title },
       target: { entityType: 'canvas', entityId: canvasId },
     });
-  }, [entityId, invokeAction, setNodeData]);
+  }, [data, entityId, invokeAction, setNodeData]);
 
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
@@ -261,8 +261,8 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
         onMouseLeave={handleMouseLeave}
         onClick={onNodeClick}
         style={{
-          width: `${size.width}px`,
-          height: `${size.height}px`,
+          width: `${size.width === 'auto' ? 'auto' : `${size.width}px`}`,
+          height: `${size.height === 'auto' ? 'auto' : `${size.height}px`}`,
           userSelect: isOperating ? 'text' : 'none',
           cursor: isOperating ? 'text' : 'grab',
         }}

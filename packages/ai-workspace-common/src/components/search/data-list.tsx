@@ -45,23 +45,9 @@ export function DataList({
 
   const fetchNewData = async (queryPayload: any): Promise<{ success: boolean; data?: SearchResult[] }> => {
     if (domain === 'skill') {
-      const res = await getClient().listSkillInstances({
-        query: {
-          ...queryPayload,
-        },
-      });
-
-      if (!res?.data?.success) return { success: false };
-      const data = res?.data?.data?.map((item) => {
-        return {
-          id: item?.skillId,
-          title: item?.displayName,
-        } as SearchResult;
-      });
-
-      return { success: true, data };
+      return { success: true, data: [] };
     } else if (domain === 'canvas') {
-      const res = await getClient().listCanvas({
+      const res = await getClient().listCanvases({
         query: {
           ...queryPayload,
         },
@@ -72,7 +58,6 @@ export function DataList({
         return {
           id: item?.canvasId,
           title: item?.title,
-          snippets: [{ text: item?.content?.slice(0, 30) + '...' }],
           metadata: {},
         } as SearchResult;
       });
@@ -90,6 +75,7 @@ export function DataList({
         return {
           id: item?.resourceId,
           title: item?.title,
+          domain: 'resource',
           snippets: [{ text: item?.content?.slice(0, 30) + '...' }],
           metadata: {
             resourceType: 'weblink',

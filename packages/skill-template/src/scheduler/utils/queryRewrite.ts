@@ -359,7 +359,7 @@ export const preprocessQuery = (
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ) => {
   const { modelName } = ctx.config.configurable;
-  const maxQueryTokens = ModelContextLimitMap[modelName] * MAX_QUERY_TOKENS_RATIO;
+  const maxQueryTokens = (ModelContextLimitMap[modelName] || 128 * 1024) * MAX_QUERY_TOKENS_RATIO;
 
   return truncateTextWithToken(query, maxQueryTokens);
 };
