@@ -98,6 +98,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         y: 0,
         zoom: 0.75,
       },
+      minZoom: 0.1,
+      maxZoom: 2,
       fitViewOptions: {
         padding: 0.2,
         minZoom: 0.1,

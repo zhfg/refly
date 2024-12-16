@@ -28,8 +28,10 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
   }));
 
   const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const fetchActionResult = async (resultId: string) => {
+    setLoading(true);
     const { data, error } = await getClient().getActionResult({
       query: { resultId },
     });
@@ -39,6 +41,7 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     }
 
     updateActionResult(resultId, data.data);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -90,19 +93,21 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     <div className="flex flex-col space-y-4 p-4">
       <div className="ai-copilot-operation-container readonly">
         <div className="ai-copilot-operation-body">
-          <PreviewChatInput
-            readonly
-            contextItems={contextItems}
-            historyItems={historyItems}
-            chatHistoryOpen={chatHistoryOpen}
-            setChatHistoryOpen={setChatHistoryOpen}
-            query={title}
-            actionMeta={actionMeta}
-          />
+          {result && (
+            <PreviewChatInput
+              readonly
+              contextItems={contextItems}
+              historyItems={historyItems}
+              chatHistoryOpen={chatHistoryOpen}
+              setChatHistoryOpen={setChatHistoryOpen}
+              query={title}
+              actionMeta={actionMeta}
+            />
+          )}
         </div>
       </div>
 
-      {steps.length === 0 && result?.status === 'executing' && <Skeleton active className="w-full h-10" />}
+      {steps.length === 0 && (result?.status === 'executing' || loading) && <Skeleton active />}
 
       {steps.map((step, index) => (
         <div key={index}>
