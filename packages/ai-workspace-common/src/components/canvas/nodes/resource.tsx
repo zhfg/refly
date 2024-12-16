@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CanvasNodeData, ResourceNodeMeta, CanvasNode, ResourceNodeProps } from './types';
 import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { EDGE_STYLES } from '../constants';
 import { getNodeCommonStyles } from './index';
@@ -16,6 +16,7 @@ import { LOCALE } from '@refly/common-types';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { useThrottledCallback } from 'use-debounce';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
 import Moveable from 'react-moveable';
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
@@ -30,7 +31,8 @@ export const ResourceNode = ({
   onNodeClick,
 }: ResourceNodeProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const { edges } = useCanvasControl();
+  const [isResizing, setIsResizing] = useState(false);
+  const { edges, setNodeDataByEntity } = useCanvasControl();
   const { setEdges } = useReactFlow();
   const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
 
@@ -118,37 +120,67 @@ export const ResourceNode = ({
 
   const isOperating = operatingNodeId === id;
 
-  return (
-    <div
-      className="relative group"
-      onMouseEnter={!isPreview ? handleMouseEnter : undefined}
-      onMouseLeave={!isPreview ? handleMouseLeave : undefined}
-      onClick={onNodeClick}
-      style={{
-        userSelect: isOperating ? 'text' : 'none',
-        cursor: isOperating ? 'text' : 'grab',
-      }}
-    >
-      {!isPreview && !hideActions && (
-        <ActionButtons
-          type="resource"
-          nodeId={id}
-          onAddToContext={handleAddToContext}
-          onDelete={handleDelete}
-          onHelpLink={handleHelpLink}
-          onAbout={handleAbout}
-          isProcessing={false}
-        />
-      )}
+  const [shouldPoll, setShouldPoll] = useState(false);
+  const { data: result } = useGetResourceDetail(
+    {
+      query: { resourceId: data?.entityId },
+    },
+    null,
+    {
+      enabled: shouldPoll,
+      refetchInterval: 2000,
+    },
+  );
+  const remoteResult = result?.data;
 
+  useEffect(() => {
+    if (!data.contentPreview) {
+      setNodeDataByEntity(
+        {
+          entityId: data.entityId,
+          type: 'resource',
+        },
+        {
+          contentPreview: remoteResult?.contentPreview,
+        },
+      );
+      if (remoteResult?.indexStatus === 'wait_parse') {
+        setShouldPoll(true);
+      } else {
+        setShouldPoll(false);
+      }
+    } else {
+      setShouldPoll(false);
+    }
+  }, [data.contentPreview, remoteResult]);
+
+  return (
+    <div>
       <div
         ref={targetRef}
-        className="relative"
+        className="relative group"
+        onMouseEnter={!isPreview ? handleMouseEnter : undefined}
+        onMouseLeave={!isPreview ? handleMouseLeave : undefined}
+        onClick={onNodeClick}
         style={{
           width: `${size.width}px`,
           height: `${size.height}px`,
+          userSelect: isOperating ? 'text' : 'none',
+          cursor: isOperating ? 'text' : 'grab',
         }}
       >
+        {!isPreview && !hideActions && !isResizing && (
+          <ActionButtons
+            type="resource"
+            nodeId={id}
+            onAddToContext={handleAddToContext}
+            onDelete={handleDelete}
+            onHelpLink={handleHelpLink}
+            onAbout={handleAbout}
+            isProcessing={false}
+          />
+        )}
+
         <div
           className={`
           relative
@@ -228,21 +260,36 @@ export const ResourceNode = ({
           target={targetRef}
           resizable={true}
           edge={false}
-          zoom={1}
           throttleResize={1}
           renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
           onResizeStart={({ setOrigin, dragStart }) => {
+            setIsResizing(true);
             setOrigin(['%', '%']);
             if (dragStart && dragStart instanceof MouseEvent) {
               dragStart.preventDefault();
             }
           }}
-          onResize={({ target, width, height }) => {
+          onResizeEnd={() => {
+            setIsResizing(false);
+          }}
+          onResize={({ target, width, height, direction }) => {
             const newWidth = Math.max(100, width);
             const newHeight = Math.max(80, height);
 
+            let newLeft = (target as HTMLElement).offsetLeft;
+            let newTop = (target as HTMLElement).offsetTop;
+
+            if (direction[0] === -1) {
+              newLeft = (target as HTMLElement).offsetLeft - (newWidth - (target as HTMLElement).offsetWidth);
+            }
+            if (direction[1] === -1) {
+              newTop = (target as HTMLElement).offsetTop - (newHeight - (target as HTMLElement).offsetHeight);
+            }
+
             target.style.width = `${newWidth}px`;
             target.style.height = `${newHeight}px`;
+            target.style.left = `${newLeft}px`;
+            target.style.top = `${newTop}px`;
 
             setSize({ width: newWidth, height: newHeight });
           }}
