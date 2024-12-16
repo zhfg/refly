@@ -120,22 +120,18 @@ export const ResourceNode = ({
   const isOperating = operatingNodeId === id;
 
   return (
-    <div
-      className="relative group"
-      onMouseEnter={!isPreview ? handleMouseEnter : undefined}
-      onMouseLeave={!isPreview ? handleMouseLeave : undefined}
-      onClick={onNodeClick}
-      style={{
-        userSelect: isOperating ? 'text' : 'none',
-        cursor: isOperating ? 'text' : 'grab',
-      }}
-    >
+    <div>
       <div
         ref={targetRef}
-        className="relative"
+        className="relative group"
+        onMouseEnter={!isPreview ? handleMouseEnter : undefined}
+        onMouseLeave={!isPreview ? handleMouseLeave : undefined}
+        onClick={onNodeClick}
         style={{
           width: `${size.width}px`,
           height: `${size.height}px`,
+          userSelect: isOperating ? 'text' : 'none',
+          cursor: isOperating ? 'text' : 'grab',
         }}
       >
         {!isPreview && !hideActions && !isResizing && (
