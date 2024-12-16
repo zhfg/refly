@@ -228,7 +228,7 @@ export const DocumentNode = ({
           edge={false}
           zoom={1}
           throttleResize={1}
-          renderDirections={['e', 's', 'se']}
+          renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
           onResizeStart={({ setOrigin, dragStart }) => {
             setOrigin(['%', '%']);
             if (dragStart && dragStart instanceof MouseEvent) {
