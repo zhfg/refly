@@ -24,7 +24,7 @@ export const LayoutControl: React.FC<LayoutControlProps> = ({ mode, changeMode }
   const { onLayout } = useCanvasControl();
   const reactFlowInstance = useReactFlow();
   const [currentZoom, setCurrentZoom] = useState(reactFlowInstance?.getZoom() ?? 1);
-  const minZoom = 0.5;
+  const minZoom = 0.1;
   const maxZoom = 2;
 
   useEffect(() => {
