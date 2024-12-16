@@ -42,6 +42,7 @@ export const DocumentNode = ({
     width: node?.measured?.width ?? 288,
     height: node?.measured?.height ?? 384,
   });
+  const [isResizing, setIsResizing] = useState(false);
 
   const { operatingNodeId } = useCanvasStoreShallow((state) => ({
     operatingNodeId: state.operatingNodeId,
@@ -127,17 +128,6 @@ export const DocumentNode = ({
         cursor: isOperating ? 'text' : 'grab',
       }}
     >
-      {!isPreview && !hideActions && (
-        <ActionButtons
-          type="document"
-          nodeId={id}
-          onAddToContext={handleAddToContext}
-          onDelete={handleDelete}
-          onHelpLink={handleHelpLink}
-          onAbout={handleAbout}
-        />
-      )}
-
       <div
         ref={targetRef}
         className="relative"
@@ -146,6 +136,17 @@ export const DocumentNode = ({
           height: `${size.height}px`,
         }}
       >
+        {!isPreview && !hideActions && !isResizing && (
+          <ActionButtons
+            type="document"
+            nodeId={id}
+            onAddToContext={handleAddToContext}
+            onDelete={handleDelete}
+            onHelpLink={handleHelpLink}
+            onAbout={handleAbout}
+          />
+        )}
+
         <div
           className={`
             relative
@@ -230,17 +231,33 @@ export const DocumentNode = ({
           throttleResize={1}
           renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
           onResizeStart={({ setOrigin, dragStart }) => {
+            setIsResizing(true);
             setOrigin(['%', '%']);
             if (dragStart && dragStart instanceof MouseEvent) {
               dragStart.preventDefault();
             }
           }}
-          onResize={({ target, width, height, drag }) => {
+          onResizeEnd={() => {
+            setIsResizing(false);
+          }}
+          onResize={({ target, width, height, direction }) => {
             const newWidth = Math.max(100, width);
             const newHeight = Math.max(80, height);
 
+            let newLeft = (target as HTMLElement).offsetLeft;
+            let newTop = (target as HTMLElement).offsetTop;
+
+            if (direction[0] === -1) {
+              newLeft = (target as HTMLElement).offsetLeft - (newWidth - (target as HTMLElement).offsetWidth);
+            }
+            if (direction[1] === -1) {
+              newTop = (target as HTMLElement).offsetTop - (newHeight - (target as HTMLElement).offsetHeight);
+            }
+
             target.style.width = `${newWidth}px`;
             target.style.height = `${newHeight}px`;
+            target.style.left = `${newLeft}px`;
+            target.style.top = `${newTop}px`;
 
             setSize({ width: newWidth, height: newHeight });
           }}
