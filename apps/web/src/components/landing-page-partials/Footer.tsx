@@ -49,12 +49,12 @@ function Footer() {
                 onClick={() => {
                   // Add your contact logic here
                   window.open(
-                    "https://powerformer.feishu.cn/share/base/form/shrcnaVXPlMWxOC6cJDa7q3cPzd",
+                    "https://powerformer.feishu.cn/wiki/Syrsw7DJxiaExSkoSiXcTF1inBg?from=landingPage",
                     "_blank",
                   )
                 }}
                 className="cursor-pointer">
-                {t("landingPage.footer.cta.contactUs")}
+                {t("landingPage.contactUs")}
               </Button>
             </div>
           </div>
@@ -92,13 +92,13 @@ function Footer() {
                       aria-label="Twitter">
                       <IconTwitter />
                     </Link>
-                    <Link
+                    {/* <Link
                       to="https://github.com/pftom/refly"
                       target="_blank"
                       className="rounded-md px-2 py-1 text-gray-600 no-underline transition hover:bg-gray-200"
                       aria-label="GitHub">
                       <IconGithub />
-                    </Link>
+                    </Link> */}
                   </div>
 
                   {/* Divider */}
