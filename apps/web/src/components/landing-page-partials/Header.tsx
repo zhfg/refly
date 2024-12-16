@@ -34,7 +34,7 @@ function Header() {
           <Button
             onClick={() => {
               window.open(
-                "https://powerformer.feishu.cn/share/base/form/shrcnaVXPlMWxOC6cJDa7q3cPzd",
+                "https://powerformer.feishu.cn/wiki/Syrsw7DJxiaExSkoSiXcTF1inBg?from=landingPage",
                 "_blank",
               )
             }}>
