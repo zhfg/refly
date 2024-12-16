@@ -51,7 +51,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { title, contentPreview: content, metadata, createdAt, entityId } = data;
   const node = getNode(id);
   const targetRef = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState({
+  const [size, setSize] = useState<{ width: number | string; height: number | string }>({
     width: node?.measured?.width ?? 288,
     height: node?.measured?.height ?? 'auto',
   });
@@ -171,6 +171,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
 
   const handleRerun = useCallback(() => {
     // Disable polling temporarily after rerun
+    setSize({ width: 288, height: 'auto' });
     setShouldPoll(false);
     setTimeout(() => setShouldPoll(true), 2000);
 
@@ -282,8 +283,8 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
         ref={targetRef}
         className="relative"
         style={{
-          width: `${size.width}px`,
-          height: `${size.height}px`,
+          width: `${size.width === 'auto' ? 'auto' : `${size.width}px`}`,
+          height: `${size.height === 'auto' ? 'auto' : `${size.height}px`}`,
         }}
       >
         <div className={`relative h-full ${getNodeCommonStyles({ selected, isHovered })}`}>
