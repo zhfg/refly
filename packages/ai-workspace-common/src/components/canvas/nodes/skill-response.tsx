@@ -178,7 +178,6 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
       ...data,
       contentPreview: '',
       metadata: {
-        ...metadata,
         status: 'waiting',
       },
     });
@@ -187,7 +186,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
       input: { query: title },
       target: { entityType: 'canvas', entityId: canvasId },
     });
-  }, [entityId, invokeAction, setNodeData]);
+  }, [data, entityId, invokeAction, setNodeData]);
 
   const runtime = getRuntime();
   const isWeb = runtime === 'web';

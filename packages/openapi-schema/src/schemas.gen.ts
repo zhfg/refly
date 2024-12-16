@@ -3232,14 +3232,6 @@ export const InvokeSkillRequestSchema = {
 3) If there is an existing result with this resultId, it will be rerun.
 `,
     },
-    skillId: {
-      type: 'string',
-      description: 'Skill instance ID to invoke (if not provided, skill scheduler will be used)',
-    },
-    convId: {
-      description: 'Conversation ID (will add messages to this conversation if provided)',
-      type: 'string',
-    },
     locale: {
       type: 'string',
       description: 'Selected output locale',
@@ -3247,14 +3239,6 @@ export const InvokeSkillRequestSchema = {
     modelName: {
       type: 'string',
       description: 'Selected model',
-    },
-    jobId: {
-      description: 'Skill job ID (if not provided, a new job will be created)',
-      type: 'string',
-    },
-    triggerId: {
-      description: "Trigger ID (typically you don't need to provide this)",
-      type: 'string',
     },
   },
 } as const;

@@ -158,6 +158,8 @@ model ActionResult {
   uid        String       @default("") @map("uid")
   /// Result title
   title      String       @default("") @map("title")
+  /// Used model
+  modelName  String?      @map("model_name")
   /// Action target type
   targetType String?      @map("target_type")
   /// Action target ID

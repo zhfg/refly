@@ -2295,14 +2295,6 @@ export type InvokeSkillRequest = {
      */
     resultId?: string;
     /**
-     * Skill instance ID to invoke (if not provided, skill scheduler will be used)
-     */
-    skillId?: string;
-    /**
-     * Conversation ID (will add messages to this conversation if provided)
-     */
-    convId?: string;
-    /**
      * Selected output locale
      */
     locale?: string;
@@ -2310,14 +2302,6 @@ export type InvokeSkillRequest = {
      * Selected model
      */
     modelName?: string;
-    /**
-     * Skill job ID (if not provided, a new job will be created)
-     */
-    jobId?: string;
-    /**
-     * Trigger ID (typically you don't need to provide this)
-     */
-    triggerId?: string;
 };
 
 export type InvokeSkillResponse = BaseResponse & {
