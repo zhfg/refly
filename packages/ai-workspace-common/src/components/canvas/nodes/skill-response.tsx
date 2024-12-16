@@ -1,8 +1,8 @@
-import { Position, NodeProps, useReactFlow } from '@xyflow/react';
+import { Position, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './types';
 import { Node } from '@xyflow/react';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { CustomHandle } from './custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
 import { EDGE_STYLES } from '../constants';
@@ -47,7 +47,6 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
 
   const { title, contentPreview: content, metadata, createdAt, entityId } = data;
   const { status, modelName, artifacts, currentLog: log, structuredData } = metadata ?? {};
-  console.log('node status', title, status);
   const sources = Array.isArray(structuredData?.sources) ? structuredData?.sources : [];
 
   const logTitle = log
@@ -65,24 +64,57 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
       })
     : '';
 
-  // const { data: result } = useGetActionResult({ query: { resultId: entityId } }, null, {
-  //   enabled: entityId && (status === 'executing' || status === 'waiting'),
-  //   refetchInterval: 2000,
-  // });
-  // const remoteStatus = result?.data?.status;
+  const [shouldPoll, setShouldPoll] = useState(false);
 
-  // useEffect(() => {
-  //   if (remoteStatus && remoteStatus !== status) {
-  //     console.log(`update node status: ${remoteStatus} -> ${status}`);
-  //     setNodeData(id, {
-  //       ...data,
-  //       metadata: {
-  //         ...data.metadata,
-  //         status: remoteStatus,
-  //       },
-  //     });
-  //   }
-  // }, [remoteStatus, data, status]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShouldPoll(true);
+    }, 2000);
+
+    return () => {
+      clearTimeout(timer);
+      setShouldPoll(false);
+    };
+  }, [data]);
+
+  const { data: result } = useGetActionResult({ query: { resultId: entityId } }, null, {
+    enabled: Boolean(entityId) && (!status || status === 'executing' || status === 'waiting') && shouldPoll,
+    refetchInterval: 2000,
+  });
+  const remoteResult = result?.data;
+
+  useEffect(() => {
+    const remoteStatus = remoteResult?.status;
+    const nodeStatus = data?.metadata?.status;
+
+    if (shouldPoll && remoteStatus && (remoteStatus === 'finish' || remoteStatus === 'failed')) {
+      let shouldUpdate = false;
+      let newNodeData = { ...data };
+
+      if (nodeStatus !== remoteStatus) {
+        shouldUpdate = true;
+        newNodeData.metadata = {
+          ...data.metadata,
+          status: remoteStatus,
+        };
+      }
+
+      const remoteContent = remoteResult?.steps
+        ?.map((s) => s.content)
+        .filter(Boolean)
+        .join('\n');
+
+      if (remoteStatus === 'finish' && data?.contentPreview !== remoteContent) {
+        shouldUpdate = true;
+        newNodeData.contentPreview = remoteContent;
+      }
+
+      if (shouldUpdate) {
+        console.log(`[${new Date().toISOString()}] update node data: ${newNodeData}`);
+        setNodeData(id, newNodeData);
+      }
+    }
+  }, [shouldPoll, remoteResult, data]);
 
   // Get query and response content from result
   const query = title;
@@ -128,6 +160,10 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { invokeAction } = useInvokeAction();
 
   const handleRerun = useCallback(() => {
+    // Disable polling temporarily after rerun
+    setShouldPoll(false);
+    setTimeout(() => setShouldPoll(true), 2000);
+
     setNodeData(id, {
       ...data,
       contentPreview: '',

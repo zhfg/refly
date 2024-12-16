@@ -478,6 +478,7 @@ export class SkillService {
               name: param.skillName,
               icon: skill.icon,
             } as ActionMeta),
+            errors: JSON.stringify([]),
             input: JSON.stringify(param.input),
             context: JSON.stringify(purgeContext(param.context)),
             history: JSON.stringify(purgeResultHistory(param.resultHistory)),
