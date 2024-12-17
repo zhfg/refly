@@ -54,7 +54,7 @@ export const useGetUserSettings = () => {
     let { localSettings } = userStore;
 
     // Handle
-    if (!token || error || !res.data) {
+    if (!token || error || !res?.data) {
       userStore.setIsCheckingLoginStatus(false);
       userStore.setUserProfile(undefined);
       userStore.setToken('');
@@ -122,7 +122,7 @@ export const useGetUserSettings = () => {
       res = resp.data;
     }
 
-    if (!token || error || !res.data) {
+    if (!token || error || !res?.data) {
       userStore.setIsCheckingLoginStatus(false);
       userStore.setUserProfile(undefined);
       userStore.setLocalSettings(defaultLocalSettings);

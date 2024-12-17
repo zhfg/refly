@@ -24,7 +24,7 @@ export const UILocaleList = (props: { children: React.ReactNode; width?: number 
         body: { uiLocale: lng, outputLocale: localSettings.outputLocale },
       });
 
-      if (error || !res.success) {
+      if (error || !res?.success) {
         message.error(t('settings.action.putErrorNotify'));
       }
     }

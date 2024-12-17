@@ -13,7 +13,7 @@ import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canva
 import { memo } from 'react';
 import { MoreHorizontal, FileInput, Loader2, MessageSquareDiff, FilePlus } from 'lucide-react';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
-
+import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 // Action button types
 type ActionButtonProps = {
   icon: React.ReactNode;
@@ -163,6 +163,10 @@ export const ActionButtons = memo(
           icon={<IconPreview className="w-4 h-4" />}
           onClick={() => {
             addPinnedNode(canvasId, getNode(nodeId) as CanvasNode<any>);
+            addPinnedNodeEmitter.emit('addPinnedNode', {
+              id: nodeId,
+              canvasId,
+            });
           }}
           tooltip={t('canvas.nodeActions.preview')}
         />

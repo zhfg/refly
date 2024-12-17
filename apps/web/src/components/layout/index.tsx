@@ -6,7 +6,7 @@ import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/
 
 import { LoginModal } from "@/components/login-modal"
 import { SubscribeModal } from "@refly-packages/ai-workspace-common/components/settings/subscribe-modal"
-
+import { ErrorBoundary } from "@sentry/react"
 import "./index.scss"
 
 const Content = Layout.Content
@@ -34,20 +34,24 @@ export const AppLayout = (props: AppLayoutProps) => {
   const showSider = !matchShare && !!userStore.userProfile
 
   return (
-    <Layout className="app-layout main">
-      {showSider && hasBetaAccess ? <SiderLayout source="sider" /> : null}
-      <Layout
-        className="content-layout"
-        style={{
-          height: "calc(100vh)",
-          flexGrow: 1,
-          overflowY: "auto",
-          width: showSider ? `calc(100% - 200px - 16px)` : `calc(100% - 16px)`,
-        }}>
-        <Content>{props.children}</Content>
+    <ErrorBoundary>
+      <Layout className="app-layout main">
+        {showSider && hasBetaAccess ? <SiderLayout source="sider" /> : null}
+        <Layout
+          className="content-layout"
+          style={{
+            height: "calc(100vh)",
+            flexGrow: 1,
+            overflowY: "auto",
+            width: showSider
+              ? `calc(100% - 200px - 16px)`
+              : `calc(100% - 16px)`,
+          }}>
+          <Content>{props.children}</Content>
+        </Layout>
+        {userStore.loginModalVisible ? <LoginModal /> : null}
+        <SubscribeModal />
       </Layout>
-      {userStore.loginModalVisible ? <LoginModal /> : null}
-      <SubscribeModal />
-    </Layout>
+    </ErrorBoundary>
   )
 }

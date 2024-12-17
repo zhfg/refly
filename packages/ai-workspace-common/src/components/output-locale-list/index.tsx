@@ -29,7 +29,7 @@ export const OutputLocaleList = (props: { children?: any; width?: number; positi
       body: { outputLocale: lng, uiLocale: localSettings.uiLocale },
     });
 
-    if (error || !res.success) {
+    if (error || !res?.success) {
       message.error(t('settings.action.putErrorNotify'));
     }
   };
