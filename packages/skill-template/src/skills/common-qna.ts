@@ -50,7 +50,7 @@ export class CommonQnA extends BaseSkill {
     const { messages = [], query: originalQuery } = state;
     const {
       locale = 'en',
-      chatHistory = [],
+      chatHistory: rawChatHistory = [],
       modelName,
       resources,
       documents,
@@ -64,6 +64,7 @@ export class CommonQnA extends BaseSkill {
     let mentionedContext: IContext;
     let context: string = '';
     let sources: Source[] = [];
+    const chatHistory = rawChatHistory.filter((message) => message.content !== '');
 
     // preprocess query, ensure query is not too long
     const query = preprocessQuery(originalQuery, {
@@ -76,7 +77,7 @@ export class CommonQnA extends BaseSkill {
     this.engine.logger.log(`preprocess query: ${query}`);
 
     // preprocess chat history, ensure chat history is not too long
-    const usedChatHistory = truncateMessages(chatHistory, 20, 1000, 10000);
+    const usedChatHistory = truncateMessages(chatHistory, 20, 4000, 30000);
 
     // check if there is any context
     const hasContext = checkHasContext({

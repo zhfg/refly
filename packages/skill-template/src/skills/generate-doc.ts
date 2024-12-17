@@ -58,7 +58,7 @@ export class GenerateDoc extends BaseSkill {
     const { messages = [], query: originalQuery } = state;
     const {
       locale = 'en',
-      chatHistory = [],
+      chatHistory: rawChatHistory = [],
       modelName,
       resources,
       documents,
@@ -83,8 +83,9 @@ export class GenerateDoc extends BaseSkill {
     optimizedQuery = query;
     this.engine.logger.log(`preprocess query: ${query}`);
 
+    const chatHistory = rawChatHistory.filter((message) => message.content !== '');
     // preprocess chat history, ensure chat history is not too long
-    const usedChatHistory = truncateMessages(chatHistory);
+    const usedChatHistory = truncateMessages(chatHistory, 20, 4000, 30000);
 
     // check if there is any context
     const hasContext = checkHasContext({

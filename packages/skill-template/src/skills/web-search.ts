@@ -55,7 +55,7 @@ export class WebSearch extends BaseSkill {
 
   callWebSearch = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { messages = [], query: originalQuery } = state;
-    const { locale = 'en', chatHistory = [], modelName, currentSkill } = config.configurable;
+    const { locale = 'en', chatHistory: rawChatHistory = [], modelName, currentSkill } = config.configurable;
 
     // Set current step
     config.metadata.step = { name: 'webSearch' };
@@ -69,7 +69,8 @@ export class WebSearch extends BaseSkill {
     });
 
     // Preprocess chat history, ensure it's not too long
-    const usedChatHistory = truncateMessages(chatHistory);
+    const chatHistory = rawChatHistory.filter((message) => message.content !== '');
+    const usedChatHistory = truncateMessages(chatHistory, 20, 4000, 30000);
 
     // Calculate token limits
     const maxTokens = ModelContextLimitMap[modelName];
