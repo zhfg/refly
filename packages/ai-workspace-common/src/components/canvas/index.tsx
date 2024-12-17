@@ -20,6 +20,7 @@ import { LibraryModal } from '@refly-packages/ai-workspace-common/components/wor
 import { useCanvasNodesStore } from '@refly-packages/ai-workspace-common/stores/canvas-nodes';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { LayoutControl } from './layout-control';
+import { ErrorBoundary } from '@sentry/react';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -310,10 +311,12 @@ export const Canvas = (props: { canvasId: string }) => {
   }, [canvasId]);
 
   return (
-    <CanvasProvider canvasId={canvasId}>
-      <ReactFlowProvider>
-        <Flow canvasId={canvasId} />
-      </ReactFlowProvider>
-    </CanvasProvider>
+    <ErrorBoundary>
+      <CanvasProvider canvasId={canvasId}>
+        <ReactFlowProvider>
+          <Flow canvasId={canvasId} />
+        </ReactFlowProvider>
+      </CanvasProvider>
+    </ErrorBoundary>
   );
 };
