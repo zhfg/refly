@@ -14,6 +14,7 @@ interface CanvasContextType {
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
 const providerCache = new Map<string, HocuspocusProvider>();
+const PROVIDER_CLEANUP_DELAY = 5000; // 5 seconds delay before actual cleanup
 
 export const CanvasProvider = ({ canvasId, children }: { canvasId: string; children: React.ReactNode }) => {
   const [token] = useCookie('_refly_ai_sid');
@@ -22,6 +23,12 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     const existingProvider = providerCache.get(canvasId);
     if (existingProvider?.status === 'connected') {
       return existingProvider;
+    }
+
+    // If there's a disconnected provider in the cache, destroy it properly first
+    if (existingProvider) {
+      existingProvider.destroy();
+      providerCache.delete(canvasId);
     }
 
     const newProvider = new HocuspocusProvider({
@@ -88,7 +95,6 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     const handleConnect = () => {
       if (isDestroyed) return;
 
-      // 立即设置初始数据
       if (provider.status === 'connected') {
         setTitle(canvasId, title.toJSON());
 
@@ -103,7 +109,6 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
         setEdges(canvasId, Array.from(uniqueEdgesMap.values()));
       }
 
-      // 设置观察者回调
       const titleObserverCallback = () => {
         if (provider.status === 'connected') {
           setTitle(canvasId, title.toJSON());
@@ -149,14 +154,16 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       cleanup?.(); // Clean up observers
       provider.off('connect', handleConnect);
 
-      // Ensure clean disconnection
-      if (provider.status === 'connected') {
-        provider.forceSync();
-      }
-
-      // Remove from cache and destroy
-      providerCache.delete(canvasId);
-      provider.destroy();
+      // Delay the provider cleanup to avoid too fast creation and destruction
+      setTimeout(() => {
+        if (providerCache.get(canvasId) === provider) {
+          if (provider.status === 'connected') {
+            provider.forceSync();
+          }
+          provider.destroy();
+          providerCache.delete(canvasId);
+        }
+      }, PROVIDER_CLEANUP_DELAY);
     };
   }, [provider, canvasId, setNodes, setEdges, setTitle]);
 
