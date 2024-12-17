@@ -9,6 +9,7 @@ import {
   CreatePortalSessionResponse,
   GetSubscriptionUsageResponse,
   ListModelsResponse,
+  ModelTier,
 } from '@refly-packages/openapi-schema';
 import { buildSuccessResponse, pick } from '@/utils';
 
@@ -44,6 +45,11 @@ export class SubscriptionController {
   @Get('modelList')
   async listModels(): Promise<ListModelsResponse> {
     const models = await this.subscriptionService.getModelList();
-    return buildSuccessResponse(models.map((m) => pick(m, ['name', 'label', 'provider', 'tier'])));
+    return buildSuccessResponse(
+      models.map((m) => ({
+        ...pick(m, ['name', 'label', 'provider']),
+        tier: m.tier as ModelTier,
+      })),
+    );
   }
 }

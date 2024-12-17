@@ -12,7 +12,7 @@ import {
 } from 'react-icons/hi2';
 import { IoIosMore } from 'react-icons/io';
 import { HiOutlineReply } from 'react-icons/hi';
-import { LuSearch, LuSettings, LuCheck, LuCopy, LuTrash, LuRotateCw } from 'react-icons/lu';
+import { LuSearch, LuSettings, LuCheck, LuCopy, LuTrash, LuRotateCw, LuBrain, LuGift } from 'react-icons/lu';
 import { LuView } from 'react-icons/lu';
 import { RiErrorWarningLine } from 'react-icons/ri';
 
@@ -53,7 +53,9 @@ export const IconError = RiErrorWarningLine;
 export const IconLoading = AiOutlineLoading3Quarters;
 export const IconSettings = LuSettings;
 export const IconCopy = LuCopy;
+export const IconModel = LuBrain;
 export const IconDown = HiOutlineChevronDown;
+export const IconSubscription = LuGift;
 
 export const ModelProviderIcons = {
   openai: OpenAIIcon,

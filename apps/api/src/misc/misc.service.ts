@@ -4,6 +4,7 @@ import { InjectQueue } from '@nestjs/bull';
 import {
   EntityType,
   ModelInfo,
+  ModelTier,
   ScrapeWeblinkRequest,
   ScrapeWeblinkResult,
   UploadResponse,
@@ -243,6 +244,9 @@ export class MiscService {
       where: { enabled: true },
     });
 
-    return models.map((model) => pick(model, ['name', 'label', 'provider', 'tier']));
+    return models.map((model) => ({
+      ...pick(model, ['name', 'label', 'provider']),
+      tier: model.tier as ModelTier,
+    }));
   }
 }

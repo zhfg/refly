@@ -404,7 +404,7 @@ export class SubscriptionService implements OnModuleInit {
   }
 
   async checkTokenUsage(user: User): Promise<CheckTokenUsageResult> {
-    const result: CheckTokenUsageResult = { t1: false, t2: false };
+    const result: CheckTokenUsageResult = { t1: false, t2: false, free: true };
     const userModel = await this.prisma.user.findUnique({ where: { uid: user.uid } });
     if (!userModel) {
       this.logger.error(`No user found for uid ${user.uid}`);

@@ -3,15 +3,13 @@ import { useEditor } from '../../../core/components';
 import { addAIHighlight } from '../../../core/extensions';
 import CrazySpinner from '../../ui/icons/crazy-spinner';
 import Magic from '../../ui/icons/magic';
-import AICompletionCommands from '../inline/ai-completion-command';
-import AISelectorCommands from '../inline/ai-selector-commands';
 import { editorEmitter, InPlaceEditType, InPlaceActionType, CanvasEditConfig } from '@refly/utils/event-emitter/editor';
 import { Input } from '@arco-design/web-react';
 import { Button } from 'antd';
 import { cn } from '@refly/utils/cn';
 import { getOsType } from '@refly/utils/env';
-import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/components/add-base-mark-context';
-import { AISettingsDropdown } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/chat-actions/ai-settings';
+import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/components/add-base-mark-context';
+import { AISettingsDropdown } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions/ai-settings';
 
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
@@ -275,15 +273,10 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
         <>
           <div className="flex relative flex-row items-center" cmdk-input-wrapper="">
             <div className="flex flex-1 items-center pl-4 border-b" cmdk-input-wrapper="">
-              <Button size="small" type="default" className="text-xs w-6 h-6 rounded border text-gray-500 gap-1 mr-1">
-                <AISettingsDropdown
-                  placement="bottom"
-                  collapsed={true}
-                  briefMode={true}
-                  modelSelectorPlacement="bottom"
-                />
+              <Button size="small" type="default" className="rounded border text-gray-500 mr-1">
+                <AISettingsDropdown placement="bottom" collapsed={true} briefMode={true} trigger={['click']} />
               </Button>
-              <AddBaseMarkContext source={MessageIntentSource.AISelector} />
+              <AddBaseMarkContext />
               <Input.TextArea
                 value={inputValue}
                 autoSize={{

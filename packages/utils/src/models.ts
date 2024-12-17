@@ -2,11 +2,12 @@ import { ModelInfo, TokenUsageItem } from '@refly-packages/openapi-schema';
 
 export enum LLMType {
   GPT4oMini = 'openai/gpt-4o-mini',
-  GPT4o = 'openai/gpt-4o-2024-08-06',
+  GPT4o = 'openai/gpt-4o',
   Claude35Sonnet = 'anthropic/claude-3.5-sonnet',
   Claude3Haiku = 'anthropic/claude-3-haiku',
   GeminiFlash15 = 'google/gemini-flash-1.5',
   GeminiPro15 = 'google/gemini-pro-1.5',
+  GeminiFlash20 = 'google/gemini-2.0-flash-exp:free',
 }
 
 export const ModelContextLimitMap = {
@@ -16,6 +17,7 @@ export const ModelContextLimitMap = {
   [LLMType.Claude3Haiku]: 200 * 1024,
   [LLMType.GeminiFlash15]: 1024 * 1024,
   [LLMType.GeminiPro15]: 1024 * 1024,
+  [LLMType.GeminiFlash20]: 1024 * 1024,
 };
 
 export const modelMap: Record<string, ModelInfo> = {
@@ -59,6 +61,13 @@ export const modelMap: Record<string, ModelInfo> = {
     label: 'Gemini 1.5 Pro',
     provider: 'google',
     tier: 't1',
+    contextLimit: 1024 * 1024,
+  },
+  [LLMType.GeminiFlash20]: {
+    name: LLMType.GeminiFlash20,
+    label: 'Gemini Flash 2.0',
+    provider: 'google',
+    tier: 'free',
     contextLimit: 1024 * 1024,
   },
 };

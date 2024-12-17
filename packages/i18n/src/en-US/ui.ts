@@ -1374,9 +1374,13 @@ const translations = {
     },
     modelSelector: {
       noModelAvailable: 'No model available',
+      premium: 'Premium',
+      standard: 'Standard',
+      free: 'Free',
+      tokenUsed: 'Used {{used}} / {{quota}}',
       quotaExceeded: {
         t1: {
-          free: 'Upgrade To Use',
+          free: 'Upgrade',
           pro: 'Quota Exceeded, Check Your Subscription',
         },
         t2: {

@@ -2517,6 +2517,7 @@ components:
       enum:
         - t1
         - t2
+        - free
     TokenUsageItem:
       type: object
       description: Token usage item
@@ -4648,6 +4649,7 @@ components:
         tier:
           type: string
           description: Model tier
+          $ref: '#/components/schemas/ModelTier'
         contextLimit:
           type: number
           description: Model context limit

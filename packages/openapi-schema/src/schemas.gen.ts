@@ -1049,7 +1049,7 @@ export const MessageTypeSchema = {
 export const ModelTierSchema = {
   type: 'string',
   description: 'Model tier',
-  enum: ['t1', 't2'],
+  enum: ['t1', 't2', 'free'],
 } as const;
 
 export const TokenUsageItemSchema = {
@@ -4122,6 +4122,7 @@ export const ModelInfoSchema = {
     tier: {
       type: 'string',
       description: 'Model tier',
+      $ref: '#/components/schemas/ModelTier',
     },
     contextLimit: {
       type: 'number',
