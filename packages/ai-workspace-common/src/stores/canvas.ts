@@ -109,7 +109,7 @@ export const useCanvasStore = create<CanvasState>()(
           if (!node) return;
           state.config[canvasId] ??= defaultCanvasConfig();
 
-          if (state.config[canvasId].pinnedNodes.some((n) => n.id === node.id)) return;
+          state.config[canvasId].pinnedNodes = state.config[canvasId].pinnedNodes.filter((n) => n.id !== node.id);
           state.config[canvasId].pinnedNodes.unshift(node);
         }),
       removePinnedNode: (canvasId, node) =>

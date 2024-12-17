@@ -31,7 +31,6 @@ export const ResourceNode = ({
   onNodeClick,
 }: ResourceNodeProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
   const { edges, setNodeDataByEntity } = useCanvasControl();
   const { setEdges } = useReactFlow();
   const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
@@ -169,7 +168,7 @@ export const ResourceNode = ({
           cursor: isOperating ? 'text' : 'grab',
         }}
       >
-        {!isPreview && !hideActions && !isResizing && (
+        {!isPreview && !hideActions && (
           <ActionButtons
             type="resource"
             nodeId={id}
@@ -263,14 +262,10 @@ export const ResourceNode = ({
           throttleResize={1}
           renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
           onResizeStart={({ setOrigin, dragStart }) => {
-            setIsResizing(true);
             setOrigin(['%', '%']);
             if (dragStart && dragStart instanceof MouseEvent) {
               dragStart.preventDefault();
             }
-          }}
-          onResizeEnd={() => {
-            setIsResizing(false);
           }}
           onResize={({ target, width, height, direction }) => {
             const newWidth = Math.max(100, width);
