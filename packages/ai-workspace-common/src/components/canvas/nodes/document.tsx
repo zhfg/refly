@@ -132,7 +132,7 @@ export const DocumentNode = ({
           cursor: isOperating ? 'text' : 'grab',
         }}
       >
-        {!isPreview && !hideActions && !isResizing && (
+        {!isPreview && !hideActions && (
           <ActionButtons
             type="document"
             nodeId={id}

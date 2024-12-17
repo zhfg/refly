@@ -169,7 +169,7 @@ export const ResourceNode = ({
           cursor: isOperating ? 'text' : 'grab',
         }}
       >
-        {!isPreview && !hideActions && !isResizing && (
+        {!isPreview && !hideActions && (
           <ActionButtons
             type="resource"
             nodeId={id}

@@ -267,7 +267,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           cursor: isOperating ? 'text' : 'grab',
         }}
       >
-        {isWeb && !hideActions && !isResizing && (
+        {isWeb && !hideActions && (
           <ActionButtons
             type="skill-response"
             nodeId={id}
