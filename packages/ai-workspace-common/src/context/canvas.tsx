@@ -25,17 +25,12 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       return existingProvider;
     }
 
-    // If there's a disconnected provider in the cache, destroy it properly first
-    if (existingProvider) {
-      existingProvider.destroy();
-      providerCache.delete(canvasId);
-    }
-
     const newProvider = new HocuspocusProvider({
       url: getWsServerOrigin(),
       name: canvasId,
       token,
       connect: true,
+      forceSyncInterval: 2000,
     });
 
     providerCache.set(canvasId, newProvider);
@@ -154,12 +149,13 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       cleanup?.(); // Clean up observers
       provider.off('connect', handleConnect);
 
+      if (provider.status === 'connected') {
+        provider.forceSync();
+      }
+
       // Delay the provider cleanup to avoid too fast creation and destruction
       setTimeout(() => {
         if (providerCache.get(canvasId) === provider) {
-          if (provider.status === 'connected') {
-            provider.forceSync();
-          }
           provider.destroy();
           providerCache.delete(canvasId);
         }

@@ -26,25 +26,116 @@ import {
   IconMoreHorizontal,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
-import Logo from '../../../../../../apps/web/src/assets/logo.svg';
 import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useUpdateCanvas } from '@refly-packages/ai-workspace-common/queries/queries';
 import { Helmet } from 'react-helmet';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useNavigate } from 'react-router-dom';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { time } from '@refly-packages/ai-workspace-common/utils/time';
+import { LOCALE } from '@refly/common-types';
 
 interface TopToolbarProps {
   canvasId: string;
 }
 
-export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
+const ActionDropdown = ({ canvasId }: TopToolbarProps) => {
   const { t } = useTranslation();
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [isRequest, setIsRequest] = useState(false);
+  const navigate = useNavigate();
+  const { getCanvasList, canvasList } = useHandleSiderData();
+
+  const handleDelete = async () => {
+    if (isRequest) return;
+    let success = false;
+    setIsRequest(true);
+    const { data } = await getClient().deleteCanvas({
+      body: {
+        canvasId,
+      },
+    });
+
+    setIsRequest(false);
+
+    if (data?.success) {
+      success = true;
+      message.success(t('canvas.action.deleteSuccess'));
+
+      // Check and remove canvasId from localStorage if matches
+      const { currentCanvasId, setCurrentCanvasId } = useCanvasStore.getState();
+      if (currentCanvasId === canvasId) {
+        setCurrentCanvasId(null);
+      }
+
+      await getCanvasList();
+      if (currentCanvasId === canvasId) {
+        const firstCanvas = canvasList?.find((canvas) => canvas.id !== canvasId);
+        if (firstCanvas?.id) {
+          navigate(`/canvas/${firstCanvas?.id}`, { replace: true });
+        } else {
+          navigate('/canvas/empty', { replace: true });
+        }
+      }
+    }
+  };
+
+  const items: MenuProps['items'] = [
+    {
+      label: (
+        <Popconfirm
+          title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas')}
+          onConfirm={handleDelete}
+          onCancel={() => setPopupVisible(false)}
+          okText={t('common.confirm')}
+          cancelText={t('common.cancel')}
+        >
+          <div className="flex items-center text-red-600">
+            <IconDelete size={16} className="mr-2" />
+            {t('workspace.deleteDropdownMenu.delete')}
+          </div>
+        </Popconfirm>
+      ),
+      key: 'delete',
+    },
+  ];
+
+  const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
+    if (info.source === 'trigger') {
+      setPopupVisible(open);
+    }
+  };
+
+  return (
+    <Dropdown
+      trigger={['click']}
+      open={popupVisible}
+      onOpenChange={handleOpenChange}
+      destroyPopupOnHide
+      menu={{
+        items,
+      }}
+    >
+      <div className="flex items-center gap-2">
+        <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
+          <Button type="text" icon={<IconMoreHorizontal />} className="w-8 h-6 flex items-center justify-center" />
+        </div>
+      </div>
+    </Dropdown>
+  );
+};
+
+export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
+  const { t, i18n } = useTranslation();
+  const language = i18n.language as LOCALE;
+
   const { collapse, setCollapse } = useSiderStoreShallow((state) => ({
     collapse: state.collapse,
     setCollapse: state.setCollapse,
   }));
+  const { provider } = useCanvasContext();
+  console.log('provider unsyncedChanges', provider?.unsyncedChanges);
 
   const { data, showPreview, setShowPreview, showMaxRatio, setShowMaxRatio, showLaunchpad, setShowLaunchpad } =
     useCanvasStoreShallow((state) => ({
@@ -69,7 +160,6 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
     setIsModalOpen(true);
   };
 
-  const { mutate, status } = useUpdateCanvas();
   const setCanvasList = useSiderStoreShallow((state) => state.setCanvasList);
 
   useEffect(() => {
@@ -85,97 +175,12 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   const handleModalOk = () => {
     if (editedTitle?.trim()) {
       setCanvasTitle(editedTitle);
-      mutate({ body: { canvasId, title: editedTitle } }, { onSuccess: () => setIsModalOpen(false) });
+      setIsModalOpen(false);
     }
   };
 
   const handleModalCancel = () => {
     setIsModalOpen(false);
-  };
-
-  const ActionDropdown = () => {
-    const [popupVisible, setPopupVisible] = useState(false);
-    const [isRequest, setIsRequest] = useState(false);
-    const navigate = useNavigate();
-    const { getCanvasList, canvasList } = useHandleSiderData();
-
-    const handleDelete = async () => {
-      if (isRequest) return;
-      let success = false;
-      setIsRequest(true);
-      const { data } = await getClient().deleteCanvas({
-        body: {
-          canvasId,
-        },
-      });
-
-      setIsRequest(false);
-
-      if (data?.success) {
-        success = true;
-        message.success(t('canvas.action.deleteSuccess'));
-
-        // Check and remove canvasId from localStorage if matches
-        const { currentCanvasId, setCurrentCanvasId } = useCanvasStore.getState();
-        if (currentCanvasId === canvasId) {
-          setCurrentCanvasId(null);
-        }
-
-        await getCanvasList();
-        if (currentCanvasId === canvasId) {
-          const firstCanvas = canvasList?.find((canvas) => canvas.id !== canvasId);
-          if (firstCanvas?.id) {
-            navigate(`/canvas/${firstCanvas?.id}`, { replace: true });
-          } else {
-            navigate('/canvas/empty', { replace: true });
-          }
-        }
-      }
-    };
-
-    const items: MenuProps['items'] = [
-      {
-        label: (
-          <Popconfirm
-            title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas')}
-            onConfirm={handleDelete}
-            onCancel={() => setPopupVisible(false)}
-            okText={t('common.confirm')}
-            cancelText={t('common.cancel')}
-          >
-            <div className="flex items-center text-red-600">
-              <IconDelete size={16} className="mr-2" />
-              {t('workspace.deleteDropdownMenu.delete')}
-            </div>
-          </Popconfirm>
-        ),
-        key: 'delete',
-      },
-    ];
-
-    const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
-      if (info.source === 'trigger') {
-        setPopupVisible(open);
-      }
-    };
-
-    return (
-      <Dropdown
-        trigger={['click']}
-        open={popupVisible}
-        onOpenChange={handleOpenChange}
-        destroyPopupOnHide
-        menu={{
-          items,
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
-            <Button type="text" icon={<IconMoreHorizontal />} className="w-8 h-6 flex items-center justify-center" />
-          </div>
-        </div>
-      </Dropdown>
-    );
   };
 
   return (
@@ -194,22 +199,17 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
               <SiderPopover>
                 <Button
                   type="text"
-                  icon={<AiOutlineMenuUnfold size={20} />}
+                  icon={<AiOutlineMenuUnfold size={18} className="text-gray-500" />}
                   onClick={() => {
                     setCollapse(!collapse);
                   }}
                 />
               </SiderPopover>
-              <Divider type="vertical" className="pr-[4px]" />
-              <div className="flex items-center justify-center">
-                <Avatar size={32} src={Logo} />
-                <span className="text-sm font-bold ml-2">Refly</span>
-              </div>
             </>
           ) : (
             <Button
               type="text"
-              icon={<AiOutlineMenuFold size={20} />}
+              icon={<AiOutlineMenuFold size={18} className="text-gray-500" />}
               onClick={() => {
                 setCollapse(!collapse);
               }}
@@ -220,7 +220,15 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
             className="group flex items-center gap-2 text-sm font-bold text-gray-500 cursor-pointer hover:text-gray-700"
             onClick={handleEditClick}
           >
-            <IconCanvas />
+            {provider?.hasUnsyncedChanges ? (
+              <Tooltip title={t('canvas.toolbar.syncingChanges')}>
+                <div className="w-2.5 h-2.5 bg-yellow-500 rounded-full animate-pulse" />
+              </Tooltip>
+            ) : (
+              <Tooltip title={t('canvas.toolbar.synced', { time: time(new Date(), language)?.utc()?.fromNow() })}>
+                <div className="w-2.5 h-2.5 bg-green-400 rounded-full" />
+              </Tooltip>
+            )}
             {!data[canvasId] ? (
               <Skeleton className="w-28" active paragraph={false} />
             ) : (
@@ -235,7 +243,6 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
             open={isModalOpen}
             okText={t('common.confirm')}
             cancelText={t('common.cancel')}
-            confirmLoading={status === 'pending'}
             onOk={handleModalOk}
             onCancel={handleModalCancel}
             okButtonProps={{ disabled: !editedTitle?.trim() }}
@@ -296,7 +303,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
             </Tooltip>
           </div>
 
-          <ActionDropdown />
+          <ActionDropdown canvasId={canvasId} />
         </div>
       </div>
     </>

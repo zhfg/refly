@@ -107,7 +107,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     },
     [ydoc],
   );
-  const throttledSyncNodesToYDoc = useThrottledCallback(syncNodesToYDoc, 50, {
+  const throttledSyncNodesToYDoc = useThrottledCallback(syncNodesToYDoc, 500, {
     leading: true,
     trailing: false,
   });
@@ -122,7 +122,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     },
     [ydoc],
   );
-  const throttledSyncEdgesToYDoc = useThrottledCallback(syncEdgesToYDoc, 50, {
+  const throttledSyncEdgesToYDoc = useThrottledCallback(syncEdgesToYDoc, 500, {
     leading: true,
     trailing: false,
   });
