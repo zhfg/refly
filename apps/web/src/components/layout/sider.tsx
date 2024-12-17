@@ -38,6 +38,7 @@ import { useCanvasNodesStore } from "@refly-packages/ai-workspace-common/stores/
 import { CanvasNodeType } from "@refly-packages/ai-workspace-common/requests/types.gen"
 // icons
 import { IconLibrary } from "@refly-packages/ai-workspace-common/components/common/icon"
+import { CanvasActionDropdown } from "@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -347,12 +348,24 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                             canvasList.map(canvas => (
                               <MenuItem
                                 key={canvas.id}
-                                onClick={() => {
-                                  if (canvas.id !== selectedKey)
+                                onClick={e => {
+                                  const isClickMenu = (
+                                    e.target as HTMLElement
+                                  )?.closest(".arco-menu-item-inner")
+                                  if (
+                                    isClickMenu &&
+                                    canvas.id !== selectedKey
+                                  ) {
                                     navigate(`/canvas/${canvas.id}`)
+                                  }
                                 }}>
-                                <IconCanvasFill className="arco-icon" />
-                                {canvas.name}
+                                <div className="flex items-center">
+                                  <IconCanvasFill className="arco-icon" />
+                                  <div className="w-32 flex-1 truncate">
+                                    {canvas?.name ?? ""}
+                                  </div>
+                                  <CanvasActionDropdown canvasId={canvas.id} />
+                                </div>
                               </MenuItem>
                             ))
                           )}

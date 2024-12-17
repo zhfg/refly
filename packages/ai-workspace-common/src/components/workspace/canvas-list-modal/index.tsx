@@ -6,18 +6,14 @@ import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { Canvas } from '@refly/openapi-schema';
-import {
-  IconCanvas,
-  IconDelete,
-  IconMoreHorizontal,
-  IconPlay,
-} from '@refly-packages/ai-workspace-common/components/common/icon';
-import { List, Modal, Button, Dropdown, DropdownProps, MenuProps, Popconfirm, message, Empty } from 'antd';
+import { IconCanvas, IconPlay } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { List, Modal, Button, Empty } from 'antd';
 import { ScrollLoading } from '../scroll-loading';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { LOCALE } from '@refly/common-types';
 import './index.scss';
-import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/use-delete-canvas';
+import { CanvasActionDropdown } from './canvasActionDropdown';
+
 interface CanvasListProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
@@ -37,7 +33,6 @@ export const CanvasListModal = (props: CanvasListProps) => {
     },
     pageSize: 20,
   });
-  const { deleteCanvas } = useDeleteCanvas();
 
   useEffect(() => {
     if (visible) {
@@ -52,56 +47,6 @@ export const CanvasListModal = (props: CanvasListProps) => {
 
   const CanvasItem = (props: { canvas: Canvas }) => {
     const { canvas } = props;
-
-    const ActionDropdown = () => {
-      const [popupVisible, setPopupVisible] = useState(false);
-
-      const handleDelete = async () => {
-        const success = await deleteCanvas(canvas.canvasId);
-        if (success) {
-          setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId));
-        }
-      };
-
-      const items: MenuProps['items'] = [
-        {
-          label: (
-            <Popconfirm
-              title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas')}
-              onConfirm={handleDelete}
-              onCancel={() => setPopupVisible(false)}
-              okText={t('common.confirm')}
-              cancelText={t('common.cancel')}
-            >
-              <div className="flex items-center text-red-600">
-                <IconDelete size={16} className="mr-2" />
-                {t('workspace.deleteDropdownMenu.delete')}
-              </div>
-            </Popconfirm>
-          ),
-          key: 'delete',
-        },
-      ];
-
-      const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
-        if (info.source === 'trigger') {
-          setPopupVisible(open);
-        }
-      };
-
-      return (
-        <Dropdown
-          trigger={['click']}
-          open={popupVisible}
-          onOpenChange={handleOpenChange}
-          menu={{
-            items,
-          }}
-        >
-          <Button size="small" type="text" icon={<IconMoreHorizontal />} />
-        </Dropdown>
-      );
-    };
 
     return (
       <div className="px-4 py-3 min-w-[600px] flex items-center justify-between border-b border-solid border-1 border-x-0 border-t-0 border-black/5">
@@ -130,7 +75,10 @@ export const CanvasListModal = (props: CanvasListProps) => {
           >
             <span className="text-xs hover:font-medium">{t('workspace.canvasListModal.continue')}</span>
           </Button>
-          <ActionDropdown />
+          <CanvasActionDropdown
+            canvasId={canvas.canvasId}
+            afterDelete={() => setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId))}
+          />
         </div>
       </div>
     );
