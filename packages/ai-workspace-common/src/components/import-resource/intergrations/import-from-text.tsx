@@ -111,7 +111,7 @@ export const ImportFromText = () => {
                 maxRows: 7,
               }}
               showWordLimit
-              maxLength={6000}
+              maxLength={100000}
               value={importResourceStore.copiedTextPayload?.content}
               allowClear
               onChange={(value) => importResourceStore.setCopiedTextPayload({ content: value })}
