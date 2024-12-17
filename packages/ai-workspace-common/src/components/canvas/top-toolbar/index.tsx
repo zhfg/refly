@@ -35,6 +35,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
+import { useDebounce } from 'use-debounce';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -135,7 +136,14 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
     setCollapse: state.setCollapse,
   }));
   const { provider } = useCanvasContext();
-  console.log('provider unsyncedChanges', provider?.unsyncedChanges);
+  const [unsyncedChanges, setUnsyncedChanges] = useState(provider?.unsyncedChanges || 0);
+  const [debouncedUnsyncedChanges] = useDebounce(unsyncedChanges, 500);
+
+  useEffect(() => {
+    provider.on('unsyncedChanges', (data) => {
+      setUnsyncedChanges(data);
+    });
+  }, [provider]);
 
   const { data, showPreview, setShowPreview, showMaxRatio, setShowMaxRatio, showLaunchpad, setShowLaunchpad } =
     useCanvasStoreShallow((state) => ({
@@ -220,21 +228,36 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
             className="group flex items-center gap-2 text-sm font-bold text-gray-500 cursor-pointer hover:text-gray-700"
             onClick={handleEditClick}
           >
-            {provider?.hasUnsyncedChanges ? (
-              <Tooltip title={t('canvas.toolbar.syncingChanges')}>
-                <div className="w-2.5 h-2.5 bg-yellow-500 rounded-full animate-pulse" />
-              </Tooltip>
-            ) : (
-              <Tooltip title={t('canvas.toolbar.synced', { time: time(new Date(), language)?.utc()?.fromNow() })}>
-                <div className="w-2.5 h-2.5 bg-green-400 rounded-full" />
-              </Tooltip>
-            )}
-            {!data[canvasId] ? (
-              <Skeleton className="w-28" active paragraph={false} />
-            ) : (
-              canvasTitle || t('common.untitled')
-            )}
-            <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative w-2.5 h-2.5">
+              <div
+                className={`
+                  absolute w-full h-full rounded-full transition-all duration-300 ease-in-out
+                  ${debouncedUnsyncedChanges > 0 ? 'opacity-100' : 'opacity-0'}
+                  bg-yellow-500 animate-pulse
+                `}
+              />
+              <div
+                className={`
+                  absolute w-full h-full rounded-full transition-all duration-300 ease-in-out
+                  ${debouncedUnsyncedChanges > 0 ? 'opacity-0' : 'opacity-100'}
+                  bg-green-400
+                `}
+              />
+            </div>
+            <Tooltip
+              title={
+                debouncedUnsyncedChanges > 0
+                  ? t('canvas.toolbar.syncingChanges')
+                  : t('canvas.toolbar.synced', { time: time(new Date(), language)?.utc()?.fromNow() })
+              }
+            >
+              {!data[canvasId] ? (
+                <Skeleton className="w-28" active paragraph={false} />
+              ) : (
+                canvasTitle || t('common.untitled')
+              )}
+              <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
+            </Tooltip>
           </div>
 
           <Modal

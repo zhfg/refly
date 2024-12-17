@@ -14,7 +14,6 @@ interface CanvasContextType {
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
 const providerCache = new Map<string, HocuspocusProvider>();
-const PROVIDER_CLEANUP_DELAY = 5000; // 5 seconds delay before actual cleanup
 
 export const CanvasProvider = ({ canvasId, children }: { canvasId: string; children: React.ReactNode }) => {
   const [token] = useCookie('_refly_ai_sid');
@@ -30,7 +29,7 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       name: canvasId,
       token,
       connect: true,
-      forceSyncInterval: 2000,
+      forceSyncInterval: 5000,
     });
 
     providerCache.set(canvasId, newProvider);
@@ -149,17 +148,14 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       cleanup?.(); // Clean up observers
       provider.off('connect', handleConnect);
 
+      // Ensure clean disconnection
       if (provider.status === 'connected') {
         provider.forceSync();
       }
 
-      // Delay the provider cleanup to avoid too fast creation and destruction
-      setTimeout(() => {
-        if (providerCache.get(canvasId) === provider) {
-          provider.destroy();
-          providerCache.delete(canvasId);
-        }
-      }, PROVIDER_CLEANUP_DELAY);
+      // Remove from cache and destroy
+      providerCache.delete(canvasId);
+      provider.destroy();
     };
   }, [provider, canvasId, setNodes, setEdges, setTitle]);
 
