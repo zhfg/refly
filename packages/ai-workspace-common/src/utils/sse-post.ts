@@ -17,7 +17,7 @@ export const ssePost = async ({
   onSkillStructedData,
   onSkillCreateNode,
   onSkillTokenUsage,
-  onError,
+  onSkillError,
   onCompleted,
 }: {
   controller: AbortController;
@@ -32,7 +32,7 @@ export const ssePost = async ({
   onSkillCreateNode: (event: SkillEvent) => void;
   onSkillArtifact: (event: SkillEvent) => void;
   onSkillTokenUsage?: (event: SkillEvent) => void;
-  onError?: (error: BaseResponse) => void;
+  onSkillError?: (event: SkillEvent) => void;
   onCompleted?: (val?: boolean) => void;
 }) => {
   let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
@@ -50,7 +50,7 @@ export const ssePost = async ({
 
     const baseResp = await extractBaseResp(response);
     if (!baseResp.success) {
-      onError?.(baseResp);
+      onSkillError?.({ error: baseResp, event: 'error' });
       return;
     }
 
@@ -107,7 +107,7 @@ export const ssePost = async ({
               } else if (skillEvent?.event === 'token_usage') {
                 onSkillTokenUsage?.(skillEvent);
               } else if (skillEvent?.event === 'error') {
-                onError?.(JSON.parse(skillEvent.content));
+                onSkillError?.(skillEvent);
               }
               setTimeout(() => {
                 // 滑动到底部
@@ -118,7 +118,7 @@ export const ssePost = async ({
 
           bufferStr = lines[lines.length - 1];
         } catch (err) {
-          onError(err);
+          onSkillError(err);
           onCompleted?.(true);
           hasError = true;
 
@@ -142,9 +142,12 @@ export const ssePost = async ({
       console.log('Fetch aborted');
     } else {
       console.error('Fetch error:', error);
-      onError?.({
-        success: false,
-        errCode: new ConnectionError(error).code,
+      onSkillError?.({
+        error: {
+          success: false,
+          errCode: new ConnectionError(error).code,
+        },
+        event: 'error',
       });
     }
   } finally {

@@ -490,7 +490,7 @@ export const useBuildTask = () => {
       onSkillStructedData,
       onSkillEnd,
       onCompleted,
-      onError,
+      onSkillError: onError,
       onSkillUsage,
     });
   };

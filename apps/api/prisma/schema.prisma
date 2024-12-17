@@ -158,12 +158,16 @@ model ActionResult {
   uid        String       @default("") @map("uid")
   /// Result title
   title      String       @default("") @map("title")
+  /// Used model
+  modelName  String?      @map("model_name")
   /// Action target type
   targetType String?      @map("target_type")
   /// Action target ID
   targetId   String?      @map("target_id")
   /// Action metadata
   actionMeta String?      @map("action_meta")
+  /// Input (JSON)
+  input      String?      @map("input")
   /// Context (JSON of `SkillContext`)
   context    String?      @map("context")
   /// Skill template config (JSON)
@@ -187,27 +191,29 @@ model ActionResult {
 
 model ActionStep {
   /// Primary key
-  pk             BigInt   @id @default(autoincrement())
+  pk             BigInt    @id @default(autoincrement())
   /// Action result id which this step belongs to
-  resultId       String   @map("result_id")
+  resultId       String    @map("result_id")
   /// Step order
-  order          Int      @default(0) @map("order")
+  order          Int       @default(0) @map("order")
   /// Step name
-  name           String   @map("name")
+  name           String    @map("name")
   /// Step content
-  content        String   @map("content")
+  content        String    @map("content")
   /// Structured data output (JSON)
-  structuredData String   @default("{}") @map("structured_data")
+  structuredData String    @default("{}") @map("structured_data")
   /// Action logs
-  logs           String   @default("[]") @map("logs")
+  logs           String    @default("[]") @map("logs")
   /// Action artifacts (JSON array)
-  artifacts      String   @default("[]") @map("artifacts")
+  artifacts      String    @default("[]") @map("artifacts")
   /// Token usage summary (JSON array)
-  tokenUsage     String   @default("[]") @map("token_usage")
+  tokenUsage     String    @default("[]") @map("token_usage")
   /// Create timestamp
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([resultId, order])
   @@map("action_steps")

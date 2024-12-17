@@ -2296,6 +2296,10 @@ export const SkillEventSchema = {
       description: 'Canvas node data. Only present when `event` is `create_node`.',
       $ref: '#/components/schemas/CanvasNode',
     },
+    error: {
+      description: 'Error data. Only present when `event` is `error`.',
+      $ref: '#/components/schemas/BaseResponse',
+    },
   },
 } as const;
 
@@ -3191,7 +3195,6 @@ export const InvokeActionResponseSchema = {
 
 export const InvokeSkillRequestSchema = {
   type: 'object',
-  required: ['input', 'target'],
   properties: {
     input: {
       description: 'Skill input',
@@ -3223,15 +3226,11 @@ export const InvokeSkillRequestSchema = {
     },
     resultId: {
       type: 'string',
-      description: 'Result ID (will be generated if not provided)',
-    },
-    skillId: {
-      type: 'string',
-      description: 'Skill instance ID to invoke (if not provided, skill scheduler will be used)',
-    },
-    convId: {
-      description: 'Conversation ID (will add messages to this conversation if provided)',
-      type: 'string',
+      description: `Result ID associated with this invocation.
+1) If not provided, a new resultId will be generated.
+2) If there is no existing result with this resultId, it will be created and run.
+3) If there is an existing result with this resultId, it will be rerun.
+`,
     },
     locale: {
       type: 'string',
@@ -3241,13 +3240,13 @@ export const InvokeSkillRequestSchema = {
       type: 'string',
       description: 'Selected model',
     },
-    jobId: {
-      description: 'Skill job ID (if not provided, a new job will be created)',
+    skillId: {
       type: 'string',
+      description: 'Skill ID',
     },
     triggerId: {
-      description: "Trigger ID (typically you don't need to provide this)",
       type: 'string',
+      description: 'Trigger ID',
     },
   },
 } as const;

@@ -370,8 +370,11 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       // Check for existing node
       const existingNode = nodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId);
       if (existingNode) {
-        message.warning(t('canvas.action.nodeAlreadyExists', { type: t(`common.${node.type}`) }));
+        if (existingNode.type !== 'skillResponse') {
+          message.warning(t('canvas.action.nodeAlreadyExists', { type: t(`common.${node.type}`) }));
+        }
         setSelectedNode(existingNode);
+        setNodeCenter(existingNode.id);
         return;
       }
 

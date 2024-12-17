@@ -9,7 +9,6 @@ import zhHansSkill from '@refly/i18n/zh-Hans/skill';
 import zhHansSkillLog from '@refly/i18n/zh-Hans/skill-log';
 
 i18next.use(initReactI18next).init({
-  lng: 'en', // if you're using a language detector, do not define the lng option
   debug: true,
   defaultNS: 'ui',
   resources: {

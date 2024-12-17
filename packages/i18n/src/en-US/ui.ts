@@ -43,6 +43,7 @@ const translations = {
     close: 'Close',
     canvas: 'Canvas',
     newCanvas: 'New Canvas',
+    skillResponse: 'Skill Response',
     resource: 'Resource',
     document: 'Document',
     newDocument: 'New Document',
@@ -475,6 +476,7 @@ const translations = {
       addSuccess: 'Canvas added successfully, start creating!',
     },
     skillResponse: {
+      executionFailed: 'Execution failed, click to retry',
       skillCompleted: 'Skill Completed',
       stepCompleted: 'Step Completed',
       stepTitle: 'Step {{index}}',
