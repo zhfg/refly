@@ -23,13 +23,13 @@ export const useLogout = () => {
         localStorage.removeItem('refly-local-settings');
 
         // Notify extension
-        chrome.runtime?.sendMessage(getExtensionId(), {
-          name: 'external-refly-logout-notify',
-        });
+        // chrome.runtime?.sendMessage(getExtensionId(), {
+        //   name: 'external-refly-logout-notify',
+        // });
 
         // Clear cookies
-        deleteCookie();
-        Cookies.remove('_refly_ai_sid', { domain: getCookieOrigin() });
+        deleteCookie?.();
+        Cookies?.remove?.('_refly_ai_sid', { domain: getCookieOrigin() });
 
         // Reset user store
         userStore.resetState();

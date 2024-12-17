@@ -146,6 +146,9 @@ interface ContextPanelState {
   removePreviewHistoryItem: () => void;
   clearHistoryItems: () => void;
   updateHistoryItem: (item: NodeItem) => void;
+
+  // Add new method
+  pinAllHistoryItems: () => void;
 }
 
 export const defaultSelectedTextCardState = {
@@ -320,6 +323,15 @@ export const useContextPanelStore = create<ContextPanelState>()(
       set((state) => ({ ...state, currentSelectionContent: content })),
 
     resetState: () => set((state) => ({ ...state, ...defaultState })),
+
+    pinAllHistoryItems: () =>
+      set((state) => ({
+        ...state,
+        historyItems: state.historyItems.map((item) => ({
+          ...item,
+          isPreview: false,
+        })),
+      })),
   })),
 );
 

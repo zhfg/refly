@@ -17,7 +17,7 @@ export const sendToBackground = async (message: BackgroundMessage, needResponse 
 
       browser.runtime.onMessage.addListener(listener);
     });
-    await browser.runtime.sendMessage(message);
+    // await browser.runtime.sendMessage(message);
 
     if (needResponse) {
       const res = await waitForResponse;
@@ -55,7 +55,7 @@ export const sendToWebpageMainWorld = async (
       const tabs = await browser.tabs.query({ active: true, currentWindow: true });
       const activeTabId = tabs?.[0]?.id;
       if (activeTabId) {
-        await browser.tabs.sendMessage(activeTabId, message);
+        // await browser.tabs.sendMessage(activeTabId, message);
       }
     } else if (fromRuntime === 'extension-csui') {
       window.postMessage(message, '*');
@@ -116,12 +116,12 @@ export const sendMessage: (message: BackgroundMessage, needResponse?: boolean) =
         const tabs = await browser.tabs.query({ active: true, currentWindow: true });
         const activeTabId = tabs?.[0]?.id;
         if (activeTabId) {
-          await browser.tabs.sendMessage(activeTabId, message);
+          // await browser.tabs.sendMessage(activeTabId, message);
         }
 
         // 这里兼容 sidepanel 给 background 发消息
         if (browser?.runtime?.sendMessage) {
-          await browser.runtime.sendMessage(message);
+          // await browser.runtime.sendMessage(message);
         }
       } else if (fromRuntime === 'extension-csui') {
         if (window && window?.postMessage) {
@@ -129,7 +129,7 @@ export const sendMessage: (message: BackgroundMessage, needResponse?: boolean) =
         }
 
         if (browser?.runtime?.sendMessage) {
-          await browser.runtime.sendMessage(message);
+          // await browser.runtime.sendMessage(message);
         }
       } else if (fromRuntime === 'web') {
         if (window && window?.postMessage) {
