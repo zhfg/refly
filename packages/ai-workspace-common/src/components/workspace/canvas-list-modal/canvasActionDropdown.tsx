@@ -56,7 +56,7 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
         items,
       }}
     >
-      <Button size="small" type="text" icon={<IconMoreHorizontal />} />
+      <Button onClick={(e) => e.stopPropagation()} size="small" type="text" icon={<IconMoreHorizontal />} />
     </Dropdown>
   );
 };
