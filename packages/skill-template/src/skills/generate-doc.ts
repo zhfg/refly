@@ -15,10 +15,10 @@ import {
 import { GraphState, IContext } from '../scheduler/types';
 // utils
 import { prepareContext } from '../scheduler/utils/context';
-import { analyzeQueryAndContext, preprocessQuery } from '../scheduler/utils/queryRewrite';
 import { truncateMessages, truncateSource } from '../scheduler/utils/truncator';
 import { countMessagesTokens, countToken, ModelContextLimitMap, checkHasContext } from '../scheduler/utils/token';
 import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils/message';
+import { processQuery } from '../scheduler/utils/queryProcessor';
 
 // prompts
 import * as generateDocument from '../scheduler/module/generateDocument';
@@ -55,79 +55,23 @@ export class GenerateDoc extends BaseSkill {
   };
 
   commonPreprocess = async (state: GraphState, config: SkillRunnableConfig, module: SkillPromptModule) => {
-    const { messages = [], query: originalQuery } = state;
-    const {
-      locale = 'en',
-      chatHistory: rawChatHistory = [],
-      modelName,
-      resources,
-      documents,
-      contentList,
-      projects,
-    } = config.configurable;
-
+    const { messages = [] } = state;
+    const { locale = 'en' } = config.configurable;
     const { tplConfig } = config?.configurable || {};
 
-    let optimizedQuery = '';
-    let mentionedContext: IContext;
-    let context: string = '';
-    let sources: Source[] = [];
-
-    // preprocess query, ensure query is not too long
-    const query = preprocessQuery(originalQuery, {
-      config: config,
-      ctxThis: this,
-      state: state,
-      tplConfig,
-    });
-    optimizedQuery = query;
-    this.engine.logger.log(`preprocess query: ${query}`);
-
-    const chatHistory = rawChatHistory.filter((message) => message.content !== '');
-    // preprocess chat history, ensure chat history is not too long
-    const usedChatHistory = truncateMessages(chatHistory, 20, 4000, 30000);
-
-    // check if there is any context
-    const hasContext = checkHasContext({
-      contentList,
-      resources,
-      documents,
-      projects: projects,
-    });
-    this.engine.logger.log(`checkHasContext: ${hasContext}`);
-
-    const maxTokens = ModelContextLimitMap[modelName];
-    const queryTokens = countToken(query);
-    const chatHistoryTokens = countMessagesTokens(usedChatHistory);
-    const remainingTokens = maxTokens - queryTokens - chatHistoryTokens;
-    this.engine.logger.log(
-      `maxTokens: ${maxTokens}, queryTokens: ${queryTokens}, chatHistoryTokens: ${chatHistoryTokens}, remainingTokens: ${remainingTokens}`,
-    );
-
-    // 新增：定义长查询的阈值（可以根据实际需求调整）
-    const LONG_QUERY_TOKENS_THRESHOLD = 100; // 约等于50-75个英文单词或25-35个中文字
-
-    // 优化 needRewriteQuery 判断逻辑
-    const needRewriteQuery =
-      queryTokens < LONG_QUERY_TOKENS_THRESHOLD && // 只有短查询才需要重写
-      (hasContext || chatHistoryTokens > 0); // 保持原有的上下文相关判断
-
-    const needPrepareContext = hasContext && remainingTokens > 0;
-    this.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`);
-
-    if (needRewriteQuery) {
-      const analyedRes = await analyzeQueryAndContext(query, {
+    // Use shared query processor
+    const { optimizedQuery, query, usedChatHistory, hasContext, remainingTokens, mentionedContext } =
+      await processQuery({
         config,
         ctxThis: this,
-        state: state,
-        tplConfig,
+        state,
       });
-      optimizedQuery = analyedRes.optimizedQuery;
-      mentionedContext = analyedRes.mentionedContext;
-    }
 
-    this.engine.logger.log(`optimizedQuery: ${optimizedQuery}`);
-    this.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
+    let context = '';
+    let sources: Source[] = [];
+
+    const needPrepareContext = hasContext && remainingTokens > 0;
+    this.engine.logger.log(`needPrepareContext: ${needPrepareContext}`);
 
     if (needPrepareContext) {
       config.metadata.step = { name: 'analyzeContext' };
@@ -140,9 +84,9 @@ export class GenerateDoc extends BaseSkill {
           enableLowerPriorityContext: hasContext,
         },
         {
-          config: config,
+          config,
           ctxThis: this,
-          state: state,
+          state,
           tplConfig,
         },
       );
@@ -170,7 +114,7 @@ export class GenerateDoc extends BaseSkill {
 
     this.engine.logger.log(`requestMessages: ${safeStringifyJSON(requestMessages)}`);
 
-    return { requestMessages, context, usedChatHistory };
+    return { requestMessages, context, sources, usedChatHistory };
   };
 
   // Add new method to generate title
@@ -253,8 +197,7 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
   };
 
   callGenerateDoc = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { currentSkill } = config?.configurable || {};
-    const { user } = config.configurable;
+    const { currentSkill, user } = config.configurable;
 
     const model = this.engine.chatModel({ temperature: 0.1 });
 
@@ -263,6 +206,7 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
       buildUserPrompt: generateDocument.buildGenerateDocumentUserPrompt,
       buildContextUserPrompt: generateDocument.buildGenerateDocumentContextUserPrompt,
     };
+
     const { requestMessages, context, usedChatHistory } = await this.commonPreprocess(state, config, module);
 
     // Generate title first
@@ -280,7 +224,7 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
       initialContent: '',
     });
 
-    // set current step
+    // Set current step
     config.metadata.step = { name: 'generateDocument' };
 
     const artifact: Artifact = {

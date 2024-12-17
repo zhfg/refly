@@ -1,14 +1,14 @@
-// deprecated
-import { GraphState, IContext, MentionedContextItem, QueryAnalysis } from '../types';
-import { summarizeChatHistory, summarizeContext } from './summarizer';
+import { GraphState, IContext, MentionedContextItem, QueryAnalysis } from '../../types';
+import { summarizeChatHistory, summarizeContext } from '../summarizer';
 import { z } from 'zod';
-import { BaseSkill, SkillRunnableConfig } from '../../base';
+import { BaseSkill, SkillRunnableConfig } from '../../../base';
 import { SkillTemplateConfig } from '@refly-packages/openapi-schema';
-import { ModelContextLimitMap } from './token';
-import { MAX_CONTEXT_RATIO, MAX_QUERY_TOKENS_RATIO } from './constants';
-import { truncateTextWithToken } from './truncator';
+import { ModelContextLimitMap } from '../token';
+import { MAX_CONTEXT_RATIO, MAX_QUERY_TOKENS_RATIO } from '../constants';
+import { truncateTextWithToken } from '../truncator';
 import { safeStringifyJSON } from '@refly-packages/utils';
-import { extractStructuredData } from './extractor';
+import { extractStructuredData } from '../extractor';
+import { buildNormalQueryRewriteExamples, buildVagueQueryRewriteExamples } from './examples';
 
 // simplify context entityId for better extraction
 export const preprocessContext = (context: IContext): IContext => {
@@ -68,106 +68,6 @@ export const postprocessContext = (
   });
 
   return context;
-};
-
-export const buildAnalyzeQuerySystemPromptExamples = () => {
-  return `
-Examples of query rewriting with context and chat history:
-
-1. Chat History Dependent Query:
-   <ChatHistory>
-   <ChatHistoryItem type={human}>What are the key features of the new product?</ChatHistoryItem>
-   <ChatHistoryItem type={ai}>The key features include AI-powered search, real-time collaboration, and document management.</ChatHistoryItem>
-   <ChatHistoryItem type={human}>Can you elaborate on that first point?</ChatHistoryItem>
-   </ChatHistory>
-
-   Original query: "How does it compare to competitors?"
-   Rewritten query: "How does the AI-powered search feature compare to competitors?"
-   mentionedContext: []
-   Reasoning: Query references the AI search feature discussed in chat history. Rewritten to clarify the subject while maintaining the comparative intent.
-
-2. Independent Query with Context:
-   <Context>
-   <ContextItem type='document' entityId='doc-1' title='Project Roadmap'>Q4 goals include improving search accuracy and adding new integrations.</ContextItem>
-   </Context>
-
-   <ChatHistory>
-   <ChatHistoryItem type={human}>What's our current team size?</ChatHistoryItem>
-   <ChatHistoryItem type={ai}>We currently have 25 team members.</ChatHistoryItem>
-   </ChatHistory>
-
-   Original query: "What are the integration plans?"
-   Rewritten query: "What are the integration plans mentioned in the Project Roadmap?"
-   mentionedContext: [
-     {
-       "type": "document",
-       "entityId": "doc-1",
-       "title": "Project Roadmap",
-       "useWholeContent": true
-     }
-   ]
-   Reasoning: Query relates to context but not chat history. Added document reference while keeping original intent.
-
-3. Self-Contained Query:
-   <Context>
-   <ContextItem type='selectedContent' entityId='content-1' title='Meeting Notes'>Team discussed API improvements.</ContextItem>
-   </Context>
-
-   <ChatHistory>
-   <ChatHistoryItem type={human}>How's the project going?</ChatHistoryItem>
-   <ChatHistoryItem type={ai}>Progress is on track with minor delays in testing.</ChatHistoryItem>
-   </ChatHistory>
-
-   Original query: "What's the weather like in Paris?"
-   Rewritten query: "What's the weather like in Paris?"
-   mentionedContext: []
-   Reasoning: Query is clear and unrelated to both context and chat history. No rewrite needed.
-
-4. Chat History Reference with Context:
-   <Context>
-   <ContextItem type='resource' entityId='resource-1' title='Performance Report'>System response time improved by 40%.</ContextItem>
-   </Context>
-
-   <ChatHistory>
-   <ChatHistoryItem type={human}>What optimization methods did we use?</ChatHistoryItem>
-   <ChatHistoryItem type={ai}>We implemented caching and database indexing.</ChatHistoryItem>
-   <ChatHistoryItem type={human}>And what was the impact?</ChatHistoryItem>
-   </ChatHistory>
-
-   Original query: "Could you explain these improvements in detail?"
-   Rewritten query: "Could you explain the system response time improvements and optimization methods (caching and database indexing) in detail?"
-   mentionedContext: [
-     {
-       "type": "resource",
-       "entityId": "resource-1",
-       "title": "Performance Report",
-       "useWholeContent": true
-     }
-   ]
-   Reasoning: Query references both chat history (optimization methods) and context (performance improvements). Combined both in rewrite for clarity.
-
-5. Ambiguous Reference Resolution:
-   <Context>
-   <ContextItem type='selectedContent' entityId='content-2' title='Security Guidelines'>New authentication protocol requires 2FA for all users.</ContextItem>
-   </Context>
-
-   <ChatHistory>
-   <ChatHistoryItem type={human}>When will this be implemented?</ChatHistoryItem>
-   <ChatHistoryItem type={ai}>The rollout is scheduled for next month.</ChatHistoryItem>
-   </ChatHistory>
-
-   Original query: "What about existing users?"
-   Rewritten query: "What about existing users regarding the new 2FA authentication protocol?"
-   mentionedContext: [
-     {
-       "type": "selectedContent",
-       "entityId": "content-2",
-       "title": "Security Guidelines",
-       "useWholeContent": true
-     }
-   ]
-   Reasoning: Query continues the conversation about authentication. Combined context and chat history to clarify the subject.
-   `;
 };
 
 // Add schema for query analysis
@@ -246,7 +146,11 @@ export async function analyzeQueryAndContext(
    - Context and chat history are unrelated to query
    - Query explicitly states its target
 
-${buildAnalyzeQuerySystemPromptExamples()}`;
+## Examples
+${buildVagueQueryRewriteExamples()}
+
+${buildNormalQueryRewriteExamples()}
+`;
 
   const userMessage = `## User Query
 ${query}

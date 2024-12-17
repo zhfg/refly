@@ -4,17 +4,15 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
 import { GraphState } from '../scheduler/types';
-import { ModelContextLimitMap } from '@refly-packages/utils';
+import { safeStringifyJSON } from '@refly-packages/utils';
 
 import { buildFinalRequestMessages } from '../scheduler/utils/message';
 
 // prompts
 import { prepareContext } from '../scheduler/utils/context';
-import { preprocessQuery } from '../scheduler/utils/queryRewrite';
-import { countMessagesTokens } from '../scheduler/utils/token';
-import { truncateMessages, truncateSource } from '../scheduler/utils/truncator';
-import { countToken } from '../scheduler/utils/token';
+import { truncateSource } from '../scheduler/utils/truncator';
 import * as librarySearch from '../scheduler/module/librarySearch';
+import { processQuery } from '../scheduler/utils/queryProcessor';
 
 export class LibrarySearch extends BaseSkill {
   name = 'librarySearch';
@@ -38,42 +36,31 @@ export class LibrarySearch extends BaseSkill {
   };
 
   callLibrarySearch = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { messages = [], query: originalQuery } = state;
-    const { locale = 'en', chatHistory: rawChatHistory = [], modelName, currentSkill } = config.configurable;
+    const { messages = [] } = state;
+    const { locale = 'en', currentSkill } = config.configurable;
 
     // Set current step
     config.metadata.step = { name: 'librarySearch' };
 
-    // Preprocess query and ensure it's not too long
-    const query = preprocessQuery(originalQuery, {
-      config,
-      ctxThis: this,
-      state,
-      tplConfig: config.configurable.tplConfig,
-    });
-
-    // Preprocess chat history
-    const chatHistory = rawChatHistory.filter((message) => message.content !== '');
-    const usedChatHistory = truncateMessages(chatHistory, 20, 4000, 30000);
-
-    // Calculate token limits
-    const maxTokens = ModelContextLimitMap[modelName];
-    const queryTokens = countToken(query);
-    const chatHistoryTokens = countMessagesTokens(usedChatHistory);
-    const remainingTokens = maxTokens - queryTokens - chatHistoryTokens;
-
+    // Force enable knowledge base search and disable web search
     config.configurable.tplConfig = {
       ...config.configurable.tplConfig,
-      // Force enable knowledge base search and disable web search
       enableWebSearch: { value: false, label: 'Web Search', displayValue: 'false' },
       enableKnowledgeBaseSearch: { value: true, label: 'Knowledge Base Search', displayValue: 'true' },
       enableSearchWholeSpace: { value: true, label: 'Search Whole Space', displayValue: 'true' },
     };
 
+    // Use shared query processor
+    const { optimizedQuery, query, usedChatHistory, remainingTokens } = await processQuery({
+      config,
+      ctxThis: this,
+      state,
+    });
+
     // Prepare context with library search focus
     const librarySearchContext = await prepareContext(
       {
-        query,
+        query: optimizedQuery,
         mentionedContext: {
           contentList: [],
           resources: [],
@@ -116,8 +103,10 @@ export class LibrarySearch extends BaseSkill {
       needPrepareContext: true,
       context: contextStr,
       originalQuery: query,
-      rewrittenQuery: query,
+      rewrittenQuery: optimizedQuery,
     });
+
+    this.engine.logger.log(`requestMessages: ${safeStringifyJSON(requestMessages)}`);
 
     // Generate answer using the model
     const model = this.engine.chatModel({ temperature: 0.1 });
