@@ -5,7 +5,7 @@ import { Wrench, MoreHorizontal } from 'lucide-react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-import { EDGE_STYLES } from '../constants';
+import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 
 type ToolNode = Node<CanvasNodeData<ToolNodeMeta>, 'tool'>;
@@ -30,6 +30,7 @@ export const ToolNode = ({ data, selected, id }: NodeProps<ToolNode>) => {
   const [isHovered, setIsHovered] = useState(false);
   const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();
+  const edgeStyles = useEdgeStyles();
 
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
@@ -43,13 +44,13 @@ export const ToolNode = ({ data, selected, id }: NodeProps<ToolNode>) => {
         if (edge.source === id || edge.target === id) {
           return {
             ...edge,
-            style: EDGE_STYLES.hover,
+            style: edgeStyles.hover,
           };
         }
         return edge;
       }),
     );
-  }, [id, setEdges]);
+  }, [id, setEdges, edgeStyles]);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
@@ -58,13 +59,13 @@ export const ToolNode = ({ data, selected, id }: NodeProps<ToolNode>) => {
         if (edge.source === id || edge.target === id) {
           return {
             ...edge,
-            style: EDGE_STYLES.default,
+            style: edgeStyles.default,
           };
         }
         return edge;
       }),
     );
-  }, [id, setEdges]);
+  }, [id, setEdges, edgeStyles]);
 
   return (
     <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>

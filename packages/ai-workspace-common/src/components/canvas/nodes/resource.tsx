@@ -5,7 +5,7 @@ import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-import { EDGE_STYLES } from '../constants';
+import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
@@ -50,6 +50,8 @@ export const ResourceNode = ({
   const isTargetConnected = edges?.some((edge) => edge.target === id);
   const isSourceConnected = edges?.some((edge) => edge.source === id);
 
+  const edgeStyles = useEdgeStyles();
+
   // 立即更新hover状态，但节流更新边缘样式
   const updateEdgeStyles = useThrottledCallback(
     (hoveredState: boolean) => {
@@ -58,7 +60,7 @@ export const ResourceNode = ({
           if (edge.source === id || edge.target === id) {
             return {
               ...edge,
-              style: hoveredState ? EDGE_STYLES.hover : EDGE_STYLES.default,
+              style: hoveredState ? edgeStyles.hover : edgeStyles.default,
             };
           }
           return edge;
@@ -66,7 +68,7 @@ export const ResourceNode = ({
       );
     },
     500,
-    { leading: true, trailing: true },
+    { leading: true, trailing: false },
   );
 
   const handleMouseEnter = useCallback(() => {

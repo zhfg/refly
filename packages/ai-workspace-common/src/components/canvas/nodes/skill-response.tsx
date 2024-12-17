@@ -6,7 +6,7 @@ import { Node } from '@xyflow/react';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { CustomHandle } from './custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
-import { EDGE_STYLES } from '../constants';
+import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
@@ -134,6 +134,8 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const isTargetConnected = edges?.some((edge) => edge.target === id);
   const isSourceConnected = edges?.some((edge) => edge.source === id);
 
+  const edgeStyles = useEdgeStyles();
+
   // Handle node hover events
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -142,13 +144,13 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
         if (edge.source === id || edge.target === id) {
           return {
             ...edge,
-            style: EDGE_STYLES.hover,
+            style: edgeStyles.hover,
           };
         }
         return edge;
       }),
     );
-  }, [id, setEdges]);
+  }, [id, setEdges, edgeStyles]);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
@@ -157,13 +159,13 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
         if (edge.source === id || edge.target === id) {
           return {
             ...edge,
-            style: EDGE_STYLES.default,
+            style: edgeStyles.default,
           };
         }
         return edge;
       }),
     );
-  }, [id, setEdges]);
+  }, [id, setEdges, edgeStyles]);
 
   const handleAddToChatHistory = useAddToChatHistory(node as NodeItem);
 

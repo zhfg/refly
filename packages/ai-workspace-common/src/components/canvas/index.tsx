@@ -11,7 +11,7 @@ import { NodePreview } from './node-preview';
 import '@xyflow/react/dist/style.css';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasProvider, useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { EDGE_STYLES } from './constants';
+import { useEdgeStyles } from './constants';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { BigSearchModal } from '@refly-packages/ai-workspace-common/components/search/modal';
@@ -39,6 +39,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, addNode } =
     useCanvasControl(canvasId);
+  const edgeStyles = useEdgeStyles();
 
   const { pinnedNodes, showPreview, showLaunchpad, showMaxRatio, interactionMode, setInteractionMode } =
     useCanvasStoreShallow((state) => ({
@@ -90,7 +91,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   }, [canvasId]); // Run only once on mount
 
   const defaultEdgeOptions = {
-    style: EDGE_STYLES.default,
+    style: edgeStyles.default,
   };
 
   const flowConfig = useMemo(
@@ -109,9 +110,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         duration: 200,
       },
       defaultEdgeOptions,
-      // elevateNodesOnSelect: false,
     }),
-    [mode],
+    [mode, edgeStyles],
   );
 
   const onNodeClick = useCallback(
