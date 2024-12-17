@@ -233,7 +233,9 @@ export class RAGService {
       });
     }
 
-    await this.qdrant.batchSaveData(points);
+    if (points.length > 0) {
+      await this.qdrant.batchSaveData(points);
+    }
 
     return { size: QdrantService.estimatePointsSize(points) };
   }
