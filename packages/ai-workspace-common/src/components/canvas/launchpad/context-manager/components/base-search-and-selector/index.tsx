@@ -185,8 +185,6 @@ export const BaseSearchAndSelector = ({
               <span>
                 <kbd>↑</kbd>
                 <kbd>↓</kbd> {t('knowledgeBase.context.popoverSelector.footer.navigate')}
-              </span>
-              <span>
                 <kbd>↵</kbd> {t('knowledgeBase.context.popoverSelector.footer.toggle')}
               </span>
             </div>

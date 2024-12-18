@@ -7,7 +7,7 @@ import { useEffect, useState, useCallback } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { CustomHandle } from './custom-handle';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-import { EDGE_STYLES } from '../constants';
+import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 
 type ToolResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'toolResponse'>;
@@ -16,6 +16,7 @@ export const ToolResponseNode = ({ data, selected, id }: NodeProps<ToolResponseN
   const [isHovered, setIsHovered] = useState(false);
   const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();
+  const edgeStyles = useEdgeStyles();
 
   // Get result from store
   const { result, updateActionResult } = useActionResultStoreShallow((state) => ({
@@ -59,13 +60,13 @@ export const ToolResponseNode = ({ data, selected, id }: NodeProps<ToolResponseN
         if (edge.source === id || edge.target === id) {
           return {
             ...edge,
-            style: EDGE_STYLES.hover,
+            style: edgeStyles.hover,
           };
         }
         return edge;
       }),
     );
-  }, [id, setEdges]);
+  }, [id, setEdges, edgeStyles]);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
@@ -74,13 +75,13 @@ export const ToolResponseNode = ({ data, selected, id }: NodeProps<ToolResponseN
         if (edge.source === id || edge.target === id) {
           return {
             ...edge,
-            style: EDGE_STYLES.default,
+            style: edgeStyles.default,
           };
         }
         return edge;
       }),
     );
-  }, [id, setEdges]);
+  }, [id, setEdges, edgeStyles]);
 
   return (
     <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>

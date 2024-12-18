@@ -8,7 +8,7 @@ import { CanvasNode, prepareNodeData } from '@refly-packages/ai-workspace-common
 import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CanvasNodeData, getNodeDefaultMetadata } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { EDGE_STYLES } from '../components/canvas/constants';
+import { getEdgeStyles, useEdgeStyles } from '../components/canvas/constants';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { genUniqueId } from '@refly-packages/utils/id';
@@ -81,6 +81,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     setModeRaw: state.setMode,
     addPinnedNode: state.addPinnedNode,
   }));
+  const edgeStyles = useEdgeStyles();
 
   const nodes = data[canvasId]?.nodes ?? [];
   const edges = data[canvasId]?.edges ?? [];
@@ -323,7 +324,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         ...params,
         id: `edge-${genUniqueId()}`,
         animated: false,
-        style: EDGE_STYLES.default,
+        style: edgeStyles.default,
       };
 
       const { data } = useCanvasStore.getState();
@@ -332,7 +333,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       setEdges(canvasId, updatedEdges);
       syncEdgesToYDoc(updatedEdges);
     },
-    [canvasId, setEdges, syncEdgesToYDoc],
+    [canvasId, setEdges, syncEdgesToYDoc, edgeStyles],
   );
 
   const setNodeCenter = useCallback(
@@ -448,7 +449,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
             id: `edge-${genUniqueId()}`,
             source: sourceNode.id,
             target: newNode.id,
-            style: EDGE_STYLES.default,
+            style: edgeStyles.default,
             type: 'default',
           })) ?? [];
 
@@ -467,7 +468,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         addPinnedNode(canvasId, newNode);
       }
     },
-    [canvasId, setSelectedNode, addPinnedNode],
+    [canvasId, setSelectedNode, addPinnedNode, edgeStyles],
   );
 
   const setMode = useCallback(
@@ -475,6 +476,22 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
       setModeRaw(canvasId, mode);
     },
     [canvasId, setModeRaw],
+  );
+
+  const updateAllEdgesStyle = useCallback(
+    (showEdges: boolean) => {
+      const { data } = useCanvasStore.getState();
+      const edges = data[canvasId]?.edges ?? [];
+
+      const updatedEdges = edges.map((edge) => ({
+        ...edge,
+        style: getEdgeStyles(showEdges)?.default,
+      }));
+
+      setEdges(canvasId, updatedEdges);
+      syncEdgesToYDoc(updatedEdges);
+    },
+    [canvasId, setEdges, syncEdgesToYDoc],
   );
 
   return {
@@ -498,5 +515,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     setSelectedNodes,
     addSelectedNode,
     addSelectedNodeByEntity,
+    updateAllEdgesStyle,
   };
 };

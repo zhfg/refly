@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import {
   Button,
   Divider,
@@ -17,7 +17,7 @@ import { useSiderStore, useSiderStoreShallow } from '@refly-packages/ai-workspac
 import { useTranslation } from 'react-i18next';
 import { FC, useState } from 'react';
 
-import { MdOutlineHideImage, MdOutlineAspectRatio } from 'react-icons/md';
+import { MdOutlineImage, MdOutlineAspectRatio } from 'react-icons/md';
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
 import {
   IconCanvas,
@@ -34,6 +34,7 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { useNavigate } from 'react-router-dom';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { IoAnalyticsOutline } from 'react-icons/io5';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -57,7 +58,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
       setShowLaunchpad: state.setShowLaunchpad,
     }));
   const canvasTitle = data[canvasId]?.title;
-  const { setCanvasTitle } = useCanvasControl();
+  const { setCanvasTitle, updateAllEdgesStyle } = useCanvasControl(canvasId);
 
   const [editedTitle, setEditedTitle] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -178,6 +179,16 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
     );
   };
 
+  const { showEdges, setShowEdges } = useCanvasStoreShallow((state) => ({
+    showEdges: state.showEdges,
+    setShowEdges: state.setShowEdges,
+  }));
+
+  const handleEdgesVisibilityChange = useCallback(() => {
+    setShowEdges(!showEdges);
+    updateAllEdgesStyle(!showEdges);
+  }, [showEdges, setShowEdges, updateAllEdgesStyle]);
+
   return (
     <>
       <Helmet>
@@ -281,7 +292,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
             <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)} destroyTooltipOnHide>
               <Button
                 type="text"
-                icon={<MdOutlineHideImage style={{ color: showPreview ? '#9CA3AF' : '#000' }} />}
+                icon={<MdOutlineImage style={{ color: showPreview ? '#000' : '#9CA3AF' }} />}
                 onClick={() => setShowPreview(!showPreview)}
                 className="w-8 h-6 flex items-center justify-center mr-1"
               />
@@ -292,6 +303,16 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
                 icon={<MdOutlineAspectRatio style={{ color: showMaxRatio ? '#000' : '#9CA3AF' }} />}
                 onClick={() => setShowMaxRatio(!showMaxRatio)}
                 className="w-8 h-6 flex items-center justify-center"
+              />
+            </Tooltip>
+            <Divider type="vertical" />
+            <Tooltip title={t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`)} destroyTooltipOnHide>
+              <Button
+                type="text"
+                icon={<IoAnalyticsOutline style={{ color: showEdges ? '#000' : '#9CA3AF' }} />}
+                onClick={handleEdgesVisibilityChange}
+                className="w-8 h-6 flex items-center justify-center"
+                style={{ color: showEdges ? '#000' : '#9CA3AF' }}
               />
             </Tooltip>
           </div>

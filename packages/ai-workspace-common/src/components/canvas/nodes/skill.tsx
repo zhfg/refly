@@ -5,7 +5,7 @@ import { Sparkles, MoreHorizontal, Cpu, Code2, Globe } from 'lucide-react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-import { EDGE_STYLES } from '../constants';
+import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
@@ -50,6 +50,7 @@ export const SkillNode = ({ data, selected, id }: NodeProps<SkillNode>) => {
   const { edges } = useCanvasControl();
   const { setEdges } = useReactFlow();
   const SkillIcon = getSkillIcon(data.metadata.skillType);
+  const edgeStyles = useEdgeStyles();
 
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
@@ -63,13 +64,13 @@ export const SkillNode = ({ data, selected, id }: NodeProps<SkillNode>) => {
         if (edge.source === id || edge.target === id) {
           return {
             ...edge,
-            style: EDGE_STYLES.hover,
+            style: edgeStyles.hover,
           };
         }
         return edge;
       }),
     );
-  }, [id, setEdges]);
+  }, [id, setEdges, edgeStyles]);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
@@ -78,13 +79,13 @@ export const SkillNode = ({ data, selected, id }: NodeProps<SkillNode>) => {
         if (edge.source === id || edge.target === id) {
           return {
             ...edge,
-            style: EDGE_STYLES.default,
+            style: edgeStyles.default,
           };
         }
         return edge;
       }),
     );
-  }, [id, setEdges]);
+  }, [id, setEdges, edgeStyles]);
 
   return (
     <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>

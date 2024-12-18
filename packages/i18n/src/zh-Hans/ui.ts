@@ -440,6 +440,8 @@ const translations = {
       addDocument: '添加文档',
       hidePreview: '隐藏节点预览',
       showPreview: '显示节点预览',
+      hideEdges: '隐藏连线',
+      showEdges: '显示连线',
       hideMaxRatio: '取消预览最大比例',
       showMaxRatio: '使用预览最大比例',
       hideLaunchpad: '隐藏 AI 提问框',
