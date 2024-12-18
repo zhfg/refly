@@ -117,11 +117,12 @@ export class AuthService {
     const newUser = await this.prisma.user.create({
       data: {
         name,
-        nickname: displayName,
+        nickname: displayName || name,
         uid,
         email,
         avatar,
         emailVerified: new Date(),
+        outputLocale: 'auto',
       },
     });
     this.logger.log(`user created: ${newUser.uid}`);

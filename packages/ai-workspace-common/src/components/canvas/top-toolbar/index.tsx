@@ -26,14 +26,16 @@ import {
   IconMoreHorizontal,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
-import Logo from '../../../../../../apps/web/src/assets/logo.svg';
 import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useUpdateCanvas } from '@refly-packages/ai-workspace-common/queries/queries';
 import { Helmet } from 'react-helmet';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useNavigate } from 'react-router-dom';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { time } from '@refly-packages/ai-workspace-common/utils/time';
+import { LOCALE } from '@refly/common-types';
+import { useDebounce } from 'use-debounce';
 import { IoAnalyticsOutline } from 'react-icons/io5';
 
 interface TopToolbarProps {
@@ -41,11 +43,22 @@ interface TopToolbarProps {
 }
 
 export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language as LOCALE;
+
   const { collapse, setCollapse } = useSiderStoreShallow((state) => ({
     collapse: state.collapse,
     setCollapse: state.setCollapse,
   }));
+  const { provider } = useCanvasContext();
+  const [unsyncedChanges, setUnsyncedChanges] = useState(provider?.unsyncedChanges || 0);
+  const [debouncedUnsyncedChanges] = useDebounce(unsyncedChanges, 500);
+
+  useEffect(() => {
+    provider.on('unsyncedChanges', (data) => {
+      setUnsyncedChanges(data);
+    });
+  }, [provider]);
 
   const { data, showPreview, setShowPreview, showMaxRatio, setShowMaxRatio, showLaunchpad, setShowLaunchpad } =
     useCanvasStoreShallow((state) => ({
@@ -70,7 +83,6 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
     setIsModalOpen(true);
   };
 
-  const { mutate, status } = useUpdateCanvas();
   const setCanvasList = useSiderStoreShallow((state) => state.setCanvasList);
 
   useEffect(() => {
@@ -86,7 +98,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   const handleModalOk = () => {
     if (editedTitle?.trim()) {
       setCanvasTitle(editedTitle);
-      mutate({ body: { canvasId, title: editedTitle } }, { onSuccess: () => setIsModalOpen(false) });
+      setIsModalOpen(false);
     }
   };
 
@@ -205,22 +217,17 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
               <SiderPopover>
                 <Button
                   type="text"
-                  icon={<AiOutlineMenuUnfold size={20} />}
+                  icon={<AiOutlineMenuUnfold size={18} className="text-gray-500" />}
                   onClick={() => {
                     setCollapse(!collapse);
                   }}
                 />
               </SiderPopover>
-              <Divider type="vertical" className="pr-[4px]" />
-              <div className="flex items-center justify-center">
-                <Avatar size={32} src={Logo} />
-                <span className="text-sm font-bold ml-2">Refly</span>
-              </div>
             </>
           ) : (
             <Button
               type="text"
-              icon={<AiOutlineMenuFold size={20} />}
+              icon={<AiOutlineMenuFold size={18} className="text-gray-500" />}
               onClick={() => {
                 setCollapse(!collapse);
               }}
@@ -231,13 +238,36 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
             className="group flex items-center gap-2 text-sm font-bold text-gray-500 cursor-pointer hover:text-gray-700"
             onClick={handleEditClick}
           >
-            <IconCanvas />
-            {!data[canvasId] ? (
-              <Skeleton className="w-28" active paragraph={false} />
-            ) : (
-              canvasTitle || t('common.untitled')
-            )}
-            <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="relative w-2.5 h-2.5">
+              <div
+                className={`
+                  absolute w-full h-full rounded-full transition-all duration-300 ease-in-out
+                  ${debouncedUnsyncedChanges > 0 ? 'opacity-100' : 'opacity-0'}
+                  bg-yellow-500 animate-pulse
+                `}
+              />
+              <div
+                className={`
+                  absolute w-full h-full rounded-full transition-all duration-300 ease-in-out
+                  ${debouncedUnsyncedChanges > 0 ? 'opacity-0' : 'opacity-100'}
+                  bg-green-400
+                `}
+              />
+            </div>
+            <Tooltip
+              title={
+                debouncedUnsyncedChanges > 0
+                  ? t('canvas.toolbar.syncingChanges')
+                  : t('canvas.toolbar.synced', { time: time(new Date(), language)?.utc()?.fromNow() })
+              }
+            >
+              {!data[canvasId] ? (
+                <Skeleton className="w-28" active paragraph={false} />
+              ) : (
+                canvasTitle || t('common.untitled')
+              )}
+              <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
+            </Tooltip>
           </div>
 
           <Modal
@@ -246,7 +276,6 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
             open={isModalOpen}
             okText={t('common.confirm')}
             cancelText={t('common.cancel')}
-            confirmLoading={status === 'pending'}
             onOk={handleModalOk}
             onCancel={handleModalCancel}
             okButtonProps={{ disabled: !editedTitle?.trim() }}

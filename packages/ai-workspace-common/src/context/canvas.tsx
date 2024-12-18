@@ -29,6 +29,7 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       name: canvasId,
       token,
       connect: true,
+      forceSyncInterval: 5000,
     });
 
     providerCache.set(canvasId, newProvider);
@@ -88,7 +89,6 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     const handleConnect = () => {
       if (isDestroyed) return;
 
-      // 立即设置初始数据
       if (provider.status === 'connected') {
         setTitle(canvasId, title.toJSON());
 
@@ -103,7 +103,6 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
         setEdges(canvasId, Array.from(uniqueEdgesMap.values()));
       }
 
-      // 设置观察者回调
       const titleObserverCallback = () => {
         if (provider.status === 'connected') {
           setTitle(canvasId, title.toJSON());

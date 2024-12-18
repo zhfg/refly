@@ -13,7 +13,7 @@ import { MiscService } from '@/misc/misc.service';
 import { ConfigService } from '@nestjs/config';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { PrismaService } from '@/common/prisma.service';
-import { IDPrefix, incrementalMarkdownUpdate, state2Markdown } from '@refly-packages/utils';
+import { IDPrefix, incrementalMarkdownUpdate, ydoc2Markdown } from '@refly-packages/utils';
 import { streamToBuffer } from '@/utils/stream';
 import { CollabContext, isCanvasContext, isDocumentContext } from './collab.dto';
 
@@ -101,14 +101,16 @@ export class CollabService {
 
   private async storeDocumentEntity({
     state,
+    document,
     context,
   }: {
     state: Buffer;
+    document: Y.Doc;
     context: Extract<CollabContext, { entityType: 'document' }>;
   }) {
     const { user, entity: doc } = context;
 
-    const content = state2Markdown(state);
+    const content = ydoc2Markdown(document);
     const storageKey = doc.storageKey || `doc/${doc.docId}.txt`;
     const stateStorageKey = doc.stateStorageKey || `state/${doc.docId}`;
 
@@ -180,15 +182,19 @@ export class CollabService {
 
   private async storeCanvasEntity({
     state,
+    document,
     context,
   }: {
     state: Buffer;
+    document: Y.Doc;
     context: Extract<CollabContext, { entityType: 'canvas' }>;
   }) {
     const { user, entity: canvas } = context;
 
     const stateStorageKey = canvas.stateStorageKey || `state/${canvas.canvasId}`;
     await this.minio.client.putObject(stateStorageKey, state);
+
+    const title = document.getText('title').toJSON();
 
     const stateStorageStat = await this.minio.client.statObject(stateStorageKey);
 
@@ -198,6 +204,11 @@ export class CollabService {
     if (!canvas.stateStorageKey) {
       canvasUpdates.stateStorageKey = stateStorageKey;
     }
+    if (canvas.title !== title) {
+      canvasUpdates.title = title;
+    }
+    this.logger.log(`canvas ${canvas.canvasId} updates: ${JSON.stringify(canvasUpdates)}`);
+
     const updatedCanvas = await this.prisma.canvas.update({
       where: { canvasId: canvas.canvasId, uid: user.uid },
       data: canvasUpdates,
@@ -222,9 +233,9 @@ export class CollabService {
     this.logger.log(`store to persist storage: ${JSON.stringify(context.entity.stateStorageKey)}`);
 
     if (isDocumentContext(context)) {
-      return this.storeDocumentEntity({ state, context });
+      return this.storeDocumentEntity({ state, document, context });
     } else if (isCanvasContext(context)) {
-      return this.storeCanvasEntity({ state, context });
+      return this.storeCanvasEntity({ state, document, context });
     } else {
       this.logger.warn(`unknown context entity type: ${JSON.stringify(context)}`);
       return null;

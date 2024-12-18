@@ -448,6 +448,8 @@ const translations = {
       showLaunchpad: '显示 AI 提问框',
       editTitle: '编辑画布标题',
       editTitlePlaceholder: '请输入画布标题',
+      syncingChanges: '同步中',
+      synced: '上次同步于{{time}}',
       mouse: '鼠标模式',
       touchpad: '触控板模式',
       tooltip: {
