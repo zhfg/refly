@@ -15,7 +15,7 @@ import { DocumentIntentType } from '@refly-packages/common-types';
 import { GraphState, IContext } from '../scheduler/types';
 // utils
 import { prepareContext } from '../scheduler/utils/context';
-import { analyzeQueryAndContext, preprocessQuery } from '../scheduler/utils/queryRewrite';
+import { analyzeQueryAndContext, preprocessQuery } from '../scheduler/utils/query-rewrite';
 import { truncateMessages, truncateSource } from '../scheduler/utils/truncator';
 import { countMessagesTokens, countToken, ModelContextLimitMap, checkHasContext } from '../scheduler/utils/token';
 import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils/message';

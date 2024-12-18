@@ -448,6 +448,8 @@ const translations = {
       addDocument: 'Add Document',
       hidePreview: 'Hide Node Preview',
       showPreview: 'Show Node Preview',
+      hideEdges: 'Hide Connections',
+      showEdges: 'Show Connections',
       hideMaxRatio: 'Cancel Preview Max Ratio',
       showMaxRatio: 'Use Preview Max Ratio',
       hideLaunchpad: 'Hide Ask AI',

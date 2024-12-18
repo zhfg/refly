@@ -5,7 +5,7 @@ import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-import { EDGE_STYLES } from '../constants';
+import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
@@ -31,7 +31,6 @@ export const ResourceNode = ({
   onNodeClick,
 }: ResourceNodeProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
   const { edges, setNodeDataByEntity } = useCanvasControl();
   const { setEdges } = useReactFlow();
   const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
@@ -51,6 +50,8 @@ export const ResourceNode = ({
   const isTargetConnected = edges?.some((edge) => edge.target === id);
   const isSourceConnected = edges?.some((edge) => edge.source === id);
 
+  const edgeStyles = useEdgeStyles();
+
   // 立即更新hover状态，但节流更新边缘样式
   const updateEdgeStyles = useThrottledCallback(
     (hoveredState: boolean) => {
@@ -59,7 +60,7 @@ export const ResourceNode = ({
           if (edge.source === id || edge.target === id) {
             return {
               ...edge,
-              style: hoveredState ? EDGE_STYLES.hover : EDGE_STYLES.default,
+              style: hoveredState ? edgeStyles.hover : edgeStyles.default,
             };
           }
           return edge;
@@ -67,7 +68,7 @@ export const ResourceNode = ({
       );
     },
     500,
-    { leading: true, trailing: true },
+    { leading: true, trailing: false },
   );
 
   const handleMouseEnter = useCallback(() => {
@@ -169,7 +170,7 @@ export const ResourceNode = ({
           cursor: isOperating ? 'text' : 'grab',
         }}
       >
-        {!isPreview && !hideActions && !isResizing && (
+        {!isPreview && !hideActions && (
           <ActionButtons
             type="resource"
             nodeId={id}
@@ -263,14 +264,10 @@ export const ResourceNode = ({
           throttleResize={1}
           renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
           onResizeStart={({ setOrigin, dragStart }) => {
-            setIsResizing(true);
             setOrigin(['%', '%']);
             if (dragStart && dragStart instanceof MouseEvent) {
               dragStart.preventDefault();
             }
-          }}
-          onResizeEnd={() => {
-            setIsResizing(false);
           }}
           onResize={({ target, width, height, direction }) => {
             const newWidth = Math.max(100, width);

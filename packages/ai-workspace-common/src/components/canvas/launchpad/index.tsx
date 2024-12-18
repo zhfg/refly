@@ -66,6 +66,8 @@ export const LaunchPad: React.FC<LaunchPadProps> = ({ visible = true }) => {
     setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
   }));
 
+  const { pinAllHistoryItems } = useChatHistory();
+
   // Add new method to clear state
   const clearLaunchpadState = () => {
     chatStore.resetState();
@@ -84,6 +86,9 @@ export const LaunchPad: React.FC<LaunchPadProps> = ({ visible = true }) => {
     if (error) {
       return;
     }
+
+    // Pin all history items before sending new message
+    pinAllHistoryItems();
 
     const { formErrors } = useContextPanelStore.getState();
     if (formErrors && Object.keys(formErrors).length > 0) {

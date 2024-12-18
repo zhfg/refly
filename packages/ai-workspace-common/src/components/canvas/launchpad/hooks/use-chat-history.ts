@@ -16,13 +16,14 @@ export const useChatHistory = () => {
     setChatHistoryOpen: state.setChatHistoryOpen,
   }));
 
-  const { historyItems, setHistoryItems, updateHistoryItem, removeHistoryItem, clearHistoryItems } =
+  const { historyItems, setHistoryItems, updateHistoryItem, removeHistoryItem, clearHistoryItems, pinAllHistoryItems } =
     useContextPanelStoreShallow((state) => ({
       historyItems: state.historyItems,
       setHistoryItems: state.setHistoryItems,
       updateHistoryItem: state.updateHistoryItem,
       removeHistoryItem: state.removeHistoryItem,
       clearHistoryItems: state.clearHistoryItems,
+      pinAllHistoryItems: state.pinAllHistoryItems,
     }));
 
   // Handle result updates
@@ -78,5 +79,6 @@ export const useChatHistory = () => {
     handleItemClick,
     handleItemPin,
     handleItemDelete,
+    pinAllHistoryItems,
   };
 };

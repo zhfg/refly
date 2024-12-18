@@ -4,7 +4,7 @@ import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback, useRef } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-import { EDGE_STYLES } from '../constants';
+import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { useTranslation } from 'react-i18next';
@@ -42,7 +42,6 @@ export const DocumentNode = ({
     width: node?.measured?.width ?? 288,
     height: node?.measured?.height ?? 384,
   });
-  const [isResizing, setIsResizing] = useState(false);
 
   const { operatingNodeId } = useCanvasStoreShallow((state) => ({
     operatingNodeId: state.operatingNodeId,
@@ -54,38 +53,38 @@ export const DocumentNode = ({
   const isTargetConnected = edges?.some((edge) => edge.target === id);
   const isSourceConnected = edges?.some((edge) => edge.source === id);
 
+  const edgeStyles = useEdgeStyles();
+
   // Handle node hover events
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
-    // Update connected edges with hover styles
     setEdges((eds) =>
       eds.map((edge) => {
         if (edge.source === id || edge.target === id) {
           return {
             ...edge,
-            style: EDGE_STYLES.hover,
+            style: edgeStyles.hover,
           };
         }
         return edge;
       }),
     );
-  }, [id, setEdges]);
+  }, [id, setEdges, edgeStyles]);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
-    // Restore default edge styles
     setEdges((eds) =>
       eds.map((edge) => {
         if (edge.source === id || edge.target === id) {
           return {
             ...edge,
-            style: EDGE_STYLES.default,
+            style: edgeStyles.default,
           };
         }
         return edge;
       }),
     );
-  }, [id, setEdges]);
+  }, [id, setEdges, edgeStyles]);
 
   const handleAddToContext = useAddToContext(
     {
@@ -132,7 +131,7 @@ export const DocumentNode = ({
           cursor: isOperating ? 'text' : 'grab',
         }}
       >
-        {!isPreview && !hideActions && !isResizing && (
+        {!isPreview && !hideActions && (
           <ActionButtons
             type="document"
             nodeId={id}
@@ -226,14 +225,10 @@ export const DocumentNode = ({
           throttleResize={1}
           renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
           onResizeStart={({ setOrigin, dragStart }) => {
-            setIsResizing(true);
             setOrigin(['%', '%']);
             if (dragStart && dragStart instanceof MouseEvent) {
               dragStart.preventDefault();
             }
-          }}
-          onResizeEnd={() => {
-            setIsResizing(false);
           }}
           onResize={({ target, width, height, direction }) => {
             const newWidth = Math.max(100, width);

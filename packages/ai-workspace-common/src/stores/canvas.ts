@@ -25,6 +25,7 @@ export interface CanvasState {
   showLaunchpad: boolean;
   interactionMode: 'mouse' | 'touchpad';
   operatingNodeId: string | null;
+  showEdges: boolean;
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -39,6 +40,7 @@ export interface CanvasState {
   setShowLaunchpad: (show: boolean) => void;
   setInteractionMode: (mode: 'mouse' | 'touchpad') => void;
   setOperatingNodeId: (nodeId: string | null) => void;
+  setShowEdges: (show: boolean) => void;
 }
 
 const defaultCanvasState: () => CanvasData = () => ({
@@ -63,6 +65,7 @@ export const useCanvasStore = create<CanvasState>()(
       showLaunchpad: true,
       interactionMode: 'touchpad',
       operatingNodeId: null,
+      showEdges: false,
 
       deleteCanvasData: (canvasId) =>
         set((state) => {
@@ -109,7 +112,7 @@ export const useCanvasStore = create<CanvasState>()(
           if (!node) return;
           state.config[canvasId] ??= defaultCanvasConfig();
 
-          if (state.config[canvasId].pinnedNodes.some((n) => n.id === node.id)) return;
+          state.config[canvasId].pinnedNodes = state.config[canvasId].pinnedNodes.filter((n) => n.id !== node.id);
           state.config[canvasId].pinnedNodes.unshift(node);
         }),
       removePinnedNode: (canvasId, node) =>
@@ -122,6 +125,10 @@ export const useCanvasStore = create<CanvasState>()(
           state.interactionMode = mode;
         }),
       setOperatingNodeId: (nodeId) => set({ operatingNodeId: nodeId }),
+      setShowEdges: (show) =>
+        set((state) => {
+          state.showEdges = show;
+        }),
     })),
     {
       name: 'canvas-storage',
@@ -129,6 +136,7 @@ export const useCanvasStore = create<CanvasState>()(
         config: state.config,
         currentCanvasId: state.currentCanvasId,
         interactionMode: state.interactionMode,
+        showEdges: state.showEdges,
       }),
     },
   ),

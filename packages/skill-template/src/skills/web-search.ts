@@ -13,10 +13,8 @@ import { prepareWebSearchContext } from '../scheduler/utils/context';
 // prompts
 import * as webSearch from '../scheduler/module/webSearch/index';
 import { concatMergedContextToStr, flattenMergedContextToSources } from '../scheduler/utils/summarizer';
-import { preprocessQuery } from '../scheduler/utils/queryRewrite';
-import { countMessagesTokens } from '../scheduler/utils/token';
-import { truncateMessages, truncateSource } from '../scheduler/utils/truncator';
-import { countToken } from '../scheduler/utils/token';
+import { truncateSource } from '../scheduler/utils/truncator';
+import { processQuery } from '../scheduler/utils/queryProcessor';
 
 export class WebSearch extends BaseSkill {
   name = 'webSearch';
@@ -54,36 +52,22 @@ export class WebSearch extends BaseSkill {
   };
 
   callWebSearch = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { messages = [], query: originalQuery } = state;
-    const { locale = 'en', chatHistory = [], modelName, currentSkill } = config.configurable;
+    const { messages = [] } = state;
+    const { locale = 'en', currentSkill } = config.configurable;
 
     // Set current step
     config.metadata.step = { name: 'webSearch' };
 
-    // Preprocess query and ensure it's not too long
-    const query = preprocessQuery(originalQuery, {
+    // Use shared query processor
+    const { optimizedQuery, query, usedChatHistory, remainingTokens } = await processQuery({
       config,
       ctxThis: this,
       state,
-      tplConfig: config.configurable.tplConfig,
     });
-
-    // Preprocess chat history, ensure it's not too long
-    const usedChatHistory = truncateMessages(chatHistory);
-
-    // Calculate token limits
-    const maxTokens = ModelContextLimitMap[modelName];
-    const queryTokens = countToken(query);
-    const chatHistoryTokens = countMessagesTokens(usedChatHistory);
-    const remainingTokens = maxTokens - queryTokens - chatHistoryTokens;
-
-    this.engine.logger.log(
-      `maxTokens: ${maxTokens}, queryTokens: ${queryTokens}, chatHistoryTokens: ${chatHistoryTokens}, remainingTokens: ${remainingTokens}`,
-    );
 
     // Perform web search with context preparation
     const webSearchContext = await prepareWebSearchContext(
-      { query },
+      { query: optimizedQuery },
       { config, ctxThis: this, state, tplConfig: config.configurable.tplConfig },
     );
 
@@ -116,6 +100,7 @@ export class WebSearch extends BaseSkill {
     if (sources.length > 0) {
       this.emitEvent({ structuredData: { sources: truncateSource(sources) } }, config);
     }
+
     const requestMessages = buildFinalRequestMessages({
       module,
       locale,
@@ -124,7 +109,7 @@ export class WebSearch extends BaseSkill {
       needPrepareContext: true,
       context: contextStr,
       originalQuery: query,
-      rewrittenQuery: query,
+      rewrittenQuery: optimizedQuery,
     });
 
     this.engine.logger.log(`Request messages: ${safeStringifyJSON(requestMessages)}`);

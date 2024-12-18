@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import {
   Button,
   Divider,
@@ -17,7 +17,7 @@ import { useSiderStore, useSiderStoreShallow } from '@refly-packages/ai-workspac
 import { useTranslation } from 'react-i18next';
 import { FC, useState } from 'react';
 
-import { MdOutlineHideImage, MdOutlineAspectRatio } from 'react-icons/md';
+import { MdOutlineImage, MdOutlineAspectRatio } from 'react-icons/md';
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
 import {
   IconCanvas,
@@ -36,96 +36,11 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { useDebounce } from 'use-debounce';
+import { IoAnalyticsOutline } from 'react-icons/io5';
 
 interface TopToolbarProps {
   canvasId: string;
 }
-
-const ActionDropdown = ({ canvasId }: TopToolbarProps) => {
-  const { t } = useTranslation();
-  const [popupVisible, setPopupVisible] = useState(false);
-  const [isRequest, setIsRequest] = useState(false);
-  const navigate = useNavigate();
-  const { getCanvasList, canvasList } = useHandleSiderData();
-
-  const handleDelete = async () => {
-    if (isRequest) return;
-    let success = false;
-    setIsRequest(true);
-    const { data } = await getClient().deleteCanvas({
-      body: {
-        canvasId,
-      },
-    });
-
-    setIsRequest(false);
-
-    if (data?.success) {
-      success = true;
-      message.success(t('canvas.action.deleteSuccess'));
-
-      // Check and remove canvasId from localStorage if matches
-      const { currentCanvasId, setCurrentCanvasId } = useCanvasStore.getState();
-      if (currentCanvasId === canvasId) {
-        setCurrentCanvasId(null);
-      }
-
-      await getCanvasList();
-      if (currentCanvasId === canvasId) {
-        const firstCanvas = canvasList?.find((canvas) => canvas.id !== canvasId);
-        if (firstCanvas?.id) {
-          navigate(`/canvas/${firstCanvas?.id}`, { replace: true });
-        } else {
-          navigate('/canvas/empty', { replace: true });
-        }
-      }
-    }
-  };
-
-  const items: MenuProps['items'] = [
-    {
-      label: (
-        <Popconfirm
-          title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas')}
-          onConfirm={handleDelete}
-          onCancel={() => setPopupVisible(false)}
-          okText={t('common.confirm')}
-          cancelText={t('common.cancel')}
-        >
-          <div className="flex items-center text-red-600">
-            <IconDelete size={16} className="mr-2" />
-            {t('workspace.deleteDropdownMenu.delete')}
-          </div>
-        </Popconfirm>
-      ),
-      key: 'delete',
-    },
-  ];
-
-  const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
-    if (info.source === 'trigger') {
-      setPopupVisible(open);
-    }
-  };
-
-  return (
-    <Dropdown
-      trigger={['click']}
-      open={popupVisible}
-      onOpenChange={handleOpenChange}
-      destroyPopupOnHide
-      menu={{
-        items,
-      }}
-    >
-      <div className="flex items-center gap-2">
-        <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
-          <Button type="text" icon={<IconMoreHorizontal />} className="w-8 h-6 flex items-center justify-center" />
-        </div>
-      </div>
-    </Dropdown>
-  );
-};
 
 export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   const { t, i18n } = useTranslation();
@@ -156,7 +71,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
       setShowLaunchpad: state.setShowLaunchpad,
     }));
   const canvasTitle = data[canvasId]?.title;
-  const { setCanvasTitle } = useCanvasControl();
+  const { setCanvasTitle, updateAllEdgesStyle } = useCanvasControl(canvasId);
 
   const [editedTitle, setEditedTitle] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -191,17 +106,112 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
     setIsModalOpen(false);
   };
 
+  const ActionDropdown = () => {
+    const [popupVisible, setPopupVisible] = useState(false);
+    const [isRequest, setIsRequest] = useState(false);
+    const navigate = useNavigate();
+    const { getCanvasList, canvasList } = useHandleSiderData();
+
+    const handleDelete = async () => {
+      if (isRequest) return;
+      let success = false;
+      setIsRequest(true);
+      const { data } = await getClient().deleteCanvas({
+        body: {
+          canvasId,
+        },
+      });
+
+      setIsRequest(false);
+
+      if (data?.success) {
+        success = true;
+        message.success(t('canvas.action.deleteSuccess'));
+
+        // Check and remove canvasId from localStorage if matches
+        const { currentCanvasId, setCurrentCanvasId } = useCanvasStore.getState();
+        if (currentCanvasId === canvasId) {
+          setCurrentCanvasId(null);
+        }
+
+        await getCanvasList();
+        if (currentCanvasId === canvasId) {
+          const firstCanvas = canvasList?.find((canvas) => canvas.id !== canvasId);
+          if (firstCanvas?.id) {
+            navigate(`/canvas/${firstCanvas?.id}`, { replace: true });
+          } else {
+            navigate('/canvas/empty', { replace: true });
+          }
+        }
+      }
+    };
+
+    const items: MenuProps['items'] = [
+      {
+        label: (
+          <Popconfirm
+            title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas')}
+            onConfirm={handleDelete}
+            onCancel={() => setPopupVisible(false)}
+            okText={t('common.confirm')}
+            cancelText={t('common.cancel')}
+          >
+            <div className="flex items-center text-red-600">
+              <IconDelete size={16} className="mr-2" />
+              {t('workspace.deleteDropdownMenu.delete')}
+            </div>
+          </Popconfirm>
+        ),
+        key: 'delete',
+      },
+    ];
+
+    const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
+      if (info.source === 'trigger') {
+        setPopupVisible(open);
+      }
+    };
+
+    return (
+      <Dropdown
+        trigger={['click']}
+        open={popupVisible}
+        onOpenChange={handleOpenChange}
+        destroyPopupOnHide
+        menu={{
+          items,
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
+            <Button type="text" icon={<IconMoreHorizontal />} className="w-8 h-6 flex items-center justify-center" />
+          </div>
+        </div>
+      </Dropdown>
+    );
+  };
+
+  const { showEdges, setShowEdges } = useCanvasStoreShallow((state) => ({
+    showEdges: state.showEdges,
+    setShowEdges: state.setShowEdges,
+  }));
+
+  const handleEdgesVisibilityChange = useCallback(() => {
+    setShowEdges(!showEdges);
+    updateAllEdgesStyle(!showEdges);
+  }, [showEdges, setShowEdges, updateAllEdgesStyle]);
+
   return (
     <>
       <Helmet>
         <title>{canvasTitle?.toString() || t('common.untitled')} · Refly</title>
       </Helmet>
       <div
-        className={`absolute h-16 top-0 left-0 right-0  box-border flex justify-between items-center py-2 px-4 pr-0 z-10 bg-transparent ${
+        className={`absolute h-16 top-0 left-0 right-0  box-border flex justify-between items-center py-2 px-4 pr-0 bg-transparent ${
           collapse ? 'w-[calc(100vw-12px)]' : 'w-[calc(100vw-232px)]'
         }`}
       >
-        <div className="flex items-center">
+        <div className="flex items-center relative z-10">
           {collapse ? (
             <>
               <SiderPopover>
@@ -293,7 +303,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
           </Modal>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 relative z-10">
           <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
             <Tooltip
               title={t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`)}
@@ -311,7 +321,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
             <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)} destroyTooltipOnHide>
               <Button
                 type="text"
-                icon={<MdOutlineHideImage style={{ color: showPreview ? '#9CA3AF' : '#000' }} />}
+                icon={<MdOutlineImage style={{ color: showPreview ? '#000' : '#9CA3AF' }} />}
                 onClick={() => setShowPreview(!showPreview)}
                 className="w-8 h-6 flex items-center justify-center mr-1"
               />
@@ -324,9 +334,19 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
                 className="w-8 h-6 flex items-center justify-center"
               />
             </Tooltip>
+            <Divider type="vertical" />
+            <Tooltip title={t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`)} destroyTooltipOnHide>
+              <Button
+                type="text"
+                icon={<IoAnalyticsOutline style={{ color: showEdges ? '#000' : '#9CA3AF' }} />}
+                onClick={handleEdgesVisibilityChange}
+                className="w-8 h-6 flex items-center justify-center"
+                style={{ color: showEdges ? '#000' : '#9CA3AF' }}
+              />
+            </Tooltip>
           </div>
 
-          <ActionDropdown canvasId={canvasId} />
+          <ActionDropdown />
         </div>
       </div>
     </>

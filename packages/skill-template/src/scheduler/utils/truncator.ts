@@ -12,9 +12,9 @@ import { countToken } from './token';
 import { BaseMessage } from '@langchain/core/messages';
 
 // configurable params
-const MAX_MESSAGES = 5;
-const MAX_MESSAGE_TOKENS = 400;
-const MAX_MESSAGES_TOTAL_TOKENS = 2000;
+const MAX_MESSAGES = 20;
+const MAX_MESSAGE_TOKENS = 4000;
+const MAX_MESSAGES_TOTAL_TOKENS = 20000;
 
 export const truncateMessages = (
   messages: BaseMessage[] = [],

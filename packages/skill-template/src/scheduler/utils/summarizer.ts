@@ -7,7 +7,7 @@ import {
   SkillContextDocumentItem,
 } from '@refly-packages/openapi-schema';
 import { truncateContext, truncateMessages } from './truncator';
-import { BaseMessage } from '@langchain/core/messages';
+import { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { getClientOrigin } from '@refly-packages/utils';
 
 export const concatChatHistoryToStr = (messages: BaseMessage[]) => {
@@ -19,8 +19,8 @@ export const concatChatHistoryToStr = (messages: BaseMessage[]) => {
     };
 
     chatHistoryStr += messages.map((m) => {
-      const type = m?.additional_kwargs?.type as string;
-      const content = m.content as string;
+      const type = (m as HumanMessage)?.getType?.() as string;
+      const content = (m?.content || '') as string;
       return concatMessage(content, type);
     });
   }

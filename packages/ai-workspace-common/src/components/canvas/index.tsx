@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect, useState } from 'react';
+import { useCallback, useMemo, useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import { Button } from 'antd';
@@ -11,7 +11,7 @@ import { NodePreview } from './node-preview';
 import '@xyflow/react/dist/style.css';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasProvider, useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { EDGE_STYLES } from './constants';
+import { useEdgeStyles } from './constants';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { BigSearchModal } from '@refly-packages/ai-workspace-common/components/search/modal';
@@ -20,6 +20,7 @@ import { LibraryModal } from '@refly-packages/ai-workspace-common/components/wor
 import { useCanvasNodesStore } from '@refly-packages/ai-workspace-common/stores/canvas-nodes';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { LayoutControl } from './layout-control';
+import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -35,8 +36,10 @@ const selectionStyles = `
 
 const Flow = ({ canvasId }: { canvasId: string }) => {
   const { t } = useTranslation();
+  const previewContainerRef = useRef<HTMLDivElement>(null);
   const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, addNode } =
     useCanvasControl(canvasId);
+  const edgeStyles = useEdgeStyles();
 
   const { pinnedNodes, showPreview, showLaunchpad, showMaxRatio, interactionMode, setInteractionMode } =
     useCanvasStoreShallow((state) => ({
@@ -88,7 +91,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   }, [canvasId]); // Run only once on mount
 
   const defaultEdgeOptions = {
-    style: EDGE_STYLES.default,
+    style: edgeStyles.default,
   };
 
   const flowConfig = useMemo(
@@ -107,9 +110,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         duration: 200,
       },
       defaultEdgeOptions,
-      // elevateNodesOnSelect: false,
     }),
-    [mode],
+    [mode, edgeStyles],
   );
 
   const onNodeClick = useCallback(
@@ -184,6 +186,19 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     return () => clearTimeout(timeoutId);
   }, [provider]);
 
+  useEffect(() => {
+    const unsubscribe = addPinnedNodeEmitter.on('addPinnedNode', ({ canvasId: emittedCanvasId }) => {
+      if (emittedCanvasId === canvasId) {
+        previewContainerRef.current?.scrollTo({
+          left: 0,
+          behavior: 'smooth',
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, [canvasId]);
+
   return (
     <Spin
       className="w-full h-full"
@@ -239,6 +254,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
 
         {showPreview && (
           <div
+            ref={previewContainerRef}
             className={`absolute top-[64px] bottom-0 right-2 overflow-x-auto preview-container`}
             style={{
               maxWidth: showMaxRatio ? '900px' : '440px',
@@ -296,7 +312,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     </Spin>
   );
 };
-
 export const Canvas = (props: { canvasId: string }) => {
   const { canvasId } = props;
   const setCurrentCanvasId = useCanvasStoreShallow((state) => state.setCurrentCanvasId);

@@ -6,7 +6,7 @@ import { Node } from '@xyflow/react';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { CustomHandle } from './custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
-import { EDGE_STYLES } from '../constants';
+import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
@@ -39,7 +39,6 @@ type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>
 export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { data, selected, id, hideActions = false, isPreview = false, hideHandles = false, onNodeClick } = props;
   const [isHovered, setIsHovered] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const { edges, setNodeData } = useCanvasControl();
   const { setEdges, getNode } = useReactFlow();
@@ -135,6 +134,8 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const isTargetConnected = edges?.some((edge) => edge.target === id);
   const isSourceConnected = edges?.some((edge) => edge.source === id);
 
+  const edgeStyles = useEdgeStyles();
+
   // Handle node hover events
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -143,13 +144,13 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
         if (edge.source === id || edge.target === id) {
           return {
             ...edge,
-            style: EDGE_STYLES.hover,
+            style: edgeStyles.hover,
           };
         }
         return edge;
       }),
     );
-  }, [id, setEdges]);
+  }, [id, setEdges, edgeStyles]);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
@@ -158,13 +159,13 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
         if (edge.source === id || edge.target === id) {
           return {
             ...edge,
-            style: EDGE_STYLES.default,
+            style: edgeStyles.default,
           };
         }
         return edge;
       }),
     );
-  }, [id, setEdges]);
+  }, [id, setEdges, edgeStyles]);
 
   const handleAddToChatHistory = useAddToChatHistory(node as NodeItem);
 
@@ -267,7 +268,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           cursor: isOperating ? 'text' : 'grab',
         }}
       >
-        {isWeb && !hideActions && !isResizing && (
+        {isWeb && !hideActions && (
           <ActionButtons
             type="skill-response"
             nodeId={id}
@@ -409,14 +410,10 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           throttleResize={1}
           renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
           onResizeStart={({ setOrigin, dragStart }) => {
-            setIsResizing(true);
             setOrigin(['%', '%']);
             if (dragStart && dragStart instanceof MouseEvent) {
               dragStart.preventDefault();
             }
-          }}
-          onResizeEnd={() => {
-            setIsResizing(false);
           }}
           onResize={({ target, width, height, direction }) => {
             const newWidth = Math.max(100, width);
