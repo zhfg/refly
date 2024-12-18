@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Dropdown, DropdownProps, Popconfirm, MenuProps, message } from 'antd';
 import { IconMoreHorizontal, IconDelete } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/use-delete-canvas';
@@ -6,10 +6,12 @@ import { useTranslation } from 'react-i18next';
 
 interface CanvasActionDropdown {
   canvasId: string;
+  canvasName: string;
+  updateShowStatus?: (canvasId: string | null) => void;
   afterDelete?: () => void;
 }
 export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
-  const { canvasId, afterDelete } = props;
+  const { canvasId, canvasName, updateShowStatus, afterDelete } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
   const { deleteCanvas } = useDeleteCanvas();
@@ -25,7 +27,7 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
     {
       label: (
         <Popconfirm
-          title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas')}
+          title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', { canvas: canvasName })}
           onConfirm={handleDelete}
           onCancel={() => setPopupVisible(false)}
           okText={t('common.confirm')}
@@ -46,6 +48,14 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
       setPopupVisible(open);
     }
   };
+
+  useEffect(() => {
+    if (popupVisible) {
+      updateShowStatus?.(canvasId);
+    } else {
+      updateShowStatus?.(null);
+    }
+  }, [popupVisible]);
 
   return (
     <Dropdown

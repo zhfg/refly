@@ -133,6 +133,9 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
   const { t } = useTranslation()
 
   const { setPendingNode } = useCanvasNodesStore()
+  const [showCanvasIdActionDropdown, setShowCanvasIdActionDropdown] = useState<
+    string | null
+  >(null)
 
   const MenuItemContent = (props: {
     icon?: React.ReactNode
@@ -348,6 +351,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                             canvasList.map(canvas => (
                               <MenuItem
                                 key={canvas.id}
+                                className="group relative"
                                 onClick={e => {
                                   const isClickMenu = (
                                     e.target as HTMLElement
@@ -364,7 +368,20 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                                   <div className="w-32 flex-1 truncate">
                                     {canvas?.name ?? ""}
                                   </div>
-                                  <CanvasActionDropdown canvasId={canvas.id} />
+                                  <div
+                                    className={`flex items-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${
+                                      showCanvasIdActionDropdown === canvas.id
+                                        ? "opacity-100"
+                                        : ""
+                                    }`}>
+                                    <CanvasActionDropdown
+                                      canvasId={canvas.id}
+                                      canvasName={canvas.name}
+                                      updateShowStatus={canvasId => {
+                                        setShowCanvasIdActionDropdown(canvasId)
+                                      }}
+                                    />
+                                  </div>
                                 </div>
                               </MenuItem>
                             ))
