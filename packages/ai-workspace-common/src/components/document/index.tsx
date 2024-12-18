@@ -636,6 +636,19 @@ export const DocumentEditorHeader = ({ docId }: { docId: string }) => {
     currentDocument: state.documentStates[docId]?.currentDocument,
     updateCurrentDocument: state.updateCurrentDocument,
   }));
+  const { setNodeDataByEntity } = useCanvasControl();
+
+  const debouncedUpdateNodeTitle = useDebouncedCallback((title) => {
+    setNodeDataByEntity(
+      {
+        entityId: docId,
+        type: 'document',
+      },
+      {
+        title,
+      },
+    );
+  }, 500);
 
   const onTitleChange = (newTitle: string) => {
     const currentDocument = useDocumentStore.getState().documentStates[docId]?.currentDocument;
@@ -645,6 +658,7 @@ export const DocumentEditorHeader = ({ docId }: { docId: string }) => {
     }
 
     updateCurrentDocument(docId, { ...currentDocument, title: newTitle });
+    debouncedUpdateNodeTitle(newTitle);
   };
 
   useEffect(() => {
