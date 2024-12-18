@@ -293,7 +293,7 @@ const translations = {
       unbindSuccessful: '移除成功！',
       failed: '删除失败！',
       deleteConfirmForDocument: '确定删除该文档吗？',
-      deleteConfirmForCanvas: '确定删除该画布吗？',
+      deleteConfirmForCanvas: '确定删除画布 [{{canvas}}] 吗？',
       deleteConfirmForProject: '确定删除该项目吗？',
       deleteConfirmForResource: '确定删除该资源吗？',
       deleteConfirmForResourceProject: '确认要从项目移除吗?',

@@ -77,6 +77,7 @@ export const CanvasListModal = (props: CanvasListProps) => {
           </Button>
           <CanvasActionDropdown
             canvasId={canvas.canvasId}
+            canvasName={canvas.title}
             afterDelete={() => setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId))}
           />
         </div>

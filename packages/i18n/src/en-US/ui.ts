@@ -301,7 +301,7 @@ const translations = {
       unbindSuccessful: 'Unbind successfully!',
       failed: 'Failed to delete',
       deleteConfirmForDocument: 'Are you sure you want to delete this document?',
-      deleteConfirmForCanvas: 'Are you sure you want to delete this canvas?',
+      deleteConfirmForCanvas: 'Are you sure you want to delete [{{canvas}}]?',
       deleteConfirmForResource: 'Are you sure you want to delete this resource?',
       deleteConfirmForResourceProject: 'Are you sure to remove this resource from the project?',
       delete: 'Delete',
