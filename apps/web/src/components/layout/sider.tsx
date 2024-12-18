@@ -7,7 +7,7 @@ import {
   Menu,
   Tag,
 } from "@arco-design/web-react"
-import { Skeleton, Tooltip, message } from "antd"
+import { Alert, Skeleton, Tooltip, message } from "antd"
 import {
   useLocation,
   useNavigate,
@@ -421,6 +421,21 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
           </div>
 
           <div className="sider-footer">
+            <Alert
+              message={
+                <div className="flex cursor-pointer items-center justify-center">
+                  <a
+                    href="https://powerformer.feishu.cn/wiki/Syrsw7DJxiaExSkoSiXcTF1inBg?from=canvas"
+                    target="_blank">
+                    👉{"    "}
+                    <span>{t("loggedHomePage.siderMenu.joinFeedback")}</span>
+                  </a>
+                </div>
+              }
+              type="success"
+              closable
+              style={{ marginBottom: 8 }}
+            />
             {!!userStore.userProfile?.uid && (
               <MenuItem
                 key="Settings"
