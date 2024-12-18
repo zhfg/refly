@@ -709,6 +709,7 @@ const translations = {
       recentProjects: '最近项目',
       recentChats: '最近会话',
       viewMore: '查看更多',
+      joinFeedback: '加入反馈群',
     },
   },
   knowledgeLibrary: {

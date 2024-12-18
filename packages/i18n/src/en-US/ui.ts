@@ -712,6 +712,7 @@ const translations = {
       recentProjects: 'Recent Projects',
       recentChats: 'Recent Chats',
       viewMore: 'View More',
+      joinFeedback: 'Join Feedback Group',
     },
   },
   knowledgeLibrary: {
