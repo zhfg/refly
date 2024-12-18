@@ -13,7 +13,7 @@ import { MiscService } from '@/misc/misc.service';
 import { ConfigService } from '@nestjs/config';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { PrismaService } from '@/common/prisma.service';
-import { IDPrefix, incrementalMarkdownUpdate, ydoc2Markdown } from '@refly-packages/utils';
+import { IDPrefix, incrementalMarkdownUpdate, state2Markdown } from '@refly-packages/utils';
 import { streamToBuffer } from '@/utils/stream';
 import { CollabContext, isCanvasContext, isDocumentContext } from './collab.dto';
 
@@ -104,11 +104,9 @@ export class CollabService {
 
   private async storeDocumentEntity({
     state,
-    document,
     context,
   }: {
     state: Buffer;
-    document: Y.Doc;
     context: Extract<CollabContext, { entityType: 'document' }>;
   }) {
     const { user, entity: doc } = context;
@@ -118,7 +116,7 @@ export class CollabService {
       return;
     }
 
-    const content = ydoc2Markdown(document);
+    const content = state2Markdown(state);
     const storageKey = doc.storageKey || `doc/${doc.docId}.txt`;
     const stateStorageKey = doc.stateStorageKey || `state/${doc.docId}`;
 
@@ -245,7 +243,7 @@ export class CollabService {
     const state = Buffer.from(Y.encodeStateAsUpdate(document));
 
     if (isDocumentContext(context)) {
-      return this.storeDocumentEntity({ state, document, context });
+      return this.storeDocumentEntity({ state, context });
     } else if (isCanvasContext(context)) {
       return this.storeCanvasEntity({ state, document, context });
     } else {
