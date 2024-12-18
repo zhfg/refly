@@ -73,7 +73,10 @@ export class CollabService {
         where: { canvasId: documentName, deletedAt: null },
       });
       context = { user, entity: canvas, entityType: 'canvas' };
+    } else {
+      throw new Error(`unknown document name: ${documentName}`);
     }
+
     if (context.entity.uid !== payload.uid) {
       throw new Error(`user not authorized: ${documentName}`);
     }
@@ -109,6 +112,11 @@ export class CollabService {
     context: Extract<CollabContext, { entityType: 'document' }>;
   }) {
     const { user, entity: doc } = context;
+
+    if (!doc) {
+      this.logger.warn(`document is empty for context: ${JSON.stringify(context)}`);
+      return;
+    }
 
     const content = ydoc2Markdown(document);
     const storageKey = doc.storageKey || `doc/${doc.docId}.txt`;
@@ -191,6 +199,11 @@ export class CollabService {
   }) {
     const { user, entity: canvas } = context;
 
+    if (!canvas) {
+      this.logger.warn(`canvas is empty for context: ${JSON.stringify(context)}`);
+      return;
+    }
+
     const stateStorageKey = canvas.stateStorageKey || `state/${canvas.canvasId}`;
     await this.minio.client.putObject(stateStorageKey, state);
 
@@ -230,7 +243,6 @@ export class CollabService {
     context: CollabContext;
   }) {
     const state = Buffer.from(Y.encodeStateAsUpdate(document));
-    this.logger.log(`store to persist storage: ${JSON.stringify(context.entity.stateStorageKey)}`);
 
     if (isDocumentContext(context)) {
       return this.storeDocumentEntity({ state, document, context });
