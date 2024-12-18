@@ -121,6 +121,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
         },
       },
       modelName: selectedModel?.name,
+      locale: localSettings?.outputLocale,
     };
 
     if (actionType === 'chat') {

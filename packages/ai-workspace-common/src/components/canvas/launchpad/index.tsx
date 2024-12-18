@@ -42,8 +42,9 @@ export const LaunchPad: React.FC<LaunchPadProps> = ({ visible = true }) => {
   const { t } = useTranslation();
 
   // stores
-  const { clearContextItems } = useContextPanelStoreShallow((state) => ({
+  const contextPanelStore = useContextPanelStoreShallow((state) => ({
     clearContextItems: state.clearContextItems,
+    resetState: state.resetState,
   }));
   const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
@@ -71,7 +72,7 @@ export const LaunchPad: React.FC<LaunchPadProps> = ({ visible = true }) => {
   // Add new method to clear state
   const clearLaunchpadState = () => {
     chatStore.resetState();
-    clearContextItems();
+    contextPanelStore.resetState();
   };
 
   // Handle canvas ID changes
