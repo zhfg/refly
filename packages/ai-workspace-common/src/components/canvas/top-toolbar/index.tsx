@@ -238,22 +238,6 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
             className="group flex items-center gap-2 text-sm font-bold text-gray-500 cursor-pointer hover:text-gray-700"
             onClick={handleEditClick}
           >
-            <div className="relative w-2.5 h-2.5">
-              <div
-                className={`
-                  absolute w-full h-full rounded-full transition-all duration-300 ease-in-out
-                  ${debouncedUnsyncedChanges > 0 ? 'opacity-100' : 'opacity-0'}
-                  bg-yellow-500 animate-pulse
-                `}
-              />
-              <div
-                className={`
-                  absolute w-full h-full rounded-full transition-all duration-300 ease-in-out
-                  ${debouncedUnsyncedChanges > 0 ? 'opacity-0' : 'opacity-100'}
-                  bg-green-400
-                `}
-              />
-            </div>
             <Tooltip
               title={
                 debouncedUnsyncedChanges > 0
@@ -261,13 +245,20 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
                   : t('canvas.toolbar.synced', { time: time(new Date(), language)?.utc()?.fromNow() })
               }
             >
-              {!data[canvasId] ? (
-                <Skeleton className="w-28" active paragraph={false} />
-              ) : (
-                canvasTitle || t('common.untitled')
-              )}
-              <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div
+                className={`
+                  relative w-2.5 h-2.5 rounded-full
+                  transition-colors duration-700 ease-in-out
+                  ${debouncedUnsyncedChanges > 0 ? 'bg-yellow-500 animate-pulse' : 'bg-green-400'}
+                `}
+              />
             </Tooltip>
+            {!data[canvasId] ? (
+              <Skeleton className="w-28" active paragraph={false} />
+            ) : (
+              canvasTitle || t('common.untitled')
+            )}
+            <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
 
           <Modal
