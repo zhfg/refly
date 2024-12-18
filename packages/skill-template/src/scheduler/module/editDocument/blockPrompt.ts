@@ -217,8 +217,9 @@ export const importantRemindersPrompt = `
 4. Support multiple block types and nested structures, generating multiple blocks as needed
 5. Including detailed explanations and examples
 6. Title is contextual information only - not for expansion
-7. The <response> tags in examples are for demonstration purposes only
-8. Ensure proper markdown formatting and structure
+7. Ensure proper markdown formatting and structure
+8. DO NOT include <response> tags in your output - they are only for demonstration in examples
+9. Output content directly without any XML-style tags
 `;
 
 // Core block content generation instructions
@@ -247,10 +248,12 @@ export const buildBlockEditDocumentCoreInstructionsPrompt = (locale: string) => 
    - Follow document's existing structure
    - Maintain consistent heading hierarchy
    - Preserve document style and tone
+   - Output content directly without any XML-style tags
 
 ### Important Notes
-1. The <response> tags in examples are for demonstration purposes only
+1. DO NOT include <response> tags in your output - they are only for demonstration in examples
 2. Remember to generate all content in ${locale} while preserving technical terms
+3. Output content directly without any wrapping tags
 `;
 
 export const buildNoContextBlockEditDocumentPrompt = (locale: string) => `

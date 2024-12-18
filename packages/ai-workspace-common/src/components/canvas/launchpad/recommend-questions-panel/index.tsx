@@ -12,6 +12,7 @@ import { InvokeSkillRequest } from '@refly-packages/ai-workspace-common/requests
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 interface RecommendQuestionsPanelProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = (
     const resultId = genActionResultID();
     const { selectedModel, newQAText } = useChatStore.getState();
     const { historyItems, contextItems } = useContextPanelStore.getState();
+    const { localSettings } = useUserStore.getState();
 
     const param: InvokeSkillRequest = {
       resultId,
@@ -53,6 +55,7 @@ export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = (
           configScope: ['runtime'],
         },
       },
+      locale: localSettings?.outputLocale,
     };
 
     invokeAction(param);

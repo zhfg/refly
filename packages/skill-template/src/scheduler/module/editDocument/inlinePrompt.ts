@@ -158,7 +158,7 @@ Our deployment workflow ensures quality. The process begins with a thorough manu
 export const importantRemindersPrompt = `
 ## Important Reminders
 1. Content within <highlight> tags indicates the section to modify
-2. The <response> tags in examples are for demonstration purposes only
+2. DO NOT include <response> tags in your output - they are only for demonstration in examples
 3. Two possible scenarios:
    - Partial document: Preserve content before/after highlight tags
    - Full document: Replace entire content when no content before/after tags
@@ -168,6 +168,7 @@ export const importantRemindersPrompt = `
 7. Including detailed explanations and examples
 8. Preserve document structure and formatting
 9. Ensure proper integration with surrounding content
+10. Output content directly without any XML-style tags
 `;
 
 // Core editing instructions
@@ -195,11 +196,12 @@ export const buildInlineEditDocumentCoreInstructionsPrompt = (locale: string) =>
    - Maintain original document structure
    - Ensure edited content flows naturally with surrounding text
    - Keep formatting consistent with original
-   - Follow specified tag structure
+   - Output content directly without any XML-style tags
 
 ### Important Notes
-1. The <response> tags in examples are for demonstration purposes only
+1. DO NOT include <response> tags in your output - they are only for demonstration in examples
 2. Remember to generate all content in ${locale} and with markdown formatting while preserving technical terms
+3. Output content directly without any wrapping tags
 `;
 
 export const buildNoContextInlineEditDocumentPrompt = (locale: string) => `
