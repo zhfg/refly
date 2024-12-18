@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow } from '@xyflow/react';
-import { Button } from 'antd';
+import { Button, Modal, Result } from 'antd';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
@@ -178,13 +178,18 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (provider.status !== 'connected') {
+      if (provider?.status !== 'connected') {
         setConnectionTimeout(true);
       }
     }, 10000); // 10 seconds timeout
 
+    // Clear timeout if provider becomes connected
+    if (provider?.status === 'connected') {
+      clearTimeout(timeoutId);
+    }
+
     return () => clearTimeout(timeoutId);
-  }, [provider]);
+  }, [provider?.status]); // Update dependency to specifically watch status
 
   useEffect(() => {
     const unsubscribe = addPinnedNodeEmitter.on('addPinnedNode', ({ canvasId: emittedCanvasId }) => {
@@ -205,11 +210,20 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
       spinning={provider.status !== 'connected' && !connectionTimeout}
       tip={connectionTimeout ? t('common.connectionFailed') : t('common.loading')}
     >
-      {connectionTimeout && (
-        <div className="text-center">
-          <Button onClick={() => window.location.reload()}>{t('common.retry')}</Button>
-        </div>
-      )}
+      <Modal
+        centered
+        open={connectionTimeout}
+        onOk={() => window.location.reload()}
+        onCancel={() => setConnectionTimeout(false)}
+        okText={t('common.retry')}
+        cancelText={t('common.cancel')}
+      >
+        <Result
+          status="warning"
+          title={t('canvas.connectionTimeout.title')}
+          extra={t('canvas.connectionTimeout.extra')}
+        />
+      </Modal>
       <div className="w-full h-screen relative flex flex-col overflow-hidden">
         <CanvasToolbar onToolSelect={handleToolSelect} />
         <TopToolbar canvasId={canvasId} />

@@ -461,6 +461,10 @@ const translations = {
         mode: '交互模式',
       },
     },
+    connectionTimeout: {
+      title: '连接超时',
+      extra: '服务器似乎繁忙，请稍后再试。',
+    },
     launchpad: {
       pinChat: '固定对话',
       unpinChat: '取消固定对话',
