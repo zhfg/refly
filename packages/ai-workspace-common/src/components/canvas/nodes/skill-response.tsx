@@ -31,10 +31,11 @@ import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-commo
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useGetActionResult } from '@refly-packages/ai-workspace-common/queries';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { genUniqueId } from '@refly-packages/ai-workspace-common/utils';
-import { CanvasSelectionContext } from '../../../modules/selection-menu/canvas-selection-context';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
+
+const POLLING_INTERVAL = 3000;
+const POLLING_COOLDOWN_TIME = 5000;
 
 export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { data, selected, id, hideActions = false, isPreview = false, hideHandles = false, onNodeClick } = props;
@@ -80,7 +81,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShouldPoll(true);
-    }, 2000);
+    }, POLLING_COOLDOWN_TIME);
 
     return () => {
       clearTimeout(timer);
@@ -90,7 +91,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
 
   const { data: result } = useGetActionResult({ query: { resultId: entityId } }, null, {
     enabled: Boolean(entityId) && (!status || status === 'executing' || status === 'waiting') && shouldPoll,
-    refetchInterval: 2000,
+    refetchInterval: POLLING_INTERVAL,
   });
   const remoteResult = result?.data;
 
@@ -175,7 +176,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
     // Disable polling temporarily after rerun
     setSize({ width: 288, height: 'auto' });
     setShouldPoll(false);
-    setTimeout(() => setShouldPoll(true), 2000);
+    setTimeout(() => setShouldPoll(true), POLLING_COOLDOWN_TIME);
 
     setNodeData(id, {
       ...data,
