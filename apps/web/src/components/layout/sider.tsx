@@ -369,7 +369,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                                     {canvas?.name ?? ""}
                                   </div>
                                   <div
-                                    className={`opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${
+                                    className={`flex items-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${
                                       showCanvasIdActionDropdown === canvas.id
                                         ? "opacity-100"
                                         : ""
