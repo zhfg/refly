@@ -469,6 +469,10 @@ const translations = {
         mode: 'Interaction Mode',
       },
     },
+    connectionTimeout: {
+      title: 'Connection Timeout',
+      extra: 'The server seems to be busy, please try again.',
+    },
     launchpad: {
       pinChat: 'Pin chat',
       unpinChat: 'Unpin chat',
