@@ -1,5 +1,5 @@
-export * as inlinePrompt from './inlinePrompt';
+export * as inlinePrompt from './inline';
 export * from './types';
 export * from './helper';
-export * as blockPrompt from './blockPrompt';
+export * as blockPrompt from './block';
 export * from './prompt';

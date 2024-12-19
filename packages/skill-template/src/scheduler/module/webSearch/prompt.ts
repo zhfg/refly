@@ -1,8 +1,12 @@
 import { buildWebSearchExamples } from './examples';
 import { buildCitationRules, buildCitationReminder } from '../common/citationRules';
-import { buildChatHistoryRules, buildQueryProcessAndChatHistoryInstructions, chatHistoryReminder } from '../common/chat-history';
+import {
+  buildChatHistoryRules,
+  buildQueryProcessAndChatHistoryInstructions,
+  chatHistoryReminder,
+} from '../common/chat-history';
 import { buildWebSearchChatHistoryExamples } from './examples';
-import { buildQueryInstruction } from '../common/query';
+import { buildQueryPriorityInstruction, buildSpecificQueryInstruction } from '../common/query';
 import { buildContextFormat } from './context';
 import { buildLocaleFollowInstruction } from '../common/locale-follow';
 
@@ -18,7 +22,7 @@ ${buildCitationRules()}
 4. If search results don't fully address the query, acknowledge this
 6. Maintain a friendly and professional tone
 
-${buildQueryInstruction()}
+${buildQueryPriorityInstruction()}
 
 ${buildQueryProcessAndChatHistoryInstructions()}
 
@@ -44,6 +48,8 @@ ${buildWebSearchChatHistoryExamples()}
 - ✓ Properly handled follow-up questions
 
 ${buildContextFormat()}
+
+${buildSpecificQueryInstruction()}
 `;
 };
 

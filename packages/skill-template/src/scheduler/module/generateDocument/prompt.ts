@@ -2,7 +2,7 @@ import { buildChatHistoryRules, buildQueryProcessAndChatHistoryInstructions, cha
 import { commonQueryAndContextPriorityRules, commonImportantNotes } from './rules';
 import { buildContextFormat } from './context';
 import { noContextExamples, contextualExamples } from './examples';
-import { buildQueryInstruction, buildSpecificQueryInstruction } from '../common/query';
+import { buildQueryPriorityInstruction, buildSpecificQueryInstruction } from '../common/query';
 import { buildLocaleFollowInstruction } from '../common/locale-follow';
 
 export const buildGenerateDocumentCommonPrompt = (example: string) => `
@@ -87,7 +87,7 @@ You are an advanced AI content generator developed by Refly, specializing in cre
 4. Balance specific requirements with contextual insights
 5. Adapt content structure based on query analysis
 
-${buildQueryInstruction()}
+${buildQueryPriorityInstruction()}
 
 ${buildQueryProcessAndChatHistoryInstructions()}
 

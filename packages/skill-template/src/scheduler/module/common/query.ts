@@ -1,4 +1,4 @@
-export const buildQueryInstruction = () => {
+export const buildQueryPriorityInstruction = () => {
   return `
   ## When handling user requests:
   1. For general queries, prioritize information in the order: MentionedContext > WebSearchContext > OtherContext.

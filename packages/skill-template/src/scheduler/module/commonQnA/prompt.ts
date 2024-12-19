@@ -1,6 +1,6 @@
 import { buildContextFormat } from './context';
 import { buildChatHistoryRules, chatHistoryReminder, buildQueryProcessAndChatHistoryInstructions } from '../common/chat-history';
-import { buildQueryInstruction, buildSpecificQueryInstruction } from '../common/query';
+import { buildQueryPriorityInstruction, buildSpecificQueryInstruction } from '../common/query';
 import { buildContextDisplayInstruction } from '../common/context';
 import { buildCommonQnAExamples, buildCommonQnAChatHistoryExamples } from './examples';
 import { buildCitationRules } from '../common/citationRules';
@@ -65,7 +65,7 @@ export const buildContextualCommonQnASystemPrompt = () => {
      - Logical reasoning for your conclusions
      - Multiple perspectives when relevant
 
-  ${buildQueryInstruction()}
+  ${buildQueryPriorityInstruction()}
 
   ${buildQueryProcessAndChatHistoryInstructions()}
 

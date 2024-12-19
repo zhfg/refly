@@ -1,7 +1,11 @@
 import { buildCitationRules, buildCitationReminder } from '../common/citationRules';
-import { buildChatHistoryRules, buildQueryProcessAndChatHistoryInstructions, chatHistoryReminder } from '../common/chat-history';
+import {
+  buildChatHistoryRules,
+  buildQueryProcessAndChatHistoryInstructions,
+  chatHistoryReminder,
+} from '../common/chat-history';
 import { buildLibrarySearchExamples, buildLibrarySearchChatHistoryExamples } from './exmaples';
-import { buildQueryInstruction, buildSpecificQueryInstruction } from '../common/query';
+import { buildQueryPriorityInstruction, buildSpecificQueryInstruction } from '../common/query';
 import { buildContextFormat } from './context';
 import { buildLocaleFollowInstruction } from '../common/locale-follow';
 
@@ -17,7 +21,7 @@ ${buildCitationRules()}
 4. If knowledge base content doesn't fully address the query, acknowledge this
 6. Maintain a friendly and professional tone
 
-${buildQueryInstruction()}
+${buildQueryPriorityInstruction()}
 
 ${buildQueryProcessAndChatHistoryInstructions()}
 
@@ -43,6 +47,8 @@ ${buildLibrarySearchChatHistoryExamples()}
 - ✓ Properly handled follow-up questions
 
 ${buildContextFormat()}
+
+${buildSpecificQueryInstruction()}
 `;
 };
 

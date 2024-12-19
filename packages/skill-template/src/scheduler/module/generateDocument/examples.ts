@@ -121,4 +121,97 @@ Our system directly addresses key market challenges identified through extensive
 ...[Note: Full response would continue with 2000+ words]
 </response>
 </example>
+
+<example index="3">
+<chatHistory>
+<ChatHistoryItem type={human}>What are our company's core technologies?</ChatHistoryItem>
+<ChatHistoryItem type={ai}>Our core technologies include AI-driven analytics, cloud infrastructure, and machine learning models [citation:1].</ChatHistoryItem>
+<ChatHistoryItem type={human}>Write a detailed technical overview of our AI analytics platform</ChatHistoryItem>
+</chatHistory>
+<context>
+<MentionedContext>
+<KnowledgeBaseDocuments>
+<ContextItem citationIndex='1' type='document' entityId='tech-stack-123'>
+Core technologies: AI analytics platform, cloud infrastructure, ML models
+</ContextItem>
+<ContextItem citationIndex='2' type='document' entityId='ai-platform-456'>
+Our AI analytics platform features:
+- Real-time data processing
+- Advanced visualization tools
+- Automated insight generation
+- Custom reporting capabilities
+</ContextItem>
+</KnowledgeBaseDocuments>
+</MentionedContext>
+</context>
+<response>
+## AI Analytics Platform Technical Overview
+
+Building on our established technological foundation [citation:1], our AI analytics platform represents a comprehensive solution for enterprise data analysis. The platform incorporates several key technical components:
+
+### Core Capabilities [citation:2]
+1. Real-time Data Processing
+   - Immediate data ingestion and analysis
+   - Stream processing architecture
+
+2. Advanced Visualization
+   - Interactive dashboards
+   - Custom visualization tools
+
+3. Automated Insights
+   - Pattern recognition
+   - Anomaly detection
+
+4. Reporting System
+   - Customizable report templates
+   - Automated report generation
+
+...[Note: Full response would continue with 2000+ words]
+</response>
+</example>
+
+<example index="4">
+<chatHistory>
+<ChatHistoryItem type={human}>What security measures do we have in place?</ChatHistoryItem>
+<ChatHistoryItem type={ai}>Our security framework includes encryption, access controls, and regular audits [citation:1].</ChatHistoryItem>
+<ChatHistoryItem type={human}>Create a comprehensive security documentation for our clients</ChatHistoryItem>
+</chatHistory>
+<context>
+<MentionedContext>
+<KnowledgeBaseDocuments>
+<ContextItem citationIndex='1' type='document' entityId='security-overview'>
+Security measures: End-to-end encryption, role-based access, quarterly audits
+</ContextItem>
+<ContextItem citationIndex='2' type='document' entityId='security-details'>
+Additional security features:
+- Multi-factor authentication
+- Regular penetration testing
+- 24/7 monitoring
+- Incident response team
+</ContextItem>
+</KnowledgeBaseDocuments>
+</MentionedContext>
+</context>
+<response>
+## Security Framework Documentation
+
+Building upon our robust security infrastructure [citation:1], this documentation provides a detailed overview of our comprehensive security measures.
+
+### Core Security Components
+1. Data Protection
+   - End-to-end encryption for all data
+   - Role-based access control implementation
+
+2. Security Monitoring [citation:2]
+   - 24/7 system monitoring
+   - Dedicated incident response team
+   - Regular penetration testing
+
+3. Authentication & Access
+   - Multi-factor authentication requirements
+   - Granular permission controls
+
+...[Note: Full response would continue with 2000+ words]
+</response>
+</example>
 `;
