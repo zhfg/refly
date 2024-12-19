@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'node:events';
 import pLimit from 'p-limit';
 import { Queue } from 'bull';
-import * as Y from 'yjs';
 import { InjectQueue } from '@nestjs/bull';
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { Prisma, SkillTrigger as SkillTriggerModel } from '@prisma/client';
@@ -93,6 +92,7 @@ import { CollabService } from '@/collab/collab.service';
 import { throttle } from 'lodash';
 import { ResultAggregator } from '@/utils/result';
 import { CollabContext } from '@/collab/collab.dto';
+import { DirectConnection } from '@hocuspocus/server';
 
 export function createLangchainMessage(result: ActionResult, steps: ActionStep[]): BaseMessage[] {
   const query = result.title;
@@ -729,9 +729,7 @@ export class SkillService {
     type ArtifactOutput = Artifact & {
       nodeCreated: boolean; // Whether the canvas node is created
       content: string; // Accumulated content
-      document?: Y.Doc; // Yjs document
-      documentName?: string;
-      collabContext?: CollabContext;
+      connection?: DirectConnection;
     };
     const artifactMap: Record<string, ArtifactOutput> = {};
 
@@ -772,7 +770,7 @@ export class SkillService {
               }
 
               // Open direct connection to yjs doc if artifact type is document
-              if (type === 'document' && !artifactMap[entityId].document) {
+              if (type === 'document' && !artifactMap[entityId].connection) {
                 const doc = await this.prisma.document.findFirst({
                   where: { docId: entityId },
                 });
@@ -781,19 +779,17 @@ export class SkillService {
                   entity: doc,
                   entityType: 'document',
                 };
-                const { document } = await this.collabService.openDirectConnection(
+                const connection = await this.collabService.openDirectConnection(
                   entityId,
                   collabContext,
                 );
 
                 this.logger.log(
                   `open direct connection to document ${entityId}, doc: ${JSON.stringify(
-                    document.toJSON(),
+                    connection.document?.toJSON(),
                   )}`,
                 );
-                artifactMap[entityId].document = document;
-                artifactMap[entityId].documentName = entityId;
-                artifactMap[entityId].collabContext = collabContext;
+                artifactMap[entityId].connection = connection;
               }
             }
             return;
@@ -813,29 +809,11 @@ export class SkillService {
       actionMeta,
     };
 
-    const throttledStoreDocument = throttle(
-      ({ document, documentName, collabContext }: ArtifactOutput) => {
-        this.collabService.storeDocument({
-          document,
-          documentName,
-          context: collabContext,
-        });
-      },
-      2000,
-      {
-        leading: true,
-        trailing: true,
-      },
-    );
-
     const throttledMarkdownUpdate = throttle(
-      ({ document, content }: ArtifactOutput) => {
-        incrementalMarkdownUpdate(document, content);
-        this.logger.log(
-          `throttledMarkdownUpdate: ${content?.slice(0, 200)}, after update doc: ${JSON.stringify(
-            document?.toJSON(),
-          )}`,
-        );
+      ({ connection, content }: ArtifactOutput) => {
+        connection.transact((doc) => {
+          incrementalMarkdownUpdate(doc, content);
+        });
       },
       20,
       {
@@ -880,7 +858,6 @@ export class SkillService {
                 // Update artifact content and yjs doc
                 artifact.content += content;
                 throttledMarkdownUpdate(artifact);
-                throttledStoreDocument(artifact);
               } else {
                 // Update result content and forward stream events to client
                 resultAggregator.handleStreamContent(runMeta, content);
@@ -938,15 +915,9 @@ export class SkillService {
       }
       result.errors.push(err.message);
     } finally {
-      await Promise.all(
-        Object.values(artifactMap).map((artifact) => {
-          return this.collabService.storeDocument({
-            document: artifact.document,
-            documentName: artifact.documentName,
-            context: artifact.collabContext,
-          });
-        }),
-      );
+      Object.values(artifactMap).forEach((artifact) => {
+        artifact.connection?.disconnect();
+      });
 
       const steps = resultAggregator.getSteps({ resultId });
 
