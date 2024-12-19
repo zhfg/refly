@@ -193,10 +193,11 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
 
   const ToolButton = ({ tool }: { tool: ToolbarItem }) => {
     return (
-      <Button
-        type="text"
-        onClick={(event) => handleToolSelect(event, tool.value)}
-        className={`
+      <TooltipWrapper tooltip={tool.tooltip}>
+        <Button
+          type="text"
+          onClick={(event) => handleToolSelect(event, tool.value)}
+          className={`
                   h-[32px] w-[32px] 
                   flex items-center justify-center 
                   hover:bg-gray-100 rounded-lg 
@@ -204,14 +205,25 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
                   group
                   ${tool.active ? 'bg-gray-100' : ''}
                 `}
-        icon={
-          <tool.icon
-            className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900"
-            style={{ color: getIconColor(tool.value) }}
-          />
-        }
-        loading={getIsLoading(tool.value)}
-      />
+          icon={
+            <tool.icon
+              className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900"
+              style={{ color: getIconColor(tool.value) }}
+            />
+          }
+          loading={getIsLoading(tool.value)}
+        />
+      </TooltipWrapper>
+    );
+  };
+
+  const ToolButtonWithBadge = ({ tool }: { tool: ToolbarItem }) => {
+    return selectedNodes.length > 0 && tool.value === 'handleLaunchpad' ? (
+      <Badge size="small" color="#00968F" offset={[-2, 2]} count={selectedNodes.length} overflowCount={9999}>
+        <ToolButton tool={tool} />
+      </Badge>
+    ) : (
+      <ToolButton tool={tool} />
     );
   };
 
@@ -225,15 +237,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     >
       {tools.map((tool, index) =>
         tool.type === 'button' ? (
-          <TooltipWrapper key={index} tooltip={tool.tooltip}>
-            {selectedNodes.length > 0 && tool.value === 'handleLaunchpad' ? (
-              <Badge size="small" color="#00968F" offset={[-2, 2]} count={selectedNodes.length} overflowCount={9999}>
-                <ToolButton tool={tool} />
-              </Badge>
-            ) : (
-              <ToolButton tool={tool} />
-            )}
-          </TooltipWrapper>
+          <ToolButtonWithBadge key={index} tool={tool} />
         ) : (
           <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm} offset={12}>
             <TooltipWrapper key={index} tooltip={tool.tooltip}>
