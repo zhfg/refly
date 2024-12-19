@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'node:events';
 import pLimit from 'p-limit';
 import { Queue } from 'bull';
+import * as Y from 'yjs';
 import { InjectQueue } from '@nestjs/bull';
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { Prisma, SkillTrigger as SkillTriggerModel } from '@prisma/client';
@@ -729,7 +730,7 @@ export class SkillService {
     type ArtifactOutput = Artifact & {
       nodeCreated: boolean; // Whether the canvas node is created
       content: string; // Accumulated content
-      connection?: DirectConnection;
+      connection?: DirectConnection & { document: Y.Doc };
     };
     const artifactMap: Record<string, ArtifactOutput> = {};
 
@@ -811,9 +812,7 @@ export class SkillService {
 
     const throttledMarkdownUpdate = throttle(
       ({ connection, content }: ArtifactOutput) => {
-        connection.transact((doc) => {
-          incrementalMarkdownUpdate(doc, content);
-        });
+        incrementalMarkdownUpdate(connection.document, content);
       },
       20,
       {

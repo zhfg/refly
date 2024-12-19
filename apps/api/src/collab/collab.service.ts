@@ -16,6 +16,7 @@ import { PrismaService } from '@/common/prisma.service';
 import { IDPrefix, incrementalMarkdownUpdate, state2Markdown } from '@refly-packages/utils';
 import { streamToBuffer } from '@/utils/stream';
 import { CollabContext, isCanvasContext, isDocumentContext } from './collab.dto';
+import { Redis } from '@hocuspocus/extension-redis';
 
 @Injectable()
 export class CollabService {
@@ -42,6 +43,12 @@ export class CollabService {
       onDisconnect: async (payload) => {
         this.logger.log(`onDisconnect ${payload.documentName}`);
       },
+      extensions: [
+        new Redis({
+          host: this.config.get('redis.host'),
+          port: this.config.get('redis.port'),
+        }),
+      ],
     });
   }
 
@@ -93,18 +100,9 @@ export class CollabService {
     return context;
   }
 
-  private async loadDocument({
-    document,
-    documentName,
-    context,
-  }: {
-    document: Y.Doc;
-    documentName: string;
-    context: CollabContext;
-  }) {
+  private async loadDocument({ document, context }: { document: Y.Doc; context: CollabContext }) {
     const { entity } = context;
     const { stateStorageKey } = entity;
-    this.logger.log(`loadDocument ${documentName}, storage key: ${stateStorageKey}`);
 
     if (!stateStorageKey) return null;
 
@@ -248,21 +246,8 @@ export class CollabService {
     });
   }
 
-  async storeDocument({
-    documentName,
-    document,
-    context,
-  }: {
-    documentName: string;
-    document: Y.Doc;
-    context: CollabContext;
-  }) {
+  async storeDocument({ document, context }: { document: Y.Doc; context: CollabContext }) {
     const state = Buffer.from(Y.encodeStateAsUpdate(document));
-    this.logger.log(
-      `storeDocument ${documentName}, storage key: ${JSON.stringify(
-        context?.entity?.stateStorageKey,
-      )}, doc: ${JSON.stringify(document.toJSON())}`,
-    );
 
     if (isDocumentContext(context)) {
       return this.storeDocumentEntity({ state, context });
