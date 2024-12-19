@@ -158,7 +158,10 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
       <>
         <Tooltip title={t(`loggedHomePage.siderMenu.viewMore`)}>
           <div
-            className="flex"
+            className="relative flex"
+            style={{
+              zIndex: 2,
+            }}
             onClick={e => {
               handleNavClick(e)
             }}>
@@ -292,13 +295,14 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
           defaultSelectedKeys={["Home"]}
           className="sider-menu-nav"
           selectedKeys={[selectedKey]}
-          defaultOpenKeys={["Canvas", "Library"]}>
+          openKeys={["Canvas", "Library"]}>
           <div className="sider-menu-inner">
             {siderSections.map((section, index) => (
               <div key={`section-${index}`} className="sider-section">
                 {section.map((item, itemIndex) => (
                   <React.Fragment key={item.key}>
                     <SubMenu
+                      className="customer-submenu"
                       key={item.key}
                       title={
                         <MenuItemContent

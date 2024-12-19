@@ -2,7 +2,7 @@ import { Button, Tooltip } from 'antd';
 import { FaArrowPointer } from 'react-icons/fa6';
 import { RiUploadCloud2Line } from 'react-icons/ri';
 import { useTranslation } from 'react-i18next';
-import { FC } from 'react';
+import { FC, useCallback } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
@@ -13,8 +13,10 @@ import { ImportResourceModal } from '@refly-packages/ai-workspace-common/compone
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconCanvas, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { IoAnalyticsOutline } from 'react-icons/io5';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -32,7 +34,7 @@ interface ToolbarProps {
 
 export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
   const { t } = useTranslation();
-  const { addNode, mode, setMode } = useCanvasControl();
+  const { addNode, mode, setMode, updateAllEdgesStyle } = useCanvasControl();
 
   const { importResourceModalVisible, setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
     importResourceModalVisible: state.importResourceModalVisible,
@@ -42,6 +44,21 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
 
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
+
+  const { showLaunchpad, setShowLaunchpad } = useCanvasStoreShallow((state) => ({
+    showLaunchpad: state.showLaunchpad,
+    setShowLaunchpad: state.setShowLaunchpad,
+  }));
+
+  const { showEdges, setShowEdges } = useCanvasStoreShallow((state) => ({
+    showEdges: state.showEdges,
+    setShowEdges: state.setShowEdges,
+  }));
+
+  const handleEdgesVisibilityChange = useCallback(() => {
+    setShowEdges(!showEdges);
+    updateAllEdgesStyle(!showEdges);
+  }, [showEdges, setShowEdges, updateAllEdgesStyle]);
 
   // Define toolbar items
   const tools: ToolbarItem[] = [
@@ -81,7 +98,31 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
       domain: 'document',
       tooltip: t('canvas.toolbar.addDocument'),
     },
+    {
+      icon: IconCanvas,
+      value: 'handleLaunchpad',
+      type: 'button',
+      domain: 'launchpad',
+      tooltip: t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`),
+    },
+    {
+      icon: IoAnalyticsOutline,
+      value: 'showEdges',
+      type: 'button',
+      domain: 'edges',
+      tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
+    },
   ];
+
+  const getIconColor = (tool: string) => {
+    if (tool === 'showEdges' && !showEdges) {
+      return '#9CA3AF';
+    }
+    if (tool === 'handleLaunchpad' && !showLaunchpad) {
+      return '#9CA3AF';
+    }
+    return '';
+  };
 
   const handleToolSelect = (event: React.MouseEvent, tool: string) => {
     event.stopPropagation();
@@ -100,6 +141,12 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
         break;
       case 'changeMode':
         setMode(mode === 'pointer' ? 'hand' : 'pointer');
+        break;
+      case 'handleLaunchpad':
+        setShowLaunchpad(!showLaunchpad);
+        break;
+      case 'showEdges':
+        handleEdgesVisibilityChange();
         break;
     }
     onToolSelect?.(tool);
@@ -141,7 +188,12 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
                 group
                 ${tool.active ? 'bg-gray-100' : ''}
               `}
-              icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
+              icon={
+                <tool.icon
+                  className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900"
+                  style={{ color: getIconColor(tool.value) }}
+                />
+              }
             />
           </TooltipWrapper>
         ) : (
