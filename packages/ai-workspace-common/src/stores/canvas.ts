@@ -62,7 +62,7 @@ export const useCanvasStore = create<CanvasState>()(
       currentCanvasId: null,
       showPreview: true,
       showMaxRatio: false,
-      showLaunchpad: false,
+      showLaunchpad: true,
       interactionMode: 'touchpad',
       operatingNodeId: null,
       showEdges: false,
