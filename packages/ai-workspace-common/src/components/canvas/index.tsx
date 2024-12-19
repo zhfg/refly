@@ -261,8 +261,15 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
 
           <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} />
 
-          <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
-            <LaunchPad visible={showLaunchpad} />
+          <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] overflow-hidden min-h-[100px]">
+            <div
+              className={`
+              relative z-50 transform transition-all duration-300 ease-in-out
+              ${showLaunchpad ? 'translate-y-0 opacity-100' : 'translate-y-[100px] opacity-0 pointer-events-none'}
+            `}
+            >
+              <LaunchPad visible={showLaunchpad} />
+            </div>
           </div>
         </div>
 
