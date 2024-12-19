@@ -126,7 +126,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     setLoginModalVisible: state.setLoginModalVisible,
   }))
 
-  const { getLibraryList, isLoadingCanvas } = useHandleSiderData(true)
+  const { isLoadingCanvas } = useHandleSiderData(true)
   const { debouncedCreateCanvas, isCreating: createCanvasLoading } =
     useCreateCanvas()
 
@@ -249,7 +249,6 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
 
       if (data?.success) {
         message.success(t("common.putSuccess"))
-        await getLibraryList()
 
         const currentCanvasId = getCurrentCanvasId()
 

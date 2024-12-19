@@ -1,5 +1,6 @@
 import { Button, Tooltip } from 'antd';
 import { FaArrowPointer } from 'react-icons/fa6';
+import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { RiUploadCloud2Line } from 'react-icons/ri';
 import { useTranslation } from 'react-i18next';
 import { FC, useCallback } from 'react';
@@ -17,6 +18,7 @@ import { IconCanvas, IconDocument, IconResource } from '@refly-packages/ai-works
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { IoAnalyticsOutline } from 'react-icons/io5';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -60,6 +62,8 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     updateAllEdgesStyle(!showEdges);
   }, [showEdges, setShowEdges, updateAllEdgesStyle]);
 
+  const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
+
   // Define toolbar items
   const tools: ToolbarItem[] = [
     // {
@@ -91,6 +95,13 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     //   domain: 'skill',
     //   tooltip: t('canvas.toolbar.addSkill'),
     // },
+    {
+      icon: HiOutlineDocumentAdd,
+      value: 'createDocument',
+      type: 'button',
+      domain: 'document',
+      tooltip: t('canvas.toolbar.createDocument'),
+    },
     {
       icon: IconDocument,
       value: 'addDocument',
@@ -124,6 +135,13 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     return '';
   };
 
+  const getIsLoading = (tool: string) => {
+    if (tool === 'createDocument' && isCreating) {
+      return true;
+    }
+    return false;
+  };
+
   const handleToolSelect = (event: React.MouseEvent, tool: string) => {
     event.stopPropagation();
     // Handle tool selection
@@ -138,6 +156,9 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
       case 'addTool':
         break;
       case 'addDocument':
+        break;
+      case 'createDocument':
+        createSingleDocumentInCanvas();
         break;
       case 'changeMode':
         setMode(mode === 'pointer' ? 'hand' : 'pointer');
@@ -194,6 +215,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
                   style={{ color: getIconColor(tool.value) }}
                 />
               }
+              loading={getIsLoading(tool.value)}
             />
           </TooltipWrapper>
         ) : (

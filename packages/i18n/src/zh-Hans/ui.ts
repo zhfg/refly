@@ -437,6 +437,7 @@ const translations = {
       addSkill: '添加技能',
       addTool: '添加工具',
       autoLayout: '自动布局',
+      createDocument: '新建文档',
       addDocument: '添加文档',
       hidePreview: '隐藏节点预览',
       showPreview: '显示节点预览',
