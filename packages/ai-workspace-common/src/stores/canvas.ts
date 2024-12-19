@@ -137,6 +137,7 @@ export const useCanvasStore = create<CanvasState>()(
         currentCanvasId: state.currentCanvasId,
         interactionMode: state.interactionMode,
         showEdges: state.showEdges,
+        showLaunchpad: state.showLaunchpad,
       }),
     },
   ),
