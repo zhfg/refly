@@ -71,7 +71,7 @@ const convertContextToItems = (context?: any): NodeItem[] => {
 const convertContextItemsToContext = (items: NodeItem[]) => {
   return {
     contentList: items
-      ?.filter((item) => item?.data?.metadata?.sourceType)
+      ?.filter((item) => item?.data?.metadata?.sourceType?.includes('Selection'))
       ?.map((item) => ({
         content: item.data?.metadata?.selectedContent ?? '',
         metadata: {
@@ -85,7 +85,7 @@ const convertContextItemsToContext = (items: NodeItem[]) => {
         },
       })),
     resources: items
-      ?.filter((item) => item.type === 'resource')
+      ?.filter((item) => item.type === 'resource' && !item.data?.metadata?.sourceType?.includes('Selection'))
       .map((item) => ({
         resourceId: item.data?.entityId || item.id,
         resource: {
@@ -100,7 +100,7 @@ const convertContextItemsToContext = (items: NodeItem[]) => {
         },
       })),
     documents: items
-      ?.filter((item) => item.type === 'document')
+      ?.filter((item) => item.type === 'document' && !item.data?.metadata?.sourceType?.includes('Selection'))
       .map((item) => ({
         docId: item.data?.entityId || item.id,
         document: {
