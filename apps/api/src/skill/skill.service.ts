@@ -92,6 +92,7 @@ import { actionResultPO2DTO, actionStepPO2DTO } from '@/action/action.dto';
 import { CollabService } from '@/collab/collab.service';
 import { throttle } from 'lodash';
 import { ResultAggregator } from '@/utils/result';
+import { CollabContext } from '@/collab/collab.dto';
 
 export function createLangchainMessage(result: ActionResult, steps: ActionStep[]): BaseMessage[] {
   const query = result.title;
@@ -729,6 +730,8 @@ export class SkillService {
       nodeCreated: boolean; // Whether the canvas node is created
       content: string; // Accumulated content
       document?: Y.Doc; // Yjs document
+      documentName?: string;
+      collabContext?: CollabContext;
     };
     const artifactMap: Record<string, ArtifactOutput> = {};
 
@@ -773,11 +776,15 @@ export class SkillService {
                 const doc = await this.prisma.document.findFirst({
                   where: { docId: entityId },
                 });
-                const { document } = await this.collabService.openDirectConnection(entityId, {
+                const collabContext: CollabContext = {
                   user,
                   entity: doc,
                   entityType: 'document',
-                });
+                };
+                const { document } = await this.collabService.openDirectConnection(
+                  entityId,
+                  collabContext,
+                );
 
                 this.logger.log(
                   `open direct connection to document ${entityId}, doc: ${JSON.stringify(
@@ -785,6 +792,8 @@ export class SkillService {
                   )}`,
                 );
                 artifactMap[entityId].document = document;
+                artifactMap[entityId].documentName = entityId;
+                artifactMap[entityId].collabContext = collabContext;
               }
             }
             return;
@@ -804,12 +813,27 @@ export class SkillService {
       actionMeta,
     };
 
+    const throttledStoreDocument = throttle(
+      ({ document, documentName, collabContext }: ArtifactOutput) => {
+        this.collabService.storeDocument({
+          document,
+          documentName,
+          context: collabContext,
+        });
+      },
+      2000,
+      {
+        leading: true,
+        trailing: true,
+      },
+    );
+
     const throttledMarkdownUpdate = throttle(
-      (doc: Y.Doc, content: string) => {
-        incrementalMarkdownUpdate(doc, content);
+      ({ document, content }: ArtifactOutput) => {
+        incrementalMarkdownUpdate(document, content);
         this.logger.log(
           `throttledMarkdownUpdate: ${content?.slice(0, 200)}, after update doc: ${JSON.stringify(
-            doc.toJSON(),
+            document?.toJSON(),
           )}`,
         );
       },
@@ -855,7 +879,8 @@ export class SkillService {
 
                 // Update artifact content and yjs doc
                 artifact.content += content;
-                throttledMarkdownUpdate(artifact.document, artifact.content);
+                throttledMarkdownUpdate(artifact);
+                throttledStoreDocument(artifact);
               } else {
                 // Update result content and forward stream events to client
                 resultAggregator.handleStreamContent(runMeta, content);
@@ -913,6 +938,16 @@ export class SkillService {
       }
       result.errors.push(err.message);
     } finally {
+      await Promise.all(
+        Object.values(artifactMap).map((artifact) => {
+          return this.collabService.storeDocument({
+            document: artifact.document,
+            documentName: artifact.documentName,
+            context: artifact.collabContext,
+          });
+        }),
+      );
+
       const steps = resultAggregator.getSteps({ resultId });
 
       await this.prisma.$transaction([
