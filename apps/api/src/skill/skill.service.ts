@@ -770,7 +770,6 @@ export class SkillService {
 
               // Open direct connection to yjs doc if artifact type is document
               if (type === 'document' && !artifactMap[entityId].document) {
-                this.logger.log(`open direct connection to document ${entityId}`);
                 const doc = await this.prisma.document.findFirst({
                   where: { docId: entityId },
                 });
@@ -779,6 +778,12 @@ export class SkillService {
                   entity: doc,
                   entityType: 'document',
                 });
+
+                this.logger.log(
+                  `open direct connection to document ${entityId}, doc: ${JSON.stringify(
+                    document.toJSON(),
+                  )}`,
+                );
                 artifactMap[entityId].document = document;
               }
             }
@@ -800,7 +805,14 @@ export class SkillService {
     };
 
     const throttledMarkdownUpdate = throttle(
-      (doc: Y.Doc, content: string) => incrementalMarkdownUpdate(doc, content),
+      (doc: Y.Doc, content: string) => {
+        incrementalMarkdownUpdate(doc, content);
+        this.logger.log(
+          `throttledMarkdownUpdate: ${content?.slice(0, 200)}, after update doc: ${JSON.stringify(
+            doc.toJSON(),
+          )}`,
+        );
+      },
       20,
       {
         leading: true,

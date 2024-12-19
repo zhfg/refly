@@ -87,9 +87,19 @@ export class CollabService {
     return context;
   }
 
-  private async loadDocument({ document, context }: { document: Y.Doc; context: CollabContext }) {
+  private async loadDocument({
+    document,
+    documentName,
+    context,
+  }: {
+    document: Y.Doc;
+    documentName: string;
+    context: CollabContext;
+  }) {
     const { entity } = context;
     const { stateStorageKey } = entity;
+    this.logger.log(`loadDocument ${documentName}, storage key: ${stateStorageKey}`);
+
     if (!stateStorageKey) return null;
 
     try {
@@ -233,6 +243,7 @@ export class CollabService {
   }
 
   async storeDocument({
+    documentName,
     document,
     context,
   }: {
@@ -241,6 +252,11 @@ export class CollabService {
     context: CollabContext;
   }) {
     const state = Buffer.from(Y.encodeStateAsUpdate(document));
+    this.logger.log(
+      `storeDocument ${documentName}, storage key: ${JSON.stringify(
+        context?.entity?.stateStorageKey,
+      )}, doc: ${JSON.stringify(document.toJSON())}`,
+    );
 
     if (isDocumentContext(context)) {
       return this.storeDocumentEntity({ state, context });
