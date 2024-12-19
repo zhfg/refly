@@ -8,11 +8,10 @@ import { ModelContextLimitMap, safeStringifyJSON } from '@refly-packages/utils';
 
 // utils
 import { buildFinalRequestMessages } from '../scheduler/utils/message';
-import { prepareWebSearchContext } from '../scheduler/utils/context';
+import { prepareContext } from '../scheduler/utils/context';
 
 // prompts
 import * as webSearch from '../scheduler/module/webSearch/index';
-import { concatMergedContextToStr, flattenMergedContextToSources } from '../scheduler/utils/summarizer';
 import { truncateSource } from '../scheduler/utils/truncator';
 import { processQuery } from '../scheduler/utils/queryProcessor';
 
@@ -58,31 +57,35 @@ export class WebSearch extends BaseSkill {
     // Set current step
     config.metadata.step = { name: 'webSearch' };
 
+    // Force enable web search and disable knowledge base search
+    config.configurable.tplConfig = {
+      ...config.configurable.tplConfig,
+      enableWebSearch: { value: true, label: 'Web Search', displayValue: 'true' },
+      enableKnowledgeBaseSearch: { value: false, label: 'Knowledge Base Search', displayValue: 'false' },
+    };
+
     // Use shared query processor
-    const { optimizedQuery, query, usedChatHistory, remainingTokens } = await processQuery({
+    const { optimizedQuery, query, usedChatHistory, remainingTokens, mentionedContext } = await processQuery({
       config,
       ctxThis: this,
       state,
     });
 
-    // Perform web search with context preparation
-    const webSearchContext = await prepareWebSearchContext(
-      { query: optimizedQuery },
-      { config, ctxThis: this, state, tplConfig: config.configurable.tplConfig },
-    );
-
-    const mergedContext = {
-      mentionedContext: null,
-      lowerPriorityContext: null,
-      webSearchSources: webSearchContext?.processedWebSearchContext?.webSearchSources ?? [],
-    };
-
-    const contextStr = concatMergedContextToStr(mergedContext);
-    const sources = flattenMergedContextToSources(mergedContext);
-
-    this.engine.logger.log(
-      `- contextStr: ${contextStr}
-       - sources: ${safeStringifyJSON(sources)}`,
+    // Prepare context with web search focus
+    const { contextStr, sources } = await prepareContext(
+      {
+        query: optimizedQuery,
+        mentionedContext,
+        maxTokens: remainingTokens,
+        enableMentionedContext: true,
+        enableLowerPriorityContext: true,
+      },
+      {
+        config,
+        ctxThis: this,
+        state,
+        tplConfig: config.configurable.tplConfig,
+      },
     );
 
     // Set current step for answer generation
@@ -95,7 +98,7 @@ export class WebSearch extends BaseSkill {
       buildUserPrompt: webSearch.buildWebSearchUserPrompt,
     };
 
-    this.engine.logger.log(`Prepared context successfully! ${safeStringifyJSON(webSearchContext)}`);
+    this.engine.logger.log(`Prepared context successfully!`);
 
     if (sources.length > 0) {
       this.emitEvent({ structuredData: { sources: truncateSource(sources) } }, config);
@@ -123,8 +126,6 @@ export class WebSearch extends BaseSkill {
         ...currentSkill,
       },
     });
-
-    this.engine.logger.log(`Response message: ${safeStringifyJSON(responseMessage)}`);
 
     return { messages: [responseMessage] };
   };
