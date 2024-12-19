@@ -57,7 +57,6 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   const shortcutSymbols = getShortcutSymbols(osType);
 
   const [resultId, setResultId] = useState('');
-  console.log('resultId', resultId);
   const [resultContent, setResultContent] = useState('');
   const [resultStatus, setResultStatus] = useState<ActionStatus>('waiting');
   const { docId } = useDocumentContext();
@@ -142,7 +141,6 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
 
   const updateResult = useCallback(
     (update: { resultId: string; payload: ActionResult }) => {
-      console.log('updateResult', update?.payload);
       if (update?.resultId === resultId) {
         if (isLoading) {
           setIsLoading(false);
@@ -242,7 +240,6 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
     editor.chain().focus().insertContentAt(selection, resultContent).run();
   };
 
-  console.log('resultStatus', resultStatus);
   return (
     <div className="w-[405px] z-50" ref={ref}>
       {(resultId && ['waiting', 'executing'].includes(resultStatus)) || isLoading ? (
