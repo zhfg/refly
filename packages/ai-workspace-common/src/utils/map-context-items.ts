@@ -1,6 +1,7 @@
 import { SkillContextContentItem, SkillContextDocumentItem, SkillContextResourceItem } from '@refly/openapi-schema';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genUniqueId } from '@refly-packages/utils/id';
+import { getClientOrigin } from '@refly-packages/utils/url';
 
 const convertContextToItems = (context?: any): NodeItem[] => {
   if (!context) return [];
@@ -71,7 +72,7 @@ const convertContextToItems = (context?: any): NodeItem[] => {
 const convertContextItemsToContext = (items: NodeItem[]) => {
   return {
     contentList: items
-      ?.filter((item) => item?.data?.metadata?.sourceType)
+      ?.filter((item) => item?.data?.metadata?.sourceType?.includes('Selection'))
       ?.map((item) => ({
         content: item.data?.metadata?.selectedContent ?? '',
         metadata: {
@@ -80,12 +81,12 @@ const convertContextItemsToContext = (items: NodeItem[]) => {
           title: item.data?.title ?? '',
           nodeId: item.id,
           ...(item.data?.metadata?.sourceType === 'extensionWeblinkSelection' && {
-            url: item.data?.metadata?.url,
+            url: item.data?.metadata?.url || getClientOrigin(),
           }),
         },
       })),
     resources: items
-      ?.filter((item) => item.type === 'resource')
+      ?.filter((item) => item.type === 'resource' && !item.data?.metadata?.sourceType?.includes('Selection'))
       .map((item) => ({
         resourceId: item.data?.entityId || item.id,
         resource: {
@@ -100,7 +101,7 @@ const convertContextItemsToContext = (items: NodeItem[]) => {
         },
       })),
     documents: items
-      ?.filter((item) => item.type === 'document')
+      ?.filter((item) => item.type === 'document' && !item.data?.metadata?.sourceType?.includes('Selection'))
       .map((item) => ({
         docId: item.data?.entityId || item.id,
         document: {
@@ -111,6 +112,7 @@ const convertContextItemsToContext = (items: NodeItem[]) => {
         metadata: {
           ...item.data?.metadata,
           nodeId: item.id,
+          url: getClientOrigin(),
         },
       })),
   };

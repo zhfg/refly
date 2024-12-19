@@ -24,6 +24,8 @@ import { genUniqueId } from '@refly-packages/utils/id';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { SelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/selection-context';
 import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
+import { getClientOrigin } from '@refly-packages/utils/url';
+import { Resource } from '@refly/openapi-schema';
 
 interface ResourceViewProps {
   resourceId: string;
@@ -62,7 +64,7 @@ export const ResourceView = (props: ResourceViewProps) => {
     refetchResourceDetail();
   };
 
-  const buildNodeData = (text: string) => {
+  const buildNodeData = (text: string, resourceDetail: Resource) => {
     const id = genUniqueId();
 
     const node: CanvasNode = {
@@ -79,6 +81,7 @@ export const ResourceView = (props: ResourceViewProps) => {
           sourceEntityId: resourceDetail.resourceId ?? '',
           sourceEntityType: 'resource',
           sourceType: 'resourceSelection',
+          url: resourceDetail.data?.url || getClientOrigin(),
         },
       },
     };
@@ -194,7 +197,7 @@ export const ResourceView = (props: ResourceViewProps) => {
                 <Markdown content={resourceDetail?.content || ''} className="text-base"></Markdown>
                 <SelectionContext
                   containerClass={`resource-content-${resourceId}`}
-                  getNodeData={(text) => buildNodeData(text)}
+                  getNodeData={(text) => buildNodeData(text, resourceDetail)}
                 ></SelectionContext>
               </div>
             </>

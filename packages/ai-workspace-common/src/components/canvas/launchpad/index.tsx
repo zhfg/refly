@@ -48,6 +48,7 @@ export const LaunchPad: React.FC<LaunchPadProps> = ({ visible = true }) => {
   }));
   const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
+    setSelectedSkill: state.setSelectedSkill,
   }));
   const chatStore = useChatStoreShallow((state) => ({
     setNewQAText: state.setNewQAText,
@@ -129,6 +130,9 @@ export const LaunchPad: React.FC<LaunchPadProps> = ({ visible = true }) => {
     };
 
     chatStore.setNewQAText('');
+
+    // Reset selected skill after sending message
+    skillStore.setSelectedSkill(null);
 
     invokeAction(param);
   };

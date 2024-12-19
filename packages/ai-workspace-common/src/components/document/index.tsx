@@ -39,12 +39,12 @@ import {
 import { createUploadFn } from '@refly-packages/ai-workspace-common/components/editor/components/image-upload';
 import { configureSlashCommand } from '@refly-packages/ai-workspace-common/components/editor/components/slash-command';
 import Collaboration from '@tiptap/extension-collaboration';
-import { useDebouncedCallback } from 'use-debounce';
+import { useDebouncedCallback, useThrottledCallback } from 'use-debounce';
 import { handleImageDrop, handleImagePaste } from '@refly-packages/ai-workspace-common/components/editor/core/plugins';
 import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
 
 import { AiOutlineWarning } from 'react-icons/ai';
-import { getWsServerOrigin } from '@refly-packages/utils/url';
+import { getClientOrigin, getWsServerOrigin } from '@refly-packages/utils/url';
 import { useDocumentStore, useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 
 // content selector
@@ -148,6 +148,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
           sourceEntityId: currentDocument?.docId ?? '',
           sourceEntityType: 'document',
           sourceType: 'documentSelection',
+          url: getClientOrigin(),
         },
       },
     };
@@ -198,7 +199,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
 
   const { setNodeDataByEntity } = useCanvasControl();
 
-  const debouncedUpdates = useDebouncedCallback(async (editor: EditorInstance) => {
+  const debouncedUpdates = useThrottledCallback(async (editor: EditorInstance) => {
     const json = editor.getJSON();
     const markdown = editor.storage.markdown.getMarkdown();
 

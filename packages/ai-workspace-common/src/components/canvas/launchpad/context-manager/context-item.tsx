@@ -71,6 +71,7 @@ export const ContextItem = ({
 
   const isSelection = item?.data?.metadata?.sourceType?.toLowerCase()?.includes('selection');
   const sourceType = isSelection ? 'selection' : item?.type;
+  console.log('sourceType', sourceType, item, isSelection);
 
   return (
     <Popover

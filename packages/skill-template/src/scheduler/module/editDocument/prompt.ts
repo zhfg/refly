@@ -5,12 +5,12 @@ import {
   buildBlockEditDocumentSystemPrompt,
   buildBlockEditDocumentUserPrompt,
   buildContextualBlockEditDocumentContextUserPrompt,
-} from './blockPrompt';
+} from './block';
 import {
   buildInlineEditDocumentSystemPrompt,
   buildInlineEditDocumentUserPrompt,
   buildContextualInlineEditDocumentContextUserPrompt,
-} from './inlinePrompt';
+} from './inline';
 
 interface EditDocumentModule {
   buildSystemPrompt: (locale: string, needPrepareContext: boolean) => string;

@@ -17,8 +17,14 @@ export const PreviewContextManager = (props: {
       <div className="flex flex-col context-content">
         <div className="flex flex-wrap content-start gap-1 w-full context-items-container">
           {contextItems?.length > 0
-            ? contextItems?.map((item) => (
-                <ContextItem canNotRemove={true} key={item.id} item={item} isLimit={false} isActive={false} />
+            ? contextItems?.map((item, index) => (
+                <ContextItem
+                  canNotRemove={true}
+                  key={`${item.id}-${index}`}
+                  item={item}
+                  isLimit={false}
+                  isActive={false}
+                />
               ))
             : null}
         </div>

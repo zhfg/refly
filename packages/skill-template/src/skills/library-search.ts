@@ -68,7 +68,7 @@ export class LibrarySearch extends BaseSkill {
           projects: [],
         },
         maxTokens: remainingTokens,
-        enableMentionedContext: false,
+        enableMentionedContext: true,
         enableLowerPriorityContext: true,
       },
       {

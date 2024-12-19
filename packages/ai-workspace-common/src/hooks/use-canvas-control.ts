@@ -366,7 +366,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         return;
       }
 
-      let needSetCenter = false;
+      let needSetCenter = true;
 
       // Check for existing node
       const existingNode = nodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId);
