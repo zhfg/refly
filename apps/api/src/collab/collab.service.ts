@@ -36,6 +36,12 @@ export class CollabService {
       onAuthenticate: (payload) => this.authenticate(payload),
       onLoadDocument: (payload) => this.loadDocument(payload),
       onStoreDocument: (payload) => this.storeDocument(payload),
+      afterUnloadDocument: async (payload) => {
+        this.logger.log(`afterUnloadDocument ${payload.documentName}`);
+      },
+      onDisconnect: async (payload) => {
+        this.logger.log(`onDisconnect ${payload.documentName}`);
+      },
     });
   }
 
