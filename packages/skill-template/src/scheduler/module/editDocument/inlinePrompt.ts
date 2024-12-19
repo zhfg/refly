@@ -1,6 +1,7 @@
 import { Document } from '@refly-packages/openapi-schema';
 import { HighlightSelection } from './types';
 import { referenceContextHandlingPrompt } from './commonPrompt';
+import { buildLocaleFollowInstruction } from '../common/locale-follow';
 
 // response.reflyDocument frontend need return surround content
 export const noContextExamples = `
@@ -172,7 +173,7 @@ export const importantRemindersPrompt = `
 `;
 
 // Core editing instructions
-export const buildInlineEditDocumentCoreInstructionsPrompt = (locale: string) => `
+export const buildInlineEditDocumentCoreInstructionsPrompt = () => `
 ## Core Editing Instructions
 
 ### Constraints
@@ -200,11 +201,10 @@ export const buildInlineEditDocumentCoreInstructionsPrompt = (locale: string) =>
 
 ### Important Notes
 1. DO NOT include <response> tags in your output - they are only for demonstration in examples
-2. Remember to generate all content in ${locale} and with markdown formatting while preserving technical terms
-3. Output content directly without any wrapping tags
+2. Output content directly without any wrapping tags
 `;
 
-export const buildNoContextInlineEditDocumentPrompt = (locale: string) => `
+export const buildNoContextInlineEditDocumentPrompt = () => `
 # Refly AI Inline Content Editing Assistant
 
 ## Role
@@ -249,17 +249,16 @@ You are an advanced AI content editor developed by Refly, specializing in precis
 3. Document Integrity
    - Create clear and concise content
    - Ensure professional tone and readability
-   - Generate all content in ${locale} while preserving technical terms
    - Provide clear thinking process and content summaries
 
-${buildInlineEditDocumentCoreInstructionsPrompt(locale)}
+${buildInlineEditDocumentCoreInstructionsPrompt()}
 
 ${noContextExamples}
 
 ${importantRemindersPrompt}
 `;
 
-export const buildContextualInlineEditDocumentPrompt = (locale: string) => `
+export const buildContextualInlineEditDocumentPrompt = () => `
 # Refly AI Context-Aware Inline Content Editing Assistant
 
 ## Role
@@ -268,7 +267,6 @@ You are an advanced AI content editor developed by Refly, specializing in precis
 - Synthesize information from reference materials into inline edits
 - Maintain document flow while incorporating cited references
 - Ensure seamless integration with surrounding text
-- Generate all content in ${locale} while preserving technical terms
 
 ## Skills and Core Capabilities
 1. Context Processing
@@ -306,7 +304,7 @@ You are an advanced AI content editor developed by Refly, specializing in precis
    - Create clear and concise content
    - Ensure professional tone and readability
 
-${buildInlineEditDocumentCoreInstructionsPrompt(locale)}
+${buildInlineEditDocumentCoreInstructionsPrompt()}
 
 ${referenceContextHandlingPrompt}
 
@@ -317,10 +315,10 @@ ${importantRemindersPrompt}
 
 export const buildInlineEditDocumentSystemPrompt = (locale: string, needPrepareContext: boolean) => {
   if (needPrepareContext) {
-    return buildContextualInlineEditDocumentPrompt(locale);
+    return buildContextualInlineEditDocumentPrompt();
   }
 
-  return buildNoContextInlineEditDocumentPrompt(locale);
+  return buildNoContextInlineEditDocumentPrompt();
 };
 
 export const buildInlineEditDocumentUserPrompt = ({
@@ -338,7 +336,7 @@ export const buildInlineEditDocumentUserPrompt = ({
  
         ${importantRemindersPrompt}
 
-        Remember to generate all content in ${locale} while preserving technical terms
+        ${buildLocaleFollowInstruction(locale)}
         `;
   }
 
@@ -351,7 +349,7 @@ export const buildInlineEditDocumentUserPrompt = ({
     
   ${importantRemindersPrompt}
 
-  Remember to generate all content in ${locale} while preserving technical terms
+  ${buildLocaleFollowInstruction(locale)}
     `;
 };
 

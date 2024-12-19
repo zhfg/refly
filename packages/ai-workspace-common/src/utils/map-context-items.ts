@@ -1,6 +1,7 @@
 import { SkillContextContentItem, SkillContextDocumentItem, SkillContextResourceItem } from '@refly/openapi-schema';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genUniqueId } from '@refly-packages/utils/id';
+import { getClientOrigin } from '@refly-packages/utils/url';
 
 const convertContextToItems = (context?: any): NodeItem[] => {
   if (!context) return [];
@@ -80,7 +81,7 @@ const convertContextItemsToContext = (items: NodeItem[]) => {
           title: item.data?.title ?? '',
           nodeId: item.id,
           ...(item.data?.metadata?.sourceType === 'extensionWeblinkSelection' && {
-            url: item.data?.metadata?.url,
+            url: item.data?.metadata?.url || getClientOrigin(),
           }),
         },
       })),
@@ -111,6 +112,7 @@ const convertContextItemsToContext = (items: NodeItem[]) => {
         metadata: {
           ...item.data?.metadata,
           nodeId: item.id,
+          url: getClientOrigin(),
         },
       })),
   };

@@ -1,6 +1,7 @@
 import { Document } from '@refly-packages/openapi-schema';
 import { HighlightSelection } from './types';
 import { referenceContextHandlingPrompt } from './commonPrompt';
+import { buildLocaleFollowInstruction } from '../common/locale-follow';
 
 /**
  * 1. beforeHighlight and afterHighlight may be empty
@@ -223,7 +224,7 @@ export const importantRemindersPrompt = `
 `;
 
 // Core block content generation instructions
-export const buildBlockEditDocumentCoreInstructionsPrompt = (locale: string) => `
+export const buildBlockEditDocumentCoreInstructionsPrompt = () => `
 ## Core Block Content Generation Instructions
 
 ### Constraints
@@ -252,11 +253,10 @@ export const buildBlockEditDocumentCoreInstructionsPrompt = (locale: string) => 
 
 ### Important Notes
 1. DO NOT include <response> tags in your output - they are only for demonstration in examples
-2. Remember to generate all content in ${locale} while preserving technical terms
 3. Output content directly without any wrapping tags
 `;
 
-export const buildNoContextBlockEditDocumentPrompt = (locale: string) => `
+export const buildNoContextBlockEditDocumentPrompt = () => `
 # Refly AI Block Content Generation Assistant
 
 ## Role
@@ -275,16 +275,15 @@ You are an advanced AI content generator developed by Refly, specializing in cre
 - Maintain document flow and context
 - Ensure natural integration with surrounding blocks
 - Provide detailed explanations with examples when needed
-- Generate all content in ${locale} while preserving technical terms
 
-${buildBlockEditDocumentCoreInstructionsPrompt(locale)}
+${buildBlockEditDocumentCoreInstructionsPrompt()}
 
 ${noContextExamples}
 
 ${importantRemindersPrompt}
 `;
 
-export const buildContextualBlockEditDocumentPrompt = (locale: string) => `
+export const buildContextualBlockEditDocumentPrompt = () => `
 # Refly AI Context-Aware Block Content Generation Assistant
 
 ## Role
@@ -292,7 +291,6 @@ You are an advanced AI content generator developed by Refly, specializing in cre
 - Generate comprehensive block content at specified insertion points (<highlight></highlight>)
 - Synthesize information from both reference materials and document context
 - Create well-structured, multi-block content that seamlessly integrates with existing document flow
-- Generate all content in ${locale} while preserving technical terms
 
 ## Skills and Core Capabilities
 1. Context Processing
@@ -329,7 +327,7 @@ You are an advanced AI content generator developed by Refly, specializing in cre
    - Create comprehensive yet focused content
    - Provide clear thinking process and content summaries
 
-${buildBlockEditDocumentCoreInstructionsPrompt(locale)}
+${buildBlockEditDocumentCoreInstructionsPrompt()}
 
 ${referenceContextHandlingPrompt}
 
@@ -340,10 +338,10 @@ ${importantRemindersPrompt}
 
 export const buildBlockEditDocumentSystemPrompt = (locale: string, needPrepareContext: boolean) => {
   if (needPrepareContext) {
-    return buildContextualBlockEditDocumentPrompt(locale);
+    return buildContextualBlockEditDocumentPrompt();
   }
 
-  return buildNoContextBlockEditDocumentPrompt(locale);
+  return buildNoContextBlockEditDocumentPrompt();
 };
 
 export const buildBlockEditDocumentUserPrompt = ({
@@ -361,7 +359,7 @@ export const buildBlockEditDocumentUserPrompt = ({
 
        ${importantRemindersPrompt}
 
-       Remember to generate all content in ${locale} while preserving technical terms
+       ${buildLocaleFollowInstruction(locale)}
        `;
   }
 
@@ -374,7 +372,7 @@ export const buildBlockEditDocumentUserPrompt = ({
    
  ${importantRemindersPrompt}
 
- Remember to generate all content in ${locale} while preserving technical terms
+ ${buildLocaleFollowInstruction(locale)}
    `;
 };
 

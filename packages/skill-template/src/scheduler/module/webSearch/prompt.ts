@@ -1,6 +1,12 @@
+import { buildWebSearchExamples } from './examples';
 import { buildCitationRules, buildCitationReminder } from '../common/citationRules';
+import { buildChatHistoryRules, buildQueryProcessAndChatHistoryInstructions, chatHistoryReminder } from '../common/chat-history';
+import { buildWebSearchChatHistoryExamples } from './examples';
+import { buildQueryInstruction } from '../common/query';
+import { buildContextFormat } from './context';
+import { buildLocaleFollowInstruction } from '../common/locale-follow';
 
-export const buildWebSearchSystemPrompt = (locale: string) => {
+export const buildWebSearchSystemPrompt = () => {
   return `You are an AI assistant developed by Refly, specializing in providing accurate information based on web search results. Your task is to synthesize information from multiple web sources to provide comprehensive and accurate answers.
 
 ${buildCitationRules()}
@@ -10,42 +16,17 @@ ${buildCitationRules()}
 2. Stay focused on the exact query - don't add unnecessary information
 3. Answer questions directly and concisely with proper source citations
 4. If search results don't fully address the query, acknowledge this
-5. Respond in the user's preferred language (${locale})
 6. Maintain a friendly and professional tone
 
-## Examples (DO NOT USE THESE DIRECTLY - FOR FORMAT REFERENCE ONLY)
+${buildQueryInstruction()}
 
-Question: "What is quantum computing?"
-Context:
-<Context>
-  <WebSearchContext>
-    <ContextItem citationIndex='[[citation:1]]' type='webSearchSource' url='quantum-basics.com' title='Introduction to Quantum Computing'>
-      Quantum computing uses quantum phenomena like superposition and entanglement for calculations
-    </ContextItem>
-    <ContextItem citationIndex='[[citation:2]]' type='webSearchSource' url='quantum-apps.com' title='Quantum Computing Applications'>
-      Applications in cryptography and drug discovery
-    </ContextItem>
-    <ContextItem citationIndex='[[citation:3]]' type='webSearchSource' url='quantum-bits.com' title='Understanding Qubits'>
-      Quantum bits can exist in multiple states simultaneously, unlike classical bits
-    </ContextItem>
-  </WebSearchContext>
-</Context>
+${buildQueryProcessAndChatHistoryInstructions()}
 
-Good Response:
-Quantum computing is a type of computing that uses quantum phenomena like superposition and entanglement to perform calculations [citation:1]. Unlike classical computers that use bits (0 or 1), quantum computers use quantum bits or qubits that can exist in multiple states simultaneously [citation:1][citation:3]. This technology has the potential to revolutionize fields like cryptography and drug discovery [citation:2].
+${buildChatHistoryRules()}
 
-Question: "What are the benefits of exercise?"
-Context:
-<Context>
-  <WebSearchContext>
-    <ContextItem citationIndex='[[citation:1]]' type='webSearchSource' url='health-org.com' title='Exercise Benefits'>
-      No relevant content for this query
-    </ContextItem>
-  </WebSearchContext>
-</Context>
+${buildWebSearchExamples()}
 
-Good Response:
-Regular exercise provides numerous health benefits, including improved cardiovascular health, better mental well-being, and weight management. (NO CITATIONS - Context not relevant to query)
+${buildWebSearchChatHistoryExamples()}
 
 ## Performance Optimization
 1. Focus on key information first
@@ -58,15 +39,12 @@ Regular exercise provides numerous health benefits, including improved cardiovas
 - ✓ Prioritize user's original query intent
 - ✓ Only cite when context is relevant
 - ✓ Citations immediately follow statements
-- ✓ Response is in ${locale} language
 - ✓ Answer is clear and concise
+- ✓ Considered full chat history for context
+- ✓ Properly handled follow-up questions
 
-## Context Format
-<Context>
-  <WebSearchContext>
-    <ContextItem citationIndex='[[citation:x]]' type='webSearchSource' url={url} title={title}>content</ContextItem>
-  </WebSearchContext>
-</Context>`;
+${buildContextFormat()}
+`;
 };
 
 export const buildWebSearchUserPrompt = ({
@@ -84,7 +62,10 @@ ${originalQuery}
 
 ${buildCitationReminder()}
 
-Please provide a clear, concise answer based on the web search results in ${locale} language.`;
+${chatHistoryReminder()}
+
+${buildLocaleFollowInstruction(locale)}
+`;
   }
 
   return `## Original Search Query
@@ -95,7 +76,10 @@ ${rewrittenQuery}
 
 ${buildCitationReminder()}
 
-Please provide a clear, concise answer based on the web search results in ${locale} language.`;
+${chatHistoryReminder()}
+
+${buildLocaleFollowInstruction(locale)}
+`;
 };
 
 export const buildWebSearchContextUserPrompt = (context: string) => `

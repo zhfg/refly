@@ -6,7 +6,7 @@ export const importantCitationRules = `
 5. Ensure all factual claims are properly cited
 `;
 
-export const commonQueryAndContextPriorityRules = (locale: string) => `
+export const commonQueryAndContextPriorityRules = () => `
 ## Query Priority and Context Relevance
 1. ALWAYS prioritize the user's original query intent above all else
 2. Context Assessment:
@@ -18,11 +18,10 @@ export const commonQueryAndContextPriorityRules = (locale: string) => `
    - Query: "Create a marketing plan" + Context about "technical specs" => Focus on marketing plan, ignore tech specs
    - Query: "Write about this document" + Context with relevant document => Use context for content`;
 
-export const commonImportantNotes = (locale: string) => `
+export const commonImportantNotes = () => `
 ## Important Notes
  1. The <response> tags in examples are for demonstration purposes only
- 2. Keep minimum content length of 2000 words
- 3. Remember to generate all content in ${locale} while preserving technical terms`;
+ 2. Keep minimum content length of 2000 words`;
 
 export const referenceContextHandlingPrompt = `
 ## Reference Context Handling Instructions

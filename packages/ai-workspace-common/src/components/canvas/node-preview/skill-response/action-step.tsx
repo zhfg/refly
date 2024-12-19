@@ -16,6 +16,7 @@ import { safeParseJSON } from '@refly-packages/utils/parse';
 import { SourceViewer } from './source-viewer';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { RecommendQuestions } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/recommend-questions';
+import { getClientOrigin } from '@refly-packages/utils/url';
 
 const parseStructuredData = (structuredData: Record<string, unknown>, field: string) => {
   return typeof structuredData[field] === 'string'
@@ -65,6 +66,7 @@ export const ActionStepCard = ({
           sourceEntityId: result.resultId ?? '',
           sourceEntityType: 'skillResponse',
           sourceType: 'skillResponseSelection',
+          url: getClientOrigin(),
         },
       },
     };
