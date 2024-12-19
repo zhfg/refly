@@ -261,7 +261,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
 
           <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} />
 
-          <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px]">
+          <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
             <LaunchPad visible={showLaunchpad} />
           </div>
         </div>
