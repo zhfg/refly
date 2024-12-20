@@ -211,7 +211,7 @@ export const DocumentNode = ({
               </Spin>
             </div>
 
-            <div className="flex-shrink-0 mt-2 text-[10px] text-gray-400 z-20">
+            <div className="flex justify-end items-center flex-shrink-0 mt-2 text-[10px] text-gray-400 z-20">
               {time(data.createdAt, language as LOCALE)
                 ?.utc()
                 ?.fromNow()}
