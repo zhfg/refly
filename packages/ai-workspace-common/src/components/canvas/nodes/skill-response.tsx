@@ -98,7 +98,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const statusShouldPoll = !status || status === 'executing' || status === 'waiting';
 
   const { data: result, error } = useGetActionResult({ query: { resultId: entityId } }, null, {
-    enabled: Boolean(entityId) && (statusShouldPoll || false) && shouldPoll,
+    enabled: Boolean(entityId) && statusShouldPoll && shouldPoll,
     refetchInterval: POLLING_INTERVAL,
   });
 
