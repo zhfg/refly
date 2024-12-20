@@ -8,8 +8,11 @@ import {
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { message } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 export const useChatHistory = () => {
+  // const { t } = useTranslation();
   // Get chat history state and actions
   const { chatHistoryOpen, setChatHistoryOpen } = useLaunchpadStoreShallow((state) => ({
     chatHistoryOpen: state.chatHistoryOpen,
@@ -71,6 +74,24 @@ export const useChatHistory = () => {
     removeHistoryItem(item.id);
   };
 
+  const handleItemAdd = (node: NodeItem) => {
+    const contextStore = useContextPanelStore.getState();
+    const historyItems = contextStore.historyItems;
+
+    // Check if node is already in context
+    const existingItem = historyItems.find((item) => item.id === node.id);
+
+    if (existingItem) {
+      contextStore.updateHistoryItem({ ...node, isPreview: false });
+      // message.warning(t('canvas.chatHistory.alreadyAdded'));
+      return;
+    }
+
+    // Add node to context
+    contextStore.addHistoryItem(node);
+    // message.success(t('canvas.chatHistory.addSuccess'));
+  };
+
   return {
     chatHistoryOpen,
     setChatHistoryOpen,
@@ -80,5 +101,6 @@ export const useChatHistory = () => {
     handleItemPin,
     handleItemDelete,
     pinAllHistoryItems,
+    handleItemAdd,
   };
 };

@@ -220,9 +220,9 @@ export const ActionButtons = memo(
             )}
             {onAddToChatHistory && (
               <ActionButton
-                icon={<IconReply className="w-4 h-4" />}
+                icon={<MessageSquareDiff className="w-4 h-4" />}
                 onClick={onAddToChatHistory}
-                tooltip={t('canvas.nodeActions.askFollowUp')}
+                tooltip={t('canvas.nodeActions.addToContext')}
               />
             )}
             {onCreateDocument && (

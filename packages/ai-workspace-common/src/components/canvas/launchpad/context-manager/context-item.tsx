@@ -78,8 +78,8 @@ export const ContextItem = ({
       arrow={false}
       content={content}
       trigger="hover"
-      placement="bottom"
-      overlayClassName="context-preview-popover"
+      placement="top"
+      overlayClassName="context-preview-popover rounded-lg"
     >
       <Button
         className={cn(

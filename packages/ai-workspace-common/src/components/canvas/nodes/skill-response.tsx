@@ -22,7 +22,7 @@ import {
   IconLoading,
   IconSearch,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { NodeItem, useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
@@ -61,6 +61,9 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const language = i18n.languages?.[0];
 
   const { canvasId } = useCanvasContext();
+  const { addNode } = useContextPanelStoreShallow((state) => ({
+    addNode: state.addHistoryItem,
+  }));
 
   const { title, contentPreview: content, metadata, createdAt, entityId } = data;
   const node = getNode(id);
@@ -309,7 +312,10 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           <ActionButtons
             type="skill-response"
             nodeId={id}
-            onAddToChatHistory={handleAddToChatHistory}
+            onAddToChatHistory={() => {
+              handleAddToChatHistory();
+              addNode(node as NodeItem);
+            }}
             onRerun={handleRerun}
             onInsertToDoc={() => handleInsertToDoc('insertBlow', content)}
             onCreateDocument={content ? handleCreateDocument : undefined}

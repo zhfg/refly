@@ -88,8 +88,7 @@ export const BaseSearchAndSelector = ({
 
   const { nodes } = useCanvasControl();
 
-  // Only resource and document nodes are allowed to be selected
-  const targetNodes = nodes.filter((item) => item.type === 'resource' || item.type === 'document');
+  const targetNodes = nodes;
   const sortedNodes: CanvasNode[] = [
     ...(selectedItems || []),
     ...(targetNodes?.filter((item) => !selectedItems.some((selected) => selected.id === item.id)) || []),
@@ -183,9 +182,13 @@ export const BaseSearchAndSelector = ({
           <div className="cmdk-footer-hint">
             <div cmdk-vercel-shortcuts="">
               <span>
-                <kbd>↑</kbd>
-                <kbd>↓</kbd> {t('knowledgeBase.context.popoverSelector.footer.navigate')}
-                <kbd>↵</kbd> {t('knowledgeBase.context.popoverSelector.footer.toggle')}
+                <span>
+                  <kbd>↑</kbd>
+                  <kbd>↓</kbd> {t('knowledgeBase.context.popoverSelector.footer.navigate')}
+                </span>
+                <span className="ml-2">
+                  <kbd>↵</kbd> {t('knowledgeBase.context.popoverSelector.footer.toggle')}
+                </span>
               </span>
             </div>
           </div>

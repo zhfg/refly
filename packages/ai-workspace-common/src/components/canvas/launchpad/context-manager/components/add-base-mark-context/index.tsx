@@ -9,6 +9,8 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/use-add-to-chat-history';
+import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 
 export const AddBaseMarkContext = () => {
   const [popoverVisible, setPopoverVisible] = useState(false);
@@ -19,6 +21,7 @@ export const AddBaseMarkContext = () => {
     removeNode: state.removeContextItem,
     selectedNodes: state.contextItems,
   }));
+  const { handleItemAdd, handleItemDelete } = useChatHistory();
 
   const handleVisibleChange = (visible: boolean) => {
     setPopoverVisible(visible);
@@ -29,12 +32,26 @@ export const AddBaseMarkContext = () => {
   };
 
   const handleSelect = (node: CanvasNode) => {
-    const selectedNodes = useContextPanelStore.getState().contextItems;
+    const contextStore = useContextPanelStore.getState();
+    const selectedNodes = contextStore.contextItems;
+    const isSelected = selectedNodes.find((item) => item.id === node.id);
 
-    if (!selectedNodes.find((item) => item.id === node.id)) {
+    if (!isSelected) {
+      // Adding node
       addNode(node);
+
+      // If it's a skill response node, add to chat history
+      if (node.type === 'skillResponse') {
+        handleItemAdd(node);
+      }
     } else {
+      // Removing node
       removeNode(node.id);
+
+      // If it's a skill response node, remove from chat history
+      if (node.type === 'skillResponse') {
+        handleItemDelete(node);
+      }
     }
   };
 

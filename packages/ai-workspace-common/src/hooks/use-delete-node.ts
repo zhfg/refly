@@ -5,10 +5,12 @@ import { message } from 'antd';
 import { useContextPanelStore } from '../stores/context-panel';
 import { CanvasNode } from '../components/canvas/nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
+import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 
 export const useDeleteNode = (node: CanvasNode, nodeType: CanvasNodeType) => {
   const { setNodes, setEdges } = useReactFlow();
   const { t } = useTranslation();
+  const { handleItemDelete } = useChatHistory();
 
   return useCallback(() => {
     // Delete node from canvas
@@ -20,6 +22,10 @@ export const useDeleteNode = (node: CanvasNode, nodeType: CanvasNodeType) => {
     // Delete from context panel if exists
     const contextStore = useContextPanelStore.getState();
     contextStore.removeContextItem(node.id);
+
+    if (nodeType === 'skillResponse') {
+      handleItemDelete(node);
+    }
 
     // Get node title based on node type
     const nodeTitle = node.data?.title ?? t('knowledgeBase.context.untitled');

@@ -19,6 +19,7 @@ import { ChatHistorySwitch } from './components/chat-history-switch';
 import './index.scss';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 
 export const ContextManager = () => {
   const { contextItems, removeContextItem, setContextItems, filterErrorInfo } = useContextPanelStoreShallow(
@@ -29,6 +30,8 @@ export const ContextManager = () => {
       filterErrorInfo: state.filterErrorInfo,
     }),
   );
+  const { handleItemDelete } = useChatHistory();
+
   const { nodes } = useCanvasControl();
   const selectedContextNodes = nodes.filter(
     (node) => node.selected && (node.type === 'resource' || node.type === 'document'),
@@ -45,6 +48,11 @@ export const ContextManager = () => {
 
   const handleRemoveItem = (item: CanvasNode<any>) => {
     removeContextItem(item.id);
+
+    if (item.type === 'skillResponse') {
+      handleItemDelete(item);
+    }
+
     if (activeItemId === item.id) {
       setActiveItemId(null);
     }
@@ -63,19 +71,21 @@ export const ContextManager = () => {
     setContextItems(newContextItems);
   }, [JSON.stringify(selectedNodeIds)]);
 
+  const filteredContextItems = contextItems.filter((item) => item.type !== 'skillResponse');
+
   return (
     <div className="flex flex-col h-full p-2 px-3">
       <div className="flex flex-col">
         <div className="flex flex-wrap content-start gap-1 w-full">
-          {historyItems?.length > 0 && (
+          {/* {historyItems?.length > 0 && (
             <ChatHistorySwitch
               chatHistoryOpen={chatHistoryOpen}
               setChatHistoryOpen={setChatHistoryOpen}
               items={historyItems}
             />
-          )}
+          )} */}
           <AddBaseMarkContext />
-          {contextItems?.map((item) => (
+          {filteredContextItems?.map((item) => (
             <ContextItem
               key={item?.id}
               item={item}

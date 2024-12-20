@@ -1360,7 +1360,7 @@ const translations = {
       extensionWeblinkSelection: '网页选中',
       document: '文档',
       resource: '资源',
-      skillResponse: '技能响应',
+      skillResponse: 'AI 回答',
       extensionWeblink: '网页',
     },
     modelSelector: {

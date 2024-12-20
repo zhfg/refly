@@ -4,9 +4,11 @@ import { message } from 'antd';
 import { useContextPanelStore } from '../stores/context-panel';
 import { CanvasNode } from '../components/canvas/nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
+import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 
 export const useAddToContext = (node: CanvasNode, nodeType: CanvasNodeType) => {
   const { t } = useTranslation();
+  const { handleItemAdd } = useChatHistory();
 
   return useCallback(() => {
     const contextStore = useContextPanelStore.getState();
@@ -41,6 +43,10 @@ export const useAddToContext = (node: CanvasNode, nodeType: CanvasNodeType) => {
 
     // Add to context
     contextStore.addContextItem(node);
+    if (nodeType === 'skillResponse') {
+      handleItemAdd(node);
+    }
+
     message.success(
       t('knowledgeBase.context.addSuccessWithTitle', {
         title: nodeTitle,

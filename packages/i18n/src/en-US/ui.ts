@@ -1368,7 +1368,7 @@ const translations = {
       extensionWeblinkSelection: 'Extension Web Link Selection',
       document: 'Document',
       resource: 'Resource',
-      skillResponse: 'Skill Response',
+      skillResponse: 'AI Response',
       extensionWeblink: 'Extension Web Link',
     },
     modelSelector: {
