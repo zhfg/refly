@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Moveable from 'react-moveable';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './types';
 import { Node } from '@xyflow/react';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { CustomHandle } from './custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
 import { useEdgeStyles } from '../constants';
@@ -31,11 +31,23 @@ import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-commo
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useGetActionResult } from '@refly-packages/ai-workspace-common/queries';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { Tooltip } from 'antd';
+import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
+import AnthropicIcon from '@refly-packages/ai-workspace-common/assets/anthropic.svg';
+import GeminiIcon from '@refly-packages/ai-workspace-common/assets/google-gemini-icon.svg';
+import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
+import { HiOutlineCircleStack } from 'react-icons/hi2';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
 const POLLING_INTERVAL = 3000;
 const POLLING_COOLDOWN_TIME = 5000;
+
+const providerIcons = {
+  openai: OpenAIIcon,
+  anthropic: AnthropicIcon,
+  google: GeminiIcon,
+};
 
 export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { data, selected, id, hideActions = false, isPreview = false, hideHandles = false, onNodeClick } = props;
@@ -58,7 +70,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   });
   const moveableRef = useRef<Moveable>(null);
 
-  const { status, modelName, artifacts, currentLog: log, structuredData } = metadata ?? {};
+  const { status, artifacts, currentLog: log, modelName, structuredData } = metadata ?? {};
   const sources = Array.isArray(structuredData?.sources) ? structuredData?.sources : [];
 
   const logTitle = log
@@ -94,6 +106,29 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
     refetchInterval: POLLING_INTERVAL,
   });
   const remoteResult = result?.data;
+
+  // ============================
+  const skill = {
+    name: remoteResult?.actionMeta?.name || '',
+    icon: remoteResult?.actionMeta?.icon,
+  };
+  const skillName = remoteResult?.actionMeta?.name || 'AI 技能';
+  const model = 'openai/gpt-4o-mini';
+
+  // Calculate total token usage
+  const tokenUsage = useMemo(() => {
+    if (!remoteResult?.steps) return 10;
+
+    let total = 10;
+    remoteResult.steps.forEach((step) => {
+      (step?.tokenUsage || []).forEach((item: any) => {
+        total += (item?.inputTokens || 0) + (item?.outputTokens || 0);
+      });
+    });
+    return total;
+  }, [remoteResult?.steps]);
+
+  // ============================
 
   useEffect(() => {
     const remoteStatus = remoteResult?.status;
@@ -323,7 +358,31 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
                 <IconCanvas className="w-4 h-4 text-white" />
               </div>
 
-              <span className="text-sm font-medium leading-normal truncate">{query}</span>
+              <Tooltip title={query}>
+                <span className="text-sm font-medium leading-normal truncate cursor-help">{query}</span>
+              </Tooltip>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {skillName && skillName !== 'commonQnA' && <SelectedSkillHeader readonly skill={skill} />}
+
+              {model && (
+                <div className="flex flex-col gap-1 px-2">
+                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                    {providerIcons[model.split('/')[0]] && (
+                      <img className="w-3 h-3" src={providerIcons[model.split('/')[0]]} alt={model.split('/')[0]} />
+                    )}
+                    {model}
+                  </div>
+
+                  {tokenUsage > 0 && (
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <HiOutlineCircleStack className="w-3 h-3" />
+                      {t('copilot.tokenUsageTotal', { count: tokenUsage })}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {status === 'failed' && (

@@ -1165,6 +1165,7 @@ const translations = {
     selectedSkillHeader: {
       title: '和 {{name}} 聊聊',
     },
+    tokenUsageTotal: '{{count}} Tokens',
     greeting: '嗨，{{name}}',
     addContext: '添加上下文',
     moreSettings: '更多设置',

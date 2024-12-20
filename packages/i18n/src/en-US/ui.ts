@@ -1173,6 +1173,7 @@ const translations = {
     selectedSkillHeader: {
       title: 'Chat with {{name}}',
     },
+    tokenUsageTotal: '{{count}} Tokens',
     greeting: 'Hello, {{name}}',
     addContext: 'Add Context',
     moreSettings: 'More Settings',
