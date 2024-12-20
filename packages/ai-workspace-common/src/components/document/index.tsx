@@ -405,6 +405,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
               handleDrop: (view, event, _slice, moved) => handleImageDrop(view, event, moved, uploadFn),
               attributes: {
                 class: 'prose prose-md prose-headings:font-title font-default focus:outline-none max-w-full',
+                'data-doc-id': docId,
               },
             }}
             onUpdate={({ editor }) => {

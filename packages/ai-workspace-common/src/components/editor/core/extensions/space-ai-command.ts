@@ -28,8 +28,10 @@ export const SpaceAICommand = Extension.create({
             // 阻止默认的空格输入
             event.preventDefault();
 
+            const docId = view.dom.closest('[data-doc-id]')?.getAttribute('data-doc-id');
+
             // 触发 AI 功能
-            editorEmitter.emit('activeAskAI', true);
+            editorEmitter.emit('activeAskAI', { value: true, docId });
 
             return true;
           }

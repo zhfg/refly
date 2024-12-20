@@ -6,6 +6,7 @@ import { editorEmitter } from '@refly/utils/event-emitter/editor';
 import type { Instance } from 'tippy.js';
 
 import { posToDOMRect } from '@tiptap/react';
+import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 
 interface GenerativeBlockMenuSwitchProps {
   open: boolean;
@@ -15,6 +16,17 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
   const { editor } = useEditor();
   const bubbleRef = useRef<Instance | null>(null);
   const editorRef = useRef<Editor | null>(null);
+
+  const docId = editor?.options?.editorProps?.attributes?.['data-doc-id'];
+  const { activeDocumentId } = useDocumentStoreShallow((state) => ({
+    activeDocumentId: state.activeDocumentId,
+  }));
+
+  useEffect(() => {
+    if (activeDocumentId && activeDocumentId !== docId) {
+      editorEmitter.emit('activeAskAI', { value: false, docId });
+    }
+  }, [activeDocumentId, docId]);
 
   useEffect(() => {
     if (!open) removeAIHighlight(editor);
@@ -39,7 +51,11 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
     removeAIHighlight(editor);
   };
 
-  const handleAskAI = (value: boolean) => {
+  const handleAskAI = ({ value, docId: eventDocId }: { value: boolean; docId?: string }) => {
+    if (eventDocId && eventDocId !== docId) {
+      return;
+    }
+
     onOpenChange(value);
 
     if (!value) {
@@ -79,13 +95,13 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
     return () => {
       editorEmitter.off('activeAskAI', handleAskAI);
     };
-  }, []);
+  }, [docId]);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onOpenChange(false);
-        editorEmitter.emit('activeAskAI', false);
+        editorEmitter.emit('activeAskAI', { value: false, docId });
         // Focus editor after closing AI selector
         setTimeout(() => {
           editor?.commands.focus();
