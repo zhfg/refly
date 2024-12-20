@@ -8,8 +8,11 @@ import {
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { message } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 export const useChatHistory = () => {
+  // const { t } = useTranslation();
   // Get chat history state and actions
   const { chatHistoryOpen, setChatHistoryOpen } = useLaunchpadStoreShallow((state) => ({
     chatHistoryOpen: state.chatHistoryOpen,
@@ -47,7 +50,8 @@ export const useChatHistory = () => {
 
   // Sync nodes with history items
   useEffect(() => {
-    const { historyItems } = useContextPanelStore.getState();
+    const { historyItems, contextItems } = useContextPanelStore.getState();
+    const contextStore = useContextPanelStore.getState();
 
     const newHistoryItems = [
       ...(selectedResultNodes
@@ -55,6 +59,27 @@ export const useChatHistory = () => {
         ?.map((node) => ({ ...node, isPreview: true })) ?? []),
       ...(historyItems?.filter((item) => !item?.isPreview) ?? []),
     ];
+
+    // Sync context items with history items
+    contextItems.forEach((contextItem) => {
+      // Remove context item if it's a skill response and not in history
+      if (
+        contextItem.type === 'skillResponse' &&
+        !newHistoryItems.some((historyItem) => historyItem.id === contextItem.id)
+      ) {
+        contextStore.removeContextItem(contextItem.id);
+      }
+    });
+
+    // Add missing history items to context
+    newHistoryItems.forEach((historyItem) => {
+      if (
+        historyItem.type === 'skillResponse' &&
+        !contextItems.some((contextItem) => contextItem.id === historyItem.id)
+      ) {
+        contextStore.addContextItem(historyItem);
+      }
+    });
 
     setHistoryItems(newHistoryItems);
   }, [JSON.stringify(selectedResultNodes?.map((node) => node?.data.contentPreview))]);
@@ -71,6 +96,24 @@ export const useChatHistory = () => {
     removeHistoryItem(item.id);
   };
 
+  const handleItemAdd = (node: NodeItem) => {
+    const contextStore = useContextPanelStore.getState();
+    const historyItems = contextStore.historyItems;
+
+    // Check if node is already in context
+    const existingItem = historyItems.find((item) => item.id === node.id);
+
+    if (existingItem) {
+      contextStore.updateHistoryItem({ ...node, isPreview: false });
+      // message.warning(t('canvas.chatHistory.alreadyAdded'));
+      return;
+    }
+
+    // Add node to context
+    contextStore.addHistoryItem(node);
+    // message.success(t('canvas.chatHistory.addSuccess'));
+  };
+
   return {
     chatHistoryOpen,
     setChatHistoryOpen,
@@ -80,5 +123,6 @@ export const useChatHistory = () => {
     handleItemPin,
     handleItemDelete,
     pinAllHistoryItems,
+    handleItemAdd,
   };
 };

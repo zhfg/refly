@@ -1,9 +1,11 @@
 import { Position, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
 import Moveable from 'react-moveable';
+import classNames from 'classnames';
+import { Divider } from 'antd';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './types';
 import { Node } from '@xyflow/react';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { CustomHandle } from './custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
 import { useEdgeStyles } from '../constants';
@@ -21,8 +23,9 @@ import {
   IconError,
   IconLoading,
   IconSearch,
+  IconToken,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { NodeItem, useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
@@ -31,6 +34,9 @@ import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-commo
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useGetActionResult } from '@refly-packages/ai-workspace-common/queries';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
+
+import { ModelProviderIcons } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -48,6 +54,9 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const language = i18n.languages?.[0];
 
   const { canvasId } = useCanvasContext();
+  const { addContextItem } = useContextPanelStoreShallow((state) => ({
+    addContextItem: state.addContextItem,
+  }));
 
   const { title, contentPreview: content, metadata, createdAt, entityId } = data;
   const node = getNode(id);
@@ -58,7 +67,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   });
   const moveableRef = useRef<Moveable>(null);
 
-  const { status, modelName, artifacts, currentLog: log, structuredData } = metadata ?? {};
+  const { status, artifacts, currentLog: log, modelInfo, structuredData, actionMeta, tokenUsage } = metadata ?? {};
   const sources = Array.isArray(structuredData?.sources) ? structuredData?.sources : [];
 
   const logTitle = log
@@ -89,11 +98,27 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
     };
   }, [data]);
 
-  const { data: result } = useGetActionResult({ query: { resultId: entityId } }, null, {
-    enabled: Boolean(entityId) && (!status || status === 'executing' || status === 'waiting') && shouldPoll,
+  const statusShouldPoll = !status || status === 'executing' || status === 'waiting';
+
+  const { data: result, error } = useGetActionResult({ query: { resultId: entityId } }, null, {
+    enabled: Boolean(entityId) && statusShouldPoll && shouldPoll,
     refetchInterval: POLLING_INTERVAL,
   });
+
+  useEffect(() => {
+    if ((result && !result.success) || error) {
+      setShouldPoll(false);
+    }
+  }, [result, error]);
+
   const remoteResult = result?.data;
+
+  const skill = {
+    name: actionMeta?.name || '',
+    icon: actionMeta?.icon,
+  };
+  const skillName = actionMeta?.name;
+  const model = modelInfo?.label;
 
   useEffect(() => {
     const remoteStatus = remoteResult?.status;
@@ -219,11 +244,11 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { debouncedCreateDocument, isCreating } = useCreateDocument();
 
   const handleCreateDocument = useCallback(async () => {
-    await debouncedCreateDocument(data?.title ?? modelName, content, {
+    await debouncedCreateDocument(data?.title ?? t('common.newDocument'), content, {
       sourceNodeId: data.entityId,
       addToCanvas: true,
     });
-  }, [content, debouncedCreateDocument, data.entityId, data?.title, modelName]);
+  }, [content, debouncedCreateDocument, data.entityId, data?.title]);
 
   const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
     updateSourceListDrawer: state.updateSourceListDrawer,
@@ -255,7 +280,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   }, [content, artifacts?.length, sources.length]);
 
   return (
-    <div>
+    <div className={classNames({ nowheel: isOperating })}>
       <div
         ref={targetRef}
         className="relative group"
@@ -273,7 +298,10 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           <ActionButtons
             type="skill-response"
             nodeId={id}
-            onAddToChatHistory={handleAddToChatHistory}
+            onAddToChatHistory={() => {
+              handleAddToChatHistory();
+              addContextItem(node as NodeItem);
+            }}
             onRerun={handleRerun}
             onInsertToDoc={() => handleInsertToDoc('insertBlow', content)}
             onCreateDocument={content ? handleCreateDocument : undefined}
@@ -285,7 +313,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           />
         )}
 
-        <div className={`relative h-full ${getNodeCommonStyles({ selected, isHovered })}`}>
+        <div className={`relative h-full flex flex-col ${getNodeCommonStyles({ selected, isHovered })}`}>
           {!isPreview && !hideHandles && (
             <>
               <CustomHandle
@@ -305,98 +333,134 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
             </>
           )}
 
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <div
-                className="
-                w-6 
-                h-6 
-                rounded 
-                bg-[#F79009]
-                shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)]
-                flex 
-                items-center 
-                justify-center
-                flex-shrink-0
-              "
-              >
-                <IconCanvas className="w-4 h-4 text-white" />
-              </div>
+          <div className="absolute bottom-0 left-0 right-0 h-[15%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
 
-              <span className="text-sm font-medium leading-normal truncate">{query}</span>
+          <div className="flex flex-col h-full">
+            <div className="flex-shrink-0 mb-3">
+              <div className="flex items-center gap-2">
+                <div
+                  className="
+                  w-6 
+                  h-6 
+                  rounded 
+                  bg-[#F79009]
+                  shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,40,0.1)]
+                  flex 
+                  items-center 
+                  justify-center
+                  flex-shrink-0
+                "
+                >
+                  <IconCanvas className="w-4 h-4 text-white" />
+                </div>
+
+                <span className="text-sm font-medium leading-normal truncate cursor-help">{query}</span>
+              </div>
             </div>
 
-            {status === 'failed' && (
-              <div
-                className="flex items-center justify-center gap-1 mt-1 hover:bg-gray-50 rounded-sm p-2 cursor-pointer"
-                onClick={() => handleRerun()}
-              >
-                <IconError className="h-4 w-4 text-red-500" />
-                <span className="text-xs text-red-500 max-w-48 truncate">
-                  {t('canvas.skillResponse.executionFailed')}
-                </span>
+            {skillName && skillName !== 'commonQnA' && (
+              <div className="flex-shrink-0 mb-2">
+                <SelectedSkillHeader readonly skill={skill} className="rounded-sm" />
               </div>
             )}
 
-            {(status === 'waiting' || status === 'executing') && !content && !artifacts?.length && (
-              <div className="flex items-center gap-2 bg-gray-100 rounded-sm p-2">
-                <IconLoading className="h-3 w-3 animate-spin text-green-500" />
-                <span className="text-xs text-gray-500 max-w-48 truncate">
-                  {log ? (
-                    <>
-                      <span className="text-green-500 font-medium">{logTitle + ' '}</span>
-                      <span className="text-gray-500">{logDescription}</span>
-                    </>
-                  ) : (
-                    t('canvas.skillResponse.aiThinking')
-                  )}
-                </span>
-              </div>
-            )}
-
-            {sources.length > 0 && (
-              <div
-                className="flex items-center justify-between gap-2 border-gray-100 border-solid rounded-sm p-2 hover:bg-gray-50 cursor-pointer"
-                onClick={handleClickSources}
-              >
-                <span className="flex items-center gap-1 text-xs text-gray-500">
-                  <>
-                    <IconSearch className="h-3 w-3 text-gray-500" />
-                    {t('canvas.skillResponse.sourcesCnt', { count: sources.length })}
-                  </>
-                </span>
-                <LuChevronRight className="h-3 w-3 text-gray-500" />
-              </div>
-            )}
-
-            {artifacts?.length > 0 && (
-              <div className="flex items-center gap-2">
-                {artifacts.map((artifact) => (
+            <div className={`flex-grow overflow-y-auto pr-2 -mr-2`}>
+              <div className="flex flex-col gap-3">
+                {status === 'failed' && (
                   <div
-                    key={artifact.entityId}
-                    className="border border-solid border-gray-300 rounded-sm px-2 py-1 w-full flex items-center gap-1"
+                    className="flex items-center justify-center gap-1 mt-1 hover:bg-gray-50 rounded-sm p-2 cursor-pointer"
+                    onClick={() => handleRerun()}
                   >
-                    {getArtifactIcon(artifact, 'text-gray-500')}
-                    <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">{artifact.title}</span>
+                    <IconError className="h-4 w-4 text-red-500" />
+                    <span className="text-xs text-red-500 max-w-48 truncate">
+                      {t('canvas.skillResponse.executionFailed')}
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
+                )}
 
-            {content && (
-              <div ref={contentRef} className="skill-response-node-content relative">
-                <Markdown
-                  content={String(content)}
-                  sources={sources}
-                  className={`text-xs ${isOperating ? 'pointer-events-auto skill-response-node-content' : 'pointer-events-none'}`}
-                />
-              </div>
-            )}
+                {(status === 'waiting' || status === 'executing') && !content && !artifacts?.length && (
+                  <div className="flex items-center gap-2 bg-gray-100 rounded-sm p-2">
+                    <IconLoading className="h-3 w-3 animate-spin text-green-500" />
+                    <span className="text-xs text-gray-500 max-w-48 truncate">
+                      {log ? (
+                        <>
+                          <span className="text-green-500 font-medium">{logTitle + ' '}</span>
+                          <span className="text-gray-500">{logDescription}</span>
+                        </>
+                      ) : (
+                        t('canvas.skillResponse.aiThinking')
+                      )}
+                    </span>
+                  </div>
+                )}
 
-            <div className="text-xs text-gray-400">
-              {time(createdAt, language as LOCALE)
-                ?.utc()
-                ?.fromNow()}
+                {sources.length > 0 && (
+                  <div
+                    className="flex items-center justify-between gap-2 border-gray-100 border-solid rounded-sm p-2 hover:bg-gray-50 cursor-pointer"
+                    onClick={handleClickSources}
+                  >
+                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                      <>
+                        <IconSearch className="h-3 w-3 text-gray-500" />
+                        {t('canvas.skillResponse.sourcesCnt', { count: sources.length })}
+                      </>
+                    </span>
+                    <LuChevronRight className="h-3 w-3 text-gray-500" />
+                  </div>
+                )}
+
+                {artifacts?.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    {artifacts.map((artifact) => (
+                      <div
+                        key={artifact.entityId}
+                        className="border border-solid border-gray-200 rounded-sm px-2 py-2 w-full flex items-center gap-1"
+                      >
+                        {getArtifactIcon(artifact, 'text-gray-500')}
+                        <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">
+                          {artifact.title}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {content && (
+                  <div ref={contentRef} className="skill-response-node-content">
+                    <Markdown
+                      content={String(content)}
+                      sources={sources}
+                      className={`text-xs ${
+                        isOperating ? 'pointer-events-auto skill-response-node-content' : 'pointer-events-none'
+                      }`}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex-shrink-0 mt-2 flex justify-between items-center text-[10px] text-gray-400 relative z-20">
+              <div className="flex items-center gap-1">
+                {model && (
+                  <div className="flex items-center gap-1">
+                    <img className="w-3 h-3" src={ModelProviderIcons[modelInfo?.provider]} alt={modelInfo?.provider} />
+                    <span>{model}</span>
+                  </div>
+                )}
+                <Divider type="vertical" className="mx-1" />
+                {tokenUsage && (
+                  <div className="flex items-center gap-1">
+                    <IconToken className="w-3 h-3" />
+                    {tokenUsage.reduce((acc, t) => acc + t.inputTokens + t.outputTokens, 0)}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                {time(data.createdAt, language as LOCALE)
+                  ?.utc()
+                  ?.fromNow()}
+              </div>
             </div>
           </div>
         </div>

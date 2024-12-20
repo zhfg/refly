@@ -20,7 +20,7 @@ import {
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { aggregateTokenUsage, genActionResultID } from '@refly-packages/utils/index';
 import { CanvasNodeData, ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { useListSkills } from '@refly-packages/ai-workspace-common/queries/queries';
+import { useListModels, useListSkills } from '@refly-packages/ai-workspace-common/queries/queries';
 
 export const useInvokeAction = () => {
   const { addNode, setNodeDataByEntity } = useCanvasControl();
@@ -43,6 +43,8 @@ export const useInvokeAction = () => {
         entityId: resultId,
         metadata: {
           status: payload.status,
+          actionMeta: payload.actionMeta,
+          modelInfo: payload.modelInfo,
         },
       };
 
@@ -68,6 +70,11 @@ export const useInvokeAction = () => {
         nodeData.metadata = {
           status: payload.status,
           structuredData: structuredData,
+        };
+      } else if (eventType === 'token_usage') {
+        nodeData.metadata = {
+          status: payload.status,
+          tokenUsage: aggregateTokenUsage(steps.flatMap((s) => s.tokenUsage)),
         };
       }
 
@@ -315,7 +322,8 @@ export const useInvokeAction = () => {
 
   const onStart = () => {};
 
-  const { data } = useListSkills();
+  const { data: skillData } = useListSkills({}, null, { staleTime: Infinity });
+  const { data: modelData } = useListModels({}, null, { staleTime: Infinity });
 
   const invokeAction = (payload: InvokeSkillRequest) => {
     payload.resultId ||= genActionResultID();
@@ -323,7 +331,10 @@ export const useInvokeAction = () => {
     const { resultId, input } = payload;
 
     const skillName = payload.skillName || 'commonQnA';
-    const skill = data?.data?.find((s) => s.name === skillName);
+    const skill = skillData?.data?.find((s) => s.name === skillName);
+
+    const modelName = payload.modelName;
+    const model = modelData?.data?.find((m) => m.name === modelName);
 
     onUpdateResult(resultId, {
       resultId,
@@ -332,6 +343,7 @@ export const useInvokeAction = () => {
         name: skill?.name,
         icon: skill?.icon,
       },
+      modelInfo: model,
       title: input?.query,
       targetId: payload.target?.entityId,
       targetType: payload.target?.entityType,

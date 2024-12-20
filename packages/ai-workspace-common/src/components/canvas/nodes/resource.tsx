@@ -18,6 +18,7 @@ import { useThrottledCallback } from 'use-debounce';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
 import Moveable from 'react-moveable';
+import classNames from 'classnames';
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
@@ -156,7 +157,7 @@ export const ResourceNode = ({
   }, [data.contentPreview, remoteResult]);
 
   return (
-    <div>
+    <div className={classNames({ nowheel: isOperating })}>
       <div
         ref={targetRef}
         className="relative group"
@@ -189,9 +190,49 @@ export const ResourceNode = ({
           ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
         `}
         >
-          <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
-          <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10">
-            <div className="absolute bottom-2 left-3 text-[10px] text-gray-400 z-20">
+          <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
+
+          <div className="flex flex-col h-full">
+            <div className="flex-shrink-0 mb-3">
+              <div className="flex items-center gap-2">
+                <div
+                  className="
+                  w-6 
+                  h-6 
+                  rounded 
+                  bg-[#17B26A] 
+                  shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)]
+                  flex 
+                  items-center 
+                  justify-center
+                  flex-shrink-0
+                "
+                >
+                  <ResourceIcon className="w-4 h-4 text-white" />
+                </div>
+
+                <span
+                  className="
+                  text-sm
+                  font-medium
+                  leading-normal
+                  text-[rgba(0,0,0,0.8)]
+                  truncate
+                "
+                >
+                  {data.title}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex-grow overflow-y-auto pr-2 -mr-2">
+              <Markdown
+                className={`text-xs ${isOperating ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                content={data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
+              />
+            </div>
+
+            <div className="flex justify-end items-center flex-shrink-0 mt-2 text-[10px] text-gray-400 z-20">
               {time(data.createdAt, language as LOCALE)
                 ?.utc()
                 ?.fromNow()}
@@ -216,43 +257,6 @@ export const ResourceNode = ({
               />
             </>
           )}
-
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <div
-                className="
-                w-6 
-                h-6 
-                rounded 
-                bg-[#17B26A] 
-                shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)]
-                flex 
-                items-center 
-                justify-center
-                flex-shrink-0
-              "
-              >
-                <ResourceIcon className="w-4 h-4 text-white" />
-              </div>
-
-              <span
-                className="
-                text-sm
-                font-medium
-                leading-normal
-                text-[rgba(0,0,0,0.8)]
-                truncate
-              "
-              >
-                {data.title}
-              </span>
-            </div>
-
-            <Markdown
-              className={`text-xs ${isOperating ? 'pointer-events-auto' : 'pointer-events-none'}`}
-              content={data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
-            />
-          </div>
         </div>
       </div>
 

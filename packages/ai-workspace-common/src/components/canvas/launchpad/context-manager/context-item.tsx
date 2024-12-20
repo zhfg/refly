@@ -71,15 +71,15 @@ export const ContextItem = ({
 
   const isSelection = item?.data?.metadata?.sourceType?.toLowerCase()?.includes('selection');
   const sourceType = isSelection ? 'selection' : item?.type;
-  console.log('sourceType', sourceType, item, isSelection);
+  // console.log('sourceType', sourceType, item, isSelection);
 
   return (
     <Popover
       arrow={false}
       content={content}
       trigger="hover"
-      placement="bottom"
-      overlayClassName="context-preview-popover"
+      placement="top"
+      overlayClassName="context-preview-popover rounded-lg"
     >
       <Button
         className={cn(

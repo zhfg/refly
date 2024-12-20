@@ -13,6 +13,7 @@ import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useThrottledCallback } from 'use-debounce';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: { direction: 'TB' | 'LR' }) => {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -294,6 +295,21 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         ...node,
         measured: node.measured ? { ...node.measured } : undefined,
       }));
+
+      // Handle deleted nodes
+      const deletedNodes = changes.filter((change) => change.type === 'remove');
+
+      if (deletedNodes.length > 0) {
+        const contextStore = useContextPanelStore.getState();
+
+        deletedNodes.forEach((change) => {
+          const nodeId = change.id;
+          // Remove from context items
+          contextStore.removeContextItem(nodeId);
+          // Remove from chat history
+          contextStore.removeHistoryItem(nodeId);
+        });
+      }
 
       const updatedNodes = applyNodeChanges(changes, mutableNodes);
       setNodes(canvasId, updatedNodes);

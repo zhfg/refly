@@ -1166,6 +1166,7 @@ const translations = {
     selectedSkillHeader: {
       title: '和 {{name}} 聊聊',
     },
+    tokenUsageTotal: '{{count}} tokens',
     greeting: '嗨，{{name}}',
     addContext: '添加上下文',
     moreSettings: '更多设置',
@@ -1360,7 +1361,7 @@ const translations = {
       extensionWeblinkSelection: '网页选中',
       document: '文档',
       resource: '资源',
-      skillResponse: '技能响应',
+      skillResponse: 'AI 回答',
       extensionWeblink: '网页',
     },
     modelSelector: {

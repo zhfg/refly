@@ -1174,6 +1174,7 @@ const translations = {
     selectedSkillHeader: {
       title: 'Chat with {{name}}',
     },
+    tokenUsageTotal: '{{count}} tokens',
     greeting: 'Hello, {{name}}',
     addContext: 'Add Context',
     moreSettings: 'More Settings',
@@ -1368,7 +1369,7 @@ const translations = {
       extensionWeblinkSelection: 'Extension Web Link Selection',
       document: 'Document',
       resource: 'Resource',
-      skillResponse: 'Skill Response',
+      skillResponse: 'AI Response',
       extensionWeblink: 'Extension Web Link',
     },
     modelSelector: {

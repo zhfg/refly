@@ -118,7 +118,11 @@ export const ChatInput = (props: ChatInputProps) => {
   return (
     <div className="ai-copilot-chat-container">
       <div className="chat-input-container">
-        <SelectedSkillHeader skill={selectedSkill} onClose={() => skillStore.setSelectedSkill(null)} />
+        <SelectedSkillHeader
+          skill={selectedSkill}
+          onClose={() => skillStore.setSelectedSkill(null)}
+          className="rounded-t-[7px]"
+        />
         <ContextManager />
         <ChatHistory />
         <div className="chat-input-body">

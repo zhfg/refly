@@ -169,7 +169,7 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
               icon={<HiOutlineCircleStack style={{ fontSize: 14 }} />}
               className="text-gray-500 text-xs"
             >
-              {tokenUsage} Tokens
+              {tokenUsage} tokens
             </Button>
           </Dropdown>
         )}

@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { Button, Divider, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { IconDelete, IconReply } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconCanvas, IconDelete, IconReply } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { Pin, PinOff } from 'lucide-react';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { NodeItem, useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getResultDisplayContent } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
@@ -33,6 +33,9 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
   const language = i18n.languages?.[0];
 
   const { setNodeCenter } = useCanvasControl();
+  const { removeContextItem } = useContextPanelStoreShallow((state) => ({
+    removeContextItem: state.removeContextItem,
+  }));
   const { chatHistoryOpen, historyItems, clearHistoryItems, handleItemPin, handleItemDelete } = useChatHistory();
 
   const renderItems = items ?? historyItems;
@@ -78,7 +81,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
         >
           <div className="text-gray-800 font-medium flex items-center justify-between text-xs">
             <div className="flex items-center whitespace-nowrap overflow-hidden">
-              <IconReply className="h-4 w-4 mr-1" />
+              <IconCanvas className="h-4 w-4 mr-1" />
               <div className="max-w-[200px] truncate">{item.data?.title}</div>
             </div>
             <div className="flex items-center space-x-1">
@@ -118,6 +121,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
                       onClick={(e) => {
                         e.stopPropagation();
                         handleItemDelete(item);
+                        removeContextItem(item.id);
                       }}
                       icon={<IconDelete className="w-4 h-4 text-gray-400" />}
                     />
