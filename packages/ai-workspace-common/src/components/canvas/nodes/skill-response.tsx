@@ -31,7 +31,7 @@ import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-commo
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useGetActionResult } from '@refly-packages/ai-workspace-common/queries';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { Tooltip } from 'antd';
+import { Divider, Tooltip } from 'antd';
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
 import AnthropicIcon from '@refly-packages/ai-workspace-common/assets/anthropic.svg';
 import GeminiIcon from '@refly-packages/ai-workspace-common/assets/google-gemini-icon.svg';
@@ -363,28 +363,6 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
               </Tooltip>
             </div>
 
-            <div className="flex flex-col gap-2">
-              {skillName && skillName !== 'commonQnA' && <SelectedSkillHeader readonly skill={skill} />}
-
-              {model && (
-                <div className="flex flex-col gap-1 px-2">
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
-                    {providerIcons[model.split('/')[0]] && (
-                      <img className="w-3 h-3" src={providerIcons[model.split('/')[0]]} alt={model.split('/')[0]} />
-                    )}
-                    {model}
-                  </div>
-
-                  {tokenUsage > 0 && (
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
-                      <HiOutlineCircleStack className="w-3 h-3" />
-                      {t('copilot.tokenUsageTotal', { count: tokenUsage })}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
             {status === 'failed' && (
               <div
                 className="flex items-center justify-center gap-1 mt-1 hover:bg-gray-50 rounded-sm p-2 cursor-pointer"
@@ -412,6 +390,31 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
                 </span>
               </div>
             )}
+
+            {skillName || model ? (
+              <div className="flex flex-col gap-2">
+                {skillName && skillName !== 'commonQnA' && <SelectedSkillHeader readonly skill={skill} />}
+
+                {model && (
+                  <div className="flex flex-col gap-1 px-2">
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      {providerIcons[model.split('/')[0]] && (
+                        <img className="w-3 h-3" src={providerIcons[model.split('/')[0]]} alt={model.split('/')[0]} />
+                      )}
+                      {model}
+                    </div>
+
+                    {tokenUsage > 0 && (
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <HiOutlineCircleStack className="w-3 h-3" />
+                        {t('copilot.tokenUsageTotal', { count: tokenUsage })}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <Divider dashed style={{ margin: '4px 0' }} />
+              </div>
+            ) : null}
 
             {sources.length > 0 && (
               <div
