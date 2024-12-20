@@ -341,7 +341,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
             </>
           )}
 
-          <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
+          <div className="absolute bottom-0 left-0 right-0 h-[15%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
 
           <div className="flex flex-col h-full">
             <div className="flex-shrink-0 mb-3">
@@ -365,6 +365,12 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
                 <span className="text-sm font-medium leading-normal truncate cursor-help">{query}</span>
               </div>
             </div>
+
+            {skillName && skillName !== 'commonQnA' && (
+              <div className="flex-shrink-0 mb-2">
+                <SelectedSkillHeader readonly skill={skill} className="rounded-sm" />
+              </div>
+            )}
 
             <div className={`flex-grow overflow-y-auto pr-2 -mr-2`}>
               <div className="flex flex-col gap-3">
@@ -395,34 +401,6 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
                     </span>
                   </div>
                 )}
-
-                {skillName || model ? (
-                  <div className="flex flex-col gap-1">
-                    {skillName && skillName !== 'commonQnA' && (
-                      <SelectedSkillHeader readonly skill={skill} className="rounded-sm" />
-                    )}
-                    <div className="flex flex-row items-center justify-between mt-2 text-xs">
-                      {model && (
-                        <div className="flex items-center gap-1 text-gray-500">
-                          {providerIcons[model.split('/')[0]] && (
-                            <img
-                              className="w-3 h-3"
-                              src={providerIcons[model.split('/')[0]]}
-                              alt={model.split('/')[0]}
-                            />
-                          )}
-                          <span>{model}</span>
-                        </div>
-                      )}
-                      {tokenUsage > 0 && (
-                        <div className="flex items-center gap-1 text-gray-500">
-                          <HiOutlineCircleStack className="w-3 h-3" />
-                          {t('copilot.tokenUsageTotal', { count: tokenUsage })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : null}
 
                 {sources.length > 0 && (
                   <div
@@ -469,10 +447,24 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
               </div>
             </div>
 
-            <div className="absolute bottom-2 left-3 text-[10px] text-gray-400 z-20">
-              {time(data.createdAt, language as LOCALE)
-                ?.utc()
-                ?.fromNow()}
+            <div className="flex-shrink-0 mt-2 flex justify-between items-center text-[10px] text-gray-400 relative z-20">
+              <div className="flex items-center gap-1">
+                {model && (
+                  <div className="flex items-center gap-1">
+                    <span>{model}</span>
+                  </div>
+                )}
+                <span>·</span>
+                {tokenUsage > 0 && (
+                  <div className="flex items-center gap-1">{t('copilot.tokenUsageTotal', { count: tokenUsage })}</div>
+                )}
+              </div>
+
+              <div>
+                {time(data.createdAt, language as LOCALE)
+                  ?.utc()
+                  ?.fromNow()}
+              </div>
             </div>
           </div>
         </div>

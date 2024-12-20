@@ -42,6 +42,7 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
               icon: actionMeta?.icon,
               name: actionMeta?.name,
             }}
+            className="rounded-t-[7px]"
           />
         )}
         {contextItems?.length === 0 && historyItems?.length === 0 ? null : (
