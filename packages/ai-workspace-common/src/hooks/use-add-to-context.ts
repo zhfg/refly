@@ -4,10 +4,15 @@ import { message } from 'antd';
 import { useContextPanelStore } from '../stores/context-panel';
 import { CanvasNode } from '../components/canvas/nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 
 export const useAddToContext = (node: CanvasNode, nodeType: CanvasNodeType) => {
   const { t } = useTranslation();
+  const { showLaunchpad, setShowLaunchpad } = useCanvasStoreShallow((state) => ({
+    showLaunchpad: state.showLaunchpad,
+    setShowLaunchpad: state.setShowLaunchpad,
+  }));
   const { handleItemAdd } = useChatHistory();
 
   return useCallback(() => {
@@ -29,6 +34,10 @@ export const useAddToContext = (node: CanvasNode, nodeType: CanvasNodeType) => {
       nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
     } else {
       nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
+    }
+
+    if (!showLaunchpad) {
+      setShowLaunchpad(true);
     }
 
     if (isAlreadyAdded) {

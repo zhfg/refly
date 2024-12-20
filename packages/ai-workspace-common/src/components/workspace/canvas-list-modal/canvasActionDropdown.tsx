@@ -19,6 +19,7 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
   const handleDelete = async () => {
     const success = await deleteCanvas(canvasId);
     if (success) {
+      setPopupVisible(false);
       afterDelete?.();
     }
   };

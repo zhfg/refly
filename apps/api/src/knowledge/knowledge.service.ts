@@ -754,6 +754,7 @@ export class KnowledgeService {
 
     param.docId = genDocumentID();
     param.title ||= 'Untitled';
+    param.initialContent ||= '';
 
     const createInput: Prisma.DocumentCreateInput = {
       docId: param.docId,
@@ -763,25 +764,25 @@ export class KnowledgeService {
       contentPreview: param.initialContent?.slice(0, 500),
     };
 
+    createInput.storageKey = `doc/${param.docId}.txt`;
+    createInput.stateStorageKey = `state/${param.docId}`;
+
+    // Save initial content and ydoc state to object storage
+    const ydoc = markdown2StateUpdate(param.initialContent);
+    await Promise.all([
+      this.minio.client.putObject(createInput.storageKey, param.initialContent),
+      this.minio.client.putObject(createInput.stateStorageKey, Buffer.from(ydoc)),
+    ]);
+
+    // Calculate storage size
+    const [storageStat, stateStorageStat] = await Promise.all([
+      this.minio.client.statObject(createInput.storageKey),
+      this.minio.client.statObject(createInput.stateStorageKey),
+    ]);
+    createInput.storageSize = storageStat.size + stateStorageStat.size;
+
+    // Add to vector store
     if (param.initialContent) {
-      createInput.storageKey = `doc/${param.docId}.txt`;
-      createInput.stateStorageKey = `state/${param.docId}`;
-
-      // Save initial content and ydoc state to object storage
-      const ydoc = markdown2StateUpdate(param.initialContent);
-      await Promise.all([
-        this.minio.client.putObject(createInput.storageKey, param.initialContent),
-        this.minio.client.putObject(createInput.stateStorageKey, Buffer.from(ydoc)),
-      ]);
-
-      // Calculate storage size
-      const [storageStat, stateStorageStat] = await Promise.all([
-        this.minio.client.statObject(createInput.storageKey),
-        this.minio.client.statObject(createInput.stateStorageKey),
-      ]);
-      createInput.storageSize = storageStat.size + stateStorageStat.size;
-
-      // Add to vector store
       const { size } = await this.ragService.indexDocument(user, {
         pageContent: param.initialContent,
         metadata: {

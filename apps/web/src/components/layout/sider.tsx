@@ -126,7 +126,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     setLoginModalVisible: state.setLoginModalVisible,
   }))
 
-  const { getLibraryList, isLoadingCanvas } = useHandleSiderData(true)
+  const { isLoadingCanvas } = useHandleSiderData(true)
   const { debouncedCreateCanvas, isCreating: createCanvasLoading } =
     useCreateCanvas()
 
@@ -158,7 +158,10 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
       <>
         <Tooltip title={t(`loggedHomePage.siderMenu.viewMore`)}>
           <div
-            className="flex"
+            className="relative flex"
+            style={{
+              zIndex: 2,
+            }}
             onClick={e => {
               handleNavClick(e)
             }}>
@@ -246,7 +249,6 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
 
       if (data?.success) {
         message.success(t("common.putSuccess"))
-        await getLibraryList()
 
         const currentCanvasId = getCurrentCanvasId()
 
@@ -292,13 +294,14 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
           defaultSelectedKeys={["Home"]}
           className="sider-menu-nav"
           selectedKeys={[selectedKey]}
-          defaultOpenKeys={["Canvas", "Library"]}>
+          openKeys={["Canvas", "Library"]}>
           <div className="sider-menu-inner">
             {siderSections.map((section, index) => (
               <div key={`section-${index}`} className="sider-section">
                 {section.map((item, itemIndex) => (
                   <React.Fragment key={item.key}>
                     <SubMenu
+                      className="customer-submenu"
                       key={item.key}
                       title={
                         <MenuItemContent
