@@ -1,8 +1,8 @@
-import { Button, Tooltip } from 'antd';
-import { FaArrowPointer } from 'react-icons/fa6';
+import { Button, Badge } from 'antd';
+import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { RiUploadCloud2Line } from 'react-icons/ri';
 import { useTranslation } from 'react-i18next';
-import { FC } from 'react';
+import { FC, useCallback } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
@@ -13,8 +13,12 @@ import { ImportResourceModal } from '@refly-packages/ai-workspace-common/compone
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconCanvas, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { IoAnalyticsOutline } from 'react-icons/io5';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
+import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -32,7 +36,7 @@ interface ToolbarProps {
 
 export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
   const { t } = useTranslation();
-  const { addNode, mode, setMode } = useCanvasControl();
+  const { addNode, mode, setMode, updateAllEdgesStyle } = useCanvasControl();
 
   const { importResourceModalVisible, setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
     importResourceModalVisible: state.importResourceModalVisible,
@@ -42,6 +46,27 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
 
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
+
+  const { selectedNodes } = useContextPanelStoreShallow((state) => ({
+    selectedNodes: state.contextItems,
+  }));
+
+  const { showLaunchpad, setShowLaunchpad } = useCanvasStoreShallow((state) => ({
+    showLaunchpad: state.showLaunchpad,
+    setShowLaunchpad: state.setShowLaunchpad,
+  }));
+
+  const { showEdges, setShowEdges } = useCanvasStoreShallow((state) => ({
+    showEdges: state.showEdges,
+    setShowEdges: state.setShowEdges,
+  }));
+
+  const handleEdgesVisibilityChange = useCallback(() => {
+    setShowEdges(!showEdges);
+    updateAllEdgesStyle(!showEdges);
+  }, [showEdges, setShowEdges, updateAllEdgesStyle]);
+
+  const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
 
   // Define toolbar items
   const tools: ToolbarItem[] = [
@@ -75,13 +100,51 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     //   tooltip: t('canvas.toolbar.addSkill'),
     // },
     {
+      icon: HiOutlineDocumentAdd,
+      value: 'createDocument',
+      type: 'button',
+      domain: 'document',
+      tooltip: t('canvas.toolbar.createDocument'),
+    },
+    {
       icon: IconDocument,
       value: 'addDocument',
       type: 'popover',
       domain: 'document',
       tooltip: t('canvas.toolbar.addDocument'),
     },
+    {
+      icon: IconCanvas,
+      value: 'handleLaunchpad',
+      type: 'button',
+      domain: 'launchpad',
+      tooltip: t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`),
+    },
+    {
+      icon: IoAnalyticsOutline,
+      value: 'showEdges',
+      type: 'button',
+      domain: 'edges',
+      tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
+    },
   ];
+
+  const getIconColor = (tool: string) => {
+    if (tool === 'showEdges' && !showEdges) {
+      return '#9CA3AF';
+    }
+    if (tool === 'handleLaunchpad' && !showLaunchpad) {
+      return '#9CA3AF';
+    }
+    return '';
+  };
+
+  const getIsLoading = (tool: string) => {
+    if (tool === 'createDocument' && isCreating) {
+      return true;
+    }
+    return false;
+  };
 
   const handleToolSelect = (event: React.MouseEvent, tool: string) => {
     event.stopPropagation();
@@ -98,8 +161,17 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
         break;
       case 'addDocument':
         break;
+      case 'createDocument':
+        createSingleDocumentInCanvas();
+        break;
       case 'changeMode':
         setMode(mode === 'pointer' ? 'hand' : 'pointer');
+        break;
+      case 'handleLaunchpad':
+        setShowLaunchpad(!showLaunchpad);
+        break;
+      case 'showEdges':
+        handleEdgesVisibilityChange();
         break;
     }
     onToolSelect?.(tool);
@@ -119,6 +191,42 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     }
   };
 
+  const ToolButton = ({ tool }: { tool: ToolbarItem }) => {
+    return (
+      <TooltipWrapper tooltip={tool.tooltip}>
+        <Button
+          type="text"
+          onClick={(event) => handleToolSelect(event, tool.value)}
+          className={`
+                  h-[32px] w-[32px] 
+                  flex items-center justify-center 
+                  hover:bg-gray-100 rounded-lg 
+                  transition-colors duration-200 
+                  group
+                  ${tool.active ? 'bg-gray-100' : ''}
+                `}
+          icon={
+            <tool.icon
+              className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900"
+              style={{ color: getIconColor(tool.value) }}
+            />
+          }
+          loading={getIsLoading(tool.value)}
+        />
+      </TooltipWrapper>
+    );
+  };
+
+  const ToolButtonWithBadge = ({ tool }: { tool: ToolbarItem }) => {
+    return selectedNodes.length > 0 && tool.value === 'handleLaunchpad' ? (
+      <Badge size="small" color="#00968F" offset={[-2, 2]} count={selectedNodes.length} overflowCount={9999}>
+        <ToolButton tool={tool} />
+      </Badge>
+    ) : (
+      <ToolButton tool={tool} />
+    );
+  };
+
   return (
     <div
       className="absolute left-4 top-1/2 -translate-y-1/2 bg-white rounded-lg p-2 flex flex-col gap-2 z-10"
@@ -129,21 +237,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     >
       {tools.map((tool, index) =>
         tool.type === 'button' ? (
-          <TooltipWrapper key={index} tooltip={tool.tooltip}>
-            <Button
-              type="text"
-              onClick={(event) => handleToolSelect(event, tool.value)}
-              className={`
-                h-[32px] w-[32px] 
-                flex items-center justify-center 
-                hover:bg-gray-100 rounded-lg 
-                transition-colors duration-200 
-                group
-                ${tool.active ? 'bg-gray-100' : ''}
-              `}
-              icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
-            />
-          </TooltipWrapper>
+          <ToolButtonWithBadge key={index} tool={tool} />
         ) : (
           <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm} offset={12}>
             <TooltipWrapper key={index} tooltip={tool.tooltip}>

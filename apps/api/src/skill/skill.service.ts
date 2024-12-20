@@ -92,6 +92,8 @@ import { actionResultPO2DTO, actionStepPO2DTO } from '@/action/action.dto';
 import { CollabService } from '@/collab/collab.service';
 import { throttle } from 'lodash';
 import { ResultAggregator } from '@/utils/result';
+import { CollabContext } from '@/collab/collab.dto';
+import { DirectConnection } from '@hocuspocus/server';
 
 export function createLangchainMessage(result: ActionResult, steps: ActionStep[]): BaseMessage[] {
   const query = result.title;
@@ -728,7 +730,7 @@ export class SkillService {
     type ArtifactOutput = Artifact & {
       nodeCreated: boolean; // Whether the canvas node is created
       content: string; // Accumulated content
-      document?: Y.Doc; // Yjs document
+      connection?: DirectConnection & { document: Y.Doc };
     };
     const artifactMap: Record<string, ArtifactOutput> = {};
 
@@ -769,17 +771,26 @@ export class SkillService {
               }
 
               // Open direct connection to yjs doc if artifact type is document
-              if (type === 'document' && !artifactMap[entityId].document) {
-                this.logger.log(`open direct connection to document ${entityId}`);
+              if (type === 'document' && !artifactMap[entityId].connection) {
                 const doc = await this.prisma.document.findFirst({
                   where: { docId: entityId },
                 });
-                const { document } = await this.collabService.openDirectConnection(entityId, {
+                const collabContext: CollabContext = {
                   user,
                   entity: doc,
                   entityType: 'document',
-                });
-                artifactMap[entityId].document = document;
+                };
+                const connection = await this.collabService.openDirectConnection(
+                  entityId,
+                  collabContext,
+                );
+
+                this.logger.log(
+                  `open direct connection to document ${entityId}, doc: ${JSON.stringify(
+                    connection.document?.toJSON(),
+                  )}`,
+                );
+                artifactMap[entityId].connection = connection;
               }
             }
             return;
@@ -800,7 +811,9 @@ export class SkillService {
     };
 
     const throttledMarkdownUpdate = throttle(
-      (doc: Y.Doc, content: string) => incrementalMarkdownUpdate(doc, content),
+      ({ connection, content }: ArtifactOutput) => {
+        incrementalMarkdownUpdate(connection.document, content);
+      },
       20,
       {
         leading: true,
@@ -843,7 +856,7 @@ export class SkillService {
 
                 // Update artifact content and yjs doc
                 artifact.content += content;
-                throttledMarkdownUpdate(artifact.document, artifact.content);
+                throttledMarkdownUpdate(artifact);
               } else {
                 // Update result content and forward stream events to client
                 resultAggregator.handleStreamContent(runMeta, content);
@@ -901,6 +914,10 @@ export class SkillService {
       }
       result.errors.push(err.message);
     } finally {
+      Object.values(artifactMap).forEach((artifact) => {
+        artifact.connection?.disconnect();
+      });
+
       const steps = resultAggregator.getSteps({ resultId });
 
       await this.prisma.$transaction([

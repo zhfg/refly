@@ -6,11 +6,16 @@ import { useCanvasControl } from './use-canvas-control';
 import { CanvasNodeType } from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { useDebouncedCallback } from 'use-debounce';
 import { parseMarkdownCitationsAndCanvasTags } from '@refly-packages/utils/parse';
+import { useCanvasNodesStore } from '@refly-packages/ai-workspace-common/stores/canvas-nodes';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 export const useCreateDocument = () => {
   const [isCreating, setIsCreating] = useState(false);
   const { t } = useTranslation();
   const { addNode, nodes } = useCanvasControl();
+  const { setPendingNode } = useCanvasNodesStore();
+
+  const { canvasId } = useCanvasContext();
 
   const createDocument = useCallback(
     async (
@@ -81,5 +86,45 @@ export const useCreateDocument = () => {
     { leading: true },
   );
 
-  return { createDocument, debouncedCreateDocument, isCreating };
+  const createSingleDocumentInCanvas = async () => {
+    if (isCreating) return;
+    setIsCreating(true);
+
+    try {
+      const { data } = await getClient().createDocument({
+        body: {
+          title: t('common.newDocument'),
+        },
+      });
+
+      if (data?.success) {
+        message.success(t('common.putSuccess'));
+
+        if (canvasId && canvasId !== 'empty') {
+          const newNode = {
+            type: 'document' as CanvasNodeType,
+            data: {
+              title: data.data?.title || '',
+              entityId: data.data?.docId || '',
+              metadata: {
+                contentPreview: data.data?.contentPreview || '',
+              },
+            },
+            position: { x: 100, y: 100 },
+          };
+
+          setPendingNode(newNode);
+        }
+      } else {
+        message.error(t('common.error'));
+      }
+    } catch (error) {
+      console.error('Error creating document:', error);
+      message.error(t('common.error'));
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  return { createDocument, debouncedCreateDocument, isCreating, createSingleDocumentInCanvas };
 };

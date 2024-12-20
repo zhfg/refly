@@ -214,6 +214,18 @@
   .sider-menu-inner {
     height: calc(100% - 68px);
     overflow-y: auto;
+
+    .customer-submenu {
+      .arco-menu-inline-header {
+        padding-right: 0 !important;
+      }
+      .arco-menu-icon-suffix {
+        .arco-icon-down {
+          z-index: 1;
+          transform: rotate(90deg);
+        }
+      }
+    }
   }
 
   .sider-footer {
