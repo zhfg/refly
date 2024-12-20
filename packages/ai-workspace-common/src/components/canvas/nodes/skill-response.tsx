@@ -54,8 +54,8 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const language = i18n.languages?.[0];
 
   const { canvasId } = useCanvasContext();
-  const { addNode } = useContextPanelStoreShallow((state) => ({
-    addNode: state.addHistoryItem,
+  const { addContextItem } = useContextPanelStoreShallow((state) => ({
+    addContextItem: state.addContextItem,
   }));
 
   const { title, contentPreview: content, metadata, createdAt, entityId } = data;
@@ -300,7 +300,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
             nodeId={id}
             onAddToChatHistory={() => {
               handleAddToChatHistory();
-              addNode(node as NodeItem);
+              addContextItem(node as NodeItem);
             }}
             onRerun={handleRerun}
             onInsertToDoc={() => handleInsertToDoc('insertBlow', content)}

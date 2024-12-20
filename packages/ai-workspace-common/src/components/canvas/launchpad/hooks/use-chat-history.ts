@@ -50,7 +50,8 @@ export const useChatHistory = () => {
 
   // Sync nodes with history items
   useEffect(() => {
-    const { historyItems } = useContextPanelStore.getState();
+    const { historyItems, contextItems } = useContextPanelStore.getState();
+    const contextStore = useContextPanelStore.getState();
 
     const newHistoryItems = [
       ...(selectedResultNodes
@@ -58,6 +59,27 @@ export const useChatHistory = () => {
         ?.map((node) => ({ ...node, isPreview: true })) ?? []),
       ...(historyItems?.filter((item) => !item?.isPreview) ?? []),
     ];
+
+    // Sync context items with history items
+    contextItems.forEach((contextItem) => {
+      // Remove context item if it's a skill response and not in history
+      if (
+        contextItem.type === 'skillResponse' &&
+        !newHistoryItems.some((historyItem) => historyItem.id === contextItem.id)
+      ) {
+        contextStore.removeContextItem(contextItem.id);
+      }
+    });
+
+    // Add missing history items to context
+    newHistoryItems.forEach((historyItem) => {
+      if (
+        historyItem.type === 'skillResponse' &&
+        !contextItems.some((contextItem) => contextItem.id === historyItem.id)
+      ) {
+        contextStore.addContextItem(historyItem);
+      }
+    });
 
     setHistoryItems(newHistoryItems);
   }, [JSON.stringify(selectedResultNodes?.map((node) => node?.data.contentPreview))]);
