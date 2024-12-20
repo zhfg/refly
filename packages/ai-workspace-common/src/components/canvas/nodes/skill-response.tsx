@@ -344,7 +344,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
           <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
 
           <div className="flex flex-col h-full">
-            <div className="flex flex-col gap-3 mb-3">
+            <div className="flex-shrink-0 mb-3">
               <div className="flex items-center gap-2">
                 <div
                   className="
@@ -364,112 +364,107 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
 
                 <span className="text-sm font-medium leading-normal truncate cursor-help">{query}</span>
               </div>
-
-              {status === 'failed' && (
-                <div
-                  className="flex items-center justify-center gap-1 mt-1 hover:bg-gray-50 rounded-sm p-2 cursor-pointer"
-                  onClick={() => handleRerun()}
-                >
-                  <IconError className="h-4 w-4 text-red-500" />
-                  <span className="text-xs text-red-500 max-w-48 truncate">
-                    {t('canvas.skillResponse.executionFailed')}
-                  </span>
-                </div>
-              )}
-
-              {(status === 'waiting' || status === 'executing') && !content && !artifacts?.length && (
-                <div className="flex items-center gap-2 bg-gray-100 rounded-sm p-2">
-                  <IconLoading className="h-3 w-3 animate-spin text-green-500" />
-                  <span className="text-xs text-gray-500 max-w-48 truncate">
-                    {log ? (
-                      <>
-                        <span className="text-green-500 font-medium">{logTitle + ' '}</span>
-                        <span className="text-gray-500">{logDescription}</span>
-                      </>
-                    ) : (
-                      t('canvas.skillResponse.aiThinking')
-                    )}
-                  </span>
-                </div>
-              )}
-
-              {skillName || model ? (
-                <div className="flex flex-col gap-1">
-                  {skillName && skillName !== 'commonQnA' && <SelectedSkillHeader readonly skill={skill} />}
-                  <div className="flex flex-row items-center justify-between mt-1 text-xs">
-                    {model && (
-                      <div className="flex items-center gap-1 text-gray-500">
-                        {providerIcons[model.split('/')[0]] && (
-                          <img className="w-3 h-3" src={providerIcons[model.split('/')[0]]} alt={model.split('/')[0]} />
-                        )}
-                        <span>{model}</span>
-                      </div>
-                    )}
-                    {tokenUsage > 0 && (
-                      <div className="flex items-center gap-1 text-gray-500">
-                        <HiOutlineCircleStack className="w-3 h-3" />
-                        {t('copilot.tokenUsageTotal', { count: tokenUsage })}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : null}
-
-              {sources.length > 0 && (
-                <div
-                  className="flex items-center justify-between gap-2 border-gray-100 border-solid rounded-sm p-2 hover:bg-gray-50 cursor-pointer"
-                  onClick={handleClickSources}
-                >
-                  <span className="flex items-center gap-1 text-xs text-gray-500">
-                    <>
-                      <IconSearch className="h-3 w-3 text-gray-500" />
-                      {t('canvas.skillResponse.sourcesCnt', { count: sources.length })}
-                    </>
-                  </span>
-                  <LuChevronRight className="h-3 w-3 text-gray-500" />
-                </div>
-              )}
-
-              {artifacts?.length > 0 && (
-                <div className="flex items-center gap-2">
-                  {artifacts.map((artifact) => (
-                    <div
-                      key={artifact.entityId}
-                      className="border border-solid border-gray-300 rounded-sm px-2 py-1 w-full flex items-center gap-1"
-                    >
-                      {getArtifactIcon(artifact, 'text-gray-500')}
-                      <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">
-                        {artifact.title}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
 
-            <div
-              className={`
-                flex-grow 
-                overflow-hidden 
-                ${isOperating ? 'overflow-y-auto pr-2 -mr-2' : ''} 
-                relative
-              `}
-              style={{
-                maxHeight: isOperating ? 'calc(100% - 84px)' : 'none',
-              }}
-              // onWheel={handleWheel}
-            >
-              {content && (
-                <div ref={contentRef} className="skill-response-node-content">
-                  <Markdown
-                    content={String(content)}
-                    sources={sources}
-                    className={`text-xs ${
-                      isOperating ? 'pointer-events-auto skill-response-node-content' : 'pointer-events-none'
-                    }`}
-                  />
-                </div>
-              )}
+            <div className={`flex-grow overflow-y-auto pr-2 -mr-2`}>
+              <div className="flex flex-col gap-3">
+                {status === 'failed' && (
+                  <div
+                    className="flex items-center justify-center gap-1 mt-1 hover:bg-gray-50 rounded-sm p-2 cursor-pointer"
+                    onClick={() => handleRerun()}
+                  >
+                    <IconError className="h-4 w-4 text-red-500" />
+                    <span className="text-xs text-red-500 max-w-48 truncate">
+                      {t('canvas.skillResponse.executionFailed')}
+                    </span>
+                  </div>
+                )}
+
+                {(status === 'waiting' || status === 'executing') && !content && !artifacts?.length && (
+                  <div className="flex items-center gap-2 bg-gray-100 rounded-sm p-2">
+                    <IconLoading className="h-3 w-3 animate-spin text-green-500" />
+                    <span className="text-xs text-gray-500 max-w-48 truncate">
+                      {log ? (
+                        <>
+                          <span className="text-green-500 font-medium">{logTitle + ' '}</span>
+                          <span className="text-gray-500">{logDescription}</span>
+                        </>
+                      ) : (
+                        t('canvas.skillResponse.aiThinking')
+                      )}
+                    </span>
+                  </div>
+                )}
+
+                {skillName || model ? (
+                  <div className="flex flex-col gap-1">
+                    {skillName && skillName !== 'commonQnA' && <SelectedSkillHeader readonly skill={skill} />}
+                    <div className="flex flex-row items-center justify-between mt-1 text-xs">
+                      {model && (
+                        <div className="flex items-center gap-1 text-gray-500">
+                          {providerIcons[model.split('/')[0]] && (
+                            <img
+                              className="w-3 h-3"
+                              src={providerIcons[model.split('/')[0]]}
+                              alt={model.split('/')[0]}
+                            />
+                          )}
+                          <span>{model}</span>
+                        </div>
+                      )}
+                      {tokenUsage > 0 && (
+                        <div className="flex items-center gap-1 text-gray-500">
+                          <HiOutlineCircleStack className="w-3 h-3" />
+                          {t('copilot.tokenUsageTotal', { count: tokenUsage })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+
+                {sources.length > 0 && (
+                  <div
+                    className="flex items-center justify-between gap-2 border-gray-100 border-solid rounded-sm p-2 hover:bg-gray-50 cursor-pointer"
+                    onClick={handleClickSources}
+                  >
+                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                      <>
+                        <IconSearch className="h-3 w-3 text-gray-500" />
+                        {t('canvas.skillResponse.sourcesCnt', { count: sources.length })}
+                      </>
+                    </span>
+                    <LuChevronRight className="h-3 w-3 text-gray-500" />
+                  </div>
+                )}
+
+                {artifacts?.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    {artifacts.map((artifact) => (
+                      <div
+                        key={artifact.entityId}
+                        className="border border-solid border-gray-300 rounded-sm px-2 py-1 w-full flex items-center gap-1"
+                      >
+                        {getArtifactIcon(artifact, 'text-gray-500')}
+                        <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">
+                          {artifact.title}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {content && (
+                  <div ref={contentRef} className="skill-response-node-content">
+                    <Markdown
+                      content={String(content)}
+                      sources={sources}
+                      className={`text-xs ${
+                        isOperating ? 'pointer-events-auto skill-response-node-content' : 'pointer-events-none'
+                      }`}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="absolute bottom-2 left-3 text-[10px] text-gray-400 z-20">
