@@ -17,6 +17,7 @@ import { LOCALE } from '@refly/common-types';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import Moveable from 'react-moveable';
+import classNames from 'classnames';
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
@@ -117,7 +118,7 @@ export const DocumentNode = ({
   }, []);
 
   return (
-    <div>
+    <div className={classNames({ nowheel: isOperating })}>
       <div
         ref={targetRef}
         className={`relative group ${onNodeClick ? 'cursor-pointer' : ''}`}
@@ -168,47 +169,49 @@ export const DocumentNode = ({
               />
             </>
           )}
-          <div className="flex flex-col gap-2">
-            {/* Header with Icon and Type */}
-            <div className="flex items-center gap-2">
-              <div
-                className="
-                  w-6 
-                  h-6 
-                  rounded 
-                  bg-[#00968F]
-                  shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)]
-                  flex 
-                  items-center 
-                  justify-center
-                  flex-shrink-0
-                "
-              >
-                <HiOutlineDocumentText className="w-4 h-4 text-white" />
-              </div>
+          <div className="flex flex-col h-full">
+            <div className="flex-shrink-0 mb-3">
+              <div className="flex items-center gap-2">
+                <div
+                  className="
+                    w-6 
+                    h-6 
+                    rounded 
+                    bg-[#00968F]
+                    shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)]
+                    flex 
+                    items-center 
+                    justify-center
+                    flex-shrink-0
+                  "
+                >
+                  <HiOutlineDocumentText className="w-4 h-4 text-white" />
+                </div>
 
-              {/* Node Type */}
-              <span
-                className="
-                  text-sm
-                  font-medium
-                  leading-normal
-                  text-[rgba(0,0,0,0.8)]
-                  truncate
-                "
-              >
-                {data.title}
-              </span>
+                <span
+                  className="
+                    text-sm
+                    font-medium
+                    leading-normal
+                    text-[rgba(0,0,0,0.8)]
+                    truncate
+                  "
+                >
+                  {data.title}
+                </span>
+              </div>
             </div>
 
-            <Spin spinning={status === 'executing' && !data.contentPreview}>
-              <Markdown
-                className={`text-xs min-h-8 ${isOperating ? 'pointer-events-auto' : 'pointer-events-none'}`}
-                content={data.contentPreview || t('canvas.nodePreview.document.noContentPreview')}
-              />
-            </Spin>
+            <div className="flex-grow overflow-y-auto pr-2 -mr-2">
+              <Spin spinning={status === 'executing' && !data.contentPreview}>
+                <Markdown
+                  className={`text-xs min-h-8 ${isOperating ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                  content={data.contentPreview || t('canvas.nodePreview.document.noContentPreview')}
+                />
+              </Spin>
+            </div>
 
-            <div className="absolute bottom-2 left-3 text-[10px] text-gray-400 z-20">
+            <div className="flex-shrink-0 mt-2 text-[10px] text-gray-400">
               {time(data.createdAt, language as LOCALE)
                 ?.utc()
                 ?.fromNow()}
