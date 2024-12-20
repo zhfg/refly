@@ -398,8 +398,10 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
 
                 {skillName || model ? (
                   <div className="flex flex-col gap-1">
-                    {skillName && skillName !== 'commonQnA' && <SelectedSkillHeader readonly skill={skill} />}
-                    <div className="flex flex-row items-center justify-between mt-1 text-xs">
+                    {skillName && skillName !== 'commonQnA' && (
+                      <SelectedSkillHeader readonly skill={skill} className="rounded-sm" />
+                    )}
+                    <div className="flex flex-row items-center justify-between mt-2 text-xs">
                       {model && (
                         <div className="flex items-center gap-1 text-gray-500">
                           {providerIcons[model.split('/')[0]] && (
