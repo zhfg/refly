@@ -24,8 +24,9 @@
   "dependencies": {
     "@elastic/elasticsearch": "7.17.14",
     "@golevelup/nestjs-stripe": "~0.8.2",
-    "@hocuspocus/extension-database": "~2.13.0",
-    "@hocuspocus/server": "~2.13.0",
+    "@hocuspocus/extension-database": "~2.15.0",
+    "@hocuspocus/extension-redis": "~2.15.0",
+    "@hocuspocus/server": "~2.15.0",
     "@langchain/community": "0.3.16",
     "@langchain/core": "0.3.19",
     "@langchain/openai": "0.3.14",

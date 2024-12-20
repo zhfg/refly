@@ -48,11 +48,14 @@ importers:
         specifier: ~0.8.2
         version: 0.8.2(@nestjs/common@10.3.10)(@nestjs/core@10.3.10)(rxjs@7.8.1)(stripe@14.19.0)
       '@hocuspocus/extension-database':
-        specifier: ~2.13.0
-        version: 2.13.6(y-protocols@1.0.6)(yjs@13.6.16)
+        specifier: ~2.15.0
+        version: 2.15.0(y-protocols@1.0.6)(yjs@13.6.16)
+      '@hocuspocus/extension-redis':
+        specifier: ~2.15.0
+        version: 2.15.0(y-protocols@1.0.6)(yjs@13.6.16)
       '@hocuspocus/server':
-        specifier: ~2.13.0
-        version: 2.13.6(y-protocols@1.0.6)(yjs@13.6.16)
+        specifier: ~2.15.0
+        version: 2.15.0(y-protocols@1.0.6)(yjs@13.6.16)
       '@langchain/community':
         specifier: 0.3.16
         version: 0.3.16(@browserbasehq/stagehand@1.3.0)(@elastic/elasticsearch@7.17.14)(@ibm-cloud/watsonx-ai@1.2.0)(@langchain/core@0.3.19)(@qdrant/js-client-rest@1.11.0)(axios@1.7.4)(cheerio@1.0.0)(ibm-cloud-sdk-core@5.1.0)(ioredis@5.4.1)(jsonwebtoken@9.0.2)(lodash@4.17.21)(openai@4.73.1)(pdf-parse@1.1.1)(redis@4.7.0)(ws@8.17.1)
@@ -3340,17 +3343,43 @@ packages:
       lib0: 0.2.98
     dev: false
 
-  /@hocuspocus/extension-database@2.13.6(y-protocols@1.0.6)(yjs@13.6.16):
-    resolution: {integrity: sha512-lFt9yKzQ8VeErPyaRvqJsoNa6rBFISq5FehqjblsfrfIZvOvBiVwsyc+3d5gQnnQmJJ0rShGCIuLRGJi+MmUaA==}
+  /@hocuspocus/common@2.15.0:
+    resolution: {integrity: sha512-xmapO5PnQvf3lYFWrrOaYPjmdrEIVYOpyjInuiCkCzkUmMQCZDVM3wXjPdMJbgAtQXEPUDVkwpr6dJTLjZgTTQ==}
+    dependencies:
+      lib0: 0.2.98
+    dev: false
+
+  /@hocuspocus/extension-database@2.15.0(y-protocols@1.0.6)(yjs@13.6.16):
+    resolution: {integrity: sha512-KWaO2SQZzI1pyDq+ZWw9iYIcqURwCVoYHI0VJ2Fsk9nUnX33BGkumcQZT/0mPAjgy+LxXyar3d4bDPBEoAL0sA==}
     peerDependencies:
       yjs: ^13.6.8
     dependencies:
-      '@hocuspocus/server': 2.13.6(y-protocols@1.0.6)(yjs@13.6.16)
+      '@hocuspocus/server': 2.15.0(y-protocols@1.0.6)(yjs@13.6.16)
       yjs: 13.6.16
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
       - y-protocols
+    dev: false
+
+  /@hocuspocus/extension-redis@2.15.0(y-protocols@1.0.6)(yjs@13.6.16):
+    resolution: {integrity: sha512-c4ik/g7B5kTKK7MuDu1Eydsxl4bs+pUn+Z0Fxkvw44c+R9W0ct1rTLc4m7crZ+07AgVbqRx6fTdgYNSeabnv1w==}
+    peerDependencies:
+      y-protocols: ^1.0.6
+      yjs: ^13.6.8
+    dependencies:
+      '@hocuspocus/server': 2.15.0(y-protocols@1.0.6)(yjs@13.6.16)
+      ioredis: 4.28.5
+      kleur: 4.1.5
+      lodash.debounce: 4.0.8
+      redlock: 4.2.0
+      uuid: 11.0.3
+      y-protocols: 1.0.6(yjs@13.6.16)
+      yjs: 13.6.16
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
     dev: false
 
   /@hocuspocus/provider@2.13.6(y-protocols@1.0.6)(yjs@13.6.16):
@@ -3370,17 +3399,17 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@hocuspocus/server@2.13.6(y-protocols@1.0.6)(yjs@13.6.16):
-    resolution: {integrity: sha512-VqiHkkQlfa2A5mFTe+rdePLt3kHJrk9ZzqDqWJfqQDlYHdyAXpW53cddsXYYDWQ/tZjYj3zQgZAT+78AHrnb/A==}
+  /@hocuspocus/server@2.15.0(y-protocols@1.0.6)(yjs@13.6.16):
+    resolution: {integrity: sha512-JfhDOz11EOWLs3uExC5ymX2GZwsHodDpCNIwaaTBImffyQEzUqkkBGOHsnMsT9s6ST0ijnVCxCQ4nXp/qTxDZw==}
     peerDependencies:
       y-protocols: ^1.0.6
       yjs: ^13.6.8
     dependencies:
-      '@hocuspocus/common': 2.13.6
+      '@hocuspocus/common': 2.15.0
       async-lock: 1.4.1
       kleur: 4.1.5
       lib0: 0.2.98
-      uuid: 10.0.0
+      uuid: 11.0.3
       ws: 8.17.1
       y-protocols: 1.0.6(yjs@13.6.16)
       yjs: 13.6.16
@@ -11160,6 +11189,11 @@ packages:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
     engines: {node: '>=0.4.0'}
 
+  /denque@1.5.1:
+    resolution: {integrity: sha512-XwE+iZ4D6ZUB7mfYRMb5wByE8L74HCn30FBN7sWnXksWc1LO1bPDl67pBR9o/kC4z/xSNAwkMYcGgqDV3BE3Hw==}
+    engines: {node: '>=0.10'}
+    dev: false
+
   /denque@2.1.0:
     resolution: {integrity: sha512-HVQE3AAb/pxF8fQAoiqpvg9i3evqug3hoiwakOyZAwJm+6vZehbkYXZ0l4JxS+I3QxM97v5aaRNhj8v5oBhekw==}
     engines: {node: '>=0.10'}
@@ -13279,6 +13313,25 @@ packages:
       loose-envify: 1.4.0
     dev: false
 
+  /ioredis@4.28.5:
+    resolution: {integrity: sha512-3GYo0GJtLqgNXj4YhrisLaNNvWSNwSS2wS4OELGfGxH8I69+XfNdnmV1AyN+ZqMh0i7eX+SWjrwFKDBDgfBC1A==}
+    engines: {node: '>=6'}
+    dependencies:
+      cluster-key-slot: 1.1.2
+      debug: 4.3.7(supports-color@5.5.0)
+      denque: 1.5.1
+      lodash.defaults: 4.2.0
+      lodash.flatten: 4.4.0
+      lodash.isarguments: 3.1.0
+      p-map: 2.1.0
+      redis-commands: 1.7.0
+      redis-errors: 1.2.0
+      redis-parser: 3.0.0
+      standard-as-callback: 2.1.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /ioredis@5.4.1:
     resolution: {integrity: sha512-2YZsvl7jopIa1gaePkeMtd9rAcSjOOjPtpcLlOeusyO+XH2SK5ZcT+UCrElPP+WVIInh2TzeI4XW9ENaSLVVHA==}
     engines: {node: '>=12.22.0'}
@@ -14717,6 +14770,10 @@ packages:
 
   /lodash.defaults@4.2.0:
     resolution: {integrity: sha512-qjxPLHd3r5DnsdGacqOMU6pb/avJzdh9tFX2ymgoZE27BmjXrNy/y4LoaiTeAb+O3gL8AfpJGtqfX/ae2leYYQ==}
+    dev: false
+
+  /lodash.flatten@4.4.0:
+    resolution: {integrity: sha512-C5N2Z3DgnnKr0LOpv/hKCgKdb7ZZwafIrsesve6lmzvZIRZRGaZ/l6Q8+2W7NaT+ZwO3fFlSCzCzrDCFdJfZ4g==}
     dev: false
 
   /lodash.includes@4.3.0:
@@ -16213,6 +16270,11 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       p-limit: 3.1.0
+
+  /p-map@2.1.0:
+    resolution: {integrity: sha512-y3b8Kpd8OAN444hxfBbFfj1FY/RjtTd8tzYwhUqNYXx0fXx2iX4maP4Qr6qhIKbQXI02wTLAda4fYUbDagTUFw==}
+    engines: {node: '>=6'}
+    dev: false
 
   /p-map@7.0.2:
     resolution: {integrity: sha512-z4cYYMMdKHzw4O5UkWJImbZynVIo0lSGTXc7bzB1e/rrDqkgGUNysK/o4bTr+0+xKvvLoTyGqYC4Fgljy9qe1Q==}
@@ -18314,6 +18376,10 @@ packages:
     engines: {node: '>= 12.13.0'}
     dev: false
 
+  /redis-commands@1.7.0:
+    resolution: {integrity: sha512-nJWqw3bTFy21hX/CPKHth6sfhZbdiHP6bTawSgQBlKOVRG7EZkfHbbHwQJnrE4vsQf0CMNE+3gJ4Fmm16vdVlQ==}
+    dev: false
+
   /redis-errors@1.2.0:
     resolution: {integrity: sha512-1qny3OExCf0UvUV/5wpYKf2YwPcOqXzkwKKSmKHiE6ZMQs5heeE/c8eXK+PNllPvmjgAbfnsbpkGZWy8cBpn9w==}
     engines: {node: '>=4'}
@@ -18335,6 +18401,13 @@ packages:
       '@redis/json': 1.0.7(@redis/client@1.6.0)
       '@redis/search': 1.2.0(@redis/client@1.6.0)
       '@redis/time-series': 1.1.0(@redis/client@1.6.0)
+    dev: false
+
+  /redlock@4.2.0:
+    resolution: {integrity: sha512-j+oQlG+dOwcetUt2WJWttu4CZVeRzUrcVcISFmEmfyuwCVSJ93rDT7YSgg7H7rnxwoRyk/jU46kycVka5tW7jA==}
+    engines: {node: '>=8.0.0'}
+    dependencies:
+      bluebird: 3.7.2
     dev: false
 
   /redux@5.0.1:
@@ -20532,6 +20605,11 @@ packages:
 
   /uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    hasBin: true
+    dev: false
+
+  /uuid@11.0.3:
+    resolution: {integrity: sha512-d0z310fCWv5dJwnX1Y/MncBAqGMKEzlBb1AOf7z9K8ALnd0utBX/msg/fA0+sbyN1ihbMsLhrBlnl1ak7Wa0rg==}
     hasBin: true
     dev: false
 

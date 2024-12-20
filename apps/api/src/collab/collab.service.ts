@@ -16,6 +16,7 @@ import { PrismaService } from '@/common/prisma.service';
 import { IDPrefix, incrementalMarkdownUpdate, state2Markdown } from '@refly-packages/utils';
 import { streamToBuffer } from '@/utils/stream';
 import { CollabContext, isCanvasContext, isDocumentContext } from './collab.dto';
+import { Redis } from '@hocuspocus/extension-redis';
 
 @Injectable()
 export class CollabService {
@@ -36,6 +37,18 @@ export class CollabService {
       onAuthenticate: (payload) => this.authenticate(payload),
       onLoadDocument: (payload) => this.loadDocument(payload),
       onStoreDocument: (payload) => this.storeDocument(payload),
+      afterUnloadDocument: async (payload) => {
+        this.logger.log(`afterUnloadDocument ${payload.documentName}`);
+      },
+      onDisconnect: async (payload) => {
+        this.logger.log(`onDisconnect ${payload.documentName}`);
+      },
+      extensions: [
+        new Redis({
+          host: this.config.get('redis.host'),
+          port: this.config.get('redis.port'),
+        }),
+      ],
     });
   }
 
@@ -90,6 +103,7 @@ export class CollabService {
   private async loadDocument({ document, context }: { document: Y.Doc; context: CollabContext }) {
     const { entity } = context;
     const { stateStorageKey } = entity;
+
     if (!stateStorageKey) return null;
 
     try {
@@ -232,14 +246,7 @@ export class CollabService {
     });
   }
 
-  async storeDocument({
-    document,
-    context,
-  }: {
-    documentName: string;
-    document: Y.Doc;
-    context: CollabContext;
-  }) {
+  async storeDocument({ document, context }: { document: Y.Doc; context: CollabContext }) {
     const state = Buffer.from(Y.encodeStateAsUpdate(document));
 
     if (isDocumentContext(context)) {
