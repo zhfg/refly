@@ -1,6 +1,8 @@
 import { Position, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
 import Moveable from 'react-moveable';
+import classNames from 'classnames';
+import { Divider } from 'antd';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './types';
 import { Node } from '@xyflow/react';
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
@@ -21,6 +23,7 @@ import {
   IconError,
   IconLoading,
   IconSearch,
+  IconToken,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
@@ -31,24 +34,14 @@ import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-commo
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useGetActionResult } from '@refly-packages/ai-workspace-common/queries';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { Divider, Tooltip } from 'antd';
-import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
-import AnthropicIcon from '@refly-packages/ai-workspace-common/assets/anthropic.svg';
-import GeminiIcon from '@refly-packages/ai-workspace-common/assets/google-gemini-icon.svg';
 import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
-import { HiOutlineCircleStack } from 'react-icons/hi2';
-import classNames from 'classnames';
+
+import { ModelProviderIcons } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
 const POLLING_INTERVAL = 3000;
 const POLLING_COOLDOWN_TIME = 5000;
-
-const providerIcons = {
-  openai: OpenAIIcon,
-  anthropic: AnthropicIcon,
-  google: GeminiIcon,
-};
 
 export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { data, selected, id, hideActions = false, isPreview = false, hideHandles = false, onNodeClick } = props;
@@ -71,7 +64,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   });
   const moveableRef = useRef<Moveable>(null);
 
-  const { status, artifacts, currentLog: log, modelName, structuredData } = metadata ?? {};
+  const { status, artifacts, currentLog: log, modelInfo, structuredData, actionMeta, tokenUsage } = metadata ?? {};
   const sources = Array.isArray(structuredData?.sources) ? structuredData?.sources : [];
 
   const logTitle = log
@@ -102,34 +95,27 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
     };
   }, [data]);
 
-  const { data: result } = useGetActionResult({ query: { resultId: entityId } }, null, {
-    enabled: Boolean(entityId) && (!status || status === 'executing' || status === 'waiting') && shouldPoll,
+  const statusShouldPoll = !status || status === 'executing' || status === 'waiting';
+
+  const { data: result, error } = useGetActionResult({ query: { resultId: entityId } }, null, {
+    enabled: Boolean(entityId) && (statusShouldPoll || false) && shouldPoll,
     refetchInterval: POLLING_INTERVAL,
   });
+
+  useEffect(() => {
+    if ((result && !result.success) || error) {
+      setShouldPoll(false);
+    }
+  }, [result, error]);
+
   const remoteResult = result?.data;
 
-  // ============================
   const skill = {
-    name: remoteResult?.actionMeta?.name || '',
-    icon: remoteResult?.actionMeta?.icon,
+    name: actionMeta?.name || '',
+    icon: actionMeta?.icon,
   };
-  const skillName = remoteResult?.actionMeta?.name || 'AI 技能';
-  const model = 'openai/gpt-4o-mini';
-
-  // Calculate total token usage
-  const tokenUsage = useMemo(() => {
-    if (!remoteResult?.steps) return 10;
-
-    let total = 10;
-    remoteResult.steps.forEach((step) => {
-      (step?.tokenUsage || []).forEach((item: any) => {
-        total += (item?.inputTokens || 0) + (item?.outputTokens || 0);
-      });
-    });
-    return total;
-  }, [remoteResult?.steps]);
-
-  // ============================
+  const skillName = actionMeta?.name;
+  const model = modelInfo?.label;
 
   useEffect(() => {
     const remoteStatus = remoteResult?.status;
@@ -255,11 +241,11 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
   const { debouncedCreateDocument, isCreating } = useCreateDocument();
 
   const handleCreateDocument = useCallback(async () => {
-    await debouncedCreateDocument(data?.title ?? modelName, content, {
+    await debouncedCreateDocument(data?.title ?? t('common.newDocument'), content, {
       sourceNodeId: data.entityId,
       addToCanvas: true,
     });
-  }, [content, debouncedCreateDocument, data.entityId, data?.title, modelName]);
+  }, [content, debouncedCreateDocument, data.entityId, data?.title]);
 
   const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
     updateSourceListDrawer: state.updateSourceListDrawer,
@@ -422,7 +408,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
                     {artifacts.map((artifact) => (
                       <div
                         key={artifact.entityId}
-                        className="border border-solid border-gray-300 rounded-sm px-2 py-1 w-full flex items-center gap-1"
+                        className="border border-solid border-gray-200 rounded-sm px-2 py-2 w-full flex items-center gap-1"
                       >
                         {getArtifactIcon(artifact, 'text-gray-500')}
                         <span className="text-xs text-gray-500 max-w-[200px] truncate inline-block">
@@ -451,12 +437,16 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
               <div className="flex items-center gap-1">
                 {model && (
                   <div className="flex items-center gap-1">
+                    <img className="w-3 h-3" src={ModelProviderIcons[modelInfo?.provider]} alt={modelInfo?.provider} />
                     <span>{model}</span>
                   </div>
                 )}
-                <span>·</span>
-                {tokenUsage > 0 && (
-                  <div className="flex items-center gap-1">{t('copilot.tokenUsageTotal', { count: tokenUsage })}</div>
+                <Divider type="vertical" className="mx-1" />
+                {tokenUsage && (
+                  <div className="flex items-center gap-1">
+                    <IconToken className="w-3 h-3" />
+                    {tokenUsage.reduce((acc, t) => acc + t.inputTokens + t.outputTokens, 0)}
+                  </div>
                 )}
               </div>
 

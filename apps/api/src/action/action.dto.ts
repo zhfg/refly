@@ -27,7 +27,7 @@ export function actionResultPO2DTO(
   result: ActionResultModel & { steps?: ActionStepModel[] },
 ): ActionResult {
   return {
-    ...pick(result, ['resultId', 'title', 'targetId', 'status']),
+    ...pick(result, ['resultId', 'title', 'targetId', 'status', 'modelName']),
     type: result.type as ActionType,
     targetType: result.targetType as EntityType,
     actionMeta: JSON.parse(result.actionMeta || '{}'),

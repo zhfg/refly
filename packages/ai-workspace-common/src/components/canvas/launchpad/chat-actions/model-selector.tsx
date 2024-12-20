@@ -11,16 +11,8 @@ import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 
 import { PiWarningCircleBold } from 'react-icons/pi';
-import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
-import AnthropicIcon from '@refly-packages/ai-workspace-common/assets/anthropic.svg';
-import GeminiIcon from '@refly-packages/ai-workspace-common/assets/google-gemini-icon.svg';
 import { ModelInfo, TokenUsageMeter } from '@refly/openapi-schema';
-
-const providerIcons = {
-  openai: OpenAIIcon,
-  anthropic: AnthropicIcon,
-  google: GeminiIcon,
-};
+import { ModelProviderIcons } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 interface ModelSelectorProps {
   dropdownMode?: boolean; // Whether to show as dropdown button
@@ -92,7 +84,7 @@ export const ModelSelector = ({ placement = 'bottom' }: ModelSelectorProps) => {
     const modelItem = (
       <div className="w-full">
         <div className="flex items-center text-xs">
-          <img className="w-4 h-4 mr-2" src={providerIcons[model.provider]} alt={model.provider} />
+          <img className="w-4 h-4 mr-2" src={ModelProviderIcons[model.provider]} alt={model.provider} />
           {model.label + ' '}
           {model.tier === 't1' && planTier === 'free' && (
             <Tag
@@ -192,7 +184,11 @@ export const ModelSelector = ({ placement = 'bottom' }: ModelSelectorProps) => {
       <span className={classNames('model-selector', 'chat-action-item')}>
         {selectedModel ? (
           <>
-            <img className="w-3 h-3 mx-1" src={providerIcons[selectedModel?.provider]} alt={selectedModel?.provider} />
+            <img
+              className="w-3 h-3 mx-1"
+              src={ModelProviderIcons[selectedModel?.provider]}
+              alt={selectedModel?.provider}
+            />
             {selectedModel?.label}
           </>
         ) : (

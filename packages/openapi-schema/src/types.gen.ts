@@ -1010,6 +1010,10 @@ export type ActionResult = {
    */
   type?: ActionType;
   /**
+   * Selected model
+   */
+  modelInfo?: ModelInfo;
+  /**
    * Action target type
    */
   targetType?: EntityType;
