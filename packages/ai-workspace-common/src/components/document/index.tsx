@@ -200,6 +200,9 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
   const { setNodeDataByEntity } = useCanvasControl();
 
   const debouncedUpdates = useThrottledCallback(async (editor: EditorInstance) => {
+    if (documentStore.documentServerStatus !== 'connected') {
+      return;
+    }
     const json = editor.getJSON();
     const markdown = editor.storage.markdown.getMarkdown();
 
