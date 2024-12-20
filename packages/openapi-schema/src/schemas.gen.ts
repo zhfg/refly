@@ -1224,6 +1224,10 @@ export const ActionResultSchema = {
       description: 'Action type',
       $ref: '#/components/schemas/ActionType',
     },
+    modelInfo: {
+      description: 'Selected model',
+      $ref: '#/components/schemas/ModelInfo',
+    },
     targetType: {
       description: 'Action target type',
       $ref: '#/components/schemas/EntityType',

@@ -1,5 +1,13 @@
 import { Node, NodeProps } from '@xyflow/react';
-import { ActionLog, ActionMeta, ActionStatus, ActionStep, Artifact, CanvasNodeType } from '@refly/openapi-schema';
+import {
+  ActionLog,
+  ActionMeta,
+  ActionStatus,
+  Artifact,
+  CanvasNodeType,
+  ModelInfo,
+  TokenUsageItem,
+} from '@refly/openapi-schema';
 
 export type CanvasNodeData<T = Record<string, unknown>> = {
   title: string;
@@ -35,7 +43,8 @@ export type ToolNodeMeta = {
 
 export type ResponseNodeMeta = {
   status: ActionStatus;
-  modelName?: string;
+  modelInfo?: ModelInfo;
+  tokenUsage?: TokenUsageItem[];
   actionMeta?: ActionMeta;
   artifacts?: Artifact[];
   currentLog?: ActionLog;
