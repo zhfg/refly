@@ -10,7 +10,7 @@ import { Input } from '@arco-design/web-react';
 import { Button } from 'antd';
 import { cn } from '@refly/utils/cn';
 import { getOsType } from '@refly/utils/env';
-import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/context-manager/components/add-base-mark-context';
+import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/components/add-base-mark-context';
 import { AISettingsDropdown } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/chat-actions/ai-settings';
 
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
@@ -25,6 +25,8 @@ import { HiCheck, HiXMark } from 'react-icons/hi2';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 interface AISelectorProps {
   open: boolean;
@@ -90,6 +92,26 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
     const resultId = genActionResultID();
     setResultId(resultId);
 
+    const { contextItems, historyItems } = useContextPanelStore.getState();
+
+    const context = convertContextItemsToContext(contextItems);
+    if (context.documents) {
+      context.documents = context.documents.map((doc) => ({
+        ...doc,
+        isCurrent: doc.docId === docId,
+        metadata: {
+          ...doc.metadata,
+          isCurrentContext: doc.docId === docId,
+        },
+      }));
+    }
+
+    const resultHistory = historyItems.map((item) => ({
+      resultId: item.data.entityId,
+      title: item.data.title,
+      steps: item.data.metadata?.steps,
+    }));
+
     const param: InvokeSkillRequest = {
       resultId,
       input: {
@@ -99,17 +121,8 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
         entityId: docId,
         entityType: 'document',
       },
-      context: {
-        documents: [
-          {
-            docId,
-            isCurrent: true,
-            metadata: {
-              isCurrentContext: true,
-            },
-          },
-        ],
-      },
+      context,
+      resultHistory,
       skillName: 'editDoc',
       tplConfig: {
         canvasEditConfig: {
@@ -123,16 +136,11 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       locale: localSettings?.outputLocale,
     };
 
-    if (actionType === 'chat') {
-      const { selection } = canvasEditConfig || {};
-      const selectedText = selection?.highlightedText || '';
-
-      if (selectedText) {
-        param.input.query =
-          `> ${uiLocale === LOCALE.EN ? '**User Selected Text:** ' : '**用户选中的文本:** '} ${selectedText}` +
-          `\n\n` +
-          `${uiLocale === LOCALE.EN ? '**Please answer question based on the user selected text:** ' : '**请根据用户选中的文本回答问题:** '} ${inputValue}`;
-      }
+    if ((selectedMdText || '').trim()) {
+      param.input.query =
+        `> ${uiLocale === LOCALE.EN ? '**User Selected Text:** ' : '**用户选中的文本:** '} ${selectedMdText}` +
+        `\n\n` +
+        `${uiLocale === LOCALE.EN ? '**Please answer question based on the user selected text:** ' : '**请根据用户选中的文本回答问题:** '} ${inputValue}`;
     }
 
     setIsLoading(true);
@@ -283,7 +291,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                   modelSelectorPlacement="bottom"
                 />
               </Button>
-              <AddBaseMarkContext source={MessageIntentSource.AISelector} />
+              <AddBaseMarkContext />
               <Input.TextArea
                 value={inputValue}
                 autoSize={{
