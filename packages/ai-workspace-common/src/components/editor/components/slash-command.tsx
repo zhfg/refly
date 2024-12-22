@@ -58,7 +58,7 @@ export const configureSuggestionItems = (param: { entityId: string; entityType: 
       command: ({ editor, range }) => {
         createBlockAfterCurrent(editor, range, () => {
           setTimeout(() => {
-            editorEmitter.emit('activeAskAI', true);
+            editorEmitter.emit('activeAskAI', { value: true, docId: param.entityId });
           }, 0);
         });
       },

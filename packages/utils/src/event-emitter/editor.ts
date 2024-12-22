@@ -38,7 +38,7 @@ export type Events = {
     content: string;
   };
   updateCanvasTitle: string;
-  activeAskAI: boolean;
+  activeAskAI: { value: boolean; docId?: string };
   inPlaceSendMessage: InPlaceSendMessagePayload;
   askAIResponse: Omit<InPlaceSendMessagePayload, 'userInput'>;
   editorSynced: void;

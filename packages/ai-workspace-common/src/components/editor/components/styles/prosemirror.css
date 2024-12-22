@@ -125,10 +125,6 @@ ul[data-type='taskList'] li[data-checked='true'] > div > p {
 
 /* Overwrite tippy-box original max-width */
 
-[data-tippy-root] {
-  z-index: 10 !important;
-}
-
 .tippy-box {
   max-width: 430px !important;
 }

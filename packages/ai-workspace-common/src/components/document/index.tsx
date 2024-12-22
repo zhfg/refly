@@ -200,6 +200,9 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
   const { setNodeDataByEntity } = useCanvasControl();
 
   const debouncedUpdates = useThrottledCallback(async (editor: EditorInstance) => {
+    if (documentStore.documentServerStatus !== 'connected') {
+      return;
+    }
     const json = editor.getJSON();
     const markdown = editor.storage.markdown.getMarkdown();
 
@@ -402,6 +405,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
               handleDrop: (view, event, _slice, moved) => handleImageDrop(view, event, moved, uploadFn),
               attributes: {
                 class: 'prose prose-md prose-headings:font-title font-default focus:outline-none max-w-full',
+                'data-doc-id': docId,
               },
             }}
             onUpdate={({ editor }) => {
