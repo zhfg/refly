@@ -3,7 +3,6 @@ import {
   Button,
   Divider,
   Tooltip,
-  Avatar,
   Dropdown,
   MenuProps,
   Popconfirm,
@@ -18,13 +17,8 @@ import { useTranslation } from 'react-i18next';
 import { FC, useState } from 'react';
 
 import { MdOutlineImage, MdOutlineAspectRatio } from 'react-icons/md';
-import { AiOutlineMenuFold, AiOutlineMenuUnfold } from 'react-icons/ai';
-import {
-  IconCanvas,
-  IconEdit,
-  IconDelete,
-  IconMoreHorizontal,
-} from '@refly-packages/ai-workspace-common/components/common/icon';
+import { AiOutlineMenuUnfold } from 'react-icons/ai';
+import { IconEdit, IconDelete, IconMoreHorizontal } from '@refly-packages/ai-workspace-common/components/common/icon';
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
 import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { Helmet } from 'react-helmet';
@@ -198,30 +192,22 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
         }`}
       >
         <div className="flex items-center relative z-10">
-          {collapse ? (
+          {collapse && (
             <>
               <SiderPopover>
                 <Button
                   type="text"
-                  icon={<AiOutlineMenuUnfold size={18} className="text-gray-500" />}
+                  icon={<AiOutlineMenuUnfold size={16} className="text-gray-500" />}
                   onClick={() => {
                     setCollapse(!collapse);
                   }}
                 />
               </SiderPopover>
+              <Divider type="vertical" className="pr-[4px] h-4" />
             </>
-          ) : (
-            <Button
-              type="text"
-              icon={<AiOutlineMenuFold size={18} className="text-gray-500" />}
-              onClick={() => {
-                setCollapse(!collapse);
-              }}
-            />
           )}
-          <Divider type="vertical" className="pr-[4px]" />
           <div
-            className="group flex items-center gap-2 text-sm font-bold text-gray-500 cursor-pointer hover:text-gray-700"
+            className="ml-1 group flex items-center gap-2 text-sm font-bold text-gray-500 cursor-pointer hover:text-gray-700"
             onClick={handleEditClick}
           >
             <Tooltip
