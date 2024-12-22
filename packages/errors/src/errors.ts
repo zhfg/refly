@@ -48,14 +48,6 @@ export class CanvasNotFoundError extends BaseError {
   };
 }
 
-export class ProjectNotFoundError extends BaseError {
-  code = 'E1001';
-  messageDict = {
-    en: 'Project not found, please refresh',
-    'zh-CN': '项目不存在，请刷新重试',
-  };
-}
-
 export class ResourceNotFoundError extends BaseError {
   code = 'E1002';
   messageDict = {
@@ -120,14 +112,6 @@ export class ShareNotFoundError extends BaseError {
   };
 }
 
-export class ConversationNotFoundError extends BaseError {
-  code = 'E1010';
-  messageDict = {
-    en: 'Thread not found',
-    'zh-CN': '会话不存在',
-  };
-}
-
 export class ActionResultNotFoundError extends BaseError {
   code = 'E1011';
   messageDict = {
@@ -168,7 +152,6 @@ const errorMap = {
   E0003: ParamsError,
   E0004: OAuthError,
   E1000: CanvasNotFoundError,
-  E1001: ProjectNotFoundError,
   E1002: ResourceNotFoundError,
   E1003: DocumentNotFoundError,
   E1004: ReferenceNotFoundError,
@@ -177,7 +160,6 @@ const errorMap = {
   E1007: LabelClassNotFoundError,
   E1008: LabelInstanceNotFoundError,
   E1009: ShareNotFoundError,
-  E1010: ConversationNotFoundError,
   E1011: ActionResultNotFoundError,
   E2001: StorageQuotaExceeded,
   E2002: ModelUsageQuotaExceeded,

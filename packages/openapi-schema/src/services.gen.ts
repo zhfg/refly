@@ -62,24 +62,6 @@ import type {
   DeleteReferencesData,
   DeleteReferencesError,
   DeleteReferencesResponse,
-  ListProjectsData,
-  ListProjectsError,
-  ListProjectsResponse,
-  GetProjectDetailData,
-  GetProjectDetailError,
-  GetProjectDetailResponse2,
-  UpdateProjectData,
-  UpdateProjectError,
-  UpdateProjectResponse,
-  CreateProjectData,
-  CreateProjectError,
-  CreateProjectResponse,
-  BindProjectResourcesData,
-  BindProjectResourcesError,
-  BindProjectResourcesResponse,
-  DeleteProjectData,
-  DeleteProjectError,
-  DeleteProjectResponse,
   CreateShareData,
   CreateShareError,
   CreateShareResponse2,
@@ -162,18 +144,6 @@ import type {
   DeleteSkillTriggerData,
   DeleteSkillTriggerError,
   DeleteSkillTriggerResponse,
-  ListSkillJobsData,
-  ListSkillJobsError,
-  ListSkillJobsResponse2,
-  GetSkillJobDetailData,
-  GetSkillJobDetailError,
-  GetSkillJobDetailResponse2,
-  ListConversationsData,
-  ListConversationsError,
-  ListConversationsResponse,
-  GetConversationDetailData,
-  GetConversationDetailError,
-  GetConversationDetailResponse2,
   GetSettingsError,
   GetSettingsResponse,
   UpdateSettingsData,
@@ -472,86 +442,8 @@ export const deleteReferences = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * List user projects
- * List all projects for a user
- */
-export const listProjects = <ThrowOnError extends boolean = false>(
-  options?: Options<ListProjectsData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).get<ListProjectsResponse, ListProjectsError, ThrowOnError>({
-    ...options,
-    url: '/knowledge/project/list',
-  });
-};
-
-/**
- * Get project detail
- * Return project details along with its canvases
- */
-export const getProjectDetail = <ThrowOnError extends boolean = false>(
-  options: Options<GetProjectDetailData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).get<GetProjectDetailResponse2, GetProjectDetailError, ThrowOnError>({
-    ...options,
-    url: '/knowledge/project/detail',
-  });
-};
-
-/**
- * Update project
- * Update an existing project
- */
-export const updateProject = <ThrowOnError extends boolean = false>(
-  options: Options<UpdateProjectData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).post<UpdateProjectResponse, UpdateProjectError, ThrowOnError>({
-    ...options,
-    url: '/knowledge/project/update',
-  });
-};
-
-/**
- * Create new project
- * Create a new project
- */
-export const createProject = <ThrowOnError extends boolean = false>(
-  options: Options<CreateProjectData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).post<CreateProjectResponse, CreateProjectError, ThrowOnError>({
-    ...options,
-    url: '/knowledge/project/create',
-  });
-};
-
-/**
- * Bind resources to project
- * Bind existing resources to a project
- */
-export const bindProjectResources = <ThrowOnError extends boolean = false>(
-  options: Options<BindProjectResourcesData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).post<BindProjectResourcesResponse, BindProjectResourcesError, ThrowOnError>({
-    ...options,
-    url: '/knowledge/project/bindRes',
-  });
-};
-
-/**
- * Delete project
- * Delete an existing project
- */
-export const deleteProject = <ThrowOnError extends boolean = false>(
-  options: Options<DeleteProjectData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).post<DeleteProjectResponse, DeleteProjectError, ThrowOnError>({
-    ...options,
-    url: '/knowledge/project/delete',
-  });
-};
-
-/**
  * Create share
- * Create new share for project or canvas
+ * Create new share for canvas
  */
 export const createShare = <ThrowOnError extends boolean = false>(options: Options<CreateShareData, ThrowOnError>) => {
   return (options?.client ?? client).post<CreateShareResponse2, CreateShareError, ThrowOnError>({
@@ -904,58 +796,6 @@ export const deleteSkillTrigger = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Get skill jobs
- * Get skill jobs
- */
-export const listSkillJobs = <ThrowOnError extends boolean = false>(
-  options?: Options<ListSkillJobsData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).get<ListSkillJobsResponse2, ListSkillJobsError, ThrowOnError>({
-    ...options,
-    url: '/skill/job/list',
-  });
-};
-
-/**
- * Get skill job detail
- * Get skill job detail
- */
-export const getSkillJobDetail = <ThrowOnError extends boolean = false>(
-  options?: Options<GetSkillJobDetailData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).get<GetSkillJobDetailResponse2, GetSkillJobDetailError, ThrowOnError>({
-    ...options,
-    url: '/skill/job/detail',
-  });
-};
-
-/**
- * List conversations
- * List all conversations
- */
-export const listConversations = <ThrowOnError extends boolean = false>(
-  options?: Options<ListConversationsData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).get<ListConversationsResponse, ListConversationsError, ThrowOnError>({
-    ...options,
-    url: '/conversation/list',
-  });
-};
-
-/**
- * Get conversation detail
- * Get conversation detail
- */
-export const getConversationDetail = <ThrowOnError extends boolean = false>(
-  options: Options<GetConversationDetailData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).get<GetConversationDetailResponse2, GetConversationDetailError, ThrowOnError>({
-    ...options,
-    url: '/conversation/{convId}',
-  });
-};
-
-/**
  * Get user settings
  * Return settings for current user
  */
@@ -1053,7 +893,7 @@ export const createPortalSession = <ThrowOnError extends boolean = false>(option
 
 /**
  * Search
- * Search for canvases, resources, projects, etc.
+ * Search for canvases, resources, documents, etc.
  */
 export const search = <ThrowOnError extends boolean = false>(options: Options<SearchData, ThrowOnError>) => {
   return (options?.client ?? client).post<SearchResponse2, SearchError, ThrowOnError>({

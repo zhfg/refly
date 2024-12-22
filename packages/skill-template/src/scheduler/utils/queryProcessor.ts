@@ -23,14 +23,7 @@ interface QueryProcessorResult {
 export async function processQuery(options: QueryProcessorOptions): Promise<QueryProcessorResult> {
   const { config, ctxThis, state } = options;
   const { query: originalQuery } = state;
-  const {
-    modelInfo,
-    chatHistory: rawChatHistory = [],
-    resources,
-    documents,
-    contentList,
-    projects,
-  } = config.configurable;
+  const { modelInfo, chatHistory: rawChatHistory = [], resources, documents, contentList } = config.configurable;
   const { tplConfig } = config?.configurable || {};
 
   let optimizedQuery = '';
@@ -54,7 +47,6 @@ export async function processQuery(options: QueryProcessorOptions): Promise<Quer
     contentList,
     resources,
     documents,
-    projects,
   });
   ctxThis.engine.logger.log(`checkHasContext: ${hasContext}`);
 

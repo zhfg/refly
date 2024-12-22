@@ -32,11 +32,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
   const { addNode } = useCanvasControl();
 
   const { selectedItems, results, setSelectedItems } = useMultilingualSearchStore();
-  const importResourceStore = useImportResourceStoreShallow((state) => ({
-    selectedProjectId: state.selectedProjectId,
-    setSelectedProjectId: state.setSelectedProjectId,
-    setImportResourceModalVisible: state.setImportResourceModalVisible,
-  }));
+  const setImportResourceModalVisible = useImportResourceStoreShallow((state) => state.setImportResourceModalVisible);
   const [saveLoading, setSaveLoading] = useState(false);
 
   const handleSelectAll = (checked: boolean) => {
@@ -48,7 +44,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
       updateSourceListDrawer({ visible: false });
     }
     if (props.sourceType === 'multilingualSearch') {
-      importResourceStore.setImportResourceModalVisible(false);
+      setImportResourceModalVisible(false);
     }
   };
 

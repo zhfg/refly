@@ -3,7 +3,7 @@ export const buildContextFormat = () => {
   ## Context Handling:
   IMPORTANT: Before processing any context, always verify its relevance to the user's original query. Irrelevant context should be completely ignored.
 
-  You will be provided with context in XML format. This context is structured hierarchically and may include web search results, mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, documents, and projects. Always consider all relevant context when formulating your responses. The context is structured as follows:
+  You will be provided with context in XML format. This context is structured hierarchically and may include web search results, mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, and documents. Always consider all relevant context when formulating your responses. The context is structured as follows:
 
   <Context>
     <WebSearchContext>

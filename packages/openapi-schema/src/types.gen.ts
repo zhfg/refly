@@ -36,10 +36,6 @@ export type ReferenceMeta = {
    */
   title?: string;
   /**
-   * Reference project ID
-   */
-  projectId?: string;
-  /**
    * Reference URL
    */
   url?: string;
@@ -138,10 +134,6 @@ export type Resource = {
    */
   resourceType: ResourceType;
   /**
-   * Resource order in project
-   */
-  order?: number;
-  /**
    * Resource title
    */
   title: string;
@@ -149,10 +141,6 @@ export type Resource = {
    * Resource metadata
    */
   data?: ResourceMeta;
-  /**
-   * Project IDs related to this resource
-   */
-  projectIds?: Array<string>;
   /**
    * Resource index status
    */
@@ -223,33 +211,6 @@ export type Document = {
   updatedAt?: string;
 };
 
-export type Project = {
-  /**
-   * Project ID
-   */
-  projectId: string;
-  /**
-   * Project title
-   */
-  title: string;
-  /**
-   * Project description
-   */
-  description?: string;
-  /**
-   * Share code
-   */
-  shareCode?: string;
-  /**
-   * Project creation time
-   */
-  createdAt: string;
-  /**
-   * Project update time
-   */
-  updatedAt: string;
-};
-
 /**
  * Entity type
  */
@@ -304,7 +265,7 @@ export type LabelClass = {
 };
 
 /**
- * Label instances related to resources, projects, etc.
+ * Label instances related to entities
  */
 export type LabelInstance = {
   /**
@@ -664,60 +625,6 @@ export type SkillInstance = SkillMeta & {
 };
 
 /**
- * Skill job record
- */
-export type SkillJob = {
-  /**
-   * Job ID
-   */
-  jobId: string;
-  /**
-   * Skill ID
-   */
-  skillId: string;
-  /**
-   * Skill display name
-   */
-  skillDisplayName: string;
-  /**
-   * Skill job status
-   */
-  jobStatus: SkillJobStatus;
-  /**
-   * Related conversation
-   */
-  conversation?: Conversation;
-  /**
-   * Skill trigger
-   */
-  trigger?: SkillTrigger;
-  /**
-   * Skill input
-   */
-  input: SkillInput;
-  /**
-   * Skill context
-   */
-  context: SkillContext;
-  /**
-   * Skill template config
-   */
-  tplConfig?: SkillTemplateConfig;
-  /**
-   * Job creation time
-   */
-  createdAt: string;
-  /**
-   * Job update time
-   */
-  updatedAt: string;
-  /**
-   * Job messages (only returned in detail API)
-   */
-  messages?: Array<ChatMessage>;
-};
-
-/**
  * Source metadata
  */
 export type SourceMeta = {
@@ -743,10 +650,6 @@ export type SourceMeta = {
    * Related entity type
    */
   entityType?: string;
-  /**
-   * Related project ID
-   */
-  projectId?: string;
   /**
    * Original locale
    */
@@ -1056,116 +959,6 @@ export type ActionResult = {
 };
 
 /**
- * Chat message
- */
-export type ChatMessage = {
-  /**
-   * Message ID
-   */
-  readonly msgId: string;
-  /**
-   * Skill job ID
-   */
-  jobId?: string;
-  /**
-   * Message type
-   */
-  type: MessageType;
-  /**
-   * Message content
-   */
-  content: string;
-  /**
-   * Skill metadata
-   */
-  skillMeta?: SkillMeta;
-  /**
-   * Message logs
-   */
-  logs?: Array<string>;
-  /**
-   * Structured data output
-   */
-  structuredData?: {
-    [key: string]: unknown;
-  };
-  /**
-   * Errors
-   */
-  errors?: Array<string>;
-  /**
-   * Token usage
-   */
-  tokenUsage?: Array<TokenUsageItem>;
-  /**
-   * Skill invocation parameters
-   */
-  invokeParam?: InvokeSkillRequest;
-  /**
-   * Message creation time
-   */
-  createdAt?: string;
-  /**
-   * Message update time
-   */
-  updatedAt?: string;
-};
-
-/**
- * Conversation list item
- */
-export type Conversation = {
-  /**
-   * Conversation ID
-   */
-  convId?: string;
-  /**
-   * Project ID
-   */
-  projectId?: string;
-  /**
-   * Conversation title
-   */
-  title?: string;
-  /**
-   * Last message content
-   */
-  lastMessage?: string;
-  /**
-   * Number of chat messages in this conversation
-   */
-  messageCount?: number;
-  /**
-   * Conversation locale
-   */
-  locale?: string;
-  /**
-   * Origin page host
-   */
-  origin?: string;
-  /**
-   * Origin page title
-   */
-  originPageTitle?: string;
-  /**
-   * Origin page url
-   */
-  originPageUrl?: string;
-  /**
-   * Conversation creation time
-   */
-  createdAt?: string;
-  /**
-   * Conversation creation time
-   */
-  updatedAt?: string;
-  /**
-   * Conversation messages (only returned for getConversationDetail api)
-   */
-  messages?: Array<ChatMessage>;
-};
-
-/**
  * Resource index status
  */
 export type IndexStatus = 'init' | 'wait_parse' | 'wait_index' | 'finish' | 'parse_failed' | 'index_failed';
@@ -1427,10 +1220,6 @@ export type UpsertResourceRequest = {
    */
   resourceId?: string;
   /**
-   * Project ID (will add to the project when creating resource)
-   */
-  projectId?: string;
-  /**
    * Resource metadata
    */
   data?: ResourceMeta;
@@ -1579,70 +1368,6 @@ export type DeleteReferencesRequest = {
    * Reference ID list
    */
   referenceIds: Array<string>;
-};
-
-export type UpsertProjectRequest = {
-  /**
-   * Project ID (only used for update)
-   */
-  projectId?: string;
-  /**
-   * Project title
-   */
-  title?: string;
-  /**
-   * Project description
-   */
-  description?: string;
-};
-
-export type UpsertProjectResponse = BaseResponse & {
-  data?: Project;
-};
-
-export type BindProjectResourceRequest = {
-  /**
-   * Project ID
-   */
-  projectId: string;
-  /**
-   * Resource ID
-   */
-  resourceId: string;
-  /**
-   * Resource order in project
-   */
-  order?: number;
-  /**
-   * Operation type
-   */
-  operation: 'bind' | 'unbind';
-};
-
-/**
- * Operation type
- */
-export type operation = 'bind' | 'unbind';
-
-export type DeleteProjectRequest = {
-  /**
-   * Project ID to delete
-   */
-  projectId: string;
-};
-
-export type ListProjectResponse = BaseResponse & {
-  /**
-   * Project list
-   */
-  data?: Array<Project>;
-};
-
-export type GetProjectDetailResponse = BaseResponse & {
-  /**
-   * Project data
-   */
-  data?: Project;
 };
 
 /**
@@ -2044,30 +1769,6 @@ export type SkillContextResourceItem = {
 };
 
 /**
- * Skill context project item
- */
-export type SkillContextProjectItem = {
-  /**
-   * Project ID
-   */
-  projectId?: string;
-  /**
-   * Project
-   */
-  project?: Project;
-  /**
-   * Whether this project is current
-   */
-  isCurrent?: boolean;
-  /**
-   * Project context metadata
-   */
-  metadata?: {
-    [key: string]: unknown;
-  };
-};
-
-/**
  * Skill context document item
  */
 export type SkillContextDocumentItem = {
@@ -2132,10 +1833,6 @@ export type SkillContext = {
    */
   resources?: Array<SkillContextResourceItem>;
   /**
-   * Context projects
-   */
-  projects?: Array<SkillContextProjectItem>;
-  /**
    * Context documents
    */
   documents?: Array<SkillContextDocumentItem>;
@@ -2149,7 +1846,7 @@ export type SkillContext = {
   urls?: Array<SkillContextUrlItem>;
 };
 
-export type SkillContextKey = 'resources' | 'projects' | 'documents' | 'contentList' | 'urls';
+export type SkillContextKey = 'resources' | 'documents' | 'contentList' | 'urls';
 
 export type SelectionKey =
   | 'documentSelection'
@@ -2201,11 +1898,6 @@ export type SkillInvocationConfig = {
    */
   context?: SkillContextRuleGroup;
 };
-
-/**
- * Skill job status
- */
-export type SkillJobStatus = 'scheduling' | 'running' | 'finish' | 'failed';
 
 export type ActionType = 'skill' | 'tool';
 
@@ -2432,68 +2124,6 @@ export type DeleteSkillTriggerRequest = {
   triggerId: string;
 };
 
-export type ListSkillJobsResponse = BaseResponse & {
-  /**
-   * Skill job list
-   */
-  data?: Array<SkillJob>;
-};
-
-export type GetSkillJobDetailResponse = BaseResponse & {
-  /**
-   * Skill job
-   */
-  data?: SkillJob;
-};
-
-export type CreateConversationRequest = {
-  /**
-   * Conversation title
-   */
-  title?: string;
-  /**
-   * Project ID
-   */
-  projectId?: string;
-  /**
-   * Conversation locale
-   */
-  locale?: string;
-  /**
-   * Origin page host
-   */
-  origin?: string;
-  /**
-   * Origin page title
-   */
-  originPageTitle?: string;
-  /**
-   * Origin page url
-   */
-  originPageUrl?: string;
-};
-
-export type CreateConversationResponse = BaseResponse & {
-  /**
-   * Created conversation
-   */
-  data?: Conversation;
-};
-
-export type ListConversationResponse = BaseResponse & {
-  /**
-   * Conversation list
-   */
-  data?: Array<Conversation>;
-};
-
-export type GetConversationDetailResponse = BaseResponse & {
-  /**
-   * Conversation data
-   */
-  data?: Conversation;
-};
-
 export type UpdateUserSettingsRequest = {
   /**
    * User name
@@ -2700,7 +2330,7 @@ export type SearchOptions = {
   enableReranker?: boolean;
 };
 
-export type SearchDomain = 'resource' | 'document' | 'canvas' | 'skill' | 'tool';
+export type SearchDomain = 'resource' | 'document' | 'canvas';
 
 export type SearchMode = 'keyword' | 'vector' | 'hybrid';
 
@@ -2992,10 +2622,6 @@ export type ListResourcesData = {
      */
     pageSize?: number;
     /**
-     * Project ID
-     */
-    projectId?: string;
-    /**
      * Resource ID
      */
     resourceId?: string;
@@ -3167,86 +2793,6 @@ export type DeleteReferencesData = {
 export type DeleteReferencesResponse = unknown;
 
 export type DeleteReferencesError = unknown;
-
-export type ListProjectsData = {
-  query?: {
-    /**
-     * Order
-     */
-    order?: ListOrder;
-    /**
-     * Page number
-     */
-    page?: number;
-    /**
-     * Page size
-     */
-    pageSize?: number;
-    /**
-     * Project ID
-     */
-    projectId?: string;
-    /**
-     * Resource ID
-     */
-    resourceId?: string;
-  };
-};
-
-export type ListProjectsResponse = ListProjectResponse;
-
-export type ListProjectsError = unknown;
-
-export type GetProjectDetailData = {
-  query: {
-    /**
-     * Project ID to retrieve
-     */
-    projectId: string;
-  };
-};
-
-export type GetProjectDetailResponse2 = GetProjectDetailResponse;
-
-export type GetProjectDetailError = unknown;
-
-export type UpdateProjectData = {
-  /**
-   * Project update request
-   */
-  body: UpsertProjectRequest;
-};
-
-export type UpdateProjectResponse = UpsertProjectResponse;
-
-export type UpdateProjectError = unknown;
-
-export type CreateProjectData = {
-  /**
-   * Project creation request
-   */
-  body: UpsertProjectRequest;
-};
-
-export type CreateProjectResponse = UpsertProjectResponse;
-
-export type CreateProjectError = unknown;
-
-export type BindProjectResourcesData = {
-  body: Array<BindProjectResourceRequest>;
-};
-
-export type BindProjectResourcesResponse = BaseResponse;
-
-export type BindProjectResourcesError = unknown;
-
-export type DeleteProjectData = {
-  body: DeleteProjectRequest;
-};
-
-export type DeleteProjectResponse = BaseResponse;
-
-export type DeleteProjectError = unknown;
 
 export type CreateShareData = {
   body: CreateShareRequest;
@@ -3573,82 +3119,6 @@ export type DeleteSkillTriggerData = {
 export type DeleteSkillTriggerResponse = BaseResponse;
 
 export type DeleteSkillTriggerError = unknown;
-
-export type ListSkillJobsData = {
-  query?: {
-    /**
-     * Job status
-     */
-    jobStatus?: SkillJobStatus;
-    /**
-     * Page number
-     */
-    page?: number;
-    /**
-     * Page size
-     */
-    pageSize?: number;
-    /**
-     * Skill ID
-     */
-    skillId?: string;
-  };
-};
-
-export type ListSkillJobsResponse2 = ListSkillJobsResponse;
-
-export type ListSkillJobsError = unknown;
-
-export type GetSkillJobDetailData = {
-  query?: {
-    /**
-     * Job ID
-     */
-    jobId?: string;
-  };
-};
-
-export type GetSkillJobDetailResponse2 = GetSkillJobDetailResponse;
-
-export type GetSkillJobDetailError = unknown;
-
-export type ListConversationsData = {
-  query?: {
-    /**
-     * Order
-     */
-    order?: ListOrder;
-    /**
-     * Page number
-     */
-    page?: number;
-    /**
-     * Page size
-     */
-    pageSize?: number;
-    /**
-     * Project ID
-     */
-    projectId?: string;
-  };
-};
-
-export type ListConversationsResponse = ListConversationResponse;
-
-export type ListConversationsError = unknown;
-
-export type GetConversationDetailData = {
-  path: {
-    /**
-     * Conversation ID
-     */
-    convId: string;
-  };
-};
-
-export type GetConversationDetailResponse2 = GetConversationDetailResponse;
-
-export type GetConversationDetailError = unknown;
 
 export type GetSettingsResponse = GetUserSettingsResponse;
 

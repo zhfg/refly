@@ -227,7 +227,6 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
         title: metadata?.title,
         entityId: metadata?.entityId,
         entityType: metadata?.domain,
-        projectId: metadata?.projectId,
         sourceType: 'library', // Add source type for knowledge base content
       },
     });
@@ -240,7 +239,6 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
       title: document.document?.title,
       pageContent: document.document?.content || '',
       metadata: {
-        projectId: document.document?.docId,
         title: document.document?.title,
         entityId: document.document?.docId,
         entityType: 'document',

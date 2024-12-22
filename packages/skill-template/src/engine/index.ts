@@ -13,7 +13,6 @@ import {
   UpdateResourceResponse,
   UpsertResourceRequest,
   User,
-  GetCanvasDetailResponse,
   UpsertCanvasRequest,
   CreateCanvasResponse,
   ResourceType,
@@ -22,16 +21,11 @@ import {
   WebSearchRequest,
   WebSearchResponse,
   ListCanvasesData,
-  UpsertProjectRequest,
-  CreateProjectResponse,
-  UpdateProjectResponse,
   AddReferencesRequest,
   AddReferencesResponse,
   DeleteReferencesRequest,
   DeleteReferencesResponse,
   GetResourceDetailData,
-  GetProjectDetailData,
-  GetProjectDetailResponse,
   BatchCreateResourceResponse,
   SearchResult,
   RerankResponse,
@@ -74,9 +68,6 @@ export interface ReflyService {
   createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
   batchCreateResource: (user: User, req: UpsertResourceRequest[]) => Promise<BatchCreateResourceResponse>;
   updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;
-  createProject: (user: User, req: UpsertProjectRequest) => Promise<CreateProjectResponse>;
-  updateProject: (user: User, req: UpsertProjectRequest) => Promise<UpdateProjectResponse>;
-  getProjectDetail: (user: User, req: GetProjectDetailData['query']) => Promise<GetProjectDetailResponse>;
   createLabelClass: (user: User, req: CreateLabelClassRequest) => Promise<CreateLabelClassResponse>;
   createLabelInstance: (user: User, req: CreateLabelInstanceRequest) => Promise<CreateLabelInstanceResponse>;
   webSearch: (user: User, req: WebSearchRequest | BatchWebSearchRequest) => Promise<WebSearchResponse>;

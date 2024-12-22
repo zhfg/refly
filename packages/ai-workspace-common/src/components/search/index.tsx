@@ -10,7 +10,7 @@ import { DataList } from './data-list';
 
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { SearchDomain, SearchResult, SkillMeta } from '@refly/openapi-schema';
+import { SearchDomain, SearchResult } from '@refly/openapi-schema';
 import { RenderItem } from '@refly-packages/ai-workspace-common/components/search/types';
 import classNames from 'classnames';
 
@@ -47,9 +47,6 @@ export const Search = (props: SearchProps) => {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const [isComposing, setIsComposing] = useState(false);
   const { t } = useTranslation();
-
-  // skill
-  const [selectedSkill, setSelectedSkill] = useState<SkillMeta>();
 
   const pages = searchStore.pages;
   const setPages = searchStore.setPages;
@@ -98,12 +95,6 @@ export const Search = (props: SearchProps) => {
         return 'canvas';
       case 'readSesources':
         return 'resource';
-      case 'knowledgeBases':
-        return 'project';
-      case 'convs':
-        return 'conversation';
-      case 'skills':
-        return 'skill';
       default:
         return '';
     }
@@ -152,13 +143,11 @@ export const Search = (props: SearchProps) => {
       const canvases = resData.filter((item) => item?.domain === 'canvas') || [];
       const resources = resData.filter((item) => item?.domain === 'resource') || [];
       const documents = resData.filter((item) => item?.domain === 'document') || [];
-      const skills = resData.filter((item) => item?.domain === 'skill') || [];
 
       searchStore.setSearchedRes({
         canvases,
         resources,
         documents,
-        skills,
       });
     },
     200,

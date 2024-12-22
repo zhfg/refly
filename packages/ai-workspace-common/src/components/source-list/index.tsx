@@ -1,22 +1,13 @@
-import { Resource, Source } from '@refly/openapi-schema';
-import { getClientOrigin, safeParseURL } from '@refly/utils/url';
-import { Skeleton, Tooltip } from '@arco-design/web-react';
+import { Source } from '@refly/openapi-schema';
+import { safeParseURL } from '@refly/utils/url';
 import { Popover } from 'antd';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // 样式
 import './index.scss';
-import { IconBook, IconCompass, IconRight } from '@arco-design/web-react/icon';
-import { Markdown } from '../markdown';
+import { IconRight } from '@arco-design/web-react/icon';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { mapSourceToResource } from '@refly-packages/ai-workspace-common/utils/resource';
-import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { ClientChatMessage } from '@refly/common-types';
-import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { TranslationWrapper } from '@refly-packages/ai-workspace-common/components/translation-wrapper';
 
 interface SourceListProps {
   sources: Source[];
@@ -25,9 +16,7 @@ interface SourceListProps {
 
 const SourceItem = ({ source, index }: { source: Source; index: number }) => {
   const domain = safeParseURL(source?.url || '');
-  const { jumpToResource, jumpToCanvas } = useJumpNewPath();
   const { i18n } = useTranslation();
-  const currentUiLocale = i18n.language as 'en' | 'zh-CN';
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
 
@@ -35,12 +24,12 @@ const SourceItem = ({ source, index }: { source: Source; index: number }) => {
   const handleClick = () => {
     if (source?.metadata?.sourceType === 'library') {
       if (source.metadata?.entityType === 'resource') {
-        jumpToResource({ resId: source.metadata.entityId });
+        // jumpToResource({ resId: source.metadata.entityId });
       } else if (source.metadata?.entityType === 'canvas') {
-        jumpToCanvas({
-          canvasId: source.metadata?.entityId,
-          projectId: source?.metadata?.projectId,
-        });
+        // jumpToCanvas({
+        //   canvasId: source.metadata?.entityId,
+        //   projectId: source?.metadata?.projectId,
+        // });
       }
     } else {
       // For web links, open in new tab
@@ -159,8 +148,6 @@ const ViewMoreItem = ({
 };
 
 export const SourceList = (props: SourceListProps) => {
-  const [scrollLoading] = useState(<Skeleton animation></Skeleton>);
-
   const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
     updateSourceListDrawer: state.updateSourceListDrawer,
   }));

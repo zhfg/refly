@@ -50,15 +50,7 @@ export class RewriteDoc extends BaseSkill {
 
   commonPreprocess = async (state: GraphState, config: SkillRunnableConfig, module: SkillPromptModule) => {
     const { messages = [], query: originalQuery } = state;
-    const {
-      locale = 'en',
-      chatHistory = [],
-      modelInfo,
-      resources,
-      documents,
-      contentList,
-      projects,
-    } = config.configurable;
+    const { locale = 'en', chatHistory = [], modelInfo, resources, documents, contentList } = config.configurable;
 
     const { tplConfig } = config?.configurable || {};
     const enableWebSearch = tplConfig?.enableWebSearch?.value as boolean;
@@ -86,7 +78,6 @@ export class RewriteDoc extends BaseSkill {
       contentList,
       resources,
       documents,
-      projects: projects,
     });
     this.engine.logger.log(`checkHasContext: ${hasContext}`);
 

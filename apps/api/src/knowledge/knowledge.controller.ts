@@ -9,27 +9,20 @@ import {
   DefaultValuePipe,
 } from '@nestjs/common';
 import {
-  UpsertProjectRequest,
-  UpsertProjectResponse,
   UpsertResourceRequest,
   UpsertResourceResponse,
-  GetProjectDetailResponse,
-  ListProjectResponse,
   ListResourceResponse,
   GetResourceDetailResponse,
-  DeleteProjectRequest,
   DeleteResourceRequest,
   DeleteResourceResponse,
   ResourceType,
   BatchCreateResourceResponse,
   ReindexResourceRequest,
   ReindexResourceResponse,
-  BindProjectResourceRequest,
   QueryReferencesRequest,
   AddReferencesRequest,
   DeleteReferencesRequest,
   ListOrder,
-  DeleteProjectResponse,
   ListDocumentResponse,
   GetDocumentDetailResponse,
   UpsertDocumentRequest,
@@ -41,94 +34,12 @@ import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { buildSuccessResponse } from '@/utils';
 import { User } from '@/utils/decorators/user.decorator';
-import { documentPO2DTO, resourcePO2DTO, projectPO2DTO, referencePO2DTO } from './knowledge.dto';
-import { ParamsError, ProjectNotFoundError } from '@refly-packages/errors';
+import { documentPO2DTO, resourcePO2DTO, referencePO2DTO } from './knowledge.dto';
+import { ParamsError } from '@refly-packages/errors';
 
 @Controller('v1/knowledge')
 export class KnowledgeController {
   constructor(private knowledgeService: KnowledgeService) {}
-
-  @UseGuards(JwtAuthGuard)
-  @Get('project/list')
-  async listProjects(
-    @User() user: UserType,
-    @Query('projectId') projectId: string,
-    @Query('resourceId') resourceId: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
-    @Query('order', new DefaultValuePipe('creationDesc')) order: ListOrder,
-  ): Promise<ListProjectResponse> {
-    const projects = await this.knowledgeService.listProjects(user, {
-      projectId,
-      resourceId,
-      page,
-      pageSize,
-      order,
-    });
-    return buildSuccessResponse(projects.map(projectPO2DTO));
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('project/detail')
-  async getProjectDetail(
-    @User() user: UserType,
-    @Query('projectId') projectId: string,
-  ): Promise<GetProjectDetailResponse> {
-    const project = await this.knowledgeService.getProjectDetail(user, { projectId });
-    return buildSuccessResponse(projectPO2DTO(project));
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('project/update')
-  async updateProject(
-    @User() user: UserType,
-    @Body() body: UpsertProjectRequest,
-  ): Promise<UpsertProjectResponse> {
-    const { projectId } = body;
-    if (!projectId) {
-      throw new ParamsError('projectId is required');
-    }
-    const project = await this.knowledgeService.getProjectDetail(user, { projectId });
-    if (!project) {
-      throw new ProjectNotFoundError();
-    }
-
-    const upserted = await this.knowledgeService.upsertProject(user, body);
-    return buildSuccessResponse(projectPO2DTO(upserted));
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('project/create')
-  async createProject(
-    @User() user: UserType,
-    @Body() body: UpsertProjectRequest,
-  ): Promise<UpsertProjectResponse> {
-    if (body.projectId) {
-      throw new ParamsError('projectId is not allowed');
-    }
-    const project = await this.knowledgeService.upsertProject(user, body);
-    return buildSuccessResponse(projectPO2DTO(project));
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('project/delete')
-  async deleteProject(
-    @User() user: UserType,
-    @Body() body: DeleteProjectRequest,
-  ): Promise<DeleteProjectResponse> {
-    if (!body.projectId) {
-      throw new ParamsError('projectId is required');
-    }
-    await this.knowledgeService.deleteProject(user, body.projectId);
-    return buildSuccessResponse({});
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('project/bindRes')
-  async bindProjectResources(@User() user: UserType, @Body() body: BindProjectResourceRequest[]) {
-    await this.knowledgeService.bindProjectResources(user, body);
-    return buildSuccessResponse({});
-  }
 
   @UseGuards(JwtAuthGuard)
   @Get('resource/list')
@@ -142,7 +53,6 @@ export class KnowledgeController {
     @Query('order', new DefaultValuePipe('creationDesc')) order: ListOrder,
   ): Promise<ListResourceResponse> {
     const resources = await this.knowledgeService.listResources(user, {
-      projectId,
       resourceId,
       resourceType,
       page,

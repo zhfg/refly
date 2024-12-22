@@ -16,7 +16,6 @@ export const convertMarkToNode = (mark: Mark, nodeType: CanvasNodeType, sourceTy
         contentPreview: mark.data,
         selectedContent: mark.data,
         xPath: mark.xPath,
-        projectId: mark.projectId,
         sourceType,
       },
     },

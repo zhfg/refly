@@ -46,12 +46,7 @@ export const countContextTokens = (context: IContext) => {
 };
 
 export const checkHasContext = (context: IContext) => {
-  return (
-    context?.contentList?.length > 0 ||
-    context?.resources?.length > 0 ||
-    context?.documents?.length > 0 ||
-    context?.projects?.length > 0
-  );
+  return context?.contentList?.length > 0 || context?.resources?.length > 0 || context?.documents?.length > 0;
 };
 
 export const countMessagesTokens = (messages: BaseMessage[] = []) => {
