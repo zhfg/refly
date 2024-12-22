@@ -18,7 +18,7 @@ import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-i
 import { useTranslation } from 'react-i18next';
 import { ActionResult, ActionStatus, ConfigScope, InvokeSkillRequest } from '@refly/openapi-schema';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { genActionResultID } from '@refly-packages/utils/index';
+import { genActionResultID, getClientOrigin } from '@refly-packages/utils/index';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { LOCALE } from '@refly/common-types';
 import { HiCheck, HiXMark } from 'react-icons/hi2';
@@ -27,6 +27,7 @@ import { useDocumentContext } from '@refly-packages/ai-workspace-common/context/
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 interface AISelectorProps {
   open: boolean;
@@ -96,6 +97,8 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
 
     const context = convertContextItemsToContext(contextItems);
     if (context.documents) {
+      const hasCurrentDoc = context.documents.some((doc) => doc.docId === docId);
+
       context.documents = context.documents.map((doc) => ({
         ...doc,
         isCurrent: doc.docId === docId,
@@ -104,6 +107,22 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
           isCurrentContext: doc.docId === docId,
         },
       }));
+
+      if (!hasCurrentDoc) {
+        context.documents.push({
+          docId,
+          document: {
+            docId,
+            title: '',
+          },
+          isCurrent: true,
+          metadata: {
+            nodeId: docId, // TODO: need use nodes id, use real canvas store nodes id
+            url: getClientOrigin(),
+            isCurrentContext: true,
+          },
+        });
+      }
     }
 
     const resultHistory = historyItems.map((item) => ({
@@ -140,7 +159,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       param.input.query =
         `> ${uiLocale === LOCALE.EN ? '**User Selected Text:** ' : '**用户选中的文本:** '} ${selectedMdText}` +
         `\n\n` +
-        `${uiLocale === LOCALE.EN ? '**Please answer question based on the user selected text:** ' : '**请根据用户选中的文本回答问题:** '} ${inputValue}`;
+        `${uiLocale === LOCALE.EN ? '**Please answer the following question based on the user selected text:** ' : '**请根据用户选中的文本回答以下问题:** '} ${inputValue}`;
     }
 
     setIsLoading(true);
