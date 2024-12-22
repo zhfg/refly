@@ -1,30 +1,24 @@
-import { Dropdown, DropdownProps, MenuProps, Switch } from 'antd';
-import { IconDown, IconSettings } from '@arco-design/web-react/icon';
-import { useTranslation } from 'react-i18next';
+import { DropdownProps } from 'antd';
 import { ModelSelector } from './model-selector';
-import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 
 interface AISettingsDropdownProps {
   collapsed?: boolean; // Whether to collapse all settings into dropdown
   className?: string;
   briefMode?: boolean; // Whether to show brief mode
-  modelSelectorPlacement?: DropdownProps['placement'];
   placement?: DropdownProps['placement'];
+  trigger?: DropdownProps['trigger'];
 }
 
 export const AISettingsDropdown = ({
   collapsed = false,
   className = '',
   briefMode = false,
-  modelSelectorPlacement = 'bottom',
-  placement = 'topLeft',
+  placement = 'bottomLeft',
+  trigger = ['click'],
 }: AISettingsDropdownProps) => {
-  const { t } = useTranslation();
-
   return (
     <>
-      <ModelSelector placement={modelSelectorPlacement} />
+      <ModelSelector className={className} placement={placement} trigger={trigger} briefMode={briefMode} />
     </>
   );
 };

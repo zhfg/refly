@@ -3,13 +3,12 @@ import {
   SkillContextResourceItem,
   SkillContextDocumentItem,
   SearchDomain,
-  SkillContextProjectItem,
   Entity,
 } from '@refly-packages/openapi-schema';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { IContext, GraphState, SkillContextContentItemMetadata } from '../types';
-import { countToken, ModelContextLimitMap } from './token';
-import { MAX_NEED_RECALL_TOKEN, SHORT_CONTENT_THRESHOLD, MIN_RELEVANCE_SCORE } from './constants';
+import { countToken } from './token';
+import { MAX_NEED_RECALL_TOKEN, SHORT_CONTENT_THRESHOLD } from './constants';
 import { DocumentInterface, Document } from '@langchain/core/documents';
 import { ContentNodeType, NodeMeta } from '../../engine';
 import { truncateTextWithToken } from './truncator';

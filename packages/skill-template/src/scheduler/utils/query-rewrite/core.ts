@@ -3,8 +3,7 @@ import { summarizeChatHistory, summarizeContext } from '../summarizer';
 import { z } from 'zod';
 import { BaseSkill, SkillRunnableConfig } from '../../../base';
 import { SkillTemplateConfig } from '@refly-packages/openapi-schema';
-import { ModelContextLimitMap } from '../token';
-import { MAX_CONTEXT_RATIO, MAX_QUERY_TOKENS_RATIO } from '../constants';
+import { MAX_CONTEXT_RATIO, MAX_QUERY_TOKENS_RATIO, DEFAULT_MODEL_CONTEXT_LIMIT } from '../constants';
 import { truncateTextWithToken } from '../truncator';
 import { safeStringifyJSON } from '@refly-packages/utils';
 import { extractStructuredData } from '../extractor';
@@ -36,7 +35,7 @@ export const postprocessContext = (
 
   mentionedContextList.forEach((item) => {
     if (item.type === 'document') {
-      // 这里需要根据entityId在originalContext中找到对应的document
+      // Find original document from originalContext by entityId
       const originalDocument = originalContext.documents.find((c, index) => `document-${index}` === item.entityId);
       if (originalDocument) {
         context.documents.push({
@@ -45,7 +44,7 @@ export const postprocessContext = (
         });
       }
     } else if (item.type === 'resource') {
-      // 这里需要根据entityId在originalContext中找到对应的resource
+      // Find original resource from originalContext by entityId
       const originalResource = originalContext.resources.find((r, index) => `resource-${index}` === item.entityId);
       if (originalResource) {
         context.resources.push({
@@ -54,7 +53,7 @@ export const postprocessContext = (
         });
       }
     } else if (item.type === 'selectedContent') {
-      // 这里需要根据entityId在originalContext中找到对应的selectedContent
+      // Find original selectedContent from originalContext by entityId
       const originalSelectedContent = originalContext.contentList.find(
         (c, index) => `content-${index}` === item.entityId,
       );
@@ -95,7 +94,7 @@ export async function analyzeQueryAndContext(
   // set current step
   ctx.config.metadata.step = { name: 'analyzeContext' };
 
-  const { chatHistory, resources, documents, contentList, projects, modelName } = ctx.config.configurable;
+  const { chatHistory, resources, documents, contentList, projects, modelInfo } = ctx.config.configurable;
   const context: IContext = {
     resources,
     documents,
@@ -105,7 +104,7 @@ export async function analyzeQueryAndContext(
 
   // Preprocess context for better extract mentioned context
   const preprocessedContext = preprocessContext(context);
-  const maxContextTokens = ModelContextLimitMap[modelName] * MAX_CONTEXT_RATIO;
+  const maxContextTokens = modelInfo.contextLimit * MAX_CONTEXT_RATIO;
   const summarizedContext = summarizeContext(preprocessedContext, maxContextTokens);
 
   // Summarize chat history
@@ -204,8 +203,8 @@ export const preprocessQuery = (
   query: string,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ) => {
-  const { modelName } = ctx.config.configurable;
-  const maxQueryTokens = (ModelContextLimitMap[modelName] || 128 * 1024) * MAX_QUERY_TOKENS_RATIO;
+  const { modelInfo } = ctx.config.configurable;
+  const maxQueryTokens = (modelInfo.contextLimit || DEFAULT_MODEL_CONTEXT_LIMIT) * MAX_QUERY_TOKENS_RATIO;
 
   return truncateTextWithToken(query, maxQueryTokens);
 };

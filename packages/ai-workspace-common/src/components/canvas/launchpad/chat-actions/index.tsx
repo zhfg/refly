@@ -93,7 +93,7 @@ export const ChatActions = (props: ChatActionsProps) => {
   return (
     <div className="chat-actions" ref={containerRef}>
       <div className="left-actions">
-        <AISettingsDropdown collapsed={containerWidth < COLLAPSE_WIDTH} briefMode={false} />
+        <AISettingsDropdown collapsed={containerWidth < COLLAPSE_WIDTH} briefMode={false} trigger={['click']} />
       </div>
       <div className="right-actions">
         {messageStateStore?.pending ? (

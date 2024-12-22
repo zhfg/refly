@@ -4,7 +4,7 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
 import { GraphState } from '../scheduler/types';
-import { ModelContextLimitMap, safeStringifyJSON } from '@refly-packages/utils';
+import { safeStringifyJSON } from '@refly-packages/utils';
 
 // utils
 import { buildFinalRequestMessages } from '../scheduler/utils/message';

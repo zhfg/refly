@@ -12,7 +12,7 @@ import {
 } from 'react-icons/hi2';
 import { IoIosMore } from 'react-icons/io';
 import { HiOutlineReply } from 'react-icons/hi';
-import { LuSearch, LuSettings, LuCheck, LuCopy, LuTrash, LuRotateCw } from 'react-icons/lu';
+import { LuSearch, LuSettings, LuCheck, LuCopy, LuTrash, LuRotateCw, LuBrain, LuGift } from 'react-icons/lu';
 import { LuView } from 'react-icons/lu';
 import { RiErrorWarningLine } from 'react-icons/ri';
 
@@ -24,8 +24,11 @@ import { IoLibraryOutline } from 'react-icons/io5';
 import { HiOutlineChevronDown } from 'react-icons/hi';
 
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
-import AnthropicIcon from '@refly-packages/ai-workspace-common/assets/anthropic.svg';
-import GeminiIcon from '@refly-packages/ai-workspace-common/assets/google-gemini-icon.svg';
+import ClaudeIcon from '@refly-packages/ai-workspace-common/assets/claude.svg';
+import GeminiIcon from '@refly-packages/ai-workspace-common/assets/gemini.svg';
+import QwenIcon from '@refly-packages/ai-workspace-common/assets/qwen.svg';
+import MetaLlamaIcon from '@refly-packages/ai-workspace-common/assets/meta.svg';
+import DeepSeekIcon from '@refly-packages/ai-workspace-common/assets/deepseek.svg';
 
 export const IconProject = IconFolder;
 export const IconCanvasFill = HiSparkles;
@@ -53,10 +56,15 @@ export const IconError = RiErrorWarningLine;
 export const IconLoading = AiOutlineLoading3Quarters;
 export const IconSettings = LuSettings;
 export const IconCopy = LuCopy;
+export const IconModel = LuBrain;
 export const IconDown = HiOutlineChevronDown;
+export const IconSubscription = LuGift;
 
 export const ModelProviderIcons = {
   openai: OpenAIIcon,
-  anthropic: AnthropicIcon,
+  anthropic: ClaudeIcon,
   google: GeminiIcon,
+  qwen: QwenIcon,
+  'meta-llama': MetaLlamaIcon,
+  deepseek: DeepSeekIcon,
 };

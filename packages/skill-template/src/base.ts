@@ -18,6 +18,7 @@ import {
   Icon,
   Artifact,
   ActionStepMeta,
+  ModelInfo,
 } from '@refly-packages/openapi-schema';
 import { EventEmitter } from 'node:stream';
 
@@ -167,7 +168,7 @@ export interface SkillRunnableConfig extends RunnableConfig {
     canvasId?: string;
     locale?: string;
     uiLocale?: string;
-    modelName?: string;
+    modelInfo?: ModelInfo;
     currentSkill?: SkillMeta;
     currentStep?: ActionStepMeta;
     chatHistory?: BaseMessage[];

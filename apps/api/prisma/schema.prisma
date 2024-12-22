@@ -737,21 +737,25 @@ model StorageUsageMeter {
 
 model ModelInfo {
   /// Primary key
-  pk        BigInt   @id @default(autoincrement())
+  pk           BigInt   @id @default(autoincrement())
   /// Model name
-  name      String   @unique @map("name")
+  name         String   @unique @map("name")
   /// Model label
-  label     String   @map("label")
+  label        String   @map("label")
   /// Model provider
-  provider  String   @map("provider")
+  provider     String   @map("provider")
+  /// Model context limit (in tokens)
+  contextLimit Int      @default(0) @map("context_limit")
+  /// Model max output length (in tokens)
+  maxOutput    Int      @default(0) @map("max_output")
   /// Model tier
-  tier      String   @map("tier")
+  tier         String   @map("tier")
   /// Whether this model is enabled
-  enabled   Boolean  @default(true) @map("enabled")
+  enabled      Boolean  @default(true) @map("enabled")
   /// Create timestamp
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@map("model_infos")
 }

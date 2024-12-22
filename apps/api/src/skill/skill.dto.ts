@@ -1,6 +1,7 @@
 import {
   ActionResult,
   InvokeSkillRequest,
+  ModelInfo,
   SimpleEventName,
   SkillInstance,
   SkillJob,
@@ -22,6 +23,7 @@ export interface InvokeSkillJobData extends InvokeSkillRequest {
   uid: string;
   rawParam: string;
   result?: ActionResult;
+  modelInfo?: ModelInfo;
 }
 
 export function skillInstancePO2DTO(skill: SkillInstanceModel): SkillInstance {

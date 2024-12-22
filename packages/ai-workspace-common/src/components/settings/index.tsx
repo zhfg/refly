@@ -9,10 +9,9 @@ import { Subscription } from '@refly-packages/ai-workspace-common/components/set
 
 import { RiAccountBoxLine } from 'react-icons/ri';
 import { HiOutlineLanguage } from 'react-icons/hi2';
-import { MdOutlineSubscriptions } from 'react-icons/md';
 
 import './index.scss';
-import { IconSettings } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconSettings, IconSubscription } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 const iconStyle = { fontSize: 16, transform: 'translateY(3px)' };
 
@@ -28,7 +27,7 @@ export const SettingModal = (props: SettingModalProps) => {
     {
       key: 'subscription',
       label: t('settings.tabs.subscription'),
-      icon: <MdOutlineSubscriptions style={iconStyle} />,
+      icon: <IconSubscription style={iconStyle} />,
       children: <Subscription />,
     },
     {

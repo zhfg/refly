@@ -10,7 +10,8 @@ import {
   GetSubscriptionUsageResponse,
   ListModelsResponse,
 } from '@refly-packages/openapi-schema';
-import { buildSuccessResponse, pick } from '@/utils';
+import { buildSuccessResponse } from '@/utils';
+import { modelInfoPO2DTO } from '@/misc/misc.dto';
 
 @Controller('v1/subscription')
 export class SubscriptionController {
@@ -44,6 +45,6 @@ export class SubscriptionController {
   @Get('modelList')
   async listModels(): Promise<ListModelsResponse> {
     const models = await this.subscriptionService.getModelList();
-    return buildSuccessResponse(models.map((m) => pick(m, ['name', 'label', 'provider', 'tier'])));
+    return buildSuccessResponse(models.map(modelInfoPO2DTO));
   }
 }
