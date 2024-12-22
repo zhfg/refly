@@ -140,7 +140,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
       {
         label: (
           <Popconfirm
-            title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas')}
+            title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', { canvas: canvasTitle })}
             onConfirm={handleDelete}
             onCancel={() => setPopupVisible(false)}
             okText={t('common.confirm')}
