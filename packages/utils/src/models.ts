@@ -7,18 +7,7 @@ export enum LLMType {
   Claude3Haiku = 'anthropic/claude-3-haiku',
   GeminiFlash15 = 'google/gemini-flash-1.5',
   GeminiPro15 = 'google/gemini-pro-1.5',
-  GeminiFlash20 = 'google/gemini-2.0-flash-exp:free',
 }
-
-export const ModelContextLimitMap = {
-  [LLMType.GPT4oMini]: 128 * 1024,
-  [LLMType.GPT4o]: 128 * 1024,
-  [LLMType.Claude35Sonnet]: 200 * 1024,
-  [LLMType.Claude3Haiku]: 200 * 1024,
-  [LLMType.GeminiFlash15]: 1024 * 1024,
-  [LLMType.GeminiPro15]: 1024 * 1024,
-  [LLMType.GeminiFlash20]: 1024 * 1024,
-};
 
 export const modelMap: Record<string, ModelInfo> = {
   [LLMType.GPT4o]: {
@@ -26,49 +15,48 @@ export const modelMap: Record<string, ModelInfo> = {
     label: 'GPT-4o',
     provider: 'openai',
     tier: 't1',
-    contextLimit: 128 * 1024,
+    contextLimit: 128000,
+    maxOutput: 16384,
   },
   [LLMType.GPT4oMini]: {
     name: LLMType.GPT4oMini,
     label: 'GPT-4o Mini',
     provider: 'openai',
     tier: 't2',
-    contextLimit: 128 * 1024,
+    contextLimit: 128000,
+    maxOutput: 16384,
   },
   [LLMType.Claude35Sonnet]: {
     name: LLMType.Claude35Sonnet,
     label: 'Claude 3.5 Sonnet',
     provider: 'anthropic',
     tier: 't1',
-    contextLimit: 200 * 1024,
+    contextLimit: 200000,
+    maxOutput: 8192,
   },
   [LLMType.Claude3Haiku]: {
     name: LLMType.Claude3Haiku,
     label: 'Claude 3 Haiku',
     provider: 'anthropic',
     tier: 't2',
-    contextLimit: 200 * 1024,
+    contextLimit: 200000,
+    maxOutput: 8192,
   },
   [LLMType.GeminiFlash15]: {
     name: LLMType.GeminiFlash15,
     label: 'Gemini 1.5 Flash',
     provider: 'google',
     tier: 't2',
-    contextLimit: 1024 * 1024,
+    contextLimit: 1000000,
+    maxOutput: 8192,
   },
   [LLMType.GeminiPro15]: {
     name: LLMType.GeminiPro15,
     label: 'Gemini 1.5 Pro',
     provider: 'google',
     tier: 't1',
-    contextLimit: 1024 * 1024,
-  },
-  [LLMType.GeminiFlash20]: {
-    name: LLMType.GeminiFlash20,
-    label: 'Gemini Flash 2.0',
-    provider: 'google',
-    tier: 'free',
-    contextLimit: 1024 * 1024,
+    contextLimit: 2000000,
+    maxOutput: 8192,
   },
 };
 

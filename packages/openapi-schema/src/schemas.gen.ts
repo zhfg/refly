@@ -4105,7 +4105,7 @@ export const UploadResponseSchema = {
 
 export const ModelInfoSchema = {
   type: 'object',
-  required: ['name', 'label', 'provider', 'tier'],
+  required: ['name', 'label', 'provider', 'tier', 'contextLimit', 'maxOutput'],
   properties: {
     name: {
       type: 'string',
@@ -4126,7 +4126,11 @@ export const ModelInfoSchema = {
     },
     contextLimit: {
       type: 'number',
-      description: 'Model context limit',
+      description: 'Model context limit (in tokens)',
+    },
+    maxOutput: {
+      type: 'number',
+      description: 'Model max output length (in tokens)',
     },
   },
 } as const;

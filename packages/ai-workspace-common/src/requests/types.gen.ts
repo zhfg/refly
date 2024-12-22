@@ -2836,9 +2836,13 @@ export type ModelInfo = {
      */
     tier: ModelTier;
     /**
-     * Model context limit
+     * Model context limit (in tokens)
      */
-    contextLimit?: number;
+    contextLimit: number;
+    /**
+     * Model max output length (in tokens)
+     */
+    maxOutput: number;
 };
 
 export type ListModelsResponse = BaseResponse & {

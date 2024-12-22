@@ -10,18 +10,18 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { safeStringifyJSON } from '@refly-packages/utils';
 import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition, Source } from '@refly-packages/openapi-schema';
-import { DocumentIntentType } from '@refly-packages/common-types';
 // types
 import { GraphState, IContext } from '../scheduler/types';
 // utils
 import { prepareContext } from '../scheduler/utils/context';
 import { analyzeQueryAndContext, preprocessQuery } from '../scheduler/utils/query-rewrite';
 import { truncateMessages, truncateSource } from '../scheduler/utils/truncator';
-import { countMessagesTokens, countToken, ModelContextLimitMap, checkHasContext } from '../scheduler/utils/token';
+import { countMessagesTokens, countToken, checkHasContext } from '../scheduler/utils/token';
 import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils/message';
 
 // prompts
 import * as rewriteCanvas from '../scheduler/module/rewriteCanvas';
+import { DEFAULT_MODEL_CONTEXT_LIMIT } from '../scheduler/utils/constants';
 
 export class RewriteDoc extends BaseSkill {
   name = 'rewriteDoc';
@@ -53,7 +53,7 @@ export class RewriteDoc extends BaseSkill {
     const {
       locale = 'en',
       chatHistory = [],
-      modelName,
+      modelInfo,
       resources,
       documents,
       contentList,
@@ -90,7 +90,7 @@ export class RewriteDoc extends BaseSkill {
     });
     this.engine.logger.log(`checkHasContext: ${hasContext}`);
 
-    const maxTokens = ModelContextLimitMap[modelName];
+    const maxTokens = modelInfo.contextLimit || DEFAULT_MODEL_CONTEXT_LIMIT;
     const queryTokens = countToken(query);
     const chatHistoryTokens = countMessagesTokens(usedChatHistory);
     const remainingTokens = maxTokens - queryTokens - chatHistoryTokens;

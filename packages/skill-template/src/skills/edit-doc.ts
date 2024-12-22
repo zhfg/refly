@@ -14,7 +14,7 @@ import { GraphState, IContext } from '../scheduler/types';
 import { prepareContext } from '../scheduler/utils/context';
 import { analyzeQueryAndContext, preprocessQuery } from '../scheduler/utils/query-rewrite';
 import { truncateMessages, truncateSource } from '../scheduler/utils/truncator';
-import { countMessagesTokens, countToken, ModelContextLimitMap, checkHasContext } from '../scheduler/utils/token';
+import { countMessagesTokens, countToken, checkHasContext } from '../scheduler/utils/token';
 import { buildFinalRequestMessages, SkillPromptModule } from '../scheduler/utils/message';
 
 // prompts
@@ -25,6 +25,7 @@ import { HighlightSelection, SelectedRange } from '../scheduler/module/editDocum
 
 import { InPlaceEditType } from '@refly-packages/utils';
 import { DocumentNotFoundError } from '@refly-packages/errors';
+import { DEFAULT_MODEL_CONTEXT_LIMIT } from '../scheduler/utils/constants';
 
 export class EditDoc extends BaseSkill {
   name = 'editDoc';
@@ -61,7 +62,7 @@ export class EditDoc extends BaseSkill {
     const {
       locale = 'en',
       chatHistory = [],
-      modelName,
+      modelInfo,
       resources,
       documents,
       contentList,
@@ -97,7 +98,7 @@ export class EditDoc extends BaseSkill {
     });
     this.engine.logger.log(`checkHasContext: ${hasContext}`);
 
-    const maxTokens = ModelContextLimitMap[modelName];
+    const maxTokens = modelInfo.contextLimit || DEFAULT_MODEL_CONTEXT_LIMIT;
     const queryTokens = countToken(query);
     const chatHistoryTokens = countMessagesTokens(usedChatHistory);
     const remainingTokens = maxTokens - queryTokens - chatHistoryTokens;

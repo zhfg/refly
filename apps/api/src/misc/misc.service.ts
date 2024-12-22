@@ -4,7 +4,6 @@ import { InjectQueue } from '@nestjs/bull';
 import {
   EntityType,
   ModelInfo,
-  ModelTier,
   ScrapeWeblinkRequest,
   ScrapeWeblinkResult,
   UploadResponse,
@@ -16,7 +15,7 @@ import { MINIO_EXTERNAL, MinioService } from '@/common/minio.service';
 import { randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { scrapeWeblink } from '@refly-packages/utils';
-import { pick, QUEUE_SYNC_STORAGE_USAGE } from '@/utils';
+import { QUEUE_SYNC_STORAGE_USAGE } from '@/utils';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
 import {
   CanvasNotFoundError,
@@ -25,6 +24,7 @@ import {
   ResourceNotFoundError,
   DocumentNotFoundError,
 } from '@refly-packages/errors';
+import { modelInfoPO2DTO } from './misc.dto';
 
 @Injectable()
 export class MiscService {
@@ -244,9 +244,6 @@ export class MiscService {
       where: { enabled: true },
     });
 
-    return models.map((model) => ({
-      ...pick(model, ['name', 'label', 'provider']),
-      tier: model.tier as ModelTier,
-    }));
+    return models.map((model) => modelInfoPO2DTO(model));
   }
 }

@@ -94,6 +94,7 @@ import { throttle } from 'lodash';
 import { ResultAggregator } from '@/utils/result';
 import { CollabContext } from '@/collab/collab.dto';
 import { DirectConnection } from '@hocuspocus/server';
+import { modelInfoPO2DTO } from '@/misc/misc.dto';
 
 export function createLangchainMessage(result: ActionResult, steps: ActionStep[]): BaseMessage[] {
   const query = result.title;
@@ -478,6 +479,7 @@ export class SkillService {
       ...param,
       uid,
       rawParam: JSON.stringify(param),
+      modelInfo: modelInfoPO2DTO(modelInfo),
     };
 
     if (existingResult) {
@@ -645,7 +647,7 @@ export class SkillService {
       eventListener?: (data: SkillEvent) => void;
     },
   ): Promise<SkillRunnableConfig> {
-    const { context, tplConfig, modelName, resultHistory, eventListener } = data;
+    const { context, tplConfig, modelInfo, resultHistory, eventListener } = data;
 
     const displayLocale =
       (data?.locale === 'auto' ? await detectLanguage(data?.input?.query) : data?.locale) ||
@@ -656,7 +658,7 @@ export class SkillService {
       configurable: {
         ...context,
         user: pick(user, ['uid', 'uiLocale', 'outputLocale']),
-        modelName,
+        modelInfo,
         locale: displayLocale,
         uiLocale: user.uiLocale,
         tplConfig,
