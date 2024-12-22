@@ -106,6 +106,7 @@ export const ModelSelector = ({
       ),
       children: modelList
         ?.filter((model) => model.tier === 't1')
+        .sort((a, b) => a.name.localeCompare(b.name))
         .map((model) => ({
           key: model.name,
           icon: <img className="w-4 h-4 mr-2" src={ModelProviderIcons[model.provider]} alt={model.provider} />,
@@ -141,6 +142,7 @@ export const ModelSelector = ({
       children:
         modelList
           ?.filter((model) => model.tier === 't2')
+          .sort((a, b) => a.name.localeCompare(b.name))
           .map((model) => {
             return {
               key: model.name,
@@ -161,6 +163,7 @@ export const ModelSelector = ({
       ),
       children: modelList
         ?.filter((model) => model.tier === 'free')
+        .sort((a, b) => a.name.localeCompare(b.name))
         .map((model) => ({
           key: model.name,
           icon: <img className="w-4 h-4 mr-2" src={ModelProviderIcons[model.provider]} alt={model.provider} />,

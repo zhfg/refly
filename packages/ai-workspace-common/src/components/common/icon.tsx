@@ -24,8 +24,11 @@ import { IoLibraryOutline } from 'react-icons/io5';
 import { HiOutlineChevronDown } from 'react-icons/hi';
 
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
-import AnthropicIcon from '@refly-packages/ai-workspace-common/assets/anthropic.svg';
-import GeminiIcon from '@refly-packages/ai-workspace-common/assets/google-gemini-icon.svg';
+import ClaudeIcon from '@refly-packages/ai-workspace-common/assets/claude.svg';
+import GeminiIcon from '@refly-packages/ai-workspace-common/assets/gemini.svg';
+import QwenIcon from '@refly-packages/ai-workspace-common/assets/qwen.svg';
+import MetaLlamaIcon from '@refly-packages/ai-workspace-common/assets/meta.svg';
+import DeepSeekIcon from '@refly-packages/ai-workspace-common/assets/deepseek.svg';
 
 export const IconProject = IconFolder;
 export const IconCanvasFill = HiSparkles;
@@ -59,6 +62,9 @@ export const IconSubscription = LuGift;
 
 export const ModelProviderIcons = {
   openai: OpenAIIcon,
-  anthropic: AnthropicIcon,
+  anthropic: ClaudeIcon,
   google: GeminiIcon,
+  qwen: QwenIcon,
+  'meta-llama': MetaLlamaIcon,
+  deepseek: DeepSeekIcon,
 };
