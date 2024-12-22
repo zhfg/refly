@@ -7,7 +7,6 @@ import { useDebouncedCallback } from 'use-debounce';
 import './index.scss';
 import { Home } from './home';
 import { DataList } from './data-list';
-import { Skill } from './skill';
 
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -332,15 +331,6 @@ export const Search = (props: SearchProps) => {
                   activeValue={value}
                   searchValue={searchValue}
                   setValue={setValue}
-                />
-              ) : null}
-              {activePage === 'skill-execute' ? (
-                <Skill
-                  key="skill"
-                  activeValue={value}
-                  searchValue={searchValue}
-                  setValue={setValue}
-                  selectedSkill={selectedSkill}
                 />
               ) : null}
             </Command.List>

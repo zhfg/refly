@@ -10,7 +10,6 @@ import { useMessageStateStore } from '@refly-packages/ai-workspace-common/stores
 
 import { CANVAS_TAG_CLOSED_REGEX } from '@refly-packages/ai-workspace-common/constants/canvas';
 
-import { getCanvasContent } from '@refly-packages/ai-workspace-common/components/copilot/utils';
 import { IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';

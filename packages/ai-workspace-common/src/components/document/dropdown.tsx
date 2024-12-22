@@ -11,7 +11,7 @@ import { useImportProjectModal } from '@refly-packages/ai-workspace-common/store
 import { IconCopy } from '@arco-design/web-react/icon';
 import { useDocumentStore } from '@refly-packages/ai-workspace-common/stores/document';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
-import { useProjectTabs } from '@refly-packages/ai-workspace-common/hooks/use-project-tabs';
+
 const iconStyle = {
   marginRight: 8,
   fontSize: 16,
@@ -32,9 +32,7 @@ interface DropListProps {
 
 const DropList = (props: DropListProps) => {
   const { handleCancel, handleDeleteClick, handlEditProject, type, getPopupContainer, position, canCopy } = props;
-  const canvasStore = useDocumentStore((state) => ({
-    editor: state.editor,
-  }));
+  const { editor } = useDocumentStore((state) => state.documentStates[state.activeDocumentId]);
   const { t } = useTranslation();
 
   return (
@@ -53,7 +51,6 @@ const DropList = (props: DropListProps) => {
           <div
             onClick={(e) => {
               e.stopPropagation();
-              const editor = canvasStore.editor;
               if (editor) {
                 const markdown = editor.storage.markdown.getMarkdown();
                 copyToClipboard(markdown);
@@ -120,7 +117,6 @@ export const DeleteDropdownMenu = (props: DeleteDropdownMenuProps) => {
   const { t } = useTranslation();
 
   const importProjectModal = useImportProjectModal();
-  const { handleDeleteTab } = useProjectTabs();
 
   const handleDeleteClick = async (e: MouseEvent) => {
     e.stopPropagation();
@@ -128,25 +124,11 @@ export const DeleteDropdownMenu = (props: DeleteDropdownMenuProps) => {
     if (type === 'document') {
       const { error } = await getClient().deleteDocument({ body: { docId: data.docId } });
       resultError = error;
-      // if (!resultError) {
-      //   handleDeleteTab(data.projectId, data.docId); // no need to delete tab
-      // }
-    }
-
-    if (type === 'project') {
-      const { error } = await getClient().deleteProject({ body: { projectId: data.projectId } });
-      resultError = error;
     }
 
     if (type === 'resource') {
       const { error } = await getClient().deleteResource({ body: { resourceId: data.resourceId } });
       resultError = error;
-      if (!resultError) {
-        const projectIds = data?.projectIds || [];
-        projectIds.forEach((projectId) => {
-          handleDeleteTab(projectId, data.resourceId);
-        });
-      }
     }
 
     if (type === 'resourceCollection') {

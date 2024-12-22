@@ -1,6 +1,5 @@
 import { CanvasNode } from '../nodes/types';
 import { SkillResponseNodePreview } from './skill-response';
-import { ToolResponseNodePreview } from './tool-response';
 import { ResourceNodePreview } from './resource';
 import { SkillNodePreview } from './skill';
 import { ToolNodePreview } from './tool';
@@ -43,8 +42,6 @@ export const NodePreview = ({ node, canvasId }: { node: CanvasNode<any>; canvasI
         return <ToolNodePreview />;
       case 'skillResponse':
         return <SkillResponseNodePreview resultId={node.data.entityId} />;
-      case 'toolResponse':
-        return <ToolResponseNodePreview resultId={node.data.entityId} />;
       default:
         return null;
     }
