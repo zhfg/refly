@@ -94,17 +94,19 @@ export function createLangchainMessage(result: ActionResult, steps: ActionStep[]
 
   return [
     new HumanMessage({ content: query }),
-    ...steps.map(
-      (step) =>
-        new AIMessage({
-          content: step.content, // TODO: dump artifact content to message
-          additional_kwargs: {
-            skillMeta: result.actionMeta,
-            structuredData: step.structuredData,
-            type: result.type,
-          },
-        }),
-    ),
+    ...(steps?.length > 0
+      ? steps?.map(
+          (step) =>
+            new AIMessage({
+              content: step.content, // TODO: dump artifact content to message
+              additional_kwargs: {
+                skillMeta: result.actionMeta,
+                structuredData: step.structuredData,
+                type: result.type,
+              },
+            }),
+        )
+      : []),
   ];
 }
 

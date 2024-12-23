@@ -87,7 +87,7 @@ export class EditDoc extends BaseSkill {
       resources,
       documents,
     });
-    this.engine.logger.log(`checkHasContext: ${hasContext}`);
+    this.engine.logger.log(`checkHasContext: ${hasContext}`); 
 
     const maxTokens = modelInfo.contextLimit || DEFAULT_MODEL_CONTEXT_LIMIT;
     const queryTokens = countToken(query);
@@ -95,7 +95,7 @@ export class EditDoc extends BaseSkill {
     const remainingTokens = maxTokens - queryTokens - chatHistoryTokens;
     this.engine.logger.log(
       `maxTokens: ${maxTokens}, queryTokens: ${queryTokens}, chatHistoryTokens: ${chatHistoryTokens}, remainingTokens: ${remainingTokens}`,
-    );
+    ); 
 
     // 新增：定义长查询的阈值（可以根据实际需求调整）
     const LONG_QUERY_TOKENS_THRESHOLD = 100; // 约等于50-75个英文单词或25-35个中文字
@@ -179,6 +179,11 @@ export class EditDoc extends BaseSkill {
 
     if (!currentDoc?.document) {
       throw new DocumentNotFoundError('No current document found for editing'); 
+    }
+
+    // Filter out documents with isCurrent before proceeding
+    if (config?.configurable?.documents) {
+      config.configurable.documents = config.configurable.documents.filter(doc => !doc?.metadata?.isCurrentContext) || [];
     }
 
     // Get selected range and edit type from metadata

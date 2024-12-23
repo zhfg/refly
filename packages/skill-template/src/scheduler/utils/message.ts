@@ -30,20 +30,20 @@ export const buildFinalRequestMessages = ({
   messages: BaseMessage[];
   needPrepareContext: boolean;
   context: string;
-  originalQuery: string;
+  originalQuery: string; 
   rewrittenQuery: string;
 }) => {
   const systemPrompt = module.buildSystemPrompt(locale, needPrepareContext);
-  const contextUserPrompt = needPrepareContext ? module.buildContextUserPrompt(context, needPrepareContext) : '';
+  const contextUserPrompt = module.buildContextUserPrompt?.(context, needPrepareContext) || '';
   const userPrompt = module.buildUserPrompt({ originalQuery, rewrittenQuery, locale });
 
-  // TODO: last check for token limit
-
+  const contextMessages = contextUserPrompt ? [new HumanMessage(contextUserPrompt)] : [];
+ 
   const requestMessages = [
     new SystemMessage(systemPrompt),
     ...chatHistory,
-    ...messages, // TODO: for refractor scheduler to agent use case
-    ...(needPrepareContext ? [new HumanMessage(contextUserPrompt)] : []),
+    ...messages,
+    ...contextMessages,
     new HumanMessage(userPrompt),
   ];
 

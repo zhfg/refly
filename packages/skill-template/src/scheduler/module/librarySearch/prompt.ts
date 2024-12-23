@@ -87,9 +87,15 @@ ${buildLocaleFollowInstruction(locale)}
 `;
 };
 
-export const buildLibrarySearchContextUserPrompt = (context: string) => `
+export const buildLibrarySearchContextUserPrompt = (context: string, needPrepareContext: boolean) => {
+  if (!needPrepareContext) {
+    return '';
+  }
+
+  return `
 ## Knowledge Base Content
 ${context}
 
 ${buildQueryProcessAndChatHistoryInstructions()}
 `;
+};
