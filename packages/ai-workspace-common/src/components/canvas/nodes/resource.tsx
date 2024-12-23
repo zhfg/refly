@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CanvasNodeData, ResourceNodeMeta, CanvasNode, ResourceNodeProps } from './types';
 import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, lazy } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
@@ -17,8 +17,9 @@ import { Markdown } from '@refly-packages/ai-workspace-common/components/markdow
 import { useThrottledCallback } from 'use-debounce';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
-import Moveable from 'react-moveable';
 import classNames from 'classnames';
+
+const Moveable = lazy(() => import('react-moveable'));
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
