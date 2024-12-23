@@ -9,7 +9,6 @@ import { Button } from 'antd';
 import { cn } from '@refly/utils/cn';
 import { getOsType } from '@refly/utils/env';
 import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/components/add-base-mark-context';
-import { AISettingsDropdown } from '@refly-packages/ai-workspace-common/components/copilot/copilot-operation-module/chat-actions/ai-settings';
 
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
@@ -26,6 +25,7 @@ import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/c
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { AISettingsDropdown } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions/ai-settings';
 
 interface AISelectorProps {
   open: boolean;
@@ -335,7 +335,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
           <div className="flex relative flex-row items-center" cmdk-input-wrapper="">
             <div className="flex flex-1 items-center pl-4 border-b" cmdk-input-wrapper="">
               <Button size="small" type="default" className="rounded border text-gray-500 mr-1">
-                <AISettingsDropdown placement="bottom" collapsed={true} briefMode={true} trigger={['hover']} />
+                <AISettingsDropdown placement="bottom" collapsed={true} briefMode={true} />
               </Button>
               <AddBaseMarkContext />
               <Input.TextArea
