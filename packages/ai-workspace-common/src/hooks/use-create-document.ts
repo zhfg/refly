@@ -86,7 +86,7 @@ export const useCreateDocument = () => {
     { leading: true },
   );
 
-  const createSingleDocumentInCanvas = async () => {
+  const createSingleDocumentInCanvas = async (position?: { x: number; y: number }) => {
     if (isCreating) return;
     setIsCreating(true);
 
@@ -110,7 +110,7 @@ export const useCreateDocument = () => {
                 contentPreview: data.data?.contentPreview || '',
               },
             },
-            position: { x: 100, y: 100 },
+            position: position || { x: 100, y: 100 },
           };
 
           setPendingNode(newNode);

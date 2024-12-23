@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow } from '@xyflow/react';
-import { Button, Modal, Result } from 'antd';
+import { Button, Modal, Result, Menu } from 'antd';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
@@ -23,6 +23,7 @@ import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin
 import { LayoutControl } from './layout-control';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
+import { MenuPopper } from './menu-popper';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -142,10 +143,31 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     [setSelectedNode, operatingNodeId, setOperatingNodeId],
   );
 
-  // Handle clicking on the canvas background to exit operating mode
-  const onPaneClick = useCallback(() => {
-    setOperatingNodeId(null);
-  }, [setOperatingNodeId]);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [lastClickTime, setLastClickTime] = useState(0);
+
+  const onPaneClick = useCallback(
+    (event: React.MouseEvent) => {
+      setOperatingNodeId(null);
+
+      const currentTime = new Date().getTime();
+      const timeDiff = currentTime - lastClickTime;
+
+      if (timeDiff < 300) {
+        const flowPosition = reactFlowInstance.screenToFlowPosition({
+          x: event.clientX,
+          y: event.clientY,
+        });
+
+        setMenuPosition(flowPosition);
+        setMenuOpen(true);
+      }
+
+      setLastClickTime(currentTime);
+    },
+    [lastClickTime, setOperatingNodeId],
+  );
 
   const selectedNodes = nodes?.filter((node) => node.selected);
 
@@ -241,7 +263,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
                   icon={<HiOutlineDocumentAdd className="-mr-1 flex items-center justify-center" />}
                   type="text"
                   className="ml-0.5 text-[20px] text-[#00968F] py-[4px] px-[8px]"
-                  onClick={createSingleDocumentInCanvas}
+                  onClick={() => createSingleDocumentInCanvas()}
                 >
                   {t('canvas.toolbar.createDocument')}
                 </Button>
@@ -256,6 +278,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
                 panOnDrag={interactionMode === 'mouse'}
                 zoomOnScroll={interactionMode === 'mouse'}
                 zoomOnPinch={interactionMode === 'touchpad'}
+                zoomOnDoubleClick={false}
                 selectNodesOnDrag={!operatingNodeId && interactionMode === 'mouse'}
                 selectionOnDrag={!operatingNodeId && interactionMode === 'touchpad'}
                 nodeTypes={nodeTypes}
@@ -345,6 +368,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         <CanvasListModal visible={showCanvasListModal} setVisible={setShowCanvasListModal} />
         <LibraryModal visible={showLibraryModal} setVisible={setShowLibraryModal} />
         <BigSearchModal />
+
+        <MenuPopper open={menuOpen} position={menuPosition} setOpen={setMenuOpen} />
       </div>
     </Spin>
   );
