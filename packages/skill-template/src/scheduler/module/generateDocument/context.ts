@@ -14,7 +14,7 @@ export const buildContextFormat = () => {
 3. Use context to enrich examples and explanations
 
 ### Context Structure Guidelines
-You will be provided with context in XML format. This context is structured hierarchically and may include mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, documents, and projects. Always consider all relevant context when formulating your responses. The context is structured as follows:
+You will be provided with context in XML format. This context is structured hierarchically and may include mentioned context, and other context. Each category may contain user-selected content, knowledge base resources, and documents. Always consider all relevant context when formulating your responses. The context is structured as follows:
 
 <Context>
    <MentionedContext>

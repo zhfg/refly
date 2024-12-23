@@ -33,18 +33,10 @@ const ResourceDeck = (props: ResourceDeckProps) => {
       if (type === 'target') {
         const meta = reference.targetMeta;
         let url = meta?.url;
-        if (!url && reference?.targetType === 'document') {
-          const projectId = meta?.projectId;
-          url = `${window.location.origin}/project/${projectId}?docId=${reference.targetId}`;
-        }
         window.open(url, '_blank');
       } else {
         const meta = reference.sourceMeta;
         let url = meta?.url;
-        if (!url && reference?.sourceType === 'document') {
-          const projectId = meta?.projectId;
-          url = `${window.location.origin}/project/${projectId}?docId=${reference.sourceId}`;
-        }
         window.open(url, '_blank');
       }
     };

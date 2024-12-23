@@ -31,8 +31,6 @@ import {
   CreateSkillTriggerResponse,
   UpdateSkillTriggerRequest,
   UpdateSkillTriggerResponse,
-  ListSkillJobsResponse,
-  GetSkillJobDetailResponse,
   PinSkillInstanceRequest,
   PinSkillInstanceResponse,
   UnpinSkillInstanceRequest,
@@ -41,7 +39,7 @@ import {
 } from '@refly-packages/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
 import { Response } from 'express';
-import { skillInstancePO2DTO, skillJobPO2DTO, skillTriggerPO2DTO } from './skill.dto';
+import { skillInstancePO2DTO, skillTriggerPO2DTO } from './skill.dto';
 
 @Controller('v1/skill')
 export class SkillController {
@@ -185,31 +183,5 @@ export class SkillController {
   ): Promise<DeleteSkillTriggerResponse> {
     await this.skillService.deleteSkillTrigger(user, body);
     return buildSuccessResponse();
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('/job/list')
-  async listSkillJobs(
-    @User() user: UserModel,
-    @Query('skillId') skillId: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
-  ): Promise<ListSkillJobsResponse> {
-    const jobs = await this.skillService.listSkillJobs(user, {
-      skillId: skillId || undefined,
-      page,
-      pageSize,
-    });
-    return buildSuccessResponse(jobs.map((log) => skillJobPO2DTO(log)));
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('/job/detail')
-  async getSkillJobDetail(
-    @User() user: UserModel,
-    @Query('jobId') jobId: string,
-  ): Promise<GetSkillJobDetailResponse> {
-    const job = await this.skillService.getSkillJobDetail(user, jobId);
-    return buildSuccessResponse(skillJobPO2DTO(job));
   }
 }

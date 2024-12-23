@@ -5,7 +5,6 @@ import { KnowledgeModule } from '@/knowledge/knowledge.module';
 import { SkillService } from './skill.service';
 import { SkillController } from './skill.controller';
 import { CommonModule } from '@/common/common.module';
-import { ConversationModule } from '@/conversation/conversation.module';
 import { SearchModule } from '@/search/search.module';
 import { CanvasModule } from '@/canvas/canvas.module';
 import { RAGModule } from '@/rag/rag.module';
@@ -24,7 +23,6 @@ import { CollabModule } from '@/collab/collab.module';
     CanvasModule,
     KnowledgeModule,
     RAGModule,
-    ConversationModule,
     SubscriptionModule,
     CollabModule,
     BullModule.registerQueue({ name: QUEUE_SKILL }),

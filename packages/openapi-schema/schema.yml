@@ -144,11 +144,6 @@ paths:
           schema:
             type: string
             $ref: '#/components/schemas/ResourceType'
-        - name: projectId
-          in: query
-          description: Project ID
-          schema:
-            type: string
         - name: page
           in: query
           description: Page number
@@ -516,177 +511,12 @@ paths:
       responses:
         '200':
           description: Successful operation
-  /knowledge/project/list:
-    get:
-      tags:
-        - knowledge
-      summary: List user projects
-      description: List all projects for a user
-      operationId: listProjects
-      parameters:
-        - name: projectId
-          in: query
-          description: Project ID
-          required: false
-          schema:
-            type: string
-        - name: resourceId
-          in: query
-          description: Resource ID
-          required: false
-          schema:
-            type: string
-        - name: page
-          in: query
-          description: Page number
-          required: false
-          schema:
-            type: number
-            default: 1
-        - name: pageSize
-          in: query
-          description: Page size
-          required: false
-          schema:
-            type: number
-            default: 10
-        - name: order
-          in: query
-          description: Order
-          required: false
-          schema:
-            $ref: '#/components/schemas/ListOrder'
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ListProjectResponse'
-      security:
-        - api_key: []
-  /knowledge/project/detail:
-    get:
-      tags:
-        - knowledge
-      summary: Get project detail
-      description: Return project details along with its canvases
-      operationId: getProjectDetail
-      parameters:
-        - name: projectId
-          in: query
-          description: Project ID to retrieve
-          required: true
-          schema:
-            type: string
-            example: cl-g30e1b80b5g1itbemc0g5jj3
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetProjectDetailResponse'
-      security:
-        - api_key: []
-  /knowledge/project/update:
-    post:
-      tags:
-        - knowledge
-      summary: Update project
-      description: Update an existing project
-      operationId: updateProject
-      requestBody:
-        description: Project update request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpsertProjectRequest'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UpsertProjectResponse'
-      security:
-        - api_key: []
-  /knowledge/project/create:
-    post:
-      tags:
-        - knowledge
-      summary: Create new project
-      description: Create a new project
-      operationId: createProject
-      requestBody:
-        description: Project creation request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpsertProjectRequest'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UpsertProjectResponse'
-      security:
-        - api_key: []
-  /knowledge/project/bindRes:
-    post:
-      tags:
-        - knowledge
-      summary: Bind resources to project
-      description: Bind existing resources to a project
-      operationId: bindProjectResources
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/BindProjectResourceRequest'
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-      security:
-        - api_key: []
-  /knowledge/project/delete:
-    post:
-      tags:
-        - knowledge
-      summary: Delete project
-      description: Delete an existing project
-      operationId: deleteProject
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeleteProjectRequest'
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-      security:
-        - api_key: []
   /share/new:
     post:
       tags:
         - share
       summary: Create share
-      description: Create new share for project or canvas
+      description: Create new share for canvas
       operationId: createShare
       requestBody:
         required: true
@@ -1318,130 +1148,6 @@ paths:
                 $ref: '#/components/schemas/BaseResponse'
       security:
         - api_key: []
-  /skill/job/list:
-    get:
-      tags:
-        - skill
-      summary: Get skill jobs
-      description: Get skill jobs
-      operationId: listSkillJobs
-      parameters:
-        - name: skillId
-          in: query
-          description: Skill ID
-          schema:
-            type: string
-            example: sk-g30e1b80b5g1itbemc0g5jj3
-        - name: jobStatus
-          in: query
-          description: Job status
-          schema:
-            type: string
-            $ref: '#/components/schemas/SkillJobStatus'
-        - name: page
-          in: query
-          description: Page number
-          schema:
-            type: number
-            default: 1
-        - name: pageSize
-          in: query
-          description: Page size
-          schema:
-            type: number
-            default: 10
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ListSkillJobsResponse'
-      security:
-        - api_key: []
-  /skill/job/detail:
-    get:
-      tags:
-        - skill
-      summary: Get skill job detail
-      description: Get skill job detail
-      operationId: getSkillJobDetail
-      parameters:
-        - name: jobId
-          in: query
-          description: Job ID
-          schema:
-            type: string
-            example: sj-g30e1b80b5g1itbemc0g5jj3
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetSkillJobDetailResponse'
-  /conversation/list:
-    get:
-      tags:
-        - chat
-      summary: List conversations
-      description: List all conversations
-      operationId: listConversations
-      parameters:
-        - name: projectId
-          in: query
-          description: Project ID
-          schema:
-            type: string
-        - name: page
-          in: query
-          description: Page number
-          schema:
-            type: number
-            default: 1
-        - name: pageSize
-          in: query
-          description: Page size
-          schema:
-            type: number
-            default: 10
-        - name: order
-          in: query
-          description: Order
-          schema:
-            type: string
-            $ref: '#/components/schemas/ListOrder'
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ListConversationResponse'
-      security:
-        - api_key: []
-  /conversation/{convId}:
-    get:
-      tags:
-        - chat
-      summary: Get conversation detail
-      description: Get conversation detail
-      operationId: getConversationDetail
-      parameters:
-        - name: convId
-          in: path
-          description: Conversation ID
-          example: cv-g30e1b80b5g1itbemc0g5jj3
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetConversationDetailResponse'
   /user/settings:
     get:
       tags:
@@ -1586,7 +1292,7 @@ paths:
       tags:
         - search
       summary: Search
-      description: Search for canvases, resources, projects, etc.
+      description: Search for canvases, resources, documents, etc.
       operationId: search
       requestBody:
         required: true
@@ -1704,9 +1410,6 @@ components:
         title:
           type: string
           description: Reference title
-        projectId:
-          type: string
-          description: Reference project ID
         url:
           type: string
           description: Reference URL
@@ -1810,9 +1513,6 @@ components:
         resourceType:
           description: Resource type
           $ref: '#/components/schemas/ResourceType'
-        order:
-          type: number
-          description: Resource order in project
         title:
           type: string
           description: Resource title
@@ -1820,11 +1520,6 @@ components:
           type: object
           description: Resource metadata
           $ref: '#/components/schemas/ResourceMeta'
-        projectIds:
-          type: array
-          description: Project IDs related to this resource
-          items:
-            type: string
         indexStatus:
           description: Resource index status
           $ref: '#/components/schemas/IndexStatus'
@@ -1888,37 +1583,6 @@ components:
           type: string
           format: date-time
           description: Document update time
-    Project:
-      type: object
-      required:
-        - projectId
-        - title
-        - createdAt
-        - updatedAt
-      properties:
-        projectId:
-          type: string
-          description: Project ID
-          example: p-g30e1b80b5g1itbemc0g5jj3
-        title:
-          type: string
-          description: Project title
-          example: Default Project
-        description:
-          type: string
-          description: Project description
-          example: Project description
-        shareCode:
-          type: string
-          description: Share code
-        createdAt:
-          type: string
-          format: date-time
-          description: Project creation time
-        updatedAt:
-          type: string
-          format: date-time
-          description: Project update time
     EntityType:
       type: string
       description: Entity type
@@ -1975,7 +1639,7 @@ components:
           description: Label class update time
     LabelInstance:
       type: object
-      description: Label instances related to resources, projects, etc.
+      description: Label instances related to entities
       required:
         - labelId
         - labelClassId
@@ -2340,60 +2004,6 @@ components:
               type: string
               format: date-time
               description: Skill update time
-    SkillJob:
-      type: object
-      description: Skill job record
-      required:
-        - jobId
-        - skillId
-        - skillDisplayName
-        - jobStatus
-        - input
-        - context
-        - createdAt
-        - updatedAt
-      properties:
-        jobId:
-          type: string
-          description: Job ID
-          example: sj-g30e1b80b5g1itbemc0g5jj3
-        skillId:
-          type: string
-          description: Skill ID
-        skillDisplayName:
-          type: string
-          description: Skill display name
-        jobStatus:
-          description: Skill job status
-          $ref: '#/components/schemas/SkillJobStatus'
-        conversation:
-          description: Related conversation
-          $ref: '#/components/schemas/Conversation'
-        trigger:
-          description: Skill trigger
-          $ref: '#/components/schemas/SkillTrigger'
-        input:
-          description: Skill input
-          $ref: '#/components/schemas/SkillInput'
-        context:
-          description: Skill context
-          $ref: '#/components/schemas/SkillContext'
-        tplConfig:
-          description: Skill template config
-          $ref: '#/components/schemas/SkillTemplateConfig'
-        createdAt:
-          type: string
-          format: date-time
-          description: Job creation time
-        updatedAt:
-          type: string
-          format: date-time
-          description: Job update time
-        messages:
-          type: array
-          description: Job messages (only returned in detail API)
-          items:
-            $ref: '#/components/schemas/ChatMessage'
     SourceMeta:
       type: object
       description: Source metadata
@@ -2416,9 +2026,6 @@ components:
         entityType:
           type: string
           description: Related entity type
-        projectId:
-          type: string
-          description: Related project ID
         originalLocale:
           type: string
           description: Original locale
@@ -2708,119 +2315,6 @@ components:
           type: string
           format: date-time
           description: Message update time
-    ChatMessage:
-      type: object
-      description: Chat message
-      required:
-        - msgId
-        - type
-        - content
-      properties:
-        msgId:
-          type: string
-          readOnly: true
-          description: Message ID
-          example: m-g30e1b80b5g1itbemc0g5jj3
-        jobId:
-          type: string
-          description: Skill job ID
-          example: sj-g30e1b80b5g1itbemc0g5jj3
-        type:
-          description: Message type
-          $ref: '#/components/schemas/MessageType'
-        content:
-          type: string
-          description: Message content
-          example: Hello
-        skillMeta:
-          type: object
-          description: Skill metadata
-          $ref: '#/components/schemas/SkillMeta'
-        logs:
-          type: array
-          description: Message logs
-          items:
-            type: string
-        structuredData:
-          type: object
-          description: Structured data output
-          example:
-            sources: [Source]
-            relatedQuestions: [string]
-        errors:
-          type: array
-          description: Errors
-          items:
-            type: string
-        tokenUsage:
-          type: array
-          description: Token usage
-          items:
-            $ref: '#/components/schemas/TokenUsageItem'
-        invokeParam:
-          description: Skill invocation parameters
-          $ref: '#/components/schemas/InvokeSkillRequest'
-        createdAt:
-          type: string
-          format: date-time
-          description: Message creation time
-        updatedAt:
-          type: string
-          format: date-time
-          description: Message update time
-    Conversation:
-      type: object
-      description: Conversation list item
-      properties:
-        convId:
-          type: string
-          description: Conversation ID
-          example: cv-g30e1b80b5g1itbemc0g5jj3
-        projectId:
-          type: string
-          description: Project ID
-          example: p-g30e1b80b5g1itbemc0g5jj3
-        title:
-          type: string
-          description: Conversation title
-          example: Default Conversation
-        lastMessage:
-          type: string
-          description: Last message content
-          example: Hello
-        messageCount:
-          type: number
-          description: Number of chat messages in this conversation
-          example: 42
-        locale:
-          description: Conversation locale
-          type: string
-          example: en
-        origin:
-          type: string
-          description: Origin page host
-          example: https://refly.ai
-        originPageTitle:
-          type: string
-          description: Origin page title
-          example: Refly | The AI Native Creation Engine
-        originPageUrl:
-          type: string
-          description: Origin page url
-          example: https://refly.ai/knowledge-base
-        createdAt:
-          type: string
-          format: date-time
-          description: Conversation creation time
-        updatedAt:
-          type: string
-          format: date-time
-          description: Conversation creation time
-        messages:
-          type: array
-          description: Conversation messages (only returned for getConversationDetail api)
-          items:
-            $ref: '#/components/schemas/ChatMessage'
     IndexStatus:
       type: string
       description: Resource index status
@@ -3120,10 +2614,6 @@ components:
           type: string
           description: Resource ID (only used for update)
           example: r-g30e1b80b5g1itbemc0g5jj3
-        projectId:
-          type: string
-          description: Project ID (will add to the project when creating resource)
-          example: p-g30e1b80b5g1itbemc0g5jj3
         data:
           description: Resource metadata
           $ref: '#/components/schemas/ResourceMeta'
@@ -3310,78 +2800,6 @@ components:
           description: Reference ID list
           items:
             type: string
-    UpsertProjectRequest:
-      type: object
-      properties:
-        projectId:
-          type: string
-          description: Project ID (only used for update)
-          example: p-g30e1b80b5g1itbemc0g5jj3
-        title:
-          type: string
-          description: Project title
-          example: My Project
-        description:
-          type: string
-          description: Project description
-          example: Project description
-    UpsertProjectResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              $ref: '#/components/schemas/Project'
-    BindProjectResourceRequest:
-      type: object
-      required:
-        - projectId
-        - resourceId
-        - operation
-      properties:
-        projectId:
-          type: string
-          description: Project ID
-        resourceId:
-          type: string
-          description: Resource ID
-        order:
-          type: number
-          description: Resource order in project
-        operation:
-          type: string
-          description: Operation type
-          enum:
-            - bind
-            - unbind
-    DeleteProjectRequest:
-      type: object
-      required:
-        - projectId
-      properties:
-        projectId:
-          type: string
-          description: Project ID to delete
-          example: p-g30e1b80b5g1itbemc0g5jj3
-    ListProjectResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: array
-              description: Project list
-              items:
-                $ref: '#/components/schemas/Project'
-    GetProjectDetailResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: object
-              description: Project data
-              $ref: '#/components/schemas/Project'
     SkillEventType:
       type: string
       description: Skill event type
@@ -3801,22 +3219,6 @@ components:
         metadata:
           type: object
           description: Resource context metadata
-    SkillContextProjectItem:
-      type: object
-      description: Skill context project item
-      properties:
-        projectId:
-          type: string
-          description: Project ID
-        project:
-          description: Project
-          $ref: '#/components/schemas/Project'
-        isCurrent:
-          type: boolean
-          description: Whether this project is current
-        metadata:
-          type: object
-          description: Project context metadata
     SkillContextDocumentItem:
       type: object
       description: Skill context document item
@@ -3866,11 +3268,6 @@ components:
           description: Context resources
           items:
             $ref: '#/components/schemas/SkillContextResourceItem'
-        projects:
-          type: array
-          description: Context projects
-          items:
-            $ref: '#/components/schemas/SkillContextProjectItem'
         documents:
           type: array
           description: Context documents
@@ -3890,7 +3287,6 @@ components:
       type: string
       enum:
         - resources
-        - projects
         - documents
         - contentList
         - urls
@@ -3956,14 +3352,6 @@ components:
         context:
           description: Skill context rule group
           $ref: '#/components/schemas/SkillContextRuleGroup'
-    SkillJobStatus:
-      type: string
-      description: Skill job status
-      enum:
-        - scheduling
-        - running
-        - finish
-        - failed
     ActionType:
       type: string
       enum:
@@ -4185,78 +3573,6 @@ components:
         triggerId:
           type: string
           description: Trigger ID to delete
-    ListSkillJobsResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: array
-              description: Skill job list
-              items:
-                $ref: '#/components/schemas/SkillJob'
-    GetSkillJobDetailResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              description: Skill job
-              $ref: '#/components/schemas/SkillJob'
-    CreateConversationRequest:
-      type: object
-      properties:
-        title:
-          type: string
-          description: Conversation title
-          example: My Conversation
-        projectId:
-          type: string
-          description: Project ID
-        locale:
-          type: string
-          description: Conversation locale
-          example: en
-        origin:
-          type: string
-          description: Origin page host
-          example: https://refly.ai
-        originPageTitle:
-          type: string
-          description: Origin page title
-          example: Refly | The AI Native Creation Engine
-        originPageUrl:
-          type: string
-          description: Origin page url
-          example: https://refly.ai/knowledge-base
-    CreateConversationResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: object
-              description: Created conversation
-              $ref: '#/components/schemas/Conversation'
-    ListConversationResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: array
-              description: Conversation list
-              items:
-                $ref: '#/components/schemas/Conversation'
-    GetConversationDetailResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: object
-              description: Conversation data
-              $ref: '#/components/schemas/Conversation'
     UpdateUserSettingsRequest:
       type: object
       properties:
@@ -4476,8 +3792,6 @@ components:
         - resource
         - document
         - canvas
-        - skill
-        - tool
     SearchMode:
       type: string
       enum:

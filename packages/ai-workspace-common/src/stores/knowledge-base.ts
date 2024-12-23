@@ -2,8 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Project, Resource, Source } from '@refly/openapi-schema';
-import { ClientChatMessage } from '@refly/common-types';
+import { Resource, Source } from '@refly/openapi-schema';
 
 export enum ActionSource {
   KnowledgeBase = 'knowledge-base',
@@ -26,7 +25,6 @@ export interface SourceListDrawer {
 
 export interface KnowledgeBaseState {
   isSaveKnowledgeBaseModalVisible: boolean;
-  knowledgeBaseList: Project[];
   pageSize: number;
   currentPage: number;
   hasMore: boolean;
@@ -37,8 +35,6 @@ export interface KnowledgeBaseState {
   activeTab: string;
   resourcePanelVisible: boolean;
 
-  // 详情
-  currentKnowledgeBase: null | Project;
   currentResource: null | Resource;
 
   // 会话 modal
@@ -51,8 +47,6 @@ export interface KnowledgeBaseState {
 
   updateIsSaveKnowledgeBaseModalVisible: (isSaveKnowledgeBaseModalVisible: boolean) => void;
   updateIsRequesting: (isRequesting: boolean) => void;
-  updateKnowledgeBaseList: (knowledgeBaseList: Project[]) => void;
-  updateCurrentKnowledgeBase: (knowledgeBase: Project) => void;
   updateResource: (resource: Resource) => void;
   updateCurrentPage: (currentPage: number) => void;
   updateHasMore: (hasMore: boolean) => void;
@@ -101,16 +95,6 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
 
     updateIsSaveKnowledgeBaseModalVisible: (isSaveKnowledgeBaseModalVisible: boolean) =>
       set((state) => ({ ...state, isSaveKnowledgeBaseModalVisible })),
-    updateKnowledgeBaseList: (knowledgeBaseList: Project[]) =>
-      set((state) => ({
-        ...state,
-        knowledgeBaseList,
-      })),
-    updateCurrentKnowledgeBase: (knowledgeBase: Project) =>
-      set((state) => ({
-        ...state,
-        currentKnowledgeBase: knowledgeBase,
-      })),
     updateResource: (resource: Resource) =>
       set((state) => ({
         ...state,

@@ -2,13 +2,11 @@ import {
   SkillContextContentItem,
   SkillContextDocumentItem,
   SkillContextResourceItem,
-  SkillContextProjectItem,
   Source,
 } from '@refly-packages/openapi-schema';
 import { BaseMessage } from '@langchain/core/messages';
 import { LOCALE } from '@refly-packages/common-types';
 import { BaseSkillState } from '../../base';
-import { ToolCall } from '@langchain/core/dist/messages/tool';
 import { ContentNodeType } from '../../engine';
 
 export interface SkillContextContentItemMetadata {
@@ -16,7 +14,6 @@ export interface SkillContextContentItemMetadata {
   url?: string;
   title: string;
   entityId?: string;
-  projectId?: string;
 }
 
 export type SelectedContentDomain = 'resourceSelection' | 'documentSelection' | 'extensionWeblinkSelection';
@@ -49,7 +46,6 @@ export interface IContext {
   contentList: SkillContextContentItem[];
   resources: SkillContextResourceItem[];
   documents: SkillContextDocumentItem[];
-  projects?: SkillContextProjectItem[];
   messages?: BaseMessage[];
   webSearchSources?: Source[];
   locale?: string | LOCALE;

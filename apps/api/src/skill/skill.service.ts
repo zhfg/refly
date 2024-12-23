@@ -15,7 +15,6 @@ import {
   DeleteSkillTriggerRequest,
   InvokeSkillRequest,
   ListSkillInstancesData,
-  ListSkillJobsData,
   ListSkillTriggersData,
   PinSkillInstanceRequest,
   Resource,
@@ -64,13 +63,7 @@ import {
 } from '@/utils';
 import { InvokeSkillJobData } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
-import {
-  projectPO2DTO,
-  documentPO2DTO,
-  resourcePO2DTO,
-  referencePO2DTO,
-} from '@/knowledge/knowledge.dto';
-import { ConversationService } from '@/conversation/conversation.service';
+import { documentPO2DTO, resourcePO2DTO, referencePO2DTO } from '@/knowledge/knowledge.dto';
 import { ConfigService } from '@nestjs/config';
 import { SearchService } from '@/search/search.service';
 import { RAGService } from '@/rag/rag.service';
@@ -142,7 +135,6 @@ export class SkillService {
     private knowledge: KnowledgeService,
     private rag: RAGService,
     private canvas: CanvasService,
-    private conversation: ConversationService,
     private subscription: SubscriptionService,
     private collabService: CollabService,
     @InjectQueue(QUEUE_SKILL) private skillQueue: Queue<InvokeSkillJobData>,
@@ -199,18 +191,6 @@ export class SkillService {
       updateResource: async (user, req) => {
         const resource = await this.knowledge.updateResource(user, req);
         return buildSuccessResponse(resourcePO2DTO(resource));
-      },
-      createProject: async (user, req) => {
-        const project = await this.knowledge.upsertProject(user, req);
-        return buildSuccessResponse(projectPO2DTO(project));
-      },
-      updateProject: async (user, req) => {
-        const project = await this.knowledge.upsertProject(user, req);
-        return buildSuccessResponse(projectPO2DTO(project));
-      },
-      getProjectDetail: async (user, req) => {
-        const project = await this.knowledge.getProjectDetail(user, req);
-        return buildSuccessResponse(projectPO2DTO(project));
       },
       createLabelClass: async (user, req) => {
         const labelClass = await this.label.createLabelClass(user, req);
@@ -311,17 +291,6 @@ export class SkillService {
       })),
     });
 
-    await Promise.all(
-      instances.map((instance) => {
-        this.elasticsearch.upsertSkill({
-          id: instance.skillId,
-          createdAt: instance.createdAt.toJSON(),
-          updatedAt: instance.updatedAt.toJSON(),
-          ...pick(instance, ['uid', 'tplName', 'displayName', 'description']),
-        });
-      }),
-    );
-
     return instances;
   }
 
@@ -394,8 +363,6 @@ export class SkillService {
         data: { deletedAt },
       }),
     ]);
-
-    await this.elasticsearch.deleteSkill(skillId);
   }
 
   async skillInvokePreCheck(user: User, param: InvokeSkillRequest): Promise<InvokeSkillJobData> {
@@ -1099,55 +1066,5 @@ export class SkillService {
       where: { triggerId: trigger.triggerId, uid: user.uid },
       data: { deletedAt: new Date() },
     });
-  }
-
-  async listSkillJobs(user: User, param: ListSkillJobsData['query']) {
-    const { skillId, jobStatus, page, pageSize } = param ?? {};
-    const jobs = await this.prisma.skillJob.findMany({
-      where: { uid: user.uid, skillId, status: jobStatus },
-      orderBy: { updatedAt: 'desc' },
-      take: pageSize,
-      skip: (page - 1) * pageSize,
-    });
-
-    const triggerIds = [...new Set(jobs.map((job) => job.triggerId).filter(Boolean))];
-    const convIds = [...new Set(jobs.map((job) => job.convId).filter(Boolean))];
-
-    const [triggers, convs] = await Promise.all([
-      this.prisma.skillTrigger.findMany({
-        where: { triggerId: { in: triggerIds }, uid: user.uid, deletedAt: null },
-      }),
-      this.prisma.conversation.findMany({
-        where: { convId: { in: convIds }, uid: user.uid },
-      }),
-    ]);
-
-    const triggerMap = new Map(triggers.map((trigger) => [trigger.triggerId, trigger]));
-    const convMap = new Map(convs.map((conv) => [conv.convId, conv]));
-
-    return jobs.map((job) => ({
-      ...job,
-      trigger: triggerMap.get(job.triggerId),
-      conversation: convMap.get(job.convId),
-    }));
-  }
-
-  async getSkillJobDetail(user: User, jobId: string) {
-    if (!jobId) {
-      throw new ParamsError('job id is required');
-    }
-
-    const { uid } = user;
-    const [job, messages] = await Promise.all([
-      this.prisma.skillJob.findUnique({
-        where: { uid, jobId },
-      }),
-      this.prisma.chatMessage.findMany({
-        where: { uid, jobId },
-        orderBy: { pk: 'asc' },
-      }),
-    ]);
-
-    return { ...job, messages };
   }
 }

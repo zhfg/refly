@@ -7,12 +7,9 @@ export enum IDPrefix {
   EVENT = 'ev-',
   LABEL_CLASS = 'lc-',
   LABEL_INSTANCE = 'li-',
-  CONVERSATION = 'cv-',
-  CHAT_MESSAGE = 'cm-',
   ACTION_RESULT = 'ar-',
   DOCUMENT = 'd-',
   RESOURCE = 'r-',
-  PROJECT = 'p-',
   CANVAS = 'c-',
   REFERENCE = 'rf-',
   TOKEN_USAGE_METER = 'tum-',
@@ -39,14 +36,6 @@ export function genLabelInstanceID(): string {
   return IDPrefix.LABEL_INSTANCE + createId();
 }
 
-export function genConvID(): string {
-  return IDPrefix.CONVERSATION + createId();
-}
-
-export function genChatMessageID(): string {
-  return IDPrefix.CHAT_MESSAGE + createId();
-}
-
 export function genActionResultID(): string {
   return IDPrefix.ACTION_RESULT + createId();
 }
@@ -57,10 +46,6 @@ export function genDocumentID(): string {
 
 export function genResourceID(): string {
   return IDPrefix.RESOURCE + createId();
-}
-
-export function genProjectID(): string {
-  return IDPrefix.PROJECT + createId();
 }
 
 export function genCanvasID(): string {
@@ -85,10 +70,6 @@ export function genSkillID(): string {
 
 export function genSkillTriggerID(): string {
   return IDPrefix.SKILL_TRIGGER + createId();
-}
-
-export function genSkillJobID(): string {
-  return IDPrefix.SKILL_JOB + createId();
 }
 
 export function genContentSelectorID(): string {

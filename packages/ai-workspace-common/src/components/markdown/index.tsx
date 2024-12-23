@@ -8,7 +8,6 @@ import RemarkGfm from 'remark-gfm';
 import { cn, markdownCitationParse } from '@refly/utils';
 
 // plugins
-import { markdownElements } from './plugins';
 import LinkElement from './plugins/link';
 import CodeElement from './plugins/code';
 
@@ -18,19 +17,15 @@ import './styles/highlight.scss';
 import { Source } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 
-const rehypePlugins = markdownElements.map((element) => element.rehypePlugin);
-
 export const Markdown = memo(
   (
     props: {
       content: string;
       loading?: boolean;
       sources?: Source[];
-      msgId?: string;
       className?: string;
     } & React.DOMAttributes<HTMLDivElement>,
   ) => {
-    const { msgId } = props;
     const mdRef = useRef<HTMLDivElement>(null);
     const { t } = useTranslation();
     const [isKatexLoaded, setIsKatexLoaded] = useState(false);
@@ -63,18 +58,6 @@ export const Markdown = memo(
     const shouldLoading = props.loading;
     const parsedContent = markdownCitationParse(props?.content || '');
 
-    const canvasComponents = useMemo(
-      () =>
-        Object.fromEntries(
-          markdownElements.map((element) => {
-            const Component = element.Component;
-
-            return [element.tag, (props: any) => <Component {...props} id={msgId} />];
-          }),
-        ),
-      [msgId],
-    );
-
     return (
       <div className={cn('markdown-body', props.className)} ref={mdRef}>
         {shouldLoading ? (
@@ -85,7 +68,6 @@ export const Markdown = memo(
               <ReactMarkdown
                 remarkPlugins={[RemarkGfm, RemarkBreaks, plugins.RemarkMath]}
                 rehypePlugins={[
-                  ...rehypePlugins,
                   plugins.RehypeKatex,
                   [
                     plugins.RehypeHighlight,

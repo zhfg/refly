@@ -1,18 +1,13 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import wordsCount from 'words-count';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { CanvasNodeType, Document } from '@refly/openapi-schema';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 import './index.scss';
-import { Input, Popover, Spin } from '@arco-design/web-react';
-import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock, HiOutlineShare } from 'react-icons/hi2';
-import {
-  IconMoreHorizontal,
-  IconQuote,
-  IconDelete,
-  IconCopy,
-} from '@refly-packages/ai-workspace-common/components/common/icon';
+import { Input, Spin } from '@arco-design/web-react';
+import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock } from 'react-icons/hi2';
+import { IconMoreHorizontal, IconDelete, IconCopy } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useTranslation } from 'react-i18next';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 
@@ -53,10 +48,7 @@ import classNames from 'classnames';
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 // componets
-import { ToC } from './ToC';
 import { Button, Divider, Dropdown, DropdownProps, MenuProps, message, Modal, Popconfirm } from 'antd';
-import { useHandleShare } from '@refly-packages/ai-workspace-common/hooks/use-handle-share';
-import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
 import { useBlocker } from 'react-router-dom';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/use-selection-context';
@@ -65,7 +57,6 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { useGetDocumentDetail } from '@refly-packages/ai-workspace-common/queries';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
-const MemorizedToC = memo(ToC);
 
 const CollaborativeEditor = ({ docId }: { docId: string }) => {
   const { t } = useTranslation();
@@ -529,27 +520,9 @@ export const CanvasStatusBar = ({
     }));
   const { t } = useTranslation();
 
-  const { createShare } = useHandleShare();
-  const [shareLoading, setShareLoading] = useState(false);
-  const handleShare = async () => {
-    setShareLoading(true);
-    await createShare({
-      entityType: 'document',
-      entityId: currentDocument?.docId,
-      shareCode: currentDocument?.shareCode || undefined,
-    });
-    setShareLoading(false);
-  };
-
   return (
     <div className="note-status-bar">
       <div className="note-status-bar-menu">
-        {/* {canvasServerStatus === 'connected' ? (
-          <div className="note-status-bar-item">
-            <AiOutlineFileWord />
-            <p className="conv-title">{t('knowledgeBase.note.noteCharsCount', { count: noteCharsCount })}</p>
-          </div>
-        ) : null} */}
         {documentServerStatus === 'connected' ? (
           <div className="note-status-bar-item">
             <HiOutlineClock />
@@ -568,45 +541,6 @@ export const CanvasStatusBar = ({
       </div>
 
       <div className="note-status-bar-menu">
-        {/* <div className="note-status-bar-item" style={{ display: 'flex', alignItems: 'center' }}>
-          <Popover
-            content={
-              <div className="sidebar">
-                <div className="sidebar-options">
-                  <div className="label-large">Table of contents</div>
-                  <div className="table-of-contents">
-                    <MemorizedToC editor={editor} items={tocItems} />
-                  </div>
-                </div>
-              </div>
-            }
-          >
-            <Button type="text" style={{ width: 32, height: 32 }} icon={<IconBook style={{ fontSize: 16 }} />} />
-          </Popover>
-          <Divider type="vertical" />
-        </div> */}
-        {/* <Button
-          type="text"
-          size="small"
-          style={{ color: deckSize ? '#00968F' : '' }}
-          icon={<IconQuote />}
-          onClick={() => {
-            setDeckSize(deckSize ? 0 : 200);
-          }}
-        ></Button> */}
-        {/* <Divider type="vertical" /> */}
-        {/* <Button
-          type="text"
-          size="small"
-          style={{ color: currentDocument?.shareCode ? '#00968F' : '' }}
-          loading={shareLoading}
-          icon={<HiOutlineShare />}
-          onClick={handleShare}
-        >
-          {currentDocument?.shareCode ? t('projectDetail.share.sharing') : t('common.share')}
-        </Button>
-        <Divider type="vertical" /> */}
-
         {currentDocument && documentServerStatus === 'connected' ? (
           <div
             className="note-status-bar-item"

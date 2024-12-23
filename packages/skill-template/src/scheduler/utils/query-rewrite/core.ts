@@ -30,7 +30,6 @@ export const postprocessContext = (
     resources: [],
     documents: [],
     contentList: [],
-    projects: [],
   };
 
   mentionedContextList.forEach((item) => {
@@ -94,12 +93,11 @@ export async function analyzeQueryAndContext(
   // set current step
   ctx.config.metadata.step = { name: 'analyzeContext' };
 
-  const { chatHistory, resources, documents, contentList, projects, modelInfo } = ctx.config.configurable;
+  const { chatHistory, resources, documents, contentList, modelInfo } = ctx.config.configurable;
   const context: IContext = {
     resources,
     documents,
     contentList,
-    projects,
   };
 
   // Preprocess context for better extract mentioned context
@@ -191,7 +189,7 @@ Please analyze the query, focusing primarily on the current query and available 
     // Return original query if analysis fails
     return {
       optimizedQuery: query,
-      mentionedContext: { resources: [], documents: [], contentList: [], projects: [] },
+      mentionedContext: { resources: [], documents: [], contentList: [] },
       intent: 'OTHER',
       confidence: 0,
       reasoning: 'Analysis failed, using original query',

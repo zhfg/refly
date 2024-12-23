@@ -71,82 +71,6 @@ model User {
   @@map("users")
 }
 
-// Conversation
-model Conversation {
-  /// Primary key
-  pk              BigInt   @id @default(autoincrement())
-  /// Conversation ID
-  convId          String   @unique @default("") @map("conv_id")
-  /// Project ID
-  projectId       String?  @map("project_id")
-  /// Related project
-  project         Project? @relation(fields: [projectId], references: [projectId])
-  /// UID
-  uid             String   @default("") @map("uid")
-  /// Conversation title
-  title           String   @map("title")
-  /// Last message content
-  lastMessage     String   @default("") @map("last_message")
-  /// Message count
-  messageCount    Int      @default(0) @map("message_count")
-  /// Conversation origin page
-  origin          String   @default("") @map("origin")
-  // Conversation origin page url
-  originPageUrl   String   @default("") @map("origin_page_url")
-  /// Conversation source page title
-  originPageTitle String   @default("") @map("origin_page_title")
-  /// Create timestamp
-  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@index([uid, updatedAt])
-  @@map("conversations")
-}
-
-/// Conversation messages
-model ChatMessage {
-  /// Primary key
-  pk             BigInt      @id @default(autoincrement())
-  /// Message id
-  msgId          String      @default("") @map("msg_id")
-  /// Conversation ID
-  convId         String      @default("") @map("conv_id")
-  /// Skill job ID
-  jobId          String      @default("") @map("job_id")
-  /// Span id
-  spanId         String?     @map("span_id")
-  /// Message type
-  type           MessageType @map("type")
-  /// UID
-  uid            String      @default("") @map("uid")
-  /// Message content
-  content        String      @map("content")
-  /// Skill metadata
-  skillMeta      String      @default("{}") @map("skill_meta")
-  /// Logs output
-  logs           String      @default("[]") @map("logs")
-  /// Structured data output (JSON)
-  structuredData String      @default("{}") @map("structured_data")
-  /// Errors
-  errors         String?     @map("errors")
-  /// Tool calls (JSON array)
-  toolCalls      String?     @map("tool_calls")
-  /// Token usage summary
-  tokenUsage     String?     @map("token_usage")
-  /// Skill invocation parameters (JSON of `InvokeSkillRequest`)
-  invokeParam    String?     @map("invoke_param")
-  /// Locale setting
-  locale         String?     @default("") @map("locale")
-  /// Create timestamp
-  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt      DateTime    @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@index([convId, updatedAt])
-  @@map("chat_messages")
-}
-
 model ActionResult {
   /// Primary key
   pk         BigInt       @id @default(autoincrement())
@@ -382,53 +306,6 @@ model Document {
   @@map("documents")
 }
 
-model Project {
-  /// Primary key
-  pk            BigInt         @id @default(autoincrement())
-  /// Project id
-  projectId     String         @unique @map("project_id")
-  /// Project title
-  title         String         @map("title")
-  /// Project description
-  description   String?        @map("description")
-  /// UID
-  uid           String         @map("uid")
-  /// Share code
-  shareCode     String?        @map("share_code")
-  /// Create timestamp
-  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz()
-  /// Soft delete timestamp
-  deletedAt     DateTime?      @map("deleted_at") @db.Timestamptz()
-  /// Related conversations
-  conversations Conversation[]
-
-  @@index([uid, updatedAt])
-  @@index([shareCode])
-  @@map("projects")
-}
-
-model ProjectResourceRelation {
-  /// Primary key
-  pk         BigInt   @id @default(autoincrement())
-  /// Project id
-  projectId  String   @map("project_id")
-  /// Resource id
-  resourceId String   @map("resource_id")
-  /// UID
-  uid        String   @default("") @map("uid")
-  /// Create timestamp
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// Display order within project
-  order      Int      @default(0) @map("order")
-
-  @@unique([projectId, resourceId])
-  @@index([resourceId])
-  @@index([projectId, order])
-  @@map("project_resource_relations")
-}
-
 model Reference {
   /// Primary key
   pk          BigInt    @id @default(autoincrement())
@@ -528,38 +405,6 @@ model SkillTrigger {
 
   @@index([skillId, deletedAt])
   @@map("skill_triggers")
-}
-
-model SkillJob {
-  /// Primary key
-  pk               BigInt   @id @default(autoincrement())
-  /// Skill job id
-  jobId            String   @unique @map("job_id")
-  /// Skill id
-  skillId          String   @map("skill_id")
-  /// Skill display name
-  skillDisplayName String   @map("skill_display_name")
-  /// UID of skill owner
-  uid              String   @map("uid")
-  /// Input (JSON of `SkillInput`)
-  input            String   @map("input")
-  /// Context (JSON of `SkillContext`)
-  context          String   @map("context")
-  /// Skill template config (JSON)
-  tplConfig        String?  @map("tpl_config")
-  /// Skill job status (refer to `SkillJobStatus`)
-  status           String   @map("status")
-  /// Skill trigger id
-  triggerId        String?  @map("trigger_id")
-  /// Conversation ID
-  convId           String?  @map("conv_id")
-  /// Create timestamp
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  /// Update timestamp
-  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz()
-
-  @@index([uid, updatedAt])
-  @@map("skill_jobs")
 }
 
 model LabelClass {

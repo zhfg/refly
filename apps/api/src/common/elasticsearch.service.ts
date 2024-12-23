@@ -1,7 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client } from '@elastic/elasticsearch';
-import { MessageType } from '@prisma/client';
 import { SearchRequest, User } from '@refly-packages/openapi-schema';
 
 interface ResourceDocument {
@@ -23,39 +22,9 @@ interface DocumentDocument {
   uid: string;
 }
 
-interface ProjectDocument {
-  id: string;
-  title?: string;
-  description?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  uid: string;
-}
-
 interface CanvasDocument {
   id: string;
   title?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  uid: string;
-}
-
-interface ConversationMessageDocument {
-  id: string;
-  convId?: string;
-  convTitle?: string;
-  content?: string;
-  type?: MessageType;
-  createdAt?: string;
-  updatedAt?: string;
-  uid: string;
-}
-
-interface SkillDocument {
-  id: string;
-  displayName?: string;
-  description?: string;
-  tplName?: string;
   createdAt?: string;
   updatedAt?: string;
   uid: string;
@@ -95,47 +64,11 @@ export const indexConfig = {
       uid: { type: 'keyword' },
     },
   },
-  project: {
-    index: 'refly_projects',
-    settings: commonSettings,
-    properties: {
-      title: { type: 'text' },
-      description: { type: 'text' },
-      createdAt: { type: 'date' },
-      updatedAt: { type: 'date' },
-      uid: { type: 'keyword' },
-    },
-  },
   canvas: {
     index: 'refly_canvases',
     settings: commonSettings,
     properties: {
       title: { type: 'text' },
-      createdAt: { type: 'date' },
-      updatedAt: { type: 'date' },
-      uid: { type: 'keyword' },
-    },
-  },
-  conversationMessage: {
-    index: 'refly_conversation_messages',
-    settings: commonSettings,
-    properties: {
-      convId: { type: 'keyword' },
-      convTitle: { type: 'text' },
-      content: { type: 'text' },
-      type: { type: 'keyword' },
-      createdAt: { type: 'date' },
-      updatedAt: { type: 'date' },
-      uid: { type: 'keyword' },
-    },
-  },
-  skill: {
-    index: 'refly_skills',
-    settings: commonSettings,
-    properties: {
-      displayName: { type: 'text' },
-      description: { type: 'text' },
-      tplName: { type: 'keyword' },
       createdAt: { type: 'date' },
       updatedAt: { type: 'date' },
       uid: { type: 'keyword' },
@@ -227,24 +160,12 @@ export class ElasticsearchService implements OnModuleInit {
     return this.upsertESDoc(indexConfig.resource.index, resource);
   }
 
-  async upsertProject(project: ProjectDocument) {
-    return this.upsertESDoc(indexConfig.project.index, project);
-  }
-
   async upsertDocument(document: DocumentDocument) {
     return this.upsertESDoc(indexConfig.document.index, document);
   }
 
   async upsertCanvas(canvas: CanvasDocument) {
     return this.upsertESDoc(indexConfig.canvas.index, canvas);
-  }
-
-  async upsertConversationMessage(message: ConversationMessageDocument) {
-    return this.upsertESDoc(indexConfig.conversationMessage.index, message);
-  }
-
-  async upsertSkill(skill: SkillDocument) {
-    return this.upsertESDoc(indexConfig.skill.index, skill);
   }
 
   async deleteResource(resourceId: string) {
@@ -272,36 +193,6 @@ export class ElasticsearchService implements OnModuleInit {
       {
         index: indexConfig.canvas.index,
         id: canvasId,
-      },
-      { ignore: [404] },
-    );
-  }
-
-  async deleteProject(projectId: string) {
-    return this.client.delete(
-      {
-        index: indexConfig.project.index,
-        id: projectId,
-      },
-      { ignore: [404] },
-    );
-  }
-
-  async deleteConversationMessage(messageId: string) {
-    return this.client.delete(
-      {
-        index: indexConfig.conversationMessage.index,
-        id: messageId,
-      },
-      { ignore: [404] },
-    );
-  }
-
-  async deleteSkill(skillId: string) {
-    return this.client.delete(
-      {
-        index: indexConfig.skill.index,
-        id: skillId,
       },
       { ignore: [404] },
     );
@@ -403,105 +294,6 @@ export class ElasticsearchService implements OnModuleInit {
         highlight: {
           fields: {
             title: {},
-          },
-        },
-      },
-    });
-
-    return body.hits.hits;
-  }
-
-  async searchProjects(user: User, req: SearchRequest) {
-    const { query, limit, entities } = req;
-    const { body } = await this.client.search<SearchResponse<ProjectDocument>>({
-      index: indexConfig.project.index,
-      body: {
-        query: {
-          bool: {
-            must: [
-              { match: { uid: user.uid } },
-              {
-                multi_match: {
-                  query,
-                  fields: ['title^2', 'description'],
-                  type: 'most_fields',
-                },
-              },
-            ],
-            ...(entities?.length > 0 && {
-              filter: [{ terms: { _id: entities.map((entity) => entity.entityId) } }],
-            }),
-          },
-        },
-        size: limit,
-        highlight: {
-          fields: {
-            title: {},
-            description: {},
-          },
-        },
-      },
-    });
-
-    return body.hits.hits;
-  }
-
-  async searchConversationMessages(user: User, req: SearchRequest) {
-    const { query, limit } = req;
-    const { body } = await this.client.search<SearchResponse<ConversationMessageDocument>>({
-      index: indexConfig.conversationMessage.index,
-      body: {
-        query: {
-          bool: {
-            must: [
-              { match: { uid: user.uid } },
-              {
-                multi_match: {
-                  query,
-                  fields: ['convTitle^2', 'content'],
-                  type: 'most_fields',
-                },
-              },
-            ],
-          },
-        },
-        size: limit,
-        highlight: {
-          fields: {
-            convTitle: {},
-            content: {},
-          },
-        },
-      },
-    });
-
-    return body.hits.hits;
-  }
-
-  async searchSkills(user: User, req: SearchRequest) {
-    const { query, limit } = req;
-    const { body } = await this.client.search<SearchResponse<SkillDocument>>({
-      index: indexConfig.skill.index,
-      body: {
-        query: {
-          bool: {
-            must: [
-              { match: { uid: user.uid } },
-              {
-                multi_match: {
-                  query,
-                  fields: ['displayName^2', 'description', 'tplName'],
-                  type: 'most_fields',
-                },
-              },
-            ],
-          },
-        },
-        size: limit,
-        highlight: {
-          fields: {
-            displayName: {},
-            description: {},
           },
         },
       },
