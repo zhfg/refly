@@ -1,10 +1,11 @@
 import { Position, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
+import Moveable from 'react-moveable';
 import classNames from 'classnames';
 import { Divider } from 'antd';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './types';
 import { Node } from '@xyflow/react';
-import { useState, useCallback, useRef, useEffect, useMemo, lazy } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { CustomHandle } from './custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
 import { useEdgeStyles } from '../constants';
@@ -37,8 +38,6 @@ import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/compone
 
 import { ModelProviderIcons } from '@refly-packages/ai-workspace-common/components/common/icon';
 
-const Moveable = lazy(() => import('react-moveable'));
-
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
 const POLLING_INTERVAL = 3000;
@@ -66,7 +65,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
     width: node?.measured?.width ?? 288,
     height: node?.measured?.height ?? 'auto',
   });
-  const moveableRef = useRef(null);
+  const moveableRef = useRef<Moveable>(null);
 
   const { status, artifacts, currentLog: log, modelInfo, structuredData, actionMeta, tokenUsage } = metadata ?? {};
   const sources = Array.isArray(structuredData?.sources) ? structuredData?.sources : [];

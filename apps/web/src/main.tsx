@@ -26,7 +26,7 @@ const AppLayout = lazy(() =>
   })),
 )
 
-import { initI18n } from "@refly-packages/ai-workspace-common/i18n/config"
+import "@refly-packages/ai-workspace-common/i18n/config"
 import {
   getEnv,
   setRuntime,
@@ -37,7 +37,6 @@ import { SuspenseLoading } from "@refly-packages/ai-workspace-common/components/
 // styles
 import "@/styles/style.css"
 
-initI18n()
 setRuntime("web")
 
 // Move Sentry initialization to a separate function

@@ -5,9 +5,7 @@
   "author": "",
   "license": "ISC",
   "exports": {
-    "./en-US": "./src/en-US/index.ts",
     "./en-US/*": "./src/en-US/*.ts",
-    "./zh-Hans": "./src/zh-Hans/index.ts",
     "./zh-Hans/*": "./src/zh-Hans/*.ts"
   }
 }
