@@ -187,13 +187,6 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       locale: localSettings?.outputLocale,
     };
 
-    // if ((selectedMdText || '').trim()) {
-    //   param.input.query =
-    //     `> ${uiLocale === LOCALE.EN ? '**User Selected Text:** ' : '**用户选中的文本:** '} ${selectedMdText}` +
-    //     `\n\n` +
-    //     `${uiLocale === LOCALE.EN ? '**Please answer the following question based on the user selected text:** ' : '**请根据用户选中的文本回答以下问题:** '} ${inputValue}`;
-    // }
-
     setIsLoading(true);
     invokeAction(param);
   };
