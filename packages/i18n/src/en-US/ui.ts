@@ -437,6 +437,7 @@ const translations = {
     completed: 'Completed',
   },
   canvas: {
+    emptyText: 'Double-click to ask AI, or',
     toolbar: {
       enablePointerMode: 'Enable Pointer Mode',
       disablePointerMode: 'Disable Pointer Mode',

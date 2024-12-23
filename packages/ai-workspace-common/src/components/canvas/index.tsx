@@ -7,6 +7,7 @@ import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
 import { TopToolbar } from './top-toolbar';
 import { NodePreview } from './node-preview';
+import { HiOutlineDocumentAdd } from 'react-icons/hi';
 
 import '@xyflow/react/dist/style.css';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
@@ -21,6 +22,7 @@ import { useCanvasNodesStore } from '@refly-packages/ai-workspace-common/stores/
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { LayoutControl } from './layout-control';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -69,6 +71,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     operatingNodeId: state.operatingNodeId,
     setOperatingNodeId: state.setOperatingNodeId,
   }));
+
+  const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } = useCreateDocument();
 
   const toggleInteractionMode = (mode: 'mouse' | 'touchpad') => {
     setInteractionMode(mode);
@@ -228,36 +232,55 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         <CanvasToolbar onToolSelect={handleToolSelect} />
         <TopToolbar canvasId={canvasId} />
         <div className="flex-grow relative">
-          <style>{selectionStyles}</style>
-          <ReactFlow
-            {...flowConfig}
-            panOnScroll={interactionMode === 'touchpad'}
-            panOnDrag={interactionMode === 'mouse'}
-            zoomOnScroll={interactionMode === 'mouse'}
-            zoomOnPinch={interactionMode === 'touchpad'}
-            selectNodesOnDrag={!operatingNodeId && interactionMode === 'mouse'}
-            selectionOnDrag={!operatingNodeId && interactionMode === 'touchpad'}
-            nodeTypes={nodeTypes}
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={onNodeClick}
-            onPaneClick={onPaneClick}
-            nodeDragThreshold={10}
-            nodesDraggable={!operatingNodeId}
-          >
-            <Background />
-            <MiniMap
-              position="bottom-left"
-              style={{
-                border: '1px solid rgba(16, 24, 40, 0.0784)',
-                boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
-              }}
-              className="bg-white/80 w-[140px] h-[92px] !mb-[46px] !ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
-            />
-          </ReactFlow>
+          {nodes?.length === 0 ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="flex items-center justify-center text-gray-500 text-center">
+                <div className="text-[20px]">{t('canvas.emptyText')}</div>
+                <Button
+                  loading={isCreatingDocument}
+                  icon={<HiOutlineDocumentAdd className="-mr-1 flex items-center justify-center" />}
+                  type="text"
+                  className="ml-0.5 text-[20px] text-[#00968F] py-[4px] px-[8px]"
+                  onClick={createSingleDocumentInCanvas}
+                >
+                  {t('canvas.toolbar.createDocument')}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <style>{selectionStyles}</style>
+              <ReactFlow
+                {...flowConfig}
+                panOnScroll={interactionMode === 'touchpad'}
+                panOnDrag={interactionMode === 'mouse'}
+                zoomOnScroll={interactionMode === 'mouse'}
+                zoomOnPinch={interactionMode === 'touchpad'}
+                selectNodesOnDrag={!operatingNodeId && interactionMode === 'mouse'}
+                selectionOnDrag={!operatingNodeId && interactionMode === 'touchpad'}
+                nodeTypes={nodeTypes}
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onNodeClick={onNodeClick}
+                onPaneClick={onPaneClick}
+                nodeDragThreshold={10}
+                nodesDraggable={!operatingNodeId}
+              >
+                <Background />
+                <MiniMap
+                  position="bottom-left"
+                  style={{
+                    border: '1px solid rgba(16, 24, 40, 0.0784)',
+                    boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
+                  }}
+                  className="bg-white/80 w-[140px] h-[92px] !mb-[46px] !ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
+                />
+              </ReactFlow>
+            </>
+          )}
 
           <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} />
 

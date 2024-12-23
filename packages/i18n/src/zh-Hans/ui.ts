@@ -429,6 +429,7 @@ const translations = {
     completed: '已完成',
   },
   canvas: {
+    emptyText: '双击向 AI 提问, 或',
     toolbar: {
       enablePointerMode: '启用框选模式',
       disablePointerMode: '关闭框选模式',
