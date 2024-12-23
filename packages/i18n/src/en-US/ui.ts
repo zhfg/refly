@@ -1307,6 +1307,7 @@ const translations = {
       recommendQuestions: 'Recommend Questions',
       replace: 'Replace Selection',
       reject: 'Reject',
+      copy: 'Copy Answer',
     },
     configManager: {
       title: 'Skill Configuration',

@@ -1299,6 +1299,7 @@ const translations = {
       recommendQuestions: '推荐问题',
       replace: '替换选中',
       reject: '拒绝',
+      copy: '复制回答',
     },
     configManager: {
       title: '技能配置',

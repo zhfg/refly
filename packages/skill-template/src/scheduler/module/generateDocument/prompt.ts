@@ -155,11 +155,17 @@ export const buildGenerateDocumentUserPrompt = ({
  `;
 };
 
-export const buildGenerateDocumentContextUserPrompt = (context: string) => `
+export const buildGenerateDocumentContextUserPrompt = (context: string, needPrepareContext: boolean) => {
+  if (!needPrepareContext) {
+    return '';
+  }
+
+  return `
 <context>
 ${context}
 </context>
 `;
+};
 
 // Add title generation prompt
 export const getTitlePrompt = (locale: string, uiLocale: string) => `

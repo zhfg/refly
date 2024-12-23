@@ -88,9 +88,15 @@ ${buildLocaleFollowInstruction(locale)}
 `;
 };
 
-export const buildWebSearchContextUserPrompt = (context: string) => `
+export const buildWebSearchContextUserPrompt = (context: string, needPrepareContext: boolean) => {
+  if (!needPrepareContext) {
+    return '';
+  }
+
+  return `
 ## Web Search Results
 ${context}
 
 ${buildCitationReminder()}
 `;
+};

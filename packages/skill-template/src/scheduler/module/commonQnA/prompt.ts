@@ -143,8 +143,14 @@ ${buildLocaleFollowInstruction(locale)}
 `;
 };
 
-export const buildCommonQnAContextUserPrompt = (context: string) => `
+export const buildCommonQnAContextUserPrompt = (context: string, needPrepareContext: boolean) => {
+  if (!needPrepareContext) {
+    return '';
+  }
+
+  return `
 <context>
 ${context}
 </context>
 `;
+};
