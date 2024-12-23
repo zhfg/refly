@@ -79,7 +79,9 @@ const defaultConfigurableState = {
     label: 'GPT-4o Mini',
     name: 'openai/gpt-4o-mini',
     provider: 'openai',
-    tier: 't2',
+    tier: 't2' as const,
+    contextLimit: 128000,
+    maxOutput: 16384,
   },
   modelList: [
     {

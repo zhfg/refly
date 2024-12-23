@@ -1049,7 +1049,7 @@ export const MessageTypeSchema = {
 export const ModelTierSchema = {
   type: 'string',
   description: 'Model tier',
-  enum: ['t1', 't2'],
+  enum: ['t1', 't2', 'free'],
 } as const;
 
 export const TokenUsageItemSchema = {
@@ -4105,7 +4105,7 @@ export const UploadResponseSchema = {
 
 export const ModelInfoSchema = {
   type: 'object',
-  required: ['name', 'label', 'provider', 'tier'],
+  required: ['name', 'label', 'provider', 'tier', 'contextLimit', 'maxOutput'],
   properties: {
     name: {
       type: 'string',
@@ -4122,10 +4122,15 @@ export const ModelInfoSchema = {
     tier: {
       type: 'string',
       description: 'Model tier',
+      $ref: '#/components/schemas/ModelTier',
     },
     contextLimit: {
       type: 'number',
-      description: 'Model context limit',
+      description: 'Model context limit (in tokens)',
+    },
+    maxOutput: {
+      type: 'number',
+      description: 'Model max output length (in tokens)',
     },
   },
 } as const;

@@ -3,8 +3,6 @@ import { useEditor } from '../../../core/components';
 import { addAIHighlight } from '../../../core/extensions';
 import CrazySpinner from '../../ui/icons/crazy-spinner';
 import Magic from '../../ui/icons/magic';
-import AICompletionCommands from '../inline/ai-completion-command';
-import AISelectorCommands from '../inline/ai-selector-commands';
 import { editorEmitter, InPlaceEditType, InPlaceActionType, CanvasEditConfig } from '@refly/utils/event-emitter/editor';
 import { Input } from '@arco-design/web-react';
 import { Button } from 'antd';
@@ -302,13 +300,8 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
         <>
           <div className="flex relative flex-row items-center" cmdk-input-wrapper="">
             <div className="flex flex-1 items-center pl-4 border-b" cmdk-input-wrapper="">
-              <Button size="small" type="default" className="text-xs w-6 h-6 rounded border text-gray-500 gap-1 mr-1">
-                <AISettingsDropdown
-                  placement="bottom"
-                  collapsed={true}
-                  briefMode={true}
-                  modelSelectorPlacement="bottom"
-                />
+              <Button size="small" type="default" className="rounded border text-gray-500 mr-1">
+                <AISettingsDropdown placement="bottom" collapsed={true} briefMode={true} trigger={['hover']} />
               </Button>
               <AddBaseMarkContext />
               <Input.TextArea

@@ -860,7 +860,7 @@ export type MessageType = 'ai' | 'human' | 'system';
 /**
  * Model tier
  */
-export type ModelTier = 't1' | 't2';
+export type ModelTier = 't1' | 't2' | 'free';
 
 /**
  * Token usage item
@@ -2862,11 +2862,15 @@ export type ModelInfo = {
   /**
    * Model tier
    */
-  tier: string;
+  tier: ModelTier;
   /**
-   * Model context limit
+   * Model context limit (in tokens)
    */
-  contextLimit?: number;
+  contextLimit: number;
+  /**
+   * Model max output length (in tokens)
+   */
+  maxOutput: number;
 };
 
 export type ListModelsResponse = BaseResponse & {

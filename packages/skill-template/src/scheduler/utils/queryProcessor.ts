@@ -1,6 +1,6 @@
 import { GraphState } from '../types';
 import { BaseSkill, SkillRunnableConfig } from '../../base';
-import { checkHasContext, countToken, countMessagesTokens, ModelContextLimitMap } from './token';
+import { checkHasContext, countToken, countMessagesTokens } from './token';
 import { truncateMessages } from './truncator';
 import { analyzeQueryAndContext, preprocessQuery } from './query-rewrite/index';
 import { safeStringifyJSON } from '@refly-packages/utils';
@@ -24,7 +24,7 @@ export async function processQuery(options: QueryProcessorOptions): Promise<Quer
   const { config, ctxThis, state } = options;
   const { query: originalQuery } = state;
   const {
-    modelName,
+    modelInfo,
     chatHistory: rawChatHistory = [],
     resources,
     documents,
@@ -59,7 +59,7 @@ export async function processQuery(options: QueryProcessorOptions): Promise<Quer
   ctxThis.engine.logger.log(`checkHasContext: ${hasContext}`);
 
   // Calculate tokens
-  const maxTokens = ModelContextLimitMap[modelName];
+  const maxTokens = modelInfo.contextLimit;
   const queryTokens = countToken(query);
   const chatHistoryTokens = countMessagesTokens(usedChatHistory);
   const remainingTokens = maxTokens - queryTokens - chatHistoryTokens;

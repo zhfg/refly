@@ -7,7 +7,7 @@ import {
   SkillContextResourceItem,
   Source,
 } from '@refly-packages/openapi-schema';
-import { ModelContextLimitMap, LLMType } from '@refly-packages/utils';
+import { LLMType } from '@refly-packages/utils';
 
 // const enc_p50k_base = get_encoding('p50k_base');
 const enc_cl100k_base = get_encoding('cl100k_base');
@@ -19,12 +19,6 @@ const enc_cl100k_base = get_encoding('cl100k_base');
 
 export const countToken = (text: string = '') => {
   return enc_cl100k_base.encode(text || '').length;
-};
-
-export const isTokenOverflow = (content: string, model: string, reservation = 1024) => {
-  const limit = ModelContextLimitMap[model]; // 这里model指 LLMType
-  const count = countToken(content);
-  return count + reservation > limit ?? 8 * 1024;
 };
 
 export const countContentTokens = (contentList: SkillContextContentItem[] = []) => {
@@ -42,11 +36,6 @@ export const countDocumentTokens = (documents: SkillContextDocumentItem[] = []) 
 export const countWebSearchContextTokens = (webSearchSources: Source[] = []) => {
   return webSearchSources.reduce((sum, source) => sum + countToken(source?.pageContent), 0);
 };
-
-// TODO: projects 搜索和在整个知识库搜索一起实现
-// export const countProjectTokens = (projects: SkillContextProjectItem[]) => {
-//   return projects.reduce((sum, project) => sum + countToken(project?.project?.content), 0);
-// };
 
 export const countContextTokens = (context: IContext) => {
   return (
@@ -69,4 +58,4 @@ export const countMessagesTokens = (messages: BaseMessage[] = []) => {
   return messages.reduce((sum, message) => sum + countToken(message.content as string), 0);
 };
 
-export { ModelContextLimitMap, LLMType };
+export { LLMType };
