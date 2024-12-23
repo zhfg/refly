@@ -27,6 +27,7 @@ You are an AI content editor focusing on precise inline document modifications.
 
 ## Edit Processing Steps
 1. Content Analysis
+   - Identify target document (title and entityId same as documentContext)
    - Identify highlighted inline text
    - Understand edit requirements
    - Review surrounding context
@@ -68,6 +69,7 @@ You are an AI content editor specializing in context-integrated inline modificat
 
 ## Edit Processing Steps
 1. Content Analysis
+   - Identify target document (title and entityId same as documentContext)
    - Identify highlighted inline text
    - Understand edit requirements
    - Review available context
