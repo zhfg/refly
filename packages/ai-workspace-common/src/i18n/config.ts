@@ -1,38 +1,22 @@
-import i18next from 'i18next';
-import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import { initReactI18next } from 'react-i18next';
 
-import enUSUi from '@refly/i18n/en-US/ui';
-import enUSSkill from '@refly/i18n/en-US/skill';
-import enUSSkillLog from '@refly/i18n/en-US/skill-log';
-import zhHansUi from '@refly/i18n/zh-Hans/ui';
-import zhHansSkill from '@refly/i18n/zh-Hans/skill';
-import zhHansSkillLog from '@refly/i18n/zh-Hans/skill-log';
+export const initI18n = async () => {
+  const i18next = (await import('i18next')).default;
 
-i18next
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    debug: process.env.NODE_ENV === 'development',
-    defaultNS: 'ui',
-    resources: {
-      en: {
-        ui: enUSUi,
-        skill: enUSSkill,
-        skillLog: enUSSkillLog,
+  i18next
+    .use(LanguageDetector)
+    .use(initReactI18next)
+    .init({
+      debug: process.env.NODE_ENV === 'development',
+      defaultNS: 'ui',
+      resources: {
+        en: (await import('@refly/i18n/en-US')).default,
+        'zh-CN': (await import('@refly/i18n/zh-Hans')).default,
+        zh: (await import('@refly/i18n/zh-Hans')).default,
       },
-      'zh-CN': {
-        ui: zhHansUi,
-        skill: zhHansSkill,
-        skillLog: zhHansSkillLog,
-      },
-      zh: {
-        ui: zhHansUi,
-        skill: zhHansSkill,
-        skillLog: zhHansSkillLog,
-      },
-    },
-    // if you see an error like: "Argument of type 'DefaultTFuncReturn' is not assignable to parameter of type xyz"
-    // set returnNull to false (and also in the i18next.d.ts options)
-    // returnNull: false,
-  });
+      // if you see an error like: "Argument of type 'DefaultTFuncReturn' is not assignable to parameter of type xyz"
+      // set returnNull to false (and also in the i18next.d.ts options)
+      // returnNull: false,
+    });
+};
