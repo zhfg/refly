@@ -15,7 +15,7 @@ const Content = (props: { val: string }) => {
   switch (props.val) {
     case 'resource':
       return <ResourceList />;
-    case 'project':
+    case 'document':
       return <DocumentList />;
     default:
       return <ResourceList />;
@@ -52,7 +52,7 @@ const ContentHeader = (props: { setVal: (val: string) => void; hitTop: boolean; 
         >
           <Radio value="canvas">{t('workspace.contentPanel.tabPanel.canvas')}</Radio>
           <Radio value="resource">{t('workspace.contentPanel.tabPanel.resource')}</Radio>
-          <Radio value="project">{t('workspace.contentPanel.tabPanel.project')}</Radio>
+          <Radio value="document">{t('workspace.contentPanel.tabPanel.document')}</Radio>
         </RadioGroup>
       </div>
     </div>

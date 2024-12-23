@@ -7,7 +7,6 @@ import api from '@opentelemetry/api';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { RAGModule } from './rag/rag.module';
-import { ConversationModule } from './conversation/conversation.module';
 
 import configuration from './config/app.config';
 import { AppController } from './app.controller';
@@ -72,7 +71,6 @@ import { ActionModule } from './action/action.module';
       inject: [ConfigService],
     }),
     AuthModule,
-    ConversationModule,
     UserModule,
     RAGModule,
     KnowledgeModule,

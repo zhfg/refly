@@ -1,7 +1,6 @@
 import React, { type Dispatch, useEffect, useRef, useState } from 'react';
 import { reflyEnv } from '@/utils/env';
 import hotKeys from 'hotkeys-js';
-import { useBuildTask } from '@refly-packages/ai-workspace-common/hooks/use-build-task';
 import { Source } from '@refly/openapi-schema';
 import { useWeblinkStore } from '@/stores/weblink';
 import { useUserStore } from '@/stores/user';
@@ -14,7 +13,6 @@ export const useBindCommands = () => {
   const softKeyboardShortcutsEnabledRef = useRef(true);
   const keyboardShortcutRef = useRef('');
   const keyboardSendShortcutRef = useRef('');
-  const { buildTaskAndGenReponse } = useBuildTask();
 
   // const loadCommands = async () => {
   //   const commands = await apiRequest({

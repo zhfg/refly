@@ -1,14 +1,12 @@
 import {
   Resource as ResourceModel,
   Document as DocumentModel,
-  Project as ProjectModel,
   Reference as ReferenceModel,
 } from '@prisma/client';
 import {
   Resource,
   ResourceType,
   IndexStatus,
-  Project,
   Reference,
   ReferenceType,
   ReferenceMeta,
@@ -21,26 +19,16 @@ export type FinalizeResourceParam = {
   uid: string;
 };
 
-export const projectPO2DTO = (project: ProjectModel): Project => {
-  return {
-    ...pick(project, ['projectId', 'title', 'description', 'shareCode']),
-    createdAt: project.createdAt.toJSON(),
-    updatedAt: project.updatedAt.toJSON(),
-  };
-};
-
 export const resourcePO2DTO = (
   resource: ResourceModel & {
-    order?: number;
     content?: string;
-    projectIds?: string[];
   },
 ): Resource => {
   if (!resource) {
     return null;
   }
   return {
-    ...pick(resource, ['resourceId', 'title', 'content', 'contentPreview', 'order', 'projectIds']),
+    ...pick(resource, ['resourceId', 'title', 'content', 'contentPreview']),
     resourceType: resource.resourceType as ResourceType,
     indexStatus: resource.indexStatus as IndexStatus,
     storageSize: resource.storageSize.toString(),

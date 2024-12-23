@@ -19,16 +19,6 @@ const Canvas = lazy(() => import("@/pages/canvas"))
 
 const prefetchRoutes = () => {
   // Prefetch common routes
-  import("@/pages/login")
-  import("@/pages/home")
-  import("@/pages/canvas")
-  import("@/pages/library")
-  import("@/pages/conv-library")
-  import("@/pages/conv-item")
-  import("@/pages/skill")
-  import("@/pages/skill-detail")
-  import("@/pages/settings")
-  import("@/pages/share-content")
   import("@refly-packages/ai-workspace-common/components/request-access")
 }
 

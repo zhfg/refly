@@ -1,4 +1,3 @@
-import { IconFolder } from '@arco-design/web-react/icon';
 import {
   HiOutlineDocumentText,
   HiOutlineSquare3Stack3D,
@@ -30,7 +29,6 @@ import QwenIcon from '@refly-packages/ai-workspace-common/assets/qwen.svg';
 import MetaLlamaIcon from '@refly-packages/ai-workspace-common/assets/meta.svg';
 import DeepSeekIcon from '@refly-packages/ai-workspace-common/assets/deepseek.svg';
 
-export const IconProject = IconFolder;
 export const IconCanvasFill = HiSparkles;
 export const IconCanvas = HiOutlineSparkles;
 export const IconDocument = HiOutlineDocumentText;

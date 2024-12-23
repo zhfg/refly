@@ -6,7 +6,6 @@ import { DataFetcher } from '@refly-packages/ai-workspace-common/modules/entity-
 import { useFetchOrSearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/hooks';
 import { HiOutlinePlus } from 'react-icons/hi2';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface SearchSelectProps extends SelectProps {
@@ -43,35 +42,7 @@ export const SearchSelect = (props: SearchSelectProps) => {
   const [popupVisible, setPopupVisible] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
 
-  const handleCreateNewEntity = async () => {
-    if (domain !== 'project') {
-      return;
-    }
-
-    if (!newEntityName) {
-      message.warning(t('entitySelector.createEntity.newProjectNameIsEmpty'));
-      return;
-    }
-
-    setCreateLoading(true);
-    const { data, error } = await getClient().createProject({
-      body: {
-        title: newEntityName,
-      },
-    });
-    setCreateLoading(false);
-
-    if (!data || error) {
-      return;
-    }
-
-    const { projectId, title } = data.data;
-    setDataList([{ id: projectId, title, domain }, ...dataList]);
-    setValue(projectId);
-    setPopupVisible(false);
-    setNewEntityName('');
-    onChange?.(projectId, { label: title, value: projectId });
-  };
+  const handleCreateNewEntity = async () => {};
 
   const handlePopupScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { currentTarget } = e;

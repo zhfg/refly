@@ -14,6 +14,7 @@ const AICompletionCommands = ({
   onOpenChange: (open: boolean) => void;
 }) => {
   const { editor } = useEditor();
+  const docId = editor?.options?.editorProps?.attributes?.['data-doc-id'];
 
   return (
     <>
@@ -40,7 +41,7 @@ const AICompletionCommands = ({
                     completion,
                   )
                   .run();
-                editorEmitter.emit('activeAskAI', false);
+                editorEmitter.emit('activeAskAI', { value: false, docId });
               }
             }}
           >
@@ -63,7 +64,7 @@ const AICompletionCommands = ({
                   .insertContentAt(selection.to + 1, completion)
                   .run();
 
-                editorEmitter.emit('activeAskAI', false);
+                editorEmitter.emit('activeAskAI', { value: false, docId });
                 // onOpenChange(false)
               }
             }}

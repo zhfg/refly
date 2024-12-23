@@ -454,46 +454,6 @@ export class SearchService {
     return this.searchCanvasesByKeywords(user, req);
   }
 
-  async emptySearchSkills(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    const skills = await this.prisma.skillInstance.findMany({
-      where: { uid: user.uid, deletedAt: null },
-      orderBy: { updatedAt: 'desc' },
-      take: req.limit || 5,
-    });
-    return skills.map((skill) => ({
-      id: skill.skillId,
-      domain: 'skill',
-      title: skill.displayName,
-      highlightedTitle: skill.displayName,
-      snippets: [{ text: skill.description, highlightedText: skill.description }],
-      createdAt: skill.createdAt.toJSON(),
-      updatedAt: skill.updatedAt.toJSON(),
-    }));
-  }
-
-  async searchSkills(user: User, req: ProcessedSearchRequest): Promise<SearchResult[]> {
-    if (req.query.length === 0) {
-      return this.emptySearchSkills(user, req);
-    }
-
-    const hits = await this.elasticsearch.searchSkills(user, req);
-
-    return hits.map((hit) => ({
-      id: hit._id,
-      domain: 'skill',
-      title: hit._source.displayName,
-      highlightedTitle: hit.highlight?.displayName?.[0] || hit._source.displayName,
-      snippets: [
-        {
-          text: hit._source.description,
-          highlightedText: hit.highlight?.description?.[0] || hit._source.description,
-        },
-      ],
-      createdAt: hit._source.createdAt,
-      updatedAt: hit._source.updatedAt,
-    }));
-  }
-
   async webSearch(
     user: User,
     req: WebSearchRequest | BatchWebSearchRequest,
@@ -602,8 +562,6 @@ export class SearchService {
             return this.searchDocuments(user, req);
           case 'canvas':
             return this.searchCanvases(user, req);
-          case 'skill':
-            return this.searchSkills(user, req);
           default:
             return [] as SearchResult[];
         }

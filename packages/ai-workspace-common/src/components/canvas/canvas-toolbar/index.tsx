@@ -1,4 +1,4 @@
-import { Button, Badge } from 'antd';
+import { Button, Badge, Divider } from 'antd';
 import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { RiUploadCloud2Line } from 'react-icons/ri';
 import { useTranslation } from 'react-i18next';
@@ -22,11 +22,11 @@ import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common
 
 // Define toolbar item interface
 interface ToolbarItem {
-  icon: React.ElementType;
-  value: string;
-  type: 'button' | 'popover';
-  domain: string;
-  tooltip: string;
+  type: 'button' | 'popover' | 'divider';
+  icon?: React.ElementType;
+  value?: string;
+  domain?: string;
+  tooltip?: string;
   active?: boolean;
 }
 
@@ -70,14 +70,6 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
 
   // Define toolbar items
   const tools: ToolbarItem[] = [
-    // {
-    //   icon: FaArrowPointer,
-    //   value: 'changeMode',
-    //   type: 'button',
-    //   domain: 'changeMode',
-    //   tooltip: mode === 'pointer' ? t('canvas.toolbar.disablePointerMode') : t('canvas.toolbar.enablePointerMode'),
-    //   active: mode === 'pointer',
-    // },
     {
       icon: RiUploadCloud2Line,
       value: 'importResource',
@@ -112,6 +104,9 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
       type: 'popover',
       domain: 'document',
       tooltip: t('canvas.toolbar.addDocument'),
+    },
+    {
+      type: 'divider',
     },
     {
       icon: IconCanvas,
@@ -235,10 +230,14 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
         boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
       }}
     >
-      {tools.map((tool, index) =>
-        tool.type === 'button' ? (
-          <ToolButtonWithBadge key={index} tool={tool} />
-        ) : (
+      {tools.map((tool, index) => {
+        if (tool.type === 'divider') {
+          return <Divider key={index} className="m-0" />;
+        }
+        if (tool.type === 'button') {
+          return <ToolButtonWithBadge key={index} tool={tool} />;
+        }
+        return (
           <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm} offset={12}>
             <TooltipWrapper key={index} tooltip={tool.tooltip}>
               <Button
@@ -256,8 +255,8 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
               />
             </TooltipWrapper>
           </SearchList>
-        ),
-      )}
+        );
+      })}
       {importResourceModalVisible ? <ImportResourceModal /> : null}
       {sourceListDrawerVisible && isWeb ? <SourceListModal classNames="source-list-modal" /> : null}
     </div>

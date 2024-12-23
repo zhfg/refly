@@ -11,7 +11,6 @@ import { BaseSkill, SkillRunnableConfig } from '../../base';
 import { mergeAndTruncateContexts, truncateContext } from './truncator';
 import { flattenMergedContextToSources, concatMergedContextToStr } from './summarizer';
 import {
-  SkillContextContentItem,
   SkillContextDocumentItem,
   SkillContextResourceItem,
   SkillTemplateConfig,
@@ -72,7 +71,6 @@ export async function prepareContext(
     contentList: [],
     resources: [],
     documents: [],
-    projects: [],
   };
   if (enableMentionedContext) {
     const mentionContextRes = await prepareMentionedContext(
@@ -93,10 +91,9 @@ export async function prepareContext(
     contentList: [],
     resources: [],
     documents: [],
-    projects: [],
   };
   if (remainingTokens > 0 && (enableMentionedContext || enableKnowledgeBaseSearch)) {
-    const { contentList = [], resources = [], documents = [], projects = [] } = ctx.config.configurable;
+    const { contentList = [], resources = [], documents = [] } = ctx.config.configurable;
     // prev remove overlapping items in mentioned context
     ctx.ctxThis.engine.logger.log(
       `Remove Overlapping Items In Mentioned Context...
@@ -105,7 +102,6 @@ export async function prepareContext(
         contentList,
         resources,
         documents,
-        projects,
       })}
       `,
     );
@@ -114,7 +110,6 @@ export async function prepareContext(
       contentList,
       resources,
       documents,
-      projects,
     });
 
     lowerPriorityContext = await prepareLowerPriorityContext(
@@ -258,7 +253,6 @@ export async function prepareMentionedContext(
     contentList: [],
     resources: [],
     documents: [],
-    projects: [],
     ...mentionedContext,
   };
 
@@ -417,10 +411,7 @@ export async function prepareContainerLevelContext(
     contentList: [],
     resources: [],
     documents: [],
-    projects: [],
   };
-
-  const { projects } = context;
 
   ctx.ctxThis.engine.logger.log(
     `Prepare Container Level Context..., 
@@ -458,9 +449,6 @@ export async function prepareContainerLevelContext(
   // Then add items from whole space
   relevantResourcesOrDocumentsFromWholeSpace.forEach(addUniqueItem);
 
-  // Keep original projects
-  processedContext.projects = projects;
-
   ctx.ctxThis.engine.logger.log(
     `Prepared Container Level Context successfully! ${safeStringifyJSON(processedContext)}`,
   );
@@ -482,7 +470,6 @@ export function removeOverlappingContextItems(context: IContext, originalContext
     contentList: [],
     resources: [],
     documents: [],
-    projects: [],
   };
 
   // Helper function to check if an item exists in the context
@@ -513,11 +500,6 @@ export function removeOverlappingContextItems(context: IContext, originalContext
         (context?.documents || []).map((n) => n.document),
         'docId',
       ),
-  );
-
-  // Deduplicate projects
-  deduplicatedContext.projects = (originalContext?.projects || []).filter(
-    (item) => !itemExistsInContext(item, context?.projects || [], 'projectId'),
   );
 
   return deduplicatedContext;

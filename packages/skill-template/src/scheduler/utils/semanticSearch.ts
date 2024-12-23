@@ -547,7 +547,7 @@ export async function knowledgeBaseSearchGetRelevantChunks(
     metadata: {
       ...item.metadata,
       title: item.title,
-      domain: item.domain, // project, resource, document
+      domain: item.domain,
     },
   }));
 

@@ -634,9 +634,6 @@ importers:
       dayjs:
         specifier: ~1.11.7
         version: 1.11.13
-      framer-motion:
-        specifier: ^11.11.9
-        version: 11.11.9(react-dom@18.3.1)(react@18.3.1)
       hotkeys-js:
         specifier: ~3.10.2
         version: 3.10.4
@@ -983,9 +980,6 @@ importers:
       dayjs:
         specifier: ~1.11.7
         version: 1.11.13
-      framer-motion:
-        specifier: ^11.11.9
-        version: 11.11.9(react-dom@18.3.1)(react@18.3.1)
       highlight.js:
         specifier: ^11.9.0
         version: 11.10.0
@@ -12335,25 +12329,6 @@ packages:
 
   /fraction.js@4.3.7:
     resolution: {integrity: sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==}
-
-  /framer-motion@11.11.9(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-XpdZseuCrZehdHGuW22zZt3SF5g6AHJHJi7JwQIigOznW4Jg1n0oGPMJQheMaKLC+0rp5gxUKMRYI6ytd3q4RQ==}
-    peerDependencies:
-      '@emotion/is-prop-valid': '*'
-      react: ^18.0.0
-      react-dom: ^18.0.0
-    peerDependenciesMeta:
-      '@emotion/is-prop-valid':
-        optional: true
-      react:
-        optional: true
-      react-dom:
-        optional: true
-    dependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      tslib: 2.7.0
-    dev: false
 
   /framework-utils@1.1.0:
     resolution: {integrity: sha512-KAfqli5PwpFJ8o3psRNs8svpMGyCSAe8nmGcjQ0zZBWN2H6dZDnq+ABp3N3hdUmFeMrLtjOCTXD4yplUJIWceg==}

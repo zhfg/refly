@@ -19,9 +19,6 @@ import {
   IndexStatus,
   ReindexResourceRequest,
   ResourceType,
-  ListProjectsData,
-  UpsertProjectRequest,
-  BindProjectResourceRequest,
   QueryReferencesRequest,
   ReferenceType,
   BaseReference,
@@ -44,7 +41,6 @@ import {
   genResourceID,
   cleanMarkdownForIngest,
   markdown2StateUpdate,
-  genProjectID,
   genReferenceID,
   genDocumentID,
 } from '@refly-packages/utils';
@@ -55,7 +51,6 @@ import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { MiscService } from '@/misc/misc.service';
 import {
-  ProjectNotFoundError,
   StorageQuotaExceeded,
   ResourceNotFoundError,
   ParamsError,
@@ -80,238 +75,17 @@ export class KnowledgeService {
     @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
   ) {}
 
-  async listProjects(user: User, params: ListProjectsData['query']) {
-    const { projectId, resourceId, page, pageSize, order } = params;
-
-    const projectIdFilter: Prisma.StringFilter<'Project'> = { equals: projectId };
-    let projectOrder: string[] = [];
-    if (resourceId) {
-      const relations = await this.prisma.projectResourceRelation.findMany({
-        select: { projectId: true },
-        where: { resourceId },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        orderBy: { pk: 'desc' },
-      });
-      projectIdFilter.in = relations.map((r) => r.projectId);
-      projectOrder = projectIdFilter.in;
-    }
-
-    const projects = await this.prisma.project.findMany({
-      where: { projectId: projectIdFilter, uid: user.uid, deletedAt: null },
-      ...(!resourceId
-        ? {
-            orderBy: { pk: order === 'creationAsc' ? 'asc' : 'desc' },
-            skip: (page - 1) * pageSize,
-            take: pageSize,
-          }
-        : {}),
-    });
-
-    if (projectOrder.length > 0) {
-      // Sort according to the order in projectOrder
-      projects.sort(
-        (a, b) => projectOrder.indexOf(a.projectId) - projectOrder.indexOf(b.projectId),
-      );
-    }
-
-    return projects;
-  }
-
-  async getProjectDetail(user: User, param: { projectId: string }) {
-    const { uid } = user;
-    const { projectId } = param;
-
-    if (!projectId) {
-      throw new ParamsError('Project ID is required');
-    }
-
-    const project = await this.prisma.project.findFirst({
-      where: { projectId, uid, deletedAt: null },
-    });
-    if (!project) {
-      throw new ProjectNotFoundError();
-    }
-
-    return project;
-  }
-
-  async upsertProject(user: User, param: UpsertProjectRequest) {
-    if (!param.projectId) {
-      param.projectId = genProjectID();
-    }
-
-    const project = await this.prisma.project.upsert({
-      where: { projectId: param.projectId },
-      create: {
-        projectId: param.projectId,
-        title: param.title,
-        description: param.description,
-        uid: user.uid,
-      },
-      update: { ...pick(param, ['title', 'description']) },
-    });
-
-    await this.elasticsearch.upsertProject({
-      id: project.projectId,
-      createdAt: project.createdAt.toJSON(),
-      updatedAt: project.updatedAt.toJSON(),
-      ...pick(project, ['title', 'description', 'uid']),
-    });
-
-    return project;
-  }
-
-  async bindProjectResources(user: User, params: BindProjectResourceRequest[]) {
-    const { uid } = user;
-
-    if (params?.length === 0) {
-      return;
-    }
-
-    params.forEach((param) => {
-      if (!param.resourceId || !param.projectId) {
-        throw new ParamsError('resourceId and projectId are required');
-      }
-      if (param.operation !== 'bind' && param.operation !== 'unbind') {
-        throw new ParamsError(`Invalid operation: ${param.operation}`);
-      }
-    });
-
-    const projectIds = new Set(params.map((p) => p.projectId));
-    const resourceIds = new Set(params.map((p) => p.resourceId));
-
-    const [projectCnt, resourceCnt] = await this.prisma.$transaction([
-      this.prisma.project.count({
-        where: { projectId: { in: Array.from(projectIds) }, uid, deletedAt: null },
-      }),
-      this.prisma.resource.count({
-        where: { resourceId: { in: Array.from(resourceIds) }, uid, deletedAt: null },
-      }),
-    ]);
-
-    if (projectCnt !== projectIds.size) {
-      throw new ProjectNotFoundError('Some of the projects cannot be found');
-    }
-    if (resourceCnt !== resourceIds.size) {
-      throw new ResourceNotFoundError('Some of the resources cannot be found');
-    }
-
-    await this.prisma.$transaction(async (tx) => {
-      for (const param of params) {
-        const { projectId, resourceId, order, operation } = param;
-
-        if (operation === 'bind') {
-          // Get max order for this project if order not specified
-          let finalOrder = order;
-          if (finalOrder === undefined) {
-            const maxOrder = await tx.projectResourceRelation.aggregate({
-              where: { projectId },
-              _max: { order: true },
-            });
-            finalOrder = (maxOrder._max.order ?? -1) + 1;
-          }
-
-          await tx.projectResourceRelation.upsert({
-            where: { projectId_resourceId: { projectId, resourceId } },
-            create: { projectId, resourceId, uid, order: finalOrder },
-            update: { order: finalOrder },
-          });
-        } else if (operation === 'unbind') {
-          await tx.projectResourceRelation.deleteMany({
-            where: { projectId, resourceId },
-          });
-        }
-      }
-    });
-  }
-
-  async deleteProject(user: User, projectId: string) {
-    const { uid } = user;
-    const project = await this.prisma.project.findFirst({
-      where: { projectId, uid, deletedAt: null },
-    });
-    if (!project) {
-      throw new ProjectNotFoundError();
-    }
-
-    await this.prisma.$transaction([
-      this.prisma.project.update({
-        where: { projectId, uid, deletedAt: null },
-        data: { deletedAt: new Date() },
-      }),
-      this.prisma.projectResourceRelation.deleteMany({
-        where: { projectId },
-      }),
-      this.prisma.labelInstance.updateMany({
-        where: { entityType: 'project', entityId: projectId, uid, deletedAt: null },
-        data: { deletedAt: new Date() },
-      }),
-    ]);
-
-    await this.elasticsearch.deleteProject(projectId);
-  }
-
   async listResources(user: User, param: ListResourcesData['query']) {
-    const {
-      resourceId,
-      projectId,
-      resourceType,
-      page = 1,
-      pageSize = 10,
-      order = 'creationDesc',
-    } = param;
+    const { resourceId, resourceType, page = 1, pageSize = 10, order = 'creationDesc' } = param;
 
     const resourceIdFilter: Prisma.StringFilter<'Resource'> = { equals: resourceId };
-    let resourceOrder: string[] = [];
-    if (projectId) {
-      const relations = await this.prisma.projectResourceRelation.findMany({
-        select: { resourceId: true },
-        where: { projectId },
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        orderBy: { order: 'asc' },
-      });
-      resourceIdFilter.in = relations.map((r) => r.resourceId);
-      resourceOrder = resourceIdFilter.in;
-    }
 
-    let resources = await this.prisma.resource.findMany({
+    return this.prisma.resource.findMany({
       where: { resourceId: resourceIdFilter, resourceType, uid: user.uid, deletedAt: null },
-      ...(!projectId
-        ? {
-            skip: (page - 1) * pageSize,
-            take: pageSize,
-            orderBy: { pk: order === 'creationAsc' ? 'asc' : 'desc' },
-          }
-        : {}),
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: { pk: order === 'creationAsc' ? 'asc' : 'desc' },
     });
-
-    if (resourceOrder.length > 0) {
-      // Sort according to the order in resourceOrder and add order field
-      resources = resources
-        .sort((a, b) => {
-          return resourceOrder.indexOf(a.resourceId) - resourceOrder.indexOf(b.resourceId);
-        })
-        .map((res, index) => ({ ...res, order: index }));
-    }
-
-    // Get projectIds for each resource
-    const resourceProjects = await this.prisma.projectResourceRelation.findMany({
-      select: { resourceId: true, projectId: true },
-      where: { resourceId: { in: resources.map((r) => r.resourceId) } },
-    });
-    const resourceProjectMap = new Map<string, string[]>();
-    resourceProjects.forEach((rp) => {
-      const projectIds = resourceProjectMap.get(rp.resourceId) || [];
-      projectIds.push(rp.projectId);
-      resourceProjectMap.set(rp.resourceId, projectIds);
-    });
-
-    return resources.map((res) => ({
-      ...res,
-      projectIds: resourceProjectMap.get(res.resourceId),
-    }));
   }
 
   async getResourceDetail(user: User, param: GetResourceDetailData['query']) {
@@ -336,12 +110,7 @@ export class KnowledgeService {
       content = await streamToString(contentStream);
     }
 
-    const projectIds = await this.prisma.projectResourceRelation.findMany({
-      select: { projectId: true },
-      where: { resourceId },
-    });
-
-    return { ...resource, content, projectIds: projectIds.map((p) => p.projectId) };
+    return { ...resource, content };
   }
 
   async createResource(
@@ -404,43 +173,28 @@ export class KnowledgeService {
       indexStatus = 'wait_index';
     }
 
-    const resource = await this.prisma.$transaction(async (tx) => {
-      const resource = await tx.resource.upsert({
-        where: { resourceId: param.resourceId },
-        create: {
-          resourceId: param.resourceId,
-          identifier,
-          resourceType: param.resourceType,
-          meta: JSON.stringify(param.data || {}),
-          contentPreview: cleanedContent?.slice(0, 500),
-          storageKey,
-          storageSize,
-          uid: user.uid,
-          title: param.title || 'Untitled',
-          indexStatus,
-        },
-        update: {
-          meta: JSON.stringify(param.data || {}),
-          contentPreview: cleanedContent?.slice(0, 500),
-          storageKey,
-          storageSize,
-          title: param.title || 'Untitled',
-          indexStatus,
-        },
-      });
-
-      // Add to project if specified
-      if (param.projectId) {
-        await tx.projectResourceRelation.upsert({
-          where: {
-            projectId_resourceId: { projectId: param.projectId, resourceId: param.resourceId },
-          },
-          create: { projectId: param.projectId, resourceId: param.resourceId },
-          update: {},
-        });
-      }
-
-      return resource;
+    const resource = await this.prisma.resource.upsert({
+      where: { resourceId: param.resourceId },
+      create: {
+        resourceId: param.resourceId,
+        identifier,
+        resourceType: param.resourceType,
+        meta: JSON.stringify(param.data || {}),
+        contentPreview: cleanedContent?.slice(0, 500),
+        storageKey,
+        storageSize,
+        uid: user.uid,
+        title: param.title || 'Untitled',
+        indexStatus,
+      },
+      update: {
+        meta: JSON.stringify(param.data || {}),
+        contentPreview: cleanedContent?.slice(0, 500),
+        storageKey,
+        storageSize,
+        title: param.title || 'Untitled',
+        indexStatus,
+      },
     });
 
     // Add to queue to be processed by worker

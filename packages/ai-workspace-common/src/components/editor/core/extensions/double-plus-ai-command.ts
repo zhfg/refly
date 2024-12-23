@@ -15,9 +15,11 @@ export const DoublePlusAICommand = Extension.create({
             // 删除 "++"
             view.dispatch(view.state.tr.delete(from - 1, to));
 
+            const docId = view.dom.closest('[data-doc-id]')?.getAttribute('data-doc-id');
+
             // 触发 AI 菜单
             setTimeout(() => {
-              editorEmitter.emit('activeAskAI', true);
+              editorEmitter.emit('activeAskAI', { value: true, docId });
             }, 0);
 
             return true;

@@ -38,10 +38,6 @@ export const ReferenceMetaSchema = {
       type: 'string',
       description: 'Reference title',
     },
-    projectId: {
-      type: 'string',
-      description: 'Reference project ID',
-    },
     url: {
       type: 'string',
       description: 'Reference URL',
@@ -171,10 +167,6 @@ export const ResourceSchema = {
       description: 'Resource type',
       $ref: '#/components/schemas/ResourceType',
     },
-    order: {
-      type: 'number',
-      description: 'Resource order in project',
-    },
     title: {
       type: 'string',
       description: 'Resource title',
@@ -183,13 +175,6 @@ export const ResourceSchema = {
       type: 'object',
       description: 'Resource metadata',
       $ref: '#/components/schemas/ResourceMeta',
-    },
-    projectIds: {
-      type: 'array',
-      description: 'Project IDs related to this resource',
-      items: {
-        type: 'string',
-      },
     },
     indexStatus: {
       description: 'Resource index status',
@@ -273,42 +258,6 @@ export const DocumentSchema = {
   },
 } as const;
 
-export const ProjectSchema = {
-  type: 'object',
-  required: ['projectId', 'title', 'createdAt', 'updatedAt'],
-  properties: {
-    projectId: {
-      type: 'string',
-      description: 'Project ID',
-      example: 'p-g30e1b80b5g1itbemc0g5jj3',
-    },
-    title: {
-      type: 'string',
-      description: 'Project title',
-      example: 'Default Project',
-    },
-    description: {
-      type: 'string',
-      description: 'Project description',
-      example: 'Project description',
-    },
-    shareCode: {
-      type: 'string',
-      description: 'Share code',
-    },
-    createdAt: {
-      type: 'string',
-      format: 'date-time',
-      description: 'Project creation time',
-    },
-    updatedAt: {
-      type: 'string',
-      format: 'date-time',
-      description: 'Project update time',
-    },
-  },
-} as const;
-
 export const EntityTypeSchema = {
   type: 'string',
   description: 'Entity type',
@@ -374,7 +323,7 @@ export const LabelClassSchema = {
 
 export const LabelInstanceSchema = {
   type: 'object',
-  description: 'Label instances related to resources, projects, etc.',
+  description: 'Label instances related to entities',
   required: ['labelId', 'labelClassId', 'value'],
   properties: {
     labelId: {
@@ -842,68 +791,6 @@ export const SkillInstanceSchema = {
   ],
 } as const;
 
-export const SkillJobSchema = {
-  type: 'object',
-  description: 'Skill job record',
-  required: ['jobId', 'skillId', 'skillDisplayName', 'jobStatus', 'input', 'context', 'createdAt', 'updatedAt'],
-  properties: {
-    jobId: {
-      type: 'string',
-      description: 'Job ID',
-      example: 'sj-g30e1b80b5g1itbemc0g5jj3',
-    },
-    skillId: {
-      type: 'string',
-      description: 'Skill ID',
-    },
-    skillDisplayName: {
-      type: 'string',
-      description: 'Skill display name',
-    },
-    jobStatus: {
-      description: 'Skill job status',
-      $ref: '#/components/schemas/SkillJobStatus',
-    },
-    conversation: {
-      description: 'Related conversation',
-      $ref: '#/components/schemas/Conversation',
-    },
-    trigger: {
-      description: 'Skill trigger',
-      $ref: '#/components/schemas/SkillTrigger',
-    },
-    input: {
-      description: 'Skill input',
-      $ref: '#/components/schemas/SkillInput',
-    },
-    context: {
-      description: 'Skill context',
-      $ref: '#/components/schemas/SkillContext',
-    },
-    tplConfig: {
-      description: 'Skill template config',
-      $ref: '#/components/schemas/SkillTemplateConfig',
-    },
-    createdAt: {
-      type: 'string',
-      format: 'date-time',
-      description: 'Job creation time',
-    },
-    updatedAt: {
-      type: 'string',
-      format: 'date-time',
-      description: 'Job update time',
-    },
-    messages: {
-      type: 'array',
-      description: 'Job messages (only returned in detail API)',
-      items: {
-        $ref: '#/components/schemas/ChatMessage',
-      },
-    },
-  },
-} as const;
-
 export const SourceMetaSchema = {
   type: 'object',
   description: 'Source metadata',
@@ -930,10 +817,6 @@ export const SourceMetaSchema = {
     entityType: {
       type: 'string',
       description: 'Related entity type',
-    },
-    projectId: {
-      type: 'string',
-      description: 'Related project ID',
     },
     originalLocale: {
       type: 'string',
@@ -1281,151 +1164,6 @@ export const ActionResultSchema = {
       type: 'string',
       format: 'date-time',
       description: 'Message update time',
-    },
-  },
-} as const;
-
-export const ChatMessageSchema = {
-  type: 'object',
-  description: 'Chat message',
-  required: ['msgId', 'type', 'content'],
-  properties: {
-    msgId: {
-      type: 'string',
-      readOnly: true,
-      description: 'Message ID',
-      example: 'm-g30e1b80b5g1itbemc0g5jj3',
-    },
-    jobId: {
-      type: 'string',
-      description: 'Skill job ID',
-      example: 'sj-g30e1b80b5g1itbemc0g5jj3',
-    },
-    type: {
-      description: 'Message type',
-      $ref: '#/components/schemas/MessageType',
-    },
-    content: {
-      type: 'string',
-      description: 'Message content',
-      example: 'Hello',
-    },
-    skillMeta: {
-      type: 'object',
-      description: 'Skill metadata',
-      $ref: '#/components/schemas/SkillMeta',
-    },
-    logs: {
-      type: 'array',
-      description: 'Message logs',
-      items: {
-        type: 'string',
-      },
-    },
-    structuredData: {
-      type: 'object',
-      description: 'Structured data output',
-      example: {
-        sources: ['Source'],
-        relatedQuestions: ['string'],
-      },
-    },
-    errors: {
-      type: 'array',
-      description: 'Errors',
-      items: {
-        type: 'string',
-      },
-    },
-    tokenUsage: {
-      type: 'array',
-      description: 'Token usage',
-      items: {
-        $ref: '#/components/schemas/TokenUsageItem',
-      },
-    },
-    invokeParam: {
-      description: 'Skill invocation parameters',
-      $ref: '#/components/schemas/InvokeSkillRequest',
-    },
-    createdAt: {
-      type: 'string',
-      format: 'date-time',
-      description: 'Message creation time',
-    },
-    updatedAt: {
-      type: 'string',
-      format: 'date-time',
-      description: 'Message update time',
-    },
-  },
-} as const;
-
-export const ConversationSchema = {
-  type: 'object',
-  description: 'Conversation list item',
-  properties: {
-    convId: {
-      type: 'string',
-      description: 'Conversation ID',
-      example: 'cv-g30e1b80b5g1itbemc0g5jj3',
-    },
-    projectId: {
-      type: 'string',
-      description: 'Project ID',
-      example: 'p-g30e1b80b5g1itbemc0g5jj3',
-    },
-    title: {
-      type: 'string',
-      description: 'Conversation title',
-      example: 'Default Conversation',
-    },
-    lastMessage: {
-      type: 'string',
-      description: 'Last message content',
-      example: 'Hello',
-    },
-    messageCount: {
-      type: 'number',
-      description: 'Number of chat messages in this conversation',
-      example: 42,
-    },
-    locale: {
-      description: 'Conversation locale',
-      type: 'string',
-      example: 'en',
-    },
-    origin: {
-      type: 'string',
-      description: 'Origin page host',
-      example: 'https://refly.ai',
-    },
-    originPageTitle: {
-      type: 'string',
-      description: 'Origin page title',
-      example: 'Refly | The AI Native Creation Engine',
-    },
-    originPageUrl: {
-      type: 'string',
-      description: 'Origin page url',
-      example: 'https://refly.ai/knowledge-base',
-    },
-    createdAt: {
-      type: 'string',
-      format: 'date-time',
-      description: 'Conversation creation time',
-    },
-    updatedAt: {
-      type: 'string',
-      format: 'date-time',
-      description: 'Conversation creation time',
-    },
-    messages: {
-      type: 'array',
-      description: 'Conversation messages (only returned for getConversationDetail api)',
-      items: {
-        $ref: '#/components/schemas/ChatMessage',
-      },
     },
   },
 } as const;
@@ -1806,11 +1544,6 @@ export const UpsertResourceRequestSchema = {
       description: 'Resource ID (only used for update)',
       example: 'r-g30e1b80b5g1itbemc0g5jj3',
     },
-    projectId: {
-      type: 'string',
-      description: 'Project ID (will add to the project when creating resource)',
-      example: 'p-g30e1b80b5g1itbemc0g5jj3',
-    },
     data: {
       description: 'Resource metadata',
       $ref: '#/components/schemas/ResourceMeta',
@@ -2137,117 +1870,6 @@ export const DeleteReferencesRequestSchema = {
       },
     },
   },
-} as const;
-
-export const UpsertProjectRequestSchema = {
-  type: 'object',
-  properties: {
-    projectId: {
-      type: 'string',
-      description: 'Project ID (only used for update)',
-      example: 'p-g30e1b80b5g1itbemc0g5jj3',
-    },
-    title: {
-      type: 'string',
-      description: 'Project title',
-      example: 'My Project',
-    },
-    description: {
-      type: 'string',
-      description: 'Project description',
-      example: 'Project description',
-    },
-  },
-} as const;
-
-export const UpsertProjectResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          $ref: '#/components/schemas/Project',
-        },
-      },
-    },
-  ],
-} as const;
-
-export const BindProjectResourceRequestSchema = {
-  type: 'object',
-  required: ['projectId', 'resourceId', 'operation'],
-  properties: {
-    projectId: {
-      type: 'string',
-      description: 'Project ID',
-    },
-    resourceId: {
-      type: 'string',
-      description: 'Resource ID',
-    },
-    order: {
-      type: 'number',
-      description: 'Resource order in project',
-    },
-    operation: {
-      type: 'string',
-      description: 'Operation type',
-      enum: ['bind', 'unbind'],
-    },
-  },
-} as const;
-
-export const DeleteProjectRequestSchema = {
-  type: 'object',
-  required: ['projectId'],
-  properties: {
-    projectId: {
-      type: 'string',
-      description: 'Project ID to delete',
-      example: 'p-g30e1b80b5g1itbemc0g5jj3',
-    },
-  },
-} as const;
-
-export const ListProjectResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'array',
-          description: 'Project list',
-          items: {
-            $ref: '#/components/schemas/Project',
-          },
-        },
-      },
-    },
-  ],
-} as const;
-
-export const GetProjectDetailResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'object',
-          description: 'Project data',
-          $ref: '#/components/schemas/Project',
-        },
-      },
-    },
-  ],
 } as const;
 
 export const SkillEventTypeSchema = {
@@ -2871,29 +2493,6 @@ export const SkillContextResourceItemSchema = {
   },
 } as const;
 
-export const SkillContextProjectItemSchema = {
-  type: 'object',
-  description: 'Skill context project item',
-  properties: {
-    projectId: {
-      type: 'string',
-      description: 'Project ID',
-    },
-    project: {
-      description: 'Project',
-      $ref: '#/components/schemas/Project',
-    },
-    isCurrent: {
-      type: 'boolean',
-      description: 'Whether this project is current',
-    },
-    metadata: {
-      type: 'object',
-      description: 'Project context metadata',
-    },
-  },
-} as const;
-
 export const SkillContextDocumentItemSchema = {
   type: 'object',
   description: 'Skill context document item',
@@ -2960,13 +2559,6 @@ export const SkillContextSchema = {
         $ref: '#/components/schemas/SkillContextResourceItem',
       },
     },
-    projects: {
-      type: 'array',
-      description: 'Context projects',
-      items: {
-        $ref: '#/components/schemas/SkillContextProjectItem',
-      },
-    },
     documents: {
       type: 'array',
       description: 'Context documents',
@@ -2993,7 +2585,7 @@ export const SkillContextSchema = {
 
 export const SkillContextKeySchema = {
   type: 'string',
-  enum: ['resources', 'projects', 'documents', 'contentList', 'urls'],
+  enum: ['resources', 'documents', 'contentList', 'urls'],
 } as const;
 
 export const SelectionKeySchema = {
@@ -3077,12 +2669,6 @@ export const SkillInvocationConfigSchema = {
       $ref: '#/components/schemas/SkillContextRuleGroup',
     },
   },
-} as const;
-
-export const SkillJobStatusSchema = {
-  type: 'string',
-  description: 'Skill job status',
-  enum: ['scheduling', 'running', 'finish', 'failed'],
 } as const;
 
 export const ActionTypeSchema = {
@@ -3416,134 +3002,6 @@ export const DeleteSkillTriggerRequestSchema = {
       description: 'Trigger ID to delete',
     },
   },
-} as const;
-
-export const ListSkillJobsResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'array',
-          description: 'Skill job list',
-          items: {
-            $ref: '#/components/schemas/SkillJob',
-          },
-        },
-      },
-    },
-  ],
-} as const;
-
-export const GetSkillJobDetailResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          description: 'Skill job',
-          $ref: '#/components/schemas/SkillJob',
-        },
-      },
-    },
-  ],
-} as const;
-
-export const CreateConversationRequestSchema = {
-  type: 'object',
-  properties: {
-    title: {
-      type: 'string',
-      description: 'Conversation title',
-      example: 'My Conversation',
-    },
-    projectId: {
-      type: 'string',
-      description: 'Project ID',
-    },
-    locale: {
-      type: 'string',
-      description: 'Conversation locale',
-      example: 'en',
-    },
-    origin: {
-      type: 'string',
-      description: 'Origin page host',
-      example: 'https://refly.ai',
-    },
-    originPageTitle: {
-      type: 'string',
-      description: 'Origin page title',
-      example: 'Refly | The AI Native Creation Engine',
-    },
-    originPageUrl: {
-      type: 'string',
-      description: 'Origin page url',
-      example: 'https://refly.ai/knowledge-base',
-    },
-  },
-} as const;
-
-export const CreateConversationResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'object',
-          description: 'Created conversation',
-          $ref: '#/components/schemas/Conversation',
-        },
-      },
-    },
-  ],
-} as const;
-
-export const ListConversationResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'array',
-          description: 'Conversation list',
-          items: {
-            $ref: '#/components/schemas/Conversation',
-          },
-        },
-      },
-    },
-  ],
-} as const;
-
-export const GetConversationDetailResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'object',
-          description: 'Conversation data',
-          $ref: '#/components/schemas/Conversation',
-        },
-      },
-    },
-  ],
 } as const;
 
 export const UpdateUserSettingsRequestSchema = {
@@ -3883,7 +3341,7 @@ export const SearchOptionsSchema = {
 
 export const SearchDomainSchema = {
   type: 'string',
-  enum: ['resource', 'document', 'canvas', 'skill', 'tool'],
+  enum: ['resource', 'document', 'canvas'],
 } as const;
 
 export const SearchModeSchema = {
