@@ -92,7 +92,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   const { docId } = useDocumentContext();
   const { invokeAction } = useInvokeAction();
 
-  const handleEdit = (actionType: InPlaceActionType) => {
+  const handleEdit = () => {
     const selection = editor.state.selection;
     const startIndex = selection.from;
     const endIndex = selection.to;
@@ -252,12 +252,12 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
 
     if (e.keyCode === 13 && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
-      handleEdit('chat');
+      handleEdit();
     }
 
     if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
       e.preventDefault();
-      handleEdit('chat');
+      handleEdit();
     }
   };
 
@@ -375,7 +375,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                 size="small"
                 disabled={!inputValue}
                 onClick={() => {
-                  handleEdit('chat');
+                  handleEdit();
                 }}
               >
                 <span>{t('copilot.chatActions.send')}</span> <span>{shortcutSymbols.edit}</span>
