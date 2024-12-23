@@ -5,7 +5,7 @@ import CrazySpinner from '../../ui/icons/crazy-spinner';
 import Magic from '../../ui/icons/magic';
 import { editorEmitter, InPlaceEditType, InPlaceActionType, CanvasEditConfig } from '@refly/utils/event-emitter/editor';
 import { Input } from '@arco-design/web-react';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import { cn } from '@refly/utils/cn';
 import { getOsType } from '@refly/utils/env';
 import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/components/add-base-mark-context';
@@ -26,6 +26,9 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { AISettingsDropdown } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions/ai-settings';
+import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
+import { CopyIcon } from '@refly-packages/ai-workspace-common/components/search/icons';
+import { IconCopy } from '@arco-design/web-react/icon';
 
 interface AISelectorProps {
   open: boolean;
@@ -316,6 +319,16 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                 </Button>
                 <Button size="small" icon={<HiXMark className="text-red-600" />} onClick={() => onOpenChange(false)}>
                   {t('copilot.chatActions.reject')}
+                </Button>
+                <Button
+                  size="small"
+                  icon={<IconCopy />}
+                  onClick={() => {
+                    copyToClipboard(resultContent);
+                    message.success(t('components.markdown.copySuccess'));
+                  }}
+                >
+                  {t('copilot.chatActions.copy')}
                 </Button>
               </div>
             )}
