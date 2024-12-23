@@ -447,7 +447,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
                     <span>{model}</span>
                   </div>
                 )}
-                <Divider type="vertical" className="mx-1" />
+                {model && tokenUsage ? <Divider type="vertical" className="mx-1" /> : null}
                 {tokenUsage && (
                   <div className="flex items-center gap-1">
                     <IconToken className="w-3 h-3" />
