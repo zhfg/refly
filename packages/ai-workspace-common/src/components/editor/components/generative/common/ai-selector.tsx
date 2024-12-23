@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef, useState, useCallback } from 'react';
-import { useEditor } from '../../../core/components';
+import { Editor, useEditor } from '../../../core/components';
 import { addAIHighlight } from '../../../core/extensions';
 import CrazySpinner from '../../ui/icons/crazy-spinner';
 import Magic from '../../ui/icons/magic';
@@ -47,6 +47,35 @@ const getShortcutSymbols = (osType: string) => {
   };
 };
 
+const CONTEXT_CHAR_LIMIT = 5000;
+
+const getCompleteBlock = (editor: Editor, doc: any, pos: number, isPrefix: boolean = true): string => {
+  if (!doc) return '';
+
+  // Get document range based on direction
+  const start = isPrefix ? 0 : pos;
+  const end = isPrefix ? pos : doc.content.size;
+
+  try {
+    // Get slice of document content
+    const slice = doc.slice(start, end);
+
+    // Convert to markdown using editor's markdown serializer
+    // Note: You'll need to access the markdown serializer from the editor instance
+    const mdText = editor.storage.markdown.serializer.serialize(slice.content);
+
+    // Trim and limit the content if needed
+    if (mdText.length > CONTEXT_CHAR_LIMIT) {
+      return isPrefix ? mdText.slice(-CONTEXT_CHAR_LIMIT) : mdText.slice(0, CONTEXT_CHAR_LIMIT);
+    }
+
+    return mdText.trim();
+  } catch (e) {
+    console.error('Error getting document content:', e);
+    return '';
+  }
+};
+
 export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditType }: AISelectorProps) => {
   const { t } = useTranslation();
   const { editor } = useEditor();
@@ -67,9 +96,14 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
     const selection = editor.state.selection;
     const startIndex = selection.from;
     const endIndex = selection.to;
+    const doc = editor.state.doc;
 
     const slice = editor.state.selection.content();
     const selectedMdText = editor.storage.markdown.serializer.serialize(slice.content);
+
+    // Get content before and after selection using document positions
+    const beforeHighlight = getCompleteBlock(editor, doc, startIndex, true);
+    const afterHighlight = getCompleteBlock(editor, doc, endIndex, false);
 
     const canvasEditConfig: CanvasEditConfig = {
       inPlaceEditType,
@@ -78,9 +112,9 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
         endIndex,
       },
       selection: {
-        beforeHighlight: '',
+        beforeHighlight,
         highlightedText: selectedMdText,
-        afterHighlight: '',
+        afterHighlight,
       },
     };
 
@@ -153,12 +187,12 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       locale: localSettings?.outputLocale,
     };
 
-    if ((selectedMdText || '').trim()) {
-      param.input.query =
-        `> ${uiLocale === LOCALE.EN ? '**User Selected Text:** ' : '**用户选中的文本:** '} ${selectedMdText}` +
-        `\n\n` +
-        `${uiLocale === LOCALE.EN ? '**Please answer the following question based on the user selected text:** ' : '**请根据用户选中的文本回答以下问题:** '} ${inputValue}`;
-    }
+    // if ((selectedMdText || '').trim()) {
+    //   param.input.query =
+    //     `> ${uiLocale === LOCALE.EN ? '**User Selected Text:** ' : '**用户选中的文本:** '} ${selectedMdText}` +
+    //     `\n\n` +
+    //     `${uiLocale === LOCALE.EN ? '**Please answer the following question based on the user selected text:** ' : '**请根据用户选中的文本回答以下问题:** '} ${inputValue}`;
+    // }
 
     setIsLoading(true);
     invokeAction(param);
@@ -223,7 +257,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
 
     if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
       e.preventDefault();
-      handleEdit('edit');
+      handleEdit('chat');
     }
   };
 
@@ -341,7 +375,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                 size="small"
                 disabled={!inputValue}
                 onClick={() => {
-                  handleEdit('edit');
+                  handleEdit('chat');
                 }}
               >
                 <span>{t('copilot.chatActions.send')}</span> <span>{shortcutSymbols.edit}</span>

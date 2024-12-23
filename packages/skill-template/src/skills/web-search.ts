@@ -127,6 +127,8 @@ export class WebSearch extends BaseSkill {
       },
     });
 
+    this.engine.logger.log(`Response message: ${safeStringifyJSON(responseMessage)}`);
+
     return { messages: [responseMessage] };
   };
 

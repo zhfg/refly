@@ -203,4 +203,146 @@ def authenticate_api():
 \`\`\`
 </response>
 </example>
+
+<example index="3">
+<chatHistory>
+<ChatHistoryItem type="human">What's our deployment strategy?</ChatHistoryItem>
+<ChatHistoryItem type="ai">We use GitOps with automated CI/CD pipelines .</ChatHistoryItem>
+<ChatHistoryItem type="human">Can you update our deployment docs to reflect this?</ChatHistoryItem>
+</chatHistory>
+<context>
+<documentContext>
+<reflyArtifact type="document" title="Deployment Guide">
+## Overview
+<highlight>We manually deploy using FTP.</highlight>
+## Release Process
+</reflyArtifact>
+</documentContext>
+<referenceContext>
+<MentionedContext>
+<KnowledgeBaseDocuments>
+<ContextItem citationIndex='1' type='document' title='DevOps Update'>
+New GitOps deployment process:
+- ArgoCD for continuous deployment
+- GitHub Actions for CI
+- Automated rollbacks
+</ContextItem>
+</KnowledgeBaseDocuments>
+</MentionedContext>
+</referenceContext>
+</context>
+<response>
+## Overview
+
+We implement a modern GitOps deployment strategy using ArgoCD for continuous deployment and GitHub Actions for CI pipelines . This automated approach ensures:
+- Consistent deployments across environments
+- Version control for infrastructure
+- Automated rollback capabilities
+</response>
+</example>
+
+<example index="4">
+<chatHistory>
+<ChatHistoryItem type="human">Tell me about our database architecture.</ChatHistoryItem>
+<ChatHistoryItem type="ai">We use a distributed PostgreSQL cluster with read replicas .</ChatHistoryItem>
+<ChatHistoryItem type="human">And what about our caching strategy?</ChatHistoryItem>
+<ChatHistoryItem type="ai">We implement Redis for distributed caching with a multi-tier strategy .</ChatHistoryItem>
+<ChatHistoryItem type="human">Please update the database section to include both details.</ChatHistoryItem>
+</chatHistory>
+<context>
+<documentContext>
+<reflyArtifact type="document" title="System Architecture">
+## Database Layer
+<highlight>We use a single MySQL database.</highlight>
+## Application Layer
+</reflyArtifact>
+</documentContext>
+<referenceContext>
+<MentionedContext>
+<KnowledgeBaseDocuments>
+<ContextItem citationIndex='1' type='document' title='Database Architecture'>
+PostgreSQL cluster configuration:
+- Primary node for writes
+- Multiple read replicas
+- Automated failover
+</ContextItem>
+<ContextItem citationIndex='2' type='document' title='Caching Strategy'>
+Redis implementation:
+- L1: Application-level cache
+- L2: Distributed Redis cluster
+- Cache invalidation patterns
+</ContextItem>
+</KnowledgeBaseDocuments>
+</MentionedContext>
+</referenceContext>
+</context>
+<response>
+## Database Layer
+
+Our data infrastructure combines a distributed PostgreSQL cluster with a multi-tier caching strategy:
+
+### Primary Database
+We utilize a distributed PostgreSQL cluster with multiple read replicas and automated failover capabilities .
+
+### Caching Layer
+The system implements a sophisticated Redis-based caching solution with multiple tiers:
+- Application-level caching for frequent requests
+- Distributed Redis cluster for shared state
+- Intelligent cache invalidation mechanisms 
+</response>
+</example>
+
+<example index="5">
+<chatHistory>
+<ChatHistoryItem type="human">What monitoring tools do we use?</ChatHistoryItem>
+<ChatHistoryItem type="ai">We use Prometheus and Grafana for metrics, with ELK stack for logs .</ChatHistoryItem>
+<ChatHistoryItem type="human">Update the monitoring section and include alert thresholds.</ChatHistoryItem>
+</chatHistory>
+<context>
+<documentContext>
+<reflyArtifact type="document" title="Operations Guide">
+## Monitoring
+<highlight>Basic server monitoring with ping checks.</highlight>
+## Maintenance
+</reflyArtifact>
+</documentContext>
+<referenceContext>
+<MentionedContext>
+<KnowledgeBaseDocuments>
+<ContextItem citationIndex='1' type='document' title='Monitoring Setup'>
+Monitoring stack:
+- Prometheus for metrics collection
+- Grafana dashboards
+- ELK for log aggregation
+</ContextItem>
+<ContextItem citationIndex='2' type='document' title='Alert Thresholds'>
+Standard thresholds:
+- CPU: 80% utilization
+- Memory: 90% usage
+- Disk: 85% full
+- Response time: >500ms
+</ContextItem>
+</KnowledgeBaseDocuments>
+</MentionedContext>
+</referenceContext>
+</context>
+<response>
+## Monitoring
+
+Our comprehensive monitoring infrastructure combines metrics, logging, and alerting:
+
+### Monitoring Stack
+We utilize industry-standard tools for complete observability :
+- Prometheus for real-time metrics collection
+- Grafana for visualization and dashboards
+- ELK stack for centralized logging
+
+### Alert Thresholds
+System alerts are configured with the following thresholds :
+- CPU utilization: 80%
+- Memory usage: 90%
+- Disk capacity: 85%
+- Service response time: 500ms
+</response>
+</example>
 `;

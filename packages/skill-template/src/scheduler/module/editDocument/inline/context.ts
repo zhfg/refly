@@ -12,6 +12,7 @@ export const buildContextualInlineEditDocumentDocumentContext = (documentContext
     <reflyArtifact 
     type="document" 
     title="${document.title}"
+    entityId="${document?.docId}"
   >
   ${selectedContent.beforeHighlight}<highlight>${selectedContent.highlightedText}</highlight>${selectedContent.afterHighlight}
   </reflyArtifact>
@@ -21,7 +22,7 @@ export const buildContextualInlineEditDocumentDocumentContext = (documentContext
   export const buildContextualInlineEditDocumentReferenceContext = (referenceContext: string) => `
     <referenceContext>
     ${referenceContext}
-    </referenceContext>`;
+    </referenceContext>`; 
   
   export const buildContextualInlineEditDocumentContext = (
     documentContext: { document: Document; selectedContent: HighlightSelection },
@@ -29,7 +30,7 @@ export const buildContextualInlineEditDocumentDocumentContext = (documentContext
   ) => {
     const documentContextString = buildContextualInlineEditDocumentDocumentContext(documentContext);
     const referenceContextString = buildContextualInlineEditDocumentReferenceContext(referenceContext);
-  
+
     return `
     <context>
     ${documentContextString}
@@ -48,6 +49,7 @@ export const buildContextualInlineEditDocumentDocumentContext = (documentContext
   <reflyArtifact 
     type="document" 
     title="${document.title}"
+    entityId="${document?.docId}"
   >
   ${selectedContent.beforeHighlight}<highlight>${selectedContent.highlightedText}</highlight>${selectedContent.afterHighlight}
   </reflyArtifact>
