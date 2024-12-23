@@ -12,6 +12,7 @@ export const buildContextualBlockEditDocumentDocumentContext = (documentContext:
    <reflyArtifact 
      type="document" 
      title="${document.title}"
+     entityId="${document?.docId}"
    >
    ${selectedContent.beforeHighlight}
    <highlight></highlight>
@@ -23,7 +24,7 @@ export const buildContextualBlockEditDocumentDocumentContext = (documentContext:
   export const buildContextualBlockEditDocumentReferenceContext = (referenceContext: string) => `
    <referenceContext>
    ${referenceContext}
-   </referenceContext>`;
+   </referenceContext>`; 
   
   export const buildContextualBlockEditDocumentContext = (
     documentContext: { document: Document; selectedContent: HighlightSelection },
@@ -50,6 +51,7 @@ export const buildContextualBlockEditDocumentDocumentContext = (documentContext:
   <reflyArtifact 
     type="document" 
     title="${document.title}"
+    entityId="${document?.docId}"
   >
   ${selectedContent.beforeHighlight}
   <highlight></highlight>

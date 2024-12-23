@@ -46,10 +46,16 @@ Authentication is required for all endpoints. To make API calls, first obtain an
 </response>
 </example>`;
 
+// TODO: add citation
 export const contextualExamples = `
 ## Context-Aware Examples
 
 <example index="1">
+<chatHistory>
+<ChatHistoryItem type="human">What's our current cloud infrastructure cost?</ChatHistoryItem>
+<ChatHistoryItem type="ai">Based on recent analysis, we've achieved 40% cost reduction .</ChatHistoryItem>
+<ChatHistoryItem type="human">Please update our cloud overview with these details.</ChatHistoryItem>
+</chatHistory>
 <context>
 <documentContext>
 <reflyArtifact identifier="tech-doc" type="document" title="Cloud Computing Overview">
@@ -70,82 +76,111 @@ Our analysis shows:
 </MentionedContext>
 </referenceContext>
 </context>
-
-<query>
-Rewrite this section to be more comprehensive with specific benefits
-</query>
 <response>
-Cloud computing is transforming modern business. It delivers elastic scalability and pay-per-use pricing, resulting in a documented 40% reduction in infrastructure costs and 60% improvement in resource utilization. Organizations can access computing power on demand while benefiting from reduced maintenance overhead and global accessibility. Many organizations are adopting cloud solutions.
-... [Note: Full response would continue with more words]
+Cloud computing is transforming modern business. It delivers elastic scalability and proven cost benefits, with our organization achieving a 40% reduction in infrastructure costs . The platform enables dynamic resource scaling with 60% improved utilization rates and 30% faster deployment cycles . Many organizations are adopting cloud solutions.
 </response>
 </example>
 
 <example index="2">
+<chatHistory>
+<ChatHistoryItem type="human">What authentication method do we use?</ChatHistoryItem>
+<ChatHistoryItem type="ai">We use JWT tokens with 15-minute expiration .</ChatHistoryItem>
+<ChatHistoryItem type="human">Update our auth docs to reflect this.</ChatHistoryItem>
+</chatHistory>
 <context>
 <documentContext>
 <reflyArtifact identifier="api-docs" type="document" title="API Documentation">
-Authentication is required for all endpoints. <highlight>When you wanting to make API calls, you need getting the token first and then you putting it in the header of you're request, this is important because without it the API will not work and give error.</highlight> See the authentication section for details.
+Authentication is required for all endpoints. <highlight>When you wanting to make API calls, you need getting the token first and then you putting it in the header of you're request.</highlight> See the authentication section for details.
 </reflyArtifact>
 </documentContext>
 
 <referenceContext>
 <MentionedContext>
 <KnowledgeBaseDocuments>
-<ContextItem citationIndex='2' type='document' title='API Standards'>
-Our API security requirements:
-- JWT authentication
+<ContextItem citationIndex='1' type='document' title='Security Standards'>
+Authentication requirements:
+- JWT-based authentication
 - 15-minute token expiration
-- HTTPS-only endpoints
+- Rate limiting enforced
 </ContextItem>
 </KnowledgeBaseDocuments>
 </MentionedContext>
 </referenceContext>
 </context>
-
-<query>
-Improve the grammar and clarity of this section with security best practices
-</query>
 <response>
-Authentication is required for all endpoints. To make API calls, first obtain a JWT token following secure token storage practices. Include this token in your request headers, ensuring proper implementation of rate limiting. The token expires after 15 minutes as per our security requirements. Requests without valid authentication will receive error responses. See the authentication section for details.
-... [Note: Full response would continue with more words]
+Authentication is required for all endpoints. To make API calls, obtain a JWT token which expires after 15 minutes . Include this token in your request headers and note that rate limiting is enforced on all endpoints . See the authentication section for details.
 </response>
 </example>
 
 <example index="3">
+<chatHistory>
+<ChatHistoryItem type="human">How do we handle database backups?</ChatHistoryItem>
+<ChatHistoryItem type="ai">We use automated daily backups with 30-day retention .</ChatHistoryItem>
+<ChatHistoryItem type="human">Please update our backup documentation.</ChatHistoryItem>
+</chatHistory>
 <context>
 <documentContext>
-<reflyArtifact identifier="tech-doc" type="document" title="Deployment Process">
-Our deployment workflow ensures quality. <highlight>The team reviews code and then deploys it. Testing happens in staging environment.</highlight> This process maintains our standards.
+<reflyArtifact identifier="ops-doc" type="document" title="Database Operations">
+Database management is critical. <highlight>We perform regular backups to ensure data safety.</highlight> Recovery procedures are documented below.
 </reflyArtifact>
 </documentContext>
 
 <referenceContext>
 <MentionedContext>
-<UserSelectedContent>
-<ContextItem citationIndex='1' type='selectedContent' title='Current Process'>
-Current deployment steps:
-1. Manual code review
-2. Testing in staging
-3. Production deployment
+<KnowledgeBaseDocuments>
+<ContextItem citationIndex='1' type='document' title='Backup Policy'>
+Current backup strategy:
+- Automated daily backups
+- 30-day retention period
+- Encrypted storage
 </ContextItem>
-</UserSelectedContent>
-<KnowledgeBaseResources>
-<ContextItem citationIndex='2' type='resource' title='CI/CD Guidelines'>
-Recommended CI/CD practices:
-- Automated testing
-- Continuous integration
-- Automated deployments
+<ContextItem citationIndex='2' type='document' title='Recovery SLA'>
+Recovery time objectives:
+- Critical data: 1 hour
+- Non-critical: 4 hours
 </ContextItem>
-</KnowledgeBaseResources>
+</KnowledgeBaseDocuments>
 </MentionedContext>
 </referenceContext>
 </context>
-
-<query>
-Expand this section with more deployment details
-</query>
 <response>
-Our deployment workflow ensures quality. The process begins with a thorough manual code review, followed by automated testing and continuous integration practices. After passing automated tests, the code undergoes comprehensive testing in the staging environment, leveraging automated deployment procedures. This process maintains our standards.
-... [Note: Full response would continue with more words]
+Database management is critical. We implement automated daily backups with 30-day retention and encrypted storage . Our recovery SLAs guarantee 1-hour restoration for critical data and 4-hour recovery for non-critical systems . Recovery procedures are documented below.
+</response>
+</example>
+
+<example index="4">
+<chatHistory>
+<ChatHistoryItem type="human">What monitoring tools do we use?</ChatHistoryItem>
+<ChatHistoryItem type="ai">We use Prometheus with Grafana dashboards .</ChatHistoryItem>
+<ChatHistoryItem type="human">Update our monitoring section with these details.</ChatHistoryItem>
+</chatHistory>
+<context>
+<documentContext>
+<reflyArtifact identifier="ops-doc" type="document" title="Operations Guide">
+System health is monitored continuously. <highlight>We use various tools to track performance metrics.</highlight> Alert thresholds are defined below.
+</reflyArtifact>
+</documentContext>
+
+<referenceContext>
+<MentionedContext>
+<KnowledgeBaseDocuments>
+<ContextItem citationIndex='1' type='document' title='Monitoring Stack'>
+Current tooling:
+- Prometheus metrics
+- Grafana dashboards
+- PagerDuty alerts
+</ContextItem>
+<ContextItem citationIndex='2' type='document' title='Alert Thresholds'>
+Standard thresholds:
+- CPU: 80%
+- Memory: 90%
+- Latency: 500ms
+</ContextItem>
+</KnowledgeBaseDocuments>
+</MentionedContext>
+</referenceContext>
+</context>
+<response>
+System health is monitored continuously. We leverage Prometheus for metrics collection with Grafana dashboards for visualization, integrated with PagerDuty for alerting . Our system triggers alerts at 80% CPU utilization, 90% memory usage, and 500ms latency thresholds . Alert thresholds are defined below.
 </response>
 </example>`;

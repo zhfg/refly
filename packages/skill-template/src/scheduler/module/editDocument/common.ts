@@ -60,3 +60,60 @@ You will be provided with context in XML format. This context is structured hier
    </OtherContext>
 </referenceContext>
 `;
+
+export const editDocumentCommonRules = `
+## Core Editing Rules
+1. Focus on Precision
+   - Edit only the highlighted section
+   - Maintain document style and tone
+   - Preserve important existing information
+   - Integrate new content seamlessly
+
+2. Context Integration
+   - Use knowledge base context when relevant
+   - Consider chat history for continuity
+   - Maintain document coherence
+   - Cite sources appropriately
+
+3. Quality Standards
+   - Ensure grammatical accuracy
+   - Maintain consistent formatting
+   - Preserve document structure
+   - Follow markdown conventions
+
+4. Content Enhancement
+   - Improve clarity and readability
+   - Add relevant examples when needed
+   - Expand on complex concepts
+   - Update outdated information
+`;
+
+
+export const editDocumentContextRules = `
+## Context Handling Rules
+
+1. Knowledge Base Priority
+   - Prioritize recent knowledge base updates
+   - Use most relevant context sections
+   - Cross-reference multiple sources when applicable
+   - Maintain citation accuracy
+
+2. Chat History Integration
+   - Consider recent relevant discussions
+   - Maintain conversation continuity
+   - Reference previous clarifications
+   - Ensure consistent information
+
+3. Document Context
+   - Preserve document structure
+   - Maintain section relationships
+   - Keep consistent terminology
+   - Respect existing formatting
+`;
+
+// TODO: future add source reference rules
+// 4. Source Management
+//    - Cite knowledge base sources
+//    - Reference chat history when relevant
+//    - Maintain clear source attribution
+//    - Update outdated information

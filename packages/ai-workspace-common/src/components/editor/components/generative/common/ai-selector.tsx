@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef, useState, useCallback } from 'react';
-import { useEditor } from '../../../core/components';
+import { Editor, useEditor } from '../../../core/components';
 import { addAIHighlight } from '../../../core/extensions';
 import CrazySpinner from '../../ui/icons/crazy-spinner';
 import Magic from '../../ui/icons/magic';
@@ -9,20 +9,23 @@ import { Button } from 'antd';
 import { cn } from '@refly/utils/cn';
 import { getOsType } from '@refly/utils/env';
 import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/components/add-base-mark-context';
-import { AISettingsDropdown } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions/ai-settings';
 
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
 import { useTranslation } from 'react-i18next';
 import { ActionResult, ActionStatus, ConfigScope, InvokeSkillRequest } from '@refly/openapi-schema';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { genActionResultID } from '@refly-packages/utils/index';
+import { genActionResultID, getClientOrigin } from '@refly-packages/utils/index';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { LOCALE } from '@refly/common-types';
 import { HiCheck, HiXMark } from 'react-icons/hi2';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { AISettingsDropdown } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions/ai-settings';
 
 interface AISelectorProps {
   open: boolean;
@@ -44,6 +47,35 @@ const getShortcutSymbols = (osType: string) => {
   };
 };
 
+const CONTEXT_CHAR_LIMIT = 5000;
+
+const getCompleteBlock = (editor: Editor, doc: any, pos: number, isPrefix: boolean = true): string => {
+  if (!doc) return '';
+
+  // Get document range based on direction
+  const start = isPrefix ? 0 : pos;
+  const end = isPrefix ? pos : doc.content.size;
+
+  try {
+    // Get slice of document content
+    const slice = doc.slice(start, end);
+
+    // Convert to markdown using editor's markdown serializer
+    // Note: You'll need to access the markdown serializer from the editor instance
+    const mdText = editor.storage.markdown.serializer.serialize(slice.content);
+
+    // Trim and limit the content if needed
+    if (mdText.length > CONTEXT_CHAR_LIMIT) {
+      return isPrefix ? mdText.slice(-CONTEXT_CHAR_LIMIT) : mdText.slice(0, CONTEXT_CHAR_LIMIT);
+    }
+
+    return mdText.trim();
+  } catch (e) {
+    console.error('Error getting document content:', e);
+    return '';
+  }
+};
+
 export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditType }: AISelectorProps) => {
   const { t } = useTranslation();
   const { editor } = useEditor();
@@ -60,13 +92,18 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   const { docId } = useDocumentContext();
   const { invokeAction } = useInvokeAction();
 
-  const handleEdit = (actionType: InPlaceActionType) => {
+  const handleEdit = () => {
     const selection = editor.state.selection;
     const startIndex = selection.from;
     const endIndex = selection.to;
+    const doc = editor.state.doc;
 
     const slice = editor.state.selection.content();
     const selectedMdText = editor.storage.markdown.serializer.serialize(slice.content);
+
+    // Get content before and after selection using document positions
+    const beforeHighlight = getCompleteBlock(editor, doc, startIndex, true);
+    const afterHighlight = getCompleteBlock(editor, doc, endIndex, false);
 
     const canvasEditConfig: CanvasEditConfig = {
       inPlaceEditType,
@@ -75,9 +112,9 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
         endIndex,
       },
       selection: {
-        beforeHighlight: '',
+        beforeHighlight,
         highlightedText: selectedMdText,
-        afterHighlight: '',
+        afterHighlight,
       },
     };
 
@@ -88,6 +125,44 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
     const resultId = genActionResultID();
     setResultId(resultId);
 
+    const { contextItems, historyItems } = useContextPanelStore.getState();
+
+    const context = convertContextItemsToContext(contextItems);
+    if (context.documents) {
+      const hasCurrentDoc = context.documents.some((doc) => doc.docId === docId);
+
+      context.documents = context.documents.map((doc) => ({
+        ...doc,
+        isCurrent: doc.docId === docId,
+        metadata: {
+          ...doc.metadata,
+          isCurrentContext: doc.docId === docId,
+        },
+      }));
+
+      if (!hasCurrentDoc) {
+        context.documents.push({
+          docId,
+          document: {
+            docId,
+            title: '',
+          },
+          isCurrent: true,
+          metadata: {
+            nodeId: docId, // TODO: need use nodes id, use real canvas store nodes id
+            url: getClientOrigin(),
+            isCurrentContext: true,
+          },
+        });
+      }
+    }
+
+    const resultHistory = historyItems.map((item) => ({
+      resultId: item.data.entityId,
+      title: item.data.title,
+      steps: item.data.metadata?.steps,
+    }));
+
     const param: InvokeSkillRequest = {
       resultId,
       input: {
@@ -97,17 +172,8 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
         entityId: docId,
         entityType: 'document',
       },
-      context: {
-        documents: [
-          {
-            docId,
-            isCurrent: true,
-            metadata: {
-              isCurrentContext: true,
-            },
-          },
-        ],
-      },
+      context,
+      resultHistory,
       skillName: 'editDoc',
       tplConfig: {
         canvasEditConfig: {
@@ -120,18 +186,6 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       modelName: selectedModel?.name,
       locale: localSettings?.outputLocale,
     };
-
-    if (actionType === 'chat') {
-      const { selection } = canvasEditConfig || {};
-      const selectedText = selection?.highlightedText || '';
-
-      if (selectedText) {
-        param.input.query =
-          `> ${uiLocale === LOCALE.EN ? '**User Selected Text:** ' : '**用户选中的文本:** '} ${selectedText}` +
-          `\n\n` +
-          `${uiLocale === LOCALE.EN ? '**Please answer question based on the user selected text:** ' : '**请根据用户选中的文本回答问题:** '} ${inputValue}`;
-      }
-    }
 
     setIsLoading(true);
     invokeAction(param);
@@ -191,12 +245,12 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
 
     if (e.keyCode === 13 && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
-      handleEdit('chat');
+      handleEdit();
     }
 
     if (e.keyCode === 13 && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
       e.preventDefault();
-      handleEdit('edit');
+      handleEdit();
     }
   };
 
@@ -274,7 +328,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
           <div className="flex relative flex-row items-center" cmdk-input-wrapper="">
             <div className="flex flex-1 items-center pl-4 border-b" cmdk-input-wrapper="">
               <Button size="small" type="default" className="rounded border text-gray-500 mr-1">
-                <AISettingsDropdown placement="bottom" collapsed={true} briefMode={true} trigger={['click']} />
+                <AISettingsDropdown placement="bottom" collapsed={true} briefMode={true} />
               </Button>
               <AddBaseMarkContext />
               <Input.TextArea
@@ -314,7 +368,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                 size="small"
                 disabled={!inputValue}
                 onClick={() => {
-                  handleEdit('edit');
+                  handleEdit();
                 }}
               >
                 <span>{t('copilot.chatActions.send')}</span> <span>{shortcutSymbols.edit}</span>

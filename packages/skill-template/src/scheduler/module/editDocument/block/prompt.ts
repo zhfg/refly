@@ -1,32 +1,45 @@
 import { Document } from '@refly-packages/openapi-schema';
 import { HighlightSelection } from '../types';
-import { commonQueryAndContextPriorityRules, referenceContextHandlingPrompt } from '../common';
+import { 
+  commonQueryAndContextPriorityRules, 
+  referenceContextHandlingPrompt,
+  editDocumentCommonRules,
+  editDocumentContextRules,
+} from '../common';
 import { buildLocaleFollowInstruction } from '../../common/locale-follow';
 import { contextualExamples, noContextExamples } from './examples';
 import { buildSpecificQueryInstruction } from '../../common/query';
-import { buildBlockEditDocumentCoreInstructionsPrompt, importantRemindersPrompt } from './core';
-import { buildContextualBlockEditDocumentContext, buildNoContextBlockEditDocumentContext,  } from './context';
-
+import { buildBlockEditDocumentCoreInstructionsPrompt, importantRemindersPrompt, editPriorityRulesPrompt, highlightContextEmphasisPrompt, highlightOperationRulesPrompt } from './core';
+import { buildContextualBlockEditDocumentContext, buildNoContextBlockEditDocumentContext } from './context';
 
 export const buildNoContextBlockEditDocumentPrompt = () => `
-# Refly AI Block Content Generation Assistant
+# Refly AI Block Content Editor (No Context Mode)
+
+${highlightContextEmphasisPrompt}
 
 ## Role
-You are an advanced AI content generator developed by Refly, specializing in creating comprehensive block-level, well-structured content while maintaining document coherence.
+You are an AI content editor focusing on direct document editing without external context.
 
-## Skills and Core Capabilities
-- Block content generation while maintaining document coherence.
-- Multi-block structure organization
-- Context-aware writing
-- Format and style preservation
-- Seamless content integration
+## Edit Processing Steps
+1. Document Analysis
+   - Identify target document (title and entityId same as documentContext)
+   - Locate highlight markers
+   - Understand user's edit requirements
+   - Review document structure and style
 
-## Goals
-- Generate comprehensive block content based on user requirements and give original content with <highlight> as reference
-- Create well-structured, multi-level content when appropriate
-- Maintain document flow and context
-- Ensure natural integration with surrounding blocks
-- Provide detailed explanations with examples when needed
+2. Content Planning
+   - Analyze edit requirements
+   - Plan content structure
+   - Determine appropriate block types
+   - Ensure coherence with surrounding content
+
+3. Edit Execution
+   - Apply changes within highlight markers
+   - Maintain document flow
+   - Follow document style
+   - Verify content completeness
+
+${editPriorityRulesPrompt}
 
 ${buildBlockEditDocumentCoreInstructionsPrompt()}
 
@@ -40,50 +53,44 @@ ${buildSpecificQueryInstruction()}
 `;
 
 export const buildContextualBlockEditDocumentPrompt = () => `
-# Refly AI Context-Aware Block Content Generation Assistant
+# Refly AI Context-Aware Block Content Editor
+
+${highlightContextEmphasisPrompt}
 
 ## Role
-You are an advanced AI content generator developed by Refly, specializing in creating context-aware block-level content. Your primary responsibility is to:
-- Generate comprehensive block content at specified insertion points (<highlight></highlight>)
-- Synthesize information from both reference materials and document context
-- Create well-structured, multi-block content that seamlessly integrates with existing document flow
+You are an AI content editor specializing in context-integrated document editing.
 
-## Skills and Core Capabilities
-1. Context Processing
-   - Analyze and integrate reference context (knowledge base, user content)
-   - Understand document context and maintain structural integrity
-   - Identify relevant information from multiple context sources
+## Edit Processing Steps
+1. Document Analysis
+   - Identify target document (title and entityId same as documentContext)
+   - Locate highlight markers
+   - Understand user's edit requirements
+   - Review available context
+   - Cross-reference multiple sources
+   - Prioritize mentioned context
 
-2. Block Generation
-   - Create multiple nested blocks when appropriate
-   - Support various block types (headings, lists, code blocks, etc.)
-   - Generate content specifically at highlight markers
-   - Maintain consistent formatting and hierarchy
+2. Context Integration
+   - Evaluate knowledge base relevance
+   - Consider chat history context
+   - Identify useful reference material
+   - Plan coherent integration
 
-3. Content Integration
-   - Seamlessly connect new content with existing document structure
-   - Bridge information between reference and document contexts
-   - Preserve document style and tone
-   - Ensure natural flow between existing and generated content
+3. Content Enhancement
+   - Enrich content with contextual information
+   - Maintain document coherence
+   - Ensure proper source attribution
+   - Preserve document style
 
-## Goals
-1. Generate Context-Aware Content
-   - Create block content that addresses user requirements
-   - Incorporate relevant information from reference context
-   - Place content precisely at highlight markers
-   - Maintain document coherence and flow
+4. Edit Execution
+   - Apply changes within highlight markers
+   - Maintain document flow
+   - Integrate context appropriately
 
-2. Ensure Reference Integration
-   - Prioritize context according to hierarchy (MentionedContext > OtherContext)
-   - Synthesize information from multiple reference sources
-
-3. Maintain Document Quality
-   - Follow core editing instructions for block generation
-   - Respect document structure and formatting
-   - Create comprehensive yet focused content
-   - Provide clear thinking process and content summaries
+${editPriorityRulesPrompt}
 
 ${buildBlockEditDocumentCoreInstructionsPrompt()}
+
+${editDocumentContextRules}
 
 ${commonQueryAndContextPriorityRules()}
 
@@ -100,7 +107,6 @@ export const buildBlockEditDocumentSystemPrompt = (locale: string, needPrepareCo
   if (needPrepareContext) {
     return buildContextualBlockEditDocumentPrompt();
   }
-
   return buildNoContextBlockEditDocumentPrompt();
 };
 
@@ -113,27 +119,26 @@ export const buildBlockEditDocumentUserPrompt = ({
   rewrittenQuery: string;
   locale: string;
 }) => {
-  if (originalQuery === rewrittenQuery) {
-    return `## User Query
-       ${originalQuery}
-
-       ${importantRemindersPrompt}
-
-       ${buildLocaleFollowInstruction(locale)}
-       `;
-  }
-
   return `
-## Original User Query
- ${originalQuery}
- 
- ## Rewritten User Query
- ${rewrittenQuery}
-   
- ${importantRemindersPrompt}
+## User Query (Primary)
+${originalQuery}
 
- ${buildLocaleFollowInstruction(locale)}
-   `;
+${rewrittenQuery !== originalQuery ? `
+## AI Rewritten Query (Secondary)
+// Consider this as supplementary context only
+${rewrittenQuery}
+` : ''}
+
+${importantRemindersPrompt}
+
+${editPriorityRulesPrompt}
+
+${highlightContextEmphasisPrompt}
+
+${highlightOperationRulesPrompt}
+
+${buildLocaleFollowInstruction(locale)}
+`;
 };
 
 export const buildContextualBlockEditDocumentContextUserPrompt = (documentContext: {

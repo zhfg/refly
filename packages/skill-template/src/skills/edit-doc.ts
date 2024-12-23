@@ -172,18 +172,16 @@ export class EditDoc extends BaseSkill {
    * 2. 前端明确选中（目前只支持一个）：明确具备选中的 startIndex 和 endIndex（使用的是 tiptap editor），则只需要优化这块内容，其他保持原样，并且发送给前端流式写入
    */
   callEditDoc = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
-    const { messages = [], query: originalQuery } = state;
-
     const { currentSkill, documents, tplConfig } = config.configurable;
 
     const currentDoc = documents?.find((doc) => doc?.metadata?.isCurrentContext);
     const canvasEditConfig = tplConfig?.canvasEditConfig?.value as CanvasEditConfig;
 
     if (!currentDoc?.document) {
-      throw new DocumentNotFoundError('No current document found for editing');
+      throw new DocumentNotFoundError('No current document found for editing'); 
     }
 
-    // Get selected range from metadata
+    // Get selected range and edit type from metadata
     const selectedRange = canvasEditConfig.selectedRange as SelectedRange;
     const inPlaceEditType = canvasEditConfig.inPlaceEditType as InPlaceEditType;
 
@@ -195,7 +193,6 @@ export class EditDoc extends BaseSkill {
 
     const model = this.engine.chatModel({
       temperature: 0.1,
-      maxTokens: 4096,
     });
 
     // Get module based on edit type
