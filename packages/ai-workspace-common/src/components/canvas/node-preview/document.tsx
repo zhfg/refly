@@ -1,9 +1,9 @@
-import { lazy, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Splitter } from 'antd';
+import { DocumentEditor } from '@refly-packages/ai-workspace-common/components/document';
 import ResourceDeck from '@refly-packages/ai-workspace-common/components/resource-view/resource-deck';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-
-const DocumentEditor = lazy(() => import('@refly-packages/ai-workspace-common/components/document'));
 
 interface DocumentNodePreviewProps {
   nodeData?: {

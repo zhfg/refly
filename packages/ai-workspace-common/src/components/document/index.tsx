@@ -421,7 +421,7 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
   );
 };
 
-const ActionDropdown = ({ doc, node }: { doc: Document; node?: CanvasNode }) => {
+export const ActionDropdown = ({ doc, node }: { doc: Document; node?: CanvasNode }) => {
   const { editor } = useDocumentStoreShallow((state) => ({
     editor: state.documentStates[doc?.docId]?.editor,
   }));
@@ -499,7 +499,7 @@ const ActionDropdown = ({ doc, node }: { doc: Document; node?: CanvasNode }) => 
   );
 };
 
-const CanvasStatusBar = ({
+export const CanvasStatusBar = ({
   deckSize,
   setDeckSize,
   docId,
@@ -570,7 +570,7 @@ const CanvasStatusBar = ({
   );
 };
 
-const DocumentEditorHeader = ({ docId }: { docId: string }) => {
+export const DocumentEditorHeader = ({ docId }: { docId: string }) => {
   const { currentDocument, updateCurrentDocument } = useDocumentStoreShallow((state) => ({
     currentDocument: state.documentStates[docId]?.currentDocument,
     updateCurrentDocument: state.updateCurrentDocument,
@@ -625,7 +625,7 @@ const DocumentEditorHeader = ({ docId }: { docId: string }) => {
   );
 };
 
-const DocumentEditor = (props: {
+export const DocumentEditor = (props: {
   docId: string;
   deckSize: number;
   setDeckSize: (size: number) => void;
@@ -707,5 +707,3 @@ const DocumentEditor = (props: {
     </DocumentProvider>
   );
 };
-
-export default DocumentEditor;
