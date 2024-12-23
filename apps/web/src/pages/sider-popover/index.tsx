@@ -10,7 +10,8 @@ const SiderPopover = (props: SiderPopoverProps) => {
   return (
     <Popover
       zIndex={11}
-      overlayInnerStyle={{ padding: 0 }}
+      overlayInnerStyle={{ padding: 0, boxShadow: "none", border: "none" }}
+      className="shadow-none"
       arrow={false}
       placement="bottom"
       content={<SiderLayout source="popover" />}>

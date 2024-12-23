@@ -1,13 +1,6 @@
 import React, { useState } from "react"
-import {
-  Avatar,
-  Button,
-  Divider,
-  Layout,
-  Menu,
-  Tag,
-} from "@arco-design/web-react"
-import { Alert, Skeleton, Tooltip, message } from "antd"
+import { Button, Divider, Layout, Menu, Tag } from "@arco-design/web-react"
+import { Alert, Avatar, Skeleton } from "antd"
 import {
   useLocation,
   useNavigate,
@@ -31,14 +24,12 @@ import { SettingModal } from "@refly-packages/ai-workspace-common/components/set
 // hooks
 import { useHandleSiderData } from "@refly-packages/ai-workspace-common/hooks/use-handle-sider-data"
 import { useSiderStoreShallow } from "@refly-packages/ai-workspace-common/stores/sider"
-import getClient from "@refly-packages/ai-workspace-common/requests/proxiedRequest"
-import { useDebouncedCallback } from "use-debounce"
 import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/use-create-canvas"
 import { useCanvasNodesStore } from "@refly-packages/ai-workspace-common/stores/canvas-nodes"
-import { CanvasNodeType } from "@refly-packages/ai-workspace-common/requests/types.gen"
 // icons
 import { IconLibrary } from "@refly-packages/ai-workspace-common/components/common/icon"
 import { CanvasActionDropdown } from "@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown"
+import { AiOutlineMenuFold } from "react-icons/ai"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -49,8 +40,12 @@ const newItemStyle = {
   fontWeight: "500",
 }
 
-const SiderLogo = (props: { navigate: (path: string) => void }) => {
-  const { navigate } = props
+const SiderLogo = (props: {
+  source: "sider" | "popover"
+  navigate: (path: string) => void
+  setCollapse: (collapse: boolean) => void
+}) => {
+  const { navigate, setCollapse, source } = props
   return (
     <div className="logo-box">
       <div className="logo" onClick={() => navigate("/")}>
@@ -60,6 +55,17 @@ const SiderLogo = (props: { navigate: (path: string) => void }) => {
           Beta
         </Tag>
       </div>
+      {source === "sider" && (
+        <div>
+          <Button
+            type="text"
+            icon={<AiOutlineMenuFold size={16} className="text-gray-500" />}
+            onClick={() => {
+              setCollapse(true)
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -78,12 +84,7 @@ const SettingItem = () => {
       <SiderMenuSettingList>
         <div className="flex flex-1 items-center justify-between">
           <div className="menu-settings user-profile">
-            <Avatar size={32}>
-              <img
-                src={userStore?.userProfile?.avatar || ""}
-                alt="user-avatar"
-              />
-            </Avatar>
+            <Avatar size={32} src={userStore?.userProfile?.avatar} />
             <span className="username">
               <span>{userStore?.userProfile?.nickname}</span>
             </span>
@@ -105,6 +106,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
   const {
     collapse,
     canvasList,
+    setCollapse,
     setShowLibraryModal,
     setShowCanvasListModal,
     showSettingModal,
@@ -113,6 +115,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     showSettingModal: state.showSettingModal,
     collapse: state.collapse,
     canvasList: state.canvasList,
+    setCollapse: state.setCollapse,
     setShowSettingModal: state.setShowSettingModal,
     setShowLibraryModal: state.setShowLibraryModal,
     setShowCanvasListModal: state.setShowCanvasListModal,
@@ -155,24 +158,20 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
       }
     }
     return (
-      <>
-        <Tooltip title={t(`loggedHomePage.siderMenu.viewMore`)}>
-          <div
-            className="relative flex"
-            style={{
-              zIndex: 2,
-            }}
-            onClick={e => {
-              handleNavClick(e)
-            }}>
-            <div className="flex flex-1 flex-nowrap items-center">
-              {position === "left" && props.icon}
-              <span className="sider-menu-title">{props.title}</span>
-              {position === "right" && props.icon}
-            </div>
-          </div>
-        </Tooltip>
-      </>
+      <div
+        className="relative flex"
+        style={{
+          zIndex: 2,
+        }}
+        onClick={e => {
+          handleNavClick(e)
+        }}>
+        <div className="flex flex-1 flex-nowrap items-center">
+          {position === "left" && props.icon}
+          <span className="sider-menu-title">{props.title}</span>
+          {position === "right" && props.icon}
+        </div>
+      </div>
     )
   }
 
@@ -225,63 +224,16 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     ],
   ]
 
-  const [createDocumentLoading, setCreateDocumentLoading] = useState(false)
-
-  const getCurrentCanvasId = () => {
-    const pathname = location.pathname
-    if (pathname.startsWith("/canvas")) {
-      const arr = pathname?.split("?")[0]?.split("/")
-      return arr[arr.length - 1]
-    }
-    return null
-  }
-
-  const handleNewDocument = useDebouncedCallback(async () => {
-    if (createDocumentLoading) return
-    setCreateDocumentLoading(true)
-
-    try {
-      const { data } = await getClient().createDocument({
-        body: {
-          title: t("common.newDocument"),
-        },
-      })
-
-      if (data?.success) {
-        message.success(t("common.putSuccess"))
-
-        const currentCanvasId = getCurrentCanvasId()
-
-        if (currentCanvasId && currentCanvasId !== "empty") {
-          const newNode = {
-            type: "document" as CanvasNodeType,
-            data: {
-              title: data.data?.title || "",
-              entityId: data.data?.docId || "",
-              metadata: {
-                contentPreview: data.data?.contentPreview || "",
-              },
-            },
-            position: { x: 100, y: 100 },
-          }
-
-          setPendingNode(newNode)
-        }
-      }
-    } catch (error) {
-      console.error("Error creating document:", error)
-      message.error(t("common.error"))
-    } finally {
-      setCreateDocumentLoading(false)
-    }
-  }, 300)
-
   return (
     <Sider
       className={`app-sider app-sider--${source}`}
       width={source === "sider" ? (collapse ? 0 : 220) : 220}>
       <div className="sider-header">
-        <SiderLogo navigate={path => navigate(path)} />
+        <SiderLogo
+          source={source}
+          navigate={path => navigate(path)}
+          setCollapse={setCollapse}
+        />
 
         <SearchQuickOpenBtn />
 
@@ -391,39 +343,6 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                           )}
                         </>
                       )}
-
-                      {item.key === "Library" && (
-                        <>
-                          <MenuItem
-                            key="newDocument"
-                            onClick={handleNewDocument}>
-                            <Button
-                              loading={createDocumentLoading}
-                              type="text"
-                              icon={
-                                <IconPlus className="arco-icon !text-[#00968F]" />
-                              }
-                              style={newItemStyle}
-                            />
-
-                            <span style={newItemStyle}>
-                              {t("loggedHomePage.siderMenu.newDocument")}
-                            </span>
-                          </MenuItem>
-
-                          {/* {libraryList.map(library => (
-                            <MenuItem key={library.id}>
-                              {library.type === "document" && (
-                                <IconDocument className="arco-icon" />
-                              )}
-                              {library.type === "resource" && (
-                                <IconResource className="arco-icon" />
-                              )}
-                              {library.name}
-                            </MenuItem>
-                          ))} */}
-                        </>
-                      )}
                     </SubMenu>
                     {itemIndex < siderSections.length - 1 && (
                       <Divider
@@ -459,7 +378,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
             {!!userStore.userProfile?.uid && (
               <MenuItem
                 key="Settings"
-                style={{ height: 40 }}
+                style={{ height: 48 }}
                 className={`menu-setting-container setting-menu-item`}
                 renderItemInTooltip={() => (
                   <MenuItemTooltipContent

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Modal } from '@arco-design/web-react';
+import { Modal } from 'antd';
 import { useCookie } from 'react-use';
 import Cookies from 'js-cookie';
 import { getCookieOrigin, getExtensionId } from '@refly/utils/url';
@@ -17,6 +17,7 @@ export const useLogout = () => {
       cancelText: t('common.cancel'),
       title: t('settings.account.logoutConfirmation.title'),
       content: t('settings.account.logoutConfirmation.message'),
+      centered: true,
       onOk() {
         // Clear local storage
         localStorage.removeItem('refly-user-profile');
