@@ -743,6 +743,12 @@ export class SkillService {
       { delay: parseInt(this.config.get('skill.idleTimeout')) },
     );
 
+    const throttledResetIdleTimeout = throttle(
+      async () => await job.changeDelay(this.config.get('skill.idleTimeout')),
+      100,
+      { leading: true, trailing: true },
+    );
+
     const resultAggregator = new ResultAggregator();
 
     type ArtifactOutput = Artifact & {
@@ -759,6 +765,8 @@ export class SkillService {
           this.logger.warn(`skill invocation aborted, ignore event: ${JSON.stringify(data)}`);
           return;
         }
+
+        await throttledResetIdleTimeout();
 
         if (res) {
           writeSSEResponse(res, data);
@@ -837,14 +845,6 @@ export class SkillService {
         leading: true,
         trailing: true,
       },
-    );
-
-    const throttledResetIdleTimeout = throttle(
-      async () => {
-        await job.changeDelay(this.config.get('skill.idleTimeout'));
-      },
-      20,
-      { leading: true, trailing: true },
     );
 
     try {
