@@ -77,14 +77,34 @@ export class CollabService {
 
     let context: CollabContext;
     if (documentName.startsWith(IDPrefix.DOCUMENT)) {
-      const doc = await this.prisma.document.findFirst({
+      let doc = await this.prisma.document.findFirst({
         where: { docId: documentName, deletedAt: null },
       });
+      if (!doc) {
+        doc = await this.prisma.document.create({
+          data: {
+            docId: documentName,
+            uid: payload.uid,
+            title: '',
+          },
+        });
+        this.logger.log(`document created: ${documentName}`);
+      }
       context = { user, entity: doc, entityType: 'document' };
     } else if (documentName.startsWith(IDPrefix.CANVAS)) {
-      const canvas = await this.prisma.canvas.findFirst({
+      let canvas = await this.prisma.canvas.findFirst({
         where: { canvasId: documentName, deletedAt: null },
       });
+      if (!canvas) {
+        canvas = await this.prisma.canvas.create({
+          data: {
+            canvasId: documentName,
+            uid: payload.uid,
+            title: '',
+          },
+        });
+        this.logger.log(`canvas created: ${documentName}`);
+      }
       context = { user, entity: canvas, entityType: 'canvas' };
     } else {
       throw new Error(`unknown document name: ${documentName}`);

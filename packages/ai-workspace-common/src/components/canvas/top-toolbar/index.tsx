@@ -55,14 +55,18 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
     });
   }, [provider]);
 
-  const { data, showPreview, setShowPreview, showMaxRatio, setShowMaxRatio } = useCanvasStoreShallow((state) => ({
-    data: state.data,
-    showPreview: state.showPreview,
-    setShowPreview: state.setShowPreview,
-    showMaxRatio: state.showMaxRatio,
-    setShowMaxRatio: state.setShowMaxRatio,
-  }));
-  const canvasTitle = data[canvasId]?.title;
+  const { data, config, showPreview, setShowPreview, showMaxRatio, setShowMaxRatio } = useCanvasStoreShallow(
+    (state) => ({
+      data: state.data[canvasId],
+      config: state.config[canvasId],
+      showPreview: state.showPreview,
+      setShowPreview: state.setShowPreview,
+      showMaxRatio: state.showMaxRatio,
+      setShowMaxRatio: state.setShowMaxRatio,
+    }),
+  );
+  const canvasTitle = data?.title;
+  const hasCanvasSynced = config?.localSyncedAt > 0 && config?.remoteSyncedAt > 0;
   const { setCanvasTitle } = useCanvasControl(canvasId);
 
   const [editedTitle, setEditedTitle] = useState('');
@@ -71,7 +75,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   const inputRef = useRef(null);
 
   const handleEditClick = () => {
-    setEditedTitle(data[canvasId]?.title ?? '');
+    setEditedTitle(data?.title ?? '');
     setIsModalOpen(true);
   };
 
@@ -147,7 +151,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
                 `}
               />
             </Tooltip>
-            {!data[canvasId] ? (
+            {!hasCanvasSynced ? (
               <Skeleton className="w-28" active paragraph={false} />
             ) : (
               canvasTitle || t('common.untitled')
