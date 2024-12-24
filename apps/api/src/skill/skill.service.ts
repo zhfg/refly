@@ -469,6 +469,7 @@ export class SkillService {
             errors: JSON.stringify([]),
             input: JSON.stringify(param.input),
             context: JSON.stringify(purgeContext(param.context)),
+            tplConfig: JSON.stringify(param.tplConfig),
             history: JSON.stringify(purgeResultHistory(param.resultHistory)),
           },
         }),
@@ -497,6 +498,7 @@ export class SkillService {
           } as ActionMeta),
           input: JSON.stringify(param.input),
           context: JSON.stringify(purgeContext(param.context)),
+          tplConfig: JSON.stringify(param.tplConfig),
           history: JSON.stringify(purgeResultHistory(param.resultHistory)),
         },
       });
