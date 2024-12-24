@@ -16,6 +16,7 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { useReactFlow } from '@xyflow/react';
+import { genMemoID } from '@refly-packages/utils/id';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -106,6 +107,15 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
 
   const menuScreenPosition = getMenuScreenPosition();
 
+  const createMemo = (position: { x: number; y: number }) => {
+    const memoId = genMemoID();
+    addNode({
+      type: 'memo',
+      data: { title: 'Memo', entityId: memoId },
+      position: position,
+    });
+  };
+
   const handleMenuClick = async ({ key }: { key: string }) => {
     setActiveKey(key);
     switch (key) {
@@ -116,6 +126,8 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
         setOpen(false);
         break;
       case 'createMemo':
+        createMemo(position);
+        setOpen(false);
         break;
       case 'addResource':
         break;

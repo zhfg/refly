@@ -4013,6 +4013,7 @@ components:
         - tool
         - skillResponse
         - toolResponse
+        - memo
     CanvasNodeData:
       type: object
       required:
