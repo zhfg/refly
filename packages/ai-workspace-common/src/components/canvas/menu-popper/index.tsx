@@ -1,4 +1,4 @@
-import { Button, Badge, Divider } from 'antd';
+import { Button, Divider } from 'antd';
 import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { HiOutlineBars2 } from 'react-icons/hi2';
 import { RiUploadCloud2Line } from 'react-icons/ri';
@@ -6,23 +6,15 @@ import { PiShootingStar } from 'react-icons/pi';
 import { MdOutlineAutoAwesomeMotion } from 'react-icons/md';
 
 import { useTranslation } from 'react-i18next';
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { CanvasNodeType, SearchDomain } from '@refly/openapi-schema';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-import { ImportResourceModal } from '@refly-packages/ai-workspace-common/components/import-resource';
-import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
-import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { IconCanvas, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
-import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { IoAnalyticsOutline } from 'react-icons/io5';
+import { IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
-import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useReactFlow } from '@xyflow/react';
 
 // Define toolbar item interface
@@ -47,35 +39,41 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const { addNode } = useCanvasControl();
 
-  const { importResourceModalVisible, setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
+  const { setImportResourceModalVisible, setInsertNodePosition } = useImportResourceStoreShallow((state) => ({
     importResourceModalVisible: state.importResourceModalVisible,
     setImportResourceModalVisible: state.setImportResourceModalVisible,
+    setInsertNodePosition: state.setInsertNodePosition,
   }));
 
   const menuItems: ToolbarItem[] = [
     { key: 'askAI', icon: PiShootingStar, type: 'button' },
-    { type: 'divider' },
+    { key: 'divider-1', type: 'divider' },
     { key: 'createDocument', icon: HiOutlineDocumentAdd, type: 'button' },
     { key: 'createMemo', icon: MdOutlineAutoAwesomeMotion, type: 'button' },
     { key: 'addResource', icon: IconResource, type: 'popover', domain: 'resource' },
     { key: 'addDocument', icon: IconDocument, type: 'popover', domain: 'document' },
     { key: 'addMemo', icon: MdOutlineAutoAwesomeMotion, type: 'button' },
     { key: 'addHighlight', icon: HiOutlineBars2, type: 'button' },
-    { type: 'divider' },
+    { key: 'divider-2', type: 'divider' },
     { key: 'importResource', icon: RiUploadCloud2Line, type: 'button' },
   ];
 
   const handleConfirm = (selectedItems: ContextItem[]) => {
     if (selectedItems.length > 0) {
       const domain = selectedItems[0]?.domain;
-      console.log('selectedItems', selectedItems);
-      selectedItems.forEach((item) => {
+      selectedItems.forEach((item, index) => {
+        const nodePosition = {
+          x: position.x + index * 300,
+          y: position.y,
+        };
         const contentPreview = item?.snippets?.map((snippet) => snippet?.text || '').join('\n');
         addNode({
           type: domain as CanvasNodeType,
           data: { title: item.title, entityId: item.id, contentPreview: item?.contentPreview || contentPreview },
+          position: nodePosition,
         });
       });
+      setOpen(false);
     }
   };
 
@@ -101,7 +99,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
 
   const getMenuScreenPosition = () => {
     const reactFlowInstance = useReactFlow();
-    // 将画布坐标转回屏幕坐标
+
     const screenPosition = reactFlowInstance.flowToScreenPosition(position);
     return adjustPosition(screenPosition.x, screenPosition.y);
   };
@@ -128,6 +126,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       case 'addHighlight':
         break;
       case 'importResource':
+        setInsertNodePosition(position);
         setImportResourceModalVisible(true);
         setOpen(false);
         break;
@@ -141,22 +140,6 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     return false;
   };
 
-  const MenuItem = ({ item, key }: { item: ToolbarItem; key: string }) => {
-    return (
-      <div key={key} className="flex items-center w-full">
-        <Button
-          loading={getIsLoading(item.key)}
-          className={`w-full px-2 justify-start ${activeKey === item.key ? 'bg-gray-100' : ''}`}
-          type="text"
-          icon={<item.icon className="flex items-center" />}
-          onClick={() => handleMenuClick({ key: item.key })}
-        >
-          <span>{t(`canvas.toolbar.${item.key}`)}</span>
-        </Button>
-      </div>
-    );
-  };
-
   // Update menu height when menu opens or content changes
   useEffect(() => {
     if (open && menuRef.current) {
@@ -167,8 +150,10 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      console.log('target', target);
-      if (open && !target.closest('.menu-popper')) {
+      const isInsideMenuPopper = menuRef.current?.contains(target);
+      const isInsidePopover = target.closest('.canvas-search-list');
+
+      if (open && !isInsideMenuPopper && !isInsidePopover) {
         setOpen(false);
       }
     };
@@ -214,7 +199,13 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
 
           if (item.type === 'popover') {
             return (
-              <SearchList key={item.key} domain={item.domain as SearchDomain} handleConfirm={handleConfirm} offset={12}>
+              <SearchList
+                className="canvas-search-list"
+                key={item.key}
+                domain={item.domain as SearchDomain}
+                handleConfirm={handleConfirm}
+                offset={12}
+              >
                 <div key={item.key} className="flex items-center w-full">
                   <Button
                     loading={getIsLoading(item.key)}

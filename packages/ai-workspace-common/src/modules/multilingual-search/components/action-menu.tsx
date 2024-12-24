@@ -32,7 +32,10 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
   const { addNode } = useCanvasControl();
 
   const { selectedItems, results, setSelectedItems } = useMultilingualSearchStore();
-  const setImportResourceModalVisible = useImportResourceStoreShallow((state) => state.setImportResourceModalVisible);
+  const { setImportResourceModalVisible, insertNodePosition } = useImportResourceStoreShallow((state) => ({
+    setImportResourceModalVisible: state.setImportResourceModalVisible,
+    insertNodePosition: state.insertNodePosition,
+  }));
   const [saveLoading, setSaveLoading] = useState(false);
 
   const handleSelectAll = (checked: boolean) => {
@@ -84,7 +87,13 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
           };
         });
 
-        resources.forEach((resource) => {
+        resources.forEach((resource, index) => {
+          const nodePosition = insertNodePosition
+            ? {
+                x: insertNodePosition?.x + index * 300,
+                y: insertNodePosition?.y,
+              }
+            : null;
           addNode({
             type: 'resource',
             data: {
@@ -95,6 +104,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
                 contentPreview: resource.contentPreview,
               },
             },
+            position: nodePosition,
           });
         });
       }

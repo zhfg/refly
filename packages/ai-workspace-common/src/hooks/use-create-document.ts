@@ -110,7 +110,7 @@ export const useCreateDocument = () => {
                 contentPreview: data.data?.contentPreview || '',
               },
             },
-            position: position || { x: 100, y: 100 },
+            position: position,
           };
 
           setPendingNode(newNode);
