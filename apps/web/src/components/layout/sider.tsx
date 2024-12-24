@@ -43,10 +43,9 @@ const newItemStyle = {
 const SiderLogo = (props: {
   source: "sider" | "popover"
   navigate: (path: string) => void
-  showCollapseBtn: boolean
   setCollapse: (collapse: boolean) => void
 }) => {
-  const { navigate, setCollapse, source, showCollapseBtn } = props
+  const { navigate, setCollapse, source } = props
   return (
     <div className="logo-box">
       <div className="logo" onClick={() => navigate("/")}>
@@ -56,7 +55,7 @@ const SiderLogo = (props: {
           Beta
         </Tag>
       </div>
-      {source === "sider" && showCollapseBtn && (
+      {source === "sider" && (
         <div>
           <Button
             type="text"
@@ -234,7 +233,6 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
           source={source}
           navigate={path => navigate(path)}
           setCollapse={setCollapse}
-          showCollapseBtn={canvasList?.length > 0}
         />
 
         <SearchQuickOpenBtn />
