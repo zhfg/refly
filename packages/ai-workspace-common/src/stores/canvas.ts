@@ -75,6 +75,7 @@ export const useCanvasStore = create<CanvasState>()(
       deleteCanvasData: (canvasId) =>
         set((state) => {
           delete state.data[canvasId];
+          delete state.config[canvasId];
         }),
       setCurrentCanvasId: (canvasId) =>
         set((state) => {
