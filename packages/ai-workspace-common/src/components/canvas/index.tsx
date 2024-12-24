@@ -92,10 +92,12 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
   const { provider } = useCanvasContext();
 
-  const { operatingNodeId, setOperatingNodeId } = useCanvasStoreShallow((state) => ({
+  const { config, operatingNodeId, setOperatingNodeId } = useCanvasStoreShallow((state) => ({
+    config: state.config[canvasId],
     operatingNodeId: state.operatingNodeId,
     setOperatingNodeId: state.setOperatingNodeId,
   }));
+  const hasCanvasSynced = config?.localSyncedAt > 0 && config?.remoteSyncedAt > 0;
 
   const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } = useCreateDocument();
 
@@ -351,7 +353,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   return (
     <Spin
       className="w-full h-full"
-      spinning={provider.status !== 'connected' && !connectionTimeout}
+      style={{ maxHeight: '100%' }}
+      spinning={!hasCanvasSynced && provider.status !== 'connected' && !connectionTimeout}
       tip={connectionTimeout ? t('common.connectionFailed') : t('common.loading')}
     >
       <Modal
@@ -395,7 +398,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             nodeDragThreshold={10}
             nodesDraggable={!operatingNodeId}
           >
-            {nodes?.length === 0 && (
+            {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
                 <div className="flex items-center justify-center text-gray-500 text-center">
                   <div className="text-[20px]">{t('canvas.emptyText')}</div>

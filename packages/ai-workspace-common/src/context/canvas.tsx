@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useCookie } from 'react-use';
+import * as Y from 'yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
+import { IndexeddbPersistence } from 'y-indexeddb';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/types';
 import { Edge } from '@xyflow/react';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
@@ -9,31 +11,52 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 interface CanvasContextType {
   canvasId: string;
   provider: HocuspocusProvider;
+  localProvider: IndexeddbPersistence;
 }
 
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
-const providerCache = new Map<string, HocuspocusProvider>();
+const providerCache = new Map<string, { remote: HocuspocusProvider; local: IndexeddbPersistence }>();
 
 export const CanvasProvider = ({ canvasId, children }: { canvasId: string; children: React.ReactNode }) => {
   const [token] = useCookie('_refly_ai_sid');
 
-  const provider = useMemo(() => {
+  const { setCanvasLocalSynced, setCanvasRemoteSynced } = useCanvasStoreShallow((state) => ({
+    setCanvasLocalSynced: state.setCanvasLocalSynced,
+    setCanvasRemoteSynced: state.setCanvasRemoteSynced,
+  }));
+
+  const { remote: provider, local: localProvider } = useMemo(() => {
     const existingProvider = providerCache.get(canvasId);
-    if (existingProvider?.status === 'connected') {
+    if (existingProvider?.remote?.status === 'connected') {
       return existingProvider;
     }
 
-    const newProvider = new HocuspocusProvider({
+    const doc = new Y.Doc();
+
+    const remoteProvider = new HocuspocusProvider({
       url: getWsServerOrigin(),
       name: canvasId,
       token,
+      document: doc,
       connect: true,
       forceSyncInterval: 5000,
     });
 
-    providerCache.set(canvasId, newProvider);
-    return newProvider;
+    remoteProvider.on('synced', () => {
+      setCanvasRemoteSynced(canvasId, Date.now());
+    });
+
+    const localProvider = new IndexeddbPersistence(canvasId, doc);
+
+    localProvider.on('synced', () => {
+      setCanvasLocalSynced(canvasId, Date.now());
+    });
+
+    const providers = { remote: remoteProvider, local: localProvider };
+
+    providerCache.set(canvasId, providers);
+    return providers;
   }, [canvasId, token]);
 
   const { setNodes, setEdges, setTitle } = useCanvasStoreShallow((state) => ({
@@ -164,7 +187,7 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     return null;
   }
 
-  return <CanvasContext.Provider value={{ canvasId, provider }}>{children}</CanvasContext.Provider>;
+  return <CanvasContext.Provider value={{ canvasId, provider, localProvider }}>{children}</CanvasContext.Provider>;
 };
 
 export const useCanvasContext = () => {

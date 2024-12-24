@@ -13,6 +13,8 @@ interface CanvasData {
 }
 
 interface CanvasConfig {
+  localSyncedAt?: number;
+  remoteSyncedAt?: number;
   pinnedNodes: CanvasNode<any>[];
 }
 
@@ -35,6 +37,8 @@ export interface CanvasState {
   setCurrentCanvasId: (canvasId: string) => void;
   setMode: (canvasId: string, mode: 'pointer' | 'hand') => void;
   addPinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
+  setCanvasLocalSynced: (canvasId: string, syncedAt: number) => void;
+  setCanvasRemoteSynced: (canvasId: string, syncedAt: number) => void;
   removePinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
   setShowPreview: (show: boolean) => void;
   setShowMaxRatio: (show: boolean) => void;
@@ -109,6 +113,16 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.data[canvasId] ??= defaultCanvasState();
           state.data[canvasId].mode = mode;
+        }),
+      setCanvasLocalSynced: (canvasId, syncedAt) =>
+        set((state) => {
+          state.config[canvasId] ??= defaultCanvasConfig();
+          state.config[canvasId].localSyncedAt = syncedAt;
+        }),
+      setCanvasRemoteSynced: (canvasId, syncedAt) =>
+        set((state) => {
+          state.config[canvasId] ??= defaultCanvasConfig();
+          state.config[canvasId].remoteSyncedAt = syncedAt;
         }),
       addPinnedNode: (canvasId, node) =>
         set((state) => {
