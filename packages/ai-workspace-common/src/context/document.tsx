@@ -9,14 +9,12 @@ import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/sto
 
 interface DocumentContextType {
   docId: string;
+  ydoc: Y.Doc;
   provider: HocuspocusProvider;
   localProvider: IndexeddbPersistence;
 }
 
 const DocumentContext = createContext<DocumentContextType | null>(null);
-
-// Add provider cache similar to canvas context
-const providerCache = new Map<string, { remote: HocuspocusProvider; local: IndexeddbPersistence }>();
 
 export const DocumentProvider = ({ docId, children }: { docId: string; children: React.ReactNode }) => {
   const [token] = useCookie('_refly_ai_sid');
@@ -25,14 +23,11 @@ export const DocumentProvider = ({ docId, children }: { docId: string; children:
     setDocumentRemoteSyncedAt: state.setDocumentRemoteSyncedAt,
   }));
 
-  const { remote: provider, local: localProvider } = useMemo(() => {
-    // Check cache first
-    const existingProvider = providerCache.get(docId);
-    if (existingProvider?.remote?.status === 'connected') {
-      return existingProvider;
-    }
-
-    // Create new Y.Doc and providers
+  const {
+    remote: provider,
+    local: localProvider,
+    doc,
+  } = useMemo(() => {
     const doc = new Y.Doc();
 
     const remoteProvider = new HocuspocusProvider({
@@ -56,17 +51,13 @@ export const DocumentProvider = ({ docId, children }: { docId: string; children:
       setDocumentLocalSyncedAt(docId, Date.now());
     });
 
-    const providers = { remote: remoteProvider, local: localProvider };
-    providerCache.set(docId, providers);
-    return providers;
+    return { remote: remoteProvider, local: localProvider, doc };
   }, [docId, token]);
 
   useEffect(() => {
     return () => {
       if (provider) {
         provider.forceSync();
-        // Clean up providers
-        providerCache.delete(docId);
         provider.destroy();
         localProvider.destroy();
       }
@@ -78,7 +69,11 @@ export const DocumentProvider = ({ docId, children }: { docId: string; children:
     return null;
   }
 
-  return <DocumentContext.Provider value={{ docId, provider, localProvider }}>{children}</DocumentContext.Provider>;
+  return (
+    <DocumentContext.Provider value={{ docId, provider, localProvider, ydoc: doc }}>
+      {children}
+    </DocumentContext.Provider>
+  );
 };
 
 export const useDocumentContext = () => {

@@ -1,17 +1,43 @@
 import { useCallback, useState } from 'react';
+import * as Y from 'yjs';
+import { IndexeddbPersistence } from 'y-indexeddb';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useCanvasControl } from './use-canvas-control';
 import { CanvasNodeType } from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { useDebouncedCallback } from 'use-debounce';
 import { parseMarkdownCitationsAndCanvasTags } from '@refly-packages/utils/parse';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { genDocumentID } from '@refly-packages/utils/id';
+import { parseMarkdown } from '@refly-packages/utils/editor';
+import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
+import { prosemirrorToYXmlFragment } from 'y-prosemirror';
+
+const createLocalDocument = async (docId: string, title: string, content: string) => {
+  const ydoc = new Y.Doc();
+  const localProvider = new IndexeddbPersistence(docId, ydoc);
+
+  // Wait for local sync
+  await new Promise<void>((resolve) => {
+    localProvider.once('synced', () => resolve());
+  });
+
+  const yTitle = ydoc.getText('title');
+  yTitle.insert(0, title);
+
+  const node = parseMarkdown(content);
+  prosemirrorToYXmlFragment(node, ydoc.getXmlFragment('default'));
+};
 
 export const useCreateDocument = () => {
   const [isCreating, setIsCreating] = useState(false);
   const { t } = useTranslation();
   const { addNode, nodes } = useCanvasControl();
+
+  const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt } = useDocumentStoreShallow((state) => ({
+    setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
+    setDocumentRemoteSyncedAt: state.setDocumentRemoteSyncedAt,
+  }));
 
   const { canvasId } = useCanvasContext();
 
@@ -21,54 +47,43 @@ export const useCreateDocument = () => {
       content: string,
       { sourceNodeId, addToCanvas }: { sourceNodeId?: string; addToCanvas?: boolean },
     ) => {
-      try {
-        message.loading(t('canvas.nodeActions.startCreateDocument'));
-        const parsedContent = parseMarkdownCitationsAndCanvasTags(content, []);
-        setIsCreating(true);
-        const { data } = await getClient().createDocument({
-          body: {
-            title: title ?? `Document-${new Date().toISOString()}`,
-            initialContent: parsedContent,
-          },
-        });
+      const docId = genDocumentID();
+      const parsedContent = parseMarkdownCitationsAndCanvasTags(content, []);
 
-        if (data?.success) {
-          message.success(t('common.putSuccess'));
+      await createLocalDocument(docId, title, parsedContent);
 
-          if (addToCanvas) {
-            // 找到源节点
-            const sourceNode = nodes.find((n) => n.type === 'skillResponse' && n.data?.entityId === sourceNodeId);
+      setDocumentLocalSyncedAt(docId, Date.now());
+      setDocumentRemoteSyncedAt(docId, Date.now());
 
-            if (!sourceNode) {
-              console.warn('Source node not found');
-              return null;
-            }
+      message.success(t('common.putSuccess'));
 
-            // 创建新的文档节点
-            const newNode = {
-              type: 'document' as CanvasNodeType,
-              data: {
-                entityId: data.data.docId,
-                title: data.data.title ?? title,
-                contentPreview: parsedContent,
-              },
-            };
+      if (addToCanvas) {
+        // Find the source node
+        const sourceNode = nodes.find((n) => n.type === 'skillResponse' && n.data?.entityId === sourceNodeId);
 
-            // 添加节点和连接
-            addNode(newNode, [
-              {
-                type: 'skillResponse',
-                entityId: sourceNodeId,
-              },
-            ]);
-          }
-
-          return data.data;
+        if (!sourceNode) {
+          console.warn('Source node not found');
+          return null;
         }
-        return null;
-      } finally {
-        setIsCreating(false);
+
+        const newNode = {
+          type: 'document' as CanvasNodeType,
+          data: {
+            entityId: docId,
+            title,
+            contentPreview: parsedContent.slice(0, 500),
+          },
+        };
+
+        addNode(newNode, [
+          {
+            type: 'skillResponse',
+            entityId: sourceNodeId,
+          },
+        ]);
       }
+
+      return docId;
     },
     [addNode, nodes, t],
   );
@@ -86,42 +101,28 @@ export const useCreateDocument = () => {
   );
 
   const createSingleDocumentInCanvas = async (position?: { x: number; y: number }) => {
-    if (isCreating) return;
-    setIsCreating(true);
+    const docId = genDocumentID();
+    const title = t('common.newDocument');
 
-    try {
-      const { data } = await getClient().createDocument({
-        body: {
-          title: t('common.newDocument'),
+    await createLocalDocument(docId, title, '');
+
+    setDocumentLocalSyncedAt(docId, Date.now());
+    setDocumentRemoteSyncedAt(docId, Date.now());
+
+    message.success(t('common.putSuccess'));
+
+    if (canvasId && canvasId !== 'empty') {
+      const newNode = {
+        type: 'document' as CanvasNodeType,
+        data: {
+          title,
+          entityId: docId,
+          contentPreview: '',
         },
-      });
+        position: position,
+      };
 
-      if (data?.success) {
-        message.success(t('common.putSuccess'));
-
-        if (canvasId && canvasId !== 'empty') {
-          const newNode = {
-            type: 'document' as CanvasNodeType,
-            data: {
-              title: data.data?.title || '',
-              entityId: data.data?.docId || '',
-              metadata: {
-                contentPreview: data.data?.contentPreview || '',
-              },
-            },
-            position: position,
-          };
-
-          addNode(newNode);
-        }
-      } else {
-        message.error(t('common.error'));
-      }
-    } catch (error) {
-      console.error('Error creating document:', error);
-      message.error(t('common.error'));
-    } finally {
-      setIsCreating(false);
+      addNode(newNode);
     }
   };
 

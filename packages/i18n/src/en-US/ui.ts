@@ -64,6 +64,7 @@ const translations = {
   editor: {
     placeholder: {
       default: "Write something, or press 'space' for AI, press '/' for commands",
+      title: 'Enter The Title',
     },
     aiSelector: {
       thinking: 'AI is thinking',

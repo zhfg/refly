@@ -37,7 +37,6 @@ export type Events = {
     isFirst: boolean;
     content: string;
   };
-  updateCanvasTitle: string;
   activeAskAI: { value: boolean; docId?: string };
   inPlaceSendMessage: InPlaceSendMessagePayload;
   askAIResponse: Omit<InPlaceSendMessagePayload, 'userInput'>;
@@ -52,7 +51,6 @@ export type EditorOperation =
   | 'createDocument'
   | 'streamCanvasContent'
   | 'streamEditCanvasContent'
-  | 'updateCanvasTitle'
   | 'inPlaceSendMessage'
   | 'activeAskAI'
   | 'askAIResponse'

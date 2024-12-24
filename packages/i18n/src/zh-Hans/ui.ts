@@ -64,6 +64,7 @@ const translations = {
   editor: {
     placeholder: {
       default: "写点什么，或按空格键激活 AI，按 '/' 键激活命令",
+      title: '请输入标题',
     },
     aiSelector: {
       thinking: 'AI 思考中',
