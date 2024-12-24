@@ -23,11 +23,13 @@ const { TextArea } = Input;
 export const ImportFromWeblink = () => {
   const { t } = useTranslation();
   const [linkStr, setLinkStr] = useState('');
-  const { scrapeLinks, setScrapeLinks, setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
-    scrapeLinks: state.scrapeLinks,
-    setScrapeLinks: state.setScrapeLinks,
-    setImportResourceModalVisible: state.setImportResourceModalVisible,
-  }));
+  const { scrapeLinks, setScrapeLinks, setImportResourceModalVisible, insertNodePosition } =
+    useImportResourceStoreShallow((state) => ({
+      scrapeLinks: state.scrapeLinks,
+      setScrapeLinks: state.setScrapeLinks,
+      setImportResourceModalVisible: state.setImportResourceModalVisible,
+      insertNodePosition: state.insertNodePosition,
+    }));
 
   const { addNode } = useCanvasControl();
 
@@ -136,7 +138,13 @@ export const ImportFromWeblink = () => {
       domain: 'resource',
       contentPreview: resource.contentPreview,
     }));
-    resources.forEach((resource) => {
+    resources.forEach((resource, index) => {
+      const nodePosition = insertNodePosition
+        ? {
+            x: insertNodePosition?.x + index * 300,
+            y: insertNodePosition?.y,
+          }
+        : null;
       addNode({
         type: 'resource',
         data: {
@@ -144,6 +152,7 @@ export const ImportFromWeblink = () => {
           entityId: resource.id,
           contentPreview: resource.contentPreview,
         },
+        position: nodePosition,
       });
     });
   };

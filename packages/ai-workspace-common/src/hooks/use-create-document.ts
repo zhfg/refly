@@ -6,14 +6,12 @@ import { useCanvasControl } from './use-canvas-control';
 import { CanvasNodeType } from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { useDebouncedCallback } from 'use-debounce';
 import { parseMarkdownCitationsAndCanvasTags } from '@refly-packages/utils/parse';
-import { useCanvasNodesStore } from '@refly-packages/ai-workspace-common/stores/canvas-nodes';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 export const useCreateDocument = () => {
   const [isCreating, setIsCreating] = useState(false);
   const { t } = useTranslation();
   const { addNode, nodes } = useCanvasControl();
-  const { setPendingNode } = useCanvasNodesStore();
 
   const { canvasId } = useCanvasContext();
 
@@ -86,7 +84,7 @@ export const useCreateDocument = () => {
     { leading: true },
   );
 
-  const createSingleDocumentInCanvas = async () => {
+  const createSingleDocumentInCanvas = async (position?: { x: number; y: number }) => {
     if (isCreating) return;
     setIsCreating(true);
 
@@ -110,10 +108,10 @@ export const useCreateDocument = () => {
                 contentPreview: data.data?.contentPreview || '',
               },
             },
-            position: { x: 100, y: 100 },
+            position: position,
           };
 
-          setPendingNode(newNode);
+          addNode(newNode);
         }
       } else {
         message.error(t('common.error'));

@@ -1,3 +1,4 @@
+import { XYPosition } from '@xyflow/react';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
@@ -22,12 +23,14 @@ interface ImportResourceState {
   // scrape
   scrapeLinks: LinkMeta[];
   copiedTextPayload: { content: string; title: string; url?: string };
+  insertNodePosition: XYPosition | null;
 
   setImportResourceModalVisible: (visible: boolean) => void;
   setScrapeLinks: (links: LinkMeta[]) => void;
   setCopiedTextPayload: (payload: Partial<{ content: string; title: string; url?: string }>) => void;
   resetState: () => void;
   setSelectedMenuItem: (menuItem: ImportResourceMenuItem) => void;
+  setInsertNodePosition: (position: XYPosition) => void;
 }
 
 export const defaultState = {
@@ -35,6 +38,7 @@ export const defaultState = {
   scrapeLinks: [],
   importResourceModalVisible: false,
   selectedMenuItem: 'import-from-web-search' as ImportResourceMenuItem,
+  insertNodePosition: null,
 };
 
 export const useImportResourceStore = create<ImportResourceState>()(
@@ -49,6 +53,7 @@ export const useImportResourceStore = create<ImportResourceState>()(
     resetState: () => set((state) => ({ ...state, ...defaultState })),
     setSelectedMenuItem: (menuItem: ImportResourceMenuItem) =>
       set((state) => ({ ...state, selectedMenuItem: menuItem })),
+    setInsertNodePosition: (position: XYPosition) => set((state) => ({ ...state, insertNodePosition: position })),
   })),
 );
 

@@ -437,6 +437,7 @@ const translations = {
     completed: 'Completed',
   },
   canvas: {
+    emptyText: 'Double-click to ask AI, or',
     toolbar: {
       enablePointerMode: 'Enable Pointer Mode',
       disablePointerMode: 'Disable Pointer Mode',
@@ -445,8 +446,12 @@ const translations = {
       addSkill: 'Add Skill',
       addTool: 'Add Tool',
       autoLayout: 'Auto Layout',
+      askAI: 'Ask AI',
+      createMemo: 'Create Memo',
+      addMemo: 'Add Memo',
       createDocument: 'Create Document',
       addDocument: 'Add Document',
+      addHighlight: 'Add Highlight',
       hidePreview: 'Hide Node Preview',
       showPreview: 'Show Node Preview',
       hideEdges: 'Hide Connections',

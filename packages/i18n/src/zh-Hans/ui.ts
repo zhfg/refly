@@ -429,6 +429,7 @@ const translations = {
     completed: '已完成',
   },
   canvas: {
+    emptyText: '双击向 AI 提问, 或',
     toolbar: {
       enablePointerMode: '启用框选模式',
       disablePointerMode: '关闭框选模式',
@@ -437,8 +438,12 @@ const translations = {
       addSkill: '添加技能',
       addTool: '添加工具',
       autoLayout: '自动布局',
+      askAI: 'AI 提问',
+      createMemo: '创建 Memo',
+      addMemo: '添加 Memo',
       createDocument: '新建文档',
       addDocument: '添加文档',
+      addHighlight: '添加 Highlight',
       hidePreview: '隐藏节点预览',
       showPreview: '显示节点预览',
       hideEdges: '隐藏连线',

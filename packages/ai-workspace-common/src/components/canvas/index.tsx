@@ -7,6 +7,7 @@ import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
 import { TopToolbar } from './top-toolbar';
 import { NodePreview } from './node-preview';
+import { HiOutlineDocumentAdd } from 'react-icons/hi';
 
 import '@xyflow/react/dist/style.css';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
@@ -21,6 +22,8 @@ import { useCanvasNodesStore } from '@refly-packages/ai-workspace-common/stores/
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { LayoutControl } from './layout-control';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
+import { MenuPopper } from './menu-popper';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -69,6 +72,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     operatingNodeId: state.operatingNodeId,
     setOperatingNodeId: state.setOperatingNodeId,
   }));
+
+  const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } = useCreateDocument();
 
   const toggleInteractionMode = (mode: 'mouse' | 'touchpad') => {
     setInteractionMode(mode);
@@ -138,10 +143,31 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     [setSelectedNode, operatingNodeId, setOperatingNodeId],
   );
 
-  // Handle clicking on the canvas background to exit operating mode
-  const onPaneClick = useCallback(() => {
-    setOperatingNodeId(null);
-  }, [setOperatingNodeId]);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [lastClickTime, setLastClickTime] = useState(0);
+
+  const onPaneClick = useCallback(
+    (event: React.MouseEvent) => {
+      setOperatingNodeId(null);
+
+      const currentTime = new Date().getTime();
+      const timeDiff = currentTime - lastClickTime;
+
+      if (timeDiff < 300) {
+        const flowPosition = reactFlowInstance.screenToFlowPosition({
+          x: event.clientX,
+          y: event.clientY,
+        });
+
+        setMenuPosition(flowPosition);
+        setMenuOpen(true);
+      }
+
+      setLastClickTime(currentTime);
+    },
+    [lastClickTime, setOperatingNodeId],
+  );
 
   const selectedNodes = nodes?.filter((node) => node.selected);
 
@@ -235,6 +261,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             panOnDrag={interactionMode === 'mouse'}
             zoomOnScroll={interactionMode === 'mouse'}
             zoomOnPinch={interactionMode === 'touchpad'}
+            zoomOnDoubleClick={false}
             selectNodesOnDrag={!operatingNodeId && interactionMode === 'mouse'}
             selectionOnDrag={!operatingNodeId && interactionMode === 'touchpad'}
             nodeTypes={nodeTypes}
@@ -248,6 +275,23 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             nodeDragThreshold={10}
             nodesDraggable={!operatingNodeId}
           >
+            {nodes?.length === 0 && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
+                <div className="flex items-center justify-center text-gray-500 text-center">
+                  <div className="text-[20px]">{t('canvas.emptyText')}</div>
+                  <Button
+                    loading={isCreatingDocument}
+                    icon={<HiOutlineDocumentAdd className="-mr-1 flex items-center justify-center" />}
+                    type="text"
+                    className="ml-0.5 text-[20px] text-[#00968F] py-[4px] px-[8px]"
+                    onClick={() => createSingleDocumentInCanvas()}
+                  >
+                    {t('canvas.toolbar.createDocument')}
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <Background />
             <MiniMap
               position="bottom-left"
@@ -322,6 +366,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         <CanvasListModal visible={showCanvasListModal} setVisible={setShowCanvasListModal} />
         <LibraryModal visible={showLibraryModal} setVisible={setShowLibraryModal} />
         <BigSearchModal />
+
+        <MenuPopper open={menuOpen} position={menuPosition} setOpen={setMenuOpen} />
       </div>
     </Spin>
   );

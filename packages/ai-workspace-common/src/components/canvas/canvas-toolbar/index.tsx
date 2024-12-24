@@ -142,7 +142,6 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
   };
 
   const handleToolSelect = (event: React.MouseEvent, tool: string) => {
-    event.stopPropagation();
     // Handle tool selection
     switch (tool) {
       case 'importResource':

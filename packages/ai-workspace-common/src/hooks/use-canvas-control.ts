@@ -432,7 +432,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
         }
       } else {
         // Default position if no source nodes
-        newPosition = {
+        newPosition = node.position ?? {
           x: Math.max(...nodes.map((n) => n.position.x), 0) + 400,
           y: Math.max(...nodes.map((n) => n.position.y), 0),
         };
