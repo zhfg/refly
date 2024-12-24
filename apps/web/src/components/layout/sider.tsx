@@ -25,7 +25,6 @@ import { SettingModal } from "@refly-packages/ai-workspace-common/components/set
 import { useHandleSiderData } from "@refly-packages/ai-workspace-common/hooks/use-handle-sider-data"
 import { useSiderStoreShallow } from "@refly-packages/ai-workspace-common/stores/sider"
 import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/use-create-canvas"
-import { useCanvasNodesStore } from "@refly-packages/ai-workspace-common/stores/canvas-nodes"
 // icons
 import { IconLibrary } from "@refly-packages/ai-workspace-common/components/common/icon"
 import { CanvasActionDropdown } from "@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown"
@@ -135,7 +134,6 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
 
   const { t } = useTranslation()
 
-  const { setPendingNode } = useCanvasNodesStore()
   const [showCanvasIdActionDropdown, setShowCanvasIdActionDropdown] = useState<
     string | null
   >(null)
@@ -150,7 +148,6 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     const { position = "left", type } = props
 
     const handleNavClick = (e: React.MouseEvent) => {
-      e.stopPropagation()
       if (type === "Canvas") {
         setShowCanvasListModal(true)
       } else if (type === "Library") {
