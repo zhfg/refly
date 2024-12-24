@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { useCookie } from 'react-use';
+import * as Y from 'yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
+import { IndexeddbPersistence } from 'y-indexeddb';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
@@ -8,48 +10,75 @@ import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/sto
 interface DocumentContextType {
   docId: string;
   provider: HocuspocusProvider;
+  localProvider: IndexeddbPersistence;
 }
 
 const DocumentContext = createContext<DocumentContextType | null>(null);
 
+// Add provider cache similar to canvas context
+const providerCache = new Map<string, { remote: HocuspocusProvider; local: IndexeddbPersistence }>();
+
 export const DocumentProvider = ({ docId, children }: { docId: string; children: React.ReactNode }) => {
   const [token] = useCookie('_refly_ai_sid');
-  const { updateDocumentServerStatus } = useDocumentStoreShallow((state) => ({
-    updateDocumentServerStatus: state.updateDocumentServerStatus,
+  const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt } = useDocumentStoreShallow((state) => ({
+    setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
+    setDocumentRemoteSyncedAt: state.setDocumentRemoteSyncedAt,
   }));
 
-  const provider = useMemo(() => {
-    const provider = new HocuspocusProvider({
+  const { remote: provider, local: localProvider } = useMemo(() => {
+    // Check cache first
+    const existingProvider = providerCache.get(docId);
+    if (existingProvider?.remote?.status === 'connected') {
+      return existingProvider;
+    }
+
+    // Create new Y.Doc and providers
+    const doc = new Y.Doc();
+
+    const remoteProvider = new HocuspocusProvider({
       url: getWsServerOrigin(),
       name: docId,
       token,
-    });
-    provider.on('status', (event) => {
-      updateDocumentServerStatus(docId, event.status);
+      document: doc,
+      connect: true,
+      forceSyncInterval: 5000,
     });
 
-    // Add synced event listener
-    provider.on('synced', () => {
+    remoteProvider.on('synced', () => {
+      setDocumentRemoteSyncedAt(docId, Date.now());
       editorEmitter.emit('editorSynced');
     });
-    return provider;
+
+    // Add local provider
+    const localProvider = new IndexeddbPersistence(docId, doc);
+
+    localProvider.on('synced', () => {
+      setDocumentLocalSyncedAt(docId, Date.now());
+    });
+
+    const providers = { remote: remoteProvider, local: localProvider };
+    providerCache.set(docId, providers);
+    return providers;
   }, [docId, token]);
 
   useEffect(() => {
     return () => {
       if (provider) {
         provider.forceSync();
+        // Clean up providers
+        providerCache.delete(docId);
         provider.destroy();
+        localProvider.destroy();
       }
     };
-  }, [docId, token]);
+  }, [docId, token, provider, localProvider]);
 
   // Add null check before rendering
   if (!provider) {
     return null;
   }
 
-  return <DocumentContext.Provider value={{ docId: docId, provider }}>{children}</DocumentContext.Provider>;
+  return <DocumentContext.Provider value={{ docId, provider, localProvider }}>{children}</DocumentContext.Provider>;
 };
 
 export const useDocumentContext = () => {

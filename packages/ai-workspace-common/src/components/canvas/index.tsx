@@ -53,7 +53,7 @@ interface ContextMenuState {
 const Flow = ({ canvasId }: { canvasId: string }) => {
   const { t } = useTranslation();
   const previewContainerRef = useRef<HTMLDivElement>(null);
-  const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, addNode } =
+  const { nodes, edges, setSelectedNode, onNodesChange, onEdgesChange, onConnect, addNode } =
     useCanvasControl(canvasId);
   const edgeStyles = useEdgeStyles();
 
@@ -144,7 +144,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
       },
       defaultEdgeOptions,
     }),
-    [mode, edgeStyles],
+    [edgeStyles],
   );
 
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });

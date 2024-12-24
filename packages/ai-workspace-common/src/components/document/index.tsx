@@ -39,7 +39,7 @@ import { handleImageDrop, handleImagePaste } from '@refly-packages/ai-workspace-
 import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
 
 import { AiOutlineWarning } from 'react-icons/ai';
-import { getClientOrigin, getWsServerOrigin } from '@refly-packages/utils/url';
+import { getClientOrigin } from '@refly-packages/utils/url';
 import { useDocumentStore, useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 
 // content selector
@@ -49,7 +49,6 @@ import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/mod
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 // componets
 import { Button, Divider, Dropdown, DropdownProps, MenuProps, message, Modal, Popconfirm } from 'antd';
-import { useBlocker } from 'react-router-dom';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/use-selection-context';
 import { DocumentProvider, useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
@@ -62,11 +61,10 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
   const { t } = useTranslation();
   const lastCursorPosRef = useRef<number>();
 
+  const { provider } = useDocumentContext();
+
   const documentStore = useDocumentStoreShallow((state) => ({
-    isAiEditing: state.isAiEditing,
     currentDocument: state.documentStates[docId]?.currentDocument,
-    documentServerStatus: state.documentStates[docId]?.documentServerStatus,
-    updateIsAiEditing: state.updateIsAiEditing,
     updateDocumentCharsCount: state.updateDocumentCharsCount,
     updateDocumentSaveStatus: state.updateDocumentSaveStatus,
     updateEditor: state.updateEditor,
@@ -151,8 +149,6 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
     addToContext(node);
   };
 
-  const { provider } = useDocumentContext();
-
   const uploadFn = useMemo(() => createUploadFn({ entityId: docId, entityType: 'document' }), [docId]);
 
   const extensions = useMemo(
@@ -191,10 +187,11 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
   const { setNodeDataByEntity } = useCanvasControl();
 
   const debouncedUpdates = useThrottledCallback(async (editor: EditorInstance) => {
-    if (documentStore.documentServerStatus !== 'connected') {
+    if (provider.status !== 'connected') {
+      console.log('document server is not connected, skip update node data');
       return;
     }
-    const json = editor.getJSON();
+
     const markdown = editor.storage.markdown.getMarkdown();
 
     setNodeDataByEntity(
@@ -208,9 +205,6 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
     );
 
     documentStore.updateDocumentCharsCount(docId, wordsCount(markdown));
-    window.localStorage.setItem('html-content', await highlightCodeblocks(editor.getHTML()));
-    window.localStorage.setItem('novel-content', JSON.stringify(json));
-    window.localStorage.setItem('markdown', editor.storage.markdown.getMarkdown());
     documentStore.updateDocumentSaveStatus(docId, 'Saved');
   }, 500);
 
@@ -283,51 +277,6 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
     }
   }, [readOnly]);
 
-  // Add navigation blocker
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      documentStore.isAiEditing &&
-      (currentLocation.pathname !== nextLocation.pathname || currentLocation.search !== nextLocation.search),
-  );
-
-  const [modal, contextHolder] = Modal.useModal();
-
-  // Handle blocking navigation
-  useEffect(() => {
-    if (blocker.state === 'blocked') {
-      modal.confirm({
-        title: t('knowledgeBase.canvas.leavePageModal.title'),
-        content: t('knowledgeBase.canvas.leavePageModal.content'),
-        centered: true,
-        okText: t('common.confirm'),
-        cancelText: t('common.cancel'),
-        onOk: () => {
-          documentStore.updateIsAiEditing(false);
-          blocker.proceed();
-        },
-        onCancel: () => {
-          blocker.reset();
-        },
-      });
-    }
-  }, [blocker]);
-
-  // Add window beforeunload handler
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (documentStore.isAiEditing) {
-        // Standard-compliant browsers
-        const message = 'AI is still editing. Changes you made may not be saved.';
-        e.preventDefault();
-        e.returnValue = message; // Chrome requires returnValue to be set
-        return message; // Safari requires return value
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [documentStore.isAiEditing]);
-
   // Handle editor focus/blur to manage active document
   useEffect(() => {
     const handleFocus = () => {
@@ -370,15 +319,6 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
       })}
     >
       <div className="w-full h-full">
-        {documentStore.isAiEditing && (
-          <div
-            className="absolute inset-0 bg-transparent z-[1000] pointer-events-auto select-none"
-            onMouseDown={(e) => e.preventDefault()}
-            onMouseUp={(e) => e.preventDefault()}
-            onClick={(e) => e.preventDefault()}
-            onDoubleClick={(e) => e.preventDefault()}
-          />
-        )}
         <EditorRoot>
           <EditorContent
             extensions={extensions}
@@ -416,7 +356,6 @@ const CollaborativeEditor = ({ docId }: { docId: string }) => {
           </EditorContent>
         </EditorRoot>
       </div>
-      {contextHolder}
     </div>
   );
 };
@@ -510,20 +449,18 @@ export const CanvasStatusBar = ({
   docId: string;
   node?: CanvasNode;
 }) => {
-  const { currentDocument, updateCurrentDocument, documentServerStatus, documentCharsCount, documentSaveStatus } =
-    useDocumentStoreShallow((state) => ({
-      currentDocument: state.documentStates[docId]?.currentDocument,
-      updateCurrentDocument: state.updateCurrentDocument,
-      documentServerStatus: state.documentStates[docId]?.documentServerStatus,
-      documentCharsCount: state.documentStates[docId]?.documentCharsCount,
-      documentSaveStatus: state.documentStates[docId]?.documentSaveStatus,
-    }));
+  const { currentDocument, updateCurrentDocument, documentSaveStatus } = useDocumentStoreShallow((state) => ({
+    currentDocument: state.documentStates[docId]?.currentDocument,
+    updateCurrentDocument: state.updateCurrentDocument,
+    documentSaveStatus: state.documentStates[docId]?.documentSaveStatus,
+  }));
+  const { provider } = useDocumentContext();
   const { t } = useTranslation();
 
   return (
     <div className="note-status-bar">
       <div className="note-status-bar-menu">
-        {documentServerStatus === 'connected' ? (
+        {provider.status === 'connected' ? (
           <div className="note-status-bar-item">
             <HiOutlineClock />
             <p className="conv-title">
@@ -532,7 +469,7 @@ export const CanvasStatusBar = ({
           </div>
         ) : null}
 
-        {documentServerStatus === 'disconnected' ? (
+        {provider.status === 'disconnected' ? (
           <div className="note-status-bar-item">
             <AiOutlineWarning />
             <p className="conv-title">{t('knowledgeBase.note.serviceDisconnected')}</p>
@@ -541,7 +478,7 @@ export const CanvasStatusBar = ({
       </div>
 
       <div className="note-status-bar-menu">
-        {currentDocument && documentServerStatus === 'connected' ? (
+        {currentDocument && provider.status === 'connected' ? (
           <div
             className="note-status-bar-item"
             onClick={() => {
@@ -625,6 +562,34 @@ export const DocumentEditorHeader = ({ docId }: { docId: string }) => {
   );
 };
 
+const DocumentBody = ({ docId }: { docId: string }) => {
+  const { t } = useTranslation();
+  const { provider } = useDocumentContext();
+
+  const { config } = useDocumentStoreShallow((state) => ({
+    config: state.config[docId],
+  }));
+  const hasDocumentSynced = config?.remoteSyncedAt > 0 && config?.localSyncedAt > 0;
+
+  return (
+    <div className="overflow-auto flex-grow">
+      <Spin
+        className="document-editor-spin"
+        tip={t('knowledgeBase.note.connecting')}
+        loading={!hasDocumentSynced && provider.status !== 'connected'}
+        style={{ height: '100%', width: '100%' }}
+      >
+        <div className="ai-note-editor">
+          <div className="ai-note-editor-container">
+            <DocumentEditorHeader docId={docId} />
+            <CollaborativeEditor docId={docId} />
+          </div>
+        </div>
+      </Spin>
+    </div>
+  );
+};
+
 export const DocumentEditor = (props: {
   docId: string;
   deckSize: number;
@@ -633,20 +598,18 @@ export const DocumentEditor = (props: {
 }) => {
   const { docId, deckSize, setDeckSize, node } = props;
 
-  const { t } = useTranslation();
-
   const {
     currentDocument: document,
-    documentServerStatus,
     updateCurrentDocument,
     resetState,
   } = useDocumentStoreShallow((state) => ({
+    config: state.config[docId],
     currentDocument: state.documentStates[docId]?.currentDocument,
-    documentServerStatus: state.documentStates[docId]?.documentServerStatus,
     newDocumentCreating: state.newDocumentCreating,
     updateCurrentDocument: state.updateCurrentDocument,
     resetState: state.resetState,
   }));
+
   const prevNote = useRef<Document>();
 
   const { data: documentDetail, isLoading } = useGetDocumentDetail({ query: { docId } });
@@ -688,21 +651,7 @@ export const DocumentEditor = (props: {
     <DocumentProvider docId={docId}>
       <div className="flex flex-col ai-note-container">
         <CanvasStatusBar deckSize={deckSize} setDeckSize={setDeckSize} docId={docId} node={node} />
-        <div className="overflow-auto flex-grow">
-          <Spin
-            className="document-editor-spin"
-            tip={t('knowledgeBase.note.connecting')}
-            loading={!document || isLoading || documentServerStatus !== 'connected'}
-            style={{ height: '100%', width: '100%' }}
-          >
-            <div className="ai-note-editor">
-              <div className="ai-note-editor-container">
-                <DocumentEditorHeader docId={docId} />
-                <CollaborativeEditor docId={docId} />
-              </div>
-            </div>
-          </Spin>
-        </div>
+        <DocumentBody docId={docId} />
       </div>
     </DocumentProvider>
   );
