@@ -28,8 +28,6 @@ export const useDeleteDocument = () => {
 
       if (data?.success) {
         success = true;
-        message.success(t('document.action.deleteSuccess'));
-
         deleteDocumentData(docId);
 
         // Clear IndexedDB persistence for the deleted document

@@ -225,7 +225,6 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
   }, [editorRef.current]);
 
   const readOnly = documentStore.readOnly;
-  console.log('CollaborativeEditor readOnly', readOnly);
 
   useEffect(() => {
     if (editorRef.current && !readOnly) {

@@ -227,9 +227,7 @@ const DocumentBody = ({ docId }: { docId: string }) => {
   const { config } = useDocumentStoreShallow((state) => ({
     config: state.config[docId],
   }));
-  console.log('config', docId, config);
   const hasDocumentSynced = config?.remoteSyncedAt > 0 && config?.localSyncedAt > 0;
-  console.log('hasDocumentSynced', hasDocumentSynced);
 
   return (
     <div className="overflow-auto flex-grow">

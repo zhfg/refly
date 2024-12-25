@@ -17,7 +17,7 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { CanvasProvider, useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useEdgeStyles } from './constants';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { BigSearchModal } from '@refly-packages/ai-workspace-common/components/search/modal';
 import { CanvasListModal } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal';
 import { LibraryModal } from '@refly-packages/ai-workspace-common/components/workspace/library-modal';
@@ -92,11 +92,14 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
   const { provider } = useCanvasContext();
 
-  const { config, operatingNodeId, setOperatingNodeId } = useCanvasStoreShallow((state) => ({
-    config: state.config[canvasId],
-    operatingNodeId: state.operatingNodeId,
-    setOperatingNodeId: state.setOperatingNodeId,
-  }));
+  const { config, operatingNodeId, setOperatingNodeId, setInitialFitViewCompleted } = useCanvasStoreShallow(
+    (state) => ({
+      config: state.config[canvasId],
+      operatingNodeId: state.operatingNodeId,
+      setOperatingNodeId: state.setOperatingNodeId,
+      setInitialFitViewCompleted: state.setInitialFitViewCompleted,
+    }),
+  );
   const hasCanvasSynced = config?.localSyncedAt > 0 && config?.remoteSyncedAt > 0;
 
   const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } = useCreateDocument();
@@ -108,20 +111,28 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   };
 
   useEffect(() => {
+    return () => {
+      setInitialFitViewCompleted(canvasId, false);
+    };
+  }, [canvasId]);
+
+  useEffect(() => {
     // Only run fitView if we have nodes and this is the initial render
     const timeoutId = setTimeout(() => {
-      if (nodes?.length > 0) {
+      const { initialFitViewCompleted } = useCanvasStore.getState().data[canvasId] ?? {};
+      if (nodes?.length > 0 && !initialFitViewCompleted) {
         reactFlowInstance.fitView({
           padding: 0.2,
           duration: 200,
           minZoom: 0.1,
           maxZoom: 1,
         });
+        setInitialFitViewCompleted(canvasId, true);
       }
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [canvasId]); // Run only once on mount
+  }, [canvasId, nodes?.length]);
 
   const defaultEdgeOptions = {
     style: edgeStyles.default,

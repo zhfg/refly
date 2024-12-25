@@ -9,6 +9,7 @@ interface CanvasData {
   nodes: CanvasNode<any>[];
   edges: Edge[];
   title: string;
+  initialFitViewCompleted?: boolean;
 }
 
 interface CanvasConfig {
@@ -32,6 +33,7 @@ export interface CanvasState {
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
   setTitle: (canvasId: string, title: string) => void;
+  setInitialFitViewCompleted: (canvasId: string, completed: boolean) => void;
   deleteCanvasData: (canvasId: string) => void;
   setCurrentCanvasId: (canvasId: string) => void;
   addPinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
@@ -51,7 +53,7 @@ const defaultCanvasState: () => CanvasData = () => ({
   nodes: [],
   edges: [],
   title: '',
-  mode: 'hand',
+  initialFitViewCompleted: false,
 });
 
 const defaultCanvasConfig: () => CanvasConfig = () => ({
@@ -107,6 +109,11 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.data[canvasId] ??= defaultCanvasState();
           state.data[canvasId].title = title;
+        }),
+      setInitialFitViewCompleted: (canvasId, completed) =>
+        set((state) => {
+          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId].initialFitViewCompleted = completed;
         }),
       setCanvasLocalSynced: (canvasId, syncedAt) =>
         set((state) => {
