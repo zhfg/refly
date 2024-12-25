@@ -130,6 +130,11 @@ export class CollabService {
       const readable = await this.minio.client.getObject(stateStorageKey);
       const state = await streamToBuffer(readable);
       Y.applyUpdate(document, state);
+
+      const title = document.getText('title')?.toJSON();
+      if (!title) {
+        document.getText('title').insert(0, entity.title);
+      }
     } catch (err) {
       this.logger.error(`fetch state failed for ${stateStorageKey}, err: ${err.stack}`);
       return null;
