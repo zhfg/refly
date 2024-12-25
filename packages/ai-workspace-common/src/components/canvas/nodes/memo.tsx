@@ -140,7 +140,7 @@ export const MemoNode = ({
     content: data?.contentPreview ?? '',
     editable: true,
     onUpdate: ({ editor }) => {
-      debouncedUpdates(editor);
+      onMemoUpdates(editor);
     },
     editorProps: {
       attributes: {
@@ -151,7 +151,7 @@ export const MemoNode = ({
     },
   });
 
-  const debouncedUpdates = useThrottledCallback(async (editor: EditorInstance) => {
+  const onMemoUpdates = useThrottledCallback(async (editor: EditorInstance) => {
     const markdown = editor.storage.markdown.getMarkdown();
 
     setNodeDataByEntity(
