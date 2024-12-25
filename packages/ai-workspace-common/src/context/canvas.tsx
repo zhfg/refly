@@ -18,6 +18,27 @@ const CanvasContext = createContext<CanvasContextType | null>(null);
 
 const providerCache = new Map<string, { remote: HocuspocusProvider; local: IndexeddbPersistence }>();
 
+const getTitleFromYDoc = (ydoc: Y.Doc) => {
+  const title = ydoc.getText('title');
+  return title.toJSON();
+};
+
+const getNodesFromYDoc = (ydoc: Y.Doc) => {
+  const nodesArray = ydoc.getArray<CanvasNode>('nodes');
+  const nodes = nodesArray.toJSON();
+  const uniqueNodesMap = new Map();
+  nodes.forEach((node) => uniqueNodesMap.set(node.id, node));
+  return Array.from(uniqueNodesMap.values());
+};
+
+const getEdgesFromYDoc = (ydoc: Y.Doc) => {
+  const edgesArray = ydoc.getArray<Edge>('edges');
+  const edges = edgesArray.toJSON();
+  const uniqueEdgesMap = new Map();
+  edges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
+  return Array.from(uniqueEdgesMap.values());
+};
+
 export const CanvasProvider = ({ canvasId, children }: { canvasId: string; children: React.ReactNode }) => {
   const [token] = useCookie('_refly_ai_sid');
 
@@ -25,6 +46,18 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     setCanvasLocalSynced: state.setCanvasLocalSynced,
     setCanvasRemoteSynced: state.setCanvasRemoteSynced,
   }));
+
+  const { setTitle, setNodes, setEdges } = useCanvasStoreShallow((state) => ({
+    setTitle: state.setTitle,
+    setNodes: state.setNodes,
+    setEdges: state.setEdges,
+  }));
+
+  const setCanvasDataFromYDoc = (ydoc: Y.Doc) => {
+    setTitle(canvasId, getTitleFromYDoc(ydoc));
+    setNodes(canvasId, getNodesFromYDoc(ydoc));
+    setEdges(canvasId, getEdgesFromYDoc(ydoc));
+  };
 
   const { remote: provider, local: localProvider } = useMemo(() => {
     const existingProvider = providerCache.get(canvasId);
@@ -50,6 +83,7 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     const localProvider = new IndexeddbPersistence(canvasId, doc);
 
     localProvider.on('synced', () => {
+      setCanvasDataFromYDoc(doc);
       setCanvasLocalSynced(canvasId, Date.now());
     });
 
@@ -58,12 +92,6 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     providerCache.set(canvasId, providers);
     return providers;
   }, [canvasId, token]);
-
-  const { setNodes, setEdges, setTitle } = useCanvasStoreShallow((state) => ({
-    setNodes: state.setNodes,
-    setEdges: state.setEdges,
-    setTitle: state.setTitle,
-  }));
 
   // Add connection status management
   const [connectionAttempts, setConnectionAttempts] = useState(0);
@@ -113,40 +141,24 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       if (isDestroyed) return;
 
       if (provider.status === 'connected') {
-        setTitle(canvasId, title.toJSON());
-
-        const initialNodes = nodesArray.toJSON();
-        const uniqueNodesMap = new Map();
-        initialNodes.forEach((node) => uniqueNodesMap.set(node.id, node));
-        setNodes(canvasId, Array.from(uniqueNodesMap.values()));
-
-        const initialEdges = edgesArray.toJSON();
-        const uniqueEdgesMap = new Map();
-        initialEdges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
-        setEdges(canvasId, Array.from(uniqueEdgesMap.values()));
+        setCanvasDataFromYDoc(ydoc);
       }
 
       const titleObserverCallback = () => {
         if (provider.status === 'connected') {
-          setTitle(canvasId, title.toJSON());
+          setTitle(canvasId, getTitleFromYDoc(ydoc));
         }
       };
 
       const nodesObserverCallback = () => {
         if (provider.status === 'connected') {
-          const nodes = nodesArray.toJSON();
-          const uniqueNodesMap = new Map();
-          nodes.forEach((node) => uniqueNodesMap.set(node.id, node));
-          setNodes(canvasId, Array.from(uniqueNodesMap.values()));
+          setNodes(canvasId, getNodesFromYDoc(ydoc));
         }
       };
 
       const edgesObserverCallback = () => {
         if (provider.status === 'connected') {
-          const edges = edgesArray.toJSON();
-          const uniqueEdgesMap = new Map();
-          edges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
-          setEdges(canvasId, Array.from(uniqueEdgesMap.values()));
+          setEdges(canvasId, getEdgesFromYDoc(ydoc));
         }
       };
 
