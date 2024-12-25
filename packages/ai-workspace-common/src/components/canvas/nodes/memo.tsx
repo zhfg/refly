@@ -22,6 +22,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import { Markdown as MarkdownPreview } from '@refly-packages/ai-workspace-common/components/markdown';
 import { Markdown } from 'tiptap-markdown';
 import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
 import './memo.scss';
 import { useThrottledCallback } from 'use-debounce';
 import { EditorInstance } from '@refly-packages/ai-workspace-common/components/editor/core/components';
@@ -135,6 +136,9 @@ export const MemoNode = ({
       StarterKit,
       Markdown.configure({
         html: false,
+      }),
+      Placeholder.configure({
+        placeholder: t('knowledgeBase.context.memoPlaceholder'),
       }),
     ],
     content: data?.contentPreview ?? '',

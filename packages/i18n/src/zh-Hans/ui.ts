@@ -408,6 +408,7 @@ const translations = {
         skillResponse: '技能响应',
         memo: '备忘录',
       },
+      memoPlaceholder: '记录当下的灵感...',
       noContent: '没有可插入的内容',
       noEditor: '没有打开的文档',
       noActiveDocument: '没有打开的文档',

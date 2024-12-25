@@ -416,6 +416,7 @@ const translations = {
         skillResponse: 'Skill Response',
         memo: 'Memo',
       },
+      memoPlaceholder: 'Record your inspiration...',
       noContent: 'No content available to insert',
       noEditor: 'No opened document',
       noActiveDocument: 'No opened document',
