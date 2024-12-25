@@ -17,7 +17,7 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { CanvasProvider, useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useEdgeStyles } from './constants';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { BigSearchModal } from '@refly-packages/ai-workspace-common/components/search/modal';
 import { CanvasListModal } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal';
 import { LibraryModal } from '@refly-packages/ai-workspace-common/components/workspace/library-modal';
@@ -53,7 +53,7 @@ interface ContextMenuState {
 const Flow = ({ canvasId }: { canvasId: string }) => {
   const { t } = useTranslation();
   const previewContainerRef = useRef<HTMLDivElement>(null);
-  const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, addNode } =
+  const { nodes, edges, setSelectedNode, onNodesChange, onEdgesChange, onConnect, addNode } =
     useCanvasControl(canvasId);
   const edgeStyles = useEdgeStyles();
 
@@ -92,10 +92,15 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
   const { provider } = useCanvasContext();
 
-  const { operatingNodeId, setOperatingNodeId } = useCanvasStoreShallow((state) => ({
-    operatingNodeId: state.operatingNodeId,
-    setOperatingNodeId: state.setOperatingNodeId,
-  }));
+  const { config, operatingNodeId, setOperatingNodeId, setInitialFitViewCompleted } = useCanvasStoreShallow(
+    (state) => ({
+      config: state.config[canvasId],
+      operatingNodeId: state.operatingNodeId,
+      setOperatingNodeId: state.setOperatingNodeId,
+      setInitialFitViewCompleted: state.setInitialFitViewCompleted,
+    }),
+  );
+  const hasCanvasSynced = config?.localSyncedAt > 0 && config?.remoteSyncedAt > 0;
 
   const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } = useCreateDocument();
 
@@ -106,20 +111,28 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   };
 
   useEffect(() => {
+    return () => {
+      setInitialFitViewCompleted(canvasId, false);
+    };
+  }, [canvasId]);
+
+  useEffect(() => {
     // Only run fitView if we have nodes and this is the initial render
     const timeoutId = setTimeout(() => {
-      if (nodes?.length > 0) {
+      const { initialFitViewCompleted } = useCanvasStore.getState().data[canvasId] ?? {};
+      if (nodes?.length > 0 && !initialFitViewCompleted) {
         reactFlowInstance.fitView({
           padding: 0.2,
           duration: 200,
           minZoom: 0.1,
           maxZoom: 1,
         });
+        setInitialFitViewCompleted(canvasId, true);
       }
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [canvasId]); // Run only once on mount
+  }, [canvasId, nodes?.length]);
 
   const defaultEdgeOptions = {
     style: edgeStyles.default,
@@ -142,7 +155,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
       },
       defaultEdgeOptions,
     }),
-    [mode, edgeStyles],
+    [edgeStyles],
   );
 
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
@@ -351,7 +364,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   return (
     <Spin
       className="w-full h-full"
-      spinning={provider.status !== 'connected' && !connectionTimeout}
+      style={{ maxHeight: '100%' }}
+      spinning={!hasCanvasSynced && provider.status !== 'connected' && !connectionTimeout}
       tip={connectionTimeout ? t('common.connectionFailed') : t('common.loading')}
     >
       <Modal
@@ -395,7 +409,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             nodeDragThreshold={10}
             nodesDraggable={!operatingNodeId}
           >
-            {nodes?.length === 0 && (
+            {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
                 <div className="flex items-center justify-center text-gray-500 text-center">
                   <div className="text-[20px]">{t('canvas.emptyText')}</div>

@@ -1,11 +1,4 @@
-import {
-  ActionResult,
-  ActionStep,
-  ActionStepMeta,
-  BaseResponse,
-  InvokeSkillRequest,
-  SkillEvent,
-} from '@refly/openapi-schema';
+import { ActionResult, ActionStep, ActionStepMeta, InvokeSkillRequest, SkillEvent } from '@refly/openapi-schema';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
 import { LOCALE } from '@refly/common-types';

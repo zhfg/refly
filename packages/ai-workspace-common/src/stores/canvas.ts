@@ -9,10 +9,12 @@ interface CanvasData {
   nodes: CanvasNode<any>[];
   edges: Edge[];
   title: string;
-  mode: 'pointer' | 'hand';
+  initialFitViewCompleted?: boolean;
 }
 
 interface CanvasConfig {
+  localSyncedAt?: number;
+  remoteSyncedAt?: number;
   pinnedNodes: CanvasNode<any>[];
 }
 
@@ -31,10 +33,12 @@ export interface CanvasState {
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
   setTitle: (canvasId: string, title: string) => void;
+  setInitialFitViewCompleted: (canvasId: string, completed: boolean) => void;
   deleteCanvasData: (canvasId: string) => void;
   setCurrentCanvasId: (canvasId: string) => void;
-  setMode: (canvasId: string, mode: 'pointer' | 'hand') => void;
   addPinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
+  setCanvasLocalSynced: (canvasId: string, syncedAt: number) => void;
+  setCanvasRemoteSynced: (canvasId: string, syncedAt: number) => void;
   removePinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
   setShowPreview: (show: boolean) => void;
   setShowMaxRatio: (show: boolean) => void;
@@ -49,7 +53,7 @@ const defaultCanvasState: () => CanvasData = () => ({
   nodes: [],
   edges: [],
   title: '',
-  mode: 'hand',
+  initialFitViewCompleted: false,
 });
 
 const defaultCanvasConfig: () => CanvasConfig = () => ({
@@ -73,6 +77,7 @@ export const useCanvasStore = create<CanvasState>()(
       deleteCanvasData: (canvasId) =>
         set((state) => {
           delete state.data[canvasId];
+          delete state.config[canvasId];
         }),
       setCurrentCanvasId: (canvasId) =>
         set((state) => {
@@ -105,10 +110,20 @@ export const useCanvasStore = create<CanvasState>()(
           state.data[canvasId] ??= defaultCanvasState();
           state.data[canvasId].title = title;
         }),
-      setMode: (canvasId, mode) =>
+      setInitialFitViewCompleted: (canvasId, completed) =>
         set((state) => {
           state.data[canvasId] ??= defaultCanvasState();
-          state.data[canvasId].mode = mode;
+          state.data[canvasId].initialFitViewCompleted = completed;
+        }),
+      setCanvasLocalSynced: (canvasId, syncedAt) =>
+        set((state) => {
+          state.config[canvasId] ??= defaultCanvasConfig();
+          state.config[canvasId].localSyncedAt = syncedAt;
+        }),
+      setCanvasRemoteSynced: (canvasId, syncedAt) =>
+        set((state) => {
+          state.config[canvasId] ??= defaultCanvasConfig();
+          state.config[canvasId].remoteSyncedAt = syncedAt;
         }),
       addPinnedNode: (canvasId, node) =>
         set((state) => {

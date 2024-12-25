@@ -64,6 +64,7 @@ const translations = {
   editor: {
     placeholder: {
       default: "Write something, or press 'space' for AI, press '/' for commands",
+      title: 'Enter The Title',
     },
     aiSelector: {
       thinking: 'AI is thinking',
@@ -535,7 +536,6 @@ const translations = {
       askFollowUp: 'Ask Follow-up',
       moreOptions: 'More Options',
       delete: 'Delete Node From Canvas',
-      startCreateDocument: 'Creating Document...',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',
@@ -1355,7 +1355,7 @@ const translations = {
     message: {
       copy: 'Copy',
       copySuccess: 'Copy Success',
-      insertBlow: 'Insert Document',
+      insertBelow: 'Insert Document',
       replaceSelection: 'Replace Selection',
       createNewNote: 'Create New Document',
       createDocument: 'Save as New Document',

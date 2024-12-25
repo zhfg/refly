@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { message } from 'antd';
-import { useDocumentStore, useDocumentStoreShallow } from '../stores/document';
-import { useActionResultStore, useActionResultStoreShallow } from '../stores/action-result';
+import { useDocumentStore } from '../stores/document';
+import { useActionResultStore } from '../stores/action-result';
 import { parseMarkdownCitationsAndCanvasTags, safeParseJSON } from '@refly/utils/parse';
 import { EditorOperation, editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { Source } from '@refly/openapi-schema';
@@ -24,17 +24,11 @@ export const useInsertToDocument = (resultId: string) => {
   };
 
   return useCallback(
-    async (operation: EditorOperation = 'insertBlow', content?: string) => {
-      const { activeDocumentId, documentStates } = useDocumentStore.getState();
+    async (operation: EditorOperation = 'insertBelow', content?: string) => {
+      const { activeDocumentId } = useDocumentStore.getState();
 
       if (!activeDocumentId) {
         message.warning(t('knowledgeBase.context.noActiveDocument'));
-        return;
-      }
-
-      const editor = documentStates[activeDocumentId]?.editor;
-      if (!editor) {
-        message.warning(t('knowledgeBase.context.noEditor'));
         return;
       }
 
@@ -63,27 +57,13 @@ export const useInsertToDocument = (resultId: string) => {
         parsedContent = parseMarkdownCitationsAndCanvasTags(answerQuestionStep?.content || '', sources);
       }
 
-      // Handle insert or replace operations
-      const selection = editor.view?.state?.selection;
-      if (selection) {
-        editor
-          .chain()
-          .focus()
-          .insertContentAt(
-            {
-              from: selection.from,
-              to: selection.to,
-            },
-            parsedContent,
-          )
-          .run();
+      editorEmitter.emit(operation, parsedContent);
 
-        message.success(
-          operation === 'insertBlow'
-            ? t('knowledgeBase.context.insertSuccess')
-            : t('knowledgeBase.context.replaceSuccess'),
-        );
-      }
+      message.success(
+        operation === 'insertBelow'
+          ? t('knowledgeBase.context.insertSuccess')
+          : t('knowledgeBase.context.replaceSuccess'),
+      );
     },
     [t],
   );

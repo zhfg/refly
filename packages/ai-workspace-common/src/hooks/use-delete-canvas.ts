@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { message } from 'antd';
+import * as Y from 'yjs';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useDebouncedCallback } from 'use-debounce';
 import { useNavigate } from 'react-router-dom';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { IndexeddbPersistence } from 'y-indexeddb';
 
 export const useDeleteCanvas = () => {
   const [isRemoving, setIsRemoving] = useState(false);
@@ -33,7 +35,13 @@ export const useDeleteCanvas = () => {
         if (currentCanvasId === canvasId) {
           setCurrentCanvasId(null);
         }
+
         deleteCanvasData(canvasId);
+
+        // Clear IndexedDB persistence for the deleted canvas
+        const indexedDbProvider = new IndexeddbPersistence(canvasId, new Y.Doc());
+        await indexedDbProvider.clearData();
+        await indexedDbProvider.destroy();
 
         getCanvasList();
 

@@ -74,19 +74,17 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   const { canvasId: routeCanvasId } = useParams();
   const canvasId = selectedCanvasId ?? contextCanvasId ?? routeCanvasId;
 
-  const { data, setNodes, setEdges, setTitle, setModeRaw, addPinnedNode } = useCanvasStoreShallow((state) => ({
+  const { data, setNodes, setEdges, setTitle, addPinnedNode } = useCanvasStoreShallow((state) => ({
     data: state.data,
     setNodes: state.setNodes,
     setEdges: state.setEdges,
     setTitle: state.setTitle,
-    setModeRaw: state.setMode,
     addPinnedNode: state.addPinnedNode,
   }));
   const edgeStyles = useEdgeStyles();
 
   const nodes = data[canvasId]?.nodes ?? [];
   const edges = data[canvasId]?.edges ?? [];
-  const mode = data[canvasId]?.mode ?? 'hand';
 
   const syncTitleToYDoc = useCallback(
     (title: string) => {
@@ -487,13 +485,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     [canvasId, setSelectedNode, addPinnedNode, edgeStyles],
   );
 
-  const setMode = useCallback(
-    (mode: 'hand' | 'pointer') => {
-      setModeRaw(canvasId, mode);
-    },
-    [canvasId, setModeRaw],
-  );
-
   const updateAllEdgesStyle = useCallback(
     (showEdges: boolean) => {
       const { data } = useCanvasStore.getState();
@@ -524,8 +515,6 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     onConnect,
     onLayout,
     addNode,
-    mode,
-    setMode,
     setCanvasTitle,
     setNodeCenter,
     setSelectedNodes,

@@ -15,6 +15,7 @@ import { Loader2, FileInput, MessageSquareDiff, FilePlus } from 'lucide-react';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 import { nodeActionEmitter, createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
+import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 
 interface MenuItem {
   key: string;
@@ -24,6 +25,7 @@ interface MenuItem {
   loading?: boolean;
   danger?: boolean;
   type: 'button' | 'divider';
+  disabled?: boolean;
 }
 
 interface NodeActionMenuProps {
@@ -41,6 +43,9 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const { canvasId } = useCanvasContext();
   const { addPinnedNode } = useCanvasStoreShallow((state) => ({
     addPinnedNode: state.addPinnedNode,
+  }));
+  const { activeDocumentId } = useDocumentStoreShallow((state) => ({
+    activeDocumentId: state.activeDocumentId,
   }));
 
   const node = getNode(nodeId) as CanvasNode;
@@ -124,6 +129,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
           label: t('canvas.nodeActions.insertToDoc'),
           onClick: handleInsertToDoc,
           type: 'button' as const,
+          disabled: !activeDocumentId,
         },
         {
           key: 'addToContext',
@@ -189,6 +195,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
             type="text"
             loading={item.loading}
             onClick={item.onClick}
+            disabled={item.disabled}
           >
             {item.loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <item.icon className="w-4 h-4" />}
             <span className="flex-1 text-left truncate">{item.label}</span>

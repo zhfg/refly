@@ -64,6 +64,7 @@ const translations = {
   editor: {
     placeholder: {
       default: "写点什么，或按空格键激活 AI，按 '/' 键激活命令",
+      title: '请输入标题',
     },
     aiSelector: {
       thinking: 'AI 思考中',
@@ -527,7 +528,6 @@ const translations = {
       askFollowUp: '继续提问',
       moreOptions: '更多选项',
       delete: '删除节点',
-      startCreateDocument: '创建文档中...',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',
@@ -1347,7 +1347,7 @@ const translations = {
     message: {
       copy: '复制',
       copySuccess: '复制成功',
-      insertBlow: '插入文档',
+      insertBelow: '插入文档',
       replaceSelection: '替换选中',
       createDocument: '保存为新文档',
       createNewNote: '创建新文档',
