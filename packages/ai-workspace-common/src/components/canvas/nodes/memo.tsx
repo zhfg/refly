@@ -2,7 +2,7 @@ import { Position, useReactFlow } from '@xyflow/react';
 import { CanvasNode, CanvasNodeData, MemoNodeProps } from './types';
 import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
@@ -19,11 +19,19 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 import Moveable from 'react-moveable';
 import classNames from 'classnames';
 import { useEditor, EditorContent } from '@tiptap/react';
+import { Markdown as MarkdownPreview } from '@refly-packages/ai-workspace-common/components/markdown';
 import { Markdown } from 'tiptap-markdown';
 import StarterKit from '@tiptap/starter-kit';
 import './memo.scss';
 import { useThrottledCallback } from 'use-debounce';
 import { EditorInstance } from '@refly-packages/ai-workspace-common/components/editor/core/components';
+import {
+  cleanupNodeEvents,
+  createNodeEventName,
+  nodeActionEmitter,
+} from '@refly-packages/ai-workspace-common/events/nodeActions';
+import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/use-insert-to-document';
+
 type MemoNode = Node<CanvasNodeData, 'memo'>;
 
 export const MemoNode = ({
@@ -40,6 +48,7 @@ export const MemoNode = ({
   const { setEdges } = useReactFlow();
   const { i18n, t } = useTranslation();
   const language = i18n.languages?.[0];
+  const [title, setTitle] = useState(data.title);
 
   const { getNode } = useReactFlow();
   const node = getNode(id);
@@ -111,16 +120,33 @@ export const MemoNode = ({
     'memo',
   );
 
-  const handleHelpLink = useCallback(() => {
-    // Implement help link logic
-    console.log('Open help link');
-  }, []);
+  const insertToDoc = useInsertToDocument(data.entityId);
+  const handleInsertToDoc = useCallback(async () => {
+    await insertToDoc('insertBlow', data?.contentPreview);
+  }, [insertToDoc, data.entityId, data]);
 
-  const handleAbout = useCallback(() => {
-    // Implement about logic
-    console.log('Show about info');
-  }, []);
-  console.log('data', data);
+  // Add event handling
+  useEffect(() => {
+    // Create node-specific event handlers
+    const handleNodeAddToContext = () => handleAddToContext();
+    const handleNodeDelete = () => handleDelete();
+    const handleNodeInsertToDoc = () => handleInsertToDoc();
+
+    // Register events with node ID
+    nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
+    nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
+    nodeActionEmitter.on(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
+
+    return () => {
+      // Cleanup events when component unmounts
+      nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
+      nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
+      nodeActionEmitter.off(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
+
+      // Clean up all node events
+      cleanupNodeEvents(id);
+    };
+  }, [id, handleAddToContext, handleDelete, handleInsertToDoc]);
 
   const editor = useEditor({
     extensions: [
@@ -156,18 +182,21 @@ export const MemoNode = ({
       },
     );
   }, 500);
-
-  const onTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onTitleChange = useThrottledCallback((value: string) => {
     setNodeDataByEntity(
       {
         entityId: data?.entityId,
         type: 'memo',
       },
       {
-        title: e.target.value,
+        title: value,
       },
     );
-  };
+  }, 500);
+
+  useEffect(() => {
+    onTitleChange(title);
+  }, [title, setTitle]);
 
   return (
     <div className={classNames({ nowheel: isOperating })}>
@@ -184,16 +213,7 @@ export const MemoNode = ({
           cursor: isOperating ? 'text' : 'grab',
         }}
       >
-        {!isPreview && !hideActions && (
-          <ActionButtons
-            type="document"
-            nodeId={id}
-            onAddToContext={handleAddToContext}
-            onDelete={handleDelete}
-            onHelpLink={handleHelpLink}
-            onAbout={handleAbout}
-          />
-        )}
+        {!isPreview && !hideActions && <ActionButtons type="memo" nodeId={id} />}
 
         <div
           className={`
@@ -239,25 +259,33 @@ export const MemoNode = ({
                 >
                   <PiNotePencilLight className="w-4 h-4 text-white" />
                 </div>
-                <Input
-                  className="text-sm font-medium leading-normal border-none focus:border-none hover:bg-gray-100"
-                  placeholder="Enter The Title"
-                  value={data.title}
-                  style={{ paddingLeft: 6 }}
-                  onChange={onTitleChange}
-                />
+                {!isPreview ? (
+                  <Input
+                    className="text-sm font-medium leading-normal border-none focus:border-none hover:bg-gray-100"
+                    placeholder="Enter The Title"
+                    value={title}
+                    style={{ paddingLeft: 6 }}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                ) : (
+                  <div className="text-sm font-medium leading-normal">{title}</div>
+                )}
               </div>
             </div>
 
             <div className="relative flex-grow overflow-y-auto pr-2 -mr-2">
-              <EditorContent
-                editor={editor}
-                className={classNames(
-                  'text-xs memo-node-editor h-full w-full',
-                  { 'pointer-events-auto': isOperating },
-                  { 'pointer-events-none': !isOperating },
-                )}
-              />
+              {!isPreview ? (
+                <EditorContent
+                  editor={editor}
+                  className={classNames(
+                    'text-xs memo-node-editor h-full w-full',
+                    { 'pointer-events-auto': isOperating },
+                    { 'pointer-events-none': !isOperating },
+                  )}
+                />
+              ) : (
+                <MarkdownPreview content={data?.contentPreview ?? ''} />
+              )}
             </div>
 
             <div className="flex justify-end items-center flex-shrink-0 mt-2 text-[10px] text-gray-400 z-20">
