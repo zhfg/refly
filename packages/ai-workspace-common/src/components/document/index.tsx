@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Document } from '@refly/openapi-schema';
+import { useDebounce } from 'use-debounce';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 import './index.scss';
 import { Input, Spin } from '@arco-design/web-react';
-import { Button, Divider, Dropdown, DropdownProps, MenuProps, message, Popconfirm } from 'antd';
-import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineClock } from 'react-icons/hi2';
+import { Button, Dropdown, DropdownProps, MenuProps, message, Popconfirm } from 'antd';
+import { HiOutlineLockClosed, HiOutlineLockOpen } from 'react-icons/hi2';
 import { IconMoreHorizontal, IconDelete, IconCopy } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useTranslation } from 'react-i18next';
-import { AiOutlineWarning } from 'react-icons/ai';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 
 import { CollaborativeEditor } from './collab-editor';
@@ -18,8 +17,10 @@ import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/use-delete-document';
 import { ydoc2Markdown } from '@refly-packages/utils/editor';
+import { time } from '@refly-packages/utils/time';
+import { LOCALE } from '@refly/common-types';
 
-const ActionDropdown = ({ doc, node }: { doc: Document; node?: CanvasNode }) => {
+const ActionDropdown = ({ docId, node }: { docId: string; node?: CanvasNode }) => {
   const { ydoc } = useDocumentContext();
   const { t } = useTranslation();
   const [popupVisible, setPopupVisible] = useState(false);
@@ -27,7 +28,7 @@ const ActionDropdown = ({ doc, node }: { doc: Document; node?: CanvasNode }) => 
   const { deleteDocument } = useDeleteDocument();
 
   const handleDelete = async () => {
-    const success = await deleteDocument(doc.docId);
+    const success = await deleteDocument(docId);
     if (success) {
       handleDeleteNode();
     }
@@ -101,65 +102,85 @@ const StatusBar = ({
   docId: string;
   node?: CanvasNode;
 }) => {
-  const { currentDocument, updateCurrentDocument, documentSaveStatus } = useDocumentStoreShallow((state) => ({
-    currentDocument: state.documentStates[docId]?.currentDocument,
-    updateCurrentDocument: state.updateCurrentDocument,
-    documentSaveStatus: state.documentStates[docId]?.documentSaveStatus,
+  const { provider, ydoc } = useDocumentContext();
+  const yReadOnly = ydoc?.getText('readOnly');
+  const { t, i18n } = useTranslation();
+  const language = i18n.language as LOCALE;
+
+  const [unsyncedChanges, setUnsyncedChanges] = useState(provider?.unsyncedChanges || 0);
+  const [debouncedUnsyncedChanges] = useDebounce(unsyncedChanges, 500);
+
+  useEffect(() => {
+    provider.on('unsyncedChanges', (data) => {
+      setUnsyncedChanges(data);
+    });
+  }, [provider]);
+
+  const { config, setDocumentReadOnly } = useDocumentStoreShallow((state) => ({
+    config: state.config[docId],
+    setDocumentReadOnly: state.setDocumentReadOnly,
   }));
-  const { provider } = useDocumentContext();
-  const { t } = useTranslation();
+  const readOnly = config?.readOnly;
+
+  useEffect(() => {
+    if (ydoc) {
+      setDocumentReadOnly(docId, yReadOnly?.toJSON() === 'true');
+
+      const observer = () => {
+        if (provider.status === 'connected') {
+          setDocumentReadOnly(docId, yReadOnly?.toJSON() === 'true');
+        }
+      };
+      yReadOnly?.observe(observer);
+
+      return () => {
+        yReadOnly?.unobserve(observer);
+      };
+    }
+  }, [ydoc]);
+
+  const toggleReadOnly = () => {
+    ydoc?.transact(() => {
+      const yReadOnly = ydoc.getText('readOnly');
+      yReadOnly.delete(0, yReadOnly?.length ?? 0);
+      yReadOnly.insert(0, (!readOnly).toString());
+    });
+
+    setDocumentReadOnly(docId, !readOnly);
+
+    readOnly ? message.success(t('knowledgeBase.note.edit')) : message.warning(t('knowledgeBase.note.readOnly'));
+  };
 
   return (
-    <div className="note-status-bar">
-      <div className="note-status-bar-menu">
-        {provider.status === 'connected' ? (
-          <div className="note-status-bar-item">
-            <HiOutlineClock />
-            <p className="conv-title">
-              {documentSaveStatus === 'Saved' ? t('knowledgeBase.note.autoSaved') : t('knowledgeBase.note.saving')}
-            </p>
-          </div>
-        ) : null}
-
-        {provider.status === 'disconnected' ? (
-          <div className="note-status-bar-item">
-            <AiOutlineWarning />
-            <p className="conv-title">{t('knowledgeBase.note.serviceDisconnected')}</p>
-          </div>
-        ) : null}
+    <div className="w-full h-10 p-3 border-x-0 border-t-0 border-b border-solid border-gray-100 flex flex-row items-center justify-between">
+      <div className="flex items-center gap-2">
+        <div
+          className={`
+                  relative w-2.5 h-2.5 rounded-full
+                  transition-colors duration-700 ease-in-out
+                  ${debouncedUnsyncedChanges > 0 ? 'bg-yellow-500 animate-pulse' : 'bg-green-400'}
+                `}
+        />
+        <div className="text-sm text-gray-500">
+          {debouncedUnsyncedChanges > 0
+            ? t('canvas.toolbar.syncingChanges')
+            : t('canvas.toolbar.synced', { time: time(new Date(), language)?.utc()?.fromNow() })}
+        </div>
       </div>
 
-      <div className="note-status-bar-menu">
-        {currentDocument && provider.status === 'connected' ? (
-          <div
-            className="note-status-bar-item"
-            onClick={() => {
-              updateCurrentDocument(docId, { ...currentDocument, readOnly: !currentDocument?.readOnly });
-              currentDocument?.readOnly
-                ? message.success(t('knowledgeBase.note.edit'))
-                : message.warning(t('knowledgeBase.note.readOnly'));
-            }}
-          >
-            <Button
-              type="text"
-              style={{ width: 32, height: 32 }}
-              icon={
-                currentDocument?.readOnly ? <HiOutlineLockClosed style={{ color: '#00968F' }} /> : <HiOutlineLockOpen />
-              }
-            />
-          </div>
-        ) : null}
-
-        <div className="note-status-bar-item">
-          <Divider type="vertical" />
-          <ActionDropdown doc={currentDocument} node={node} />
-        </div>
+      <div className="flex items-center gap-1">
+        <Button
+          type="text"
+          icon={readOnly ? <HiOutlineLockClosed style={{ color: '#00968F' }} /> : <HiOutlineLockOpen />}
+          onClick={() => toggleReadOnly()}
+        />
+        <ActionDropdown docId={docId} node={node} />
       </div>
     </div>
   );
 };
 
-export const DocumentEditorHeader = ({ docId }: { docId: string }) => {
+const DocumentEditorHeader = ({ docId }: { docId: string }) => {
   const { t } = useTranslation();
   const { ydoc } = useDocumentContext();
   const ydocTitle = ydoc.getText('title').toJSON();
@@ -206,7 +227,9 @@ const DocumentBody = ({ docId }: { docId: string }) => {
   const { config } = useDocumentStoreShallow((state) => ({
     config: state.config[docId],
   }));
+  console.log('config', docId, config);
   const hasDocumentSynced = config?.remoteSyncedAt > 0 && config?.localSyncedAt > 0;
+  console.log('hasDocumentSynced', hasDocumentSynced);
 
   return (
     <div className="overflow-auto flex-grow">

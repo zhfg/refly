@@ -48,11 +48,11 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
   const { provider, ydoc } = useDocumentContext();
 
   const documentStore = useDocumentStoreShallow((state) => ({
+    readOnly: state.config[docId]?.readOnly,
     activeDocumentId: state.activeDocumentId,
     currentDocument: state.documentStates[docId]?.currentDocument,
     setHasEditorSelection: state.setHasEditorSelection,
     updateDocumentCharsCount: state.updateDocumentCharsCount,
-    updateDocumentSaveStatus: state.updateDocumentSaveStatus,
     updateTocItems: state.updateTocItems,
     updateLastCursorPosRef: state.updateLastCursorPosRef,
     setActiveDocumentId: state.setActiveDocumentId,
@@ -173,7 +173,6 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
 
   const debouncedUpdates = useThrottledCallback(async (editor: EditorInstance) => {
     if (provider.status !== 'connected') {
-      console.log('document server is not connected, skip update node data');
       return;
     }
 
@@ -190,7 +189,6 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
     );
 
     documentStore.updateDocumentCharsCount(docId, wordsCount(markdown));
-    documentStore.updateDocumentSaveStatus(docId, 'Saved');
   }, 100);
 
   useEffect(() => {
@@ -226,7 +224,8 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
     };
   }, [editorRef.current]);
 
-  const readOnly = documentStore?.currentDocument?.readOnly ?? false;
+  const readOnly = documentStore.readOnly;
+  console.log('CollaborativeEditor readOnly', readOnly);
 
   useEffect(() => {
     if (editorRef.current && !readOnly) {
@@ -386,7 +385,6 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
             }}
             onUpdate={({ editor }) => {
               debouncedUpdates(editor);
-              documentStore.updateDocumentSaveStatus(docId, 'Unsaved');
             }}
             slotAfter={<ImageResizer />}
           >

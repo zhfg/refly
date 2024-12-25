@@ -10,8 +10,6 @@ export enum ActionSource {
   Canvas = 'canvas',
 }
 
-export type DocumentSaveStatus = 'Saved' | 'Unsaved';
-
 export interface TableOfContentsItem {
   isActive: boolean;
   isScrolledOver: boolean;
@@ -22,20 +20,16 @@ export interface TableOfContentsItem {
 
 interface DocumentState {
   documentCharsCount?: number;
-  documentSaveStatus?: DocumentSaveStatus;
   lastCursorPosRef?: number;
   tocItems?: TableOfContentsItem[];
   currentDocument?: Document;
 }
 
 interface DocumentConfig {
+  readOnly?: boolean;
   localSyncedAt?: number;
   remoteSyncedAt?: number;
 }
-
-const defaultDocumentState: () => DocumentState = () => ({
-  documentSaveStatus: 'Unsaved' as DocumentSaveStatus,
-});
 
 interface DocumentBaseState {
   // Canvas specific states stored by docId
@@ -46,12 +40,12 @@ interface DocumentBaseState {
 
   setHasEditorSelection: (hasEditorSelection: boolean) => void;
   updateCurrentDocument: (docId: string, document: Document) => void;
-  updateDocumentSaveStatus: (docId: string, status: DocumentSaveStatus) => void;
   updateDocumentCharsCount: (docId: string, count: number) => void;
   updateLastCursorPosRef: (docId: string, pos: number) => void;
   updateTocItems: (docId: string, items: TableOfContentsItem[]) => void;
   setActiveDocumentId: (docId: string) => void;
 
+  setDocumentReadOnly: (docId: string, readOnly: boolean) => void;
   setDocumentLocalSyncedAt: (docId: string, syncedAt: number) => void;
   setDocumentRemoteSyncedAt: (docId: string, syncedAt: number) => void;
 
@@ -79,37 +73,37 @@ export const useDocumentStore = create<DocumentBaseState>()(
 
       updateCurrentDocument: (docId: string, document: Document) =>
         set((state) => {
-          state.documentStates[docId] ??= defaultDocumentState();
+          state.documentStates[docId] ??= {};
           state.documentStates[docId].currentDocument = document;
-        }),
-
-      updateDocumentSaveStatus: (docId: string, status: DocumentSaveStatus) =>
-        set((state) => {
-          state.documentStates[docId] ??= defaultDocumentState();
-          state.documentStates[docId].documentSaveStatus = status;
         }),
 
       updateDocumentCharsCount: (docId: string, count: number) =>
         set((state) => {
-          state.documentStates[docId] ??= defaultDocumentState();
+          state.documentStates[docId] ??= {};
           state.documentStates[docId].documentCharsCount = count;
         }),
 
       updateLastCursorPosRef: (docId: string, pos: number) =>
         set((state) => {
-          state.documentStates[docId] ??= defaultDocumentState();
+          state.documentStates[docId] ??= {};
           state.documentStates[docId].lastCursorPosRef = pos;
         }),
 
       updateTocItems: (docId: string, items: TableOfContentsItem[]) =>
         set((state) => {
-          state.documentStates[docId] ??= defaultDocumentState();
+          state.documentStates[docId] ??= {};
           state.documentStates[docId].tocItems = items;
         }),
 
       setActiveDocumentId: (docId: string) =>
         set((state) => {
           state.activeDocumentId = docId;
+        }),
+
+      setDocumentReadOnly: (docId: string, readOnly: boolean) =>
+        set((state) => {
+          state.config[docId] ??= {};
+          state.config[docId].readOnly = readOnly;
         }),
 
       setDocumentLocalSyncedAt: (docId: string, syncedAt: number) =>
@@ -132,8 +126,7 @@ export const useDocumentStore = create<DocumentBaseState>()(
 
       resetState: (docId: string) =>
         set((state) => {
-          state.documentStates[docId] = defaultDocumentState();
-          state.config[docId] = {};
+          state.documentStates[docId] = {};
         }),
     })),
     {
