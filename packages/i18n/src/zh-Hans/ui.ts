@@ -430,6 +430,14 @@ const translations = {
   },
   canvas: {
     emptyText: '双击向 AI 提问, 或',
+    contextMenu: {
+      enableClickPreview: '启用点击预览',
+      disableClickPreview: '禁用点击预览',
+      hideLaunchpad: '隐藏 AI 提问框',
+      showLaunchpad: '显示 AI 提问框',
+      hideEdges: '隐藏连线',
+      showEdges: '显示连线',
+    },
     toolbar: {
       enablePointerMode: '启用框选模式',
       disablePointerMode: '关闭框选模式',

@@ -7,6 +7,10 @@ import { PiShootingStar } from 'react-icons/pi';
 import { RiUploadCloud2Line } from 'react-icons/ri';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { IconCanvas, IconPreview } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IoAnalyticsOutline } from 'react-icons/io5';
+import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/use-edge-visible';
 
 interface ContextMenuProps {
   open: boolean;
@@ -18,6 +22,8 @@ interface MenuItem {
   key: string;
   icon?: React.ElementType;
   type: 'button' | 'divider';
+  active?: boolean;
+  title?: string;
 }
 
 export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) => {
@@ -29,12 +35,40 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
     setImportResourceModalVisible: state.setImportResourceModalVisible,
     setInsertNodePosition: state.setInsertNodePosition,
   }));
+  const { showEdges, showLaunchpad, clickToPreview, setShowEdges, setShowLaunchpad, setClickToPreview } =
+    useCanvasStoreShallow((state) => ({
+      showEdges: state.showEdges,
+      showLaunchpad: state.showLaunchpad,
+      clickToPreview: state.clickToPreview,
+      setShowEdges: state.setShowEdges,
+      setShowLaunchpad: state.setShowLaunchpad,
+      setClickToPreview: state.setClickToPreview,
+    }));
+  const { showEdges: edgeVisible, toggleEdgeVisible } = useEdgeVisible();
 
   const menuItems: MenuItem[] = [
-    { key: 'createDocument', icon: HiOutlineDocumentAdd, type: 'button' },
-    { key: 'divider-1', type: 'divider' },
-    { key: 'askAI', icon: PiShootingStar, type: 'button' },
-    { key: 'importResource', icon: RiUploadCloud2Line, type: 'button' },
+    // { key: 'divider-1', type: 'divider' },
+    {
+      key: 'toggleLaunchpad',
+      icon: IconCanvas,
+      type: 'button',
+      active: showLaunchpad,
+      title: showLaunchpad ? t('canvas.contextMenu.hideLaunchpad') : t('canvas.contextMenu.showLaunchpad'),
+    },
+    {
+      key: 'toggleEdges',
+      icon: IoAnalyticsOutline,
+      type: 'button',
+      active: showEdges,
+      title: showEdges ? t('canvas.contextMenu.hideEdges') : t('canvas.contextMenu.showEdges'),
+    },
+    {
+      key: 'toggleClickPreview',
+      icon: IconPreview,
+      type: 'button',
+      active: clickToPreview,
+      title: clickToPreview ? t('canvas.contextMenu.disableClickPreview') : t('canvas.contextMenu.enableClickPreview'),
+    },
   ];
 
   const adjustPosition = (x: number, y: number) => {
@@ -67,17 +101,14 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
 
   const handleMenuClick = async (key: string) => {
     switch (key) {
-      case 'createDocument':
-        await createSingleDocumentInCanvas(t('common.newDocument'), '', {
-          addToCanvas: true,
-        });
+      case 'toggleLaunchpad':
+        setShowLaunchpad(!showLaunchpad);
         break;
-      case 'askAI':
-        // TODO: Handle ask AI
+      case 'toggleEdges':
+        toggleEdgeVisible();
         break;
-      case 'importResource':
-        setInsertNodePosition(position);
-        setImportResourceModalVisible(true);
+      case 'toggleClickPreview':
+        setClickToPreview(!clickToPreview);
         break;
     }
     setOpen(false);
@@ -133,7 +164,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
             icon={item.icon && <item.icon className="flex items-center w-4 h-4" />}
             onClick={() => handleMenuClick(item.key)}
           >
-            <span className="flex-1 text-left truncate">{t(`canvas.contextMenu.${item.key}`)}</span>
+            <span className="flex-1 text-left truncate">{item.title}</span>
           </Button>
         );
       })}
