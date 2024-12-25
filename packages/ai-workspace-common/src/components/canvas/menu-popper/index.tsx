@@ -53,8 +53,8 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     { key: 'createMemo', icon: MdOutlineAutoAwesomeMotion, type: 'button' },
     { key: 'addResource', icon: IconResource, type: 'popover', domain: 'resource' },
     { key: 'addDocument', icon: IconDocument, type: 'popover', domain: 'document' },
-    { key: 'addMemo', icon: MdOutlineAutoAwesomeMotion, type: 'button' },
-    { key: 'addHighlight', icon: HiOutlineBars2, type: 'button' },
+    // { key: 'addMemo', icon: MdOutlineAutoAwesomeMotion, type: 'button' },
+    // { key: 'addHighlight', icon: HiOutlineBars2, type: 'button' },
     { key: 'divider-2', type: 'divider' },
     { key: 'importResource', icon: RiUploadCloud2Line, type: 'button' },
   ];
