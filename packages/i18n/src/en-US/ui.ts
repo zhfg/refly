@@ -536,7 +536,6 @@ const translations = {
       askFollowUp: 'Ask Follow-up',
       moreOptions: 'More Options',
       delete: 'Delete Node From Canvas',
-      startCreateDocument: 'Creating Document...',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',
@@ -1356,7 +1355,7 @@ const translations = {
     message: {
       copy: 'Copy',
       copySuccess: 'Copy Success',
-      insertBlow: 'Insert Document',
+      insertBelow: 'Insert Document',
       replaceSelection: 'Replace Selection',
       createNewNote: 'Create New Document',
       createDocument: 'Save as New Document',

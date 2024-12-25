@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from 'antd';
-import { Message } from '@arco-design/web-react';
+import { Button, message } from 'antd';
 import { ActionResult, ActionStep, Source } from '@refly/openapi-schema';
 import { FilePlus } from 'lucide-react';
 import { IconCheckCircle, IconCopy, IconImport } from '@arco-design/web-react/icon';
@@ -9,7 +8,7 @@ import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { parseMarkdownCitationsAndCanvasTags, safeParseJSON } from '@refly/utils/parse';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
-import { EditorOperation } from '@refly-packages/utils/event-emitter/editor';
+import { editorEmitter, EditorOperation } from '@refly-packages/utils/event-emitter/editor';
 import { Dropdown, Menu } from '@arco-design/web-react';
 import { HiOutlineCircleStack } from 'react-icons/hi2';
 
@@ -20,17 +19,15 @@ interface ActionContainerProps {
 
 export const ActionContainer = ({ result, step }: ActionContainerProps) => {
   const { t } = useTranslation();
-  const { editor: noteStoreEditor, isCreatingNewDocumentOnHumanMessage } = useDocumentStoreShallow((state) => ({
-    editor: state.editor,
-    isCreatingNewDocumentOnHumanMessage: state.isCreatingNewDocumentOnHumanMessage,
+  const { debouncedCreateDocument } = useCreateDocument();
+  const { hasEditorSelection, activeDocumentId } = useDocumentStoreShallow((state) => ({
+    hasEditorSelection: state.hasEditorSelection,
+    activeDocumentId: state.activeDocumentId,
   }));
-  const { debouncedCreateDocument, isCreating } = useCreateDocument();
 
   const { title } = result ?? {};
   const isPending = result?.status === 'executing';
 
-  // Track editor selection state
-  const [hasEditorSelection, setHasEditorSelection] = useState(false);
   let sources =
     typeof step?.structuredData?.['sources'] === 'string'
       ? safeParseJSON(step?.structuredData?.['sources'])
@@ -39,16 +36,18 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
   const editorActionList = [
     {
       icon: <IconImport style={{ fontSize: 14 }} />,
-      key: 'insertBlow',
+      key: 'insertBelow',
+      enabled: step.content && activeDocumentId,
     },
     {
       icon: <IconCheckCircle style={{ fontSize: 14 }} />,
       key: 'replaceSelection',
+      enabled: step.content && activeDocumentId && hasEditorSelection,
     },
     {
       icon: <FilePlus style={{ fontSize: 14, width: 14, height: 14 }} />,
       key: 'createDocument',
-      loading: isCreating,
+      enabled: step.content,
     },
   ];
 
@@ -62,29 +61,11 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
     setTokenUsage(total);
   }, [step?.tokenUsage]);
 
-  const handleEditorOperation = async (type: EditorOperation, content: string) => {
+  const handleEditorOperation = async (type: EditorOperation | 'createDocument', content: string) => {
     const parsedContent = parseMarkdownCitationsAndCanvasTags(content, sources);
 
-    if (type === 'insertBlow' || type === 'replaceSelection') {
-      const editor = noteStoreEditor;
-
-      if (!editor) return;
-
-      const selection = editor.view?.state?.selection;
-
-      if (selection) {
-        editor
-          .chain()
-          .focus()
-          .insertContentAt(
-            {
-              from: selection.from,
-              to: selection.to,
-            },
-            parsedContent,
-          )
-          .run();
-      }
+    if (type === 'insertBelow' || type === 'replaceSelection') {
+      editorEmitter.emit(type, parsedContent);
     } else if (type === 'createDocument') {
       await debouncedCreateDocument(title ?? t('common.newDocument'), content, {
         sourceNodeId: result.resultId,
@@ -92,53 +73,6 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
       });
     }
   };
-
-  useEffect(() => {
-    if (!noteStoreEditor) {
-      setHasEditorSelection(false);
-      return;
-    }
-
-    const updateSelection = () => {
-      const { state } = noteStoreEditor.view;
-      const { from, to } = state.selection;
-      setHasEditorSelection(from !== to);
-    };
-
-    // Update initial state
-    updateSelection();
-
-    // Listen for selection changes
-    noteStoreEditor.on('selectionUpdate', updateSelection);
-    noteStoreEditor.on('blur', updateSelection);
-    noteStoreEditor.on('focus', updateSelection);
-
-    return () => {
-      noteStoreEditor.off('selectionUpdate', updateSelection);
-      noteStoreEditor.off('blur', updateSelection);
-      noteStoreEditor.off('focus', updateSelection);
-    };
-  }, [noteStoreEditor]);
-
-  // Filter editor actions based on conditions
-  const availableEditorActions = useMemo(() => {
-    if (!step.content) {
-      return [];
-    }
-
-    if (!noteStoreEditor) {
-      // If no editor, only show create new note
-      return editorActionList.filter((item) => item.key === 'createDocument');
-    }
-
-    if (!hasEditorSelection) {
-      // If no selection, show create new note and insert below
-      return editorActionList.filter((item) => ['createDocument', 'insertBlow'].includes(item.key));
-    }
-
-    // If has selection, show all actions
-    return editorActionList;
-  }, [noteStoreEditor, hasEditorSelection]);
 
   const tokenUsageDropdownList = (
     <Menu>
@@ -186,7 +120,7 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
                 onClick={() => {
                   const parsedText = parseMarkdownCitationsAndCanvasTags(step.content, sources);
                   copyToClipboard(parsedText || '');
-                  Message.success(t('copilot.message.copySuccess'));
+                  message.success(t('copilot.message.copySuccess'));
                 }}
               >
                 <span className="opacity-0 max-w-0 transform -translate-x-0.5 transition-all duration-400 whitespace-nowrap group-hover:opacity-100 group-hover:max-w-[200px] group-hover:translate-x-0 group-hover:ml-1">
@@ -194,14 +128,14 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
                 </span>
               </Button>
             )}
-            {availableEditorActions.map((item) => (
+            {editorActionList.map((item) => (
               <Button
                 key={item.key}
                 size="small"
-                loading={item.key === 'createDocument' && (isCreatingNewDocumentOnHumanMessage || isCreating)}
                 type="text"
                 className="text-[#64645F] text-xs flex justify-center items-center h-6 px-1 rounded-lg hover:bg-[#f1f1f0] hover:text-[#00968f] transition-all duration-400 relative overflow-hidden group"
                 icon={item.icon}
+                disabled={!item.enabled}
                 onClick={() => {
                   const parsedText = parseMarkdownCitationsAndCanvasTags(step.content, sources);
                   handleEditorOperation(item.key as EditorOperation, parsedText || '');
@@ -213,7 +147,6 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
               </Button>
             ))}
           </div>
-          <div></div>
         </div>
       )}
     </div>

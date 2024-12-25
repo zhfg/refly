@@ -38,21 +38,18 @@ const defaultDocumentState: () => DocumentState = () => ({
 });
 
 interface DocumentBaseState {
-  newDocumentCreating: boolean;
-  isCreatingNewDocumentOnHumanMessage: boolean;
-
   // Canvas specific states stored by docId
   activeDocumentId: string;
+  hasEditorSelection: boolean;
   documentStates: Record<string, DocumentState>;
   config: Record<string, DocumentConfig>;
 
+  setHasEditorSelection: (hasEditorSelection: boolean) => void;
   updateCurrentDocument: (docId: string, document: Document) => void;
   updateDocumentSaveStatus: (docId: string, status: DocumentSaveStatus) => void;
   updateDocumentCharsCount: (docId: string, count: number) => void;
   updateLastCursorPosRef: (docId: string, pos: number) => void;
   updateTocItems: (docId: string, items: TableOfContentsItem[]) => void;
-  updateNewDocumentCreating: (creating: boolean) => void;
-  updateIsCreatingNewDocumentOnHumanMessage: (creating: boolean) => void;
   setActiveDocumentId: (docId: string) => void;
 
   setDocumentLocalSyncedAt: (docId: string, syncedAt: number) => void;
@@ -64,11 +61,7 @@ interface DocumentBaseState {
 }
 
 export const defaultState = {
-  newDocumentCreating: false,
-  isCreatingNewDocumentOnHumanMessage: false,
-  editor: null,
-
-  // documents
+  hasEditorSelection: false,
   documentStates: {},
   activeDocumentId: '',
   config: {},
@@ -78,6 +71,11 @@ export const useDocumentStore = create<DocumentBaseState>()(
   persist(
     immer((set) => ({
       ...defaultState,
+
+      setHasEditorSelection: (hasEditorSelection: boolean) =>
+        set((state) => {
+          state.hasEditorSelection = hasEditorSelection;
+        }),
 
       updateCurrentDocument: (docId: string, document: Document) =>
         set((state) => {
@@ -107,16 +105,6 @@ export const useDocumentStore = create<DocumentBaseState>()(
         set((state) => {
           state.documentStates[docId] ??= defaultDocumentState();
           state.documentStates[docId].tocItems = items;
-        }),
-
-      updateNewDocumentCreating: (creating: boolean) =>
-        set((state) => {
-          state.newDocumentCreating = creating;
-        }),
-
-      updateIsCreatingNewDocumentOnHumanMessage: (creating: boolean) =>
-        set((state) => {
-          state.isCreatingNewDocumentOnHumanMessage = creating;
         }),
 
       setActiveDocumentId: (docId: string) =>

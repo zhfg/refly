@@ -17,10 +17,10 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/use-delete-document';
-import { useEditor } from '@refly-packages/ai-workspace-common/components/editor/core/components';
+import { ydoc2Markdown } from '@refly-packages/utils/editor';
 
 const ActionDropdown = ({ doc, node }: { doc: Document; node?: CanvasNode }) => {
-  const { editor } = useEditor();
+  const { ydoc } = useDocumentContext();
   const { t } = useTranslation();
   const [popupVisible, setPopupVisible] = useState(false);
   const handleDeleteNode = node ? useDeleteNode(node, node.type) : undefined;
@@ -34,8 +34,9 @@ const ActionDropdown = ({ doc, node }: { doc: Document; node?: CanvasNode }) => 
   };
 
   const handleCopy = () => {
-    const markdown = editor?.storage.markdown.getMarkdown();
-    copyToClipboard(markdown);
+    const title = ydoc.getText('title').toJSON();
+    const content = ydoc2Markdown(ydoc);
+    copyToClipboard(`# ${title}\n\n${content}`);
     message.success({ content: t('contentDetail.item.copySuccess') });
   };
 
@@ -52,6 +53,7 @@ const ActionDropdown = ({ doc, node }: { doc: Document; node?: CanvasNode }) => 
     {
       label: (
         <Popconfirm
+          placement="bottom"
           title={t('workspace.deleteDropdownMenu.deleteConfirmForDocument')}
           onConfirm={handleDelete}
           onCancel={() => setPopupVisible(false)}

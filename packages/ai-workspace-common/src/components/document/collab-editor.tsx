@@ -50,6 +50,7 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
   const documentStore = useDocumentStoreShallow((state) => ({
     activeDocumentId: state.activeDocumentId,
     currentDocument: state.documentStates[docId]?.currentDocument,
+    setHasEditorSelection: state.setHasEditorSelection,
     updateDocumentCharsCount: state.updateDocumentCharsCount,
     updateDocumentSaveStatus: state.updateDocumentSaveStatus,
     updateTocItems: state.updateTocItems,
@@ -198,14 +199,42 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
     };
   }, [docId]);
 
+  useEffect(() => {
+    if (!editorRef.current) {
+      return;
+    }
+    const editor = editorRef.current;
+
+    const updateSelection = () => {
+      const { state } = editor.view;
+      const { from, to } = state.selection;
+      documentStore.setHasEditorSelection(from !== to);
+    };
+
+    // Update initial state
+    updateSelection();
+
+    // Listen for selection changes
+    editor.on('selectionUpdate', updateSelection);
+    editor.on('blur', updateSelection);
+    editor.on('focus', updateSelection);
+
+    return () => {
+      editor.off('selectionUpdate', updateSelection);
+      editor.off('blur', updateSelection);
+      editor.off('focus', updateSelection);
+    };
+  }, [editorRef.current]);
+
   const readOnly = documentStore?.currentDocument?.readOnly ?? false;
 
   useEffect(() => {
     if (editorRef.current && !readOnly) {
-      editorRef.current.on('blur', () => {
-        lastCursorPosRef.current = editorRef.current?.view?.state?.selection?.$head?.pos;
+      const editor = editorRef.current;
 
-        const editor = editorRef.current;
+      editor.on('blur', () => {
+        lastCursorPosRef.current = editor?.view?.state?.selection?.$head?.pos;
+
         const { state } = editor?.view || {};
         const { selection } = state || {};
         const { doc } = editor?.state || {};
@@ -230,8 +259,13 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
 
   useEffect(() => {
     const insertBelow = (content: string) => {
-      const isFocused = editorRef.current?.isFocused;
       const editor = editorRef.current;
+      if (!editor) {
+        console.warn('editor is not initialized');
+        return;
+      }
+
+      const isFocused = editor.isFocused;
       const { activeDocumentId } = useDocumentStore.getState();
 
       if (activeDocumentId !== docId) {
@@ -262,26 +296,34 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
       }
     };
 
-    editorEmitter.on('insertBlow', insertBelow);
+    editorEmitter.on('insertBelow', insertBelow);
 
     return () => {
-      editorEmitter.off('insertBlow', insertBelow);
+      editorEmitter.off('insertBelow', insertBelow);
       documentStore.setActiveDocumentId(null);
     };
   }, []);
 
   useEffect(() => {
     if (editorRef.current) {
+      const editor = editorRef.current;
+
       if (readOnly) {
         // ensure we sync the content just before setting the editor to readonly
         provider.forceSync();
       }
-      editorRef.current.setOptions({ editable: !readOnly });
+      editor.setOptions({ editable: !readOnly });
     }
-  }, [readOnly]);
+  }, [editorRef.current, readOnly]);
 
   // Handle editor focus/blur to manage active document
   useEffect(() => {
+    if (!editorRef.current) {
+      return;
+    }
+
+    const editor = editorRef.current;
+
     const handleFocus = () => {
       documentStore.setActiveDocumentId(docId);
     };
@@ -291,17 +333,17 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
       // Only update if user switches to another document
     };
 
-    editorRef.current?.on('focus', handleFocus);
-    editorRef.current?.on('blur', handleBlur);
+    editor.on('focus', handleFocus);
+    editor.on('blur', handleBlur);
 
     // Set initial active document if editor is focused
-    if (editorRef.current?.isFocused) {
+    if (editor.isFocused) {
       documentStore.setActiveDocumentId(docId);
     }
 
     return () => {
-      editorRef.current?.off('focus', handleFocus);
-      editorRef.current?.off('blur', handleBlur);
+      editor.off('focus', handleFocus);
+      editor.off('blur', handleBlur);
     };
   }, [docId, documentStore.setActiveDocumentId, editorRef.current, readOnly]);
 

@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { message } from 'antd';
-import { useDocumentStore, useDocumentStoreShallow } from '../stores/document';
-import { useActionResultStore, useActionResultStoreShallow } from '../stores/action-result';
+import { useDocumentStore } from '../stores/document';
+import { useActionResultStore } from '../stores/action-result';
 import { parseMarkdownCitationsAndCanvasTags, safeParseJSON } from '@refly/utils/parse';
 import { EditorOperation, editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { Source } from '@refly/openapi-schema';
@@ -24,7 +24,7 @@ export const useInsertToDocument = (resultId: string) => {
   };
 
   return useCallback(
-    async (operation: EditorOperation = 'insertBlow', content?: string) => {
+    async (operation: EditorOperation = 'insertBelow', content?: string) => {
       const { activeDocumentId } = useDocumentStore.getState();
 
       if (!activeDocumentId) {
@@ -60,7 +60,7 @@ export const useInsertToDocument = (resultId: string) => {
       editorEmitter.emit(operation, parsedContent);
 
       message.success(
-        operation === 'insertBlow'
+        operation === 'insertBelow'
           ? t('knowledgeBase.context.insertSuccess')
           : t('knowledgeBase.context.replaceSuccess'),
       );

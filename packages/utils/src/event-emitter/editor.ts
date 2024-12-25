@@ -23,7 +23,7 @@ export interface InPlaceSendMessagePayload {
 }
 
 export type Events = {
-  insertBlow: string;
+  insertBelow: string;
   replaceSelection: string;
   contineInChat: string;
   createNewNote: string;
@@ -45,7 +45,7 @@ export type Events = {
 };
 
 export type EditorOperation =
-  | 'insertBlow'
+  | 'insertBelow'
   | 'replaceSelection'
   | 'contineInChat'
   | 'streamCanvasContent'
