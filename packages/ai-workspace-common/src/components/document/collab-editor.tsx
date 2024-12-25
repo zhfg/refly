@@ -48,10 +48,10 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
   const { provider, ydoc } = useDocumentContext();
 
   const documentStore = useDocumentStoreShallow((state) => ({
+    activeDocumentId: state.activeDocumentId,
     currentDocument: state.documentStates[docId]?.currentDocument,
     updateDocumentCharsCount: state.updateDocumentCharsCount,
     updateDocumentSaveStatus: state.updateDocumentSaveStatus,
-    updateEditor: state.updateEditor,
     updateTocItems: state.updateTocItems,
     updateLastCursorPosRef: state.updateLastCursorPosRef,
     setActiveDocumentId: state.setActiveDocumentId,
@@ -229,15 +229,23 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
   }, [editorRef.current, readOnly]);
 
   useEffect(() => {
-    editorEmitter.on('insertBlow', (content) => {
+    const insertBelow = (content: string) => {
       const isFocused = editorRef.current?.isFocused;
+      const editor = editorRef.current;
+      const { activeDocumentId } = useDocumentStore.getState();
+
+      if (activeDocumentId !== docId) {
+        return;
+      }
 
       if (isFocused) {
-        lastCursorPosRef.current = editorRef.current?.view?.state?.selection?.$head?.pos;
-        editorRef.current?.commands?.insertContentAt?.(lastCursorPosRef.current, content);
+        // Insert at current cursor position when focused
+        lastCursorPosRef.current = editor?.view?.state?.selection?.$head?.pos;
+        editor?.commands?.insertContentAt?.(lastCursorPosRef.current, content);
       } else if (lastCursorPosRef.current) {
-        editorRef.current
-          .chain()
+        // Insert at last known cursor position
+        editor
+          ?.chain()
           .focus(lastCursorPosRef.current)
           .insertContentAt(
             {
@@ -247,8 +255,19 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
             content,
           )
           .run();
+      } else {
+        // Insert at the bottom of the document
+        const docSize = editor?.state?.doc?.content?.size ?? 0;
+        editor?.chain().focus(docSize).insertContentAt(docSize, content).run();
       }
-    });
+    };
+
+    editorEmitter.on('insertBlow', insertBelow);
+
+    return () => {
+      editorEmitter.off('insertBlow', insertBelow);
+      documentStore.setActiveDocumentId(null);
+    };
   }, []);
 
   useEffect(() => {
@@ -308,7 +327,7 @@ export const CollaborativeEditor = ({ docId }: { docId: string }) => {
             extensions={extensions}
             onCreate={({ editor }) => {
               editorRef.current = editor;
-              documentStore.updateEditor(docId, editor);
+              documentStore.setActiveDocumentId(docId);
             }}
             editable={!readOnly}
             className="w-full h-full border-muted sm:rounded-lg"

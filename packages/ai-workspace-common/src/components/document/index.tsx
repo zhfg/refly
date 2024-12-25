@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { Document } from '@refly/openapi-schema';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
@@ -12,32 +11,25 @@ import { useTranslation } from 'react-i18next';
 import { AiOutlineWarning } from 'react-icons/ai';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 
+import { CollaborativeEditor } from './collab-editor';
 import { DocumentProvider, useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
-import { CollaborativeEditor } from './collab-editor';
+import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/use-delete-document';
+import { useEditor } from '@refly-packages/ai-workspace-common/components/editor/core/components';
 
 const ActionDropdown = ({ doc, node }: { doc: Document; node?: CanvasNode }) => {
-  const { editor } = useDocumentStoreShallow((state) => ({
-    editor: state.documentStates[doc?.docId]?.editor,
-  }));
+  const { editor } = useEditor();
   const { t } = useTranslation();
   const [popupVisible, setPopupVisible] = useState(false);
   const handleDeleteNode = node ? useDeleteNode(node, node.type) : undefined;
+  const { deleteDocument } = useDeleteDocument();
 
   const handleDelete = async () => {
-    const { data } = await getClient().deleteDocument({
-      body: {
-        docId: doc.docId,
-      },
-    });
-    if (data?.success) {
-      if (handleDeleteNode) {
-        handleDeleteNode();
-      } else {
-        message.success(t('common.putSuccess'));
-      }
+    const success = await deleteDocument(doc.docId);
+    if (success) {
+      handleDeleteNode();
     }
   };
 

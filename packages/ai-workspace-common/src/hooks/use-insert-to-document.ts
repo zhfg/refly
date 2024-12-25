@@ -25,16 +25,10 @@ export const useInsertToDocument = (resultId: string) => {
 
   return useCallback(
     async (operation: EditorOperation = 'insertBlow', content?: string) => {
-      const { activeDocumentId, documentStates } = useDocumentStore.getState();
+      const { activeDocumentId } = useDocumentStore.getState();
 
       if (!activeDocumentId) {
         message.warning(t('knowledgeBase.context.noActiveDocument'));
-        return;
-      }
-
-      const editor = documentStates[activeDocumentId]?.editor;
-      if (!editor) {
-        message.warning(t('knowledgeBase.context.noEditor'));
         return;
       }
 
@@ -63,27 +57,13 @@ export const useInsertToDocument = (resultId: string) => {
         parsedContent = parseMarkdownCitationsAndCanvasTags(answerQuestionStep?.content || '', sources);
       }
 
-      // Handle insert or replace operations
-      const selection = editor.view?.state?.selection;
-      if (selection) {
-        editor
-          .chain()
-          .focus()
-          .insertContentAt(
-            {
-              from: selection.from,
-              to: selection.to,
-            },
-            parsedContent,
-          )
-          .run();
+      editorEmitter.emit(operation, parsedContent);
 
-        message.success(
-          operation === 'insertBlow'
-            ? t('knowledgeBase.context.insertSuccess')
-            : t('knowledgeBase.context.replaceSuccess'),
-        );
-      }
+      message.success(
+        operation === 'insertBlow'
+          ? t('knowledgeBase.context.insertSuccess')
+          : t('knowledgeBase.context.replaceSuccess'),
+      );
     },
     [t],
   );

@@ -15,6 +15,7 @@ import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/wo
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/use-delete-document';
 
 const { Meta } = Card;
 
@@ -60,15 +61,11 @@ export const DocumentList = () => {
 
   const ActionDropdown = ({ doc }: { doc: Document }) => {
     const [popupVisible, setPopupVisible] = useState(false);
+    const { deleteDocument } = useDeleteDocument();
 
     const handleDelete = async () => {
-      const { data } = await getClient().deleteDocument({
-        body: {
-          docId: doc.docId,
-        },
-      });
-      if (data?.success) {
-        message.success(t('common.putSuccess'));
+      const success = await deleteDocument(doc.docId);
+      if (success) {
         setDataList(dataList.filter((n) => n.docId !== doc.docId));
         getLibraryList();
       }

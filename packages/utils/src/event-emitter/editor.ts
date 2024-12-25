@@ -48,7 +48,6 @@ export type EditorOperation =
   | 'insertBlow'
   | 'replaceSelection'
   | 'contineInChat'
-  | 'createDocument'
   | 'streamCanvasContent'
   | 'streamEditCanvasContent'
   | 'inPlaceSendMessage'

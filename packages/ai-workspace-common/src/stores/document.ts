@@ -1,9 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
-
+import { immer } from 'zustand/middleware/immer';
 import { Document } from '@refly/openapi-schema';
-import { EditorInstance } from '@refly-packages/ai-workspace-common/components/editor/core/components';
 
 export enum ActionSource {
   KnowledgeBase = 'knowledge-base',
@@ -22,12 +21,11 @@ export interface TableOfContentsItem {
 }
 
 interface DocumentState {
-  editor: EditorInstance | null;
-  documentCharsCount: number;
-  documentSaveStatus: DocumentSaveStatus;
-  lastCursorPosRef: number | null;
-  tocItems: TableOfContentsItem[];
-  currentDocument: Document | null;
+  documentCharsCount?: number;
+  documentSaveStatus?: DocumentSaveStatus;
+  lastCursorPosRef?: number;
+  tocItems?: TableOfContentsItem[];
+  currentDocument?: Document;
 }
 
 interface DocumentConfig {
@@ -35,9 +33,9 @@ interface DocumentConfig {
   remoteSyncedAt?: number;
 }
 
-const defaultDocumentState = {
+const defaultDocumentState: () => DocumentState = () => ({
   documentSaveStatus: 'Unsaved' as DocumentSaveStatus,
-};
+});
 
 interface DocumentBaseState {
   newDocumentCreating: boolean;
@@ -55,11 +53,12 @@ interface DocumentBaseState {
   updateTocItems: (docId: string, items: TableOfContentsItem[]) => void;
   updateNewDocumentCreating: (creating: boolean) => void;
   updateIsCreatingNewDocumentOnHumanMessage: (creating: boolean) => void;
-  updateEditor: (docId: string, editor: EditorInstance) => void;
   setActiveDocumentId: (docId: string) => void;
 
   setDocumentLocalSyncedAt: (docId: string, syncedAt: number) => void;
   setDocumentRemoteSyncedAt: (docId: string, syncedAt: number) => void;
+
+  deleteDocumentData: (docId: string) => void;
 
   resetState: (docId: string) => void;
 }
@@ -77,85 +76,78 @@ export const defaultState = {
 
 export const useDocumentStore = create<DocumentBaseState>()(
   persist(
-    (set) => ({
+    immer((set) => ({
       ...defaultState,
 
       updateCurrentDocument: (docId: string, document: Document) =>
-        set((state) => ({
-          ...state,
-          documentStates: {
-            ...state.documentStates,
-            [docId]: { ...state.documentStates[docId], currentDocument: document },
-          },
-        })),
-
-      updateEditor: (docId: string, editor: EditorInstance) =>
-        set((state) => ({
-          ...state,
-          documentStates: { ...state.documentStates, [docId]: { ...state.documentStates[docId], editor } },
-        })),
+        set((state) => {
+          state.documentStates[docId] ??= defaultDocumentState();
+          state.documentStates[docId].currentDocument = document;
+        }),
 
       updateDocumentSaveStatus: (docId: string, status: DocumentSaveStatus) =>
-        set((state) => ({
-          ...state,
-          documentStates: {
-            ...state.documentStates,
-            [docId]: { ...state.documentStates[docId], documentSaveStatus: status },
-          },
-        })),
+        set((state) => {
+          state.documentStates[docId] ??= defaultDocumentState();
+          state.documentStates[docId].documentSaveStatus = status;
+        }),
 
       updateDocumentCharsCount: (docId: string, count: number) =>
-        set((state) => ({
-          ...state,
-          documentStates: {
-            ...state.documentStates,
-            [docId]: { ...state.documentStates[docId], documentCharsCount: count },
-          },
-        })),
+        set((state) => {
+          state.documentStates[docId] ??= defaultDocumentState();
+          state.documentStates[docId].documentCharsCount = count;
+        }),
 
       updateLastCursorPosRef: (docId: string, pos: number) =>
-        set((state) => ({
-          ...state,
-          documentStates: {
-            ...state.documentStates,
-            [docId]: { ...state.documentStates[docId], lastCursorPosRef: pos },
-          },
-        })),
+        set((state) => {
+          state.documentStates[docId] ??= defaultDocumentState();
+          state.documentStates[docId].lastCursorPosRef = pos;
+        }),
 
       updateTocItems: (docId: string, items: TableOfContentsItem[]) =>
-        set((state) => ({
-          ...state,
-          documentStates: { ...state.documentStates, [docId]: { ...state.documentStates[docId], tocItems: items } },
-        })),
+        set((state) => {
+          state.documentStates[docId] ??= defaultDocumentState();
+          state.documentStates[docId].tocItems = items;
+        }),
 
-      updateNewDocumentCreating: (creating: boolean) => set((state) => ({ ...state, newDocumentCreating: creating })),
+      updateNewDocumentCreating: (creating: boolean) =>
+        set((state) => {
+          state.newDocumentCreating = creating;
+        }),
 
       updateIsCreatingNewDocumentOnHumanMessage: (creating: boolean) =>
-        set((state) => ({ ...state, isCreatingNewDocumentOnHumanMessage: creating })),
+        set((state) => {
+          state.isCreatingNewDocumentOnHumanMessage = creating;
+        }),
 
-      setActiveDocumentId: (docId: string) => set((state) => ({ ...state, activeDocumentId: docId })),
+      setActiveDocumentId: (docId: string) =>
+        set((state) => {
+          state.activeDocumentId = docId;
+        }),
 
       setDocumentLocalSyncedAt: (docId: string, syncedAt: number) =>
-        set((state) => ({
-          ...state,
-          config: { ...state.config, [docId]: { ...state.config[docId], localSyncedAt: syncedAt } },
-        })),
+        set((state) => {
+          state.config[docId] ??= {};
+          state.config[docId].localSyncedAt = syncedAt;
+        }),
 
       setDocumentRemoteSyncedAt: (docId: string, syncedAt: number) =>
-        set((state) => ({
-          ...state,
-          config: { ...state.config, [docId]: { ...state.config[docId], remoteSyncedAt: syncedAt } },
-        })),
+        set((state) => {
+          state.config[docId] ??= {};
+          state.config[docId].remoteSyncedAt = syncedAt;
+        }),
+
+      deleteDocumentData: (docId: string) =>
+        set((state) => {
+          delete state.config[docId];
+          delete state.documentStates[docId];
+        }),
 
       resetState: (docId: string) =>
-        set((state) => ({
-          ...state,
-          documentStates: {
-            ...state.documentStates,
-            [docId]: { ...state.documentStates[docId], ...defaultDocumentState },
-          },
-        })),
-    }),
+        set((state) => {
+          state.documentStates[docId] = defaultDocumentState();
+          state.config[docId] = {};
+        }),
+    })),
     {
       name: 'document-storage',
       partialize: (state) => ({
