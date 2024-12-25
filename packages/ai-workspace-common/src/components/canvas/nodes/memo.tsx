@@ -3,14 +3,14 @@ import { CanvasNode, CanvasNodeData, MemoNodeProps } from './types';
 import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useCanvasControl, useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { useTranslation } from 'react-i18next';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
-import { PiNotePencilLight } from 'react-icons/pi';
+import { IconMemo } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Input } from 'antd';
 
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
@@ -61,6 +61,8 @@ export const MemoNode = ({
     operatingNodeId: state.operatingNodeId,
   }));
 
+  const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
+
   const isOperating = operatingNodeId === id;
 
   // Check if node has any connections
@@ -72,33 +74,13 @@ export const MemoNode = ({
   // Handle node hover events
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
-    setEdges((eds) =>
-      eds.map((edge) => {
-        if (edge.source === id || edge.target === id) {
-          return {
-            ...edge,
-            style: edgeStyles.hover,
-          };
-        }
-        return edge;
-      }),
-    );
-  }, [id, setEdges, edgeStyles]);
+    onHoverStart();
+  }, [onHoverStart]);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
-    setEdges((eds) =>
-      eds.map((edge) => {
-        if (edge.source === id || edge.target === id) {
-          return {
-            ...edge,
-            style: edgeStyles.default,
-          };
-        }
-        return edge;
-      }),
-    );
-  }, [id, setEdges, edgeStyles]);
+    onHoverEnd();
+  }, [onHoverEnd]);
 
   const handleAddToContext = useAddToContext(
     {
@@ -182,6 +164,7 @@ export const MemoNode = ({
       },
     );
   }, 500);
+
   const onTitleChange = useThrottledCallback((value: string) => {
     setNodeDataByEntity(
       {
@@ -249,7 +232,7 @@ export const MemoNode = ({
                     w-6 
                     h-6 
                     rounded 
-                    bg-[#00968F]
+                    bg-[#2E90FA]
                     shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)]
                     flex 
                     items-center 
@@ -257,7 +240,7 @@ export const MemoNode = ({
                     flex-shrink-0
                   "
                 >
-                  <PiNotePencilLight className="w-4 h-4 text-white" />
+                  <IconMemo className="w-4 h-4 text-white" />
                 </div>
                 {!isPreview ? (
                   <Input
@@ -284,7 +267,7 @@ export const MemoNode = ({
                   )}
                 />
               ) : (
-                <MarkdownPreview content={data?.contentPreview ?? ''} />
+                <MarkdownPreview className="text-xs" content={data?.contentPreview ?? ''} />
               )}
             </div>
 

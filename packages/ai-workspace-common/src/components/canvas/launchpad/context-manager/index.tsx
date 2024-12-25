@@ -34,7 +34,7 @@ export const ContextManager = () => {
 
   const { nodes } = useCanvasControl();
   const selectedContextNodes = nodes.filter(
-    (node) => node.selected && (node.type === 'resource' || node.type === 'document'),
+    (node) => node.selected && ['resource', 'document', 'memo'].includes(node.type),
   );
 
   const [activeItemId, setActiveItemId] = useState(null);
