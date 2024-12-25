@@ -1,4 +1,4 @@
-import { Position, NodeProps, useReactFlow } from '@xyflow/react';
+import { Position, useReactFlow } from '@xyflow/react';
 import { CanvasNode, CanvasNodeData, MemoNodeProps } from './types';
 import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
 import { PiNotePencilLight } from 'react-icons/pi';
+import { Input } from 'antd';
 
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
@@ -156,6 +157,18 @@ export const MemoNode = ({
     );
   }, 500);
 
+  const onTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNodeDataByEntity(
+      {
+        entityId: data?.entityId,
+        type: 'memo',
+      },
+      {
+        title: e.target.value,
+      },
+    );
+  };
+
   return (
     <div className={classNames({ nowheel: isOperating })}>
       <div
@@ -226,18 +239,13 @@ export const MemoNode = ({
                 >
                   <PiNotePencilLight className="w-4 h-4 text-white" />
                 </div>
-
-                <span
-                  className="
-                    text-sm
-                    font-medium
-                    leading-normal
-                    text-[rgba(0,0,0,0.8)]
-                    truncate
-                  "
-                >
-                  {data.title}
-                </span>
+                <Input
+                  className="text-sm font-medium leading-normal border-none focus:border-none hover:bg-gray-100"
+                  placeholder="Enter The Title"
+                  value={data.title}
+                  style={{ paddingLeft: 6 }}
+                  onChange={onTitleChange}
+                />
               </div>
             </div>
 
