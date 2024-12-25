@@ -148,9 +148,7 @@ export const MemoNode = ({
     },
     editorProps: {
       attributes: {
-        class: classNames('max-w-none', 'focus:outline-none', {
-          'pointer-events-none': !isOperating,
-        }),
+        class: classNames('max-w-none', 'focus:outline-none'),
       },
     },
   });
@@ -262,14 +260,7 @@ export const MemoNode = ({
 
             <div className="relative flex-grow overflow-y-auto pr-2 -mr-2">
               {!isPreview ? (
-                <EditorContent
-                  editor={editor}
-                  className={classNames(
-                    'text-xs memo-node-editor h-full w-full',
-                    { 'pointer-events-auto': isOperating },
-                    { 'pointer-events-none': !isOperating },
-                  )}
-                />
+                <EditorContent editor={editor} className={classNames('text-xs memo-node-editor h-full w-full')} />
               ) : (
                 <MarkdownPreview className="text-xs" content={data?.contentPreview ?? ''} />
               )}
