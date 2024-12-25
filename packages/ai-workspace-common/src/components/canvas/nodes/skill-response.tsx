@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { Divider, message } from 'antd';
 import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './types';
 import { Node } from '@xyflow/react';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { CustomHandle } from './custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
 import { useEdgeStyles } from '../constants';
@@ -39,13 +39,33 @@ import { ModelProviderIcons } from '@refly-packages/ai-workspace-common/componen
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
+import { memo } from 'react';
+import { Source } from '@refly-packages/ai-workspace-common/requests/types.gen';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
 const POLLING_INTERVAL = 3000;
 const POLLING_COOLDOWN_TIME = 5000;
 
-export const SkillResponseNode = (props: SkillResponseNodeProps) => {
+// 抽离内容渲染组件
+const NodeContent = memo(
+  ({ content, sources, isOperating }: { content: string; sources: Source[]; isOperating: boolean }) => {
+    return (
+      <div className="skill-response-node-content">
+        <Markdown
+          content={String(content)}
+          sources={sources}
+          className={`text-xs ${
+            isOperating ? 'pointer-events-auto skill-response-node-content' : 'pointer-events-none'
+          }`}
+        />
+      </div>
+    );
+  },
+);
+
+// 主组件使用 memo 包裹
+export const SkillResponseNode = memo((props: SkillResponseNodeProps) => {
   const { data, selected, id, hideActions = false, isPreview = false, hideHandles = false, onNodeClick } = props;
   const [isHovered, setIsHovered] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -309,20 +329,26 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
     };
   }, [id, handleRerun, handleAddToContext, handleInsertToDoc, handleCreateDocument, handleDelete]);
 
+  // 使用 useMemo 缓存计算值
+  const nodeStyle = useMemo(
+    () => ({
+      width: `${size.width === 'auto' ? 'auto' : `${size.width}px`}`,
+      height: `${size.height === 'auto' ? 'auto' : `${size.height}px`}`,
+      userSelect: isOperating ? 'text' : 'none',
+      cursor: isOperating ? 'text' : 'grab',
+    }),
+    [size.width, size.height, isOperating],
+  );
+
   return (
     <div className={classNames({ nowheel: isOperating })}>
       <div
         ref={targetRef}
         className="relative group"
+        style={nodeStyle}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={onNodeClick}
-        style={{
-          width: `${size.width === 'auto' ? 'auto' : `${size.width}px`}`,
-          height: `${size.height === 'auto' ? 'auto' : `${size.height}px`}`,
-          userSelect: isOperating ? 'text' : 'none',
-          cursor: isOperating ? 'text' : 'grab',
-        }}
       >
         {!isPreview && !hideActions && <ActionButtons type="skillResponse" nodeId={id} />}
 
@@ -438,17 +464,7 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
                   </div>
                 )}
 
-                {content && (
-                  <div ref={contentRef} className="skill-response-node-content">
-                    <Markdown
-                      content={String(content)}
-                      sources={sources}
-                      className={`text-xs ${
-                        isOperating ? 'pointer-events-auto skill-response-node-content' : 'pointer-events-none'
-                      }`}
-                    />
-                  </div>
-                )}
+                {content && <NodeContent content={content} sources={sources} isOperating={isOperating} />}
               </div>
             </div>
 
@@ -520,4 +536,4 @@ export const SkillResponseNode = (props: SkillResponseNodeProps) => {
       )}
     </div>
   );
-};
+});

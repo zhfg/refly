@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect, useState, useRef } from 'react';
+import { useCallback, useMemo, useEffect, useState, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import { Button, Modal, Result } from 'antd';
@@ -50,7 +50,7 @@ interface ContextMenuState {
   nodeType?: 'document' | 'resource' | 'skillResponse';
 }
 
-const Flow = ({ canvasId }: { canvasId: string }) => {
+const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { t } = useTranslation();
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const { nodes, edges, mode, setSelectedNode, onNodesChange, onEdgesChange, onConnect, addNode } =
@@ -348,6 +348,10 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     [operatingNodeId, handleNodePreview, setOperatingNodeId, setSelectedNode],
   );
 
+  // 缓存节点数据
+  const memoizedNodes = useMemo(() => nodes, [nodes]);
+  const memoizedEdges = useMemo(() => edges, [edges]);
+
   return (
     <Spin
       className="w-full h-full"
@@ -383,8 +387,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             selectNodesOnDrag={!operatingNodeId && interactionMode === 'mouse'}
             selectionOnDrag={!operatingNodeId && interactionMode === 'touchpad'}
             nodeTypes={nodeTypes}
-            nodes={nodes}
-            edges={edges}
+            nodes={memoizedNodes}
+            edges={memoizedEdges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
@@ -509,7 +513,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
       </div>
     </Spin>
   );
-};
+});
+
 export const Canvas = (props: { canvasId: string }) => {
   const { canvasId } = props;
   const setCurrentCanvasId = useCanvasStoreShallow((state) => state.setCurrentCanvasId);
