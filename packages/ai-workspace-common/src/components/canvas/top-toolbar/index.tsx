@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Button,
   Divider,
@@ -30,6 +30,7 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { useDebounce } from 'use-debounce';
+import { ActionDropdown } from './action-dropdown';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -43,6 +44,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
     collapse: state.collapse,
     setCollapse: state.setCollapse,
   }));
+  const { getCanvasList } = useHandleSiderData();
   const { provider } = useCanvasContext();
   const [unsyncedChanges, setUnsyncedChanges] = useState(provider?.unsyncedChanges || 0);
   const [debouncedUnsyncedChanges] = useDebounce(unsyncedChanges, 500);
@@ -74,16 +76,21 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   };
 
   const setCanvasList = useSiderStoreShallow((state) => state.setCanvasList);
+  const canvasList = useSiderStoreShallow((state) => state.canvasList);
+
+  const updateCanvasTitle = useCallback(() => {
+    if (!canvasTitle || typeof canvasTitle !== 'string') return;
+
+    const currentCanvas = canvasList?.find((canvas) => canvas.id === canvasId);
+    if (!currentCanvas || currentCanvas.name === canvasTitle) return;
+
+    const newList = canvasList.map((canvas) => (canvas.id === canvasId ? { ...canvas, name: canvasTitle } : canvas));
+    setCanvasList(newList);
+  }, [canvasId, canvasTitle, canvasList, setCanvasList]);
 
   useEffect(() => {
-    if (canvasTitle && typeof canvasTitle === 'string') {
-      const { canvasList } = useSiderStore.getState();
-      const currentCanvas = canvasList.find((canvas) => canvas.id === canvasId);
-      if (currentCanvas && currentCanvas.name !== canvasTitle) {
-        setCanvasList(canvasList.map((canvas) => (canvas.id === canvasId ? { ...canvas, name: canvasTitle } : canvas)));
-      }
-    }
-  }, [canvasId, canvasTitle]);
+    updateCanvasTitle();
+  }, []);
 
   const handleModalOk = () => {
     if (editedTitle?.trim()) {
@@ -94,91 +101,6 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
 
   const handleModalCancel = () => {
     setIsModalOpen(false);
-  };
-
-  const ActionDropdown = () => {
-    const [popupVisible, setPopupVisible] = useState(false);
-    const [isRequest, setIsRequest] = useState(false);
-    const navigate = useNavigate();
-    const { getCanvasList, canvasList } = useHandleSiderData();
-
-    const handleDelete = async () => {
-      if (isRequest) return;
-      let success = false;
-      setIsRequest(true);
-      const { data } = await getClient().deleteCanvas({
-        body: {
-          canvasId,
-        },
-      });
-
-      setIsRequest(false);
-
-      if (data?.success) {
-        success = true;
-        message.success(t('canvas.action.deleteSuccess'));
-
-        // Check and remove canvasId from localStorage if matches
-        const { currentCanvasId, setCurrentCanvasId } = useCanvasStore.getState();
-        if (currentCanvasId === canvasId) {
-          setCurrentCanvasId(null);
-        }
-
-        await getCanvasList();
-        if (currentCanvasId === canvasId) {
-          const firstCanvas = canvasList?.find((canvas) => canvas.id !== canvasId);
-          if (firstCanvas?.id) {
-            navigate(`/canvas/${firstCanvas?.id}`, { replace: true });
-          } else {
-            navigate('/canvas/empty', { replace: true });
-          }
-        }
-      }
-    };
-
-    const items: MenuProps['items'] = [
-      {
-        label: (
-          <Popconfirm
-            title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', { canvas: canvasTitle })}
-            onConfirm={handleDelete}
-            onCancel={() => setPopupVisible(false)}
-            okText={t('common.confirm')}
-            cancelText={t('common.cancel')}
-          >
-            <div className="flex items-center text-red-600">
-              <IconDelete size={16} className="mr-2" />
-              {t('workspace.deleteDropdownMenu.delete')}
-            </div>
-          </Popconfirm>
-        ),
-        key: 'delete',
-      },
-    ];
-
-    const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
-      if (info.source === 'trigger') {
-        setPopupVisible(open);
-      }
-    };
-
-    return (
-      <Dropdown
-        trigger={['click']}
-        open={popupVisible}
-        onOpenChange={handleOpenChange}
-        destroyPopupOnHide
-        menu={{
-          items,
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
-            <Button type="text" icon={<IconMoreHorizontal />} className="w-8 h-6 flex items-center justify-center" />
-          </div>
-        </div>
-      </Dropdown>
-    );
   };
 
   return (
@@ -286,7 +208,12 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
             </Tooltip>
           </div>
 
-          <ActionDropdown />
+          <ActionDropdown
+            canvasId={canvasId}
+            canvasTitle={canvasTitle}
+            canvasList={canvasList}
+            getCanvasList={getCanvasList}
+          />
         </div>
       </div>
     </>

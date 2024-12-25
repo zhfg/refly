@@ -438,6 +438,14 @@ const translations = {
   },
   canvas: {
     emptyText: 'Double-click to ask AI, or',
+    contextMenu: {
+      enableClickPreview: 'Enable Click Preview',
+      disableClickPreview: 'Disable Click Preview',
+      hideLaunchpad: 'Hide Ask AI',
+      showLaunchpad: 'Show Ask AI',
+      hideEdges: 'Hide Edges',
+      showEdges: 'Show Edges',
+    },
     toolbar: {
       enablePointerMode: 'Enable Pointer Mode',
       disablePointerMode: 'Disable Pointer Mode',

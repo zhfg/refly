@@ -1,4 +1,4 @@
-import { Button, Badge, Divider } from 'antd';
+import { Button, Badge, Divider, Tooltip } from 'antd';
 import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { RiUploadCloud2Line } from 'react-icons/ri';
 import { useTranslation } from 'react-i18next';
@@ -15,10 +15,11 @@ import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-commo
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { IconCanvas, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/use-edge-visible';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -61,10 +62,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     setShowEdges: state.setShowEdges,
   }));
 
-  const handleEdgesVisibilityChange = useCallback(() => {
-    setShowEdges(!showEdges);
-    updateAllEdgesStyle(!showEdges);
-  }, [showEdges, setShowEdges, updateAllEdgesStyle]);
+  const { toggleEdgeVisible } = useEdgeVisible();
 
   const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
 
@@ -165,7 +163,7 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
         setShowLaunchpad(!showLaunchpad);
         break;
       case 'showEdges':
-        handleEdgesVisibilityChange();
+        toggleEdgeVisible();
         break;
     }
     onToolSelect?.(tool);
@@ -187,11 +185,10 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
 
   const ToolButton = ({ tool }: { tool: ToolbarItem }) => {
     return (
-      <TooltipWrapper tooltip={tool.tooltip}>
-        <Button
-          type="text"
-          onClick={(event) => handleToolSelect(event, tool.value)}
-          className={`
+      <Button
+        type="text"
+        onClick={(event) => handleToolSelect(event, tool.value)}
+        className={`
                   h-[32px] w-[32px] 
                   flex items-center justify-center 
                   hover:bg-gray-100 rounded-lg 
@@ -199,15 +196,14 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
                   group
                   ${tool.active ? 'bg-gray-100' : ''}
                 `}
-          icon={
-            <tool.icon
-              className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900"
-              style={{ color: getIconColor(tool.value) }}
-            />
-          }
-          loading={getIsLoading(tool.value)}
-        />
-      </TooltipWrapper>
+        icon={
+          <tool.icon
+            className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900"
+            style={{ color: getIconColor(tool.value) }}
+          />
+        }
+        loading={getIsLoading(tool.value)}
+      />
     );
   };
 

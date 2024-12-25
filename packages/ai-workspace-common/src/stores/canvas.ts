@@ -26,6 +26,7 @@ export interface CanvasState {
   interactionMode: 'mouse' | 'touchpad';
   operatingNodeId: string | null;
   showEdges: boolean;
+  clickToPreview: boolean;
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -41,6 +42,7 @@ export interface CanvasState {
   setInteractionMode: (mode: 'mouse' | 'touchpad') => void;
   setOperatingNodeId: (nodeId: string | null) => void;
   setShowEdges: (show: boolean) => void;
+  setClickToPreview: (enabled: boolean) => void;
 }
 
 const defaultCanvasState: () => CanvasData = () => ({
@@ -66,6 +68,7 @@ export const useCanvasStore = create<CanvasState>()(
       interactionMode: 'touchpad',
       operatingNodeId: null,
       showEdges: false,
+      clickToPreview: true,
 
       deleteCanvasData: (canvasId) =>
         set((state) => {
@@ -129,6 +132,10 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.showEdges = show;
         }),
+      setClickToPreview: (enabled) =>
+        set((state) => {
+          state.clickToPreview = enabled;
+        }),
     })),
     {
       name: 'canvas-storage',
@@ -138,6 +145,7 @@ export const useCanvasStore = create<CanvasState>()(
         interactionMode: state.interactionMode,
         showEdges: state.showEdges,
         showLaunchpad: state.showLaunchpad,
+        clickToPreview: state.clickToPreview,
       }),
     },
   ),

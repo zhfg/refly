@@ -26,6 +26,7 @@ import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin
 import { LayoutControl } from './layout-control';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 import { MenuPopper } from './menu-popper';
+import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/use-node-preview-control';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -56,15 +57,25 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     useCanvasControl(canvasId);
   const edgeStyles = useEdgeStyles();
 
-  const { pinnedNodes, showPreview, showLaunchpad, showMaxRatio, interactionMode, setInteractionMode } =
-    useCanvasStoreShallow((state) => ({
-      pinnedNodes: state.config[canvasId]?.pinnedNodes,
-      showPreview: state.showPreview,
-      showLaunchpad: state.showLaunchpad,
-      showMaxRatio: state.showMaxRatio,
-      interactionMode: state.interactionMode,
-      setInteractionMode: state.setInteractionMode,
-    }));
+  const {
+    pinnedNodes,
+    showPreview,
+    showLaunchpad,
+    showMaxRatio,
+    interactionMode,
+    setInteractionMode,
+    clickToPreview,
+    showEdges,
+  } = useCanvasStoreShallow((state) => ({
+    pinnedNodes: state.config[canvasId]?.pinnedNodes,
+    showPreview: state.showPreview,
+    showLaunchpad: state.showLaunchpad,
+    showMaxRatio: state.showMaxRatio,
+    interactionMode: state.interactionMode,
+    setInteractionMode: state.setInteractionMode,
+    clickToPreview: state.clickToPreview,
+    showEdges: state.showEdges,
+  }));
 
   const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } = useSiderStoreShallow(
     (state) => ({
@@ -87,6 +98,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   }));
 
   const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } = useCreateDocument();
+
+  const { handleNodePreview } = useNodePreviewControl({ canvasId });
 
   const toggleInteractionMode = (mode: 'mouse' | 'touchpad') => {
     setInteractionMode(mode);
@@ -170,17 +183,38 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const [showLeftIndicator, setShowLeftIndicator] = useState(false);
   const [showRightIndicator, setShowRightIndicator] = useState(false);
 
-  const updateIndicators = useCallback((container: HTMLDivElement) => {
-    setShowLeftIndicator(container.scrollLeft > 0);
-    setShowRightIndicator(container.scrollLeft < container.scrollWidth - container.clientWidth - 1);
-  }, []);
+  const updateIndicators = useCallback(
+    (container: HTMLDivElement | null) => {
+      if (!container) return;
+
+      const shouldShowLeft = container.scrollLeft > 0;
+      const shouldShowRight = container.scrollLeft < container.scrollWidth - container.clientWidth - 1;
+
+      if (shouldShowLeft !== showLeftIndicator) {
+        setShowLeftIndicator(shouldShowLeft);
+      }
+      if (shouldShowRight !== showRightIndicator) {
+        setShowRightIndicator(shouldShowRight);
+      }
+    },
+    [showLeftIndicator, showRightIndicator],
+  );
 
   useEffect(() => {
-    const container = document.querySelector('.preview-container');
+    const container = document.querySelector('.preview-container') as HTMLDivElement;
     if (container) {
-      updateIndicators(container as HTMLDivElement);
+      const observer = new ResizeObserver(() => {
+        updateIndicators(container);
+      });
+
+      observer.observe(container);
+      updateIndicators(container);
+
+      return () => {
+        observer.disconnect();
+      };
     }
-  }, [selectedNodes, pinnedNodes, updateIndicators]);
+  }, [updateIndicators]);
 
   // Handle pending node
   useEffect(() => {
@@ -193,19 +227,20 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   const [connectionTimeout, setConnectionTimeout] = useState(false);
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (provider?.status !== 'connected') {
-        setConnectionTimeout(true);
-      }
-    }, 10000); // 10 seconds timeout
+    let timeoutId: NodeJS.Timeout;
 
-    // Clear timeout if provider becomes connected
-    if (provider?.status === 'connected') {
-      clearTimeout(timeoutId);
+    if (provider?.status !== 'connected') {
+      timeoutId = setTimeout(() => {
+        setConnectionTimeout(true);
+      }, 10000);
     }
 
-    return () => clearTimeout(timeoutId);
-  }, [provider?.status]); // Update dependency to specifically watch status
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [provider?.status]);
 
   useEffect(() => {
     const unsubscribe = addPinnedNodeEmitter.on('addPinnedNode', ({ canvasId: emittedCanvasId }) => {
@@ -278,7 +313,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     [reactFlowInstance],
   );
 
-  const onNodeClick = useCallback(
+  const handleNodeClick = useCallback(
     (event: React.MouseEvent, node: CanvasNode<any>) => {
       setContextMenu((prev) => ({ ...prev, open: false }));
 
@@ -287,21 +322,30 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         return;
       }
 
-      // If clicking the currently selected node, toggle operating mode
-      if (node.selected && node.id === operatingNodeId) {
-        // Already in operating mode, do nothing
-        return;
-      } else if (node.selected && !operatingNodeId) {
-        // Enter operating mode
-        setOperatingNodeId(node.id);
-        event.stopPropagation();
-      } else {
-        // Just select the node
+      // If in operating mode, handle operation mode logic
+      if (operatingNodeId) {
+        if (node.selected && node.id === operatingNodeId) {
+          return;
+        }
         setOperatingNodeId(null);
         setSelectedNode(node);
+        return;
+      }
+
+      // Handle preview if enabled
+      const previewHandled = handleNodePreview(node);
+
+      // If preview wasn't handled (disabled), handle selection
+      if (!previewHandled) {
+        if (node.selected) {
+          setOperatingNodeId(node.id);
+          event.stopPropagation();
+        } else {
+          setSelectedNode(node);
+        }
       }
     },
-    [setSelectedNode, operatingNodeId, setOperatingNodeId],
+    [operatingNodeId, handleNodePreview, setOperatingNodeId, setSelectedNode],
   );
 
   return (
@@ -344,7 +388,7 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
-            onNodeClick={onNodeClick}
+            onNodeClick={handleNodeClick}
             onPaneClick={onPaneClick}
             onPaneContextMenu={onPaneContextMenu}
             onNodeContextMenu={onNodeContextMenu}
