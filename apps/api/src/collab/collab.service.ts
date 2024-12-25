@@ -138,9 +138,11 @@ export class CollabService {
 
   private async storeDocumentEntity({
     state,
+    document,
     context,
   }: {
     state: Buffer;
+    document: Y.Doc;
     context: Extract<CollabContext, { entityType: 'document' }>;
   }) {
     const { user, entity: doc } = context;
@@ -149,6 +151,8 @@ export class CollabService {
       this.logger.warn(`document is empty for context: ${JSON.stringify(context)}`);
       return;
     }
+
+    const title = document.getText('title').toJSON();
 
     const content = state2Markdown(state);
     const storageKey = doc.storageKey || `doc/${doc.docId}.txt`;
@@ -160,7 +164,7 @@ export class CollabService {
       this.minio.client.putObject(stateStorageKey, state),
     ]);
 
-    // Prepare canvas updates
+    // Prepare document updates
     const docUpdates: Prisma.DocumentUpdateInput = {};
     if (!doc.storageKey) {
       docUpdates.storageKey = storageKey;
@@ -170,6 +174,9 @@ export class CollabService {
     }
     if (doc.contentPreview !== content.slice(0, 500)) {
       docUpdates.contentPreview = content.slice(0, 500);
+    }
+    if (doc.title !== title) {
+      docUpdates.title = title;
     }
 
     // Re-calculate storage size
@@ -270,7 +277,7 @@ export class CollabService {
     const state = Buffer.from(Y.encodeStateAsUpdate(document));
 
     if (isDocumentContext(context)) {
-      return this.storeDocumentEntity({ state, context });
+      return this.storeDocumentEntity({ state, document, context });
     } else if (isCanvasContext(context)) {
       return this.storeCanvasEntity({ state, document, context });
     } else {
