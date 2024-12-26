@@ -155,6 +155,16 @@ export const MemoNode = ({
       attributes: {
         class: classNames('max-w-none', 'focus:outline-none'),
       },
+      handleDOMEvents: {
+        mousedown: (view, event) => {
+          event.stopPropagation();
+          return false;
+        },
+        click: (view, event) => {
+          event.stopPropagation();
+          return false;
+        },
+      },
     },
   });
 
@@ -199,8 +209,8 @@ export const MemoNode = ({
         style={{
           width: `${size.width}px`,
           height: `${size.height}px`,
-          userSelect: isOperating ? 'text' : 'none',
-          cursor: isOperating ? 'text' : 'grab',
+          userSelect: 'none',
+          cursor: isOperating ? 'default' : 'grab',
         }}
       >
         {!isPreview && !hideActions && <ActionButtons type="memo" nodeId={id} />}
@@ -265,7 +275,14 @@ export const MemoNode = ({
 
             <div className="relative flex-grow overflow-y-auto pr-2 -mr-2">
               {!isPreview ? (
-                <EditorContent editor={editor} className={classNames('text-xs memo-node-editor h-full w-full')} />
+                <div
+                  className="editor-wrapper"
+                  style={{ userSelect: 'text', cursor: 'text' }}
+                  onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <EditorContent editor={editor} className={classNames('text-xs memo-node-editor h-full w-full')} />
+                </div>
               ) : (
                 <MarkdownPreview className="text-xs" content={data?.contentPreview ?? ''} />
               )}
