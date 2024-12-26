@@ -27,6 +27,10 @@ import { LayoutControl } from './layout-control';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 import { MenuPopper } from './menu-popper';
 import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/use-node-preview-control';
+import {
+  EditorPerformanceProvider,
+  useEditorPerformance,
+} from '@refly-packages/ai-workspace-common/context/editor-performance';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -411,6 +415,17 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   // Memoize the node types configuration
   const memoizedNodeTypes = useMemo(() => nodeTypes, []);
 
+  // Optimize node dragging performance
+  const { setIsNodeDragging } = useEditorPerformance();
+
+  const onNodeDragStart = useCallback(() => {
+    setIsNodeDragging(true);
+  }, [setIsNodeDragging]);
+
+  const onNodeDragStop = useCallback(() => {
+    setIsNodeDragging(false);
+  }, [setIsNodeDragging]);
+
   return (
     <Spin
       className="w-full h-full"
@@ -456,6 +471,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onPaneClick={onPaneClick}
             onPaneContextMenu={onPaneContextMenu}
             onNodeContextMenu={onNodeContextMenu}
+            onNodeDragStart={onNodeDragStart}
+            onNodeDragStop={onNodeDragStop}
             nodeDragThreshold={10}
             nodesDraggable={!operatingNodeId}
             onlyRenderVisibleElements={true}
@@ -581,10 +598,12 @@ export const Canvas = (props: { canvasId: string }) => {
   }, [canvasId]);
 
   return (
-    <CanvasProvider canvasId={canvasId}>
-      <ReactFlowProvider>
-        <Flow canvasId={canvasId} />
-      </ReactFlowProvider>
-    </CanvasProvider>
+    <EditorPerformanceProvider>
+      <CanvasProvider canvasId={canvasId}>
+        <ReactFlowProvider>
+          <Flow canvasId={canvasId} />
+        </ReactFlowProvider>
+      </CanvasProvider>
+    </EditorPerformanceProvider>
   );
 };

@@ -4,7 +4,11 @@ import { CanvasNodeData, ResourceNodeMeta, CanvasNode, ResourceNodeProps } from 
 import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { useCanvasControl, useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import {
+  useCanvasControl,
+  useNodeHoverEffect,
+  useSetNodeDataByEntity,
+} from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
@@ -41,7 +45,8 @@ const NodeHeader = memo(({ title, ResourceIcon }: { title: string; ResourceIcon:
 export const ResourceNode = memo(
   (props: ResourceNodeProps) => {
     const [isHovered, setIsHovered] = useState(false);
-    const { edges, setNodeDataByEntity } = useCanvasControl();
+    const { edges } = useCanvasControl();
+    const setNodeDataByEntity = useSetNodeDataByEntity();
     const { setEdges, getNode } = useReactFlow();
     const ResourceIcon =
       props.data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;

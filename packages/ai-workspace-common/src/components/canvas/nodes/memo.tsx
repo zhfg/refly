@@ -3,7 +3,11 @@ import { CanvasNode, CanvasNodeData, MemoNodeProps } from './types';
 import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useCanvasControl, useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import {
+  useCanvasControl,
+  useNodeHoverEffect,
+  useSetNodeDataByEntity,
+} from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
@@ -45,7 +49,8 @@ export const MemoNode = ({
   onNodeClick,
 }: MemoNodeProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const { edges, setNodeDataByEntity } = useCanvasControl();
+  const { edges } = useCanvasControl();
+  const setNodeDataByEntity = useSetNodeDataByEntity();
   const { setEdges } = useReactFlow();
   const { i18n, t } = useTranslation();
   const language = i18n.languages?.[0];
@@ -105,7 +110,7 @@ export const MemoNode = ({
 
   const insertToDoc = useInsertToDocument(data.entityId);
   const handleInsertToDoc = useCallback(async () => {
-    await insertToDoc('insertBlow', data?.contentPreview);
+    await insertToDoc('insertBelow', data?.contentPreview);
   }, [insertToDoc, data.entityId, data]);
 
   // Add event handling

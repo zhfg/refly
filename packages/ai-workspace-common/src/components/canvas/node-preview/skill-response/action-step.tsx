@@ -7,7 +7,6 @@ import { IconCheckCircle } from '@arco-design/web-react/icon';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@refly-packages/utils/cn';
 import { IconCheck, IconLoading } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { SelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/selection-context';
@@ -207,6 +206,8 @@ export const ActionStepCard = memo(
     const { canvasId } = useCanvasContext();
     const { setSelectedNodeByEntity } = useNodeSelection(canvasId);
     const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
+
+    console.log('ActionStepCard', result);
 
     useEffect(() => {
       if (result?.status === 'finish') {

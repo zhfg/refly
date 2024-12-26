@@ -1,12 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-
 import { PreviewContextManager } from './preview-context-manager';
-import { useEffect, useState } from 'react';
+import { useMemo, memo } from 'react';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { ChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-history';
 import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 
 interface PreviewChatInputProps {
   contextItems: NodeItem[];
@@ -21,16 +19,14 @@ interface PreviewChatInputProps {
   readonly?: boolean;
 }
 
-export const PreviewChatInput = (props: PreviewChatInputProps) => {
+const PreviewChatInputComponent = (props: PreviewChatInputProps) => {
   const { contextItems, historyItems, chatHistoryOpen, setChatHistoryOpen, query, actionMeta, readonly } = props;
   const { t } = useTranslation();
-  const [userQuery, setUserQuery] = useState(query);
 
-  useEffect(() => {
-    setUserQuery(query);
-  }, [query]);
-
-  const hideSelectedSkillHeader = !actionMeta || actionMeta?.name === 'commonQnA' || !actionMeta?.name;
+  const hideSelectedSkillHeader = useMemo(
+    () => !actionMeta || actionMeta?.name === 'commonQnA' || !actionMeta?.name,
+    [actionMeta?.name],
+  );
 
   return (
     <div className="ai-copilot-chat-container">
@@ -54,7 +50,7 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
           />
         )}
         <ChatHistory readonly items={historyItems} />
-        <div className="text-base mx-4 my-2">{userQuery}</div>
+        <div className="text-base mx-4 my-2">{query}</div>
 
         {/* {skillStore.selectedSkill?.configSchema?.items?.length > 0 && (
       <ConfigManager
@@ -74,3 +70,16 @@ export const PreviewChatInput = (props: PreviewChatInputProps) => {
     </div>
   );
 };
+
+const arePropsEqual = (prevProps: PreviewChatInputProps, nextProps: PreviewChatInputProps) => {
+  return (
+    prevProps.query === nextProps.query &&
+    prevProps.readonly === nextProps.readonly &&
+    prevProps.chatHistoryOpen === nextProps.chatHistoryOpen &&
+    prevProps.contextItems === nextProps.contextItems &&
+    prevProps.historyItems === nextProps.historyItems &&
+    prevProps.actionMeta?.name === nextProps.actionMeta?.name
+  );
+};
+
+export const PreviewChatInput = memo(PreviewChatInputComponent, arePropsEqual);
