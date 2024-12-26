@@ -3,7 +3,7 @@ import { NodeActionMenu } from '../node-action-menu';
 
 type ActionButtonsProps = {
   nodeId: string;
-  type: 'document' | 'resource' | 'skillResponse';
+  type: 'document' | 'resource' | 'skillResponse' | 'memo';
 };
 
 export const ActionButtons: FC<ActionButtonsProps> = ({ nodeId, type }) => {

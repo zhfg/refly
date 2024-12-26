@@ -345,6 +345,11 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
         return;
       }
 
+      // Memo nodes are not previewable
+      if (node.type === 'memo') {
+        return;
+      }
+
       // Handle preview if enabled
       const previewHandled = handleNodePreview(node);
 

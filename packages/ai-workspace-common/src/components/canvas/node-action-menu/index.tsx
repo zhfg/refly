@@ -30,7 +30,7 @@ interface MenuItem {
 
 interface NodeActionMenuProps {
   nodeId: string;
-  nodeType: 'document' | 'resource' | 'skillResponse';
+  nodeType: 'document' | 'resource' | 'skillResponse' | 'memo';
   onClose?: () => void;
   isProcessing?: boolean;
   isCompleted?: boolean;
@@ -115,6 +115,22 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
           type: 'button' as const,
         },
       ],
+      memo: [
+        {
+          key: 'addToContext',
+          icon: MessageSquareDiff,
+          label: t('canvas.nodeActions.addToContext'),
+          onClick: handleAddToContext,
+          type: 'button' as const,
+        },
+        {
+          key: 'insertToDoc',
+          icon: FileInput,
+          label: t('canvas.nodeActions.insertToDoc'),
+          onClick: handleInsertToDoc,
+          type: 'button' as const,
+        },
+      ],
       skillResponse: [
         {
           key: 'rerun',
@@ -160,7 +176,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     };
 
     return [
-      ...baseItems,
+      ...(nodeType !== 'memo' ? baseItems : []),
       ...(nodeTypeItems[nodeType] || []),
       { key: 'divider-2', type: 'divider' } as MenuItem,
       deleteItem,

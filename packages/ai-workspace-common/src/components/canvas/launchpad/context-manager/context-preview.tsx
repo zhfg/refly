@@ -5,11 +5,12 @@ import { useMatch, useSearchParams, useParams } from '@refly-packages/ai-workspa
 import {
   CanvasNode,
   DocumentNodeProps,
+  MemoNodeProps,
   ResourceNodeProps,
   SkillResponseNode,
   SkillResponseNodeProps,
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { DocumentNode, ResourceNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { DocumentNode, ResourceNode, MemoNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 export const ContextPreview = ({ item }: { item: CanvasNode }) => {
   const { t } = useTranslation();
@@ -88,6 +89,8 @@ export const ContextPreview = ({ item }: { item: CanvasNode }) => {
         }
       } else if (item.type === 'resource') {
         await getResourceDetail(item.data.entityId);
+      } else if (item.type === 'memo') {
+        setContent(item.data.contentPreview);
       }
     } catch (error) {
       console.error('Failed to fetch content:', error);
@@ -115,6 +118,8 @@ export const ContextPreview = ({ item }: { item: CanvasNode }) => {
         return <ResourceNode {...(commonProps as ResourceNodeProps)} />;
       case 'skillResponse':
         return <SkillResponseNode {...(commonProps as SkillResponseNodeProps)} />;
+      case 'memo':
+        return <MemoNode {...(commonProps as MemoNodeProps)} />;
       default:
         return null;
     }

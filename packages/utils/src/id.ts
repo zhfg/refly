@@ -18,6 +18,7 @@ export enum IDPrefix {
   SKILL_TRIGGER = 'tr-',
   SKILL_JOB = 'sj-',
   CONTENT_SELECTOR = 'cs-',
+  MEMO = 'm-',
 }
 
 export function genUID(): string {
@@ -50,6 +51,10 @@ export function genResourceID(): string {
 
 export function genCanvasID(): string {
   return IDPrefix.CANVAS + createId();
+}
+
+export function genMemoID(): string {
+  return IDPrefix.MEMO + createId();
 }
 
 export function genReferenceID(): string {
