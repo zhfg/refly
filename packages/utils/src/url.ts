@@ -6,11 +6,11 @@ export let SENTRY_DSN =
   'https://3a105c6104e4c4de3ead00dc11f16623@o4507205453414400.ingest.us.sentry.io/4507209639133184';
 
 export const SERVER_PROD_DOMAIN = 'https://api.refly.ai';
-export const SERVER_STAGING_DOMAIN = 'https://staging.api.refly.ai';
+export const SERVER_STAGING_DOMAIN = 'https://staging-api.refly.ai';
 export const SERVER_DEV_DOMAIN = 'http://localhost:3000';
 
 export const WS_SERVER_PROD_DOMAIN = 'wss://collab.refly.ai';
-export const WS_SERVER_STAGING_DOMAIN = 'wss://staging.collab.refly.ai';
+export const WS_SERVER_STAGING_DOMAIN = 'wss://staging-collab.refly.ai';
 export const WS_SERVER_DEV_DOMAIN = 'ws://localhost:1234';
 
 export const CLIENT_PROD_APP_DOMAIN = 'https://refly.ai';
