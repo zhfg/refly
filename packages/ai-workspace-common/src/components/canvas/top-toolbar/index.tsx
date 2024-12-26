@@ -1,4 +1,4 @@
-import { useEffect, useRef, FC, useState, useCallback } from 'react';
+import { useEffect, useRef, FC, useState, useCallback, memo } from 'react';
 import { Button, Divider, Tooltip, Input, Modal, Skeleton } from 'antd';
 import { useSiderStore, useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useTranslation } from 'react-i18next';
@@ -20,8 +20,146 @@ interface TopToolbarProps {
   canvasId: string;
 }
 
-export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
-  const { t, i18n } = useTranslation();
+const CanvasTitle = memo(
+  ({
+    canvasId,
+    canvasTitle,
+    hasCanvasSynced,
+    debouncedUnsyncedChanges,
+    language,
+  }: {
+    canvasId: string;
+    canvasTitle?: string;
+    hasCanvasSynced: boolean;
+    debouncedUnsyncedChanges: number;
+    language: LOCALE;
+  }) => {
+    const { t } = useTranslation();
+    const [editedTitle, setEditedTitle] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const inputRef = useRef(null);
+    const { setCanvasTitle } = useCanvasControl(canvasId);
+
+    const handleEditClick = () => {
+      setEditedTitle(canvasTitle ?? '');
+      setIsModalOpen(true);
+    };
+
+    const handleModalOk = () => {
+      if (editedTitle?.trim()) {
+        setCanvasTitle(editedTitle);
+        setIsModalOpen(false);
+      }
+    };
+
+    const handleModalCancel = () => {
+      setIsModalOpen(false);
+    };
+
+    return (
+      <>
+        <div
+          className="ml-1 group flex items-center gap-2 text-sm font-bold text-gray-500 cursor-pointer hover:text-gray-700"
+          onClick={handleEditClick}
+        >
+          <Tooltip
+            title={
+              debouncedUnsyncedChanges > 0
+                ? t('canvas.toolbar.syncingChanges')
+                : t('canvas.toolbar.synced', { time: time(new Date(), language)?.utc()?.fromNow() })
+            }
+          >
+            <div
+              className={`
+              relative w-2.5 h-2.5 rounded-full
+              transition-colors duration-700 ease-in-out
+              ${debouncedUnsyncedChanges > 0 ? 'bg-yellow-500 animate-pulse' : 'bg-green-400'}
+            `}
+            />
+          </Tooltip>
+          {!hasCanvasSynced ? (
+            <Skeleton className="w-28" active paragraph={false} />
+          ) : (
+            canvasTitle || t('common.untitled')
+          )}
+          <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+
+        <Modal
+          centered
+          title={t('canvas.toolbar.editTitle')}
+          open={isModalOpen}
+          okText={t('common.confirm')}
+          cancelText={t('common.cancel')}
+          onOk={handleModalOk}
+          onCancel={handleModalCancel}
+          okButtonProps={{ disabled: !editedTitle?.trim() }}
+          afterOpenChange={(open) => {
+            if (open) {
+              inputRef.current?.focus();
+            }
+          }}
+        >
+          <Input
+            autoFocus
+            ref={inputRef}
+            value={editedTitle}
+            onChange={(e) => setEditedTitle(e.target.value)}
+            placeholder={t('canvas.toolbar.editTitlePlaceholder')}
+            onKeyDown={(e) => {
+              if (e.keyCode === 13 && !e.nativeEvent.isComposing) {
+                e.preventDefault();
+                if (editedTitle?.trim()) {
+                  handleModalOk();
+                }
+              }
+            }}
+          />
+        </Modal>
+      </>
+    );
+  },
+);
+
+const ToolbarButtons = memo(
+  ({
+    showPreview,
+    showMaxRatio,
+    setShowPreview,
+    setShowMaxRatio,
+  }: {
+    showPreview: boolean;
+    showMaxRatio: boolean;
+    setShowPreview: (show: boolean) => void;
+    setShowMaxRatio: (show: boolean) => void;
+  }) => {
+    const { t } = useTranslation();
+
+    return (
+      <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
+        <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)} destroyTooltipOnHide>
+          <Button
+            type="text"
+            icon={<MdOutlineImage style={{ color: showPreview ? '#000' : '#9CA3AF' }} />}
+            onClick={() => setShowPreview(!showPreview)}
+            className="w-8 h-6 flex items-center justify-center mr-1"
+          />
+        </Tooltip>
+        <Tooltip title={t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`)} destroyTooltipOnHide>
+          <Button
+            type="text"
+            icon={<MdOutlineAspectRatio style={{ color: showMaxRatio ? '#000' : '#9CA3AF' }} />}
+            onClick={() => setShowMaxRatio(!showMaxRatio)}
+            className="w-8 h-6 flex items-center justify-center"
+          />
+        </Tooltip>
+      </div>
+    );
+  },
+);
+
+export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
+  const { i18n, t } = useTranslation();
   const language = i18n.language as LOCALE;
 
   const { collapse, setCollapse } = useSiderStoreShallow((state) => ({
@@ -33,11 +171,16 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   const [unsyncedChanges, setUnsyncedChanges] = useState(provider?.unsyncedChanges || 0);
   const [debouncedUnsyncedChanges] = useDebounce(unsyncedChanges, 500);
 
+  const handleUnsyncedChanges = useCallback((data: number) => {
+    setUnsyncedChanges(data);
+  }, []);
+
   useEffect(() => {
-    provider.on('unsyncedChanges', (data) => {
-      setUnsyncedChanges(data);
-    });
-  }, [provider]);
+    provider.on('unsyncedChanges', handleUnsyncedChanges);
+    return () => {
+      provider.off('unsyncedChanges', handleUnsyncedChanges);
+    };
+  }, [provider, handleUnsyncedChanges]);
 
   const { data, config, showPreview, setShowPreview, showMaxRatio, setShowMaxRatio } = useCanvasStoreShallow(
     (state) => ({
@@ -49,47 +192,9 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
       setShowMaxRatio: state.setShowMaxRatio,
     }),
   );
+
   const canvasTitle = data?.title;
   const hasCanvasSynced = config?.localSyncedAt > 0 && config?.remoteSyncedAt > 0;
-  const { setCanvasTitle } = useCanvasControl(canvasId);
-
-  const [editedTitle, setEditedTitle] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const inputRef = useRef(null);
-
-  const handleEditClick = () => {
-    setEditedTitle(data?.title ?? '');
-    setIsModalOpen(true);
-  };
-
-  const setCanvasList = useSiderStoreShallow((state) => state.setCanvasList);
-  const canvasList = useSiderStoreShallow((state) => state.canvasList);
-
-  const updateCanvasTitle = useCallback(() => {
-    if (!canvasTitle || typeof canvasTitle !== 'string') return;
-
-    const currentCanvas = canvasList?.find((canvas) => canvas.id === canvasId);
-    if (!currentCanvas || currentCanvas.name === canvasTitle) return;
-
-    const newList = canvasList.map((canvas) => (canvas.id === canvasId ? { ...canvas, name: canvasTitle } : canvas));
-    setCanvasList(newList);
-  }, [canvasId, canvasTitle, canvasList, setCanvasList]);
-
-  useEffect(() => {
-    updateCanvasTitle();
-  }, []);
-
-  const handleModalOk = () => {
-    if (editedTitle?.trim()) {
-      setCanvasTitle(editedTitle);
-      setIsModalOpen(false);
-    }
-  };
-
-  const handleModalCancel = () => {
-    setIsModalOpen(false);
-  };
 
   return (
     <>
@@ -116,89 +221,26 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
               <Divider type="vertical" className="pr-[4px] h-4" />
             </>
           )}
-          <div
-            className="ml-1 group flex items-center gap-2 text-sm font-bold text-gray-500 cursor-pointer hover:text-gray-700"
-            onClick={handleEditClick}
-          >
-            <Tooltip
-              title={
-                debouncedUnsyncedChanges > 0
-                  ? t('canvas.toolbar.syncingChanges')
-                  : t('canvas.toolbar.synced', { time: time(new Date(), language)?.utc()?.fromNow() })
-              }
-            >
-              <div
-                className={`
-                  relative w-2.5 h-2.5 rounded-full
-                  transition-colors duration-700 ease-in-out
-                  ${debouncedUnsyncedChanges > 0 ? 'bg-yellow-500 animate-pulse' : 'bg-green-400'}
-                `}
-              />
-            </Tooltip>
-            {!hasCanvasSynced ? (
-              <Skeleton className="w-28" active paragraph={false} />
-            ) : (
-              canvasTitle || t('common.untitled')
-            )}
-            <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-
-          <Modal
-            centered
-            title={t('canvas.toolbar.editTitle')}
-            open={isModalOpen}
-            okText={t('common.confirm')}
-            cancelText={t('common.cancel')}
-            onOk={handleModalOk}
-            onCancel={handleModalCancel}
-            okButtonProps={{ disabled: !editedTitle?.trim() }}
-            afterOpenChange={(open) => {
-              if (open) {
-                inputRef.current?.focus();
-              }
-            }}
-          >
-            <Input
-              autoFocus
-              ref={inputRef}
-              value={editedTitle}
-              onChange={(e) => setEditedTitle(e.target.value)}
-              placeholder={t('canvas.toolbar.editTitlePlaceholder')}
-              onKeyDown={(e) => {
-                if (e.keyCode === 13 && !e.nativeEvent.isComposing) {
-                  e.preventDefault();
-                  if (editedTitle?.trim()) {
-                    handleModalOk();
-                  }
-                }
-              }}
-            />
-          </Modal>
+          <CanvasTitle
+            canvasId={canvasId}
+            canvasTitle={canvasTitle}
+            hasCanvasSynced={hasCanvasSynced}
+            debouncedUnsyncedChanges={debouncedUnsyncedChanges}
+            language={language}
+          />
         </div>
 
         <div className="flex items-center gap-2 relative z-10">
-          <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
-            <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)} destroyTooltipOnHide>
-              <Button
-                type="text"
-                icon={<MdOutlineImage style={{ color: showPreview ? '#000' : '#9CA3AF' }} />}
-                onClick={() => setShowPreview(!showPreview)}
-                className="w-8 h-6 flex items-center justify-center mr-1"
-              />
-            </Tooltip>
-            <Tooltip title={t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`)} destroyTooltipOnHide>
-              <Button
-                type="text"
-                icon={<MdOutlineAspectRatio style={{ color: showMaxRatio ? '#000' : '#9CA3AF' }} />}
-                onClick={() => setShowMaxRatio(!showMaxRatio)}
-                className="w-8 h-6 flex items-center justify-center"
-              />
-            </Tooltip>
-          </div>
+          <ToolbarButtons
+            showPreview={showPreview}
+            showMaxRatio={showMaxRatio}
+            setShowPreview={setShowPreview}
+            setShowMaxRatio={setShowMaxRatio}
+          />
 
           <ActionDropdown canvasId={canvasId} canvasTitle={canvasTitle} />
         </div>
       </div>
     </>
   );
-};
+});

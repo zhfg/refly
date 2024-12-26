@@ -2,7 +2,7 @@ import { Button, Badge, Divider, Tooltip } from 'antd';
 import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { RiUploadCloud2Line } from 'react-icons/ri';
 import { useTranslation } from 'react-i18next';
-import { FC, useCallback } from 'react';
+import { FC, memo, useCallback, useMemo } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
@@ -36,153 +36,191 @@ interface ToolbarProps {
   onToolSelect?: (tool: string) => void;
 }
 
-export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
+// 1. 将工具栏配置抽离为独立的组件
+const useToolbarConfig = () => {
   const { t } = useTranslation();
-  const { addNode, mode, setMode, updateAllEdgesStyle } = useCanvasControl();
+  const { showLaunchpad, showEdges } = useCanvasStoreShallow((state) => ({
+    showLaunchpad: state.showLaunchpad,
+    showEdges: state.showEdges,
+  }));
+
+  // 不在 useMemo 中调用 hook
+  const sourceListDrawerVisible = useKnowledgeBaseStoreShallow((state) => state.sourceListDrawer.visible);
+  const runtime = getRuntime();
+  const isWeb = runtime === 'web';
+
+  return useMemo(
+    () => ({
+      tools: [
+        {
+          icon: RiUploadCloud2Line,
+          value: 'importResource',
+          type: 'button',
+          domain: 'resource',
+          tooltip: t('canvas.toolbar.importResource'),
+        },
+        {
+          icon: IconResource,
+          value: 'addResource',
+          type: 'popover',
+          domain: 'resource',
+          tooltip: t('canvas.toolbar.addResource'),
+        },
+        // {
+        //   icon: Sparkles,
+        //   value: 'addSkill',
+        //   type: 'popover',
+        //   domain: 'skill',
+        //   tooltip: t('canvas.toolbar.addSkill'),
+        // },
+        {
+          icon: HiOutlineDocumentAdd,
+          value: 'createDocument',
+          type: 'button',
+          domain: 'document',
+          tooltip: t('canvas.toolbar.createDocument'),
+        },
+        {
+          icon: IconDocument,
+          value: 'addDocument',
+          type: 'popover',
+          domain: 'document',
+          tooltip: t('canvas.toolbar.addDocument'),
+        },
+        {
+          type: 'divider',
+        },
+        {
+          icon: IconCanvas,
+          value: 'handleLaunchpad',
+          type: 'button',
+          domain: 'launchpad',
+          tooltip: t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`),
+        },
+        {
+          icon: IoAnalyticsOutline,
+          value: 'showEdges',
+          type: 'button',
+          domain: 'edges',
+          tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
+          active: showEdges,
+        },
+      ] as ToolbarItem[],
+      modals: {
+        sourceList: sourceListDrawerVisible && isWeb,
+      },
+    }),
+    [t, showEdges, showLaunchpad, sourceListDrawerVisible, isWeb],
+  );
+};
+
+// 2. 抽离搜索列表组件
+const SearchListWrapper = memo(
+  ({ tool, handleConfirm }: { tool: ToolbarItem; handleConfirm: (items: ContextItem[]) => void }) => {
+    const handleToolSelect = useCallback((event: React.MouseEvent) => {
+      event.preventDefault();
+    }, []);
+
+    return (
+      <SearchList domain={tool.domain as SearchDomain} handleConfirm={handleConfirm} offset={12}>
+        <TooltipWrapper tooltip={tool.tooltip}>
+          <Button
+            type="text"
+            onClick={handleToolSelect}
+            className={`
+            h-[32px] w-[32px] 
+            flex items-center justify-center 
+            hover:bg-gray-100 rounded-lg 
+            transition-colors duration-200 
+            group
+            ${tool.active ? 'bg-gray-100' : ''}
+          `}
+            icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
+          />
+        </TooltipWrapper>
+      </SearchList>
+    );
+  },
+);
+
+// 3. 优化主组件
+export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
+  const { t } = useTranslation();
+  const { addNode } = useCanvasControl();
+
+  // 4. 使用 selector 函数分离状态
+  const { showLaunchpad, setShowLaunchpad, showEdges } = useCanvasStoreShallow((state) => ({
+    showLaunchpad: state.showLaunchpad,
+    setShowLaunchpad: state.setShowLaunchpad,
+    showEdges: state.showEdges,
+  }));
 
   const { importResourceModalVisible, setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
     importResourceModalVisible: state.importResourceModalVisible,
     setImportResourceModalVisible: state.setImportResourceModalVisible,
   }));
-  const sourceListDrawerVisible = useKnowledgeBaseStoreShallow((state) => state.sourceListDrawer.visible);
 
-  const runtime = getRuntime();
-  const isWeb = runtime === 'web';
-
-  const { selectedNodes } = useContextPanelStoreShallow((state) => ({
-    selectedNodes: state.contextItems,
-  }));
-
-  const { showLaunchpad, setShowLaunchpad } = useCanvasStoreShallow((state) => ({
-    showLaunchpad: state.showLaunchpad,
-    setShowLaunchpad: state.setShowLaunchpad,
-  }));
-
-  const { showEdges, setShowEdges } = useCanvasStoreShallow((state) => ({
-    showEdges: state.showEdges,
-    setShowEdges: state.setShowEdges,
-  }));
-
+  const selectedNodes = useContextPanelStoreShallow((state) => state.contextItems);
+  const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
   const { toggleEdgeVisible } = useEdgeVisible();
 
-  const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
+  // 5. 使用工具栏配置
+  const { tools, modals } = useToolbarConfig();
 
-  // Define toolbar items
-  const tools: ToolbarItem[] = [
-    {
-      icon: RiUploadCloud2Line,
-      value: 'importResource',
-      type: 'button',
-      domain: 'resource',
-      tooltip: t('canvas.toolbar.importResource'),
+  // 6. 缓存回调函数
+  const getIconColor = useCallback(
+    (tool: string) => {
+      if (tool === 'showEdges' && !showEdges) return '#9CA3AF';
+      if (tool === 'handleLaunchpad' && !showLaunchpad) return '#9CA3AF';
+      return '';
     },
-    {
-      icon: IconResource,
-      value: 'addResource',
-      type: 'popover',
-      domain: 'resource',
-      tooltip: t('canvas.toolbar.addResource'),
-    },
-    // {
-    //   icon: Sparkles,
-    //   value: 'addSkill',
-    //   type: 'popover',
-    //   domain: 'skill',
-    //   tooltip: t('canvas.toolbar.addSkill'),
-    // },
-    {
-      icon: HiOutlineDocumentAdd,
-      value: 'createDocument',
-      type: 'button',
-      domain: 'document',
-      tooltip: t('canvas.toolbar.createDocument'),
-    },
-    {
-      icon: IconDocument,
-      value: 'addDocument',
-      type: 'popover',
-      domain: 'document',
-      tooltip: t('canvas.toolbar.addDocument'),
-    },
-    {
-      type: 'divider',
-    },
-    {
-      icon: IconCanvas,
-      value: 'handleLaunchpad',
-      type: 'button',
-      domain: 'launchpad',
-      tooltip: t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`),
-    },
-    {
-      icon: IoAnalyticsOutline,
-      value: 'showEdges',
-      type: 'button',
-      domain: 'edges',
-      tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
-    },
-  ];
+    [showEdges, showLaunchpad],
+  );
 
-  const getIconColor = (tool: string) => {
-    if (tool === 'showEdges' && !showEdges) {
-      return '#9CA3AF';
-    }
-    if (tool === 'handleLaunchpad' && !showLaunchpad) {
-      return '#9CA3AF';
-    }
-    return '';
-  };
+  const getIsLoading = useCallback(
+    (tool: string) => {
+      return tool === 'createDocument' && isCreating;
+    },
+    [isCreating],
+  );
 
-  const getIsLoading = (tool: string) => {
-    if (tool === 'createDocument' && isCreating) {
-      return true;
-    }
-    return false;
-  };
+  const handleToolSelect = useCallback(
+    (event: React.MouseEvent, tool: string) => {
+      switch (tool) {
+        case 'importResource':
+          setImportResourceModalVisible(true);
+          break;
+        case 'createDocument':
+          createSingleDocumentInCanvas();
+          break;
+        case 'handleLaunchpad':
+          setShowLaunchpad(!showLaunchpad);
+          break;
+        case 'showEdges':
+          toggleEdgeVisible();
+          break;
+      }
+      onToolSelect?.(tool);
+    },
+    [setImportResourceModalVisible, createSingleDocumentInCanvas, setShowLaunchpad, toggleEdgeVisible, onToolSelect],
+  );
 
-  const handleToolSelect = (event: React.MouseEvent, tool: string) => {
-    // Handle tool selection
-    switch (tool) {
-      case 'importResource':
-        setImportResourceModalVisible(true);
-        break;
-      case 'addResource':
-        break;
-      case 'addSkill':
-        break;
-      case 'addTool':
-        break;
-      case 'addDocument':
-        break;
-      case 'createDocument':
-        createSingleDocumentInCanvas();
-        break;
-      case 'changeMode':
-        setMode(mode === 'pointer' ? 'hand' : 'pointer');
-        break;
-      case 'handleLaunchpad':
-        setShowLaunchpad(!showLaunchpad);
-        break;
-      case 'showEdges':
-        toggleEdgeVisible();
-        break;
-    }
-    onToolSelect?.(tool);
-  };
-
-  const handleConfirm = (selectedItems: ContextItem[]) => {
-    if (selectedItems.length > 0) {
-      const domain = selectedItems[0]?.domain;
-      console.log('selectedItems', selectedItems);
+  const handleConfirm = useCallback(
+    (selectedItems: ContextItem[]) => {
       selectedItems.forEach((item) => {
         const contentPreview = item?.snippets?.map((snippet) => snippet?.text || '').join('\n');
         addNode({
-          type: domain as CanvasNodeType,
-          data: { title: item.title, entityId: item.id, contentPreview: item?.contentPreview || contentPreview },
+          type: item.domain as CanvasNodeType,
+          data: {
+            title: item.title,
+            entityId: item.id,
+            contentPreview: item?.contentPreview || contentPreview,
+          },
         });
       });
-    }
-  };
+    },
+    [addNode],
+  );
 
   return (
     <div
@@ -209,28 +247,12 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
             />
           );
         }
-        return (
-          <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm} offset={12}>
-            <TooltipWrapper key={index} tooltip={tool.tooltip}>
-              <Button
-                type="text"
-                onClick={(event) => handleToolSelect(event, tool.value)}
-                className={`
-                  h-[32px] w-[32px] 
-                  flex items-center justify-center 
-                  hover:bg-gray-100 rounded-lg 
-                  transition-colors duration-200 
-                  group
-                  ${tool.active ? 'bg-gray-100' : ''}
-                `}
-                icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
-              />
-            </TooltipWrapper>
-          </SearchList>
-        );
+
+        return <SearchListWrapper key={index} tool={tool} handleConfirm={handleConfirm} />;
       })}
-      {importResourceModalVisible ? <ImportResourceModal /> : null}
-      {sourceListDrawerVisible && isWeb ? <SourceListModal classNames="source-list-modal" /> : null}
+
+      {importResourceModalVisible && <ImportResourceModal />}
+      {modals.sourceList && <SourceListModal classNames="source-list-modal" />}
     </div>
   );
-};
+});

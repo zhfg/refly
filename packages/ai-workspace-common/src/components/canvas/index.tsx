@@ -402,8 +402,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         />
       </Modal>
       <div className="w-full h-screen relative flex flex-col overflow-hidden">
-        {/* <CanvasToolbar onToolSelect={handleToolSelect} /> */}
-        {/* <TopToolbar canvasId={canvasId} /> */}
+        <CanvasToolbar onToolSelect={handleToolSelect} />
+        <TopToolbar canvasId={canvasId} />
         <div className="flex-grow relative">
           <style>{selectionStyles}</style>
           <ReactFlow
@@ -456,7 +456,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             /> */}
           </ReactFlow>
 
-          {/* <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} /> */}
+          <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} />
 
           {memoizedLaunchPad}
         </div>
