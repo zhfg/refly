@@ -2,7 +2,7 @@ import { Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { CanvasNode, CanvasNodeData, DocumentNodeMeta, DocumentNodeProps } from './types';
 import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, memo, useMemo } from 'react';
 import { useCanvasControl, useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
@@ -23,152 +23,159 @@ import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-works
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
-export const DocumentNode = ({
-  data,
-  selected,
-  id,
-  isPreview = false,
-  hideActions = false,
-  hideHandles = false,
-  onNodeClick,
-}: DocumentNodeProps) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const { edges } = useCanvasControl();
-  const { setEdges } = useReactFlow();
-  const { i18n, t } = useTranslation();
-  const language = i18n.languages?.[0];
+export const DocumentNode = memo(
+  ({
+    data,
+    selected,
+    id,
+    isPreview = false,
+    hideActions = false,
+    hideHandles = false,
+    onNodeClick,
+  }: DocumentNodeProps) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const { edges } = useCanvasControl();
+    const { i18n, t } = useTranslation();
+    const language = i18n.languages?.[0];
 
-  const { getNode } = useReactFlow();
-  const node = getNode(id);
-  const targetRef = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState({
-    width: node?.measured?.width ?? 288,
-    height: node?.measured?.height ?? 384,
-  });
+    const targetRef = useRef<HTMLDivElement>(null);
+    const { getNode } = useReactFlow();
 
-  const { operatingNodeId } = useCanvasStoreShallow((state) => ({
-    operatingNodeId: state.operatingNodeId,
-  }));
+    // Memoize node and its measurements
+    const node = useMemo(() => getNode(id), [id, getNode]);
+    const initialSize = useMemo(
+      () => ({
+        width: node?.measured?.width ?? 288,
+        height: node?.measured?.height ?? 384,
+      }),
+      [node?.measured?.width, node?.measured?.height],
+    );
 
-  const isOperating = operatingNodeId === id;
+    const [size, setSize] = useState(initialSize);
 
-  // Check if node has any connections
-  const isTargetConnected = edges?.some((edge) => edge.target === id);
-  const isSourceConnected = edges?.some((edge) => edge.source === id);
+    const { operatingNodeId } = useCanvasStoreShallow((state) => ({
+      operatingNodeId: state.operatingNodeId,
+    }));
 
-  const edgeStyles = useEdgeStyles();
+    const isOperating = operatingNodeId === id;
 
-  const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
+    // Check if node has any connections
+    const isTargetConnected = edges?.some((edge) => edge.target === id);
+    const isSourceConnected = edges?.some((edge) => edge.source === id);
 
-  // Handle node hover events
-  const handleMouseEnter = useCallback(() => {
-    setIsHovered(true);
-    onHoverStart();
-  }, [onHoverStart]);
+    const edgeStyles = useEdgeStyles();
 
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false);
-    onHoverEnd();
-  }, [onHoverEnd]);
+    const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
 
-  const handleAddToContext = useAddToContext(
-    {
-      id,
-      type: 'document',
-      data,
-      position: { x: 0, y: 0 },
-    } as CanvasNode,
-    'document',
-  );
+    // Handle node hover events
+    const handleMouseEnter = useCallback(() => {
+      setIsHovered(true);
+      onHoverStart();
+    }, [onHoverStart]);
 
-  const handleDelete = useDeleteNode(
-    {
-      id,
-      type: 'document',
-      data,
-      position: { x: 0, y: 0 },
-    } as CanvasNode,
-    'document',
-  );
+    const handleMouseLeave = useCallback(() => {
+      setIsHovered(false);
+      onHoverEnd();
+    }, [onHoverEnd]);
 
-  const handleHelpLink = useCallback(() => {
-    // Implement help link logic
-    console.log('Open help link');
-  }, []);
+    const handleAddToContext = useAddToContext(
+      {
+        id,
+        type: 'document',
+        data,
+        position: { x: 0, y: 0 },
+      } as CanvasNode,
+      'document',
+    );
 
-  const handleAbout = useCallback(() => {
-    // Implement about logic
-    console.log('Show about info');
-  }, []);
+    const handleDelete = useDeleteNode(
+      {
+        id,
+        type: 'document',
+        data,
+        position: { x: 0, y: 0 },
+      } as CanvasNode,
+      'document',
+    );
 
-  // Add event handling
-  useEffect(() => {
-    // Create node-specific event handlers
-    const handleNodeAddToContext = () => handleAddToContext();
-    const handleNodeDelete = () => handleDelete();
+    const handleHelpLink = useCallback(() => {
+      // Implement help link logic
+      console.log('Open help link');
+    }, []);
 
-    // Register events with node ID
-    nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
-    nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
+    const handleAbout = useCallback(() => {
+      // Implement about logic
+      console.log('Show about info');
+    }, []);
 
-    return () => {
-      // Cleanup events when component unmounts
-      nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
-      nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
+    // Add event handling
+    useEffect(() => {
+      // Create node-specific event handlers
+      const handleNodeAddToContext = () => handleAddToContext();
+      const handleNodeDelete = () => handleDelete();
 
-      // Clean up all node events
-      cleanupNodeEvents(id);
-    };
-  }, [id, handleAddToContext, handleDelete]);
+      // Register events with node ID
+      nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
+      nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
 
-  return (
-    <div className={classNames({ nowheel: isOperating })}>
-      <div
-        ref={targetRef}
-        className={`relative group ${onNodeClick ? 'cursor-pointer' : ''}`}
-        onMouseEnter={!isPreview ? handleMouseEnter : undefined}
-        onMouseLeave={!isPreview ? handleMouseLeave : undefined}
-        onClick={onNodeClick}
-        style={{
-          width: `${size.width}px`,
-          height: `${size.height}px`,
-          userSelect: isOperating ? 'text' : 'none',
-          cursor: isOperating ? 'text' : 'grab',
-        }}
-      >
-        {!isPreview && !hideActions && <ActionButtons type="document" nodeId={id} />}
+      return () => {
+        // Cleanup events when component unmounts
+        nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
+        nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
 
+        // Clean up all node events
+        cleanupNodeEvents(id);
+      };
+    }, [id, handleAddToContext, handleDelete]);
+
+    return (
+      <div className={classNames({ nowheel: isOperating })}>
         <div
-          className={`
+          ref={targetRef}
+          className={`relative group ${onNodeClick ? 'cursor-pointer' : ''}`}
+          onMouseEnter={!isPreview ? handleMouseEnter : undefined}
+          onMouseLeave={!isPreview ? handleMouseLeave : undefined}
+          onClick={onNodeClick}
+          style={{
+            width: `${size.width}px`,
+            height: `${size.height}px`,
+            userSelect: isOperating ? 'text' : 'none',
+            cursor: isOperating ? 'text' : 'grab',
+          }}
+        >
+          {!isPreview && !hideActions && <ActionButtons type="document" nodeId={id} />}
+
+          <div
+            className={`
             relative
             h-full
             ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
           `}
-        >
-          <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
-          {!isPreview && !hideHandles && (
-            <>
-              <CustomHandle
-                type="target"
-                position={Position.Left}
-                isConnected={isTargetConnected}
-                isNodeHovered={isHovered}
-                nodeType="document"
-              />
-              <CustomHandle
-                type="source"
-                position={Position.Right}
-                isConnected={isSourceConnected}
-                isNodeHovered={isHovered}
-                nodeType="document"
-              />
-            </>
-          )}
-          <div className="flex flex-col h-full">
-            <div className="flex-shrink-0 mb-3">
-              <div className="flex items-center gap-2">
-                <div
-                  className="
+          >
+            <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
+            {!isPreview && !hideHandles && (
+              <>
+                <CustomHandle
+                  type="target"
+                  position={Position.Left}
+                  isConnected={isTargetConnected}
+                  isNodeHovered={isHovered}
+                  nodeType="document"
+                />
+                <CustomHandle
+                  type="source"
+                  position={Position.Right}
+                  isConnected={isSourceConnected}
+                  isNodeHovered={isHovered}
+                  nodeType="document"
+                />
+              </>
+            )}
+            <div className="flex flex-col h-full">
+              <div className="flex-shrink-0 mb-3">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="
                     w-6 
                     h-6 
                     rounded 
@@ -179,80 +186,97 @@ export const DocumentNode = ({
                     justify-center
                     flex-shrink-0
                   "
-                >
-                  <HiOutlineDocumentText className="w-4 h-4 text-white" />
-                </div>
+                  >
+                    <HiOutlineDocumentText className="w-4 h-4 text-white" />
+                  </div>
 
-                <span
-                  className="
+                  <span
+                    className="
                     text-sm
                     font-medium
                     leading-normal
                     text-[rgba(0,0,0,0.8)]
                     truncate
                   "
-                >
-                  {data.title}
-                </span>
+                  >
+                    {data.title}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div className="flex-grow overflow-y-auto pr-2 -mr-2">
-              <Spin spinning={status === 'executing' && !data.contentPreview}>
-                <Markdown
-                  className={`text-xs min-h-8 ${isOperating ? 'pointer-events-auto' : 'pointer-events-none'}`}
-                  content={data.contentPreview || t('canvas.nodePreview.document.noContentPreview')}
-                />
-              </Spin>
-            </div>
+              <div className="flex-grow overflow-y-auto pr-2 -mr-2">
+                <Spin spinning={status === 'executing' && !data.contentPreview}>
+                  <Markdown
+                    className={`text-xs min-h-8 ${isOperating ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                    content={data.contentPreview || t('canvas.nodePreview.document.noContentPreview')}
+                  />
+                </Spin>
+              </div>
 
-            <div className="flex justify-end items-center flex-shrink-0 mt-2 text-[10px] text-gray-400 z-20">
-              {time(data.createdAt, language as LOCALE)
-                ?.utc()
-                ?.fromNow()}
+              <div className="flex justify-end items-center flex-shrink-0 mt-2 text-[10px] text-gray-400 z-20">
+                {time(data.createdAt, language as LOCALE)
+                  ?.utc()
+                  ?.fromNow()}
+              </div>
             </div>
           </div>
         </div>
+
+        {!isPreview && selected && (
+          <Moveable
+            target={targetRef}
+            resizable={true}
+            edge={false}
+            throttleResize={1}
+            renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
+            onResizeStart={({ setOrigin, dragStart }) => {
+              setOrigin(['%', '%']);
+              if (dragStart && dragStart instanceof MouseEvent) {
+                dragStart.preventDefault();
+              }
+            }}
+            onResize={({ target, width, height, direction }) => {
+              const newWidth = Math.max(100, width);
+              const newHeight = Math.max(80, height);
+
+              let newLeft = (target as HTMLElement).offsetLeft;
+              let newTop = (target as HTMLElement).offsetTop;
+
+              if (direction[0] === -1) {
+                newLeft = (target as HTMLElement).offsetLeft - (newWidth - (target as HTMLElement).offsetWidth);
+              }
+              if (direction[1] === -1) {
+                newTop = (target as HTMLElement).offsetTop - (newHeight - (target as HTMLElement).offsetHeight);
+              }
+
+              target.style.width = `${newWidth}px`;
+              target.style.height = `${newHeight}px`;
+              target.style.left = `${newLeft}px`;
+              target.style.top = `${newTop}px`;
+
+              setSize({ width: newWidth, height: newHeight });
+            }}
+            hideDefaultLines={true}
+            className={`!pointer-events-auto ${!isHovered ? 'moveable-control-hidden' : 'moveable-control-show'}`}
+          />
+        )}
       </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison function for DocumentNode
+    return (
+      prevProps.id === nextProps.id &&
+      prevProps.selected === nextProps.selected &&
+      prevProps.isPreview === nextProps.isPreview &&
+      prevProps.hideActions === nextProps.hideActions &&
+      prevProps.hideHandles === nextProps.hideHandles &&
+      prevProps.data.title === nextProps.data.title &&
+      prevProps.data.contentPreview === nextProps.data.contentPreview &&
+      prevProps.data.createdAt === nextProps.data.createdAt
+    );
+  },
+);
 
-      {!isPreview && selected && (
-        <Moveable
-          target={targetRef}
-          resizable={true}
-          edge={false}
-          throttleResize={1}
-          renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
-          onResizeStart={({ setOrigin, dragStart }) => {
-            setOrigin(['%', '%']);
-            if (dragStart && dragStart instanceof MouseEvent) {
-              dragStart.preventDefault();
-            }
-          }}
-          onResize={({ target, width, height, direction }) => {
-            const newWidth = Math.max(100, width);
-            const newHeight = Math.max(80, height);
-
-            let newLeft = (target as HTMLElement).offsetLeft;
-            let newTop = (target as HTMLElement).offsetTop;
-
-            if (direction[0] === -1) {
-              newLeft = (target as HTMLElement).offsetLeft - (newWidth - (target as HTMLElement).offsetWidth);
-            }
-            if (direction[1] === -1) {
-              newTop = (target as HTMLElement).offsetTop - (newHeight - (target as HTMLElement).offsetHeight);
-            }
-
-            target.style.width = `${newWidth}px`;
-            target.style.height = `${newHeight}px`;
-            target.style.left = `${newLeft}px`;
-            target.style.top = `${newTop}px`;
-
-            setSize({ width: newWidth, height: newHeight });
-          }}
-          hideDefaultLines={true}
-          className={`!pointer-events-auto ${!isHovered ? 'moveable-control-hidden' : 'moveable-control-show'}`}
-        />
-      )}
-    </div>
-  );
-};
+// Add display name for debugging
+DocumentNode.displayName = 'DocumentNode';

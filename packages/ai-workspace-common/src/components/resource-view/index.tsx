@@ -38,7 +38,17 @@ export const ResourceView = (props: ResourceViewProps) => {
 
   const { t } = useTranslation();
 
-  const { data, refetch: refetchResourceDetail, isLoading } = useGetResourceDetail({ query: { resourceId } });
+  const {
+    data,
+    refetch: refetchResourceDetail,
+    isLoading,
+  } = useGetResourceDetail({ query: { resourceId } }, null, {
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: 60 * 1000, // Data fresh for 1 minute
+    gcTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
   const { data: resourceDetail } = data || {};
 
   const { showContentSelector, scope } = useContentSelectorStoreShallow((state) => ({

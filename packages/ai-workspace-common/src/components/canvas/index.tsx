@@ -352,6 +352,16 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const memoizedNodes = useMemo(() => nodes, [nodes]);
   const memoizedEdges = useMemo(() => edges, [edges]);
 
+  // Memoize LaunchPad component
+  const memoizedLaunchPad = useMemo(
+    () => (
+      <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
+        <LaunchPad visible={showLaunchpad} />
+      </div>
+    ),
+    [showLaunchpad],
+  );
+
   return (
     <Spin
       className="w-full h-full"
@@ -373,8 +383,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         />
       </Modal>
       <div className="w-full h-screen relative flex flex-col overflow-hidden">
-        <CanvasToolbar onToolSelect={handleToolSelect} />
-        <TopToolbar canvasId={canvasId} />
+        {/* <CanvasToolbar onToolSelect={handleToolSelect} /> */}
+        {/* <TopToolbar canvasId={canvasId} /> */}
         <div className="flex-grow relative">
           <style>{selectionStyles}</style>
           <ReactFlow
@@ -416,7 +426,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
               </div>
             )}
 
-            <Background />
+            {/* <Background />
             <MiniMap
               position="bottom-left"
               style={{
@@ -424,14 +434,12 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
                 boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
               }}
               className="bg-white/80 w-[140px] h-[92px] !mb-[46px] !ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
-            />
+            /> */}
           </ReactFlow>
 
-          <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} />
+          {/* <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} /> */}
 
-          <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
-            <LaunchPad visible={showLaunchpad} />
-          </div>
+          {memoizedLaunchPad}
         </div>
 
         {showPreview && (

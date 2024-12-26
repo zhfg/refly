@@ -649,7 +649,13 @@ export const DocumentEditor = (props: {
   }));
   const prevNote = useRef<Document>();
 
-  const { data: documentDetail, isLoading } = useGetDocumentDetail({ query: { docId } });
+  const { data: documentDetail, isLoading } = useGetDocumentDetail({ query: { docId } }, null, {
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: 60 * 1000, // Data fresh for 1 minute
+    gcTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
 
   useEffect(() => {
     if (documentDetail?.data) {

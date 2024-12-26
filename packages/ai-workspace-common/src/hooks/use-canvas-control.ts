@@ -539,55 +539,28 @@ export const useNodeHoverEffect = (nodeId: string) => {
   const { setEdges, setNodes } = useReactFlow();
   const edgeStyles = useEdgeStyles();
 
+  const updateNodeAndEdges = useCallback(
+    (isHovered: boolean) => {
+      // Batch update both nodes and edges in a single React state update
+      const newZIndex = isHovered ? 1000 : 0;
+      const newEdgeStyle = isHovered ? edgeStyles.hover : edgeStyles.default;
+
+      setNodes((nodes) => nodes.map((node) => (node.id === nodeId ? { ...node, zIndex: newZIndex } : node)));
+
+      setEdges((eds) =>
+        eds.map((edge) => (edge.source === nodeId || edge.target === nodeId ? { ...edge, style: newEdgeStyle } : edge)),
+      );
+    },
+    [nodeId, setEdges, setNodes, edgeStyles],
+  );
+
   const handleMouseEnter = useCallback(() => {
-    setEdges((eds) =>
-      eds.map((edge) => {
-        if (edge.source === nodeId || edge.target === nodeId) {
-          return {
-            ...edge,
-            style: edgeStyles.hover,
-          };
-        }
-        return edge;
-      }),
-    );
-    setNodes((nodes) =>
-      nodes.map((node) => {
-        if (node.id === nodeId) {
-          return {
-            ...node,
-            zIndex: 1000,
-          };
-        }
-        return node;
-      }),
-    );
-  }, [nodeId, setEdges, edgeStyles, setNodes]);
+    updateNodeAndEdges(true);
+  }, [updateNodeAndEdges]);
 
   const handleMouseLeave = useCallback(() => {
-    setEdges((eds) =>
-      eds.map((edge) => {
-        if (edge.source === nodeId || edge.target === nodeId) {
-          return {
-            ...edge,
-            style: edgeStyles.default,
-          };
-        }
-        return edge;
-      }),
-    );
-    setNodes((nodes) =>
-      nodes.map((node) => {
-        if (node.id === nodeId) {
-          return {
-            ...node,
-            zIndex: 0,
-          };
-        }
-        return node;
-      }),
-    );
-  }, [nodeId, setEdges, edgeStyles, setNodes]);
+    updateNodeAndEdges(false);
+  }, [updateNodeAndEdges]);
 
   return {
     handleMouseEnter,

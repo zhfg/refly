@@ -1,6 +1,6 @@
 import { Button, Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { FC, useCallback } from 'react';
+import { FC, useCallback, useMemo } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import {
   IconReply,
@@ -39,12 +39,11 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const { t } = useTranslation();
   const { getNode } = useReactFlow();
   const { canvasId } = useCanvasContext();
-  const { addPinnedNode } = useCanvasStoreShallow((state) => ({
-    addPinnedNode: state.addPinnedNode,
-  }));
 
-  const node = getNode(nodeId) as CanvasNode;
-  const nodeData = node?.data;
+  const node = useMemo(() => getNode(nodeId) as CanvasNode, [nodeId, getNode]);
+  const nodeData = useMemo(() => node?.data, [node]);
+
+  const addPinnedNode = useCanvasStoreShallow(useCallback((state) => state.addPinnedNode, []));
 
   const handleRerun = useCallback(() => {
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'rerun'));
@@ -161,7 +160,20 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     ];
   };
 
-  const menuItems = getMenuItems();
+  const menuItems = useMemo(
+    () => getMenuItems(),
+    [
+      nodeType,
+      nodeData?.contentPreview,
+      handleRerun,
+      handleDelete,
+      handleAddToContext,
+      handleCreateDocument,
+      handleInsertToDoc,
+      handlePreview,
+      t,
+    ],
+  );
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-2 w-[200px] border border-[rgba(0,0,0,0.06)]">
