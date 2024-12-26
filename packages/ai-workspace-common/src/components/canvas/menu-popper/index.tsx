@@ -12,11 +12,12 @@ import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-s
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { CanvasNodeType, SearchDomain } from '@refly/openapi-schema';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/use-add-node';
 import { IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { useReactFlow } from '@xyflow/react';
 import { genMemoID } from '@refly-packages/utils/id';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -38,7 +39,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
   const [menuHeight, setMenuHeight] = useState<number>(0);
   const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } = useCreateDocument();
   const [activeKey, setActiveKey] = useState<string | null>(null);
-  const { addNode } = useCanvasControl();
+  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
 
   const { setImportResourceModalVisible, setInsertNodePosition } = useImportResourceStoreShallow((state) => ({
     importResourceModalVisible: state.importResourceModalVisible,

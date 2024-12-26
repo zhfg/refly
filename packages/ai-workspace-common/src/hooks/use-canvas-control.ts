@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useThrottledCallback } from 'use-debounce';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useAddNode } from './use-add-node';
 
 const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: { direction: 'TB' | 'LR' }) => {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -406,124 +407,7 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
     [setCenter],
   );
 
-  const addNode = useCallback(
-    (
-      node: { type: CanvasNodeType; data: CanvasNodeData<any>; position?: XYPosition },
-      connectTo?: CanvasNodeFilter[],
-    ) => {
-      const { data } = useCanvasStore.getState();
-      const nodes = data[canvasId]?.nodes ?? [];
-      const edges = data[canvasId]?.edges ?? [];
-
-      if (!node?.type || !node?.data) {
-        console.warn('Invalid node data provided');
-        return;
-      }
-
-      let needSetCenter = true;
-
-      // Check for existing node
-      const existingNode = nodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId);
-      if (existingNode) {
-        if (existingNode.type !== 'skillResponse') {
-          message.warning(t('canvas.action.nodeAlreadyExists', { type: t(`common.${node.type}`) }));
-        }
-        setSelectedNode(existingNode);
-        setNodeCenter(existingNode.id);
-        return;
-      }
-
-      // Find source nodes
-      const sourceNodes = connectTo
-        ?.map((filter) => nodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId))
-        .filter(Boolean);
-
-      // Calculate new node position
-      let newPosition: XYPosition;
-
-      if (sourceNodes?.length) {
-        // Get all existing target nodes that are connected to any of the source nodes
-        const existingTargetNodeIds = new Set(
-          edges.filter((edge) => sourceNodes.some((source) => source.id === edge.source)).map((edge) => edge.target),
-        );
-
-        const existingTargetNodes = nodes.filter((n) => existingTargetNodeIds.has(n.id));
-
-        if (existingTargetNodes.length) {
-          // Position based on existing target nodes
-          const minTargetX = Math.min(...existingTargetNodes.map((n) => n.position.x));
-          const maxTargetY = Math.max(...existingTargetNodes.map((n) => n.position.y + (n.measured?.height ?? 100)));
-
-          newPosition = {
-            x: minTargetX,
-            y: maxTargetY + 40,
-          };
-        } else {
-          // First connection - position based on source nodes
-          const avgSourceX = sourceNodes.reduce((sum, n) => sum + n.position.x, 0) / sourceNodes.length;
-          const maxSourceY = Math.max(...sourceNodes.map((n) => n.position.y + (n.measured?.height ?? 100)));
-
-          newPosition = {
-            x: avgSourceX + 400, // Offset to the right of source nodes
-            y: maxSourceY + 40,
-          };
-        }
-      } else {
-        // Default position if no source nodes
-        newPosition = node.position ?? {
-          x: Math.max(...nodes.map((n) => n.position.x), 0) + 400,
-          y: Math.max(...nodes.map((n) => n.position.y), 0),
-        };
-        needSetCenter = true;
-      }
-
-      const enrichedData = {
-        createdAt: new Date().toISOString(),
-        ...node.data,
-        metadata: {
-          ...getNodeDefaultMetadata(node.type),
-          ...node?.data?.metadata,
-        },
-      };
-
-      const newNode = prepareNodeData({
-        type: node.type,
-        data: enrichedData,
-        position: newPosition,
-        selected: true,
-      });
-      const updatedNodes = deduplicateNodes([...nodes.map((n) => ({ ...n, selected: false })), newNode]);
-
-      setNodes(canvasId, updatedNodes);
-      syncFunctions.syncNodesToYDoc(updatedNodes);
-
-      if (connectTo?.length > 0) {
-        const newEdges: Edge[] =
-          sourceNodes?.map((sourceNode) => ({
-            id: `edge-${genUniqueId()}`,
-            source: sourceNode.id,
-            target: newNode.id,
-            style: edgeStyles.default,
-            type: 'default',
-          })) ?? [];
-
-        if (newEdges.length > 0) {
-          const updatedEdges = deduplicateEdges([...edges, ...newEdges]);
-          setEdges(canvasId, updatedEdges);
-          syncFunctions.syncEdgesToYDoc(updatedEdges);
-        }
-      }
-
-      if (needSetCenter) {
-        setNodeCenter(newNode.id);
-      }
-
-      if (newNode.type === 'document' || newNode.type === 'resource') {
-        addPinnedNode(canvasId, newNode);
-      }
-    },
-    [canvasId, setNodes, syncFunctions, edgeStyles],
-  );
+  const { addNode } = useAddNode(canvasId);
 
   const updateAllEdgesStyle = useCallback(
     (showEdges: boolean) => {
