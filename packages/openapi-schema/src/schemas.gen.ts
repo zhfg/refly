@@ -3654,7 +3654,7 @@ export const InMemorySearchResponseSchema = {
 
 export const CanvasNodeTypeSchema = {
   type: 'string',
-  enum: ['document', 'resource', 'skill', 'tool', 'skillResponse', 'toolResponse'],
+  enum: ['document', 'resource', 'skill', 'tool', 'skillResponse', 'toolResponse', 'memo'],
 } as const;
 
 export const CanvasNodeDataSchema = {

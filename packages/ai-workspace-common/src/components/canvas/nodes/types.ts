@@ -73,3 +73,4 @@ export type DocumentNodeProps = NodeProps<Node<CanvasNodeData<DocumentNodeMeta>,
 export type ResourceNodeProps = NodeProps<Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>> & CommonNodeProps;
 export type SkillResponseNodeProps = NodeProps<Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>> &
   CommonNodeProps;
+export type MemoNodeProps = NodeProps<Node<CanvasNodeData, 'memo'>> & CommonNodeProps;

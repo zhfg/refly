@@ -16,6 +16,7 @@ import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-
 import { IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { useReactFlow } from '@xyflow/react';
+import { genMemoID } from '@refly-packages/utils/id';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -52,8 +53,8 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     { key: 'createMemo', icon: MdOutlineAutoAwesomeMotion, type: 'button' },
     { key: 'addResource', icon: IconResource, type: 'popover', domain: 'resource' },
     { key: 'addDocument', icon: IconDocument, type: 'popover', domain: 'document' },
-    { key: 'addMemo', icon: MdOutlineAutoAwesomeMotion, type: 'button' },
-    { key: 'addHighlight', icon: HiOutlineBars2, type: 'button' },
+    // { key: 'addMemo', icon: MdOutlineAutoAwesomeMotion, type: 'button' },
+    // { key: 'addHighlight', icon: HiOutlineBars2, type: 'button' },
     { key: 'divider-2', type: 'divider' },
     { key: 'importResource', icon: RiUploadCloud2Line, type: 'button' },
   ];
@@ -106,6 +107,15 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
 
   const menuScreenPosition = getMenuScreenPosition();
 
+  const createMemo = (position: { x: number; y: number }) => {
+    const memoId = genMemoID();
+    addNode({
+      type: 'memo',
+      data: { title: t('knowledgeBase.context.nodeTypes.memo'), entityId: memoId },
+      position: position,
+    });
+  };
+
   const handleMenuClick = async ({ key }: { key: string }) => {
     setActiveKey(key);
     switch (key) {
@@ -116,6 +126,8 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
         setOpen(false);
         break;
       case 'createMemo':
+        createMemo(position);
+        setOpen(false);
         break;
       case 'addResource':
         break;

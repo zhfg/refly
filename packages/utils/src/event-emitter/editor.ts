@@ -23,7 +23,7 @@ export interface InPlaceSendMessagePayload {
 }
 
 export type Events = {
-  insertBlow: string;
+  insertBelow: string;
   replaceSelection: string;
   contineInChat: string;
   createNewNote: string;
@@ -37,7 +37,6 @@ export type Events = {
     isFirst: boolean;
     content: string;
   };
-  updateCanvasTitle: string;
   activeAskAI: { value: boolean; docId?: string };
   inPlaceSendMessage: InPlaceSendMessagePayload;
   askAIResponse: Omit<InPlaceSendMessagePayload, 'userInput'>;
@@ -46,13 +45,11 @@ export type Events = {
 };
 
 export type EditorOperation =
-  | 'insertBlow'
+  | 'insertBelow'
   | 'replaceSelection'
   | 'contineInChat'
-  | 'createDocument'
   | 'streamCanvasContent'
   | 'streamEditCanvasContent'
-  | 'updateCanvasTitle'
   | 'inPlaceSendMessage'
   | 'activeAskAI'
   | 'askAIResponse'

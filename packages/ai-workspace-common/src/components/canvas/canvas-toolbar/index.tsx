@@ -20,6 +20,7 @@ import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/use-edge-visible';
+import { ToolButton } from './tool-button';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -183,40 +184,6 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
     }
   };
 
-  const ToolButton = ({ tool }: { tool: ToolbarItem }) => {
-    return (
-      <Button
-        type="text"
-        onClick={(event) => handleToolSelect(event, tool.value)}
-        className={`
-                  h-[32px] w-[32px] 
-                  flex items-center justify-center 
-                  hover:bg-gray-100 rounded-lg 
-                  transition-colors duration-200 
-                  group
-                  ${tool.active ? 'bg-gray-100' : ''}
-                `}
-        icon={
-          <tool.icon
-            className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900"
-            style={{ color: getIconColor(tool.value) }}
-          />
-        }
-        loading={getIsLoading(tool.value)}
-      />
-    );
-  };
-
-  const ToolButtonWithBadge = ({ tool }: { tool: ToolbarItem }) => {
-    return selectedNodes.length > 0 && tool.value === 'handleLaunchpad' ? (
-      <Badge size="small" color="#00968F" offset={[-2, 2]} count={selectedNodes.length} overflowCount={9999}>
-        <ToolButton tool={tool} />
-      </Badge>
-    ) : (
-      <ToolButton tool={tool} />
-    );
-  };
-
   return (
     <div
       className="absolute left-[12px] top-1/2 -translate-y-1/2 bg-white rounded-lg p-2 flex flex-col gap-2 z-10"
@@ -229,8 +196,18 @@ export const CanvasToolbar: FC<ToolbarProps> = ({ onToolSelect }) => {
         if (tool.type === 'divider') {
           return <Divider key={index} className="m-0" />;
         }
+
         if (tool.type === 'button') {
-          return <ToolButtonWithBadge key={index} tool={tool} />;
+          return (
+            <ToolButton
+              key={index}
+              tool={tool}
+              selectedNodes={selectedNodes}
+              handleToolSelect={handleToolSelect}
+              getIconColor={getIconColor}
+              getIsLoading={getIsLoading}
+            />
+          );
         }
         return (
           <SearchList key={index} domain={tool.domain as SearchDomain} handleConfirm={handleConfirm} offset={12}>

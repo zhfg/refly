@@ -1,35 +1,19 @@
-import React, { useEffect, useRef, useCallback, useMemo } from 'react';
-import {
-  Button,
-  Divider,
-  Tooltip,
-  Dropdown,
-  MenuProps,
-  Popconfirm,
-  DropdownProps,
-  Input,
-  Modal,
-  Skeleton,
-  message,
-} from 'antd';
+import { useEffect, useRef, FC, useState, useCallback } from 'react';
+import { Button, Divider, Tooltip, Input, Modal, Skeleton } from 'antd';
 import { useSiderStore, useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useTranslation } from 'react-i18next';
-import { FC, useState } from 'react';
+import { LOCALE } from '@refly/common-types';
+import { useDebounce } from 'use-debounce';
 
 import { MdOutlineImage, MdOutlineAspectRatio } from 'react-icons/md';
 import { AiOutlineMenuUnfold } from 'react-icons/ai';
-import { IconEdit, IconDelete, IconMoreHorizontal } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconEdit } from '@refly-packages/ai-workspace-common/components/common/icon';
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
-import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { Helmet } from 'react-helmet';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-import { useNavigate } from 'react-router-dom';
-import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { LOCALE } from '@refly/common-types';
-import { useDebounce } from 'use-debounce';
 import { ActionDropdown } from './action-dropdown';
 
 interface TopToolbarProps {
@@ -44,7 +28,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
     collapse: state.collapse,
     setCollapse: state.setCollapse,
   }));
-  const { getCanvasList } = useHandleSiderData();
+
   const { provider } = useCanvasContext();
   const [unsyncedChanges, setUnsyncedChanges] = useState(provider?.unsyncedChanges || 0);
   const [debouncedUnsyncedChanges] = useDebounce(unsyncedChanges, 500);
@@ -55,14 +39,18 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
     });
   }, [provider]);
 
-  const { data, showPreview, setShowPreview, showMaxRatio, setShowMaxRatio } = useCanvasStoreShallow((state) => ({
-    data: state.data,
-    showPreview: state.showPreview,
-    setShowPreview: state.setShowPreview,
-    showMaxRatio: state.showMaxRatio,
-    setShowMaxRatio: state.setShowMaxRatio,
-  }));
-  const canvasTitle = data[canvasId]?.title;
+  const { data, config, showPreview, setShowPreview, showMaxRatio, setShowMaxRatio } = useCanvasStoreShallow(
+    (state) => ({
+      data: state.data[canvasId],
+      config: state.config[canvasId],
+      showPreview: state.showPreview,
+      setShowPreview: state.setShowPreview,
+      showMaxRatio: state.showMaxRatio,
+      setShowMaxRatio: state.setShowMaxRatio,
+    }),
+  );
+  const canvasTitle = data?.title;
+  const hasCanvasSynced = config?.localSyncedAt > 0 && config?.remoteSyncedAt > 0;
   const { setCanvasTitle } = useCanvasControl(canvasId);
 
   const [editedTitle, setEditedTitle] = useState('');
@@ -71,7 +59,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
   const inputRef = useRef(null);
 
   const handleEditClick = () => {
-    setEditedTitle(data[canvasId]?.title ?? '');
+    setEditedTitle(data?.title ?? '');
     setIsModalOpen(true);
   };
 
@@ -147,7 +135,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
                 `}
               />
             </Tooltip>
-            {!data[canvasId] ? (
+            {!hasCanvasSynced ? (
               <Skeleton className="w-28" active paragraph={false} />
             ) : (
               canvasTitle || t('common.untitled')
@@ -208,12 +196,7 @@ export const TopToolbar: FC<TopToolbarProps> = ({ canvasId }) => {
             </Tooltip>
           </div>
 
-          <ActionDropdown
-            canvasId={canvasId}
-            canvasTitle={canvasTitle}
-            canvasList={canvasList}
-            getCanvasList={getCanvasList}
-          />
+          <ActionDropdown canvasId={canvasId} canvasTitle={canvasTitle} />
         </div>
       </div>
     </>

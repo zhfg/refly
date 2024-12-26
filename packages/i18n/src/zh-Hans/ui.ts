@@ -64,6 +64,7 @@ const translations = {
   editor: {
     placeholder: {
       default: "写点什么，或按空格键激活 AI，按 '/' 键激活命令",
+      title: '请输入标题',
     },
     aiSelector: {
       thinking: 'AI 思考中',
@@ -406,7 +407,9 @@ const translations = {
         document: '文档',
         resource: '资源',
         skillResponse: '技能响应',
+        memo: '备忘录',
       },
+      memoPlaceholder: '记录当下的灵感...',
       noContent: '没有可插入的内容',
       noEditor: '没有打开的文档',
       noActiveDocument: '没有打开的文档',
@@ -447,8 +450,8 @@ const translations = {
       addTool: '添加工具',
       autoLayout: '自动布局',
       askAI: 'AI 提问',
-      createMemo: '创建 Memo',
-      addMemo: '添加 Memo',
+      createMemo: '创建备忘录',
+      addMemo: '添加备忘录',
       createDocument: '新建文档',
       addDocument: '添加文档',
       addHighlight: '添加 Highlight',
@@ -527,7 +530,6 @@ const translations = {
       askFollowUp: '继续提问',
       moreOptions: '更多选项',
       delete: '删除节点',
-      startCreateDocument: '创建文档中...',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',
@@ -1347,7 +1349,7 @@ const translations = {
     message: {
       copy: '复制',
       copySuccess: '复制成功',
-      insertBlow: '插入文档',
+      insertBelow: '插入文档',
       replaceSelection: '替换选中',
       createDocument: '保存为新文档',
       createNewNote: '创建新文档',
@@ -1379,6 +1381,7 @@ const translations = {
       extensionWeblinkSelection: '网页选中',
       document: '文档',
       resource: '资源',
+      memo: '备忘录',
       skillResponse: 'AI 回答',
       extensionWeblink: '网页',
     },

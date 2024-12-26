@@ -5,6 +5,7 @@ import { ResourceNode } from './resource';
 import { SkillNode } from './skill';
 import { ToolNode } from './tool';
 import { SkillResponseNode } from './skill-response';
+import { MemoNode } from './memo';
 import {
   NodeMetadataMap,
   CanvasNodeData,
@@ -24,6 +25,7 @@ export * from './resource';
 export * from './skill';
 export * from './tool';
 export * from './skill-response';
+export * from './memo';
 
 // Node types mapping
 export const nodeTypes: NodeTypes = {
@@ -32,6 +34,7 @@ export const nodeTypes: NodeTypes = {
   skill: SkillNode,
   tool: ToolNode,
   skillResponse: SkillResponseNode,
+  memo: MemoNode,
 };
 
 // Helper function to prepare node data

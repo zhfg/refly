@@ -299,7 +299,7 @@ export const SkillResponseNode = memo(
 
     const insertToDoc = useInsertToDocument(data.entityId);
     const handleInsertToDoc = useCallback(async () => {
-      await insertToDoc('insertBlow', data?.contentPreview);
+      await insertToDoc('insertBelow', data?.contentPreview);
     }, [insertToDoc, data.entityId, data]);
 
     const runtime = getRuntime();

@@ -15,6 +15,7 @@ import { Loader2, FileInput, MessageSquareDiff, FilePlus } from 'lucide-react';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 import { nodeActionEmitter, createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
+import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 
 interface MenuItem {
   key: string;
@@ -24,11 +25,12 @@ interface MenuItem {
   loading?: boolean;
   danger?: boolean;
   type: 'button' | 'divider';
+  disabled?: boolean;
 }
 
 interface NodeActionMenuProps {
   nodeId: string;
-  nodeType: 'document' | 'resource' | 'skillResponse';
+  nodeType: 'document' | 'resource' | 'skillResponse' | 'memo';
   onClose?: () => void;
   isProcessing?: boolean;
   isCompleted?: boolean;
@@ -39,6 +41,10 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const { t } = useTranslation();
   const { getNode } = useReactFlow();
   const { canvasId } = useCanvasContext();
+
+  const { activeDocumentId } = useDocumentStoreShallow((state) => ({
+    activeDocumentId: state.activeDocumentId,
+  }));
 
   const node = useMemo(() => getNode(nodeId) as CanvasNode, [nodeId, getNode]);
   const nodeData = useMemo(() => node?.data, [node]);
@@ -109,6 +115,22 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
           type: 'button' as const,
         },
       ],
+      memo: [
+        {
+          key: 'addToContext',
+          icon: MessageSquareDiff,
+          label: t('canvas.nodeActions.addToContext'),
+          onClick: handleAddToContext,
+          type: 'button' as const,
+        },
+        {
+          key: 'insertToDoc',
+          icon: FileInput,
+          label: t('canvas.nodeActions.insertToDoc'),
+          onClick: handleInsertToDoc,
+          type: 'button' as const,
+        },
+      ],
       skillResponse: [
         {
           key: 'rerun',
@@ -123,6 +145,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
           label: t('canvas.nodeActions.insertToDoc'),
           onClick: handleInsertToDoc,
           type: 'button' as const,
+          disabled: !activeDocumentId,
         },
         {
           key: 'addToContext',
@@ -153,7 +176,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     };
 
     return [
-      ...baseItems,
+      ...(nodeType !== 'memo' ? baseItems : []),
       ...(nodeTypeItems[nodeType] || []),
       { key: 'divider-2', type: 'divider' } as MenuItem,
       deleteItem,
@@ -201,6 +224,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
             type="text"
             loading={item.loading}
             onClick={item.onClick}
+            disabled={item.disabled}
           >
             {item.loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <item.icon className="w-4 h-4" />}
             <span className="flex-1 text-left truncate">{item.label}</span>

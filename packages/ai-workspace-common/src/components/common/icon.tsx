@@ -18,7 +18,8 @@ import { RiErrorWarningLine } from 'react-icons/ri';
 import { RiDoubleQuotesL } from 'react-icons/ri';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BiText } from 'react-icons/bi';
-import { PiNotePencil } from 'react-icons/pi';
+import { PiNotePencil, PiNotePencilLight } from 'react-icons/pi';
+
 import { IoLibraryOutline } from 'react-icons/io5';
 import { HiOutlineChevronDown } from 'react-icons/hi';
 
@@ -33,6 +34,7 @@ export const IconCanvasFill = HiSparkles;
 export const IconCanvas = HiOutlineSparkles;
 export const IconDocument = HiOutlineDocumentText;
 export const IconResource = HiOutlineSquare3Stack3D;
+export const IconMemo = PiNotePencilLight;
 export const IconResponse = HiOutlineChatBubbleLeftRight;
 export const IconLibrary = IoLibraryOutline;
 export const IconThread = HiOutlineChatBubbleLeftRight;

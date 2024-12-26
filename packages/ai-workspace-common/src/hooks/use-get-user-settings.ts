@@ -3,18 +3,20 @@ import { useMatch, useNavigate } from '@refly-packages/ai-workspace-common/utils
 
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { LocalSettings, defaultLocalSettings, useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import {
+  LocalSettings,
+  defaultLocalSettings,
+  useUserStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/user';
 import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { mapDefaultLocale } from '@refly-packages/ai-workspace-common/utils/locale';
 import { useCookie } from 'react-use';
 import { LOCALE } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
-import { getClientOrigin, getWebLogin } from '@refly-packages/utils/url';
-import { getRuntime } from '../utils/env';
 import { GetUserSettingsResponse } from '@refly/openapi-schema';
 
 export const useGetUserSettings = () => {
-  const userStore = useUserStore((state) => ({
+  const userStore = useUserStoreShallow((state) => ({
     setUserProfile: state.setUserProfile,
     setLocalSettings: state.setLocalSettings,
     setToken: state.setToken,

@@ -64,6 +64,7 @@ const translations = {
   editor: {
     placeholder: {
       default: "Write something, or press 'space' for AI, press '/' for commands",
+      title: 'Enter The Title',
     },
     aiSelector: {
       thinking: 'AI is thinking',
@@ -414,7 +415,9 @@ const translations = {
         document: 'Document',
         resource: 'Resource',
         skillResponse: 'Skill Response',
+        memo: 'Memo',
       },
+      memoPlaceholder: 'Record your inspiration...',
       noContent: 'No content available to insert',
       noEditor: 'No opened document',
       noActiveDocument: 'No opened document',
@@ -535,7 +538,6 @@ const translations = {
       askFollowUp: 'Ask Follow-up',
       moreOptions: 'More Options',
       delete: 'Delete Node From Canvas',
-      startCreateDocument: 'Creating Document...',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',
@@ -1355,7 +1357,7 @@ const translations = {
     message: {
       copy: 'Copy',
       copySuccess: 'Copy Success',
-      insertBlow: 'Insert Document',
+      insertBelow: 'Insert Document',
       replaceSelection: 'Replace Selection',
       createNewNote: 'Create New Document',
       createDocument: 'Save as New Document',
@@ -1387,6 +1389,7 @@ const translations = {
       extensionWeblinkSelection: 'Extension Web Link Selection',
       document: 'Document',
       resource: 'Resource',
+      memo: 'Memo',
       skillResponse: 'AI Response',
       extensionWeblink: 'Extension Web Link',
     },

@@ -1,63 +1,23 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Button, Dropdown, MenuProps, Popconfirm, DropdownProps, message } from 'antd';
+import { Button, Dropdown, MenuProps, Popconfirm, DropdownProps } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import { IconDelete, IconMoreHorizontal } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/use-delete-canvas';
 
 interface ActionDropdownProps {
   canvasId: string;
   canvasTitle?: string;
-  canvasList?: any[];
-  getCanvasList: () => Promise<void>;
 }
 
-export const ActionDropdown: React.FC<ActionDropdownProps> = ({ canvasId, canvasTitle, canvasList, getCanvasList }) => {
+export const ActionDropdown: React.FC<ActionDropdownProps> = ({ canvasId, canvasTitle }) => {
   const [popupVisible, setPopupVisible] = useState(false);
-  const [isRequest, setIsRequest] = useState(false);
-  const navigate = useNavigate();
   const { t } = useTranslation();
+  const { deleteCanvas } = useDeleteCanvas();
 
-  const [currentCanvasId, setCurrentCanvasId] = useCanvasStoreShallow((state) => [
-    state.currentCanvasId,
-    state.setCurrentCanvasId,
-  ]);
-
-  const handleDelete = useCallback(async () => {
-    if (isRequest) return;
-    setIsRequest(true);
-
-    try {
-      const { data } = await getClient().deleteCanvas({
-        body: { canvasId },
-      });
-
-      const { currentCanvasId, setCurrentCanvasId } = useCanvasStore.getState();
-
-      if (data?.success) {
-        message.success(t('canvas.action.deleteSuccess'));
-
-        if (currentCanvasId === canvasId) {
-          setCurrentCanvasId(null);
-        }
-
-        await getCanvasList();
-
-        if (currentCanvasId === canvasId) {
-          const firstCanvas = canvasList?.find((canvas) => canvas.id !== canvasId);
-          if (firstCanvas?.id) {
-            navigate(`/canvas/${firstCanvas?.id}`, { replace: true });
-          } else {
-            navigate('/canvas/empty', { replace: true });
-          }
-        }
-      }
-    } finally {
-      setIsRequest(false);
-      setPopupVisible(false);
-    }
-  }, [canvasId, currentCanvasId, isRequest, canvasList, navigate, getCanvasList, setCurrentCanvasId]);
+  const handleDelete = async () => {
+    await deleteCanvas(canvasId);
+    setPopupVisible(false);
+  };
 
   const items: MenuProps['items'] = useMemo(
     () => [
