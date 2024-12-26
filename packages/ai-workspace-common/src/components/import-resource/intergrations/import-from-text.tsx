@@ -11,8 +11,9 @@ import {
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/use-add-node';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
@@ -21,7 +22,7 @@ export const ImportFromText = () => {
   const { t } = useTranslation();
   const importResourceStore = useImportResourceStore();
   const { copiedTextPayload } = useImportResourceStore.getState();
-  const { addNode } = useCanvasControl();
+  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
   const { insertNodePosition } = useImportResourceStoreShallow((state) => ({
     insertNodePosition: state.insertNodePosition,
   }));

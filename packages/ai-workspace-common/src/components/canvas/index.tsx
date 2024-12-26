@@ -13,6 +13,7 @@ import { NodeContextMenu } from './node-context-menu';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
 
 import '@xyflow/react/dist/style.css';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/use-add-node';
 import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasProvider, useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useEdgeStyles } from './constants';
@@ -61,8 +62,12 @@ const MemoizedMiniMap = memo(MiniMap);
 const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { t } = useTranslation();
   const previewContainerRef = useRef<HTMLDivElement>(null);
-  const { nodes, edges, setSelectedNode, onNodesChange, onEdgesChange, onConnect, addNode } =
-    useCanvasControl(canvasId);
+  const { addNode } = useAddNode(canvasId);
+  const { nodes, edges } = useCanvasStoreShallow((state) => ({
+    nodes: state.data[canvasId]?.nodes ?? [],
+    edges: state.data[canvasId]?.edges ?? [],
+  }));
+  const { setSelectedNode, onNodesChange, onEdgesChange, onConnect } = useCanvasControl(canvasId);
   const edgeStyles = useEdgeStyles();
 
   const {

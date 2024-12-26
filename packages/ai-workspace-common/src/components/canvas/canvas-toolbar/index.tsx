@@ -8,7 +8,7 @@ import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-s
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { CanvasNodeType, SearchDomain } from '@refly/openapi-schema';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/use-add-node';
 import { ImportResourceModal } from '@refly-packages/ai-workspace-common/components/import-resource';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
@@ -146,7 +146,7 @@ const SearchListWrapper = memo(
 // 3. 优化主组件
 export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
   const { t } = useTranslation();
-  const { addNode } = useCanvasControl();
+  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
 
   // 4. 使用 selector 函数分离状态
   const { showLaunchpad, setShowLaunchpad, showEdges } = useCanvasStoreShallow((state) => ({

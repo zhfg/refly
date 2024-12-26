@@ -4,7 +4,8 @@ import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
 import { LOCALE } from '@refly/common-types';
 import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/utils/request';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useCanvasControl, useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/use-add-node';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import {
   useActionResultStore,
@@ -14,9 +15,10 @@ import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action
 import { aggregateTokenUsage, genActionResultID } from '@refly-packages/utils/index';
 import { CanvasNodeData, ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useGetSubscriptionUsage, useListModels, useListSkills } from '@refly-packages/ai-workspace-common/queries';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 export const useInvokeAction = () => {
-  const { addNode } = useCanvasControl();
+  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
   const setNodeDataByEntity = useSetNodeDataByEntity();
   const { updateActionResult } = useActionResultStoreShallow((state) => ({
     updateActionResult: state.updateActionResult,
