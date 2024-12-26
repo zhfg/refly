@@ -50,6 +50,10 @@ interface ContextMenuState {
   nodeType?: 'document' | 'resource' | 'skillResponse';
 }
 
+// Add new memoized components
+const MemoizedBackground = memo(Background);
+const MemoizedMiniMap = memo(MiniMap);
+
 const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { t } = useTranslation();
   const previewContainerRef = useRef<HTMLDivElement>(null);
@@ -380,6 +384,33 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     [showLaunchpad],
   );
 
+  // Memoize MiniMap styles
+  const miniMapStyles = useMemo(
+    () => ({
+      border: '1px solid rgba(16, 24, 40, 0.0784)',
+      boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
+    }),
+    [],
+  );
+
+  // Memoize the Background and MiniMap components
+  const memoizedBackground = useMemo(() => <MemoizedBackground />, []);
+  const memoizedMiniMap = useMemo(
+    () => (
+      <MemoizedMiniMap
+        position="bottom-left"
+        style={miniMapStyles}
+        className="bg-white/80 w-[140px] h-[92px] !mb-[46px] !ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
+        zoomable={false}
+        pannable={false}
+      />
+    ),
+    [miniMapStyles],
+  );
+
+  // Memoize the node types configuration
+  const memoizedNodeTypes = useMemo(() => nodeTypes, []);
+
   return (
     <Spin
       className="w-full h-full"
@@ -415,7 +446,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             zoomOnDoubleClick={false}
             selectNodesOnDrag={!operatingNodeId && interactionMode === 'mouse'}
             selectionOnDrag={!operatingNodeId && interactionMode === 'touchpad'}
-            nodeTypes={nodeTypes}
+            nodeTypes={memoizedNodeTypes}
             nodes={memoizedNodes}
             edges={memoizedEdges}
             onNodesChange={onNodesChange}
@@ -427,6 +458,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onNodeContextMenu={onNodeContextMenu}
             nodeDragThreshold={10}
             nodesDraggable={!operatingNodeId}
+            onlyRenderVisibleElements={true}
+            elevateNodesOnSelect={false}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
@@ -445,15 +478,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
               </div>
             )}
 
-            {/* <Background />
-            <MiniMap
-              position="bottom-left"
-              style={{
-                border: '1px solid rgba(16, 24, 40, 0.0784)',
-                boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
-              }}
-              className="bg-white/80 w-[140px] h-[92px] !mb-[46px] !ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
-            /> */}
+            {memoizedBackground}
+            {memoizedMiniMap}
           </ReactFlow>
 
           <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} />
