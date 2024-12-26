@@ -14,8 +14,6 @@ import { ActionButtons } from './action-buttons';
 import { useTranslation } from 'react-i18next';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
-import { IconMemo } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { Input } from 'antd';
 
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
@@ -26,6 +24,12 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import { Markdown as MarkdownPreview } from '@refly-packages/ai-workspace-common/components/markdown';
 import { Markdown } from 'tiptap-markdown';
 import StarterKit from '@tiptap/starter-kit';
+import TextStyle from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
+import { Link } from '@tiptap/extension-link';
+import Underline from '@tiptap/extension-underline';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
 import Placeholder from '@tiptap/extension-placeholder';
 import './memo.scss';
 import { useThrottledCallback } from 'use-debounce';
@@ -36,7 +40,7 @@ import {
   nodeActionEmitter,
 } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/use-insert-to-document';
-
+import { MemoEditor } from './memo-editor';
 type MemoNode = Node<CanvasNodeData, 'memo'>;
 
 export const MemoNode = ({
@@ -51,7 +55,6 @@ export const MemoNode = ({
   const [isHovered, setIsHovered] = useState(false);
   const { edges } = useCanvasControl();
   const setNodeDataByEntity = useSetNodeDataByEntity();
-  const { setEdges } = useReactFlow();
   const { i18n, t } = useTranslation();
   const language = i18n.languages?.[0];
   const [title, setTitle] = useState(data.title);
@@ -139,8 +142,24 @@ export const MemoNode = ({
   const editor = useEditor({
     extensions: [
       StarterKit,
+      Underline,
+      TextStyle,
+      Color,
+      Link.configure({
+        openOnClick: true,
+        HTMLAttributes: {
+          class: 'text-blue-500 hover:underline cursor-pointer',
+          target: '_blank',
+          rel: 'noopener noreferrer',
+        },
+        validate: (href) => /^(https?:\/\/|mailto:|tel:)/.test(href),
+      }),
       Markdown.configure({
         html: false,
+      }),
+      TaskList,
+      TaskItem.configure({
+        nested: true,
       }),
       Placeholder.configure({
         placeholder: t('knowledgeBase.context.memoPlaceholder'),
@@ -157,11 +176,17 @@ export const MemoNode = ({
       },
       handleDOMEvents: {
         mousedown: (view, event) => {
-          event.stopPropagation();
+          if (selected) {
+            event.stopPropagation();
+          }
+          onNodeClick?.();
           return false;
         },
         click: (view, event) => {
-          event.stopPropagation();
+          if (selected) {
+            event.stopPropagation();
+          }
+          onNodeClick?.();
           return false;
         },
       },
@@ -198,8 +223,11 @@ export const MemoNode = ({
     onTitleChange(title);
   }, [title, setTitle]);
 
+  const [bgColor, setBgColor] = useState('#E7F5FF');
+
   return (
     <div className={classNames({ nowheel: isOperating })}>
+      {!isPreview && selected && <MemoEditor editor={editor} bgColor={bgColor} onChangeBackground={setBgColor} />}
       <div
         ref={targetRef}
         className={`relative group ${onNodeClick ? 'cursor-pointer' : ''}`}
@@ -216,13 +244,13 @@ export const MemoNode = ({
         {!isPreview && !hideActions && <ActionButtons type="memo" nodeId={id} />}
 
         <div
+          style={{ backgroundColor: bgColor }}
           className={`
             relative
             h-full
             ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
           `}
         >
-          <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
           {!isPreview && !hideHandles && (
             <>
               <CustomHandle
@@ -242,45 +270,9 @@ export const MemoNode = ({
             </>
           )}
           <div className="flex flex-col h-full">
-            <div className="flex-shrink-0 mb-3">
-              <div className="flex items-center gap-2">
-                <div
-                  className="
-                    w-6 
-                    h-6 
-                    rounded 
-                    bg-[#2E90FA]
-                    shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)]
-                    flex 
-                    items-center 
-                    justify-center
-                    flex-shrink-0
-                  "
-                >
-                  <IconMemo className="w-4 h-4 text-white" />
-                </div>
-                {!isPreview ? (
-                  <Input
-                    className="text-sm font-medium leading-normal border-none focus:border-none hover:bg-gray-100"
-                    placeholder="Enter The Title"
-                    value={title}
-                    style={{ paddingLeft: 6 }}
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
-                ) : (
-                  <div className="text-sm font-medium leading-normal">{title}</div>
-                )}
-              </div>
-            </div>
-
             <div className="relative flex-grow overflow-y-auto pr-2 -mr-2">
               {!isPreview ? (
-                <div
-                  className="editor-wrapper"
-                  style={{ userSelect: 'text', cursor: 'text' }}
-                  onClick={(e) => e.stopPropagation()}
-                  onMouseDown={(e) => e.stopPropagation()}
-                >
+                <div className="editor-wrapper" style={{ userSelect: 'text', cursor: 'text' }}>
                   <EditorContent editor={editor} className={classNames('text-xs memo-node-editor h-full w-full')} />
                 </div>
               ) : (
@@ -311,7 +303,7 @@ export const MemoNode = ({
             }
           }}
           onResize={({ target, width, height, direction }) => {
-            const newWidth = Math.max(100, width);
+            const newWidth = Math.max(200, width);
             const newHeight = Math.max(80, height);
 
             let newLeft = (target as HTMLElement).offsetLeft;
