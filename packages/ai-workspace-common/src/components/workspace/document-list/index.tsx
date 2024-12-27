@@ -14,8 +14,8 @@ import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
-import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/use-add-node';
-import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/use-delete-document';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-document';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 const { Meta } = Card;

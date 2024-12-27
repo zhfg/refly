@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { LuZoomIn, LuZoomOut } from 'react-icons/lu';
 import { IconDown } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useReactFlow, useOnViewportChange } from '@xyflow/react';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useCanvasLayout } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-layout';
 import { TFunction } from 'i18next';
 
 interface LayoutControlProps {
@@ -130,7 +130,7 @@ ZoomControls.displayName = 'ZoomControls';
 export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeMode }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const { onLayout } = useCanvasControl();
+  const { onLayout } = useCanvasLayout();
   const reactFlowInstance = useReactFlow();
   const [currentZoom, setCurrentZoom] = useState(reactFlowInstance?.getZoom() ?? 1);
   const minZoom = 0.1;

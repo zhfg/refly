@@ -6,7 +6,7 @@ import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common
 import { useEffect, useState, useCallback } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { CustomHandle } from './custom-handle';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 
@@ -14,7 +14,7 @@ type ToolResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'toolResponse'>;
 
 export const ToolResponseNode = ({ data, selected, id }: NodeProps<ToolResponseNode>) => {
   const [isHovered, setIsHovered] = useState(false);
-  const { edges } = useCanvasControl();
+  const { edges } = useCanvasData();
   const { setEdges } = useReactFlow();
   const edgeStyles = useEdgeStyles();
 

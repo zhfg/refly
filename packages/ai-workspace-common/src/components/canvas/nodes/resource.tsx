@@ -4,16 +4,11 @@ import { CanvasNodeData, ResourceNodeMeta, CanvasNode, ResourceNodeProps } from 
 import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import {
-  useCanvasControl,
-  useNodeHoverEffect,
-  useSetNodeDataByEntity,
-} from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
-import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
-import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
@@ -26,7 +21,9 @@ import classNames from 'classnames';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { memo } from 'react';
-
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
+import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
+import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
 const NodeHeader = memo(({ title, ResourceIcon }: { title: string; ResourceIcon: any }) => {
@@ -45,7 +42,7 @@ const NodeHeader = memo(({ title, ResourceIcon }: { title: string; ResourceIcon:
 export const ResourceNode = memo(
   (props: ResourceNodeProps) => {
     const [isHovered, setIsHovered] = useState(false);
-    const { edges } = useCanvasControl();
+    const { edges } = useCanvasData();
     const setNodeDataByEntity = useSetNodeDataByEntity();
     const { setEdges, getNode } = useReactFlow();
     const ResourceIcon =
@@ -235,6 +232,8 @@ export const ResourceNode = memo(
 
       setSize({ width: newWidth, height: newHeight });
     }, []);
+
+    console.log('isOperating', isOperating);
 
     return (
       <div className={classNames({ nowheel: isOperating })}>

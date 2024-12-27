@@ -12,10 +12,10 @@ import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/sto
 
 import { CollaborativeEditor } from './collab-editor';
 import { DocumentProvider, useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
-import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
-import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
-import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/use-delete-document';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
+import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-document';
 import { ydoc2Markdown } from '@refly-packages/utils/editor';
 import { time } from '@refly-packages/utils/time';
 import { LOCALE } from '@refly/common-types';

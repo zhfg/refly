@@ -17,8 +17,9 @@ import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/
 import { RecommendQuestions } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/recommend-questions';
 import { getClientOrigin } from '@refly-packages/utils/url';
 import { memo } from 'react';
-import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/use-node-selection';
+import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
 
 const parseStructuredData = (structuredData: Record<string, unknown>, field: string) => {
   return typeof structuredData[field] === 'string'
@@ -140,6 +141,8 @@ const StepContent = memo(
     buildNodeData: (text: string) => CanvasNode;
     step: ActionStep;
   }) => {
+    console.log('stepcontent', step);
+
     return (
       <div className="my-3 text-gray-600 text-base skill-response-content">
         <Markdown content={content} sources={sources} />
@@ -203,8 +206,8 @@ export const ActionStepCard = memo(
     query: string;
   }) => {
     const { t } = useTranslation();
-    const { canvasId } = useCanvasContext();
-    const { setSelectedNodeByEntity } = useNodeSelection(canvasId);
+    const canvasId = useCanvasId();
+    const { setSelectedNodeByEntity } = useNodeSelection();
     const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
 
     console.log('ActionStepCard', result);

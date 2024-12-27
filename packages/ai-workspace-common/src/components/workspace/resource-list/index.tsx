@@ -13,7 +13,7 @@ import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/wo
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { Resource } from '@refly/openapi-schema';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
-import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/use-add-node';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 const { Meta } = Card;

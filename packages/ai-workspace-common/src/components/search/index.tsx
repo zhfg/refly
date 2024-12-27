@@ -17,7 +17,7 @@ import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { IconCanvas, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/use-add-node';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 export interface SearchProps extends React.ComponentProps<'div'> {

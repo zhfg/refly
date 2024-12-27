@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
-import { useCanvasStoreShallow } from '../stores/canvas';
-import { CanvasNode } from '../components/canvas/nodes';
-import { addPinnedNodeEmitter } from '../events/addPinnedNode';
+import { useCanvasStoreShallow } from '../../stores/canvas';
+import { CanvasNode } from '../../components/canvas/nodes';
+import { addPinnedNodeEmitter } from '../../events/addPinnedNode';
 
 interface UseNodePreviewControlOptions {
   canvasId: string;

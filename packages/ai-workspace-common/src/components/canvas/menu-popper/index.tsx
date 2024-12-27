@@ -12,9 +12,9 @@ import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-s
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { CanvasNodeType, SearchDomain } from '@refly/openapi-schema';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
-import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/use-add-node';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useReactFlow } from '@xyflow/react';
 import { genMemoID } from '@refly-packages/utils/id';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';

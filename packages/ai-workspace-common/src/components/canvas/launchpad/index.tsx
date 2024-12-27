@@ -25,11 +25,11 @@ import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/st
 import { editorEmitter, InPlaceSendMessagePayload } from '@refly-packages/utils/event-emitter/editor';
 import { LOCALE } from '@refly/common-types';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
+import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { useContextFilterErrorTip } from './context-manager/hooks/use-context-filter-errror-tip';
 import { InvokeSkillRequest } from '@refly/openapi-schema';
 import { genActionResultID } from '@refly-packages/utils/id';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-control';
 import { useChatHistory } from './hooks/use-chat-history';
 import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { RecommendQuestionsPanel } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/recommend-questions-panel';

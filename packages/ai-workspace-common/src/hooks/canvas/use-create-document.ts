@@ -3,7 +3,7 @@ import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useAddNode } from './use-add-node';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { CanvasNodeType } from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { useDebouncedCallback } from 'use-debounce';
 import { parseMarkdownCitationsAndCanvasTags } from '@refly-packages/utils/parse';
@@ -32,10 +32,9 @@ const createLocalDocument = async (docId: string, title: string, content: string
 
 export const useCreateDocument = () => {
   const [isCreating, setIsCreating] = useState(false);
-  const { t } = useTranslation();
-  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
   const { canvasId } = useCanvasContext();
-  const nodes = useCanvasStoreShallow((state) => state.data[canvasId]?.nodes ?? []);
+  const { t } = useTranslation();
+  const { addNode } = useAddNode(canvasId);
 
   const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt } = useDocumentStoreShallow((state) => ({
     setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
@@ -48,6 +47,8 @@ export const useCreateDocument = () => {
       content: string,
       { sourceNodeId, addToCanvas }: { sourceNodeId?: string; addToCanvas?: boolean },
     ) => {
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
       const docId = genDocumentID();
       const parsedContent = parseMarkdownCitationsAndCanvasTags(content, []);
 
@@ -86,7 +87,7 @@ export const useCreateDocument = () => {
 
       return docId;
     },
-    [addNode, nodes, t],
+    [addNode, canvasId],
   );
 
   const debouncedCreateDocument = useDebouncedCallback(
