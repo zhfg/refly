@@ -124,12 +124,13 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
   const canvasId = selectedCanvasId ?? contextCanvasId ?? routeCanvasId;
 
   // Get all store actions and data in one subscription
-  const { data, setNodes, setEdges, setTitle, addPinnedNode } = useCanvasStoreShallow((state) => ({
+  const { data, setNodes, setEdges, setTitle, addPinnedNode, removePinnedNode } = useCanvasStoreShallow((state) => ({
     data: state.data,
     setNodes: state.setNodes,
     setEdges: state.setEdges,
     setTitle: state.setTitle,
     addPinnedNode: state.addPinnedNode,
+    removePinnedNode: state.removePinnedNode,
   }));
 
   const edgeStyles = useEdgeStyles();
@@ -346,6 +347,8 @@ export const useCanvasControl = (selectedCanvasId?: string) => {
           contextStore.removeContextItem(nodeId);
           // Remove from chat history
           contextStore.removeHistoryItem(nodeId);
+          // Remove from pinned nodes
+          removePinnedNode(canvasId, nodeId);
         });
       }
 
