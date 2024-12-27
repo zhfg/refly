@@ -5,7 +5,6 @@ import { CustomHandle } from './custom-handle';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
-import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +22,7 @@ import { Markdown } from 'tiptap-markdown';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
+import Highlight from '@tiptap/extension-highlight';
 import { Link } from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import TaskList from '@tiptap/extension-task-list';
@@ -56,16 +56,13 @@ export const MemoNode = ({
   const setNodeDataByEntity = useSetNodeDataByEntity();
   const { i18n, t } = useTranslation();
   const language = i18n.languages?.[0];
-  const [title, setTitle] = useState(data.title);
-
-  // console.log('memo', id);
 
   const { getNode } = useReactFlow();
   const node = getNode(id);
   const targetRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({
     width: node?.measured?.width ?? 288,
-    height: node?.measured?.height ?? 384,
+    height: node?.measured?.height ?? 284,
   });
   const { operatingNodeId } = useCanvasStoreShallow((state) => ({
     operatingNodeId: state.operatingNodeId,
@@ -78,8 +75,6 @@ export const MemoNode = ({
   // Check if node has any connections
   const isTargetConnected = edges?.some((edge) => edge.target === id);
   const isSourceConnected = edges?.some((edge) => edge.source === id);
-
-  const edgeStyles = useEdgeStyles();
 
   // Handle node hover events
   const handleMouseEnter = useCallback(() => {
@@ -146,6 +141,12 @@ export const MemoNode = ({
       Underline,
       TextStyle,
       Color,
+      Highlight.configure({
+        multicolor: true,
+        HTMLAttributes: {
+          class: 'highlight',
+        },
+      }),
       Link.configure({
         openOnClick: true,
         HTMLAttributes: {
@@ -207,22 +208,6 @@ export const MemoNode = ({
       },
     );
   }, 500);
-
-  const onTitleChange = useThrottledCallback((value: string) => {
-    setNodeDataByEntity(
-      {
-        entityId: data?.entityId,
-        type: 'memo',
-      },
-      {
-        title: value,
-      },
-    );
-  }, 500);
-
-  useEffect(() => {
-    onTitleChange(title);
-  }, [title, setTitle]);
 
   const [bgColor, setBgColor] = useState('#E7F5FF');
 

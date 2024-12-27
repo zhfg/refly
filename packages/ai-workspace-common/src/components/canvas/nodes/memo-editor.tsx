@@ -31,8 +31,8 @@ export const MemoEditor: FC<MemoEditorProps> = ({ editor, bgColor, onChangeBackg
         <Divider className="mx-0 h-8" type="vertical" />
         <NodeSelector open={open} onOpenChange={setOpen} triggerEditor={editor} />
         <Divider className="mx-0 h-8" type="vertical" />
-        <ColorSelector open={openColor} onOpenChange={setOpenColor} triggerEditor={editor} />
-        <Divider className="mx-0 h-8" type="vertical" />
+        {/* <ColorSelector open={openColor} onOpenChange={setOpenColor} triggerEditor={editor} />
+        <Divider className="mx-0 h-8" type="vertical" /> */}
         <TextButtons triggerEditor={editor} />
         <LinkSelector open={openLink} onOpenChange={setOpenLink} triggerEditor={editor} />
       </div>
