@@ -15,7 +15,7 @@ import {
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
-import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/use-add-node';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 

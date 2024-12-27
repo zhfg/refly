@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { message } from 'antd';
-import { NodeItem, useContextPanelStore } from '../stores/context-panel';
+import { NodeItem, useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export const useAddToChatHistory = (node: NodeItem) => {
   const { t } = useTranslation();

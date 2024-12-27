@@ -7,7 +7,7 @@ import { IconCheckCircle, IconCopy, IconImport } from '@arco-design/web-react/ic
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { parseMarkdownCitationsAndCanvasTags, safeParseJSON } from '@refly/utils/parse';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
-import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { editorEmitter, EditorOperation } from '@refly-packages/utils/event-emitter/editor';
 import { Dropdown, Menu } from '@arco-design/web-react';
 import { HiOutlineCircleStack } from 'react-icons/hi2';

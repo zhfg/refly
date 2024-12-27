@@ -11,10 +11,10 @@ import { IconEdit } from '@refly-packages/ai-workspace-common/components/common/
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { Helmet } from 'react-helmet';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { ActionDropdown } from './action-dropdown';
+import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -38,7 +38,7 @@ const CanvasTitle = memo(
     const [editedTitle, setEditedTitle] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const inputRef = useRef(null);
-    const { setCanvasTitle } = useCanvasControl(canvasId);
+    const { syncTitleToYDoc } = useCanvasSync();
 
     const handleEditClick = () => {
       setEditedTitle(canvasTitle ?? '');
@@ -47,7 +47,7 @@ const CanvasTitle = memo(
 
     const handleModalOk = () => {
       if (editedTitle?.trim()) {
-        setCanvasTitle(editedTitle);
+        syncTitleToYDoc(editedTitle);
         setIsModalOpen(false);
       }
     };

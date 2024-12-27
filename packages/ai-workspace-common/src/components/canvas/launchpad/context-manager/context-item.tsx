@@ -8,7 +8,9 @@ import { ContextPreview } from './context-preview';
 import { useCallback } from 'react';
 import { Message } from '@arco-design/web-react';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
+import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
+import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
 
 export const ContextItem = ({
   item,
@@ -28,7 +30,9 @@ export const ContextItem = ({
   const { t } = useTranslation();
   const { data } = item ?? {};
   const icon = getNodeIcon(item?.type);
-  const { nodes, setSelectedNode, setNodeCenter } = useCanvasControl();
+  const { setSelectedNode } = useNodeSelection();
+  const { nodes } = useCanvasData();
+  const { setNodeCenter } = useNodePosition();
 
   const handleItemClick = useCallback(
     async (item: CanvasNode<any>) => {

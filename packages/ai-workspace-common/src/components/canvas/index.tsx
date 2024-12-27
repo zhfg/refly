@@ -10,11 +10,10 @@ import { NodePreview } from './node-preview';
 import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { ContextMenu } from './context-menu';
 import { NodeContextMenu } from './node-context-menu';
-import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 
 import '@xyflow/react/dist/style.css';
-import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/use-add-node';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { CanvasProvider, useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useEdgeStyles } from './constants';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
@@ -27,11 +26,14 @@ import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin
 import { LayoutControl } from './layout-control';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 import { MenuPopper } from './menu-popper';
-import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/use-node-preview-control';
+import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-preview-control';
 import {
   EditorPerformanceProvider,
   useEditorPerformance,
 } from '@refly-packages/ai-workspace-common/context/editor-performance';
+import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
+import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
+import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -67,7 +69,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     nodes: state.data[canvasId]?.nodes ?? [],
     edges: state.data[canvasId]?.edges ?? [],
   }));
-  const { setSelectedNode, onNodesChange, onEdgesChange, onConnect } = useCanvasControl(canvasId);
+  const { onNodesChange } = useNodeOperations(canvasId);
+  const { setSelectedNode } = useNodeSelection();
+  const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
 
   const {
@@ -100,7 +104,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   );
 
   const reactFlowInstance = useReactFlow();
-  const { getNode } = reactFlowInstance;
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
   const { provider } = useCanvasContext();

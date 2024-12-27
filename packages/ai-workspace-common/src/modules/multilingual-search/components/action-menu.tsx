@@ -7,7 +7,7 @@ import './action-menu.scss';
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/use-add-node';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 

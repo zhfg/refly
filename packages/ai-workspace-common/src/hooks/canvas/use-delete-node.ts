@@ -2,8 +2,8 @@ import { useCallback } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
 import { message } from 'antd';
-import { useContextPanelStore } from '../stores/context-panel';
-import { CanvasNode } from '../components/canvas/nodes';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
@@ -13,6 +13,7 @@ export const useDeleteNode = (node: CanvasNode, nodeType: CanvasNodeType) => {
   const { t } = useTranslation();
   const { canvasId } = useCanvasContext();
   const { handleItemDelete } = useChatHistory();
+
   return useCallback(() => {
     // Delete node from canvas
     setNodes((nodes) => nodes.filter((n) => n.id !== node.id));

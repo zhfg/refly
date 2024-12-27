@@ -49,6 +49,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const node = useMemo(() => getNode(nodeId) as CanvasNode, [nodeId, getNode]);
   const nodeData = useMemo(() => node?.data, [node]);
 
+  // console.log('nodeactionmenu', nodeId);
+
   const addPinnedNode = useCanvasStoreShallow(useCallback((state) => state.addPinnedNode, []));
 
   const handleRerun = useCallback(() => {

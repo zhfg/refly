@@ -18,7 +18,7 @@ import { getNodeIcon } from '../../utils/icon';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 interface CustomProps {
@@ -87,7 +87,7 @@ export const BaseSearchAndSelector = ({
     };
   }, []);
 
-  const { nodes } = useCanvasControl();
+  const { nodes } = useCanvasData();
 
   const targetNodes = nodes;
   const sortedNodes: CanvasNode[] = [

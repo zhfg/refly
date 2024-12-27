@@ -3,13 +3,13 @@ import { CanvasNode, CanvasNodeData, DocumentNodeMeta, DocumentNodeProps } from 
 import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback, useRef, useEffect, memo, useMemo } from 'react';
-import { useCanvasControl, useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { useTranslation } from 'react-i18next';
-import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
-import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { HiOutlineDocumentText } from 'react-icons/hi2';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
@@ -20,7 +20,7 @@ import Moveable from 'react-moveable';
 import classNames from 'classnames';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
-
+import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
 export const DocumentNode = memo(
@@ -34,9 +34,11 @@ export const DocumentNode = memo(
     onNodeClick,
   }: DocumentNodeProps) => {
     const [isHovered, setIsHovered] = useState(false);
-    const { edges } = useCanvasControl();
+    const { edges } = useCanvasData();
     const { i18n, t } = useTranslation();
     const language = i18n.languages?.[0];
+
+    // console.log('document', id);
 
     const targetRef = useRef<HTMLDivElement>(null);
     const { getNode } = useReactFlow();
@@ -204,10 +206,12 @@ export const DocumentNode = memo(
                 </div>
               </div>
 
-              <div className="flex-grow overflow-y-auto pr-2 -mr-2">
+              <div
+                className={`flex-grow overflow-y-auto pr-2 -mr-2 ${isOperating ? 'overflow-auto' : 'overflow-hidden'}`}
+              >
                 <Spin spinning={status === 'executing' && !data.contentPreview}>
                   <Markdown
-                    className={`text-xs min-h-8 ${isOperating ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                    className={`text-xs min-h-8 ${isOperating ? 'pointer-events-auto cursor-text select-text' : 'pointer-events-none select-none'}`}
                     content={data.contentPreview || t('canvas.nodePreview.document.noContentPreview')}
                   />
                 </Spin>

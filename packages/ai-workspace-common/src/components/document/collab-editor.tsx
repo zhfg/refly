@@ -38,10 +38,9 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/use-selection-context';
 import { useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
-import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 
 export const CollaborativeEditor = memo(
   ({ docId }: { docId: string }) => {

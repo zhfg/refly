@@ -11,13 +11,13 @@ import { LuChevronRight } from 'react-icons/lu';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
-import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
-import { useCanvasControl, useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
-import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/use-insert-to-document';
+import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
+import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
+import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-insert-to-document';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
-import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/use-add-to-chat-history';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
+import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-chat-history';
 import {
   IconCanvas,
   IconError,
@@ -41,6 +41,7 @@ import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-works
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { memo } from 'react';
 import { Source } from '@refly-packages/ai-workspace-common/requests/types.gen';
+import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -132,7 +133,15 @@ export const SkillResponseNode = memo(
     const { data, selected, id, hideActions = false, isPreview = false, hideHandles = false, onNodeClick } = props;
     const [isHovered, setIsHovered] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
-    const { edges, setNodeData } = useCanvasControl();
+
+    const { edges, operatingNodeId } = useCanvasStoreShallow((state) => ({
+      edges: state.data[state.currentCanvasId]?.edges ?? [],
+      operatingNodeId: state.operatingNodeId,
+    }));
+
+    // console.log('skillresponse', id);
+
+    const setNodeData = useSetNodeData();
     const { setEdges, getNode, setNodes } = useReactFlow();
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
 
@@ -150,12 +159,12 @@ export const SkillResponseNode = memo(
     const initialSize = useMemo(
       () => ({
         width: node?.measured?.width ?? 288,
-        height: node?.measured?.height ?? 'auto',
+        height: node?.measured?.height ?? ('auto' as const),
       }),
       [node?.measured?.width, node?.measured?.height],
     );
 
-    const [size, setSize] = useState(initialSize);
+    const [size, setSize] = useState<{ width: number | 'auto'; height: number | 'auto' }>(initialSize);
     const moveableRef = useRef<Moveable>(null);
 
     const { status, artifacts, currentLog: log, modelInfo, structuredData, actionMeta, tokenUsage } = metadata ?? {};
@@ -351,9 +360,6 @@ export const SkillResponseNode = memo(
       });
     }, [sources, query]);
 
-    const { operatingNodeId } = useCanvasStoreShallow((state) => ({
-      operatingNodeId: state.operatingNodeId,
-    }));
     const isOperating = operatingNodeId === id;
 
     const resizeMoveable = useCallback((width: number, height: number) => {
@@ -399,12 +405,13 @@ export const SkillResponseNode = memo(
 
     // 使用 useMemo 缓存计算值
     const nodeStyle = useMemo(
-      () => ({
-        width: `${size.width === 'auto' ? 'auto' : `${size.width}px`}`,
-        height: `${size.height === 'auto' ? 'auto' : `${size.height}px`}`,
-        userSelect: isOperating ? 'text' : 'none',
-        cursor: isOperating ? 'text' : 'grab',
-      }),
+      () =>
+        ({
+          width: typeof size.width === 'number' ? `${size.width}px` : 'auto',
+          height: typeof size.height === 'number' ? `${size.height}px` : 'auto',
+          userSelect: isOperating ? 'text' : 'none',
+          cursor: isOperating ? 'text' : 'grab',
+        }) as const,
       [size.width, size.height, isOperating],
     );
 
@@ -413,23 +420,21 @@ export const SkillResponseNode = memo(
       const newWidth = Math.max(100, width);
       const newHeight = Math.max(80, height);
 
-      let newLeft = target.offsetLeft;
-      let newTop = target.offsetTop;
-
-      if (direction[0] === -1) {
-        newLeft = target.offsetLeft - (newWidth - target.offsetWidth);
-      }
-      if (direction[1] === -1) {
-        newTop = target.offsetTop - (newHeight - target.offsetHeight);
-      }
-
-      // 直接更新样式，不使用 requestAnimationFrame
-      target.style.width = `${newWidth}px`;
-      target.style.height = `${newHeight}px`;
-      target.style.left = `${newLeft}px`;
-      target.style.top = `${newTop}px`;
-
       setSize({ width: newWidth, height: newHeight });
+
+      // Update target style directly
+      if (target) {
+        target.style.width = `${newWidth}px`;
+        target.style.height = `${newHeight}px`;
+
+        // Update position if needed
+        if (direction[0] === -1) {
+          target.style.left = `${target.offsetLeft - (newWidth - target.offsetWidth)}px`;
+        }
+        if (direction[1] === -1) {
+          target.style.top = `${target.offsetTop - (newHeight - target.offsetHeight)}px`;
+        }
+      }
     }, []);
 
     return (

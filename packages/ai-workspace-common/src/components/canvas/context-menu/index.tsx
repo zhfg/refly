@@ -5,12 +5,12 @@ import { useReactFlow } from '@xyflow/react';
 import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { PiShootingStar } from 'react-icons/pi';
 import { RiUploadCloud2Line } from 'react-icons/ri';
-import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { IconCanvas, IconPreview } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { IoAnalyticsOutline } from 'react-icons/io5';
-import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/use-edge-visible';
+import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
 
 interface ContextMenuProps {
   open: boolean;

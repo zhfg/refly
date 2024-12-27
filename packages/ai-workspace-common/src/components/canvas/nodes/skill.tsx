@@ -4,7 +4,7 @@ import { Node } from '@xyflow/react';
 import { Sparkles, MoreHorizontal, Cpu, Code2, Globe } from 'lucide-react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback } from 'react';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 
@@ -47,7 +47,7 @@ const getSkillTitle = (skillType: string) => {
 
 export const SkillNode = ({ data, selected, id }: NodeProps<SkillNode>) => {
   const [isHovered, setIsHovered] = useState(false);
-  const { edges } = useCanvasControl();
+  const { edges } = useCanvasData();
   const { setEdges } = useReactFlow();
   const SkillIcon = getSkillIcon(data.metadata.skillType);
   const edgeStyles = useEdgeStyles();

@@ -191,6 +191,8 @@ export const ResourceView = memo(
       scope: state.scope,
     }));
 
+    console.log('resourceview', resourceId);
+
     const {
       data,
       refetch: refetchResourceDetail,

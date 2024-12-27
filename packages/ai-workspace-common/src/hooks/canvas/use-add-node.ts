@@ -10,8 +10,8 @@ import {
   getNodeDefaultMetadata,
   prepareNodeData,
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { useEdgeStyles } from '../components/canvas/constants';
-import { CanvasNodeFilter } from './use-canvas-control';
+import { useEdgeStyles } from '../../components/canvas/constants';
+import { CanvasNodeFilter } from './use-node-selection';
 
 const deduplicateNodes = (nodes: any[]) => {
   const uniqueNodesMap = new Map();
