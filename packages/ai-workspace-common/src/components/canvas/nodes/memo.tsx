@@ -57,6 +57,8 @@ export const MemoNode = ({
   const { i18n, t } = useTranslation();
   const language = i18n.languages?.[0];
 
+  // console.log('memo', id);
+
   const { getNode } = useReactFlow();
   const node = getNode(id);
   const targetRef = useRef<HTMLDivElement>(null);
