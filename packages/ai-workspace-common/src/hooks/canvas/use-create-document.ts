@@ -3,7 +3,7 @@ import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useCanvasControl } from './use-canvas-control';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { CanvasNodeType } from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { useDebouncedCallback } from 'use-debounce';
 import { parseMarkdownCitationsAndCanvasTags } from '@refly-packages/utils/parse';
@@ -12,6 +12,7 @@ import { genDocumentID } from '@refly-packages/utils/id';
 import { parseMarkdown } from '@refly-packages/utils/editor';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { prosemirrorToYXmlFragment } from 'y-prosemirror';
+import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 const createLocalDocument = async (docId: string, title: string, content: string) => {
   const ydoc = new Y.Doc();
@@ -31,15 +32,14 @@ const createLocalDocument = async (docId: string, title: string, content: string
 
 export const useCreateDocument = () => {
   const [isCreating, setIsCreating] = useState(false);
+  const { canvasId } = useCanvasContext();
   const { t } = useTranslation();
-  const { addNode, nodes } = useCanvasControl();
+  const { addNode } = useAddNode(canvasId);
 
   const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt } = useDocumentStoreShallow((state) => ({
     setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
     setDocumentRemoteSyncedAt: state.setDocumentRemoteSyncedAt,
   }));
-
-  const { canvasId } = useCanvasContext();
 
   const createDocument = useCallback(
     async (
@@ -47,6 +47,8 @@ export const useCreateDocument = () => {
       content: string,
       { sourceNodeId, addToCanvas }: { sourceNodeId?: string; addToCanvas?: boolean },
     ) => {
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
       const docId = genDocumentID();
       const parsedContent = parseMarkdownCitationsAndCanvasTags(content, []);
 
@@ -85,7 +87,7 @@ export const useCreateDocument = () => {
 
       return docId;
     },
-    [addNode, nodes, t],
+    [addNode, canvasId],
   );
 
   const debouncedCreateDocument = useDebouncedCallback(

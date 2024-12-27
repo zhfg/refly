@@ -12,7 +12,6 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { ChatHistorySwitch } from './components/chat-history-switch';
 
@@ -20,7 +19,7 @@ import './index.scss';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
-
+import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 export const ContextManager = () => {
   const { contextItems, removeContextItem, setContextItems, filterErrorInfo } = useContextPanelStoreShallow(
     (state) => ({
@@ -32,7 +31,7 @@ export const ContextManager = () => {
   );
   const { handleItemDelete } = useChatHistory();
 
-  const { nodes } = useCanvasControl();
+  const { nodes } = useCanvasData();
   const selectedContextNodes = nodes.filter(
     (node) => node.selected && ['resource', 'document', 'memo'].includes(node.type),
   );

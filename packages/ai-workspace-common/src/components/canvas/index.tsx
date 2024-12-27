@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect, useState, useRef } from 'react';
+import { useCallback, useMemo, useEffect, useState, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import { Button, Modal, Result } from 'antd';
@@ -10,10 +10,10 @@ import { NodePreview } from './node-preview';
 import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { ContextMenu } from './context-menu';
 import { NodeContextMenu } from './node-context-menu';
-import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 
 import '@xyflow/react/dist/style.css';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { CanvasProvider, useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useEdgeStyles } from './constants';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
@@ -26,7 +26,14 @@ import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin
 import { LayoutControl } from './layout-control';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 import { MenuPopper } from './menu-popper';
-import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/use-node-preview-control';
+import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-preview-control';
+import {
+  EditorPerformanceProvider,
+  useEditorPerformance,
+} from '@refly-packages/ai-workspace-common/context/editor-performance';
+import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
+import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
+import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -50,11 +57,21 @@ interface ContextMenuState {
   nodeType?: 'document' | 'resource' | 'skillResponse';
 }
 
-const Flow = ({ canvasId }: { canvasId: string }) => {
+// Add new memoized components
+const MemoizedBackground = memo(Background);
+const MemoizedMiniMap = memo(MiniMap);
+
+const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { t } = useTranslation();
   const previewContainerRef = useRef<HTMLDivElement>(null);
-  const { nodes, edges, setSelectedNode, onNodesChange, onEdgesChange, onConnect, addNode } =
-    useCanvasControl(canvasId);
+  const { addNode } = useAddNode(canvasId);
+  const { nodes, edges } = useCanvasStoreShallow((state) => ({
+    nodes: state.data[canvasId]?.nodes ?? [],
+    edges: state.data[canvasId]?.edges ?? [],
+  }));
+  const { onNodesChange } = useNodeOperations(canvasId);
+  const { setSelectedNode } = useNodeSelection();
+  const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
 
   const {
@@ -87,7 +104,6 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
   );
 
   const reactFlowInstance = useReactFlow();
-  const { getNode } = reactFlowInstance;
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
   const { provider } = useCanvasContext();
@@ -366,6 +382,58 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
     [operatingNodeId, handleNodePreview, setOperatingNodeId, setSelectedNode],
   );
 
+  // 缓存节点数据
+  const memoizedNodes = useMemo(() => nodes, [nodes]);
+  const memoizedEdges = useMemo(() => edges, [edges]);
+
+  // Memoize LaunchPad component
+  const memoizedLaunchPad = useMemo(
+    () => (
+      <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
+        <LaunchPad visible={showLaunchpad} />
+      </div>
+    ),
+    [showLaunchpad],
+  );
+
+  // Memoize MiniMap styles
+  const miniMapStyles = useMemo(
+    () => ({
+      border: '1px solid rgba(16, 24, 40, 0.0784)',
+      boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
+    }),
+    [],
+  );
+
+  // Memoize the Background and MiniMap components
+  const memoizedBackground = useMemo(() => <MemoizedBackground />, []);
+  const memoizedMiniMap = useMemo(
+    () => (
+      <MemoizedMiniMap
+        position="bottom-left"
+        style={miniMapStyles}
+        className="bg-white/80 w-[140px] h-[92px] !mb-[46px] !ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
+        zoomable={false}
+        pannable={false}
+      />
+    ),
+    [miniMapStyles],
+  );
+
+  // Memoize the node types configuration
+  const memoizedNodeTypes = useMemo(() => nodeTypes, []);
+
+  // Optimize node dragging performance
+  const { setIsNodeDragging } = useEditorPerformance();
+
+  const onNodeDragStart = useCallback(() => {
+    setIsNodeDragging(true);
+  }, [setIsNodeDragging]);
+
+  const onNodeDragStop = useCallback(() => {
+    setIsNodeDragging(false);
+  }, [setIsNodeDragging]);
+
   return (
     <Spin
       className="w-full h-full"
@@ -401,9 +469,9 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             zoomOnDoubleClick={false}
             selectNodesOnDrag={!operatingNodeId && interactionMode === 'mouse'}
             selectionOnDrag={!operatingNodeId && interactionMode === 'touchpad'}
-            nodeTypes={nodeTypes}
-            nodes={nodes}
-            edges={edges}
+            nodeTypes={memoizedNodeTypes}
+            nodes={memoizedNodes}
+            edges={memoizedEdges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
@@ -411,8 +479,12 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
             onPaneClick={onPaneClick}
             onPaneContextMenu={onPaneContextMenu}
             onNodeContextMenu={onNodeContextMenu}
+            onNodeDragStart={onNodeDragStart}
+            onNodeDragStop={onNodeDragStop}
             nodeDragThreshold={10}
             nodesDraggable={!operatingNodeId}
+            onlyRenderVisibleElements={true}
+            elevateNodesOnSelect={false}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
@@ -431,22 +503,13 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
               </div>
             )}
 
-            <Background />
-            <MiniMap
-              position="bottom-left"
-              style={{
-                border: '1px solid rgba(16, 24, 40, 0.0784)',
-                boxShadow: '0px 4px 6px 0px rgba(16, 24, 40, 0.03)',
-              }}
-              className="bg-white/80 w-[140px] h-[92px] !mb-[46px] !ml-[10px] rounded-lg shadow-md p-2 [&>svg]:w-full [&>svg]:h-full"
-            />
+            {memoizedBackground}
+            {memoizedMiniMap}
           </ReactFlow>
 
           <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} />
 
-          <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
-            <LaunchPad visible={showLaunchpad} />
-          </div>
+          {memoizedLaunchPad}
         </div>
 
         {showPreview && (
@@ -528,7 +591,8 @@ const Flow = ({ canvasId }: { canvasId: string }) => {
       </div>
     </Spin>
   );
-};
+});
+
 export const Canvas = (props: { canvasId: string }) => {
   const { canvasId } = props;
   const setCurrentCanvasId = useCanvasStoreShallow((state) => state.setCurrentCanvasId);
@@ -542,10 +606,12 @@ export const Canvas = (props: { canvasId: string }) => {
   }, [canvasId]);
 
   return (
-    <CanvasProvider canvasId={canvasId}>
-      <ReactFlowProvider>
-        <Flow canvasId={canvasId} />
-      </ReactFlowProvider>
-    </CanvasProvider>
+    <EditorPerformanceProvider>
+      <CanvasProvider canvasId={canvasId}>
+        <ReactFlowProvider>
+          <Flow canvasId={canvasId} />
+        </ReactFlowProvider>
+      </CanvasProvider>
+    </EditorPerformanceProvider>
   );
 };

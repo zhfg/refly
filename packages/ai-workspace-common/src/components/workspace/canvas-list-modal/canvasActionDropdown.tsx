@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Dropdown, DropdownProps, Popconfirm, MenuProps, message } from 'antd';
 import { IconMoreHorizontal, IconDelete } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/use-delete-canvas';
+import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-canvas';
 import { useTranslation } from 'react-i18next';
 
 interface CanvasActionDropdown {

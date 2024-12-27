@@ -24,7 +24,7 @@ import { SettingModal } from "@refly-packages/ai-workspace-common/components/set
 // hooks
 import { useHandleSiderData } from "@refly-packages/ai-workspace-common/hooks/use-handle-sider-data"
 import { useSiderStoreShallow } from "@refly-packages/ai-workspace-common/stores/sider"
-import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/use-create-canvas"
+import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/canvas/use-create-canvas"
 // icons
 import { IconLibrary } from "@refly-packages/ai-workspace-common/components/common/icon"
 import { CanvasActionDropdown } from "@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown"

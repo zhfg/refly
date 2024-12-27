@@ -3,13 +3,14 @@ import { CanvasNode, CanvasNodeData, MemoNodeProps } from './types';
 import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useCanvasControl, useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { useTranslation } from 'react-i18next';
-import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
-import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { IconMemo } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Input } from 'antd';
 
@@ -31,8 +32,8 @@ import {
   createNodeEventName,
   nodeActionEmitter,
 } from '@refly-packages/ai-workspace-common/events/nodeActions';
-import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/use-insert-to-document';
-
+import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-insert-to-document';
+import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 type MemoNode = Node<CanvasNodeData, 'memo'>;
 
 export const MemoNode = ({
@@ -45,11 +46,14 @@ export const MemoNode = ({
   onNodeClick,
 }: MemoNodeProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const { edges, setNodeDataByEntity } = useCanvasControl();
+  const { edges } = useCanvasData();
+  const setNodeDataByEntity = useSetNodeDataByEntity();
   const { setEdges } = useReactFlow();
   const { i18n, t } = useTranslation();
   const language = i18n.languages?.[0];
   const [title, setTitle] = useState(data.title);
+
+  // console.log('memo', id);
 
   const { getNode } = useReactFlow();
   const node = getNode(id);
@@ -105,7 +109,7 @@ export const MemoNode = ({
 
   const insertToDoc = useInsertToDocument(data.entityId);
   const handleInsertToDoc = useCallback(async () => {
-    await insertToDoc('insertBlow', data?.contentPreview);
+    await insertToDoc('insertBelow', data?.contentPreview);
   }, [insertToDoc, data.entityId, data]);
 
   // Add event handling

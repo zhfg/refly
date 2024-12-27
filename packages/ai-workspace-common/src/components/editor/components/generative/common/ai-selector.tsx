@@ -11,7 +11,7 @@ import { getOsType } from '@refly/utils/env';
 import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/components/add-base-mark-context';
 
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
+import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { useTranslation } from 'react-i18next';
 import { ActionResult, ActionStatus, ConfigScope, InvokeSkillRequest } from '@refly/openapi-schema';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';

@@ -1,6 +1,7 @@
 import { Button, Tooltip } from 'antd';
 import { FormInstance } from '@arco-design/web-react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState, useMemo, useCallback } from 'react';
+import { memo } from 'react';
 
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { IconSend } from '@arco-design/web-react/icon';
@@ -22,89 +23,108 @@ interface ChatActionsProps {
   handleAbort: () => void;
 }
 
-export const ChatActions = (props: ChatActionsProps) => {
-  const { handleSendMessage, handleAbort } = props;
+export const ChatActions = memo(
+  (props: ChatActionsProps) => {
+    const { handleSendMessage, handleAbort } = props;
+    const { t } = useTranslation();
 
-  const { t } = useTranslation();
+    const { setRecommendQuestionsOpen, recommendQuestionsOpen } = useLaunchpadStoreShallow(
+      useCallback(
+        (state) => ({
+          setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
+          recommendQuestionsOpen: state.recommendQuestionsOpen,
+        }),
+        [],
+      ),
+    );
 
-  // stores
-  const chatStore = useChatStoreShallow((state) => ({
-    newQAText: state.newQAText,
-    enableWebSearch: state.enableWebSearch,
-    setEnableWebSearch: state.setEnableWebSearch,
-    enableKnowledgeBaseSearch: state.enableKnowledgeBaseSearch,
-    setEnableKnowledgeBaseSearch: state.setEnableKnowledgeBaseSearch,
-    enableDeepReasonWebSearch: state.enableDeepReasonWebSearch,
-    setEnableDeepReasonWebSearch: state.setEnableDeepReasonWebSearch,
-  }));
+    // Memoize handlers
+    const handleRecommendQuestionsToggle = useCallback(() => {
+      setRecommendQuestionsOpen(!recommendQuestionsOpen);
+    }, [recommendQuestionsOpen, setRecommendQuestionsOpen]);
 
-  const { data: tokenUsageData } = useGetSubscriptionUsage();
-  const tokenUsage = tokenUsageData?.data?.token;
-  const tokenAvailable =
-    tokenUsage?.t1TokenQuota > tokenUsage?.t1TokenUsed || tokenUsage?.t2TokenQuota > tokenUsage?.t2TokenUsed;
+    const handleSendClick = useCallback(() => {
+      handleSendMessage();
+    }, [handleSendMessage]);
 
-  // hooks
-  const runtime = getRuntime();
-  const isWeb = runtime === 'web';
+    // stores
+    const chatStore = useChatStoreShallow((state) => ({
+      newQAText: state.newQAText,
+      enableWebSearch: state.enableWebSearch,
+      setEnableWebSearch: state.setEnableWebSearch,
+      enableKnowledgeBaseSearch: state.enableKnowledgeBaseSearch,
+      setEnableKnowledgeBaseSearch: state.setEnableKnowledgeBaseSearch,
+      enableDeepReasonWebSearch: state.enableDeepReasonWebSearch,
+      setEnableDeepReasonWebSearch: state.setEnableDeepReasonWebSearch,
+    }));
 
-  const userStore = useUserStoreShallow((state) => ({
-    isLogin: state.isLogin,
-    setLoginModalVisible: state.setLoginModalVisible,
-  }));
-
-  const canSendEmptyMessage = chatStore.newQAText?.trim();
-  const canSendMessage = !userStore.isLogin || (tokenAvailable && canSendEmptyMessage);
-
-  const [containerWidth, setContainerWidth] = useState<number>(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const COLLAPSE_WIDTH = 600; // Adjust this threshold as needed
-
-  const { setRecommendQuestionsOpen, recommendQuestionsOpen } = useLaunchpadStoreShallow((state) => ({
-    setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
-    recommendQuestionsOpen: state.recommendQuestionsOpen,
-  }));
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setContainerWidth(entry.contentRect.width);
-      }
+    const { data: tokenUsageData } = useGetSubscriptionUsage({}, [], {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      staleTime: 60 * 1000, // Consider data fresh for 1 minute
+      gcTime: 5 * 60 * 1000, // Cache for 5 minutes
     });
 
-    resizeObserver.observe(containerRef.current);
+    const tokenUsage = useMemo(() => tokenUsageData?.data?.token, [tokenUsageData?.data?.token]);
+    const tokenAvailable = useMemo(
+      () => tokenUsage?.t1TokenQuota > tokenUsage?.t1TokenUsed || tokenUsage?.t2TokenQuota > tokenUsage?.t2TokenUsed,
+      [tokenUsage],
+    );
 
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
+    // hooks
+    const runtime = getRuntime();
+    const isWeb = runtime === 'web';
 
-  return (
-    <div className="chat-actions" ref={containerRef}>
-      <div className="left-actions">
-        <AISettingsDropdown collapsed={containerWidth < COLLAPSE_WIDTH} briefMode={false} trigger={['click']} />
+    const userStore = useUserStoreShallow((state) => ({
+      isLogin: state.isLogin,
+      setLoginModalVisible: state.setLoginModalVisible,
+    }));
+
+    const canSendEmptyMessage = useMemo(() => chatStore.newQAText?.trim(), [chatStore.newQAText]);
+    const canSendMessage = useMemo(
+      () => !userStore.isLogin || (tokenAvailable && canSendEmptyMessage),
+      [userStore.isLogin, tokenAvailable, canSendEmptyMessage],
+    );
+
+    const [containerWidth, setContainerWidth] = useState<number>(0);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const COLLAPSE_WIDTH = 600;
+
+    return (
+      <div className="chat-actions" ref={containerRef}>
+        <div className="left-actions">
+          <AISettingsDropdown collapsed={containerWidth < COLLAPSE_WIDTH} briefMode={false} trigger={['click']} />
+        </div>
+        <div className="right-actions">
+          <Tooltip destroyTooltipOnHide title={t('copilot.chatActions.recommendQuestions')}>
+            <Button size="small" onClick={handleRecommendQuestionsToggle} className="mr-0">
+              <PiMagicWand />
+            </Button>
+          </Tooltip>
+
+          {!isWeb ? null : (
+            <Button
+              size="small"
+              type="primary"
+              disabled={!canSendMessage}
+              className="text-xs gap-1"
+              onClick={handleSendClick}
+            >
+              <IconSend />
+              <span>{t('copilot.chatActions.send')}</span>
+            </Button>
+          )}
+        </div>
       </div>
-      <div className="right-actions">
-        <Tooltip destroyTooltipOnHide title={t('copilot.chatActions.recommendQuestions')}>
-          <Button size="small" onClick={() => setRecommendQuestionsOpen(!recommendQuestionsOpen)} className="mr-0">
-            <PiMagicWand />
-          </Button>
-        </Tooltip>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison for memo
+    return (
+      prevProps.handleSendMessage === nextProps.handleSendMessage && prevProps.handleAbort === nextProps.handleAbort
+    );
+  },
+);
 
-        {!isWeb ? null : (
-          <Button
-            size="small"
-            type="primary"
-            disabled={!canSendMessage}
-            className="text-xs gap-1"
-            onClick={() => handleSendMessage()}
-          >
-            <IconSend />
-            <span>{t('copilot.chatActions.send')}</span>
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-};
+ChatActions.displayName = 'ChatActions';

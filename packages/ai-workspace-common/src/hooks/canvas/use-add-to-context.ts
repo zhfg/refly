@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { message } from 'antd';
-import { useContextPanelStore } from '../stores/context-panel';
-import { CanvasNode } from '../components/canvas/nodes';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';

@@ -7,9 +7,8 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
-import { message } from 'antd';
-import { useTranslation } from 'react-i18next';
+import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
+import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 
 export const useChatHistory = () => {
   // const { t } = useTranslation();
@@ -45,7 +44,8 @@ export const useChatHistory = () => {
     };
   }, []);
 
-  const { nodes, setSelectedNodeByEntity } = useCanvasControl();
+  const { nodes } = useCanvasData();
+  const { setSelectedNodeByEntity } = useNodeSelection();
   const selectedResultNodes = nodes?.filter((node) => node?.selected && node?.type === 'skillResponse');
 
   // Sync nodes with history items

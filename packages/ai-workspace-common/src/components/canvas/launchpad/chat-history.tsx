@@ -9,7 +9,8 @@ import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { NodeItem, useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getResultDisplayContent } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
+import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 
 // Define props interface
 interface ChatHistoryProps {
@@ -32,7 +33,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
-  const { setNodeCenter } = useCanvasControl();
+  const { setNodeCenter } = useNodePosition();
   const { removeContextItem } = useContextPanelStoreShallow((state) => ({
     removeContextItem: state.removeContextItem,
   }));
@@ -49,7 +50,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
     };
   }, []);
 
-  const { setSelectedNodeByEntity } = useCanvasControl();
+  const { setSelectedNodeByEntity } = useNodeSelection();
   const handleItemClick = (item: NodeItem, event: React.MouseEvent) => {
     event.preventDefault();
     if (!item?.id || !item?.data?.entityId) return;

@@ -39,6 +39,9 @@ const translations = {
     name: 'Web Search',
     placeholder: 'Search the web and get answers...',
     steps: {
+      analyzeContext: {
+        name: 'Context Analysis',
+      },
       webSearch: {
         name: 'Web Search',
       },

@@ -4,7 +4,8 @@ import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
 import { LOCALE } from '@refly/common-types';
 import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/utils/request';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import {
   useActionResultStore,
@@ -14,9 +15,13 @@ import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action
 import { aggregateTokenUsage, genActionResultID } from '@refly-packages/utils/index';
 import { CanvasNodeData, ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useGetSubscriptionUsage, useListModels, useListSkills } from '@refly-packages/ai-workspace-common/queries';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 export const useInvokeAction = () => {
-  const { addNode, setNodeDataByEntity } = useCanvasControl();
+  const { canvasId } = useCanvasContext();
+  const { addNode } = useAddNode(canvasId);
+  const setNodeDataByEntity = useSetNodeDataByEntity();
   const { updateActionResult } = useActionResultStoreShallow((state) => ({
     updateActionResult: state.updateActionResult,
   }));
@@ -24,7 +29,13 @@ export const useInvokeAction = () => {
   const globalAbortControllerRef = { current: null as AbortController | null };
   const globalIsAbortedRef = { current: false as boolean };
 
-  const { refetch: refetchTokenUsage } = useGetSubscriptionUsage();
+  const { refetch: refetchTokenUsage } = useGetSubscriptionUsage({}, [], {
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: 60 * 1000, // Consider data fresh for 1 minute
+    gcTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
 
   const onUpdateResult = (resultId: string, payload: ActionResult, event?: SkillEvent) => {
     actionEmitter.emit('updateResult', { resultId, payload });
@@ -319,8 +330,21 @@ export const useInvokeAction = () => {
 
   const onStart = () => {};
 
-  const { data: skillData } = useListSkills({}, null, { staleTime: Infinity });
-  const { data: modelData } = useListModels({}, null, { staleTime: Infinity });
+  const { data: skillData } = useListSkills({}, null, {
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: 60 * 1000, // Data fresh for 1 minute
+    gcTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  const { data: modelData } = useListModels({}, null, {
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
 
   const invokeAction = (payload: InvokeSkillRequest) => {
     payload.resultId ||= genActionResultID();

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, memo, useCallback } from 'react';
 import { Divider, Skeleton } from 'antd';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -18,7 +18,26 @@ interface SkillResponseNodePreviewProps {
   resultId: string;
 }
 
-export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewProps) => {
+const StepsList = memo(({ steps, result, title }: { steps: any[]; result: any; title: string }) => {
+  return (
+    <>
+      {steps.map((step, index) => (
+        <div key={index}>
+          <Divider className="my-2" />
+          <ActionStepCard
+            result={result}
+            step={step}
+            stepStatus={result.status === 'executing' && index === steps?.length - 1 ? 'executing' : 'finish'}
+            index={index + 1}
+            query={title}
+          />
+        </div>
+      ))}
+    </>
+  );
+});
+
+const SkillResponseNodePreviewComponent = ({ resultId }: SkillResponseNodePreviewProps) => {
   const { result, updateActionResult } = useActionResultStoreShallow((state) => ({
     result: state.resultMap[resultId],
     updateActionResult: state.updateActionResult,
@@ -26,6 +45,8 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
   const knowledgeBaseStore = useKnowledgeBaseStore((state) => ({
     sourceListDrawerVisible: state.sourceListDrawer.visible,
   }));
+
+  console.log('SkillResponseNodePreview', result);
 
   const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -50,21 +71,23 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
     }
   }, [resultId]);
 
-  const scrollToBottom = (event: { resultId: string; payload: ActionResult }) => {
-    console.log('scrollToBottom', event);
-    if (event.resultId !== resultId || event.payload.status !== 'executing') {
-      return;
-    }
+  const scrollToBottom = useCallback(
+    (event: { resultId: string; payload: ActionResult }) => {
+      if (event.resultId !== resultId || event.payload.status !== 'executing') {
+        return;
+      }
 
-    const container = document.body.querySelector('.preview-container');
-    if (container) {
-      const { scrollHeight, clientHeight } = container;
-      container.scroll({
-        behavior: 'smooth',
-        top: scrollHeight - clientHeight + 50,
-      });
-    }
-  };
+      const container = document.body.querySelector('.preview-container');
+      if (container) {
+        const { scrollHeight, clientHeight } = container;
+        container.scroll({
+          behavior: 'smooth',
+          top: scrollHeight - clientHeight + 50,
+        });
+      }
+    },
+    [resultId],
+  );
 
   useEffect(() => {
     actionEmitter.on('updateResult', scrollToBottom);
@@ -74,20 +97,24 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
   }, []);
 
   const { title, steps = [], context, history = [], actionMeta } = result ?? {};
-  const contextItems = convertContextToItems(context);
+  const contextItems = useMemo(() => (context ? convertContextToItems(context) : []), [context]);
 
-  const historyItems = history.map((item) => ({
-    id: item.resultId,
-    position: { x: 0, y: 0 },
-    data: {
-      entityId: item.resultId,
-      contentPreview: item.steps?.map((step) => step.content)?.join('\n\n'),
-      title: item.title,
-      metadata: {
-        steps: item.steps,
-      },
-    },
-  }));
+  const historyItems = useMemo(
+    () =>
+      history?.map((item) => ({
+        id: item.resultId,
+        position: { x: 0, y: 0 },
+        data: {
+          entityId: item.resultId,
+          contentPreview: item.steps?.map((step) => step.content)?.join('\n\n'),
+          title: item.title,
+          metadata: {
+            steps: item.steps,
+          },
+        },
+      })) || [],
+    [history],
+  );
 
   return (
     <div className="flex flex-col space-y-4 p-4">
@@ -109,20 +136,13 @@ export const SkillResponseNodePreview = ({ resultId }: SkillResponseNodePreviewP
 
       {steps.length === 0 && (result?.status === 'executing' || loading) && <Skeleton active />}
 
-      {steps.map((step, index) => (
-        <div key={index}>
-          <Divider className="my-2" />
-          <ActionStepCard
-            result={result}
-            step={step}
-            stepStatus={result.status === 'executing' && index === steps?.length - 1 ? 'executing' : 'finish'}
-            index={index + 1}
-            query={title}
-          />
-        </div>
-      ))}
+      <StepsList steps={steps} result={result} title={title} />
 
       {knowledgeBaseStore?.sourceListDrawerVisible ? <SourceListModal classNames="source-list-modal" /> : null}
     </div>
   );
 };
+
+export const SkillResponseNodePreview = memo(SkillResponseNodePreviewComponent, (prevProps, nextProps) => {
+  return prevProps.resultId === nextProps.resultId;
+});

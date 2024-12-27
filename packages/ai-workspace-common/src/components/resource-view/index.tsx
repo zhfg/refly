@@ -9,7 +9,7 @@ import { Button } from 'antd';
 // 请求
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo, useCallback } from 'react';
 
 // content selector
 import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
@@ -33,181 +33,249 @@ interface ResourceViewProps {
   setDeckSize: (size: number) => void;
 }
 
-export const ResourceView = (props: ResourceViewProps) => {
-  const { resourceId, deckSize, setDeckSize } = props;
+const TopBar = memo(({ deckSize, setDeckSize }: { deckSize: number; setDeckSize: (size: number) => void }) => {
+  return (
+    <div className="w-[90%] pt-2 pb-2 mx-auto flex justify-end items-center">
+      <Button
+        type="text"
+        size="small"
+        style={{ color: deckSize ? 'rgb(var(--primary-6))' : '#000' }}
+        icon={<IconQuote />}
+        onClick={() => {
+          setDeckSize(deckSize ? 0 : 200);
+        }}
+      />
+    </div>
+  );
+});
 
-  const { t } = useTranslation();
+const ResourceMeta = memo(
+  ({
+    resourceDetail,
+    isReindexing,
+    onReindex,
+  }: {
+    resourceDetail: Resource;
+    isReindexing: boolean;
+    onReindex: (resourceId: string) => void;
+  }) => {
+    const { t } = useTranslation();
 
-  const { data, refetch: refetchResourceDetail, isLoading } = useGetResourceDetail({ query: { resourceId } });
-  const { data: resourceDetail } = data || {};
-
-  const { showContentSelector, scope } = useContentSelectorStoreShallow((state) => ({
-    showContentSelector: state.showContentSelector,
-    scope: state.scope,
-  }));
-
-  const [isReindexing, setIsReindexing] = useState(false);
-  const handleReindexResource = async (resourceId: string) => {
-    if (!resourceId || isReindexing) return;
-
-    setIsReindexing(true);
-    const { data, error } = await getClient().reindexResource({
-      body: {
-        resourceIds: [resourceId],
-      },
-    });
-    setIsReindexing(false);
-
-    if (error || !data?.success) {
-      return;
-    }
-    refetchResourceDetail();
-  };
-
-  const buildNodeData = (text: string, resourceDetail: Resource) => {
-    const id = genUniqueId();
-
-    const node: CanvasNode = {
-      id,
-      type: 'resource',
-      position: { x: 0, y: 0 },
-      data: {
-        entityId: resourceDetail.resourceId ?? '',
-        title: resourceDetail.title ?? 'Selected Content',
-        metadata: {
-          contentPreview: text,
-          selectedContent: text,
-          xPath: id,
-          sourceEntityId: resourceDetail.resourceId ?? '',
-          sourceEntityType: 'resource',
-          sourceType: 'resourceSelection',
-          url: resourceDetail.data?.url || getClientOrigin(),
-        },
-      },
-    };
-
-    return node;
-  };
-
-  // refresh every 2 seconds if resource is waiting to be parsed or indexed
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-    if (['wait_parse', 'wait_index'].includes(resourceDetail?.indexStatus)) {
-      intervalId = setInterval(() => {
-        refetchResourceDetail();
-      }, 2000);
-    }
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [resourceDetail?.indexStatus]);
-
-  const TopBar = () => {
     return (
-      <div className="w-[90%] pt-2 pb-2 mx-auto flex justify-end items-center">
-        <Button
-          type="text"
-          size="small"
-          style={{ color: deckSize ? 'rgb(var(--primary-6))' : '#000' }}
-          icon={<IconQuote />}
-          onClick={() => {
-            setDeckSize(deckSize ? 0 : 200);
-          }}
-        ></Button>
+      <div className="knowledge-base-resource-meta">
+        {['wait_parse', 'parse_failed', 'wait_index', 'index_failed'].includes(resourceDetail?.indexStatus) && (
+          <Alert
+            className="py-[8px] px-[15px] !items-center"
+            style={{ marginBottom: 16 }}
+            type={['wait_index', 'wait_parse'].includes(resourceDetail?.indexStatus) ? 'warning' : 'error'}
+            showIcon
+            icon={['wait_index', 'wait_parse'].includes(resourceDetail?.indexStatus) ? <IconLoading /> : null}
+            description={
+              t(`resource.${resourceDetail?.indexStatus}`) +
+              (['wait_index', 'index_failed'].includes(resourceDetail?.indexStatus)
+                ? ': ' + t(`resource.${resourceDetail?.indexStatus}_tip`)
+                : '')
+            }
+            action={
+              ['index_failed', 'parse_failed'].includes(resourceDetail?.indexStatus) ? (
+                <Button
+                  size="small"
+                  loading={isReindexing}
+                  icon={<IconRefresh />}
+                  className="retry-btn"
+                  onClick={() => onReindex(resourceDetail.resourceId)}
+                >
+                  {t('common.retry')}
+                </Button>
+              ) : null
+            }
+          />
+        )}
+
+        <div className="knowledge-base-directory-site-intro">
+          <div className="site-intro-icon">
+            <ResourceIcon url={resourceDetail?.data?.url} resourceType={resourceDetail?.resourceType} size={24} />
+          </div>
+          <div className="site-intro-content">
+            <p className="site-intro-site-name">{resourceDetail?.data?.title}</p>
+            <a
+              className="site-intro-site-url no-underline text-[#00968F]"
+              href={resourceDetail?.data?.url}
+              target="_blank"
+            >
+              {resourceDetail?.data?.url}
+            </a>
+          </div>
+        </div>
       </div>
     );
-  };
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.resourceDetail?.resourceId === nextProps.resourceDetail?.resourceId &&
+      prevProps.resourceDetail?.indexStatus === nextProps.resourceDetail?.indexStatus &&
+      prevProps.isReindexing === nextProps.isReindexing
+    );
+  },
+);
 
-  return (
-    <div className="knowledge-base-resource-detail-container pt-[16px]">
-      {resourceId ? (
-        <div className="knowledge-base-resource-detail-body">
-          {isLoading ? (
-            <div className="knowledge-base-resource-skeleton">
-              <Skeleton active style={{ marginTop: 24 }}></Skeleton>
-              <Skeleton active style={{ marginTop: 24 }}></Skeleton>
-              <Skeleton active style={{ marginTop: 24 }}></Skeleton>
-              <Skeleton active style={{ marginTop: 24 }}></Skeleton>
-            </div>
-          ) : (
-            <>
-              {/* <TopBar /> */}
-              <div className="knowledge-base-resource-meta">
-                {['wait_parse', 'parse_failed', 'wait_index', 'index_failed'].includes(resourceDetail?.indexStatus) && (
-                  <Alert
-                    className="py-[8px] px-[15px] !items-center"
-                    style={{ marginBottom: 16 }}
-                    type={['wait_index', 'wait_parse'].includes(resourceDetail?.indexStatus) ? 'warning' : 'error'}
-                    showIcon
-                    icon={['wait_index', 'wait_parse'].includes(resourceDetail?.indexStatus) ? <IconLoading /> : null}
-                    description={
-                      t(`resource.${resourceDetail?.indexStatus}`) +
-                      (['wait_index', 'index_failed'].includes(resourceDetail?.indexStatus)
-                        ? ': ' + t(`resource.${resourceDetail?.indexStatus}_tip`)
-                        : '')
-                    }
-                    action={
-                      ['index_failed', 'parse_failed'].includes(resourceDetail?.indexStatus) ? (
-                        <Button
-                          size="small"
-                          loading={isReindexing}
-                          icon={<IconRefresh />}
-                          className="retry-btn"
-                          onClick={() => handleReindexResource(resourceId)}
-                        >
-                          {t('common.retry')}
-                        </Button>
-                      ) : null
-                    }
-                  />
-                )}
+const ResourceContent = memo(
+  ({
+    resourceDetail,
+    resourceId,
+    showContentSelector,
+    scope,
+  }: {
+    resourceDetail: Resource;
+    resourceId: string;
+    showContentSelector: boolean;
+    scope: string;
+  }) => {
+    const buildNodeData = useCallback(
+      (text: string) => {
+        const id = genUniqueId();
+        return {
+          id,
+          type: 'resource',
+          position: { x: 0, y: 0 },
+          data: {
+            entityId: resourceDetail.resourceId ?? '',
+            title: resourceDetail.title ?? 'Selected Content',
+            metadata: {
+              contentPreview: text,
+              selectedContent: text,
+              xPath: id,
+              sourceEntityId: resourceDetail.resourceId ?? '',
+              sourceEntityType: 'resource',
+              sourceType: 'resourceSelection',
+              url: resourceDetail.data?.url || getClientOrigin(),
+            },
+          },
+        } as CanvasNode;
+      },
+      [resourceDetail],
+    );
 
-                <div className="knowledge-base-directory-site-intro">
-                  <div className="site-intro-icon">
-                    <ResourceIcon
-                      url={resourceDetail?.data?.url}
-                      resourceType={resourceDetail?.resourceType}
-                      size={24}
-                    />
-                  </div>
-                  <div className="site-intro-content">
-                    <p className="site-intro-site-name">{resourceDetail?.data?.title}</p>
-                    <a
-                      className="site-intro-site-url no-underline text-[#00968F]"
-                      href={resourceDetail?.data?.url}
-                      target="_blank"
-                    >
-                      {resourceDetail?.data?.url}
-                    </a>
-                  </div>
-                </div>
-                {/* {resourceDetail && <LabelGroup entityId={resourceDetail.resourceId} entityType={'resource'} />} */}
-              </div>
-              <div
-                className={classNames(`knowledge-base-resource-content resource-content-${resourceId}`, {
-                  'refly-selector-mode-active': showContentSelector,
-                  'refly-block-selector-mode': scope === 'block',
-                  'refly-inline-selector-mode': scope === 'inline',
-                })}
-              >
-                {/* {initContentSelectorElem()} */}
-                <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>
-                <Markdown content={resourceDetail?.content || ''} className="text-base"></Markdown>
-                <SelectionContext
-                  containerClass={`resource-content-${resourceId}`}
-                  getNodeData={(text) => buildNodeData(text, resourceDetail)}
-                ></SelectionContext>
-              </div>
-            </>
-          )}
-        </div>
-      ) : (
+    return (
+      <div
+        className={classNames(`knowledge-base-resource-content resource-content-${resourceId}`, {
+          'refly-selector-mode-active': showContentSelector,
+          'refly-block-selector-mode': scope === 'block',
+          'refly-inline-selector-mode': scope === 'inline',
+        })}
+      >
+        <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>
+        <Markdown content={resourceDetail?.content || ''} className="text-base" />
+        <SelectionContext containerClass={`resource-content-${resourceId}`} getNodeData={buildNodeData} />
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.resourceDetail?.resourceId === nextProps.resourceDetail?.resourceId &&
+      prevProps.resourceDetail?.content === nextProps.resourceDetail?.content &&
+      prevProps.showContentSelector === nextProps.showContentSelector &&
+      prevProps.scope === nextProps.scope
+    );
+  },
+);
+
+export const ResourceView = memo(
+  (props: ResourceViewProps) => {
+    const { resourceId, deckSize, setDeckSize } = props;
+    const { t } = useTranslation();
+    const [isReindexing, setIsReindexing] = useState(false);
+
+    const { showContentSelector, scope } = useContentSelectorStoreShallow((state) => ({
+      showContentSelector: state.showContentSelector,
+      scope: state.scope,
+    }));
+
+    console.log('resourceview', resourceId);
+
+    const {
+      data,
+      refetch: refetchResourceDetail,
+      isLoading,
+    } = useGetResourceDetail({ query: { resourceId } }, null, {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      staleTime: 60 * 1000,
+      gcTime: 5 * 60 * 1000,
+    });
+    const { data: resourceDetail } = data || {};
+
+    const handleReindexResource = useCallback(
+      async (resourceId: string) => {
+        if (!resourceId || isReindexing) return;
+
+        setIsReindexing(true);
+        const { data, error } = await getClient().reindexResource({
+          body: {
+            resourceIds: [resourceId],
+          },
+        });
+        setIsReindexing(false);
+
+        if (error || !data?.success) {
+          return;
+        }
+        refetchResourceDetail();
+      },
+      [isReindexing, refetchResourceDetail],
+    );
+
+    useEffect(() => {
+      let intervalId: NodeJS.Timeout;
+      if (['wait_parse', 'wait_index'].includes(resourceDetail?.indexStatus)) {
+        intervalId = setInterval(() => {
+          refetchResourceDetail();
+        }, 2000);
+      }
+      return () => {
+        if (intervalId) {
+          clearInterval(intervalId);
+        }
+      };
+    }, [resourceDetail?.indexStatus, refetchResourceDetail]);
+
+    if (!resourceId) {
+      return (
         <div className="w-full h-full flex justify-center items-center">
           <Empty description={t('common.empty')} />
         </div>
-      )}
-    </div>
-  );
-};
+      );
+    }
+
+    return (
+      <div className="knowledge-base-resource-detail-container pt-[16px]">
+        <div className="knowledge-base-resource-detail-body">
+          {isLoading ? (
+            <div className="knowledge-base-resource-skeleton">
+              <Skeleton active style={{ marginTop: 24 }} />
+              <Skeleton active style={{ marginTop: 24 }} />
+              <Skeleton active style={{ marginTop: 24 }} />
+              <Skeleton active style={{ marginTop: 24 }} />
+            </div>
+          ) : (
+            <>
+              <ResourceMeta
+                resourceDetail={resourceDetail}
+                isReindexing={isReindexing}
+                onReindex={handleReindexResource}
+              />
+              <ResourceContent
+                resourceDetail={resourceDetail}
+                resourceId={resourceId}
+                showContentSelector={showContentSelector}
+                scope={scope}
+              />
+            </>
+          )}
+        </div>
+      </div>
+    );
+  },
+  (prevProps, nextProps) => prevProps.resourceId === nextProps.resourceId,
+);

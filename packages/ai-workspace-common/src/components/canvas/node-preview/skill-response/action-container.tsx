@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, message } from 'antd';
 import { ActionResult, ActionStep, Source } from '@refly/openapi-schema';
@@ -7,7 +7,7 @@ import { IconCheckCircle, IconCopy, IconImport } from '@arco-design/web-react/ic
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { parseMarkdownCitationsAndCanvasTags, safeParseJSON } from '@refly/utils/parse';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
-import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/use-create-document';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { editorEmitter, EditorOperation } from '@refly-packages/utils/event-emitter/editor';
 import { Dropdown, Menu } from '@arco-design/web-react';
 import { HiOutlineCircleStack } from 'react-icons/hi2';
@@ -17,7 +17,7 @@ interface ActionContainerProps {
   result: ActionResult;
 }
 
-export const ActionContainer = ({ result, step }: ActionContainerProps) => {
+const ActionContainerComponent = ({ result, step }: ActionContainerProps) => {
   const { t } = useTranslation();
   const { debouncedCreateDocument } = useCreateDocument();
   const { hasEditorSelection, activeDocumentId } = useDocumentStoreShallow((state) => ({
@@ -28,28 +28,34 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
   const { title } = result ?? {};
   const isPending = result?.status === 'executing';
 
-  let sources =
-    typeof step?.structuredData?.['sources'] === 'string'
-      ? safeParseJSON(step?.structuredData?.['sources'])
-      : (step?.structuredData?.['sources'] as Source[]);
+  const sources = useMemo(
+    () =>
+      typeof step?.structuredData?.['sources'] === 'string'
+        ? safeParseJSON(step?.structuredData?.['sources'])
+        : (step?.structuredData?.['sources'] as Source[]),
+    [step?.structuredData],
+  );
 
-  const editorActionList = [
-    {
-      icon: <IconImport style={{ fontSize: 14 }} />,
-      key: 'insertBelow',
-      enabled: step.content && activeDocumentId,
-    },
-    {
-      icon: <IconCheckCircle style={{ fontSize: 14 }} />,
-      key: 'replaceSelection',
-      enabled: step.content && activeDocumentId && hasEditorSelection,
-    },
-    {
-      icon: <FilePlus style={{ fontSize: 14, width: 14, height: 14 }} />,
-      key: 'createDocument',
-      enabled: step.content,
-    },
-  ];
+  const editorActionList = useMemo(
+    () => [
+      {
+        icon: <IconImport style={{ fontSize: 14 }} />,
+        key: 'insertBelow',
+        enabled: step.content && activeDocumentId,
+      },
+      {
+        icon: <IconCheckCircle style={{ fontSize: 14 }} />,
+        key: 'replaceSelection',
+        enabled: step.content && activeDocumentId && hasEditorSelection,
+      },
+      {
+        icon: <FilePlus style={{ fontSize: 14, width: 14, height: 14 }} />,
+        key: 'createDocument',
+        enabled: step.content,
+      },
+    ],
+    [step.content, activeDocumentId, hasEditorSelection],
+  );
 
   const [tokenUsage, setTokenUsage] = useState(0);
 
@@ -61,35 +67,50 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
     setTokenUsage(total);
   }, [step?.tokenUsage]);
 
-  const handleEditorOperation = async (type: EditorOperation | 'createDocument', content: string) => {
-    const parsedContent = parseMarkdownCitationsAndCanvasTags(content, sources);
+  const handleEditorOperation = useCallback(
+    async (type: EditorOperation | 'createDocument', content: string) => {
+      const parsedContent = parseMarkdownCitationsAndCanvasTags(content, sources);
 
-    if (type === 'insertBelow' || type === 'replaceSelection') {
-      editorEmitter.emit(type, parsedContent);
-    } else if (type === 'createDocument') {
-      await debouncedCreateDocument(title ?? t('common.newDocument'), content, {
-        sourceNodeId: result.resultId,
-        addToCanvas: true,
-      });
-    }
-  };
+      if (type === 'insertBelow' || type === 'replaceSelection') {
+        editorEmitter.emit(type, parsedContent);
+      } else if (type === 'createDocument') {
+        await debouncedCreateDocument(title ?? t('common.newDocument'), content, {
+          sourceNodeId: result.resultId,
+          addToCanvas: true,
+        });
+      }
+    },
+    [sources, title, result.resultId, debouncedCreateDocument, t],
+  );
 
-  const tokenUsageDropdownList = (
-    <Menu>
-      {step?.tokenUsage?.map((item: any, index: number) => (
-        <Menu.Item key={'token-usage-' + index}>
-          <div className="flex items-center">
-            <span>
-              {item?.modelName}:{' '}
-              {t('copilot.tokenUsage', {
-                inputCount: item?.inputTokens,
-                outputCount: item?.outputTokens,
-              })}
-            </span>
-          </div>
-        </Menu.Item>
-      ))}
-    </Menu>
+  const handleCopyToClipboard = useCallback(
+    (content: string) => {
+      const parsedText = parseMarkdownCitationsAndCanvasTags(content, sources);
+      copyToClipboard(parsedText || '');
+      message.success(t('copilot.message.copySuccess'));
+    },
+    [sources, t],
+  );
+
+  const tokenUsageDropdownList = useMemo(
+    () => (
+      <Menu>
+        {step?.tokenUsage?.map((item: any, index: number) => (
+          <Menu.Item key={'token-usage-' + index}>
+            <div className="flex items-center">
+              <span>
+                {item?.modelName}:{' '}
+                {t('copilot.tokenUsage', {
+                  inputCount: item?.inputTokens,
+                  outputCount: item?.outputTokens,
+                })}
+              </span>
+            </div>
+          </Menu.Item>
+        ))}
+      </Menu>
+    ),
+    [step?.tokenUsage, t],
   );
 
   return (
@@ -117,11 +138,7 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
                 size="small"
                 icon={<IconCopy style={{ fontSize: 14 }} />}
                 className="text-[#64645F] text-xs flex justify-center items-center h-6 px-1 rounded-lg hover:bg-[#f1f1f0] hover:text-[#00968f] transition-all duration-400 relative overflow-hidden group"
-                onClick={() => {
-                  const parsedText = parseMarkdownCitationsAndCanvasTags(step.content, sources);
-                  copyToClipboard(parsedText || '');
-                  message.success(t('copilot.message.copySuccess'));
-                }}
+                onClick={() => handleCopyToClipboard(step.content)}
               >
                 <span className="opacity-0 max-w-0 transform -translate-x-0.5 transition-all duration-400 whitespace-nowrap group-hover:opacity-100 group-hover:max-w-[200px] group-hover:translate-x-0 group-hover:ml-1">
                   {t('copilot.message.copy')}
@@ -152,3 +169,7 @@ export const ActionContainer = ({ result, step }: ActionContainerProps) => {
     </div>
   );
 };
+
+export const ActionContainer = memo(ActionContainerComponent, (prevProps, nextProps) => {
+  return prevProps.step === nextProps.step && prevProps.result === nextProps.result;
+});
