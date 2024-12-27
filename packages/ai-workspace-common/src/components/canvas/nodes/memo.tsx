@@ -197,14 +197,16 @@ export const MemoNode = ({
 
   const onMemoUpdates = useThrottledCallback(async (editor: EditorInstance) => {
     const markdown = editor.storage.markdown.getMarkdown();
+    const maxLength = 1000;
 
+    editor.commands.setContent(markdown.slice(0, maxLength));
     setNodeDataByEntity(
       {
         entityId: data?.entityId,
         type: 'memo',
       },
       {
-        contentPreview: markdown,
+        contentPreview: markdown?.slice(0, maxLength),
       },
     );
   }, 500);
