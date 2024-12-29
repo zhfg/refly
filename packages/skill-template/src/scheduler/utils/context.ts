@@ -20,6 +20,7 @@ import { uniqBy } from 'lodash';
 import { MAX_CONTEXT_RATIO } from './constants';
 import { safeStringifyJSON } from '@refly-packages/utils';
 import { callMultiLingualWebSearch } from '../module/multiLingualSearch';
+import { checkIsSupportedModel, checkModelContextLenSupport } from './model';
 
 export async function prepareContext(
   {
@@ -47,6 +48,9 @@ export async function prepareContext(
   let remainingTokens = maxContextTokens;
   ctx.ctxThis.engine.logger.log(`Max Context Tokens: ${maxContextTokens}`);
 
+  const { modelInfo } = ctx.config.configurable;
+  const isSupportedModel = checkIsSupportedModel(modelInfo);
+
   // 1. web search context
   let processedWebSearchContext: IContext = {
     contentList: [],
@@ -58,6 +62,7 @@ export async function prepareContext(
     const preparedRes = await prepareWebSearchContext(
       {
         query,
+        enableQueryRewrite: isSupportedModel,
       },
       ctx,
     );
@@ -72,7 +77,7 @@ export async function prepareContext(
     resources: [],
     documents: [],
   };
-  if (enableMentionedContext) {
+  if (enableMentionedContext && isSupportedModel) {
     const mentionContextRes = await prepareMentionedContext(
       {
         query,
@@ -92,7 +97,7 @@ export async function prepareContext(
     resources: [],
     documents: [],
   };
-  if (remainingTokens > 0 && (enableMentionedContext || enableKnowledgeBaseSearch)) {
+  if (remainingTokens > 0 && ((enableMentionedContext && isSupportedModel) || enableKnowledgeBaseSearch)) {
     const { contentList = [], resources = [], documents = [] } = ctx.config.configurable;
     // prev remove overlapping items in mentioned context
     ctx.ctxThis.engine.logger.log(
@@ -162,8 +167,14 @@ export async function prepareContext(
 export async function prepareWebSearchContext(
   {
     query,
+    enableQueryRewrite = true,
+    enableTranslateQuery = false,
+    enableTranslateResult = false,
   }: {
     query: string;
+    enableQueryRewrite?: boolean;
+    enableTranslateQuery?: boolean;
+    enableTranslateResult?: boolean;
   },
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
 ): Promise<{
@@ -178,7 +189,6 @@ export async function prepareWebSearchContext(
   let searchLimit = 10;
   let searchLocaleListLen = 2;
   let enableRerank = true;
-  let enableTranslateQuery = false;
   let searchLocaleList: string[] = ['en'];
   let rerankRelevanceThreshold = 0.2;
 
@@ -204,12 +214,13 @@ export async function prepareWebSearchContext(
       resultDisplayLocale: locale || 'auto',
       enableRerank,
       enableTranslateQuery,
-      enableTranslateResult: false,
+      enableTranslateResult,
       rerankRelevanceThreshold,
       translateConcurrencyLimit: 10,
       webSearchConcurrencyLimit: 3,
       batchSize: 5,
       enableDeepReasonWebSearch,
+      enableQueryRewrite,
     },
     {
       config: ctx.config,
@@ -219,7 +230,11 @@ export async function prepareWebSearchContext(
   );
 
   // Take only first 10 sources
-  const webSearchSources = searchResult.sources || [];
+  const isModelContextLenSupport = checkModelContextLenSupport(ctx?.config?.configurable?.modelInfo);
+  let webSearchSources = searchResult.sources || [];
+  if (!isModelContextLenSupport) {
+    webSearchSources = webSearchSources.slice(0, 10);
+  }
 
   processedWebSearchContext.webSearchSources = webSearchSources;
 

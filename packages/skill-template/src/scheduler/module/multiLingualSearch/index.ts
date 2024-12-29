@@ -9,6 +9,7 @@ import { mergeSearchResults, searchResultsToSources, sourcesToSearchResults } fr
 import { translateResults } from './translateResult';
 import { performConcurrentWebSearch } from './webSearch';
 import { getOptimizedSearchLocales, normalizeLocale } from './locale';
+import { extractStructuredData } from '../../utils/extractor';
 
 /**
  * 目标：
@@ -42,6 +43,7 @@ interface CallMultiLingualWebSearchParams {
   webSearchConcurrencyLimit: number;
   batchSize: number;
   enableDeepReasonWebSearch: boolean;
+  enableQueryRewrite: boolean;
 }
 
 export const callMultiLingualWebSearch = async (
@@ -75,35 +77,39 @@ export const callMultiLingualWebSearch = async (
 
   const model = engine.chatModel({ temperature: 0.1 });
 
+  const enableQueryRewrite = params.enableQueryRewrite ?? true;
+
   try {
-    // Step 1: Rewrite query
-    // TODO: 同时在 deepReasonSearch 和非 deepReasonSearch 下应该应用不同的改写设计（比如 deepReasonSearch 会拆分为更多个 query）
-    timeTracker.startStep('rewriteQuery');
-    const rewriteResult = await model.withStructuredOutput(rewriteQueryOutputSchema).invoke(
-      [
-        new SystemMessage(buildRewriteQuerySystemPrompt()),
-        new HumanMessage(
-          buildRewriteQueryUserPrompt({
-            query,
-          }),
-        ),
-      ],
-      config,
-    );
-    const rewriteDuration = timeTracker.endStep('rewriteQuery');
-    engine.logger.log(`Rewrite queries completed in ${rewriteDuration}ms`);
-    ctxThis.emitEvent(
-      {
-        log: {
-          key: 'rewriteQuery',
-          descriptionArgs: {
-            duration: rewriteDuration,
-            rewrittenQueries: rewriteResult.queries.rewrittenQueries.join(', '),
+    let queries = [query]; // Default to original query
+
+    // Step 1: Rewrite query (now optional)
+    if (enableQueryRewrite) {
+      timeTracker.startStep('rewriteQuery');
+      const rewriteResult = await extractStructuredData(
+        model,
+        rewriteQueryOutputSchema,
+        buildRewriteQuerySystemPrompt() + '\n\n' + buildRewriteQueryUserPrompt({ query }),
+        config,
+      );
+
+      queries = rewriteResult?.queries?.rewrittenQueries || [query];
+      const rewriteDuration = timeTracker.endStep('rewriteQuery');
+      engine.logger.log(`Rewrite queries completed in ${rewriteDuration}ms`);
+      ctxThis.emitEvent(
+        {
+          log: {
+            key: 'rewriteQuery',
+            descriptionArgs: {
+              duration: rewriteDuration,
+              rewrittenQueries: rewriteResult.queries.rewrittenQueries.join(', '),
+            },
           },
         },
-      },
-      config,
-    );
+        config,
+      );
+
+      engine.logger.log(`Search analysis: ${JSON.stringify(rewriteResult.analysis)}`);
+    }
 
     // Determine display locale
     const displayLocale = resultDisplayLocale;
@@ -111,7 +117,6 @@ export const callMultiLingualWebSearch = async (
     const optimizedSearchLocales = getOptimizedSearchLocales(displayLocale, searchLocaleListLen);
     searchLocaleList = optimizedSearchLocales;
 
-    engine.logger.log(`Search analysis: ${JSON.stringify(rewriteResult.analysis)}`);
     engine.logger.log(`Recommended display locale: ${displayLocale}`);
 
     // Step 2: Translate query (if enabled)
@@ -128,13 +133,13 @@ export const callMultiLingualWebSearch = async (
         for (const targetLocale of searchLocaleList) {
           // 使用标准化的 locale 进行比较
           if (normalizeLocale(targetLocale) === normalizeLocale(resultDisplayLocale)) {
-            queryMap[targetLocale] = rewriteResult.queries.rewrittenQueries;
+            queryMap[targetLocale] = queries;
             continue;
           }
 
           // 批量翻译查询，使用标准化的 locale 进行翻译
           const translatedQueries = await batchTranslateText(
-            rewriteResult.queries.rewrittenQueries,
+            queries,
             normalizeLocale(targetLocale),
             normalizeLocale(resultDisplayLocale),
           );
@@ -160,13 +165,13 @@ export const callMultiLingualWebSearch = async (
         engine.logger.error(`Error in query translation: ${error.stack}`);
         // 翻译失败时，使用原始查询
         for (const locale of searchLocaleList) {
-          queryMap[locale] = rewriteResult.queries.rewrittenQueries;
+          queryMap[locale] = queries;
         }
       }
     } else {
       // If translation is disabled, use original queries for all locales
       for (const locale of searchLocaleList) {
-        queryMap[locale] = rewriteResult.queries.rewrittenQueries;
+        queryMap[locale] = queries;
       }
     }
 
@@ -183,9 +188,8 @@ export const callMultiLingualWebSearch = async (
     const webSearchDuration = timeTracker.endStep('webSearch');
     engine.logger.log(`Web search completed in ${webSearchDuration}ms`);
 
-    const mergedResults = mergeSearchResults(allResults);
-
-    finalResults = mergedResults;
+    // Make merging results optional
+    finalResults = mergeSearchResults(allResults);
 
     ctxThis.emitEvent(
       {
@@ -193,7 +197,7 @@ export const callMultiLingualWebSearch = async (
           key: 'webSearchCompleted',
           descriptionArgs: {
             duration: webSearchDuration,
-            totalResults: mergedResults?.length,
+            totalResults: finalResults?.length,
           },
         },
       },
@@ -204,7 +208,7 @@ export const callMultiLingualWebSearch = async (
       // Step 4: Translate merged results to display locale
       timeTracker.startStep('translateResults');
       const translatedResults = await translateResults({
-        sources: mergedResults,
+        sources: finalResults,
         targetLocale: displayLocale,
         model,
         config,
@@ -219,7 +223,7 @@ export const callMultiLingualWebSearch = async (
             key: 'translateResults',
             descriptionArgs: {
               duration: translateResultsDuration,
-              totalResults: mergedResults?.length,
+              totalResults: finalResults?.length,
             },
           },
         },
@@ -229,12 +233,12 @@ export const callMultiLingualWebSearch = async (
       // Map translated results back to Source format
       // TODO: 这里需要记录 original locale 和 translated locale
       const translatedSources = translatedResults.translations.map((translation, index) => ({
-        ...mergedResults[index],
+        ...finalResults[index],
         title: translation.title,
         pageContent: translation.snippet,
         url: translation.originalUrl,
         metadata: {
-          originalLocale: mergedResults[index]?.metadata?.originalLocale,
+          originalLocale: finalResults[index]?.metadata?.originalLocale,
           translatedDisplayLocale: displayLocale,
         },
       }));

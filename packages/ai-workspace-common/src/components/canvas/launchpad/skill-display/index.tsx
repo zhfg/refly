@@ -15,7 +15,7 @@ export const SkillDisplay = () => {
   }));
 
   const skillDisplayRef = useRef<HTMLDivElement>(null);
-  const containCnt = 4;
+  const containCnt = 3;
 
   const { data } = useListSkills({}, [], {
     refetchOnWindowFocus: false,
