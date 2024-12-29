@@ -36,6 +36,28 @@ model Account {
   @@map("accounts")
 }
 
+model VerificationSession {
+  /// Primary key
+  pk             BigInt   @id @default(autoincrement())
+  /// Session id
+  sessionId      String   @unique @map("session_id")
+  /// Verification purpose
+  purpose        String   @map("purpose")
+  /// Email
+  email          String   @map("email")
+  /// Verification code
+  code           String   @map("code")
+  /// Hashed password
+  hashedPassword String?  @map("hashed_password")
+  /// Expiration timestamp
+  expiresAt      DateTime @map("expires_at") @db.Timestamptz()
+  /// Create timestamp
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([email, code])
+  @@map("verification_sessions")
+}
+
 model User {
   /// Primary key
   pk             BigInt    @id @default(autoincrement())

@@ -1,25 +1,65 @@
-import { Controller, Logger, Get, Post, Res, UseGuards } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Controller, Logger, Get, Post, Res, UseGuards, Body } from '@nestjs/common';
 import { Response } from 'express';
 import { User as UserModel } from '@prisma/client';
 
 import { User } from '@/utils/decorators/user.decorator';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './guard/local-auth.guard';
 import { GithubOauthGuard } from './guard/github-oauth.guard';
 import { GoogleOauthGuard } from './guard/google-oauth.guard';
 import { OAuthError } from '@refly-packages/errors';
+import {
+  EmailSignupRequest,
+  EmailLoginRequest,
+  CreateVerificationRequest,
+  CheckVerificationRequest,
+  CheckVerificationResponse,
+  EmailSignupResponse,
+  ResendVerificationRequest,
+  AuthConfigResponse,
+} from '@refly-packages/openapi-schema';
+import { buildSuccessResponse } from '@/utils';
 
 @Controller('v1/auth')
 export class AuthController {
   private logger = new Logger(AuthController.name);
 
-  constructor(private configService: ConfigService, private authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
-  @UseGuards(LocalAuthGuard)
-  @Post('login')
-  async login(@User() user: UserModel) {
-    return this.authService.login(user);
+  @Get('config')
+  getAuthConfig(): AuthConfigResponse {
+    return buildSuccessResponse(this.authService.getAuthConfig());
+  }
+
+  @Post('email/signup')
+  async emailSignup(@Body() { email, password }: EmailSignupRequest): Promise<EmailSignupResponse> {
+    const { sessionId } = await this.authService.emailSignup(email, password);
+    return buildSuccessResponse({ sessionId });
+  }
+
+  @Post('email/login')
+  async emailLogin(@Body() { email, password }: EmailLoginRequest, @Res() res: Response) {
+    const { accessToken } = await this.authService.emailLogin(email, password);
+    this.authService.redirect(res, accessToken);
+  }
+
+  @Post('verification/create')
+  async createVerification(@Body() params: CreateVerificationRequest) {
+    const { sessionId } = await this.authService.createVerification(params);
+    return buildSuccessResponse({ sessionId });
+  }
+
+  @Post('verification/resend')
+  async resendVerification(@Body() { sessionId }: ResendVerificationRequest) {
+    await this.authService.sendVerificationEmail(sessionId);
+    return buildSuccessResponse();
+  }
+
+  @Post('verification/check')
+  async checkVerification(
+    @Body() params: CheckVerificationRequest,
+  ): Promise<CheckVerificationResponse> {
+    const { verification, accessToken } = await this.authService.checkVerification(params);
+    return buildSuccessResponse({ accessToken, purpose: verification.purpose });
   }
 
   @UseGuards(GithubOauthGuard)
@@ -41,11 +81,7 @@ export class AuthController {
       this.logger.log(`github oauth callback success, req.user = ${user?.email}`);
 
       const { accessToken } = await this.authService.login(user);
-      res
-        .cookie(this.configService.get('auth.cookieTokenField'), accessToken, {
-          domain: this.configService.get('auth.cookieDomain'),
-        })
-        .redirect(this.configService.get('auth.redirectUrl'));
+      this.authService.redirect(res, accessToken);
     } catch (error) {
       this.logger.error('GitHub OAuth callback failed:', error.stack);
       throw new OAuthError();
@@ -59,11 +95,7 @@ export class AuthController {
       this.logger.log(`google oauth callback success, req.user = ${user?.email}`);
 
       const { accessToken } = await this.authService.login(user);
-      res
-        .cookie(this.configService.get('auth.cookieTokenField'), accessToken, {
-          domain: this.configService.get('auth.cookieDomain'),
-        })
-        .redirect(this.configService.get('auth.redirectUrl'));
+      this.authService.redirect(res, accessToken);
     } catch (error) {
       this.logger.error('Google OAuth callback failed:', error.stack);
       throw new OAuthError();

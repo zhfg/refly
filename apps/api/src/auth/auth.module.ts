@@ -7,7 +7,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
 import { AuthService } from './auth.service';
-import { LocalStrategy } from './strategy/local.strategy';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { AuthController } from './auth.controller';
 import { GithubOauthStrategy } from './strategy/github-oauth.strategy';
@@ -34,7 +33,7 @@ import { GoogleOauthStrategy } from './strategy/google-oauth.strategy';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, GithubOauthStrategy, GoogleOauthStrategy],
+  providers: [AuthService, JwtStrategy, GithubOauthStrategy, GoogleOauthStrategy],
   exports: [AuthService],
   controllers: [AuthController],
 })

@@ -2,9 +2,10 @@
 
 import { type Options } from "@hey-api/client-fetch";
 import { type QueryClient } from "@tanstack/react-query";
-import { checkSettingsField, getActionResult, getDocumentDetail, getResourceDetail, getSettings, getShareContent, getSubscriptionPlan, getSubscriptionUsage, listActions, listCanvases, listDocuments, listLabelClasses, listLabelInstances, listModels, listResources, listSkillInstances, listSkills, listSkillTriggers, serveStatic } from "../requests/services.gen";
+import { checkSettingsField, getActionResult, getAuthConfig, getDocumentDetail, getResourceDetail, getSettings, getShareContent, getSubscriptionPlan, getSubscriptionUsage, listActions, listCanvases, listDocuments, listLabelClasses, listLabelInstances, listModels, listResources, listSkillInstances, listSkills, listSkillTriggers, serveStatic } from "../requests/services.gen";
 import { CheckSettingsFieldData, GetActionResultData, GetDocumentDetailData, GetResourceDetailData, GetShareContentData, ListCanvasesData, ListDocumentsData, ListLabelClassesData, ListLabelInstancesData, ListResourcesData, ListSkillInstancesData, ListSkillTriggersData } from "../requests/types.gen";
 import * as Common from "./common";
+export const prefetchUseGetAuthConfig = (queryClient: QueryClient, clientOptions: Options<unknown, true> = {}) => queryClient.prefetchQuery({ queryKey: Common.UseGetAuthConfigKeyFn(clientOptions), queryFn: () => getAuthConfig({ ...clientOptions }).then(response => response.data) });
 export const prefetchUseListCanvases = (queryClient: QueryClient, clientOptions: Options<ListCanvasesData, true> = {}) => queryClient.prefetchQuery({ queryKey: Common.UseListCanvasesKeyFn(clientOptions), queryFn: () => listCanvases({ ...clientOptions }).then(response => response.data) });
 export const prefetchUseListResources = (queryClient: QueryClient, clientOptions: Options<ListResourcesData, true> = {}) => queryClient.prefetchQuery({ queryKey: Common.UseListResourcesKeyFn(clientOptions), queryFn: () => listResources({ ...clientOptions }).then(response => response.data) });
 export const prefetchUseGetResourceDetail = (queryClient: QueryClient, clientOptions: Options<GetResourceDetailData, true>) => queryClient.prefetchQuery({ queryKey: Common.UseGetResourceDetailKeyFn(clientOptions), queryFn: () => getResourceDetail({ ...clientOptions }).then(response => response.data) });

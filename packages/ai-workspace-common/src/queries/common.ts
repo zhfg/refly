@@ -2,7 +2,11 @@
 
 import { type Options } from "@hey-api/client-fetch";
 import { UseQueryResult } from "@tanstack/react-query";
-import { addReferences, batchCreateResource, batchUpdateDocument, checkSettingsField, createCanvas, createCheckoutSession, createDocument, createLabelClass, createLabelInstance, createPortalSession, createResource, createShare, createSkillInstance, createSkillTrigger, deleteCanvas, deleteDocument, deleteLabelClass, deleteLabelInstance, deleteReferences, deleteResource, deleteShare, deleteSkillInstance, deleteSkillTrigger, getActionResult, getDocumentDetail, getResourceDetail, getSettings, getShareContent, getSubscriptionPlan, getSubscriptionUsage, invokeAction, invokeSkill, listActions, listCanvases, listDocuments, listLabelClasses, listLabelInstances, listModels, listResources, listSkillInstances, listSkills, listSkillTriggers, multiLingualWebSearch, pinSkillInstance, queryReferences, reindexResource, scrape, search, serveStatic, streamInvokeAction, streamInvokeSkill, unpinSkillInstance, updateCanvas, updateDocument, updateLabelClass, updateLabelInstance, updateResource, updateSettings, updateSkillInstance, updateSkillTrigger, upload } from "../requests/services.gen";
+import { addReferences, batchCreateResource, batchUpdateDocument, checkSettingsField, checkVerification, createCanvas, createCheckoutSession, createDocument, createLabelClass, createLabelInstance, createPortalSession, createResource, createShare, createSkillInstance, createSkillTrigger, createVerification, deleteCanvas, deleteDocument, deleteLabelClass, deleteLabelInstance, deleteReferences, deleteResource, deleteShare, deleteSkillInstance, deleteSkillTrigger, emailLogin, emailSignup, getActionResult, getAuthConfig, getDocumentDetail, getResourceDetail, getSettings, getShareContent, getSubscriptionPlan, getSubscriptionUsage, invokeAction, invokeSkill, listActions, listCanvases, listDocuments, listLabelClasses, listLabelInstances, listModels, listResources, listSkillInstances, listSkills, listSkillTriggers, multiLingualWebSearch, pinSkillInstance, queryReferences, reindexResource, resendVerification, scrape, search, serveStatic, streamInvokeAction, streamInvokeSkill, unpinSkillInstance, updateCanvas, updateDocument, updateLabelClass, updateLabelInstance, updateResource, updateSettings, updateSkillInstance, updateSkillTrigger, upload } from "../requests/services.gen";
+export type GetAuthConfigDefaultResponse = Awaited<ReturnType<typeof getAuthConfig>>["data"];
+export type GetAuthConfigQueryResult<TData = GetAuthConfigDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
+export const useGetAuthConfigKey = "GetAuthConfig";
+export const UseGetAuthConfigKeyFn = (clientOptions: Options<unknown, true> = {}, queryKey?: Array<unknown>) => [useGetAuthConfigKey, ...(queryKey ?? [clientOptions])];
 export type ListCanvasesDefaultResponse = Awaited<ReturnType<typeof listCanvases>>["data"];
 export type ListCanvasesQueryResult<TData = ListCanvasesDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
 export const useListCanvasesKey = "ListCanvases";
@@ -79,6 +83,21 @@ export type ServeStaticDefaultResponse = Awaited<ReturnType<typeof serveStatic>>
 export type ServeStaticQueryResult<TData = ServeStaticDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
 export const useServeStaticKey = "ServeStatic";
 export const UseServeStaticKeyFn = (clientOptions: Options<unknown, true> = {}, queryKey?: Array<unknown>) => [useServeStaticKey, ...(queryKey ?? [clientOptions])];
+export type EmailSignupMutationResult = Awaited<ReturnType<typeof emailSignup>>;
+export const useEmailSignupKey = "EmailSignup";
+export const UseEmailSignupKeyFn = (mutationKey?: Array<unknown>) => [useEmailSignupKey, ...(mutationKey ?? [])];
+export type EmailLoginMutationResult = Awaited<ReturnType<typeof emailLogin>>;
+export const useEmailLoginKey = "EmailLogin";
+export const UseEmailLoginKeyFn = (mutationKey?: Array<unknown>) => [useEmailLoginKey, ...(mutationKey ?? [])];
+export type CreateVerificationMutationResult = Awaited<ReturnType<typeof createVerification>>;
+export const useCreateVerificationKey = "CreateVerification";
+export const UseCreateVerificationKeyFn = (mutationKey?: Array<unknown>) => [useCreateVerificationKey, ...(mutationKey ?? [])];
+export type ResendVerificationMutationResult = Awaited<ReturnType<typeof resendVerification>>;
+export const useResendVerificationKey = "ResendVerification";
+export const UseResendVerificationKeyFn = (mutationKey?: Array<unknown>) => [useResendVerificationKey, ...(mutationKey ?? [])];
+export type CheckVerificationMutationResult = Awaited<ReturnType<typeof checkVerification>>;
+export const useCheckVerificationKey = "CheckVerification";
+export const UseCheckVerificationKeyFn = (mutationKey?: Array<unknown>) => [useCheckVerificationKey, ...(mutationKey ?? [])];
 export type CreateCanvasMutationResult = Awaited<ReturnType<typeof createCanvas>>;
 export const useCreateCanvasKey = "CreateCanvas";
 export const UseCreateCanvasKeyFn = (mutationKey?: Array<unknown>) => [useCreateCanvasKey, ...(mutationKey ?? [])];

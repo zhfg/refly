@@ -2,6 +2,23 @@
 
 import { createClient, createConfig, type Options, formDataBodySerializer } from '@hey-api/client-fetch';
 import type {
+  GetAuthConfigError,
+  GetAuthConfigResponse,
+  EmailSignupData,
+  EmailSignupError,
+  EmailSignupResponse2,
+  EmailLoginData,
+  EmailLoginError,
+  EmailLoginResponse2,
+  CreateVerificationData,
+  CreateVerificationError,
+  CreateVerificationResponse2,
+  ResendVerificationData,
+  ResendVerificationError,
+  ResendVerificationResponse,
+  CheckVerificationData,
+  CheckVerificationError,
+  CheckVerificationResponse2,
   ListCanvasesData,
   ListCanvasesError,
   ListCanvasesResponse,
@@ -180,6 +197,78 @@ import type {
 } from './types.gen';
 
 export const client = createClient(createConfig());
+
+/**
+ * Get auth config
+ * Get auth config
+ */
+export const getAuthConfig = <ThrowOnError extends boolean = false>(options?: Options<unknown, ThrowOnError>) => {
+  return (options?.client ?? client).get<GetAuthConfigResponse, GetAuthConfigError, ThrowOnError>({
+    ...options,
+    url: '/auth/config',
+  });
+};
+
+/**
+ * Sign up with email
+ * Sign up with email
+ */
+export const emailSignup = <ThrowOnError extends boolean = false>(options: Options<EmailSignupData, ThrowOnError>) => {
+  return (options?.client ?? client).post<EmailSignupResponse2, EmailSignupError, ThrowOnError>({
+    ...options,
+    url: '/auth/email/signup',
+  });
+};
+
+/**
+ * Login with email
+ * Login with email
+ */
+export const emailLogin = <ThrowOnError extends boolean = false>(options: Options<EmailLoginData, ThrowOnError>) => {
+  return (options?.client ?? client).post<EmailLoginResponse2, EmailLoginError, ThrowOnError>({
+    ...options,
+    url: '/auth/email/login',
+  });
+};
+
+/**
+ * Create verification session
+ * Create a verification session
+ */
+export const createVerification = <ThrowOnError extends boolean = false>(
+  options: Options<CreateVerificationData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<CreateVerificationResponse2, CreateVerificationError, ThrowOnError>({
+    ...options,
+    url: '/auth/verification/create',
+  });
+};
+
+/**
+ * Resend verification
+ * Resend verification
+ */
+export const resendVerification = <ThrowOnError extends boolean = false>(
+  options: Options<ResendVerificationData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<ResendVerificationResponse, ResendVerificationError, ThrowOnError>({
+    ...options,
+    url: '/auth/verification/resend',
+  });
+};
+
+/**
+ * Verify authentication session
+ * Verify account creation
+ */
+export const checkVerification = <ThrowOnError extends boolean = false>(
+  options: Options<CheckVerificationData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<CheckVerificationResponse2, CheckVerificationError, ThrowOnError>({
+    ...options,
+    url: '/auth/verification/check',
+  });
+};
 
 /**
  * List user canvases

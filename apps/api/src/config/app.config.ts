@@ -53,12 +53,19 @@ export default () => ({
       secret: process.env.JWT_SECRET || 'test',
       expiresIn: process.env.JWT_EXPIRATION_TIME || '14d',
     },
+    email: {
+      enabled: process.env.EMAIL_AUTH_ENABLED === 'true' || true,
+      sender: process.env.EMAIL_SENDER || 'Refly <notifications@refly.ai>',
+      resendApiKey: process.env.RESEND_API_KEY,
+    },
     github: {
+      enabled: process.env.GITHUB_AUTH_ENABLED === 'true' || false,
       clientId: process.env.GITHUB_CLIENT_ID || 'test',
       clientSecret: process.env.GITHUB_CLIENT_SECRET || 'test',
       callbackUrl: process.env.GITHUB_CALLBACK_URL || 'test',
     },
     google: {
+      enabled: process.env.GOOGLE_AUTH_ENABLED === 'true' || false,
       clientId: process.env.GOOGLE_CLIENT_ID || 'test',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'test',
       callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'test',
