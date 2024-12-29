@@ -46,7 +46,7 @@ const SkillResponseNodePreviewComponent = ({ resultId }: SkillResponseNodePrevie
     sourceListDrawerVisible: state.sourceListDrawer.visible,
   }));
 
-  console.log('SkillResponseNodePreview', result);
+  // console.log('SkillResponseNodePreview', result);
 
   const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
   const [loading, setLoading] = useState(false);
