@@ -24,6 +24,9 @@ import {
   OAuthError,
   PasswordIncorrect,
 } from '@refly-packages/errors';
+import { Queue } from 'bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
+import { QUEUE_SEND_VERIFICATION_EMAIL } from '@/utils/const';
 
 @Injectable()
 export class AuthService {
@@ -35,6 +38,7 @@ export class AuthService {
     private configService: ConfigService,
     private jwtService: JwtService,
     private miscService: MiscService,
+    @InjectQueue(QUEUE_SEND_VERIFICATION_EMAIL) private emailQueue: Queue,
   ) {
     this.resend = new Resend(this.configService.get('auth.email.resendApiKey'));
   }
@@ -219,9 +223,13 @@ export class AuthService {
       },
     });
 
-    // await this.sendVerificationEmail(sessionId, session);
+    await this.addSendVerificationEmailJob(sessionId);
 
     return session;
+  }
+
+  async addSendVerificationEmailJob(sessionId: string) {
+    await this.emailQueue.add('verifyEmail', { sessionId });
   }
 
   async sendVerificationEmail(sessionId: string, session?: VerificationSession) {

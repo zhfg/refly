@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-
+import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CommonModule } from '@/common/common.module';
 import { MiscModule } from '@/misc/misc.module';
@@ -7,10 +7,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
 import { AuthService } from './auth.service';
+import { AuthProcessor } from './auth.processor';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { AuthController } from './auth.controller';
 import { GithubOauthStrategy } from './strategy/github-oauth.strategy';
 import { GoogleOauthStrategy } from './strategy/google-oauth.strategy';
+
+import { QUEUE_SEND_VERIFICATION_EMAIL } from '@/utils/const';
 
 @Module({
   imports: [
@@ -20,6 +23,7 @@ import { GoogleOauthStrategy } from './strategy/google-oauth.strategy';
     PassportModule.register({
       session: true,
     }),
+    BullModule.registerQueue({ name: QUEUE_SEND_VERIFICATION_EMAIL }),
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
         // available options: https://github.com/auth0/node-jsonwebtoken#usage
@@ -33,7 +37,7 @@ import { GoogleOauthStrategy } from './strategy/google-oauth.strategy';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, JwtStrategy, GithubOauthStrategy, GoogleOauthStrategy],
+  providers: [AuthService, AuthProcessor, JwtStrategy, GithubOauthStrategy, GoogleOauthStrategy],
   exports: [AuthService],
   controllers: [AuthController],
 })
