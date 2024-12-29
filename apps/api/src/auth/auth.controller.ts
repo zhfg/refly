@@ -21,6 +21,7 @@ import {
   ResendVerificationResponse,
 } from '@refly-packages/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
+import { hours, minutes, Throttle } from '@nestjs/throttler';
 
 @Controller('v1/auth')
 export class AuthController {
@@ -33,18 +34,21 @@ export class AuthController {
     return buildSuccessResponse(this.authService.getAuthConfig());
   }
 
+  @Throttle({ default: { limit: 5, ttl: hours(1) } })
   @Post('email/signup')
   async emailSignup(@Body() { email, password }: EmailSignupRequest): Promise<EmailSignupResponse> {
     const { sessionId } = await this.authService.emailSignup(email, password);
     return buildSuccessResponse({ sessionId });
   }
 
+  @Throttle({ default: { limit: 5, ttl: hours(1) } })
   @Post('email/login')
   async emailLogin(@Body() { email, password }: EmailLoginRequest): Promise<EmailLoginResponse> {
     const { accessToken } = await this.authService.emailLogin(email, password);
     return buildSuccessResponse({ accessToken });
   }
 
+  @Throttle({ default: { limit: 5, ttl: hours(1) } })
   @Post('verification/create')
   async createVerification(
     @Body() params: CreateVerificationRequest,
@@ -53,6 +57,7 @@ export class AuthController {
     return buildSuccessResponse({ sessionId });
   }
 
+  @Throttle({ default: { limit: 1, ttl: minutes(1) } })
   @Post('verification/resend')
   async resendVerification(
     @Body() { sessionId }: ResendVerificationRequest,
@@ -61,6 +66,7 @@ export class AuthController {
     return buildSuccessResponse();
   }
 
+  @Throttle({ default: { limit: 5, ttl: minutes(10) } })
   @Post('verification/check')
   async checkVerification(
     @Body() params: CheckVerificationRequest,

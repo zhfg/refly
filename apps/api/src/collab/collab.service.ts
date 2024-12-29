@@ -11,6 +11,7 @@ import { Prisma } from '@prisma/client';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { MiscService } from '@/misc/misc.service';
 import { ConfigService } from '@nestjs/config';
+import { RedisService } from '@/common/redis.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { PrismaService } from '@/common/prisma.service';
 import { IDPrefix, incrementalMarkdownUpdate, state2Markdown } from '@refly-packages/utils';
@@ -26,6 +27,7 @@ export class CollabService {
   constructor(
     private rag: RAGService,
     private prisma: PrismaService,
+    private redis: RedisService,
     private elasticsearch: ElasticsearchService,
     private config: ConfigService,
     private miscService: MiscService,
@@ -43,12 +45,7 @@ export class CollabService {
       onDisconnect: async (payload) => {
         this.logger.log(`onDisconnect ${payload.documentName}`);
       },
-      extensions: [
-        new Redis({
-          host: this.config.get('redis.host'),
-          port: this.config.get('redis.port'),
-        }),
-      ],
+      extensions: [new Redis({ redis: this.redis })],
     });
   }
 
