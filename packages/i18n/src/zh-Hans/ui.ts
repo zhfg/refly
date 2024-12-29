@@ -218,6 +218,7 @@ const translations = {
     description: '请输入我们向 {{email}} 发送的验证码:',
     resendHint: '无法收到邮件？',
     resend: '重新发送',
+    resendSuccess: '验证邮件发送成功',
     submit: '提交',
   },
   projectDetail: {

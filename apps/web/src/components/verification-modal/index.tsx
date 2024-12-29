@@ -19,6 +19,7 @@ export const VerificationModal = () => {
     }),
   )
   const [isLoading, setIsLoading] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
   const [otp, setOtp] = useState("")
 
   const handleSubmit = async () => {
@@ -51,6 +52,17 @@ export const VerificationModal = () => {
     }
   }
 
+  const handleResend = async () => {
+    const { sessionId } = useVerificationStore.getState()
+    if (!sessionId) return
+
+    setResendLoading(true)
+    await getClient().resendVerification({ body: { sessionId } })
+    setResendLoading(false)
+
+    message.success(t("emailVerification.resendSuccess"))
+  }
+
   return (
     <Modal
       centered
@@ -64,14 +76,24 @@ export const VerificationModal = () => {
           {t("emailVerification.description", { email })}
         </p>
         <div className="flex items-center justify-center">
-          <Input.OTP size="large" value={otp} onChange={code => setOtp(code)} />
+          <Input.OTP
+            size="large"
+            autoFocus
+            value={otp}
+            onChange={code => setOtp(code)}
+          />
         </div>
         <div className="flex items-center text-sm">
           <div className="text-gray-500">
             {t("emailVerification.resendHint")}{" "}
           </div>
 
-          <Button type="link" size="small" className="text-sm">
+          <Button
+            type="link"
+            size="small"
+            className="text-sm"
+            loading={resendLoading}
+            onClick={handleResend}>
             {t("emailVerification.resend")}
           </Button>
         </div>

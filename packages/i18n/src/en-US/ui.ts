@@ -227,6 +227,7 @@ const translations = {
     description: 'Please enter the verification code sent to {{email}}:',
     resendHint: "Can't receive the email?",
     resend: 'Resend',
+    resendSuccess: 'Verification email sent successfully',
     submit: 'Submit',
   },
   projectDetail: {
