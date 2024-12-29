@@ -220,7 +220,7 @@ export const MemoNode = ({
       {!isPreview && selected && <MemoEditor editor={editor} bgColor={bgColor} onChangeBackground={setBgColor} />}
       <div
         ref={targetRef}
-        className={`relative group ${onNodeClick ? 'cursor-pointer' : ''}`}
+        className="relative"
         onMouseEnter={!isPreview ? handleMouseEnter : undefined}
         onMouseLeave={!isPreview ? handleMouseLeave : undefined}
         onClick={onNodeClick}
@@ -231,7 +231,7 @@ export const MemoNode = ({
           cursor: isOperating ? 'default' : 'grab',
         }}
       >
-        {!isPreview && !hideActions && <ActionButtons type="memo" nodeId={id} />}
+        {!isPreview && !hideActions && <ActionButtons type="memo" nodeId={id} isNodeHovered={isHovered} />}
 
         <div
           style={{ backgroundColor: bgColor }}

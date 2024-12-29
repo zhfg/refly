@@ -356,33 +356,26 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         return;
       }
 
-      // If in operating mode, handle operation mode logic
-      if (operatingNodeId) {
-        if (node.selected && node.id === operatingNodeId) {
-          return;
-        }
-        setOperatingNodeId(null);
-        setSelectedNode(node);
+      if (node.selected && node.id === operatingNodeId) {
+        // Already in operating mode, do nothing
         return;
       }
 
-      // Memo and skill nodes are not previewable
+      if (node.selected && !operatingNodeId) {
+        setOperatingNodeId(node.id);
+        event.stopPropagation();
+      } else {
+        setSelectedNode(node);
+        setOperatingNodeId(null);
+      }
+
+      // Memo nodes are not previewable
       if (node.type === 'memo' || node.type === 'skill') {
         return;
       }
 
       // Handle preview if enabled
-      const previewHandled = handleNodePreview(node);
-
-      // If preview wasn't handled (disabled), handle selection
-      if (!previewHandled) {
-        if (node.selected) {
-          setOperatingNodeId(node.id);
-          event.stopPropagation();
-        } else {
-          setSelectedNode(node);
-        }
-      }
+      handleNodePreview(node);
     },
     [operatingNodeId, handleNodePreview, setOperatingNodeId, setSelectedNode],
   );
