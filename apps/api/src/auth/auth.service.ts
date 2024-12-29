@@ -1,4 +1,4 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
 import argon2 from 'argon2';
 import { Profile } from 'passport';
@@ -16,6 +16,14 @@ import {
   CheckVerificationRequest,
   CreateVerificationRequest,
 } from '@refly-packages/openapi-schema';
+import {
+  AccountNotFoundError,
+  EmailAlreadyRegistered,
+  IncorrectVerificationCode,
+  InvalidVerificationSession,
+  OAuthError,
+  PasswordIncorrect,
+} from '@refly-packages/errors';
 
 @Injectable()
 export class AuthService {
@@ -104,7 +112,8 @@ export class AuthService {
     // oauth profile returns no email, this is invalid
     // TODO: Optimize error code
     if (emails?.length === 0) {
-      throw new UnauthorizedException('emails is empty, invalid oauth');
+      this.logger.warn(`emails is empty, invalid oauth`);
+      throw new OAuthError();
     }
     const email = emails[0].value;
 
@@ -169,7 +178,7 @@ export class AuthService {
   async emailSignup(email: string, password: string) {
     const existingUser = await this.prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      throw new UnauthorizedException('Email already registered');
+      throw new EmailAlreadyRegistered();
     }
 
     return this.createVerification({ email, purpose: 'signup', password });
@@ -178,16 +187,12 @@ export class AuthService {
   async emailLogin(email: string, password: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user || !user.password) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new AccountNotFoundError();
     }
 
     const isPasswordValid = await argon2.verify(user.password, password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    if (!user.emailVerified) {
-      throw new UnauthorizedException('Email not verified');
+      throw new PasswordIncorrect();
     }
 
     return this.login(user);
@@ -237,11 +242,11 @@ export class AuthService {
     });
 
     if (!verification) {
-      throw new UnauthorizedException('Invalid or expired verification session');
+      throw new InvalidVerificationSession();
     }
 
     if (verification.code !== code) {
-      throw new UnauthorizedException('Verification code is incorrect');
+      throw new IncorrectVerificationCode();
     }
 
     let user: UserModel;
@@ -259,7 +264,7 @@ export class AuthService {
     } else {
       user = await this.prisma.user.findUnique({ where: { email: verification.email } });
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new AccountNotFoundError();
       }
     }
 

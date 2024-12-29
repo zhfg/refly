@@ -33,6 +33,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   const verificationStore = useVerificationStoreShallow(state => ({
     setModalOpen: state.setModalOpen,
     setSessionId: state.setSessionId,
+    setEmail: state.setEmail,
   }))
 
   const { t } = useTranslation()
@@ -67,6 +68,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
       if (data?.success) {
         userStore.setLoginModalVisible(false)
         verificationStore.setModalOpen(true)
+        verificationStore.setEmail(values.email)
         verificationStore.setSessionId(data.data?.sessionId ?? null)
       }
     } else {

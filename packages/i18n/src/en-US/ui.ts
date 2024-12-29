@@ -224,12 +224,10 @@ const translations = {
   },
   emailVerification: {
     title: 'Email Verification',
-    description: 'Please enter the verification code sent to your email:',
+    description: 'Please enter the verification code sent to {{email}}:',
     resendHint: "Can't receive the email?",
     resend: 'Resend',
     submit: 'Submit',
-    success: 'Verification successful',
-    error: 'Verification failed. Please try again.',
   },
   projectDetail: {
     directory: {

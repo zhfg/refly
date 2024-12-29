@@ -6,17 +6,18 @@ import {
   useVerificationStoreShallow,
 } from "@refly-packages/ai-workspace-common/stores/verification"
 import getClient from "@refly-packages/ai-workspace-common/requests/proxiedRequest"
+import { InvalidVerificationSession } from "@refly/errors"
 
 export const VerificationModal = () => {
   const { t } = useTranslation()
-  const { sessionId, modalOpen, setModalOpen, setSessionId } =
-    useVerificationStoreShallow(state => ({
-      sessionId: state.sessionId,
+  const { email, modalOpen, setModalOpen, reset } = useVerificationStoreShallow(
+    state => ({
+      email: state.email,
       modalOpen: state.modalOpen,
       setModalOpen: state.setModalOpen,
-      setSessionId: state.setSessionId,
-    }))
-  console.log("sessionId", sessionId)
+      reset: state.reset,
+    }),
+  )
   const [isLoading, setIsLoading] = useState(false)
   const [otp, setOtp] = useState("")
 
@@ -38,14 +39,15 @@ export const VerificationModal = () => {
     })
     setIsLoading(false)
 
+    if (data?.errCode === new InvalidVerificationSession().code) {
+      reset()
+      return
+    }
+
     if (data?.success) {
+      reset()
       document.cookie = `_refly_ai_sid=${data?.data?.accessToken ?? ""}; path=/`
-      setSessionId(null)
-      setModalOpen(false)
-      message.success(t("emailVerification.success"))
       window.location.reload()
-    } else {
-      message.error(t("emailVerification.error"))
     }
   }
 
@@ -59,7 +61,7 @@ export const VerificationModal = () => {
       title={t("emailVerification.title")}>
       <div className="flex flex-col gap-4 py-1">
         <p className="text-sm text-gray-700">
-          {t("emailVerification.description")}
+          {t("emailVerification.description", { email })}
         </p>
         <div className="flex items-center justify-center">
           <Input.OTP size="large" value={otp} onChange={code => setOtp(code)} />

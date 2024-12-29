@@ -215,12 +215,10 @@ const translations = {
   },
   emailVerification: {
     title: '邮箱验证',
-    description: '请输入我们向您的邮箱发送的验证码:',
+    description: '请输入我们向 {{email}} 发送的验证码:',
     resendHint: '无法收到邮件？',
     resend: '重新发送',
     submit: '提交',
-    success: '验证成功',
-    error: '验证失败，请重试。',
   },
   projectDetail: {
     directory: {
