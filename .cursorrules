@@ -12,3 +12,6 @@ Always use useCallback for function props to maintain referential equality.
 Always specify proper dependency arrays in useEffect to prevent infinite loops.
 Always avoid inline object/array creation in render to prevent unnecessary re-renders.
 Always use proper key props when rendering lists.
+
+// Component Structure Rules
+Always split nested components with closures into separate components to avoid performance issues and improve code maintainability.
