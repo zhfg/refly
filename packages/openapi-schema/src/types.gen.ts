@@ -1176,7 +1176,7 @@ export type EmailSignupRequest = {
   password: string;
 };
 
-export type EmailSignupResponse = BaseResponse & {
+export type EmailSignupData = {
   /**
    * Access token (only returned if the email verification is turned off)
    */
@@ -1185,6 +1185,10 @@ export type EmailSignupResponse = BaseResponse & {
    * Verification session ID
    */
   sessionId?: string;
+};
+
+export type EmailSignupResponse = BaseResponse & {
+  data?: EmailSignupData;
 };
 
 /**
@@ -1210,11 +1214,15 @@ export type CreateVerificationRequest = {
   password?: string;
 };
 
-export type CreateVerificationResponse = BaseResponse & {
+export type CreateVerificationData = {
   /**
    * Verification session ID
    */
   sessionId?: string;
+};
+
+export type CreateVerificationResponse = BaseResponse & {
+  data?: CreateVerificationData;
 };
 
 /**
@@ -1241,7 +1249,7 @@ export type CheckVerificationRequest = {
   code: string;
 };
 
-export type CheckVerificationResponse = BaseResponse & {
+export type CheckVerificationData = {
   /**
    * Access token
    */
@@ -1249,7 +1257,11 @@ export type CheckVerificationResponse = BaseResponse & {
   /**
    * Verification purpose
    */
-  purpose?: VerificationPurpose;
+  purpose?: string;
+};
+
+export type CheckVerificationResponse = BaseResponse & {
+  data?: CheckVerificationData;
 };
 
 /**
@@ -1266,11 +1278,15 @@ export type EmailLoginRequest = {
   password: string;
 };
 
-export type EmailLoginResponse = BaseResponse & {
+export type EmailLoginData = {
   /**
    * Access token
    */
   accessToken?: string;
+};
+
+export type EmailLoginResponse = BaseResponse & {
+  data?: EmailLoginData;
 };
 
 export type GetUserSettingsResponse = BaseResponse & {
@@ -2696,7 +2712,7 @@ export type GetAuthConfigResponse = AuthConfigResponse;
 
 export type GetAuthConfigError = unknown;
 
-export type EmailSignupData = {
+export type EmailSignupData2 = {
   body: EmailSignupRequest;
 };
 
@@ -2704,7 +2720,7 @@ export type EmailSignupResponse2 = EmailSignupResponse;
 
 export type EmailSignupError = unknown;
 
-export type EmailLoginData = {
+export type EmailLoginData2 = {
   body: EmailLoginRequest;
 };
 
@@ -2712,7 +2728,7 @@ export type EmailLoginResponse2 = EmailLoginResponse;
 
 export type EmailLoginError = unknown;
 
-export type CreateVerificationData = {
+export type CreateVerificationData2 = {
   body: CreateVerificationRequest;
 };
 
@@ -2728,7 +2744,7 @@ export type ResendVerificationResponse = BaseResponse;
 
 export type ResendVerificationError = unknown;
 
-export type CheckVerificationData = {
+export type CheckVerificationData2 = {
   body: CheckVerificationRequest;
 };
 

@@ -2676,17 +2676,22 @@ components:
         password:
           type: string
           description: Password
+    EmailSignupData:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Access token (only returned if the email verification is turned off)
+        sessionId:
+          type: string
+          description: Verification session ID
     EmailSignupResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
-            accessToken:
-              type: string
-              description: Access token (only returned if the email verification is turned off)
-            sessionId:
-              type: string
-              description: Verification session ID
+            data:
+              $ref: '#/components/schemas/EmailSignupData'
     VerificationPurpose:
       type: string
       description: Verification purpose
@@ -2710,14 +2715,19 @@ components:
         password:
           type: string
           description: Password
+    CreateVerificationData:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: Verification session ID
     CreateVerificationResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
-            sessionId:
-              type: string
-              description: Verification session ID
+            data:
+              $ref: '#/components/schemas/CreateVerificationData'
     ResendVerificationRequest:
       type: object
       description: Resend verification request
@@ -2740,18 +2750,22 @@ components:
         code:
           type: string
           description: Verification code
+    CheckVerificationData:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Access token
+        purpose:
+          type: string
+          description: Verification purpose
     CheckVerificationResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
-            accessToken:
-              type: string
-              description: Access token
-            purpose:
-              type: string
-              description: Verification purpose
-              $ref: '#/components/schemas/VerificationPurpose'
+            data:
+              $ref: '#/components/schemas/CheckVerificationData'
     EmailLoginRequest:
       type: object
       description: Email login request
@@ -2765,14 +2779,19 @@ components:
         password:
           type: string
           description: Password
+    EmailLoginData:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Access token
     EmailLoginResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
         - type: object
           properties:
-            accessToken:
-              type: string
-              description: Access token
+            data:
+              $ref: '#/components/schemas/EmailLoginData'
     GetUserSettingsResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

@@ -4,19 +4,19 @@ import { createClient, createConfig, type Options, formDataBodySerializer } from
 import type {
   GetAuthConfigError,
   GetAuthConfigResponse,
-  EmailSignupData,
+  EmailSignupData2,
   EmailSignupError,
   EmailSignupResponse2,
-  EmailLoginData,
+  EmailLoginData2,
   EmailLoginError,
   EmailLoginResponse2,
-  CreateVerificationData,
+  CreateVerificationData2,
   CreateVerificationError,
   CreateVerificationResponse2,
   ResendVerificationData,
   ResendVerificationError,
   ResendVerificationResponse,
-  CheckVerificationData,
+  CheckVerificationData2,
   CheckVerificationError,
   CheckVerificationResponse2,
   ListCanvasesData,
@@ -213,7 +213,7 @@ export const getAuthConfig = <ThrowOnError extends boolean = false>(options?: Op
  * Sign up with email
  * Sign up with email
  */
-export const emailSignup = <ThrowOnError extends boolean = false>(options: Options<EmailSignupData, ThrowOnError>) => {
+export const emailSignup = <ThrowOnError extends boolean = false>(options: Options<EmailSignupData2, ThrowOnError>) => {
   return (options?.client ?? client).post<EmailSignupResponse2, EmailSignupError, ThrowOnError>({
     ...options,
     url: '/auth/email/signup',
@@ -224,7 +224,7 @@ export const emailSignup = <ThrowOnError extends boolean = false>(options: Optio
  * Login with email
  * Login with email
  */
-export const emailLogin = <ThrowOnError extends boolean = false>(options: Options<EmailLoginData, ThrowOnError>) => {
+export const emailLogin = <ThrowOnError extends boolean = false>(options: Options<EmailLoginData2, ThrowOnError>) => {
   return (options?.client ?? client).post<EmailLoginResponse2, EmailLoginError, ThrowOnError>({
     ...options,
     url: '/auth/email/login',
@@ -236,7 +236,7 @@ export const emailLogin = <ThrowOnError extends boolean = false>(options: Option
  * Create a verification session
  */
 export const createVerification = <ThrowOnError extends boolean = false>(
-  options: Options<CreateVerificationData, ThrowOnError>,
+  options: Options<CreateVerificationData2, ThrowOnError>,
 ) => {
   return (options?.client ?? client).post<CreateVerificationResponse2, CreateVerificationError, ThrowOnError>({
     ...options,
@@ -262,7 +262,7 @@ export const resendVerification = <ThrowOnError extends boolean = false>(
  * Verify account creation
  */
 export const checkVerification = <ThrowOnError extends boolean = false>(
-  options: Options<CheckVerificationData, ThrowOnError>,
+  options: Options<CheckVerificationData2, ThrowOnError>,
 ) => {
   return (options?.client ?? client).post<CheckVerificationResponse2, CheckVerificationError, ThrowOnError>({
     ...options,

@@ -183,10 +183,28 @@ const translations = {
       content: '登录失败，请重新登录',
     },
     loginModal: {
-      title: '欢迎来到 Refly, 登录以继续使用',
-      loginBtn: {
-        github: '使用 GitHub 登录',
-        google: '使用 Google 登录',
+      continue: '继续',
+      signin: '登录',
+      signup: '注册',
+      signinTitle: '登录 Refly',
+      signinSubtitle: '欢迎回来！请登录以继续使用',
+      signupTitle: '创建您的账户',
+      signupSubtitle: '欢迎！请填写详细信息以开始使用',
+      signinHint: '已有账户？',
+      signupHint: '还没有账户？',
+      oauthBtn: {
+        github: 'GitHub',
+        google: 'Google',
+      },
+      emailLabel: '邮箱地址',
+      emailPlaceholder: '请输入您的邮箱地址',
+      passwordLabel: '密码',
+      passwordPlaceholder: '请输入您的密码',
+      verifyRules: {
+        emailRequired: '邮箱地址不能为空',
+        emailInvalid: '请输入有效的邮箱地址',
+        passwordRequired: '密码不能为空',
+        passwordMin: '密码必须包含 8 个或更多字符',
       },
       loggingStatus: '登录中...',
       and: '及',
@@ -194,6 +212,15 @@ const translations = {
       privacyPolicy: '隐私政策',
       terms: '服务条款',
     },
+  },
+  emailVerification: {
+    title: '邮箱验证',
+    description: '请输入我们向您的邮箱发送的验证码:',
+    resendHint: '无法收到邮件？',
+    resend: '重新发送',
+    submit: '提交',
+    success: '验证成功',
+    error: '验证失败，请重试。',
   },
   projectDetail: {
     directory: {

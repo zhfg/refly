@@ -192,10 +192,28 @@ const translations = {
       content: 'Login failed, please try again',
     },
     loginModal: {
-      title: 'Welcome to Refly, sign in to continue',
-      loginBtn: {
-        github: 'Sign in with GitHub',
-        google: 'Sign in with Google',
+      continue: 'Continue',
+      signin: 'Sign in',
+      signup: 'Sign up',
+      signinTitle: 'Sign in to Refly',
+      signinSubtitle: 'Welcome back! Sign in to continue.',
+      signupTitle: 'Create your account',
+      signupSubtitle: 'Welcome! Please fill in the details to get started.',
+      signinHint: 'Already have an account?',
+      signupHint: "Don't have an account?",
+      oauthBtn: {
+        github: 'GitHub',
+        google: 'Google',
+      },
+      emailLabel: 'Email address',
+      emailPlaceholder: 'Enter your email address',
+      passwordLabel: 'Password',
+      passwordPlaceholder: 'Enter your password',
+      verifyRules: {
+        emailRequired: 'Email cannot be empty',
+        emailInvalid: 'Please enter a valid email address',
+        passwordRequired: 'Password cannot be empty',
+        passwordMin: 'Password must contain 8 or more characters',
       },
       loggingStatus: 'Signing in...',
       and: 'and',
@@ -203,6 +221,15 @@ const translations = {
       privacyPolicy: 'Privacy Policy',
       terms: 'Terms of Service',
     },
+  },
+  emailVerification: {
+    title: 'Email Verification',
+    description: 'Please enter the verification code sent to your email:',
+    resendHint: "Can't receive the email?",
+    resend: 'Resend',
+    submit: 'Submit',
+    success: 'Verification successful',
+    error: 'Verification failed. Please try again.',
   },
   projectDetail: {
     directory: {
@@ -1467,6 +1494,13 @@ const translations = {
   deck: {
     references: 'References',
     referencedBy: 'Referenced By',
+  },
+  verification: {
+    title: 'Verification Required',
+    otpPlaceholder: 'Enter verification code',
+    submit: 'Verify',
+    success: 'Verification successful',
+    error: 'Verification failed. Please try again.',
   },
 };
 

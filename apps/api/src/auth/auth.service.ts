@@ -214,7 +214,7 @@ export class AuthService {
       },
     });
 
-    await this.sendVerificationEmail(sessionId, session);
+    // await this.sendVerificationEmail(sessionId, session);
 
     return session;
   }

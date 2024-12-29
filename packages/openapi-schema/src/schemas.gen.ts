@@ -1452,6 +1452,20 @@ export const EmailSignupRequestSchema = {
   },
 } as const;
 
+export const EmailSignupDataSchema = {
+  type: 'object',
+  properties: {
+    accessToken: {
+      type: 'string',
+      description: 'Access token (only returned if the email verification is turned off)',
+    },
+    sessionId: {
+      type: 'string',
+      description: 'Verification session ID',
+    },
+  },
+} as const;
+
 export const EmailSignupResponseSchema = {
   allOf: [
     {
@@ -1460,13 +1474,8 @@ export const EmailSignupResponseSchema = {
     {
       type: 'object',
       properties: {
-        accessToken: {
-          type: 'string',
-          description: 'Access token (only returned if the email verification is turned off)',
-        },
-        sessionId: {
-          type: 'string',
-          description: 'Verification session ID',
+        data: {
+          $ref: '#/components/schemas/EmailSignupData',
         },
       },
     },
@@ -1500,6 +1509,16 @@ export const CreateVerificationRequestSchema = {
   },
 } as const;
 
+export const CreateVerificationDataSchema = {
+  type: 'object',
+  properties: {
+    sessionId: {
+      type: 'string',
+      description: 'Verification session ID',
+    },
+  },
+} as const;
+
 export const CreateVerificationResponseSchema = {
   allOf: [
     {
@@ -1508,9 +1527,8 @@ export const CreateVerificationResponseSchema = {
     {
       type: 'object',
       properties: {
-        sessionId: {
-          type: 'string',
-          description: 'Verification session ID',
+        data: {
+          $ref: '#/components/schemas/CreateVerificationData',
         },
       },
     },
@@ -1545,6 +1563,20 @@ export const CheckVerificationRequestSchema = {
   },
 } as const;
 
+export const CheckVerificationDataSchema = {
+  type: 'object',
+  properties: {
+    accessToken: {
+      type: 'string',
+      description: 'Access token',
+    },
+    purpose: {
+      type: 'string',
+      description: 'Verification purpose',
+    },
+  },
+} as const;
+
 export const CheckVerificationResponseSchema = {
   allOf: [
     {
@@ -1553,14 +1585,8 @@ export const CheckVerificationResponseSchema = {
     {
       type: 'object',
       properties: {
-        accessToken: {
-          type: 'string',
-          description: 'Access token',
-        },
-        purpose: {
-          type: 'string',
-          description: 'Verification purpose',
-          $ref: '#/components/schemas/VerificationPurpose',
+        data: {
+          $ref: '#/components/schemas/CheckVerificationData',
         },
       },
     },
@@ -1583,6 +1609,16 @@ export const EmailLoginRequestSchema = {
   },
 } as const;
 
+export const EmailLoginDataSchema = {
+  type: 'object',
+  properties: {
+    accessToken: {
+      type: 'string',
+      description: 'Access token',
+    },
+  },
+} as const;
+
 export const EmailLoginResponseSchema = {
   allOf: [
     {
@@ -1591,9 +1627,8 @@ export const EmailLoginResponseSchema = {
     {
       type: 'object',
       properties: {
-        accessToken: {
-          type: 'string',
-          description: 'Access token',
+        data: {
+          $ref: '#/components/schemas/EmailLoginData',
         },
       },
     },

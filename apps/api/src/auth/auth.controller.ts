@@ -16,6 +16,9 @@ import {
   EmailSignupResponse,
   ResendVerificationRequest,
   AuthConfigResponse,
+  EmailLoginResponse,
+  CreateVerificationResponse,
+  ResendVerificationResponse,
 } from '@refly-packages/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
 
@@ -37,19 +40,23 @@ export class AuthController {
   }
 
   @Post('email/login')
-  async emailLogin(@Body() { email, password }: EmailLoginRequest, @Res() res: Response) {
+  async emailLogin(@Body() { email, password }: EmailLoginRequest): Promise<EmailLoginResponse> {
     const { accessToken } = await this.authService.emailLogin(email, password);
-    this.authService.redirect(res, accessToken);
+    return buildSuccessResponse({ accessToken });
   }
 
   @Post('verification/create')
-  async createVerification(@Body() params: CreateVerificationRequest) {
+  async createVerification(
+    @Body() params: CreateVerificationRequest,
+  ): Promise<CreateVerificationResponse> {
     const { sessionId } = await this.authService.createVerification(params);
     return buildSuccessResponse({ sessionId });
   }
 
   @Post('verification/resend')
-  async resendVerification(@Body() { sessionId }: ResendVerificationRequest) {
+  async resendVerification(
+    @Body() { sessionId }: ResendVerificationRequest,
+  ): Promise<ResendVerificationResponse> {
     await this.authService.sendVerificationEmail(sessionId);
     return buildSuccessResponse();
   }
