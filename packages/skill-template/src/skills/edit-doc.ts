@@ -26,6 +26,7 @@ import { HighlightSelection, SelectedRange } from '../scheduler/module/editDocum
 import { InPlaceEditType } from '@refly-packages/utils';
 import { DocumentNotFoundError } from '@refly-packages/errors';
 import { DEFAULT_MODEL_CONTEXT_LIMIT } from '../scheduler/utils/constants';
+import { checkModelContextLenSupport } from '../scheduler/utils/model';
 
 export class EditDoc extends BaseSkill {
   name = 'editDoc';
@@ -80,6 +81,7 @@ export class EditDoc extends BaseSkill {
 
     // preprocess chat history, ensure chat history is not too long
     const usedChatHistory = truncateMessages(chatHistory);
+    const isModelContextLenSupport = checkModelContextLenSupport(modelInfo);
 
     // check if there is any context
     const hasContext = checkHasContext({
@@ -87,7 +89,7 @@ export class EditDoc extends BaseSkill {
       resources,
       documents,
     });
-    this.engine.logger.log(`checkHasContext: ${hasContext}`); 
+    this.engine.logger.log(`checkHasContext: ${hasContext}`);
 
     const maxTokens = modelInfo.contextLimit || DEFAULT_MODEL_CONTEXT_LIMIT;
     const queryTokens = countToken(query);
@@ -95,7 +97,7 @@ export class EditDoc extends BaseSkill {
     const remainingTokens = maxTokens - queryTokens - chatHistoryTokens;
     this.engine.logger.log(
       `maxTokens: ${maxTokens}, queryTokens: ${queryTokens}, chatHistoryTokens: ${chatHistoryTokens}, remainingTokens: ${remainingTokens}`,
-    ); 
+    );
 
     // 新增：定义长查询的阈值（可以根据实际需求调整）
     const LONG_QUERY_TOKENS_THRESHOLD = 100; // 约等于50-75个英文单词或25-35个中文字
@@ -156,7 +158,7 @@ export class EditDoc extends BaseSkill {
       locale,
       chatHistory: usedChatHistory,
       messages,
-      needPrepareContext,
+      needPrepareContext: needPrepareContext && isModelContextLenSupport,
       context,
       originalQuery: query,
       rewrittenQuery: optimizedQuery,
@@ -180,12 +182,13 @@ export class EditDoc extends BaseSkill {
     const canvasEditConfig = tplConfig?.canvasEditConfig?.value as CanvasEditConfig;
 
     if (!currentDoc?.document) {
-      throw new DocumentNotFoundError('No current document found for editing'); 
+      throw new DocumentNotFoundError('No current document found for editing');
     }
 
     // Filter out documents with isCurrent before proceeding
     if (config?.configurable?.documents) {
-      config.configurable.documents = config.configurable.documents.filter(doc => !doc?.metadata?.isCurrentContext) || [];
+      config.configurable.documents =
+        config.configurable.documents.filter((doc) => !doc?.metadata?.isCurrentContext) || [];
     }
 
     // Get selected range and edit type from metadata
