@@ -24,6 +24,8 @@ import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/
 import { ContextManager } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useEdgeStyles } from '@refly-packages/ai-workspace-common/components/canvas/constants';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
 
@@ -31,7 +33,8 @@ export const SkillNode = ({ data, selected, id }: NodeProps<SkillNode>) => {
   const [isHovered, setIsHovered] = useState(false);
   const { edges } = useCanvasData();
   const setNodeData = useSetNodeData();
-  const { getNode, deleteElements } = useReactFlow();
+  const edgeStyles = useEdgeStyles();
+  const { getNode, addEdges, deleteElements } = useReactFlow();
   const handleDeleteNode = useDeleteNode(
     {
       id,
@@ -80,9 +83,40 @@ export const SkillNode = ({ data, selected, id }: NodeProps<SkillNode>) => {
 
   const setContextItems = useCallback(
     (items: NodeItem[]) => {
+      // Update node data with new context node IDs
       setNodeData(id, { metadata: { contextNodeIds: items.map((item) => item.id) } });
+
+      const { edges = [] } = useCanvasStore.getState().data[canvasId] ?? {};
+
+      // Get existing edges connected to this node
+      const existingEdges = edges?.filter((edge) => edge.target === id) ?? [];
+      const existingSourceIds = new Set(existingEdges.map((edge) => edge.source));
+
+      // Find items that need new connections
+      const newItems = items.filter((item) => !existingSourceIds.has(item.id));
+
+      // Create new edges for unconnected items
+      const newEdges = newItems.map((item) => ({
+        id: `${item.id}-${id}`,
+        source: item.id,
+        target: id,
+        style: edgeStyles.hover,
+        type: 'default',
+      }));
+
+      // Find edges that need to be removed
+      const edgesToRemove = existingEdges.filter((edge) => !items.some((item) => item.id === edge.source));
+
+      // Apply changes
+      if (newEdges?.length > 0) {
+        addEdges(newEdges);
+      }
+
+      if (edgesToRemove?.length > 0) {
+        deleteElements({ edges: edgesToRemove });
+      }
     },
-    [id, setNodeData],
+    [id, canvasId, setNodeData, addEdges, deleteElements],
   );
 
   useEffect(() => {
@@ -129,8 +163,13 @@ export const SkillNode = ({ data, selected, id }: NodeProps<SkillNode>) => {
           entityType: 'canvas',
         },
         modelName: modelInfo?.name,
-        context: convertContextItemsToContext([]),
-        resultHistory: [],
+        context: convertContextItemsToContext(contextItems),
+        resultHistory: contextItems
+          .filter((item) => item.type === 'skillResponse')
+          .map((item) => ({
+            resultId: item.data?.entityId,
+            title: item.data?.title,
+          })),
         skillName: selectedSkill?.name,
       },
       node?.position,

@@ -23,6 +23,7 @@ import { useChatHistory } from './hooks/use-chat-history';
 
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { useSyncSelectedNodesToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-sync-selected-nodes-to-context';
 
 export const ChatPanel = () => {
   const { t } = useTranslation();
@@ -59,6 +60,9 @@ export const ChatPanel = () => {
   const { handleFilterErrorTip } = useContextFilterErrorTip();
   const { invokeAction, abortAction } = useInvokeAction();
   const { pinAllHistoryItems } = useChatHistory();
+
+  // automatically sync selected nodes to context
+  useSyncSelectedNodesToContext(contextItems, setContextItems);
 
   useEffect(() => {
     if (!selectedSkill?.configSchema?.items?.length) {

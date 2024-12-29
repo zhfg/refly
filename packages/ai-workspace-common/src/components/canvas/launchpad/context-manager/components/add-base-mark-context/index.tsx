@@ -3,7 +3,6 @@ import { Badge, Button, Popover, Tooltip } from 'antd';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { BaseMarkContextSelector } from '../base-mark-context-selector';
 import { useTranslation } from 'react-i18next';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
@@ -26,9 +25,7 @@ export const AddBaseMarkContext = ({ contextItems, setContextItems }: AddBaseMar
   };
 
   const handleSelect = (node: CanvasNode) => {
-    const contextStore = useContextPanelStore.getState();
-    const selectedNodes = contextStore.contextItems;
-    const isSelected = selectedNodes.find((item) => item.id === node.id);
+    const isSelected = contextItems.find((item) => item.id === node.id);
 
     if (!isSelected) {
       // Adding node
