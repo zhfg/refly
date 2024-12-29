@@ -204,7 +204,7 @@ export const SkillNode = ({ data, selected, id }: NodeProps<SkillNode>) => {
           ${getNodeCommonStyles({ selected, isHovered })}
         `}
       >
-        <ActionButtons type="skill" nodeId={id} />
+        <ActionButtons type="skill" nodeId={id} isNodeHovered={isHovered} />
 
         <CustomHandle
           type="target"
