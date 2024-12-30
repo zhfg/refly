@@ -49,7 +49,7 @@ const PlanItem = (props: {
       case 'max':
         return lookupKey === 'monthly' ? 29.9 : 299;
       case 'pro':
-        return lookupKey === 'monthly' ? 9.9 : 99;
+        return lookupKey === 'monthly' ? 10 : 100;
       case 'plus':
         return lookupKey === 'monthly' ? 4.9 : 49;
       case 'free':
@@ -271,7 +271,6 @@ export const PriceContent = (props: { source: PriceSource }) => {
     });
 
     if (data?.data?.url) {
-      setVisible(false);
       window.location.href = data.data.url;
     }
   };
