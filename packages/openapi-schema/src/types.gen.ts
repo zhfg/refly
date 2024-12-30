@@ -971,12 +971,7 @@ export type SubscriptionInterval = 'monthly' | 'yearly';
 /**
  * Subscription plan type
  */
-export type SubscriptionPlanType = 'free' | 'pro';
-
-/**
- * Price lookup key
- */
-export type PriceLookupKey = 'refly_pro_monthly' | 'refly_pro_yearly';
+export type SubscriptionPlanType = 'free' | 'plus' | 'pro' | 'max';
 
 /**
  * Subscription status
@@ -996,10 +991,6 @@ export type Subscription = {
    * Subscription ID
    */
   subscriptionId: string;
-  /**
-   * Lookup key
-   */
-  lookupKey?: string;
   /**
    * Subscription plan type
    */
@@ -2313,9 +2304,13 @@ export type CheckSettingsFieldResponse = BaseResponse & {
 
 export type CreateCheckoutSessionRequest = {
   /**
-   * Price lookup key
+   * Subscription plan type
    */
-  lookupKey: PriceLookupKey;
+  planType: SubscriptionPlanType;
+  /**
+   * Subscription billing interval
+   */
+  interval?: SubscriptionInterval;
 };
 
 export type CreateCheckoutSessionResponse = BaseResponse & {
@@ -2340,6 +2335,36 @@ export type CreatePortalSessionResponse = BaseResponse & {
      */
     url?: string;
   };
+};
+
+export type SubscriptionPlan = {
+  /**
+   * Subscription plan type
+   */
+  planType?: string;
+  /**
+   * Token quota per month (T1)
+   */
+  t1TokenQuota?: number;
+  /**
+   * Token quota per month (T2)
+   */
+  t2TokenQuota?: number;
+  /**
+   * Object storage quota (in bytes)
+   */
+  objectStorageQuota?: string;
+  /**
+   * Vector storage quota (in bytes)
+   */
+  vectorStorageQuota?: string;
+};
+
+export type GetSubscriptionPlansResponse = BaseResponse & {
+  /**
+   * Subscription plans
+   */
+  data?: Array<SubscriptionPlan>;
 };
 
 export type SubscriptionUsageData = {
@@ -3354,9 +3379,9 @@ export type CheckSettingsFieldResponse2 = CheckSettingsFieldResponse;
 
 export type CheckSettingsFieldError = unknown;
 
-export type GetSubscriptionPlanResponse = unknown;
+export type GetSubscriptionPlansResponse2 = GetSubscriptionPlansResponse;
 
-export type GetSubscriptionPlanError = unknown;
+export type GetSubscriptionPlansError = unknown;
 
 export type GetSubscriptionUsageResponse2 = GetSubscriptionUsageResponse;
 
