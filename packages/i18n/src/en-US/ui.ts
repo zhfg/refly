@@ -1049,8 +1049,8 @@ const translations = {
           fileStorage:
             'Used for storing resource texts, text and history versions of canvases, and uploaded files (images)',
         },
-        vectorStorage: 'Vector Storage ({{storage}})',
-        fileStorage: 'File Storage ({{storage}})',
+        vectorStorage: 'Vector Storage',
+        fileStorage: 'File Storage',
         fileStorageType: {
           note: 'Canvases',
           resource: 'Resources',

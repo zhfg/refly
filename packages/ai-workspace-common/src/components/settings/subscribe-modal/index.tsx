@@ -8,7 +8,9 @@ import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { IconCheck, IconQuestionCircle } from '@arco-design/web-react/icon';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
-import { AiFillInfoCircle } from 'react-icons/ai';
+
+const premiumModels = 'GPT-4o / Claude 3.5 Sonnet / Gemini Pro 1.5';
+const basicModels = 'GPT-4o Mini / Claude 3 Haiku / Gemini Flash 1.5';
 
 interface ModelFeatures {
   name: string;
@@ -21,12 +23,15 @@ const PlanItem = (props: {
   isActive: boolean;
   description: string;
   features: ModelFeatures[];
-  handleClick: () => void;
-  loading?: boolean;
+  handleClick?: () => void;
   lookupKey: string;
+  loadingInfo: {
+    isLoading: boolean;
+    plan: string;
+  };
 }) => {
   const { t } = useTranslation();
-  const { title, isActive, features, description, handleClick, lookupKey, loading } = props;
+  const { title, isActive, features, description, handleClick, lookupKey, loadingInfo } = props;
 
   const getPrice = (plan: 'max' | 'pro' | 'plus' | 'free') => {
     switch (plan) {
@@ -75,7 +80,7 @@ const PlanItem = (props: {
         className="subscribe-btn"
         type={isActive ? 'primary' : 'default'}
         onClick={handleClick}
-        loading={title === 'pro' && loading}
+        loading={loadingInfo.isLoading && loadingInfo.plan === title}
       >
         {getButtonText(title)}
       </Button>
@@ -111,21 +116,31 @@ export const SubscribeModal = () => {
   );
 
   const [lookupKey, setLookupKey] = useState<'monthly' | 'yearly'>('yearly');
-  const [loading, setLoading] = useState(false);
+  const [loadingInfo, setLoadingInfo] = useState<{
+    isLoading: boolean;
+    plan: string;
+  }>({
+    isLoading: false,
+    plan: '',
+  });
+
+  const modalTooltipContent = t('settings.subscription.subscribe.tooltip.modelToken');
+  const vectorStorageTooltipContent = t('settings.subscription.subscribe.tooltip.vectorStorage');
+  const fileStorageTooltipContent = t('settings.subscription.subscribe.tooltip.fileStorage');
 
   const freeFeatures: ModelFeatures[] = [
     {
       name: t('settings.subscription.subscribe.t2ModalOneTime', { tokenCount: '1,000,000' }),
-      details: 'GPT-4o Mini / Claude 3 Haiku',
-      tooltip: t('settings.subscription.subscribe.tooltip.modelToken'),
+      details: basicModels,
+      tooltip: modalTooltipContent,
     },
     {
-      name: t('settings.subscription.subscribe.vectorStorage', { storage: '10MB' }),
-      tooltip: t('settings.subscription.subscribe.tooltip.vectorStorage'),
+      name: `${t('settings.subscription.subscribe.vectorStorage')} (10MB)`,
+      tooltip: vectorStorageTooltipContent,
     },
     {
-      name: t('settings.subscription.subscribe.fileStorage', { storage: '100MB' }),
-      tooltip: t('settings.subscription.subscribe.tooltip.fileStorage'),
+      name: `${t('settings.subscription.subscribe.fileStorage')} (100MB)`,
+      tooltip: fileStorageTooltipContent,
     },
     {
       name: t('settings.subscription.subscribe.free.serviceSupport.name'),
@@ -136,21 +151,21 @@ export const SubscribeModal = () => {
   const plusFeatures: ModelFeatures[] = [
     {
       name: t('settings.subscription.subscribe.t1ModalMonthly', { tokenCount: '500,000' }),
-      details: 'GPT-4o / Claude 3.5 Sonnet',
-      tooltip: t('settings.subscription.subscribe.tooltip.modelToken'),
+      details: premiumModels,
+      tooltip: modalTooltipContent,
     },
     {
       name: t('settings.subscription.subscribe.t2ModalMonthly', { tokenCount: '5,000,000' }),
-      details: 'GPT-4o Mini / Claude 3 Haiku',
-      tooltip: t('settings.subscription.subscribe.tooltip.modelToken'),
+      details: basicModels,
+      tooltip: modalTooltipContent,
     },
     {
-      name: t('settings.subscription.subscribe.vectorStorage', { storage: '50MB' }),
-      tooltip: t('settings.subscription.subscribe.tooltip.vectorStorage'),
+      name: `${t('settings.subscription.subscribe.vectorStorage')} (50MB)`,
+      tooltip: vectorStorageTooltipContent,
     },
     {
-      name: t('settings.subscription.subscribe.fileStorage', { storage: '500MB' }),
-      tooltip: t('settings.subscription.subscribe.tooltip.fileStorage'),
+      name: `${t('settings.subscription.subscribe.fileStorage')} (500MB)`,
+      tooltip: fileStorageTooltipContent,
     },
     {
       name: t('settings.subscription.subscribe.plus.serviceSupport.name'),
@@ -161,21 +176,21 @@ export const SubscribeModal = () => {
   const proFeatures: ModelFeatures[] = [
     {
       name: t('settings.subscription.subscribe.t1ModalMonthly', { tokenCount: '1,000,000' }),
-      details: 'GPT-4o / Claude 3.5 Sonnet',
-      tooltip: t('settings.subscription.subscribe.tooltip.modelToken'),
+      details: premiumModels,
+      tooltip: modalTooltipContent,
     },
     {
       name: t('settings.subscription.subscribe.t2ModalUnlimited'),
-      details: 'GPT-4o Mini / Claude 3 Haiku',
-      tooltip: t('settings.subscription.subscribe.tooltip.modelToken'),
+      details: basicModels,
+      tooltip: modalTooltipContent,
     },
     {
-      name: t('settings.subscription.subscribe.vectorStorage', { storage: '100MB' }),
-      tooltip: t('settings.subscription.subscribe.tooltip.vectorStorage'),
+      name: `${t('settings.subscription.subscribe.vectorStorage')} (100MB)`,
+      tooltip: vectorStorageTooltipContent,
     },
     {
-      name: t('settings.subscription.subscribe.fileStorage', { storage: '1G' }),
-      tooltip: t('settings.subscription.subscribe.tooltip.fileStorage'),
+      name: `${t('settings.subscription.subscribe.fileStorage')} (1G)`,
+      tooltip: fileStorageTooltipContent,
     },
     {
       name: t('settings.subscription.subscribe.pro.serviceSupport.name'),
@@ -186,21 +201,21 @@ export const SubscribeModal = () => {
   const maxFeatures: ModelFeatures[] = [
     {
       name: t('settings.subscription.subscribe.t1ModalUnlimited'),
-      details: 'GPT-4o / Claude 3.5 Sonnet',
-      tooltip: t('settings.subscription.subscribe.tooltip.modelToken'),
+      details: premiumModels,
+      tooltip: modalTooltipContent,
     },
     {
       name: t('settings.subscription.subscribe.t2ModalUnlimited'),
-      details: 'GPT-4o Mini / Claude 3 Haiku',
-      tooltip: t('settings.subscription.subscribe.tooltip.modelToken'),
+      details: basicModels,
+      tooltip: modalTooltipContent,
     },
     {
-      name: t('settings.subscription.subscribe.vectorStorage', { storage: '500MB' }),
-      tooltip: t('settings.subscription.subscribe.tooltip.vectorStorage'),
+      name: `${t('settings.subscription.subscribe.vectorStorage')} (500MB)`,
+      tooltip: vectorStorageTooltipContent,
     },
     {
       name: t('settings.subscription.subscribe.fileStorage', { storage: '5G' }),
-      tooltip: t('settings.subscription.subscribe.tooltip.fileStorage'),
+      tooltip: fileStorageTooltipContent,
     },
     {
       name: t('settings.subscription.subscribe.max.serviceSupport.name'),
@@ -209,14 +224,20 @@ export const SubscribeModal = () => {
   ];
 
   const createCheckoutSession = async (plan: 'max' | 'pro' | 'plus') => {
-    if (loading) return;
-    setLoading(true);
+    if (loadingInfo.isLoading) return;
+    setLoadingInfo({
+      isLoading: true,
+      plan,
+    });
     const { data } = await getClient().createCheckoutSession({
       body: {
         lookupKey: `refly_${plan}_${lookupKey}`,
       },
     });
-    setLoading(false);
+    setLoadingInfo({
+      isLoading: false,
+      plan: '',
+    });
     if (data?.data?.url) {
       window.location.href = data.data.url;
     }
@@ -270,7 +291,7 @@ export const SubscribeModal = () => {
               setVisible(false);
             }}
             lookupKey={lookupKey}
-            loading={loading}
+            loadingInfo={loadingInfo}
           />
 
           <PlanItem
@@ -280,7 +301,7 @@ export const SubscribeModal = () => {
             isActive={true}
             handleClick={() => createCheckoutSession('plus')}
             lookupKey={lookupKey}
-            loading={loading}
+            loadingInfo={loadingInfo}
           />
 
           <PlanItem
@@ -290,7 +311,7 @@ export const SubscribeModal = () => {
             isActive={true}
             handleClick={() => createCheckoutSession('pro')}
             lookupKey={lookupKey}
-            loading={loading}
+            loadingInfo={loadingInfo}
           />
 
           <PlanItem
@@ -300,7 +321,7 @@ export const SubscribeModal = () => {
             isActive={true}
             handleClick={() => createCheckoutSession('max')}
             lookupKey={lookupKey}
-            loading={loading}
+            loadingInfo={loadingInfo}
           />
         </div>
       </div>

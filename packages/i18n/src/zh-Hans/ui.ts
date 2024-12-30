@@ -1032,8 +1032,8 @@ const translations = {
           vectorStorage: '用于存储资源和画布的语义化向量数据',
           fileStorage: '用于存储资源文本、画布文本和历史版本、以及上传的文件（图片）数据',
         },
-        vectorStorage: '向量存储 ({{storage}})',
-        fileStorage: '文件存储 ({{storage}})',
+        vectorStorage: '向量存储',
+        fileStorage: '文件存储',
         fileStorageType: {
           note: '画布',
           resource: '资源',
