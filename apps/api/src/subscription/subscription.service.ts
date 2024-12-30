@@ -48,7 +48,10 @@ export class SubscriptionService implements OnModuleInit {
     });
     if (modelInfos.length === 0) {
       modelInfos = await this.prisma.modelInfo.createManyAndReturn({
-        data: defaultModelList,
+        data: defaultModelList.map((m) => ({
+          ...m,
+          capabilities: JSON.stringify(m.capabilities),
+        })),
       });
       this.logger.log(`Model info created: ${modelInfos.map((m) => m.name).join(',')}`);
     } else {

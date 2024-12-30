@@ -17,6 +17,10 @@ export const modelMap: Record<string, ModelInfo> = {
     tier: 't1',
     contextLimit: 128000,
     maxOutput: 16384,
+    capabilities: {
+      functionCall: true,
+      vision: true,
+    },
   },
   [LLMType.GPT4oMini]: {
     name: LLMType.GPT4oMini,
@@ -25,6 +29,10 @@ export const modelMap: Record<string, ModelInfo> = {
     tier: 't2',
     contextLimit: 128000,
     maxOutput: 16384,
+    capabilities: {
+      functionCall: true,
+      vision: true,
+    },
   },
   [LLMType.Claude35Sonnet]: {
     name: LLMType.Claude35Sonnet,
@@ -33,6 +41,10 @@ export const modelMap: Record<string, ModelInfo> = {
     tier: 't1',
     contextLimit: 200000,
     maxOutput: 8192,
+    capabilities: {
+      functionCall: true,
+      vision: true,
+    },
   },
   [LLMType.Claude3Haiku]: {
     name: LLMType.Claude3Haiku,
@@ -41,6 +53,9 @@ export const modelMap: Record<string, ModelInfo> = {
     tier: 't2',
     contextLimit: 200000,
     maxOutput: 8192,
+    capabilities: {
+      functionCall: true,
+    },
   },
   [LLMType.GeminiFlash15]: {
     name: LLMType.GeminiFlash15,
@@ -49,6 +64,10 @@ export const modelMap: Record<string, ModelInfo> = {
     tier: 't2',
     contextLimit: 1000000,
     maxOutput: 8192,
+    capabilities: {
+      functionCall: true,
+      vision: true,
+    },
   },
   [LLMType.GeminiPro15]: {
     name: LLMType.GeminiPro15,
@@ -57,6 +76,10 @@ export const modelMap: Record<string, ModelInfo> = {
     tier: 't1',
     contextLimit: 2000000,
     maxOutput: 8192,
+    capabilities: {
+      functionCall: true,
+      vision: true,
+    },
   },
 };
 
