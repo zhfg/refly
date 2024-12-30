@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { useCookie } from 'react-use';
 import * as Y from 'yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
@@ -41,6 +41,9 @@ const getEdgesFromYDoc = (ydoc: Y.Doc) => {
 
 export const CanvasProvider = ({ canvasId, children }: { canvasId: string; children: React.ReactNode }) => {
   const [token] = useCookie('_refly_ai_sid');
+  const [connectionAttempts, setConnectionAttempts] = useState(0);
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 2000;
 
   const { setCanvasLocalSynced, setCanvasRemoteSynced } = useCanvasStoreShallow((state) => ({
     setCanvasLocalSynced: state.setCanvasLocalSynced,
@@ -53,11 +56,14 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
     setEdges: state.setEdges,
   }));
 
-  const setCanvasDataFromYDoc = (ydoc: Y.Doc) => {
-    setTitle(canvasId, getTitleFromYDoc(ydoc));
-    setNodes(canvasId, getNodesFromYDoc(ydoc));
-    setEdges(canvasId, getEdgesFromYDoc(ydoc));
-  };
+  const setCanvasDataFromYDoc = useCallback(
+    (ydoc: Y.Doc) => {
+      setTitle(canvasId, getTitleFromYDoc(ydoc));
+      setNodes(canvasId, getNodesFromYDoc(ydoc));
+      setEdges(canvasId, getEdgesFromYDoc(ydoc));
+    },
+    [canvasId, setTitle, setNodes, setEdges],
+  );
 
   const { remote: provider, local: localProvider } = useMemo(() => {
     const existingProvider = providerCache.get(canvasId);
@@ -76,28 +82,28 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       forceSyncInterval: 5000,
     });
 
-    remoteProvider.on('synced', () => {
+    const handleSync = () => {
       setCanvasRemoteSynced(canvasId, Date.now());
-    });
+    };
+
+    remoteProvider.on('synced', handleSync);
 
     const localProvider = new IndexeddbPersistence(canvasId, doc);
 
-    localProvider.on('synced', () => {
+    const handleLocalSync = () => {
       setCanvasDataFromYDoc(doc);
       setCanvasLocalSynced(canvasId, Date.now());
-    });
+    };
+
+    localProvider.on('synced', handleLocalSync);
 
     const providers = { remote: remoteProvider, local: localProvider };
-
     providerCache.set(canvasId, providers);
+
     return providers;
-  }, [canvasId, token]);
+  }, [canvasId, token, setCanvasRemoteSynced, setCanvasLocalSynced, setCanvasDataFromYDoc]);
 
-  // Add connection status management
-  const [connectionAttempts, setConnectionAttempts] = useState(0);
-  const MAX_RETRIES = 3;
-  const RETRY_DELAY = 2000;
-
+  // Handle connection retries
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
 
@@ -111,16 +117,19 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       }
     };
 
-    provider.on('status', ({ status }) => {
+    const handleStatus = ({ status }: { status: string }) => {
       if (status === 'connected') {
         setConnectionAttempts(0);
       } else {
         handleConnection();
       }
-    });
+    };
+
+    provider.on('status', handleStatus);
 
     return () => {
       clearTimeout(timeoutId);
+      provider.off('status', handleStatus);
     };
   }, [provider, connectionAttempts]);
 
@@ -182,24 +191,34 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       isDestroyed = true;
       cleanup?.(); // Clean up observers
       provider.off('connect', handleConnect);
-
-      // Ensure clean disconnection
-      if (provider.status === 'connected') {
-        provider.forceSync();
-      }
-
-      // Remove from cache and destroy
-      providerCache.delete(canvasId);
-      provider.destroy();
     };
-  }, [provider, canvasId, setNodes, setEdges, setTitle]);
+  }, [provider, canvasId, setNodes, setEdges, setTitle, setCanvasDataFromYDoc]);
 
-  // Add null check before rendering
-  if (!provider) {
-    return null;
-  }
+  // Add cleanup on unmount
+  useEffect(() => {
+    return () => {
+      const providers = providerCache.get(canvasId);
+      if (providers) {
+        if (providers.remote.status === 'connected') {
+          providers.remote.forceSync();
+        }
+        providers.remote.destroy();
+        providers.local.destroy();
+        providerCache.delete(canvasId);
+      }
+    };
+  }, [canvasId]);
 
-  return <CanvasContext.Provider value={{ canvasId, provider, localProvider }}>{children}</CanvasContext.Provider>;
+  const value = useMemo(
+    () => ({
+      canvasId,
+      provider,
+      localProvider,
+    }),
+    [canvasId, provider, localProvider],
+  );
+
+  return <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>;
 };
 
 export const useCanvasContext = () => {
