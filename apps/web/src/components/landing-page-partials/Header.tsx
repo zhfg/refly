@@ -1,14 +1,14 @@
 import Logo from "@/assets/logo.svg"
 import { Button } from "antd"
-import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 import { useTranslation } from "react-i18next"
+import { useAuthStoreShallow } from "@refly-packages/ai-workspace-common/stores/auth"
 import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
 import { IconDown } from "@refly-packages/ai-workspace-common/components/common/icon"
 
 function Header() {
   const { t } = useTranslation()
-  const { setLoginModalVisible } = useUserStoreShallow(state => ({
-    setLoginModalVisible: state.setLoginModalVisible,
+  const { setLoginModalOpen } = useAuthStoreShallow(state => ({
+    setLoginModalOpen: state.setLoginModalOpen,
   }))
 
   return (
@@ -28,7 +28,7 @@ function Header() {
               <IconDown className="ml-1 transition-transform duration-200 group-hover:rotate-180" />
             </Button>
           </UILocaleList>
-          <Button type="primary" onClick={() => setLoginModalVisible(true)}>
+          <Button type="primary" onClick={() => setLoginModalOpen(true)}>
             {t("landingPage.tryForFree")}
           </Button>
           <Button

@@ -22,7 +22,6 @@ export const useGetUserSettings = () => {
     setToken: state.setToken,
     setIsCheckingLoginStatus: state.setIsCheckingLoginStatus,
     setIsLogin: state.setIsLogin,
-    loginModalVisible: state.loginModalVisible,
     userProfile: state.userProfile,
     localSettings: state.localSettings,
     isCheckingLoginStatus: state.isCheckingLoginStatus,

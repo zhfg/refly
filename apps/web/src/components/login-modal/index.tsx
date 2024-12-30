@@ -2,8 +2,6 @@ import { Button, Modal, Divider, Input, Form } from "antd"
 import { Link } from "@refly-packages/ai-workspace-common/utils/router"
 import { useState } from "react"
 
-import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
-
 import Logo from "@/assets/logo.svg"
 import Google from "@/assets/google.svg"
 import GitHub from "@/assets/github-mark.svg"
@@ -22,15 +20,13 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   const [isSignUpMode, setIsSignUpMode] = useState(false)
   const [form] = Form.useForm<FormValues>()
 
-  const userStore = useUserStoreShallow(state => ({
-    setIsLogin: state.setIsLogin,
-    setLoginProvider: state.setLoginProvider,
-    isLogin: state.isLogin,
-    loginProvider: state.loginProvider,
-    loginModalVisible: state.loginModalVisible,
-    setLoginModalVisible: state.setLoginModalVisible,
-  }))
   const authStore = useAuthStoreShallow(state => ({
+    loginInProgress: state.loginInProgress,
+    loginProvider: state.loginProvider,
+    loginModalOpen: state.loginModalOpen,
+    setLoginInProgress: state.setLoginInProgress,
+    setLoginProvider: state.setLoginProvider,
+    setLoginModalOpen: state.setLoginModalOpen,
     setVerificationModalOpen: state.setVerificationModalOpen,
     setResetPasswordModalOpen: state.setResetPasswordModalOpen,
     setSessionId: state.setSessionId,
@@ -47,16 +43,16 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
    * 3. Subsequently, make requests with the cookie or login status
    */
   const handleLogin = (provider: "github" | "google") => {
-    userStore.setIsLogin(true)
-    userStore.setLoginProvider(provider)
+    authStore.setLoginInProgress(true)
+    authStore.setLoginProvider(provider)
     location.href = `${getServerOrigin()}/v1/auth/${provider}`
   }
 
   const handleEmailAuth = async () => {
     const values = await form.validateFields()
 
-    userStore.setIsLogin(true)
-    userStore.setLoginProvider("email")
+    authStore.setLoginProvider("email")
+    authStore.setLoginInProgress(true)
 
     if (isSignUpMode) {
       const { data } = await getClient().emailSignup({
@@ -65,13 +61,13 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
           password: values.password,
         },
       })
-      userStore.setIsLogin(false)
+      authStore.setLoginInProgress(false)
 
       if (data?.success) {
-        userStore.setLoginModalVisible(false)
-        authStore.setVerificationModalOpen(true)
+        authStore.setLoginModalOpen(false)
         authStore.setEmail(values.email)
         authStore.setSessionId(data.data?.sessionId ?? null)
+        authStore.setVerificationModalOpen(true)
       }
     } else {
       const { data } = await getClient().emailLogin({
@@ -80,10 +76,10 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
           password: values.password,
         },
       })
-      userStore.setIsLogin(false)
+      authStore.setLoginInProgress(false)
 
       if (data?.success) {
-        userStore.setLoginModalVisible(false)
+        authStore.setLoginModalOpen(false)
         document.cookie = `_refly_ai_sid=${data.data?.accessToken ?? ""}; path=/`
         authStore.reset()
         window.location.reload()
@@ -92,7 +88,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   }
 
   const handleResetPassword = () => {
-    userStore.setLoginModalVisible(false)
+    authStore.setLoginModalOpen(false)
     authStore.setResetPasswordModalOpen(true)
   }
 
@@ -103,11 +99,11 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
 
   return (
     <Modal
-      open={props.visible || userStore.loginModalVisible}
+      open={props.visible || authStore.loginModalOpen}
       centered
       footer={null}
       width={410}
-      onCancel={() => userStore.setLoginModalVisible(false)}>
+      onCancel={() => authStore.setLoginModalOpen(false)}>
       <div className="relative flex h-full w-full flex-col items-center justify-center">
         <div className="flex flex-row items-center">
           <img src={Logo} alt="Refly" style={{ width: 24, height: 24 }} />
@@ -132,24 +128,28 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
           <Button
             onClick={() => handleLogin("github")}
             className="mt-2 h-8 w-40"
-            loading={userStore.isLogin && userStore.loginProvider === "github"}
+            loading={
+              authStore.loginInProgress && authStore.loginProvider === "github"
+            }
             disabled={
-              userStore.isLogin && userStore.loginProvider !== "github"
+              authStore.loginInProgress && authStore.loginProvider !== "github"
             }>
             <img src={GitHub} alt="github" className="mr-1 h-4 w-4" />
-            {userStore.isLogin && userStore.loginProvider === "github"
+            {authStore.loginInProgress && authStore.loginProvider === "github"
               ? t("landingPage.loginModal.loggingStatus")
               : t("landingPage.loginModal.oauthBtn.github")}
           </Button>
           <Button
             onClick={() => handleLogin("google")}
             className="mt-2 h-8 w-40"
-            loading={userStore.isLogin && userStore.loginProvider === "google"}
+            loading={
+              authStore.loginInProgress && authStore.loginProvider === "google"
+            }
             disabled={
-              userStore.isLogin && userStore.loginProvider !== "google"
+              authStore.loginInProgress && authStore.loginProvider !== "google"
             }>
             <img src={Google} alt="google" className="mr-1 h-4 w-4" />
-            {userStore.isLogin && userStore.loginProvider === "google"
+            {authStore.loginInProgress && authStore.loginProvider === "google"
               ? t("landingPage.loginModal.loggingStatus")
               : t("landingPage.loginModal.oauthBtn.google")}
           </Button>
@@ -233,7 +233,9 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
             <Button
               type="primary"
               onClick={handleEmailAuth}
-              loading={userStore.isLogin && userStore.loginProvider === "email"}
+              loading={
+                authStore.loginInProgress && authStore.loginProvider === "email"
+              }
               className="h-10 w-full text-base">
               {t("landingPage.loginModal.continue")}
             </Button>
@@ -270,7 +272,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
             to={`/terms`}
             className="mx-1 text-xs text-green-600 underline"
             onClick={() => {
-              userStore.setLoginModalVisible(false)
+              authStore.setLoginModalOpen(false)
             }}>
             {t("landingPage.loginModal.terms")}
           </Link>
@@ -279,7 +281,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
             to={`/privacy`}
             className="mx-1 text-xs text-green-600 underline"
             onClick={() => {
-              userStore.setLoginModalVisible(false)
+              authStore.setLoginModalOpen(false)
             }}>
             {t("landingPage.loginModal.privacyPolicy")}
           </Link>

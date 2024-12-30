@@ -6,12 +6,12 @@ import AnimatedShinyText from "@/components/magicui/animated-shiny-text"
 import { ArrowRightIcon } from "lucide-react"
 import { Button } from "antd"
 import BlurImage from "@/components/common/BlurImage"
-import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
+import { useAuthStoreShallow } from "@refly-packages/ai-workspace-common/stores/auth"
 
 function HeroHome() {
   const { t, i18n } = useTranslation()
-  const { setLoginModalVisible } = useUserStoreShallow(state => ({
-    setLoginModalVisible: state.setLoginModalVisible,
+  const { setLoginModalOpen } = useAuthStoreShallow(state => ({
+    setLoginModalOpen: state.setLoginModalOpen,
   }))
 
   const isZhCN = i18n.language === "zh-CN"
@@ -61,7 +61,7 @@ function HeroHome() {
               <div className="mb-5">
                 <div className="z-10 flex items-center justify-center">
                   <div
-                    onClick={() => setLoginModalVisible(true)}
+                    onClick={() => setLoginModalOpen(true)}
                     className={cn(
                       "group inline-flex items-center justify-center rounded-lg border border-black/5 bg-white text-base hover:cursor-pointer hover:bg-neutral-50 dark:border-white/5",
                       "px-4",
@@ -201,7 +201,7 @@ function HeroHome() {
             {/* Add buttons after the description paragraph */}
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
               <Button
-                onClick={() => setLoginModalVisible(true)}
+                onClick={() => setLoginModalOpen(true)}
                 size="large"
                 type="primary"
                 className="cursor-pointer">

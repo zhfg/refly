@@ -24,9 +24,9 @@ export const AppLayout = (props: AppLayoutProps) => {
   const userStore = useUserStoreShallow(state => ({
     userProfile: state.userProfile,
     isLogin: state.isLogin,
-    loginModalVisible: state.loginModalVisible,
   }))
   const authStore = useAuthStoreShallow(state => ({
+    loginModalOpen: state.loginModalOpen,
     verificationModalOpen: state.verificationModalOpen,
     resetPasswordModalOpen: state.resetPasswordModalOpen,
   }))
@@ -57,7 +57,7 @@ export const AppLayout = (props: AppLayoutProps) => {
           }}>
           <Content>{props.children}</Content>
         </Layout>
-        {userStore.loginModalVisible && <LoginModal />}
+        {authStore.loginModalOpen && <LoginModal />}
         {authStore.verificationModalOpen && <VerificationModal />}
         {authStore.resetPasswordModalOpen && <ResetPasswordModal />}
         <SubscribeModal />

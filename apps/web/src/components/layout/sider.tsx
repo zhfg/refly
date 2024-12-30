@@ -124,8 +124,6 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
   const location = useLocation()
   const userStore = useUserStoreShallow(state => ({
     userProfile: state.userProfile,
-    loginModalVisible: state.loginModalVisible,
-    setLoginModalVisible: state.setLoginModalVisible,
   }))
 
   const { isLoadingCanvas } = useHandleSiderData(true)
