@@ -35,7 +35,7 @@ import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
-
+import './index.scss';
 const selectionStyles = `
   .react-flow__selection {
     background: rgba(0, 150, 143, 0.03) !important;

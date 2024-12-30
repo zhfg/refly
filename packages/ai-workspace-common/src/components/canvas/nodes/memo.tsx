@@ -201,7 +201,22 @@ export const MemoNode = ({
     const markdown = editor.storage.markdown.getMarkdown();
     const maxLength = 1000;
 
-    editor.commands.setContent(markdown.slice(0, maxLength));
+    if (markdown.length > maxLength) {
+      const truncatedContent = markdown.slice(0, maxLength);
+      const currentPos = editor.state.selection.from;
+
+      editor.commands.command(({ tr }) => {
+        tr.setMeta('preventSelectionChange', true);
+        return true;
+      });
+
+      editor.commands.setContent(truncatedContent);
+
+      if (currentPos <= maxLength) {
+        editor.commands.setTextSelection(currentPos);
+      }
+    }
+
     setNodeDataByEntity(
       {
         entityId: data?.entityId,
