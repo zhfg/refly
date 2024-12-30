@@ -1016,7 +1016,9 @@ const translations = {
       subscriptionManagement: '管理账单及订阅',
       subscriptionStatus: {
         free: 'FREE',
+        plus: 'PLUS',
         pro: 'PRO',
+        max: 'MAX',
       },
       subscribe: {
         title: '选择适合您的套餐',
@@ -1030,39 +1032,46 @@ const translations = {
           vectorStorage: '用于存储资源和画布的语义化向量数据',
           fileStorage: '用于存储资源文本、画布文本和历史版本、以及上传的文件（图片）数据',
         },
-        vectorStorage: '向量存储',
-        fileStorage: '文件存储',
+        vectorStorage: '向量存储 ({{storage}})',
+        fileStorage: '文件存储 ({{storage}})',
         fileStorageType: {
           note: '画布',
           resource: '资源',
           file: '上传文件',
         },
-        pro: {
+        upgrade: '立即升级',
+        continueFree: '继续免费',
+        t1ModalMonthly: '高阶模型 ({{tokenCount}} tokens / 每月)',
+        t2ModalMonthly: '基础模型 ({{tokenCount}} tokens / 每月)',
+        t2ModalOneTime: '基础模型 ({{tokenCount}} tokens / 一次性)',
+        t1ModalUnlimited: '高阶模型 (无限量)',
+        t2ModalUnlimited: '基础模型 (无限量)',
+        free: {
+          description: '一切都准备就绪，只等您开始上手',
+          serviceSupport: {
+            name: '服务支持',
+            details: '社区支持（微信或飞书群）',
+          },
+        },
+        plus: {
           description: '享受先进的高阶模型，并拥有更充裕的模型使用和存储额度',
-          buttonText: '立即升级',
-          t1Token: {
-            name: '高阶模型',
-            count: '1,000,000 tokens / 每月',
-          },
-          t2Token: {
-            name: '基础模型',
-            count: '5,000,000 tokens / 每月',
-          },
           serviceSupport: {
             name: '服务支持',
             details: '高优邮件支持',
           },
         },
-        free: {
-          description: '一切都准备就绪，只等您开始上手',
-          buttonText: '继续免费',
-          t2Token: {
-            name: '基础模型',
-            count: '1,000,000 tokens / 一次性',
-          },
+        pro: {
+          description: '享受先进的高阶模型，并拥有更充裕的模型使用和存储额度',
           serviceSupport: {
             name: '服务支持',
-            details: '社区支持（飞书群）',
+            details: '高优邮件支持',
+          },
+        },
+        max: {
+          description: '享受先进的高阶模型，并拥有更充裕的模型使用和存储额度',
+          serviceSupport: {
+            name: '服务支持',
+            details: '专属微信/ Discord 群聊',
           },
         },
         description: '可随时取消订阅。订阅即表示您同意Refly的',

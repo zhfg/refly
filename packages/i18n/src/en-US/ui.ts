@@ -1032,7 +1032,9 @@ const translations = {
       subscriptionManagement: 'Manage Billing and Subscriptions',
       subscriptionStatus: {
         free: 'FREE',
+        plus: 'PLUS',
         pro: 'PRO',
+        max: 'MAX',
       },
       subscribe: {
         title: 'Choose the plan that suits you best',
@@ -1047,41 +1049,49 @@ const translations = {
           fileStorage:
             'Used for storing resource texts, text and history versions of canvases, and uploaded files (images)',
         },
-        vectorStorage: 'Vector Storage',
-        fileStorage: 'File Storage',
+        vectorStorage: 'Vector Storage ({{storage}})',
+        fileStorage: 'File Storage ({{storage}})',
         fileStorageType: {
           note: 'Canvases',
           resource: 'Resources',
           file: 'Uploaded Files',
         },
-        pro: {
-          description: 'Premium models along with much larger token and storage quota',
-          buttonText: 'Upgrade Now',
-          t1Token: {
-            name: 'Premium Models',
-            count: '1,000,000 tokens / Month',
-          },
-          t2Token: {
-            name: 'Basic Models',
-            count: '5,000,000 tokens / Month',
-          },
-          serviceSupport: {
-            name: 'Service Support',
-            details: 'Priority Email Support',
-          },
-        },
+        upgrade: 'Upgrade Now',
+        continueFree: 'Continue Free',
+        t1ModalMonthly: 'High-End Models ({{tokenCount}} tokens / Monthly)',
+        t2ModalMonthly: 'Basic Models ({{tokenCount}} tokens / Monthly)',
+        t2ModalOneTime: 'Basic Models ({{tokenCount}} tokens / One-Time)',
+        t1ModalUnlimited: 'High-End Models (Unlimited)',
+        t2ModalUnlimited: 'Basic Models (Unlimited)',
         free: {
           description: 'Everything you need to get started',
-          buttonText: 'Continue Free',
-          t2Token: {
-            name: 'Basic Models',
-            count: '1,000,000 tokens / One-time',
-          },
           serviceSupport: {
             name: 'Service Support',
             details: 'Community support (Discord)',
           },
         },
+        plus: {
+          description: 'Premium models along with much larger token and storage quota',
+          serviceSupport: {
+            name: 'Service Support',
+            details: 'Priority Email Support',
+          },
+        },
+        pro: {
+          description: 'Premium models along with much larger token and storage quota',
+          serviceSupport: {
+            name: 'Service Support',
+            details: 'Priority Email Support',
+          },
+        },
+        max: {
+          description: 'Premium models along with much larger token and storage quota',
+          serviceSupport: {
+            name: 'Service Support',
+            details: 'Exclusive WeChat/Discord Group',
+          },
+        },
+
         description: "Cancel anytime. Subscribing means you agree to Refly's",
         and: 'and',
         privacy: 'privacy',
