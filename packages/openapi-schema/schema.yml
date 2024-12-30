@@ -11,6 +11,8 @@ externalDocs:
 servers:
   - url: /v1
 tags:
+  - name: auth
+    description: Authentication endpoints
   - name: canvas
     description: Canvas management endpoints
   - name: knowledge
@@ -32,6 +34,120 @@ tags:
   - name: misc
     description: Miscellaneous endpoints
 paths:
+  /auth/config:
+    get:
+      tags:
+        - auth
+      summary: Get auth config
+      description: Get auth config
+      operationId: getAuthConfig
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthConfigResponse'
+  /auth/email/signup:
+    post:
+      tags:
+        - auth
+      summary: Sign up with email
+      description: Sign up with email
+      operationId: emailSignup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailSignupRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailSignupResponse'
+  /auth/email/login:
+    post:
+      tags:
+        - auth
+      summary: Login with email
+      description: Login with email
+      operationId: emailLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailLoginRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailLoginResponse'
+  /auth/verification/create:
+    post:
+      tags:
+        - auth
+      summary: Create verification session
+      description: Create a verification session
+      operationId: createVerification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVerificationRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateVerificationResponse'
+  /auth/verification/resend:
+    post:
+      tags:
+        - auth
+      summary: Resend verification
+      description: Resend verification
+      operationId: resendVerification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+  /auth/verification/check:
+    post:
+      tags:
+        - auth
+      summary: Verify authentication session
+      description: Verify account creation
+      operationId: checkVerification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckVerificationRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckVerificationResponse'
   /canvas/list:
     get:
       tags:
@@ -2522,6 +2638,160 @@ components:
           type: boolean
           description: Whether the user has beta access
           default: false
+    AuthProvider:
+      type: string
+      description: Auth provider
+      enum:
+        - email
+        - google
+        - github
+    AuthConfigItem:
+      type: object
+      required:
+        - provider
+      properties:
+        provider:
+          description: Auth provider
+          $ref: '#/components/schemas/AuthProvider'
+    AuthConfigResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Auth providers
+              items:
+                $ref: '#/components/schemas/AuthConfigItem'
+    EmailSignupRequest:
+      type: object
+      description: Email signup request
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: Email
+        password:
+          type: string
+          description: Password
+    EmailSignupData:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Access token (only returned if the email verification is turned off)
+        sessionId:
+          type: string
+          description: Verification session ID
+    EmailSignupResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/EmailSignupData'
+    VerificationPurpose:
+      type: string
+      description: Verification purpose
+      enum:
+        - signup
+        - resetPassword
+    CreateVerificationRequest:
+      type: object
+      description: Create verification session request
+      required:
+        - email
+        - purpose
+      properties:
+        email:
+          type: string
+          description: Email
+        purpose:
+          type: string
+          description: Verification purpose
+          $ref: '#/components/schemas/VerificationPurpose'
+        password:
+          type: string
+          description: Password
+    CreateVerificationData:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: Verification session ID
+    CreateVerificationResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CreateVerificationData'
+    ResendVerificationRequest:
+      type: object
+      description: Resend verification request
+      required:
+        - sessionId
+      properties:
+        sessionId:
+          type: string
+          description: Verification session ID
+    CheckVerificationRequest:
+      type: object
+      description: Check verification code request
+      required:
+        - sessionId
+        - code
+      properties:
+        sessionId:
+          type: string
+          description: Verification session ID
+        code:
+          type: string
+          description: Verification code
+    CheckVerificationData:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Access token
+        purpose:
+          type: string
+          description: Verification purpose
+    CheckVerificationResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CheckVerificationData'
+    EmailLoginRequest:
+      type: object
+      description: Email login request
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: Email
+        password:
+          type: string
+          description: Password
+    EmailLoginData:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Access token
+    EmailLoginResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/EmailLoginData'
     GetUserSettingsResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

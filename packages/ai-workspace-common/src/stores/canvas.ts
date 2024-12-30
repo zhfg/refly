@@ -47,9 +47,11 @@ export interface CanvasState {
   setOperatingNodeId: (nodeId: string | null) => void;
   setShowEdges: (show: boolean) => void;
   setClickToPreview: (enabled: boolean) => void;
+
+  clearState: () => void;
 }
 
-const defaultCanvasState: () => CanvasData = () => ({
+const defaultCanvasData: () => CanvasData = () => ({
   nodes: [],
   edges: [],
   title: '',
@@ -60,19 +62,23 @@ const defaultCanvasConfig: () => CanvasConfig = () => ({
   pinnedNodes: [],
 });
 
+const defaultCanvasState = () => ({
+  data: {},
+  config: {},
+  currentCanvasId: null,
+  showPreview: true,
+  showMaxRatio: false,
+  showLaunchpad: true,
+  interactionMode: 'touchpad' as const,
+  operatingNodeId: null,
+  showEdges: false,
+  clickToPreview: true,
+});
+
 export const useCanvasStore = create<CanvasState>()(
   persist(
     immer((set) => ({
-      data: {},
-      config: {},
-      currentCanvasId: null,
-      showPreview: true,
-      showMaxRatio: false,
-      showLaunchpad: true,
-      interactionMode: 'touchpad',
-      operatingNodeId: null,
-      showEdges: false,
-      clickToPreview: true,
+      ...defaultCanvasState(),
 
       deleteCanvasData: (canvasId) =>
         set((state) => {
@@ -97,22 +103,22 @@ export const useCanvasStore = create<CanvasState>()(
         }),
       setNodes: (canvasId, nodes) =>
         set((state) => {
-          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId] ??= defaultCanvasData();
           state.data[canvasId].nodes = nodes;
         }),
       setEdges: (canvasId, edges) =>
         set((state) => {
-          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId] ??= defaultCanvasData();
           state.data[canvasId].edges = edges;
         }),
       setTitle: (canvasId, title) =>
         set((state) => {
-          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId] ??= defaultCanvasData();
           state.data[canvasId].title = title;
         }),
       setInitialFitViewCompleted: (canvasId, completed) =>
         set((state) => {
-          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId] ??= defaultCanvasData();
           state.data[canvasId].initialFitViewCompleted = completed;
         }),
       setCanvasLocalSynced: (canvasId, syncedAt) =>
@@ -151,6 +157,7 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.clickToPreview = enabled;
         }),
+      clearState: () => set(defaultCanvasState()),
     })),
     {
       name: 'canvas-storage',

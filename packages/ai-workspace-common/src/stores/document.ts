@@ -52,19 +52,20 @@ interface DocumentBaseState {
   deleteDocumentData: (docId: string) => void;
 
   resetState: (docId: string) => void;
+  clearState: () => void;
 }
 
-export const defaultState = {
+export const defaultState = () => ({
   hasEditorSelection: false,
   documentStates: {},
   activeDocumentId: '',
   config: {},
-};
+});
 
 export const useDocumentStore = create<DocumentBaseState>()(
   persist(
     immer((set) => ({
-      ...defaultState,
+      ...defaultState(),
 
       setHasEditorSelection: (hasEditorSelection: boolean) =>
         set((state) => {
@@ -128,6 +129,8 @@ export const useDocumentStore = create<DocumentBaseState>()(
         set((state) => {
           state.documentStates[docId] = {};
         }),
+
+      clearState: () => set(defaultState()),
     })),
     {
       name: 'document-storage',

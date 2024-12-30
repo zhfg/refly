@@ -2,8 +2,11 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
+import { ThrottlerGuard, ThrottlerModule, seconds } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import api from '@opentelemetry/api';
 
+import { CommonModule } from '@/common/common.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { RAGModule } from './rag/rag.module';
@@ -22,6 +25,8 @@ import { ShareModule } from './share/share.module';
 import { CanvasModule } from './canvas/canvas.module';
 import { CollabModule } from './collab/collab.module';
 import { ActionModule } from './action/action.module';
+import { RedisService } from '@/common/redis.service';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -29,6 +34,21 @@ import { ActionModule } from './action/action.module';
       load: [configuration],
       cache: true,
       expandVariables: true,
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [CommonModule],
+      inject: [RedisService],
+      useFactory: async (redis: RedisService) => ({
+        throttlers: [
+          {
+            name: 'default',
+            ttl: seconds(1),
+            limit: 10,
+          },
+        ],
+        getTracker: (req) => (req.ips?.length ? req.ips[0] : req.ip),
+        storage: new ThrottlerStorageRedisService(redis),
+      }),
     }),
     LoggerModule.forRoot({
       pinoHttp: {
@@ -86,5 +106,11 @@ import { ActionModule } from './action/action.module';
     ActionModule,
   ],
   controllers: [AppController],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

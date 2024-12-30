@@ -1143,6 +1143,152 @@ export type UserSettings = {
   hasBetaAccess?: boolean;
 };
 
+/**
+ * Auth provider
+ */
+export type AuthProvider = 'email' | 'google' | 'github';
+
+export type AuthConfigItem = {
+  /**
+   * Auth provider
+   */
+  provider: AuthProvider;
+};
+
+export type AuthConfigResponse = BaseResponse & {
+  /**
+   * Auth providers
+   */
+  data?: Array<AuthConfigItem>;
+};
+
+/**
+ * Email signup request
+ */
+export type EmailSignupRequest = {
+  /**
+   * Email
+   */
+  email: string;
+  /**
+   * Password
+   */
+  password: string;
+};
+
+export type EmailSignupData = {
+  /**
+   * Access token (only returned if the email verification is turned off)
+   */
+  accessToken?: string;
+  /**
+   * Verification session ID
+   */
+  sessionId?: string;
+};
+
+export type EmailSignupResponse = BaseResponse & {
+  data?: EmailSignupData;
+};
+
+/**
+ * Verification purpose
+ */
+export type VerificationPurpose = 'signup' | 'resetPassword';
+
+/**
+ * Create verification session request
+ */
+export type CreateVerificationRequest = {
+  /**
+   * Email
+   */
+  email: string;
+  /**
+   * Verification purpose
+   */
+  purpose: VerificationPurpose;
+  /**
+   * Password
+   */
+  password?: string;
+};
+
+export type CreateVerificationData = {
+  /**
+   * Verification session ID
+   */
+  sessionId?: string;
+};
+
+export type CreateVerificationResponse = BaseResponse & {
+  data?: CreateVerificationData;
+};
+
+/**
+ * Resend verification request
+ */
+export type ResendVerificationRequest = {
+  /**
+   * Verification session ID
+   */
+  sessionId: string;
+};
+
+/**
+ * Check verification code request
+ */
+export type CheckVerificationRequest = {
+  /**
+   * Verification session ID
+   */
+  sessionId: string;
+  /**
+   * Verification code
+   */
+  code: string;
+};
+
+export type CheckVerificationData = {
+  /**
+   * Access token
+   */
+  accessToken?: string;
+  /**
+   * Verification purpose
+   */
+  purpose?: string;
+};
+
+export type CheckVerificationResponse = BaseResponse & {
+  data?: CheckVerificationData;
+};
+
+/**
+ * Email login request
+ */
+export type EmailLoginRequest = {
+  /**
+   * Email
+   */
+  email: string;
+  /**
+   * Password
+   */
+  password: string;
+};
+
+export type EmailLoginData = {
+  /**
+   * Access token
+   */
+  accessToken?: string;
+};
+
+export type EmailLoginResponse = BaseResponse & {
+  data?: EmailLoginData;
+};
+
 export type GetUserSettingsResponse = BaseResponse & {
   data?: UserSettings;
 };
@@ -2576,6 +2722,50 @@ export type CanvasNode = {
   type: CanvasNodeType;
   data: CanvasNodeData;
 };
+
+export type GetAuthConfigResponse = AuthConfigResponse;
+
+export type GetAuthConfigError = unknown;
+
+export type EmailSignupData2 = {
+  body: EmailSignupRequest;
+};
+
+export type EmailSignupResponse2 = EmailSignupResponse;
+
+export type EmailSignupError = unknown;
+
+export type EmailLoginData2 = {
+  body: EmailLoginRequest;
+};
+
+export type EmailLoginResponse2 = EmailLoginResponse;
+
+export type EmailLoginError = unknown;
+
+export type CreateVerificationData2 = {
+  body: CreateVerificationRequest;
+};
+
+export type CreateVerificationResponse2 = CreateVerificationResponse;
+
+export type CreateVerificationError = unknown;
+
+export type ResendVerificationData = {
+  body: ResendVerificationRequest;
+};
+
+export type ResendVerificationResponse = BaseResponse;
+
+export type ResendVerificationError = unknown;
+
+export type CheckVerificationData2 = {
+  body: CheckVerificationRequest;
+};
+
+export type CheckVerificationResponse2 = CheckVerificationResponse;
+
+export type CheckVerificationError = unknown;
 
 export type ListCanvasesData = {
   query?: {

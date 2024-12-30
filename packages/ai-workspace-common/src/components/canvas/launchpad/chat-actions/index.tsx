@@ -69,7 +69,6 @@ export const ChatActions = memo(
 
     const userStore = useUserStoreShallow((state) => ({
       isLogin: state.isLogin,
-      setLoginModalVisible: state.setLoginModalVisible,
     }));
 
     const canSendEmptyMessage = useMemo(() => query?.trim(), [query]);

@@ -40,6 +40,54 @@ export class OAuthError extends BaseError {
   };
 }
 
+export class AccountNotFoundError extends BaseError {
+  code = 'E0005';
+  messageDict = {
+    en: 'Account not found, please sign up',
+    'zh-CN': '账户不存在，请注册',
+  };
+}
+
+export class PasswordIncorrect extends BaseError {
+  code = 'E0006';
+  messageDict = {
+    en: 'Password incorrect, please try again',
+    'zh-CN': '密码错误，请重试',
+  };
+}
+
+export class EmailAlreadyRegistered extends BaseError {
+  code = 'E0007';
+  messageDict = {
+    en: 'Email already registered, please sign in or try another one',
+    'zh-CN': '邮箱已被注册，请登录或尝试其他邮箱',
+  };
+}
+
+export class InvalidVerificationSession extends BaseError {
+  code = 'E0008';
+  messageDict = {
+    en: 'Verification session not found or expired, please try again',
+    'zh-CN': '验证会话不存在或已过期，请重试',
+  };
+}
+
+export class IncorrectVerificationCode extends BaseError {
+  code = 'E0009';
+  messageDict = {
+    en: 'Verification code is incorrect, please try again',
+    'zh-CN': '验证码错误，请重试',
+  };
+}
+
+export class OperationTooFrequent extends BaseError {
+  code = 'E0010';
+  messageDict = {
+    en: 'Operation too frequent, please try again later',
+    'zh-CN': '操作过于频繁，请稍后再试',
+  };
+}
+
 export class CanvasNotFoundError extends BaseError {
   code = 'E1000';
   messageDict = {
@@ -151,6 +199,12 @@ const errorMap = {
   E0002: UnauthorizedError,
   E0003: ParamsError,
   E0004: OAuthError,
+  E0005: AccountNotFoundError,
+  E0006: PasswordIncorrect,
+  E0007: EmailAlreadyRegistered,
+  E0008: InvalidVerificationSession,
+  E0009: IncorrectVerificationCode,
+  E0010: OperationTooFrequent,
   E1000: CanvasNotFoundError,
   E1002: ResourceNotFoundError,
   E1003: DocumentNotFoundError,

@@ -1,7 +1,7 @@
 import { Button, Form, Input, Upload, Modal, message } from 'antd';
 import { useEffect, useState } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { AiOutlineInfoCircle } from 'react-icons/ai';
+import { AiOutlineUser } from 'react-icons/ai';
 
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 // components
@@ -75,7 +75,6 @@ export const AccountSetting = () => {
       });
       if (error) {
         console.log(error);
-        message.error(t('settings.account.updateError'));
         return;
       }
       setLoading(false);
@@ -112,7 +111,7 @@ export const AccountSetting = () => {
                 Modal.info({
                   title: t('settings.account.avatar'),
                   okButtonProps: { style: { backgroundColor: '#00968F' } },
-                  icon: <AiOutlineInfoCircle size={22} className="mr-1" />,
+                  icon: <AiOutlineUser size={22} className="mr-1" />,
                   content: (
                     <div className="text-center">
                       <img

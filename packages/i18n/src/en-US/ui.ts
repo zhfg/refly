@@ -61,6 +61,13 @@ const translations = {
     noMoreText: 'No more~',
     unTitle: 'Untitled',
   },
+  verifyRules: {
+    emailRequired: 'Email cannot be empty',
+    emailInvalid: 'Please enter a valid email address',
+    passwordRequired: 'Password cannot be empty',
+    passwordMin: 'Password must contain 8 or more characters',
+    passwordConfirmNotMatch: 'The new password that you entered do not match!',
+  },
   editor: {
     placeholder: {
       default: "Write something, or press 'space' for AI, press '/' for commands",
@@ -192,17 +199,48 @@ const translations = {
       content: 'Login failed, please try again',
     },
     loginModal: {
-      title: 'Welcome to Refly, sign in to continue',
-      loginBtn: {
-        github: 'Sign in with GitHub',
-        google: 'Sign in with Google',
+      continue: 'Continue',
+      signin: 'Sign in',
+      signup: 'Sign up',
+      signinTitle: 'Sign in to Refly',
+      signinSubtitle: 'Welcome back! Sign in to continue.',
+      signupTitle: 'Create your account',
+      signupSubtitle: 'Welcome! Please fill in the details to get started.',
+      signinHint: 'Already have an account?',
+      signupHint: "Don't have an account?",
+      oauthBtn: {
+        github: 'GitHub',
+        google: 'Google',
       },
+      emailLabel: 'Email address',
+      emailPlaceholder: 'Enter your email address',
+      passwordLabel: 'Password',
+      passwordPlaceholder: 'Enter your password',
+      passwordForget: 'Forget password?',
       loggingStatus: 'Signing in...',
       and: 'and',
       utilText: 'By registering, you agree to our',
       privacyPolicy: 'Privacy Policy',
       terms: 'Terms of Service',
     },
+    resetPasswordModal: {
+      title: 'Reset Password',
+      continue: 'Continue',
+      emailLabel: 'Email address',
+      emailPlaceholder: 'Enter your email address',
+      passwordLabel: 'New password',
+      passwordPlaceholder: 'Enter your new password',
+      passwordConfirmLabel: 'Confirm password',
+      passwordConfirmPlaceholder: 'Enter your new password again',
+    },
+  },
+  emailVerification: {
+    title: 'Email Verification',
+    description: 'Please enter the verification code sent to {{email}}:',
+    resendHint: "Can't receive the email?",
+    resend: 'Resend',
+    resendSuccess: 'Verification email sent successfully',
+    submit: 'Submit',
   },
   projectDetail: {
     directory: {
@@ -1467,6 +1505,13 @@ const translations = {
   deck: {
     references: 'References',
     referencedBy: 'Referenced By',
+  },
+  verification: {
+    title: 'Verification Required',
+    otpPlaceholder: 'Enter verification code',
+    submit: 'Verify',
+    success: 'Verification successful',
+    error: 'Verification failed. Please try again.',
   },
 };
 

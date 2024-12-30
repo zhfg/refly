@@ -28,7 +28,7 @@ import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/canva
 // icons
 import { IconLibrary } from "@refly-packages/ai-workspace-common/components/common/icon"
 import { CanvasActionDropdown } from "@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown"
-import { AiOutlineMenuFold } from "react-icons/ai"
+import { AiOutlineMenuFold, AiOutlineUser } from "react-icons/ai"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -83,7 +83,11 @@ const SettingItem = () => {
       <SiderMenuSettingList>
         <div className="flex flex-1 items-center justify-between">
           <div className="menu-settings user-profile">
-            <Avatar size={32} src={userStore?.userProfile?.avatar} />
+            <Avatar
+              size={32}
+              src={userStore?.userProfile?.avatar}
+              icon={<AiOutlineUser />}
+            />
             <span className="username">
               <span>{userStore?.userProfile?.nickname}</span>
             </span>
@@ -124,8 +128,6 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
   const location = useLocation()
   const userStore = useUserStoreShallow(state => ({
     userProfile: state.userProfile,
-    loginModalVisible: state.loginModalVisible,
-    setLoginModalVisible: state.setLoginModalVisible,
   }))
 
   const { isLoadingCanvas } = useHandleSiderData(true)

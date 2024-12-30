@@ -5,3 +5,4 @@ export const QUEUE_SIMPLE_EVENT = 'simpleEvent';
 export const QUEUE_SKILL_TIMEOUT_CHECK = 'skillTimeoutCheck';
 export const QUEUE_SYNC_TOKEN_USAGE = 'syncTokenUsage';
 export const QUEUE_SYNC_STORAGE_USAGE = 'syncStorageUsage';
+export const QUEUE_SEND_VERIFICATION_EMAIL = 'sendVerificationEmail';
