@@ -191,13 +191,22 @@ export class AuthService {
   }
 
   async emailLogin(email: string, password: string) {
+    if (!email?.trim() || !password?.trim()) {
+      throw new ParamsError('Email and password are required');
+    }
+
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user || !user.password) {
+    if (!user) {
       throw new AccountNotFoundError();
     }
 
-    const isPasswordValid = await argon2.verify(user.password, password);
-    if (!isPasswordValid) {
+    try {
+      const isPasswordValid = await argon2.verify(user.password, password);
+      if (!isPasswordValid) {
+        throw new PasswordIncorrect();
+      }
+    } catch (error) {
+      this.logger.error(`Password verification failed: ${error.message}`);
       throw new PasswordIncorrect();
     }
 
