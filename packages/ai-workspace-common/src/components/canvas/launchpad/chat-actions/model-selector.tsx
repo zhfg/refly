@@ -63,6 +63,83 @@ const UsageProgress = memo(
 
 UsageProgress.displayName = 'UsageProgress';
 
+// Memoize model option items
+const ModelOption = memo(({ provider, label }: { provider: string; label: string }) => (
+  <img className="w-4 h-4 mr-2" src={ModelProviderIcons[provider]} alt={provider} />
+));
+
+ModelOption.displayName = 'ModelOption';
+
+// Create a memoized group header component
+const GroupHeader = memo(
+  ({
+    type,
+    tokenUsage,
+    planTier,
+    setDropdownOpen,
+    setSubscribeModalVisible,
+  }: {
+    type: 'premium' | 'standard' | 'free';
+    tokenUsage: any;
+    planTier: string;
+    setDropdownOpen: (open: boolean) => void;
+    setSubscribeModalVisible: (visible: boolean) => void;
+  }) => {
+    const { t } = useTranslation();
+
+    if (type === 'premium') {
+      return (
+        <div className="flex justify-between items-center">
+          <span className="text-sm">{t('copilot.modelSelector.premium')}</span>
+          {planTier === 'free' && tokenUsage?.t1TokenQuota === 0 ? (
+            <Button
+              type="text"
+              size="small"
+              className="text-xs !text-green-600 gap-1 translate-x-2"
+              icon={<IconSubscription />}
+              onClick={(e) => {
+                e.stopPropagation();
+                setDropdownOpen(false);
+                setSubscribeModalVisible(true);
+              }}
+            >
+              {t(`copilot.modelSelector.upgrade`)}
+            </Button>
+          ) : (
+            <UsageProgress
+              used={tokenUsage?.t1TokenUsed}
+              quota={tokenUsage?.t1TokenQuota}
+              setDropdownOpen={setDropdownOpen}
+            />
+          )}
+        </div>
+      );
+    }
+
+    if (type === 'standard') {
+      return (
+        <div className="flex justify-between items-center">
+          <div className="text-sm">{t('copilot.modelSelector.standard')}</div>
+          <UsageProgress
+            used={tokenUsage?.t2TokenUsed}
+            quota={tokenUsage?.t2TokenQuota}
+            setDropdownOpen={setDropdownOpen}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex justify-between items-center">
+        <span className="text-sm">{t('copilot.modelSelector.free')}</span>
+        <LuInfinity className="text-sm" />
+      </div>
+    );
+  },
+);
+
+GroupHeader.displayName = 'GroupHeader';
+
 export const ModelSelector = memo(
   ({ placement = 'bottomLeft', trigger = ['click'], briefMode = false, model, setModel }: ModelSelectorProps) => {
     const { t } = useTranslation();
@@ -114,7 +191,7 @@ export const ModelSelector = memo(
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((model) => ({
             key: model.name,
-            icon: <img className="w-4 h-4 mr-2" src={ModelProviderIcons[model.provider]} alt={model.provider} />,
+            icon: <ModelOption provider={model.provider} label={model.label} />,
             label: <span className="text-xs">{model.label}</span>,
             disabled: t1Disabled,
           })),
@@ -128,7 +205,7 @@ export const ModelSelector = memo(
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((model) => ({
             key: model.name,
-            icon: <img className="w-4 h-4 mr-2" src={ModelProviderIcons[model.provider]} alt={model.provider} />,
+            icon: <ModelOption provider={model.provider} label={model.label} />,
             label: <span className="text-xs">{model.label}</span>,
             disabled: t2Disabled,
           })),
@@ -142,12 +219,13 @@ export const ModelSelector = memo(
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((model) => ({
             key: model.name,
-            icon: <img className="w-4 h-4 mr-2" src={ModelProviderIcons[model.provider]} alt={model.provider} />,
+            icon: <ModelOption provider={model.provider} label={model.label} />,
             label: <span className="text-xs">{model.label}</span>,
           })),
       [modelList],
     );
 
+    // Optimize droplist creation
     const droplist: MenuProps['items'] = useMemo(() => {
       const items = [];
 
@@ -156,30 +234,13 @@ export const ModelSelector = memo(
           key: 't1',
           type: 'group',
           label: (
-            <div className="flex justify-between items-center">
-              <span className="text-sm">{t('copilot.modelSelector.premium')}</span>
-              {planTier === 'free' && tokenUsage?.t1TokenQuota === 0 ? (
-                <Button
-                  type="text"
-                  size="small"
-                  className="text-xs !text-green-600 gap-1 translate-x-2"
-                  icon={<IconSubscription />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDropdownOpen(false);
-                    setSubscribeModalVisible(true);
-                  }}
-                >
-                  {t(`copilot.modelSelector.upgrade`)}
-                </Button>
-              ) : (
-                <UsageProgress
-                  used={tokenUsage?.t1TokenUsed}
-                  quota={tokenUsage?.t1TokenQuota}
-                  setDropdownOpen={setDropdownOpen}
-                />
-              )}
-            </div>
+            <GroupHeader
+              type="premium"
+              tokenUsage={tokenUsage}
+              planTier={planTier}
+              setDropdownOpen={setDropdownOpen}
+              setSubscribeModalVisible={setSubscribeModalVisible}
+            />
           ),
           children: t1Models,
         });
@@ -190,14 +251,13 @@ export const ModelSelector = memo(
           key: 't2',
           type: 'group',
           label: (
-            <div className="flex justify-between items-center">
-              <div className="text-sm">{t('copilot.modelSelector.standard')}</div>
-              <UsageProgress
-                used={tokenUsage?.t2TokenUsed}
-                quota={tokenUsage?.t2TokenQuota}
-                setDropdownOpen={setDropdownOpen}
-              />
-            </div>
+            <GroupHeader
+              type="standard"
+              tokenUsage={tokenUsage}
+              planTier={planTier}
+              setDropdownOpen={setDropdownOpen}
+              setSubscribeModalVisible={setSubscribeModalVisible}
+            />
           ),
           children: t2Models,
         });
@@ -208,17 +268,20 @@ export const ModelSelector = memo(
           key: 'free',
           type: 'group',
           label: (
-            <div className="flex justify-between items-center">
-              <span className="text-sm">{t('copilot.modelSelector.free')}</span>
-              <LuInfinity className="text-sm" />
-            </div>
+            <GroupHeader
+              type="free"
+              tokenUsage={tokenUsage}
+              planTier={planTier}
+              setDropdownOpen={setDropdownOpen}
+              setSubscribeModalVisible={setSubscribeModalVisible}
+            />
           ),
           children: freeModels,
         });
       }
 
       return items;
-    }, [t1Models, t2Models, freeModels, planTier, tokenUsage, t, setDropdownOpen, setSubscribeModalVisible]);
+    }, [t1Models, t2Models, freeModels, tokenUsage, planTier, setDropdownOpen, setSubscribeModalVisible]);
 
     const isModelDisabled = useCallback((meter: TokenUsageMeter, model: ModelInfo) => {
       if (meter && model) {
@@ -252,6 +315,29 @@ export const ModelSelector = memo(
       [modelList, setModel],
     );
 
+    // Memoize the selected model display
+    const SelectedModelDisplay = memo(({ model }: { model: ModelInfo | null }) => {
+      const { t } = useTranslation();
+
+      if (!model) {
+        return (
+          <>
+            <PiWarningCircleBold className="text-yellow-600" />
+            <span className="text-yellow-600">{t('copilot.modelSelector.noModelAvailable')}</span>
+          </>
+        );
+      }
+
+      return (
+        <>
+          <img className="w-3 h-3 mx-1" src={ModelProviderIcons[model.provider]} alt={model.provider} />
+          {model.label}
+        </>
+      );
+    });
+
+    SelectedModelDisplay.displayName = 'SelectedModelDisplay';
+
     if (isModelListLoading || isTokenUsageLoading) {
       return <Skeleton className="w-28" active paragraph={false} />;
     }
@@ -270,17 +356,7 @@ export const ModelSelector = memo(
       >
         {!briefMode ? (
           <span className={classNames('model-selector', 'chat-action-item')}>
-            {model ? (
-              <>
-                <img className="w-3 h-3 mx-1" src={ModelProviderIcons[model?.provider]} alt={model?.provider} />
-                {model?.label}
-              </>
-            ) : (
-              <>
-                <PiWarningCircleBold className="text-yellow-600" />
-                <span className="text-yellow-600">{t('copilot.modelSelector.noModelAvailable')}</span>
-              </>
-            )}
+            <SelectedModelDisplay model={model} />
             <IconDown />
           </span>
         ) : (

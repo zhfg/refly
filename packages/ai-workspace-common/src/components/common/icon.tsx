@@ -21,8 +21,10 @@ import {
   LuBrain,
   LuGift,
   LuSparkles,
+  LuView,
+  LuPlay,
+  LuInfinity,
 } from 'react-icons/lu';
-import { LuView, LuPlay } from 'react-icons/lu';
 import { RiErrorWarningLine } from 'react-icons/ri';
 
 import { RiDoubleQuotesL } from 'react-icons/ri';
@@ -79,4 +81,14 @@ export const ModelProviderIcons = {
   qwen: QwenIcon,
   'meta-llama': MetaLlamaIcon,
   deepseek: DeepSeekIcon,
+} as const;
+
+const iconCache = new Map<string, string>();
+
+export const preloadModelIcons = () => {
+  Object.entries(ModelProviderIcons).forEach(([provider, icon]) => {
+    if (!iconCache.has(provider)) {
+      iconCache.set(provider, icon);
+    }
+  });
 };

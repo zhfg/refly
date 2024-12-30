@@ -481,7 +481,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onNodeDragStop={onNodeDragStop}
             nodeDragThreshold={10}
             nodesDraggable={!operatingNodeId}
-            onlyRenderVisibleElements={true}
+            // onlyRenderVisibleElements={true}
             elevateNodesOnSelect={false}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
