@@ -251,9 +251,12 @@ export async function processDocumentsWithSimilarity(
   for (const document of sortedDocuments) {
     const documentTokens = countToken(document?.document?.content || '');
 
-    if (documentTokens > MAX_NEED_RECALL_TOKEN || !document.metadata?.useWholeContent) {
+    if (
+      documentTokens > MAX_NEED_RECALL_TOKEN ||
+      (typeof document?.metadata?.useWholeContent === 'boolean' && !document.metadata?.useWholeContent)
+    ) {
       // 1.1 大内容，直接走召回
-      const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
+      let relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
         {
           entities: [
@@ -267,6 +270,21 @@ export async function processDocumentsWithSimilarity(
         },
         ctx,
       );
+
+      // If knowledge base search returns empty results, fallback to in-memory search
+      if (!relevantChunks || relevantChunks.length === 0) {
+        relevantChunks = await inMemoryGetRelevantChunks(
+          query,
+          document?.document?.content || '',
+          {
+            entityId: document?.document?.docId,
+            title: document?.document?.title || '',
+            entityType: 'document',
+          },
+          ctx,
+        );
+      }
+
       const relevantContent = assembleChunks(relevantChunks);
       result.push({ ...document, document: { ...document.document!, content: relevantContent } });
       usedTokens += countToken(relevantContent);
@@ -308,6 +326,21 @@ export async function processDocumentsWithSimilarity(
         },
         ctx,
       );
+
+      // If knowledge base search returns empty results, fallback to in-memory search
+      if (!relevantChunks || relevantChunks.length === 0) {
+        relevantChunks = await inMemoryGetRelevantChunks(
+          query,
+          remainingDocument?.document?.content || '',
+          {
+            entityId: remainingDocument?.document?.docId,
+            title: remainingDocument?.document?.title || '',
+            entityType: 'document',
+          },
+          ctx,
+        );
+      }
+
       relevantChunks = truncateChunks(relevantChunks, remainingTokens);
       const relevantContent = assembleChunks(relevantChunks);
       result.push({ ...remainingDocument, document: { ...remainingDocument.document!, content: relevantContent } });
@@ -348,7 +381,7 @@ export async function processResourcesWithSimilarity(
 
     if (resourceTokens > MAX_NEED_RECALL_TOKEN || !resource.metadata?.useWholeContent) {
       // 2.1 大内容，直接走召回
-      const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
+      let relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
         query,
         {
           entities: [
@@ -362,6 +395,21 @@ export async function processResourcesWithSimilarity(
         },
         ctx,
       );
+
+      // If knowledge base search returns empty results, fallback to in-memory search
+      if (!relevantChunks || relevantChunks.length === 0) {
+        relevantChunks = await inMemoryGetRelevantChunks(
+          query,
+          resource?.resource?.content || '',
+          {
+            entityId: resource?.resource?.resourceId,
+            title: resource?.resource?.title || '',
+            entityType: 'resource',
+          },
+          ctx,
+        );
+      }
+
       const relevantContent = assembleChunks(relevantChunks);
       result.push({ ...resource, resource: { ...resource.resource!, content: relevantContent } });
       usedTokens += countToken(relevantContent);
@@ -404,6 +452,21 @@ export async function processResourcesWithSimilarity(
         },
         ctx,
       );
+
+      // If knowledge base search returns empty results, fallback to in-memory search
+      if (!relevantChunks || relevantChunks.length === 0) {
+        relevantChunks = await inMemoryGetRelevantChunks(
+          query,
+          remainingResource?.resource?.content || '',
+          {
+            entityId: remainingResource?.resource?.resourceId,
+            title: remainingResource?.resource?.title || '',
+            entityType: 'resource',
+          },
+          ctx,
+        );
+      }
+
       relevantChunks = truncateChunks(relevantChunks, remainingTokens);
       const relevantContent = assembleChunks(relevantChunks);
       result.push({ ...remainingResource, resource: { ...remainingResource.resource!, content: relevantContent } });
@@ -466,7 +529,7 @@ export async function processWholeSpaceWithSimilarity(
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<(SkillContextResourceItem | SkillContextDocumentItem)[]> {
   // 1. scope projects for get relevant chunks
-  const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
+  let relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
     query,
     {
       entities: [],
@@ -475,6 +538,12 @@ export async function processWholeSpaceWithSimilarity(
     },
     ctx,
   );
+
+  // If knowledge base search returns empty results, fallback to in-memory search
+  if (!relevantChunks || relevantChunks.length === 0) {
+    // Since we don't have specific content to search in memory, we'll return empty array
+    return [];
+  }
 
   // 2. 按照 domain 和 id 进行分类
   const groupedChunks: { [key: string]: DocumentInterface[] } = {};

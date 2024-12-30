@@ -97,7 +97,7 @@ export async function prepareContext(
     resources: [],
     documents: [],
   };
-  if (remainingTokens > 0 && ((enableMentionedContext && isSupportedModel) || enableKnowledgeBaseSearch)) {
+  if (remainingTokens > 0 && (enableMentionedContext || enableKnowledgeBaseSearch)) {
     const { contentList = [], resources = [], documents = [] } = ctx.config.configurable;
     // prev remove overlapping items in mentioned context
     ctx.ctxThis.engine.logger.log(
