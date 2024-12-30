@@ -141,7 +141,7 @@ const StepContent = memo(
     buildNodeData: (text: string) => CanvasNode;
     step: ActionStep;
   }) => {
-    console.log('stepcontent', step);
+    // console.log('stepcontent', step);
 
     return (
       <div className="my-3 text-gray-600 text-base skill-response-content">
@@ -210,7 +210,7 @@ export const ActionStepCard = memo(
     const { setSelectedNodeByEntity } = useNodeSelection();
     const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
 
-    console.log('ActionStepCard', result);
+    // console.log('ActionStepCard', result);
 
     useEffect(() => {
       if (result?.status === 'finish') {

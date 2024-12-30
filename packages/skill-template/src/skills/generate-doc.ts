@@ -25,6 +25,7 @@ import * as generateDocument from '../scheduler/module/generateDocument';
 import { extractStructuredData } from '../scheduler/utils/extractor';
 import { BaseMessage, HumanMessage } from '@langchain/core/dist/messages';
 import { truncateTextWithToken } from '../scheduler/utils/truncator';
+import { checkModelContextLenSupport } from '../scheduler/utils/model';
 
 // Add title schema with reason
 const titleSchema = z.object({
@@ -56,7 +57,7 @@ export class GenerateDoc extends BaseSkill {
 
   commonPreprocess = async (state: GraphState, config: SkillRunnableConfig, module: SkillPromptModule) => {
     const { messages = [] } = state;
-    const { locale = 'en' } = config.configurable;
+    const { locale = 'en', modelInfo } = config.configurable;
     const { tplConfig } = config?.configurable || {};
 
     // Use shared query processor
@@ -71,6 +72,7 @@ export class GenerateDoc extends BaseSkill {
     let sources: Source[] = [];
 
     const needPrepareContext = hasContext && remainingTokens > 0;
+    const isModelContextLenSupport = checkModelContextLenSupport(modelInfo);
     this.engine.logger.log(`needPrepareContext: ${needPrepareContext}`);
 
     if (needPrepareContext) {
@@ -106,7 +108,7 @@ export class GenerateDoc extends BaseSkill {
       locale,
       chatHistory: usedChatHistory,
       messages,
-      needPrepareContext,
+      needPrepareContext: needPrepareContext && isModelContextLenSupport,
       context,
       originalQuery: query,
       rewrittenQuery: optimizedQuery,
@@ -170,6 +172,7 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
         titlePrompt,
         config,
         3, // Max retries
+        config?.configurable?.modelInfo,
       );
 
       // Log the reasoning process

@@ -3943,6 +3943,15 @@ components:
                 url:
                   type: string
                   description: File URL
+    ModelCapabilities:
+      type: object
+      properties:
+        functionCall:
+          type: boolean
+          description: Whether this model supports function calling
+        vision:
+          type: boolean
+          description: Whether this model can take images as input
     ModelInfo:
       type: object
       required:
@@ -3972,6 +3981,9 @@ components:
         maxOutput:
           type: number
           description: Model max output length (in tokens)
+        capabilities:
+          description: Model capabilities
+          $ref: '#/components/schemas/ModelCapabilities'
     ListModelsResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

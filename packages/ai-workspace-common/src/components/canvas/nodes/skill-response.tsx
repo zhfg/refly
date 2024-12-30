@@ -24,6 +24,7 @@ import {
   IconLoading,
   IconSearch,
   IconToken,
+  preloadModelIcons,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { NodeItem, useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
@@ -85,6 +86,14 @@ const NodeHeader = memo(({ query, skillName, skill }: { query: string; skillName
   );
 });
 
+// 创建一个 memo 化的 ModelIcon 组件
+const ModelIcon = memo(({ provider }: { provider: string }) => {
+  return <img className="w-3 h-3 mx-1" src={ModelProviderIcons[provider]} alt={provider} />;
+});
+
+ModelIcon.displayName = 'ModelIcon';
+
+// 在 NodeFooter 组件中使用
 const NodeFooter = memo(
   ({
     model,
@@ -104,7 +113,7 @@ const NodeFooter = memo(
         <div className="flex items-center gap-1">
           {model && (
             <div className="flex items-center gap-1">
-              <img className="w-3 h-3" src={ModelProviderIcons[modelInfo?.provider]} alt={modelInfo?.provider} />
+              <ModelIcon provider={modelInfo?.provider} />
               <span>{model}</span>
             </div>
           )}
@@ -124,7 +133,18 @@ const NodeFooter = memo(
       </div>
     );
   },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.model === nextProps.model &&
+      prevProps.createdAt === nextProps.createdAt &&
+      prevProps.language === nextProps.language &&
+      JSON.stringify(prevProps.modelInfo) === JSON.stringify(nextProps.modelInfo) &&
+      JSON.stringify(prevProps.tokenUsage) === JSON.stringify(nextProps.tokenUsage)
+    );
+  },
 );
+
+NodeFooter.displayName = 'NodeFooter';
 
 export const SkillResponseNode = memo(
   (props: SkillResponseNodeProps) => {
@@ -420,6 +440,11 @@ export const SkillResponseNode = memo(
           target.style.top = `${target.offsetTop - (newHeight - target.offsetHeight)}px`;
         }
       }
+    }, []);
+
+    // 在组件挂载时预加载图标
+    useEffect(() => {
+      preloadModelIcons();
     }, []);
 
     return (

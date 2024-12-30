@@ -3561,6 +3561,20 @@ export const UploadResponseSchema = {
   ],
 } as const;
 
+export const ModelCapabilitiesSchema = {
+  type: 'object',
+  properties: {
+    functionCall: {
+      type: 'boolean',
+      description: 'Whether this model supports function calling',
+    },
+    vision: {
+      type: 'boolean',
+      description: 'Whether this model can take images as input',
+    },
+  },
+} as const;
+
 export const ModelInfoSchema = {
   type: 'object',
   required: ['name', 'label', 'provider', 'tier', 'contextLimit', 'maxOutput'],
@@ -3589,6 +3603,10 @@ export const ModelInfoSchema = {
     maxOutput: {
       type: 'number',
       description: 'Model max output length (in tokens)',
+    },
+    capabilities: {
+      description: 'Model capabilities',
+      $ref: '#/components/schemas/ModelCapabilities',
     },
   },
 } as const;

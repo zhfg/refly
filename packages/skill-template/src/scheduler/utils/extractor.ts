@@ -1,20 +1,75 @@
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { SkillRunnableConfig } from '../../base';
 import { z } from 'zod';
+import { checkIsSupportedModel } from './model';
+import { AIMessage, AIMessageChunk, BaseMessage, MessageContentComplex } from '@langchain/core/messages';
+import { ToolCall } from '@langchain/core/messages/tool';
+import { ModelInfo } from '@refly-packages/openapi-schema';
 
 // Helper function to extract JSON from markdown code blocks
 function extractJsonFromMarkdown(content: string): any {
-  // Match content between ```json and ``` tags
-  const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/);
-  if (!jsonMatch?.[1]) {
-    throw new Error('No JSON content found in markdown');
+  // Remove any escaped newlines and normalize line endings
+  const normalizedContent = content.replace(/\\n/g, '\n').replace(/\r\n/g, '\n');
+
+  // Try different JSON extraction patterns
+  const patterns = [
+    // Pattern 1: Standard markdown code block
+    /```(?:json)?\n([\s\S]*?)\n```/,
+    // Pattern 2: Single-line code block
+    /`(.*?)`/,
+    // Pattern 3: Raw JSON
+    /([\s\S]*)/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = normalizedContent.match(pattern);
+    if (match?.[1]) {
+      try {
+        const trimmed = match[1].trim();
+        return JSON.parse(trimmed);
+      } catch (e) {
+        // Continue to next pattern if parsing fails
+        continue;
+      }
+    }
   }
 
+  // If all patterns fail, try to parse the entire content
   try {
-    return JSON.parse(jsonMatch[1]);
+    return JSON.parse(normalizedContent);
   } catch (error) {
-    throw new Error('Failed to parse JSON from markdown');
+    throw new Error('Failed to parse JSON from response');
   }
+}
+
+// Helper function to generate schema instructions from Zod schema
+function generateSchemaInstructions(schema: z.ZodType): string {
+  const shape = (schema as any)._def.shape;
+  const schemaName = schema.description || 'structured_output';
+
+  // Generate field descriptions
+  const fields = Object.entries(shape || {})
+    .map(([key, value]) => {
+      const fieldType = (value as any).typeName;
+      const description = (value as any).description;
+      const isOptional = !(value as any)._def.required;
+
+      return `- "${key}": ${fieldType}${isOptional ? ' (optional)' : ''} - ${description || ''}`;
+    })
+    .join('\n');
+
+  return `Please provide a JSON object for "${schemaName}" with the following structure:
+${fields}
+
+Important:
+1. Respond ONLY with a valid JSON object
+2. Wrap the JSON in \`\`\`json and \`\`\` tags
+3. Make sure all required fields are included
+4. Follow the exact types specified`;
+}
+
+interface ExtendedAIMessage extends AIMessage {
+  tool_calls?: ToolCall[];
 }
 
 export async function extractStructuredData<T extends z.ZodType>(
@@ -23,44 +78,87 @@ export async function extractStructuredData<T extends z.ZodType>(
   prompt: string,
   config: SkillRunnableConfig,
   maxRetries: number = 3,
+  modelInfo: ModelInfo,
 ): Promise<z.infer<T>> {
   let lastError = '';
 
+  // Check if model supports structured output
+  const useStructuredOutput = checkIsSupportedModel(modelInfo);
+
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const fullPrompt = lastError
-        ? `${prompt}\n\nPrevious attempt failed with error: ${lastError}\nPlease try again.`
-        : prompt;
+      if (useStructuredOutput) {
+        // Use withStructuredOutput for supported models
+        const structuredLLM = model.withStructuredOutput(schema, {
+          includeRaw: true,
+          name: schema.description ?? 'structured_output',
+        });
 
-      const structuredLLM = model.withStructuredOutput(schema, {
-        includeRaw: true,
-        name: schema.description ?? 'structured_output',
-      });
+        const result = await structuredLLM.invoke(prompt, {
+          ...config,
+          metadata: {
+            ...config.metadata,
+            suppressOutput: true,
+          },
+        });
 
-      const result = await structuredLLM.invoke(fullPrompt, {
-        ...config,
-        metadata: {
-          ...config.metadata,
-          suppressOutput: true,
-        },
-      });
+        // Try to get parsed result first
+        if (result?.parsed) return result.parsed;
 
-      // First try to use parsed data if available
-      if (result?.parsed) {
-        return result.parsed;
+        // Fall back to raw content if available
+        if (result?.raw?.content) {
+          const extractedJson = extractJsonFromMarkdown(String(result.raw.content));
+          return schema.parse(extractedJson);
+        }
+
+        // Try to extract from tool calls if available
+        const rawMessage = result?.raw as ExtendedAIMessage;
+        if (rawMessage?.tool_calls?.[0]?.args) {
+          return schema.parse(rawMessage.tool_calls[0].args);
+        }
+      } else {
+        // Fallback for unsupported models: Use prompt engineering
+        const schemaInstructions = generateSchemaInstructions(schema);
+        const fullPrompt = `${prompt}\n\n${schemaInstructions}${
+          lastError
+            ? `\n\nPrevious attempt failed with error: ${lastError}\nPlease try again and ensure the response is valid JSON.`
+            : ''
+        }`;
+
+        const response = await model.invoke(fullPrompt, config);
+        let content = '';
+
+        if (typeof response === 'string') {
+          content = response;
+        } else if (response?.content === 'string') {
+          content = response.content;
+        } else if (response instanceof AIMessageChunk) {
+          if (typeof response.content === 'string') {
+            content = response.content;
+          } else if (Array.isArray(response.content)) {
+            // Handle array content by joining text parts
+            content = response.content
+              .map((item) => {
+                if (typeof item === 'string') return item;
+                if ('type' in item && item.type === 'text') return item.text;
+                return '';
+              })
+              .join('');
+          }
+        } else {
+          content = String(response);
+        }
+
+        const extractedJson = extractJsonFromMarkdown(content);
+        return schema.parse(extractedJson);
       }
-
-      // If parsed is not available, try to extract from raw content
-      if (result?.raw?.content) {
-        const extractedJson = extractJsonFromMarkdown(String(result.raw.content));
-        // Validate extracted JSON against schema
-        const validated = schema.parse(extractedJson);
-        return validated;
-      }
-
-      lastError = 'Failed to extract structured output from both parsed and raw content';
     } catch (error) {
       lastError = error instanceof Error ? error.message : 'Unknown error occurred';
+
+      // On last retry, throw the error
+      if (i === maxRetries - 1) {
+        throw new Error(`Failed to extract structured data after ${maxRetries} attempts. Last error: ${lastError}`);
+      }
     }
   }
 

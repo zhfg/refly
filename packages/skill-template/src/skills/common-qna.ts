@@ -16,6 +16,7 @@ import { processQuery } from '../scheduler/utils/queryProcessor';
 
 // prompts
 import * as commonQnA from '../scheduler/module/commonQnA';
+import { checkModelContextLenSupport } from '../scheduler/utils/model';
 
 export class CommonQnA extends BaseSkill {
   name = 'commonQnA';
@@ -47,7 +48,7 @@ export class CommonQnA extends BaseSkill {
 
   commonPreprocess = async (state: GraphState, config: SkillRunnableConfig, module: SkillPromptModule) => {
     const { messages = [] } = state;
-    const { locale = 'en' } = config.configurable;
+    const { locale = 'en', modelInfo } = config.configurable;
 
     // Use shared query processor
     const { optimizedQuery, query, usedChatHistory, hasContext, remainingTokens, mentionedContext } =
@@ -61,6 +62,7 @@ export class CommonQnA extends BaseSkill {
     let sources: Source[] = [];
 
     const needPrepareContext = hasContext && remainingTokens > 0;
+    const isModelContextLenSupport = checkModelContextLenSupport(modelInfo);
 
     this.engine.logger.log(`optimizedQuery: ${optimizedQuery}`);
     this.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
@@ -94,7 +96,7 @@ export class CommonQnA extends BaseSkill {
       locale,
       chatHistory: usedChatHistory,
       messages,
-      needPrepareContext,
+      needPrepareContext: needPrepareContext && isModelContextLenSupport,
       context,
       originalQuery: query,
       rewrittenQuery: optimizedQuery,

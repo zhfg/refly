@@ -6,5 +6,6 @@ export function modelInfoPO2DTO(modelInfo: ModelInfoPO): ModelInfo {
   return {
     ...pick(modelInfo, ['name', 'label', 'provider', 'contextLimit', 'maxOutput']),
     tier: modelInfo.tier as ModelTier,
+    capabilities: JSON.parse(modelInfo.capabilities),
   };
 }

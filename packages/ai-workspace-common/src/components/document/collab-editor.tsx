@@ -376,8 +376,6 @@ export const CollaborativeEditor = memo(
       };
     }, [docId]);
 
-    console.log('CollaborativeEditor', activeDocumentId);
-
     return (
       <div
         className={classNames('w-full', 'ai-note-editor-content-container', {

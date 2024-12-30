@@ -149,11 +149,14 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [canvasId, nodes?.length]);
+  }, [canvasId, nodes?.length, reactFlowInstance, setInitialFitViewCompleted]);
 
-  const defaultEdgeOptions = {
-    style: edgeStyles.default,
-  };
+  const defaultEdgeOptions = useMemo(
+    () => ({
+      style: edgeStyles.default,
+    }),
+    [edgeStyles],
+  );
 
   const flowConfig = useMemo(
     () => ({
@@ -172,7 +175,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       },
       defaultEdgeOptions,
     }),
-    [edgeStyles],
+    [defaultEdgeOptions],
   );
 
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
@@ -250,7 +253,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       addNode(pendingNode);
       clearPendingNode();
     }
-  }, [pendingNode]);
+  }, [pendingNode, addNode, clearPendingNode]);
 
   const [connectionTimeout, setConnectionTimeout] = useState(false);
 
@@ -481,7 +484,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onNodeDragStop={onNodeDragStop}
             nodeDragThreshold={10}
             nodesDraggable={!operatingNodeId}
-            onlyRenderVisibleElements={true}
+            // onlyRenderVisibleElements={true}
             elevateNodesOnSelect={false}
           >
             {nodes?.length === 0 && hasCanvasSynced && (

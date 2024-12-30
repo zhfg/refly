@@ -593,6 +593,8 @@ model ModelInfo {
   contextLimit Int      @default(0) @map("context_limit")
   /// Model max output length (in tokens)
   maxOutput    Int      @default(0) @map("max_output")
+  /// Model capabilities (JSON)
+  capabilities String   @default("{}") @map("capabilities")
   /// Model tier
   tier         String   @map("tier")
   /// Whether this model is enabled

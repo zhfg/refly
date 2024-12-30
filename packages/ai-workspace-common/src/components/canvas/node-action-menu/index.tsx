@@ -27,6 +27,7 @@ interface MenuItem {
   onClick: () => void;
   loading?: boolean;
   danger?: boolean;
+  primary?: boolean;
   type: 'button' | 'divider';
   disabled?: boolean;
 }
@@ -121,6 +122,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         label: t('canvas.nodeActions.askAI'),
         onClick: handleAskAI,
         type: 'button' as const,
+        primary: true,
       },
       { key: 'divider-1', type: 'divider' } as MenuItem,
     ];
@@ -256,7 +258,9 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
               rounded
               text-sm
               transition-colors
-              ${item.danger ? 'text-red-600 hover:bg-red-50' : 'text-gray-700 hover:bg-gray-50'}
+              text-gray-700 hover:bg-gray-50 hover:text-gray-700
+              ${item.danger ? '!text-red-600 hover:bg-red-50' : ''}
+              ${item.primary ? '!text-primary-600 hover:bg-primary-50' : ''}
               ${item.loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
             `}
             type="text"
