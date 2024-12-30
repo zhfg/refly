@@ -201,8 +201,8 @@ export const MemoNode = ({
     const markdown = editor.storage.markdown.getMarkdown();
     const maxLength = 1000;
 
-    if (markdown.length > 1000) {
-      const truncatedContent = markdown.slice(0, 1000);
+    if (markdown.length > maxLength) {
+      const truncatedContent = markdown.slice(0, maxLength);
       const currentPos = editor.state.selection.from;
 
       editor.commands.command(({ tr }) => {
@@ -212,7 +212,7 @@ export const MemoNode = ({
 
       editor.commands.setContent(truncatedContent);
 
-      if (currentPos <= 1000) {
+      if (currentPos <= maxLength) {
         editor.commands.setTextSelection(currentPos);
       }
     }
