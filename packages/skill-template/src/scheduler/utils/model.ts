@@ -1,9 +1,7 @@
 import { ModelInfo } from '@refly-packages/openapi-schema';
 
-const SUPPORTED_PROVIDERS = ['openai', 'anthropic', 'google'];
-
 export const checkIsSupportedModel = (modelInfo: ModelInfo) => {
-  return SUPPORTED_PROVIDERS.includes(modelInfo.provider);
+  return !!modelInfo.capabilities.functionCall;
 };
 
 export const checkModelContextLenSupport = (modelInfo: ModelInfo) => {

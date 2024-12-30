@@ -2448,6 +2448,17 @@ export type UploadResponse = BaseResponse & {
     };
 };
 
+export type ModelCapabilities = {
+    /**
+     * Whether this model supports function calling
+     */
+    functionCall?: boolean;
+    /**
+     * Whether this model can take images as input
+     */
+    vision?: boolean;
+};
+
 export type ModelInfo = {
     /**
      * Model name
@@ -2473,6 +2484,10 @@ export type ModelInfo = {
      * Model max output length (in tokens)
      */
     maxOutput: number;
+    /**
+     * Model capabilities
+     */
+    capabilities?: ModelCapabilities;
 };
 
 export type ListModelsResponse = BaseResponse & {
@@ -2503,7 +2518,7 @@ export type InMemorySearchResponse = BaseResponse & {
     data?: Array<DocumentInterface>;
 };
 
-export type CanvasNodeType = 'document' | 'resource' | 'skill' | 'tool' | 'skillResponse' | 'toolResponse';
+export type CanvasNodeType = 'document' | 'resource' | 'skill' | 'tool' | 'skillResponse' | 'toolResponse' | 'memo';
 
 export type CanvasNodeData = {
     /**
