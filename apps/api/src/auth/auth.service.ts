@@ -74,6 +74,17 @@ export class AuthService {
       .redirect(this.configService.get('auth.redirectUrl'));
   }
 
+  async genUniqueUsername(candidate: string) {
+    let name = candidate;
+    let userExists = await this.prisma.user.findUnique({ where: { name } });
+    while (userExists) {
+      const randomSuffix = randomBytes(3).toString('hex');
+      name = `${candidate}_${randomSuffix}`;
+      userExists = await this.prisma.user.findUnique({ where: { name } });
+    }
+    return name;
+  }
+
   /**
    * General OAuth logic
    * @param accessToken
@@ -128,18 +139,8 @@ export class AuthService {
       return user;
     }
 
-    const namePrefix = email.split('@')[0];
-    let name = namePrefix;
-
-    // Check if the name already exists and add a random suffix if it does
-    let userExists = await this.prisma.user.findUnique({ where: { name } });
-    while (userExists) {
-      const randomSuffix = randomBytes(3).toString('hex');
-      name = `${namePrefix}_${randomSuffix}`;
-      userExists = await this.prisma.user.findUnique({ where: { name } });
-    }
-
     const uid = genUID();
+    const name = await this.genUniqueUsername(email.split('@')[0]);
 
     // download avatar if profile photo exists
     let avatar: string;
@@ -259,12 +260,14 @@ export class AuthService {
 
     let user: UserModel;
     if (verification.purpose === 'signup') {
+      const name = await this.genUniqueUsername(verification.email.split('@')[0]);
       user = await this.prisma.user.create({
         data: {
           email: verification.email,
           password: verification.hashedPassword,
           uid: genUID(),
-          name: verification.email.split('@')[0],
+          name,
+          nickname: name,
           emailVerified: new Date(),
           outputLocale: 'auto',
         },
