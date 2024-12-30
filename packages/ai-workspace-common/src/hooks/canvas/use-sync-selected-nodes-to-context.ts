@@ -1,25 +1,30 @@
 import { useEffect } from 'react';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-
 export const useSyncSelectedNodesToContext = (
   contextItems: NodeItem[],
   setContextItems: (items: NodeItem[]) => void,
 ) => {
   const { nodes } = useCanvasData();
-  const selectedContextNodes = nodes.filter(
-    (node) => node.selected && ['resource', 'document', 'memo', 'skillResponse'].includes(node.type),
+  // Add deduplication for selectedContextNodes using Set
+  const selectedNodeIds = new Set(
+    nodes
+      .filter((node) => node.selected && ['resource', 'document', 'memo', 'skillResponse'].includes(node.type))
+      .map((node) => node.id),
   );
 
-  const selectedNodeIds = selectedContextNodes?.map((node) => node.id) ?? [];
+  const selectedContextNodes = nodes.filter((node) => selectedNodeIds.has(node.id));
 
   useEffect(() => {
+    // ... rest of the code remains the same ...
+    const nonPreviewItems = contextItems.filter((item) => !item.isPreview);
+    const existingIds = new Set(nonPreviewItems.map((item) => item.id));
+
     const newContextItems = [
-      ...contextItems.filter((item) => !item.isPreview),
-      ...selectedContextNodes
-        .filter((node) => !contextItems.some((item) => item.id === node.id))
-        .map((node) => ({ ...node, isPreview: true })),
+      ...nonPreviewItems,
+      ...selectedContextNodes.filter((node) => !existingIds.has(node.id)).map((node) => ({ ...node, isPreview: true })),
     ];
+
     setContextItems(newContextItems);
-  }, [JSON.stringify(selectedNodeIds), setContextItems]);
+  }, [JSON.stringify([...selectedNodeIds]), setContextItems]);
 };
