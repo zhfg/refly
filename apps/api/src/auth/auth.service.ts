@@ -22,6 +22,7 @@ import {
   IncorrectVerificationCode,
   InvalidVerificationSession,
   OAuthError,
+  ParamsError,
   PasswordIncorrect,
 } from '@refly-packages/errors';
 import { Queue } from 'bullmq';
@@ -208,6 +209,10 @@ export class AuthService {
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
+    if (purpose === 'resetPassword' && !password) {
+      throw new ParamsError('Password is required to reset password');
+    }
+
     let hashedPassword: string;
     if (password) {
       hashedPassword = await argon2.hash(password);
@@ -258,13 +263,15 @@ export class AuthService {
       throw new IncorrectVerificationCode();
     }
 
+    const { purpose, email, hashedPassword } = verification;
+
     let user: UserModel;
-    if (verification.purpose === 'signup') {
-      const name = await this.genUniqueUsername(verification.email.split('@')[0]);
+    if (purpose === 'signup') {
+      const name = await this.genUniqueUsername(email.split('@')[0]);
       user = await this.prisma.user.create({
         data: {
-          email: verification.email,
-          password: verification.hashedPassword,
+          email,
+          password: hashedPassword,
           uid: genUID(),
           name,
           nickname: name,
@@ -272,11 +279,17 @@ export class AuthService {
           outputLocale: 'auto',
         },
       });
-    } else {
-      user = await this.prisma.user.findUnique({ where: { email: verification.email } });
+    } else if (purpose === 'resetPassword') {
+      user = await this.prisma.user.findUnique({ where: { email } });
       if (!user) {
         throw new AccountNotFoundError();
       }
+      await this.prisma.user.update({
+        where: { email },
+        data: { password: hashedPassword },
+      });
+    } else {
+      throw new ParamsError(`Invalid verification purpose: ${purpose}`);
     }
 
     const { accessToken } = await this.login(user);

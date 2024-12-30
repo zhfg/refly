@@ -8,8 +8,10 @@ import { LoginModal } from "@/components/login-modal"
 import { SubscribeModal } from "@refly-packages/ai-workspace-common/components/settings/subscribe-modal"
 import { ErrorBoundary } from "@sentry/react"
 import { VerificationModal } from "@/components/verification-modal"
+import { useAuthStoreShallow } from "@refly-packages/ai-workspace-common/stores/auth"
+import { ResetPasswordModal } from "@/components/reset-password-modal"
+
 import "./index.scss"
-import { useVerificationStoreShallow } from "@refly-packages/ai-workspace-common/stores/verification"
 
 const Content = Layout.Content
 
@@ -24,8 +26,9 @@ export const AppLayout = (props: AppLayoutProps) => {
     isLogin: state.isLogin,
     loginModalVisible: state.loginModalVisible,
   }))
-  const verificationStore = useVerificationStoreShallow(state => ({
-    modalOpen: state.modalOpen,
+  const authStore = useAuthStoreShallow(state => ({
+    verificationModalOpen: state.verificationModalOpen,
+    resetPasswordModalOpen: state.resetPasswordModalOpen,
   }))
 
   const matchShare = useMatch("/share/:shareCode")
@@ -55,7 +58,8 @@ export const AppLayout = (props: AppLayoutProps) => {
           <Content>{props.children}</Content>
         </Layout>
         {userStore.loginModalVisible && <LoginModal />}
-        {verificationStore.modalOpen && <VerificationModal />}
+        {authStore.verificationModalOpen && <VerificationModal />}
+        {authStore.resetPasswordModalOpen && <ResetPasswordModal />}
         <SubscribeModal />
       </Layout>
     </ErrorBoundary>

@@ -2,22 +2,20 @@ import { Modal, Input, Button, message } from "antd"
 import { useTranslation } from "react-i18next"
 import { useState } from "react"
 import {
-  useVerificationStore,
-  useVerificationStoreShallow,
-} from "@refly-packages/ai-workspace-common/stores/verification"
+  useAuthStore,
+  useAuthStoreShallow,
+} from "@refly-packages/ai-workspace-common/stores/auth"
 import getClient from "@refly-packages/ai-workspace-common/requests/proxiedRequest"
 import { InvalidVerificationSession } from "@refly/errors"
 
 export const VerificationModal = () => {
   const { t } = useTranslation()
-  const { email, modalOpen, setModalOpen, reset } = useVerificationStoreShallow(
-    state => ({
-      email: state.email,
-      modalOpen: state.modalOpen,
-      setModalOpen: state.setModalOpen,
-      reset: state.reset,
-    }),
-  )
+  const authStore = useAuthStoreShallow(state => ({
+    email: state.email,
+    verificationModalOpen: state.verificationModalOpen,
+    setVerificationModalOpen: state.setVerificationModalOpen,
+    reset: state.reset,
+  }))
   const [isLoading, setIsLoading] = useState(false)
   const [resendLoading, setResendLoading] = useState(false)
   const [otp, setOtp] = useState("")
@@ -25,7 +23,7 @@ export const VerificationModal = () => {
   const handleSubmit = async () => {
     if (!otp) return
 
-    const { sessionId } = useVerificationStore.getState()
+    const { sessionId } = useAuthStore.getState()
     if (!sessionId) {
       message.error(t("emailVerification.sessionNotFound"))
       return
@@ -41,19 +39,19 @@ export const VerificationModal = () => {
     setIsLoading(false)
 
     if (data?.errCode === new InvalidVerificationSession().code) {
-      reset()
+      authStore.reset()
       return
     }
 
     if (data?.success) {
-      reset()
+      authStore.reset()
       document.cookie = `_refly_ai_sid=${data?.data?.accessToken ?? ""}; path=/`
       window.location.reload()
     }
   }
 
   const handleResend = async () => {
-    const { sessionId } = useVerificationStore.getState()
+    const { sessionId } = useAuthStore.getState()
     if (!sessionId) return
 
     setResendLoading(true)
@@ -66,14 +64,14 @@ export const VerificationModal = () => {
   return (
     <Modal
       centered
-      open={modalOpen}
-      onCancel={() => setModalOpen(false)}
+      open={authStore.verificationModalOpen}
+      onCancel={() => authStore.setVerificationModalOpen(false)}
       footer={null}
       destroyOnClose
       title={t("emailVerification.title")}>
       <div className="flex flex-col gap-4 py-1">
         <p className="text-sm text-gray-700">
-          {t("emailVerification.description", { email })}
+          {t("emailVerification.description", { email: authStore.email })}
         </p>
         <div className="flex items-center justify-center">
           <Input.OTP

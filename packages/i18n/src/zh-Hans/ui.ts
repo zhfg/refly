@@ -61,6 +61,13 @@ const translations = {
     noMoreText: '已经到底啦~',
     unTitle: '未命名',
   },
+  verifyRules: {
+    emailRequired: '邮箱地址不能为空',
+    emailInvalid: '请输入有效的邮箱地址',
+    passwordRequired: '密码不能为空',
+    passwordMin: '密码必须包含 8 个或更多字符',
+    passwordConfirmNotMatch: '两次输入的密码不一致',
+  },
   editor: {
     placeholder: {
       default: "写点什么，或按空格键激活 AI，按 '/' 键激活命令",
@@ -200,17 +207,22 @@ const translations = {
       emailPlaceholder: '请输入您的邮箱地址',
       passwordLabel: '密码',
       passwordPlaceholder: '请输入您的密码',
-      verifyRules: {
-        emailRequired: '邮箱地址不能为空',
-        emailInvalid: '请输入有效的邮箱地址',
-        passwordRequired: '密码不能为空',
-        passwordMin: '密码必须包含 8 个或更多字符',
-      },
+      passwordForget: '忘记密码？',
       loggingStatus: '登录中...',
       and: '及',
       utilText: '注册即表明您同意 ',
       privacyPolicy: '隐私政策',
       terms: '服务条款',
+    },
+    resetPasswordModal: {
+      title: '重置密码',
+      continue: '继续',
+      emailLabel: '邮箱地址',
+      emailPlaceholder: '请输入您的邮箱地址',
+      passwordLabel: '新密码',
+      passwordPlaceholder: '请输入您的新密码',
+      passwordConfirmLabel: '确认密码',
+      passwordConfirmPlaceholder: '请再次输入您的新密码',
     },
   },
   emailVerification: {

@@ -61,6 +61,13 @@ const translations = {
     noMoreText: 'No more~',
     unTitle: 'Untitled',
   },
+  verifyRules: {
+    emailRequired: 'Email cannot be empty',
+    emailInvalid: 'Please enter a valid email address',
+    passwordRequired: 'Password cannot be empty',
+    passwordMin: 'Password must contain 8 or more characters',
+    passwordConfirmNotMatch: 'The new password that you entered do not match!',
+  },
   editor: {
     placeholder: {
       default: "Write something, or press 'space' for AI, press '/' for commands",
@@ -209,17 +216,22 @@ const translations = {
       emailPlaceholder: 'Enter your email address',
       passwordLabel: 'Password',
       passwordPlaceholder: 'Enter your password',
-      verifyRules: {
-        emailRequired: 'Email cannot be empty',
-        emailInvalid: 'Please enter a valid email address',
-        passwordRequired: 'Password cannot be empty',
-        passwordMin: 'Password must contain 8 or more characters',
-      },
+      passwordForget: 'Forget password?',
       loggingStatus: 'Signing in...',
       and: 'and',
       utilText: 'By registering, you agree to our',
       privacyPolicy: 'Privacy Policy',
       terms: 'Terms of Service',
+    },
+    resetPasswordModal: {
+      title: 'Reset Password',
+      continue: 'Continue',
+      emailLabel: 'Email address',
+      emailPlaceholder: 'Enter your email address',
+      passwordLabel: 'New password',
+      passwordPlaceholder: 'Enter your new password',
+      passwordConfirmLabel: 'Confirm password',
+      passwordConfirmPlaceholder: 'Enter your new password again',
     },
   },
   emailVerification: {

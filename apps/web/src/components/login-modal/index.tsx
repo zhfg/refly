@@ -11,7 +11,7 @@ import GitHub from "@/assets/github-mark.svg"
 import { getServerOrigin } from "@refly/utils/url"
 import { useTranslation } from "react-i18next"
 import getClient from "@refly-packages/ai-workspace-common/requests/proxiedRequest"
-import { useVerificationStoreShallow } from "@refly-packages/ai-workspace-common/stores/verification"
+import { useAuthStoreShallow } from "@refly-packages/ai-workspace-common/stores/auth"
 
 interface FormValues {
   email: string
@@ -30,10 +30,12 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
     loginModalVisible: state.loginModalVisible,
     setLoginModalVisible: state.setLoginModalVisible,
   }))
-  const verificationStore = useVerificationStoreShallow(state => ({
-    setModalOpen: state.setModalOpen,
+  const authStore = useAuthStoreShallow(state => ({
+    setVerificationModalOpen: state.setVerificationModalOpen,
+    setResetPasswordModalOpen: state.setResetPasswordModalOpen,
     setSessionId: state.setSessionId,
     setEmail: state.setEmail,
+    reset: state.reset,
   }))
 
   const { t } = useTranslation()
@@ -67,9 +69,9 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
 
       if (data?.success) {
         userStore.setLoginModalVisible(false)
-        verificationStore.setModalOpen(true)
-        verificationStore.setEmail(values.email)
-        verificationStore.setSessionId(data.data?.sessionId ?? null)
+        authStore.setVerificationModalOpen(true)
+        authStore.setEmail(values.email)
+        authStore.setSessionId(data.data?.sessionId ?? null)
       }
     } else {
       const { data } = await getClient().emailLogin({
@@ -83,9 +85,15 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
       if (data?.success) {
         userStore.setLoginModalVisible(false)
         document.cookie = `_refly_ai_sid=${data.data?.accessToken ?? ""}; path=/`
+        authStore.reset()
         window.location.reload()
       }
     }
+  }
+
+  const handleResetPassword = () => {
+    userStore.setLoginModalVisible(false)
+    authStore.setResetPasswordModalOpen(true)
   }
 
   const handleModeSwitch = (signUp: boolean) => {
@@ -147,7 +155,9 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
           </Button>
         </div>
 
-        <Divider className="flex-1">or</Divider>
+        <div className="w-full px-4">
+          <Divider className="flex-1">or</Divider>
+        </div>
 
         <Form
           form={form}
@@ -166,19 +176,11 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
             rules={[
               {
                 required: true,
-                message: (
-                  <span className="text-xs text-red-500">
-                    {t("landingPage.loginModal.verifyRules.emailRequired")}
-                  </span>
-                ),
+                message: t("verifyRules.emailRequired"),
               },
               {
                 type: "email",
-                message: (
-                  <span className="text-xs text-red-500">
-                    {t("landingPage.loginModal.verifyRules.emailInvalid")}
-                  </span>
-                ),
+                message: t("verifyRules.emailInvalid"),
               },
             ]}>
             <Input
@@ -191,30 +193,32 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
           <Form.Item
             name="password"
             label={
-              <span className="font-medium">
-                {t("landingPage.loginModal.passwordLabel")}
-              </span>
+              <div className="flex w-96 flex-row items-center justify-between">
+                <span className="font-medium">
+                  {t("landingPage.loginModal.passwordLabel")}
+                </span>
+                {!isSignUpMode && (
+                  <Button
+                    type="link"
+                    className="p-0 text-green-600"
+                    onClick={handleResetPassword}>
+                    {t("landingPage.loginModal.passwordForget")}
+                  </Button>
+                )}
+              </div>
             }
             validateTrigger={["onBlur"]}
             hasFeedback
             rules={[
               {
                 required: true,
-                message: (
-                  <span className="text-xs text-red-500">
-                    {t("landingPage.loginModal.verifyRules.passwordRequired")}
-                  </span>
-                ),
+                message: t("verifyRules.passwordRequired"),
               },
               ...(isSignUpMode
                 ? [
                     {
                       min: 8,
-                      message: (
-                        <span className="text-xs text-red-500">
-                          {t("landingPage.loginModal.verifyRules.passwordMin")}
-                        </span>
-                      ),
+                      message: t("verifyRules.passwordMin"),
                     },
                   ]
                 : []),
