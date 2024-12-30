@@ -172,6 +172,7 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
         titlePrompt,
         config,
         3, // Max retries
+        config?.configurable?.modelInfo,
       );
 
       // Log the reasoning process

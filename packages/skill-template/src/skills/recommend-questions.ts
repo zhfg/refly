@@ -137,6 +137,7 @@ Please generate relevant recommended questions in ${locale} language.`;
         contextPrompt,
         config,
         3, // Max retries
+        config?.configurable?.modelInfo,
       );
 
       // Emit structured data including both questions and reasoning
@@ -155,7 +156,20 @@ Please generate relevant recommended questions in ${locale} language.`;
       return {};
     } catch (error) {
       this.engine.logger.error(`Error generating recommended questions: ${error.stack}`);
-      return {};
+
+      this.emitEvent(
+        {
+          structuredData: {
+            recommendedQuestions: {
+              questions: [],
+              locale,
+            },
+          },
+        },
+        config,
+      );
+
+      throw error;
     }
   };
 

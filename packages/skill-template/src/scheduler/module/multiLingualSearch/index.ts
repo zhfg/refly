@@ -90,6 +90,8 @@ export const callMultiLingualWebSearch = async (
         rewriteQueryOutputSchema,
         buildRewriteQuerySystemPrompt() + '\n\n' + buildRewriteQueryUserPrompt({ query }),
         config,
+        3,
+        ctx?.config?.configurable?.modelInfo,
       );
 
       queries = rewriteResult?.queries?.rewrittenQueries || [query];

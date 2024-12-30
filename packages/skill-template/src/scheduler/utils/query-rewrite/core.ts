@@ -162,13 +162,14 @@ Please analyze the query, focusing primarily on the current query and available 
 
   const model = ctx.ctxThis.engine.chatModel({ temperature: 0.3 });
 
-  try { 
+  try {
     const result = await extractStructuredData(
       model,
       queryAnalysisSchema,
       systemPrompt + '\n\n' + userMessage,
       ctx.config,
       3, // maxRetries
+      ctx?.config?.configurable?.modelInfo,
     );
 
     ctx.ctxThis.engine.logger.log(`- Rewritten Query: ${result.rewrittenQuery}
