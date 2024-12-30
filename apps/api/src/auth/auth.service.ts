@@ -276,18 +276,30 @@ export class AuthService {
 
     let user: UserModel;
     if (purpose === 'signup') {
+      const uid = genUID();
       const name = await this.genUniqueUsername(email.split('@')[0]);
-      user = await this.prisma.user.create({
-        data: {
-          email,
-          password: hashedPassword,
-          uid: genUID(),
-          name,
-          nickname: name,
-          emailVerified: new Date(),
-          outputLocale: 'auto',
-        },
-      });
+      const [newUser] = await this.prisma.$transaction([
+        this.prisma.user.create({
+          data: {
+            email,
+            password: hashedPassword,
+            uid,
+            name,
+            nickname: name,
+            emailVerified: new Date(),
+            outputLocale: 'auto',
+          },
+        }),
+        this.prisma.account.create({
+          data: {
+            type: 'email',
+            uid,
+            provider: 'email',
+            providerAccountId: email,
+          },
+        }),
+      ]);
+      user = newUser;
     } else if (purpose === 'resetPassword') {
       user = await this.prisma.user.findUnique({ where: { email } });
       if (!user) {

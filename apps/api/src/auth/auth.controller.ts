@@ -21,7 +21,7 @@ import {
   ResendVerificationResponse,
 } from '@refly-packages/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
-import { hours, minutes, Throttle } from '@nestjs/throttler';
+import { hours, minutes, seconds, Throttle } from '@nestjs/throttler';
 
 @Controller('v1/auth')
 export class AuthController {
@@ -57,7 +57,7 @@ export class AuthController {
     return buildSuccessResponse({ sessionId });
   }
 
-  @Throttle({ default: { limit: 1, ttl: minutes(1) } })
+  @Throttle({ default: { limit: 1, ttl: seconds(30) } })
   @Post('verification/resend')
   async resendVerification(
     @Body() { sessionId }: ResendVerificationRequest,
@@ -66,7 +66,7 @@ export class AuthController {
     return buildSuccessResponse();
   }
 
-  @Throttle({ default: { limit: 5, ttl: minutes(10) } })
+  @Throttle({ default: { limit: 5, ttl: minutes(30) } })
   @Post('verification/check')
   async checkVerification(
     @Body() params: CheckVerificationRequest,

@@ -1,12 +1,14 @@
 import { Modal, Input, Button, message } from "antd"
 import { useTranslation } from "react-i18next"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   useAuthStore,
   useAuthStoreShallow,
 } from "@refly-packages/ai-workspace-common/stores/auth"
 import getClient from "@refly-packages/ai-workspace-common/requests/proxiedRequest"
 import { InvalidVerificationSession } from "@refly/errors"
+
+const RESEND_INTERVAL = 30
 
 export const VerificationModal = () => {
   const { t } = useTranslation()
@@ -19,6 +21,22 @@ export const VerificationModal = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [resendLoading, setResendLoading] = useState(false)
   const [otp, setOtp] = useState("")
+  const [countdown, setCountdown] = useState(0)
+
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setInterval(() => {
+        setCountdown(prev => prev - 1)
+      }, 1000)
+      return () => clearInterval(timer)
+    }
+  }, [countdown])
+
+  useEffect(() => {
+    if (authStore.verificationModalOpen) {
+      setCountdown(RESEND_INTERVAL)
+    }
+  }, [authStore.verificationModalOpen])
 
   const handleSubmit = async () => {
     if (!otp) return
@@ -58,6 +76,8 @@ export const VerificationModal = () => {
     await getClient().resendVerification({ body: { sessionId } })
     setResendLoading(false)
 
+    setCountdown(RESEND_INTERVAL)
+
     message.success(t("emailVerification.resendSuccess"))
   }
 
@@ -91,8 +111,10 @@ export const VerificationModal = () => {
             size="small"
             className="text-sm"
             loading={resendLoading}
+            disabled={countdown > 0}
             onClick={handleResend}>
-            {t("emailVerification.resend")}
+            {t("emailVerification.resend") +
+              (countdown > 0 ? ` (${countdown})` : "")}
           </Button>
         </div>
 

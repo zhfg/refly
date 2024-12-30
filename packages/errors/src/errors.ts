@@ -80,6 +80,14 @@ export class IncorrectVerificationCode extends BaseError {
   };
 }
 
+export class OperationTooFrequent extends BaseError {
+  code = 'E0010';
+  messageDict = {
+    en: 'Operation too frequent, please try again later',
+    'zh-CN': '操作过于频繁，请稍后再试',
+  };
+}
+
 export class CanvasNotFoundError extends BaseError {
   code = 'E1000';
   messageDict = {
@@ -196,6 +204,7 @@ const errorMap = {
   E0007: EmailAlreadyRegistered,
   E0008: InvalidVerificationSession,
   E0009: IncorrectVerificationCode,
+  E0010: OperationTooFrequent,
   E1000: CanvasNotFoundError,
   E1002: ResourceNotFoundError,
   E1003: DocumentNotFoundError,
