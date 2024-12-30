@@ -16,6 +16,7 @@ import { HomeRedirect } from "@refly-packages/ai-workspace-common/components/hom
 // Lazy load components
 const Home = lazy(() => import("@/pages/home"))
 const Canvas = lazy(() => import("@/pages/canvas"))
+const Pricing = lazy(() => import("@/pages/pricing"))
 
 const prefetchRoutes = () => {
   // Prefetch common routes
@@ -91,6 +92,7 @@ export const AppRouter = (props: { layout?: any }) => {
       <Layout>
         <Routes>
           <Route path="/" element={<HomeRedirect defaultNode={<Home />} />} />
+          <Route path="/pricing" element={<Pricing />} />
 
           <Route
             path="/canvas/:canvasId"

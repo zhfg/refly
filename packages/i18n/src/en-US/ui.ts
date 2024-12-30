@@ -1021,6 +1021,7 @@ const translations = {
       },
     },
     subscription: {
+      getStarted: 'Get Started',
       subscribeNow: 'Subscribe Now',
       currentPlan: 'Current Plan',
       t1TokenUsed: 'Premium Model Token Usage',

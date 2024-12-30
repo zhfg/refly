@@ -1005,6 +1005,7 @@ const translations = {
       },
     },
     subscription: {
+      getStarted: '开始使用',
       subscribeNow: '立即订阅',
       currentPlan: '当前套餐',
       t1TokenUsed: '高阶模型 Token 使用量',
