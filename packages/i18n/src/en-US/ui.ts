@@ -233,6 +233,12 @@ const translations = {
       passwordConfirmLabel: 'Confirm password',
       passwordConfirmPlaceholder: 'Enter your new password again',
     },
+    tab: {
+      product: 'Product',
+      price: 'Price',
+      docs: 'Docs',
+      discord: 'Discord',
+    },
   },
   emailVerification: {
     title: 'Email Verification',

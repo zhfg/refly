@@ -224,6 +224,12 @@ const translations = {
       passwordConfirmLabel: '确认密码',
       passwordConfirmPlaceholder: '请再次输入您的新密码',
     },
+    tab: {
+      product: '产品',
+      price: '价格',
+      docs: '文档',
+      discord: 'Discord',
+    },
   },
   emailVerification: {
     title: '邮箱验证',

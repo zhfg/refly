@@ -7,8 +7,6 @@ import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common
 import { PriceContent } from './priceContent';
 
 export const SubscribeModal = () => {
-  const { t } = useTranslation();
-
   const { subscribeModalVisible: visible, setSubscribeModalVisible: setVisible } = useSubscriptionStoreShallow(
     (state) => ({
       subscribeModalVisible: state.subscribeModalVisible,
@@ -26,7 +24,7 @@ export const SubscribeModal = () => {
       className="subscribe-modal"
       onCancel={() => setVisible(false)}
     >
-      <PriceContent />
+      <PriceContent source="modal" />
     </Modal>
   );
 };

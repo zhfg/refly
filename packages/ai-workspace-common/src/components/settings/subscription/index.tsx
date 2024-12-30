@@ -222,7 +222,7 @@ export const Subscription = () => {
               className="subscribe-btn"
               onClick={() => {
                 setShowSettingModal(false);
-                navigate('/pricing');
+                setSubscribeModalVisible(true);
               }}
             >
               {t('settings.subscription.subscribeNow')}

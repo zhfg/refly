@@ -69,8 +69,9 @@ export const AppRouter = (props: { layout?: any }) => {
   const routeLogin = useMatch("/")
 
   const isShareContent = useMatch("/share/:shareCode")
+  const isPricing = useMatch("/pricing")
 
-  if (!isShareContent) {
+  if (!isShareContent && !isPricing) {
     if (
       !userStore.isCheckingLoginStatus === undefined ||
       userStore.isCheckingLoginStatus

@@ -10,9 +10,10 @@ import { IconCheck, IconQuestionCircle } from '@arco-design/web-react/icon';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
+import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
 
 export type PriceLookupKey = 'monthly' | 'yearly';
-export type PriceSource = 'subscribe' | 'landing';
+export type PriceSource = 'page' | 'modal';
 const premiumModels = 'GPT-4o / Claude 3.5 Sonnet / Gemini Pro 1.5';
 const basicModels = 'GPT-4o Mini / Claude 3 Haiku / Gemini Flash 1.5';
 
@@ -36,9 +37,11 @@ const PlanItem = (props: {
 }) => {
   const { t } = useTranslation();
   const { title, isActive, features, description, handleClick, lookupKey, loadingInfo } = props;
-  const { isLogin, setLoginModalVisible } = useUserStoreShallow((state) => ({
+  const { isLogin } = useUserStoreShallow((state) => ({
     isLogin: state.isLogin,
-    setLoginModalVisible: state.setLoginModalVisible,
+  }));
+  const { setLoginModalOpen } = useAuthStoreShallow((state) => ({
+    setLoginModalOpen: state.setLoginModalOpen,
   }));
 
   const getPrice = (plan: 'max' | 'pro' | 'plus' | 'free') => {
@@ -76,7 +79,7 @@ const PlanItem = (props: {
     if (isLogin) {
       handleClick();
     } else {
-      setLoginModalVisible(true);
+      setLoginModalOpen(true);
     }
   };
 
@@ -128,14 +131,21 @@ const PlanItem = (props: {
   );
 };
 
-export const PriceContent = () => {
+export const PriceContent = (props: { source: PriceSource }) => {
   const navigate = useNavigate();
+  const { source } = props;
   const { t } = useTranslation();
   const { setSubscribeModalVisible: setVisible } = useSubscriptionStoreShallow((state) => ({
     setSubscribeModalVisible: state.setSubscribeModalVisible,
   }));
+  const { setLoginModalOpen } = useAuthStoreShallow((state) => ({
+    setLoginModalOpen: state.setLoginModalOpen,
+  }));
+  const { isLogin } = useUserStoreShallow((state) => ({
+    isLogin: state.isLogin,
+  }));
 
-  const [lookupKey, setLookupKey] = useState<'monthly' | 'yearly'>('yearly');
+  const [lookupKey, setLookupKey] = useState<PriceLookupKey>('yearly');
   const [loadingInfo, setLoadingInfo] = useState<{
     isLoading: boolean;
     plan: string;
@@ -251,7 +261,8 @@ export const PriceContent = () => {
     });
     const { data } = await getClient().createCheckoutSession({
       body: {
-        lookupKey: `refly_${plan}_${lookupKey}`,
+        planType: plan,
+        interval: lookupKey,
       },
     });
     setLoadingInfo({
@@ -295,9 +306,11 @@ export const PriceContent = () => {
           features={freeFeatures}
           isActive={false}
           handleClick={() => {
-            navigate('/', {
-              replace: true,
-            });
+            isLogin
+              ? source === 'modal'
+                ? setVisible(false)
+                : navigate('/', { replace: true })
+              : setLoginModalOpen(true);
           }}
           lookupKey={lookupKey}
           loadingInfo={loadingInfo}
