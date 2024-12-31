@@ -310,7 +310,7 @@ export class SubscriptionService implements OnModuleInit {
     this.logger.log(`New subscription created: ${subscription.id}`);
 
     const checkoutSession = await this.prisma.checkoutSession.findFirst({
-      where: { subscriptionId: subscription.id, paymentStatus: 'paid' },
+      where: { subscriptionId: subscription.id },
       orderBy: { pk: 'desc' },
     });
     if (!checkoutSession) {
