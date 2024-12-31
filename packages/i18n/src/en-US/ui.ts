@@ -1452,6 +1452,7 @@ const translations = {
       extensionWeblink: 'Extension Web Link',
     },
     modelSelector: {
+      unlimited: 'Unlimited',
       noModelAvailable: 'No model available',
       premium: 'Premium',
       standard: 'Standard',

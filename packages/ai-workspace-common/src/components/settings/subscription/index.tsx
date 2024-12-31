@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
-import { Button, Progress, Tooltip, Tag, Spin, Space } from 'antd';
+import { Button, Progress, Tooltip, Tag, Space } from 'antd';
 import { HiOutlineQuestionMarkCircle } from 'react-icons/hi2';
 import { HiOutlineExternalLink } from 'react-icons/hi';
 import { RiBillLine } from 'react-icons/ri';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { formatStorage } from '@refly-packages/ai-workspace-common/modules/entity-selector/utils';
 
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
@@ -18,16 +19,33 @@ import { StorageUsageMeter } from '@refly/openapi-schema';
 import dayjs from 'dayjs';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 
-const UsageItem = ({ title, used, quota, description, type, endAt = null }) => {
+const UsageItem = ({
+  title,
+  used,
+  quota,
+  description,
+  type,
+  endAt,
+}: {
+  title: string;
+  used: number;
+  quota: number;
+  description: string;
+  type: string;
+  endAt?: string;
+}) => {
   const { t } = useTranslation();
-  const formatNumber = (num) => {
+  const formatNumber = (num: number) => {
+    if (num < 0) {
+      return '∞';
+    }
     if (type === 'vectorStorage') {
       return formatStorage(num);
     }
     return num?.toLocaleString() || '0';
   };
 
-  const formatDate = (date) => {
+  const formatDate = (date: string) => {
     return dayjs(date).format('YYYY-MM-DD');
   };
 
@@ -250,8 +268,8 @@ export const Subscription = () => {
           <UsageItem
             title={t('settings.subscription.subscribe.vectorStorage')}
             description={t('settings.subscription.subscribe.tooltip.vectorStorage')}
-            used={storageUsage?.vectorStorageUsed}
-            quota={storageUsage?.vectorStorageQuota}
+            used={parseFloat(storageUsage?.vectorStorageUsed)}
+            quota={parseFloat(storageUsage?.vectorStorageQuota)}
             type="vectorStorage"
           />
           <FileStorageUsageItem storage={storageUsage} />

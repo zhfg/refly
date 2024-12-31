@@ -1443,6 +1443,7 @@ const translations = {
       extensionWeblink: '网页',
     },
     modelSelector: {
+      unlimited: '无限量',
       noModelAvailable: '无可用模型',
       premium: '高阶模型',
       standard: '标准模型',
