@@ -1029,7 +1029,7 @@ const translations = {
       },
       subscribe: {
         title: '选择适合您的套餐',
-        subtitle: '订阅年度计划可节省 20%！',
+        subtitle: '订阅年度计划立省20%，立即订阅再享额外50%折扣！',
         monthly: '按月',
         yearly: '按年',
         monthlyPlan: '每月自动续费',

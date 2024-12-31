@@ -47,11 +47,11 @@ const PlanItem = (props: {
   const getPrice = (plan: 'max' | 'pro' | 'plus' | 'free') => {
     switch (plan) {
       case 'max':
-        return lookupKey === 'monthly' ? 29.9 : 299;
+        return lookupKey === 'monthly' ? 29.9 : 149.5;
       case 'pro':
-        return lookupKey === 'monthly' ? 10 : 100;
+        return lookupKey === 'monthly' ? 9.9 : 49.5;
       case 'plus':
-        return lookupKey === 'monthly' ? 4.9 : 49;
+        return lookupKey === 'monthly' ? 4.9 : 24.5;
       case 'free':
         return 0;
     }
@@ -89,7 +89,18 @@ const PlanItem = (props: {
 
       <div className="subscribe-content-plans-item-price">
         <span className="price">
-          {title !== 'free' ? `$${getPrice(title)}` : t('settings.subscription.subscribe.forFree')}
+          {title !== 'free' ? (
+            <>
+              ${getPrice(title)}
+              {lookupKey === 'yearly' && (
+                <span className="text-sm text-gray-500">
+                  (<span className="line-through decoration-gray-700 ">${getPrice(title) * 2}</span>)
+                </span>
+              )}
+            </>
+          ) : (
+            t('settings.subscription.subscribe.forFree')
+          )}
         </span>
         <span className="period">
           {' '}
@@ -346,16 +357,18 @@ export const PriceContent = (props: { source: PriceSource }) => {
         />
       </div>
 
-      <div className="subscribe-content-description">
-        {t('settings.subscription.subscribe.description')}
-        <a href={`/privacy`} target="_blank" rel="noreferrer">
-          {t('settings.subscription.subscribe.privacy')}
-        </a>
-        {t('settings.subscription.subscribe.and')}
-        <a href={`/terms`} target="_blank" rel="noreferrer">
-          {t('settings.subscription.subscribe.terms')}
-        </a>
-      </div>
+      {isLogin && (
+        <div className="subscribe-content-description">
+          {t('settings.subscription.subscribe.description')}
+          <a href={`/privacy`} target="_blank" rel="noreferrer">
+            {t('settings.subscription.subscribe.privacy')}
+          </a>
+          {t('settings.subscription.subscribe.and')}
+          <a href={`/terms`} target="_blank" rel="noreferrer">
+            {t('settings.subscription.subscribe.terms')}
+          </a>
+        </div>
+      )}
     </div>
   );
 };

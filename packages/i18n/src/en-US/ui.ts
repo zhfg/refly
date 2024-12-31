@@ -235,7 +235,7 @@ const translations = {
     },
     tab: {
       product: 'Product',
-      price: 'Price',
+      price: 'Pricing',
       docs: 'Docs',
       discord: 'Discord',
     },
@@ -1045,7 +1045,7 @@ const translations = {
       },
       subscribe: {
         title: 'Choose the plan that suits you best',
-        subtitle: 'Subscribe to an annual plan to save 20%!',
+        subtitle: 'Subscribe to the annual plan to save 20%, and subscribe now to enjoy an additional 50% discount!',
         monthly: 'Monthly',
         yearly: 'Yearly',
         monthlyPlan: 'Monthly Auto-Renewal',

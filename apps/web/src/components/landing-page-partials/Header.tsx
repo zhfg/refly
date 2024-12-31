@@ -59,13 +59,18 @@ function Header() {
                 key={item.value}
                 className={`${value === item.value ? "font-bold text-[#00968f]" : ""}`}
                 onClick={() => {
-                  setValue(item.value)
                   switch (item.value) {
                     case "product":
                       navigate("/")
                       break
                     case "pricing":
                       navigate("/pricing")
+                      break
+                    case "docs":
+                      window.open("https://docs.refly.ai", "_blank")
+                      break
+                    case "discord":
+                      window.open("https://discord.gg/bWjffrb89h", "_blank")
                       break
                   }
                 }}>

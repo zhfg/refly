@@ -18,13 +18,19 @@ export const SubscribeModal = () => {
     <Modal
       width={'100vw'}
       height={'100vh'}
-      centered
+      style={{
+        top: 0,
+        paddingBottom: 0,
+        maxWidth: '100vw',
+      }}
       open={visible}
       footer={null}
-      className="subscribe-modal"
+      className="subscribe-modal !p-0"
       onCancel={() => setVisible(false)}
     >
-      <PriceContent source="modal" />
+      <div className="w-full h-full overflow-auto px-[5%]">
+        <PriceContent source="modal" />
+      </div>
     </Modal>
   );
 };

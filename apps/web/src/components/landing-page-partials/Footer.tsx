@@ -3,14 +3,14 @@ import Logo from "@/assets/logo.svg"
 import { useTranslation } from "react-i18next"
 import "./footer.scss"
 import { Button } from "antd"
-import { IconDown, IconGithub, IconTwitter } from "@arco-design/web-react/icon"
+import { IconDown, IconTwitter } from "@arco-design/web-react/icon"
 import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
-import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
+import { useAuthStoreShallow } from "@refly-packages/ai-workspace-common/stores/auth"
 
 function Footer() {
   const { t } = useTranslation()
-  const { setLoginModalVisible } = useUserStoreShallow(state => ({
-    setLoginModalVisible: state.setLoginModalVisible,
+  const { setLoginModalOpen } = useAuthStoreShallow(state => ({
+    setLoginModalOpen: state.setLoginModalOpen,
   }))
 
   // Add scroll to top function
@@ -39,7 +39,7 @@ function Footer() {
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button
                 type="primary"
-                onClick={() => setLoginModalVisible(true)}
+                onClick={() => setLoginModalOpen(true)}
                 size="large"
                 className="cursor-pointer">
                 {t("landingPage.footer.cta.getStarted")}
