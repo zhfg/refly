@@ -343,7 +343,12 @@ export const useNodeSelection = () => {
 
       // Update width and height calculation
       const getNodeDimensions = (node: Node) => {
-        // Get node width and height, either from measured dimensions or default values
+        if (node.type === 'group') {
+          return {
+            width: (node.data as any)?.metadata?.width ?? 200,
+            height: (node.data as any)?.metadata?.height ?? 100,
+          };
+        }
         const width = node.measured?.width ?? node.width ?? 200;
         const height = node.measured?.height ?? node.height ?? 100;
         return { width, height };
@@ -556,55 +561,193 @@ export const useNodeSelection = () => {
 
   const setSelectedNodes = useCallback(
     (selectedNodes: CanvasNode<any>[], currentNodes: CanvasNode<any>[]) => {
-      // Find all temporary groups
-      const tempGroups = currentNodes.filter((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
-
-      // If there are multiple temp groups, remove all but keep the most recent one
-      // if (tempGroups.length > 1) {
-      //   // Remove all temp groups except the last one
-      //   tempGroups.slice(0, -1).forEach((group) => {
-      //     ungroupNodes(group.id);
-      //   });
-      // }
-
-      // Get fresh nodes after potential ungroup operations
-      const { data } = useCanvasStore.getState();
-      const freshNodes = data[canvasId]?.nodes ?? [];
-
       // 如果没有选中节点，直接返回
       if (!selectedNodes.length) {
         return;
       }
 
+      // 如果只选中了一个节点，不需要创建临时组
       if (selectedNodes.length < 2) {
-        // If less than 2 nodes selected and there's a temp group, remove it
-        const existingTempGroup = freshNodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
-        if (existingTempGroup) {
-          ungroupNodes(existingTempGroup.id);
-          setTempGroupId(null);
-        }
         return;
       }
 
-      // Get fresh nodes again after potential ungroup operation
-      const latestNodes = useCanvasStore.getState().data[canvasId]?.nodes ?? [];
+      // 获取最新的节点状态
+      const { data } = useCanvasStore.getState();
+      const latestNodes = data[canvasId]?.nodes ?? [];
+
+      // 检查是否存在临时组
       const existingTempGroup = latestNodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
 
-      if (existingTempGroup) {
-        // Update existing temporary group
-        // Pass the latest nodes to updateTempGroup
-        updateTempGroup(selectedNodes, latestNodes, existingTempGroup.id);
-      } else {
-        // Create new temporary group
-        // selectedNodes might contain outdated positions, so we need to map to fresh nodes
-        const freshSelectedNodes = selectedNodes.map((selectedNode) => {
-          const freshNode = latestNodes.find((n) => n.id === selectedNode.id);
-          return freshNode || selectedNode;
-        });
-        createTemporaryGroup(freshSelectedNodes);
+      // 检查选中的节点中是否有来自现有组的节点
+      const selectedGroups = selectedNodes.filter((node) => node.type === 'group');
+      const selectedNonGroups = selectedNodes.filter((node) => node.type !== 'group' && !node.parentId);
+
+      // 如果选中的节点中包含组节点，检查是否满足创建新组的条件
+      if (selectedGroups.length > 0) {
+        // 如果只选中了组节点，没有其他独立节点，不创建新组
+        if (selectedNonGroups.length === 0) {
+          return;
+        }
       }
+
+      // 如果存在临时组，检查选中节点是否有变化
+      if (existingTempGroup) {
+        const currentSelectedIds = new Set([...selectedGroups.map((n) => n.id), ...selectedNonGroups.map((n) => n.id)]);
+        const currentGroupChildren = latestNodes.filter((n) => n.parentId === existingTempGroup.id);
+        const currentChildrenIds = new Set(currentGroupChildren.map((n) => n.id));
+
+        // 如果选中节点和当前组内节点完全相同，则不需要更新
+        if (
+          currentSelectedIds.size === currentChildrenIds.size &&
+          [...currentSelectedIds].every((id) => currentChildrenIds.has(id))
+        ) {
+          return;
+        }
+
+        // 如果临时组存在，且选中节点发生变化，删除临时组
+        let updatedNodes = latestNodes
+          .map((node) => {
+            if (node.parentId === existingTempGroup.id) {
+              const { parentId, extent, ...nodeWithoutParent } = node;
+              return {
+                ...nodeWithoutParent,
+                position: {
+                  x: existingTempGroup.position.x + node.position.x,
+                  y: existingTempGroup.position.y + node.position.y,
+                },
+                selected: selectedNodes.some((n) => n.id === node.id),
+              };
+            }
+            return node;
+          })
+          .filter((node) => node.id !== existingTempGroup.id);
+
+        // 更新节点状态
+        updateNodesWithSync(sortNodes(updatedNodes));
+        setTempGroupId(null);
+        return;
+      }
+
+      // 获取要组合的节点（包括组节点和非组节点）
+      const nodesToGroup = [...selectedGroups, ...selectedNonGroups];
+
+      // 如果没有需要组合的节点，直接返回
+      if (nodesToGroup.length < 2) {
+        return;
+      }
+
+      // 计算新组的尺寸和位置
+      const getNodeDimensions = (node: Node) => {
+        if (node.type === 'group') {
+          // 对于组节点，需要考虑其内部节点的位置
+          const groupChildren = latestNodes.filter((n) => n.parentId === node.id);
+          if (groupChildren.length > 0) {
+            const childPositions = groupChildren.map((child) => ({
+              x: node.position.x + child.position.x,
+              y: node.position.y + child.position.y,
+              width: child.measured?.width ?? child.width ?? 200,
+              height: child.measured?.height ?? child.height ?? 100,
+            }));
+
+            const left = Math.min(...childPositions.map((p) => p.x));
+            const right = Math.max(...childPositions.map((p) => p.x + p.width));
+            const top = Math.min(...childPositions.map((p) => p.y));
+            const bottom = Math.max(...childPositions.map((p) => p.y + p.height));
+
+            return {
+              width: right - left + 40, // 添加一些padding
+              height: bottom - top + 40,
+            };
+          }
+          return {
+            width: (node.data as any)?.metadata?.width ?? 200,
+            height: (node.data as any)?.metadata?.height ?? 100,
+          };
+        }
+        const width = node.measured?.width ?? node.width ?? 200;
+        const height = node.measured?.height ?? node.height ?? 100;
+        return { width, height };
+      };
+
+      // 计算组的边界，需要考虑节点可能在其他组内的情况
+      const nodeBoundaries = nodesToGroup.map((node) => {
+        const { width, height } = getNodeDimensions(node);
+        let position = { ...node.position };
+
+        return {
+          left: position.x,
+          right: position.x + width,
+          top: position.y,
+          bottom: position.y + height,
+        };
+      });
+
+      const minX = Math.min(...nodeBoundaries.map((b) => b.left));
+      const maxX = Math.max(...nodeBoundaries.map((b) => b.right));
+      const minY = Math.min(...nodeBoundaries.map((b) => b.top));
+      const maxY = Math.max(...nodeBoundaries.map((b) => b.bottom));
+
+      const PADDING = 40;
+      const width = maxX - minX + PADDING;
+      const height = maxY - minY + PADDING;
+
+      // 创建新的组节点
+      const groupNode = prepareNodeData({
+        type: 'group' as CanvasNodeType,
+        data: {
+          title: 'Group',
+          entityId: genUniqueId(),
+          metadata: {
+            width,
+            height,
+            isTemporary: true,
+          },
+        },
+        position: {
+          x: minX - PADDING / 2,
+          y: minY - PADDING / 2,
+        },
+        selected: false,
+        className: 'react-flow__node-default important-box-shadow-none',
+        style: {
+          background: 'transparent',
+          border: 'none',
+          boxShadow: 'none',
+          width: width,
+          height: height,
+        },
+      });
+
+      // 更新节点位置到新组内，保持原有的组结构
+      let updatedNodes = latestNodes.map((node) => {
+        // 只处理被选中的组节点和独立节点，不处理组内的子节点
+        if (selectedGroups.some((g) => g.id === node.id) || selectedNonGroups.some((n) => n.id === node.id)) {
+          const nodePosition = { ...node.position };
+          return {
+            ...node,
+            parentId: groupNode.id,
+            extent: 'parent' as const,
+            positionAbsolute: nodePosition,
+            position: {
+              x: nodePosition.x - minX + PADDING / 2,
+              y: nodePosition.y - minY + PADDING / 2,
+            },
+            selected: true,
+            draggable: true,
+          };
+        }
+        // 保持其他节点不变，包括原有组内的节点
+        return node;
+      });
+
+      // 添加新组节点
+      updatedNodes = [...updatedNodes, groupNode];
+
+      // 更新节点状态
+      updateNodesWithSync(sortNodes(updatedNodes));
+      setTempGroupId(groupNode.id);
     },
-    [updateNodesWithSync, createTemporaryGroup, updateTempGroup, setTempGroupId, ungroupNodes, canvasId],
+    [canvasId, updateNodesWithSync, setTempGroupId],
   );
 
   const deselectNode = useCallback(
