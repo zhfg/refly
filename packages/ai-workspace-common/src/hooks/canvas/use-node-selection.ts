@@ -24,6 +24,79 @@ export const useNodeSelection = () => {
 
   const [tempGroupId, setTempGroupId] = useState<string | null>(null);
 
+  const ungroupNodes = useCallback(
+    (groupId: string) => {
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
+
+      // Find the group node
+      const groupNode = nodes.find((n) => n.id === groupId && n.type === 'group');
+      if (!groupNode) return;
+
+      // Update child nodes to remove group parent and restore absolute positions
+      const updatedNodes = nodes
+        .map((node) => {
+          if (node.parentId === groupId) {
+            // Remove group-related properties
+            const { parentId, extent, ...nodeWithoutParent } = node;
+            return {
+              ...nodeWithoutParent,
+              // Restore absolute position
+              position: {
+                x: groupNode.position.x + node.position.x,
+                y: groupNode.position.y + node.position.y,
+              },
+              selected: false,
+            };
+          }
+          return node;
+        })
+        .filter((node) => node.id !== groupId); // Remove the group node
+
+      updateNodesWithSync(sortNodes(updatedNodes));
+    },
+    [canvasId, updateNodesWithSync],
+  );
+
+  const ungroupMultipleNodes = useCallback(
+    (groupIds: string[]) => {
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
+
+      // Process all groups and their children
+      let updatedNodes = [...nodes];
+
+      // Handle each group one by one
+      groupIds.forEach((groupId) => {
+        const groupNode = updatedNodes.find((n) => n.id === groupId && n.type === 'group');
+        if (!groupNode) return;
+
+        // Update child nodes to remove group parent and restore absolute positions
+        updatedNodes = updatedNodes
+          .map((node) => {
+            if (node.parentId === groupId) {
+              // Remove group-related properties
+              const { parentId, extent, ...nodeWithoutParent } = node;
+              return {
+                ...nodeWithoutParent,
+                // Restore absolute position
+                position: {
+                  x: groupNode.position.x + node.position.x,
+                  y: groupNode.position.y + node.position.y,
+                },
+                selected: false,
+              };
+            }
+            return node;
+          })
+          .filter((node) => node.id !== groupId); // Remove the group node
+      });
+
+      updateNodesWithSync(sortNodes(updatedNodes));
+    },
+    [canvasId, updateNodesWithSync],
+  );
+
   const setSelectedNode = useCallback(
     (node: CanvasNode<any> | null) => {
       const { data } = useCanvasStore.getState();
@@ -101,7 +174,7 @@ export const useNodeSelection = () => {
             data: {
               ...node.data,
               metadata: {
-                ...node.data.metadata,
+                ...(node.data?.metadata || {}),
                 isTemporary: false,
               },
             },
@@ -353,42 +426,185 @@ export const useNodeSelection = () => {
     [canvasId, tempGroupId, updateNodesWithSync],
   );
 
+  const updateTempGroup = useCallback(
+    (selectedNodes: Node[], currentNodes: Node[], existingGroupId: string) => {
+      // 检查是否需要更新
+      const currentSelectedIds = new Set(selectedNodes.filter((n) => n.type !== 'group').map((n) => n.id));
+      const currentGroupChildren = currentNodes.filter((n) => n.parentId === existingGroupId && n.type !== 'group');
+      const currentChildrenIds = new Set(currentGroupChildren.map((n) => n.id));
+
+      // 如果选中节点和当前组内节点完全相同，则不需要更新
+      if (
+        currentSelectedIds.size === currentChildrenIds.size &&
+        [...currentSelectedIds].every((id) => currentChildrenIds.has(id))
+      ) {
+        return;
+      }
+
+      console.log('updateTempGroup', selectedNodes, currentGroupChildren, existingGroupId);
+
+      // Get node dimensions helper
+      const getNodeDimensions = (node: Node) => {
+        const width = node.measured?.width ?? node.width ?? 200;
+        const height = node.measured?.height ?? node.height ?? 100;
+        return { width, height };
+      };
+
+      // Find existing group node
+      const existingGroup = currentNodes.find((n) => n.id === existingGroupId);
+      if (!existingGroup) return;
+
+      // Calculate new boundaries for all selected nodes
+      const nodeBoundaries = selectedNodes.map((node) => {
+        const { width, height } = getNodeDimensions(node);
+        // If node is already in group, use its absolute position
+        const nodePosition =
+          node.parentId === existingGroupId
+            ? {
+                x: existingGroup.position.x + node.position.x,
+                y: existingGroup.position.y + node.position.y,
+              }
+            : node.position;
+
+        return {
+          left: nodePosition.x,
+          right: nodePosition.x + width,
+          top: nodePosition.y,
+          bottom: nodePosition.y + height,
+        };
+      });
+
+      const minX = Math.min(...nodeBoundaries.map((b) => b.left));
+      const maxX = Math.max(...nodeBoundaries.map((b) => b.right));
+      const minY = Math.min(...nodeBoundaries.map((b) => b.top));
+      const maxY = Math.max(...nodeBoundaries.map((b) => b.bottom));
+
+      const PADDING = 40;
+      const width = maxX - minX + PADDING;
+      const height = maxY - minY + PADDING;
+
+      // Update existing group node and its children
+      const updatedNodes = currentNodes.map((node) => {
+        if (node.id === existingGroupId) {
+          return {
+            ...node,
+            position: {
+              x: minX - PADDING / 2,
+              y: minY - PADDING / 2,
+            },
+            style: {
+              ...node.style,
+              width,
+              height,
+            },
+            data: {
+              ...node.data,
+              metadata: {
+                ...((node.data?.metadata as any) || {}),
+                width,
+                height,
+              },
+            },
+          };
+        }
+
+        const isSelected = currentSelectedIds.has(node.id);
+        if (isSelected) {
+          // Calculate relative position based on whether the node was already in the group
+          const nodeAbsolutePosition =
+            node.parentId === existingGroupId
+              ? {
+                  x: existingGroup.position.x + node.position.x,
+                  y: existingGroup.position.y + node.position.y,
+                }
+              : node.position;
+
+          return {
+            ...node,
+            parentId: existingGroupId,
+            extent: 'parent' as const,
+            positionAbsolute: nodeAbsolutePosition,
+            position: {
+              x: nodeAbsolutePosition.x - minX + PADDING / 2,
+              y: nodeAbsolutePosition.y - minY + PADDING / 2,
+            },
+            selected: true,
+            draggable: true,
+          };
+        }
+
+        // Remove parentId for nodes that are no longer selected
+        if (node.parentId === existingGroupId && !isSelected) {
+          const { parentId, extent, ...nodeWithoutParent } = node;
+          return {
+            ...nodeWithoutParent,
+            position: {
+              x: node.position.x + existingGroup.position.x,
+              y: node.position.y + existingGroup.position.y,
+            },
+            selected: false,
+          };
+        }
+
+        return node;
+      });
+
+      updateNodesWithSync(sortNodes(updatedNodes));
+    },
+    [updateNodesWithSync],
+  );
+
   const setSelectedNodes = useCallback(
-    (selectedNodes: CanvasNode<any>[]) => {
+    (selectedNodes: CanvasNode<any>[], currentNodes: CanvasNode<any>[]) => {
+      // Find all temporary groups
+      const tempGroups = currentNodes.filter((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
+
+      // If there are multiple temp groups, remove all but keep the most recent one
+      // if (tempGroups.length > 1) {
+      //   // Remove all temp groups except the last one
+      //   tempGroups.slice(0, -1).forEach((group) => {
+      //     ungroupNodes(group.id);
+      //   });
+      // }
+
+      // Get fresh nodes after potential ungroup operations
       const { data } = useCanvasStore.getState();
-      const nodes = data[canvasId]?.nodes ?? [];
+      const freshNodes = data[canvasId]?.nodes ?? [];
 
-      console.log('selectedNodes', selectedNodes);
+      // 如果没有选中节点，直接返回
+      if (!selectedNodes.length) {
+        return;
+      }
 
-      const shouldCreateTempGroup =
-        selectedNodes.length >= 2 && !nodes.some((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
+      if (selectedNodes.length < 2) {
+        // If less than 2 nodes selected and there's a temp group, remove it
+        const existingTempGroup = freshNodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
+        if (existingTempGroup) {
+          ungroupNodes(existingTempGroup.id);
+          setTempGroupId(null);
+        }
+        return;
+      }
 
-      if (shouldCreateTempGroup) {
-        createTemporaryGroup(selectedNodes);
-      } else if (selectedNodes.length < 2 && tempGroupId) {
-        const updatedNodes = nodes
-          .map((node) => {
-            if (node.parentId === tempGroupId) {
-              const { parentId, extent, ...nodeWithoutParent } = node;
-              const parentNode = nodes.find((n) => n.id === parentId);
-              const computedPosition = {
-                x: node.position.x + (parentNode?.position.x || 0),
-                y: node.position.y + (parentNode?.position.y || 0),
-              };
-              return {
-                ...nodeWithoutParent,
-                position: computedPosition,
-              };
-            }
-            return node;
-          })
-          .filter((node) => node.id !== tempGroupId);
+      // Get fresh nodes again after potential ungroup operation
+      const latestNodes = useCanvasStore.getState().data[canvasId]?.nodes ?? [];
+      const existingTempGroup = latestNodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
 
-        updateNodesWithSync(sortNodes(updatedNodes));
-        setTempGroupId(null);
+      if (existingTempGroup) {
+        // Update existing temporary group
+        // Pass the latest nodes to updateTempGroup
+        updateTempGroup(selectedNodes, latestNodes, existingTempGroup.id);
+      } else {
+        // Create new temporary group
+        // selectedNodes might contain outdated positions, so we need to map to fresh nodes
+        const freshSelectedNodes = selectedNodes.map((selectedNode) => {
+          const freshNode = latestNodes.find((n) => n.id === selectedNode.id);
+          return freshNode || selectedNode;
+        });
+        createTemporaryGroup(freshSelectedNodes);
       }
     },
-    [canvasId, createTemporaryGroup, tempGroupId, updateNodesWithSync],
+    [updateNodesWithSync, createTemporaryGroup, updateTempGroup, setTempGroupId, ungroupNodes, canvasId],
   );
 
   const deselectNode = useCallback(
@@ -417,40 +633,6 @@ export const useNodeSelection = () => {
     [canvasId, deselectNode],
   );
 
-  const ungroupNodes = useCallback(
-    (groupId: string) => {
-      const { data } = useCanvasStore.getState();
-      const nodes = data[canvasId]?.nodes ?? [];
-
-      // Find the group node
-      const groupNode = nodes.find((n) => n.id === groupId && n.type === 'group');
-      if (!groupNode) return;
-
-      // Update child nodes to remove group parent and restore absolute positions
-      const updatedNodes = nodes
-        .map((node) => {
-          if (node.parentId === groupId) {
-            // Remove group-related properties
-            const { parentId, extent, ...nodeWithoutParent } = node;
-            return {
-              ...nodeWithoutParent,
-              // Restore absolute position
-              position: {
-                x: groupNode.position.x + node.position.x,
-                y: groupNode.position.y + node.position.y,
-              },
-              selected: false,
-            };
-          }
-          return node;
-        })
-        .filter((node) => node.id !== groupId); // Remove the group node
-
-      updateNodesWithSync(sortNodes(updatedNodes));
-    },
-    [canvasId, updateNodesWithSync],
-  );
-
   return {
     setSelectedNode,
     addSelectedNode,
@@ -464,5 +646,6 @@ export const useNodeSelection = () => {
     createTemporaryGroup,
     tempGroupId,
     convertTemporaryToPermGroup,
+    ungroupMultipleNodes,
   };
 };

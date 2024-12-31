@@ -76,7 +76,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   console.log('nodes', nodes);
   const { onNodesChange, updateNodesWithSync } = useNodeOperations(canvasId);
-  const { setSelectedNode, createGroupFromSelectedNodes, setSelectedNodes, ungroupNodes } = useNodeSelection();
+  const { setSelectedNode, createGroupFromSelectedNodes, setSelectedNodes, ungroupMultipleNodes } = useNodeSelection();
   const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
 
@@ -201,15 +201,14 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       setOperatingNodeId(null);
       setContextMenu((prev) => ({ ...prev, open: false }));
 
-      // Remove temporary group when clicking on canvas
+      // Remove temporary groups when clicking on canvas
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
+      const tempGroups = nodes.filter((node) => node.type === 'group' && node.data?.metadata?.isTemporary);
 
-      const tempGroup = nodes.find((node) => node.type === 'group' && node.data?.metadata?.isTemporary);
-
-      // If temporary group exists, ungroup it
-      if (tempGroup) {
-        ungroupNodes(tempGroup.id);
+      if (tempGroups.length > 0) {
+        const groupIds = tempGroups.map((group) => group.id);
+        ungroupMultipleNodes(groupIds);
       }
 
       const currentTime = new Date().getTime();
@@ -227,7 +226,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
       setLastClickTime(currentTime);
     },
-    [lastClickTime, setOperatingNodeId, canvasId, updateNodesWithSync, sortNodes],
+    [lastClickTime, setOperatingNodeId, canvasId, ungroupMultipleNodes],
   );
 
   const handleToolSelect = (tool: string) => {
@@ -387,11 +386,15 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         return;
       }
 
+      // If clicking a non-group node, remove any temporary groups
       if (node.type !== 'group') {
-        const tempGroup = nodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
+        const { data } = useCanvasStore.getState();
+        const nodes = data[canvasId]?.nodes ?? [];
+        const tempGroups = nodes.filter((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
 
-        if (tempGroup) {
-          ungroupNodes(tempGroup.id);
+        if (tempGroups.length > 0) {
+          const groupIds = tempGroups.map((group) => group.id);
+          ungroupMultipleNodes(groupIds);
         }
       }
 
@@ -416,7 +419,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       // Handle preview if enabled
       handleNodePreview(node);
     },
-    [operatingNodeId, handleNodePreview, setOperatingNodeId, setSelectedNode],
+    [operatingNodeId, handleNodePreview, setOperatingNodeId, setSelectedNode, canvasId, ungroupMultipleNodes],
   );
 
   // 缓存节点数据
@@ -563,19 +566,22 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onSelectionContextMenu={onSelectionContextMenu}
             onSelectionChange={useCallback(
               ({ nodes: selectedNodes }) => {
-                // Avoid unnecessary updates if selection hasn't changed
                 const currentSelectedNodes = nodes.filter((n) => n.selected);
                 const currentSelectedIds = new Set(currentSelectedNodes.map((n) => n.id));
                 const newSelectedIds = new Set(selectedNodes.map((n) => n.id));
 
-                // Only update if the selection has actually changed
                 if (currentSelectedIds.size === 0 || currentSelectedIds.size === 1) {
+                  const tempGroups = nodes.filter((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
+                  if (tempGroups.length > 0) {
+                    const groupIds = tempGroups.map((group) => group.id);
+                    ungroupMultipleNodes(groupIds);
+                  }
                   return;
                 }
 
-                setSelectedNodes(selectedNodes as CanvasNode<any>[]);
+                setSelectedNodes(selectedNodes as CanvasNode<any>[], nodes);
               },
-              [nodes, setSelectedNodes],
+              [nodes, setSelectedNodes, ungroupMultipleNodes],
             )}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
