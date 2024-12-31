@@ -127,6 +127,11 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     onClose?.();
   }, [ungroupNodes, nodeId, onClose]);
 
+  const handleGroup = useCallback(() => {
+    createGroupFromSelectedNodes();
+    onClose?.();
+  }, [createGroupFromSelectedNodes, onClose]);
+
   const getMenuItems = (): MenuItem[] => {
     const baseItems: MenuItem[] = [
       {
@@ -182,7 +187,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
               key: 'group',
               icon: Group,
               label: t('canvas.nodeActions.group'),
-              onClick: createGroupFromSelectedNodes,
+              onClick: handleGroup,
               type: 'button' as const,
             }
           : {
