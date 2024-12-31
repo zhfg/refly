@@ -34,7 +34,7 @@ export const GroupActionMenu: FC<GroupActionMenuProps> = ({ nodeId, isTemporary,
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-1 flex gap-1 border border-[rgba(0,0,0,0.06)]">
-      <Button
+      {/* <Button
         type="text"
         className="flex items-center justify-center w-8 h-8 hover:bg-gray-50"
         icon={<AlignLeft className="w-4 h-4" />}
@@ -51,21 +51,25 @@ export const GroupActionMenu: FC<GroupActionMenuProps> = ({ nodeId, isTemporary,
         className="flex items-center justify-center w-8 h-8 hover:bg-gray-50"
         icon={<AlignRight className="w-4 h-4" />}
         onClick={() => handleAlign('right')}
-      />
+      /> */}
       {isTemporary ? (
         <Button
           type="text"
-          className="flex items-center justify-center w-8 h-8 hover:bg-gray-50"
+          className="flex items-center justify-center  h-8 hover:bg-gray-50"
           icon={<Group className="w-4 h-4" />}
           onClick={handleGroup}
-        />
+        >
+          {t('canvas.nodeActions.group')}
+        </Button>
       ) : (
         <Button
           type="text"
-          className="flex items-center justify-center w-8 h-8 hover:bg-gray-50"
+          className="flex items-center justify-center  h-8 hover:bg-gray-50"
           icon={<Ungroup className="w-4 h-4" />}
           onClick={handleUngroup}
-        />
+        >
+          {t('canvas.nodeActions.ungroup')}
+        </Button>
       )}
     </div>
   );
