@@ -378,6 +378,26 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     [reactFlowInstance],
   );
 
+  const handleSelectionChange = useCallback(
+    ({ nodes: selectedNodes }) => {
+      const currentSelectedNodes = nodes.filter((n) => n.selected);
+      const currentSelectedIds = new Set(currentSelectedNodes.map((n) => n.id));
+      const newSelectedIds = new Set(selectedNodes.map((n) => n.id));
+
+      if (currentSelectedIds.size === 0 || currentSelectedIds.size === 1) {
+        const tempGroups = nodes.filter((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
+        if (tempGroups.length > 0) {
+          const groupIds = tempGroups.map((group) => group.id);
+          ungroupMultipleNodes(groupIds);
+        }
+        return;
+      }
+
+      setSelectedNodes(selectedNodes as CanvasNode<any>[], nodes);
+    },
+    [nodes, setSelectedNodes, ungroupMultipleNodes],
+  );
+
   const handleNodeClick = useCallback(
     (event: React.MouseEvent, node: CanvasNode<any>) => {
       setContextMenu((prev) => ({ ...prev, open: false }));
@@ -565,25 +585,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             elevateNodesOnSelect={false}
             // TODO: important: don't delete this, it will be used later
             onSelectionContextMenu={onSelectionContextMenu}
-            onSelectionChange={useCallback(
-              ({ nodes: selectedNodes }) => {
-                const currentSelectedNodes = nodes.filter((n) => n.selected);
-                const currentSelectedIds = new Set(currentSelectedNodes.map((n) => n.id));
-                const newSelectedIds = new Set(selectedNodes.map((n) => n.id));
-
-                if (currentSelectedIds.size === 0 || currentSelectedIds.size === 1) {
-                  const tempGroups = nodes.filter((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
-                  if (tempGroups.length > 0) {
-                    const groupIds = tempGroups.map((group) => group.id);
-                    ungroupMultipleNodes(groupIds);
-                  }
-                  return;
-                }
-
-                setSelectedNodes(selectedNodes as CanvasNode<any>[], nodes);
-              },
-              [nodes, setSelectedNodes, ungroupMultipleNodes],
-            )}
+            onSelectionChange={handleSelectionChange}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
