@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next"
 import "./hero-home.scss"
 import "../../styles/fonts.scss"
 import { cn } from "@refly-packages/ai-workspace-common/utils/cn"
-import AnimatedShinyText from "@/components/magicui/animated-shiny-text"
+import AnimatedShinyText from "@refly-packages/ai-workspace-common/components/magicui/animated-shiny-text"
 import { ArrowRightIcon } from "lucide-react"
 import { Button } from "antd"
 import BlurImage from "@/components/common/BlurImage"
@@ -18,7 +18,7 @@ function HeroHome() {
 
   return (
     <section className="bg-gradient-to-b from-[#D2EAE1] via-[#FCFCFC] to-[#FFFFFF]">
-      <div className="relative mx-auto max-w-4xl px-4">
+      <div className="relative mx-auto max-w-7xl px-4">
         {/* Illustration behind hero content */}
         <div
           className="pointer-events-none absolute bottom-0 left-0 -ml-20 hidden lg:block"
@@ -79,7 +79,7 @@ function HeroHome() {
 
               <h1
                 className={cn(
-                  "mb-5 flex max-w-4xl flex-col font-['Alibaba_PuHuiTi_Bold',system-ui,-apple-system,sans-serif]",
+                  "mb-5 flex max-w-7xl flex-col font-['Alibaba_PuHuiTi_Bold',system-ui,-apple-system,sans-serif]",
                   "text-[3rem] !tracking-[-0.2rem] sm:mb-6 sm:text-[5rem]",
                   // 为中文调整行高
                   isZhCN ? "leading-[1.2]" : "leading-[0.9]",

@@ -25,7 +25,7 @@ function Footer() {
   return (
     <footer className="px-6">
       <div className="py-12 md:py-16">
-        <div className="mx-auto w-full md:w-[70%]">
+        <div className="mx-auto w-full max-w-7xl md:w-[70%]">
           {/* CTA Block */}
           <div
             className="mb-[72px] flex h-[380px] w-full flex-col items-center justify-center rounded-[20px] border border-[#E3E3E3] p-12 text-center font-['Alibaba_PuHuiTi_Bold',system-ui,-apple-system,sans-serif]"

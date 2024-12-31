@@ -30,7 +30,7 @@ const FeatureCard = ({
   isReversed = false,
   background = "linear-gradient(180deg, #F3EEFC 0%, #FFFFFF 100%)",
 }: FeatureCardProps & { feature: Feature }) => (
-  <div className="relative mx-auto mt-[40px] w-full md:w-[65%]">
+  <div className="relative mx-auto mt-[40px] w-full max-w-7xl md:w-[65%]">
     <div
       className="min-h-[360px] w-full overflow-visible rounded-[20px] md:h-[600px]"
       style={{

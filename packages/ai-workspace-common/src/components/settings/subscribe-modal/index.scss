@@ -57,7 +57,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 100px;
+        width: 120px;
         height: 100%;
         border-radius: 8px;
         cursor: pointer;
@@ -133,10 +133,12 @@
       }
 
       &-price {
-        font-size: 28px;
-        line-height: 46px;
+        font-size: 36px;
+        line-height: 50px;
         color: #000;
-        font-weight: 600;
+        font-weight: 800;
+        height: 48px;
+        margin-top: 12px;
         .period {
           color: #2c2929;
           font-size: 14px;
@@ -145,8 +147,9 @@
       }
 
       .description {
+        height: 36px;
         font-size: 14px;
-        line-height: 24px;
+        line-height: 18px;
         color: rgb(107 114 128);
       }
 
@@ -178,8 +181,12 @@
         &--pro {
           border: 1px solid #3537cc;
           &.ant-btn-default {
+            background: linear-gradient(to right, #068cd4, #3537cc);
+            color: #fff;
+            border-color: #068cd4;
+
             &:hover {
-              background: linear-gradient(to right, #068cd4, #3537cc);
+              background: linear-gradient(to right, #005f8c, #2a2a9a);
               color: #fff;
               border-color: #068cd4;
             }

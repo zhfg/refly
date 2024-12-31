@@ -161,6 +161,12 @@ const translations = {
         ],
       },
     },
+    pricing: {
+      title: 'Plans and Pricing',
+      subtitle: 'Embark on your AI content creation journey with Refly',
+      description: 'Sign up and get a free trial of a million standard model tokens. No credit card required.',
+      limitedOffer: 'Annual subscription - 50% off for a limited time!',
+    },
     footer: {
       cta: {
         title: 'Ready to experience AI free-form canvas and ignite your creativity?',
@@ -1042,12 +1048,12 @@ const translations = {
       getStarted: 'Get Started',
       subscribeNow: 'Subscribe Now',
       currentPlan: 'Current Plan',
-      t1TokenUsed: 'Premium Model Token Usage',
+      t1TokenUsed: 'Advanced Model Token Usage',
       t1TokenUsedDescription:
-        'Premium models include OpenAI GPT-4o and Anthropic Claude 3.5 Sonnet, usage includes both model input and output tokens.',
-      t2TokenUsed: 'Basic Model Token Usage',
+        'Advanced models include OpenAI GPT-4o and Anthropic Claude 3.5 Sonnet, usage includes both model input and output tokens.',
+      t2TokenUsed: 'Standard Model Token Usage',
       t2TokenUsedDescription:
-        'Basic models include OpenAI GPT-4o-mini and Anthropic Claude 3 Haiku, usage includes both model input and output tokens.',
+        'Standard models include OpenAI GPT-4o-mini and Anthropic Claude 3 Haiku, usage includes both model input and output tokens.',
       subscriptionManagement: 'Manage Billing and Subscriptions',
       subscriptionStatus: {
         free: 'FREE',
@@ -1070,8 +1076,8 @@ const translations = {
         },
         vectorStorage: 'Vector Storage',
         fileStorage: 'File Storage',
-        t1Modal: 'High-End Models',
-        t2Modal: 'Basic Models',
+        t1Model: 'Advanced Models',
+        t2Model: 'Standard Models',
         fileStorageType: {
           note: 'Canvases',
           resource: 'Resources',
@@ -1082,7 +1088,7 @@ const translations = {
         oneTime: 'One-Time',
         unlimited: 'Unlimited',
         free: {
-          description: 'Everything you need to start a creative journey',
+          description: 'Everything you need to get started',
           serviceSupport: {
             name: 'Service Support',
             details: 'Community support (Discord)',
@@ -1465,7 +1471,7 @@ const translations = {
     modelSelector: {
       unlimited: 'Unlimited',
       noModelAvailable: 'No model available',
-      premium: 'Premium',
+      premium: 'Advanced',
       standard: 'Standard',
       free: 'Free',
       tokenUsed: 'Used {{used}} / {{quota}}',

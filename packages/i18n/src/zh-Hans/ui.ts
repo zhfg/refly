@@ -159,6 +159,12 @@ const translations = {
         ],
       },
     },
+    pricing: {
+      title: '计划与定价',
+      subtitle: '踏上您的 AI 内容创作之旅',
+      description: '注册并获得一百万标准模型 token 的免费试用。无需绑定信用卡。',
+      limitedOffer: '年订限时五折优惠！',
+    },
     footer: {
       cta: {
         title: '准备好立即体验 AI 自由画布，激发创作灵感了吗？',
@@ -1053,8 +1059,8 @@ const translations = {
         },
         vectorStorage: '向量存储',
         fileStorage: '文件存储',
-        t1Modal: '高阶模型',
-        t2Modal: '基础模型',
+        t1Model: '高阶模型',
+        t2Model: '基础模型',
         fileStorageType: {
           note: '画布',
           resource: '资源',

@@ -10,6 +10,8 @@ import {
   useLocation,
 } from "@refly-packages/ai-workspace-common/utils/router"
 import "./header.scss"
+import { FaDiscord } from "react-icons/fa6"
+
 function Header() {
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -33,7 +35,16 @@ function Header() {
       value: "docs",
     },
     {
-      label: t("landingPage.tab.discord"),
+      label: (
+        <div
+          className="flex cursor-pointer items-center gap-1"
+          onClick={() =>
+            window.open("https://discord.gg/bWjffrb89h", "_blank")
+          }>
+          <FaDiscord />
+          {t("landingPage.tab.discord")}
+        </div>
+      ),
       value: "discord",
     },
   ]
@@ -44,11 +55,13 @@ function Header() {
 
   return (
     <div className="fixed top-0 z-20 flex w-full !justify-center px-6 backdrop-blur-lg sm:px-6 md:px-6 lg:px-0">
-      <div className="relative flex w-full items-center justify-between py-4 md:w-[65%]">
+      <div className="relative flex max-w-7xl items-center justify-between py-4 md:w-[65%]">
         <div
           className="mr-4 flex shrink-0 flex-row items-center"
           style={{ height: 45 }}>
-          <div className="flex h-full flex-row items-center">
+          <div
+            className="flex h-full cursor-pointer flex-row items-center"
+            onClick={() => navigate("/")}>
             <img src={Logo} className="w-[35px]" alt="Refly Logo" />
             <span className="ml-2 text-base font-bold">Refly</span>
           </div>

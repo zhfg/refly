@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 import Footer from "@/components/landing-page-partials/Footer"
 import FrequentlyAskedQuestions from "@/components/landing-page-partials/frequently-asked-questions"
+
 const PricingPage = () => {
   const { t } = useTranslation()
   const { isLogin } = useUserStoreShallow(state => ({
@@ -23,7 +24,18 @@ const PricingPage = () => {
           <Header />
         </>
       )}
-      <div className="mx-auto w-[70%] bg-white">
+      <div className="mx-auto my-10 w-[70%] max-w-7xl bg-white">
+        <div className="my-10 flex flex-col items-center justify-center gap-5">
+          <div className="w-fit bg-gradient-to-r from-green-700 to-green-400 bg-clip-text text-lg font-bold text-transparent">
+            {t("landingPage.pricing.title")}
+          </div>
+          <div className="text-4xl font-bold">
+            {t("landingPage.pricing.subtitle")}
+          </div>
+          <div className="text-base text-gray-500">
+            {t("landingPage.pricing.description")}
+          </div>
+        </div>
         <PriceContent source="page" />
       </div>
       {!isLogin && (

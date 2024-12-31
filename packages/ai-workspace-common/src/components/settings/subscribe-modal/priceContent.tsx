@@ -1,21 +1,23 @@
 import { useState } from 'react';
 
-import { Button, Tooltip } from 'antd';
+import { Button, Divider, Tag, Tooltip } from 'antd';
 
 // styles
 import './index.scss';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { IconCheck, IconQuestionCircle } from '@arco-design/web-react/icon';
+import { IconCheck, IconQuestionCircle, IconStar } from '@arco-design/web-react/icon';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
+import AnimatedGradientText from '@refly-packages/ai-workspace-common/components/magicui/animated-gradient-text';
 
 export type PriceLookupKey = 'monthly' | 'yearly';
 export type PriceSource = 'page' | 'modal';
-const premiumModels = 'GPT-4o / Claude 3.5 Sonnet / Gemini Pro 1.5';
-const basicModels = 'GPT-4o Mini / Claude 3 Haiku / Gemini Flash 1.5';
+
+const premiumModels = 'GPT-4o, Claude 3.5 Sonnet, Gemini Pro 1.5 and more';
+const basicModels = 'GPT-4o Mini, Claude 3 Haiku, Gemini Flash 1.5 and more';
 
 interface ModelFeatures {
   name: string;
@@ -76,7 +78,6 @@ const PlanItem = (props: {
   };
 
   const handleButtonClick = () => {
-    console.log('handleButtonClick', isLogin);
     if (isLogin) {
       handleClick();
     } else {
@@ -97,9 +98,11 @@ const PlanItem = (props: {
         ${title === 'pro' && 'item-pro bg-[#EBF1FF]'}
         ${title === 'max' && 'item-max bg-[#FFF5EB]'}`}
       >
-        <div className="subscribe-content-plans-item-title">
+        <div className="subscribe-content-plans-item-title font-extrabold">
           {t(`settings.subscription.subscriptionStatus.${title}`)}
         </div>
+
+        <div className="description">{t(`settings.subscription.subscribe.${title}.description`)}</div>
 
         <div className="subscribe-content-plans-item-price">
           <span className="price">
@@ -107,8 +110,8 @@ const PlanItem = (props: {
               <>
                 ${getPrice(title)}
                 {lookupKey === 'yearly' && (
-                  <span className="text-sm text-gray-500">
-                    (<span className="line-through decoration-gray-700 ">${getPrice(title) * 2}</span>)
+                  <span className="text-sm text-gray-500 ml-1">
+                    <span className="line-through decoration-gray-700 ">${getPrice(title) * 2}</span>
                   </span>
                 )}
               </>
@@ -124,8 +127,6 @@ const PlanItem = (props: {
               : t(`settings.subscription.subscribe.${lookupKey === 'monthly' ? 'month' : 'year'}`)}
           </span>
         </div>
-
-        <div className="description">{t(`settings.subscription.subscribe.${title}.description`)}</div>
 
         <Button
           className={`subscribe-btn subscribe-btn--${title}`}
@@ -168,19 +169,19 @@ const PlanItem = (props: {
         </Button>
 
         <div className="plane-features">
-          <div className="description">{t('settings.subscription.subscribe.planFeatures')}</div>
+          <Divider className="mt-2 mb-6" />
           {features.map((feature, index) => (
             <div className="plane-features-item" key={index}>
               <div className="text-gray-500">
                 <IconCheck style={{ color: 'green', strokeWidth: 6 }} /> {feature.name}
                 {feature.tooltip && (
                   <Tooltip title={<div>{feature.tooltip}</div>}>
-                    <IconQuestionCircle />
+                    <IconQuestionCircle className="ml-1" />
                   </Tooltip>
                 )}
               </div>
-              {feature.count && <div className="ml-[18px] text-xs text-[#000] font-bold">{feature.count}</div>}
-              <div className="ml-[18px] text-[10px] text-gray-400">{feature.details}</div>
+              {feature.count && <div className="ml-4 text-sm text-black font-medium">{feature.count}</div>}
+              <div className="ml-4 text-xs text-gray-400">{feature.details}</div>
             </div>
           ))}
         </div>
@@ -212,8 +213,8 @@ export const PriceContent = (props: { source: PriceSource }) => {
     plan: '',
   });
 
-  const t1ModalName = t('settings.subscription.subscribe.t1Modal');
-  const t2ModalName = t('settings.subscription.subscribe.t2Modal');
+  const t1ModelName = t('settings.subscription.subscribe.t1Model');
+  const t2ModelName = t('settings.subscription.subscribe.t2Model');
   const vectorStorageName = t('settings.subscription.subscribe.vectorStorage');
   const fileStorageName = t('settings.subscription.subscribe.fileStorage');
   const modalTooltipContent = t('settings.subscription.subscribe.tooltip.modelToken');
@@ -225,7 +226,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
 
   const freeFeatures: ModelFeatures[] = [
     {
-      name: t1ModalName,
+      name: t2ModelName,
       count: `1,000,000 tokens / ${oneTime}`,
       details: basicModels,
       tooltip: modalTooltipContent,
@@ -242,19 +243,19 @@ export const PriceContent = (props: { source: PriceSource }) => {
     },
     {
       name: t('settings.subscription.subscribe.free.serviceSupport.name'),
-      details: t('settings.subscription.subscribe.free.serviceSupport.details'),
+      count: t('settings.subscription.subscribe.free.serviceSupport.details'),
     },
   ];
 
   const plusFeatures: ModelFeatures[] = [
     {
-      name: t1ModalName,
+      name: t1ModelName,
       count: `500,000 tokens / ${month}`,
       details: premiumModels,
       tooltip: modalTooltipContent,
     },
     {
-      name: t2ModalName,
+      name: t2ModelName,
       count: `5,000,000 tokens / ${month}`,
       details: basicModels,
       tooltip: modalTooltipContent,
@@ -271,19 +272,19 @@ export const PriceContent = (props: { source: PriceSource }) => {
     },
     {
       name: t('settings.subscription.subscribe.plus.serviceSupport.name'),
-      details: t('settings.subscription.subscribe.plus.serviceSupport.details'),
+      count: t('settings.subscription.subscribe.plus.serviceSupport.details'),
     },
   ];
 
   const proFeatures: ModelFeatures[] = [
     {
-      name: t1ModalName,
+      name: t1ModelName,
       count: `1,000,000 tokens / ${month}`,
       details: premiumModels,
       tooltip: modalTooltipContent,
     },
     {
-      name: t2ModalName,
+      name: t2ModelName,
       count: unlimited,
       details: basicModels,
       tooltip: modalTooltipContent,
@@ -300,19 +301,19 @@ export const PriceContent = (props: { source: PriceSource }) => {
     },
     {
       name: t('settings.subscription.subscribe.pro.serviceSupport.name'),
-      details: t('settings.subscription.subscribe.pro.serviceSupport.details'),
+      count: t('settings.subscription.subscribe.pro.serviceSupport.details'),
     },
   ];
 
   const maxFeatures: ModelFeatures[] = [
     {
-      name: t1ModalName,
+      name: t1ModelName,
       count: unlimited,
       details: premiumModels,
       tooltip: modalTooltipContent,
     },
     {
-      name: t2ModalName,
+      name: t2ModelName,
       count: unlimited,
       details: basicModels,
       tooltip: modalTooltipContent,
@@ -329,7 +330,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
     },
     {
       name: t('settings.subscription.subscribe.max.serviceSupport.name'),
-      details: t('settings.subscription.subscribe.max.serviceSupport.details'),
+      count: t('settings.subscription.subscribe.max.serviceSupport.details'),
     },
   ];
 
@@ -357,8 +358,14 @@ export const PriceContent = (props: { source: PriceSource }) => {
 
   return (
     <div className="subscribe-content min-w-[800px]">
-      <div className="subscribe-content-title">{t('settings.subscription.subscribe.title')}</div>
-      <div className="subscribe-content-subtitle">{t('settings.subscription.subscribe.subtitle')}</div>
+      <div className="flex items-center justify-center">
+        <div className="text-base ml-1 border border-solid border-yellow-500 rounded-xl px-4 py-1 w-fit mb-4 flex items-center gap-2">
+          <span>🎉</span>
+          <span className="inline bg-gradient-to-r from-[#ffaa40] via-[#9c40ff] to-[#ffaa40] bg-[length:200%_100%] bg-clip-text text-transparent animate-[gradient-animation_1s_ease-in-out_infinite]">
+            {t('landingPage.pricing.limitedOffer')}
+          </span>
+        </div>
+      </div>
 
       <div className="subscribe-content-type">
         <div className="subscribe-content-type-inner">
@@ -366,7 +373,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
             className={`subscribe-content-type-inner-item ${lookupKey === 'yearly' ? 'active' : ''}`}
             onClick={() => setLookupKey('yearly')}
           >
-            {t('settings.subscription.subscribe.yearly')}
+            <span>{t('settings.subscription.subscribe.yearly')}</span>
           </div>
 
           <div
