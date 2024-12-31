@@ -19,6 +19,7 @@ const basicModels = 'GPT-4o Mini / Claude 3 Haiku / Gemini Flash 1.5';
 
 interface ModelFeatures {
   name: string;
+  count?: string;
   details?: string;
   tooltip?: string;
 }
@@ -42,6 +43,7 @@ const PlanItem = (props: {
   const { setLoginModalOpen } = useAuthStoreShallow((state) => ({
     setLoginModalOpen: state.setLoginModalOpen,
   }));
+  const [isHovered, setIsHovered] = useState(false);
 
   const getPrice = (plan: 'max' | 'pro' | 'plus' | 'free') => {
     switch (plan) {
@@ -83,59 +85,105 @@ const PlanItem = (props: {
   };
 
   return (
-    <div className={`subscribe-content-plans-item ${isActive ? 'active' : ''}`}>
-      <div className="subscribe-content-plans-item-title">{t(`settings.subscription.subscriptionStatus.${title}`)}</div>
-
-      <div className="subscribe-content-plans-item-price">
-        <span className="price">
-          {title !== 'free' ? (
-            <>
-              ${getPrice(title)}
-              {lookupKey === 'yearly' && (
-                <span className="text-sm text-gray-500">
-                  (<span className="line-through decoration-gray-700 ">${getPrice(title) * 2}</span>)
-                </span>
-              )}
-            </>
-          ) : (
-            t('settings.subscription.subscribe.forFree')
-          )}
-        </span>
-        <span className="period">
-          {' '}
-          /{' '}
-          {title === 'free'
-            ? t('settings.subscription.subscribe.period')
-            : t(`settings.subscription.subscribe.${lookupKey === 'monthly' ? 'month' : 'year'}`)}
-        </span>
+    <div className={`flex flex-col felx-1 p-1 ${title === 'pro' ? 'pro-plan' : ''}`}>
+      <div className="h-[20px] text-center text-xs text-white font-bold">
+        {title === 'pro' && t('settings.subscription.mostPopular')}
       </div>
-
-      <div className="description">{t(`settings.subscription.subscribe.${title}.description`)}</div>
-
-      <Button
-        className="subscribe-btn"
-        type={isActive ? 'primary' : 'default'}
-        onClick={handleButtonClick}
-        loading={loadingInfo.isLoading && loadingInfo.plan === title}
+      <div
+        className={`
+        subscribe-content-plans-item
+        ${title === 'free' && 'item-free bg-gray-50'}
+        ${title === 'plus' && 'item-plus bg-[#E8F4FC]'}
+        ${title === 'pro' && 'item-pro bg-[#EBF1FF]'}
+        ${title === 'max' && 'item-max bg-[#FFF5EB]'}`}
       >
-        {getButtonText(title)}
-      </Button>
+        <div className="subscribe-content-plans-item-title">
+          {t(`settings.subscription.subscriptionStatus.${title}`)}
+        </div>
 
-      <div className="plane-features">
-        <div className="description">{t('settings.subscription.subscribe.planFeatures')}</div>
-        {features.map((feature, index) => (
-          <div className="plane-features-item" key={index}>
-            <div className="name">
-              <IconCheck style={{ color: 'green', strokeWidth: 6 }} /> {feature.name}
-              {feature.tooltip && (
-                <Tooltip title={<div>{feature.tooltip}</div>}>
-                  <IconQuestionCircle />
-                </Tooltip>
-              )}
-            </div>
-            <div className="details">{feature.details}</div>
+        <div className="subscribe-content-plans-item-price">
+          <span className="price">
+            {title !== 'free' ? (
+              <>
+                ${getPrice(title)}
+                {lookupKey === 'yearly' && (
+                  <span className="text-sm text-gray-500">
+                    (<span className="line-through decoration-gray-700 ">${getPrice(title) * 2}</span>)
+                  </span>
+                )}
+              </>
+            ) : (
+              t('settings.subscription.subscribe.forFree')
+            )}
+          </span>
+          <span className="period">
+            {' '}
+            /{' '}
+            {title === 'free'
+              ? t('settings.subscription.subscribe.period')
+              : t(`settings.subscription.subscribe.${lookupKey === 'monthly' ? 'month' : 'year'}`)}
+          </span>
+        </div>
+
+        <div className="description">{t(`settings.subscription.subscribe.${title}.description`)}</div>
+
+        <Button
+          className={`subscribe-btn subscribe-btn--${title}`}
+          onClick={handleButtonClick}
+          loading={loadingInfo.isLoading && loadingInfo.plan === title}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <div className="relative w-full h-full overflow-hidden flex items-center justify-center">
+            <span
+              className={`
+                inline-flex
+                items-center
+                justify-center
+                w-full
+                h-full
+                transition-transform duration-300
+                absolute
+                ${isHovered ? '-translate-y-full' : 'translate-y-0'}
+              `}
+            >
+              {getButtonText(title)}
+            </span>
+            <span
+              className={`
+                absolute
+                inline-flex
+                items-center
+                justify-center
+                w-full
+                h-full
+                m-auto
+                transition-transform duration-300
+                ${isHovered ? 'translate-y-0' : 'translate-y-full'}
+              `}
+            >
+              {getButtonText(title)}
+            </span>
           </div>
-        ))}
+        </Button>
+
+        <div className="plane-features">
+          <div className="description">{t('settings.subscription.subscribe.planFeatures')}</div>
+          {features.map((feature, index) => (
+            <div className="plane-features-item" key={index}>
+              <div className="text-gray-500">
+                <IconCheck style={{ color: 'green', strokeWidth: 6 }} /> {feature.name}
+                {feature.tooltip && (
+                  <Tooltip title={<div>{feature.tooltip}</div>}>
+                    <IconQuestionCircle />
+                  </Tooltip>
+                )}
+              </div>
+              {feature.count && <div className="ml-[18px] text-xs text-[#000] font-bold">{feature.count}</div>}
+              <div className="ml-[18px] text-[10px] text-gray-400">{feature.details}</div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -164,22 +212,32 @@ export const PriceContent = (props: { source: PriceSource }) => {
     plan: '',
   });
 
+  const t1ModalName = t('settings.subscription.subscribe.t1Modal');
+  const t2ModalName = t('settings.subscription.subscribe.t2Modal');
+  const vectorStorageName = t('settings.subscription.subscribe.vectorStorage');
+  const fileStorageName = t('settings.subscription.subscribe.fileStorage');
   const modalTooltipContent = t('settings.subscription.subscribe.tooltip.modelToken');
   const vectorStorageTooltipContent = t('settings.subscription.subscribe.tooltip.vectorStorage');
   const fileStorageTooltipContent = t('settings.subscription.subscribe.tooltip.fileStorage');
+  const unlimited = t('settings.subscription.subscribe.unlimited');
+  const oneTime = t('settings.subscription.subscribe.oneTime');
+  const month = t('settings.subscription.subscribe.month');
 
   const freeFeatures: ModelFeatures[] = [
     {
-      name: t('settings.subscription.subscribe.t2ModalOneTime', { tokenCount: '1,000,000' }),
+      name: t1ModalName,
+      count: `1,000,000 tokens / ${oneTime}`,
       details: basicModels,
       tooltip: modalTooltipContent,
     },
     {
-      name: `${t('settings.subscription.subscribe.vectorStorage')} (10MB)`,
+      name: vectorStorageName,
+      count: '10MB',
       tooltip: vectorStorageTooltipContent,
     },
     {
-      name: `${t('settings.subscription.subscribe.fileStorage')} (100MB)`,
+      name: fileStorageName,
+      count: '100MB',
       tooltip: fileStorageTooltipContent,
     },
     {
@@ -190,21 +248,25 @@ export const PriceContent = (props: { source: PriceSource }) => {
 
   const plusFeatures: ModelFeatures[] = [
     {
-      name: t('settings.subscription.subscribe.t1ModalMonthly', { tokenCount: '500,000' }),
+      name: t1ModalName,
+      count: `500,000 tokens / ${month}`,
       details: premiumModels,
       tooltip: modalTooltipContent,
     },
     {
-      name: t('settings.subscription.subscribe.t2ModalMonthly', { tokenCount: '5,000,000' }),
+      name: t2ModalName,
+      count: `5,000,000 tokens / ${month}`,
       details: basicModels,
       tooltip: modalTooltipContent,
     },
     {
-      name: `${t('settings.subscription.subscribe.vectorStorage')} (50MB)`,
+      name: vectorStorageName,
+      count: '50MB',
       tooltip: vectorStorageTooltipContent,
     },
     {
-      name: `${t('settings.subscription.subscribe.fileStorage')} (500MB)`,
+      name: fileStorageName,
+      count: '500MB',
       tooltip: fileStorageTooltipContent,
     },
     {
@@ -215,21 +277,25 @@ export const PriceContent = (props: { source: PriceSource }) => {
 
   const proFeatures: ModelFeatures[] = [
     {
-      name: t('settings.subscription.subscribe.t1ModalMonthly', { tokenCount: '1,000,000' }),
+      name: t1ModalName,
+      count: `1,000,000 tokens / ${month}`,
       details: premiumModels,
       tooltip: modalTooltipContent,
     },
     {
-      name: t('settings.subscription.subscribe.t2ModalUnlimited'),
+      name: t2ModalName,
+      count: unlimited,
       details: basicModels,
       tooltip: modalTooltipContent,
     },
     {
-      name: `${t('settings.subscription.subscribe.vectorStorage')} (100MB)`,
+      name: vectorStorageName,
+      count: '100MB',
       tooltip: vectorStorageTooltipContent,
     },
     {
-      name: `${t('settings.subscription.subscribe.fileStorage')} (1G)`,
+      name: fileStorageName,
+      count: '1G',
       tooltip: fileStorageTooltipContent,
     },
     {
@@ -240,21 +306,25 @@ export const PriceContent = (props: { source: PriceSource }) => {
 
   const maxFeatures: ModelFeatures[] = [
     {
-      name: t('settings.subscription.subscribe.t1ModalUnlimited'),
+      name: t1ModalName,
+      count: unlimited,
       details: premiumModels,
       tooltip: modalTooltipContent,
     },
     {
-      name: t('settings.subscription.subscribe.t2ModalUnlimited'),
+      name: t2ModalName,
+      count: unlimited,
       details: basicModels,
       tooltip: modalTooltipContent,
     },
     {
-      name: `${t('settings.subscription.subscribe.vectorStorage')} (500MB)`,
+      name: vectorStorageName,
+      count: '500MB',
       tooltip: vectorStorageTooltipContent,
     },
     {
-      name: t('settings.subscription.subscribe.fileStorage', { storage: '5G' }),
+      name: fileStorageName,
+      count: '5G',
       tooltip: fileStorageTooltipContent,
     },
     {
@@ -286,7 +356,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
   };
 
   return (
-    <div className="subscribe-content min-w-[1000px]">
+    <div className="subscribe-content min-w-[800px]">
       <div className="subscribe-content-title">{t('settings.subscription.subscribe.title')}</div>
       <div className="subscribe-content-subtitle">{t('settings.subscription.subscribe.subtitle')}</div>
 

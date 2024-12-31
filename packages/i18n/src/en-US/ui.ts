@@ -239,6 +239,17 @@ const translations = {
       docs: 'Docs',
       discord: 'Discord',
     },
+    faq: {
+      title: 'Frequently Asked Questions',
+      Q1: 'Can Refly be used for free?',
+      A1: 'As an open-source project, for individual users, you can deploy the community version by yourself to use all its features. To enable more users to quickly start and experience Refly, we have launched the Cloud version and provided all registered users with a one-time allocation of one million standard model tokens and sufficient storage space for trial use. If you wish to experience advanced models or increase the usage amount, you can upgrade to a paid subscription plan.',
+      Q2: 'What payment methods do you support?',
+      A2: 'We support bank cards, Alipay, Amazon Pay, and Cash App Pay. The supported payment methods may be subject to change at any time. Please refer to the payment methods displayed in the Stripe checkout page for the most accurate information.',
+      Q3: 'How can I change or cancel my subscription plan?',
+      A3: 'Changing the subscription plan is not supported at present. If you need to cancel your subscription, please click the "Settings - Subscription - Manage Billing and Subscription" button and then proceed to the Stripe platform to manage your subscription. Once the cancellation is successful, your account will be automatically downgraded to the free version upon the expiration of the current plan.',
+      Q4: 'Is a refund available?',
+      A4: 'Currently, there is no refund option available. If you have a strong demand for a refund, please contact the Refly team, and we will assist you in resolving the issue.',
+    },
   },
   emailVerification: {
     title: 'Email Verification',
@@ -1027,6 +1038,7 @@ const translations = {
       },
     },
     subscription: {
+      mostPopular: 'Most Popular',
       getStarted: 'Get Started',
       subscribeNow: 'Subscribe Now',
       currentPlan: 'Current Plan',
@@ -1058,6 +1070,8 @@ const translations = {
         },
         vectorStorage: 'Vector Storage',
         fileStorage: 'File Storage',
+        t1Modal: 'High-End Models',
+        t2Modal: 'Basic Models',
         fileStorageType: {
           note: 'Canvases',
           resource: 'Resources',
@@ -1065,11 +1079,8 @@ const translations = {
         },
         upgrade: 'Upgrade Now',
         continueFree: 'Continue Free',
-        t1ModalMonthly: 'High-End Models ({{tokenCount}} tokens / Monthly)',
-        t2ModalMonthly: 'Basic Models ({{tokenCount}} tokens / Monthly)',
-        t2ModalOneTime: 'Basic Models ({{tokenCount}} tokens / One-Time)',
-        t1ModalUnlimited: 'High-End Models (Unlimited)',
-        t2ModalUnlimited: 'Basic Models (Unlimited)',
+        oneTime: 'One-Time',
+        unlimited: 'Unlimited',
         free: {
           description: 'Everything you need to start a creative journey',
           serviceSupport: {

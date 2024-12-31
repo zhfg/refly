@@ -230,6 +230,17 @@ const translations = {
       docs: '文档',
       discord: 'Discord',
     },
+    faq: {
+      title: '常见问题',
+      Q1: 'Refly 可以免费使用吗？',
+      A1: 'Refly 作为开源项目，对于个人用户，您可以通过自行部署社区版使用其所有功能。为了更多用户快速上手体验 Refly，我们推出了 Cloud 版本，并为所有注册用户提供了一次性一百万标准模型 token 和足够体验使用的存储空间。如果您需要体验进阶模型或扩大用量，可升级付费订阅套餐。',
+      Q2: '你们支持哪些付款方式？',
+      A2: '我们支持银行卡、支付宝、Amazon Pay 和 Cash App Pay。支持的付款方式可能随时有变，请以 Stripe 收银台显示的付款方式为准。',
+      Q3: '如何更改或取消订阅方案？',
+      A3: '目前不支持更改订阅方案。如果您需要取消订阅方案，请点击「设置-订阅-管理账单及订阅」按钮后前往 Stripe 管理订阅计划。取消订阅成功后，在当前方案到期时将自动降级为免费版。',
+      Q4: '是否支持退款？',
+      A4: '目前暂不开放退款入口，如果您有强烈的退款需求，请联系 Refly 团队为您解决。',
+    },
   },
   emailVerification: {
     title: '邮箱验证',
@@ -1011,6 +1022,7 @@ const translations = {
       },
     },
     subscription: {
+      mostPopular: '最受欢迎',
       getStarted: '开始使用',
       subscribeNow: '立即订阅',
       currentPlan: '当前套餐',
@@ -1041,6 +1053,8 @@ const translations = {
         },
         vectorStorage: '向量存储',
         fileStorage: '文件存储',
+        t1Modal: '高阶模型',
+        t2Modal: '基础模型',
         fileStorageType: {
           note: '画布',
           resource: '资源',
@@ -1048,11 +1062,8 @@ const translations = {
         },
         upgrade: '立即升级',
         continueFree: '继续免费',
-        t1ModalMonthly: '高阶模型 ({{tokenCount}} tokens / 每月)',
-        t2ModalMonthly: '基础模型 ({{tokenCount}} tokens / 每月)',
-        t2ModalOneTime: '基础模型 ({{tokenCount}} tokens / 一次性)',
-        t1ModalUnlimited: '高阶模型 (无限量)',
-        t2ModalUnlimited: '基础模型 (无限量)',
+        oneTime: '一次性',
+        unlimited: '无限量',
         free: {
           description: '开启创意之旅的完美起点',
           serviceSupport: {

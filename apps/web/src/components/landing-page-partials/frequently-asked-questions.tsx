@@ -1,4 +1,4 @@
-import { FaPersonCircleQuestion } from "react-icons/fa6"
+import { BsQuestionDiamond } from "react-icons/bs"
 
 import type { CollapseProps } from "antd"
 import { Collapse } from "antd"
@@ -43,21 +43,26 @@ function FrequentlyAskedQuestions() {
     border: "none",
   }
 
+  const items = [1, 2, 3, 4].map(item => ({
+    key: item,
+    label: t(`landingPage.faq.Q${item}`),
+    children: <p>{t(`landingPage.faq.A${item}`)}</p>,
+    style: panelStyle,
+  }))
+
   return (
-    <div className="flex w-full justify-between px-[10%] pt-12 md:pt-16">
-      <div className="flex w-1/4 flex-col">
-        <div>
-          <FaPersonCircleQuestion size={30} color="#00968F" />
-          <div className="text-2xl font-bold">Frequently Asked</div>
-          <div className="text-2xl font-bold">Questions</div>
+    <div className="flex w-full justify-center pt-12 md:pt-16">
+      <div className="flex w-[70%] px-4">
+        <div className="flex w-1/4 shrink-0 flex-col items-center gap-4 pr-8">
+          <div className="text-2xl font-bold">{t("landingPage.faq.title")}</div>
         </div>
-      </div>
-      <div className="flex-grow">
-        <Collapse
-          bordered={false}
-          style={{ background: "transparent" }}
-          items={getItems(panelStyle)}
-        />
+        <div className="flex-grow">
+          <Collapse
+            bordered={false}
+            style={{ background: "transparent" }}
+            items={items}
+          />
+        </div>
       </div>
     </div>
   )

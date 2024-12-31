@@ -23,7 +23,7 @@ const PricingPage = () => {
           <Header />
         </>
       )}
-      <div className="mx-auto w-[80%] bg-white">
+      <div className="mx-auto w-[70%] bg-white px-6">
         <PriceContent source="page" />
       </div>
       {!isLogin && (
