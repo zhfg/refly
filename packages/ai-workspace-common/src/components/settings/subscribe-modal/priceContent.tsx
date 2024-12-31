@@ -85,7 +85,7 @@ const PlanItem = (props: {
   };
 
   return (
-    <div className={`flex flex-col felx-1 p-1 ${title === 'pro' ? 'pro-plan' : ''}`}>
+    <div className={`flex flex-col flex-1 shrink-0 p-1 ${title === 'pro' ? 'pro-plan' : ''}`}>
       <div className="h-[20px] text-center text-xs text-white font-bold">
         {title === 'pro' && t('settings.subscription.mostPopular')}
       </div>
