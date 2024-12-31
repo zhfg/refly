@@ -1,6 +1,8 @@
-import { FC, memo, useState } from 'react';
+import { FC, memo, useState, useMemo } from 'react';
 import { NodeActionMenu } from '../node-action-menu';
 import { CanvasNodeType } from '@refly/openapi-schema';
+import { useReactFlow } from '@xyflow/react';
+import { CanvasNode } from './index';
 
 type ActionButtonsProps = {
   nodeId: string;
@@ -11,6 +13,14 @@ type ActionButtonsProps = {
 export const ActionButtons: FC<ActionButtonsProps> = memo(
   ({ nodeId, type, isNodeHovered }) => {
     const [isMenuHovered, setIsMenuHovered] = useState(false);
+    const { getNode } = useReactFlow();
+
+    // 获取节点数据，检查是否为临时组
+    const node = useMemo(() => getNode(nodeId) as CanvasNode, [nodeId, getNode]);
+    const isTemporaryGroup = type === 'group' && node?.data?.metadata?.isTemporary;
+
+    // 如果是临时组或者节点被hover，显示操作按钮
+    const shouldShowMenu = isTemporaryGroup || isNodeHovered || isMenuHovered;
 
     return (
       <>
@@ -21,7 +31,7 @@ export const ActionButtons: FC<ActionButtonsProps> = memo(
             top-0
             w-[30px]
             h-full
-            ${isNodeHovered || isMenuHovered ? '' : 'pointer-events-none'}
+            ${shouldShowMenu ? '' : 'pointer-events-none'}
           `}
           onMouseEnter={() => setIsMenuHovered(true)}
           onMouseLeave={() => setIsMenuHovered(false)}
@@ -38,7 +48,7 @@ export const ActionButtons: FC<ActionButtonsProps> = memo(
             w-[150px]
             bg-white
             rounded-lg
-            ${isNodeHovered || isMenuHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+            ${shouldShowMenu ? 'opacity-100' : 'opacity-0 pointer-events-none'}
           `}
           onMouseEnter={() => setIsMenuHovered(true)}
           onMouseLeave={() => setIsMenuHovered(false)}

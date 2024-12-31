@@ -16,6 +16,8 @@ interface ContextMenuProps {
   open: boolean;
   position: { x: number; y: number };
   setOpen: (open: boolean) => void;
+  isSelection?: boolean;
+  onCreateGroup?: () => void;
 }
 
 interface MenuItem {
@@ -26,7 +28,7 @@ interface MenuItem {
   title?: string;
 }
 
-export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) => {
+export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isSelection, onCreateGroup }) => {
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuHeight, setMenuHeight] = useState<number>(0);
@@ -47,7 +49,17 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
   const { showEdges: edgeVisible, toggleEdgeVisible } = useEdgeVisible();
 
   const menuItems: MenuItem[] = [
-    // { key: 'divider-1', type: 'divider' },
+    // TODO: important: don't delete this, it will be used later
+    // ...(isSelection
+    //   ? [
+    //       {
+    //         key: 'createGroup',
+    //         type: 'button',
+    //         title: t('canvas.contextMenu.createGroup'),
+    //       } as MenuItem,
+    //       { key: 'divider-1', type: 'divider' } as MenuItem,
+    //     ]
+    //   : []),
     {
       key: 'toggleLaunchpad',
       icon: IconCanvas,
@@ -101,6 +113,10 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
 
   const handleMenuClick = async (key: string) => {
     switch (key) {
+      // TODO: important: don't delete this, it will be used later
+      // case 'createGroup':
+      //   onCreateGroup?.();
+      //   break;
       case 'toggleLaunchpad':
         setShowLaunchpad(!showLaunchpad);
         break;

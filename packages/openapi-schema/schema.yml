@@ -4296,6 +4296,7 @@ components:
         - skillResponse
         - toolResponse
         - memo
+        - group
     CanvasNodeData:
       type: object
       required:

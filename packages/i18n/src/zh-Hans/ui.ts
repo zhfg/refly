@@ -473,6 +473,7 @@ const translations = {
   canvas: {
     emptyText: '双击向 AI 提问, 或',
     contextMenu: {
+      createGroup: '创建分组',
       enableClickPreview: '启用点击预览',
       disableClickPreview: '禁用点击预览',
       hideLaunchpad: '隐藏 AI 提问框',
@@ -571,6 +572,7 @@ const translations = {
       askFollowUp: '继续提问',
       moreOptions: '更多选项',
       delete: '删除节点',
+      ungroup: '取消分组',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',

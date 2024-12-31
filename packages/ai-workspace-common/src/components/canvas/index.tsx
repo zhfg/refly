@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useEffect, useState, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow } from '@xyflow/react';
+import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow, Node } from '@xyflow/react';
 import { Button, Modal, Result } from 'antd';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
@@ -11,8 +11,8 @@ import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { ContextMenu } from './context-menu';
 import { NodeContextMenu } from './node-context-menu';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
-
-import '@xyflow/react/dist/style.css';
+import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
+import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { CanvasProvider, useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useEdgeStyles } from './constants';
@@ -33,9 +33,11 @@ import {
 } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
-import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
-import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
+import { genUniqueId } from '@refly-packages/utils/id';
+
+import '@xyflow/react/dist/style.css';
 import './index.scss';
+
 const selectionStyles = `
   .react-flow__selection {
     background: rgba(0, 150, 143, 0.03) !important;
@@ -56,6 +58,7 @@ interface ContextMenuState {
   type: 'canvas' | 'node';
   nodeId?: string;
   nodeType?: CanvasNodeType;
+  isSelection?: boolean;
 }
 
 // Add new memoized components
@@ -70,10 +73,21 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     nodes: state.data[canvasId]?.nodes ?? [],
     edges: state.data[canvasId]?.edges ?? [],
   }));
-  const { onNodesChange } = useNodeOperations(canvasId);
-  const { setSelectedNode } = useNodeSelection();
+
+  console.log('nodes', nodes);
+  const { onNodesChange, updateNodesWithSync } = useNodeOperations(canvasId);
+  const { setSelectedNode, createGroupFromSelectedNodes, setSelectedNodes, ungroupNodes } = useNodeSelection();
   const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
+
+  // Helper function to sort nodes (groups first)
+  const sortNodes = useCallback((nodes: CanvasNode<any>[]) => {
+    return nodes.sort((a, b) => {
+      if (a.type === 'group') return -1;
+      if (b.type === 'group') return 1;
+      return 0;
+    });
+  }, []);
 
   const {
     pinnedNodes,
@@ -182,10 +196,21 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [lastClickTime, setLastClickTime] = useState(0);
 
-  const onPaneClick = useCallback(
+  const handlePanelClick = useCallback(
     (event: React.MouseEvent) => {
       setOperatingNodeId(null);
       setContextMenu((prev) => ({ ...prev, open: false }));
+
+      // Remove temporary group when clicking on canvas
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
+
+      const tempGroup = nodes.find((node) => node.type === 'group' && node.data?.metadata?.isTemporary);
+
+      // If temporary group exists, ungroup it
+      if (tempGroup) {
+        ungroupNodes(tempGroup.id);
+      }
 
       const currentTime = new Date().getTime();
       const timeDiff = currentTime - lastClickTime;
@@ -202,7 +227,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
       setLastClickTime(currentTime);
     },
-    [lastClickTime, setOperatingNodeId],
+    [lastClickTime, setOperatingNodeId, canvasId, updateNodesWithSync, sortNodes],
   );
 
   const handleToolSelect = (tool: string) => {
@@ -335,6 +360,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         case 'memo':
           menuNodeType = 'memo';
           break;
+        case 'group':
+          menuNodeType = 'group';
+          break;
         default:
           return; // Don't show context menu for unknown node types
       }
@@ -359,6 +387,14 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         return;
       }
 
+      if (node.type !== 'group') {
+        const tempGroup = nodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
+
+        if (tempGroup) {
+          ungroupNodes(tempGroup.id);
+        }
+      }
+
       if (node.selected && node.id === operatingNodeId) {
         // Already in operating mode, do nothing
         return;
@@ -373,7 +409,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       }
 
       // Memo nodes are not previewable
-      if (node.type === 'memo' || node.type === 'skill') {
+      if (node.type === 'memo' || node.type === 'skill' || node.type === 'group') {
         return;
       }
 
@@ -435,6 +471,43 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     setIsNodeDragging(false);
   }, [setIsNodeDragging]);
 
+  const handleCreateGroup = useCallback(() => {
+    createGroupFromSelectedNodes();
+  }, [createGroupFromSelectedNodes]);
+
+  const onSelectionContextMenu = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      const flowPosition = reactFlowInstance.screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      // Find temporary group node
+      const tempGroup = nodes.find((node) => node.type === 'group' && node.data?.metadata?.isTemporary);
+
+      if (tempGroup) {
+        // Show node context menu for temporary group
+        setContextMenu({
+          open: true,
+          position: flowPosition,
+          type: 'node',
+          nodeId: tempGroup.id,
+          nodeType: 'group',
+        });
+      } else {
+        // Show regular canvas context menu for selection
+        setContextMenu({
+          open: true,
+          position: flowPosition,
+          type: 'canvas',
+          isSelection: true,
+        });
+      }
+    },
+    [reactFlowInstance, nodes],
+  );
+
   return (
     <Spin
       className="w-full h-full"
@@ -477,7 +550,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onNodeClick={handleNodeClick}
-            onPaneClick={onPaneClick}
+            onPaneClick={handlePanelClick}
             onPaneContextMenu={onPaneContextMenu}
             onNodeContextMenu={onNodeContextMenu}
             onNodeDragStart={onNodeDragStart}
@@ -486,6 +559,24 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             nodesDraggable={!operatingNodeId}
             // onlyRenderVisibleElements={true}
             elevateNodesOnSelect={false}
+            // TODO: important: don't delete this, it will be used later
+            onSelectionContextMenu={onSelectionContextMenu}
+            onSelectionChange={useCallback(
+              ({ nodes: selectedNodes }) => {
+                // Avoid unnecessary updates if selection hasn't changed
+                const currentSelectedNodes = nodes.filter((n) => n.selected);
+                const currentSelectedIds = new Set(currentSelectedNodes.map((n) => n.id));
+                const newSelectedIds = new Set(selectedNodes.map((n) => n.id));
+
+                // Only update if the selection has actually changed
+                if (currentSelectedIds.size === 0 || currentSelectedIds.size === 1) {
+                  return;
+                }
+
+                setSelectedNodes(selectedNodes as CanvasNode<any>[]);
+              },
+              [nodes, setSelectedNodes],
+            )}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
@@ -543,6 +634,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             open={contextMenu.open}
             position={contextMenu.position}
             setOpen={(open) => setContextMenu((prev) => ({ ...prev, open }))}
+            isSelection={contextMenu.isSelection}
+            onCreateGroup={handleCreateGroup}
           />
         )}
 

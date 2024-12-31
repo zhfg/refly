@@ -12,13 +12,14 @@ import {
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { FileInput, MessageSquareDiff, FilePlus } from 'lucide-react';
+import { FileInput, MessageSquareDiff, FilePlus, Ungroup } from 'lucide-react';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 import { nodeActionEmitter, createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { genSkillID } from '@refly-packages/utils/id';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 
 interface MenuItem {
   key: string;
@@ -57,6 +58,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   // console.log('nodeactionmenu', nodeId);
 
   const addPinnedNode = useCanvasStoreShallow(useCallback((state) => state.addPinnedNode, []));
+  const { ungroupNodes } = useNodeSelection();
 
   const handleAskAI = useCallback(() => {
     const node = getNode(nodeId) as CanvasNode;
@@ -114,6 +116,11 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     onClose?.();
   }, [node, nodeId, canvasId]);
 
+  const handleUngroup = useCallback(() => {
+    ungroupNodes(nodeId);
+    onClose?.();
+  }, [ungroupNodes, nodeId, onClose]);
+
   const getMenuItems = (): MenuItem[] => {
     const baseItems: MenuItem[] = [
       {
@@ -159,6 +166,23 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
           icon: FileInput,
           label: t('canvas.nodeActions.insertToDoc'),
           onClick: handleInsertToDoc,
+          type: 'button' as const,
+        },
+      ],
+      group: [
+        // TODO: important: don't delete this, it will be used later
+        // {
+        //   key: 'ungroup',
+        //   icon: Ungroup,
+        //   label: t('canvas.nodeActions.ungroup'),
+        //   onClick: handleUngroup,
+        //   type: 'button' as const,
+        // },
+        {
+          key: 'addToContext',
+          icon: MessageSquareDiff,
+          label: t('canvas.nodeActions.addToContext'),
+          onClick: handleAddToContext,
           type: 'button' as const,
         },
       ],

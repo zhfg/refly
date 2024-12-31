@@ -2664,7 +2664,7 @@ export type InMemorySearchResponse = BaseResponse & {
     data?: Array<DocumentInterface>;
 };
 
-export type CanvasNodeType = 'document' | 'resource' | 'skill' | 'tool' | 'skillResponse' | 'toolResponse' | 'memo';
+export type CanvasNodeType = 'document' | 'resource' | 'skill' | 'tool' | 'skillResponse' | 'toolResponse' | 'memo' | 'group';
 
 export type CanvasNodeData = {
     /**

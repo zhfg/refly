@@ -481,6 +481,7 @@ const translations = {
   canvas: {
     emptyText: 'Double-click to ask AI, or',
     contextMenu: {
+      createGroup: 'Create Group',
       enableClickPreview: 'Enable Click Preview',
       disableClickPreview: 'Disable Click Preview',
       hideLaunchpad: 'Hide Ask AI',
@@ -579,6 +580,7 @@ const translations = {
       askFollowUp: 'Ask Follow-up',
       moreOptions: 'More Options',
       delete: 'Delete Node',
+      ungroup: 'Ungroup',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',

@@ -6,6 +6,7 @@ import { SkillNode } from './skill';
 import { ToolNode } from './tool';
 import { SkillResponseNode } from './skill-response';
 import { MemoNode } from './memo';
+import { GroupNode } from './group';
 import {
   NodeMetadataMap,
   CanvasNodeData,
@@ -26,6 +27,7 @@ export * from './skill';
 export * from './tool';
 export * from './skill-response';
 export * from './memo';
+export * from './group';
 
 // Node types mapping
 export const nodeTypes: NodeTypes = {
@@ -35,6 +37,7 @@ export const nodeTypes: NodeTypes = {
   tool: ToolNode,
   skillResponse: SkillResponseNode,
   memo: MemoNode,
+  group: GroupNode,
 };
 
 // Helper function to prepare node data
@@ -44,12 +47,18 @@ export const prepareNodeData = <T extends CanvasNodeType>({
   position = { x: 0, y: 0 },
   connectable = true,
   selected = false,
+  selectable = true,
+  className,
+  style,
 }: {
   type: T;
   data: CanvasNodeData<NodeMetadataMap[T]>;
   position?: { x: number; y: number };
   connectable?: boolean;
+  selectable?: boolean;
   selected?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
 }) => {
   return {
     id: `node-${genUniqueId()}`,
@@ -58,6 +67,9 @@ export const prepareNodeData = <T extends CanvasNodeType>({
     data,
     connectable,
     selected,
+    selectable,
+    className,
+    style,
   };
 };
 
