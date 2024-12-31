@@ -45,16 +45,16 @@ function FrequentlyAskedQuestions() {
 
   const items = [1, 2, 3, 4].map(item => ({
     key: item,
-    label: t(`landingPage.faq.Q${item}`),
+    label: <div className="font-bold">{t(`landingPage.faq.Q${item}`)}</div>,
     children: <p>{t(`landingPage.faq.A${item}`)}</p>,
     style: panelStyle,
   }))
 
   return (
     <div className="flex w-full justify-center pt-12 md:pt-16">
-      <div className="flex w-[70%] px-4">
-        <div className="flex w-1/4 shrink-0 flex-col items-center gap-4 pr-8">
-          <div className="text-2xl font-bold">{t("landingPage.faq.title")}</div>
+      <div className="flex w-[70%] flex-col px-4">
+        <div className="mb-4 text-2xl font-bold">
+          {t("landingPage.faq.title")}
         </div>
         <div className="flex-grow">
           <Collapse
