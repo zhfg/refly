@@ -26,7 +26,6 @@ interface ModelFeatures {
 const PlanItem = (props: {
   title: 'max' | 'pro' | 'plus' | 'free';
   isActive: boolean;
-  description: string;
   features: ModelFeatures[];
   handleClick?: () => void;
   lookupKey: string;
@@ -36,7 +35,7 @@ const PlanItem = (props: {
   };
 }) => {
   const { t } = useTranslation();
-  const { title, isActive, features, description, handleClick, lookupKey, loadingInfo } = props;
+  const { title, isActive, features, handleClick, lookupKey, loadingInfo } = props;
   const { isLogin } = useUserStoreShallow((state) => ({
     isLogin: state.isLogin,
   }));
@@ -111,7 +110,7 @@ const PlanItem = (props: {
         </span>
       </div>
 
-      <div className="description">{description}</div>
+      <div className="description">{t(`settings.subscription.subscribe.${title}.description`)}</div>
 
       <Button
         className="subscribe-btn"
@@ -287,7 +286,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
   };
 
   return (
-    <div className="subscribe-content">
+    <div className="subscribe-content min-w-[1000px]">
       <div className="subscribe-content-title">{t('settings.subscription.subscribe.title')}</div>
       <div className="subscribe-content-subtitle">{t('settings.subscription.subscribe.subtitle')}</div>
 
@@ -312,7 +311,6 @@ export const PriceContent = (props: { source: PriceSource }) => {
       <div className="subscribe-content-plans">
         <PlanItem
           title="free"
-          description={t('settings.subscription.subscribe.free.description')}
           features={freeFeatures}
           isActive={false}
           handleClick={() => {
@@ -328,7 +326,6 @@ export const PriceContent = (props: { source: PriceSource }) => {
 
         <PlanItem
           title="plus"
-          description={t('settings.subscription.subscribe.plus.description')}
           features={plusFeatures}
           isActive={true}
           handleClick={() => createCheckoutSession('plus')}
@@ -338,7 +335,6 @@ export const PriceContent = (props: { source: PriceSource }) => {
 
         <PlanItem
           title="pro"
-          description={t('settings.subscription.subscribe.pro.description')}
           features={proFeatures}
           isActive={true}
           handleClick={() => createCheckoutSession('pro')}
@@ -348,7 +344,6 @@ export const PriceContent = (props: { source: PriceSource }) => {
 
         <PlanItem
           title="max"
-          description={t('settings.subscription.subscribe.max.description')}
           features={maxFeatures}
           isActive={true}
           handleClick={() => createCheckoutSession('max')}

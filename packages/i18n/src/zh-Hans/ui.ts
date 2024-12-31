@@ -1054,28 +1054,28 @@ const translations = {
         t1ModalUnlimited: '高阶模型 (无限量)',
         t2ModalUnlimited: '基础模型 (无限量)',
         free: {
-          description: '一切都准备就绪，只等您开始上手',
+          description: '开启创意之旅的完美起点',
           serviceSupport: {
             name: '服务支持',
             details: '社区支持（微信或飞书群）',
           },
         },
         plus: {
-          description: '享受先进的高阶模型，并拥有更充裕的模型使用和存储额度',
+          description: '释放更多创作潜能，体验进阶模型',
           serviceSupport: {
             name: '服务支持',
             details: '高优邮件支持',
           },
         },
         pro: {
-          description: '享受先进的高阶模型，并拥有更充裕的模型使用和存储额度',
+          description: '专业创作者的理想之选',
           serviceSupport: {
             name: '服务支持',
             details: '高优邮件支持',
           },
         },
         max: {
-          description: '享受先进的高阶模型，并拥有更充裕的模型使用和存储额度',
+          description: '突破所有限制，尽情释放无限创意',
           serviceSupport: {
             name: '服务支持',
             details: '专属微信/ Discord 群聊',

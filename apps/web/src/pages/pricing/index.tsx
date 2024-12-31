@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet"
 import { useTranslation } from "react-i18next"
 import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
 import Footer from "@/components/landing-page-partials/Footer"
+import FrequentlyAskedQuestions from "@/components/landing-page-partials/frequently-asked-questions"
 const PricingPage = () => {
   const { t } = useTranslation()
   const { isLogin } = useUserStoreShallow(state => ({
@@ -25,7 +26,12 @@ const PricingPage = () => {
       <div className="mx-auto w-[80%] bg-white">
         <PriceContent source="page" />
       </div>
-      {!isLogin && <Footer />}
+      {!isLogin && (
+        <>
+          <FrequentlyAskedQuestions />
+          <Footer />
+        </>
+      )}
     </div>
   )
 }

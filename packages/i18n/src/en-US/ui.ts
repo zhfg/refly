@@ -1071,28 +1071,28 @@ const translations = {
         t1ModalUnlimited: 'High-End Models (Unlimited)',
         t2ModalUnlimited: 'Basic Models (Unlimited)',
         free: {
-          description: 'Everything you need to get started',
+          description: 'Everything you need to start a creative journey',
           serviceSupport: {
             name: 'Service Support',
             details: 'Community support (Discord)',
           },
         },
         plus: {
-          description: 'Premium models along with much larger token and storage quota',
+          description: 'Unlock more possibilities with advanced models',
           serviceSupport: {
             name: 'Service Support',
             details: 'Priority Email Support',
           },
         },
         pro: {
-          description: 'Premium models along with much larger token and storage quota',
+          description: 'Ideal choice for professional creators',
           serviceSupport: {
             name: 'Service Support',
             details: 'Priority Email Support',
           },
         },
         max: {
-          description: 'Premium models along with much larger token and storage quota',
+          description: 'Unlimited creativity without boundaries',
           serviceSupport: {
             name: 'Service Support',
             details: 'Exclusive WeChat/Discord Group',
