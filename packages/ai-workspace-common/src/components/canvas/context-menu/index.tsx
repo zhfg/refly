@@ -49,17 +49,6 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
   const { showEdges: edgeVisible, toggleEdgeVisible } = useEdgeVisible();
 
   const menuItems: MenuItem[] = [
-    // TODO: important: don't delete this, it will be used later
-    // ...(isSelection
-    //   ? [
-    //       {
-    //         key: 'createGroup',
-    //         type: 'button',
-    //         title: t('canvas.contextMenu.createGroup'),
-    //       } as MenuItem,
-    //       { key: 'divider-1', type: 'divider' } as MenuItem,
-    //     ]
-    //   : []),
     {
       key: 'toggleLaunchpad',
       icon: IconCanvas,
