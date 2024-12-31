@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Button, Divider, Tag, Tooltip } from 'antd';
+import { Button, Divider, Tooltip } from 'antd';
 
 // styles
 import './index.scss';
@@ -11,7 +11,6 @@ import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
-import AnimatedGradientText from '@refly-packages/ai-workspace-common/components/magicui/animated-gradient-text';
 
 export type PriceLookupKey = 'monthly' | 'yearly';
 export type PriceSource = 'page' | 'modal';
