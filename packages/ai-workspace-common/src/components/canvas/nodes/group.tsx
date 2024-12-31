@@ -108,8 +108,8 @@ export const GroupNode = memo(
 
           {!isPreview && !hideActions && (
             <>
-              <ActionButtons type="group" nodeId={id} isNodeHovered={isHovered} />
-              {/* <GroupActionButtons nodeId={id} isTemporary={isTemporary} isNodeHovered={isHovered} /> */}
+              <ActionButtons type="group" nodeId={id} isNodeHovered={isHovered} isTemporaryGroup={isTemporary} />
+              <GroupActionButtons nodeId={id} isTemporary={isTemporary} isNodeHovered={isHovered} />
             </>
           )}
         </div>

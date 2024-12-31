@@ -37,6 +37,7 @@ import { genUniqueId } from '@refly-packages/utils/id';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';
+import { SelectionContextMenu } from '@refly-packages/ai-workspace-common/components/canvas/selection-context-menu';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -55,7 +56,7 @@ const POLLING_COOLDOWN_TIME = 5000;
 interface ContextMenuState {
   open: boolean;
   position: { x: number; y: number };
-  type: 'canvas' | 'node';
+  type: 'canvas' | 'node' | 'selection';
   nodeId?: string;
   nodeType?: CanvasNodeType;
   isSelection?: boolean;
@@ -494,7 +495,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         setContextMenu({
           open: true,
           position: flowPosition,
-          type: 'node',
+          type: 'selection',
           nodeId: tempGroup.id,
           nodeType: 'group',
         });
@@ -647,6 +648,16 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
         {contextMenu.open && contextMenu.type === 'node' && contextMenu.nodeId && contextMenu.nodeType && (
           <NodeContextMenu
+            open={contextMenu.open}
+            position={contextMenu.position}
+            nodeId={contextMenu.nodeId}
+            nodeType={contextMenu.nodeType}
+            setOpen={(open) => setContextMenu((prev) => ({ ...prev, open }))}
+          />
+        )}
+
+        {contextMenu.open && contextMenu.type === 'selection' && (
+          <SelectionContextMenu
             open={contextMenu.open}
             position={contextMenu.position}
             nodeId={contextMenu.nodeId}

@@ -176,6 +176,22 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         },
       ],
       group: [
+        // TODO: important: don't delete this, it will be used later
+        isTemporaryGroup
+          ? {
+              key: 'group',
+              icon: Group,
+              label: t('canvas.nodeActions.group'),
+              onClick: createGroupFromSelectedNodes,
+              type: 'button' as const,
+            }
+          : {
+              key: 'ungroup',
+              icon: Ungroup,
+              label: t('canvas.nodeActions.ungroup'),
+              onClick: handleUngroup,
+              type: 'button' as const,
+            },
         {
           key: 'addToContext',
           icon: MessageSquareDiff,

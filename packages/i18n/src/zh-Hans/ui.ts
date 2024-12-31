@@ -573,6 +573,7 @@ const translations = {
       moreOptions: '更多选项',
       delete: '删除节点',
       ungroup: '取消分组',
+      group: '分组',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',

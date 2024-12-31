@@ -19,10 +19,10 @@ export const GroupActionButtons: FC<GroupActionButtonsProps> = memo(
         <div
           className={`
             absolute
-            -top-[36px]
+            -top-[60px]
             left-0
             w-full
-            h-[36px]
+            h-[60px]
             ${shouldShowMenu ? '' : 'pointer-events-none'}
           `}
           onMouseEnter={() => setIsMenuHovered(true)}
@@ -32,7 +32,7 @@ export const GroupActionButtons: FC<GroupActionButtonsProps> = memo(
         <div
           className={`
             absolute
-            -top-[32px]
+            -top-[56px]
             left-1/2
             transform
             -translate-x-1/2
