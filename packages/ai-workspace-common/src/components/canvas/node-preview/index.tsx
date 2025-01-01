@@ -5,7 +5,7 @@ import { SkillNodePreview } from './skill';
 import { ToolNodePreview } from './tool';
 import { DocumentNodePreview } from './document';
 import { NodePreviewHeader } from './node-preview-header';
-import { useState, useMemo, useCallback, useEffect, useRef, memo } from 'react';
+import { useState, useMemo, useCallback, useRef, memo } from 'react';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 const PreviewComponent = memo(
@@ -71,9 +71,6 @@ export const NodePreview = memo(
       () => `
     bg-white 
     rounded-lg 
-    border
-    border-[rgba(16,24,40,0.0784)]
-    shadow-[0px_4px_6px_0px_rgba(16,24,40,0.03)]
     will-change-transform
     ${isMaximized ? 'fixed' : ''}
   `,
@@ -85,7 +82,10 @@ export const NodePreview = memo(
     }, [isMaximized]);
 
     return (
-      <div className="pointer-events-none" ref={previewRef}>
+      <div
+        className="pointer-events-none border border-solid border-gray-100 rounded-lg shadow bg-transparent"
+        ref={previewRef}
+      >
         <div className={previewClassName} style={previewStyles}>
           <div className="pointer-events-auto">
             <NodePreviewHeader
