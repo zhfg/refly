@@ -154,13 +154,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
       ],
       memo: [
         {
-          key: 'addToContext',
-          icon: MessageSquareDiff,
-          label: t('canvas.nodeActions.addToContext'),
-          onClick: handleAddToContext,
-          type: 'button' as const,
-        },
-        {
           key: 'insertToDoc',
           icon: FileInput,
           label: t('canvas.nodeActions.insertToDoc'),

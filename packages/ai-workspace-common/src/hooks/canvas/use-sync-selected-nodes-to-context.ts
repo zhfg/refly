@@ -8,7 +8,7 @@ export const useSyncSelectedNodesToContext = (
 ) => {
   const { nodes } = useCanvasData();
   const selectedContextNodes = nodes.filter(
-    (node) => node.selected && ['resource', 'document', 'memo', 'skillResponse'].includes(node.type),
+    (node) => node.selected && ['resource', 'document', 'skillResponse'].includes(node.type),
   );
 
   const selectedNodeIds = selectedContextNodes?.map((node) => node.id) ?? [];
