@@ -113,7 +113,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     onClose?.();
   }, [node, nodeId, canvasId]);
 
-  const getMenuItems = (): MenuItem[] => {
+  const getMenuItems = (activeDocumentId: string): MenuItem[] => {
     const baseItems: MenuItem[] = [
       {
         key: 'askAI',
@@ -159,6 +159,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
           label: t('canvas.nodeActions.insertToDoc'),
           onClick: handleInsertToDoc,
           type: 'button' as const,
+          disabled: !activeDocumentId,
         },
       ],
       skill: [
@@ -223,8 +224,9 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   };
 
   const menuItems = useMemo(
-    () => getMenuItems(),
+    () => getMenuItems(activeDocumentId),
     [
+      activeDocumentId,
       nodeType,
       nodeData?.contentPreview,
       handleRerun,
