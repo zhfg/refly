@@ -33,6 +33,10 @@ export const useNodeOperations = (selectedCanvasId?: string) => {
         measured: node.measured ? { ...node.measured } : undefined,
       }));
 
+      console.log('mutableNodes', mutableNodes);
+      console.log('changes', changes);
+      console.log('onNodesChange nodes', nodes);
+
       // Handle deleted nodes
       const deletedNodes = changes.filter((change) => change.type === 'remove');
 

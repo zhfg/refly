@@ -33,7 +33,8 @@ import {
 } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
-import { genUniqueId } from '@refly-packages/utils/id';
+import { useBatchNodesSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection';
+import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';
@@ -77,7 +78,10 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   console.log('nodes', nodes);
   const { onNodesChange, updateNodesWithSync } = useNodeOperations(canvasId);
-  const { setSelectedNode, createGroupFromSelectedNodes, setSelectedNodes, ungroupMultipleNodes } = useNodeSelection();
+  const { setSelectedNode } = useNodeSelection();
+  const { ungroupMultipleNodes } = useUngroupNodes();
+  const { createGroupFromSelectedNodes, handleSelectionChange } = useBatchNodesSelection();
+
   const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
 
@@ -378,26 +382,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     [reactFlowInstance],
   );
 
-  const handleSelectionChange = useCallback(
-    ({ nodes: selectedNodes }) => {
-      const currentSelectedNodes = nodes.filter((n) => n.selected);
-      const currentSelectedIds = new Set(currentSelectedNodes.map((n) => n.id));
-      const newSelectedIds = new Set(selectedNodes.map((n) => n.id));
-
-      if (currentSelectedIds.size === 0 || currentSelectedIds.size === 1) {
-        const tempGroups = nodes.filter((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
-        if (tempGroups.length > 0) {
-          const groupIds = tempGroups.map((group) => group.id);
-          ungroupMultipleNodes(groupIds);
-        }
-        return;
-      }
-
-      setSelectedNodes(selectedNodes as CanvasNode<any>[], nodes);
-    },
-    [nodes, setSelectedNodes, ungroupMultipleNodes],
-  );
-
   const handleNodeClick = useCallback(
     (event: React.MouseEvent, node: CanvasNode<any>) => {
       setContextMenu((prev) => ({ ...prev, open: false }));
@@ -585,7 +569,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             elevateNodesOnSelect={false}
             // TODO: important: don't delete this, it will be used later
             onSelectionContextMenu={onSelectionContextMenu}
-            onSelectionChange={handleSelectionChange}
+            onSelectionChange={({ nodes: selectedNodes }) => handleSelectionChange(selectedNodes as CanvasNode<any>[])}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">

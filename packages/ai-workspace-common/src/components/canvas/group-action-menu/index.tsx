@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { FC, useCallback } from 'react';
 import { AlignCenter, AlignLeft, AlignRight, Group, Ungroup } from 'lucide-react';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
+import { useBatchNodesSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection';
+import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
 
 interface GroupActionMenuProps {
   nodeId: string;
@@ -12,7 +14,8 @@ interface GroupActionMenuProps {
 
 export const GroupActionMenu: FC<GroupActionMenuProps> = ({ nodeId, isTemporary, onClose }) => {
   const { t } = useTranslation();
-  const { createGroupFromSelectedNodes, ungroupNodes } = useNodeSelection();
+  const { createGroupFromSelectedNodes } = useBatchNodesSelection();
+  const { ungroupNodes } = useUngroupNodes();
 
   const handleAlign = useCallback(
     (direction: 'left' | 'center' | 'right') => {

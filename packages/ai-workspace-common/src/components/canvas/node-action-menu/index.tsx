@@ -19,7 +19,7 @@ import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/sto
 import { genSkillID } from '@refly-packages/utils/id';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
-import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
+import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
 
 interface MenuItem {
   key: string;
@@ -58,7 +58,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   // console.log('nodeactionmenu', nodeId);
 
   const addPinnedNode = useCanvasStoreShallow(useCallback((state) => state.addPinnedNode, []));
-  const { ungroupNodes, createGroupFromSelectedNodes } = useNodeSelection();
+  const { ungroupNodes } = useUngroupNodes();
   const isTemporaryGroup = useMemo(
     () => node?.type === 'group' && node?.data?.metadata?.isTemporary,
     [node?.type, node?.data?.metadata?.isTemporary],

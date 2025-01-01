@@ -5,10 +5,10 @@ import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/ca
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { CommonNodeProps } from './types';
-import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { GroupActionButtons } from '../group-action-menu/group-action-buttons';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
+import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
 
 interface GroupMetadata {
   label?: string;
@@ -39,7 +39,7 @@ export const GroupNode = memo(
   }: GroupNodeProps) => {
     const [isHovered, setIsHovered] = useState(false);
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
-    const { ungroupNodes } = useNodeSelection();
+    const { ungroupNodes } = useUngroupNodes();
 
     useEffect(() => {
       const handleNodeUngroup = () => {
