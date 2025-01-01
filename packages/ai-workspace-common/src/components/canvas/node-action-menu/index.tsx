@@ -56,7 +56,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
 
   // console.log('nodeactionmenu', nodeId);
 
-  const addPinnedNode = useCanvasStoreShallow(useCallback((state) => state.addPinnedNode, []));
+  const addPinnedNode = useCanvasStoreShallow(useCallback((state) => state.addNodePreview, []));
 
   const handleAskAI = useCallback(() => {
     const node = getNode(nodeId) as CanvasNode;

@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useCallback, useMemo } from 'react';
 import { Button, Dropdown, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import {
@@ -18,9 +18,16 @@ import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasNode } from '../nodes/types';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
-import { IconCanvas, IconDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconCanvas,
+  IconDocument,
+  IconPin,
+  IconUnpin,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
+import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-preview-control';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 // Define background colors for different node types
 const NODE_COLORS: Record<CanvasNodeType, string> = {
@@ -120,6 +127,18 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
   const handleAddToContext = useAddToContext(node, node.type);
   const handleDelete = useDeleteNode(node, node.type);
 
+  const { canvasId } = useCanvasContext();
+  const { pinNode, unpinNode, isNodePinned } = useNodePreviewControl({ canvasId });
+  const isPinned = isNodePinned(node.id);
+
+  const handlePin = useCallback(() => {
+    if (isPinned) {
+      unpinNode(node);
+    } else {
+      pinNode(node);
+    }
+  }, [isPinned, pinNode, unpinNode, node]);
+
   // Define dropdown menu items
   const menuItems: MenuProps['items'] = [
     {
@@ -164,11 +183,18 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
           <Button
             type="text"
             className={`p-1.5 hover:bg-gray-100 ${isMaximized ? 'text-primary-600' : 'text-gray-500'}`}
-            onClick={onMaximize}
+            onClick={() => onMaximize()}
           >
             <Maximize2 className="w-4 h-4" />
           </Button>
         )}
+        <Button
+          type="text"
+          className={`p-1.5 hover:bg-gray-100 ${isPinned ? 'text-primary-600' : 'text-gray-500'}`}
+          onClick={() => handlePin()}
+        >
+          {isPinned ? <IconUnpin className="w-4 h-4" /> : <IconPin className="w-4 h-4" />}
+        </Button>
         <Dropdown
           menu={{ items: menuItems }}
           trigger={['click']}

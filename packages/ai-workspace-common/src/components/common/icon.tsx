@@ -23,6 +23,8 @@ import {
   LuSparkles,
   LuView,
   LuPlay,
+  LuPin,
+  LuPinOff,
 } from 'react-icons/lu';
 import { RiErrorWarningLine } from 'react-icons/ri';
 
@@ -63,6 +65,8 @@ export const IconRun = LuPlay;
 export const IconRerun = LuRotateCw;
 export const IconReply = HiOutlineReply;
 export const IconMoreHorizontal = IoIosMore;
+export const IconPin = LuPin;
+export const IconUnpin = LuPinOff;
 export const IconEdit = PiNotePencil;
 export const IconDelete = LuTrash;
 export const IconSearch = LuSearch;

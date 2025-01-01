@@ -75,25 +75,15 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
 
-  const {
-    pinnedNodes,
-    showPreview,
-    showLaunchpad,
-    showMaxRatio,
-    interactionMode,
-    setInteractionMode,
-    clickToPreview,
-    showEdges,
-  } = useCanvasStoreShallow((state) => ({
-    pinnedNodes: state.config[canvasId]?.pinnedNodes,
-    showPreview: state.showPreview,
-    showLaunchpad: state.showLaunchpad,
-    showMaxRatio: state.showMaxRatio,
-    interactionMode: state.interactionMode,
-    setInteractionMode: state.setInteractionMode,
-    clickToPreview: state.clickToPreview,
-    showEdges: state.showEdges,
-  }));
+  const { nodePreviews, showPreview, showLaunchpad, showMaxRatio, interactionMode, setInteractionMode } =
+    useCanvasStoreShallow((state) => ({
+      nodePreviews: state.config[canvasId]?.nodePreviews,
+      showPreview: state.showPreview,
+      showLaunchpad: state.showLaunchpad,
+      showMaxRatio: state.showMaxRatio,
+      interactionMode: state.interactionMode,
+      setInteractionMode: state.setInteractionMode,
+    }));
 
   const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } = useSiderStoreShallow(
     (state) => ({
@@ -524,7 +514,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
           >
             <div className="relative h-full">
               <div className="flex gap-2 h-full">
-                {pinnedNodes
+                {nodePreviews
                   ?.filter(Boolean)
                   ?.map((node) => <NodePreview key={node?.id} node={node} canvasId={canvasId} />)}
               </div>

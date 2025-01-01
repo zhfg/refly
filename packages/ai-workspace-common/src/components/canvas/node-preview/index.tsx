@@ -48,7 +48,7 @@ export const NodePreview = memo(
     const previewRef = useRef<HTMLDivElement>(null);
 
     const { removePinnedNode } = useCanvasStoreShallow((state) => ({
-      removePinnedNode: state.removePinnedNode,
+      removePinnedNode: state.removeNodePreview,
     }));
 
     const handleClose = useCallback(() => {
@@ -83,7 +83,7 @@ export const NodePreview = memo(
 
     return (
       <div
-        className="pointer-events-none border border-solid border-gray-100 rounded-lg shadow bg-transparent"
+        className="pointer-events-none border border-solid border-gray-100 rounded-lg shadow-lg bg-transparent"
         ref={previewRef}
       >
         <div className={previewClassName} style={previewStyles}>
