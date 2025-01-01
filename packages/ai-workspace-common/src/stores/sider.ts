@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
-interface SiderData {
+export interface SiderData {
   id: string;
   name: string;
   updatedAt: string;

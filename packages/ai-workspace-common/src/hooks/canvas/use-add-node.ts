@@ -30,10 +30,10 @@ export const useAddNode = (canvasId: string) => {
   const edgeStyles = useEdgeStyles();
   const { setCenter, getNode } = useReactFlow();
 
-  const { setNodes, setEdges, addPinnedNode } = useCanvasStoreShallow((state) => ({
+  const { setNodes, setEdges, addNodePreview } = useCanvasStoreShallow((state) => ({
     setNodes: state.setNodes,
     setEdges: state.setEdges,
-    addPinnedNode: state.addPinnedNode,
+    addNodePreview: state.addNodePreview,
   }));
 
   const setNodeCenter = useCallback(
@@ -176,10 +176,10 @@ export const useAddNode = (canvasId: string) => {
       }
 
       if (newNode.type === 'document' || newNode.type === 'resource') {
-        addPinnedNode(canvasId, newNode);
+        addNodePreview(canvasId, newNode);
       }
     },
-    [canvasId, setNodes, setEdges, edgeStyles, setSelectedNode, setNodeCenter, addPinnedNode, t],
+    [canvasId, setNodes, setEdges, edgeStyles, setSelectedNode, setNodeCenter, addNodePreview, t],
   );
 
   return { addNode };

@@ -1,5 +1,5 @@
 import { Input } from 'antd';
-import { useRef } from 'react';
+import { memo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
@@ -14,7 +14,7 @@ interface ChatInputProps {
   handleSendMessage: () => void;
 }
 
-export const ChatInput = ({ query, setQuery, selectedSkill, handleSendMessage }: ChatInputProps) => {
+const ChatInputComponent = ({ query, setQuery, selectedSkill, handleSendMessage }: ChatInputProps) => {
   const { t } = useTranslation();
   const inputRef = useRef<RefTextAreaType>(null);
   const searchStore = useSearchStoreShallow((state) => ({
@@ -75,7 +75,7 @@ export const ChatInput = ({ query, setQuery, selectedSkill, handleSendMessage }:
           setQuery(e.target.value);
         }}
         onKeyDownCapture={(e) => handleKeyDown(e)}
-        className="m-1 mb-0 bg-transparent outline-none border-none resize-none focus:outline-none focus:shadow-none focus:border-none"
+        className="mb-0 bg-transparent outline-none box-border border-none resize-none focus:outline-none focus:shadow-none focus:border-none"
         placeholder={
           selectedSkill
             ? t(`${selectedSkill?.name}.placeholder`, {
@@ -92,3 +92,9 @@ export const ChatInput = ({ query, setQuery, selectedSkill, handleSendMessage }:
     </div>
   );
 };
+
+export const ChatInput = memo(ChatInputComponent, (prevProps, nextProps) => {
+  return prevProps.query === nextProps.query && prevProps.selectedSkill?.name === nextProps.selectedSkill?.name;
+});
+
+ChatInput.displayName = 'ChatInput';

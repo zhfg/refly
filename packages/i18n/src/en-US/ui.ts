@@ -572,6 +572,7 @@ const translations = {
       executing: 'Skill is executing, please wait...',
       startRunning: 'Skill is running...',
       startRerun: 'Skill is rerunning...',
+      resultNotFound: 'Sorry, the execution result seems to be lost.',
     },
     chatHistory: {
       alreadyAdded: 'Already added to chat history',
@@ -1402,6 +1403,7 @@ const translations = {
       replace: 'Replace Selection',
       reject: 'Reject',
       copy: 'Copy Answer',
+      exitEdit: 'Exit Edit Mode',
     },
     configManager: {
       title: 'Skill Configuration',

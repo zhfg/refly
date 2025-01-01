@@ -1,11 +1,15 @@
 import { PrismaService } from '@/common/prisma.service';
+import { SubscriptionService } from '@/subscription/subscription.service';
 import { Injectable } from '@nestjs/common';
 import { ActionResultNotFoundError } from '@refly-packages/errors';
 import { GetActionResultData, User } from '@refly-packages/openapi-schema';
 
 @Injectable()
 export class ActionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private subscriptionService: SubscriptionService,
+  ) {}
 
   async getActionResult(user: User, param: GetActionResultData['query']) {
     const { resultId } = param;
@@ -33,10 +37,13 @@ export class ActionService {
       return updatedResult;
     }
 
+    const modelList = await this.subscriptionService.getModelList();
+    const modelInfo = modelList.find((model) => model.name === result.modelName);
+
     const steps = await this.prisma.actionStep.findMany({
       where: { resultId, deletedAt: null },
       orderBy: { order: 'asc' },
     });
-    return { ...result, steps };
+    return { ...result, steps, modelInfo };
   }
 }

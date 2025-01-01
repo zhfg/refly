@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { ContextItem } from './context-item';
 
 import { AddBaseMarkContext } from './components/add-base-mark-context';
@@ -12,7 +12,7 @@ interface ContextManagerProps {
   filterErrorInfo?: FilterErrorInfo;
 }
 
-export const ContextManager = ({ contextItems, setContextItems, filterErrorInfo }: ContextManagerProps) => {
+const ContextManagerComponent = ({ contextItems, setContextItems, filterErrorInfo }: ContextManagerProps) => {
   const { getNode } = useReactFlow();
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
   const itemSelected = useMemo(() => {
@@ -46,3 +46,7 @@ export const ContextManager = ({ contextItems, setContextItems, filterErrorInfo 
     </div>
   );
 };
+
+export const ContextManager = memo(ContextManagerComponent);
+
+ContextManager.displayName = 'ContextManager';

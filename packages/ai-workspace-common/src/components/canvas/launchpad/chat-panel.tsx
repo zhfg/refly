@@ -1,6 +1,6 @@
 import { Form } from '@arco-design/web-react';
 import { notification } from 'antd';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   useContextPanelStore,
@@ -10,6 +10,7 @@ import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canva
 import { useContextFilterErrorTip } from './context-manager/hooks/use-context-filter-errror-tip';
 import { InvokeSkillRequest } from '@refly/openapi-schema';
 import { genActionResultID } from '@refly-packages/utils/id';
+import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
@@ -17,13 +18,14 @@ import { SelectedSkillHeader } from './selected-skill-header';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { ContextManager } from './context-manager';
 import { ConfigManager } from './config-manager';
-import { ChatActions } from './chat-actions';
+import { ChatActions, CustomAction } from './chat-actions';
 import { ChatInput } from './chat-input';
 import { useChatHistory } from './hooks/use-chat-history';
 
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useSyncSelectedNodesToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-sync-selected-nodes-to-context';
+import { PiMagicWand } from 'react-icons/pi';
 
 export const ChatPanel = () => {
   const { t } = useTranslation();
@@ -144,6 +146,28 @@ export const ChatPanel = () => {
     abortAction();
   };
 
+  const { setRecommendQuestionsOpen, recommendQuestionsOpen } = useLaunchpadStoreShallow((state) => ({
+    setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
+    recommendQuestionsOpen: state.recommendQuestionsOpen,
+  }));
+
+  const handleRecommendQuestionsToggle = useCallback(() => {
+    setRecommendQuestionsOpen(!recommendQuestionsOpen);
+  }, [recommendQuestionsOpen, setRecommendQuestionsOpen]);
+
+  const customActions: CustomAction[] = useMemo(
+    () => [
+      {
+        icon: <PiMagicWand />,
+        title: t('copilot.chatActions.recommendQuestions'),
+        onClick: () => {
+          handleRecommendQuestionsToggle();
+        },
+      },
+    ],
+    [handleRecommendQuestionsToggle],
+  );
+
   return (
     <div className="ai-copilot-chat-container">
       <div className="chat-input-container">
@@ -189,6 +213,7 @@ export const ChatPanel = () => {
           form={form}
           handleSendMessage={handleSendMessage}
           handleAbort={handleAbort}
+          customActions={customActions}
         />
       </div>
     </div>

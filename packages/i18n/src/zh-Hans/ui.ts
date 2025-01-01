@@ -564,6 +564,7 @@ const translations = {
       executing: '技能正在执行中，请稍等...',
       startRunning: '技能开始执行...',
       startRerun: '技能开始重新执行...',
+      resultNotFound: '抱歉，执行结果似乎丢失了。',
     },
     chatHistory: {
       alreadyAdded: '已添加到对话历史',
@@ -1393,6 +1394,7 @@ const translations = {
       replace: '替换选中',
       reject: '拒绝',
       copy: '复制回答',
+      exitEdit: '退出编辑模式',
     },
     configManager: {
       title: '技能配置',

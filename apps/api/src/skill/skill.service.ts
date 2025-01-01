@@ -383,19 +383,10 @@ export class SkillService {
         ? JSON.parse(existingResult.input)
         : { query: existingResult.title };
 
-      if (existingResult.modelName) {
-        param.modelName = existingResult.modelName;
-      }
-      if (existingResult.actionMeta) {
-        param.skillName = safeParseJSON(existingResult.actionMeta).name;
-      }
-
-      if (existingResult.context) {
-        param.context = JSON.parse(existingResult.context);
-      }
-      if (existingResult.history) {
-        param.resultHistory = JSON.parse(existingResult.history);
-      }
+      param.modelName ??= existingResult.modelName;
+      param.skillName ??= safeParseJSON(existingResult.actionMeta).name;
+      param.context ??= JSON.parse(existingResult.context);
+      param.resultHistory ??= JSON.parse(existingResult.history);
     }
 
     param.input ||= { query: '' };

@@ -2,13 +2,10 @@ import { Button, Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FC, useEffect, useRef, useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { HiOutlineDocumentAdd } from 'react-icons/hi';
-import { PiShootingStar } from 'react-icons/pi';
-import { RiUploadCloud2Line } from 'react-icons/ri';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { IconCanvas, IconPreview } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconAskAI, IconPreview } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
 
@@ -50,7 +47,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
     // { key: 'divider-1', type: 'divider' },
     {
       key: 'toggleLaunchpad',
-      icon: IconCanvas,
+      icon: IconAskAI,
       type: 'button',
       active: showLaunchpad,
       title: showLaunchpad ? t('canvas.contextMenu.hideLaunchpad') : t('canvas.contextMenu.showLaunchpad'),

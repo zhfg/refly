@@ -69,7 +69,7 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
 
   const { nodes } = useCanvasData();
 
-  const targetNodes = nodes;
+  const targetNodes = nodes.filter((node) => node?.type !== 'skill');
   const sortedNodes: CanvasNode[] = [
     ...(selectedItems || []),
     ...(targetNodes?.filter((item) => !selectedItems.some((selected) => selected.id === item.id)) || []),

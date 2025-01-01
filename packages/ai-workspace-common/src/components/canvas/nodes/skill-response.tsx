@@ -19,9 +19,9 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-chat-history';
 import {
-  IconCanvas,
   IconError,
   IconLoading,
+  IconResponse,
   IconSearch,
   IconToken,
   preloadModelIcons,
@@ -46,9 +46,8 @@ import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
 const POLLING_INTERVAL = 3000;
-const POLLING_COOLDOWN_TIME = 5000;
+const POLLING_COOLDOWN_TIME = 10000;
 
-// 抽离内容渲染组件
 const NodeContent = memo(
   ({ content, sources, isOperating }: { content: string; sources: Source[]; isOperating: boolean }) => {
     return (
@@ -65,14 +64,13 @@ const NodeContent = memo(
   },
 );
 
-// 抽离更多可复用的子组件并使用 memo
 const NodeHeader = memo(({ query, skillName, skill }: { query: string; skillName: string; skill: any }) => {
   return (
     <>
       <div className="flex-shrink-0 mb-3">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded bg-[#F79009] shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,40,0.1)] flex items-center justify-center flex-shrink-0">
-            <IconCanvas className="w-4 h-4 text-white" />
+            <IconResponse className="w-4 h-4 text-white" />
           </div>
           <span className="text-sm font-medium leading-normal truncate cursor-help">{query}</span>
         </div>
@@ -86,14 +84,12 @@ const NodeHeader = memo(({ query, skillName, skill }: { query: string; skillName
   );
 });
 
-// 创建一个 memo 化的 ModelIcon 组件
 const ModelIcon = memo(({ provider }: { provider: string }) => {
   return <img className="w-3 h-3 mx-1" src={ModelProviderIcons[provider]} alt={provider} />;
 });
 
 ModelIcon.displayName = 'ModelIcon';
 
-// 在 NodeFooter 组件中使用
 const NodeFooter = memo(
   ({
     model,
@@ -169,7 +165,7 @@ export const SkillResponseNode = memo(
       addContextItem: state.addContextItem,
     }));
 
-    const { title, contentPreview: content, metadata, createdAt, entityId } = data;
+    const { title, contentPreview: content, metadata, createdAt, entityId } = data ?? {};
     const node = useMemo(() => getNode(props.id), [props.id, getNode]);
     const initialSize = useMemo(
       () => ({
@@ -321,10 +317,10 @@ export const SkillResponseNode = memo(
       });
     }, [data, entityId, invokeAction, setNodeData]);
 
-    const insertToDoc = useInsertToDocument(data.entityId);
+    const insertToDoc = useInsertToDocument(entityId);
     const handleInsertToDoc = useCallback(async () => {
-      await insertToDoc('insertBelow', data?.contentPreview);
-    }, [insertToDoc, data.entityId, data]);
+      await insertToDoc('insertBelow', content);
+    }, [insertToDoc, entityId, content]);
 
     const runtime = getRuntime();
     const isWeb = runtime === 'web';
@@ -342,11 +338,11 @@ export const SkillResponseNode = memo(
     const { debouncedCreateDocument } = useCreateDocument();
 
     const handleCreateDocument = useCallback(async () => {
-      await debouncedCreateDocument(data?.title ?? t('common.newDocument'), content, {
-        sourceNodeId: data.entityId,
+      await debouncedCreateDocument(title ?? t('common.newDocument'), content, {
+        sourceNodeId: entityId,
         addToCanvas: true,
       });
-    }, [content, debouncedCreateDocument, data.entityId, data?.title]);
+    }, [content, debouncedCreateDocument, entityId, title]);
 
     const handleAddToContext = useCallback(() => {
       handleAddToChatHistory();
@@ -583,17 +579,16 @@ export const SkillResponseNode = memo(
     );
   },
   (prevProps, nextProps) => {
-    // 自定义比较函数
     return (
       prevProps.id === nextProps.id &&
       prevProps.selected === nextProps.selected &&
       prevProps.isPreview === nextProps.isPreview &&
       prevProps.hideActions === nextProps.hideActions &&
       prevProps.hideHandles === nextProps.hideHandles &&
-      prevProps.data.title === nextProps.data.title &&
-      prevProps.data.contentPreview === nextProps.data.contentPreview &&
-      prevProps.data.createdAt === nextProps.data.createdAt &&
-      JSON.stringify(prevProps.data.metadata) === JSON.stringify(nextProps.data.metadata)
+      prevProps.data?.title === nextProps.data?.title &&
+      prevProps.data?.contentPreview === nextProps.data?.contentPreview &&
+      prevProps.data?.createdAt === nextProps.data?.createdAt &&
+      JSON.stringify(prevProps.data?.metadata) === JSON.stringify(nextProps.data?.metadata)
     );
   },
 );
