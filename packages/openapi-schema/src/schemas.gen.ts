@@ -1183,13 +1183,7 @@ export const SubscriptionIntervalSchema = {
 export const SubscriptionPlanTypeSchema = {
   type: 'string',
   description: 'Subscription plan type',
-  enum: ['free', 'pro'],
-} as const;
-
-export const PriceLookupKeySchema = {
-  type: 'string',
-  description: 'Price lookup key',
-  enum: ['refly_pro_monthly', 'refly_pro_yearly'],
+  enum: ['free', 'plus', 'pro', 'max'],
 } as const;
 
 export const SubscriptionStatusSchema = {
@@ -1205,10 +1199,6 @@ export const SubscriptionSchema = {
     subscriptionId: {
       type: 'string',
       description: 'Subscription ID',
-    },
-    lookupKey: {
-      type: 'string',
-      description: 'Lookup key',
     },
     planType: {
       type: 'string',
@@ -3304,11 +3294,15 @@ export const CheckSettingsFieldResponseSchema = {
 
 export const CreateCheckoutSessionRequestSchema = {
   type: 'object',
-  required: ['lookupKey'],
+  required: ['planType'],
   properties: {
-    lookupKey: {
-      description: 'Price lookup key',
-      $ref: '#/components/schemas/PriceLookupKey',
+    planType: {
+      description: 'Subscription plan type',
+      $ref: '#/components/schemas/SubscriptionPlanType',
+    },
+    interval: {
+      description: 'Subscription billing interval',
+      $ref: '#/components/schemas/SubscriptionInterval',
     },
   },
 } as const;
@@ -3352,6 +3346,52 @@ export const CreatePortalSessionResponseSchema = {
               type: 'string',
               description: 'Portal session URL',
             },
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const SubscriptionPlanSchema = {
+  type: 'object',
+  properties: {
+    planType: {
+      type: 'string',
+      description: 'Subscription plan type',
+    },
+    t1TokenQuota: {
+      type: 'number',
+      description: 'Token quota per month (T1)',
+    },
+    t2TokenQuota: {
+      type: 'number',
+      description: 'Token quota per month (T2)',
+    },
+    objectStorageQuota: {
+      type: 'string',
+      description: 'Object storage quota (in bytes)',
+    },
+    vectorStorageQuota: {
+      type: 'string',
+      description: 'Vector storage quota (in bytes)',
+    },
+  },
+} as const;
+
+export const GetSubscriptionPlansResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Subscription plans',
+          items: {
+            $ref: '#/components/schemas/SubscriptionPlan',
           },
         },
       },

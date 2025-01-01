@@ -90,8 +90,8 @@ export default () => ({
   stripe: {
     apiKey: process.env.STRIPE_API_KEY,
     webhookSecret: {
-      account: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET,
-      accountTest: process.env.STRIPE_ACCOUNT_TEST_WEBHOOK_SECRET,
+      account: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET || 'test',
+      accountTest: process.env.STRIPE_ACCOUNT_TEST_WEBHOOK_SECRET || 'test',
     },
     sessionSuccessUrl: process.env.STRIPE_SESSION_SUCCESS_URL,
     sessionCancelUrl: process.env.STRIPE_SESSION_CANCEL_URL,
@@ -99,12 +99,12 @@ export default () => ({
   },
   quota: {
     token: {
-      t1: parseInt(process.env.QUOTA_T1_TOKEN) || 0,
-      t2: parseInt(process.env.QUOTA_T2_TOKEN) || 1000000,
+      t1: parseInt(process.env.QUOTA_T1_TOKEN) || -1,
+      t2: parseInt(process.env.QUOTA_T2_TOKEN) || -1,
     },
     storage: {
-      object: parseInt(process.env.QUOTA_STORAGE_OBJECT) || 10 * 1024 * 1024 * 1024, // 10 GB
-      vector: parseInt(process.env.QUOTA_STORAGE_VECTOR) || 1024 * 1024 * 1024, // 1 GB
+      object: parseInt(process.env.QUOTA_STORAGE_OBJECT) || -1,
+      vector: parseInt(process.env.QUOTA_STORAGE_VECTOR) || -1,
     },
   },
   credentials: {

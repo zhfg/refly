@@ -3,14 +3,14 @@ import Logo from "@/assets/logo.svg"
 import { useTranslation } from "react-i18next"
 import "./footer.scss"
 import { Button } from "antd"
-import { IconDown, IconGithub, IconTwitter } from "@arco-design/web-react/icon"
+import { IconDown, IconTwitter } from "@arco-design/web-react/icon"
 import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
-import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
+import { useAuthStoreShallow } from "@refly-packages/ai-workspace-common/stores/auth"
 
 function Footer() {
   const { t } = useTranslation()
-  const { setLoginModalVisible } = useUserStoreShallow(state => ({
-    setLoginModalVisible: state.setLoginModalVisible,
+  const { setLoginModalOpen } = useAuthStoreShallow(state => ({
+    setLoginModalOpen: state.setLoginModalOpen,
   }))
 
   // Add scroll to top function
@@ -25,7 +25,7 @@ function Footer() {
   return (
     <footer className="px-6">
       <div className="py-12 md:py-16">
-        <div className="mx-auto w-full md:w-[70%]">
+        <div className="mx-auto w-full max-w-7xl md:w-[70%]">
           {/* CTA Block */}
           <div
             className="mb-[72px] flex h-[380px] w-full flex-col items-center justify-center rounded-[20px] border border-[#E3E3E3] p-12 text-center font-['Alibaba_PuHuiTi_Bold',system-ui,-apple-system,sans-serif]"
@@ -39,7 +39,7 @@ function Footer() {
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button
                 type="primary"
-                onClick={() => setLoginModalVisible(true)}
+                onClick={() => setLoginModalOpen(true)}
                 size="large"
                 className="cursor-pointer">
                 {t("landingPage.footer.cta.getStarted")}

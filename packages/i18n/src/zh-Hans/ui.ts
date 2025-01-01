@@ -159,6 +159,12 @@ const translations = {
         ],
       },
     },
+    pricing: {
+      title: '计划与定价',
+      subtitle: '踏上您的 AI 内容创作之旅',
+      description: '注册并获得一百万标准模型 token 的免费试用。无需绑定信用卡。',
+      limitedOffer: '年订限时五折优惠！',
+    },
     footer: {
       cta: {
         title: '准备好立即体验 AI 自由画布，激发创作灵感了吗？',
@@ -223,6 +229,23 @@ const translations = {
       passwordPlaceholder: '请输入您的新密码',
       passwordConfirmLabel: '确认密码',
       passwordConfirmPlaceholder: '请再次输入您的新密码',
+    },
+    tab: {
+      product: '产品',
+      price: '价格',
+      docs: '文档',
+      discord: 'Discord',
+    },
+    faq: {
+      title: '常见问题',
+      Q1: 'Refly 可以免费使用吗？',
+      A1: 'Refly 作为开源项目，对于个人用户，您可以通过自行部署社区版使用其所有功能。为了更多用户快速上手体验 Refly，我们推出了 Cloud 版本，并为所有注册用户提供了一次性一百万标准模型 token 和足够体验使用的存储空间。如果您需要体验进阶模型或扩大用量，可升级付费订阅套餐。',
+      Q2: '你们支持哪些付款方式？',
+      A2: '我们支持银行卡、支付宝、Amazon Pay 和 Cash App Pay。支持的付款方式可能随时有变，请以 Stripe 收银台显示的付款方式为准。',
+      Q3: '如何更改或取消订阅方案？',
+      A3: '目前不支持更改订阅方案。如果您需要取消订阅方案，请点击「设置-订阅-管理账单及订阅」按钮后前往 Stripe 管理订阅计划。取消订阅成功后，在当前方案到期时将自动降级为免费版。',
+      Q4: '是否支持退款？',
+      A4: '目前暂不开放退款入口，如果您有强烈的退款需求，请联系 Refly 团队为您解决。',
     },
   },
   emailVerification: {
@@ -1005,6 +1028,8 @@ const translations = {
       },
     },
     subscription: {
+      mostPopular: '最受欢迎',
+      getStarted: '开始使用',
       subscribeNow: '立即订阅',
       currentPlan: '当前套餐',
       t1TokenUsed: '高阶模型 Token 使用量',
@@ -1016,11 +1041,13 @@ const translations = {
       subscriptionManagement: '管理账单及订阅',
       subscriptionStatus: {
         free: 'FREE',
+        plus: 'PLUS',
         pro: 'PRO',
+        max: 'MAX',
       },
       subscribe: {
         title: '选择适合您的套餐',
-        subtitle: '订阅年度计划可节省 20%！',
+        subtitle: '订阅年度计划立省20%，立即订阅再享额外50%折扣！',
         monthly: '按月',
         yearly: '按年',
         monthlyPlan: '每月自动续费',
@@ -1032,37 +1059,43 @@ const translations = {
         },
         vectorStorage: '向量存储',
         fileStorage: '文件存储',
+        t1Model: '高阶模型',
+        t2Model: '基础模型',
         fileStorageType: {
           note: '画布',
           resource: '资源',
           file: '上传文件',
         },
-        pro: {
-          description: '享受先进的高阶模型，并拥有更充裕的模型使用和存储额度',
-          buttonText: '立即升级',
-          t1Token: {
-            name: '高阶模型',
-            count: '1,000,000 tokens / 每月',
+        upgrade: '立即升级',
+        continueFree: '继续免费',
+        oneTime: '一次性',
+        unlimited: '无限量',
+        free: {
+          description: '开启创意之旅的完美起点',
+          serviceSupport: {
+            name: '服务支持',
+            details: '社区支持（微信或飞书群）',
           },
-          t2Token: {
-            name: '基础模型',
-            count: '5,000,000 tokens / 每月',
-          },
+        },
+        plus: {
+          description: '释放更多创作潜能，体验进阶模型',
           serviceSupport: {
             name: '服务支持',
             details: '高优邮件支持',
           },
         },
-        free: {
-          description: '一切都准备就绪，只等您开始上手',
-          buttonText: '继续免费',
-          t2Token: {
-            name: '基础模型',
-            count: '1,000,000 tokens / 一次性',
-          },
+        pro: {
+          description: '专业创作者的理想之选',
           serviceSupport: {
             name: '服务支持',
-            details: '社区支持（飞书群）',
+            details: '高优邮件支持',
+          },
+        },
+        max: {
+          description: '突破所有限制，尽情释放无限创意',
+          serviceSupport: {
+            name: '服务支持',
+            details: '专属微信/ Discord 群聊',
           },
         },
         description: '可随时取消订阅。订阅即表示您同意Refly的',
@@ -1427,6 +1460,7 @@ const translations = {
       extensionWeblink: '网页',
     },
     modelSelector: {
+      unlimited: '无限量',
       noModelAvailable: '无可用模型',
       premium: '高阶模型',
       standard: '标准模型',

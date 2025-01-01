@@ -7,11 +7,12 @@ import {
   CreateCheckoutSessionRequest,
   CreateCheckoutSessionResponse,
   CreatePortalSessionResponse,
+  GetSubscriptionPlansResponse,
   GetSubscriptionUsageResponse,
   ListModelsResponse,
 } from '@refly-packages/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
-import { modelInfoPO2DTO } from '@/misc/misc.dto';
+import { modelInfoPO2DTO, subscriptionPlanPO2DTO } from '@/misc/misc.dto';
 
 @Controller('v1/subscription')
 export class SubscriptionController {
@@ -32,6 +33,12 @@ export class SubscriptionController {
   async createPortalSession(@User() user: UserModel): Promise<CreatePortalSessionResponse> {
     const session = await this.subscriptionService.createPortalSession(user);
     return buildSuccessResponse({ url: session.url });
+  }
+
+  @Get('/plans')
+  async getPlans(): Promise<GetSubscriptionPlansResponse> {
+    const plans = this.subscriptionService.getSubscriptionPlans();
+    return buildSuccessResponse(plans.map(subscriptionPlanPO2DTO));
   }
 
   @UseGuards(JwtAuthGuard)

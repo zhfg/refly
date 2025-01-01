@@ -49,7 +49,6 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'verification-storage',
       partialize: (state) => ({
-        loginModalOpen: state.loginModalOpen,
         verificationModalOpen: state.verificationModalOpen,
         resetPasswordModalOpen: state.resetPasswordModalOpen,
         sessionId: state.sessionId,

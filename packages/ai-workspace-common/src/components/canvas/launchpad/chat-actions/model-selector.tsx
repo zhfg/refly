@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback, memo } from 'react';
-import { Button, Dropdown, DropdownProps, MenuProps, Progress, Skeleton } from 'antd';
+import { Button, Dropdown, DropdownProps, MenuProps, Progress, Skeleton, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { IconDown } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
@@ -38,21 +38,27 @@ const UsageProgress = memo(
 
     return (
       <div className="flex items-center gap-1 cursor-pointer" onClick={handleShowSettingModal}>
-        <Progress
-          type="circle"
-          percent={(used / quota) * 100}
-          strokeColor={used >= quota ? '#EF4444' : '#46C0B2'}
-          strokeWidth={20}
-          size={14}
-          format={() =>
-            used >= quota
-              ? t(`copilot.modelSelector.quotaExceeded`)
-              : t('copilot.modelSelector.tokenUsed', {
-                  used: formattedUsed,
-                  quota: formattedQuota,
-                })
-          }
-        />
+        {quota < 0 ? (
+          <Tooltip title={t('copilot.modelSelector.unlimited')}>
+            <LuInfinity className="text-sm" />
+          </Tooltip>
+        ) : (
+          <Progress
+            type="circle"
+            percent={(used / quota) * 100}
+            strokeColor={used >= quota ? '#EF4444' : '#46C0B2'}
+            strokeWidth={20}
+            size={14}
+            format={() =>
+              used >= quota
+                ? t(`copilot.modelSelector.quotaExceeded`)
+                : t('copilot.modelSelector.tokenUsed', {
+                    used: formattedUsed,
+                    quota: formattedQuota,
+                  })
+            }
+          />
+        )}
       </div>
     );
   },
@@ -132,7 +138,7 @@ const GroupHeader = memo(
     return (
       <div className="flex justify-between items-center">
         <span className="text-sm">{t('copilot.modelSelector.free')}</span>
-        <LuInfinity className="text-sm" />
+        <UsageProgress used={-1} quota={-1} setDropdownOpen={setDropdownOpen} />
       </div>
     );
   },
@@ -171,11 +177,11 @@ export const ModelSelector = memo(
     const modelList = useMemo(() => modelListData?.data, [modelListData?.data]);
     const tokenUsage = useMemo(() => tokenUsageData?.data?.token, [tokenUsageData?.data?.token]);
     const t1Disabled = useMemo(
-      () => tokenUsage?.t1TokenUsed >= tokenUsage?.t1TokenQuota,
+      () => tokenUsage?.t1TokenUsed >= tokenUsage?.t1TokenQuota && tokenUsage?.t1TokenQuota > 0,
       [tokenUsage?.t1TokenUsed, tokenUsage?.t1TokenQuota],
     );
     const t2Disabled = useMemo(
-      () => tokenUsage?.t2TokenUsed >= tokenUsage?.t2TokenQuota,
+      () => tokenUsage?.t2TokenUsed >= tokenUsage?.t2TokenQuota && tokenUsage?.t2TokenQuota > 0,
       [tokenUsage?.t2TokenUsed, tokenUsage?.t2TokenQuota],
     );
 
@@ -286,9 +292,9 @@ export const ModelSelector = memo(
     const isModelDisabled = useCallback((meter: TokenUsageMeter, model: ModelInfo) => {
       if (meter && model) {
         if (model.tier === 't1') {
-          return meter.t1TokenUsed >= meter.t1TokenQuota;
+          return meter.t1TokenUsed >= meter.t1TokenQuota && meter.t1TokenQuota > 0;
         } else if (model.tier === 't2') {
-          return meter.t2TokenUsed >= meter.t2TokenQuota;
+          return meter.t2TokenUsed >= meter.t2TokenQuota && meter.t2TokenQuota > 0;
         }
       }
       return false;
