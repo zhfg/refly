@@ -48,7 +48,9 @@ const SiderLogo = (props: {
         onClick={() => navigate("/")}>
         <img src={Logo} alt="Refly" className="h-8 w-8" />
         <span className="text-xl font-bold text-black">Refly </span>
-        <Tag color="green">Beta</Tag>
+        <Tag color="green" className="text-[10px] leading-4">
+          Beta
+        </Tag>
       </div>
       {source === "sider" && (
         <div>
@@ -295,8 +297,10 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     <Sider
       width={source === "sider" ? (collapse ? 0 : 220) : 220}
       className={cn(
-        "my-2 rounded-r-lg border border-solid border-gray-100 bg-white shadow-sm",
-        source === "sider" ? "h-[calc(100vh-16px)]" : "h-[calc(100vh-83px)]",
+        "border border-solid border-gray-100 bg-white shadow-sm",
+        source === "sider"
+          ? "h-[calc(100vh)]"
+          : "h-[calc(100vh-100px)] rounded-r-lg",
       )}>
       <div className="flex h-full flex-col">
         <SiderLogo
