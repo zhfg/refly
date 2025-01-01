@@ -69,6 +69,7 @@ export const useAddNode = (canvasId: string) => {
     (
       node: { type: CanvasNodeType; data: CanvasNodeData<any>; position?: XYPosition },
       connectTo?: CanvasNodeFilter[],
+      shouldPreview: boolean = true,
     ) => {
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
@@ -175,7 +176,7 @@ export const useAddNode = (canvasId: string) => {
         setNodeCenter(newNode.id);
       }
 
-      if (newNode.type === 'document' || newNode.type === 'resource') {
+      if ((newNode.type === 'document' || newNode.type === 'resource') && shouldPreview) {
         addPinnedNode(canvasId, newNode);
       }
     },
