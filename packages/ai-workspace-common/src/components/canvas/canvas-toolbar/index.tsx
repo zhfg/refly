@@ -13,7 +13,7 @@ import { ImportResourceModal } from '@refly-packages/ai-workspace-common/compone
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { IconCanvas, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconAskAI, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
 import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { IoAnalyticsOutline } from 'react-icons/io5';
@@ -91,7 +91,7 @@ const useToolbarConfig = () => {
           type: 'divider',
         },
         {
-          icon: IconCanvas,
+          icon: IconAskAI,
           value: 'handleLaunchpad',
           type: 'button',
           domain: 'launchpad',

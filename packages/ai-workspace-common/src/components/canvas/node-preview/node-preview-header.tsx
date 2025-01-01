@@ -19,9 +19,9 @@ import { CanvasNode } from '../nodes/types';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import {
-  IconCanvas,
   IconDocument,
   IconPin,
+  IconResponse,
   IconUnpin,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
@@ -48,9 +48,9 @@ const getNodeIcon = (node: CanvasNode<any>) => {
     case 'resource':
       return node.data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
     case 'skillResponse':
-      return IconCanvas;
+      return IconResponse;
     case 'toolResponse':
-      return IconCanvas;
+      return IconResponse;
     case 'skill':
       switch (node.data?.metadata?.skillType) {
         case 'prompt':

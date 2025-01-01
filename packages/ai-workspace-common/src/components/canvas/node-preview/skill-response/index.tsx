@@ -1,20 +1,24 @@
 import { useEffect, useState, useMemo, memo, useCallback } from 'react';
-import { Divider, Skeleton } from 'antd';
+import { Button, Divider, Result, Skeleton } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { ActionResult } from '@refly/openapi-schema';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { ActionStepCard } from './action-step';
 import { convertContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 import { PreviewChatInput } from './preview-chat-input';
-
-import './index.scss';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
+import { EditChatInput } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/edit-chat-input';
+import { cn } from '@refly-packages/utils/cn';
 
 interface SkillResponseNodePreviewProps {
+  node: CanvasNode;
   resultId: string;
 }
 
@@ -37,7 +41,7 @@ const StepsList = memo(({ steps, result, title }: { steps: any[]; result: any; t
   );
 });
 
-const SkillResponseNodePreviewComponent = ({ resultId }: SkillResponseNodePreviewProps) => {
+const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNodePreviewProps) => {
   const { result, updateActionResult } = useActionResultStoreShallow((state) => ({
     result: state.resultMap[resultId],
     updateActionResult: state.updateActionResult,
@@ -46,10 +50,11 @@ const SkillResponseNodePreviewComponent = ({ resultId }: SkillResponseNodePrevie
     sourceListDrawerVisible: state.sourceListDrawer.visible,
   }));
 
-  // console.log('SkillResponseNodePreview', result);
+  const deleteNode = useDeleteNode(node, 'skillResponse');
 
-  const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
+  const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const fetchActionResult = async (resultId: string) => {
     setLoading(true);
@@ -68,6 +73,8 @@ const SkillResponseNodePreviewComponent = ({ resultId }: SkillResponseNodePrevie
   useEffect(() => {
     if (!result) {
       fetchActionResult(resultId);
+    } else {
+      setLoading(false);
     }
   }, [resultId]);
 
@@ -96,47 +103,53 @@ const SkillResponseNodePreviewComponent = ({ resultId }: SkillResponseNodePrevie
     };
   }, []);
 
-  const { title, steps = [], context, history = [], actionMeta } = result ?? {};
-  const contextItems = useMemo(() => (context ? convertContextToItems(context) : []), [context]);
+  const { title, steps = [], context, history = [], actionMeta, modelInfo } = result ?? {};
+  const contextItems = useMemo(() => (context ? convertContextToItems(context, history) : []), [context, history]);
 
-  const historyItems = useMemo(
-    () =>
-      history?.map((item) => ({
-        id: item.resultId,
-        position: { x: 0, y: 0 },
-        data: {
-          entityId: item.resultId,
-          contentPreview: item.steps?.map((step) => step.content)?.join('\n\n'),
-          title: item.title,
-          metadata: {
-            steps: item.steps,
-          },
-        },
-      })) || [],
-    [history],
-  );
+  if (!result && !loading) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        <Result
+          status="404"
+          subTitle={t('canvas.skillResponse.resultNotFound')}
+          extra={<Button onClick={() => deleteNode()}>{t('canvas.nodeActions.delete')}</Button>}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col space-y-4 p-4">
-      <div className="ai-copilot-operation-container readonly">
-        <div className="ai-copilot-operation-body">
-          {result && (
-            <PreviewChatInput
-              readonly
-              contextItems={contextItems}
-              historyItems={historyItems}
-              chatHistoryOpen={chatHistoryOpen}
-              setChatHistoryOpen={setChatHistoryOpen}
-              query={title}
-              actionMeta={actionMeta}
-            />
-          )}
-        </div>
+    <div className="flex flex-col space-y-4 p-4 h-full">
+      {editMode ? (
+        <EditChatInput
+          resultId={resultId}
+          contextItems={contextItems}
+          query={title}
+          actionMeta={actionMeta}
+          modelInfo={modelInfo}
+          setEditMode={setEditMode}
+        />
+      ) : (
+        <PreviewChatInput
+          readonly
+          contextItems={contextItems}
+          query={title}
+          actionMeta={actionMeta}
+          setEditMode={setEditMode}
+        />
+      )}
+
+      <div
+        className={cn('h-full', {
+          'opacity-30': editMode,
+          'pointer-events-none': editMode,
+        })}
+      >
+        {steps.length === 0 && (result?.status === 'executing' || result?.status === 'waiting' || loading) && (
+          <Skeleton active />
+        )}
+        <StepsList steps={steps} result={result} title={title} />
       </div>
-
-      {steps.length === 0 && (result?.status === 'executing' || loading) && <Skeleton active />}
-
-      <StepsList steps={steps} result={result} title={title} />
 
       {knowledgeBaseStore?.sourceListDrawerVisible ? <SourceListModal classNames="source-list-modal" /> : null}
     </div>
@@ -144,5 +157,5 @@ const SkillResponseNodePreviewComponent = ({ resultId }: SkillResponseNodePrevie
 };
 
 export const SkillResponseNodePreview = memo(SkillResponseNodePreviewComponent, (prevProps, nextProps) => {
-  return prevProps.resultId === nextProps.resultId;
+  return prevProps.node.id === nextProps.node.id && prevProps.resultId === nextProps.resultId;
 });

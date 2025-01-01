@@ -7,6 +7,7 @@ import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canva
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 export const useDeleteNode = (node: CanvasNode, nodeType: CanvasNodeType) => {
   const { setNodes, setEdges } = useReactFlow();
@@ -25,6 +26,10 @@ export const useDeleteNode = (node: CanvasNode, nodeType: CanvasNodeType) => {
     const contextStore = useContextPanelStore.getState();
     contextStore.removeContextItem(node.id);
 
+    // Delete node preview from canvas store
+    const canvasStore = useCanvasStore.getState();
+    canvasStore.removeNodePreview(canvasId, node.id);
+
     if (nodeType === 'skillResponse') {
       handleItemDelete(node);
     }
@@ -39,5 +44,5 @@ export const useDeleteNode = (node: CanvasNode, nodeType: CanvasNodeType) => {
         type: t(`knowledgeBase.context.nodeTypes.${nodeType}`),
       }),
     );
-  }, [node, nodeType, setNodes, setEdges, t]);
+  }, [node, nodeType, setNodes, setEdges, t, canvasId]);
 };

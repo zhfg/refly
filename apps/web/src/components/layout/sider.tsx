@@ -8,7 +8,6 @@ import {
 
 import {
   IconCanvas,
-  IconCanvasFill,
   IconPlus,
 } from "@refly-packages/ai-workspace-common/components/common/icon"
 import cn from "classnames"
@@ -35,11 +34,6 @@ import { AiOutlineMenuFold, AiOutlineUser } from "react-icons/ai"
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
 const SubMenu = Menu.SubMenu
-
-const newItemStyle = {
-  color: "#00968F",
-  fontWeight: "500",
-}
 
 const SiderLogo = (props: {
   source: "sider" | "popover"
@@ -193,11 +187,9 @@ const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
       }}>
       <div className="flex h-8 w-40 items-center justify-between">
         <div className="flex items-center gap-3">
-          {selectedKey === canvas.id ? (
-            <IconCanvasFill className="text-green-600" />
-          ) : (
-            <IconCanvas />
-          )}
+          <IconCanvas
+            className={cn({ "text-green-600": selectedKey === canvas.id })}
+          />
           <div className="w-28 truncate">{canvas?.name ?? ""}</div>
         </div>
 

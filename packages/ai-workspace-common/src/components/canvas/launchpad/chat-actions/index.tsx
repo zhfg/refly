@@ -11,10 +11,15 @@ import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/st
 // styles
 import './index.scss';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { PiMagicWand } from 'react-icons/pi';
 import { useGetSubscriptionUsage } from '@refly-packages/ai-workspace-common/queries/queries';
 import { ModelSelector } from './model-selector';
 import { ModelInfo } from '@refly/openapi-schema';
+
+export interface CustomAction {
+  icon: React.ReactNode;
+  title: string;
+  onClick: () => void;
+}
 
 interface ChatActionsProps {
   query: string;
@@ -23,45 +28,17 @@ interface ChatActionsProps {
   form?: FormInstance;
   handleSendMessage: () => void;
   handleAbort: () => void;
+  customActions?: CustomAction[];
 }
 
 export const ChatActions = memo(
   (props: ChatActionsProps) => {
-    const { query, model, setModel, handleSendMessage, handleAbort } = props;
+    const { query, model, setModel, handleSendMessage, handleAbort, customActions } = props;
     const { t } = useTranslation();
-
-    const { setRecommendQuestionsOpen, recommendQuestionsOpen } = useLaunchpadStoreShallow(
-      useCallback(
-        (state) => ({
-          setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
-          recommendQuestionsOpen: state.recommendQuestionsOpen,
-        }),
-        [],
-      ),
-    );
-
-    // Memoize handlers
-    const handleRecommendQuestionsToggle = useCallback(() => {
-      setRecommendQuestionsOpen(!recommendQuestionsOpen);
-    }, [recommendQuestionsOpen, setRecommendQuestionsOpen]);
 
     const handleSendClick = useCallback(() => {
       handleSendMessage();
     }, [handleSendMessage]);
-
-    const { data: tokenUsageData } = useGetSubscriptionUsage({}, [], {
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      staleTime: 60 * 1000, // Consider data fresh for 1 minute
-      gcTime: 5 * 60 * 1000, // Cache for 5 minutes
-    });
-
-    const tokenUsage = useMemo(() => tokenUsageData?.data?.token, [tokenUsageData?.data?.token]);
-    const tokenAvailable = useMemo(
-      () => tokenUsage?.t1TokenQuota > tokenUsage?.t1TokenUsed || tokenUsage?.t2TokenQuota > tokenUsage?.t2TokenUsed,
-      [tokenUsage],
-    );
 
     // hooks
     const runtime = getRuntime();
@@ -73,8 +50,8 @@ export const ChatActions = memo(
 
     const canSendEmptyMessage = useMemo(() => query?.trim(), [query]);
     const canSendMessage = useMemo(
-      () => !userStore.isLogin || (tokenAvailable && canSendEmptyMessage),
-      [userStore.isLogin, tokenAvailable, canSendEmptyMessage],
+      () => !userStore.isLogin || canSendEmptyMessage,
+      [userStore.isLogin, canSendEmptyMessage],
     );
 
     const containerRef = useRef<HTMLDivElement>(null);
@@ -85,11 +62,13 @@ export const ChatActions = memo(
           <ModelSelector model={model} setModel={setModel} briefMode={false} trigger={['click']} />
         </div>
         <div className="right-actions">
-          <Tooltip destroyTooltipOnHide title={t('copilot.chatActions.recommendQuestions')}>
-            <Button size="small" onClick={handleRecommendQuestionsToggle} className="mr-0">
-              <PiMagicWand />
-            </Button>
-          </Tooltip>
+          {customActions?.map((action) => (
+            <Tooltip destroyTooltipOnHide title={action.title}>
+              <Button size="small" onClick={action.onClick} className="mr-0">
+                {action.icon}
+              </Button>
+            </Tooltip>
+          ))}
 
           {!isWeb ? null : (
             <Button

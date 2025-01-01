@@ -5,8 +5,13 @@ import {
   ActionType,
   EntityType,
 } from '@refly-packages/openapi-schema';
-import { ActionResult as ActionResultModel, ActionStep as ActionStepModel } from '@prisma/client';
+import {
+  ActionResult as ActionResultModel,
+  ActionStep as ActionStepModel,
+  ModelInfo as ModelInfoModel,
+} from '@prisma/client';
 import { pick } from '@/utils';
+import { modelInfoPO2DTO } from '@/misc/misc.dto';
 
 export interface InvokeActionJobData extends InvokeActionRequest {
   uid: string;
@@ -24,10 +29,10 @@ export function actionStepPO2DTO(step: ActionStepModel): ActionStep {
 }
 
 export function actionResultPO2DTO(
-  result: ActionResultModel & { steps?: ActionStepModel[] },
+  result: ActionResultModel & { steps?: ActionStepModel[]; modelInfo?: ModelInfoModel },
 ): ActionResult {
   return {
-    ...pick(result, ['resultId', 'title', 'targetId', 'status', 'modelName']),
+    ...pick(result, ['resultId', 'title', 'targetId', 'status']),
     type: result.type as ActionType,
     targetType: result.targetType as EntityType,
     actionMeta: JSON.parse(result.actionMeta || '{}'),
@@ -38,5 +43,6 @@ export function actionResultPO2DTO(
     createdAt: result.createdAt.toJSON(),
     updatedAt: result.updatedAt.toJSON(),
     steps: result.steps?.map(actionStepPO2DTO),
+    modelInfo: result.modelInfo ? modelInfoPO2DTO(result.modelInfo) : undefined,
   };
 }

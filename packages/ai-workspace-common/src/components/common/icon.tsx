@@ -31,10 +31,12 @@ import { RiErrorWarningLine } from 'react-icons/ri';
 import { RiDoubleQuotesL } from 'react-icons/ri';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BiText } from 'react-icons/bi';
-import { PiNotePencil, PiNotePencilLight, PiShootingStar } from 'react-icons/pi';
+import { PiNotePencil, PiNotePencilLight } from 'react-icons/pi';
+import { TfiBlackboard } from 'react-icons/tfi';
 
 import { IoLibraryOutline } from 'react-icons/io5';
 import { HiOutlineChevronDown } from 'react-icons/hi';
+import { RxExit } from 'react-icons/rx';
 
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
 import ClaudeIcon from '@refly-packages/ai-workspace-common/assets/claude.svg';
@@ -44,13 +46,12 @@ import MetaLlamaIcon from '@refly-packages/ai-workspace-common/assets/meta.svg';
 import DeepSeekIcon from '@refly-packages/ai-workspace-common/assets/deepseek.svg';
 import MistralIcon from '@refly-packages/ai-workspace-common/assets/mistral.svg';
 
-export const IconCanvasFill = HiSparkles;
-export const IconCanvas = HiOutlineSparkles;
+export const IconCanvas = TfiBlackboard;
 export const IconAskAI = LuSparkles;
 export const IconDocument = HiOutlineDocumentText;
 export const IconResource = HiOutlineSquare3Stack3D;
 export const IconMemo = PiNotePencilLight;
-export const IconResponse = HiOutlineChatBubbleLeftRight;
+export const IconResponse = HiOutlineSparkles;
 export const IconLibrary = IoLibraryOutline;
 export const IconThread = HiOutlineChatBubbleLeftRight;
 export const IconPreview = LuView;
@@ -77,6 +78,7 @@ export const IconCopy = LuCopy;
 export const IconModel = LuBrain;
 export const IconDown = HiOutlineChevronDown;
 export const IconSubscription = LuGift;
+export const IconExit = RxExit;
 
 export const ModelProviderIcons = {
   openai: OpenAIIcon,

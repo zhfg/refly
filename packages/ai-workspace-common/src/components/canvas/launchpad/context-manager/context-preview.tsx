@@ -8,13 +8,13 @@ import {
   SkillResponseNodeProps,
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { DocumentNode, ResourceNode, MemoNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { useReactFlow } from '@xyflow/react';
+import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 
 export const ContextPreview = memo(
   ({ item }: { item: CanvasNode }) => {
-    const { getNode } = useReactFlow();
+    const { nodes } = useCanvasData();
+    const node = nodes.find((node) => node.data?.entityId === item?.data?.entityId);
 
-    const node = getNode(item?.id);
     const commonProps = {
       isPreview: true,
       hideActions: true,

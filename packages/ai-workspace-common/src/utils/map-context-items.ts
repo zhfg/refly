@@ -1,12 +1,31 @@
-import { SkillContextContentItem, SkillContextDocumentItem, SkillContextResourceItem } from '@refly/openapi-schema';
+import {
+  ActionResult,
+  SkillContext,
+  SkillContextContentItem,
+  SkillContextDocumentItem,
+  SkillContextResourceItem,
+} from '@refly/openapi-schema';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { getClientOrigin } from '@refly-packages/utils/url';
 
-const convertContextToItems = (context?: any): NodeItem[] => {
+const convertContextToItems = (context?: SkillContext, history?: ActionResult[]): NodeItem[] => {
   if (!context) return [];
 
   const items: NodeItem[] = [];
+
+  history?.forEach((item) => {
+    items.push({
+      id: genUniqueId(),
+      position: { x: 0, y: 0 },
+      type: 'skillResponse',
+      data: {
+        entityId: item.resultId,
+        contentPreview: item.steps?.map((step) => step.content)?.join('\n\n'),
+        title: item.title,
+      },
+    });
+  });
 
   // Convert contentList
   context?.contentList?.forEach((content: SkillContextContentItem) => {

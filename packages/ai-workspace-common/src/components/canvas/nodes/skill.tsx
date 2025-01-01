@@ -45,70 +45,6 @@ const NodeHeader = memo(({ query }: { query: string }) => {
 
 NodeHeader.displayName = 'NodeHeader';
 
-// Memoized ContextManagerWrapper Component
-const ContextManagerWrapper = memo(
-  ({ contextItems, setContextItems }: { contextItems: NodeItem[]; setContextItems: (items: NodeItem[]) => void }) => {
-    return <ContextManager contextItems={contextItems} setContextItems={setContextItems} />;
-  },
-);
-
-ContextManagerWrapper.displayName = 'ContextManagerWrapper';
-
-// Memoized ChatInputWrapper Component
-const ChatInputWrapper = memo(
-  ({
-    query,
-    setQuery,
-    selectedSkill,
-    handleSendMessage,
-  }: {
-    query: string;
-    setQuery: (query: string) => void;
-    selectedSkill: Skill | null;
-    handleSendMessage: () => void;
-  }) => {
-    return (
-      <ChatInput
-        handleSendMessage={handleSendMessage}
-        query={query}
-        setQuery={setQuery}
-        selectedSkill={selectedSkill}
-      />
-    );
-  },
-);
-
-ChatInputWrapper.displayName = 'ChatInputWrapper';
-
-// Memoized ChatActionsWrapper Component
-const ChatActionsWrapper = memo(
-  ({
-    query,
-    modelInfo,
-    setModelInfo,
-    handleSendMessage,
-    handleAbort,
-  }: {
-    query: string;
-    modelInfo: ModelInfo | null;
-    setModelInfo: (model: ModelInfo | null) => void;
-    handleSendMessage: () => void;
-    handleAbort: () => void;
-  }) => {
-    return (
-      <ChatActions
-        query={query}
-        model={modelInfo}
-        setModel={setModelInfo}
-        handleSendMessage={handleSendMessage}
-        handleAbort={handleAbort}
-      />
-    );
-  },
-);
-
-ChatActionsWrapper.displayName = 'ChatActionsWrapper';
-
 export const SkillNode = memo(
   ({ data, selected, id }: NodeProps<SkillNode>) => {
     const [isHovered, setIsHovered] = useState(false);
@@ -284,17 +220,17 @@ export const SkillNode = memo(
 
           <div className="flex flex-col gap-1">
             <NodeHeader query={localQuery} />
-            <ContextManagerWrapper contextItems={contextItems} setContextItems={setContextItems} />
-            <ChatInputWrapper
+            <ContextManager contextItems={contextItems} setContextItems={setContextItems} />
+            <ChatInput
               query={localQuery}
               setQuery={setQuery}
               selectedSkill={selectedSkill}
               handleSendMessage={handleSendMessage}
             />
-            <ChatActionsWrapper
+            <ChatActions
               query={localQuery}
-              modelInfo={modelInfo}
-              setModelInfo={setModelInfo}
+              model={modelInfo}
+              setModel={setModelInfo}
               handleSendMessage={handleSendMessage}
               handleAbort={abortAction}
             />
