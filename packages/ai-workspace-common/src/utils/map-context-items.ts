@@ -5,11 +5,12 @@ import {
   SkillContextDocumentItem,
   SkillContextResourceItem,
 } from '@refly/openapi-schema';
+import { Node, Edge } from '@xyflow/react';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { getClientOrigin } from '@refly-packages/utils/url';
 
-const convertContextToItems = (context?: SkillContext, history?: ActionResult[]): NodeItem[] => {
+export const convertContextToItems = (context?: SkillContext, history?: ActionResult[]): NodeItem[] => {
   if (!context) return [];
 
   const items: NodeItem[] = [];
@@ -88,7 +89,7 @@ const convertContextToItems = (context?: SkillContext, history?: ActionResult[])
   return items;
 };
 
-const convertContextItemsToContext = (items: NodeItem[]) => {
+export const convertContextItemsToContext = (items: NodeItem[]) => {
   return {
     contentList: items
       ?.filter((item) => item?.data?.metadata?.sourceType?.includes('Selection'))
@@ -137,4 +138,65 @@ const convertContextItemsToContext = (items: NodeItem[]) => {
   };
 };
 
-export { convertContextToItems, convertContextItemsToContext };
+export const convertContextItemsToEdges = (
+  resultId: string,
+  items: NodeItem[],
+  nodes?: Node[],
+  edges?: Edge[],
+): { edgesToAdd: Edge[]; edgesToDelete: Edge[] } => {
+  // Initialize arrays for new edges and edges to be deleted
+  const edgesToAdd: Edge[] = [];
+  const edgesToDelete = edges ?? [];
+
+  // Return early if no items to process
+  if (!items?.length) {
+    return { edgesToAdd, edgesToDelete };
+  }
+
+  const currentNode = nodes.find((node) => node.data?.entityId === resultId);
+  if (!currentNode) {
+    console.warn('currentNode not found');
+    return { edgesToAdd, edgesToDelete };
+  }
+
+  const relatedEdges = edges.filter((edge) => edge.target === currentNode.id) ?? [];
+
+  // Create a map of source entity IDs to their corresponding node IDs
+  const entityNodeMap = new Map<string, string>();
+  nodes?.forEach((node) => {
+    if (node.data?.entityId) {
+      entityNodeMap.set(node.data.entityId as string, node.id);
+    }
+  });
+
+  const itemNodeIds = items.map((item) => entityNodeMap.get(item.data?.entityId as string));
+  const itemNodeIdSet = new Set(itemNodeIds);
+
+  const edgeSourceIds = relatedEdges.map((edge) => edge.source);
+  const edgeSourceIdSet = new Set(edgeSourceIds);
+
+  // Process each item to create edges based on relationships
+  items.forEach((item) => {
+    const itemNodeId = entityNodeMap.get(item.data?.entityId as string);
+    if (!edgeSourceIdSet.has(itemNodeId)) {
+      const newEdge: Edge = {
+        id: `${itemNodeId}-${currentNode.id}`,
+        source: itemNodeId,
+        target: currentNode.id,
+      };
+      edgesToAdd.push(newEdge);
+    }
+  });
+
+  // Delete edges that are no longer part of the context items
+  relatedEdges.forEach((edge) => {
+    if (!itemNodeIdSet.has(edge.source)) {
+      edgesToDelete.push(edge);
+    }
+  });
+
+  return {
+    edgesToAdd,
+    edgesToDelete,
+  };
+};

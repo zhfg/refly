@@ -8,6 +8,7 @@ import {
   IconAskAI,
   IconLoading,
   IconRun,
+  IconPreview,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
@@ -54,9 +55,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const node = useMemo(() => getNode(nodeId) as CanvasNode, [nodeId, getNode]);
   const nodeData = useMemo(() => node?.data, [node]);
 
-  // console.log('nodeactionmenu', nodeId);
-
-  const addPinnedNode = useCanvasStoreShallow(useCallback((state) => state.addNodePreview, []));
+  const addNodePreview = useCanvasStoreShallow((state) => state.addNodePreview);
 
   const handleAskAI = useCallback(() => {
     const node = getNode(nodeId) as CanvasNode;
@@ -109,7 +108,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   }, [nodeId, nodeData?.contentPreview]);
 
   const handlePreview = useCallback(() => {
-    addPinnedNode(canvasId, node);
+    addNodePreview(canvasId, node);
     addPinnedNodeEmitter.emit('addPinnedNode', { id: nodeId, canvasId });
     onClose?.();
   }, [node, nodeId, canvasId]);
@@ -125,6 +124,13 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         primary: true,
       },
       { key: 'divider-1', type: 'divider' } as MenuItem,
+      {
+        key: 'preview',
+        icon: IconPreview,
+        label: t('canvas.nodeActions.preview'),
+        onClick: handlePreview,
+        type: 'button' as const,
+      },
     ];
 
     const nodeTypeItems: Record<string, MenuItem[]> = {

@@ -46,9 +46,8 @@ import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
 const POLLING_INTERVAL = 3000;
-const POLLING_COOLDOWN_TIME = 5000;
+const POLLING_COOLDOWN_TIME = 10000;
 
-// 抽离内容渲染组件
 const NodeContent = memo(
   ({ content, sources, isOperating }: { content: string; sources: Source[]; isOperating: boolean }) => {
     return (
@@ -85,14 +84,12 @@ const NodeHeader = memo(({ query, skillName, skill }: { query: string; skillName
   );
 });
 
-// 创建一个 memo 化的 ModelIcon 组件
 const ModelIcon = memo(({ provider }: { provider: string }) => {
   return <img className="w-3 h-3 mx-1" src={ModelProviderIcons[provider]} alt={provider} />;
 });
 
 ModelIcon.displayName = 'ModelIcon';
 
-// 在 NodeFooter 组件中使用
 const NodeFooter = memo(
   ({
     model,

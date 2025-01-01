@@ -16,6 +16,8 @@ import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/store
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { EditChatInput } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/edit-chat-input';
 import { cn } from '@refly-packages/utils/cn';
+import { useReactFlow } from '@xyflow/react';
+import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
 
 interface SkillResponseNodePreviewProps {
   node: CanvasNode;
@@ -50,6 +52,8 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
     sourceListDrawerVisible: state.sourceListDrawer.visible,
   }));
 
+  const { getNodes } = useReactFlow();
+  const setNodeData = useSetNodeData();
   const deleteNode = useDeleteNode(node, 'skillResponse');
 
   const { t } = useTranslation();
@@ -68,6 +72,21 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
 
     updateActionResult(resultId, data.data);
     setLoading(false);
+
+    const remoteResult = data.data;
+    const node = getNodes().find((node) => node.data?.entityId === resultId);
+    if (node && remoteResult) {
+      setNodeData(node.id, {
+        title: remoteResult.title,
+        metadata: {
+          status: remoteResult.status,
+          contentPreview: remoteResult.steps
+            ?.map((s) => s.content)
+            .filter(Boolean)
+            .join('\n'),
+        },
+      });
+    }
   };
 
   useEffect(() => {

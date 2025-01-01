@@ -11,9 +11,13 @@ import {
 } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
 import { ModelInfo } from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
-import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import {
+  convertContextItemsToContext,
+  convertContextItemsToEdges,
+} from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { IconExit } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { useReactFlow } from '@xyflow/react';
 
 interface EditChatInputProps {
   resultId: string;
@@ -31,6 +35,7 @@ interface EditChatInputProps {
 const EditChatInputComponent = (props: EditChatInputProps) => {
   const { resultId, contextItems, query, modelInfo, actionMeta, setEditMode, readonly } = props;
 
+  const { getEdges, getNodes, deleteElements, addEdges } = useReactFlow();
   const [editQuery, setEditQuery] = useState<string>(query);
   const [editContextItems, setEditContextItems] = useState<NodeItem[]>(contextItems);
   const [editModelInfo, setEditModelInfo] = useState<ModelInfo>(modelInfo);
@@ -45,6 +50,21 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
   const { invokeAction } = useInvokeAction();
 
   const handleSendMessage = useCallback(() => {
+    // Synchronize edges with latest context items
+    console.log('editContextItems', editContextItems);
+    const nodes = getNodes();
+    console.log('nodes', nodes);
+    const currentNode = nodes.find((node) => node.data?.entityId === resultId);
+    if (!currentNode) {
+      return;
+    }
+    const edges = getEdges().filter((edge) => edge.target === currentNode.id);
+    const { edgesToAdd, edgesToDelete } = convertContextItemsToEdges(resultId, editContextItems, nodes, edges);
+    console.log('edgesToAdd', edgesToAdd);
+    console.log('edgesToDelete', edgesToDelete);
+    addEdges(edgesToAdd);
+    deleteElements({ edges: edgesToDelete });
+
     invokeAction({
       resultId,
       input: {
