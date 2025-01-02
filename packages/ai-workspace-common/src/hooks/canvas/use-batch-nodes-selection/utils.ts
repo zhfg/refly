@@ -97,8 +97,8 @@ export const calculateGroupBoundaries = (nodesToGroup: Node[], currentNodes: Nod
   const maxY = Math.max(...nodeBoundaries.map((b) => b.bottom));
 
   const dimensions = {
-    width: maxX - minX + PADDING,
-    height: maxY - minY + PADDING,
+    width: maxX - minX,
+    height: maxY - minY,
   };
 
   // Create group node

@@ -1,87 +1,83 @@
-import { FC, useState } from 'react';
-import { Node, useStore } from '@xyflow/react';
+import { FC, useState, useEffect } from 'react';
+import { Node, useStore, useReactFlow } from '@xyflow/react';
 import { GroupActionMenu } from '../group-action-menu';
 import { NodeActionMenu } from '../node-action-menu';
 import { CanvasNode } from '../nodes';
+import { calculateGroupBoundaries, PADDING } from '../../../hooks/canvas/use-batch-nodes-selection/utils';
 
 interface SelectionActionMenusProps {
   selectedNodes: Node[];
 }
 
-export const SelectionActionMenus: FC<SelectionActionMenusProps> = ({ selectedNodes }) => {
+export const SelectionActionMenus: FC<SelectionActionMenusProps> = () => {
   const [isTopMenuHovered, setIsTopMenuHovered] = useState(false);
   const [isRightMenuHovered, setIsRightMenuHovered] = useState(false);
 
-  // Get transform and nodes from React Flow store
+  // Get transform from React Flow store
   const transform = useStore((state) => state.transform);
-  // 直接从 store 获取实时的节点数据
-  const nodes = useStore((state) => state.nodes.filter((node) => node.selected));
+  const nodes = useStore((state) => state.nodes);
+  const selectedNodes = nodes.filter((node) => node?.selected);
+  const { getZoom } = useReactFlow();
+  const zoom = getZoom();
 
-  const shouldShowMenus = nodes.length >= 2 || isTopMenuHovered || isRightMenuHovered;
+  const shouldShowMenus = selectedNodes.length >= 2 || isTopMenuHovered || isRightMenuHovered;
 
   if (!shouldShowMenus) return null;
 
-  // Calculate bounding box using real-time node positions
-  const bbox = nodes.reduce(
-    (acc, node) => {
-      const nodeLeft = node.position.x;
-      const nodeRight = node.position.x + (node.width || 0);
-      const nodeTop = node.position.y;
-      const nodeBottom = node.position.y + (node.height || 0);
+  // Calculate boundaries
+  const { dimensions, minX, minY } = calculateGroupBoundaries(selectedNodes, nodes);
 
-      return {
-        left: Math.min(acc.left, nodeLeft),
-        right: Math.max(acc.right, nodeRight),
-        top: Math.min(acc.top, nodeTop),
-        bottom: Math.max(acc.bottom, nodeBottom),
-      };
-    },
-    { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity },
-  );
-
-  // Calculate menu positions in flow coordinates
-  const centerX = (bbox.left + bbox.right) / 2;
-  const rightX = bbox.right;
-  const topY = bbox.top;
-  const centerY = (bbox.top + bbox.bottom) / 2;
-
-  // Apply flow transform
-  const topMenuStyle = {
-    transform: `translate(${centerX * transform[2] + transform[0]}px, ${(topY - 60) * transform[2] + transform[1]}px) translate(-50%, 0)`,
-    position: 'absolute' as const,
-    zIndex: 50,
-    transition: 'none',
-    willChange: 'transform',
-    pointerEvents: 'all',
+  // Calculate positions for menus
+  const topMenuPosition = {
+    x: minX + dimensions.width / 2, // Center horizontally
+    y: minY - 12, // Slightly above the selection
   };
 
-  const rightMenuStyle = {
-    transform: `translate(${(rightX + 30) * transform[2] + transform[0]}px, ${centerY * transform[2] + transform[1]}px)`,
-    position: 'absolute' as const,
-    zIndex: 50,
-    transition: 'none',
-    willChange: 'transform',
-    pointerEvents: 'all',
+  const rightMenuPosition = {
+    x: minX + dimensions.width + 12, // Only 4px from the right edge
+    y: minY, // Align with top
   };
 
   return (
     <>
+      {/* Top Group Action Menu */}
       <div
         className="react-flow__node-toolbar"
-        style={topMenuStyle}
+        style={{
+          position: 'absolute',
+          left: `${topMenuPosition.x * zoom + transform[0]}px`,
+          top: `${topMenuPosition.y * zoom + transform[1]}px`,
+          transform: `translate(-50%, -100%) scale(${zoom})`,
+          transformOrigin: 'center bottom',
+          zIndex: 51,
+          pointerEvents: 'all',
+        }}
         onMouseEnter={() => setIsTopMenuHovered(true)}
         onMouseLeave={() => setIsTopMenuHovered(false)}
       >
-        <GroupActionMenu nodeId={nodes[0]?.id} isTemporary={true} />
+        <GroupActionMenu nodeId={selectedNodes[0]?.id} isTemporary={true} />
       </div>
 
+      {/* Right Node Action Menu */}
       <div
         className="react-flow__node-toolbar"
-        style={rightMenuStyle}
+        style={{
+          position: 'absolute',
+          left: `${rightMenuPosition.x * zoom + transform[0]}px`,
+          top: `${rightMenuPosition.y * zoom + transform[1]}px`,
+          transform: `scale(${zoom})`,
+          transformOrigin: 'left top',
+          zIndex: 51,
+          pointerEvents: 'all',
+        }}
         onMouseEnter={() => setIsRightMenuHovered(true)}
         onMouseLeave={() => setIsRightMenuHovered(false)}
       >
-        <NodeActionMenu nodeId={nodes[0]?.id} nodeType={(nodes[0] as CanvasNode)?.type} isMultiSelection={true} />
+        <NodeActionMenu
+          nodeId={selectedNodes[0]?.id}
+          nodeType={(selectedNodes[0] as CanvasNode)?.type}
+          isMultiSelection={true}
+        />
       </div>
     </>
   );
