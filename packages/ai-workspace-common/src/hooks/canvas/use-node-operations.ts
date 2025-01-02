@@ -1,10 +1,11 @@
 import { useCallback } from 'react';
-import { applyNodeChanges, NodeChange, NodeDimensionChange, NodePositionChange } from '@xyflow/react';
+import { applyNodeChanges, NodeChange, Node } from '@xyflow/react';
 import { useCanvasData } from './use-canvas-data';
 import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { useCanvasSync } from './use-canvas-sync';
 import { useContextPanelStore } from '../../stores/context-panel';
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
+import { useSelectionMenuPosition } from './use-selection-menu-position';
 
 export const useNodeOperations = (selectedCanvasId?: string) => {
   const canvasId = useCanvasId();
@@ -54,6 +55,8 @@ export const useNodeOperations = (selectedCanvasId?: string) => {
 
       const updatedNodes = applyNodeChanges(changes, mutableNodes);
       updateNodesWithSync(updatedNodes);
+
+      return updatedNodes;
     },
     [canvasId, updateNodesWithSync],
   );

@@ -8,7 +8,13 @@ import { useAddNode } from '../use-add-node';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { CoordinateExtent, Node } from '@xyflow/react';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
-import { calculateGroupBoundaries, PADDING, shouldDestroyTemporaryGroup, sortNodes } from './utils';
+import {
+  calculateGroupBoundaries,
+  getValidSelectedNodes,
+  PADDING,
+  shouldDestroyTemporaryGroup,
+  sortNodes,
+} from './utils';
 import { useUngroupNodes } from './use-ungroup-nodes';
 
 export interface CanvasNodeFilter {
@@ -51,16 +57,13 @@ export const useBatchNodesSelection = () => {
     );
   };
 
-  const shouldCreateNewTempGroup = (selectedNodes: Node[]) => {
-    const selectedGroups = selectedNodes.filter((node) => node.type === 'group');
-    const selectedNonGroups = selectedNodes.filter((node) => node.type !== 'group' && !node.parentId);
+  const shouldCreateNewTempGroup = (selectedNodes: CanvasNode<any>[], beforeNodes: CanvasNode<any>[]) => {
+    // Only consider:
+    // 1. Non-temporary group nodes themselves
+    // 2. Nodes that aren't children of permanent groups
+    const validNodes = getValidSelectedNodes(selectedNodes, beforeNodes);
 
-    // Don't create group if only group nodes are selected
-    if (selectedGroups.length > 0 && selectedNonGroups.length === 0) {
-      return false;
-    }
-
-    return selectedNodes.length >= 2;
+    return validNodes.length >= 2;
   };
 
   const convertTemporaryToPermGroup = useCallback(
@@ -111,14 +114,6 @@ export const useBatchNodesSelection = () => {
 
     if (selectedNodes.length < 2) return;
 
-    // Check if there's already a temporary group
-    const tempGroup = beforeNodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
-    if (tempGroup) {
-      // If there's a temporary group, convert it to permanent
-      convertTemporaryToPermGroup(tempGroup.id);
-      return;
-    }
-
     // Update width and height calculation using the same logic
     const { groupNode, minX, minY } = calculateGroupBoundaries(selectedNodes, beforeNodes);
 
@@ -150,7 +145,7 @@ export const useBatchNodesSelection = () => {
   }, [canvasId, updateNodesWithSync, convertTemporaryToPermGroup]);
 
   const createTemporaryGroup = useCallback(
-    (selectedNodes: Node[]) => {
+    (selectedNodes: CanvasNode<any>[]) => {
       if (selectedNodes.length < 2) {
         if (tempGroupId) {
           const { data } = useCanvasStore.getState();
@@ -201,7 +196,14 @@ export const useBatchNodesSelection = () => {
         }
       }
 
-      const { groupNode, minX, minY } = calculateGroupBoundaries(selectedNodes, beforeNodes);
+      // Filter out nodes that are children of permanent groups
+      const validNodes = getValidSelectedNodes(selectedNodes, beforeNodes);
+
+      if (validNodes.length < 2) {
+        return;
+      }
+
+      const { groupNode, minX, minY } = calculateGroupBoundaries(validNodes, beforeNodes);
 
       setTempGroupId(groupNode.id);
 
@@ -234,10 +236,13 @@ export const useBatchNodesSelection = () => {
   );
 
   const updateTempGroup = useCallback(
-    (selectedNodes: CanvasNode<any>[], beforeNodes: CanvasNode<any>[], existingGroupId: string) => {
+    (selectedNodes: CanvasNode<any>[], beforeNodes: CanvasNode<any>[], existingTempGroupId: string) => {
+      // Filter out nodes that are children of permanent groups
+      const validNodes = getValidSelectedNodes(selectedNodes, beforeNodes);
+
       // 检查是否需要更新
-      const currentSelectedIds = new Set(selectedNodes.filter((n) => n.type !== 'group').map((n) => n.id));
-      const beforeGroupChildren = beforeNodes.filter((n) => n.parentId === existingGroupId && n.type !== 'group');
+      const currentSelectedIds = new Set(validNodes.map((n) => n.id));
+      const beforeGroupChildren = beforeNodes.filter((n) => n.parentId === existingTempGroupId);
       const beforeChildrenIds = new Set(beforeGroupChildren.map((n) => n.id));
 
       // 如果选中节点和当前组内节点完全相同，则不需要更新
@@ -248,17 +253,20 @@ export const useBatchNodesSelection = () => {
         return;
       }
 
-      // Only consider selected nodes that aren't groups
-      const selectedNonGroupNodes = selectedNodes.filter((n) => n.type !== 'group');
+      // Calculate positions considering group nodes as whole units
+      const nodesToConsider = validNodes.map((node) => {
+        if (node.type === 'group') {
+          // Use the group's current position and dimensions
+          return node;
+        }
 
-      // Get absolute positions for all nodes
-      const nodesToConsider = selectedNonGroupNodes.map((node) => {
+        // For regular nodes, calculate absolute position if they're in a temporary group
         const existingNode = beforeNodes.find((n) => n.id === node.id);
         if (!existingNode) return node;
 
         // If node was already in group, calculate its absolute position
-        if (existingNode.parentId === existingGroupId) {
-          const parentGroup = beforeNodes.find((n) => n.id === existingGroupId);
+        if (existingNode.parentId === existingTempGroupId) {
+          const parentGroup = beforeNodes.find((n) => n.id === existingTempGroupId);
           return {
             ...node,
             position: {
@@ -268,7 +276,6 @@ export const useBatchNodesSelection = () => {
           };
         }
 
-        // Otherwise use its current position
         return node;
       });
 
@@ -277,7 +284,7 @@ export const useBatchNodesSelection = () => {
 
       // Update nodes while maintaining absolute positions
       const updatedNodes = beforeNodes.map((node) => {
-        if (node.id === existingGroupId) {
+        if (node.id === existingTempGroupId) {
           // Update group position and size
           return {
             ...node,
@@ -301,10 +308,10 @@ export const useBatchNodesSelection = () => {
           };
         }
 
-        const isSelected = selectedNonGroupNodes.some((n) => n.id === node.id);
+        const isSelected = validNodes.some((n) => n.id === node.id);
         if (isSelected) {
           const absolutePosition =
-            node.parentId === existingGroupId
+            node.parentId === existingTempGroupId
               ? {
                   x: node.positionAbsolute?.x || node.position.x,
                   y: node.positionAbsolute?.y || node.position.y,
@@ -313,7 +320,7 @@ export const useBatchNodesSelection = () => {
 
           return {
             ...node,
-            parentId: existingGroupId,
+            parentId: existingTempGroupId,
             extent: 'parent' as const,
             positionAbsolute: absolutePosition,
             position: {
@@ -326,14 +333,14 @@ export const useBatchNodesSelection = () => {
         }
 
         // Remove nodes from group that are no longer selected
-        if (node.parentId === existingGroupId && !isSelected) {
+        if (node.parentId === existingTempGroupId && !isSelected) {
           const absolutePosition = {
             x:
               node.positionAbsolute?.x ||
-              node.position.x + beforeNodes.find((n) => n.id === existingGroupId)?.position.x,
+              node.position.x + beforeNodes.find((n) => n.id === existingTempGroupId)?.position.x,
             y:
               node.positionAbsolute?.y ||
-              node.position.y + beforeNodes.find((n) => n.id === existingGroupId)?.position.y,
+              node.position.y + beforeNodes.find((n) => n.id === existingTempGroupId)?.position.y,
           };
 
           const { parentId, extent, ...nodeWithoutParent } = node;
@@ -357,8 +364,13 @@ export const useBatchNodesSelection = () => {
       const { data } = useCanvasStore.getState();
       const beforeNodes = data[canvasId]?.nodes ?? [];
 
-      // Step 1: Handle case when 1 or fewer nodes are selected
-      if (shouldDestroyTemporaryGroup(selectedNodes)) {
+      // Filter out nodes that are children of permanent groups
+      const validNodes = getValidSelectedNodes(selectedNodes, beforeNodes);
+
+      console.log('validNodes', validNodes, selectedNodes, beforeNodes);
+
+      // Step 1: Handle case when 1 or fewer valid nodes are selected
+      if (validNodes.length <= 1) {
         destroyTemporaryGroups(beforeNodes, ungroupMultipleNodes);
         return;
       }
@@ -368,12 +380,12 @@ export const useBatchNodesSelection = () => {
 
       // Step 3: Update existing temporary group if needed
       if (existingTempGroup && shouldUpdateExistingTempGroup(selectedNodes, existingTempGroup, beforeNodes)) {
-        updateTempGroup(selectedNodes, beforeNodes, existingTempGroup?.id);
+        updateTempGroup(selectedNodes, beforeNodes, existingTempGroup.id);
         return;
       }
 
       // Step 4: Create new temporary group if needed
-      if (shouldCreateNewTempGroup(selectedNodes)) {
+      if (shouldCreateNewTempGroup(selectedNodes, beforeNodes)) {
         createTemporaryGroup(selectedNodes);
       }
     },

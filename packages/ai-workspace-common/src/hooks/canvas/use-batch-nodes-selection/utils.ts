@@ -23,6 +23,29 @@ export const sortNodes = (nodes: Node[]) => {
   });
 };
 
+export const getValidSelectedNodes = (selectedNodes: CanvasNode<any>[], beforeNodes: CanvasNode<any>[]) => {
+  return selectedNodes.filter((node) => {
+    if (node.type === 'group' && !node.data?.metadata?.isTemporary) {
+      return true;
+    } else if (node.type === 'group' && node.data?.metadata?.isTemporary) {
+      return false;
+    }
+
+    if (node.parentId) {
+      const parent = beforeNodes.find((n) => n.id === node.parentId);
+      if (parent?.type === 'group' && !parent.data?.metadata?.isTemporary) {
+        return false;
+      }
+    }
+
+    if (!node.parentId) {
+      return true;
+    }
+
+    return true;
+  });
+};
+
 // 计算新组的尺寸和位置
 export const getNodeDimensions = (node: Node, latestNodes: Node[]) => {
   if (node.type === 'group') {
@@ -86,7 +109,6 @@ export const calculateGroupBoundaries = (nodesToGroup: Node[], currentNodes: Nod
       entityId: genUniqueId(),
       metadata: {
         ...dimensions,
-        isTemporary: true,
       },
     },
     position: {

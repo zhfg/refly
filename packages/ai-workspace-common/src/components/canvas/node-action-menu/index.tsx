@@ -40,9 +40,10 @@ interface NodeActionMenuProps {
   isProcessing?: boolean;
   isCompleted?: boolean;
   isCreatingDocument?: boolean;
+  isMultiSelection?: boolean;
 }
 
-export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onClose }) => {
+export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onClose, isMultiSelection }) => {
   const { t } = useTranslation();
   const { getNode } = useReactFlow();
   const { canvasId } = useCanvasContext();
@@ -128,6 +129,36 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   }, [ungroupNodes, nodeId, onClose]);
 
   const getMenuItems = (): MenuItem[] => {
+    if (isMultiSelection) {
+      return [
+        {
+          key: 'askAI',
+          icon: IconAskAI,
+          label: t('canvas.nodeActions.askAI'),
+          onClick: handleAskAI,
+          type: 'button' as const,
+          primary: true,
+        },
+        { key: 'divider-1', type: 'divider' } as MenuItem,
+        {
+          key: 'addToContext',
+          icon: MessageSquareDiff,
+          label: t('canvas.nodeActions.addToContext'),
+          onClick: handleAddToContext,
+          type: 'button' as const,
+        },
+        { key: 'divider-2', type: 'divider' } as MenuItem,
+        {
+          key: 'delete',
+          icon: IconDelete,
+          label: t('canvas.nodeActions.delete'),
+          onClick: handleDelete,
+          danger: true,
+          type: 'button' as const,
+        },
+      ];
+    }
+
     const baseItems: MenuItem[] = [
       {
         key: 'askAI',
