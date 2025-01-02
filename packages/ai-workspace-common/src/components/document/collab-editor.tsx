@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, memo, useCallback } from 'react';
 import { useThrottledCallback } from 'use-debounce';
+import classNames from 'classnames';
 import wordsCount from 'words-count';
 import { useTranslation } from 'react-i18next';
 import { CanvasNodeType } from '@refly/openapi-schema';
@@ -31,8 +32,7 @@ import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-t
 
 import { getClientOrigin } from '@refly-packages/utils/url';
 import { useDocumentStore, useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
-import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
-import classNames from 'classnames';
+
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/use-selection-context';

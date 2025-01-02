@@ -17,7 +17,6 @@ import { getClientOrigin } from '@refly-packages/utils/url';
 import { Resource } from '@refly/openapi-schema';
 
 import './index.scss';
-import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
 
 interface ResourceViewProps {
   resourceId: string;
