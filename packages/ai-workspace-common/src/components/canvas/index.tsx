@@ -84,34 +84,16 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
 
-  // Helper function to sort nodes (groups first)
-  const sortNodes = useCallback((nodes: CanvasNode<any>[]) => {
-    return nodes.sort((a, b) => {
-      if (a.type === 'group') return -1;
-      if (b.type === 'group') return 1;
-      return 0;
-    });
-  }, []);
-
-  const {
-    pinnedNodes,
-    showPreview,
-    showLaunchpad,
-    showMaxRatio,
-    interactionMode,
-    setInteractionMode,
-    clickToPreview,
-    showEdges,
-  } = useCanvasStoreShallow((state) => ({
-    pinnedNodes: state.config[canvasId]?.pinnedNodes,
-    showPreview: state.showPreview,
-    showLaunchpad: state.showLaunchpad,
-    showMaxRatio: state.showMaxRatio,
-    interactionMode: state.interactionMode,
-    setInteractionMode: state.setInteractionMode,
-    clickToPreview: state.clickToPreview,
-    showEdges: state.showEdges,
-  }));
+  const { nodePreviews, showPreview, showLaunchpad, showMaxRatio, interactionMode, setInteractionMode, showEdges } =
+    useCanvasStoreShallow((state) => ({
+      nodePreviews: state.config[canvasId]?.nodePreviews,
+      showPreview: state.showPreview,
+      showLaunchpad: state.showLaunchpad,
+      showMaxRatio: state.showMaxRatio,
+      interactionMode: state.interactionMode,
+      setInteractionMode: state.setInteractionMode,
+      showEdges: state.showEdges,
+    }));
 
   const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } = useSiderStoreShallow(
     (state) => ({
@@ -565,7 +547,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
           >
             <div className="relative h-full">
               <div className="flex gap-2 h-full">
-                {pinnedNodes
+                {nodePreviews
                   ?.filter(Boolean)
                   ?.map((node) => <NodePreview key={node?.id} node={node} canvasId={canvasId} />)}
               </div>

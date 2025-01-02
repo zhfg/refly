@@ -1331,16 +1331,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CheckSettingsFieldResponse'
-  /subscription/plan:
+  /subscription/plans:
     get:
       tags:
         - subscription
-      summary: Get subscription plan
-      description: Get subscription plan
-      operationId: getSubscriptionPlan
+      summary: Get subscription plans
+      description: Get subscription plans
+      operationId: getSubscriptionPlans
       responses:
         '200':
           description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSubscriptionPlansResponse'
   /subscription/usage:
     get:
       tags:
@@ -2452,13 +2456,9 @@ components:
       description: Subscription plan type
       enum:
         - free
+        - plus
         - pro
-    PriceLookupKey:
-      type: string
-      description: Price lookup key
-      enum:
-        - refly_pro_monthly
-        - refly_pro_yearly
+        - max
     SubscriptionStatus:
       type: string
       description: Subscription status
@@ -2481,9 +2481,6 @@ components:
         subscriptionId:
           type: string
           description: Subscription ID
-        lookupKey:
-          type: string
-          description: Lookup key
         planType:
           type: string
           description: Subscription plan type
@@ -3889,11 +3886,14 @@ components:
     CreateCheckoutSessionRequest:
       type: object
       required:
-        - lookupKey
+        - planType
       properties:
-        lookupKey:
-          description: Price lookup key
-          $ref: '#/components/schemas/PriceLookupKey'
+        planType:
+          description: Subscription plan type
+          $ref: '#/components/schemas/SubscriptionPlanType'
+        interval:
+          description: Subscription billing interval
+          $ref: '#/components/schemas/SubscriptionInterval'
     CreateCheckoutSessionResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'
@@ -3918,6 +3918,34 @@ components:
                 url:
                   type: string
                   description: Portal session URL
+    SubscriptionPlan:
+      type: object
+      properties:
+        planType:
+          type: string
+          description: Subscription plan type
+        t1TokenQuota:
+          type: number
+          description: Token quota per month (T1)
+        t2TokenQuota:
+          type: number
+          description: Token quota per month (T2)
+        objectStorageQuota:
+          type: string
+          description: Object storage quota (in bytes)
+        vectorStorageQuota:
+          type: string
+          description: Vector storage quota (in bytes)
+    GetSubscriptionPlansResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Subscription plans
+              items:
+                $ref: '#/components/schemas/SubscriptionPlan'
     SubscriptionUsageData:
       type: object
       properties:

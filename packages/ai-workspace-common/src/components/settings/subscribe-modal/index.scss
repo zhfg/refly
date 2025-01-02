@@ -1,3 +1,23 @@
+.subscribe-modal {
+  .ant-modal-content {
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    .ant-modal-body {
+      width: 100%;
+      padding: 24px 0;
+      max-height: 100vh;
+      overflow-y: auto;
+    }
+  }
+}
+
 .subscribe-content {
   &-title {
     font-size: 30px;
@@ -9,7 +29,7 @@
 
   &-subtitle {
     margin-top: 8px;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 24px;
     color: rgb(242 103 37);
     font-weight: 600;
@@ -37,7 +57,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 100px;
+        width: 120px;
         height: 100%;
         border-radius: 8px;
         cursor: pointer;
@@ -58,12 +78,15 @@
     display: flex;
     gap: 12px;
     justify-content: center;
-    background: rgb(240 249 255);
     border-radius: 12px;
+
+    .pro-plan {
+      border-radius: 12px;
+      background: rgb(143, 163, 212);
+    }
 
     &-item {
       flex: 1;
-      background: #fff;
       border-radius: 12px;
       padding: 28px;
       box-sizing: border-box;
@@ -76,18 +99,46 @@
         font-weight: 600;
       }
 
-      &.active {
-        border-color: #00968f;
+      &.item-free {
+        &:hover {
+          box-shadow: #e5e5e5 0px 0px 0px 2px;
+        }
+      }
+
+      &.item-plus {
+        &:hover {
+          box-shadow: rgb(0, 134, 201) 0px 0px 0px 2px;
+        }
         .subscribe-content-plans-item-title {
-          color: #00968f;
+          color: #016aa2;
+        }
+      }
+
+      &.item-pro {
+        &:hover {
+          box-shadow: rgb(143, 163, 212) 0px 0px 0px 2px;
+        }
+        .subscribe-content-plans-item-title {
+          color: #3537cc;
+        }
+      }
+
+      &.item-max {
+        &:hover {
+          box-shadow: rgb(232, 178, 102) 0px 0px 0px 2px;
+        }
+        .subscribe-content-plans-item-title {
+          color: #f26725;
         }
       }
 
       &-price {
-        font-size: 28px;
-        line-height: 46px;
+        font-size: 36px;
+        line-height: 50px;
         color: #000;
-        font-weight: 600;
+        font-weight: 800;
+        height: 48px;
+        margin-top: 12px;
         .period {
           color: #2c2929;
           font-size: 14px;
@@ -96,8 +147,9 @@
       }
 
       .description {
+        height: 36px;
         font-size: 14px;
-        line-height: 24px;
+        line-height: 18px;
         color: rgb(107 114 128);
       }
 
@@ -108,10 +160,47 @@
         font-size: 16px;
         line-height: 24px;
         font-weight: 600;
-        &.ant-btn-primary {
-          background: linear-gradient(to right, #00c4b8, #00968f);
-          &:hover {
-            background: linear-gradient(to right, #00c4b8, #00c4b8);
+        background: transparent;
+        padding: 0 12px !important;
+
+        &--free {
+          background: transparent;
+        }
+
+        &--plus {
+          border: 1px solid #016aa2;
+          &.ant-btn-default {
+            &:hover {
+              background: linear-gradient(to right, #068cd4, #016aa2);
+              color: #fff;
+              border-color: #068cd4;
+            }
+          }
+        }
+
+        &--pro {
+          border: 1px solid #3537cc;
+          &.ant-btn-default {
+            background: linear-gradient(to right, #068cd4, #3537cc);
+            color: #fff;
+            border-color: #068cd4;
+
+            &:hover {
+              background: linear-gradient(to right, #005f8c, #2a2a9a);
+              color: #fff;
+              border-color: #068cd4;
+            }
+          }
+        }
+
+        &--max {
+          border: 1px solid #f26725;
+          &.ant-btn-default {
+            &:hover {
+              background: linear-gradient(to right, #f69e75, #f26725);
+              color: #fff;
+              border-color: #f69e75;
+            }
           }
         }
       }
@@ -119,16 +208,10 @@
       .plane-features {
         &-item {
           margin-bottom: 8px;
-          font-size: 14px;
-          color: #000;
+          font-size: 12px;
           font-weight: 500;
           &:last-child {
             margin-bottom: 0;
-          }
-          .details {
-            margin-left: 18px;
-            font-size: 12px;
-            color: rgba(0, 0, 0, 0.5);
           }
         }
       }

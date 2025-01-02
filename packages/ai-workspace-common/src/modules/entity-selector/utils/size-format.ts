@@ -1,12 +1,17 @@
 export const formatStorage = (num: number | string) => {
   const numValue = typeof num === 'string' ? parseFloat(num) : num;
-  if (numValue < 1024) {
-    return `${numValue} B`;
-  } else if (numValue < 1024 * 1024) {
-    return `${(numValue / 1024).toFixed(2)} KB`;
-  } else if (numValue < 1024 * 1024 * 1024) {
-    return `${(numValue / (1024 * 1024)).toFixed(2)} MB`;
-  } else {
-    return `${(numValue / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const base = 1024;
+  let value = Math.abs(numValue);
+  let unitIndex = 0;
+
+  while (value >= base && unitIndex < units.length - 1) {
+    value /= base;
+    unitIndex++;
   }
+
+  // Format with at most 2 decimal places and remove trailing zeros
+  const formattedValue = Number(value.toFixed(2)).toString();
+  return `${formattedValue} ${units[unitIndex]}`;
 };

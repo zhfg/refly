@@ -2,7 +2,7 @@
 
 import { type Options } from "@hey-api/client-fetch";
 import { UseQueryResult } from "@tanstack/react-query";
-import { addReferences, batchCreateResource, batchUpdateDocument, checkSettingsField, checkVerification, createCanvas, createCheckoutSession, createDocument, createLabelClass, createLabelInstance, createPortalSession, createResource, createShare, createSkillInstance, createSkillTrigger, createVerification, deleteCanvas, deleteDocument, deleteLabelClass, deleteLabelInstance, deleteReferences, deleteResource, deleteShare, deleteSkillInstance, deleteSkillTrigger, emailLogin, emailSignup, getActionResult, getAuthConfig, getDocumentDetail, getResourceDetail, getSettings, getShareContent, getSubscriptionPlan, getSubscriptionUsage, invokeAction, invokeSkill, listActions, listCanvases, listDocuments, listLabelClasses, listLabelInstances, listModels, listResources, listSkillInstances, listSkills, listSkillTriggers, multiLingualWebSearch, pinSkillInstance, queryReferences, reindexResource, resendVerification, scrape, search, serveStatic, streamInvokeAction, streamInvokeSkill, unpinSkillInstance, updateCanvas, updateDocument, updateLabelClass, updateLabelInstance, updateResource, updateSettings, updateSkillInstance, updateSkillTrigger, upload } from "../requests/services.gen";
+import { addReferences, batchCreateResource, batchUpdateDocument, checkSettingsField, checkVerification, createCanvas, createCheckoutSession, createDocument, createLabelClass, createLabelInstance, createPortalSession, createResource, createShare, createSkillInstance, createSkillTrigger, createVerification, deleteCanvas, deleteDocument, deleteLabelClass, deleteLabelInstance, deleteReferences, deleteResource, deleteShare, deleteSkillInstance, deleteSkillTrigger, emailLogin, emailSignup, getActionResult, getAuthConfig, getDocumentDetail, getResourceDetail, getSettings, getShareContent, getSubscriptionPlans, getSubscriptionUsage, invokeAction, invokeSkill, listActions, listCanvases, listDocuments, listLabelClasses, listLabelInstances, listModels, listResources, listSkillInstances, listSkills, listSkillTriggers, multiLingualWebSearch, pinSkillInstance, queryReferences, reindexResource, resendVerification, scrape, search, serveStatic, streamInvokeAction, streamInvokeSkill, unpinSkillInstance, updateCanvas, updateDocument, updateLabelClass, updateLabelInstance, updateResource, updateSettings, updateSkillInstance, updateSkillTrigger, upload } from "../requests/services.gen";
 export type GetAuthConfigDefaultResponse = Awaited<ReturnType<typeof getAuthConfig>>["data"];
 export type GetAuthConfigQueryResult<TData = GetAuthConfigDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
 export const useGetAuthConfigKey = "GetAuthConfig";
@@ -67,10 +67,10 @@ export type CheckSettingsFieldDefaultResponse = Awaited<ReturnType<typeof checkS
 export type CheckSettingsFieldQueryResult<TData = CheckSettingsFieldDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
 export const useCheckSettingsFieldKey = "CheckSettingsField";
 export const UseCheckSettingsFieldKeyFn = (clientOptions: Options<unknown, true>, queryKey?: Array<unknown>) => [useCheckSettingsFieldKey, ...(queryKey ?? [clientOptions])];
-export type GetSubscriptionPlanDefaultResponse = Awaited<ReturnType<typeof getSubscriptionPlan>>["data"];
-export type GetSubscriptionPlanQueryResult<TData = GetSubscriptionPlanDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
-export const useGetSubscriptionPlanKey = "GetSubscriptionPlan";
-export const UseGetSubscriptionPlanKeyFn = (clientOptions: Options<unknown, true> = {}, queryKey?: Array<unknown>) => [useGetSubscriptionPlanKey, ...(queryKey ?? [clientOptions])];
+export type GetSubscriptionPlansDefaultResponse = Awaited<ReturnType<typeof getSubscriptionPlans>>["data"];
+export type GetSubscriptionPlansQueryResult<TData = GetSubscriptionPlansDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
+export const useGetSubscriptionPlansKey = "GetSubscriptionPlans";
+export const UseGetSubscriptionPlansKeyFn = (clientOptions: Options<unknown, true> = {}, queryKey?: Array<unknown>) => [useGetSubscriptionPlansKey, ...(queryKey ?? [clientOptions])];
 export type GetSubscriptionUsageDefaultResponse = Awaited<ReturnType<typeof getSubscriptionUsage>>["data"];
 export type GetSubscriptionUsageQueryResult<TData = GetSubscriptionUsageDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
 export const useGetSubscriptionUsageKey = "GetSubscriptionUsage";

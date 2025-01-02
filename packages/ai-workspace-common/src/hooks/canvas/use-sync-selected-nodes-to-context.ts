@@ -9,7 +9,7 @@ export const useSyncSelectedNodesToContext = (
   // Add deduplication for selectedContextNodes using Set
   const selectedNodeIds = new Set(
     nodes
-      .filter((node) => node.selected && ['resource', 'document', 'memo', 'skillResponse'].includes(node.type))
+      .filter((node) => node.selected && ['resource', 'document', 'skillResponse'].includes(node.type))
       .map((node) => node.id),
   );
 

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useCanvasStoreShallow } from '../../stores/canvas';
+import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { CanvasNode } from '../../components/canvas/nodes';
 import { addPinnedNodeEmitter } from '../../events/addPinnedNode';
 
@@ -7,16 +7,29 @@ interface UseNodePreviewControlOptions {
   canvasId: string;
 }
 
-export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions) => {
-  const { clickToPreview, setClickToPreview, addPinnedNode, removePinnedNode, pinnedNodes } = useCanvasStoreShallow(
-    (state) => ({
+interface NodePreviewControl {
+  clickToPreview: boolean;
+  nodePreviews: CanvasNode[];
+  toggleClickToPreview: () => void;
+  previewNode: (node: CanvasNode) => void;
+  closeNodePreview: (node: CanvasNode) => void;
+  pinNode: (node: CanvasNode) => void;
+  unpinNode: (node: CanvasNode) => void;
+  isNodePinned: (nodeId: string) => boolean;
+  clearPinnedNodes: () => void;
+  handleNodePreview: (node: CanvasNode) => boolean;
+}
+
+export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions): NodePreviewControl => {
+  const { clickToPreview, setClickToPreview, addNodePreview, setNodePreview, removeNodePreview, nodePreviews } =
+    useCanvasStoreShallow((state) => ({
       clickToPreview: state.clickToPreview,
       setClickToPreview: state.setClickToPreview,
-      addPinnedNode: (canvasId: string, node: CanvasNode) => state.addPinnedNode(canvasId, node),
-      removePinnedNode: (canvasId: string, nodeId: string) => state.removePinnedNode(canvasId, nodeId),
-      pinnedNodes: state.config[canvasId]?.pinnedNodes || [],
-    }),
-  );
+      addNodePreview: state.addNodePreview,
+      setNodePreview: state.setNodePreview,
+      removeNodePreview: state.removeNodePreview,
+      nodePreviews: state.config[canvasId]?.nodePreviews || [],
+    }));
 
   /**
    * Toggle click-to-preview functionality
@@ -28,12 +41,26 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
   /**
    * Pin a node for preview
    */
+  const previewNode = useCallback(
+    (node: CanvasNode) => {
+      addNodePreview(canvasId, node);
+    },
+    [canvasId, addNodePreview],
+  );
+
+  const closeNodePreview = useCallback(
+    (node: CanvasNode) => {
+      removeNodePreview(canvasId, node.id);
+    },
+    [canvasId, removeNodePreview],
+  );
+
   const pinNode = useCallback(
     (node: CanvasNode) => {
-      addPinnedNode(canvasId, node);
+      setNodePreview(canvasId, { ...node, isPinned: true });
       addPinnedNodeEmitter.emit('addPinnedNode', { id: node.id, canvasId });
     },
-    [canvasId, addPinnedNode],
+    [canvasId, setNodePreview],
   );
 
   /**
@@ -41,9 +68,9 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
    */
   const unpinNode = useCallback(
     (node: CanvasNode) => {
-      removePinnedNode(canvasId, node.id);
+      setNodePreview(canvasId, { ...node, isPinned: false });
     },
-    [canvasId, removePinnedNode],
+    [canvasId, setNodePreview],
   );
 
   /**
@@ -51,19 +78,21 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
    */
   const isNodePinned = useCallback(
     (nodeId: string) => {
-      return pinnedNodes.some((node) => node.id === nodeId);
+      const { config } = useCanvasStore.getState();
+      const nodePreviews = config[canvasId]?.nodePreviews || [];
+      return nodePreviews.some((n) => n.id === nodeId && n.isPinned);
     },
-    [pinnedNodes],
+    [canvasId],
   );
 
   /**
    * Clear all pinned nodes
    */
   const clearPinnedNodes = useCallback(() => {
-    pinnedNodes.forEach((node) => {
-      removePinnedNode(canvasId, node.id);
+    nodePreviews.forEach((node) => {
+      removeNodePreview(canvasId, node.id);
     });
-  }, [canvasId, pinnedNodes, removePinnedNode]);
+  }, [canvasId, nodePreviews, removeNodePreview]);
 
   /**
    * Handle node click with preview logic
@@ -73,19 +102,21 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
       if (!clickToPreview) {
         return false;
       }
-      pinNode(node);
+      addNodePreview(canvasId, node);
       return true;
     },
-    [clickToPreview, pinNode],
+    [canvasId, clickToPreview, addNodePreview],
   );
 
   return {
     // State
     clickToPreview,
-    pinnedNodes,
+    nodePreviews,
 
     // Actions
     toggleClickToPreview,
+    previewNode,
+    closeNodePreview,
     pinNode,
     unpinNode,
     isNodePinned,

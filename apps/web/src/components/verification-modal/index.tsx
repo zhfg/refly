@@ -64,7 +64,7 @@ export const VerificationModal = () => {
     if (data?.success) {
       authStore.reset()
       document.cookie = `_refly_ai_sid=${data?.data?.accessToken ?? ""}; path=/`
-      window.location.reload()
+      window.location.replace("/")
     }
   }
 

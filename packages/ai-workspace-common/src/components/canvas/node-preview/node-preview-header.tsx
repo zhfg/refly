@@ -18,9 +18,16 @@ import { CanvasNodeType } from '@refly/openapi-schema';
 import { CanvasNode } from '../nodes/types';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
-import { IconCanvas, IconDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconDocument,
+  IconPin,
+  IconResponse,
+  IconUnpin,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
+import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-preview-control';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 // Define background colors for different node types
 const NODE_COLORS: Record<CanvasNodeType, string> = {
@@ -42,9 +49,9 @@ const getNodeIcon = (node: CanvasNode<any>) => {
     case 'resource':
       return node.data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
     case 'skillResponse':
-      return IconCanvas;
+      return IconResponse;
     case 'toolResponse':
-      return IconCanvas;
+      return IconResponse;
     case 'skill':
       switch (node.data?.metadata?.skillType) {
         case 'prompt':
@@ -128,6 +135,18 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
     deleteNode(node);
   }, [node, deleteNode]);
 
+  const { canvasId } = useCanvasContext();
+  const { pinNode, unpinNode, isNodePinned } = useNodePreviewControl({ canvasId });
+  const isPinned = isNodePinned(node.id);
+
+  const handlePin = useCallback(() => {
+    if (isPinned) {
+      unpinNode(node);
+    } else {
+      pinNode(node);
+    }
+  }, [isPinned, pinNode, unpinNode, node]);
+
   // Define dropdown menu items
   const menuItems: MenuProps['items'] = [
     {
@@ -172,11 +191,18 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
           <Button
             type="text"
             className={`p-1.5 hover:bg-gray-100 ${isMaximized ? 'text-primary-600' : 'text-gray-500'}`}
-            onClick={onMaximize}
+            onClick={() => onMaximize()}
           >
             <Maximize2 className="w-4 h-4" />
           </Button>
         )}
+        <Button
+          type="text"
+          className={`p-1.5 hover:bg-gray-100 ${isPinned ? 'text-primary-600' : 'text-gray-500'}`}
+          onClick={() => handlePin()}
+        >
+          {isPinned ? <IconUnpin className="w-4 h-4" /> : <IconPin className="w-4 h-4" />}
+        </Button>
         <Dropdown
           menu={{ items: menuItems }}
           trigger={['click']}

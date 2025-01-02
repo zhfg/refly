@@ -38,7 +38,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       );
 
       const status = exception.getStatus();
-      response.status(status).json(exception.getResponse());
+      response?.status(status).json(exception.getResponse());
       return;
     }
 
@@ -49,7 +49,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     // Handle OAuth errors, redirect to home page
     if (baseRespData.errCode === new OAuthError().code) {
       const redirectUrl = this.configService.get('auth.redirectUrl');
-      response.redirect(`${redirectUrl}?loginFailed=1`);
+      response?.redirect(`${redirectUrl}?loginFailed=1`);
       return;
     }
 
@@ -71,6 +71,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       );
     }
 
-    response.status(HttpStatus.OK).json(baseRespData);
+    response?.status(HttpStatus.OK).json(baseRespData);
   }
 }

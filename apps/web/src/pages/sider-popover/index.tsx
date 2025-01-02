@@ -14,6 +14,7 @@ const SiderPopover = (props: SiderPopoverProps) => {
       className="shadow-none"
       arrow={false}
       placement="bottom"
+      mouseEnterDelay={0.5}
       content={<SiderLayout source="popover" />}>
       {children}
     </Popover>

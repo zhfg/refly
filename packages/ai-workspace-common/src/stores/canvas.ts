@@ -12,10 +12,14 @@ interface CanvasData {
   initialFitViewCompleted?: boolean;
 }
 
+type NodePreview = CanvasNode<any> & {
+  isPinned?: boolean;
+};
+
 interface CanvasConfig {
   localSyncedAt?: number;
   remoteSyncedAt?: number;
-  pinnedNodes: CanvasNode<any>[];
+  nodePreviews: NodePreview[];
 }
 
 export interface CanvasState {
@@ -36,10 +40,11 @@ export interface CanvasState {
   setInitialFitViewCompleted: (canvasId: string, completed: boolean) => void;
   deleteCanvasData: (canvasId: string) => void;
   setCurrentCanvasId: (canvasId: string) => void;
-  addPinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
+  addNodePreview: (canvasId: string, node: NodePreview) => void;
+  setNodePreview: (canvasId: string, node: NodePreview) => void;
+  removeNodePreview: (canvasId: string, nodeId: string) => void;
   setCanvasLocalSynced: (canvasId: string, syncedAt: number) => void;
   setCanvasRemoteSynced: (canvasId: string, syncedAt: number) => void;
-  removePinnedNode: (canvasId: string, nodeId: string) => void;
   setShowPreview: (show: boolean) => void;
   setShowMaxRatio: (show: boolean) => void;
   setShowLaunchpad: (show: boolean) => void;
@@ -59,7 +64,7 @@ const defaultCanvasData: () => CanvasData = () => ({
 });
 
 const defaultCanvasConfig: () => CanvasConfig = () => ({
-  pinnedNodes: [],
+  nodePreviews: [],
 });
 
 const defaultCanvasState = () => ({
@@ -131,18 +136,61 @@ export const useCanvasStore = create<CanvasState>()(
           state.config[canvasId] ??= defaultCanvasConfig();
           state.config[canvasId].remoteSyncedAt = syncedAt;
         }),
-      addPinnedNode: (canvasId, node) =>
+      addNodePreview: (canvasId, node) =>
         set((state) => {
           if (!node) return;
           state.config[canvasId] ??= defaultCanvasConfig();
+          state.config[canvasId].nodePreviews ??= [];
 
-          state.config[canvasId].pinnedNodes = state.config[canvasId].pinnedNodes.filter((n) => n.id !== node.id);
-          state.config[canvasId].pinnedNodes.unshift(node);
+          const previews = state.config[canvasId].nodePreviews;
+          const existingNodeIndex = previews.findIndex((n) => n.id === node.id);
+
+          // Do nothing if the node already exists
+          if (existingNodeIndex !== -1) {
+            return;
+          }
+
+          if (node.isPinned) {
+            // Find the first pinned node index
+            const firstPinnedIndex = previews.findIndex((n) => n.isPinned);
+
+            if (firstPinnedIndex === -1) {
+              // If no pinned nodes, add after the unpinned node (if exists)
+              previews.length > 0 ? previews.splice(1, 0, node) : previews.push(node);
+            } else {
+              // Insert before the first pinned node
+              previews.splice(firstPinnedIndex, 0, node);
+            }
+          } else {
+            // For unpinned node: remove any existing unpinned node and add new one at start
+            const unpinnedIndex = previews.findIndex((n) => !n.isPinned);
+            if (unpinnedIndex !== -1) {
+              previews.splice(unpinnedIndex, 1);
+            }
+            previews.unshift(node);
+          }
         }),
-      removePinnedNode: (canvasId, nodeId) =>
+      setNodePreview: (canvasId, node) =>
+        set((state) => {
+          if (!node) return;
+          state.config[canvasId] ??= defaultCanvasConfig();
+          state.config[canvasId].nodePreviews ??= [];
+          const existingNodeIndex = state.config[canvasId].nodePreviews.findIndex((n) => n.id === node.id);
+          if (existingNodeIndex !== -1) {
+            // If the node is unpinned and not the first one, remove it
+            if (!node.isPinned && existingNodeIndex > 0) {
+              state.config[canvasId].nodePreviews.splice(existingNodeIndex, 1);
+            } else {
+              // Otherwise, update the node
+              state.config[canvasId].nodePreviews[existingNodeIndex] = node;
+            }
+          }
+        }),
+      removeNodePreview: (canvasId, nodeId) =>
         set((state) => {
           state.config[canvasId] ??= defaultCanvasConfig();
-          state.config[canvasId].pinnedNodes = state.config[canvasId].pinnedNodes.filter((n) => n.id !== nodeId);
+          state.config[canvasId].nodePreviews ??= [];
+          state.config[canvasId].nodePreviews = state.config[canvasId].nodePreviews.filter((n) => n.id !== nodeId);
         }),
       setInteractionMode: (mode) =>
         set((state) => {

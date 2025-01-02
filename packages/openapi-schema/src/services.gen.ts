@@ -169,8 +169,8 @@ import type {
   CheckSettingsFieldData,
   CheckSettingsFieldError,
   CheckSettingsFieldResponse2,
-  GetSubscriptionPlanError,
-  GetSubscriptionPlanResponse,
+  GetSubscriptionPlansError,
+  GetSubscriptionPlansResponse2,
   GetSubscriptionUsageError,
   GetSubscriptionUsageResponse2,
   ListModelsError,
@@ -922,13 +922,15 @@ export const checkSettingsField = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Get subscription plan
- * Get subscription plan
+ * Get subscription plans
+ * Get subscription plans
  */
-export const getSubscriptionPlan = <ThrowOnError extends boolean = false>(options?: Options<unknown, ThrowOnError>) => {
-  return (options?.client ?? client).get<GetSubscriptionPlanResponse, GetSubscriptionPlanError, ThrowOnError>({
+export const getSubscriptionPlans = <ThrowOnError extends boolean = false>(
+  options?: Options<unknown, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<GetSubscriptionPlansResponse2, GetSubscriptionPlansError, ThrowOnError>({
     ...options,
-    url: '/subscription/plan',
+    url: '/subscription/plans',
   });
 };
 

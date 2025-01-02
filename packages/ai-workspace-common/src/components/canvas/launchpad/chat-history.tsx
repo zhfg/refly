@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Button, Divider, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { IconCanvas, IconDelete, IconReply } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconDelete, IconResponse } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { Pin, PinOff } from 'lucide-react';
@@ -82,7 +82,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
         >
           <div className="text-gray-800 font-medium flex items-center justify-between text-xs">
             <div className="flex items-center whitespace-nowrap overflow-hidden">
-              <IconCanvas className="h-4 w-4 mr-1" />
+              <IconResponse className="h-4 w-4 mr-1" />
               <div className="max-w-[200px] truncate">{item.data?.title}</div>
             </div>
             <div className="flex items-center space-x-1">

@@ -1,13 +1,12 @@
 import { IconLink } from '@arco-design/web-react/icon';
 import {
-  IconCanvas,
   IconDocument,
   IconResource,
   IconMemo,
+  IconResponse,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { MarkType } from '@refly/common-types';
 import { CanvasNodeType } from '@refly/openapi-schema';
-import { FileText } from 'lucide-react';
 import { HiOutlineDocumentText, HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 
 export const getTypeIcon = (markType: MarkType, style?: any) => {
@@ -30,13 +29,13 @@ export const getTypeIcon = (markType: MarkType, style?: any) => {
 export const getNodeIcon = (node: CanvasNodeType, style?: any) => {
   switch (node) {
     case 'resource':
-      return <HiOutlineSquare3Stack3D style={style} />;
+      return <IconResource style={style} />;
     case 'document':
-      return <HiOutlineDocumentText style={style} />;
+      return <IconDocument style={style} />;
     case 'memo':
       return <IconMemo style={style} />;
     case 'skillResponse':
-      return <IconCanvas />;
+      return <IconResponse />;
     default:
       return null;
   }

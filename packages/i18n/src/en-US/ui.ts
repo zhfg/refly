@@ -161,6 +161,12 @@ const translations = {
         ],
       },
     },
+    pricing: {
+      title: 'Plans and Pricing',
+      subtitle: 'Embark on your AI content creation journey with Refly',
+      description: 'Sign up and get a free trial of a million standard model tokens. No credit card required.',
+      limitedOffer: 'Annual subscription - 50% off for a limited time!',
+    },
     footer: {
       cta: {
         title: 'Ready to experience AI free-form canvas and ignite your creativity?',
@@ -232,6 +238,23 @@ const translations = {
       passwordPlaceholder: 'Enter your new password',
       passwordConfirmLabel: 'Confirm password',
       passwordConfirmPlaceholder: 'Enter your new password again',
+    },
+    tab: {
+      product: 'Product',
+      price: 'Pricing',
+      docs: 'Docs',
+      discord: 'Discord',
+    },
+    faq: {
+      title: 'Frequently Asked Questions',
+      Q1: 'Can Refly be used for free?',
+      A1: 'As an open-source project, for individual users, you can deploy the community version by yourself to use all its features. To enable more users to quickly start and experience Refly, we have launched the Cloud version and provided all registered users with a one-time allocation of one million standard model tokens and sufficient storage space for trial use. If you wish to experience advanced models or increase the usage amount, you can upgrade to a paid subscription plan.',
+      Q2: 'What payment methods do you support?',
+      A2: 'We support bank cards, Alipay, Amazon Pay, and Cash App Pay. The supported payment methods may be subject to change at any time. Please refer to the payment methods displayed in the Stripe checkout page for the most accurate information.',
+      Q3: 'How can I change or cancel my subscription plan?',
+      A3: 'Changing the subscription plan is not supported at present. If you need to cancel your subscription, please click the "Settings - Subscription - Manage Billing and Subscription" button and then proceed to the Stripe platform to manage your subscription. Once the cancellation is successful, your account will be automatically downgraded to the free version upon the expiration of the current plan.',
+      Q4: 'Is a refund available?',
+      A4: 'Currently, there is no refund option available. If you have a strong demand for a refund, please contact the Refly team, and we will assist you in resolving the issue.',
     },
   },
   emailVerification: {
@@ -550,6 +573,7 @@ const translations = {
       executing: 'Skill is executing, please wait...',
       startRunning: 'Skill is running...',
       startRerun: 'Skill is rerunning...',
+      resultNotFound: 'Sorry, the execution result seems to be lost.',
     },
     chatHistory: {
       alreadyAdded: 'Already added to chat history',
@@ -1025,22 +1049,26 @@ const translations = {
       },
     },
     subscription: {
+      mostPopular: 'Most Popular',
+      getStarted: 'Get Started',
       subscribeNow: 'Subscribe Now',
       currentPlan: 'Current Plan',
-      t1TokenUsed: 'Premium Model Token Usage',
+      t1TokenUsed: 'Advanced Model Token Usage',
       t1TokenUsedDescription:
-        'Premium models include OpenAI GPT-4o and Anthropic Claude 3.5 Sonnet, usage includes both model input and output tokens.',
-      t2TokenUsed: 'Basic Model Token Usage',
+        'Advanced models include OpenAI GPT-4o and Anthropic Claude 3.5 Sonnet, usage includes both model input and output tokens.',
+      t2TokenUsed: 'Standard Model Token Usage',
       t2TokenUsedDescription:
-        'Basic models include OpenAI GPT-4o-mini and Anthropic Claude 3 Haiku, usage includes both model input and output tokens.',
+        'Standard models include OpenAI GPT-4o-mini and Anthropic Claude 3 Haiku, usage includes both model input and output tokens.',
       subscriptionManagement: 'Manage Billing and Subscriptions',
       subscriptionStatus: {
         free: 'FREE',
+        plus: 'PLUS',
         pro: 'PRO',
+        max: 'MAX',
       },
       subscribe: {
         title: 'Choose the plan that suits you best',
-        subtitle: 'Subscribe to an annual plan to save 20%!',
+        subtitle: 'Subscribe to the annual plan to save 20%, and subscribe now to enjoy an additional 50% discount!',
         monthly: 'Monthly',
         yearly: 'Yearly',
         monthlyPlan: 'Monthly Auto-Renewal',
@@ -1053,39 +1081,46 @@ const translations = {
         },
         vectorStorage: 'Vector Storage',
         fileStorage: 'File Storage',
+        t1Model: 'Advanced Models',
+        t2Model: 'Standard Models',
         fileStorageType: {
           note: 'Canvases',
           resource: 'Resources',
           file: 'Uploaded Files',
         },
-        pro: {
-          description: 'Premium models along with much larger token and storage quota',
-          buttonText: 'Upgrade Now',
-          t1Token: {
-            name: 'Premium Models',
-            count: '1,000,000 tokens / Month',
-          },
-          t2Token: {
-            name: 'Basic Models',
-            count: '5,000,000 tokens / Month',
-          },
-          serviceSupport: {
-            name: 'Service Support',
-            details: 'Priority Email Support',
-          },
-        },
+        upgrade: 'Upgrade Now',
+        continueFree: 'Continue Free',
+        oneTime: 'One-Time',
+        unlimited: 'Unlimited',
         free: {
           description: 'Everything you need to get started',
-          buttonText: 'Continue Free',
-          t2Token: {
-            name: 'Basic Models',
-            count: '1,000,000 tokens / One-time',
-          },
           serviceSupport: {
             name: 'Service Support',
             details: 'Community support (Discord)',
           },
         },
+        plus: {
+          description: 'Unlock more possibilities with advanced models',
+          serviceSupport: {
+            name: 'Service Support',
+            details: 'Priority Email Support',
+          },
+        },
+        pro: {
+          description: 'Ideal choice for professional creators',
+          serviceSupport: {
+            name: 'Service Support',
+            details: 'Priority Email Support',
+          },
+        },
+        max: {
+          description: 'Unlimited creativity without boundaries',
+          serviceSupport: {
+            name: 'Service Support',
+            details: 'Exclusive WeChat/Discord Group',
+          },
+        },
+
         description: "Cancel anytime. Subscribing means you agree to Refly's",
         and: 'and',
         privacy: 'privacy',
@@ -1372,6 +1407,7 @@ const translations = {
       replace: 'Replace Selection',
       reject: 'Reject',
       copy: 'Copy Answer',
+      exitEdit: 'Exit Edit Mode',
     },
     configManager: {
       title: 'Skill Configuration',
@@ -1439,8 +1475,9 @@ const translations = {
       extensionWeblink: 'Extension Web Link',
     },
     modelSelector: {
+      unlimited: 'Unlimited',
       noModelAvailable: 'No model available',
-      premium: 'Premium',
+      premium: 'Advanced',
       standard: 'Standard',
       free: 'Free',
       tokenUsed: 'Used {{used}} / {{quota}}',

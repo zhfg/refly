@@ -10,6 +10,7 @@ interface CanvasActionDropdown {
   updateShowStatus?: (canvasId: string | null) => void;
   afterDelete?: () => void;
 }
+
 export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
   const { canvasId, canvasName, updateShowStatus, afterDelete } = props;
   const [popupVisible, setPopupVisible] = useState(false);

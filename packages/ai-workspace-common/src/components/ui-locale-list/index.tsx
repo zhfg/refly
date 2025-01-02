@@ -1,16 +1,17 @@
 import { useTranslation } from 'react-i18next';
 import { Dropdown, MenuProps, message } from 'antd';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { safeParseJSON, safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
+import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { LOCALE } from '@refly/common-types';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 export const UILocaleList = (props: { children: React.ReactNode; width?: number }) => {
   const { t, i18n } = useTranslation();
-  const userStore = useUserStore();
-
-  const storageUserProfile = safeParseJSON(localStorage.getItem('refly-user-profile'));
-  const notShowLoginBtn = storageUserProfile?.uid || userStore?.userProfile?.uid;
+  const userStore = useUserStoreShallow((state) => ({
+    isLogin: state.isLogin,
+    userProfile: state.userProfile,
+    setLocalSettings: state.setLocalSettings,
+  }));
 
   const changeLang = async (lng: LOCALE) => {
     const { localSettings } = useUserStore.getState();
@@ -19,7 +20,7 @@ export const UILocaleList = (props: { children: React.ReactNode; width?: number 
     userStore.setLocalSettings({ ...localSettings, uiLocale: lng });
     localStorage.setItem('refly-local-settings', safeStringifyJSON({ ...localSettings, uiLocale: lng }));
 
-    if (notShowLoginBtn) {
+    if (userStore.isLogin) {
       const { data: res, error } = await getClient().updateSettings({
         body: { uiLocale: lng, outputLocale: localSettings.outputLocale },
       });
