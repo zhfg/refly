@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useMemo, memo, useState, useCallback } from 'react';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
@@ -21,7 +21,7 @@ import { useReactFlow } from '@xyflow/react';
 
 interface EditChatInputProps {
   resultId: string;
-  contextItems: NodeItem[];
+  contextItems: IContextItem[];
   query: string;
   modelInfo: ModelInfo;
   actionMeta?: {
@@ -37,7 +37,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
 
   const { getEdges, getNodes, deleteElements, addEdges } = useReactFlow();
   const [editQuery, setEditQuery] = useState<string>(query);
-  const [editContextItems, setEditContextItems] = useState<NodeItem[]>(contextItems);
+  const [editContextItems, setEditContextItems] = useState<IContextItem[]>(contextItems);
   const [editModelInfo, setEditModelInfo] = useState<ModelInfo>(modelInfo);
   const { t } = useTranslation();
 
@@ -51,17 +51,14 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
 
   const handleSendMessage = useCallback(() => {
     // Synchronize edges with latest context items
-    console.log('editContextItems', editContextItems);
     const nodes = getNodes();
-    console.log('nodes', nodes);
     const currentNode = nodes.find((node) => node.data?.entityId === resultId);
     if (!currentNode) {
       return;
     }
+
     const edges = getEdges().filter((edge) => edge.target === currentNode.id);
     const { edgesToAdd, edgesToDelete } = convertContextItemsToEdges(resultId, editContextItems, nodes, edges);
-    console.log('edgesToAdd', edgesToAdd);
-    console.log('edgesToDelete', edgesToDelete);
     addEdges(edgesToAdd);
     deleteElements({ edges: edgesToDelete });
 

@@ -62,7 +62,7 @@ export const ChatPanel = () => {
   const { invokeAction, abortAction } = useInvokeAction();
 
   // automatically sync selected nodes to context
-  useSyncSelectedNodesToContext(contextItems, setContextItems);
+  useSyncSelectedNodesToContext();
 
   useEffect(() => {
     if (!selectedSkill?.configSchema?.items?.length) {

@@ -26,7 +26,7 @@ export function Home({
         <Item
           key={index}
           className={classNames(item?.isSelected ? 'selected' : '', 'search-res-item')}
-          value={`${item?.data?.data?.title}__${item?.data?.data?.entityId}`}
+          value={`${item?.data?.title}__${item?.data?.entityId}`}
           activeValue={activeValue}
           onSelect={() => {
             item?.onItemClick(item.data);
@@ -36,8 +36,8 @@ export function Home({
           <div className="search-res-container">
             <p
               className="search-res-title"
-              dangerouslySetInnerHTML={{ __html: item?.data?.data?.title }}
-              title={item?.data?.data?.title.replace(/<[^>]*>/g, '')}
+              dangerouslySetInnerHTML={{ __html: item?.data?.title }}
+              title={item?.data?.title.replace(/<[^>]*>/g, '')}
             ></p>
           </div>
         </Item>

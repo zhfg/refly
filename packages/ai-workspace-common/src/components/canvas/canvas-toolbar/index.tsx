@@ -160,7 +160,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
     setImportResourceModalVisible: state.setImportResourceModalVisible,
   }));
 
-  const selectedNodes = useContextPanelStoreShallow((state) => state.contextItems);
+  const contextItems = useContextPanelStoreShallow((state) => state.contextItems);
   const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
   const { toggleEdgeVisible } = useEdgeVisible();
 
@@ -242,7 +242,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
             <ToolButton
               key={index}
               tool={tool}
-              selectedNodes={selectedNodes}
+              contextCnt={contextItems?.length}
               handleToolSelect={handleToolSelect}
               getIconColor={getIconColor}
               getIsLoading={getIsLoading}

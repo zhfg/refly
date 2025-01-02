@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 import { Mark } from '@refly/common-types';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { CanvasNodeType } from '@refly/openapi-schema';
 
 export interface FilterErrorInfo {
   [key: string]: {
@@ -12,14 +12,18 @@ export interface FilterErrorInfo {
   };
 }
 
-export interface NodeItem extends CanvasNode<any> {
+export interface IContextItem {
+  title: string;
+  entityId: string;
+  type: CanvasNodeType;
+  metadata?: Record<string, any>;
   isPreview?: boolean; // is preview mode
   isCurrentContext?: boolean;
 }
 
 interface ContextPanelState {
   // Canvas selected context items
-  contextItems: NodeItem[];
+  contextItems: IContextItem[];
 
   // selection text
   currentSelectedMark: Mark;
@@ -38,11 +42,11 @@ interface ContextPanelState {
 
   resetState: () => void;
 
-  addContextItem: (node: NodeItem) => void;
-  setContextItems: (nodes: NodeItem[]) => void;
-  removeContextItem: (id: string) => void;
+  addContextItem: (item: IContextItem) => void;
+  setContextItems: (items: IContextItem[]) => void;
+  removeContextItem: (entityId: string) => void;
   clearContextItems: () => void;
-  updateContextItem: (node: NodeItem) => void;
+  updateContextItem: (item: IContextItem) => void;
 }
 
 export const defaultSelectedTextCardState = {
@@ -75,14 +79,14 @@ export const useContextPanelStore = create<ContextPanelState>()(
       set((state) => ({ ...state, filterErrorInfo: { ...state.filterErrorInfo, ...errorInfo } })),
     setFormErrors: (errors: Record<string, string>) => set((state) => ({ ...state, formErrors: errors })),
 
-    addContextItem: (node: CanvasNode) =>
+    addContextItem: (item: IContextItem) =>
       set((state) => {
-        const existingIndex = state.contextItems.findIndex((item) => item.id === node.id);
+        const existingIndex = state.contextItems.findIndex((item) => item.entityId === item.entityId);
 
         if (existingIndex >= 0) {
           // Update existing item
           const updatedItems = [...state.contextItems];
-          updatedItems[existingIndex] = node;
+          updatedItems[existingIndex] = item;
           return {
             ...state,
             contextItems: updatedItems,
@@ -92,20 +96,22 @@ export const useContextPanelStore = create<ContextPanelState>()(
         // Add new item to end
         return {
           ...state,
-          contextItems: [...state.contextItems, node],
+          contextItems: [...state.contextItems, item],
         };
       }),
-    setContextItems: (nodes: CanvasNode[]) => set((state) => ({ ...state, contextItems: nodes })),
-    removeContextItem: (id: string) =>
+    setContextItems: (items: IContextItem[]) => set((state) => ({ ...state, contextItems: items })),
+    removeContextItem: (entityId: string) =>
       set((state) => ({
         ...state,
-        contextItems: state.contextItems.filter((node) => node.id !== id),
+        contextItems: state.contextItems.filter((item) => item.entityId !== entityId),
       })),
     clearContextItems: () => set((state) => ({ ...state, contextItems: [] })),
-    updateContextItem: (node: CanvasNode) =>
+    updateContextItem: (updatedItem: IContextItem) =>
       set((state) => ({
         ...state,
-        contextItems: state.contextItems.map((item) => (item.id === node.id ? { ...item, ...node } : item)),
+        contextItems: state.contextItems.map((item) =>
+          item.entityId === updatedItem.entityId ? { ...item, ...updatedItem } : item,
+        ),
       })),
 
     resetState: () => set((state) => ({ ...state, ...defaultState })),

@@ -1,12 +1,11 @@
-import { useTranslation } from 'react-i18next';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { PreviewContextManager } from './preview-context-manager';
 import { useMemo, memo } from 'react';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
 
 interface PreviewChatInputProps {
-  contextItems: NodeItem[];
+  contextItems: IContextItem[];
   query: string;
   actionMeta?: {
     icon?: any;

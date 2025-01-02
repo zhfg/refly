@@ -1,25 +1,31 @@
 import { useEffect } from 'react';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { IContextItem, useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
-export const useSyncSelectedNodesToContext = (
-  contextItems: NodeItem[],
-  setContextItems: (items: NodeItem[]) => void,
-) => {
+export const useSyncSelectedNodesToContext = () => {
   const { nodes } = useCanvasData();
   const selectedContextNodes = nodes.filter(
     (node) => node.selected && ['resource', 'document', 'skillResponse'].includes(node.type),
   );
 
-  const selectedNodeIds = selectedContextNodes?.map((node) => node.id) ?? [];
+  const selectedEntityIds = selectedContextNodes?.map((node) => node.data?.entityId)?.filter(Boolean) ?? [];
 
   useEffect(() => {
-    const newContextItems = [
+    const { contextItems, setContextItems } = useContextPanelStore.getState();
+    const contextEntityIds = new Set(contextItems.map((item) => item.entityId));
+
+    const newContextItems: IContextItem[] = [
       ...contextItems.filter((item) => !item.isPreview),
       ...selectedContextNodes
-        .filter((node) => !contextItems.some((item) => item.id === node.id))
-        .map((node) => ({ ...node, isPreview: true })),
+        .filter((node) => !contextEntityIds.has(node.data?.entityId))
+        .map((node) => ({
+          entityId: node.data?.entityId,
+          title: node.data?.title,
+          type: node.type,
+          isPreview: true,
+          metadata: node.data?.metadata,
+        })),
     ];
     setContextItems(newContextItems);
-  }, [JSON.stringify(selectedNodeIds), setContextItems]);
+  }, [JSON.stringify(selectedEntityIds)]);
 };

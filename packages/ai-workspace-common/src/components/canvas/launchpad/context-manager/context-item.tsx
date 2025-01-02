@@ -1,16 +1,17 @@
 import { Button, Popover } from 'antd';
 import { IconClose } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
+import { useReactFlow } from '@xyflow/react';
 import { getNodeIcon } from './utils/icon';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import cn from 'classnames';
 import { ContextPreview } from './context-preview';
 import { useCallback } from 'react';
 import { Message } from '@arco-design/web-react';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 export const ContextItem = ({
   item,
@@ -21,27 +22,35 @@ export const ContextItem = ({
   canNotRemove,
 }: {
   canNotRemove?: boolean;
-  item: NodeItem;
+  item: IContextItem;
   isActive: boolean;
   isLimit?: boolean;
   disabled?: boolean;
-  onRemove?: (item: NodeItem) => void;
+  onRemove?: (item: IContextItem) => void;
 }) => {
   const { t } = useTranslation();
-  const { data } = item ?? {};
+  const { title, entityId, type, metadata } = item ?? {};
   const icon = getNodeIcon(item?.type);
   const { setSelectedNode } = useNodeSelection();
   const { nodes } = useCanvasData();
+  const { getNodes } = useReactFlow();
   const { setNodeCenter } = useNodePosition();
 
   const handleItemClick = useCallback(
-    async (item: CanvasNode<any>) => {
-      setNodeCenter(item.id);
-      const isSelectionNode = item.data?.metadata?.sourceType?.includes('Selection');
+    async (item: IContextItem) => {
+      const node = getNodes().find((node) => node.data?.entityId === item.entityId);
+
+      if (!node) {
+        return;
+      }
+
+      setNodeCenter(node.id);
+
+      const isSelectionNode = metadata?.sourceType?.includes('Selection');
 
       if (isSelectionNode) {
-        const sourceEntityId = item.data?.metadata?.sourceEntityId;
-        const sourceEntityType = item.data?.metadata?.sourceEntityType;
+        const sourceEntityId = metadata?.sourceEntityId;
+        const sourceEntityType = metadata?.sourceEntityType;
 
         if (!sourceEntityId || !sourceEntityType) {
           console.warn('Missing source entity information for selection node');
@@ -61,7 +70,7 @@ export const ContextItem = ({
 
         setSelectedNode(sourceNode);
       } else {
-        setSelectedNode(item);
+        setSelectedNode(node as CanvasNode<any>);
       }
     },
     [nodes, setSelectedNode, t],
@@ -69,8 +78,8 @@ export const ContextItem = ({
 
   const content = <ContextPreview item={item} />;
 
-  const isSelection = item?.data?.metadata?.sourceType?.toLowerCase()?.includes('selection');
-  const sourceType = isSelection ? 'selection' : item?.type;
+  const isSelection = metadata?.sourceType?.toLowerCase()?.includes('selection');
+  const sourceType = isSelection ? 'selection' : type;
 
   return (
     <Popover
@@ -101,9 +110,9 @@ export const ContextItem = ({
               'text-gray-300': disabled,
               'text-red-500': isLimit,
             })}
-            title={data?.title ?? ''}
+            title={title ?? ''}
           >
-            {data?.title}
+            {title}
           </span>
           <span className="item-type text-gray-500 mr-1">
             {item.isCurrentContext ? t('copilot.contextItem.current') : ''}

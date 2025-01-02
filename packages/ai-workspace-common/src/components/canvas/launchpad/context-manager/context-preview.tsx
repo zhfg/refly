@@ -1,6 +1,5 @@
 import { memo } from 'react';
 import {
-  CanvasNode,
   DocumentNodeProps,
   MemoNodeProps,
   ResourceNodeProps,
@@ -9,11 +8,12 @@ import {
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { DocumentNode, ResourceNode, MemoNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export const ContextPreview = memo(
-  ({ item }: { item: CanvasNode }) => {
+  ({ item }: { item: IContextItem }) => {
     const { nodes } = useCanvasData();
-    const node = nodes.find((node) => node.data?.entityId === item?.data?.entityId);
+    const node = nodes.find((node) => node.data?.entityId === item?.entityId);
 
     const commonProps = {
       isPreview: true,
@@ -21,7 +21,7 @@ export const ContextPreview = memo(
       hideHandles: true,
       data: node?.data,
       selected: false,
-      id: item?.id,
+      id: node?.id,
     };
 
     switch (item?.type) {
@@ -38,6 +38,6 @@ export const ContextPreview = memo(
     }
   },
   (prevProps, nextProps) => {
-    return prevProps.item.id === nextProps.item.id && prevProps.item.type === nextProps.item.type;
+    return prevProps.item.entityId === nextProps.item.entityId;
   },
 );

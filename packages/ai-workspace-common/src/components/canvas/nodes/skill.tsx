@@ -1,5 +1,5 @@
 import { NodeProps, Position, useReactFlow } from '@xyflow/react';
-import { CanvasNodeData, SkillNodeMeta } from './types';
+import { CanvasNode, CanvasNodeData, SkillNodeMeta } from './types';
 import { Node } from '@xyflow/react';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback, useEffect, useMemo, memo } from 'react';
@@ -22,9 +22,8 @@ import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/no
 import { createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { ContextManager } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useEdgeStyles } from '@refly-packages/ai-workspace-common/components/canvas/constants';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
@@ -51,7 +50,7 @@ export const SkillNode = memo(
     const { edges } = useCanvasData();
     const setNodeData = useSetNodeData();
     const edgeStyles = useEdgeStyles();
-    const { getNode, addEdges, deleteElements } = useReactFlow();
+    const { getNode, getNodes, getEdges, addEdges, deleteElements } = useReactFlow();
     const handleDeleteNode = useDeleteNode(
       {
         id,
@@ -96,26 +95,45 @@ export const SkillNode = memo(
       [id, setNodeData],
     );
 
-    const contextItems = useMemo(() => contextNodeIds.map((id) => getNode(id) as NodeItem), [contextNodeIds, getNode]);
+    const contextItems: IContextItem[] = useMemo(() => {
+      const nodes = getNodes() as CanvasNode<any>[];
+      return nodes
+        .filter((node) => contextNodeIds.includes(node.id))
+        .map((node) => ({
+          title: node.data?.title,
+          entityId: node.data?.entityId,
+          type: node.type,
+          metadata: node.data?.metadata,
+        }));
+    }, [contextNodeIds, getNode]);
 
     const setContextItems = useCallback(
-      (items: NodeItem[]) => {
-        setNodeData(id, { metadata: { contextNodeIds: items.map((item) => item.id) } });
+      (items: IContextItem[]) => {
+        const nodes = getNodes() as CanvasNode<any>[];
+        const entityNodeMap = new Map(nodes.map((node) => [node.data?.entityId, node]));
+        const contextNodes = items.map((item) => entityNodeMap.get(item.entityId));
 
-        const { edges = [] } = useCanvasStore.getState().data[canvasId] ?? {};
+        setNodeData(id, {
+          metadata: {
+            contextNodeIds: contextNodes.map((node) => node?.id),
+          },
+        });
+
+        const edges = getEdges();
         const existingEdges = edges?.filter((edge) => edge.target === id) ?? [];
         const existingSourceIds = new Set(existingEdges.map((edge) => edge.source));
-        const newItems = items.filter((item) => !existingSourceIds.has(item.id));
+        const newSourceNodes = contextNodes.filter((node) => !existingSourceIds.has(node?.id));
 
-        const newEdges = newItems.map((item) => ({
-          id: `${item.id}-${id}`,
-          source: item.id,
+        const newEdges = newSourceNodes.map((node) => ({
+          id: `${node.id}-${id}`,
+          source: node.id,
           target: id,
           style: edgeStyles.hover,
           type: 'default',
         }));
 
-        const edgesToRemove = existingEdges.filter((edge) => !items.some((item) => item.id === edge.source));
+        const contextNodeIds = new Set(contextNodes.map((node) => node?.id));
+        const edgesToRemove = existingEdges.filter((edge) => !contextNodeIds.has(edge.source));
 
         if (newEdges?.length > 0) {
           addEdges(newEdges);

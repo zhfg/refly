@@ -23,7 +23,7 @@ import {
   IconToken,
   preloadModelIcons,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { NodeItem, useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
@@ -335,8 +335,13 @@ export const SkillResponseNode = memo(
     }, [content, debouncedCreateDocument, entityId, title]);
 
     const handleAddToContext = useCallback(() => {
-      addContextItem(node as NodeItem);
-    }, [node, addContextItem]);
+      addContextItem({
+        title: title,
+        entityId: entityId,
+        type: 'skillResponse',
+        metadata: metadata,
+      });
+    }, [title, entityId, metadata, addContextItem]);
 
     const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
       updateSourceListDrawer: state.updateSourceListDrawer,

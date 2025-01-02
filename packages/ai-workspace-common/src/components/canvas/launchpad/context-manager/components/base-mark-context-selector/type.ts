@@ -1,13 +1,13 @@
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { CanvasNodeType } from '@refly/openapi-schema';
 
 export interface RenderItem {
-  data: CanvasNode;
+  data: IContextItem;
   type: CanvasNodeType;
   icon: React.ReactNode;
   action?: boolean;
   isSelected?: boolean;
   actionHeading?: { create: string };
-  onItemClick?: (item: CanvasNode) => void;
+  onItemClick?: (item: IContextItem) => void;
   onCreateClick?: () => void;
 }
