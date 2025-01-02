@@ -214,6 +214,13 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
           onClick: handleAddToContext,
           type: 'button' as const,
         },
+        {
+          key: 'ungroup',
+          icon: Ungroup,
+          label: t('canvas.nodeActions.ungroup'),
+          onClick: handleUngroup,
+          type: 'button' as const,
+        },
       ],
       skill: [
         {

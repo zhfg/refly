@@ -61,12 +61,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const addPinnedNode = useCanvasStoreShallow(useCallback((state) => state.addPinnedNode, []));
   const { ungroupNodes } = useUngroupNodes();
   const { createGroupFromSelectedNodes } = useBatchNodesSelection();
-  const isTemporaryGroup = useMemo(
-    () => node?.type === 'group' && node?.data?.metadata?.isTemporary,
-    [node?.type, node?.data?.metadata?.isTemporary],
-  );
-
-  console.log('isTemporaryGroup', isTemporaryGroup);
 
   const handleAskAI = useCallback(() => {
     const node = getNode(nodeId) as CanvasNode;
@@ -183,22 +177,13 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         },
       ],
       group: [
-        // TODO: important: don't delete this, it will be used later
-        isTemporaryGroup
-          ? {
-              key: 'group',
-              icon: Group,
-              label: t('canvas.nodeActions.group'),
-              onClick: handleGroup,
-              type: 'button' as const,
-            }
-          : {
-              key: 'ungroup',
-              icon: Ungroup,
-              label: t('canvas.nodeActions.ungroup'),
-              onClick: handleUngroup,
-              type: 'button' as const,
-            },
+        {
+          key: 'group',
+          icon: Group,
+          label: t('canvas.nodeActions.group'),
+          onClick: handleGroup,
+          type: 'button' as const,
+        },
         {
           key: 'addToContext',
           icon: MessageSquareDiff,

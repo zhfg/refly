@@ -471,27 +471,12 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         y: event.clientY,
       });
 
-      // Find temporary group node
-      const tempGroup = nodes.find((node) => node.type === 'group' && node.data?.metadata?.isTemporary);
-
-      if (tempGroup) {
-        // Show node context menu for temporary group
-        setContextMenu({
-          open: true,
-          position: flowPosition,
-          type: 'selection',
-          nodeId: tempGroup.id,
-          nodeType: 'group',
-        });
-      } else {
-        // Show regular canvas context menu for selection
-        setContextMenu({
-          open: true,
-          position: flowPosition,
-          type: 'canvas',
-          isSelection: true,
-        });
-      }
+      setContextMenu({
+        open: true,
+        position: flowPosition,
+        type: 'selection',
+        nodeType: 'group',
+      });
     },
     [reactFlowInstance, nodes],
   );
