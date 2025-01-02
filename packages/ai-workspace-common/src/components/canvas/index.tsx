@@ -34,7 +34,7 @@ import {
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
 import { useGroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-group-nodes';
-import { SelectionActionMenus } from './multi-selection-menu';
+import { MultiSelectionMenus } from './multi-selection-menu';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';
@@ -590,7 +590,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
           />
         )}
 
-        {selectedNodes.length > 0 && <SelectionActionMenus />}
+        {selectedNodes.length > 0 && <MultiSelectionMenus />}
       </div>
     </Spin>
   );

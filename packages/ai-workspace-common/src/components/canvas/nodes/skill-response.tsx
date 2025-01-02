@@ -418,7 +418,7 @@ export const SkillResponseNode = memo(
         return;
       }
 
-      const { context, history } = resultData.data;
+      const { context, history, title, modelInfo, actionMeta } = resultData.data;
       const contextItems = context ? convertContextToItems(context, history) : [];
 
       // Create new skill node with context, similar to group node implementation
@@ -439,6 +439,9 @@ export const SkillResponseNode = memo(
             entityId: genSkillID(),
             metadata: {
               contextNodeIds, // Use all context item IDs
+              query: title,
+              modelInfo,
+              selectedSkill: actionMeta,
             },
           },
         },

@@ -596,6 +596,7 @@ const translations = {
     nodeActions: {
       askAI: 'Ask AI',
       compareAskAI: 'Compare Ask AI',
+      batchRun: 'Batch Run',
       addToContext: 'Add to Context',
       processingVector: 'Processing Vector',
       run: 'Run',
