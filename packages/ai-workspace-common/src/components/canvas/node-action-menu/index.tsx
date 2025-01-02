@@ -60,12 +60,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
 
   const addPinnedNode = useCanvasStoreShallow(useCallback((state) => state.addPinnedNode, []));
   const { ungroupNodes } = useUngroupNodes();
-  const isTemporaryGroup = useMemo(
-    () => node?.type === 'group' && node?.data?.metadata?.isTemporary,
-    [node?.type, node?.data?.metadata?.isTemporary],
-  );
-
-  console.log('isTemporaryGroup', isTemporaryGroup);
 
   const handleAskAI = useCallback(() => {
     const node = getNode(nodeId) as CanvasNode;

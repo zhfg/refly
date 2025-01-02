@@ -1,0 +1,167 @@
+import { Button, Divider } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { FC, useCallback, useMemo } from 'react';
+import { useReactFlow } from '@xyflow/react';
+import {
+  IconRerun,
+  IconDelete,
+  IconAskAI,
+  IconLoading,
+  IconRun,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { FileInput, MessageSquareDiff, FilePlus, Ungroup, Group } from 'lucide-react';
+import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
+import { nodeActionEmitter, createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
+import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
+import { genSkillID } from '@refly-packages/utils/id';
+import { CanvasNodeType } from '@refly/openapi-schema';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
+import { useBatchNodesSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection';
+
+interface MenuItem {
+  key: string;
+  icon: React.ElementType;
+  label: string;
+  onClick: () => void;
+  loading?: boolean;
+  danger?: boolean;
+  primary?: boolean;
+  type: 'button' | 'divider';
+  disabled?: boolean;
+}
+
+interface SelectionActionMenuProps {
+  onClose?: () => void;
+}
+
+export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) => {
+  const { t } = useTranslation();
+  const { getNode, getNodes } = useReactFlow();
+  const { canvasId } = useCanvasContext();
+  const { addNode } = useAddNode(canvasId);
+  const { ungroupNodes } = useUngroupNodes();
+  const { createGroupFromSelectedNodes } = useBatchNodesSelection();
+
+  const handleAskAI = useCallback(() => {
+    // Get all selected nodes except skills
+    const selectedNodes = getNodes().filter((node) => node.selected && !['skill', 'memo'].includes(node.type));
+
+    const connectTo = selectedNodes.map((node) => ({
+      type: node.type as CanvasNodeType,
+      entityId: node.data.entityId as string,
+    }));
+
+    // Only proceed if there are non-skill nodes selected
+    if (selectedNodes.length > 0) {
+      addNode(
+        {
+          type: 'skill',
+          data: {
+            title: 'Skill',
+            entityId: genSkillID(),
+            metadata: {
+              contextNodeIds: selectedNodes.map((node) => node.id),
+            },
+          },
+        },
+        connectTo,
+      );
+    }
+
+    onClose?.();
+  }, [getNodes, addNode, onClose]);
+
+  const handleAddToContext = useCallback(() => {
+    onClose?.();
+  }, []);
+
+  const handleDelete = useCallback(() => {
+    onClose?.();
+  }, []);
+
+  const handleGroup = useCallback(() => {
+    createGroupFromSelectedNodes();
+    onClose?.();
+  }, [createGroupFromSelectedNodes, onClose]);
+
+  const getMenuItems = (): MenuItem[] => {
+    return [
+      {
+        key: 'askAI',
+        icon: IconAskAI,
+        label: t('canvas.nodeActions.askAI'),
+        onClick: handleAskAI,
+        type: 'button' as const,
+        primary: true,
+      },
+      { key: 'divider-1', type: 'divider' } as MenuItem,
+      {
+        key: 'addToContext',
+        icon: MessageSquareDiff,
+        label: t('canvas.nodeActions.addToContext'),
+        onClick: handleAddToContext,
+        type: 'button' as const,
+      },
+      { key: 'divider-2', type: 'divider' } as MenuItem,
+      {
+        key: 'group',
+        icon: Group,
+        label: t('canvas.nodeActions.group'),
+        onClick: handleGroup,
+        type: 'button' as const,
+      },
+      {
+        key: 'delete',
+        icon: IconDelete,
+        label: t('canvas.nodeActions.delete'),
+        onClick: handleDelete,
+        danger: true,
+        type: 'button' as const,
+      },
+    ];
+  };
+
+  const menuItems = useMemo(() => getMenuItems(), []);
+
+  return (
+    <div className="bg-white rounded-lg shadow-lg p-2 w-[200px] border border-[rgba(0,0,0,0.06)]">
+      {menuItems.map((item) => {
+        if (item.type === 'divider') {
+          return <Divider key={item.key} className="my-1 h-[1px] bg-gray-100" />;
+        }
+
+        return (
+          <Button
+            key={item.key}
+            className={`
+              w-full
+              h-8
+              flex
+              items-center
+              gap-2
+              px-2
+              rounded
+              text-sm
+              transition-colors
+              text-gray-700 hover:bg-gray-50 hover:text-gray-700
+              ${item.danger ? '!text-red-600 hover:bg-red-50' : ''}
+              ${item.primary ? '!text-primary-600 hover:bg-primary-50' : ''}
+              ${item.loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+            `}
+            type="text"
+            loading={item.loading}
+            onClick={item.onClick}
+            disabled={item.disabled}
+          >
+            {item.loading ? <IconLoading className="w-4 h-4" /> : <item.icon className="w-4 h-4" />}
+            <span className="flex-1 text-left truncate">{item.label}</span>
+          </Button>
+        );
+      })}
+    </div>
+  );
+};

@@ -8,11 +8,10 @@ type ActionButtonsProps = {
   nodeId: string;
   type: CanvasNodeType;
   isNodeHovered: boolean;
-  isTemporaryGroup: boolean;
 };
 
 export const ActionButtons: FC<ActionButtonsProps> = memo(
-  ({ nodeId, type, isNodeHovered, isTemporaryGroup }) => {
+  ({ nodeId, type, isNodeHovered }) => {
     const [isMenuHovered, setIsMenuHovered] = useState(false);
     const { getNode } = useReactFlow();
 
@@ -20,7 +19,7 @@ export const ActionButtons: FC<ActionButtonsProps> = memo(
     const node = useMemo(() => getNode(nodeId) as CanvasNode, [nodeId, getNode]);
 
     // 如果是临时组或者节点被hover，显示操作按钮
-    const shouldShowMenu = isTemporaryGroup || isNodeHovered || isMenuHovered;
+    const shouldShowMenu = isNodeHovered || isMenuHovered;
 
     return (
       <>

@@ -34,7 +34,7 @@ import {
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
 import { useBatchNodesSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection';
-import { SelectionActionMenus } from './selection-action-menus';
+import { SelectionActionMenus } from './multi-selection-menu';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';

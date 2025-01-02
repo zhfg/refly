@@ -37,7 +37,7 @@ const NodeHeader = memo(({ query }: { query: string }) => {
         <IconAskAI className="w-4 h-4 text-white" />
       </div>
       <span className="text-[13px] font-medium leading-normal text-[rgba(0,0,0,0.8)] font-['PingFang_SC'] truncate">
-        {'Prompt'}
+        {'Skill'}
       </span>
     </div>
   );

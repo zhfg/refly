@@ -1,6 +1,6 @@
 import { FC, useEffect, useRef } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { NodeActionMenu } from './action-menu';
+import { SelectionActionMenu } from '../multi-selection-menu/selection-action-menu';
 import { CanvasNodeType } from '@refly/openapi-schema';
 
 interface SelectionContextMenuProps {
@@ -54,7 +54,7 @@ export const SelectionContextMenu: FC<SelectionContextMenuProps> = ({ open, posi
         e.preventDefault();
       }}
     >
-      <NodeActionMenu nodeId={nodeId} nodeType={nodeType} onClose={() => setOpen(false)} />
+      <SelectionActionMenu onClose={() => setOpen(false)} />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { FC, useState, useEffect } from 'react';
 import { Node, useStore, useReactFlow } from '@xyflow/react';
 import { GroupActionMenu } from '../group-action-menu';
-import { NodeActionMenu } from '../node-action-menu';
+import { SelectionActionMenu } from './selection-action-menu';
 import { CanvasNode } from '../nodes';
 import { calculateGroupBoundaries } from './utils';
 
@@ -73,11 +73,7 @@ export const SelectionActionMenus: FC<SelectionActionMenusProps> = () => {
         onMouseEnter={() => setIsRightMenuHovered(true)}
         onMouseLeave={() => setIsRightMenuHovered(false)}
       >
-        <NodeActionMenu
-          nodeId={selectedNodes[0]?.id}
-          nodeType={(selectedNodes[0] as CanvasNode)?.type}
-          isMultiSelection={true}
-        />
+        <SelectionActionMenu />
       </div>
     </>
   );
