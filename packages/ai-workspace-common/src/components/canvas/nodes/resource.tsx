@@ -24,6 +24,9 @@ import { memo } from 'react';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { genSkillID } from '@refly-packages/utils/id';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
 const NodeHeader = memo(({ title, ResourceIcon }: { title: string; ResourceIcon: any }) => {
@@ -138,6 +141,25 @@ export const ResourceNode = memo(
       console.log('Show about info');
     }, []);
 
+    const { canvasId } = useCanvasContext();
+    const { addNode } = useAddNode(canvasId);
+
+    const handleAskAI = useCallback(() => {
+      addNode(
+        {
+          type: 'skill',
+          data: {
+            title: 'Skill',
+            entityId: genSkillID(),
+            metadata: {
+              contextNodeIds: [props.id],
+            },
+          },
+        },
+        [{ type: 'resource', entityId: props.data.entityId }],
+      );
+    }, [props.id, props.data.entityId, addNode]);
+
     const { operatingNodeId } = useCanvasStoreShallow((state) => ({
       operatingNodeId: state.operatingNodeId,
     }));
@@ -188,20 +210,23 @@ export const ResourceNode = memo(
       // Create node-specific event handlers
       const handleNodeAddToContext = () => handleAddToContext();
       const handleNodeDelete = () => handleDelete();
+      const handleNodeAskAI = () => handleAskAI();
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(props.id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(props.id, 'delete'), handleNodeDelete);
+      nodeActionEmitter.on(createNodeEventName(props.id, 'askAI'), handleNodeAskAI);
 
       return () => {
         // Cleanup events when component unmounts
         nodeActionEmitter.off(createNodeEventName(props.id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(props.id, 'delete'), handleNodeDelete);
+        nodeActionEmitter.off(createNodeEventName(props.id, 'askAI'), handleNodeAskAI);
 
         // Clean up all node events
         cleanupNodeEvents(props.id);
       };
-    }, [props.id, handleAddToContext, handleDelete]);
+    }, [props.id, handleAddToContext, handleDelete, handleAskAI]);
 
     const nodeStyle = useMemo(
       () => ({

@@ -14,6 +14,10 @@ import { useReactFlow } from '@xyflow/react';
 import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-chat-history';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { genSkillID } from '@refly-packages/utils/id';
+import { CanvasNodeType } from '@refly/openapi-schema';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 interface GroupMetadata {
   label?: string;
@@ -49,6 +53,8 @@ export const GroupNode = memo(
     const { deleteNodes, deleteNode } = useDeleteNode();
     const { addNodesToContext } = useAddToContext();
     const { addNodesToHistory } = useAddToChatHistory();
+    const { canvasId } = useCanvasContext();
+    const { addNode } = useAddNode(canvasId);
 
     const handleAddToContext = useCallback(() => {
       const childNodes = getNodes().filter((node) => {
@@ -73,20 +79,55 @@ export const GroupNode = memo(
       }
     }, [id, data, getNodes, addNodesToContext, addNodesToHistory]);
 
+    const handleAskAI = useCallback(() => {
+      const childNodes = getNodes().filter((node) => {
+        const isInGroup = node.parentId === id;
+        return isInGroup && !['skill', 'memo'].includes(node.type);
+      });
+
+      console.log('childNodes', childNodes);
+
+      if (childNodes.length > 0) {
+        const connectTo = childNodes.map((node) => ({
+          type: node.type as CanvasNodeType,
+          entityId: node.data.entityId as string,
+        }));
+
+        addNode(
+          {
+            type: 'skill',
+            data: {
+              title: 'Skill',
+              entityId: genSkillID(),
+              metadata: {
+                contextNodeIds: childNodes.map((node) => node.id),
+              },
+            },
+          },
+          connectTo,
+        );
+      }
+    }, [id, getNodes, addNode]);
+
     useEffect(() => {
       const handleNodeUngroup = () => {
         ungroupNodes(id);
       };
+      const handleNodeAskAI = () => {
+        handleAskAI();
+      };
 
       nodeActionEmitter.on(createNodeEventName(id, 'ungroup'), handleNodeUngroup);
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleAddToContext);
+      nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
       return () => {
         nodeActionEmitter.off(createNodeEventName(id, 'ungroup'), handleNodeUngroup);
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleAddToContext);
+        nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
         cleanupNodeEvents(id);
       };
-    }, [id, ungroupNodes, handleAddToContext]);
+    }, [id, ungroupNodes, handleAddToContext, handleAskAI]);
 
     const handleMouseEnter = useCallback(() => {
       setIsHovered(true);

@@ -62,22 +62,9 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const { ungroupNodes } = useUngroupNodes();
 
   const handleAskAI = useCallback(() => {
-    const node = getNode(nodeId) as CanvasNode;
-    addNode(
-      {
-        type: 'skill',
-        data: {
-          title: 'Skill',
-          entityId: genSkillID(),
-          metadata: {
-            contextNodeIds: [nodeId],
-          },
-        },
-      },
-      [{ type: node.type, entityId: node.data.entityId }],
-    );
+    nodeActionEmitter.emit(createNodeEventName(nodeId, 'askAI'));
     onClose?.();
-  }, [nodeId]);
+  }, [nodeId, onClose]);
 
   const handleRun = useCallback(() => {
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'run'));

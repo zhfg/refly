@@ -21,6 +21,10 @@ import classNames from 'classnames';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { genSkillID } from '@refly-packages/utils/id';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
 export const DocumentNode = memo(
@@ -112,25 +116,47 @@ export const DocumentNode = memo(
       console.log('Show about info');
     }, []);
 
+    const { canvasId } = useCanvasContext();
+    const { addNode } = useAddNode(canvasId);
+
+    const handleAskAI = useCallback(() => {
+      addNode(
+        {
+          type: 'skill',
+          data: {
+            title: 'Skill',
+            entityId: genSkillID(),
+            metadata: {
+              contextNodeIds: [id],
+            },
+          },
+        },
+        [{ type: 'document', entityId: data.entityId }],
+      );
+    }, [id, data.entityId, addNode]);
+
     // Add event handling
     useEffect(() => {
       // Create node-specific event handlers
       const handleNodeAddToContext = () => handleAddToContext();
       const handleNodeDelete = () => handleDelete();
+      const handleNodeAskAI = () => handleAskAI();
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
+      nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
       return () => {
         // Cleanup events when component unmounts
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
+        nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
         // Clean up all node events
         cleanupNodeEvents(id);
       };
-    }, [id, handleAddToContext, handleDelete]);
+    }, [id, handleAddToContext, handleDelete, handleAskAI]);
 
     return (
       <div className={classNames({ nowheel: isOperating })}>

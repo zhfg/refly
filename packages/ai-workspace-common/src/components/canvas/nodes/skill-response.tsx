@@ -43,6 +43,8 @@ import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common
 import { Source } from '@refly/openapi-schema';
 import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { genSkillID } from '@refly-packages/utils/id';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -386,6 +388,24 @@ export const SkillResponseNode = memo(
       moveableRef.current?.request('resizable', { width, height });
     }, []);
 
+    const { addNode } = useAddNode(canvasId);
+
+    const handleAskAI = useCallback(() => {
+      addNode(
+        {
+          type: 'skill',
+          data: {
+            title: 'Skill',
+            entityId: genSkillID(),
+            metadata: {
+              contextNodeIds: [id],
+            },
+          },
+        },
+        [{ type: 'skillResponse', entityId: data.entityId }],
+      );
+    }, [id, data.entityId, addNode]);
+
     // Update size when content changes
     useEffect(() => {
       if (!targetRef.current) return;
@@ -402,8 +422,10 @@ export const SkillResponseNode = memo(
       const handleNodeInsertToDoc = () => handleInsertToDoc();
       const handleNodeCreateDocument = () => handleCreateDocument();
       const handleNodeDelete = () => handleDelete();
+      const handleNodeAskAI = () => handleAskAI();
 
       // Register events with node ID
+      nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
       nodeActionEmitter.on(createNodeEventName(id, 'rerun'), handleNodeRerun);
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
@@ -412,6 +434,7 @@ export const SkillResponseNode = memo(
 
       return () => {
         // Cleanup events when component unmounts
+        nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
         nodeActionEmitter.off(createNodeEventName(id, 'rerun'), handleNodeRerun);
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
