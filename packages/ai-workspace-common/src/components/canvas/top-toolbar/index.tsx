@@ -39,6 +39,9 @@ const CanvasTitle = memo(
     const [isModalOpen, setIsModalOpen] = useState(false);
     const inputRef = useRef(null);
     const { syncTitleToYDoc } = useCanvasSync();
+    const { updateCanvasTitle } = useSiderStoreShallow((state) => ({
+      updateCanvasTitle: state.updateCanvasTitle,
+    }));
 
     const handleEditClick = () => {
       setEditedTitle(canvasTitle ?? '');
@@ -48,6 +51,7 @@ const CanvasTitle = memo(
     const handleModalOk = () => {
       if (editedTitle?.trim()) {
         syncTitleToYDoc(editedTitle);
+        updateCanvasTitle(canvasId, editedTitle);
         setIsModalOpen(false);
       }
     };
