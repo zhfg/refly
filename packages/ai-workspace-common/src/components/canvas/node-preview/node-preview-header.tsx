@@ -14,7 +14,7 @@ import {
   FilePlus,
   Trash2,
 } from 'lucide-react';
-import { CanvasNodeType } from '@refly/openapi-schema';
+import { NODE_COLORS } from '../nodes/colors';
 import { CanvasNode } from '../nodes/types';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
@@ -28,17 +28,6 @@ import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-preview-control';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-
-// Define background colors for different node types
-const NODE_COLORS: Record<CanvasNodeType, string> = {
-  document: '#00968F',
-  resource: '#17B26A',
-  skillResponse: '#F79009',
-  toolResponse: '#F79009',
-  skill: '#6172F3',
-  tool: '#2E90FA',
-  memo: '#6172F3',
-};
 
 // Get icon component based on node type and metadata
 const getNodeIcon = (node: CanvasNode<any>) => {

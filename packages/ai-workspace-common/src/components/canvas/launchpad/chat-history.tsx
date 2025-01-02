@@ -1,11 +1,12 @@
-import React, { useEffect } from 'react';
-import { Button, Divider, Tooltip } from 'antd';
+import React, { useMemo } from 'react';
+import { Timeline } from 'antd';
 import { useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
-import { IconDelete, IconResponse } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { LOCALE } from '@refly/common-types';
-import { Pin, PinOff } from 'lucide-react';
+import {
+  IconResponse,
+  IconResponseFilled,
+  IconThreadHistory,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getResultDisplayContent } from '@refly-packages/ai-workspace-common/components/common/result-display';
@@ -15,34 +16,17 @@ import { CanvasNode, ResponseNodeMeta } from '@refly-packages/ai-workspace-commo
 
 // Define props interface
 interface ChatHistoryProps {
-  // Data
-  items?: IContextItem[];
-
-  // Mode control
-  readonly?: boolean;
-
-  // Cleanup
-  onCleanup?: () => void;
-
-  // Actions
+  item: IContextItem;
   onItemClick?: (item: IContextItem) => void;
-  onItemPin?: (item: IContextItem) => void;
-  onItemDelete?: (item: IContextItem) => void;
 }
 
-const ChatHistoryItem = ({ item, readonly }: { item: IContextItem; readonly?: boolean }) => {
-  const { t, i18n } = useTranslation();
-  const language = i18n.languages?.[0];
-
-  const { getNodes } = useReactFlow();
+const ChatHistoryItem = ({ node }: { node: CanvasNode<ResponseNodeMeta> }) => {
   const { setNodeCenter } = useNodePosition();
   const { setSelectedNode } = useNodeSelection();
 
-  const node = getNodes().find((node) => node.data?.entityId === item.entityId) as CanvasNode<ResponseNodeMeta>;
-
-  const handleItemClick = (item: IContextItem, event: React.MouseEvent) => {
+  const handleItemClick = (node: CanvasNode<ResponseNodeMeta>, event: React.MouseEvent) => {
     event.preventDefault();
-    if (!item?.entityId || !node) return;
+    if (!node) return;
 
     setNodeCenter(node.id);
     setSelectedNode(node as CanvasNode<any>);
@@ -50,62 +34,12 @@ const ChatHistoryItem = ({ item, readonly }: { item: IContextItem; readonly?: bo
 
   return (
     <div
-      key={`${item.entityId}`}
-      className={cn('m-1 py-1 px-2 rounded-lg cursor-pointer border-gray-100 hover:bg-gray-100', {
-        'border-dashed': item.isPreview,
-        'border-solid bg-gray-100': !item.isPreview,
-      })}
-      onClick={(e) => handleItemClick(item, e)}
+      key={`${node.id}`}
+      className={cn('m-1 py-0.5 px-2 rounded-lg cursor-pointer border-gray-100 hover:bg-gray-100', {})}
+      onClick={(e) => handleItemClick(node, e)}
     >
-      <div className="text-gray-800 font-medium flex items-center justify-between text-xs">
-        <div className="flex items-center whitespace-nowrap overflow-hidden">
-          <IconResponse className="h-4 w-4 mr-1" />
-          <div className="max-w-[200px] truncate">{item.title}</div>
-        </div>
-        <div className="flex items-center space-x-1">
-          <span className="text-gray-400 text-xs mr-1">
-            {time(node?.data?.createdAt, language as LOCALE)
-              ?.utc()
-              ?.fromNow()}
-          </span>
-          {!readonly && (
-            <>
-              <Divider type="vertical" className="h-4" />
-              <Tooltip
-                destroyTooltipOnHide
-                title={item?.isPreview ? t('canvas.launchpad.pinChat') : t('canvas.launchpad.unpinChat')}
-              >
-                <Button
-                  type="text"
-                  size="small"
-                  onClick={(e) => {
-                    // TODO
-                    e.stopPropagation();
-                  }}
-                  icon={
-                    item?.isPreview ? (
-                      <Pin className="w-4 h-4 text-gray-400" />
-                    ) : (
-                      <PinOff className="w-4 h-4 text-gray-400" />
-                    )
-                  }
-                />
-              </Tooltip>
-
-              <Tooltip destroyTooltipOnHide title={t('canvas.launchpad.removeChat')}>
-                <Button
-                  type="text"
-                  size="small"
-                  onClick={(e) => {
-                    // TODO
-                    e.stopPropagation();
-                  }}
-                  icon={<IconDelete className="w-4 h-4 text-gray-400" />}
-                />
-              </Tooltip>
-            </>
-          )}
-        </div>
+      <div className="text-gray-800 font-medium flex items-center justify-between text-[13px] whitespace-nowrap overflow-hidden">
+        <div className="max-w-[200px] truncate">{node.data?.title}</div>
       </div>
       <div className="text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis text-xs">
         {getResultDisplayContent(node.data)}
@@ -114,23 +48,63 @@ const ChatHistoryItem = ({ item, readonly }: { item: IContextItem; readonly?: bo
   );
 };
 
-export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = false, onCleanup }) => {
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      onCleanup?.();
-    };
-  }, []);
+export const ChatHistory: React.FC<ChatHistoryProps> = ({ item }) => {
+  const { getNode, getNodes, getEdges } = useReactFlow();
+  const { t } = useTranslation();
 
-  if (items.length === 0) {
-    return null;
-  }
+  const historyNodes = useMemo(() => {
+    const nodes = getNodes();
+    const startNode = nodes.find((node) => node.data?.entityId === item?.entityId);
+
+    if (!startNode) return [];
+
+    const edges = getEdges();
+    const targetToSourceMap = new Map(edges.map((edge) => [edge.target, edge.source]));
+    const history: CanvasNode<ResponseNodeMeta>[] = [startNode as CanvasNode<ResponseNodeMeta>];
+
+    // Helper function to recursively find source nodes
+    const findSourceNodes = (nodeId: string, visited = new Set<string>()) => {
+      // Prevent infinite loops in case of circular dependencies
+      if (visited.has(nodeId)) return;
+      visited.add(nodeId);
+
+      const sourceId = targetToSourceMap.get(nodeId);
+      const sourceNode = getNode(sourceId);
+      if (sourceNode) {
+        history.push(sourceNode as CanvasNode<ResponseNodeMeta>);
+        findSourceNodes(sourceId, visited);
+      }
+    };
+
+    // Start the recursive search from the start node
+    findSourceNodes(startNode.id);
+
+    // Return nodes in reverse order (oldest to newest)
+    return history.reverse();
+  }, [getNodes, getEdges, item?.entityId]);
 
   return (
-    <div className="w-full px-2 space-y-1 rounded-lg max-h-[200px] overflow-y-auto">
-      {items.map((item) => (
-        <ChatHistoryItem item={item} readonly={readonly} />
-      ))}
+    <div className="w-72 p-3 pb-0 rounded-lg max-h-[400px] overflow-y-auto">
+      <div className="flex items-center gap-2">
+        <div className="w-6 h-6 rounded bg-slate-500 shadow-lg flex items-center justify-center flex-shrink-0">
+          <IconThreadHistory className="w-4 h-4 text-white" />
+        </div>
+        <span className="text-sm font-medium leading-normal truncate">{t('copilot.contextItem.threadHistory')}</span>
+      </div>
+      <div className="ml-1 mt-5">
+        <Timeline
+          className="[&_.ant-timeline-item]:p-0 [&_.ant-timeline-item-content]:ms-3"
+          items={historyNodes.map((node, index) => ({
+            dot:
+              index === historyNodes.length - 1 ? (
+                <IconResponseFilled className="h-4 w-4 text-gray-500" />
+              ) : (
+                <IconResponse className="h-4 w-4 text-gray-500" />
+              ),
+            children: <ChatHistoryItem node={node} />,
+          }))}
+        />
+      </div>
     </div>
   );
 };

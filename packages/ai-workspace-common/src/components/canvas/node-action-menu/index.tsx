@@ -66,7 +66,14 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
           title: 'Skill',
           entityId: genSkillID(),
           metadata: {
-            contextNodeIds: [nodeId],
+            contextItems: [
+              {
+                title: node.data.title,
+                entityId: node.data.entityId,
+                type: node.type,
+                metadata: node.type === 'skillResponse' ? { withHistory: true } : {},
+              },
+            ],
           },
         },
       },

@@ -61,7 +61,7 @@ export const SkillNode = memo(
       'skill',
     );
 
-    const { query, selectedSkill, modelInfo, contextNodeIds = [] } = data.metadata;
+    const { query, selectedSkill, modelInfo, contextItems = [] } = data.metadata;
 
     const [localQuery, setLocalQuery] = useState(query);
 
@@ -95,29 +95,13 @@ export const SkillNode = memo(
       [id, setNodeData],
     );
 
-    const contextItems: IContextItem[] = useMemo(() => {
-      const nodes = getNodes() as CanvasNode<any>[];
-      return nodes
-        .filter((node) => contextNodeIds.includes(node.id))
-        .map((node) => ({
-          title: node.data?.title,
-          entityId: node.data?.entityId,
-          type: node.type,
-          metadata: node.data?.metadata,
-        }));
-    }, [contextNodeIds, getNode]);
-
     const setContextItems = useCallback(
       (items: IContextItem[]) => {
+        setNodeData(id, { metadata: { contextItems: items } });
+
         const nodes = getNodes() as CanvasNode<any>[];
         const entityNodeMap = new Map(nodes.map((node) => [node.data?.entityId, node]));
         const contextNodes = items.map((item) => entityNodeMap.get(item.entityId));
-
-        setNodeData(id, {
-          metadata: {
-            contextNodeIds: contextNodes.map((node) => node?.id),
-          },
-        });
 
         const edges = getEdges();
         const existingEdges = edges?.filter((edge) => edge.target === id) ?? [];

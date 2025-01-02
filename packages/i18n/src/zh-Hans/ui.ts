@@ -1459,6 +1459,7 @@ const translations = {
       resource: '资源',
       memo: '备忘录',
       skillResponse: 'AI 回答',
+      threadHistory: '对话历史',
       extensionWeblink: '网页',
     },
     modelSelector: {

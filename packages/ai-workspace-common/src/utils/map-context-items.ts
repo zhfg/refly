@@ -9,7 +9,7 @@ import { Node, Edge } from '@xyflow/react';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getClientOrigin } from '@refly-packages/utils/url';
 
-export const convertContextToItems = (context?: SkillContext, history?: ActionResult[]): IContextItem[] => {
+export const convertContextToItems = (context: SkillContext, history: ActionResult[]): IContextItem[] => {
   if (!context) return [];
 
   const items: IContextItem[] = [];

@@ -9,6 +9,7 @@ import {
   Skill,
   TokenUsageItem,
 } from '@refly/openapi-schema';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export type CanvasNodeData<T = Record<string, unknown>> = {
   title: string;
@@ -35,7 +36,7 @@ export type SkillNodeMeta = {
   query: string;
   selectedSkill?: Skill;
   modelInfo?: ModelInfo;
-  contextNodeIds?: string[];
+  contextItems?: IContextItem[];
 };
 
 export type ToolNodeMeta = {

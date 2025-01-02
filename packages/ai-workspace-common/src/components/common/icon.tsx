@@ -2,12 +2,13 @@ import {
   HiOutlineDocumentText,
   HiOutlineSquare3Stack3D,
   HiOutlineSparkles,
-  HiSparkles,
-  HiOutlineChatBubbleLeftRight,
   HiMiniPlayCircle,
   HiOutlineCircleStack,
+  HiSquare3Stack3D,
+  HiDocumentText,
   HiPlus,
   HiMinus,
+  HiSparkles,
 } from 'react-icons/hi2';
 import { IoIosMore } from 'react-icons/io';
 import { HiOutlineReply } from 'react-icons/hi';
@@ -26,9 +27,8 @@ import {
   LuPin,
   LuPinOff,
 } from 'react-icons/lu';
-import { RiErrorWarningLine } from 'react-icons/ri';
+import { RiErrorWarningLine, RiDoubleQuotesL, RiChatHistoryLine, RiChatHistoryFill } from 'react-icons/ri';
 
-import { RiDoubleQuotesL } from 'react-icons/ri';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BiText } from 'react-icons/bi';
 import { PiNotePencil, PiNotePencilLight } from 'react-icons/pi';
@@ -49,11 +49,15 @@ import MistralIcon from '@refly-packages/ai-workspace-common/assets/mistral.svg'
 export const IconCanvas = TfiBlackboard;
 export const IconAskAI = LuSparkles;
 export const IconDocument = HiOutlineDocumentText;
+export const IconDocumentFilled = HiDocumentText;
 export const IconResource = HiOutlineSquare3Stack3D;
+export const IconResourceFilled = HiSquare3Stack3D;
 export const IconMemo = PiNotePencilLight;
 export const IconResponse = HiOutlineSparkles;
+export const IconResponseFilled = HiSparkles;
 export const IconLibrary = IoLibraryOutline;
-export const IconThread = HiOutlineChatBubbleLeftRight;
+export const IconThreadHistory = RiChatHistoryLine;
+export const IconThreadHistoryFilled = RiChatHistoryFill;
 export const IconPreview = LuView;
 export const IconQuote = RiDoubleQuotesL;
 export const IconToken = HiOutlineCircleStack;

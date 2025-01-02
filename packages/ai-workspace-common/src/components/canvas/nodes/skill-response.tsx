@@ -66,7 +66,7 @@ const NodeHeader = memo(({ query, skillName, skill }: { query: string; skillName
     <>
       <div className="flex-shrink-0 mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-[#F79009] shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,40,0.1)] flex items-center justify-center flex-shrink-0">
+          <div className="w-6 h-6 rounded bg-[#F79009] shadow-lg flex items-center justify-center flex-shrink-0">
             <IconResponse className="w-4 h-4 text-white" />
           </div>
           <span className="text-sm font-medium leading-normal truncate cursor-help">{query}</span>

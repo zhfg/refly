@@ -9,6 +9,7 @@ import {
 import { DocumentNode, ResourceNode, MemoNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { ChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-history';
 
 export const ContextPreview = memo(
   ({ item }: { item: IContextItem }) => {
@@ -30,6 +31,9 @@ export const ContextPreview = memo(
       case 'resource':
         return <ResourceNode {...(commonProps as ResourceNodeProps)} />;
       case 'skillResponse':
+        if (item.metadata?.withHistory) {
+          return <ChatHistory item={item} />;
+        }
         return <SkillResponseNode {...(commonProps as SkillResponseNodeProps)} />;
       case 'memo':
         return <MemoNode {...(commonProps as MemoNodeProps)} />;

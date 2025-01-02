@@ -2,11 +2,11 @@ import { Button, Popover } from 'antd';
 import { IconClose } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 import { useReactFlow } from '@xyflow/react';
-import { getNodeIcon } from './utils/icon';
+import { getContextItemIcon } from './utils/icon';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import cn from 'classnames';
 import { ContextPreview } from './context-preview';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
@@ -29,57 +29,62 @@ export const ContextItem = ({
   onRemove?: (item: IContextItem) => void;
 }) => {
   const { t } = useTranslation();
-  const { title, entityId, type, metadata } = item ?? {};
-  const icon = getNodeIcon(item?.type);
+  const { title, entityId, type, metadata, isCurrentContext } = item ?? {};
+  const icon = getContextItemIcon(item);
   const { setSelectedNode } = useNodeSelection();
   const { nodes } = useCanvasData();
   const { getNodes } = useReactFlow();
   const { setNodeCenter } = useNodePosition();
 
-  const handleItemClick = useCallback(
-    async (item: IContextItem) => {
-      const node = getNodes().find((node) => node.data?.entityId === item.entityId);
+  const handleItemClick = useCallback(async () => {
+    const node = getNodes().find((node) => node.data?.entityId === entityId);
 
-      if (!node) {
+    if (!node) {
+      return;
+    }
+
+    setNodeCenter(node.id);
+
+    const isSelectionNode = metadata?.sourceType?.includes('Selection');
+
+    if (isSelectionNode) {
+      const sourceEntityId = metadata?.sourceEntityId;
+      const sourceEntityType = metadata?.sourceEntityType;
+
+      if (!sourceEntityId || !sourceEntityType) {
+        console.warn('Missing source entity information for selection node');
         return;
       }
 
-      setNodeCenter(node.id);
+      const sourceNode = nodes.find((node) => node.data?.entityId === sourceEntityId && node.type === sourceEntityType);
 
-      const isSelectionNode = metadata?.sourceType?.includes('Selection');
-
-      if (isSelectionNode) {
-        const sourceEntityId = metadata?.sourceEntityId;
-        const sourceEntityType = metadata?.sourceEntityType;
-
-        if (!sourceEntityId || !sourceEntityType) {
-          console.warn('Missing source entity information for selection node');
-          return;
-        }
-
-        const sourceNode = nodes.find(
-          (node) => node.data?.entityId === sourceEntityId && node.type === sourceEntityType,
-        );
-
-        if (!sourceNode) {
-          Message.warning({
-            content: t('canvas.contextManager.nodeNotFound'),
-          });
-          return;
-        }
-
-        setSelectedNode(sourceNode);
-      } else {
-        setSelectedNode(node as CanvasNode<any>);
+      if (!sourceNode) {
+        Message.warning({
+          content: t('canvas.contextManager.nodeNotFound'),
+        });
+        return;
       }
-    },
-    [nodes, setSelectedNode, t],
-  );
+
+      setSelectedNode(sourceNode);
+    } else {
+      setSelectedNode(node as CanvasNode<any>);
+    }
+  }, [entityId, setSelectedNode, t]);
 
   const content = <ContextPreview item={item} />;
 
   const isSelection = metadata?.sourceType?.toLowerCase()?.includes('selection');
   const sourceType = isSelection ? 'selection' : type;
+
+  const contextTypeDesc = useMemo(() => {
+    if (type !== 'skillResponse') {
+      return (isCurrentContext ? t('copilot.contextItem.current') : '') + t(`copilot.contextItem.${sourceType}`);
+    }
+    if (metadata?.withHistory) {
+      return t('copilot.contextItem.threadHistory');
+    }
+    return t('copilot.contextItem.skillResponse');
+  }, [type, metadata?.withHistory, isCurrentContext, t]);
 
   return (
     <Popover
@@ -101,23 +106,23 @@ export const ContextItem = ({
             'border-dashed': item?.isPreview,
           },
         )}
-        onClick={() => handleItemClick?.(item)}
+        onClick={() => handleItemClick()}
       >
         <div className="h-[18px] flex items-center w-full text-xs">
           <span className="flex items-center flex-shrink-0 mr-1">{icon}</span>
           <span
-            className={cn('flex-1 whitespace-nowrap overflow-hidden text-ellipsis min-w-0 mr-1', {
-              'text-gray-300': disabled,
-              'text-red-500': isLimit,
-            })}
+            className={cn(
+              'flex-1 whitespace-nowrap overflow-hidden text-ellipsis min-w-0 mr-1 text-gray-600 hover:text-green-600',
+              {
+                'text-gray-300': disabled,
+                'text-red-500': isLimit,
+              },
+            )}
             title={title ?? ''}
           >
             {title}
           </span>
-          <span className="item-type text-gray-500 mr-1">
-            {item.isCurrentContext ? t('copilot.contextItem.current') : ''}
-            {t(`copilot.contextItem.${sourceType}`)}
-          </span>
+          {/* <span className="item-type text-gray-500 mr-1">{contextTypeDesc}</span> */}
           {!canNotRemove && (
             <IconClose
               className={cn('flex-shrink-0 text-xs cursor-pointer', {

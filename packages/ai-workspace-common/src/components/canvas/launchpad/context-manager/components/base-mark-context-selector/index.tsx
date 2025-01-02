@@ -7,7 +7,7 @@ import { Command } from 'cmdk';
 
 import { Home } from './home';
 import { RenderItem } from './type';
-import { getNodeIcon } from '../../utils/icon';
+import { getContextItemIcon } from '../../utils/icon';
 
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { IContextItem, useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
@@ -97,7 +97,7 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
     return processedNodes.map((item) => ({
       data: item,
       type: item?.type,
-      icon: getNodeIcon(item?.type, { width: 12, height: 12 }),
+      icon: getContextItemIcon(item, { width: 12, height: 12 }),
       isSelected: selectedItems?.some((selected) => selected?.entityId === item?.entityId),
       onItemClick: (item: IContextItem) => {
         onSelect?.(item);
