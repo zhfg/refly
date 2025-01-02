@@ -8,36 +8,64 @@ import { CanvasNodeType } from '@refly/openapi-schema';
 import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
-export const useDeleteNode = (node: CanvasNode, nodeType: CanvasNodeType) => {
+interface DeleteNodeOptions {
+  showMessage?: boolean;
+}
+
+export const useDeleteNode = () => {
   const { setNodes, setEdges } = useReactFlow();
   const { t } = useTranslation();
   const { canvasId } = useCanvasContext();
   const { handleItemDelete } = useChatHistory();
 
-  return useCallback(() => {
-    // Delete node from canvas
-    setNodes((nodes) => nodes.filter((n) => n.id !== node.id));
+  const deleteSingleNode = useCallback(
+    (node: CanvasNode<any>, options: DeleteNodeOptions = {}) => {
+      const { showMessage = true } = options;
 
-    // Delete connected edges
-    setEdges((edges) => edges.filter((e) => e.source !== node.id && e.target !== node.id));
+      // Delete node from canvas
+      setNodes((nodes) => nodes.filter((n) => n.id !== node.id));
 
-    // Delete from context panel if exists
-    const contextStore = useContextPanelStore.getState();
-    contextStore.removeContextItem(node.id);
+      // Delete connected edges
+      setEdges((edges) => edges.filter((e) => e.source !== node.id && e.target !== node.id));
 
-    if (nodeType === 'skillResponse') {
-      handleItemDelete(node);
-    }
+      // Delete from context panel if exists
+      const contextStore = useContextPanelStore.getState();
+      contextStore.removeContextItem(node.id);
 
-    // Get node title based on node type
-    const nodeTitle = node.data?.title ?? t('knowledgeBase.context.untitled');
+      if (node.type === 'skillResponse') {
+        handleItemDelete(node);
+      }
 
-    // Show success message
-    message.success(
-      t('knowledgeBase.context.deleteSuccessWithTitle', {
-        title: nodeTitle,
-        type: t(`knowledgeBase.context.nodeTypes.${nodeType}`),
-      }),
-    );
-  }, [node, nodeType, setNodes, setEdges, t]);
+      if (showMessage) {
+        // Get node title based on node type
+        const nodeTitle = node.data?.title ?? t('knowledgeBase.context.untitled');
+
+        // Show success message
+        message.success(
+          t('knowledgeBase.context.deleteSuccessWithTitle', {
+            title: nodeTitle,
+            type: t(`knowledgeBase.context.nodeTypes.${node.type}`),
+          }),
+        );
+      }
+
+      return true;
+    },
+    [setNodes, setEdges, t, handleItemDelete],
+  );
+
+  const deleteNodes = useCallback(
+    (nodes: CanvasNode[], options: DeleteNodeOptions = {}) => {
+      // Delete each node
+      const results = nodes.map((node) => deleteSingleNode(node, { ...options }));
+
+      return results.filter(Boolean).length; // Return number of successfully deleted nodes
+    },
+    [deleteSingleNode],
+  );
+
+  return {
+    deleteNode: deleteSingleNode,
+    deleteNodes,
+  };
 };

@@ -330,15 +330,16 @@ export const SkillResponseNode = memo(
     const runtime = getRuntime();
     const isWeb = runtime === 'web';
 
-    const handleDelete = useDeleteNode(
-      {
+    const { deleteNode } = useDeleteNode();
+
+    const handleDelete = useCallback(() => {
+      deleteNode({
         id,
         type: 'skillResponse',
         data,
         position: { x: 0, y: 0 },
-      } as CanvasNode,
-      'skillResponse',
-    );
+      } as CanvasNode);
+    }, [id, data, deleteNode]);
 
     const { debouncedCreateDocument } = useCreateDocument();
 

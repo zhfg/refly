@@ -574,6 +574,7 @@ const translations = {
       delete: '删除节点',
       ungroup: '取消分组',
       group: '分组',
+      deleteAll: '删除',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',

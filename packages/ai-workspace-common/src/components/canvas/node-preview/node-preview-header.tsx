@@ -117,12 +117,16 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
   const nodeTitle = getNodeTitle(node);
   const { t } = useTranslation();
   const { addToContext } = useAddToContext();
-  const handleDelete = useDeleteNode(node, node.type);
+  const { deleteNode } = useDeleteNode();
 
   // Update handleAddToContext to use new hook
   const handleAddToContext = useCallback(() => {
     addToContext(node);
   }, [node, addToContext]);
+
+  const handleDelete = useCallback(() => {
+    deleteNode(node);
+  }, [node, deleteNode]);
 
   // Define dropdown menu items
   const menuItems: MenuProps['items'] = [

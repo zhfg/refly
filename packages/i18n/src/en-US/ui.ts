@@ -582,6 +582,7 @@ const translations = {
       delete: 'Delete Node',
       ungroup: 'Ungroup',
       group: 'Group',
+      deleteAll: 'Delete',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',

@@ -91,15 +91,16 @@ export const DocumentNode = memo(
       } as CanvasNode);
     }, [id, data, addToContext]);
 
-    const handleDelete = useDeleteNode(
-      {
+    const { deleteNode } = useDeleteNode();
+
+    const handleDelete = useCallback(() => {
+      deleteNode({
         id,
         type: 'document',
         data,
         position: { x: 0, y: 0 },
-      } as CanvasNode,
-      'document',
-    );
+      } as CanvasNode);
+    }, [id, data, deleteNode]);
 
     const handleHelpLink = useCallback(() => {
       // Implement help link logic

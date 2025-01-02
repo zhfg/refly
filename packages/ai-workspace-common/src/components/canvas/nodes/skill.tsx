@@ -7,7 +7,7 @@ import { useState, useCallback, useEffect, useMemo, memo } from 'react';
 import { getNodeCommonStyles } from './index';
 import { ChatInput } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-input';
 import { IconAskAI } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { ModelInfo, Skill } from '@refly/openapi-schema';
+import { CanvasNode, ModelInfo, Skill } from '@refly/openapi-schema';
 import { useDebouncedCallback } from 'use-debounce';
 import { ChatActions } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
@@ -116,15 +116,7 @@ export const SkillNode = memo(
     const setNodeData = useSetNodeData();
     const edgeStyles = useEdgeStyles();
     const { getNode, addEdges, deleteElements } = useReactFlow();
-    const handleDeleteNode = useDeleteNode(
-      {
-        id,
-        type: 'skill',
-        data,
-        position: { x: 0, y: 0 },
-      },
-      'skill',
-    );
+    const { deleteNode } = useDeleteNode();
 
     const { query, selectedSkill, modelInfo, contextNodeIds = [] } = data.metadata;
 
@@ -248,9 +240,19 @@ export const SkillNode = memo(
       );
     }, [id, getNode, deleteElements, invokeAction, canvasId, contextItems]);
 
+    const handleDelete = useCallback(() => {
+      const currentNode = getNode(id);
+      deleteNode({
+        id,
+        type: 'skill',
+        data,
+        position: currentNode?.position || { x: 0, y: 0 },
+      });
+    }, [id, data, getNode, deleteNode]);
+
     useEffect(() => {
       const handleNodeRun = () => handleSendMessage();
-      const handleNodeDelete = () => handleDeleteNode();
+      const handleNodeDelete = () => handleDelete();
 
       nodeActionEmitter.on(createNodeEventName(id, 'run'), handleNodeRun);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
@@ -260,7 +262,7 @@ export const SkillNode = memo(
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
         cleanupNodeEvents(id);
       };
-    }, [id, handleSendMessage, handleDeleteNode]);
+    }, [id, handleSendMessage, handleDelete]);
 
     return (
       <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>

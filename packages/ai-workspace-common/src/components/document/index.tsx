@@ -27,13 +27,16 @@ const ActionDropdown = ({ docId, node }: { docId: string; node?: CanvasNode }) =
   const { ydoc } = useDocumentContext();
   const { t } = useTranslation();
   const [popupVisible, setPopupVisible] = useState(false);
-  const handleDeleteNode = node ? useDeleteNode(node, node.type) : undefined;
+  const { deleteNode } = useDeleteNode();
   const { deleteDocument } = useDeleteDocument();
 
   const handleDelete = async () => {
     const success = await deleteDocument(docId);
-    if (success) {
-      handleDeleteNode();
+    if (success && node) {
+      deleteNode({
+        ...node,
+        position: node.position,
+      });
     }
   };
 

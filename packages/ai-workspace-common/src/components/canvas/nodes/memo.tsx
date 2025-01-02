@@ -100,15 +100,16 @@ export const MemoNode = ({
     } as CanvasNode);
   }, [id, data, addToContext]);
 
-  const handleDelete = useDeleteNode(
-    {
+  const { deleteNode } = useDeleteNode();
+
+  const handleDelete = useCallback(() => {
+    deleteNode({
       id,
       type: 'memo',
       data,
       position: { x: 0, y: 0 },
-    } as CanvasNode,
-    'memo',
-  );
+    } as CanvasNode);
+  }, [id, data, deleteNode]);
 
   const insertToDoc = useInsertToDocument(data.entityId);
   const handleInsertToDoc = useCallback(async () => {

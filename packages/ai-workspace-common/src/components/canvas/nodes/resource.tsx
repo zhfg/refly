@@ -117,15 +117,16 @@ export const ResourceNode = memo(
       } as CanvasNode);
     }, [props.id, props.data, addToContext]);
 
-    const handleDelete = useDeleteNode(
-      {
+    const { deleteNode } = useDeleteNode();
+
+    const handleDelete = useCallback(() => {
+      deleteNode({
         id: props.id,
         type: 'resource',
         data: props.data,
         position: { x: 0, y: 0 },
-      } as CanvasNode,
-      'resource',
-    );
+      } as CanvasNode);
+    }, [props.id, props.data, deleteNode]);
 
     const handleHelpLink = useCallback(() => {
       // Implement help link logic

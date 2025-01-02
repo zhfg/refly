@@ -25,6 +25,7 @@ import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores
 import { message } from 'antd';
 import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 
 interface MenuItem {
   key: string;
@@ -55,6 +56,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
   }));
   const { handleItemAdd } = useChatHistory();
   const { addNodesToContext } = useAddToContext();
+  const { deleteNodes } = useDeleteNode();
 
   const handleAskAI = useCallback(() => {
     // Get all selected nodes except skills
@@ -100,8 +102,18 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
   }, [getNodes, addNodesToContext, onClose]);
 
   const handleDelete = useCallback(() => {
+    const selectedNodes = getNodes()
+      .filter((node) => node.selected)
+      .map((node) => ({
+        id: node.id,
+        type: node.type,
+        data: node.data,
+        position: node.position,
+      })) as CanvasNode[];
+
+    deleteNodes(selectedNodes);
     onClose?.();
-  }, []);
+  }, [getNodes, deleteNodes, onClose]);
 
   const handleGroup = useCallback(() => {
     createGroupFromSelectedNodes();
@@ -137,7 +149,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
       {
         key: 'delete',
         icon: IconDelete,
-        label: t('canvas.nodeActions.delete'),
+        label: t('canvas.nodeActions.deleteAll'),
         onClick: handleDelete,
         danger: true,
         type: 'button' as const,
