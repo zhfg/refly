@@ -104,52 +104,50 @@ export const useBatchNodesSelection = () => {
     [canvasId, updateNodesWithSync],
   );
 
-  const createGroupFromSelectedNodes = useCallback(
-    (selectedNodes: Node[]) => {
-      const { data } = useCanvasStore.getState();
-      const beforeNodes = data[canvasId]?.nodes ?? [];
+  const createGroupFromSelectedNodes = useCallback(() => {
+    const { data } = useCanvasStore.getState();
+    const beforeNodes = data[canvasId]?.nodes ?? [];
+    const selectedNodes = beforeNodes.filter((n) => n.selected);
 
-      if (selectedNodes.length < 2) return;
+    if (selectedNodes.length < 2) return;
 
-      // Check if there's already a temporary group
-      const tempGroup = beforeNodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
-      if (tempGroup) {
-        // If there's a temporary group, convert it to permanent
-        convertTemporaryToPermGroup(tempGroup.id);
-        return;
+    // Check if there's already a temporary group
+    const tempGroup = beforeNodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
+    if (tempGroup) {
+      // If there's a temporary group, convert it to permanent
+      convertTemporaryToPermGroup(tempGroup.id);
+      return;
+    }
+
+    // Update width and height calculation using the same logic
+    const { groupNode, minX, minY } = calculateGroupBoundaries(selectedNodes, beforeNodes);
+
+    // Update nodes to be children of the group while maintaining their absolute positions
+    const updatedNodes = beforeNodes.map((node) => {
+      if (node.selected) {
+        return {
+          ...node,
+          parentId: groupNode.id,
+          extent: 'parent' as const,
+          // Keep original absolute position
+          positionAbsolute: {
+            x: node.position.x,
+            y: node.position.y,
+          },
+          // Set relative position within group
+          position: {
+            x: node.position.x - minX + PADDING / 2,
+            y: node.position.y - minY + PADDING / 2,
+          },
+          selected: false,
+          draggable: true,
+        };
       }
+      return node;
+    });
 
-      // Update width and height calculation using the same logic
-      const { groupNode, minX, minY } = calculateGroupBoundaries(selectedNodes, beforeNodes);
-
-      // Update nodes to be children of the group while maintaining their absolute positions
-      const updatedNodes = beforeNodes.map((node) => {
-        if (node.selected) {
-          return {
-            ...node,
-            parentId: groupNode.id,
-            extent: 'parent' as const,
-            // Keep original absolute position
-            positionAbsolute: {
-              x: node.position.x,
-              y: node.position.y,
-            },
-            // Set relative position within group
-            position: {
-              x: node.position.x - minX + PADDING / 2,
-              y: node.position.y - minY + PADDING / 2,
-            },
-            selected: false,
-            draggable: true,
-          };
-        }
-        return node;
-      });
-
-      updateNodesWithSync(sortNodes([...updatedNodes, groupNode]));
-    },
-    [canvasId, updateNodesWithSync, convertTemporaryToPermGroup],
-  );
+    updateNodesWithSync(sortNodes([...updatedNodes, groupNode]));
+  }, [canvasId, updateNodesWithSync, convertTemporaryToPermGroup]);
 
   const createTemporaryGroup = useCallback(
     (selectedNodes: Node[]) => {
@@ -236,7 +234,7 @@ export const useBatchNodesSelection = () => {
   );
 
   const updateTempGroup = useCallback(
-    (selectedNodes: Node[], beforeNodes: Node[], existingGroupId: string) => {
+    (selectedNodes: CanvasNode<any>[], beforeNodes: CanvasNode<any>[], existingGroupId: string) => {
       // 检查是否需要更新
       const currentSelectedIds = new Set(selectedNodes.filter((n) => n.type !== 'group').map((n) => n.id));
       const beforeGroupChildren = beforeNodes.filter((n) => n.parentId === existingGroupId && n.type !== 'group');
@@ -250,19 +248,37 @@ export const useBatchNodesSelection = () => {
         return;
       }
 
-      console.log('updateTempGroup', selectedNodes, beforeGroupChildren, existingGroupId);
+      // Only consider selected nodes that aren't groups
+      const selectedNonGroupNodes = selectedNodes.filter((n) => n.type !== 'group');
 
-      // Find existing group node
-      const existingGroup = beforeNodes.find((n) => n.id === existingGroupId);
-      // if (!existingGroup) return;
+      // Get absolute positions for all nodes
+      const nodesToConsider = selectedNonGroupNodes.map((node) => {
+        const existingNode = beforeNodes.find((n) => n.id === node.id);
+        if (!existingNode) return node;
 
-      // Calculate new boundaries for all selected nodes
-      const { minX, minY, dimensions } = calculateGroupBoundaries(selectedNodes, beforeNodes);
-      const { width, height } = dimensions;
+        // If node was already in group, calculate its absolute position
+        if (existingNode.parentId === existingGroupId) {
+          const parentGroup = beforeNodes.find((n) => n.id === existingGroupId);
+          return {
+            ...node,
+            position: {
+              x: parentGroup.position.x + existingNode.position.x,
+              y: parentGroup.position.y + existingNode.position.y,
+            },
+          };
+        }
 
-      // Update existing group node and its children
+        // Otherwise use its current position
+        return node;
+      });
+
+      // Calculate new boundaries based on absolute positions
+      const { minX, minY, dimensions } = calculateGroupBoundaries(nodesToConsider, beforeNodes);
+
+      // Update nodes while maintaining absolute positions
       const updatedNodes = beforeNodes.map((node) => {
         if (node.id === existingGroupId) {
+          // Update group position and size
           return {
             ...node,
             position: {
@@ -271,28 +287,27 @@ export const useBatchNodesSelection = () => {
             },
             style: {
               ...node.style,
-              width,
-              height,
+              width: dimensions.width,
+              height: dimensions.height,
             },
             data: {
               ...node.data,
               metadata: {
-                ...((node.data?.metadata as any) || {}),
-                width,
-                height,
+                ...(node.data?.metadata || {}),
+                width: dimensions.width,
+                height: dimensions.height,
               },
             },
           };
         }
 
-        const isSelected = currentSelectedIds.has(node.id);
+        const isSelected = selectedNonGroupNodes.some((n) => n.id === node.id);
         if (isSelected) {
-          // Calculate relative position based on whether the node was already in the group
-          const nodeAbsolutePosition =
+          const absolutePosition =
             node.parentId === existingGroupId
               ? {
-                  x: existingGroup.position.x + node.position.x,
-                  y: existingGroup.position.y + node.position.y,
+                  x: node.positionAbsolute?.x || node.position.x,
+                  y: node.positionAbsolute?.y || node.position.y,
                 }
               : node.position;
 
@@ -300,25 +315,31 @@ export const useBatchNodesSelection = () => {
             ...node,
             parentId: existingGroupId,
             extent: 'parent' as const,
-            positionAbsolute: nodeAbsolutePosition,
+            positionAbsolute: absolutePosition,
             position: {
-              x: nodeAbsolutePosition.x - minX + PADDING / 2,
-              y: nodeAbsolutePosition.y - minY + PADDING / 2,
+              x: absolutePosition.x - minX + PADDING / 2,
+              y: absolutePosition.y - minY + PADDING / 2,
             },
             selected: true,
             draggable: true,
           };
         }
 
-        // Remove parentId for nodes that are no longer selected
+        // Remove nodes from group that are no longer selected
         if (node.parentId === existingGroupId && !isSelected) {
+          const absolutePosition = {
+            x:
+              node.positionAbsolute?.x ||
+              node.position.x + beforeNodes.find((n) => n.id === existingGroupId)?.position.x,
+            y:
+              node.positionAbsolute?.y ||
+              node.position.y + beforeNodes.find((n) => n.id === existingGroupId)?.position.y,
+          };
+
           const { parentId, extent, ...nodeWithoutParent } = node;
           return {
             ...nodeWithoutParent,
-            position: {
-              x: node.position.x + existingGroup.position.x,
-              y: node.position.y + existingGroup.position.y,
-            },
+            position: absolutePosition,
             selected: false,
           };
         }
