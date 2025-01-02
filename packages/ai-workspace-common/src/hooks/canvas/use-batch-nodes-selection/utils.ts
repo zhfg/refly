@@ -80,14 +80,29 @@ export const getNodeDimensions = (node: Node, latestNodes: Node[]) => {
 };
 
 export const calculateGroupBoundaries = (nodesToGroup: Node[], currentNodes: Node[]) => {
-  // Calculate boundaries
+  // Calculate boundaries considering parent groups
   const nodeBoundaries = nodesToGroup.map((node) => {
     const { width, height } = getNodeDimensions(node, currentNodes);
+
+    // Calculate absolute position considering parent groups
+    let absoluteX = node.position.x;
+    let absoluteY = node.position.y;
+
+    // If node has a parent, add parent's position
+    if (node.parentId) {
+      let parent = currentNodes.find((n) => n.id === node.parentId);
+      while (parent) {
+        absoluteX += parent.position.x;
+        absoluteY += parent.position.y;
+        parent = currentNodes.find((n) => n.id === parent.parentId);
+      }
+    }
+
     return {
-      left: node.position.x,
-      right: node.position.x + width,
-      top: node.position.y,
-      bottom: node.position.y + height,
+      left: absoluteX,
+      right: absoluteX + width,
+      top: absoluteY,
+      bottom: absoluteY + height,
     };
   });
 
