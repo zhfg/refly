@@ -1,13 +1,4 @@
-import { useCallback, useState } from 'react';
-import { useCanvasStore, useCanvasStoreShallow } from '../../../stores/canvas';
-import { CanvasNode, prepareNodeData } from '../../../components/canvas/nodes';
-import { useCanvasData } from '../use-canvas-data';
-import { CanvasNodeType } from '@refly/openapi-schema';
-import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
-import { useAddNode } from '../use-add-node';
-import { genUniqueId } from '@refly-packages/utils/id';
-import { CoordinateExtent, Node } from '@xyflow/react';
-import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
+import { Node } from '@xyflow/react';
 
 export const PADDING = 40;
 
@@ -23,41 +14,37 @@ export const sortNodes = (nodes: Node[]) => {
   });
 };
 
-export const getValidSelectedNodes = (selectedNodes: CanvasNode<any>[], beforeNodes: CanvasNode<any>[]) => {
-  return selectedNodes.filter((node) => {
-    if (node.type === 'group' && !node.data?.metadata?.isTemporary) {
-      return true;
-    } else if (node.type === 'group' && node.data?.metadata?.isTemporary) {
-      return false;
-    }
+// Get absolute position for any node considering all parent groups
+export const getAbsolutePosition = (node: Node, allNodes: Node[]) => {
+  let absoluteX = node.position.x;
+  let absoluteY = node.position.y;
+  let currentNode = node;
+  let parent = allNodes.find((n) => n.id === currentNode.parentId);
 
-    if (node.parentId) {
-      const parent = beforeNodes.find((n) => n.id === node.parentId);
-      if (parent?.type === 'group' && !parent.data?.metadata?.isTemporary) {
-        return false;
-      }
-    }
+  while (parent) {
+    absoluteX += parent.position.x;
+    absoluteY += parent.position.y;
+    currentNode = parent;
+    parent = allNodes.find((n) => n.id === currentNode.parentId);
+  }
 
-    if (!node.parentId) {
-      return true;
-    }
-
-    return true;
-  });
+  return { x: absoluteX, y: absoluteY };
 };
 
-// 计算新组的尺寸和位置
-export const getNodeDimensions = (node: Node, latestNodes: Node[]) => {
+// Get node dimensions considering if it's a group
+export const getNodeDimensions = (node: Node, allNodes: Node[]) => {
   if (node.type === 'group') {
-    // 对于组节点，需要考虑其内部节点的位置
-    const groupChildren = latestNodes.filter((n) => n.parentId === node.id);
+    const groupChildren = allNodes.filter((n) => n.parentId === node.id);
     if (groupChildren.length > 0) {
-      const childPositions = groupChildren.map((child) => ({
-        x: node.position.x + child.position.x,
-        y: node.position.y + child.position.y,
-        width: child.measured?.width ?? child.width ?? 200,
-        height: child.measured?.height ?? child.height ?? 100,
-      }));
+      const childPositions = groupChildren.map((child) => {
+        const { x, y } = getAbsolutePosition(child, allNodes);
+        return {
+          x,
+          y,
+          width: child.measured?.width ?? child.width ?? 200,
+          height: child.measured?.height ?? child.height ?? 100,
+        };
+      });
 
       const left = Math.min(...childPositions.map((p) => p.x));
       const right = Math.max(...childPositions.map((p) => p.x + p.width));
@@ -65,8 +52,8 @@ export const getNodeDimensions = (node: Node, latestNodes: Node[]) => {
       const bottom = Math.max(...childPositions.map((p) => p.y + p.height));
 
       return {
-        width: right - left + 40, // 添加一些padding
-        height: bottom - top + 40,
+        width: right - left + PADDING,
+        height: bottom - top + PADDING,
       };
     }
     return {
@@ -74,61 +61,50 @@ export const getNodeDimensions = (node: Node, latestNodes: Node[]) => {
       height: (node.data as any)?.metadata?.height ?? 100,
     };
   }
-  const width = node.measured?.width ?? node.width ?? 200;
-  const height = node.measured?.height ?? node.height ?? 100;
-  return { width, height };
+
+  return {
+    width: node.measured?.width ?? node.width ?? 200,
+    height: node.measured?.height ?? node.height ?? 100,
+  };
 };
 
+// Calculate group boundaries based on absolute positions
 export const calculateGroupBoundaries = (nodesToGroup: Node[], currentNodes: Node[]) => {
-  // Calculate boundaries considering parent groups
-  const nodeBoundaries = nodesToGroup.map((node) => {
-    const { width, height } = getNodeDimensions(node, currentNodes);
-
-    // Calculate absolute position considering parent groups
-    let absoluteX = node.position.x;
-    let absoluteY = node.position.y;
-
-    // If node has a parent, add parent's position
-    if (node.parentId) {
-      let parent = currentNodes.find((n) => n.id === node.parentId);
-      while (parent) {
-        absoluteX += parent.position.x;
-        absoluteY += parent.position.y;
-        parent = currentNodes.find((n) => n.id === parent.parentId);
-      }
-    }
+  // Get absolute positions and dimensions for all nodes
+  const nodesWithAbsolutePos = nodesToGroup.map((node) => {
+    const absolutePos = getAbsolutePosition(node, currentNodes);
+    const dimensions = getNodeDimensions(node, currentNodes);
 
     return {
-      left: absoluteX,
-      right: absoluteX + width,
-      top: absoluteY,
-      bottom: absoluteY + height,
+      ...node,
+      absolutePos,
+      dimensions,
     };
   });
 
-  const minX = Math.min(...nodeBoundaries.map((b) => b.left));
-  const maxX = Math.max(...nodeBoundaries.map((b) => b.right));
-  const minY = Math.min(...nodeBoundaries.map((b) => b.top));
-  const maxY = Math.max(...nodeBoundaries.map((b) => b.bottom));
+  // Calculate boundaries
+  const left = Math.min(...nodesWithAbsolutePos.map((n) => n.absolutePos.x));
+  const right = Math.max(...nodesWithAbsolutePos.map((n) => n.absolutePos.x + n.dimensions.width));
+  const top = Math.min(...nodesWithAbsolutePos.map((n) => n.absolutePos.y));
+  const bottom = Math.max(...nodesWithAbsolutePos.map((n) => n.absolutePos.y + n.dimensions.height));
 
   const dimensions = {
-    width: maxX - minX,
-    height: maxY - minY,
+    width: right - left + PADDING,
+    height: bottom - top + PADDING,
   };
 
   // Create group node
-  const groupNode = prepareNodeData({
-    type: 'group' as CanvasNodeType,
+  const groupNode = {
+    type: 'group' as const,
     data: {
       title: 'Group',
-      entityId: genUniqueId(),
       metadata: {
         ...dimensions,
       },
     },
     position: {
-      x: minX - PADDING / 2,
-      y: minY - PADDING / 2,
+      x: left - PADDING / 2,
+      y: top - PADDING / 2,
     },
     className: 'react-flow__node-default important-box-shadow-none',
     style: {
@@ -139,7 +115,7 @@ export const calculateGroupBoundaries = (nodesToGroup: Node[], currentNodes: Nod
     },
     selected: true,
     draggable: true,
-  });
+  };
 
-  return { groupNode, dimensions, minX, minY };
+  return { groupNode, dimensions, minX: left, minY: top };
 };

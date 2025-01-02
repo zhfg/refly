@@ -3,7 +3,7 @@ import { Node, useStore, useReactFlow } from '@xyflow/react';
 import { GroupActionMenu } from '../group-action-menu';
 import { NodeActionMenu } from '../node-action-menu';
 import { CanvasNode } from '../nodes';
-import { calculateGroupBoundaries, PADDING } from '../../../hooks/canvas/use-batch-nodes-selection/utils';
+import { calculateGroupBoundaries } from './utils';
 
 interface SelectionActionMenusProps {
   selectedNodes: Node[];

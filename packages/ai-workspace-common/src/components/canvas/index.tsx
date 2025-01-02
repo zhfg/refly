@@ -34,13 +34,11 @@ import {
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
 import { useBatchNodesSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection';
-import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
 import { SelectionActionMenus } from './selection-action-menus';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';
 import { SelectionContextMenu } from '@refly-packages/ai-workspace-common/components/canvas/selection-context-menu';
-import { useSelectionMenuPosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-selection-menu-position';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -81,9 +79,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   console.log('nodes', nodes);
   const { onNodesChange, updateNodesWithSync } = useNodeOperations(canvasId);
   const { setSelectedNode } = useNodeSelection();
-  const { ungroupMultipleNodes } = useUngroupNodes();
-  const { createGroupFromSelectedNodes, handleSelectionChange } = useBatchNodesSelection();
-  const { menuPositions, calculateMenuPositions } = useSelectionMenuPosition();
+  const { createGroupFromSelectedNodes } = useBatchNodesSelection();
 
   const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
@@ -209,16 +205,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       setOperatingNodeId(null);
       setContextMenu((prev) => ({ ...prev, open: false }));
 
-      // Remove temporary groups when clicking on canvas
-      const { data } = useCanvasStore.getState();
-      const nodes = data[canvasId]?.nodes ?? [];
-      const tempGroups = nodes.filter((node) => node.type === 'group' && node.data?.metadata?.isTemporary);
-
-      if (tempGroups.length > 0) {
-        const groupIds = tempGroups.map((group) => group.id);
-        ungroupMultipleNodes(groupIds);
-      }
-
       const currentTime = new Date().getTime();
       const timeDiff = currentTime - lastClickTime;
 
@@ -234,7 +220,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
       setLastClickTime(currentTime);
     },
-    [lastClickTime, setOperatingNodeId, canvasId, ungroupMultipleNodes],
+    [lastClickTime, setOperatingNodeId, canvasId],
   );
 
   const handleToolSelect = (tool: string) => {
@@ -394,18 +380,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         return;
       }
 
-      // If clicking a non-group node, remove any temporary groups
-      if (node.type !== 'group') {
-        const { data } = useCanvasStore.getState();
-        const nodes = data[canvasId]?.nodes ?? [];
-        const tempGroups = nodes.filter((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
-
-        if (tempGroups.length > 0) {
-          const groupIds = tempGroups.map((group) => group.id);
-          ungroupMultipleNodes(groupIds);
-        }
-      }
-
       if (node.selected && node.id === operatingNodeId) {
         // Already in operating mode, do nothing
         return;
@@ -427,7 +401,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       // Handle preview if enabled
       handleNodePreview(node);
     },
-    [operatingNodeId, handleNodePreview, setOperatingNodeId, setSelectedNode, canvasId, ungroupMultipleNodes],
+    [operatingNodeId, handleNodePreview, setOperatingNodeId, setSelectedNode, canvasId],
   );
 
   // 缓存节点数据
@@ -564,10 +538,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             nodeTypes={memoizedNodeTypes}
             nodes={memoizedNodes}
             edges={memoizedEdges}
-            onNodesChange={(changes) => {
-              const updatedNodes = onNodesChange(changes);
-              calculateMenuPositions(updatedNodes);
-            }}
+            onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onNodeClick={handleNodeClick}
