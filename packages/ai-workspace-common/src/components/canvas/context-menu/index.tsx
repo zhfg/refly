@@ -102,10 +102,6 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
 
   const handleMenuClick = async (key: string) => {
     switch (key) {
-      // TODO: important: don't delete this, it will be used later
-      // case 'createGroup':
-      //   onCreateGroup?.();
-      //   break;
       case 'toggleLaunchpad':
         setShowLaunchpad(!showLaunchpad);
         break;
