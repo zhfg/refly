@@ -106,15 +106,16 @@ export const ResourceNode = memo(
       }
     }, [isHovered, onHoverEnd]);
 
-    const handleAddToContext = useAddToContext(
-      {
+    const { addToContext } = useAddToContext();
+
+    const handleAddToContext = useCallback(() => {
+      addToContext({
         id: props.id,
         type: 'resource',
         data: props.data,
         position: { x: 0, y: 0 },
-      } as CanvasNode,
-      'resource',
-    );
+      } as CanvasNode);
+    }, [props.id, props.data, addToContext]);
 
     const handleDelete = useDeleteNode(
       {

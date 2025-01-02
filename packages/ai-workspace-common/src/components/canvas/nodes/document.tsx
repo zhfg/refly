@@ -80,15 +80,16 @@ export const DocumentNode = memo(
       onHoverEnd();
     }, [onHoverEnd]);
 
-    const handleAddToContext = useAddToContext(
-      {
+    const { addToContext } = useAddToContext();
+
+    const handleAddToContext = useCallback(() => {
+      addToContext({
         id,
         type: 'document',
         data,
         position: { x: 0, y: 0 },
-      } as CanvasNode,
-      'document',
-    );
+      } as CanvasNode);
+    }, [id, data, addToContext]);
 
     const handleDelete = useDeleteNode(
       {

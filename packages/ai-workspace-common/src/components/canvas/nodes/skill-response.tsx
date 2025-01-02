@@ -42,6 +42,7 @@ import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-works
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { Source } from '@refly/openapi-schema';
 import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -348,10 +349,17 @@ export const SkillResponseNode = memo(
       });
     }, [content, debouncedCreateDocument, data.entityId, data?.title]);
 
+    const { addToContext } = useAddToContext();
+
     const handleAddToContext = useCallback(() => {
       handleAddToChatHistory();
-      addContextItem(node as NodeItem);
-    }, [node, handleAddToChatHistory, addContextItem]);
+      addToContext({
+        id,
+        type: 'skillResponse',
+        data,
+        position: { x: 0, y: 0 },
+      } as CanvasNode);
+    }, [id, data, addToContext]);
 
     const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
       updateSourceListDrawer: state.updateSourceListDrawer,

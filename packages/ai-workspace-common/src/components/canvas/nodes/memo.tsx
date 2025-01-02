@@ -89,15 +89,16 @@ export const MemoNode = ({
     onHoverEnd();
   }, [onHoverEnd]);
 
-  const handleAddToContext = useAddToContext(
-    {
+  const { addToContext } = useAddToContext();
+
+  const handleAddToContext = useCallback(() => {
+    addToContext({
       id,
       type: 'memo',
       data,
       position: { x: 0, y: 0 },
-    } as CanvasNode,
-    'memo',
-  );
+    } as CanvasNode);
+  }, [id, data, addToContext]);
 
   const handleDelete = useDeleteNode(
     {

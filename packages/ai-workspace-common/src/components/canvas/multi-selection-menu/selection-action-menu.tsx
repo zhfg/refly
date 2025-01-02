@@ -21,6 +21,10 @@ import { CanvasNodeType } from '@refly/openapi-schema';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
 import { useBatchNodesSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection';
+import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { message } from 'antd';
+import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 
 interface MenuItem {
   key: string;
@@ -45,6 +49,12 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
   const { addNode } = useAddNode(canvasId);
   const { ungroupNodes } = useUngroupNodes();
   const { createGroupFromSelectedNodes } = useBatchNodesSelection();
+  const { showLaunchpad, setShowLaunchpad } = useCanvasStoreShallow((state) => ({
+    showLaunchpad: state.showLaunchpad,
+    setShowLaunchpad: state.setShowLaunchpad,
+  }));
+  const { handleItemAdd } = useChatHistory();
+  const { addNodesToContext } = useAddToContext();
 
   const handleAskAI = useCallback(() => {
     // Get all selected nodes except skills
@@ -76,8 +86,18 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
   }, [getNodes, addNode, onClose]);
 
   const handleAddToContext = useCallback(() => {
+    const selectedNodes = getNodes()
+      .filter((node) => node.selected)
+      .map((node) => ({
+        id: node.id,
+        type: node.type,
+        data: node.data,
+        position: node.position,
+      })) as CanvasNode[];
+
+    addNodesToContext(selectedNodes);
     onClose?.();
-  }, []);
+  }, [getNodes, addNodesToContext, onClose]);
 
   const handleDelete = useCallback(() => {
     onClose?.();
