@@ -70,6 +70,11 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     onClose?.();
   }, [nodeId]);
 
+  const handleCompareAskAI = useCallback(() => {
+    nodeActionEmitter.emit(createNodeEventName(nodeId, 'compareAskAI'));
+    onClose?.();
+  }, [nodeId, onClose]);
+
   const handleRerun = useCallback(() => {
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'rerun'));
     onClose?.();
@@ -148,6 +153,15 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         type: 'button' as const,
         primary: true,
       },
+      nodeType === 'skillResponse'
+        ? {
+            key: 'compareAskAI',
+            icon: IconAskAI,
+            label: t('canvas.nodeActions.compareAskAI'),
+            onClick: handleCompareAskAI,
+            type: 'button' as const,
+          }
+        : null,
       { key: 'divider-1', type: 'divider' } as MenuItem,
       {
         key: 'preview',
@@ -156,7 +170,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         onClick: handlePreview,
         type: 'button' as const,
       },
-    ];
+    ].filter(Boolean);
 
     const nodeTypeItems: Record<string, MenuItem[]> = {
       document: [

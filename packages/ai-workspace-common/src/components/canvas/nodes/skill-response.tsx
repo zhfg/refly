@@ -40,11 +40,16 @@ import { ModelProviderIcons } from '@refly-packages/ai-workspace-common/componen
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
-import { Source } from '@refly/openapi-schema';
+import { CanvasNodeType, Source } from '@refly/openapi-schema';
 import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import {
+  convertContextItemsToContext,
+  convertContextToItems,
+} from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -400,7 +405,46 @@ export const SkillResponseNode = memo(
         },
         [{ type: 'skillResponse', entityId: data.entityId }],
       );
-    }, [id, data.entityId, addNode]);
+    }, [id, data.entityId, addNode]); // Add new handler for compare run
+
+    const handleCompareAskAI = useCallback(async () => {
+      // Fetch action result to get context
+      const { data: resultData } = await getClient().getActionResult({
+        query: { resultId: data?.entityId },
+      });
+
+      if (!resultData?.success || !resultData.data) {
+        message.error(t('canvas.nodePreview.resultNotFound'));
+        return;
+      }
+
+      const { context, history } = resultData.data;
+      const contextItems = context ? convertContextToItems(context, history) : [];
+
+      // Create new skill node with context, similar to group node implementation
+      const connectTo = contextItems.map((item) => ({
+        type: item.type as CanvasNodeType,
+        entityId: item.data?.entityId,
+      }));
+
+      // Get all context item IDs
+      const contextNodeIds = contextItems.map((item) => item.id);
+
+      // Create new skill node
+      addNode(
+        {
+          type: 'skill',
+          data: {
+            title: t('canvas.nodeActions.compareAskAI'),
+            entityId: genSkillID(),
+            metadata: {
+              contextNodeIds, // Use all context item IDs
+            },
+          },
+        },
+        connectTo,
+      );
+    }, [id, data?.entityId, addNode, t]);
 
     // Update size when content changes
     useEffect(() => {
@@ -419,9 +463,11 @@ export const SkillResponseNode = memo(
       const handleNodeCreateDocument = () => handleCreateDocument();
       const handleNodeDelete = () => handleDelete();
       const handleNodeAskAI = () => handleAskAI();
+      const handleNodeCompareAskAI = () => handleCompareAskAI();
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
+      nodeActionEmitter.on(createNodeEventName(id, 'compareAskAI'), handleNodeCompareAskAI);
       nodeActionEmitter.on(createNodeEventName(id, 'rerun'), handleNodeRerun);
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
@@ -431,6 +477,7 @@ export const SkillResponseNode = memo(
       return () => {
         // Cleanup events when component unmounts
         nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
+        nodeActionEmitter.off(createNodeEventName(id, 'compareAskAI'), handleNodeCompareAskAI);
         nodeActionEmitter.off(createNodeEventName(id, 'rerun'), handleNodeRerun);
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);

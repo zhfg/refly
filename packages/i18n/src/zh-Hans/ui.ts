@@ -587,6 +587,7 @@ const translations = {
     },
     nodeActions: {
       askAI: '问问 AI',
+      compareAskAI: '比较 AI 回答',
       addToContext: '添加到上下文',
       processingVector: '处理向量',
       run: '运行',
