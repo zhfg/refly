@@ -2,28 +2,14 @@ import { Button, Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FC, useCallback, useMemo } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import {
-  IconRerun,
-  IconDelete,
-  IconAskAI,
-  IconLoading,
-  IconRun,
-} from '@refly-packages/ai-workspace-common/components/common/icon';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { IconDelete, IconAskAI, IconLoading } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { FileInput, MessageSquareDiff, FilePlus, Ungroup, Group } from 'lucide-react';
-import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
-import { nodeActionEmitter, createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
-import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
+import { MessageSquareDiff, Group } from 'lucide-react';
 import { genSkillID } from '@refly-packages/utils/id';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
-import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
-import { useBatchNodesSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { message } from 'antd';
-import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
+import { useGroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-group-nodes';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-chat-history';
@@ -46,16 +32,10 @@ interface SelectionActionMenuProps {
 
 export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) => {
   const { t } = useTranslation();
-  const { getNode, getNodes } = useReactFlow();
+  const { getNodes } = useReactFlow();
   const { canvasId } = useCanvasContext();
   const { addNode } = useAddNode(canvasId);
-  const { ungroupNodes } = useUngroupNodes();
-  const { createGroupFromSelectedNodes } = useBatchNodesSelection();
-  const { showLaunchpad, setShowLaunchpad } = useCanvasStoreShallow((state) => ({
-    showLaunchpad: state.showLaunchpad,
-    setShowLaunchpad: state.setShowLaunchpad,
-  }));
-  const { handleItemAdd } = useChatHistory();
+  const { createGroupFromSelectedNodes } = useGroupNodes();
   const { addNodesToContext } = useAddToContext();
   const { deleteNodes } = useDeleteNode();
   const { addNodesToHistory } = useAddToChatHistory();

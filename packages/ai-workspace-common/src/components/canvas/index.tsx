@@ -33,7 +33,7 @@ import {
 } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
-import { useBatchNodesSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection';
+import { useGroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-group-nodes';
 import { SelectionActionMenus } from './multi-selection-menu';
 
 import '@xyflow/react/dist/style.css';
@@ -78,9 +78,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const selectedNodes = nodes.filter((node) => node.selected) || [];
 
   console.log('nodes', nodes);
-  const { onNodesChange, updateNodesWithSync } = useNodeOperations(canvasId);
+  const { onNodesChange } = useNodeOperations(canvasId);
   const { setSelectedNode } = useNodeSelection();
-  const { createGroupFromSelectedNodes } = useBatchNodesSelection();
 
   const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
@@ -458,10 +457,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     setIsNodeDragging(false);
   }, [setIsNodeDragging]);
 
-  const handleCreateGroup = useCallback(() => {
-    createGroupFromSelectedNodes();
-  }, [createGroupFromSelectedNodes]);
-
   const onSelectionContextMenu = useCallback(
     (event: React.MouseEvent) => {
       event.preventDefault();
@@ -590,7 +585,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             position={contextMenu.position}
             setOpen={(open) => setContextMenu((prev) => ({ ...prev, open }))}
             isSelection={contextMenu.isSelection}
-            onCreateGroup={handleCreateGroup}
           />
         )}
 

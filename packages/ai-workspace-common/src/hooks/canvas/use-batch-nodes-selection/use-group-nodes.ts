@@ -9,7 +9,7 @@ import { useUngroupNodes } from './use-ungroup-nodes';
 import { prepareNodeData } from '../../../components/canvas/nodes';
 import { genUniqueId } from '@refly-packages/utils/id';
 
-export const useBatchNodesSelection = () => {
+export const useGroupNodes = () => {
   const canvasId = useCanvasId();
   const { updateNodesWithSync } = useNodeOperations(canvasId);
   const { ungroupNodes } = useUngroupNodes();

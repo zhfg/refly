@@ -5,7 +5,6 @@ import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { useCanvasSync } from './use-canvas-sync';
 import { useContextPanelStore } from '../../stores/context-panel';
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
-import { useSelectionMenuPosition } from './use-selection-menu-position';
 
 export const useNodeOperations = (selectedCanvasId?: string) => {
   const canvasId = useCanvasId();
@@ -34,9 +33,9 @@ export const useNodeOperations = (selectedCanvasId?: string) => {
         measured: node.measured ? { ...node.measured } : undefined,
       }));
 
-      console.log('mutableNodes', mutableNodes);
-      console.log('changes', changes);
-      console.log('onNodesChange nodes', nodes);
+      // console.log('mutableNodes', mutableNodes);
+      // console.log('changes', changes);
+      // console.log('onNodesChange nodes', nodes);
 
       // Handle deleted nodes
       const deletedNodes = changes.filter((change) => change.type === 'remove');
