@@ -75,6 +75,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     nodes: state.data[canvasId]?.nodes ?? [],
     edges: state.data[canvasId]?.edges ?? [],
   }));
+  const selectedNodes = nodes.filter((node) => node.selected) || [];
 
   console.log('nodes', nodes);
   const { onNodesChange, updateNodesWithSync } = useNodeOperations(canvasId);
@@ -373,6 +374,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   const handleNodeClick = useCallback(
     (event: React.MouseEvent, node: CanvasNode<any>) => {
+      const { operatingNodeId } = useCanvasStore.getState();
       setContextMenu((prev) => ({ ...prev, open: false }));
 
       if (!node?.id) {
@@ -460,9 +462,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     createGroupFromSelectedNodes();
   }, [createGroupFromSelectedNodes]);
 
-  // Add selected nodes state
-  const [selectedNodes, setSelectedNodes] = useState<Node[]>([]);
-
   const onSelectionContextMenu = useCallback(
     (event: React.MouseEvent) => {
       event.preventDefault();
@@ -480,10 +479,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     },
     [reactFlowInstance, nodes],
   );
-
-  const onSelectionChange = useCallback(({ nodes }: { nodes: Node[] }) => {
-    setSelectedNodes(nodes);
-  }, []);
 
   return (
     <Spin
@@ -536,9 +531,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             nodesDraggable={!operatingNodeId}
             // onlyRenderVisibleElements={true}
             elevateNodesOnSelect={false}
-            // TODO: important: don't delete this, it will be used later
             onSelectionContextMenu={onSelectionContextMenu}
-            onSelectionChange={onSelectionChange}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
@@ -621,7 +614,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
           />
         )}
 
-        <SelectionActionMenus selectedNodes={selectedNodes} />
+        {selectedNodes.length > 0 && <SelectionActionMenus />}
       </div>
     </Spin>
   );

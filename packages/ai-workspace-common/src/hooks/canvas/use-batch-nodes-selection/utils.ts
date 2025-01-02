@@ -113,7 +113,7 @@ export const calculateGroupBoundaries = (nodesToGroup: Node[], currentNodes: Nod
       boxShadow: 'none',
       ...dimensions,
     },
-    selected: true,
+    selected: false,
     draggable: true,
   };
 

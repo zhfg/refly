@@ -83,7 +83,7 @@ export const GroupNode = memo(
           className="relative h-full rounded-lg"
           style={{
             background: 'transparent',
-            border: isTemporary ? 'none' : '2px dashed rgba(0, 0, 0, 0.1)',
+            border: selected ? '2px dashed #00968F' : '2px dashed rgba(0, 0, 0, 0.1)',
             transition: 'all 0.2s ease',
           }}
         >

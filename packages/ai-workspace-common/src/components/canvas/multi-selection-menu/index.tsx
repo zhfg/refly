@@ -5,9 +5,7 @@ import { SelectionActionMenu } from './selection-action-menu';
 import { CanvasNode } from '../nodes';
 import { calculateGroupBoundaries } from './utils';
 
-interface SelectionActionMenusProps {
-  selectedNodes: Node[];
-}
+interface SelectionActionMenusProps {}
 
 export const SelectionActionMenus: FC<SelectionActionMenusProps> = () => {
   const [isTopMenuHovered, setIsTopMenuHovered] = useState(false);
