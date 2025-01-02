@@ -12,7 +12,7 @@ import {
 import { ModelInfo } from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import {
-  convertContextItemsToContext,
+  convertContextItemsToInvokeParams,
   convertContextItemsToEdges,
 } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
@@ -65,6 +65,8 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
     addEdges(edgesToAdd);
     deleteElements({ edges: edgesToDelete });
 
+    const { context, resultHistory } = convertContextItemsToInvokeParams(editContextItems);
+
     invokeAction({
       resultId,
       input: {
@@ -75,13 +77,8 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
         entityType: 'canvas',
       },
       modelName: editModelInfo?.name,
-      context: convertContextItemsToContext(editContextItems),
-      resultHistory: editContextItems
-        .filter((item) => item.type === 'skillResponse')
-        .map((item) => ({
-          resultId: item.data?.entityId,
-          title: item.data?.title,
-        })),
+      context,
+      resultHistory,
       skillName: actionMeta?.name,
     });
     setEditMode(false);

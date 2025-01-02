@@ -11,7 +11,7 @@ import { ModelInfo, Skill } from '@refly/openapi-schema';
 import { useDebouncedCallback } from 'use-debounce';
 import { ChatActions } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
-import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
@@ -157,6 +157,7 @@ export const SkillNode = memo(
       const node = getNode(id);
       const data = node?.data as CanvasNodeData<SkillNodeMeta>;
       const { query, modelInfo, selectedSkill } = data.metadata ?? {};
+      const { context, resultHistory } = convertContextItemsToInvokeParams(contextItems);
 
       deleteElements({ nodes: [node] });
 
@@ -171,13 +172,8 @@ export const SkillNode = memo(
             entityType: 'canvas',
           },
           modelName: modelInfo?.name,
-          context: convertContextItemsToContext(contextItems),
-          resultHistory: contextItems
-            .filter((item) => item.type === 'skillResponse')
-            .map((item) => ({
-              resultId: item.data?.entityId,
-              title: item.data?.title,
-            })),
+          context,
+          resultHistory,
           skillName: selectedSkill?.name,
         },
         node?.position,

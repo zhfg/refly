@@ -42,8 +42,6 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
 
   const contextPanelStore = useContextPanelStoreShallow((state) => ({
     clearContextItems: state.clearContextItems,
-    resetSelectedTextCardState: state.resetSelectedTextCardState,
-    clearHistoryItems: state.clearHistoryItems,
   }));
 
   const handleSearchValueChange = (val: string) => {
@@ -164,9 +162,7 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
                 size="small"
                 icon={<IconRefresh />}
                 onClick={() => {
-                  contextPanelStore.resetSelectedTextCardState();
                   contextPanelStore.clearContextItems();
-                  contextPanelStore.clearHistoryItems();
                 }}
               >
                 {t('knowledgeBase.context.clearContext')}

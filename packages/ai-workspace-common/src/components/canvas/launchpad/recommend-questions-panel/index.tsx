@@ -11,7 +11,7 @@ import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { InvokeSkillRequest } from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 interface RecommendQuestionsPanelProps {
@@ -30,8 +30,9 @@ export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = (
     setLoading(true);
     const resultId = genActionResultID();
     const { selectedModel, newQAText } = useChatStore.getState();
-    const { historyItems, contextItems } = useContextPanelStore.getState();
+    const { contextItems } = useContextPanelStore.getState();
     const { localSettings } = useUserStore.getState();
+    const { context, resultHistory } = convertContextItemsToInvokeParams(contextItems);
 
     const param: InvokeSkillRequest = {
       resultId,
@@ -39,14 +40,10 @@ export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = (
         query: newQAText,
       },
       target: null,
-      context: convertContextItemsToContext(contextItems),
+      context,
       skillName: 'recommendQuestions',
       modelName: selectedModel?.name,
-      resultHistory: historyItems.map((item) => ({
-        resultId: item?.data?.entityId,
-        title: item?.data?.title,
-        steps: item?.data?.metadata?.steps,
-      })),
+      resultHistory,
       tplConfig: {
         refresh: {
           value: refresh,

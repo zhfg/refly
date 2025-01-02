@@ -20,8 +20,11 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { HiCheck, HiXMark } from 'react-icons/hi2';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import {
+  useContextPanelStore,
+  useContextPanelStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { IconCopy } from '@arco-design/web-react/icon';
 import { ModelSelector } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions/model-selector';
@@ -96,6 +99,11 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
     setSelectedModel: state.setSelectedModel,
   }));
 
+  const { contextItems, setContextItems } = useContextPanelStoreShallow((state) => ({
+    contextItems: state.contextItems,
+    setContextItems: state.setContextItems,
+  }));
+
   const handleEdit = () => {
     const selection = editor.state.selection;
     const startIndex = selection.from;
@@ -129,9 +137,10 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
     const resultId = genActionResultID();
     setResultId(resultId);
 
-    const { contextItems, historyItems } = useContextPanelStore.getState();
+    // TODO: maybe use independent context panel store
+    const { contextItems } = useContextPanelStore.getState();
 
-    const context = convertContextItemsToContext(contextItems);
+    const { context, resultHistory } = convertContextItemsToInvokeParams(contextItems);
     if (context.documents) {
       const hasCurrentDoc = context.documents.some((doc) => doc.docId === docId);
 
@@ -160,12 +169,6 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
         });
       }
     }
-
-    const resultHistory = historyItems.map((item) => ({
-      resultId: item.data.entityId,
-      title: item.data.title,
-      steps: item.data.metadata?.steps,
-    }));
 
     const param: InvokeSkillRequest = {
       resultId,
@@ -335,7 +338,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                   trigger={['click']}
                 />
               </Button>
-              <AddBaseMarkContext />
+              <AddBaseMarkContext contextItems={contextItems} setContextItems={setContextItems} />
               <Input.TextArea
                 value={inputValue}
                 autoSize={{

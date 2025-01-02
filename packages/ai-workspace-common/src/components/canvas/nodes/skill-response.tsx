@@ -8,16 +8,13 @@ import { Node } from '@xyflow/react';
 import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
 import { CustomHandle } from './custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
-import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-insert-to-document';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
-import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-chat-history';
 import {
   IconError,
   IconLoading,
@@ -273,8 +270,6 @@ export const SkillResponseNode = memo(
     const isTargetConnected = edges?.some((edge) => edge.target === id);
     const isSourceConnected = edges?.some((edge) => edge.source === id);
 
-    const edgeStyles = useEdgeStyles();
-
     // Handle node hover events
     const handleMouseEnter = useCallback(() => {
       setIsHovered(true);
@@ -285,8 +280,6 @@ export const SkillResponseNode = memo(
       setIsHovered(false);
       onHoverEnd();
     }, [onHoverEnd]);
-
-    const handleAddToChatHistory = useAddToChatHistory(node as NodeItem);
 
     const { invokeAction } = useInvokeAction();
 
@@ -322,9 +315,6 @@ export const SkillResponseNode = memo(
       await insertToDoc('insertBelow', content);
     }, [insertToDoc, entityId, content]);
 
-    const runtime = getRuntime();
-    const isWeb = runtime === 'web';
-
     const handleDelete = useDeleteNode(
       {
         id,
@@ -345,9 +335,8 @@ export const SkillResponseNode = memo(
     }, [content, debouncedCreateDocument, entityId, title]);
 
     const handleAddToContext = useCallback(() => {
-      handleAddToChatHistory();
       addContextItem(node as NodeItem);
-    }, [node, handleAddToChatHistory, addContextItem]);
+    }, [node, addContextItem]);
 
     const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
       updateSourceListDrawer: state.updateSourceListDrawer,

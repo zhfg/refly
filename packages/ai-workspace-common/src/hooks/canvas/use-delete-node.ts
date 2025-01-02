@@ -5,7 +5,6 @@ import { message } from 'antd';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
-import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
@@ -13,7 +12,6 @@ export const useDeleteNode = (node: CanvasNode, nodeType: CanvasNodeType) => {
   const { setNodes, setEdges } = useReactFlow();
   const { t } = useTranslation();
   const { canvasId } = useCanvasContext();
-  const { handleItemDelete } = useChatHistory();
 
   return useCallback(() => {
     // Delete node from canvas
@@ -29,10 +27,6 @@ export const useDeleteNode = (node: CanvasNode, nodeType: CanvasNodeType) => {
     // Delete node preview from canvas store
     const canvasStore = useCanvasStore.getState();
     canvasStore.removeNodePreview(canvasId, node.id);
-
-    if (nodeType === 'skillResponse') {
-      handleItemDelete(node);
-    }
 
     // Get node title based on node type
     const nodeTitle = node.data?.title ?? t('knowledgeBase.context.untitled');

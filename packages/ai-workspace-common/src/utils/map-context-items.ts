@@ -89,8 +89,10 @@ export const convertContextToItems = (context?: SkillContext, history?: ActionRe
   return items;
 };
 
-export const convertContextItemsToContext = (items: NodeItem[]) => {
-  return {
+export const convertContextItemsToInvokeParams = (
+  items: NodeItem[],
+): { context: SkillContext; resultHistory: ActionResult[] } => {
+  const context = {
     contentList: items
       ?.filter((item) => item?.data?.metadata?.sourceType?.includes('Selection'))
       ?.map((item) => ({
@@ -136,6 +138,14 @@ export const convertContextItemsToContext = (items: NodeItem[]) => {
         },
       })),
   };
+  const resultHistory = items
+    ?.filter((item) => item.type === 'skillResponse')
+    .map((item) => ({
+      resultId: item.data?.entityId,
+      title: item.data?.title,
+    }));
+
+  return { context, resultHistory };
 };
 
 export const convertContextItemsToEdges = (

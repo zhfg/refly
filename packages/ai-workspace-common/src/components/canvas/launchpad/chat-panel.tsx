@@ -12,7 +12,7 @@ import { InvokeSkillRequest } from '@refly/openapi-schema';
 import { genActionResultID } from '@refly-packages/utils/id';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 import { SelectedSkillHeader } from './selected-skill-header';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
@@ -20,7 +20,6 @@ import { ContextManager } from './context-manager';
 import { ConfigManager } from './config-manager';
 import { ChatActions, CustomAction } from './chat-actions';
 import { ChatInput } from './chat-input';
-import { useChatHistory } from './hooks/use-chat-history';
 
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
@@ -61,7 +60,6 @@ export const ChatPanel = () => {
   const { canvasId } = useCanvasContext();
   const { handleFilterErrorTip } = useContextFilterErrorTip();
   const { invokeAction, abortAction } = useInvokeAction();
-  const { pinAllHistoryItems } = useChatHistory();
 
   // automatically sync selected nodes to context
   useSyncSelectedNodesToContext(contextItems, setContextItems);
@@ -94,9 +92,6 @@ export const ChatPanel = () => {
       return;
     }
 
-    // Pin all history items before sending new message
-    pinAllHistoryItems();
-
     const { formErrors } = useContextPanelStore.getState();
     if (formErrors && Object.keys(formErrors).length > 0) {
       notification.error({
@@ -110,9 +105,11 @@ export const ChatPanel = () => {
 
     const { localSettings } = useUserStore.getState();
     const { newQAText, selectedModel } = useChatStore.getState();
-    const { contextItems, historyItems } = useContextPanelStore.getState();
+    const { contextItems } = useContextPanelStore.getState();
 
     const resultId = genActionResultID();
+    const { context, resultHistory } = convertContextItemsToInvokeParams(contextItems);
+
     const param: InvokeSkillRequest = {
       resultId,
       input: {
@@ -123,12 +120,8 @@ export const ChatPanel = () => {
         entityType: 'canvas',
       },
       modelName: selectedModel?.name,
-      context: convertContextItemsToContext(contextItems),
-      resultHistory: historyItems.map((item) => ({
-        resultId: item.data.entityId,
-        title: item.data.title,
-        steps: item.data.metadata?.steps,
-      })),
+      context,
+      resultHistory,
       skillName: skillStore.selectedSkill?.name,
       locale: localSettings?.outputLocale,
       tplConfig,

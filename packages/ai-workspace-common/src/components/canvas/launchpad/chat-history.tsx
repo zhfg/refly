@@ -8,7 +8,6 @@ import { Pin, PinOff } from 'lucide-react';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { NodeItem, useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getResultDisplayContent } from '@refly-packages/ai-workspace-common/components/common/result-display';
-import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 
@@ -29,7 +28,13 @@ interface ChatHistoryProps {
   onItemDelete?: (item: NodeItem) => void;
 }
 
-export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = false, onCleanup }) => {
+export const ChatHistory: React.FC<ChatHistoryProps> = ({
+  items,
+  readonly = false,
+  onCleanup,
+  onItemPin,
+  onItemDelete,
+}) => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
@@ -37,9 +42,8 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
   const { removeContextItem } = useContextPanelStoreShallow((state) => ({
     removeContextItem: state.removeContextItem,
   }));
-  const { chatHistoryOpen, historyItems, clearHistoryItems, handleItemPin, handleItemDelete } = useChatHistory();
 
-  const renderItems = items ?? historyItems;
+  const renderItems = items;
 
   // Sync selected nodes with history items
 
@@ -65,7 +69,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
   // Add validation for renderItems
   const validItems = (renderItems || []).filter((item) => item && typeof item === 'object' && item.data);
 
-  if (!chatHistoryOpen || validItems.length === 0) {
+  if (validItems.length === 0) {
     return null;
   }
 
@@ -103,7 +107,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
                       size="small"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleItemPin(item);
+                        onItemPin?.(item);
                       }}
                       icon={
                         item?.isPreview ? (
@@ -121,7 +125,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ items, readonly = fals
                       size="small"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleItemDelete(item);
+                        onItemDelete?.(item);
                         removeContextItem(item.id);
                       }}
                       icon={<IconDelete className="w-4 h-4 text-gray-400" />}
