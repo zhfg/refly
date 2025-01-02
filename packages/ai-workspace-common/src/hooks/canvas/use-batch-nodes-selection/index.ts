@@ -20,12 +20,11 @@ export const useBatchNodesSelection = () => {
   const canvasId = useCanvasId();
   const { updateNodesWithSync } = useNodeOperations(canvasId);
   const { ungroupMultipleNodes } = useUngroupNodes();
-  // ungroup
 
   const [tempGroupId, setTempGroupId] = useState<string | null>(null);
 
-  const destroyTemporaryGroups = (nodes: CanvasNode<any>[], ungroupMultipleNodes: (ids: string[]) => void) => {
-    const tempGroups = nodes.filter((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
+  const destroyTemporaryGroups = (beforeNodes: CanvasNode<any>[], ungroupMultipleNodes: (ids: string[]) => void) => {
+    const tempGroups = beforeNodes.filter((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
     if (tempGroups.length > 0) {
       const groupIds = tempGroups.map((group) => group.id);
       ungroupMultipleNodes(groupIds);
@@ -35,20 +34,20 @@ export const useBatchNodesSelection = () => {
   const shouldUpdateExistingTempGroup = (
     selectedNodes: Node[],
     existingTempGroup: Node | undefined,
-    currentNodes: Node[],
+    beforeNodes: Node[],
   ) => {
     if (!existingTempGroup) return false;
 
     const selectedGroups = selectedNodes.filter((node) => node.type === 'group');
     const selectedNonGroups = selectedNodes.filter((node) => node.type !== 'group' && !node.parentId);
     const currentSelectedIds = new Set([...selectedGroups.map((n) => n.id), ...selectedNonGroups.map((n) => n.id)]);
-    const currentGroupChildren = currentNodes.filter((n) => n.parentId === existingTempGroup.id);
-    const currentChildrenIds = new Set(currentGroupChildren.map((n) => n.id));
+    const beforeGroupChildren = beforeNodes.filter((n) => n.parentId === existingTempGroup.id);
+    const beforeChildrenIds = new Set(beforeGroupChildren.map((n) => n.id));
 
     // Return false if selection hasn't changed
     return !(
-      currentSelectedIds.size === currentChildrenIds.size &&
-      [...currentSelectedIds].every((id) => currentChildrenIds.has(id))
+      currentSelectedIds.size === beforeChildrenIds.size &&
+      [...currentSelectedIds].every((id) => beforeChildrenIds.has(id))
     );
   };
 
@@ -65,16 +64,16 @@ export const useBatchNodesSelection = () => {
   };
 
   const convertTemporaryToPermGroup = useCallback(
-    (groupId: string) => {
+    (tempGroupId: string) => {
       const { data } = useCanvasStore.getState();
-      const nodes = data[canvasId]?.nodes ?? [];
-      const currentNode = nodes.find((n) => n.id === groupId);
+      const beforeNodes = data[canvasId]?.nodes ?? [];
+      const currentTempGroupNode = beforeNodes.find((n) => n.id === tempGroupId);
 
-      if (!currentNode) return;
+      if (!currentTempGroupNode) return;
 
       // Update the current temporary group to permanent and clear all selections
-      const updatedNodes = nodes.map((node) => {
-        if (node.id === groupId) {
+      const updatedNodes = beforeNodes.map((node) => {
+        if (node.id === tempGroupId) {
           // Update the temporary group to permanent
           return {
             ...node,
@@ -105,63 +104,65 @@ export const useBatchNodesSelection = () => {
     [canvasId, updateNodesWithSync],
   );
 
-  const createGroupFromSelectedNodes = useCallback(() => {
-    const { data } = useCanvasStore.getState();
-    const nodes = data[canvasId]?.nodes ?? [];
-    const selectedNodes = nodes.filter((node) => node.selected);
+  const createGroupFromSelectedNodes = useCallback(
+    (selectedNodes: Node[]) => {
+      const { data } = useCanvasStore.getState();
+      const beforeNodes = data[canvasId]?.nodes ?? [];
 
-    if (selectedNodes.length < 2) return;
+      if (selectedNodes.length < 2) return;
 
-    // Check if there's already a temporary group
-    const tempGroup = nodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
-    if (tempGroup) {
-      // If there's a temporary group, convert it to permanent
-      convertTemporaryToPermGroup(tempGroup.id);
-      return;
-    }
-
-    // Update width and height calculation using the same logic
-    const { groupNode, minX, minY } = calculateGroupBoundaries(selectedNodes, nodes);
-
-    // Update nodes to be children of the group while maintaining their absolute positions
-    const updatedNodes = nodes.map((node) => {
-      if (node.selected) {
-        return {
-          ...node,
-          parentId: groupNode.id,
-          extent: 'parent' as const,
-          // Keep original absolute position
-          positionAbsolute: {
-            x: node.position.x,
-            y: node.position.y,
-          },
-          // Set relative position within group
-          position: {
-            x: node.position.x - minX + PADDING / 2,
-            y: node.position.y - minY + PADDING / 2,
-          },
-          selected: false,
-          draggable: true,
-        };
+      // Check if there's already a temporary group
+      const tempGroup = beforeNodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
+      if (tempGroup) {
+        // If there's a temporary group, convert it to permanent
+        convertTemporaryToPermGroup(tempGroup.id);
+        return;
       }
-      return node;
-    });
 
-    updateNodesWithSync(sortNodes([...updatedNodes, groupNode]));
-  }, [canvasId, updateNodesWithSync, convertTemporaryToPermGroup]);
+      // Update width and height calculation using the same logic
+      const { groupNode, minX, minY } = calculateGroupBoundaries(selectedNodes, beforeNodes);
+
+      // Update nodes to be children of the group while maintaining their absolute positions
+      const updatedNodes = beforeNodes.map((node) => {
+        if (node.selected) {
+          return {
+            ...node,
+            parentId: groupNode.id,
+            extent: 'parent' as const,
+            // Keep original absolute position
+            positionAbsolute: {
+              x: node.position.x,
+              y: node.position.y,
+            },
+            // Set relative position within group
+            position: {
+              x: node.position.x - minX + PADDING / 2,
+              y: node.position.y - minY + PADDING / 2,
+            },
+            selected: false,
+            draggable: true,
+          };
+        }
+        return node;
+      });
+
+      updateNodesWithSync(sortNodes([...updatedNodes, groupNode]));
+    },
+    [canvasId, updateNodesWithSync, convertTemporaryToPermGroup],
+  );
 
   const createTemporaryGroup = useCallback(
     (selectedNodes: Node[]) => {
       if (selectedNodes.length < 2) {
         if (tempGroupId) {
           const { data } = useCanvasStore.getState();
-          const nodes = data[canvasId]?.nodes ?? [];
-          const existingGroup = nodes.find((n) => n.id === tempGroupId);
+          const beforeNodes = data[canvasId]?.nodes ?? [];
+          const existingGroup = beforeNodes.find((n) => n.id === tempGroupId);
           if (!existingGroup) {
             return;
           }
 
-          const updatedNodes = nodes
+          const updatedNodes = beforeNodes
             .map((node) => {
               if (node.parentId === tempGroupId) {
                 const { parentId, extent, ...nodeWithoutParent } = node;
@@ -184,26 +185,29 @@ export const useBatchNodesSelection = () => {
       }
 
       const { data } = useCanvasStore.getState();
-      const nodes = data[canvasId]?.nodes ?? [];
-      const existingGroup = nodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
+      const beforeNodes = data[canvasId]?.nodes ?? [];
+      const existingGroup = beforeNodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
 
       // If there's already a temporary group with the same selected nodes, don't recreate
       if (existingGroup) {
-        const groupChildren = nodes.filter((n) => n.parentId === existingGroup.id);
-        const selectedIds = new Set(selectedNodes.map((n) => n.id));
-        const childrenIds = new Set(groupChildren.map((n) => n.id));
+        const beforeGroupChildren = beforeNodes.filter((n) => n.parentId === existingGroup.id);
+        const currentSelectedIds = new Set(selectedNodes.map((n) => n.id));
+        const beforeChildrenIds = new Set(beforeGroupChildren.map((n) => n.id));
 
         // Check if the selected nodes are the same as the group children
-        if (selectedIds.size === childrenIds.size && [...selectedIds].every((id) => childrenIds.has(id))) {
+        if (
+          currentSelectedIds.size === beforeChildrenIds.size &&
+          [...currentSelectedIds].every((id) => beforeChildrenIds.has(id))
+        ) {
           return;
         }
       }
 
-      const { groupNode, minX, minY } = calculateGroupBoundaries(selectedNodes, nodes);
+      const { groupNode, minX, minY } = calculateGroupBoundaries(selectedNodes, beforeNodes);
 
       setTempGroupId(groupNode.id);
 
-      const updatedNodes = nodes.map((node) => {
+      const updatedNodes = beforeNodes.map((node) => {
         if (node.selected) {
           return {
             ...node,
@@ -232,32 +236,32 @@ export const useBatchNodesSelection = () => {
   );
 
   const updateTempGroup = useCallback(
-    (selectedNodes: Node[], currentNodes: Node[], existingGroupId: string) => {
+    (selectedNodes: Node[], beforeNodes: Node[], existingGroupId: string) => {
       // 检查是否需要更新
       const currentSelectedIds = new Set(selectedNodes.filter((n) => n.type !== 'group').map((n) => n.id));
-      const currentGroupChildren = currentNodes.filter((n) => n.parentId === existingGroupId && n.type !== 'group');
-      const currentChildrenIds = new Set(currentGroupChildren.map((n) => n.id));
+      const beforeGroupChildren = beforeNodes.filter((n) => n.parentId === existingGroupId && n.type !== 'group');
+      const beforeChildrenIds = new Set(beforeGroupChildren.map((n) => n.id));
 
       // 如果选中节点和当前组内节点完全相同，则不需要更新
       if (
-        currentSelectedIds.size === currentChildrenIds.size &&
-        [...currentSelectedIds].every((id) => currentChildrenIds.has(id))
+        currentSelectedIds.size === beforeChildrenIds.size &&
+        [...currentSelectedIds].every((id) => beforeChildrenIds.has(id))
       ) {
         return;
       }
 
-      console.log('updateTempGroup', selectedNodes, currentGroupChildren, existingGroupId);
+      console.log('updateTempGroup', selectedNodes, beforeGroupChildren, existingGroupId);
 
       // Find existing group node
-      const existingGroup = currentNodes.find((n) => n.id === existingGroupId);
-      if (!existingGroup) return;
+      const existingGroup = beforeNodes.find((n) => n.id === existingGroupId);
+      // if (!existingGroup) return;
 
       // Calculate new boundaries for all selected nodes
-      const { minX, minY, dimensions } = calculateGroupBoundaries(selectedNodes, currentNodes);
+      const { minX, minY, dimensions } = calculateGroupBoundaries(selectedNodes, beforeNodes);
       const { width, height } = dimensions;
 
       // Update existing group node and its children
-      const updatedNodes = currentNodes.map((node) => {
+      const updatedNodes = beforeNodes.map((node) => {
         if (node.id === existingGroupId) {
           return {
             ...node,
@@ -330,20 +334,20 @@ export const useBatchNodesSelection = () => {
   const handleSelectionChange = useCallback(
     (selectedNodes: CanvasNode<any>[] = []) => {
       const { data } = useCanvasStore.getState();
-      const currentNodes = data[canvasId]?.nodes ?? [];
+      const beforeNodes = data[canvasId]?.nodes ?? [];
 
       // Step 1: Handle case when 1 or fewer nodes are selected
       if (shouldDestroyTemporaryGroup(selectedNodes)) {
-        destroyTemporaryGroups(currentNodes, ungroupMultipleNodes);
+        destroyTemporaryGroups(beforeNodes, ungroupMultipleNodes);
         return;
       }
 
       // Step 2: Check for existing temporary group
-      const existingTempGroup = currentNodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
+      const existingTempGroup = beforeNodes.find((n) => n.type === 'group' && n.data?.metadata?.isTemporary);
 
       // Step 3: Update existing temporary group if needed
-      if (existingTempGroup && shouldUpdateExistingTempGroup(selectedNodes, existingTempGroup, currentNodes)) {
-        updateTempGroup(selectedNodes, currentNodes, existingTempGroup?.id);
+      if (existingTempGroup && shouldUpdateExistingTempGroup(selectedNodes, existingTempGroup, beforeNodes)) {
+        updateTempGroup(selectedNodes, beforeNodes, existingTempGroup?.id);
         return;
       }
 
