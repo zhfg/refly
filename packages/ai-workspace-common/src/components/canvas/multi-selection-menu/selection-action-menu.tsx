@@ -26,6 +26,7 @@ import { message } from 'antd';
 import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
+import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-chat-history';
 
 interface MenuItem {
   key: string;
@@ -57,6 +58,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
   const { handleItemAdd } = useChatHistory();
   const { addNodesToContext } = useAddToContext();
   const { deleteNodes } = useDeleteNode();
+  const { addNodesToHistory } = useAddToChatHistory();
 
   const handleAskAI = useCallback(() => {
     // Get all selected nodes except skills
@@ -97,9 +99,17 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
         position: node.position,
       })) as CanvasNode[];
 
+    // Add all selected nodes to context
     addNodesToContext(selectedNodes);
+
+    // Add skill response nodes to chat history
+    const skillResponseNodes = selectedNodes.filter((node) => node.type === 'skillResponse');
+    if (skillResponseNodes.length > 0) {
+      addNodesToHistory(skillResponseNodes, { showMessage: false });
+    }
+
     onClose?.();
-  }, [getNodes, addNodesToContext, onClose]);
+  }, [getNodes, addNodesToContext, addNodesToHistory, onClose]);
 
   const handleDelete = useCallback(() => {
     const selectedNodes = getNodes()

@@ -11,6 +11,9 @@ import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-works
 import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { useReactFlow } from '@xyflow/react';
+import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-chat-history';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
+import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 interface GroupMetadata {
   label?: string;
@@ -44,6 +47,31 @@ export const GroupNode = memo(
     const { ungroupNodes } = useUngroupNodes();
     const { getNodes } = useReactFlow();
     const { deleteNodes, deleteNode } = useDeleteNode();
+    const { addNodesToContext } = useAddToContext();
+    const { addNodesToHistory } = useAddToChatHistory();
+
+    const handleAddToContext = useCallback(() => {
+      const childNodes = getNodes().filter((node) => {
+        const isInGroup = node.parentId === id;
+        return isInGroup;
+      });
+
+      if (childNodes.length > 0) {
+        const nodesToAdd = childNodes.map((node) => ({
+          id: node.id,
+          type: node.type,
+          data: node.data,
+          position: node.position,
+        }));
+
+        addNodesToContext(nodesToAdd as CanvasNode[]);
+
+        const skillResponseNodes = nodesToAdd.filter((node) => node.type === 'skillResponse');
+        if (skillResponseNodes.length > 0) {
+          addNodesToHistory(skillResponseNodes as NodeItem[], { showMessage: false });
+        }
+      }
+    }, [id, data, getNodes, addNodesToContext, addNodesToHistory]);
 
     useEffect(() => {
       const handleNodeUngroup = () => {
@@ -51,12 +79,14 @@ export const GroupNode = memo(
       };
 
       nodeActionEmitter.on(createNodeEventName(id, 'ungroup'), handleNodeUngroup);
+      nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleAddToContext);
 
       return () => {
         nodeActionEmitter.off(createNodeEventName(id, 'ungroup'), handleNodeUngroup);
+        nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleAddToContext);
         cleanupNodeEvents(id);
       };
-    }, [id, ungroupNodes]);
+    }, [id, ungroupNodes, handleAddToContext]);
 
     const handleMouseEnter = useCallback(() => {
       setIsHovered(true);

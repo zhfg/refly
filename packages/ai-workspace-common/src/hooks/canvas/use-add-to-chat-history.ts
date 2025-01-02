@@ -3,24 +3,50 @@ import { useTranslation } from 'react-i18next';
 import { message } from 'antd';
 import { NodeItem, useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
-export const useAddToChatHistory = (node: NodeItem) => {
+interface AddToChatHistoryOptions {
+  showMessage?: boolean;
+}
+
+export const useAddToChatHistory = () => {
   const { t } = useTranslation();
 
-  return useCallback(() => {
-    const contextStore = useContextPanelStore.getState();
-    const historyItems = contextStore.historyItems;
+  const addSingleNodeToHistory = useCallback(
+    (node: NodeItem, options: AddToChatHistoryOptions = {}) => {
+      const { showMessage = true } = options;
+      const contextStore = useContextPanelStore.getState();
+      const historyItems = contextStore.historyItems;
 
-    // Check if node is already in context
-    const existingItem = historyItems.find((item) => item.id === node.id);
+      // Check if node is already in context
+      const existingItem = historyItems.find((item) => item.id === node.id);
 
-    if (existingItem) {
-      contextStore.updateHistoryItem({ ...node, isPreview: false });
-      message.warning(t('canvas.chatHistory.alreadyAdded'));
-      return;
-    }
+      if (existingItem) {
+        contextStore.updateHistoryItem({ ...node, isPreview: false });
+        if (showMessage) {
+          message.warning(t('canvas.chatHistory.alreadyAdded'));
+        }
+        return;
+      }
 
-    // Add node to context
-    contextStore.addHistoryItem(node);
-    message.success(t('canvas.chatHistory.addSuccess'));
-  }, [node, t]);
+      // Add node to context
+      contextStore.addHistoryItem(node);
+      if (showMessage) {
+        message.success(t('canvas.chatHistory.addSuccess'));
+      }
+    },
+    [t],
+  );
+
+  const addNodesToHistory = useCallback(
+    (nodes: NodeItem[], options: AddToChatHistoryOptions = {}) => {
+      // Add each node to history
+      const results = nodes.map((node) => addSingleNodeToHistory(node, { ...options }));
+      return results.length;
+    },
+    [addSingleNodeToHistory],
+  );
+
+  return {
+    addToHistory: addSingleNodeToHistory,
+    addNodesToHistory,
+  };
 };

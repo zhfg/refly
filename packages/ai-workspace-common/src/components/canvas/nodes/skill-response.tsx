@@ -291,8 +291,7 @@ export const SkillResponseNode = memo(
       onHoverEnd();
     }, [onHoverEnd]);
 
-    const handleAddToChatHistory = useAddToChatHistory(node as NodeItem);
-
+    const { addToHistory } = useAddToChatHistory();
     const { invokeAction } = useInvokeAction();
 
     const handleRerun = useCallback(() => {
@@ -353,14 +352,21 @@ export const SkillResponseNode = memo(
     const { addToContext } = useAddToContext();
 
     const handleAddToContext = useCallback(() => {
-      handleAddToChatHistory();
       addToContext({
         id,
         type: 'skillResponse',
         data,
         position: { x: 0, y: 0 },
       } as CanvasNode);
-    }, [id, data, addToContext]);
+
+      // Add to chat history
+      addToHistory({
+        id,
+        type: 'skillResponse',
+        data,
+        position: { x: 0, y: 0 },
+      } as CanvasNode);
+    }, [id, data, addToContext, addToHistory]);
 
     const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
       updateSourceListDrawer: state.updateSourceListDrawer,
