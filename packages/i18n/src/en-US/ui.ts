@@ -511,6 +511,9 @@ const translations = {
       showLaunchpad: 'Show Ask AI',
       hideEdges: 'Hide Edges',
       showEdges: 'Show Edges',
+      toggleNodeSizeMode: 'Toggle Node Size Mode',
+      compactMode: 'Compact Mode',
+      adaptiveMode: 'Adaptive Mode',
     },
     toolbar: {
       enablePointerMode: 'Enable Pointer Mode',
@@ -595,7 +598,7 @@ const translations = {
     },
     nodeActions: {
       askAI: 'Ask AI',
-      compareAskAI: 'Compare Ask AI',
+      cloneAskAI: 'Clone Ask AI',
       batchRun: 'Batch Run',
       addToContext: 'Add to Context',
       processingVector: 'Processing Vector',
@@ -609,6 +612,8 @@ const translations = {
       ungroup: 'Ungroup',
       group: 'Group',
       deleteAll: 'Delete',
+      compactMode: 'Compact Mode',
+      adaptiveMode: 'Adaptive Mode',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',

@@ -10,7 +10,7 @@ export type NodeActionEvents = {
     content?: string;
   };
   [key: `node:${string}:askAI`]: void;
-  [key: `node:${string}:compareAskAI`]: void;
+  [key: `node:${string}:cloneAskAI`]: void;
 };
 
 export const nodeActionEmitter = mitt<NodeActionEvents>();
@@ -28,7 +28,7 @@ export const cleanupNodeEvents = (nodeId: string) => {
     'insertToDoc',
     'ungroup',
     'askAI',
-    'compareAskAI',
+    'cloneAskAI',
   ];
   eventTypes.forEach((type) => {
     nodeActionEmitter.all.delete(createNodeEventName(nodeId, type));

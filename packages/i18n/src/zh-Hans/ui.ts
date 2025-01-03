@@ -503,6 +503,9 @@ const translations = {
       showLaunchpad: '显示 AI 提问框',
       hideEdges: '隐藏连线',
       showEdges: '显示连线',
+      toggleNodeSizeMode: '切换节点大小模式',
+      compactMode: '紧凑模式',
+      adaptiveMode: '自适应模式',
     },
     toolbar: {
       enablePointerMode: '启用框选模式',
@@ -587,7 +590,7 @@ const translations = {
     },
     nodeActions: {
       askAI: '问问 AI',
-      compareAskAI: '比较 AI 回答',
+      cloneAskAI: '克隆 AI 提问',
       batchRun: '批量运行',
       addToContext: '添加到上下文',
       processingVector: '处理向量',
@@ -601,6 +604,8 @@ const translations = {
       ungroup: '取消分组',
       group: '分组',
       deleteAll: '删除',
+      compactMode: '紧凑模式',
+      adaptiveMode: '自适应模式',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',

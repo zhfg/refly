@@ -407,7 +407,7 @@ export const SkillResponseNode = memo(
       );
     }, [id, data.entityId, addNode]); // Add new handler for compare run
 
-    const handleCompareAskAI = useCallback(async () => {
+    const handleCloneAskAI = useCallback(async () => {
       // Fetch action result to get context
       const { data: resultData } = await getClient().getActionResult({
         query: { resultId: data?.entityId },
@@ -435,7 +435,7 @@ export const SkillResponseNode = memo(
         {
           type: 'skill',
           data: {
-            title: t('canvas.nodeActions.compareAskAI'),
+            title: t('canvas.nodeActions.cloneAskAI'),
             entityId: genSkillID(),
             metadata: {
               contextNodeIds, // Use all context item IDs
@@ -466,11 +466,11 @@ export const SkillResponseNode = memo(
       const handleNodeCreateDocument = () => handleCreateDocument();
       const handleNodeDelete = () => handleDelete();
       const handleNodeAskAI = () => handleAskAI();
-      const handleNodeCompareAskAI = () => handleCompareAskAI();
+      const handleNodeCloneAskAI = () => handleCloneAskAI();
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
-      nodeActionEmitter.on(createNodeEventName(id, 'compareAskAI'), handleNodeCompareAskAI);
+      nodeActionEmitter.on(createNodeEventName(id, 'cloneAskAI'), handleNodeCloneAskAI);
       nodeActionEmitter.on(createNodeEventName(id, 'rerun'), handleNodeRerun);
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
@@ -480,7 +480,7 @@ export const SkillResponseNode = memo(
       return () => {
         // Cleanup events when component unmounts
         nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
-        nodeActionEmitter.off(createNodeEventName(id, 'compareAskAI'), handleNodeCompareAskAI);
+        nodeActionEmitter.off(createNodeEventName(id, 'cloneAskAI'), handleNodeCloneAskAI);
         nodeActionEmitter.off(createNodeEventName(id, 'rerun'), handleNodeRerun);
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
