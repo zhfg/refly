@@ -103,7 +103,6 @@ const useToolbarConfig = () => {
           type: 'button',
           domain: 'edges',
           tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
-          active: showEdges,
         },
       ] as ToolbarItem[],
       modals: {
