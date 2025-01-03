@@ -2,17 +2,20 @@ import { useCallback } from 'react';
 import { applyNodeChanges, NodeChange } from '@xyflow/react';
 import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { useCanvasSync } from './use-canvas-sync';
-import { useContextPanelStore } from '../../stores/context-panel';
+import { useContextPanelStoreShallow } from '../../stores/context-panel';
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
 
-export const useNodeOperations = (selectedCanvasId?: string) => {
+export const useNodeOperations = () => {
   const canvasId = useCanvasId();
-  const { setNodes, setTitle } = useCanvasStoreShallow((state) => ({
+  const { setNodes, removeNodePreview } = useCanvasStoreShallow((state) => ({
     setNodes: state.setNodes,
-    setTitle: state.setTitle,
+    removeNodePreview: state.removeNodePreview,
+  }));
+  const { removeContextItem } = useContextPanelStoreShallow((state) => ({
+    removeContextItem: state.removeContextItem,
   }));
 
-  const { throttledSyncNodesToYDoc, syncTitleToYDoc } = useCanvasSync();
+  const { throttledSyncNodesToYDoc } = useCanvasSync();
 
   const updateNodesWithSync = useCallback(
     (updatedNodes: any[]) => {
@@ -32,20 +35,15 @@ export const useNodeOperations = (selectedCanvasId?: string) => {
         measured: node.measured ? { ...node.measured } : undefined,
       }));
 
-      // console.log('mutableNodes', mutableNodes);
-      // console.log('changes', changes);
-      // console.log('onNodesChange nodes', nodes);
-
       // Handle deleted nodes
       const deletedNodes = changes.filter((change) => change.type === 'remove');
 
       if (deletedNodes.length > 0) {
-        const contextStore = useContextPanelStore.getState();
-
         deletedNodes.forEach((change) => {
           const nodeId = change.id;
-          // Remove from context items
-          contextStore.removeContextItem(nodeId);
+          // Remove from context items and node previews
+          removeContextItem(nodeId);
+          removeNodePreview(canvasId, nodeId);
         });
       }
 
