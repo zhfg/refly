@@ -24,7 +24,6 @@ import {
   useContextPanelStore,
   useContextPanelStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { IconCopy } from '@arco-design/web-react/icon';
 import { ModelSelector } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions/model-selector';

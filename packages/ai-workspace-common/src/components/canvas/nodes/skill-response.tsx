@@ -38,7 +38,7 @@ import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/no
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { Source } from '@refly/openapi-schema';
-import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
+import { usePatchNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-patch-node-data';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -156,7 +156,7 @@ export const SkillResponseNode = memo(
       operatingNodeId: state.operatingNodeId,
     }));
 
-    const setNodeData = useSetNodeData();
+    const patchNodeData = usePatchNodeData();
     const { getNode } = useReactFlow();
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
 
@@ -243,12 +243,11 @@ export const SkillResponseNode = memo(
 
       if (shouldPoll && remoteStatus && (remoteStatus === 'finish' || remoteStatus === 'failed')) {
         let shouldUpdate = false;
-        let newNodeData = { ...data };
+        let nodeDataUpdates: Partial<CanvasNodeData<ResponseNodeMeta>> = {};
 
         if (nodeStatus !== remoteStatus) {
           shouldUpdate = true;
-          newNodeData.metadata = {
-            ...data.metadata,
+          nodeDataUpdates.metadata = {
             status: remoteStatus,
           };
         }
@@ -260,11 +259,11 @@ export const SkillResponseNode = memo(
 
         if (remoteStatus === 'finish' && data?.contentPreview !== remoteContent) {
           shouldUpdate = true;
-          newNodeData.contentPreview = remoteContent;
+          nodeDataUpdates.contentPreview = remoteContent;
         }
 
         if (shouldUpdate) {
-          setNodeData(id, newNodeData);
+          patchNodeData(id, nodeDataUpdates);
           updateActionResult(entityId, remoteResult);
         }
       }
@@ -303,7 +302,7 @@ export const SkillResponseNode = memo(
       setShouldPoll(false);
       setTimeout(() => setShouldPoll(true), POLLING_COOLDOWN_TIME);
 
-      setNodeData(id, {
+      patchNodeData(id, {
         ...data,
         contentPreview: '',
         metadata: {
@@ -322,7 +321,7 @@ export const SkillResponseNode = memo(
           entityId: canvasId,
         },
       );
-    }, [data, entityId, invokeAction, setNodeData]);
+    }, [data, entityId, invokeAction, patchNodeData]);
 
     const insertToDoc = useInsertToDocument(entityId);
     const handleInsertToDoc = useCallback(async () => {

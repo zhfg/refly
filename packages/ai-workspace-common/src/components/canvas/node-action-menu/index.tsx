@@ -59,6 +59,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
 
   const handleAskAI = useCallback(() => {
     const node = getNode(nodeId) as CanvasNode;
+    console.log('handleAskAI node', node);
     addNode(
       {
         type: 'skill',
@@ -66,6 +67,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
           title: 'Skill',
           entityId: genSkillID(),
           metadata: {
+            modelInfo: node.data.metadata?.modelInfo,
             contextItems: [
               {
                 title: node.data.title,

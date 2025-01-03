@@ -511,7 +511,7 @@ const translations = {
       addSkill: '添加技能',
       addTool: '添加工具',
       autoLayout: '自动布局',
-      askAI: 'AI 提问',
+      askAI: '问问 AI',
       createMemo: '创建备忘录',
       addMemo: '添加备忘录',
       createDocument: '新建文档',

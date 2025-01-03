@@ -73,6 +73,7 @@ export const convertContextToItems = (context: SkillContext, history: ActionResu
 
 export const convertContextItemsToInvokeParams = (
   items: IContextItem[],
+  getHistory: (item: IContextItem) => ActionResult[],
 ): { context: SkillContext; resultHistory: ActionResult[] } => {
   const context = {
     contentList: items
@@ -122,10 +123,9 @@ export const convertContextItemsToInvokeParams = (
   };
   const resultHistory = items
     ?.filter((item) => item.type === 'skillResponse')
-    .map((item) => ({
-      resultId: item.entityId,
-      title: item.title,
-    }));
+    .flatMap((item) => {
+      return item.metadata?.withHistory ? getHistory(item) : [{ title: item.title, resultId: item.entityId }];
+    });
 
   return { context, resultHistory };
 };

@@ -11,7 +11,6 @@ import { ModelInfo, Skill } from '@refly/openapi-schema';
 import { useDebouncedCallback } from 'use-debounce';
 import { ChatActions } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
-import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
@@ -23,7 +22,7 @@ import { createNodeEventName } from '@refly-packages/ai-workspace-common/events/
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { ContextManager } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
+import { usePatchNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-patch-node-data';
 import { useEdgeStyles } from '@refly-packages/ai-workspace-common/components/canvas/constants';
 import { genActionResultID } from '@refly-packages/utils/id';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
@@ -50,7 +49,7 @@ export const SkillNode = memo(
   ({ data, selected, id }: NodeProps<SkillNode>) => {
     const [isHovered, setIsHovered] = useState(false);
     const { edges } = useCanvasData();
-    const setNodeData = useSetNodeData();
+    const patchNodeData = usePatchNodeData();
     const edgeStyles = useEdgeStyles();
     const { getNode, getNodes, getEdges, addEdges, deleteElements } = useReactFlow();
     const { addNode } = useAddNode();
@@ -65,7 +64,7 @@ export const SkillNode = memo(
     const isSourceConnected = useMemo(() => edges?.some((edge) => edge.source === id), [edges, id]);
 
     const updateNodeData = useDebouncedCallback((data: Partial<CanvasNodeData<SkillNodeMeta>>) => {
-      setNodeData(id, data);
+      patchNodeData(id, data);
     }, 50);
 
     const { selectedModel } = useChatStoreShallow((state) => ({
@@ -85,14 +84,14 @@ export const SkillNode = memo(
 
     const setModelInfo = useCallback(
       (modelInfo: ModelInfo | null) => {
-        setNodeData(id, { metadata: { modelInfo } });
+        patchNodeData(id, { metadata: { modelInfo } });
       },
-      [id, setNodeData],
+      [id, patchNodeData],
     );
 
     const setContextItems = useCallback(
       (items: IContextItem[]) => {
-        setNodeData(id, { metadata: { contextItems: items } });
+        patchNodeData(id, { metadata: { contextItems: items } });
 
         const nodes = getNodes() as CanvasNode<any>[];
         const entityNodeMap = new Map(nodes.map((node) => [node.data?.entityId, node]));
@@ -122,7 +121,7 @@ export const SkillNode = memo(
           deleteElements({ edges: edgesToRemove });
         }
       },
-      [id, canvasId, setNodeData, addEdges, deleteElements, edgeStyles.hover],
+      [id, canvasId, patchNodeData, addEdges, deleteElements, edgeStyles.hover],
     );
 
     useEffect(() => {
@@ -133,7 +132,7 @@ export const SkillNode = memo(
 
     const setSelectedSkill = useCallback(
       (skill: Skill | null) => {
-        setNodeData(id, { metadata: { selectedSkill: skill } });
+        patchNodeData(id, { metadata: { selectedSkill: skill } });
       },
       [id, updateNodeData],
     );
@@ -153,7 +152,7 @@ export const SkillNode = memo(
     const handleSendMessage = useCallback(() => {
       const node = getNode(id);
       const data = node?.data as CanvasNodeData<SkillNodeMeta>;
-      const { query, contextItems } = data?.metadata ?? {};
+      const { query = '', contextItems = [] } = data?.metadata ?? {};
 
       deleteElements({ nodes: [node] });
 
@@ -168,17 +167,24 @@ export const SkillNode = memo(
           entityType: 'canvas',
         },
       );
-      addNode({
-        type: 'skillResponse',
-        data: {
-          title: query,
-          entityId: resultId,
-          metadata: {
-            status: 'executing',
-            contextItems,
+      addNode(
+        {
+          type: 'skillResponse',
+          data: {
+            title: query,
+            entityId: resultId,
+            metadata: {
+              status: 'executing',
+              contextItems,
+            },
           },
+          position: node.position,
         },
-      });
+        contextItems.map((item) => ({
+          type: item.type,
+          entityId: item.entityId,
+        })),
+      );
     }, [id, getNode, deleteElements, invokeAction, canvasId, addNode]);
 
     useEffect(() => {

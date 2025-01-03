@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { useCanvasContext } from '../../context/canvas';
 import { useParams } from 'react-router-dom';
+import { useCanvasContext } from '../../context/canvas';
 import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { CanvasNodeData } from '../../components/canvas/nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
@@ -32,14 +32,7 @@ export const useSetNodeDataByEntity = () => {
           ...n,
           data:
             n.id === node.id
-              ? {
-                  ...n.data,
-                  ...nodeData,
-                  metadata: {
-                    ...n.data?.metadata,
-                    ...nodeData?.metadata,
-                  },
-                }
+              ? { ...n.data, ...nodeData, metadata: { ...n.data.metadata, ...nodeData.metadata } }
               : n.data,
         }));
         setNodes(canvasId, updatedNodes);

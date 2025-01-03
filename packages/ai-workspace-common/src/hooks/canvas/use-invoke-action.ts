@@ -19,9 +19,10 @@ import {
   ResponseNodeMeta,
   SkillNodeMeta,
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { useGetSubscriptionUsage, useListModels, useListSkills } from '@refly-packages/ai-workspace-common/queries';
+import { useGetSubscriptionUsage } from '@refly-packages/ai-workspace-common/queries';
 
 import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 
 export const useInvokeAction = () => {
   const { addNode } = useAddNode();
@@ -337,26 +338,17 @@ export const useInvokeAction = () => {
 
   const onStart = () => {};
 
-  const { data: skillData } = useListSkills({}, null, {
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    staleTime: 60 * 1000, // Data fresh for 1 minute
-    gcTime: 5 * 60 * 1000, // Cache for 5 minutes
-  });
-
-  const { data: modelData } = useListModels({}, null, {
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    staleTime: 60 * 1000,
-    gcTime: 5 * 60 * 1000,
-  });
+  const findThreadHistory = useFindThreadHistory();
 
   const invokeAction = (payload: SkillNodeMeta, target: Entity) => {
     payload.resultId ||= genActionResultID();
     const { query, modelInfo, contextItems, selectedSkill, resultId } = payload;
-    const { context, resultHistory } = convertContextItemsToInvokeParams(contextItems);
+    const { context, resultHistory } = convertContextItemsToInvokeParams(contextItems, (item) =>
+      findThreadHistory({ resultId: item.entityId }).map((node) => ({
+        title: node.data?.title,
+        resultId: node.data?.entityId,
+      })),
+    );
 
     const param = {
       resultId,

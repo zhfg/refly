@@ -56,7 +56,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
       return;
     }
 
-    const edges = getEdges().filter((edge) => edge.target === currentNode.id);
+    const edges = getEdges();
     const { edgesToAdd, edgesToDelete } = convertContextItemsToEdges(resultId, editContextItems, nodes, edges);
     addEdges(edgesToAdd);
     deleteElements({ edges: edgesToDelete });

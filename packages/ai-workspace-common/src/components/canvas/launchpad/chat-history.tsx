@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { Timeline } from 'antd';
-import { useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
 import {
   IconResponse,
@@ -13,6 +12,7 @@ import { getResultDisplayContent } from '@refly-packages/ai-workspace-common/com
 import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { CanvasNode, ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 
 // Define props interface
 interface ChatHistoryProps {
@@ -26,6 +26,8 @@ const ChatHistoryItem = ({ node }: { node: CanvasNode<ResponseNodeMeta> }) => {
 
   const handleItemClick = (node: CanvasNode<ResponseNodeMeta>, event: React.MouseEvent) => {
     event.preventDefault();
+    event.stopPropagation();
+
     if (!node) return;
 
     setNodeCenter(node.id);
@@ -49,39 +51,13 @@ const ChatHistoryItem = ({ node }: { node: CanvasNode<ResponseNodeMeta> }) => {
 };
 
 export const ChatHistory: React.FC<ChatHistoryProps> = ({ item }) => {
-  const { getNode, getNodes, getEdges } = useReactFlow();
   const { t } = useTranslation();
 
+  const findThreadHistory = useFindThreadHistory();
+
   const historyNodes = useMemo(() => {
-    const nodes = getNodes();
-    const startNode = nodes.find((node) => node.data?.entityId === item?.entityId);
-
-    if (!startNode) return [];
-
-    const edges = getEdges();
-    const targetToSourceMap = new Map(edges.map((edge) => [edge.target, edge.source]));
-    const history: CanvasNode<ResponseNodeMeta>[] = [startNode as CanvasNode<ResponseNodeMeta>];
-
-    // Helper function to recursively find source nodes
-    const findSourceNodes = (nodeId: string, visited = new Set<string>()) => {
-      // Prevent infinite loops in case of circular dependencies
-      if (visited.has(nodeId)) return;
-      visited.add(nodeId);
-
-      const sourceId = targetToSourceMap.get(nodeId);
-      const sourceNode = getNode(sourceId);
-      if (sourceNode) {
-        history.push(sourceNode as CanvasNode<ResponseNodeMeta>);
-        findSourceNodes(sourceId, visited);
-      }
-    };
-
-    // Start the recursive search from the start node
-    findSourceNodes(startNode.id);
-
-    // Return nodes in reverse order (oldest to newest)
-    return history.reverse();
-  }, [getNodes, getEdges, item?.entityId]);
+    return findThreadHistory({ resultId: item?.entityId });
+  }, [findThreadHistory, item?.entityId]);
 
   return (
     <div className="w-72 p-3 pb-0 rounded-lg max-h-[400px] overflow-y-auto">
