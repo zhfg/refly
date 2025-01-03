@@ -77,7 +77,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   }));
   const selectedNodes = nodes.filter((node) => node.selected) || [];
 
-  console.log('nodes', nodes);
   const { onNodesChange } = useNodeOperations(canvasId);
   const { setSelectedNode } = useNodeSelection();
 
