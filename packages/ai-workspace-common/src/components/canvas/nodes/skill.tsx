@@ -1,6 +1,7 @@
 import { NodeProps, Position, useReactFlow } from '@xyflow/react';
 import { CanvasNode, CanvasNodeData, SkillNodeMeta } from './types';
 import { Node } from '@xyflow/react';
+import { Button } from 'antd';
 import { CustomHandle } from './custom-handle';
 import { useState, useCallback, useEffect, useMemo, memo } from 'react';
 
@@ -26,22 +27,46 @@ import { usePatchNodeData } from '@refly-packages/ai-workspace-common/hooks/canv
 import { useEdgeStyles } from '@refly-packages/ai-workspace-common/components/canvas/constants';
 import { genActionResultID } from '@refly-packages/utils/id';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useTranslation } from 'react-i18next';
+import { IconClose } from '@arco-design/web-react/icon';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
 
 // Memoized Header Component
-const NodeHeader = memo(({ query }: { query: string }) => {
-  return (
-    <div className="flex items-center gap-2">
-      <div className="w-6 h-6 rounded bg-[#6172F3] shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)] flex items-center justify-center flex-shrink-0">
-        <IconAskAI className="w-4 h-4 text-white" />
+const NodeHeader = memo(
+  ({
+    query,
+    selectedSkillName,
+    setSelectedSkill,
+  }: {
+    query: string;
+    selectedSkillName?: string;
+    setSelectedSkill: (skill: Skill | null) => void;
+  }) => {
+    const { t } = useTranslation();
+    return (
+      <div className="flex justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded bg-[#6172F3] shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)] flex items-center justify-center flex-shrink-0">
+            <IconAskAI className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-[13px] font-medium leading-normal text-[rgba(0,0,0,0.8)] font-['PingFang_SC'] truncate">
+            {selectedSkillName ? t(`${selectedSkillName}.name`, { ns: 'skill' }) : 'Prompt'}
+          </span>
+        </div>
+        {selectedSkillName && (
+          <Button
+            type="text"
+            icon={<IconClose />}
+            onClick={() => {
+              setSelectedSkill?.(null);
+            }}
+          />
+        )}
       </div>
-      <span className="text-[13px] font-medium leading-normal text-[rgba(0,0,0,0.8)] font-['PingFang_SC'] truncate">
-        {'Prompt'}
-      </span>
-    </div>
-  );
-});
+    );
+  },
+);
 
 NodeHeader.displayName = 'NodeHeader';
 
@@ -53,7 +78,7 @@ export const SkillNode = memo(
     const edgeStyles = useEdgeStyles();
     const { getNode, getNodes, getEdges, addEdges, deleteElements } = useReactFlow();
     const { addNode } = useAddNode();
-    const deleteNode = useDeleteNode();
+    const { deleteNode } = useDeleteNode();
 
     const { query, selectedSkill, modelInfo, contextItems = [] } = data.metadata;
 
@@ -187,9 +212,19 @@ export const SkillNode = memo(
       );
     }, [id, getNode, deleteElements, invokeAction, canvasId, addNode]);
 
+    const handleDelete = useCallback(() => {
+      const currentNode = getNode(id);
+      deleteNode({
+        id,
+        type: 'skill',
+        data,
+        position: currentNode?.position || { x: 0, y: 0 },
+      });
+    }, [id, data, getNode, deleteNode]);
+
     useEffect(() => {
       const handleNodeRun = () => handleSendMessage();
-      const handleNodeDelete = () => deleteNode(id);
+      const handleNodeDelete = () => handleDelete();
 
       nodeActionEmitter.on(createNodeEventName(id, 'run'), handleNodeRun);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
@@ -199,7 +234,7 @@ export const SkillNode = memo(
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
         cleanupNodeEvents(id);
       };
-    }, [id, handleSendMessage, deleteNode]);
+    }, [id, handleSendMessage, handleDelete]);
 
     return (
       <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
@@ -222,14 +257,24 @@ export const SkillNode = memo(
           />
 
           <div className="flex flex-col gap-1">
-            <NodeHeader query={localQuery} />
+            <NodeHeader
+              query={localQuery}
+              selectedSkillName={selectedSkill?.name}
+              setSelectedSkill={setSelectedSkill}
+            />
+
             <ContextManager contextItems={contextItems} setContextItems={setContextItems} />
             <ChatInput
               query={localQuery}
               setQuery={setQuery}
-              selectedSkill={selectedSkill}
+              selectedSkillName={selectedSkill?.name}
               handleSendMessage={handleSendMessage}
+              handleSelectSkill={(skill) => {
+                setQuery('');
+                setSelectedSkill(skill);
+              }}
             />
+
             <ChatActions
               query={localQuery}
               model={modelInfo}

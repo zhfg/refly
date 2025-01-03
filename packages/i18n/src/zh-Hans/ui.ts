@@ -496,12 +496,16 @@ const translations = {
   canvas: {
     emptyText: '双击向 AI 提问, 或',
     contextMenu: {
+      createGroup: '创建分组',
       enableClickPreview: '启用点击预览',
       disableClickPreview: '禁用点击预览',
       hideLaunchpad: '隐藏 AI 提问框',
       showLaunchpad: '显示 AI 提问框',
       hideEdges: '隐藏连线',
       showEdges: '显示连线',
+      toggleNodeSizeMode: '切换节点大小模式',
+      compactMode: '紧凑模式',
+      adaptiveMode: '自适应模式',
     },
     toolbar: {
       enablePointerMode: '启用框选模式',
@@ -586,6 +590,8 @@ const translations = {
     },
     nodeActions: {
       askAI: '问问 AI',
+      cloneAskAI: '克隆 AI 提问',
+      batchRun: '批量运行',
       addToContext: '添加到上下文',
       processingVector: '处理向量',
       run: '运行',
@@ -595,6 +601,11 @@ const translations = {
       askFollowUp: '继续提问',
       moreOptions: '更多选项',
       delete: '删除节点',
+      ungroup: '取消分组',
+      group: '分组',
+      deleteAll: '删除',
+      compactMode: '紧凑模式',
+      adaptiveMode: '自适应模式',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',

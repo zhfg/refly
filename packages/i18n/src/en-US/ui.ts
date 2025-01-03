@@ -504,12 +504,16 @@ const translations = {
   canvas: {
     emptyText: 'Double-click to ask AI, or',
     contextMenu: {
+      createGroup: 'Create Group',
       enableClickPreview: 'Enable Click Preview',
       disableClickPreview: 'Disable Click Preview',
       hideLaunchpad: 'Hide Ask AI',
       showLaunchpad: 'Show Ask AI',
       hideEdges: 'Hide Edges',
       showEdges: 'Show Edges',
+      toggleNodeSizeMode: 'Toggle Node Size Mode',
+      compactMode: 'Compact Mode',
+      adaptiveMode: 'Adaptive Mode',
     },
     toolbar: {
       enablePointerMode: 'Enable Pointer Mode',
@@ -594,6 +598,8 @@ const translations = {
     },
     nodeActions: {
       askAI: 'Ask AI',
+      cloneAskAI: 'Clone Ask AI',
+      batchRun: 'Batch Run',
       addToContext: 'Add to Context',
       processingVector: 'Processing Vector',
       run: 'Run',
@@ -603,6 +609,11 @@ const translations = {
       askFollowUp: 'Ask Follow-up',
       moreOptions: 'More Options',
       delete: 'Delete Node',
+      ungroup: 'Ungroup',
+      group: 'Group',
+      deleteAll: 'Delete',
+      compactMode: 'Compact Mode',
+      adaptiveMode: 'Adaptive Mode',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',

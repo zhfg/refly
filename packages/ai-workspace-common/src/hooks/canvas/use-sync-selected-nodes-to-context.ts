@@ -23,7 +23,7 @@ export const useSyncSelectedNodesToContext = () => {
           title: node.data?.title,
           type: node.type,
           isPreview: true,
-          metadata: node.type === 'skillResponse' ? { ...node.data.metadata, withHistory: true } : node.data.metadata,
+          metadata: node.data?.metadata,
         })),
     ];
     setContextItems(newContextItems);

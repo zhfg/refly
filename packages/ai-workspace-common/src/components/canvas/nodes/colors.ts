@@ -9,5 +9,6 @@ export const NODE_COLORS: Record<CanvasNodeType | 'threadHistory', string> = {
   skill: '#6172F3',
   tool: '#2E90FA',
   memo: '#6172F3',
+  group: '#6172F3',
   threadHistory: '#64748b',
 };

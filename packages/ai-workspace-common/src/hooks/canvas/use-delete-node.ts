@@ -1,47 +1,69 @@
 import { useCallback } from 'react';
+import { message } from 'antd';
 import { useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
-import { message } from 'antd';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
+interface DeleteNodeOptions {
+  showMessage?: boolean;
+}
+
 export const useDeleteNode = () => {
-  const { getNode, getEdges, deleteElements } = useReactFlow();
+  const { setNodes, setEdges } = useReactFlow();
   const { t } = useTranslation();
   const { canvasId } = useCanvasContext();
+  const { removeContextItem } = useContextPanelStoreShallow((state) => ({
+    removeContextItem: state.removeContextItem,
+  }));
 
-  return useCallback(
-    (id: string) => {
-      const node = getNode(id);
-      if (!node) return;
+  const deleteSingleNode = useCallback(
+    (node: CanvasNode<any>, options: DeleteNodeOptions = {}) => {
+      const { showMessage = true } = options;
 
-      const edges = getEdges();
+      // Delete node from canvas
+      setNodes((nodes) => nodes.filter((n) => n.id !== node.id));
 
-      deleteElements({
-        nodes: [node],
-        edges: edges.filter((e) => e.source === node.id || e.target === node.id),
-      });
-
-      // Delete from context panel if exists
-      const contextStore = useContextPanelStore.getState();
-      contextStore.removeContextItem(node.id);
+      // Delete connected edges
+      setEdges((edges) => edges.filter((e) => e.source !== node.id && e.target !== node.id));
 
       // Delete node preview from canvas store
       const canvasStore = useCanvasStore.getState();
       canvasStore.removeNodePreview(canvasId, node.id);
+      removeContextItem(node.id);
 
-      // Get node title based on node type
-      const nodeTitle = node.data?.title ?? t('knowledgeBase.context.untitled');
+      if (showMessage) {
+        // Get node title based on node type
+        const nodeTitle = node.data?.title ?? t('knowledgeBase.context.untitled');
 
-      // Show success message
-      message.success(
-        t('knowledgeBase.context.deleteSuccessWithTitle', {
-          title: nodeTitle,
-          type: t(`knowledgeBase.context.nodeTypes.${node.type}`),
-        }),
-      );
+        // Show success message
+        message.success(
+          t('knowledgeBase.context.deleteSuccessWithTitle', {
+            title: nodeTitle,
+            type: t(`knowledgeBase.context.nodeTypes.${node.type}`),
+          }),
+        );
+      }
+
+      return true;
     },
-    [getNode, getEdges, deleteElements, t, canvasId],
+    [setNodes, setEdges, t],
   );
+
+  const deleteNodes = useCallback(
+    (nodes: CanvasNode[], options: DeleteNodeOptions = {}) => {
+      // Delete each node
+      const results = nodes.map((node) => deleteSingleNode(node, { ...options }));
+
+      return results.filter(Boolean).length; // Return number of successfully deleted nodes
+    },
+    [deleteSingleNode],
+  );
+
+  return {
+    deleteNode: deleteSingleNode,
+    deleteNodes,
+  };
 };

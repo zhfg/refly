@@ -24,6 +24,9 @@ import { memo } from 'react';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { genSkillID } from '@refly-packages/utils/id';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
@@ -106,17 +109,27 @@ export const ResourceNode = memo(
       }
     }, [isHovered, onHoverEnd]);
 
-    const handleAddToContext = useAddToContext(
-      {
+    const { addToContext } = useAddToContext();
+
+    const handleAddToContext = useCallback(() => {
+      addToContext({
+        type: 'resource',
+        title: data.title,
+        entityId: data.entityId,
+        metadata: data.metadata,
+      });
+    }, [id, data, addToContext]);
+
+    const { deleteNode } = useDeleteNode();
+
+    const handleDelete = useCallback(() => {
+      deleteNode({
         id,
         type: 'resource',
         data,
         position: { x: 0, y: 0 },
-      } as CanvasNode,
-      'resource',
-    );
-
-    const deleteNode = useDeleteNode();
+      } as CanvasNode);
+    }, [id, data, deleteNode]);
 
     const handleHelpLink = useCallback(() => {
       // Implement help link logic
@@ -127,6 +140,31 @@ export const ResourceNode = memo(
       // Implement about logic
       console.log('Show about info');
     }, []);
+
+    const { addNode } = useAddNode();
+
+    const handleAskAI = useCallback(() => {
+      addNode(
+        {
+          type: 'skill',
+          data: {
+            title: 'Skill',
+            entityId: genSkillID(),
+            metadata: {
+              contextItems: [
+                {
+                  type: 'resource',
+                  title: data.title,
+                  entityId: data.entityId,
+                  metadata: data.metadata,
+                },
+              ] as IContextItem[],
+            },
+          },
+        },
+        [{ type: 'resource', entityId: data.entityId }],
+      );
+    }, [id, data, addNode]);
 
     const { operatingNodeId } = useCanvasStoreShallow((state) => ({
       operatingNodeId: state.operatingNodeId,
@@ -177,21 +215,24 @@ export const ResourceNode = memo(
     useEffect(() => {
       // Create node-specific event handlers
       const handleNodeAddToContext = () => handleAddToContext();
-      const handleNodeDelete = () => deleteNode(id);
+      const handleNodeDelete = () => handleDelete();
+      const handleNodeAskAI = () => handleAskAI();
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
+      nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
       return () => {
         // Cleanup events when component unmounts
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
+        nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
         // Clean up all node events
         cleanupNodeEvents(id);
       };
-    }, [id, handleAddToContext, deleteNode]);
+    }, [id, handleAddToContext, handleDelete, handleAskAI]);
 
     const nodeStyle = useMemo(
       () => ({

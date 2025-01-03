@@ -2,7 +2,7 @@ import { IconDown } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
-import { useRef, useMemo, useCallback } from 'react';
+import { useRef, useMemo, useCallback, useState } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 import { useListSkills } from '@refly-packages/ai-workspace-common/queries';
 import { Skill, SearchDomain } from '@refly-packages/ai-workspace-common/requests/types.gen';
@@ -13,6 +13,8 @@ export const SkillDisplay = () => {
     setSelectedSkill: state.setSelectedSkill,
     setSkillManagerModalVisible: state.setSkillManagerModalVisible,
   }));
+
+  const [open, setOpen] = useState(false);
 
   const skillDisplayRef = useRef<HTMLDivElement>(null);
   const containCnt = 3;
@@ -65,16 +67,19 @@ export const SkillDisplay = () => {
     () => (
       <SearchList
         domain={'skill' as SearchDomain}
+        open={open}
+        setOpen={setOpen}
         trigger="hover"
         mode="single"
         handleConfirm={handleSearchListConfirm}
+        placement="right"
       >
         <div key="more" className="skill-item group" onClick={handleSkillManagerOpen}>
           <IconDown className="transform transition-transform duration-300 ease-in-out group-hover:rotate-180" />
         </div>
       </SearchList>
     ),
-    [handleSearchListConfirm, handleSkillManagerOpen],
+    [handleSearchListConfirm, handleSkillManagerOpen, open, setOpen],
   );
 
   return (

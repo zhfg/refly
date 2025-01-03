@@ -13,6 +13,8 @@ interface ContextMenuProps {
   open: boolean;
   position: { x: number; y: number };
   setOpen: (open: boolean) => void;
+  isSelection?: boolean;
+  onCreateGroup?: () => void;
 }
 
 interface MenuItem {
@@ -23,7 +25,7 @@ interface MenuItem {
   title?: string;
 }
 
-export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) => {
+export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isSelection, onCreateGroup }) => {
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuHeight, setMenuHeight] = useState<number>(0);
@@ -44,7 +46,6 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
   const { showEdges: edgeVisible, toggleEdgeVisible } = useEdgeVisible();
 
   const menuItems: MenuItem[] = [
-    // { key: 'divider-1', type: 'divider' },
     {
       key: 'toggleLaunchpad',
       icon: IconAskAI,

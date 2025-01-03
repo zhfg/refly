@@ -3,7 +3,7 @@ import { Connection, Edge, applyEdgeChanges, EdgeChange } from '@xyflow/react';
 import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { useCanvasData } from './use-canvas-data';
 import { genUniqueId } from '@refly-packages/utils/id';
-import { useEdgeStyles } from '../../components/canvas/constants';
+import { useEdgeStyles, getEdgeStyles } from '../../components/canvas/constants';
 import { useCanvasSync } from './use-canvas-sync';
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
 
@@ -54,14 +54,15 @@ export const useEdgeOperations = (selectedCanvasId?: string) => {
     (showEdges: boolean) => {
       const { data } = useCanvasStore.getState();
       const edges = data[canvasId]?.edges ?? [];
+      const edgeStyles = getEdgeStyles(showEdges);
       const updatedEdges = edges.map((edge) => ({
         ...edge,
-        style: edgeStyles[showEdges ? 'default' : 'hidden'],
+        style: edgeStyles.default,
       }));
       setEdges(canvasId, updatedEdges);
       throttledSyncEdgesToYDoc(updatedEdges);
     },
-    [canvasId, setEdges, edgeStyles, throttledSyncEdgesToYDoc],
+    [canvasId, setEdges, throttledSyncEdgesToYDoc],
   );
 
   return {

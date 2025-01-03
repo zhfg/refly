@@ -1,5 +1,5 @@
-import { FC, useCallback, useMemo } from 'react';
-import { Button, Dropdown, Tooltip } from 'antd';
+import { FC, useCallback } from 'react';
+import { Button, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   FileText,
@@ -111,10 +111,17 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
   const nodeColor = NODE_COLORS[node.type];
   const nodeTitle = getNodeTitle(node);
   const { t } = useTranslation();
+  const { addToContext } = useAddToContext();
 
-  // Add hooks for context and delete actions
-  const handleAddToContext = useAddToContext(node, node.type);
-  const deleteNode = useDeleteNode();
+  const { deleteNode } = useDeleteNode();
+  const handleAddToContext = useCallback(() => {
+    addToContext({
+      type: node.type,
+      title: node.data?.title,
+      entityId: node.data?.entityId,
+      metadata: node.data?.metadata,
+    });
+  }, [node, addToContext]);
 
   const { canvasId } = useCanvasContext();
   const { pinNode, unpinNode, isNodePinned } = useNodePreviewControl({ canvasId });
@@ -148,7 +155,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
           {t('canvas.nodeActions.delete')}
         </div>
       ),
-      onClick: () => deleteNode(node.id),
+      onClick: () => deleteNode(node),
       className: 'hover:bg-red-50',
     },
   ];

@@ -21,6 +21,9 @@ import classNames from 'classnames';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { genSkillID } from '@refly-packages/utils/id';
+
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
 export const DocumentNode = memo(
@@ -80,17 +83,27 @@ export const DocumentNode = memo(
       onHoverEnd();
     }, [onHoverEnd]);
 
-    const handleAddToContext = useAddToContext(
-      {
+    const { addToContext } = useAddToContext();
+
+    const handleAddToContext = useCallback(() => {
+      addToContext({
+        type: 'document',
+        title: data.title,
+        entityId: data.entityId,
+        metadata: data.metadata,
+      });
+    }, [data, addToContext]);
+
+    const { deleteNode } = useDeleteNode();
+
+    const handleDelete = useCallback(() => {
+      deleteNode({
         id,
         type: 'document',
         data,
         position: { x: 0, y: 0 },
-      } as CanvasNode,
-      'document',
-    );
-
-    const deleteNode = useDeleteNode();
+      } as CanvasNode);
+    }, [id, data, deleteNode]);
 
     const handleHelpLink = useCallback(() => {
       // Implement help link logic
@@ -102,25 +115,53 @@ export const DocumentNode = memo(
       console.log('Show about info');
     }, []);
 
+    const { addNode } = useAddNode();
+
+    const handleAskAI = useCallback(() => {
+      addNode(
+        {
+          type: 'skill',
+          data: {
+            title: 'Skill',
+            entityId: genSkillID(),
+            metadata: {
+              contextItems: [
+                {
+                  type: 'document',
+                  title: data.title,
+                  entityId: data.entityId,
+                  metadata: data.metadata,
+                },
+              ],
+            },
+          },
+        },
+        [{ type: 'document', entityId: data.entityId }],
+      );
+    }, [id, data.entityId, addNode]);
+
     // Add event handling
     useEffect(() => {
       // Create node-specific event handlers
       const handleNodeAddToContext = () => handleAddToContext();
-      const handleNodeDelete = () => deleteNode(id);
+      const handleNodeDelete = () => handleDelete();
+      const handleNodeAskAI = () => handleAskAI();
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
+      nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
       return () => {
         // Cleanup events when component unmounts
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
+        nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
         // Clean up all node events
         cleanupNodeEvents(id);
       };
-    }, [id, handleAddToContext, deleteNode]);
+    }, [id, handleAddToContext, handleDelete, handleAskAI]);
 
     return (
       <div className={classNames({ nowheel: isOperating })}>

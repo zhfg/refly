@@ -9,7 +9,7 @@ import {
   ChatActions,
   CustomAction,
 } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
-import { ModelInfo } from '@refly-packages/ai-workspace-common/requests/types.gen';
+import { ModelInfo, Skill } from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { convertContextItemsToEdges } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
@@ -38,15 +38,19 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
   const [editContextItems, setEditContextItems] = useState<IContextItem[]>(contextItems);
   const [editModelInfo, setEditModelInfo] = useState<ModelInfo>(modelInfo);
   const { t } = useTranslation();
+  const [localActionMeta, setLocalActionMeta] = useState<{
+    name?: string;
+    icon?: any;
+  } | null>(actionMeta);
 
   const hideSelectedSkillHeader = useMemo(
-    () => !actionMeta || actionMeta?.name === 'commonQnA' || !actionMeta?.name,
-    [actionMeta?.name],
+    () => !localActionMeta || localActionMeta?.name === 'commonQnA' || !localActionMeta?.name,
+    [localActionMeta?.name],
   );
 
   const { canvasId } = useCanvasContext();
   const { invokeAction } = useInvokeAction();
-  const skill = useFindSkill(actionMeta?.name);
+  const skill = useFindSkill(localActionMeta?.name);
 
   const handleSendMessage = useCallback(() => {
     // Synchronize edges with latest context items
@@ -75,7 +79,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
       },
     );
     setEditMode(false);
-  }, [resultId, editQuery, editModelInfo, editContextItems, actionMeta]);
+  }, [resultId, editQuery, editModelInfo, editContextItems, localActionMeta]);
 
   const customActions: CustomAction[] = useMemo(
     () => [
@@ -90,6 +94,13 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
     [setEditMode],
   );
 
+  const handleSelectSkill = useCallback((skill: Skill) => {
+    setLocalActionMeta({
+      icon: skill.icon,
+      name: skill.name,
+    });
+  }, []);
+
   return (
     <div className="ai-copilot-chat-container">
       <div className={cn('border border-solid border-gray-200 rounded-lg')}>
@@ -97,18 +108,25 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
           <SelectedSkillHeader
             readonly={readonly}
             skill={{
-              icon: actionMeta?.icon,
-              name: actionMeta?.name,
+              icon: localActionMeta?.icon,
+              name: localActionMeta?.name,
             }}
             className="rounded-t-[7px]"
+            onClose={() => {
+              setLocalActionMeta(null);
+            }}
           />
         )}
         <ContextManager contextItems={editContextItems} setContextItems={setEditContextItems} />
         <ChatInput
           query={editQuery}
           setQuery={setEditQuery}
-          selectedSkill={null}
+          selectedSkillName={localActionMeta?.name}
           handleSendMessage={handleSendMessage}
+          handleSelectSkill={(skill) => {
+            setEditQuery('');
+            handleSelectSkill(skill);
+          }}
         />
         <ChatActions
           query={editQuery}

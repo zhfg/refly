@@ -14,6 +14,14 @@ export const useNodeOperations = (selectedCanvasId?: string) => {
 
   const { throttledSyncNodesToYDoc, syncTitleToYDoc } = useCanvasSync();
 
+  const updateNodesWithSync = useCallback(
+    (updatedNodes: any[]) => {
+      setNodes(canvasId, updatedNodes);
+      throttledSyncNodesToYDoc(updatedNodes);
+    },
+    [canvasId, setNodes, throttledSyncNodesToYDoc],
+  );
+
   const onNodesChange = useCallback(
     (changes: NodeChange<any>[]) => {
       const { data } = useCanvasStore.getState();
@@ -23,6 +31,10 @@ export const useNodeOperations = (selectedCanvasId?: string) => {
         ...node,
         measured: node.measured ? { ...node.measured } : undefined,
       }));
+
+      // console.log('mutableNodes', mutableNodes);
+      // console.log('changes', changes);
+      // console.log('onNodesChange nodes', nodes);
 
       // Handle deleted nodes
       const deletedNodes = changes.filter((change) => change.type === 'remove');
@@ -38,13 +50,15 @@ export const useNodeOperations = (selectedCanvasId?: string) => {
       }
 
       const updatedNodes = applyNodeChanges(changes, mutableNodes);
-      setNodes(canvasId, updatedNodes);
-      throttledSyncNodesToYDoc(updatedNodes);
+      updateNodesWithSync(updatedNodes);
+
+      return updatedNodes;
     },
-    [canvasId, setNodes, setTitle, throttledSyncNodesToYDoc, syncTitleToYDoc],
+    [canvasId, updateNodesWithSync],
   );
 
   return {
     onNodesChange,
+    updateNodesWithSync,
   };
 };

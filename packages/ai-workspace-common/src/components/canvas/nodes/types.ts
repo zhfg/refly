@@ -22,7 +22,10 @@ export type CanvasNodeData<T = Record<string, unknown>> = {
   sourceHandle?: string;
 };
 
-export type CanvasNode<T = Record<string, unknown>> = Node<CanvasNodeData<T>, CanvasNodeType>;
+export type CanvasNode<T = Record<string, unknown>> = Node<CanvasNodeData<T>, CanvasNodeType> & {
+  className?: string;
+  style?: React.CSSProperties;
+};
 
 // Node specific metadata types
 export type DocumentNodeMeta = {

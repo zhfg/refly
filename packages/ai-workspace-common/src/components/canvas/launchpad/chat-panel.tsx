@@ -192,7 +192,7 @@ export const ChatPanel = () => {
         <ChatInput
           query={chatStore.newQAText}
           setQuery={chatStore.setNewQAText}
-          selectedSkill={selectedSkill}
+          selectedSkillName={selectedSkill?.name}
           handleSendMessage={handleSendMessage}
         />
 
