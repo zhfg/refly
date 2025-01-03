@@ -41,14 +41,14 @@ export class AuthController {
     return buildSuccessResponse({ sessionId });
   }
 
-  @Throttle({ default: { limit: 5, ttl: hours(1) } })
+  @Throttle({ default: { limit: 5, ttl: minutes(10) } })
   @Post('email/login')
   async emailLogin(@Body() { email, password }: EmailLoginRequest): Promise<EmailLoginResponse> {
     const { accessToken } = await this.authService.emailLogin(email, password);
     return buildSuccessResponse({ accessToken });
   }
 
-  @Throttle({ default: { limit: 5, ttl: hours(1) } })
+  @Throttle({ default: { limit: 5, ttl: minutes(10) } })
   @Post('verification/create')
   async createVerification(
     @Body() params: CreateVerificationRequest,
@@ -66,7 +66,7 @@ export class AuthController {
     return buildSuccessResponse();
   }
 
-  @Throttle({ default: { limit: 5, ttl: minutes(30) } })
+  @Throttle({ default: { limit: 5, ttl: minutes(10) } })
   @Post('verification/check')
   async checkVerification(
     @Body() params: CheckVerificationRequest,
