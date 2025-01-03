@@ -405,6 +405,7 @@ const translations = {
         },
         toolbar: {
           quote: '引用内容提问',
+          createMemo: '创建备忘录',
         },
       },
       leavePageModal: {
@@ -417,6 +418,7 @@ const translations = {
       contentSelectorIsEmpty: '请选择文本',
       contentSelector: '内容划线选择器',
       addContext: '添加上下文',
+      createMemo: '创建备忘录',
       clearContext: '清空',
       addToContext: '引用提问',
       resource: '资源',

@@ -412,6 +412,7 @@ const translations = {
         },
         toolbar: {
           quote: 'Quote Content to Ask',
+          createMemo: 'Create Memo',
         },
       },
       leavePageModal: {
@@ -425,6 +426,7 @@ const translations = {
       contentSelectorIsEmpty: 'Please select text',
       clearSelector: 'Clear Selection',
       addContext: 'Add Context',
+      createMemo: 'Create Memo',
       clearContext: 'Clear',
       addToContext: 'Quote',
       resource: 'Resource',

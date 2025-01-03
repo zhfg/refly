@@ -35,12 +35,14 @@ import '@refly-packages/ai-workspace-common/modules/content-selector/styles/cont
 import classNames from 'classnames';
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { genUniqueId } from '@refly-packages/utils/id';
+import { genMemoID, genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/use-selection-context';
 import { useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 
 export const CollaborativeEditor = memo(
   ({ docId }: { docId: string }) => {
@@ -194,6 +196,23 @@ export const CollaborativeEditor = memo(
 
       addToContext(node);
     };
+
+    const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
+    const handleCreateMemo = useCallback(
+      (selectedText: string) => {
+        const memoId = genMemoID();
+
+        addNode({
+          type: 'memo',
+          data: {
+            title: t('knowledgeBase.context.nodeTypes.memo'),
+            contentPreview: selectedText,
+            entityId: memoId,
+          },
+        });
+      },
+      [selectedText, t, addNode],
+    );
 
     // Apply Codeblock Highlighting on the HTML from editor.getHTML()
     const highlightCodeblocks = async (content: string) => {
@@ -415,6 +434,7 @@ export const CollaborativeEditor = memo(
                 contentSelector={{
                   text: t('knowledgeBase.context.addToContext'),
                   handleClick: () => handleAddToContext(selectedText),
+                  createMemo: () => handleCreateMemo(selectedText),
                 }}
               />
               <CollabGenAIBlockMenu />

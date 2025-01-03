@@ -5,6 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useSelectionContext } from './use-selection-context';
 import { MessageSquareDiff } from 'lucide-react';
+import { IconMemo } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { genMemoID } from '@refly-packages/utils/id';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 
 interface SelectionContextProps {
   containerClass?: string;
@@ -13,9 +17,27 @@ interface SelectionContextProps {
 
 export const SelectionContext: React.FC<SelectionContextProps> = ({ containerClass, getNodeData }) => {
   const { t } = useTranslation();
-  const { selectedText, isSelecting, addToContext } = useSelectionContext({
+  const { selectedText, isSelecting, addToContext, removeSelection } = useSelectionContext({
     containerClass,
   });
+  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
+
+  const createMemo = useCallback(
+    (selectedText: string) => {
+      const memoId = genMemoID();
+
+      addNode({
+        type: 'memo',
+        data: {
+          title: t('knowledgeBase.context.nodeTypes.memo'),
+          contentPreview: selectedText,
+          entityId: memoId,
+        },
+      });
+      removeSelection();
+    },
+    [selectedText, t, addNode],
+  );
 
   const handleAddToContext = useCallback(
     (text: string) => {
@@ -27,10 +49,25 @@ export const SelectionContext: React.FC<SelectionContextProps> = ({ containerCla
     [getNodeData, addToContext, t],
   );
 
+  const buttons = [
+    {
+      className: 'w-full font-medium text-xs justify-start !text-[#00968F] hover:!text-[#00968F]/80',
+      icon: <MessageSquareDiff size={12} />,
+      label: t('knowledgeBase.context.addToContext'),
+      onClick: () => handleAddToContext(selectedText),
+    },
+    {
+      className: 'w-full font-medium text-xs justify-start',
+      icon: <IconMemo size={12} />,
+      label: t('knowledgeBase.context.createMemo'),
+      onClick: () => createMemo(selectedText),
+    },
+  ];
+
   return (
     <SelectionBubble containerClass={containerClass} placement="top" offset={[0, 10]}>
       <div
-        className="refly-selector-hover-menu"
+        className="refly-selector-hover-menu flex flex-col"
         style={{
           background: '#FFFFFF',
           border: '1px solid rgba(0,0,0,0.10)',
@@ -39,25 +76,26 @@ export const SelectionContext: React.FC<SelectionContextProps> = ({ containerCla
           padding: '2px 4px',
         }}
       >
-        <Button
-          type="text"
-          size="small"
-          className="text-[#00968F] hover:text-[#00968F]/80"
-          icon={<MessageSquareDiff size={12} className="text-[#00968F]" />}
-          onMouseDown={(e) => {
-            // Prevent selection from being cleared
-            e.preventDefault();
-            e.stopPropagation();
-            handleAddToContext(selectedText);
-          }}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            // handleAddToContext(selectedText);
-          }}
-        >
-          <span className="font-medium text-xs text-[#00968F]">{t('knowledgeBase.context.addToContext')}</span>
-        </Button>
+        {buttons.map((button) => (
+          <Button
+            type="text"
+            size="small"
+            className={button.className}
+            icon={button.icon}
+            onMouseDown={(e) => {
+              // Prevent selection from being cleared
+              e.preventDefault();
+              e.stopPropagation();
+              button.onClick();
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            {button.label}
+          </Button>
+        ))}
       </div>
     </SelectionBubble>
   );
