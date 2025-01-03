@@ -4,7 +4,7 @@ import { useCanvasContext } from '../../context/canvas';
 import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { CanvasNodeData } from '../../components/canvas/nodes';
 
-export const useSetNodeData = (selectedCanvasId?: string) => {
+export const usePatchNodeData = (selectedCanvasId?: string) => {
   const { canvasId: contextCanvasId, provider } = useCanvasContext();
   const { canvasId: routeCanvasId } = useParams();
   const ydoc = provider.document;

@@ -12,7 +12,7 @@ import { genDocumentID } from '@refly-packages/utils/id';
 import { parseMarkdown } from '@refly-packages/utils/editor';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { prosemirrorToYXmlFragment } from 'y-prosemirror';
-import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 const createLocalDocument = async (docId: string, title: string, content: string) => {
   const ydoc = new Y.Doc();
@@ -34,7 +34,7 @@ export const useCreateDocument = () => {
   const [isCreating, setIsCreating] = useState(false);
   const { canvasId } = useCanvasContext();
   const { t } = useTranslation();
-  const { addNode } = useAddNode(canvasId);
+  const { addNode } = useAddNode();
 
   const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt } = useDocumentStoreShallow((state) => ({
     setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,

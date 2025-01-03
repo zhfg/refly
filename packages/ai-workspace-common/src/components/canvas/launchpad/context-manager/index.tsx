@@ -3,26 +3,31 @@ import { ContextItem } from './context-item';
 
 import { AddBaseMarkContext } from './components/add-base-mark-context';
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
-import { FilterErrorInfo, NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { FilterErrorInfo, IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useReactFlow } from '@xyflow/react';
 
 interface ContextManagerProps {
-  contextItems: NodeItem[];
-  setContextItems: (items: NodeItem[]) => void;
+  contextItems: IContextItem[];
+  setContextItems: (items: IContextItem[]) => void;
   filterErrorInfo?: FilterErrorInfo;
 }
 
-const ContextManagerComponent = ({ contextItems, setContextItems, filterErrorInfo }: ContextManagerProps) => {
-  const { getNode } = useReactFlow();
+const ContextManagerComponent = ({ contextItems = [], setContextItems, filterErrorInfo }: ContextManagerProps) => {
+  const { getNodes } = useReactFlow();
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
+
   const itemSelected = useMemo(() => {
-    return new Map(contextItems.map((item) => [item.id, getNode(item.id)?.selected]));
+    const nodes = getNodes();
+    const entityIdNodeMap = new Map(
+      nodes.filter((node) => node.data?.entityId).map((node) => [node.data?.entityId, node]),
+    );
+    return new Map(contextItems.map((item) => [item.entityId, entityIdNodeMap.get(item.entityId)?.selected]));
   }, [contextItems]);
 
-  const handleRemoveItem = (item: NodeItem) => {
-    setContextItems(contextItems.filter((contextItem) => contextItem.id !== item.id));
+  const handleRemoveItem = (item: IContextItem) => {
+    setContextItems(contextItems.filter((contextItem) => contextItem.entityId !== item.entityId));
 
-    if (activeItemId === item.id) {
+    if (activeItemId === item.entityId) {
       setActiveItemId(null);
     }
   };
@@ -32,12 +37,12 @@ const ContextManagerComponent = ({ contextItems, setContextItems, filterErrorInf
       <div className="flex flex-col">
         <div className="flex flex-wrap content-start gap-1 w-full">
           <AddBaseMarkContext contextItems={contextItems} setContextItems={setContextItems} />
-          {contextItems?.map((item) => (
+          {contextItems.filter(Boolean).map((item) => (
             <ContextItem
-              key={item?.id}
+              key={item.entityId}
               item={item}
               isLimit={!!filterErrorInfo?.[mapSelectionTypeToContentList(item?.type)]}
-              isActive={itemSelected.get(item.id)}
+              isActive={itemSelected.get(item.entityId)}
               onRemove={handleRemoveItem}
             />
           ))}

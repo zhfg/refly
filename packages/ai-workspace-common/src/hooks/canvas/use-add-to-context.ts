@@ -1,11 +1,8 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { message } from 'antd';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { CanvasNodeType } from '@refly/openapi-schema';
+import { IContextItem, useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 
 export const useAddToContext = () => {
   const { t } = useTranslation();
@@ -13,25 +10,26 @@ export const useAddToContext = () => {
     showLaunchpad: state.showLaunchpad,
     setShowLaunchpad: state.setShowLaunchpad,
   }));
-  const { handleItemAdd } = useChatHistory();
 
   const addSingleNodeToContext = useCallback(
-    (node: CanvasNode) => {
+    (item: IContextItem) => {
       const contextStore = useContextPanelStore.getState();
       const selectedContextItems = contextStore.contextItems;
-      const nodeType = node?.type;
+      const nodeType = item?.type;
 
       // Check if item is already in context
-      const isAlreadyAdded = selectedContextItems.some((item) => item.id === node.id && !item.isPreview);
+      const isAlreadyAdded = selectedContextItems.some(
+        (selectedItem) => selectedItem.entityId === item.entityId && !selectedItem.isPreview,
+      );
 
       // Get node title based on type
       let nodeTitle = '';
-      if (node?.data?.metadata?.sourceType === 'documentSelection') {
-        nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
+      if (item?.metadata?.sourceType === 'documentSelection') {
+        nodeTitle = item?.title ?? t('knowledgeBase.context.untitled');
       } else if (nodeType === 'skillResponse') {
-        nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
+        nodeTitle = item?.title ?? t('knowledgeBase.context.untitled');
       } else {
-        nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
+        nodeTitle = item?.title ?? t('knowledgeBase.context.untitled');
       }
 
       if (!showLaunchpad) {
@@ -49,10 +47,7 @@ export const useAddToContext = () => {
       }
 
       // Add to context
-      contextStore.addContextItem(node);
-      if (nodeType === 'skillResponse') {
-        handleItemAdd(node);
-      }
+      contextStore.addContextItem(item);
 
       message.success(
         t('knowledgeBase.context.addSuccessWithTitle', {
@@ -61,16 +56,18 @@ export const useAddToContext = () => {
         }),
       );
 
+      // Add to context
+      contextStore.addContextItem(item);
+
       return true;
     },
-    [showLaunchpad, setShowLaunchpad, handleItemAdd, t],
+    [showLaunchpad, setShowLaunchpad],
   );
 
-  const addNodesToContext = useCallback(
-    (nodes: CanvasNode[]) => {
+  const addContextItems = useCallback(
+    (items: IContextItem[]) => {
       // Filter out memo, skill, and group nodes
-      // Filter out memo, skill, and group nodes
-      const validNodes = nodes.filter((node) => !['skill', 'memo', 'group'].includes(node.type));
+      const validNodes = items.filter((item) => !['skill', 'memo', 'group'].includes(item.type));
 
       if (!showLaunchpad) {
         setShowLaunchpad(true);
@@ -86,6 +83,6 @@ export const useAddToContext = () => {
 
   return {
     addToContext: addSingleNodeToContext,
-    addNodesToContext,
+    addContextItems,
   };
 };

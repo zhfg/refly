@@ -8,16 +8,13 @@ import { Node } from '@xyflow/react';
 import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
 import { CustomHandle } from './custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
-import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './action-buttons';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-insert-to-document';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
-import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-chat-history';
 import {
   IconError,
   IconLoading,
@@ -26,7 +23,7 @@ import {
   IconToken,
   preloadModelIcons,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { NodeItem, useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
@@ -40,16 +37,13 @@ import { ModelProviderIcons } from '@refly-packages/ai-workspace-common/componen
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
+import { usePatchNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-patch-node-data';
 import { CanvasNodeType, Source } from '@refly/openapi-schema';
-import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import {
-  convertContextItemsToContext,
-  convertContextToItems,
-} from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { convertContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -77,7 +71,7 @@ const NodeHeader = memo(({ query, skillName, skill }: { query: string; skillName
     <>
       <div className="flex-shrink-0 mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-[#F79009] shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,40,0.1)] flex items-center justify-center flex-shrink-0">
+          <div className="w-6 h-6 rounded bg-[#F79009] shadow-lg flex items-center justify-center flex-shrink-0">
             <IconResponse className="w-4 h-4 text-white" />
           </div>
           <span className="text-sm font-medium leading-normal truncate cursor-help">{query}</span>
@@ -151,8 +145,15 @@ const NodeFooter = memo(
 NodeFooter.displayName = 'NodeFooter';
 
 export const SkillResponseNode = memo(
-  (props: SkillResponseNodeProps) => {
-    const { data, selected, id, hideActions = false, isPreview = false, hideHandles = false, onNodeClick } = props;
+  ({
+    data,
+    selected,
+    id,
+    hideActions = false,
+    isPreview = false,
+    hideHandles = false,
+    onNodeClick,
+  }: SkillResponseNodeProps) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const { edges, operatingNodeId } = useCanvasStoreShallow((state) => ({
@@ -160,7 +161,7 @@ export const SkillResponseNode = memo(
       operatingNodeId: state.operatingNodeId,
     }));
 
-    const setNodeData = useSetNodeData();
+    const patchNodeData = usePatchNodeData();
     const { getNode } = useReactFlow();
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
 
@@ -174,7 +175,7 @@ export const SkillResponseNode = memo(
     }));
 
     const { title, contentPreview: content, metadata, createdAt, entityId } = data ?? {};
-    const node = useMemo(() => getNode(props.id), [props.id, getNode]);
+    const node = useMemo(() => getNode(id), [id, getNode]);
     const initialSize = useMemo(
       () => ({
         width: node?.measured?.width ?? 288,
@@ -247,12 +248,11 @@ export const SkillResponseNode = memo(
 
       if (shouldPoll && remoteStatus && (remoteStatus === 'finish' || remoteStatus === 'failed')) {
         let shouldUpdate = false;
-        let newNodeData = { ...data };
+        let nodeDataUpdates: Partial<CanvasNodeData<ResponseNodeMeta>> = {};
 
         if (nodeStatus !== remoteStatus) {
           shouldUpdate = true;
-          newNodeData.metadata = {
-            ...data.metadata,
+          nodeDataUpdates.metadata = {
             status: remoteStatus,
           };
         }
@@ -264,11 +264,11 @@ export const SkillResponseNode = memo(
 
         if (remoteStatus === 'finish' && data?.contentPreview !== remoteContent) {
           shouldUpdate = true;
-          newNodeData.contentPreview = remoteContent;
+          nodeDataUpdates.contentPreview = remoteContent;
         }
 
         if (shouldUpdate) {
-          setNodeData(id, newNodeData);
+          patchNodeData(id, nodeDataUpdates);
           updateActionResult(entityId, remoteResult);
         }
       }
@@ -281,8 +281,6 @@ export const SkillResponseNode = memo(
     const isTargetConnected = edges?.some((edge) => edge.target === id);
     const isSourceConnected = edges?.some((edge) => edge.source === id);
 
-    const edgeStyles = useEdgeStyles();
-
     // Handle node hover events
     const handleMouseEnter = useCallback(() => {
       setIsHovered(true);
@@ -294,7 +292,6 @@ export const SkillResponseNode = memo(
       onHoverEnd();
     }, [onHoverEnd]);
 
-    const { addToHistory } = useAddToChatHistory();
     const { invokeAction } = useInvokeAction();
 
     const handleRerun = useCallback(() => {
@@ -310,27 +307,31 @@ export const SkillResponseNode = memo(
       setShouldPoll(false);
       setTimeout(() => setShouldPoll(true), POLLING_COOLDOWN_TIME);
 
-      setNodeData(id, {
+      patchNodeData(id, {
         ...data,
         contentPreview: '',
         metadata: {
           status: 'waiting',
         },
       });
-      invokeAction({
-        resultId: entityId,
-        input: { query: title },
-        target: { entityType: 'canvas', entityId: canvasId },
-      });
-    }, [data, entityId, invokeAction, setNodeData]);
+
+      // TODO: check if rerun will drop other param
+      invokeAction(
+        {
+          resultId: entityId,
+          query: title,
+        },
+        {
+          entityType: 'canvas',
+          entityId: canvasId,
+        },
+      );
+    }, [data, entityId, invokeAction, patchNodeData]);
 
     const insertToDoc = useInsertToDocument(entityId);
     const handleInsertToDoc = useCallback(async () => {
       await insertToDoc('insertBelow', content);
     }, [insertToDoc, entityId, content]);
-
-    const runtime = getRuntime();
-    const isWeb = runtime === 'web';
 
     const { deleteNode } = useDeleteNode();
 
@@ -356,20 +357,12 @@ export const SkillResponseNode = memo(
 
     const handleAddToContext = useCallback(() => {
       addToContext({
-        id,
         type: 'skillResponse',
-        data,
-        position: { x: 0, y: 0 },
-      } as CanvasNode);
-
-      // Add to chat history
-      addToHistory({
-        id,
-        type: 'skillResponse',
-        data,
-        position: { x: 0, y: 0 },
-      } as CanvasNode);
-    }, [id, data, addToContext, addToHistory]);
+        title: title,
+        entityId: entityId,
+        metadata: data?.metadata,
+      });
+    }, [id, data, addToContext]);
 
     const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
       updateSourceListDrawer: state.updateSourceListDrawer,
@@ -389,7 +382,7 @@ export const SkillResponseNode = memo(
       moveableRef.current?.request('resizable', { width, height });
     }, []);
 
-    const { addNode } = useAddNode(canvasId);
+    const { addNode } = useAddNode();
 
     const handleAskAI = useCallback(() => {
       addNode(
@@ -399,7 +392,17 @@ export const SkillResponseNode = memo(
             title: 'Skill',
             entityId: genSkillID(),
             metadata: {
-              contextNodeIds: [id],
+              contextItems: [
+                {
+                  type: 'skillResponse',
+                  title: data.title,
+                  entityId: data.entityId,
+                  metadata: {
+                    ...data.metadata,
+                    withHistory: true,
+                  },
+                },
+              ],
             },
           },
         },
@@ -423,12 +426,9 @@ export const SkillResponseNode = memo(
 
       // Create new skill node with context, similar to group node implementation
       const connectTo = contextItems.map((item) => ({
-        type: item.type as CanvasNodeType,
-        entityId: item.data?.entityId,
+        type: item.type,
+        entityId: item.entityId,
       }));
-
-      // Get all context item IDs
-      const contextNodeIds = contextItems.map((item) => item.id);
 
       // Create new skill node
       addNode(
@@ -438,7 +438,7 @@ export const SkillResponseNode = memo(
             title: t('canvas.nodeActions.cloneAskAI'),
             entityId: genSkillID(),
             metadata: {
-              contextNodeIds, // Use all context item IDs
+              contextItems,
               query: title,
               modelInfo,
               selectedSkill: actionMeta,
@@ -490,7 +490,7 @@ export const SkillResponseNode = memo(
         // Clean up all node events
         cleanupNodeEvents(id);
       };
-    }, [id, handleRerun, handleAddToContext, handleInsertToDoc, handleCreateDocument, handleDelete]);
+    }, [id, handleRerun, handleAddToContext, handleInsertToDoc, handleCreateDocument, deleteNode]);
 
     // 使用 useMemo 缓存计算值
     const nodeStyle = useMemo(

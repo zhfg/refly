@@ -1,6 +1,5 @@
 import { memo, FC } from 'react';
 import { Button, Badge } from 'antd';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
 
 // Define toolbar item interface
@@ -15,7 +14,7 @@ export interface ToolbarItem {
 
 interface ToolButtonProps {
   tool: ToolbarItem;
-  selectedNodes: NodeItem[];
+  contextCnt: number;
   handleToolSelect: (event: React.MouseEvent, tool: string) => void;
   getIconColor: (tool: string) => string;
   getIsLoading: (tool: string) => boolean;
@@ -24,21 +23,21 @@ interface ToolButtonProps {
 export const ToolButton: FC<ToolButtonProps> = memo(
   ({
     tool,
-    selectedNodes,
+    contextCnt = 0,
     handleToolSelect,
     getIconColor,
     getIsLoading,
   }: {
     tool: ToolbarItem;
-    selectedNodes: NodeItem[];
+    contextCnt: number;
     handleToolSelect: (event: React.MouseEvent, tool: string) => void;
     getIconColor: (tool: string) => string;
     getIsLoading: (tool: string) => boolean;
   }) => {
     return (
       <TooltipWrapper tooltip={tool.tooltip}>
-        {selectedNodes.length > 0 && tool.value === 'handleLaunchpad' ? (
-          <Badge size="small" color="#00968F" offset={[-2, 2]} count={selectedNodes.length} overflowCount={9999}>
+        {contextCnt > 0 && tool.value === 'handleLaunchpad' ? (
+          <Badge size="small" color="#00968F" offset={[-2, 2]} count={contextCnt} overflowCount={9999}>
             <Button
               type="text"
               onClick={(event) => handleToolSelect(event, tool.value)}

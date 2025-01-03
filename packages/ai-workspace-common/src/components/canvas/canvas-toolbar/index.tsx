@@ -153,7 +153,7 @@ const SearchListWrapper = memo(
 // 3. 优化主组件
 export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
   const { t } = useTranslation();
-  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
+  const { addNode } = useAddNode();
 
   // 4. 使用 selector 函数分离状态
   const { showLaunchpad, setShowLaunchpad, showEdges } = useCanvasStoreShallow((state) => ({
@@ -167,7 +167,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
     setImportResourceModalVisible: state.setImportResourceModalVisible,
   }));
 
-  const selectedNodes = useContextPanelStoreShallow((state) => state.contextItems);
+  const contextItems = useContextPanelStoreShallow((state) => state.contextItems);
   const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
   const { toggleEdgeVisible } = useEdgeVisible();
 
@@ -253,7 +253,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
             <ToolButton
               key={index}
               tool={tool}
-              selectedNodes={selectedNodes}
+              contextCnt={contextItems?.length}
               handleToolSelect={handleToolSelect}
               getIconColor={getIconColor}
               getIsLoading={getIsLoading}

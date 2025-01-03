@@ -6,25 +6,19 @@ import {
   SkillContextResourceItem,
 } from '@refly/openapi-schema';
 import { Node, Edge } from '@xyflow/react';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { genUniqueId } from '@refly-packages/utils/id';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getClientOrigin } from '@refly-packages/utils/url';
 
-export const convertContextToItems = (context?: SkillContext, history?: ActionResult[]): NodeItem[] => {
+export const convertContextToItems = (context: SkillContext, history: ActionResult[]): IContextItem[] => {
   if (!context) return [];
 
-  const items: NodeItem[] = [];
+  const items: IContextItem[] = [];
 
   history?.forEach((item) => {
     items.push({
-      id: genUniqueId(),
-      position: { x: 0, y: 0 },
       type: 'skillResponse',
-      data: {
-        entityId: item.resultId,
-        contentPreview: item.steps?.map((step) => step.content)?.join('\n\n'),
-        title: item.title,
-      },
+      entityId: item.resultId,
+      title: item.title,
     });
   });
 
@@ -32,24 +26,20 @@ export const convertContextToItems = (context?: SkillContext, history?: ActionRe
   context?.contentList?.forEach((content: SkillContextContentItem) => {
     const metadata = content.metadata as any;
     items.push({
-      id: metadata?.nodeId ?? genUniqueId(),
       type: metadata?.domain?.includes('resource')
         ? 'resource'
         : metadata?.domain?.includes('document')
           ? 'document'
           : 'skillResponse',
-      position: { x: 0, y: 0 },
-      data: {
-        entityId: metadata?.entityId ?? '',
-        title: metadata?.title ?? 'Selected Content',
-        metadata: {
-          contentPreview: content.content,
-          selectedContent: content.content,
-          sourceEntityId: metadata?.entityId ?? '',
-          sourceEntityType: metadata?.domain?.split('Selection')[0] ?? '',
-          sourceType: metadata?.domain ?? '',
-          ...(metadata?.url && { url: metadata.url }),
-        },
+      entityId: metadata?.entityId ?? '',
+      title: metadata?.title ?? 'Selected Content',
+      metadata: {
+        contentPreview: content.content,
+        selectedContent: content.content,
+        sourceEntityId: metadata?.entityId ?? '',
+        sourceEntityType: metadata?.domain?.split('Selection')[0] ?? '',
+        sourceType: metadata?.domain ?? '',
+        ...(metadata?.url && { url: metadata.url }),
       },
     });
   });
@@ -57,14 +47,10 @@ export const convertContextToItems = (context?: SkillContext, history?: ActionRe
   // Convert resources
   context?.resources?.forEach((resource: SkillContextResourceItem) => {
     items.push({
-      id: resource.metadata?.nodeId ?? genUniqueId(),
       type: 'resource',
-      position: { x: 0, y: 0 },
-      data: {
-        entityId: resource.resourceId ?? '',
-        title: resource.resource?.title ?? 'Resource',
-        metadata: resource.metadata ?? {},
-      },
+      entityId: resource.resourceId ?? '',
+      title: resource.resource?.title ?? 'Resource',
+      metadata: resource.metadata ?? {},
       isPreview: resource.isCurrent ? true : false,
       isCurrentContext: resource.isCurrent,
     });
@@ -73,14 +59,10 @@ export const convertContextToItems = (context?: SkillContext, history?: ActionRe
   // Convert documents
   context?.documents?.forEach((doc: SkillContextDocumentItem) => {
     items.push({
-      id: doc.metadata?.nodeId ?? genUniqueId(),
       type: 'document',
-      position: { x: 0, y: 0 },
-      data: {
-        entityId: doc.docId ?? '',
-        title: doc.document?.title ?? 'Document',
-        metadata: doc.metadata ?? {},
-      },
+      entityId: doc.docId ?? '',
+      title: doc.document?.title ?? 'Document',
+      metadata: doc.metadata ?? {},
       isPreview: doc.isCurrent ? true : false,
       isCurrentContext: doc.isCurrent,
     });
@@ -89,58 +71,68 @@ export const convertContextToItems = (context?: SkillContext, history?: ActionRe
   return items;
 };
 
-export const convertContextItemsToContext = (items: NodeItem[]) => {
-  return {
+export const convertContextItemsToInvokeParams = (
+  items: IContextItem[],
+  getHistory: (item: IContextItem) => ActionResult[],
+): { context: SkillContext; resultHistory: ActionResult[] } => {
+  const context = {
     contentList: items
-      ?.filter((item) => item?.data?.metadata?.sourceType?.includes('Selection'))
+      ?.filter((item) => item?.metadata?.sourceType?.includes('Selection'))
       ?.map((item) => ({
-        content: item.data?.metadata?.selectedContent ?? '',
+        content: item.metadata?.selectedContent ?? '',
         metadata: {
-          domain: item.data?.metadata?.sourceType ?? '',
-          entityId: item.data?.entityId ?? '',
-          title: item.data?.title ?? '',
-          nodeId: item.id,
-          ...(item.data?.metadata?.sourceType === 'extensionWeblinkSelection' && {
-            url: item.data?.metadata?.url || getClientOrigin(),
+          domain: item.metadata?.sourceType ?? '',
+          entityId: item.entityId ?? '',
+          title: item.title ?? '',
+          nodeId: item.entityId,
+          ...(item.metadata?.sourceType === 'extensionWeblinkSelection' && {
+            url: item.metadata?.url || getClientOrigin(),
           }),
         },
       })),
     resources: items
-      ?.filter((item) => item.type === 'resource' && !item.data?.metadata?.sourceType?.includes('Selection'))
+      ?.filter((item) => item?.type === 'resource' && !item?.metadata?.sourceType?.includes('Selection'))
       .map((item) => ({
-        resourceId: item.data?.entityId || item.id,
+        resourceId: item.entityId,
         resource: {
-          resourceId: item.data?.entityId,
-          resourceType: item.data?.metadata?.resourceType,
-          title: item.data?.title,
+          resourceId: item.entityId,
+          resourceType: item.metadata?.resourceType,
+          title: item.title,
         },
         isCurrent: item.isCurrentContext,
         metadata: {
-          ...item.data?.metadata,
-          nodeId: item.id,
+          ...item.metadata,
+          nodeId: item.entityId,
         },
       })),
     documents: items
-      ?.filter((item) => item.type === 'document' && !item.data?.metadata?.sourceType?.includes('Selection'))
+      ?.filter((item) => item?.type === 'document' && !item?.metadata?.sourceType?.includes('Selection'))
       .map((item) => ({
-        docId: item.data?.entityId || item.id,
+        docId: item.entityId,
         document: {
-          docId: item.data?.entityId,
-          title: item.data?.title,
+          docId: item.entityId,
+          title: item.title,
         },
         isCurrent: item.isCurrentContext,
         metadata: {
-          ...item.data?.metadata,
-          nodeId: item.id,
+          ...item.metadata,
+          nodeId: item.entityId,
           url: getClientOrigin(),
         },
       })),
   };
+  const resultHistory = items
+    ?.filter((item) => item.type === 'skillResponse')
+    .flatMap((item) => {
+      return item.metadata?.withHistory ? getHistory(item) : [{ title: item.title, resultId: item.entityId }];
+    });
+
+  return { context, resultHistory };
 };
 
 export const convertContextItemsToEdges = (
   resultId: string,
-  items: NodeItem[],
+  items: IContextItem[],
   nodes?: Node[],
   edges?: Edge[],
 ): { edgesToAdd: Edge[]; edgesToDelete: Edge[] } => {
@@ -169,7 +161,7 @@ export const convertContextItemsToEdges = (
     }
   });
 
-  const itemNodeIds = items.map((item) => entityNodeMap.get(item.data?.entityId as string));
+  const itemNodeIds = items.map((item) => entityNodeMap.get(item.entityId as string));
   const itemNodeIdSet = new Set(itemNodeIds);
 
   const edgeSourceIds = relatedEdges.map((edge) => edge.source);
@@ -177,7 +169,7 @@ export const convertContextItemsToEdges = (
 
   // Process each item to create edges based on relationships
   items.forEach((item) => {
-    const itemNodeId = entityNodeMap.get(item.data?.entityId as string);
+    const itemNodeId = entityNodeMap.get(item.entityId as string);
     if (!edgeSourceIdSet.has(itemNodeId)) {
       const newEdge: Edge = {
         id: `${itemNodeId}-${currentNode.id}`,

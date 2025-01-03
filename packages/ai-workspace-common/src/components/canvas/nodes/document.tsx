@@ -23,7 +23,6 @@ import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-works
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
-import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
@@ -88,12 +87,12 @@ export const DocumentNode = memo(
 
     const handleAddToContext = useCallback(() => {
       addToContext({
-        id,
         type: 'document',
-        data,
-        position: { x: 0, y: 0 },
-      } as CanvasNode);
-    }, [id, data, addToContext]);
+        title: data.title,
+        entityId: data.entityId,
+        metadata: data.metadata,
+      });
+    }, [data, addToContext]);
 
     const { deleteNode } = useDeleteNode();
 
@@ -116,8 +115,7 @@ export const DocumentNode = memo(
       console.log('Show about info');
     }, []);
 
-    const { canvasId } = useCanvasContext();
-    const { addNode } = useAddNode(canvasId);
+    const { addNode } = useAddNode();
 
     const handleAskAI = useCallback(() => {
       addNode(
@@ -127,7 +125,14 @@ export const DocumentNode = memo(
             title: 'Skill',
             entityId: genSkillID(),
             metadata: {
-              contextNodeIds: [id],
+              contextItems: [
+                {
+                  type: 'document',
+                  title: data.title,
+                  entityId: data.entityId,
+                  metadata: data.metadata,
+                },
+              ],
             },
           },
         },

@@ -8,24 +8,21 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { useContextFilterErrorTip } from './context-manager/hooks/use-context-filter-errror-tip';
-import { InvokeSkillRequest } from '@refly/openapi-schema';
 import { genActionResultID } from '@refly-packages/utils/id';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 import { SelectedSkillHeader } from './selected-skill-header';
-import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
+import { useSkillStore, useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { ContextManager } from './context-manager';
 import { ConfigManager } from './config-manager';
 import { ChatActions, CustomAction } from './chat-actions';
 import { ChatInput } from './chat-input';
-import { useChatHistory } from './hooks/use-chat-history';
 
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useSyncSelectedNodesToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-sync-selected-nodes-to-context';
 import { PiMagicWand } from 'react-icons/pi';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 
 export const ChatPanel = () => {
   const { t } = useTranslation();
@@ -60,11 +57,11 @@ export const ChatPanel = () => {
   // hooks
   const { canvasId } = useCanvasContext();
   const { handleFilterErrorTip } = useContextFilterErrorTip();
+  const { addNode } = useAddNode();
   const { invokeAction, abortAction } = useInvokeAction();
-  const { pinAllHistoryItems } = useChatHistory();
 
   // automatically sync selected nodes to context
-  useSyncSelectedNodesToContext(contextItems, setContextItems);
+  useSyncSelectedNodesToContext();
 
   useEffect(() => {
     if (!selectedSkill?.configSchema?.items?.length) {
@@ -94,9 +91,6 @@ export const ChatPanel = () => {
       return;
     }
 
-    // Pin all history items before sending new message
-    pinAllHistoryItems();
-
     const { formErrors } = useContextPanelStore.getState();
     if (formErrors && Object.keys(formErrors).length > 0) {
       notification.error({
@@ -108,38 +102,51 @@ export const ChatPanel = () => {
 
     const tplConfig = form?.getFieldValue('tplConfig');
 
-    const { localSettings } = useUserStore.getState();
+    const { selectedSkill } = useSkillStore.getState();
     const { newQAText, selectedModel } = useChatStore.getState();
-    const { contextItems, historyItems } = useContextPanelStore.getState();
+    const query = userInput || newQAText.trim();
+
+    const { contextItems } = useContextPanelStore.getState();
 
     const resultId = genActionResultID();
-    const param: InvokeSkillRequest = {
-      resultId,
-      input: {
-        query: userInput || newQAText.trim(),
-      },
-      target: {
-        entityId: canvasId,
-        entityType: 'canvas',
-      },
-      modelName: selectedModel?.name,
-      context: convertContextItemsToContext(contextItems),
-      resultHistory: historyItems.map((item) => ({
-        resultId: item.data.entityId,
-        title: item.data.title,
-        steps: item.data.metadata?.steps,
-      })),
-      skillName: skillStore.selectedSkill?.name,
-      locale: localSettings?.outputLocale,
-      tplConfig,
-    };
 
     chatStore.setNewQAText('');
 
     // Reset selected skill after sending message
     skillStore.setSelectedSkill(null);
 
-    invokeAction(param);
+    invokeAction(
+      {
+        query,
+        resultId,
+        selectedSkill,
+        modelInfo: selectedModel,
+        contextItems,
+        tplConfig,
+      },
+      {
+        entityType: 'canvas',
+        entityId: canvasId,
+      },
+    );
+
+    addNode(
+      {
+        type: 'skillResponse',
+        data: {
+          title: query,
+          entityId: resultId,
+          metadata: {
+            status: 'executing',
+            contextItems,
+          },
+        },
+      },
+      contextItems.map((item) => ({
+        type: item.type,
+        entityId: item.entityId,
+      })),
+    );
   };
 
   const handleAbort = () => {

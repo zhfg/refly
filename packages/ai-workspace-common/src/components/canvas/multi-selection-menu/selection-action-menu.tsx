@@ -6,17 +6,16 @@ import { IconDelete, IconAskAI, IconLoading } from '@refly-packages/ai-workspace
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { CanvasNode, SkillNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { MessageSquareDiff, Group } from 'lucide-react';
-import { genSkillID } from '@refly-packages/utils/id';
+import { genActionResultID, genSkillID } from '@refly-packages/utils/id';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useGroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-group-nodes';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
-import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-chat-history';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
-import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { CanvasNodeData } from '@refly-packages/ai-workspace-common/components/canvas/nodes/types';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+
 interface MenuItem {
   key: string;
   icon: React.ElementType;
@@ -37,11 +36,10 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
   const { t } = useTranslation();
   const { getNodes } = useReactFlow();
   const { canvasId } = useCanvasContext();
-  const { addNode } = useAddNode(canvasId);
+  const { addNode } = useAddNode();
   const { createGroupFromSelectedNodes } = useGroupNodes();
-  const { addNodesToContext } = useAddToContext();
+  const { addContextItems } = useAddToContext();
   const { deleteNodes } = useDeleteNode();
-  const { addNodesToHistory } = useAddToChatHistory();
   const { invokeAction } = useInvokeAction();
   const nodes = useStore((state) => state.nodes);
 
@@ -56,7 +54,9 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
 
   const handleAskAI = useCallback(() => {
     // Get all selected nodes except skills
-    const selectedNodes = getNodes().filter((node) => node.selected && !['skill', 'memo'].includes(node.type));
+    const selectedNodes = getNodes().filter(
+      (node) => node.selected && !['skill', 'memo'].includes(node.type),
+    ) as CanvasNode[];
 
     const connectTo = selectedNodes.map((node) => ({
       type: node.type as CanvasNodeType,
@@ -72,7 +72,15 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
             title: 'Skill',
             entityId: genSkillID(),
             metadata: {
-              contextNodeIds: selectedNodes.map((node) => node.id),
+              contextItems: selectedNodes.map((node) => ({
+                type: node.type,
+                title: node.data?.title,
+                entityId: node.data?.entityId,
+                metadata: {
+                  ...node.data?.metadata,
+                  ...(node.type === 'skillResponse' ? { withHistory: true } : {}),
+                },
+              })),
             },
           },
         },
@@ -84,26 +92,20 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
   }, [getNodes, addNode, onClose]);
 
   const handleAddToContext = useCallback(() => {
-    const selectedNodes = getNodes()
+    const selectedItems = getNodes()
       .filter((node) => node.selected)
       .map((node) => ({
-        id: node.id,
         type: node.type,
-        data: node.data,
-        position: node.position,
-      })) as CanvasNode[];
+        title: node.data?.title,
+        entityId: node.data?.entityId,
+        metadata: node.data?.metadata,
+      })) as IContextItem[];
 
     // Add all selected nodes to context
-    addNodesToContext(selectedNodes);
-
-    // Add skill response nodes to chat history
-    const skillResponseNodes = selectedNodes.filter((node) => node.type === 'skillResponse');
-    if (skillResponseNodes.length > 0) {
-      addNodesToHistory(skillResponseNodes, { showMessage: false });
-    }
+    addContextItems(selectedItems);
 
     onClose?.();
-  }, [getNodes, addNodesToContext, addNodesToHistory, onClose]);
+  }, [getNodes, addContextItems, onClose]);
 
   const handleDelete = useCallback(() => {
     const selectedNodes = getNodes()
@@ -129,34 +131,43 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
     const selectedSkillNodes = getNodes().filter((node) => node.selected && node.type === 'skill');
 
     selectedSkillNodes.forEach((node) => {
-      const { metadata, entityId } = node.data as CanvasNodeData<SkillNodeMeta>;
-      const { query, modelInfo, selectedSkill, contextNodeIds = [] } = metadata;
+      const { metadata } = node.data as CanvasNodeData<SkillNodeMeta>;
+      const { query, modelInfo, selectedSkill, contextItems = [] } = metadata;
 
-      // Get context items for this skill node
-      const contextItems = contextNodeIds.map((id) => getNodes().find((n) => n.id === id)) as NodeItem[];
+      const resultId = genActionResultID();
 
       // Invoke action for this skill node
       invokeAction(
         {
-          resultId: entityId,
-          input: {
-            query,
-          },
-          target: {
-            entityId: canvasId,
-            entityType: 'canvas',
-          },
-          modelName: modelInfo?.name,
-          context: convertContextItemsToContext(contextItems),
-          resultHistory: contextItems
-            .filter((item) => item.type === 'skillResponse')
-            .map((item) => ({
-              resultId: item.data?.entityId,
-              title: item.data?.title,
-            })),
-          skillName: selectedSkill?.name,
+          resultId,
+          query,
+          modelInfo,
+          contextItems,
+          selectedSkill,
         },
-        node.position,
+        {
+          entityId: canvasId,
+          entityType: 'canvas',
+        },
+      );
+
+      addNode(
+        {
+          type: 'skillResponse',
+          data: {
+            title: query,
+            entityId: resultId,
+            metadata: {
+              status: 'executing',
+              contextItems,
+            },
+          },
+          position: node.position,
+        },
+        contextItems.map((item) => ({
+          type: item.type,
+          entityId: item.entityId,
+        })),
       );
 
       // Delete the skill node after invoking

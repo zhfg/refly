@@ -30,8 +30,6 @@ export const selectedTextDomains: SelectedTextDomain[] = [
   'documentAfterCursorSelection',
 ];
 
-// mainly for display context card, now deprecated
-export type ContextDomain = 'weblink' | 'resource' | 'canvas' | 'collection' | 'selected-text';
 // selected text card domain
 export type SelectedTextDomain = SelectedTextMarkType | SelectedCursorTextMarkType;
 

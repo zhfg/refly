@@ -10,13 +10,11 @@ import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/no
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
-import { useAddToChatHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-chat-history';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genSkillID } from '@refly-packages/utils/id';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
-import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import Moveable from 'react-moveable';
 
 interface GroupMetadata {
@@ -49,14 +47,10 @@ export const GroupNode = memo(
     const [isHovered, setIsHovered] = useState(false);
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
     const { ungroupNodes } = useUngroupNodes();
-    const { getNodes, setNodes } = useReactFlow();
+    const { getNode, getNodes, setNodes } = useReactFlow();
     const { deleteNodes, deleteNode } = useDeleteNode();
-    const { addNodesToContext } = useAddToContext();
-    const { addNodesToHistory } = useAddToChatHistory();
-    const { canvasId } = useCanvasContext();
-    const { addNode } = useAddNode(canvasId);
-
-    const { getNode } = useReactFlow();
+    const { addContextItems } = useAddToContext();
+    const { addNode } = useAddNode();
 
     // Memoize node and its measurements
     const node = useMemo(() => getNode(id), [id, getNode]);
@@ -108,29 +102,25 @@ export const GroupNode = memo(
       });
 
       if (childNodes.length > 0) {
-        const nodesToAdd = childNodes.map((node) => ({
-          id: node.id,
-          type: node.type,
-          data: node.data,
-          position: node.position,
-        }));
+        const contextItems = childNodes.map(
+          (node) =>
+            ({
+              type: node.type,
+              title: node.data.title,
+              entityId: node.data.entityId,
+              metadata: node.data.metadata,
+            }) as IContextItem,
+        );
 
-        addNodesToContext(nodesToAdd as CanvasNode[]);
-
-        const skillResponseNodes = nodesToAdd.filter((node) => node.type === 'skillResponse');
-        if (skillResponseNodes.length > 0) {
-          addNodesToHistory(skillResponseNodes as NodeItem[], { showMessage: false });
-        }
+        addContextItems(contextItems);
       }
-    }, [id, data, getNodes, addNodesToContext, addNodesToHistory]);
+    }, [id, data, getNodes, addContextItems]);
 
     const handleAskAI = useCallback(() => {
       const childNodes = getNodes().filter((node) => {
         const isInGroup = node.parentId === id;
         return isInGroup && !['skill', 'memo'].includes(node.type);
-      });
-
-      console.log('childNodes', childNodes);
+      }) as CanvasNode[];
 
       if (childNodes.length > 0) {
         const connectTo = childNodes.map((node) => ({
@@ -145,7 +135,15 @@ export const GroupNode = memo(
               title: 'Skill',
               entityId: genSkillID(),
               metadata: {
-                contextNodeIds: childNodes.map((node) => node.id),
+                contextItems: childNodes.map((node) => ({
+                  type: node.type,
+                  title: node.data?.title,
+                  entityId: node.data?.entityId,
+                  metadata: {
+                    ...node.data?.metadata,
+                    ...(node.type === 'skillResponse' ? { withHistory: true } : {}),
+                  },
+                })),
               },
             },
           },

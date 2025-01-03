@@ -18,7 +18,6 @@ import { useTranslation } from 'react-i18next';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { IconCanvas, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 export interface SearchProps extends React.ComponentProps<'div'> {
   showList?: boolean;
@@ -30,7 +29,7 @@ export const Search = (props: SearchProps) => {
   const { showList, onClickOutside, onSearchValueChange, ...divProps } = props;
 
   const navigate = useNavigate();
-  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
+  const { addNode } = useAddNode();
 
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [searchValue, setSearchValue] = useState('');

@@ -70,7 +70,7 @@ const MemoizedMiniMap = memo(MiniMap);
 const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { t } = useTranslation();
   const previewContainerRef = useRef<HTMLDivElement>(null);
-  const { addNode } = useAddNode(canvasId);
+  const { addNode } = useAddNode();
   const { nodes, edges } = useCanvasStoreShallow((state) => ({
     nodes: state.data[canvasId]?.nodes ?? [],
     edges: state.data[canvasId]?.edges ?? [],

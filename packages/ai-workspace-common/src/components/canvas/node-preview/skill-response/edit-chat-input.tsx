@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useMemo, memo, useState, useCallback } from 'react';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
@@ -11,17 +11,15 @@ import {
 } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
 import { ModelInfo, Skill } from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
-import {
-  convertContextItemsToContext,
-  convertContextItemsToEdges,
-} from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { convertContextItemsToEdges } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { IconExit } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useReactFlow } from '@xyflow/react';
+import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
 
 interface EditChatInputProps {
   resultId: string;
-  contextItems: NodeItem[];
+  contextItems: IContextItem[];
   query: string;
   modelInfo: ModelInfo;
   actionMeta?: {
@@ -37,7 +35,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
 
   const { getEdges, getNodes, deleteElements, addEdges } = useReactFlow();
   const [editQuery, setEditQuery] = useState<string>(query);
-  const [editContextItems, setEditContextItems] = useState<NodeItem[]>(contextItems);
+  const [editContextItems, setEditContextItems] = useState<IContextItem[]>(contextItems);
   const [editModelInfo, setEditModelInfo] = useState<ModelInfo>(modelInfo);
   const { t } = useTranslation();
   const [localActionMeta, setLocalActionMeta] = useState<{
@@ -52,42 +50,34 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
 
   const { canvasId } = useCanvasContext();
   const { invokeAction } = useInvokeAction();
+  const skill = useFindSkill(localActionMeta?.name);
 
   const handleSendMessage = useCallback(() => {
     // Synchronize edges with latest context items
-    console.log('editContextItems', editContextItems);
     const nodes = getNodes();
-    console.log('nodes', nodes);
     const currentNode = nodes.find((node) => node.data?.entityId === resultId);
     if (!currentNode) {
       return;
     }
-    const edges = getEdges().filter((edge) => edge.target === currentNode.id);
+
+    const edges = getEdges();
     const { edgesToAdd, edgesToDelete } = convertContextItemsToEdges(resultId, editContextItems, nodes, edges);
-    console.log('edgesToAdd', edgesToAdd);
-    console.log('edgesToDelete', edgesToDelete);
     addEdges(edgesToAdd);
     deleteElements({ edges: edgesToDelete });
 
-    invokeAction({
-      resultId,
-      input: {
+    invokeAction(
+      {
+        resultId,
         query: editQuery,
+        contextItems: editContextItems,
+        modelInfo: editModelInfo,
+        selectedSkill: skill,
       },
-      target: {
+      {
         entityId: canvasId,
         entityType: 'canvas',
       },
-      modelName: editModelInfo?.name,
-      context: convertContextItemsToContext(editContextItems),
-      resultHistory: editContextItems
-        .filter((item) => item.type === 'skillResponse')
-        .map((item) => ({
-          resultId: item.data?.entityId,
-          title: item.data?.title,
-        })),
-      skillName: localActionMeta?.name,
-    });
+    );
     setEditMode(false);
   }, [resultId, editQuery, editModelInfo, editContextItems, localActionMeta]);
 

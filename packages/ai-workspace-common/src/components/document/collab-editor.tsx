@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, memo, useCallback } from 'react';
 import { useThrottledCallback } from 'use-debounce';
+import classNames from 'classnames';
 import wordsCount from 'words-count';
 import { useTranslation } from 'react-i18next';
 import { CanvasNodeType } from '@refly/openapi-schema';
@@ -31,10 +32,8 @@ import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-t
 
 import { getClientOrigin } from '@refly-packages/utils/url';
 import { useDocumentStore, useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
-import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
-import classNames from 'classnames';
+
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/use-selection-context';
 import { useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
@@ -60,16 +59,8 @@ export const CollaborativeEditor = memo(
       setActiveDocumentId: state.setActiveDocumentId,
     }));
 
-    const contextPanelStore = useContextPanelStore((state) => ({
-      updateBeforeSelectionNoteContent: state.updateBeforeSelectionNoteContent,
-      updateAfterSelectionNoteContent: state.updateAfterSelectionNoteContent,
-      updateCurrentSelectionContent: state.updateCurrentSelectionContent,
-    }));
-
-    const { readOnly, activeDocumentId, currentDocument } = useDocumentStoreShallow((state) => ({
+    const { readOnly } = useDocumentStoreShallow((state) => ({
       readOnly: state.config[docId]?.readOnly,
-      activeDocumentId: state.activeDocumentId,
-      currentDocument: state.documentStates[docId]?.currentDocument,
     }));
 
     const { showContentSelector, scope } = useContentSelectorStore((state) => ({
@@ -257,25 +248,7 @@ export const CollaborativeEditor = memo(
 
         const handleBlur = () => {
           lastCursorPosRef.current = editor?.view?.state?.selection?.$head?.pos;
-
-          const { state } = editor?.view || {};
-          const { selection } = state || {};
-          const { doc } = editor?.state || {};
-          const { from, to } = selection || {};
-
-          const getMarkdownSlice = (start: number, end: number) => {
-            const slice = doc.slice(start, end);
-            return editor.storage.markdown.serializer.serialize(slice.content);
-          };
-
-          const prevSelectionContent = getMarkdownSlice(0, from);
-          const afterSelectionContent = getMarkdownSlice(to, editor?.state?.doc?.content?.size);
-          const selectedContent = getMarkdownSlice(from, to);
-
           documentActions.updateLastCursorPosRef(docId, lastCursorPosRef.current);
-          contextPanelStore.updateCurrentSelectionContent(selectedContent);
-          contextPanelStore.updateBeforeSelectionNoteContent(prevSelectionContent);
-          contextPanelStore.updateAfterSelectionNoteContent(afterSelectionContent);
         };
 
         editor.on('blur', handleBlur);
@@ -284,7 +257,7 @@ export const CollaborativeEditor = memo(
           editor.off('blur', handleBlur);
         };
       }
-    }, [readOnly, docId, documentActions, contextPanelStore]);
+    }, [readOnly, docId, documentActions]);
 
     useEffect(() => {
       const insertBelow = (content: string) => {

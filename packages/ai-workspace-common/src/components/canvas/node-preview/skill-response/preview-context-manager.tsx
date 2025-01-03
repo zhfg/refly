@@ -1,10 +1,10 @@
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { ContextItem } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/context-item';
 import { memo, useMemo } from 'react';
 import './index.scss';
 
 interface PreviewContextManagerProps {
-  contextItems: NodeItem[];
+  contextItems: IContextItem[];
 }
 
 const PreviewContextManagerComponent = (props: PreviewContextManagerProps) => {
@@ -14,7 +14,13 @@ const PreviewContextManagerComponent = (props: PreviewContextManagerProps) => {
     () =>
       contextItems?.length > 0
         ? contextItems.map((item, index) => (
-            <ContextItem canNotRemove={true} key={`${item.id}-${index}`} item={item} isLimit={false} isActive={false} />
+            <ContextItem
+              canNotRemove={true}
+              key={`${item.entityId}-${index}`}
+              item={item}
+              isLimit={false}
+              isActive={false}
+            />
           ))
         : null,
     [contextItems],

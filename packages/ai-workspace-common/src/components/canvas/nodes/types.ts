@@ -7,8 +7,10 @@ import {
   CanvasNodeType,
   ModelInfo,
   Skill,
+  SkillTemplateConfig,
   TokenUsageItem,
 } from '@refly/openapi-schema';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export type CanvasNodeData<T = Record<string, unknown>> = {
   title: string;
@@ -36,9 +38,11 @@ export type ResourceNodeMeta = {
 
 export type SkillNodeMeta = {
   query: string;
+  resultId?: string;
   selectedSkill?: Skill;
   modelInfo?: ModelInfo;
-  contextNodeIds?: string[];
+  contextItems?: IContextItem[];
+  tplConfig?: SkillTemplateConfig;
 };
 
 export type ToolNodeMeta = {
@@ -53,6 +57,7 @@ export type ResponseNodeMeta = {
   artifacts?: Artifact[];
   currentLog?: ActionLog;
   structuredData?: Record<string, unknown>;
+  contextItems?: IContextItem[];
 };
 
 // Type mapping for node metadata

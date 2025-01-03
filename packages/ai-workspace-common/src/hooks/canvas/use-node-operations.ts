@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
-import { applyNodeChanges, NodeChange, Node } from '@xyflow/react';
-import { useCanvasData } from './use-canvas-data';
+import { applyNodeChanges, NodeChange } from '@xyflow/react';
 import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { useCanvasSync } from './use-canvas-sync';
 import { useContextPanelStore } from '../../stores/context-panel';
@@ -47,8 +46,6 @@ export const useNodeOperations = (selectedCanvasId?: string) => {
           const nodeId = change.id;
           // Remove from context items
           contextStore.removeContextItem(nodeId);
-          // Remove from chat history
-          contextStore.removeHistoryItem(nodeId);
         });
       }
 

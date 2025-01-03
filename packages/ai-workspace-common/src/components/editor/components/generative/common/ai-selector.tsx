@@ -20,11 +20,15 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { HiCheck, HiXMark } from 'react-icons/hi2';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import {
+  useContextPanelStore,
+  useContextPanelStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { IconCopy } from '@arco-design/web-react/icon';
 import { ModelSelector } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions/model-selector';
+import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
+import { useDocumentStore } from '@refly-packages/ai-workspace-common/stores/document';
 
 interface AISelectorProps {
   open: boolean;
@@ -90,10 +94,16 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   const [resultStatus, setResultStatus] = useState<ActionStatus>('waiting');
   const { docId } = useDocumentContext();
   const { invokeAction } = useInvokeAction();
+  const skill = useFindSkill('editDoc');
 
   const { selectedModel, setSelectedModel } = useChatStoreShallow((state) => ({
     selectedModel: state.selectedModel,
     setSelectedModel: state.setSelectedModel,
+  }));
+
+  const { contextItems, setContextItems } = useContextPanelStoreShallow((state) => ({
+    contextItems: state.contextItems,
+    setContextItems: state.setContextItems,
   }));
 
   const handleEdit = () => {
@@ -122,77 +132,53 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       },
     };
 
+    const { currentDocument } = useDocumentStore.getState()?.documentStates?.[docId] ?? {};
+
     const { localSettings } = useUserStore.getState();
-    const { uiLocale } = localSettings;
+    const { uiLocale = 'en' } = localSettings;
 
     const { selectedModel } = useChatStore.getState();
     const resultId = genActionResultID();
     setResultId(resultId);
 
-    const { contextItems, historyItems } = useContextPanelStore.getState();
+    // TODO: maybe use independent context panel store
+    const { contextItems } = useContextPanelStore.getState();
 
-    const context = convertContextItemsToContext(contextItems);
-    if (context.documents) {
-      const hasCurrentDoc = context.documents.some((doc) => doc.docId === docId);
+    const hasCurrentDoc = contextItems.findIndex((item) => item.entityId === docId);
 
-      context.documents = context.documents.map((doc) => ({
-        ...doc,
-        isCurrent: doc.docId === docId,
-        metadata: {
-          ...doc.metadata,
-          isCurrentContext: doc.docId === docId,
-        },
-      }));
-
-      if (!hasCurrentDoc) {
-        context.documents.push({
-          docId,
-          document: {
-            docId,
-            title: '',
-          },
-          isCurrent: true,
-          metadata: {
-            nodeId: docId, // TODO: need use nodes id, use real canvas store nodes id
-            url: getClientOrigin(),
-            isCurrentContext: true,
-          },
-        });
-      }
+    if (hasCurrentDoc === -1) {
+      contextItems.push({
+        type: 'document',
+        entityId: docId,
+        title: currentDocument?.title ?? '',
+        isCurrentContext: true,
+      });
+    } else {
+      contextItems[hasCurrentDoc].isCurrentContext = true;
     }
 
-    const resultHistory = historyItems.map((item) => ({
-      resultId: item.data.entityId,
-      title: item.data.title,
-      steps: item.data.metadata?.steps,
-    }));
-
-    const param: InvokeSkillRequest = {
-      resultId,
-      input: {
+    setIsLoading(true);
+    invokeAction(
+      {
         query: inputValue,
-      },
-      target: {
-        entityId: docId,
-        entityType: 'document',
-      },
-      context,
-      resultHistory,
-      skillName: 'editDoc',
-      tplConfig: {
-        canvasEditConfig: {
-          value: canvasEditConfig as { [key: string]: unknown },
-          configScope: 'runtime' as unknown as ConfigScope,
-          displayValue: localSettings?.uiLocale === 'zh-CN' ? '编辑文档配置' : 'Edit Document Config',
-          label: localSettings?.uiLocale === 'zh-CN' ? '编辑文档配置' : 'Edit Document Config',
+        resultId,
+        modelInfo: selectedModel,
+        contextItems,
+        selectedSkill: skill,
+        tplConfig: {
+          canvasEditConfig: {
+            value: canvasEditConfig as { [key: string]: unknown },
+            configScope: 'runtime' as unknown as ConfigScope,
+            displayValue: uiLocale === 'zh-CN' ? '编辑文档配置' : 'Edit Document Config', // TODO: check if need to use i18n
+            label: uiLocale === 'zh-CN' ? '编辑文档配置' : 'Edit Document Config',
+          },
         },
       },
-      modelName: selectedModel?.name,
-      locale: localSettings?.outputLocale,
-    };
-
-    setIsLoading(true);
-    invokeAction(param);
+      {
+        entityType: 'document',
+        entityId: docId,
+      },
+    );
   };
 
   const updateResult = useCallback(
@@ -335,7 +321,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
                   trigger={['click']}
                 />
               </Button>
-              <AddBaseMarkContext />
+              <AddBaseMarkContext contextItems={contextItems} setContextItems={setContextItems} />
               <Input.TextArea
                 value={inputValue}
                 autoSize={{

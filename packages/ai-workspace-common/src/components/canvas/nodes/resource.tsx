@@ -26,7 +26,8 @@ import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/ca
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
-import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
 const NodeHeader = memo(({ title, ResourceIcon }: { title: string; ResourceIcon: any }) => {
@@ -43,13 +44,12 @@ const NodeHeader = memo(({ title, ResourceIcon }: { title: string; ResourceIcon:
 });
 
 export const ResourceNode = memo(
-  (props: ResourceNodeProps) => {
+  ({ id, data, isPreview, selected, hideActions, hideHandles, onNodeClick }: ResourceNodeProps) => {
     const [isHovered, setIsHovered] = useState(false);
     const { edges } = useCanvasData();
     const setNodeDataByEntity = useSetNodeDataByEntity();
     const { setEdges, getNode } = useReactFlow();
-    const ResourceIcon =
-      props.data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
+    const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
 
     const { i18n, t } = useTranslation();
     const language = i18n.languages?.[0];
@@ -57,7 +57,7 @@ export const ResourceNode = memo(
     const targetRef = useRef<HTMLDivElement>(null);
 
     // Memoize node and its measurements
-    const node = useMemo(() => getNode(props.id), [props.id, getNode]);
+    const node = useMemo(() => getNode(id), [id, getNode]);
     const initialSize = useMemo(
       () => ({
         width: node?.measured?.width ?? 288,
@@ -69,8 +69,8 @@ export const ResourceNode = memo(
     const [size, setSize] = useState(initialSize);
 
     // Check if node has any connections
-    const isTargetConnected = edges?.some((edge) => edge.target === props.id);
-    const isSourceConnected = edges?.some((edge) => edge.source === props.id);
+    const isTargetConnected = edges?.some((edge) => edge.target === id);
+    const isSourceConnected = edges?.some((edge) => edge.source === id);
 
     const edgeStyles = useEdgeStyles();
 
@@ -79,7 +79,7 @@ export const ResourceNode = memo(
       (hoveredState: boolean) => {
         setEdges((eds) =>
           eds.map((edge) => {
-            if (edge.source === props.id || edge.target === props.id) {
+            if (edge.source === id || edge.target === id) {
               return {
                 ...edge,
                 style: hoveredState ? edgeStyles.hover : edgeStyles.default,
@@ -93,7 +93,7 @@ export const ResourceNode = memo(
       { leading: true, trailing: false },
     );
 
-    const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(props.id);
+    const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
 
     const handleMouseEnter = useCallback(() => {
       if (!isHovered) {
@@ -113,23 +113,23 @@ export const ResourceNode = memo(
 
     const handleAddToContext = useCallback(() => {
       addToContext({
-        id: props.id,
         type: 'resource',
-        data: props.data,
-        position: { x: 0, y: 0 },
-      } as CanvasNode);
-    }, [props.id, props.data, addToContext]);
+        title: data.title,
+        entityId: data.entityId,
+        metadata: data.metadata,
+      });
+    }, [id, data, addToContext]);
 
     const { deleteNode } = useDeleteNode();
 
     const handleDelete = useCallback(() => {
       deleteNode({
-        id: props.id,
+        id,
         type: 'resource',
-        data: props.data,
+        data,
         position: { x: 0, y: 0 },
       } as CanvasNode);
-    }, [props.id, props.data, deleteNode]);
+    }, [id, data, deleteNode]);
 
     const handleHelpLink = useCallback(() => {
       // Implement help link logic
@@ -141,8 +141,7 @@ export const ResourceNode = memo(
       console.log('Show about info');
     }, []);
 
-    const { canvasId } = useCanvasContext();
-    const { addNode } = useAddNode(canvasId);
+    const { addNode } = useAddNode();
 
     const handleAskAI = useCallback(() => {
       addNode(
@@ -152,24 +151,31 @@ export const ResourceNode = memo(
             title: 'Skill',
             entityId: genSkillID(),
             metadata: {
-              contextNodeIds: [props.id],
+              contextItems: [
+                {
+                  type: 'resource',
+                  title: data.title,
+                  entityId: data.entityId,
+                  metadata: data.metadata,
+                },
+              ] as IContextItem[],
             },
           },
         },
-        [{ type: 'resource', entityId: props.data.entityId }],
+        [{ type: 'resource', entityId: data.entityId }],
       );
-    }, [props.id, props.data.entityId, addNode]);
+    }, [id, data, addNode]);
 
     const { operatingNodeId } = useCanvasStoreShallow((state) => ({
       operatingNodeId: state.operatingNodeId,
     }));
 
-    const isOperating = operatingNodeId === props.id;
+    const isOperating = operatingNodeId === id;
 
     const [shouldPoll, setShouldPoll] = useState(false);
     const { data: result } = useGetResourceDetail(
       {
-        query: { resourceId: props.data?.entityId },
+        query: { resourceId: data?.entityId },
       },
       null,
       {
@@ -185,10 +191,10 @@ export const ResourceNode = memo(
     const remoteResult = result?.data;
 
     useEffect(() => {
-      if (!props.data.contentPreview) {
+      if (!data.contentPreview) {
         setNodeDataByEntity(
           {
-            entityId: props.data.entityId,
+            entityId: data.entityId,
             type: 'resource',
           },
           {
@@ -203,7 +209,7 @@ export const ResourceNode = memo(
       } else {
         setShouldPoll(false);
       }
-    }, [props.data.contentPreview, remoteResult]);
+    }, [data.contentPreview, remoteResult]);
 
     // Add event handling
     useEffect(() => {
@@ -213,20 +219,20 @@ export const ResourceNode = memo(
       const handleNodeAskAI = () => handleAskAI();
 
       // Register events with node ID
-      nodeActionEmitter.on(createNodeEventName(props.id, 'addToContext'), handleNodeAddToContext);
-      nodeActionEmitter.on(createNodeEventName(props.id, 'delete'), handleNodeDelete);
-      nodeActionEmitter.on(createNodeEventName(props.id, 'askAI'), handleNodeAskAI);
+      nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
+      nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
+      nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
       return () => {
         // Cleanup events when component unmounts
-        nodeActionEmitter.off(createNodeEventName(props.id, 'addToContext'), handleNodeAddToContext);
-        nodeActionEmitter.off(createNodeEventName(props.id, 'delete'), handleNodeDelete);
-        nodeActionEmitter.off(createNodeEventName(props.id, 'askAI'), handleNodeAskAI);
+        nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
+        nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
+        nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
         // Clean up all node events
-        cleanupNodeEvents(props.id);
+        cleanupNodeEvents(id);
       };
-    }, [props.id, handleAddToContext, handleDelete, handleAskAI]);
+    }, [id, handleAddToContext, handleDelete, handleAskAI]);
 
     const nodeStyle = useMemo(
       () => ({
@@ -267,9 +273,9 @@ export const ResourceNode = memo(
         <div
           ref={targetRef}
           className="relative"
-          onMouseEnter={!props.isPreview ? handleMouseEnter : undefined}
-          onMouseLeave={!props.isPreview ? handleMouseLeave : undefined}
-          onClick={props.onNodeClick}
+          onMouseEnter={!isPreview ? handleMouseEnter : undefined}
+          onMouseLeave={!isPreview ? handleMouseLeave : undefined}
+          onClick={onNodeClick}
           style={
             {
               width: `${size.width}px`,
@@ -279,37 +285,35 @@ export const ResourceNode = memo(
             } as React.CSSProperties
           }
         >
-          {!props.isPreview && !props.hideActions && (
-            <ActionButtons type="resource" nodeId={props.id} isNodeHovered={isHovered} />
-          )}
+          {!isPreview && !hideActions && <ActionButtons type="resource" nodeId={id} isNodeHovered={isHovered} />}
 
           <div
             className={`
           relative
           h-full
-          ${getNodeCommonStyles({ selected: !props.isPreview && props.selected, isHovered })}
+          ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
         `}
           >
             <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
 
             <div className="flex flex-col h-full">
-              <NodeHeader title={props.data.title} ResourceIcon={ResourceIcon} />
+              <NodeHeader title={data.title} ResourceIcon={ResourceIcon} />
 
               <div className="flex-grow overflow-y-auto pr-2 -mr-2">
                 <Markdown
                   className={`text-xs ${isOperating ? 'pointer-events-auto' : 'pointer-events-none'}`}
-                  content={props.data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
+                  content={data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
                 />
               </div>
 
               <div className="flex justify-end items-center flex-shrink-0 mt-2 text-[10px] text-gray-400 z-20">
-                {time(props.data.createdAt, language as LOCALE)
+                {time(data.createdAt, language as LOCALE)
                   ?.utc()
                   ?.fromNow()}
               </div>
             </div>
 
-            {!props.isPreview && !props.hideHandles && (
+            {!isPreview && !hideHandles && (
               <>
                 <CustomHandle
                   type="target"
@@ -330,7 +334,7 @@ export const ResourceNode = memo(
           </div>
         </div>
 
-        {!props.isPreview && props.selected && (
+        {!isPreview && selected && (
           <Moveable
             target={targetRef}
             resizable={true}

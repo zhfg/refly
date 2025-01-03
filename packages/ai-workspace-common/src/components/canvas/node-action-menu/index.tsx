@@ -11,7 +11,6 @@ import {
   IconPreview,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { FileInput, MessageSquareDiff, FilePlus, Ungroup, Group } from 'lucide-react';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
@@ -20,6 +19,7 @@ import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/sto
 import { genSkillID } from '@refly-packages/utils/id';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
 
 interface MenuItem {
@@ -48,7 +48,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const { t } = useTranslation();
   const { getNode } = useReactFlow();
   const { canvasId } = useCanvasContext();
-  const { addNode } = useAddNode(canvasId);
+  const { addNode } = useAddNode();
 
   const { activeDocumentId } = useDocumentStoreShallow((state) => ({
     activeDocumentId: state.activeDocumentId,
@@ -61,6 +61,28 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const { ungroupNodes } = useUngroupNodes();
 
   const handleAskAI = useCallback(() => {
+    const node = getNode(nodeId) as CanvasNode;
+    addNode(
+      {
+        type: 'skill',
+        data: {
+          title: 'Skill',
+          entityId: genSkillID(),
+          metadata: {
+            modelInfo: node.data.metadata?.modelInfo,
+            contextItems: [
+              {
+                title: node.data.title,
+                entityId: node.data.entityId,
+                type: node.type,
+                metadata: node.type === 'skillResponse' ? { withHistory: true } : {},
+              },
+            ],
+          },
+        },
+      },
+      [{ type: node.type, entityId: node.data.entityId }],
+    );
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'askAI'));
     onClose?.();
   }, [nodeId, onClose]);

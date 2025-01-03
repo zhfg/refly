@@ -1,14 +1,9 @@
 import { useCallback } from 'react';
+import { message } from 'antd';
 import { useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
-import { message } from 'antd';
-import {
-  useContextPanelStore,
-  useContextPanelStoreShallow,
-} from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { CanvasNodeType } from '@refly/openapi-schema';
-import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
@@ -20,7 +15,6 @@ export const useDeleteNode = () => {
   const { setNodes, setEdges } = useReactFlow();
   const { t } = useTranslation();
   const { canvasId } = useCanvasContext();
-  const { handleItemDelete } = useChatHistory();
   const { removeContextItem } = useContextPanelStoreShallow((state) => ({
     removeContextItem: state.removeContextItem,
   }));
@@ -40,10 +34,6 @@ export const useDeleteNode = () => {
       canvasStore.removeNodePreview(canvasId, node.id);
       removeContextItem(node.id);
 
-      if (node.type === 'skillResponse') {
-        handleItemDelete(node);
-      }
-
       if (showMessage) {
         // Get node title based on node type
         const nodeTitle = node.data?.title ?? t('knowledgeBase.context.untitled');
@@ -59,7 +49,7 @@ export const useDeleteNode = () => {
 
       return true;
     },
-    [setNodes, setEdges, t, handleItemDelete],
+    [setNodes, setEdges, t],
   );
 
   const deleteNodes = useCallback(

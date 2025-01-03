@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { ActionResult } from '@refly/openapi-schema';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { CanvasNode, ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { ActionStepCard } from './action-step';
@@ -17,10 +17,10 @@ import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/
 import { EditChatInput } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/edit-chat-input';
 import { cn } from '@refly-packages/utils/cn';
 import { useReactFlow } from '@xyflow/react';
-import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
+import { usePatchNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-patch-node-data';
 
 interface SkillResponseNodePreviewProps {
-  node: CanvasNode;
+  node: CanvasNode<ResponseNodeMeta>;
   resultId: string;
 }
 
@@ -53,7 +53,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   }));
 
   const { getNodes } = useReactFlow();
-  const setNodeData = useSetNodeData();
+  const patchNodeData = usePatchNodeData();
   const { deleteNode } = useDeleteNode();
 
   const { t } = useTranslation();
@@ -76,7 +76,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
     const remoteResult = data.data;
     const node = getNodes().find((node) => node.data?.entityId === resultId);
     if (node && remoteResult) {
-      setNodeData(node.id, {
+      patchNodeData(node.id, {
         title: remoteResult.title,
         metadata: {
           status: remoteResult.status,
@@ -122,8 +122,18 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
     };
   }, []);
 
+  const { data } = node;
   const { title, steps = [], context, history = [], actionMeta, modelInfo } = result ?? {};
-  const contextItems = useMemo(() => (context ? convertContextToItems(context, history) : []), [context, history]);
+
+  const contextItems = useMemo(() => {
+    // Prefer contextItems from node metadata
+    if (data.metadata?.contextItems) {
+      return data.metadata?.contextItems;
+    }
+
+    // Fallback to contextItems from context (could be legacy nodes)
+    return convertContextToItems(context, history);
+  }, [context, history]);
 
   const handleDelete = useCallback(() => {
     deleteNode({

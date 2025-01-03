@@ -1,31 +1,22 @@
+import { Button, Skeleton, Empty, Alert } from 'antd';
+import { useEffect, useState, memo, useCallback } from 'react';
+import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
+
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { IconLoading, IconRefresh } from '@arco-design/web-react/icon';
 import { IconQuote } from '@refly-packages/ai-workspace-common/components/common/icon';
-
-// 自定义样式
-import './index.scss';
-import { Skeleton, Empty, Alert } from 'antd';
-import { Button } from 'antd';
-// 请求
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-
-import { useEffect, useState, memo, useCallback } from 'react';
-
-// content selector
-import '@refly-packages/ai-workspace-common/modules/content-selector/styles/content-selector.scss';
-import classNames from 'classnames';
-import { useContentSelectorStoreShallow } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
-import { useTranslation } from 'react-i18next';
-
-import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
 import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { genUniqueId } from '@refly-packages/utils/id';
+import { useContentSelectorStoreShallow } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { SelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/selection-context';
 import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
 import { getClientOrigin } from '@refly-packages/utils/url';
 import { Resource } from '@refly/openapi-schema';
+
+import './index.scss';
 
 interface ResourceViewProps {
   resourceId: string;

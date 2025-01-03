@@ -93,12 +93,12 @@ export const MemoNode = ({
 
   const handleAddToContext = useCallback(() => {
     addToContext({
-      id,
       type: 'memo',
-      data,
-      position: { x: 0, y: 0 },
-    } as CanvasNode);
-  }, [id, data, addToContext]);
+      title: data.title,
+      entityId: data.entityId,
+      metadata: data.metadata,
+    });
+  }, [data, addToContext]);
 
   const { deleteNode } = useDeleteNode();
 
@@ -137,7 +137,7 @@ export const MemoNode = ({
       // Clean up all node events
       cleanupNodeEvents(id);
     };
-  }, [id, handleAddToContext, handleDelete, handleInsertToDoc]);
+  }, [id, handleAddToContext, deleteNode, handleInsertToDoc]);
 
   const editor = useEditor({
     extensions: [

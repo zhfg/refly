@@ -14,7 +14,6 @@ import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { Resource } from '@refly/openapi-schema';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 const { Meta } = Card;
 
@@ -25,7 +24,7 @@ export const ResourceList = () => {
     showLibraryModal: state.showLibraryModal,
     setShowLibraryModal: state.setShowLibraryModal,
   }));
-  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
+  const { addNode } = useAddNode();
 
   const { getLibraryList } = useHandleSiderData();
   const { dataList, setDataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({

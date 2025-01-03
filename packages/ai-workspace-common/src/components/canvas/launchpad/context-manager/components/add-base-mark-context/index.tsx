@@ -4,12 +4,11 @@ import { IconPlus } from '@arco-design/web-react/icon';
 import { BaseMarkContextSelector } from '../base-mark-context-selector';
 import { useTranslation } from 'react-i18next';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 interface AddBaseMarkContextProps {
-  contextItems: NodeItem[];
-  setContextItems: (items: NodeItem[]) => void;
+  contextItems: IContextItem[];
+  setContextItems: (items: IContextItem[]) => void;
 }
 
 export const AddBaseMarkContext = ({ contextItems, setContextItems }: AddBaseMarkContextProps) => {
@@ -24,15 +23,15 @@ export const AddBaseMarkContext = ({ contextItems, setContextItems }: AddBaseMar
     setPopoverVisible(false);
   };
 
-  const handleSelect = (node: CanvasNode) => {
-    const isSelected = contextItems.find((item) => item.id === node.id);
+  const handleSelect = (item: IContextItem) => {
+    const isSelected = contextItems.find((item) => item.entityId === item.entityId);
 
     if (!isSelected) {
       // Adding node
-      setContextItems([...contextItems, node]);
+      setContextItems([...contextItems, item]);
     } else {
       // Removing node
-      setContextItems(contextItems.filter((item) => item.id !== node.id));
+      setContextItems(contextItems.filter((item) => item.entityId !== item.entityId));
     }
   };
 

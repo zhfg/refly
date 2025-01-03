@@ -7,10 +7,10 @@ import { Command } from 'cmdk';
 
 import { Home } from './home';
 import { RenderItem } from './type';
-import { getNodeIcon } from '../../utils/icon';
+import { getContextItemIcon } from '../../utils/icon';
 
 import { IconRefresh } from '@arco-design/web-react/icon';
-import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { IContextItem, useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 
@@ -19,8 +19,8 @@ import './index.scss';
 interface CustomProps {
   onClickOutside?: () => void;
   onSearchValueChange?: (value: string) => void;
-  onSelect?: (item: CanvasNode) => void;
-  selectedItems: CanvasNode[];
+  onSelect?: (item: IContextItem) => void;
+  selectedItems: IContextItem[];
   onClose?: () => void;
 }
 
@@ -42,8 +42,6 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
 
   const contextPanelStore = useContextPanelStoreShallow((state) => ({
     clearContextItems: state.clearContextItems,
-    resetSelectedTextCardState: state.resetSelectedTextCardState,
-    clearHistoryItems: state.clearHistoryItems,
   }));
 
   const handleSearchValueChange = (val: string) => {
@@ -70,30 +68,38 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
   const { nodes } = useCanvasData();
 
   const targetNodes = nodes.filter((node) => node?.type !== 'skill');
-  const sortedNodes: CanvasNode[] = [
+  const sortedItems: IContextItem[] = [
     ...(selectedItems || []),
-    ...(targetNodes?.filter((item) => !selectedItems.some((selected) => selected.id === item.id)) || []),
+    ...(
+      targetNodes?.filter((node) => !selectedItems.some((selected) => selected.entityId === node.data?.entityId)) || []
+    ).map((node) => ({
+      title: node.data?.title,
+      entityId: node.data?.entityId,
+      type: node.type,
+      metadata: node.data?.metadata,
+    })),
   ];
 
   // Memoize the filtered and sorted nodes to prevent unnecessary recalculations
   const processedNodes = useMemo(() => {
-    const filteredNodes =
-      sortedNodes?.filter((node) => node?.data?.title?.toLowerCase().includes(searchValue.toLowerCase())) ?? [];
+    const filteredItems =
+      sortedItems?.filter((item) => item?.title?.toLowerCase().includes(searchValue.toLowerCase())) ?? [];
 
     return [
       ...(selectedItems ?? []),
-      ...(filteredNodes?.filter((item) => !selectedItems?.some((selected) => selected?.id === item?.id)) ?? []),
+      ...(filteredItems?.filter((item) => !selectedItems?.some((selected) => selected?.entityId === item?.entityId)) ??
+        []),
     ];
-  }, [sortedNodes, searchValue, selectedItems]);
+  }, [sortedItems, searchValue, selectedItems]);
 
   // Memoize the render data transformation
   const sortedRenderData = useMemo(() => {
     return processedNodes.map((item) => ({
       data: item,
       type: item?.type,
-      icon: getNodeIcon(item?.type, { width: 12, height: 12 }),
-      isSelected: selectedItems?.some((selected) => selected?.id === item?.id),
-      onItemClick: (item: CanvasNode) => {
+      icon: getContextItemIcon(item, { width: 12, height: 12 }),
+      isSelected: selectedItems?.some((selected) => selected?.entityId === item?.entityId),
+      onItemClick: (item: IContextItem) => {
         onSelect?.(item);
       },
     }));
@@ -164,9 +170,7 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
                 size="small"
                 icon={<IconRefresh />}
                 onClick={() => {
-                  contextPanelStore.resetSelectedTextCardState();
                   contextPanelStore.clearContextItems();
-                  contextPanelStore.clearHistoryItems();
                 }}
               >
                 {t('knowledgeBase.context.clearContext')}

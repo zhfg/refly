@@ -517,7 +517,7 @@ const translations = {
       addSkill: '添加技能',
       addTool: '添加工具',
       autoLayout: '自动布局',
-      askAI: 'AI 提问',
+      askAI: '问问 AI',
       createMemo: '创建备忘录',
       addMemo: '添加备忘录',
       createDocument: '新建文档',
@@ -1472,6 +1472,7 @@ const translations = {
       resource: '资源',
       memo: '备忘录',
       skillResponse: 'AI 回答',
+      threadHistory: '对话历史',
       extensionWeblink: '网页',
     },
     modelSelector: {

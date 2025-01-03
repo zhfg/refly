@@ -1481,6 +1481,7 @@ const translations = {
       resource: 'Resource',
       memo: 'Memo',
       skillResponse: 'AI Response',
+      threadHistory: 'Thread History',
       extensionWeblink: 'Extension Web Link',
     },
     modelSelector: {

@@ -1,5 +1,5 @@
 import { FC, useCallback } from 'react';
-import { Button, Dropdown, Tooltip } from 'antd';
+import { Button, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   FileText,
@@ -14,7 +14,7 @@ import {
   FilePlus,
   Trash2,
 } from 'lucide-react';
-import { CanvasNodeType } from '@refly/openapi-schema';
+import { NODE_COLORS } from '../nodes/colors';
 import { CanvasNode } from '../nodes/types';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
@@ -28,18 +28,6 @@ import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-preview-control';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-
-// Define background colors for different node types
-const NODE_COLORS: Record<CanvasNodeType, string> = {
-  document: '#00968F',
-  resource: '#17B26A',
-  skillResponse: '#F79009',
-  toolResponse: '#F79009',
-  skill: '#6172F3',
-  tool: '#2E90FA',
-  memo: '#6172F3',
-  group: '#6172F3',
-};
 
 // Get icon component based on node type and metadata
 const getNodeIcon = (node: CanvasNode<any>) => {
@@ -124,16 +112,16 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
   const nodeTitle = getNodeTitle(node);
   const { t } = useTranslation();
   const { addToContext } = useAddToContext();
+
   const { deleteNode } = useDeleteNode();
-
-  // Update handleAddToContext to use new hook
   const handleAddToContext = useCallback(() => {
-    addToContext(node);
+    addToContext({
+      type: node.type,
+      title: node.data?.title,
+      entityId: node.data?.entityId,
+      metadata: node.data?.metadata,
+    });
   }, [node, addToContext]);
-
-  const handleDelete = useCallback(() => {
-    deleteNode(node);
-  }, [node, deleteNode]);
 
   const { canvasId } = useCanvasContext();
   const { pinNode, unpinNode, isNodePinned } = useNodePreviewControl({ canvasId });
@@ -167,7 +155,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
           {t('canvas.nodeActions.delete')}
         </div>
       ),
-      onClick: handleDelete,
+      onClick: () => deleteNode(node),
       className: 'hover:bg-red-50',
     },
   ];
