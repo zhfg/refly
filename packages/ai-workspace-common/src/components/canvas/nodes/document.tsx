@@ -28,7 +28,7 @@ type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
 export const DocumentNode = memo(
   ({
-    data,
+    data = { title: '', entityId: '' },
     selected,
     id,
     isPreview = false,
