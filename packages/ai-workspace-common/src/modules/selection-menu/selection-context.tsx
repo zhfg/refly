@@ -6,9 +6,7 @@ import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canva
 import { useSelectionContext } from './use-selection-context';
 import { MessageSquareDiff } from 'lucide-react';
 import { IconMemo } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { genMemoID } from '@refly-packages/utils/id';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useCreateMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-memo';
 
 interface SelectionContextProps {
   containerClass?: string;
@@ -20,23 +18,16 @@ export const SelectionContext: React.FC<SelectionContextProps> = ({ containerCla
   const { selectedText, isSelecting, addToContext, removeSelection } = useSelectionContext({
     containerClass,
   });
-  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
 
-  const createMemo = useCallback(
+  const { createMemo } = useCreateMemo();
+  const handleCreateMemo = useCallback(
     (selectedText: string) => {
-      const memoId = genMemoID();
-
-      addNode({
-        type: 'memo',
-        data: {
-          title: t('knowledgeBase.context.nodeTypes.memo'),
-          contentPreview: selectedText,
-          entityId: memoId,
-        },
+      createMemo({
+        content: selectedText,
       });
       removeSelection();
     },
-    [selectedText, t, addNode],
+    [selectedText, createMemo],
   );
 
   const handleAddToContext = useCallback(
@@ -60,7 +51,7 @@ export const SelectionContext: React.FC<SelectionContextProps> = ({ containerCla
       className: 'w-full font-medium text-xs justify-start',
       icon: <IconMemo size={12} />,
       label: t('knowledgeBase.context.createMemo'),
-      onClick: () => createMemo(selectedText),
+      onClick: () => handleCreateMemo(selectedText),
     },
   ];
 

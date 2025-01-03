@@ -41,8 +41,7 @@ import { useDocumentContext } from '@refly-packages/ai-workspace-common/context/
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useCreateMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-memo';
 
 export const CollaborativeEditor = memo(
   ({ docId }: { docId: string }) => {
@@ -197,21 +196,12 @@ export const CollaborativeEditor = memo(
       addToContext(node);
     };
 
-    const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
+    const { createMemo } = useCreateMemo();
     const handleCreateMemo = useCallback(
       (selectedText: string) => {
-        const memoId = genMemoID();
-
-        addNode({
-          type: 'memo',
-          data: {
-            title: t('knowledgeBase.context.nodeTypes.memo'),
-            contentPreview: selectedText,
-            entityId: memoId,
-          },
-        });
+        createMemo({ content: selectedText });
       },
-      [selectedText, t, addNode],
+      [selectedText],
     );
 
     // Apply Codeblock Highlighting on the HTML from editor.getHTML()
