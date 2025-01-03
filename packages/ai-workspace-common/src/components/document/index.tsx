@@ -1,6 +1,6 @@
 import { useEffect, useState, memo, useCallback, useRef } from 'react';
 import { useDebounce, useDebouncedCallback } from 'use-debounce';
-import { CanvasNode, Document } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import './index.scss';
@@ -20,20 +20,20 @@ import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/can
 import { ydoc2Markdown } from '@refly-packages/utils/editor';
 import { time } from '@refly-packages/utils/time';
 import { LOCALE } from '@refly/common-types';
-import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
+import { Document } from '@refly/openapi-schema';
 import { useGetDocumentDetail } from '@refly-packages/ai-workspace-common/queries/queries';
 
 const ActionDropdown = ({ docId, node }: { docId: string; node?: CanvasNode }) => {
   const { ydoc } = useDocumentContext();
   const { t } = useTranslation();
   const [popupVisible, setPopupVisible] = useState(false);
-  const handleDeleteNode = node ? useDeleteNode(node, node.type) : undefined;
+  const deleteNode = useDeleteNode();
   const { deleteDocument } = useDeleteDocument();
 
   const handleDelete = async () => {
     const success = await deleteDocument(docId);
     if (success) {
-      handleDeleteNode();
+      deleteNode(node?.id);
     }
   };
 

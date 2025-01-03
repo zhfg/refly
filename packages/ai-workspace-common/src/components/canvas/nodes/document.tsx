@@ -90,15 +90,7 @@ export const DocumentNode = memo(
       'document',
     );
 
-    const handleDelete = useDeleteNode(
-      {
-        id,
-        type: 'document',
-        data,
-        position: { x: 0, y: 0 },
-      } as CanvasNode,
-      'document',
-    );
+    const deleteNode = useDeleteNode();
 
     const handleHelpLink = useCallback(() => {
       // Implement help link logic
@@ -114,7 +106,7 @@ export const DocumentNode = memo(
     useEffect(() => {
       // Create node-specific event handlers
       const handleNodeAddToContext = () => handleAddToContext();
-      const handleNodeDelete = () => handleDelete();
+      const handleNodeDelete = () => deleteNode(id);
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
@@ -128,7 +120,7 @@ export const DocumentNode = memo(
         // Clean up all node events
         cleanupNodeEvents(id);
       };
-    }, [id, handleAddToContext, handleDelete]);
+    }, [id, handleAddToContext, deleteNode]);
 
     return (
       <div className={classNames({ nowheel: isOperating })}>

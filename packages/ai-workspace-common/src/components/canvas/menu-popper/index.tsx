@@ -37,7 +37,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
   const [menuHeight, setMenuHeight] = useState<number>(0);
   const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } = useCreateDocument();
   const [activeKey, setActiveKey] = useState<string | null>(null);
-  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
+  const { addNode } = useAddNode();
 
   const { setImportResourceModalVisible, setInsertNodePosition } = useImportResourceStoreShallow((state) => ({
     importResourceModalVisible: state.importResourceModalVisible,

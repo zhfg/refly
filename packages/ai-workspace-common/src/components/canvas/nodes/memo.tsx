@@ -99,15 +99,7 @@ export const MemoNode = ({
     'memo',
   );
 
-  const handleDelete = useDeleteNode(
-    {
-      id,
-      type: 'memo',
-      data,
-      position: { x: 0, y: 0 },
-    } as CanvasNode,
-    'memo',
-  );
+  const deleteNode = useDeleteNode();
 
   const insertToDoc = useInsertToDocument(data.entityId);
   const handleInsertToDoc = useCallback(async () => {
@@ -118,7 +110,7 @@ export const MemoNode = ({
   useEffect(() => {
     // Create node-specific event handlers
     const handleNodeAddToContext = () => handleAddToContext();
-    const handleNodeDelete = () => handleDelete();
+    const handleNodeDelete = () => deleteNode(id);
     const handleNodeInsertToDoc = () => handleInsertToDoc();
 
     // Register events with node ID
@@ -135,7 +127,7 @@ export const MemoNode = ({
       // Clean up all node events
       cleanupNodeEvents(id);
     };
-  }, [id, handleAddToContext, handleDelete, handleInsertToDoc]);
+  }, [id, handleAddToContext, deleteNode, handleInsertToDoc]);
 
   const editor = useEditor({
     extensions: [

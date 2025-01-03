@@ -11,7 +11,6 @@ import {
   IconPreview,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { FileInput, MessageSquareDiff, FilePlus } from 'lucide-react';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
@@ -20,6 +19,7 @@ import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/sto
 import { genSkillID } from '@refly-packages/utils/id';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 interface MenuItem {
   key: string;
@@ -46,7 +46,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const { t } = useTranslation();
   const { getNode } = useReactFlow();
   const { canvasId } = useCanvasContext();
-  const { addNode } = useAddNode(canvasId);
+  const { addNode } = useAddNode();
 
   const { activeDocumentId } = useDocumentStoreShallow((state) => ({
     activeDocumentId: state.activeDocumentId,

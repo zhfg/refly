@@ -114,7 +114,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
 
   // Add hooks for context and delete actions
   const handleAddToContext = useAddToContext(node, node.type);
-  const handleDelete = useDeleteNode(node, node.type);
+  const deleteNode = useDeleteNode();
 
   const { canvasId } = useCanvasContext();
   const { pinNode, unpinNode, isNodePinned } = useNodePreviewControl({ canvasId });
@@ -148,7 +148,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
           {t('canvas.nodeActions.delete')}
         </div>
       ),
-      onClick: handleDelete,
+      onClick: () => deleteNode(node.id),
       className: 'hover:bg-red-50',
     },
   ];

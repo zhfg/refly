@@ -11,13 +11,11 @@ import {
 } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
 import { ModelInfo } from '@refly-packages/ai-workspace-common/requests/types.gen';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
-import {
-  convertContextItemsToInvokeParams,
-  convertContextItemsToEdges,
-} from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { convertContextItemsToEdges } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { IconExit } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useReactFlow } from '@xyflow/react';
+import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
 
 interface EditChatInputProps {
   resultId: string;
@@ -48,6 +46,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
 
   const { canvasId } = useCanvasContext();
   const { invokeAction } = useInvokeAction();
+  const skill = useFindSkill(actionMeta?.name);
 
   const handleSendMessage = useCallback(() => {
     // Synchronize edges with latest context items
@@ -62,22 +61,19 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
     addEdges(edgesToAdd);
     deleteElements({ edges: edgesToDelete });
 
-    const { context, resultHistory } = convertContextItemsToInvokeParams(editContextItems);
-
-    invokeAction({
-      resultId,
-      input: {
+    invokeAction(
+      {
+        resultId,
         query: editQuery,
+        contextItems: editContextItems,
+        modelInfo: editModelInfo,
+        selectedSkill: skill,
       },
-      target: {
+      {
         entityId: canvasId,
         entityType: 'canvas',
       },
-      modelName: editModelInfo?.name,
-      context,
-      resultHistory,
-      skillName: actionMeta?.name,
-    });
+    );
     setEditMode(false);
   }, [resultId, editQuery, editModelInfo, editContextItems, actionMeta]);
 

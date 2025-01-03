@@ -16,14 +16,13 @@ import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-document';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 const { Meta } = Card;
 
 export const DocumentList = () => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
-  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
+  const { addNode } = useAddNode();
 
   const { showLibraryModal, setShowLibraryModal } = useSiderStoreShallow((state) => ({
     showLibraryModal: state.showLibraryModal,

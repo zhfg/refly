@@ -1,4 +1,5 @@
-import { ActionResult, ActionStep, ActionStepMeta, InvokeSkillRequest, SkillEvent } from '@refly/openapi-schema';
+import { useCallback } from 'react';
+import { ActionResult, ActionStep, ActionStepMeta, Entity, SkillEvent } from '@refly/openapi-schema';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
 import { LOCALE } from '@refly/common-types';
@@ -13,15 +14,17 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { aggregateTokenUsage, genActionResultID } from '@refly-packages/utils/index';
-import { CanvasNodeData, ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import {
+  CanvasNodeData,
+  ResponseNodeMeta,
+  SkillNodeMeta,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useGetSubscriptionUsage, useListModels, useListSkills } from '@refly-packages/ai-workspace-common/queries';
-import { useCallback } from 'react';
-import { XYPosition } from '@xyflow/react';
-import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+
+import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 export const useInvokeAction = () => {
-  const { canvasId } = useCanvasContext();
-  const { addNode } = useAddNode(canvasId);
+  const { addNode } = useAddNode();
   const setNodeDataByEntity = useSetNodeDataByEntity();
   const { updateActionResult } = useActionResultStoreShallow((state) => ({
     updateActionResult: state.updateActionResult,
@@ -350,73 +353,44 @@ export const useInvokeAction = () => {
     gcTime: 5 * 60 * 1000,
   });
 
-  const invokeAction = (payload: InvokeSkillRequest, newNodePosition?: XYPosition) => {
+  const invokeAction = (payload: SkillNodeMeta, target: Entity) => {
     payload.resultId ||= genActionResultID();
+    const { query, modelInfo, contextItems, selectedSkill, resultId } = payload;
+    const { context, resultHistory } = convertContextItemsToInvokeParams(contextItems);
 
-    const { resultId, input } = payload;
-
-    const skillName = payload.skillName || 'commonQnA';
-    const skill = skillData?.data?.find((s) => s.name === skillName);
-
-    const modelName = payload.modelName;
-    const model = modelData?.data?.find((m) => m.name === modelName);
+    const param = {
+      resultId,
+      input: {
+        query,
+      },
+      target,
+      modelName: modelInfo?.name,
+      context,
+      resultHistory,
+      skillName: selectedSkill?.name,
+    };
 
     onUpdateResult(resultId, {
       resultId,
       type: 'skill',
-      actionMeta: {
-        name: skill?.name,
-        icon: skill?.icon,
-      },
-      modelInfo: model,
-      title: input?.query,
-      targetId: payload.target?.entityId,
-      targetType: payload.target?.entityType,
-      context: payload.context,
-      history: payload.resultHistory,
-      tplConfig: payload.tplConfig,
+      actionMeta: selectedSkill,
+      modelInfo,
+      title: query,
+      targetId: target?.entityId,
+      targetType: target?.entityType,
+      context,
+      history: resultHistory,
+      tplConfig: {},
       status: 'waiting',
       steps: [],
       errors: [],
     });
 
-    if (payload?.target?.entityType === 'canvas') {
-      const connectTo = [
-        ...(Array.isArray(payload.context?.documents) ? payload.context.documents : []).map((document) => ({
-          type: 'document' as const,
-          entityId: document.docId,
-        })),
-        ...(payload.context?.resources ?? []).map((resource) => ({
-          type: 'resource' as const,
-          entityId: resource.resourceId,
-        })),
-        ...(payload.resultHistory ?? []).map((result) => ({
-          type: 'skillResponse' as const,
-          entityId: result.resultId,
-        })),
-      ].filter(Boolean);
-
-      addNode(
-        {
-          type: 'skillResponse',
-          data: {
-            title: input?.query,
-            entityId: resultId,
-            metadata: {
-              status: 'executing',
-            },
-          },
-          position: newNodePosition,
-        },
-        connectTo,
-      );
-    }
-
     globalAbortControllerRef.current = new AbortController();
 
     ssePost({
       controller: globalAbortControllerRef.current,
-      payload,
+      payload: param,
       token: getAuthTokenFromCookie(),
       onStart,
       onSkillStart,

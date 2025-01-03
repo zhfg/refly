@@ -140,8 +140,15 @@ const NodeFooter = memo(
 NodeFooter.displayName = 'NodeFooter';
 
 export const SkillResponseNode = memo(
-  (props: SkillResponseNodeProps) => {
-    const { data, selected, id, hideActions = false, isPreview = false, hideHandles = false, onNodeClick } = props;
+  ({
+    data,
+    selected,
+    id,
+    hideActions = false,
+    isPreview = false,
+    hideHandles = false,
+    onNodeClick,
+  }: SkillResponseNodeProps) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const { edges, operatingNodeId } = useCanvasStoreShallow((state) => ({
@@ -163,7 +170,7 @@ export const SkillResponseNode = memo(
     }));
 
     const { title, contentPreview: content, metadata, createdAt, entityId } = data ?? {};
-    const node = useMemo(() => getNode(props.id), [props.id, getNode]);
+    const node = useMemo(() => getNode(id), [id, getNode]);
     const initialSize = useMemo(
       () => ({
         width: node?.measured?.width ?? 288,
@@ -303,11 +310,18 @@ export const SkillResponseNode = memo(
           status: 'waiting',
         },
       });
-      invokeAction({
-        resultId: entityId,
-        input: { query: title },
-        target: { entityType: 'canvas', entityId: canvasId },
-      });
+
+      // TODO: check if rerun will drop other param
+      invokeAction(
+        {
+          resultId: entityId,
+          query: title,
+        },
+        {
+          entityType: 'canvas',
+          entityId: canvasId,
+        },
+      );
     }, [data, entityId, invokeAction, setNodeData]);
 
     const insertToDoc = useInsertToDocument(entityId);
@@ -315,15 +329,7 @@ export const SkillResponseNode = memo(
       await insertToDoc('insertBelow', content);
     }, [insertToDoc, entityId, content]);
 
-    const handleDelete = useDeleteNode(
-      {
-        id,
-        type: 'skillResponse',
-        data,
-        position: { x: 0, y: 0 },
-      } as CanvasNode,
-      'skillResponse',
-    );
+    const deleteNode = useDeleteNode();
 
     const { debouncedCreateDocument } = useCreateDocument();
 
@@ -376,7 +382,7 @@ export const SkillResponseNode = memo(
       const handleNodeAddToContext = () => handleAddToContext();
       const handleNodeInsertToDoc = () => handleInsertToDoc();
       const handleNodeCreateDocument = () => handleCreateDocument();
-      const handleNodeDelete = () => handleDelete();
+      const handleNodeDelete = () => deleteNode(id);
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'rerun'), handleNodeRerun);
@@ -396,7 +402,7 @@ export const SkillResponseNode = memo(
         // Clean up all node events
         cleanupNodeEvents(id);
       };
-    }, [id, handleRerun, handleAddToContext, handleInsertToDoc, handleCreateDocument, handleDelete]);
+    }, [id, handleRerun, handleAddToContext, handleInsertToDoc, handleCreateDocument, deleteNode]);
 
     // 使用 useMemo 缓存计算值
     const nodeStyle = useMemo(

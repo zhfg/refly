@@ -12,6 +12,7 @@ import {
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useEdgeStyles } from '../../components/canvas/constants';
 import { CanvasNodeFilter } from './use-node-selection';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 const deduplicateNodes = (nodes: any[]) => {
   const uniqueNodesMap = new Map();
@@ -25,10 +26,11 @@ const deduplicateEdges = (edges: any[]) => {
   return Array.from(uniqueEdgesMap.values());
 };
 
-export const useAddNode = (canvasId: string) => {
+export const useAddNode = () => {
   const { t } = useTranslation();
   const edgeStyles = useEdgeStyles();
   const { setCenter, getNode } = useReactFlow();
+  const { canvasId } = useCanvasContext();
 
   const { setNodes, setEdges, addNodePreview } = useCanvasStoreShallow((state) => ({
     setNodes: state.setNodes,

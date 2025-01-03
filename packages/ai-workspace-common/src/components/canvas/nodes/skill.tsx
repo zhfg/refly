@@ -25,6 +25,8 @@ import { ContextManager } from '@refly-packages/ai-workspace-common/components/c
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
 import { useEdgeStyles } from '@refly-packages/ai-workspace-common/components/canvas/constants';
+import { genActionResultID } from '@refly-packages/utils/id';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
 
@@ -51,15 +53,8 @@ export const SkillNode = memo(
     const setNodeData = useSetNodeData();
     const edgeStyles = useEdgeStyles();
     const { getNode, getNodes, getEdges, addEdges, deleteElements } = useReactFlow();
-    const handleDeleteNode = useDeleteNode(
-      {
-        id,
-        type: 'skill',
-        data,
-        position: { x: 0, y: 0 },
-      },
-      'skill',
-    );
+    const { addNode } = useAddNode();
+    const deleteNode = useDeleteNode();
 
     const { query, selectedSkill, modelInfo, contextItems = [] } = data.metadata;
 
@@ -158,33 +153,37 @@ export const SkillNode = memo(
     const handleSendMessage = useCallback(() => {
       const node = getNode(id);
       const data = node?.data as CanvasNodeData<SkillNodeMeta>;
-      const { query, modelInfo, selectedSkill } = data.metadata ?? {};
-      const { context, resultHistory } = convertContextItemsToInvokeParams(contextItems);
+      const { query, contextItems } = data?.metadata ?? {};
 
       deleteElements({ nodes: [node] });
 
+      const resultId = genActionResultID();
       invokeAction(
         {
-          resultId: data.entityId,
-          input: {
-            query,
-          },
-          target: {
-            entityId: canvasId,
-            entityType: 'canvas',
-          },
-          modelName: modelInfo?.name,
-          context,
-          resultHistory,
-          skillName: selectedSkill?.name,
+          resultId,
+          ...data?.metadata,
         },
-        node?.position,
+        {
+          entityId: canvasId,
+          entityType: 'canvas',
+        },
       );
-    }, [id, getNode, deleteElements, invokeAction, canvasId, contextItems]);
+      addNode({
+        type: 'skillResponse',
+        data: {
+          title: query,
+          entityId: resultId,
+          metadata: {
+            status: 'executing',
+            contextItems,
+          },
+        },
+      });
+    }, [id, getNode, deleteElements, invokeAction, canvasId, addNode]);
 
     useEffect(() => {
       const handleNodeRun = () => handleSendMessage();
-      const handleNodeDelete = () => handleDeleteNode();
+      const handleNodeDelete = () => deleteNode(id);
 
       nodeActionEmitter.on(createNodeEventName(id, 'run'), handleNodeRun);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
@@ -194,7 +193,7 @@ export const SkillNode = memo(
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
         cleanupNodeEvents(id);
       };
-    }, [id, handleSendMessage, handleDeleteNode]);
+    }, [id, handleSendMessage, deleteNode]);
 
     return (
       <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>

@@ -54,7 +54,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
 
   const { getNodes } = useReactFlow();
   const setNodeData = useSetNodeData();
-  const deleteNode = useDeleteNode(node, 'skillResponse');
+  const deleteNode = useDeleteNode();
 
   const { t } = useTranslation();
   const [editMode, setEditMode] = useState(false);
@@ -131,7 +131,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
         <Result
           status="404"
           subTitle={t('canvas.skillResponse.resultNotFound')}
-          extra={<Button onClick={() => deleteNode()}>{t('canvas.nodeActions.delete')}</Button>}
+          extra={<Button onClick={() => deleteNode(node.id)}>{t('canvas.nodeActions.delete')}</Button>}
         />
       </div>
     );
