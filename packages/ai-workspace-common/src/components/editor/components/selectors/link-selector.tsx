@@ -88,8 +88,8 @@ export const LinkSelector = ({ open, onOpenChange, triggerEditor }: LinkSelector
       placement="bottom"
       overlayClassName="editor-link-popover"
     >
-      <Button type="text" className="gap-2 rounded-none border-none px-2">
-        <LucideLink className="h-4 w-4 font-medium" />
+      <Button type="text" className="gap-2 rounded-none border-none px-1.5">
+        <LucideLink className="h-3.5 w-3.5 font-medium" />
       </Button>
     </Popover>
   );

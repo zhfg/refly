@@ -102,7 +102,7 @@ export const NodeSelector = ({ triggerEditor, open, onOpenChange }: NodeSelector
             </div>
             <span className="text-xs">{item.name}</span>
           </div>
-          {activeItem.name === item.name && <Check className="h-4 w-4" />}
+          {activeItem.name === item.name && <Check className="h-3.5 w-3.5" />}
         </EditorBubbleItem>
       ))}
     </div>
@@ -119,7 +119,7 @@ export const NodeSelector = ({ triggerEditor, open, onOpenChange }: NodeSelector
       overlayClassName="editor-node-selector-popover"
     >
       <Button type="text" className="gap-0.5 flex items-center space-x-1 px-2 rounded-none">
-        <activeItem.icon className="h-4 w-4" />
+        <activeItem.icon className="h-3.5 w-3.5" />
         <ChevronDown className="h-3 w-3" />
       </Button>
     </Popover>

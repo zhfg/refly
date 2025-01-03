@@ -72,6 +72,12 @@ export const useSelectionContext = ({ containerClass, containerRef, enabled = tr
     [selectedText, addContextItem],
   );
 
+  const removeSelection = useCallback(() => {
+    window.getSelection()?.removeAllRanges();
+    setSelectedText('');
+    setIsSelecting(false);
+  }, []);
+
   // Setup event listeners
   useEffect(() => {
     if (!enabled) {
@@ -91,5 +97,6 @@ export const useSelectionContext = ({ containerClass, containerRef, enabled = tr
     selectedText,
     isSelecting,
     addToContext,
+    removeSelection,
   };
 };

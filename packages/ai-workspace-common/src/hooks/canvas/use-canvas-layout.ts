@@ -6,6 +6,7 @@ import { Edge } from '@xyflow/react';
 import { useCanvasStoreShallow } from '../../stores/canvas';
 import { useCanvasData } from './use-canvas-data';
 import { useCanvasSync } from './use-canvas-sync';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: { direction: 'TB' | 'LR' }) => {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -40,8 +41,8 @@ const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: {
   };
 };
 
-export const useCanvasLayout = (selectedCanvasId?: string) => {
-  const { canvasId } = useCanvasData(selectedCanvasId);
+export const useCanvasLayout = () => {
+  const { canvasId } = useCanvasContext();
   const { data, setNodes, setEdges } = useCanvasStoreShallow((state) => ({
     data: state.data,
     setNodes: state.setNodes,

@@ -234,7 +234,6 @@ export const MemoNode = ({
 
   return (
     <div className={classNames({ nowheel: isOperating })}>
-      {!isPreview && selected && <MemoEditor editor={editor} bgColor={bgColor} onChangeBackground={setBgColor} />}
       <div
         ref={targetRef}
         className="relative"
@@ -248,6 +247,7 @@ export const MemoNode = ({
           cursor: isOperating ? 'default' : 'grab',
         }}
       >
+        {!isPreview && selected && <MemoEditor editor={editor} bgColor={bgColor} onChangeBackground={setBgColor} />}
         {!isPreview && !hideActions && <ActionButtons type="memo" nodeId={id} isNodeHovered={isHovered} />}
 
         <div

@@ -41,6 +41,7 @@ import { useDocumentContext } from '@refly-packages/ai-workspace-common/context/
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
+import { useCreateMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-memo';
 
 export const CollaborativeEditor = memo(
   ({ docId }: { docId: string }) => {
@@ -194,6 +195,14 @@ export const CollaborativeEditor = memo(
 
       addToContext(node);
     };
+
+    const { createMemo } = useCreateMemo();
+    const handleCreateMemo = useCallback(
+      (selectedText: string) => {
+        createMemo({ content: selectedText });
+      },
+      [selectedText],
+    );
 
     // Apply Codeblock Highlighting on the HTML from editor.getHTML()
     const highlightCodeblocks = async (content: string) => {
@@ -415,6 +424,7 @@ export const CollaborativeEditor = memo(
                 contentSelector={{
                   text: t('knowledgeBase.context.addToContext'),
                   handleClick: () => handleAddToContext(selectedText),
+                  createMemo: () => handleCreateMemo(selectedText),
                 }}
               />
               <CollabGenAIBlockMenu />

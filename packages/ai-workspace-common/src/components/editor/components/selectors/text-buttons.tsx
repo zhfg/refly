@@ -57,9 +57,9 @@ export const TextButtons = ({ triggerEditor }: { triggerEditor?: EditorInstance 
             item.command(editor);
           }}
         >
-          <Button type="text" className="rounded-none px-2">
+          <Button type="text" className="rounded-none px-1.5">
             <item.icon
-              className={cn('h-4 w-4', {
+              className={cn('h-3.5 w-3.5', {
                 'text-green-500': item.isActive(editor),
               })}
             />
