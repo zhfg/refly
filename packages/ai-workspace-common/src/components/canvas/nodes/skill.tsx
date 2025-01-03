@@ -26,22 +26,47 @@ import { NodeItem } from '@refly-packages/ai-workspace-common/stores/context-pan
 import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useEdgeStyles } from '@refly-packages/ai-workspace-common/components/canvas/constants';
+import { useTranslation } from 'react-i18next';
+import { IconClose } from '@arco-design/web-react/icon';
+import { Button } from 'antd';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
 
 // Memoized Header Component
-const NodeHeader = memo(({ query }: { query: string }) => {
-  return (
-    <div className="flex items-center gap-2">
-      <div className="w-6 h-6 rounded bg-[#6172F3] shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)] flex items-center justify-center flex-shrink-0">
-        <IconAskAI className="w-4 h-4 text-white" />
+const NodeHeader = memo(
+  ({
+    query,
+    selectedSkillName,
+    setSelectedSkill,
+  }: {
+    query: string;
+    selectedSkillName?: string;
+    setSelectedSkill: (skill: Skill | null) => void;
+  }) => {
+    const { t } = useTranslation();
+    return (
+      <div className="flex justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded bg-[#6172F3] shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)] flex items-center justify-center flex-shrink-0">
+            <IconAskAI className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-[13px] font-medium leading-normal text-[rgba(0,0,0,0.8)] font-['PingFang_SC'] truncate">
+            {selectedSkillName ? t(`${selectedSkillName}.name`, { ns: 'skill' }) : 'Prompt'}
+          </span>
+        </div>
+        {selectedSkillName && (
+          <Button
+            type="text"
+            icon={<IconClose />}
+            onClick={() => {
+              setSelectedSkill?.(null);
+            }}
+          />
+        )}
       </div>
-      <span className="text-[13px] font-medium leading-normal text-[rgba(0,0,0,0.8)] font-['PingFang_SC'] truncate">
-        {'Prompt'}
-      </span>
-    </div>
-  );
-});
+    );
+  },
+);
 
 NodeHeader.displayName = 'NodeHeader';
 
@@ -219,14 +244,24 @@ export const SkillNode = memo(
           />
 
           <div className="flex flex-col gap-1">
-            <NodeHeader query={localQuery} />
+            <NodeHeader
+              query={localQuery}
+              selectedSkillName={selectedSkill?.name}
+              setSelectedSkill={setSelectedSkill}
+            />
+
             <ContextManager contextItems={contextItems} setContextItems={setContextItems} />
             <ChatInput
               query={localQuery}
               setQuery={setQuery}
-              selectedSkill={selectedSkill}
+              selectedSkillName={selectedSkill?.name}
               handleSendMessage={handleSendMessage}
+              handleSelectSkill={(skill) => {
+                setQuery('');
+                setSelectedSkill(skill);
+              }}
             />
+
             <ChatActions
               query={localQuery}
               model={modelInfo}
