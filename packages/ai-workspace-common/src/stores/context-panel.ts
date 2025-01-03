@@ -81,7 +81,7 @@ export const useContextPanelStore = create<ContextPanelState>()(
 
     addContextItem: (item: IContextItem) =>
       set((state) => {
-        const existingIndex = state.contextItems.findIndex((item) => item.entityId === item.entityId);
+        const existingIndex = state.contextItems.findIndex((contextItem) => contextItem.entityId === item.entityId);
 
         if (existingIndex >= 0) {
           // Update existing item
