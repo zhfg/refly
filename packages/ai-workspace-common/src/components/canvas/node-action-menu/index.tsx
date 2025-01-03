@@ -12,13 +12,12 @@ import {
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { FileInput, MessageSquareDiff, FilePlus, Ungroup, Group } from 'lucide-react';
+import { FileInput, MessageSquareDiff, FilePlus, Ungroup } from 'lucide-react';
+import { GrClone } from 'react-icons/gr';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 import { nodeActionEmitter, createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
-import { genSkillID } from '@refly-packages/utils/id';
 import { CanvasNodeType } from '@refly/openapi-schema';
-import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
 
@@ -48,7 +47,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const { t } = useTranslation();
   const { getNode } = useReactFlow();
   const { canvasId } = useCanvasContext();
-  const { addNode } = useAddNode();
 
   const { activeDocumentId } = useDocumentStoreShallow((state) => ({
     activeDocumentId: state.activeDocumentId,
@@ -61,28 +59,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const { ungroupNodes } = useUngroupNodes();
 
   const handleAskAI = useCallback(() => {
-    const node = getNode(nodeId) as CanvasNode;
-    addNode(
-      {
-        type: 'skill',
-        data: {
-          title: 'Skill',
-          entityId: genSkillID(),
-          metadata: {
-            modelInfo: node.data.metadata?.modelInfo,
-            contextItems: [
-              {
-                title: node.data.title,
-                entityId: node.data.entityId,
-                type: node.type,
-                metadata: node.type === 'skillResponse' ? { withHistory: true } : {},
-              },
-            ],
-          },
-        },
-      },
-      [{ type: node.type, entityId: node.data.entityId }],
-    );
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'askAI'));
     onClose?.();
   }, [nodeId, onClose]);
@@ -92,8 +68,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     onClose?.();
   }, [nodeId]);
 
-  const handleCompareAskAI = useCallback(() => {
-    nodeActionEmitter.emit(createNodeEventName(nodeId, 'compareAskAI'));
+  const handleCloneAskAI = useCallback(() => {
+    nodeActionEmitter.emit(createNodeEventName(nodeId, 'cloneAskAI'));
     onClose?.();
   }, [nodeId, onClose]);
 
@@ -177,10 +153,10 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
       },
       nodeType === 'skillResponse'
         ? {
-            key: 'compareAskAI',
-            icon: IconAskAI,
-            label: t('canvas.nodeActions.compareAskAI'),
-            onClick: handleCompareAskAI,
+            key: 'cloneAskAI',
+            icon: GrClone,
+            label: t('canvas.nodeActions.cloneAskAI'),
+            onClick: handleCloneAskAI,
             type: 'button' as const,
           }
         : null,

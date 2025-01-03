@@ -15,7 +15,7 @@ import { genMemoID, genSkillID } from '@refly-packages/utils/id';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useReactFlow } from '@xyflow/react';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { cn } from '@refly-packages/utils/cn';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -23,6 +23,9 @@ interface ToolbarItem {
   icon?: React.ElementType;
   key?: string;
   domain?: string;
+  primary?: boolean;
+  danger?: boolean;
+  loading?: boolean;
   showSearchList?: boolean;
   setShowSearchList?: (show: boolean) => void;
 }
@@ -51,7 +54,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
   }));
 
   const menuItems: ToolbarItem[] = [
-    { key: 'askAI', icon: IconAskAI, type: 'button' },
+    { key: 'askAI', icon: IconAskAI, type: 'button', primary: true },
     { key: 'divider-1', type: 'divider' },
     { key: 'createDocument', icon: HiOutlineDocumentAdd, type: 'button' },
     { key: 'createMemo', icon: MdOutlineAutoAwesomeMotion, type: 'button' },
@@ -226,7 +229,11 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
               <div key={item.key} className="flex items-center w-full">
                 <Button
                   loading={getIsLoading(item.key)}
-                  className={`w-full px-2 justify-start ${activeKey === item.key ? 'bg-gray-100' : ''}`}
+                  className={cn(`w-full px-2 justify-start`, {
+                    'bg-gray-100': activeKey === item.key,
+                    'text-primary-600': item.primary,
+                    'text-red-600': item.danger,
+                  })}
                   type="text"
                   icon={<item.icon className="flex items-center" />}
                   onClick={() => handleMenuClick({ key: item.key })}
@@ -252,7 +259,11 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
                 <div key={item.key} className="flex items-center w-full">
                   <Button
                     loading={getIsLoading(item.key)}
-                    className={`w-full px-2 justify-start ${activeKey === item.key ? 'bg-gray-100' : ''}`}
+                    className={cn(`w-full px-2 justify-start`, {
+                      'bg-gray-100': activeKey === item.key,
+                      'text-primary-600': item.primary,
+                      'text-red-600': item.danger,
+                    })}
                     type="text"
                     icon={<item.icon className="flex items-center" />}
                     onClick={() => handleMenuClick({ key: item.key })}

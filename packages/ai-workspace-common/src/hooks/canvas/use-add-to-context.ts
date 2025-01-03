@@ -56,9 +56,6 @@ export const useAddToContext = () => {
         }),
       );
 
-      // Add to context
-      contextStore.addContextItem(item);
-
       return true;
     },
     [showLaunchpad, setShowLaunchpad],
