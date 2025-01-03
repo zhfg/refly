@@ -40,8 +40,16 @@ import { ModelProviderIcons } from '@refly-packages/ai-workspace-common/componen
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
-import { Source } from '@refly/openapi-schema';
+import { CanvasNodeType, Source } from '@refly/openapi-schema';
 import { useSetNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { genSkillID } from '@refly-packages/utils/id';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import {
+  convertContextItemsToContext,
+  convertContextToItems,
+} from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -286,8 +294,7 @@ export const SkillResponseNode = memo(
       onHoverEnd();
     }, [onHoverEnd]);
 
-    const handleAddToChatHistory = useAddToChatHistory(node as NodeItem);
-
+    const { addToHistory } = useAddToChatHistory();
     const { invokeAction } = useInvokeAction();
 
     const handleRerun = useCallback(() => {
@@ -325,15 +332,16 @@ export const SkillResponseNode = memo(
     const runtime = getRuntime();
     const isWeb = runtime === 'web';
 
-    const handleDelete = useDeleteNode(
-      {
+    const { deleteNode } = useDeleteNode();
+
+    const handleDelete = useCallback(() => {
+      deleteNode({
         id,
         type: 'skillResponse',
         data,
         position: { x: 0, y: 0 },
-      } as CanvasNode,
-      'skillResponse',
-    );
+      } as CanvasNode);
+    }, [id, data, deleteNode]);
 
     const { debouncedCreateDocument } = useCreateDocument();
 
@@ -344,10 +352,24 @@ export const SkillResponseNode = memo(
       });
     }, [content, debouncedCreateDocument, entityId, title]);
 
+    const { addToContext } = useAddToContext();
+
     const handleAddToContext = useCallback(() => {
-      handleAddToChatHistory();
-      addContextItem(node as NodeItem);
-    }, [node, handleAddToChatHistory, addContextItem]);
+      addToContext({
+        id,
+        type: 'skillResponse',
+        data,
+        position: { x: 0, y: 0 },
+      } as CanvasNode);
+
+      // Add to chat history
+      addToHistory({
+        id,
+        type: 'skillResponse',
+        data,
+        position: { x: 0, y: 0 },
+      } as CanvasNode);
+    }, [id, data, addToContext, addToHistory]);
 
     const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
       updateSourceListDrawer: state.updateSourceListDrawer,
@@ -367,6 +389,66 @@ export const SkillResponseNode = memo(
       moveableRef.current?.request('resizable', { width, height });
     }, []);
 
+    const { addNode } = useAddNode(canvasId);
+
+    const handleAskAI = useCallback(() => {
+      addNode(
+        {
+          type: 'skill',
+          data: {
+            title: 'Skill',
+            entityId: genSkillID(),
+            metadata: {
+              contextNodeIds: [id],
+            },
+          },
+        },
+        [{ type: 'skillResponse', entityId: data.entityId }],
+      );
+    }, [id, data.entityId, addNode]); // Add new handler for compare run
+
+    const handleCloneAskAI = useCallback(async () => {
+      // Fetch action result to get context
+      const { data: resultData } = await getClient().getActionResult({
+        query: { resultId: data?.entityId },
+      });
+
+      if (!resultData?.success || !resultData.data) {
+        message.error(t('canvas.nodePreview.resultNotFound'));
+        return;
+      }
+
+      const { context, history, title, modelInfo, actionMeta } = resultData.data;
+      const contextItems = context ? convertContextToItems(context, history) : [];
+
+      // Create new skill node with context, similar to group node implementation
+      const connectTo = contextItems.map((item) => ({
+        type: item.type as CanvasNodeType,
+        entityId: item.data?.entityId,
+      }));
+
+      // Get all context item IDs
+      const contextNodeIds = contextItems.map((item) => item.id);
+
+      // Create new skill node
+      addNode(
+        {
+          type: 'skill',
+          data: {
+            title: t('canvas.nodeActions.cloneAskAI'),
+            entityId: genSkillID(),
+            metadata: {
+              contextNodeIds, // Use all context item IDs
+              query: title,
+              modelInfo,
+              selectedSkill: actionMeta,
+            },
+          },
+        },
+        connectTo,
+      );
+    }, [id, data?.entityId, addNode, t]);
+
     // Update size when content changes
     useEffect(() => {
       if (!targetRef.current) return;
@@ -383,8 +465,12 @@ export const SkillResponseNode = memo(
       const handleNodeInsertToDoc = () => handleInsertToDoc();
       const handleNodeCreateDocument = () => handleCreateDocument();
       const handleNodeDelete = () => handleDelete();
+      const handleNodeAskAI = () => handleAskAI();
+      const handleNodeCloneAskAI = () => handleCloneAskAI();
 
       // Register events with node ID
+      nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
+      nodeActionEmitter.on(createNodeEventName(id, 'cloneAskAI'), handleNodeCloneAskAI);
       nodeActionEmitter.on(createNodeEventName(id, 'rerun'), handleNodeRerun);
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
@@ -393,6 +479,8 @@ export const SkillResponseNode = memo(
 
       return () => {
         // Cleanup events when component unmounts
+        nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
+        nodeActionEmitter.off(createNodeEventName(id, 'cloneAskAI'), handleNodeCloneAskAI);
         nodeActionEmitter.off(createNodeEventName(id, 'rerun'), handleNodeRerun);
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);

@@ -102,7 +102,6 @@ const useToolbarConfig = () => {
           type: 'button',
           domain: 'edges',
           tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
-          active: showEdges,
         },
       ] as ToolbarItem[],
       modals: {
@@ -217,14 +216,18 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
     (selectedItems: ContextItem[]) => {
       selectedItems.forEach((item) => {
         const contentPreview = item?.snippets?.map((snippet) => snippet?.text || '').join('\n');
-        addNode({
-          type: item.domain as CanvasNodeType,
-          data: {
-            title: item.title,
-            entityId: item.id,
-            contentPreview: item?.contentPreview || contentPreview,
+        addNode(
+          {
+            type: item.domain as CanvasNodeType,
+            data: {
+              title: item.title,
+              entityId: item.id,
+              contentPreview: item?.contentPreview || contentPreview,
+            },
           },
-        });
+          [],
+          false,
+        );
       });
     },
     [addNode],

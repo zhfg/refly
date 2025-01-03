@@ -89,25 +89,27 @@ export const MemoNode = ({
     onHoverEnd();
   }, [onHoverEnd]);
 
-  const handleAddToContext = useAddToContext(
-    {
-      id,
-      type: 'memo',
-      data,
-      position: { x: 0, y: 0 },
-    } as CanvasNode,
-    'memo',
-  );
+  const { addToContext } = useAddToContext();
 
-  const handleDelete = useDeleteNode(
-    {
+  const handleAddToContext = useCallback(() => {
+    addToContext({
       id,
       type: 'memo',
       data,
       position: { x: 0, y: 0 },
-    } as CanvasNode,
-    'memo',
-  );
+    } as CanvasNode);
+  }, [id, data, addToContext]);
+
+  const { deleteNode } = useDeleteNode();
+
+  const handleDelete = useCallback(() => {
+    deleteNode({
+      id,
+      type: 'memo',
+      data,
+      position: { x: 0, y: 0 },
+    } as CanvasNode);
+  }, [id, data, deleteNode]);
 
   const insertToDoc = useInsertToDocument(data.entityId);
   const handleInsertToDoc = useCallback(async () => {

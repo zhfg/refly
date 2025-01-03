@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useEffect, useState, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow } from '@xyflow/react';
+import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow, Node } from '@xyflow/react';
 import { Button, Modal, Result } from 'antd';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
@@ -11,8 +11,8 @@ import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { ContextMenu } from './context-menu';
 import { NodeContextMenu } from './node-context-menu';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
-
-import '@xyflow/react/dist/style.css';
+import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
+import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { CanvasProvider, useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useEdgeStyles } from './constants';
@@ -33,9 +33,13 @@ import {
 } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
-import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
-import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
+import { useGroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-group-nodes';
+import { MultiSelectionMenus } from './multi-selection-menu';
+
+import '@xyflow/react/dist/style.css';
 import './index.scss';
+import { SelectionContextMenu } from '@refly-packages/ai-workspace-common/components/canvas/selection-context-menu';
+
 const selectionStyles = `
   .react-flow__selection {
     background: rgba(0, 150, 143, 0.03) !important;
@@ -53,9 +57,10 @@ const POLLING_COOLDOWN_TIME = 5000;
 interface ContextMenuState {
   open: boolean;
   position: { x: number; y: number };
-  type: 'canvas' | 'node';
+  type: 'canvas' | 'node' | 'selection';
   nodeId?: string;
   nodeType?: CanvasNodeType;
+  isSelection?: boolean;
 }
 
 // Add new memoized components
@@ -70,12 +75,16 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     nodes: state.data[canvasId]?.nodes ?? [],
     edges: state.data[canvasId]?.edges ?? [],
   }));
+  const selectedNodes = nodes.filter((node) => node.selected) || [];
+
+  console.log('nodes', nodes);
   const { onNodesChange } = useNodeOperations(canvasId);
   const { setSelectedNode } = useNodeSelection();
+
   const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
 
-  const { nodePreviews, showPreview, showLaunchpad, showMaxRatio, interactionMode, setInteractionMode } =
+  const { nodePreviews, showPreview, showLaunchpad, showMaxRatio, interactionMode, setInteractionMode, showEdges } =
     useCanvasStoreShallow((state) => ({
       nodePreviews: state.config[canvasId]?.nodePreviews,
       showPreview: state.showPreview,
@@ -83,6 +92,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       showMaxRatio: state.showMaxRatio,
       interactionMode: state.interactionMode,
       setInteractionMode: state.setInteractionMode,
+      showEdges: state.showEdges,
     }));
 
   const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } = useSiderStoreShallow(
@@ -172,7 +182,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [lastClickTime, setLastClickTime] = useState(0);
 
-  const onPaneClick = useCallback(
+  const handlePanelClick = useCallback(
     (event: React.MouseEvent) => {
       setOperatingNodeId(null);
       setContextMenu((prev) => ({ ...prev, open: false }));
@@ -192,7 +202,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
       setLastClickTime(currentTime);
     },
-    [lastClickTime, setOperatingNodeId],
+    [lastClickTime, setOperatingNodeId, canvasId],
   );
 
   const handleToolSelect = (tool: string) => {
@@ -325,6 +335,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         case 'memo':
           menuNodeType = 'memo';
           break;
+        case 'group':
+          menuNodeType = 'group';
+          break;
         default:
           return; // Don't show context menu for unknown node types
       }
@@ -342,6 +355,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   const handleNodeClick = useCallback(
     (event: React.MouseEvent, node: CanvasNode<any>) => {
+      const { operatingNodeId } = useCanvasStore.getState();
       setContextMenu((prev) => ({ ...prev, open: false }));
 
       if (!node?.id) {
@@ -363,14 +377,14 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       }
 
       // Memo nodes are not previewable
-      if (node.type === 'memo' || node.type === 'skill') {
+      if (node.type === 'memo' || node.type === 'skill' || node.type === 'group') {
         return;
       }
 
       // Handle preview if enabled
       handleNodePreview(node);
     },
-    [operatingNodeId, handleNodePreview, setOperatingNodeId, setSelectedNode],
+    [operatingNodeId, handleNodePreview, setOperatingNodeId, setSelectedNode, canvasId],
   );
 
   // 缓存节点数据
@@ -425,6 +439,24 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     setIsNodeDragging(false);
   }, [setIsNodeDragging]);
 
+  const onSelectionContextMenu = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      const flowPosition = reactFlowInstance.screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      setContextMenu({
+        open: true,
+        position: flowPosition,
+        type: 'selection',
+        nodeType: 'group',
+      });
+    },
+    [reactFlowInstance, nodes],
+  );
+
   return (
     <Spin
       className="w-full h-full"
@@ -467,7 +499,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onNodeClick={handleNodeClick}
-            onPaneClick={onPaneClick}
+            onPaneClick={handlePanelClick}
             onPaneContextMenu={onPaneContextMenu}
             onNodeContextMenu={onNodeContextMenu}
             onNodeDragStart={onNodeDragStart}
@@ -476,6 +508,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             nodesDraggable={!operatingNodeId}
             // onlyRenderVisibleElements={true}
             elevateNodesOnSelect={false}
+            onSelectionContextMenu={onSelectionContextMenu}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
@@ -533,6 +566,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             open={contextMenu.open}
             position={contextMenu.position}
             setOpen={(open) => setContextMenu((prev) => ({ ...prev, open }))}
+            isSelection={contextMenu.isSelection}
           />
         )}
 
@@ -545,6 +579,18 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             setOpen={(open) => setContextMenu((prev) => ({ ...prev, open }))}
           />
         )}
+
+        {contextMenu.open && contextMenu.type === 'selection' && (
+          <SelectionContextMenu
+            open={contextMenu.open}
+            position={contextMenu.position}
+            nodeId={contextMenu.nodeId}
+            nodeType={contextMenu.nodeType}
+            setOpen={(open) => setContextMenu((prev) => ({ ...prev, open }))}
+          />
+        )}
+
+        {selectedNodes.length > 0 && <MultiSelectionMenus />}
       </div>
     </Spin>
   );

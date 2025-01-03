@@ -54,7 +54,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
 
   const { getNodes } = useReactFlow();
   const setNodeData = useSetNodeData();
-  const deleteNode = useDeleteNode(node, 'skillResponse');
+  const { deleteNode } = useDeleteNode();
 
   const { t } = useTranslation();
   const [editMode, setEditMode] = useState(false);
@@ -125,13 +125,22 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   const { title, steps = [], context, history = [], actionMeta, modelInfo } = result ?? {};
   const contextItems = useMemo(() => (context ? convertContextToItems(context, history) : []), [context, history]);
 
+  const handleDelete = useCallback(() => {
+    deleteNode({
+      id: node.id,
+      type: 'skillResponse',
+      data: node.data,
+      position: node.position || { x: 0, y: 0 },
+    });
+  }, [node, deleteNode]);
+
   if (!result && !loading) {
     return (
       <div className="h-full w-full flex items-center justify-center">
         <Result
           status="404"
           subTitle={t('canvas.skillResponse.resultNotFound')}
-          extra={<Button onClick={() => deleteNode()}>{t('canvas.nodeActions.delete')}</Button>}
+          extra={<Button onClick={handleDelete}>{t('canvas.nodeActions.delete')}</Button>}
         />
       </div>
     );

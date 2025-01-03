@@ -7,7 +7,7 @@ import { CanvasNodeType } from '@refly/openapi-schema';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/hooks/use-chat-history';
 
-export const useAddToContext = (node: CanvasNode, nodeType: CanvasNodeType) => {
+export const useAddToContext = () => {
   const { t } = useTranslation();
   const { showLaunchpad, setShowLaunchpad } = useCanvasStoreShallow((state) => ({
     showLaunchpad: state.showLaunchpad,
@@ -15,52 +15,77 @@ export const useAddToContext = (node: CanvasNode, nodeType: CanvasNodeType) => {
   }));
   const { handleItemAdd } = useChatHistory();
 
-  return useCallback(() => {
-    const contextStore = useContextPanelStore.getState();
-    const selectedContextItems = contextStore.contextItems;
+  const addSingleNodeToContext = useCallback(
+    (node: CanvasNode) => {
+      const contextStore = useContextPanelStore.getState();
+      const selectedContextItems = contextStore.contextItems;
+      const nodeType = node?.type;
 
-    // Check if item is already in context
-    const isAlreadyAdded = selectedContextItems.some((item) => {
-      if ('id' in node) {
-        return item.id === node.id && !item.isPreview;
+      // Check if item is already in context
+      const isAlreadyAdded = selectedContextItems.some((item) => item.id === node.id && !item.isPreview);
+
+      // Get node title based on type
+      let nodeTitle = '';
+      if (node?.data?.metadata?.sourceType === 'documentSelection') {
+        nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
+      } else if (nodeType === 'skillResponse') {
+        nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
+      } else {
+        nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
       }
-    });
 
-    // Get node title based on type
-    let nodeTitle = '';
-    if (node?.data?.metadata?.sourceType === 'documentSelection') {
-      nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
-    } else if (nodeType === 'skillResponse') {
-      nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
-    } else {
-      nodeTitle = (node as CanvasNode)?.data?.title ?? t('knowledgeBase.context.untitled');
-    }
+      if (!showLaunchpad) {
+        setShowLaunchpad(true);
+      }
 
-    if (!showLaunchpad) {
-      setShowLaunchpad(true);
-    }
+      if (isAlreadyAdded) {
+        message.warning(
+          t('knowledgeBase.context.alreadyAddedWithTitle', {
+            title: nodeTitle,
+            type: t(`knowledgeBase.context.nodeTypes.${nodeType}`),
+          }),
+        );
+        return false;
+      }
 
-    if (isAlreadyAdded) {
-      message.warning(
-        t('knowledgeBase.context.alreadyAddedWithTitle', {
+      // Add to context
+      contextStore.addContextItem(node);
+      if (nodeType === 'skillResponse') {
+        handleItemAdd(node);
+      }
+
+      message.success(
+        t('knowledgeBase.context.addSuccessWithTitle', {
           title: nodeTitle,
           type: t(`knowledgeBase.context.nodeTypes.${nodeType}`),
         }),
       );
-      return;
-    }
 
-    // Add to context
-    contextStore.addContextItem(node);
-    if (nodeType === 'skillResponse') {
-      handleItemAdd(node);
-    }
+      return true;
+    },
+    [showLaunchpad, setShowLaunchpad, handleItemAdd, t],
+  );
 
-    message.success(
-      t('knowledgeBase.context.addSuccessWithTitle', {
-        title: nodeTitle,
-        type: t(`knowledgeBase.context.nodeTypes.${nodeType}`),
-      }),
-    );
-  }, [node, nodeType, t]);
+  const addNodesToContext = useCallback(
+    (nodes: CanvasNode[]) => {
+      // Filter out memo, skill, and group nodes
+      // Filter out memo, skill, and group nodes
+      const validNodes = nodes.filter((node) => !['skill', 'memo', 'group'].includes(node.type));
+
+      if (!showLaunchpad) {
+        setShowLaunchpad(true);
+      }
+
+      // Add each valid node to context
+      const results = validNodes.map((node) => addSingleNodeToContext(node));
+
+      return results.filter(Boolean).length; // Return number of successfully added nodes
+    },
+    [showLaunchpad, setShowLaunchpad, addSingleNodeToContext],
+  );
+
+  return {
+    addToContext: addSingleNodeToContext,
+    addNodesToContext,
+  };
 };

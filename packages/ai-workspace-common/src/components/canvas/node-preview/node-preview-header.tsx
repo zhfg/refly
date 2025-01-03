@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo } from 'react';
+import { FC, useCallback } from 'react';
 import { Button, Dropdown, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import {
@@ -38,6 +38,7 @@ const NODE_COLORS: Record<CanvasNodeType, string> = {
   skill: '#6172F3',
   tool: '#2E90FA',
   memo: '#6172F3',
+  group: '#6172F3',
 };
 
 // Get icon component based on node type and metadata
@@ -122,10 +123,17 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
   const nodeColor = NODE_COLORS[node.type];
   const nodeTitle = getNodeTitle(node);
   const { t } = useTranslation();
+  const { addToContext } = useAddToContext();
+  const { deleteNode } = useDeleteNode();
 
-  // Add hooks for context and delete actions
-  const handleAddToContext = useAddToContext(node, node.type);
-  const handleDelete = useDeleteNode(node, node.type);
+  // Update handleAddToContext to use new hook
+  const handleAddToContext = useCallback(() => {
+    addToContext(node);
+  }, [node, addToContext]);
+
+  const handleDelete = useCallback(() => {
+    deleteNode(node);
+  }, [node, deleteNode]);
 
   const { canvasId } = useCanvasContext();
   const { pinNode, unpinNode, isNodePinned } = useNodePreviewControl({ canvasId });

@@ -13,13 +13,14 @@ import {
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { FileInput, MessageSquareDiff, FilePlus } from 'lucide-react';
+import { FileInput, MessageSquareDiff, FilePlus, Ungroup, Group } from 'lucide-react';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 import { nodeActionEmitter, createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { genSkillID } from '@refly-packages/utils/id';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
 
 interface MenuItem {
   key: string;
@@ -40,9 +41,10 @@ interface NodeActionMenuProps {
   isProcessing?: boolean;
   isCompleted?: boolean;
   isCreatingDocument?: boolean;
+  isMultiSelection?: boolean;
 }
 
-export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onClose }) => {
+export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onClose, isMultiSelection }) => {
   const { t } = useTranslation();
   const { getNode } = useReactFlow();
   const { canvasId } = useCanvasContext();
@@ -56,29 +58,22 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const nodeData = useMemo(() => node?.data, [node]);
 
   const addNodePreview = useCanvasStoreShallow((state) => state.addNodePreview);
+  const { ungroupNodes } = useUngroupNodes();
 
   const handleAskAI = useCallback(() => {
-    const node = getNode(nodeId) as CanvasNode;
-    addNode(
-      {
-        type: 'skill',
-        data: {
-          title: 'Skill',
-          entityId: genSkillID(),
-          metadata: {
-            contextNodeIds: [nodeId],
-          },
-        },
-      },
-      [{ type: node.type, entityId: node.data.entityId }],
-    );
+    nodeActionEmitter.emit(createNodeEventName(nodeId, 'askAI'));
     onClose?.();
-  }, [nodeId]);
+  }, [nodeId, onClose]);
 
   const handleRun = useCallback(() => {
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'run'));
     onClose?.();
   }, [nodeId]);
+
+  const handleCompareAskAI = useCallback(() => {
+    nodeActionEmitter.emit(createNodeEventName(nodeId, 'compareAskAI'));
+    onClose?.();
+  }, [nodeId, onClose]);
 
   const handleRerun = useCallback(() => {
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'rerun'));
@@ -113,7 +108,42 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     onClose?.();
   }, [node, nodeId, canvasId]);
 
+  const handleUngroup = useCallback(() => {
+    ungroupNodes(nodeId);
+    onClose?.();
+  }, [ungroupNodes, nodeId, onClose]);
+
   const getMenuItems = (activeDocumentId: string): MenuItem[] => {
+    if (isMultiSelection) {
+      return [
+        {
+          key: 'askAI',
+          icon: IconAskAI,
+          label: t('canvas.nodeActions.askAI'),
+          onClick: handleAskAI,
+          type: 'button' as const,
+          primary: true,
+        },
+        { key: 'divider-1', type: 'divider' } as MenuItem,
+        {
+          key: 'addToContext',
+          icon: MessageSquareDiff,
+          label: t('canvas.nodeActions.addToContext'),
+          onClick: handleAddToContext,
+          type: 'button' as const,
+        },
+        { key: 'divider-2', type: 'divider' } as MenuItem,
+        {
+          key: 'delete',
+          icon: IconDelete,
+          label: t('canvas.nodeActions.delete'),
+          onClick: handleDelete,
+          danger: true,
+          type: 'button' as const,
+        },
+      ];
+    }
+
     const baseItems: MenuItem[] = [
       {
         key: 'askAI',
@@ -123,6 +153,15 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         type: 'button' as const,
         primary: true,
       },
+      nodeType === 'skillResponse'
+        ? {
+            key: 'compareAskAI',
+            icon: IconAskAI,
+            label: t('canvas.nodeActions.compareAskAI'),
+            onClick: handleCompareAskAI,
+            type: 'button' as const,
+          }
+        : null,
       { key: 'divider-1', type: 'divider' } as MenuItem,
       {
         key: 'preview',
@@ -131,7 +170,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         onClick: handlePreview,
         type: 'button' as const,
       },
-    ];
+    ].filter(Boolean);
 
     const nodeTypeItems: Record<string, MenuItem[]> = {
       document: [
@@ -160,6 +199,22 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
           onClick: handleInsertToDoc,
           type: 'button' as const,
           disabled: !activeDocumentId,
+        },
+      ],
+      group: [
+        {
+          key: 'addToContext',
+          icon: MessageSquareDiff,
+          label: t('canvas.nodeActions.addToContext'),
+          onClick: handleAddToContext,
+          type: 'button' as const,
+        },
+        {
+          key: 'ungroup',
+          icon: Ungroup,
+          label: t('canvas.nodeActions.ungroup'),
+          onClick: handleUngroup,
+          type: 'button' as const,
         },
       ],
       skill: [
