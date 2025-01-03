@@ -35,7 +35,7 @@ import '@refly-packages/ai-workspace-common/modules/content-selector/styles/cont
 import classNames from 'classnames';
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { genMemoID, genUniqueId } from '@refly-packages/utils/id';
+import { genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/use-selection-context';
 import { useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
