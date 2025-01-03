@@ -88,6 +88,14 @@ export class OperationTooFrequent extends BaseError {
   };
 }
 
+export class InvalidRefreshToken extends BaseError {
+  code = 'E0011';
+  messageDict = {
+    en: 'Invalid or expired refresh token',
+    'zh-CN': '无效或已过期的刷新令牌',
+  };
+}
+
 export class CanvasNotFoundError extends BaseError {
   code = 'E1000';
   messageDict = {
@@ -205,6 +213,7 @@ const errorMap = {
   E0008: InvalidVerificationSession,
   E0009: IncorrectVerificationCode,
   E0010: OperationTooFrequent,
+  E0011: InvalidRefreshToken,
   E1000: CanvasNotFoundError,
   E1002: ResourceNotFoundError,
   E1003: DocumentNotFoundError,

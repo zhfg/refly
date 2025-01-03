@@ -1,6 +1,8 @@
-import { Controller, Logger, Get, Post, Res, UseGuards, Body } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Logger, Get, Post, Res, UseGuards, Body, Req } from '@nestjs/common';
+import { Response, Request } from 'express';
 import { User as UserModel } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
+import { UnauthorizedError } from '@refly-packages/errors';
 
 import { User } from '@/utils/decorators/user.decorator';
 import { AuthService } from './auth.service';
@@ -22,12 +24,13 @@ import {
 } from '@refly-packages/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
 import { hours, minutes, seconds, Throttle } from '@nestjs/throttler';
+import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 
 @Controller('v1/auth')
 export class AuthController {
   private logger = new Logger(AuthController.name);
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private configService: ConfigService) {}
 
   @Get('config')
   getAuthConfig(): AuthConfigResponse {
@@ -93,8 +96,8 @@ export class AuthController {
     try {
       this.logger.log(`github oauth callback success, req.user = ${user?.email}`);
 
-      const { accessToken } = await this.authService.login(user);
-      this.authService.redirect(res, accessToken);
+      const tokens = await this.authService.login(user);
+      this.authService.redirect(res, tokens);
     } catch (error) {
       this.logger.error('GitHub OAuth callback failed:', error.stack);
       throw new OAuthError();
@@ -107,11 +110,51 @@ export class AuthController {
     try {
       this.logger.log(`google oauth callback success, req.user = ${user?.email}`);
 
-      const { accessToken } = await this.authService.login(user);
-      this.authService.redirect(res, accessToken);
+      const tokens = await this.authService.login(user);
+      this.authService.redirect(res, tokens);
     } catch (error) {
       this.logger.error('Google OAuth callback failed:', error.stack);
       throw new OAuthError();
     }
+  }
+
+  @Post('refresh')
+  async refreshToken(@Req() req: Request): Promise<EmailLoginResponse> {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      throw new UnauthorizedError();
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } =
+      await this.authService.refreshAccessToken(refreshToken);
+
+    // Set the new refresh token in the cookie
+    req.res?.cookie('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/api/v1/auth/refresh',
+      domain: this.configService.get('auth.cookieDomain'),
+    });
+
+    return buildSuccessResponse({ accessToken });
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@User() user: UserModel, @Res() res: Response) {
+    await this.authService.revokeAllRefreshTokens(user.uid);
+
+    // Clear cookies
+    res
+      .clearCookie(this.configService.get('auth.cookieTokenField'), {
+        domain: this.configService.get('auth.cookieDomain'),
+      })
+      .clearCookie('refreshToken', {
+        domain: this.configService.get('auth.cookieDomain'),
+        path: '/api/v1/auth/refresh',
+      })
+      .status(200)
+      .json(buildSuccessResponse());
   }
 }

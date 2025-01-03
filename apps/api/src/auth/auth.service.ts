@@ -5,7 +5,7 @@ import { Profile } from 'passport';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { User as UserModel, VerificationSession } from '@prisma/client';
+import { User as UserModel, VerificationSession, RefreshToken } from '@prisma/client';
 import { JwtPayload } from './dto';
 import { genUID, genVerificationSessionID } from '@refly-packages/utils';
 import { PrismaService } from '@/common/prisma.service';
@@ -24,6 +24,7 @@ import {
   OAuthError,
   ParamsError,
   PasswordIncorrect,
+  InvalidRefreshToken,
 } from '@refly-packages/errors';
 import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
@@ -60,17 +61,111 @@ export class AuthService {
 
   async login(user: UserModel) {
     const payload: JwtPayload = { uid: user.uid, email: user.email };
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.get('auth.jwt.secret'),
+      expiresIn: '15m', // Short-lived access token
+    });
+
+    // Generate refresh token
+    const refreshToken = await this.generateRefreshToken(user.uid);
+
     return {
-      accessToken: this.jwtService.sign(payload, {
-        secret: this.configService.get('auth.jwt.secret'),
-      }),
+      accessToken,
+      refreshToken,
     };
   }
 
-  redirect(res: Response, accessToken: string) {
+  private async generateRefreshToken(uid: string): Promise<string> {
+    const jti = randomBytes(32).toString('hex');
+    const token = randomBytes(64).toString('hex');
+    const hashedToken = await argon2.hash(token);
+
+    // Store the hashed refresh token
+    await this.prisma.refreshToken.create({
+      data: {
+        jti,
+        uid,
+        hashedToken,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      },
+    });
+
+    return `${jti}.${token}`;
+  }
+
+  async refreshAccessToken(refreshToken: string) {
+    try {
+      const [jti, token] = refreshToken.split('.');
+
+      if (!jti || !token) {
+        throw new InvalidRefreshToken();
+      }
+
+      // Find the refresh token in the database
+      const storedToken = await this.prisma.refreshToken.findUnique({
+        where: { jti },
+      });
+
+      if (!storedToken || storedToken.revoked || storedToken.expiresAt < new Date()) {
+        throw new InvalidRefreshToken();
+      }
+
+      // Verify the token
+      const isValid = await argon2.verify(storedToken.hashedToken, token);
+      if (!isValid) {
+        throw new InvalidRefreshToken();
+      }
+
+      // Revoke the current refresh token (one-time use)
+      await this.prisma.refreshToken.update({
+        where: { jti },
+        data: { revoked: true },
+      });
+
+      // Get the user
+      const user = await this.prisma.user.findUnique({
+        where: { uid: storedToken.uid },
+      });
+
+      if (!user) {
+        throw new AccountNotFoundError();
+      }
+
+      // Generate new tokens
+      return this.login(user);
+    } catch (error) {
+      if (error instanceof InvalidRefreshToken) {
+        throw error;
+      }
+      this.logger.error('Error refreshing token:', error);
+      throw new InvalidRefreshToken();
+    }
+  }
+
+  async revokeAllRefreshTokens(uid: string) {
+    await this.prisma.refreshToken.updateMany({
+      where: { uid },
+      data: { revoked: true },
+    });
+  }
+
+  redirect(
+    res: Response,
+    { accessToken, refreshToken }: { accessToken: string; refreshToken: string },
+  ) {
     res
       .cookie(this.configService.get('auth.cookieTokenField'), accessToken, {
         domain: this.configService.get('auth.cookieDomain'),
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+      })
+      .cookie('refreshToken', refreshToken, {
+        domain: this.configService.get('auth.cookieDomain'),
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        path: '/api/v1/auth/refresh',
       })
       .redirect(this.configService.get('auth.redirectUrl'));
   }
