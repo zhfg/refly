@@ -23,6 +23,8 @@ interface ToolbarItem {
   icon?: React.ElementType;
   key?: string;
   domain?: string;
+  showSearchList?: boolean;
+  setShowSearchList?: (show: boolean) => void;
 }
 
 interface MenuPopperProps {
@@ -39,6 +41,9 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
 
+  const [showSearchResourceList, setShowSearchResourceList] = useState(false);
+  const [showSearchDocumentList, setShowSearchDocumentList] = useState(false);
+
   const { setImportResourceModalVisible, setInsertNodePosition } = useImportResourceStoreShallow((state) => ({
     importResourceModalVisible: state.importResourceModalVisible,
     setImportResourceModalVisible: state.setImportResourceModalVisible,
@@ -50,8 +55,22 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     { key: 'divider-1', type: 'divider' },
     { key: 'createDocument', icon: HiOutlineDocumentAdd, type: 'button' },
     { key: 'createMemo', icon: MdOutlineAutoAwesomeMotion, type: 'button' },
-    { key: 'addResource', icon: IconResource, type: 'popover', domain: 'resource' },
-    { key: 'addDocument', icon: IconDocument, type: 'popover', domain: 'document' },
+    {
+      key: 'addResource',
+      icon: IconResource,
+      type: 'popover',
+      domain: 'resource',
+      showSearchList: showSearchResourceList,
+      setShowSearchList: setShowSearchResourceList,
+    },
+    {
+      key: 'addDocument',
+      icon: IconDocument,
+      type: 'popover',
+      domain: 'document',
+      showSearchList: showSearchDocumentList,
+      setShowSearchList: setShowSearchDocumentList,
+    },
     // { key: 'addMemo', icon: MdOutlineAutoAwesomeMotion, type: 'button' },
     // { key: 'addHighlight', icon: HiOutlineBars2, type: 'button' },
     { key: 'divider-2', type: 'divider' },
@@ -226,6 +245,9 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
                 domain={item.domain as SearchDomain}
                 handleConfirm={handleConfirm}
                 offset={12}
+                placement="right"
+                open={item.showSearchList}
+                setOpen={item.setShowSearchList}
               >
                 <div key={item.key} className="flex items-center w-full">
                   <Button

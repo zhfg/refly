@@ -1,10 +1,9 @@
-import { Button, Badge, Divider, Tooltip } from 'antd';
+import { Button, Divider } from 'antd';
 import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { RiUploadCloud2Line } from 'react-icons/ri';
 import { useTranslation } from 'react-i18next';
-import { FC, memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
-
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { CanvasNodeType, SearchDomain } from '@refly/openapi-schema';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
@@ -120,8 +119,17 @@ const SearchListWrapper = memo(
       event.preventDefault();
     }, []);
 
+    const [open, setOpen] = useState(false);
+
     return (
-      <SearchList domain={tool.domain as SearchDomain} handleConfirm={handleConfirm} offset={12}>
+      <SearchList
+        domain={tool.domain as SearchDomain}
+        handleConfirm={handleConfirm}
+        offset={12}
+        placement="right"
+        open={open}
+        setOpen={setOpen}
+      >
         <TooltipWrapper tooltip={tool.tooltip}>
           <Button
             type="text"

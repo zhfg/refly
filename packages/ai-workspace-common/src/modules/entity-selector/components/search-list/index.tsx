@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Button, Input, Popover, Empty, Divider } from 'antd';
+import { Button, Input, Popover, PopoverProps, Empty, Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { SearchDomain } from '@refly/openapi-schema';
 import { DataFetcher } from '@refly-packages/ai-workspace-common/modules/entity-selector/utils';
@@ -8,7 +8,7 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 import throttle from 'lodash.throttle';
 import { IconCheck } from '@arco-design/web-react/icon';
-import { FileText, Link2, MessageSquare, Sparkles, Wrench, Cpu, Code2, Globe } from 'lucide-react';
+import { FileText, Link2, Wrench, Cpu, Code2, Globe } from 'lucide-react';
 import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 
 interface SearchListProps {
@@ -18,9 +18,12 @@ interface SearchListProps {
   children?: React.ReactNode;
   handleConfirm?: (selectedItems: ContextItem[]) => void;
   className?: string;
-  trigger?: 'click' | 'hover';
+  trigger?: PopoverProps['trigger'];
   mode?: 'multiple' | 'single';
   offset?: number | [number, number];
+  placement?: PopoverProps['placement'];
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }
 
 // Define domain colors similar to NODE_COLORS
@@ -69,7 +72,18 @@ const getDomainIcon = (domain: SearchDomain, metadata?: any) => {
 
 export const SearchList = (props: SearchListProps) => {
   const { t } = useTranslation();
-  const { domain, fetchData, defaultValue, children, handleConfirm, mode = 'multiple', offset, ...selectProps } = props;
+  const {
+    domain,
+    fetchData,
+    defaultValue,
+    children,
+    handleConfirm,
+    mode = 'multiple',
+    offset,
+    open,
+    setOpen,
+    ...selectProps
+  } = props;
 
   const { loadMore, dataList, isRequesting, handleValueChange, resetState, hasMore } = useFetchOrSearchList({
     domain,
@@ -77,7 +91,6 @@ export const SearchList = (props: SearchListProps) => {
     pageSize: 20,
   });
 
-  const [open, setOpen] = useState(false);
   const [value, setValue] = useState<any>(defaultValue);
   const [selectedItems, setSelectedItems] = useState<ContextItem[]>([]);
 
@@ -110,6 +123,7 @@ export const SearchList = (props: SearchListProps) => {
   };
 
   const handleItemClick = (item: ContextItem) => {
+    console.log('skill', item.title);
     if (mode === 'single') {
       handleConfirm?.([item]);
       setOpen(false);
@@ -235,9 +249,9 @@ export const SearchList = (props: SearchListProps) => {
         </div>
       }
       trigger={props?.trigger || 'click'}
-      placement="right"
-      open={open}
+      placement={props?.placement}
       arrow={false}
+      open={open}
       onOpenChange={setOpen}
       align={{
         offset: [
