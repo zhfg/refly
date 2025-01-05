@@ -618,11 +618,11 @@ export class KnowledgeService {
     ]);
 
     const cleanups: Promise<any>[] = [
-      this.ragService.deleteCanvasNodes(user, docId),
+      this.ragService.deleteDocumentNodes(user, docId),
       this.elasticsearch.deleteDocument(docId),
       this.miscService.removeFilesByEntity(user, {
         entityId: docId,
-        entityType: 'canvas',
+        entityType: 'document',
       }),
     ];
 

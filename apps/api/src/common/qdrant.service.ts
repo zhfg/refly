@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { QdrantClient } from '@qdrant/js-client-rest';
-import { Filter, PointStruct } from './qdrant.dto';
+import { Filter, PointStruct, ScrollRequest } from './qdrant.dto';
 
 @Injectable()
 export class QdrantService implements OnModuleInit {
@@ -92,5 +92,26 @@ export class QdrantService implements OnModuleInit {
       limit: args.limit || 10,
       filter,
     });
+  }
+
+  async scroll(param: ScrollRequest) {
+    const points = [];
+    let currentOffset = param.offset;
+
+    while (true) {
+      const response = await this.client.scroll(this.collectionName, {
+        ...param,
+        offset: currentOffset,
+      });
+
+      points.push(...response.points);
+
+      if (!response.next_page_offset) {
+        break;
+      }
+      currentOffset = response.next_page_offset;
+    }
+
+    return points;
   }
 }
