@@ -11,6 +11,10 @@ import { useReactFlow, useOnViewportChange } from '@xyflow/react';
 import { useCanvasLayout } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-layout';
 import { TFunction } from 'i18next';
 
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
+import { IconExpand, IconShrink } from '@refly-packages/ai-workspace-common/components/common/icon';
+
 interface LayoutControlProps {
   mode: 'mouse' | 'touchpad';
   changeMode: (mode: 'mouse' | 'touchpad') => void;
@@ -32,6 +36,8 @@ interface TooltipButtonProps {
 interface ActionButtonsProps {
   onFitView: () => void;
   onLayout: (direction: 'TB' | 'LR') => void;
+  onToggleSizeMode: () => void;
+  nodeSizeMode: 'compact' | 'adaptive';
   t: TFunction;
 }
 
@@ -63,7 +69,7 @@ const TooltipButton = memo(({ tooltip, children, ...buttonProps }: TooltipButton
 ));
 
 // Update component definitions
-const ActionButtons = memo(({ onFitView, onLayout, t }: ActionButtonsProps) => (
+const ActionButtons = memo(({ onFitView, onLayout, onToggleSizeMode, nodeSizeMode, t }: ActionButtonsProps) => (
   <>
     <TooltipButton tooltip={t('canvas.toolbar.tooltip.fitView')} onClick={onFitView} className={buttonClass}>
       <RiFullscreenFill className={iconClass} size={16} />
@@ -71,6 +77,18 @@ const ActionButtons = memo(({ onFitView, onLayout, t }: ActionButtonsProps) => (
 
     <TooltipButton tooltip={t('canvas.toolbar.tooltip.layout')} onClick={() => onLayout('LR')} className={buttonClass}>
       <LuLayoutDashboard className={iconClass} size={16} />
+    </TooltipButton>
+
+    <TooltipButton
+      tooltip={nodeSizeMode === 'compact' ? t('canvas.contextMenu.adaptiveMode') : t('canvas.contextMenu.compactMode')}
+      onClick={onToggleSizeMode}
+      className={buttonClass}
+    >
+      {nodeSizeMode === 'compact' ? (
+        <IconExpand className={iconClass} size={16} />
+      ) : (
+        <IconShrink className={iconClass} size={16} />
+      )}
     </TooltipButton>
   </>
 ));
@@ -210,6 +228,20 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
     [t],
   );
 
+  // Add these new hooks
+  const { nodeSizeMode, setNodeSizeMode } = useCanvasStoreShallow((state) => ({
+    nodeSizeMode: state.nodeSizeMode,
+    setNodeSizeMode: state.setNodeSizeMode,
+  }));
+  const { updateAllNodesSizeMode } = useNodeOperations();
+
+  // Add handler for size mode toggle
+  const handleToggleSizeMode = useCallback(() => {
+    const newMode = nodeSizeMode === 'compact' ? 'adaptive' : 'compact';
+    setNodeSizeMode(newMode);
+    updateAllNodesSizeMode(newMode);
+  }, [nodeSizeMode, setNodeSizeMode, updateAllNodesSizeMode]);
+
   return (
     <div className="absolute bottom-2 left-2.5 px-1 h-[32px] border-box flex items-center justify-center bg-white rounded-md shadow-md">
       <ZoomControls
@@ -223,7 +255,13 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
 
       <Divider type="vertical" className="h-full" />
 
-      <ActionButtons onFitView={handleFitView} onLayout={onLayout} t={t} />
+      <ActionButtons
+        onFitView={handleFitView}
+        onLayout={onLayout}
+        onToggleSizeMode={handleToggleSizeMode}
+        nodeSizeMode={nodeSizeMode}
+        t={t}
+      />
 
       <ModeSelector mode={mode} open={open} setOpen={setOpen} items={items} onModeChange={changeMode} t={t} />
     </div>

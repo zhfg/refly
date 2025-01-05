@@ -8,6 +8,8 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 import { IconAskAI, IconPreview } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
+import { MdOutlineCompareArrows } from 'react-icons/md';
+import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 
 interface ContextMenuProps {
   open: boolean;
@@ -29,21 +31,27 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuHeight, setMenuHeight] = useState<number>(0);
-  const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
-  const { setImportResourceModalVisible, setInsertNodePosition } = useImportResourceStoreShallow((state) => ({
-    setImportResourceModalVisible: state.setImportResourceModalVisible,
-    setInsertNodePosition: state.setInsertNodePosition,
+  const { isCreating } = useCreateDocument();
+  const {
+    showEdges,
+    showLaunchpad,
+    clickToPreview,
+    nodeSizeMode,
+    setShowLaunchpad,
+    setClickToPreview,
+    setNodeSizeMode,
+  } = useCanvasStoreShallow((state) => ({
+    showEdges: state.showEdges,
+    showLaunchpad: state.showLaunchpad,
+    clickToPreview: state.clickToPreview,
+    nodeSizeMode: state.nodeSizeMode,
+    setShowEdges: state.setShowEdges,
+    setShowLaunchpad: state.setShowLaunchpad,
+    setClickToPreview: state.setClickToPreview,
+    setNodeSizeMode: state.setNodeSizeMode,
   }));
-  const { showEdges, showLaunchpad, clickToPreview, setShowEdges, setShowLaunchpad, setClickToPreview } =
-    useCanvasStoreShallow((state) => ({
-      showEdges: state.showEdges,
-      showLaunchpad: state.showLaunchpad,
-      clickToPreview: state.clickToPreview,
-      setShowEdges: state.setShowEdges,
-      setShowLaunchpad: state.setShowLaunchpad,
-      setClickToPreview: state.setClickToPreview,
-    }));
   const { showEdges: edgeVisible, toggleEdgeVisible } = useEdgeVisible();
+  const { updateAllNodesSizeMode } = useNodeOperations();
 
   const menuItems: MenuItem[] = [
     {
@@ -66,6 +74,13 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       type: 'button',
       active: clickToPreview,
       title: clickToPreview ? t('canvas.contextMenu.disableClickPreview') : t('canvas.contextMenu.enableClickPreview'),
+    },
+    {
+      key: 'toggleNodeSizeMode',
+      icon: MdOutlineCompareArrows,
+      type: 'button',
+      active: nodeSizeMode === 'compact',
+      title: nodeSizeMode === 'compact' ? t('canvas.contextMenu.adaptiveMode') : t('canvas.contextMenu.compactMode'),
     },
   ];
 
@@ -107,6 +122,11 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
         break;
       case 'toggleClickPreview':
         setClickToPreview(!clickToPreview);
+        break;
+      case 'toggleNodeSizeMode':
+        const newMode = nodeSizeMode === 'compact' ? 'adaptive' : 'compact';
+        setNodeSizeMode(newMode);
+        updateAllNodesSizeMode(newMode);
         break;
     }
     setOpen(false);

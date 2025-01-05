@@ -1,11 +1,11 @@
 import { Position, NodeProps, useEdges, useReactFlow } from '@xyflow/react';
-import { CanvasNodeData, ResponseNodeMeta } from './types';
+import { CanvasNodeData, ResponseNodeMeta } from './shared/types';
 import { Node } from '@xyflow/react';
 import { MessageSquare, MoreHorizontal } from 'lucide-react';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { useEffect, useState, useCallback } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { CustomHandle } from './custom-handle';
+import { CustomHandle } from './shared/custom-handle';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';

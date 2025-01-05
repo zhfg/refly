@@ -1,8 +1,8 @@
 import { Position, NodeProps, useReactFlow } from '@xyflow/react';
-import { CanvasNodeData, ToolNodeMeta } from './types';
+import { CanvasNodeData, ToolNodeMeta } from './shared/types';
 import { Node } from '@xyflow/react';
 import { Wrench, MoreHorizontal } from 'lucide-react';
-import { CustomHandle } from './custom-handle';
+import { CustomHandle } from './shared/custom-handle';
 import { useState, useCallback } from 'react';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useEdgeStyles } from '../constants';

@@ -14,8 +14,8 @@ import {
   FilePlus,
   Trash2,
 } from 'lucide-react';
-import { NODE_COLORS } from '../nodes/colors';
-import { CanvasNode } from '../nodes/types';
+import { NODE_COLORS } from '../nodes/shared/colors';
+import { CanvasNode } from '../nodes/shared/types';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import {

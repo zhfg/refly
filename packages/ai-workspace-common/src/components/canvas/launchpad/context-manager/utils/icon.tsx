@@ -6,7 +6,7 @@ import {
   IconDocumentFilled,
   IconThreadHistoryFilled,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canvas/nodes/colors';
+import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/colors';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export const getContextItemIcon = (item: IContextItem, style?: React.CSSProperties) => {

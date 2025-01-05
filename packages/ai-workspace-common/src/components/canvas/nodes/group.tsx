@@ -1,10 +1,10 @@
 import { memo, useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import { Position, NodeProps, NodeResizer, NodeResizeControl, useReactFlow } from '@xyflow/react';
-import { CustomHandle } from './custom-handle';
+import { CustomHandle } from './shared/custom-handle';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { getNodeCommonStyles } from './index';
-import { ActionButtons } from './action-buttons';
-import { CanvasNode, CommonNodeProps } from './types';
+import { ActionButtons } from './shared/action-buttons';
+import { CanvasNode, CommonNodeProps } from './shared/types';
 import { GroupActionButtons } from '../group-action-menu/group-action-buttons';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';

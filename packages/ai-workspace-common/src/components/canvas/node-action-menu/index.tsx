@@ -1,6 +1,6 @@
 import { Button, Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { FC, useCallback, useMemo } from 'react';
+import { FC, useCallback, useMemo, useEffect, useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import {
   IconRerun,
@@ -12,7 +12,7 @@ import {
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { FileInput, MessageSquareDiff, FilePlus, Ungroup } from 'lucide-react';
+import { FileInput, MessageSquareDiff, FilePlus, Ungroup, Group, MoveVertical } from 'lucide-react';
 import { GrClone } from 'react-icons/gr';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 import { nodeActionEmitter, createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
@@ -20,6 +20,7 @@ import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/sto
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
+import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 
 interface MenuItem {
   key: string;
@@ -47,6 +48,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const { t } = useTranslation();
   const { getNode } = useReactFlow();
   const { canvasId } = useCanvasContext();
+  const { addNode } = useAddNode();
+  const { setNodeSizeMode } = useNodeOperations();
 
   const { activeDocumentId } = useDocumentStoreShallow((state) => ({
     activeDocumentId: state.activeDocumentId,
@@ -54,6 +57,11 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
 
   const node = useMemo(() => getNode(nodeId) as CanvasNode, [nodeId, getNode]);
   const nodeData = useMemo(() => node?.data, [node]);
+  const [localSizeMode, setLocalSizeMode] = useState(() => nodeData?.metadata?.sizeMode || 'adaptive');
+
+  useEffect(() => {
+    setLocalSizeMode(nodeData?.metadata?.sizeMode || 'adaptive');
+  }, [nodeData?.metadata?.sizeMode]);
 
   const addNodePreview = useCanvasStoreShallow((state) => state.addNodePreview);
   const { ungroupNodes } = useUngroupNodes();
@@ -111,6 +119,13 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     onClose?.();
   }, [ungroupNodes, nodeId, onClose]);
 
+  const handleToggleSizeMode = useCallback(() => {
+    const newMode = localSizeMode === 'compact' ? 'adaptive' : 'compact';
+    setLocalSizeMode(newMode);
+    setNodeSizeMode(nodeId, newMode);
+    onClose?.();
+  }, [nodeId, localSizeMode, setNodeSizeMode, onClose]);
+
   const getMenuItems = (activeDocumentId: string): MenuItem[] => {
     if (isMultiSelection) {
       return [
@@ -166,6 +181,13 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         icon: IconPreview,
         label: t('canvas.nodeActions.preview'),
         onClick: handlePreview,
+        type: 'button' as const,
+      },
+      {
+        key: 'toggleSizeMode',
+        icon: MoveVertical,
+        label: localSizeMode === 'compact' ? t('canvas.nodeActions.adaptiveMode') : t('canvas.nodeActions.compactMode'),
+        onClick: handleToggleSizeMode,
         type: 'button' as const,
       },
     ].filter(Boolean);
@@ -289,6 +311,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
       handleInsertToDoc,
       handlePreview,
       t,
+      localSizeMode,
+      handleToggleSizeMode,
     ],
   );
 
