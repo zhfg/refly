@@ -9,6 +9,8 @@ import {
   IconLoading,
   IconRun,
   IconPreview,
+  IconExpand,
+  IconShrink,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
@@ -184,7 +186,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
       },
       {
         key: 'toggleSizeMode',
-        icon: MoveVertical,
+        icon: localSizeMode === 'compact' ? IconExpand : IconShrink,
         label: localSizeMode === 'compact' ? t('canvas.nodeActions.adaptiveMode') : t('canvas.nodeActions.compactMode'),
         onClick: handleToggleSizeMode,
         type: 'button' as const,
