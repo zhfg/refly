@@ -5,7 +5,12 @@ import { useReactFlow } from '@xyflow/react';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { IconAskAI, IconPreview } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconAskAI,
+  IconPreview,
+  IconExpand,
+  IconShrink,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
 import { MdOutlineCompareArrows } from 'react-icons/md';
@@ -77,7 +82,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
     },
     {
       key: 'toggleNodeSizeMode',
-      icon: MdOutlineCompareArrows,
+      icon: nodeSizeMode === 'compact' ? IconExpand : IconShrink,
       type: 'button',
       active: nodeSizeMode === 'compact',
       title: nodeSizeMode === 'compact' ? t('canvas.contextMenu.adaptiveMode') : t('canvas.contextMenu.compactMode'),
