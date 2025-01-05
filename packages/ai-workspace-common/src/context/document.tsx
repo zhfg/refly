@@ -18,9 +18,10 @@ const DocumentContext = createContext<DocumentContextType | null>(null);
 
 export const DocumentProvider = ({ docId, children }: { docId: string; children: React.ReactNode }) => {
   const [token] = useCookie('_refly_ai_sid');
-  const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt } = useDocumentStoreShallow((state) => ({
+  const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt, updateDocument } = useDocumentStoreShallow((state) => ({
     setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
     setDocumentRemoteSyncedAt: state.setDocumentRemoteSyncedAt,
+    updateDocument: state.updateDocument,
   }));
 
   const {
@@ -55,14 +56,27 @@ export const DocumentProvider = ({ docId, children }: { docId: string; children:
   }, [docId, token]);
 
   useEffect(() => {
+    const ydoc = provider.document;
+    if (!ydoc) return;
+
+    const title = ydoc.getText('title');
+
+    const titleObserverCallback = () => {
+      updateDocument(docId, { docId, title: title?.toJSON() });
+    };
+
+    title.observe(titleObserverCallback);
+
     return () => {
+      title.unobserve(titleObserverCallback);
+
       if (provider) {
         provider.forceSync();
         provider.destroy();
         localProvider.destroy();
       }
     };
-  }, [docId, token, provider, localProvider]);
+  }, [provider, docId, token, localProvider]);
 
   // Add null check before rendering
   if (!provider) {

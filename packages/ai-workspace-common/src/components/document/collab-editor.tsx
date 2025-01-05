@@ -159,20 +159,20 @@ export const CollaborativeEditor = memo(
     });
 
     const buildNodeData = (text: string) => {
-      const { currentDocument } = useDocumentStore.getState()?.documentStates?.[docId] ?? {};
+      const { document } = useDocumentStore.getState()?.data?.[docId] ?? {};
 
       return {
         id: genUniqueId(),
         type: 'document' as CanvasNodeType,
         position: { x: 0, y: 0 },
         data: {
-          entityId: currentDocument?.docId ?? '',
-          title: currentDocument?.title ?? 'Selected Content',
+          entityId: document?.docId ?? '',
+          title: document?.title ?? 'Selected Content',
           metadata: {
             contentPreview: text,
             selectedContent: text,
             xPath: genUniqueId(),
-            sourceEntityId: currentDocument?.docId ?? '',
+            sourceEntityId: document?.docId ?? '',
             sourceEntityType: 'document',
             sourceType: 'documentSelection',
             url: getClientOrigin(),

@@ -3,7 +3,7 @@ import { Editor, useEditor } from '../../../core/components';
 import { addAIHighlight } from '../../../core/extensions';
 import CrazySpinner from '../../ui/icons/crazy-spinner';
 import Magic from '../../ui/icons/magic';
-import { editorEmitter, InPlaceEditType, InPlaceActionType, CanvasEditConfig } from '@refly/utils/event-emitter/editor';
+import { InPlaceEditType, CanvasEditConfig } from '@refly/utils/event-emitter/editor';
 import { Input } from '@arco-design/web-react';
 import { Button, message } from 'antd';
 import { cn } from '@refly/utils/cn';
@@ -132,7 +132,8 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       },
     };
 
-    const { currentDocument } = useDocumentStore.getState()?.documentStates?.[docId] ?? {};
+    const { data } = useDocumentStore.getState();
+    const { document } = data[docId] ?? {};
 
     const { localSettings } = useUserStore.getState();
     const { uiLocale = 'en' } = localSettings;
@@ -150,7 +151,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       contextItems.push({
         type: 'document',
         entityId: docId,
-        title: currentDocument?.title ?? '',
+        title: document?.title ?? '',
         isCurrentContext: true,
       });
     } else {
