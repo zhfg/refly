@@ -56,7 +56,7 @@ export const ActionButtons: FC<ActionButtonsProps> = memo(
             e.preventDefault();
           }}
         >
-          <NodeActionMenu nodeId={nodeId} nodeType={type} />
+          {shouldShowMenu && <NodeActionMenu nodeId={nodeId} nodeType={type} />}
         </div>
       </>
     );
