@@ -16,25 +16,17 @@ export interface UserState {
   // state
   isCheckingLoginStatus: boolean | undefined;
   isLogin: boolean;
-  loginProvider: string;
   userProfile?: UserSettings;
   token?: string;
   localSettings: LocalSettings; // 在获取 user 信息的时候记录这个 settings，并 host 到 localStorage，每次保存更新，类似 userProfile
 
   runtime: IRuntime;
 
-  // login modal
-  loginModalVisible?: boolean;
-  waitingListModalVisible?: boolean; // 前期处理
-
   // method
   setIsCheckingLoginStatus: (val: boolean) => void;
   setIsLogin: (val: boolean) => void;
-  setLoginProvider: (val: string) => void;
   setUserProfile: (val?: UserSettings) => void;
   setToken: (val?: string) => void;
-  setLoginModalVisible: (val: boolean) => void;
-  setWaitingListModalVisible: (val: boolean) => void;
   setLocalSettings: (val: LocalSettings) => void;
   setRuntime: (val: IRuntime) => void;
   resetState: () => void;
@@ -68,12 +60,9 @@ export const defaultExtraState = {
   // messages: fakeMessages as any,
   isCheckingLoginStatus: false,
   isLogin: false,
-  loginProvider: '',
   userProfile: undefined,
   token: '',
   runtime: 'web' as IRuntime,
-  loginModalVisible: false,
-  waitingListModalVisible: false,
   localSettings: { ...defaultLocalSettings }, // 默认使用浏览器的 navigator 获取语言，插件里面使用 chrome.i18n.detectLanguage
 };
 
@@ -88,11 +77,8 @@ export const useUserStore = create<UserState>()(
 
     setIsCheckingLoginStatus: (val: boolean) => set((state) => ({ ...state, isCheckingLoginStatus: val })),
     setIsLogin: (val: boolean) => set((state) => ({ ...state, isLogin: val })),
-    setLoginProvider: (val: string) => set((state) => ({ ...state, loginProvider: val })),
     setUserProfile: (val?: UserSettings) => set((state) => ({ ...state, userProfile: val })),
     setToken: (val?: string) => set((state) => ({ ...state, token: val })),
-    setLoginModalVisible: (val: boolean) => set((state) => ({ ...state, loginModalVisible: val })),
-    setWaitingListModalVisible: (val: boolean) => set((state) => ({ ...state, waitingListModalVisible: val })),
     setLocalSettings: (val: LocalSettings) => set((state) => ({ ...state, localSettings: val })),
     setRuntime: (val: IRuntime) => set((state) => ({ ...state, runtime: val })),
     resetState: () => set((state) => ({ ...state, ...defaultExtraState })),

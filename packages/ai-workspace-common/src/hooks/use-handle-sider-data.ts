@@ -26,7 +26,6 @@ export const useHandleSiderData = (initData?: boolean) => {
       return;
     }
     const canvases = res?.data || [];
-    console.log(`load canvases from remote`, canvases);
     updateCanvasList(
       canvases.map((canvas) => ({
         id: canvas.canvasId,

@@ -966,12 +966,7 @@ export type SubscriptionInterval = 'monthly' | 'yearly';
 /**
  * Subscription plan type
  */
-export type SubscriptionPlanType = 'free' | 'pro';
-
-/**
- * Price lookup key
- */
-export type PriceLookupKey = 'refly_pro_monthly' | 'refly_pro_yearly';
+export type SubscriptionPlanType = 'free' | 'plus' | 'pro' | 'max';
 
 /**
  * Subscription status
@@ -983,10 +978,6 @@ export type Subscription = {
      * Subscription ID
      */
     subscriptionId: string;
-    /**
-     * Lookup key
-     */
-    lookupKey?: string;
     /**
      * Subscription plan type
      */
@@ -1128,6 +1119,152 @@ export type UserSettings = {
      * Whether the user has beta access
      */
     hasBetaAccess?: boolean;
+};
+
+/**
+ * Auth provider
+ */
+export type AuthProvider = 'email' | 'google' | 'github';
+
+export type AuthConfigItem = {
+    /**
+     * Auth provider
+     */
+    provider: AuthProvider;
+};
+
+export type AuthConfigResponse = BaseResponse & {
+    /**
+     * Auth providers
+     */
+    data?: Array<AuthConfigItem>;
+};
+
+/**
+ * Email signup request
+ */
+export type EmailSignupRequest = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Password
+     */
+    password: string;
+};
+
+export type EmailSignupData = {
+    /**
+     * Access token (only returned if the email verification is turned off)
+     */
+    accessToken?: string;
+    /**
+     * Verification session ID
+     */
+    sessionId?: string;
+};
+
+export type EmailSignupResponse = BaseResponse & {
+    data?: EmailSignupData;
+};
+
+/**
+ * Verification purpose
+ */
+export type VerificationPurpose = 'signup' | 'resetPassword';
+
+/**
+ * Create verification session request
+ */
+export type CreateVerificationRequest = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Verification purpose
+     */
+    purpose: VerificationPurpose;
+    /**
+     * Password
+     */
+    password?: string;
+};
+
+export type CreateVerificationData = {
+    /**
+     * Verification session ID
+     */
+    sessionId?: string;
+};
+
+export type CreateVerificationResponse = BaseResponse & {
+    data?: CreateVerificationData;
+};
+
+/**
+ * Resend verification request
+ */
+export type ResendVerificationRequest = {
+    /**
+     * Verification session ID
+     */
+    sessionId: string;
+};
+
+/**
+ * Check verification code request
+ */
+export type CheckVerificationRequest = {
+    /**
+     * Verification session ID
+     */
+    sessionId: string;
+    /**
+     * Verification code
+     */
+    code: string;
+};
+
+export type CheckVerificationData = {
+    /**
+     * Access token
+     */
+    accessToken?: string;
+    /**
+     * Verification purpose
+     */
+    purpose?: string;
+};
+
+export type CheckVerificationResponse = BaseResponse & {
+    data?: CheckVerificationData;
+};
+
+/**
+ * Email login request
+ */
+export type EmailLoginRequest = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Password
+     */
+    password: string;
+};
+
+export type EmailLoginData = {
+    /**
+     * Access token
+     */
+    accessToken?: string;
+};
+
+export type EmailLoginResponse = BaseResponse & {
+    data?: EmailLoginData;
 };
 
 export type GetUserSettingsResponse = BaseResponse & {
@@ -2139,9 +2276,13 @@ export type CheckSettingsFieldResponse = BaseResponse & {
 
 export type CreateCheckoutSessionRequest = {
     /**
-     * Price lookup key
+     * Subscription plan type
      */
-    lookupKey: PriceLookupKey;
+    planType: SubscriptionPlanType;
+    /**
+     * Subscription billing interval
+     */
+    interval?: SubscriptionInterval;
 };
 
 export type CreateCheckoutSessionResponse = BaseResponse & {
@@ -2166,6 +2307,36 @@ export type CreatePortalSessionResponse = BaseResponse & {
          */
         url?: string;
     };
+};
+
+export type SubscriptionPlan = {
+    /**
+     * Subscription plan type
+     */
+    planType?: string;
+    /**
+     * Token quota per month (T1)
+     */
+    t1TokenQuota?: number;
+    /**
+     * Token quota per month (T2)
+     */
+    t2TokenQuota?: number;
+    /**
+     * Object storage quota (in bytes)
+     */
+    objectStorageQuota?: string;
+    /**
+     * Vector storage quota (in bytes)
+     */
+    vectorStorageQuota?: string;
+};
+
+export type GetSubscriptionPlansResponse = BaseResponse & {
+    /**
+     * Subscription plans
+     */
+    data?: Array<SubscriptionPlan>;
 };
 
 export type SubscriptionUsageData = {
@@ -2448,6 +2619,17 @@ export type UploadResponse = BaseResponse & {
     };
 };
 
+export type ModelCapabilities = {
+    /**
+     * Whether this model supports function calling
+     */
+    functionCall?: boolean;
+    /**
+     * Whether this model can take images as input
+     */
+    vision?: boolean;
+};
+
 export type ModelInfo = {
     /**
      * Model name
@@ -2473,6 +2655,10 @@ export type ModelInfo = {
      * Model max output length (in tokens)
      */
     maxOutput: number;
+    /**
+     * Model capabilities
+     */
+    capabilities?: ModelCapabilities;
 };
 
 export type ListModelsResponse = BaseResponse & {
@@ -2503,7 +2689,7 @@ export type InMemorySearchResponse = BaseResponse & {
     data?: Array<DocumentInterface>;
 };
 
-export type CanvasNodeType = 'document' | 'resource' | 'skill' | 'tool' | 'skillResponse' | 'toolResponse';
+export type CanvasNodeType = 'document' | 'resource' | 'skill' | 'tool' | 'skillResponse' | 'toolResponse' | 'memo' | 'group';
 
 export type CanvasNodeData = {
     /**
@@ -2533,6 +2719,50 @@ export type CanvasNode = {
     type: CanvasNodeType;
     data: CanvasNodeData;
 };
+
+export type GetAuthConfigResponse = (AuthConfigResponse);
+
+export type GetAuthConfigError = unknown;
+
+export type EmailSignupData2 = {
+    body: EmailSignupRequest;
+};
+
+export type EmailSignupResponse2 = (EmailSignupResponse);
+
+export type EmailSignupError = unknown;
+
+export type EmailLoginData2 = {
+    body: EmailLoginRequest;
+};
+
+export type EmailLoginResponse2 = (EmailLoginResponse);
+
+export type EmailLoginError = unknown;
+
+export type CreateVerificationData2 = {
+    body: CreateVerificationRequest;
+};
+
+export type CreateVerificationResponse2 = (CreateVerificationResponse);
+
+export type CreateVerificationError = unknown;
+
+export type ResendVerificationData = {
+    body: ResendVerificationRequest;
+};
+
+export type ResendVerificationResponse = (BaseResponse);
+
+export type ResendVerificationError = unknown;
+
+export type CheckVerificationData2 = {
+    body: CheckVerificationRequest;
+};
+
+export type CheckVerificationResponse2 = (CheckVerificationResponse);
+
+export type CheckVerificationError = unknown;
 
 export type ListCanvasesData = {
     query?: {
@@ -3121,9 +3351,9 @@ export type CheckSettingsFieldResponse2 = (CheckSettingsFieldResponse);
 
 export type CheckSettingsFieldError = unknown;
 
-export type GetSubscriptionPlanResponse = (unknown);
+export type GetSubscriptionPlansResponse2 = (GetSubscriptionPlansResponse);
 
-export type GetSubscriptionPlanError = unknown;
+export type GetSubscriptionPlansError = unknown;
 
 export type GetSubscriptionUsageResponse2 = (GetSubscriptionUsageResponse);
 

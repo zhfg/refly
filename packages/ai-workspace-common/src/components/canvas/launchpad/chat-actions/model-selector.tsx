@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Button, Dropdown, DropdownProps, MenuProps, Progress, Skeleton } from 'antd';
+import { useEffect, useState, useMemo, useCallback, memo } from 'react';
+import { Button, Dropdown, DropdownProps, MenuProps, Progress, Skeleton, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { IconDown } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
-import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
@@ -17,97 +16,85 @@ import { LuInfinity } from 'react-icons/lu';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 
 interface ModelSelectorProps {
-  dropdownMode?: boolean; // Whether to show as dropdown button
+  model: ModelInfo | null;
+  setModel: (model: ModelInfo | null) => void;
   briefMode?: boolean;
-  className?: string;
   placement?: DropdownProps['placement'];
   trigger?: DropdownProps['trigger'];
 }
 
-const UsageProgress = ({
-  used,
-  quota,
-  setDropdownOpen,
-}: {
-  used: number;
-  quota: number;
-  setDropdownOpen: (open: boolean) => void;
-}) => {
-  const { t } = useTranslation();
-  const setShowSettingModal = useSiderStoreShallow((state) => state.setShowSettingModal);
+const UsageProgress = memo(
+  ({ used, quota, setDropdownOpen }: { used: number; quota: number; setDropdownOpen: (open: boolean) => void }) => {
+    const { t } = useTranslation();
+    const setShowSettingModal = useSiderStoreShallow((state) => state.setShowSettingModal);
 
-  const handleShowSettingModal = () => {
-    setDropdownOpen(false);
-    setShowSettingModal(true);
-  };
+    const handleShowSettingModal = useCallback(() => {
+      setDropdownOpen(false);
+      setShowSettingModal(true);
+    }, [setDropdownOpen, setShowSettingModal]);
 
-  return (
-    <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleShowSettingModal()}>
-      <Progress
-        type="circle"
-        percent={(used / quota) * 100}
-        strokeColor={used >= quota ? '#EF4444' : '#46C0B2'}
-        strokeWidth={20}
-        size={14}
-        format={() =>
-          used >= quota
-            ? t(`copilot.modelSelector.quotaExceeded`)
-            : t('copilot.modelSelector.tokenUsed', {
-                used: used?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') ?? '0',
-                quota: quota?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') ?? '0',
-              })
-        }
-      />
-    </div>
-  );
-};
+    const formattedUsed = useMemo(() => used?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') ?? '0', [used]);
+    const formattedQuota = useMemo(() => quota?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') ?? '0', [quota]);
 
-export const ModelSelector = ({
-  placement = 'bottomLeft',
-  trigger = ['click'],
-  briefMode = false,
-}: ModelSelectorProps) => {
-  const { t } = useTranslation();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+    return (
+      <div className="flex items-center gap-1 cursor-pointer" onClick={handleShowSettingModal}>
+        {quota < 0 ? (
+          <Tooltip title={t('copilot.modelSelector.unlimited')}>
+            <LuInfinity className="text-sm" />
+          </Tooltip>
+        ) : (
+          <Progress
+            type="circle"
+            percent={(used / quota) * 100}
+            strokeColor={used >= quota ? '#EF4444' : '#46C0B2'}
+            strokeWidth={20}
+            size={14}
+            format={() =>
+              used >= quota
+                ? t(`copilot.modelSelector.quotaExceeded`)
+                : t('copilot.modelSelector.tokenUsed', {
+                    used: formattedUsed,
+                    quota: formattedQuota,
+                  })
+            }
+          />
+        )}
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    return prevProps.used === nextProps.used && prevProps.quota === nextProps.quota;
+  },
+);
 
-  const { userProfile } = useUserStoreShallow((state) => ({
-    userProfile: state.userProfile,
-  }));
-  const { selectedModel, setSelectedModel } = useChatStoreShallow((state) => ({
-    selectedModel: state.selectedModel,
-    setSelectedModel: state.setSelectedModel,
-  }));
-  const { setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
-    setSubscribeModalVisible: state.setSubscribeModalVisible,
-  }));
+UsageProgress.displayName = 'UsageProgress';
 
-  const { data: modelListData, isLoading: isModelListLoading } = useListModels();
-  const { data: tokenUsageData, isLoading: isTokenUsageLoading } = useGetSubscriptionUsage();
+// Memoize model option items
+const ModelOption = memo(({ provider, label }: { provider: string; label: string }) => (
+  <img className="w-4 h-4 mr-2" src={ModelProviderIcons[provider]} alt={provider} />
+));
 
-  const modelList = modelListData?.data;
-  const tokenUsage = tokenUsageData?.data?.token;
-  const t1Disabled = tokenUsage?.t1TokenUsed >= tokenUsage?.t1TokenQuota;
-  const t2Disabled = tokenUsage?.t2TokenUsed >= tokenUsage?.t2TokenQuota;
+ModelOption.displayName = 'ModelOption';
 
-  const planTier = userProfile?.subscription?.planType || 'free';
+// Create a memoized group header component
+const GroupHeader = memo(
+  ({
+    type,
+    tokenUsage,
+    planTier,
+    setDropdownOpen,
+    setSubscribeModalVisible,
+  }: {
+    type: 'premium' | 'standard' | 'free';
+    tokenUsage: any;
+    planTier: string;
+    setDropdownOpen: (open: boolean) => void;
+    setSubscribeModalVisible: (visible: boolean) => void;
+  }) => {
+    const { t } = useTranslation();
 
-  const droplist: MenuProps['items'] = [];
-
-  const t1Models = modelList
-    ?.filter((model) => model.tier === 't1')
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((model) => ({
-      key: model.name,
-      icon: <img className="w-4 h-4 mr-2" src={ModelProviderIcons[model.provider]} alt={model.provider} />,
-      label: <span className="text-xs">{model.label}</span>,
-      disabled: t1Disabled,
-    }));
-
-  if (t1Models?.length > 0) {
-    droplist.push({
-      key: 't1',
-      type: 'group',
-      label: (
+    if (type === 'premium') {
+      return (
         <div className="flex justify-between items-center">
           <span className="text-sm">{t('copilot.modelSelector.premium')}</span>
           {planTier === 'free' && tokenUsage?.t1TokenQuota === 0 ? (
@@ -132,26 +119,11 @@ export const ModelSelector = ({
             />
           )}
         </div>
-      ),
-      children: t1Models,
-    });
-  }
+      );
+    }
 
-  const t2Models = modelList
-    ?.filter((model) => model.tier === 't2')
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((model) => ({
-      key: model.name,
-      icon: <img className="w-4 h-4 mr-2" src={ModelProviderIcons[model.provider]} alt={model.provider} />,
-      label: <span className="text-xs">{model.label}</span>,
-      disabled: t2Disabled,
-    }));
-
-  if (t2Models?.length > 0) {
-    droplist.push({
-      key: 't2',
-      type: 'group',
-      label: (
+    if (type === 'standard') {
+      return (
         <div className="flex justify-between items-center">
           <div className="text-sm">{t('copilot.modelSelector.standard')}</div>
           <UsageProgress
@@ -160,99 +132,253 @@ export const ModelSelector = ({
             setDropdownOpen={setDropdownOpen}
           />
         </div>
-      ),
-      children: t2Models,
-    });
-  }
+      );
+    }
 
-  const freeModels = modelList
-    ?.filter((model) => model.tier === 'free')
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((model) => ({
-      key: model.name,
-      icon: <img className="w-4 h-4 mr-2" src={ModelProviderIcons[model.provider]} alt={model.provider} />,
-      label: <span className="text-xs">{model.label}</span>,
+    return (
+      <div className="flex justify-between items-center">
+        <span className="text-sm">{t('copilot.modelSelector.free')}</span>
+        <UsageProgress used={-1} quota={-1} setDropdownOpen={setDropdownOpen} />
+      </div>
+    );
+  },
+);
+
+GroupHeader.displayName = 'GroupHeader';
+
+export const ModelSelector = memo(
+  ({ placement = 'bottomLeft', trigger = ['click'], briefMode = false, model, setModel }: ModelSelectorProps) => {
+    const { t } = useTranslation();
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const { userProfile } = useUserStoreShallow((state) => ({
+      userProfile: state.userProfile,
+    }));
+    const { setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
+      setSubscribeModalVisible: state.setSubscribeModalVisible,
     }));
 
-  if (freeModels?.length > 0) {
-    droplist.push({
-      key: 'free',
-      type: 'group',
-      label: (
-        <div className="flex justify-between items-center">
-          <span className="text-sm">{t('copilot.modelSelector.free')}</span>
-          <LuInfinity className="text-sm" />
-        </div>
-      ),
-      children: freeModels,
+    const { data: modelListData, isLoading: isModelListLoading } = useListModels({}, [], {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+      gcTime: 10 * 60 * 1000, // Cache for 10 minutes
     });
-  }
 
-  const isModelDisabled = (meter: TokenUsageMeter, model: ModelInfo) => {
-    if (meter && model) {
-      if (model.tier === 't1') {
-        return meter.t1TokenUsed >= meter.t1TokenQuota;
-      } else if (model.tier === 't2') {
-        return meter.t2TokenUsed >= meter.t2TokenQuota;
+    const { data: tokenUsageData, isLoading: isTokenUsageLoading } = useGetSubscriptionUsage({}, [], {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      staleTime: 60 * 1000, // Consider data fresh for 1 minute
+      gcTime: 5 * 60 * 1000, // Cache for 5 minutes
+    });
+
+    const modelList = useMemo(() => modelListData?.data, [modelListData?.data]);
+    const tokenUsage = useMemo(() => tokenUsageData?.data?.token, [tokenUsageData?.data?.token]);
+    const t1Disabled = useMemo(
+      () => tokenUsage?.t1TokenUsed >= tokenUsage?.t1TokenQuota && tokenUsage?.t1TokenQuota > 0,
+      [tokenUsage?.t1TokenUsed, tokenUsage?.t1TokenQuota],
+    );
+    const t2Disabled = useMemo(
+      () => tokenUsage?.t2TokenUsed >= tokenUsage?.t2TokenQuota && tokenUsage?.t2TokenQuota > 0,
+      [tokenUsage?.t2TokenUsed, tokenUsage?.t2TokenQuota],
+    );
+
+    const planTier = useMemo(
+      () => userProfile?.subscription?.planType || 'free',
+      [userProfile?.subscription?.planType],
+    );
+
+    const t1Models = useMemo(
+      () =>
+        modelList
+          ?.filter((model) => model.tier === 't1')
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((model) => ({
+            key: model.name,
+            icon: <ModelOption provider={model.provider} label={model.label} />,
+            label: <span className="text-xs">{model.label}</span>,
+            disabled: t1Disabled,
+          })),
+      [modelList, t1Disabled],
+    );
+
+    const t2Models = useMemo(
+      () =>
+        modelList
+          ?.filter((model) => model.tier === 't2')
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((model) => ({
+            key: model.name,
+            icon: <ModelOption provider={model.provider} label={model.label} />,
+            label: <span className="text-xs">{model.label}</span>,
+            disabled: t2Disabled,
+          })),
+      [modelList, t2Disabled],
+    );
+
+    const freeModels = useMemo(
+      () =>
+        modelList
+          ?.filter((model) => model.tier === 'free')
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((model) => ({
+            key: model.name,
+            icon: <ModelOption provider={model.provider} label={model.label} />,
+            label: <span className="text-xs">{model.label}</span>,
+          })),
+      [modelList],
+    );
+
+    // Optimize droplist creation
+    const droplist: MenuProps['items'] = useMemo(() => {
+      const items = [];
+
+      if (t1Models?.length > 0) {
+        items.push({
+          key: 't1',
+          type: 'group',
+          label: (
+            <GroupHeader
+              type="premium"
+              tokenUsage={tokenUsage}
+              planTier={planTier}
+              setDropdownOpen={setDropdownOpen}
+              setSubscribeModalVisible={setSubscribeModalVisible}
+            />
+          ),
+          children: t1Models,
+        });
       }
-    }
-    return false;
-  };
 
-  useEffect(() => {
-    if (!selectedModel || isModelDisabled(tokenUsage, selectedModel)) {
-      const availableModel = modelList.find((model) => !isModelDisabled(tokenUsage, model));
-      if (availableModel) {
-        setSelectedModel(availableModel);
-      } else {
-        setSelectedModel(null);
+      if (t2Models?.length > 0) {
+        items.push({
+          key: 't2',
+          type: 'group',
+          label: (
+            <GroupHeader
+              type="standard"
+              tokenUsage={tokenUsage}
+              planTier={planTier}
+              setDropdownOpen={setDropdownOpen}
+              setSubscribeModalVisible={setSubscribeModalVisible}
+            />
+          ),
+          children: t2Models,
+        });
       }
+
+      if (freeModels?.length > 0) {
+        items.push({
+          key: 'free',
+          type: 'group',
+          label: (
+            <GroupHeader
+              type="free"
+              tokenUsage={tokenUsage}
+              planTier={planTier}
+              setDropdownOpen={setDropdownOpen}
+              setSubscribeModalVisible={setSubscribeModalVisible}
+            />
+          ),
+          children: freeModels,
+        });
+      }
+
+      return items;
+    }, [t1Models, t2Models, freeModels, tokenUsage, planTier, setDropdownOpen, setSubscribeModalVisible]);
+
+    const isModelDisabled = useCallback((meter: TokenUsageMeter, model: ModelInfo) => {
+      if (meter && model) {
+        if (model.tier === 't1') {
+          return meter.t1TokenUsed >= meter.t1TokenQuota && meter.t1TokenQuota > 0;
+        } else if (model.tier === 't2') {
+          return meter.t2TokenUsed >= meter.t2TokenQuota && meter.t2TokenQuota > 0;
+        }
+      }
+      return false;
+    }, []);
+
+    useEffect(() => {
+      if (!model || isModelDisabled(tokenUsage, model)) {
+        const availableModel = modelList?.find((model) => !isModelDisabled(tokenUsage, model));
+        if (availableModel) {
+          setModel(availableModel);
+        } else {
+          setModel(null);
+        }
+      }
+    }, [model, tokenUsage, modelList, isModelDisabled, setModel]);
+
+    const handleMenuClick = useCallback(
+      ({ key }: { key: string }) => {
+        const selectedModel = modelList?.find((model) => model.name === key);
+        if (selectedModel) {
+          setModel(selectedModel);
+        }
+      },
+      [modelList, setModel],
+    );
+
+    // Memoize the selected model display
+    const SelectedModelDisplay = memo(({ model }: { model: ModelInfo | null }) => {
+      const { t } = useTranslation();
+
+      if (!model) {
+        return (
+          <>
+            <PiWarningCircleBold className="text-yellow-600" />
+            <span className="text-yellow-600">{t('copilot.modelSelector.noModelAvailable')}</span>
+          </>
+        );
+      }
+
+      return (
+        <>
+          <img className="w-3 h-3 mx-1" src={ModelProviderIcons[model.provider]} alt={model.provider} />
+          {model.label}
+        </>
+      );
+    });
+
+    SelectedModelDisplay.displayName = 'SelectedModelDisplay';
+
+    if (isModelListLoading || isTokenUsageLoading) {
+      return <Skeleton className="w-28" active paragraph={false} />;
     }
-  }, [selectedModel, tokenUsage]);
 
-  if (isModelListLoading || isTokenUsageLoading) {
-    return <Skeleton className="w-28" active paragraph={false} />;
-  }
+    return (
+      <Dropdown
+        menu={{
+          items: droplist,
+          onClick: handleMenuClick,
+        }}
+        placement={placement}
+        trigger={trigger}
+        open={dropdownOpen}
+        onOpenChange={setDropdownOpen}
+        getPopupContainer={getPopupContainer}
+      >
+        {!briefMode ? (
+          <span className={classNames('model-selector', 'chat-action-item')}>
+            <SelectedModelDisplay model={model} />
+            <IconDown />
+          </span>
+        ) : (
+          <IconModel className="w-3.5 h-3.5" />
+        )}
+      </Dropdown>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.placement === nextProps.placement &&
+      prevProps.briefMode === nextProps.briefMode &&
+      prevProps.model === nextProps.model &&
+      JSON.stringify(prevProps.trigger) === JSON.stringify(nextProps.trigger)
+    );
+  },
+);
 
-  return (
-    <Dropdown
-      menu={{
-        items: droplist,
-        onClick: ({ key }) => {
-          const model = modelList.find((model) => model.name === key);
-          if (model) {
-            setSelectedModel(model);
-          }
-        },
-      }}
-      placement={placement}
-      trigger={trigger}
-      open={dropdownOpen}
-      onOpenChange={setDropdownOpen}
-      getPopupContainer={getPopupContainer}
-    >
-      {!briefMode ? (
-        <span className={classNames('model-selector', 'chat-action-item')}>
-          {selectedModel ? (
-            <>
-              <img
-                className="w-3 h-3 mx-1"
-                src={ModelProviderIcons[selectedModel?.provider]}
-                alt={selectedModel?.provider}
-              />
-              {selectedModel?.label}
-            </>
-          ) : (
-            <>
-              <PiWarningCircleBold className="text-yellow-600" />
-              <span className="text-yellow-600">{t('copilot.modelSelector.noModelAvailable')}</span>
-            </>
-          )}
-          <IconDown />
-        </span>
-      ) : (
-        <IconModel className="w-3.5 h-3.5" />
-      )}
-    </Dropdown>
-  );
-};
+ModelSelector.displayName = 'ModelSelector';

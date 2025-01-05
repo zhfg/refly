@@ -3,7 +3,7 @@ import { Editor, useEditor } from '../../../core/components';
 import { addAIHighlight } from '../../../core/extensions';
 import CrazySpinner from '../../ui/icons/crazy-spinner';
 import Magic from '../../ui/icons/magic';
-import { editorEmitter, InPlaceEditType, InPlaceActionType, CanvasEditConfig } from '@refly/utils/event-emitter/editor';
+import { InPlaceEditType, CanvasEditConfig } from '@refly/utils/event-emitter/editor';
 import { Input } from '@arco-design/web-react';
 import { Button, message } from 'antd';
 import { cn } from '@refly/utils/cn';
@@ -11,24 +11,24 @@ import { getOsType } from '@refly/utils/env';
 import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/components/add-base-mark-context';
 
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
+import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { useTranslation } from 'react-i18next';
 import { ActionResult, ActionStatus, ConfigScope, InvokeSkillRequest } from '@refly/openapi-schema';
-import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { genActionResultID, getClientOrigin } from '@refly-packages/utils/index';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { LOCALE } from '@refly/common-types';
 import { HiCheck, HiXMark } from 'react-icons/hi2';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
-import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { AISettingsDropdown } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions/ai-settings';
+import {
+  useContextPanelStore,
+  useContextPanelStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
-import { CopyIcon } from '@refly-packages/ai-workspace-common/components/search/icons';
 import { IconCopy } from '@arco-design/web-react/icon';
+import { ModelSelector } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions/model-selector';
+import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
+import { useDocumentStore } from '@refly-packages/ai-workspace-common/stores/document';
 
 interface AISelectorProps {
   open: boolean;
@@ -50,7 +50,7 @@ const getShortcutSymbols = (osType: string) => {
   };
 };
 
-const CONTEXT_CHAR_LIMIT = 5000;
+const CONTEXT_CHAR_LIMIT = 500;
 
 const getCompleteBlock = (editor: Editor, doc: any, pos: number, isPrefix: boolean = true): string => {
   if (!doc) return '';
@@ -94,6 +94,17 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   const [resultStatus, setResultStatus] = useState<ActionStatus>('waiting');
   const { docId } = useDocumentContext();
   const { invokeAction } = useInvokeAction();
+  const skill = useFindSkill('editDoc');
+
+  const { selectedModel, setSelectedModel } = useChatStoreShallow((state) => ({
+    selectedModel: state.selectedModel,
+    setSelectedModel: state.setSelectedModel,
+  }));
+
+  const { contextItems, setContextItems } = useContextPanelStoreShallow((state) => ({
+    contextItems: state.contextItems,
+    setContextItems: state.setContextItems,
+  }));
 
   const handleEdit = () => {
     const selection = editor.state.selection;
@@ -121,77 +132,54 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       },
     };
 
+    const { data } = useDocumentStore.getState();
+    const { document } = data[docId] ?? {};
+
     const { localSettings } = useUserStore.getState();
-    const { uiLocale } = localSettings;
+    const { uiLocale = 'en' } = localSettings;
 
     const { selectedModel } = useChatStore.getState();
     const resultId = genActionResultID();
     setResultId(resultId);
 
-    const { contextItems, historyItems } = useContextPanelStore.getState();
+    // TODO: maybe use independent context panel store
+    const { contextItems } = useContextPanelStore.getState();
 
-    const context = convertContextItemsToContext(contextItems);
-    if (context.documents) {
-      const hasCurrentDoc = context.documents.some((doc) => doc.docId === docId);
+    const hasCurrentDoc = contextItems.findIndex((item) => item.entityId === docId);
 
-      context.documents = context.documents.map((doc) => ({
-        ...doc,
-        isCurrent: doc.docId === docId,
-        metadata: {
-          ...doc.metadata,
-          isCurrentContext: doc.docId === docId,
-        },
-      }));
-
-      if (!hasCurrentDoc) {
-        context.documents.push({
-          docId,
-          document: {
-            docId,
-            title: '',
-          },
-          isCurrent: true,
-          metadata: {
-            nodeId: docId, // TODO: need use nodes id, use real canvas store nodes id
-            url: getClientOrigin(),
-            isCurrentContext: true,
-          },
-        });
-      }
+    if (hasCurrentDoc === -1) {
+      contextItems.push({
+        type: 'document',
+        entityId: docId,
+        title: document?.title ?? '',
+        isCurrentContext: true,
+      });
+    } else {
+      contextItems[hasCurrentDoc].isCurrentContext = true;
     }
 
-    const resultHistory = historyItems.map((item) => ({
-      resultId: item.data.entityId,
-      title: item.data.title,
-      steps: item.data.metadata?.steps,
-    }));
-
-    const param: InvokeSkillRequest = {
-      resultId,
-      input: {
+    setIsLoading(true);
+    invokeAction(
+      {
         query: inputValue,
-      },
-      target: {
-        entityId: docId,
-        entityType: 'document',
-      },
-      context,
-      resultHistory,
-      skillName: 'editDoc',
-      tplConfig: {
-        canvasEditConfig: {
-          value: canvasEditConfig as { [key: string]: unknown },
-          configScope: 'runtime' as unknown as ConfigScope,
-          displayValue: localSettings?.uiLocale === 'zh-CN' ? '编辑文档配置' : 'Edit Document Config',
-          label: localSettings?.uiLocale === 'zh-CN' ? '编辑文档配置' : 'Edit Document Config',
+        resultId,
+        modelInfo: selectedModel,
+        contextItems,
+        selectedSkill: skill,
+        tplConfig: {
+          canvasEditConfig: {
+            value: canvasEditConfig as { [key: string]: unknown },
+            configScope: 'runtime' as unknown as ConfigScope,
+            displayValue: uiLocale === 'zh-CN' ? '编辑文档配置' : 'Edit Document Config', // TODO: check if need to use i18n
+            label: uiLocale === 'zh-CN' ? '编辑文档配置' : 'Edit Document Config',
+          },
         },
       },
-      modelName: selectedModel?.name,
-      locale: localSettings?.outputLocale,
-    };
-
-    setIsLoading(true);
-    invokeAction(param);
+      {
+        entityType: 'document',
+        entityId: docId,
+      },
+    );
   };
 
   const updateResult = useCallback(
@@ -257,13 +245,6 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
     }
   };
 
-  // payload: Omit<InPlaceSendMessagePayload, 'userInput'>
-  const handleAskAIResponse = () => {
-    handleBubbleClose?.();
-    // onOpenChange(false);
-    // editorEmitter.emit('bubbleClose');
-  };
-
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -280,14 +261,6 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       document.removeEventListener('keydown', handleEsc);
     };
   }, [onOpenChange, editor]);
-
-  useEffect(() => {
-    editorEmitter.on('askAIResponse', handleAskAIResponse);
-
-    return () => {
-      editorEmitter.off('askAIResponse', handleAskAIResponse);
-    };
-  }, []);
 
   const handleReplace = () => {
     const selection = editor.view.state.selection;
@@ -341,9 +314,15 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
           <div className="flex relative flex-row items-center" cmdk-input-wrapper="">
             <div className="flex flex-1 items-center pl-4 border-b" cmdk-input-wrapper="">
               <Button size="small" type="default" className="rounded border text-gray-500 mr-1">
-                <AISettingsDropdown placement="bottom" collapsed={true} briefMode={true} />
+                <ModelSelector
+                  model={selectedModel}
+                  setModel={setSelectedModel}
+                  placement="bottom"
+                  briefMode={true}
+                  trigger={['click']}
+                />
               </Button>
-              <AddBaseMarkContext />
+              <AddBaseMarkContext contextItems={contextItems} setContextItems={setContextItems} />
               <Input.TextArea
                 value={inputValue}
                 autoSize={{

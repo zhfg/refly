@@ -1,18 +1,10 @@
 import { useRef } from 'react';
 import { useContentSelectorStore } from '../stores/content-selector';
-import {
-  onMessage,
-  sendMessage, // Added this import
-} from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import type { SyncMarkEvent, SyncStatusEvent } from '@refly/common-types';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { genUniqueId } from '@refly-packages/utils/id';
-import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useDocumentStore } from '@refly-packages/ai-workspace-common/stores/document';
-import { Message } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
-import { convertMarkToNode } from '@refly-packages/ai-workspace-common/utils/mark-to-node';
 
 // stores
 
@@ -25,84 +17,6 @@ export const useSelectedMark = () => {
     resetState: state.resetState,
     setShowContentSelector: state.setShowContentSelector,
   }));
-  const contextPanelStore = useContextPanelStore((state) => ({
-    currentSelectedMark: state.currentSelectedMark,
-    currentSelectedMarks: state.currentSelectedMarks,
-    updateCurrentSelectedMarks: state.updateCurrentSelectedMarks,
-    updateCurrentSelectedMark: state.updateCurrentSelectedMark,
-  }));
-  const messageListenerEventRef = useRef<any>();
-
-  // 从 content-selector-app 获取信息，以此和 main-app 解耦合
-  const contentSelectedHandler = (event: MessageEvent<any>) => {
-    const data = event as any as SyncMarkEvent;
-    const { body, name } = data || {};
-
-    if (name === 'syncMarkEvent') {
-      console.log('contentSelectedHandler', data);
-      // 代表从 content-selector-app 获取信息
-      const { marks = [] } = useContentSelectorStore.getState();
-      const { currentSelectedMarks, enableMultiSelect, currentSelectedMark } = useContextPanelStore.getState();
-      const { type, mark } = body || {};
-
-      // enableMultiSelect 只是打开生效状态，不影响实际选中
-      if (type === 'remove') {
-        const newMarks = marks.filter((item) => item?.xPath !== mark?.xPath);
-
-        contentSelectorStore.setMarks(newMarks);
-
-        const newCurrentSelectedMarks = currentSelectedMarks.filter((item) => item?.xPath !== mark?.xPath);
-        contextPanelStore.updateCurrentSelectedMarks(newCurrentSelectedMarks);
-
-        contextPanelStore.updateCurrentSelectedMark(null);
-      } else if (type === 'add') {
-        const { currentResource } = useKnowledgeBaseStore.getState();
-        const { currentDocument } = useDocumentStore.getState();
-        let title = '';
-        let parentId = '';
-        let projectId = '';
-
-        if (mark.domain === 'documentSelection') {
-          title = currentDocument?.title;
-          parentId = currentDocument?.docId;
-        } else if (mark.domain === 'resourceSelection' || mark.domain === 'extensionWeblinkSelection') {
-          title = currentResource?.title;
-          parentId = currentResource?.resourceId;
-        }
-
-        const newMark = { ...mark, id: genUniqueId(), title, parentId, projectId };
-        console.log('newMark===', newMark);
-
-        // check if the content selection mark is already exists
-        const isDuplicate = marks.some(
-          (existingMark) => existingMark.type === newMark.type && existingMark.data === newMark.data,
-        );
-
-        if (isDuplicate) {
-          return;
-        }
-
-        // Convert to node and add to context
-        const node = convertMarkToNode(newMark, 'document', mark.domain);
-        const { addContextItem } = useContextPanelStore.getState();
-        addContextItem(node);
-
-        // Update content selector state
-        contentSelectorStore.setMarks([...marks, newMark]);
-
-        const newCurrentSelectedMarks = [...currentSelectedMarks, newMark];
-        contextPanelStore.updateCurrentSelectedMarks(newCurrentSelectedMarks);
-
-        contextPanelStore.updateCurrentSelectedMark(newMark);
-        Message.success(t('knowledgeBase.context.contentSelectorAddSuccess'));
-      } else if (type === 'reset') {
-        // 这里代表一起清空
-        contentSelectorStore.setMarks([]);
-        contextPanelStore.updateCurrentSelectedMarks([]);
-        contextPanelStore.updateCurrentSelectedMark(null);
-      }
-    }
-  };
 
   const handleInitContentSelectorListener = () => {
     const { isInjectStyles, scope } = useContentSelectorStore.getState();
@@ -193,22 +107,11 @@ export const useSelectedMark = () => {
     contentSelectorStore.resetState();
   };
 
-  const initMessageListener = () => {
-    onMessage(contentSelectedHandler, getRuntime()).then((clearEvent) => {
-      messageListenerEventRef.current = clearEvent;
-    });
-
-    return () => {
-      messageListenerEventRef.current?.(); // clear event
-    };
-  };
-
   return {
     handleInitContentSelectorListener,
     handleStopContentSelectorListener,
     handleReset,
     handleRemoveAllMarks,
     handleRemoveMark,
-    initMessageListener,
   };
 };

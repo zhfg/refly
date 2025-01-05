@@ -1,5 +1,5 @@
-import { FC } from 'react';
-import { Button, Dropdown, Tooltip } from 'antd';
+import { FC, useCallback } from 'react';
+import { Button, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   FileText,
@@ -14,23 +14,20 @@ import {
   FilePlus,
   Trash2,
 } from 'lucide-react';
-import { CanvasNodeType } from '@refly/openapi-schema';
-import { CanvasNode } from '../nodes/types';
-import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
-import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
-import { IconCanvas, IconDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { NODE_COLORS } from '../nodes/shared/colors';
+import { CanvasNode } from '../nodes/shared/types';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
+import {
+  IconDocument,
+  IconPin,
+  IconResponse,
+  IconUnpin,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
-
-// Define background colors for different node types
-const NODE_COLORS: Record<CanvasNodeType, string> = {
-  document: '#00968F',
-  resource: '#17B26A',
-  skillResponse: '#F79009',
-  toolResponse: '#F79009',
-  skill: '#6172F3',
-  tool: '#2E90FA',
-};
+import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-preview-control';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 // Get icon component based on node type and metadata
 const getNodeIcon = (node: CanvasNode<any>) => {
@@ -40,9 +37,9 @@ const getNodeIcon = (node: CanvasNode<any>) => {
     case 'resource':
       return node.data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
     case 'skillResponse':
-      return IconCanvas;
+      return IconResponse;
     case 'toolResponse':
-      return IconCanvas;
+      return IconResponse;
     case 'skill':
       switch (node.data?.metadata?.skillType) {
         case 'prompt':
@@ -114,10 +111,29 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
   const nodeColor = NODE_COLORS[node.type];
   const nodeTitle = getNodeTitle(node);
   const { t } = useTranslation();
+  const { addToContext } = useAddToContext();
 
-  // Add hooks for context and delete actions
-  const handleAddToContext = useAddToContext(node, node.type);
-  const handleDelete = useDeleteNode(node, node.type);
+  const { deleteNode } = useDeleteNode();
+  const handleAddToContext = useCallback(() => {
+    addToContext({
+      type: node.type,
+      title: node.data?.title,
+      entityId: node.data?.entityId,
+      metadata: node.data?.metadata,
+    });
+  }, [node, addToContext]);
+
+  const { canvasId } = useCanvasContext();
+  const { pinNode, unpinNode, isNodePinned } = useNodePreviewControl({ canvasId });
+  const isPinned = isNodePinned(node.id);
+
+  const handlePin = useCallback(() => {
+    if (isPinned) {
+      unpinNode(node);
+    } else {
+      pinNode(node);
+    }
+  }, [isPinned, pinNode, unpinNode, node]);
 
   // Define dropdown menu items
   const menuItems: MenuProps['items'] = [
@@ -139,7 +155,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
           {t('canvas.nodeActions.delete')}
         </div>
       ),
-      onClick: handleDelete,
+      onClick: () => deleteNode(node),
       className: 'hover:bg-red-50',
     },
   ];
@@ -163,11 +179,18 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
           <Button
             type="text"
             className={`p-1.5 hover:bg-gray-100 ${isMaximized ? 'text-primary-600' : 'text-gray-500'}`}
-            onClick={onMaximize}
+            onClick={() => onMaximize()}
           >
             <Maximize2 className="w-4 h-4" />
           </Button>
         )}
+        <Button
+          type="text"
+          className={`p-1.5 hover:bg-gray-100 ${isPinned ? 'text-primary-600' : 'text-gray-500'}`}
+          onClick={() => handlePin()}
+        >
+          {isPinned ? <IconUnpin className="w-4 h-4" /> : <IconPin className="w-4 h-4" />}
+        </Button>
         <Dropdown
           menu={{ items: menuItems }}
           trigger={['click']}

@@ -2,11 +2,15 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import Stripe from 'stripe';
 import { InjectStripeClient, StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { PrismaService } from '@/common/prisma.service';
-import { CreateCheckoutSessionRequest, PriceLookupKey, User } from '@refly-packages/openapi-schema';
+import {
+  CreateCheckoutSessionRequest,
+  SubscriptionInterval,
+  SubscriptionPlanType,
+  User,
+} from '@refly-packages/openapi-schema';
 import {
   genTokenUsageMeterID,
   genStorageUsageMeterID,
-  getSubscriptionInfoFromLookupKey,
   defaultModelList,
 } from '@refly-packages/utils';
 import {
@@ -23,6 +27,7 @@ import {
   Subscription as SubscriptionModel,
   User as UserModel,
   ModelInfo as ModelInfoModel,
+  SubscriptionPlan as SubscriptionPlanModel,
   Prisma,
 } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
@@ -36,6 +41,8 @@ export class SubscriptionService implements OnModuleInit {
   private modelListSyncedAt: Date | null = null;
   private modelListPromise: Promise<ModelInfoModel[]> | null = null;
 
+  private subscriptionPlans: SubscriptionPlanModel[];
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
@@ -48,7 +55,10 @@ export class SubscriptionService implements OnModuleInit {
     });
     if (modelInfos.length === 0) {
       modelInfos = await this.prisma.modelInfo.createManyAndReturn({
-        data: defaultModelList,
+        data: defaultModelList.map((m) => ({
+          ...m,
+          capabilities: JSON.stringify(m.capabilities),
+        })),
       });
       this.logger.log(`Model info created: ${modelInfos.map((m) => m.name).join(',')}`);
     } else {
@@ -58,39 +68,19 @@ export class SubscriptionService implements OnModuleInit {
     this.modelList = modelInfos;
     this.modelListSyncedAt = new Date();
 
-    const usageQuotas = await this.prisma.subscriptionUsageQuota.findMany({
-      select: { planType: true },
-    });
-    if (usageQuotas.length === 0) {
-      const created = await this.prisma.subscriptionUsageQuota.createManyAndReturn({
-        data: [
-          {
-            planType: 'free',
-            t1TokenQuota: 0,
-            t2TokenQuota: 1_000_000,
-            objectStorageQuota: 100 * 1024 * 1024, // 100 MB
-            vectorStorageQuota: 10 * 1024 * 1024, // 10 MB
-          },
-          {
-            planType: 'pro',
-            t1TokenQuota: 1_000_000,
-            t2TokenQuota: 5_000_000,
-            objectStorageQuota: 10 * 1024 * 1024 * 1024, // 1 GB
-            vectorStorageQuota: 100 * 1024 * 1024, // 100 MB
-          },
-        ],
-      });
-      this.logger.log(`Usage quota created for plans: ${created.map((q) => q.planType).join(',')}`);
-    } else {
-      this.logger.log(
-        `Usage quota already configured for plans: ${usageQuotas.map((q) => q.planType).join(',')}`,
-      );
-    }
+    this.subscriptionPlans = await this.prisma.subscriptionPlan.findMany();
   }
 
   async createCheckoutSession(user: UserModel, param: CreateCheckoutSessionRequest) {
     const { uid } = user;
-    const { lookupKey } = param;
+    const { planType, interval } = param;
+    const plan = this.subscriptionPlans.find(
+      (p) => p.planType === planType && p.interval === interval,
+    );
+    if (!plan) {
+      throw new ParamsError(`No plan found for plan type: ${planType}`);
+    }
+    const lookupKey = plan.lookupKey;
 
     const prices = await this.stripeClient.prices.list({
       lookup_keys: [lookupKey],
@@ -165,9 +155,7 @@ export class SubscriptionService implements OnModuleInit {
         data: { subscriptionId: sub.subscriptionId },
       });
 
-      const usageQuota = await prisma.subscriptionUsageQuota.findUnique({
-        where: { planType: sub.planType },
-      });
+      const plan = this.subscriptionPlans.find((p) => p.planType === sub.planType);
 
       const endAt =
         sub.planType === 'free'
@@ -182,9 +170,9 @@ export class SubscriptionService implements OnModuleInit {
           subscriptionId: sub.subscriptionId,
           startAt: startOfDay(now),
           endAt,
-          t1TokenQuota: usageQuota?.t1TokenQuota || this.config.get('quota.token.t1'),
+          t1TokenQuota: plan?.t1TokenQuota ?? this.config.get('quota.token.t1'),
           t1TokenUsed: 0,
-          t2TokenQuota: usageQuota?.t2TokenQuota || this.config.get('quota.token.t2'),
+          t2TokenQuota: plan?.t2TokenQuota ?? this.config.get('quota.token.t2'),
           t2TokenUsed: 0,
         },
       });
@@ -198,10 +186,8 @@ export class SubscriptionService implements OnModuleInit {
         },
         data: {
           subscriptionId: sub.subscriptionId,
-          objectStorageQuota:
-            usageQuota?.objectStorageQuota || this.config.get('quota.storage.object'),
-          vectorStorageQuota:
-            usageQuota?.vectorStorageQuota || this.config.get('quota.storage.vector'),
+          objectStorageQuota: plan?.objectStorageQuota ?? this.config.get('quota.storage.object'),
+          vectorStorageQuota: plan?.vectorStorageQuota ?? this.config.get('quota.storage.vector'),
         },
       });
 
@@ -249,9 +235,7 @@ export class SubscriptionService implements OnModuleInit {
         data: { deletedAt: now },
       });
 
-      const freeQuota = await prisma.subscriptionUsageQuota.findUnique({
-        where: { planType: 'free' },
-      });
+      const freePlan = this.subscriptionPlans.find((p) => p.planType === 'free');
 
       // Update storage usage meter
       await prisma.storageUsageMeter.updateMany({
@@ -263,9 +247,9 @@ export class SubscriptionService implements OnModuleInit {
         data: {
           subscriptionId: null,
           objectStorageQuota:
-            freeQuota?.objectStorageQuota || this.config.get('quota.storage.object'),
+            freePlan?.objectStorageQuota ?? this.config.get('quota.storage.object'),
           vectorStorageQuota:
-            freeQuota?.vectorStorageQuota || this.config.get('quota.storage.vector'),
+            freePlan?.vectorStorageQuota ?? this.config.get('quota.storage.vector'),
         },
       });
     });
@@ -326,7 +310,7 @@ export class SubscriptionService implements OnModuleInit {
     this.logger.log(`New subscription created: ${subscription.id}`);
 
     const checkoutSession = await this.prisma.checkoutSession.findFirst({
-      where: { subscriptionId: subscription.id, paymentStatus: 'paid' },
+      where: { subscriptionId: subscription.id },
       orderBy: { pk: 'desc' },
     });
     if (!checkoutSession) {
@@ -335,13 +319,17 @@ export class SubscriptionService implements OnModuleInit {
     }
     const { uid } = checkoutSession;
 
-    const { planType, interval } = getSubscriptionInfoFromLookupKey(
-      checkoutSession.lookupKey as PriceLookupKey,
-    );
+    const plan = this.subscriptionPlans.find((p) => p.lookupKey === checkoutSession.lookupKey);
+    if (!plan) {
+      this.logger.error(`No plan found for lookup key: ${checkoutSession.lookupKey}`);
+      return;
+    }
+
+    const { planType, interval } = plan;
 
     const sub = await this.createSubscription(uid, {
-      planType,
-      interval,
+      planType: planType as SubscriptionPlanType,
+      interval: interval as SubscriptionInterval,
       lookupKey: checkoutSession.lookupKey,
       status: subscription.status,
       subscriptionId: subscription.id,
@@ -413,8 +401,8 @@ export class SubscriptionService implements OnModuleInit {
 
     const meter = await this.getOrCreateTokenUsageMeter(userModel);
 
-    result.t1 = meter.t1TokenUsed < meter.t1TokenQuota;
-    result.t2 = meter.t2TokenUsed < meter.t2TokenQuota;
+    result.t1 = meter.t1TokenQuota < 0 || meter.t1TokenUsed < meter.t1TokenQuota;
+    result.t2 = meter.t2TokenQuota < 0 || meter.t2TokenUsed < meter.t2TokenQuota;
 
     return result;
   }
@@ -431,8 +419,10 @@ export class SubscriptionService implements OnModuleInit {
     const meter = await this.getOrCreateStorageUsageMeter(userModel);
 
     result.objectStorageAvailable =
+      meter.objectStorageQuota < 0 ||
       meter.resourceSize + meter.canvasSize + meter.fileSize < meter.objectStorageQuota;
-    result.vectorStorageAvailable = meter.vectorStorageUsed < meter.vectorStorageQuota;
+    result.vectorStorageAvailable =
+      meter.vectorStorageQuota < 0 || meter.vectorStorageUsed < meter.vectorStorageQuota;
 
     return result;
   }
@@ -473,9 +463,7 @@ export class SubscriptionService implements OnModuleInit {
           ? null
           : new Date(startAt.getFullYear(), startAt.getMonth() + 1, startAt.getDate());
 
-      const usageQuota = await prisma.subscriptionUsageQuota.findUnique({
-        where: { planType },
-      });
+      const plan = this.subscriptionPlans.find((p) => p.planType === planType);
 
       return prisma.tokenUsageMeter.create({
         data: {
@@ -484,9 +472,9 @@ export class SubscriptionService implements OnModuleInit {
           subscriptionId: sub?.subscriptionId,
           startAt,
           endAt,
-          t1TokenQuota: usageQuota?.t1TokenQuota || this.config.get('quota.token.t1'),
+          t1TokenQuota: plan?.t1TokenQuota ?? this.config.get('quota.token.t1'),
           t1TokenUsed: 0,
-          t2TokenQuota: usageQuota?.t2TokenQuota || this.config.get('quota.token.t2'),
+          t2TokenQuota: plan?.t2TokenQuota ?? this.config.get('quota.token.t2'),
           t2TokenUsed: 0,
         },
       });
@@ -516,19 +504,15 @@ export class SubscriptionService implements OnModuleInit {
 
       // Find the storage quota for the plan
       const planType = sub?.planType || 'free';
-      const usageQuota = await prisma.subscriptionUsageQuota.findUnique({
-        where: { planType },
-      });
+      const plan = this.subscriptionPlans.find((p) => p.planType === planType);
 
       return prisma.storageUsageMeter.create({
         data: {
           meterId: genStorageUsageMeterID(),
           uid,
           subscriptionId: sub?.subscriptionId,
-          objectStorageQuota:
-            usageQuota?.objectStorageQuota || this.config.get('quota.storage.object'),
-          vectorStorageQuota:
-            usageQuota?.vectorStorageQuota || this.config.get('quota.storage.vector'),
+          objectStorageQuota: plan?.objectStorageQuota ?? this.config.get('quota.storage.object'),
+          vectorStorageQuota: plan?.vectorStorageQuota ?? this.config.get('quota.storage.vector'),
         },
       });
     });
@@ -567,20 +551,24 @@ export class SubscriptionService implements OnModuleInit {
           ...pick(usage, ['tier', 'modelProvider', 'modelName', 'inputTokens', 'outputTokens']),
         },
       }),
-      this.prisma.tokenUsageMeter.updateMany({
-        where: {
-          uid,
-          startAt: { lte: timestamp },
-          OR: [{ endAt: null }, { endAt: { gte: timestamp } }],
-          subscriptionId: user.subscriptionId,
-          deletedAt: null,
-        },
-        data: {
-          [usage.tier === 't1' ? 't1TokenUsed' : 't2TokenUsed']: {
-            increment: usage.inputTokens + usage.outputTokens,
-          },
-        },
-      }),
+      ...(usage.tier !== 'free'
+        ? [
+            this.prisma.tokenUsageMeter.updateMany({
+              where: {
+                uid,
+                startAt: { lte: timestamp },
+                OR: [{ endAt: null }, { endAt: { gte: timestamp } }],
+                subscriptionId: user.subscriptionId,
+                deletedAt: null,
+              },
+              data: {
+                [usage.tier === 't1' ? 't1TokenUsed' : 't2TokenUsed']: {
+                  increment: usage.inputTokens + usage.outputTokens,
+                },
+              },
+            }),
+          ]
+        : []),
     ]);
   }
 
@@ -630,18 +618,22 @@ export class SubscriptionService implements OnModuleInit {
       await prisma.storageUsageMeter.update({
         where: { meterId: activeMeter.meterId },
         data: {
-          resourceSize: resourceSizeSum._sum.storageSize || 0,
-          canvasSize: docSizeSum._sum.storageSize || 0,
-          fileSize: fileSizeSum._sum.storageSize || 0,
+          resourceSize: resourceSizeSum._sum.storageSize ?? BigInt(0),
+          canvasSize: docSizeSum._sum.storageSize ?? BigInt(0),
+          fileSize: fileSizeSum._sum.storageSize ?? BigInt(0),
           vectorStorageUsed:
-            (resourceSizeSum._sum.vectorSize || BigInt(0)) +
-            (docSizeSum._sum.vectorSize || BigInt(0)),
+            (resourceSizeSum._sum.vectorSize ?? BigInt(0)) +
+            (docSizeSum._sum.vectorSize ?? BigInt(0)),
           syncedAt: timestamp,
         },
       });
     });
 
     // this.logger.log(`Storage usage for user ${uid} synced at ${timestamp}`);
+  }
+
+  getSubscriptionPlans() {
+    return this.subscriptionPlans;
   }
 
   async getModelList() {

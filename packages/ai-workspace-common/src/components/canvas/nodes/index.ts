@@ -5,6 +5,8 @@ import { ResourceNode } from './resource';
 import { SkillNode } from './skill';
 import { ToolNode } from './tool';
 import { SkillResponseNode } from './skill-response';
+import { MemoNode } from './memo/memo';
+import { GroupNode } from './group';
 import {
   NodeMetadataMap,
   CanvasNodeData,
@@ -13,17 +15,19 @@ import {
   SkillNodeMeta,
   ToolNodeMeta,
   ResponseNodeMeta,
-} from './types';
+} from './shared/types';
 import { t } from 'i18next';
 import { genUniqueId } from '@refly-packages/utils/id';
 
 // Export all components and types
-export * from './types';
+export * from './shared/types';
 export * from './document';
 export * from './resource';
 export * from './skill';
 export * from './tool';
 export * from './skill-response';
+export * from './memo/memo';
+export * from './group';
 
 // Node types mapping
 export const nodeTypes: NodeTypes = {
@@ -32,6 +36,8 @@ export const nodeTypes: NodeTypes = {
   skill: SkillNode,
   tool: ToolNode,
   skillResponse: SkillResponseNode,
+  memo: MemoNode,
+  group: GroupNode,
 };
 
 // Helper function to prepare node data
@@ -41,12 +47,20 @@ export const prepareNodeData = <T extends CanvasNodeType>({
   position = { x: 0, y: 0 },
   connectable = true,
   selected = false,
+  selectable = true,
+  className,
+  style,
+  draggable = true,
 }: {
   type: T;
   data: CanvasNodeData<NodeMetadataMap[T]>;
   position?: { x: number; y: number };
   connectable?: boolean;
+  selectable?: boolean;
   selected?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+  draggable?: boolean;
 }) => {
   return {
     id: `node-${genUniqueId()}`,
@@ -55,6 +69,10 @@ export const prepareNodeData = <T extends CanvasNodeType>({
     data,
     connectable,
     selected,
+    selectable,
+    className,
+    style,
+    draggable,
   };
 };
 
@@ -86,10 +104,7 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
     case 'skill':
       return {
         query: '',
-        skillType: 'prompt',
-        model: 'gpt-4',
-        parameters: {}, // Additional parameters if needed
-        lastExecuted: null,
+        modelInfo: null,
       } as SkillNodeMeta;
 
     case 'tool':

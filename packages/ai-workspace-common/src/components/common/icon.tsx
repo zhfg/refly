@@ -2,25 +2,44 @@ import {
   HiOutlineDocumentText,
   HiOutlineSquare3Stack3D,
   HiOutlineSparkles,
-  HiSparkles,
-  HiOutlineChatBubbleLeftRight,
   HiMiniPlayCircle,
   HiOutlineCircleStack,
+  HiSquare3Stack3D,
+  HiDocumentText,
   HiPlus,
   HiMinus,
+  HiSparkles,
 } from 'react-icons/hi2';
 import { IoIosMore } from 'react-icons/io';
 import { HiOutlineReply } from 'react-icons/hi';
-import { LuSearch, LuSettings, LuCheck, LuCopy, LuTrash, LuRotateCw, LuBrain, LuGift } from 'react-icons/lu';
-import { LuView } from 'react-icons/lu';
-import { RiErrorWarningLine } from 'react-icons/ri';
+import {
+  LuSearch,
+  LuSettings,
+  LuCheck,
+  LuCopy,
+  LuTrash,
+  LuRotateCw,
+  LuBrain,
+  LuGift,
+  LuSparkles,
+  LuView,
+  LuPlay,
+  LuPin,
+  LuPinOff,
+} from 'react-icons/lu';
+import { RiErrorWarningLine, RiDoubleQuotesL, RiChatHistoryLine, RiChatHistoryFill } from 'react-icons/ri';
 
-import { RiDoubleQuotesL } from 'react-icons/ri';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BiText } from 'react-icons/bi';
-import { PiNotePencil } from 'react-icons/pi';
+import { PiNotePencil, PiNotePencilLight } from 'react-icons/pi';
+import { TfiBlackboard } from 'react-icons/tfi';
+
 import { IoLibraryOutline } from 'react-icons/io5';
 import { HiOutlineChevronDown } from 'react-icons/hi';
+import { RxExit } from 'react-icons/rx';
+
+import { AiOutlineShrink } from 'react-icons/ai';
+import { RiExpandDiagonalLine } from 'react-icons/ri';
 
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
 import ClaudeIcon from '@refly-packages/ai-workspace-common/assets/claude.svg';
@@ -28,14 +47,20 @@ import GeminiIcon from '@refly-packages/ai-workspace-common/assets/gemini.svg';
 import QwenIcon from '@refly-packages/ai-workspace-common/assets/qwen.svg';
 import MetaLlamaIcon from '@refly-packages/ai-workspace-common/assets/meta.svg';
 import DeepSeekIcon from '@refly-packages/ai-workspace-common/assets/deepseek.svg';
+import MistralIcon from '@refly-packages/ai-workspace-common/assets/mistral.svg';
 
-export const IconCanvasFill = HiSparkles;
-export const IconCanvas = HiOutlineSparkles;
+export const IconCanvas = TfiBlackboard;
+export const IconAskAI = LuSparkles;
 export const IconDocument = HiOutlineDocumentText;
+export const IconDocumentFilled = HiDocumentText;
 export const IconResource = HiOutlineSquare3Stack3D;
-export const IconResponse = HiOutlineChatBubbleLeftRight;
+export const IconResourceFilled = HiSquare3Stack3D;
+export const IconMemo = PiNotePencilLight;
+export const IconResponse = HiOutlineSparkles;
+export const IconResponseFilled = HiSparkles;
 export const IconLibrary = IoLibraryOutline;
-export const IconThread = HiOutlineChatBubbleLeftRight;
+export const IconThreadHistory = RiChatHistoryLine;
+export const IconThreadHistoryFilled = RiChatHistoryFill;
 export const IconPreview = LuView;
 export const IconQuote = RiDoubleQuotesL;
 export const IconToken = HiOutlineCircleStack;
@@ -44,9 +69,12 @@ export const IconPlus = HiPlus;
 export const IconMinus = HiMinus;
 export const IconCheck = LuCheck;
 export const IconPlay = HiMiniPlayCircle;
+export const IconRun = LuPlay;
 export const IconRerun = LuRotateCw;
 export const IconReply = HiOutlineReply;
 export const IconMoreHorizontal = IoIosMore;
+export const IconPin = LuPin;
+export const IconUnpin = LuPinOff;
 export const IconEdit = PiNotePencil;
 export const IconDelete = LuTrash;
 export const IconSearch = LuSearch;
@@ -57,6 +85,9 @@ export const IconCopy = LuCopy;
 export const IconModel = LuBrain;
 export const IconDown = HiOutlineChevronDown;
 export const IconSubscription = LuGift;
+export const IconExit = RxExit;
+export const IconExpand = RiExpandDiagonalLine;
+export const IconShrink = AiOutlineShrink;
 
 export const ModelProviderIcons = {
   openai: OpenAIIcon,
@@ -65,4 +96,15 @@ export const ModelProviderIcons = {
   qwen: QwenIcon,
   'meta-llama': MetaLlamaIcon,
   deepseek: DeepSeekIcon,
+  mistral: MistralIcon,
+} as const;
+
+const iconCache = new Map<string, string>();
+
+export const preloadModelIcons = () => {
+  Object.entries(ModelProviderIcons).forEach(([provider, icon]) => {
+    if (!iconCache.has(provider)) {
+      iconCache.set(provider, icon);
+    }
+  });
 };

@@ -15,7 +15,7 @@ import {
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 
 const { TextArea } = Input;
@@ -23,13 +23,15 @@ const { TextArea } = Input;
 export const ImportFromWeblink = () => {
   const { t } = useTranslation();
   const [linkStr, setLinkStr] = useState('');
-  const { scrapeLinks, setScrapeLinks, setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
-    scrapeLinks: state.scrapeLinks,
-    setScrapeLinks: state.setScrapeLinks,
-    setImportResourceModalVisible: state.setImportResourceModalVisible,
-  }));
+  const { scrapeLinks, setScrapeLinks, setImportResourceModalVisible, insertNodePosition } =
+    useImportResourceStoreShallow((state) => ({
+      scrapeLinks: state.scrapeLinks,
+      setScrapeLinks: state.setScrapeLinks,
+      setImportResourceModalVisible: state.setImportResourceModalVisible,
+      insertNodePosition: state.insertNodePosition,
+    }));
 
-  const { addNode } = useCanvasControl();
+  const { addNode } = useAddNode();
 
   const [saveLoading, setSaveLoading] = useState(false);
   const { getLibraryList } = useHandleSiderData();
@@ -136,7 +138,13 @@ export const ImportFromWeblink = () => {
       domain: 'resource',
       contentPreview: resource.contentPreview,
     }));
-    resources.forEach((resource) => {
+    resources.forEach((resource, index) => {
+      const nodePosition = insertNodePosition
+        ? {
+            x: insertNodePosition?.x + index * 300,
+            y: insertNodePosition?.y,
+          }
+        : null;
       addNode({
         type: 'resource',
         data: {
@@ -144,6 +152,7 @@ export const ImportFromWeblink = () => {
           entityId: resource.id,
           contentPreview: resource.contentPreview,
         },
+        position: nodePosition,
       });
     });
   };

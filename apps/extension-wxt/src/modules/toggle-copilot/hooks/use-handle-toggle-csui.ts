@@ -1,6 +1,5 @@
 import { useExtensionMessage } from '@/hooks/use-extension-message';
 import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
-import { useHandleContextWorkflow } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-handle-context-workflow';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { BackgroundMessage, CopilotMsgName } from '@refly/common-types';

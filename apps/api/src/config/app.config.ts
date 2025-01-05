@@ -53,12 +53,19 @@ export default () => ({
       secret: process.env.JWT_SECRET || 'test',
       expiresIn: process.env.JWT_EXPIRATION_TIME || '14d',
     },
+    email: {
+      enabled: process.env.EMAIL_AUTH_ENABLED === 'true' || true,
+      sender: process.env.EMAIL_SENDER || 'Refly <notifications@refly.ai>',
+      resendApiKey: process.env.RESEND_API_KEY,
+    },
     github: {
+      enabled: process.env.GITHUB_AUTH_ENABLED === 'true' || false,
       clientId: process.env.GITHUB_CLIENT_ID || 'test',
       clientSecret: process.env.GITHUB_CLIENT_SECRET || 'test',
       callbackUrl: process.env.GITHUB_CALLBACK_URL || 'test',
     },
     google: {
+      enabled: process.env.GOOGLE_AUTH_ENABLED === 'true' || false,
       clientId: process.env.GOOGLE_CLIENT_ID || 'test',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'test',
       callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'test',
@@ -77,12 +84,14 @@ export default () => ({
   },
   skill: {
     defaultModel: process.env.REFLY_DEFAULT_MODEL || 'openai/gpt-4o-mini',
+    idleTimeout: parseInt(process.env.SKILL_IDLE_TIMEOUT) || 1000 * 10, // 10 seconds
+    executionTimeout: parseInt(process.env.SKILL_EXECUTION_TIMEOUT) || 1000 * 60 * 3, // 3 minutes
   },
   stripe: {
     apiKey: process.env.STRIPE_API_KEY,
     webhookSecret: {
-      account: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET,
-      accountTest: process.env.STRIPE_ACCOUNT_TEST_WEBHOOK_SECRET,
+      account: process.env.STRIPE_ACCOUNT_WEBHOOK_SECRET || 'test',
+      accountTest: process.env.STRIPE_ACCOUNT_TEST_WEBHOOK_SECRET || 'test',
     },
     sessionSuccessUrl: process.env.STRIPE_SESSION_SUCCESS_URL,
     sessionCancelUrl: process.env.STRIPE_SESSION_CANCEL_URL,
@@ -90,12 +99,12 @@ export default () => ({
   },
   quota: {
     token: {
-      t1: parseInt(process.env.QUOTA_T1_TOKEN) || 0,
-      t2: parseInt(process.env.QUOTA_T2_TOKEN) || 1000000,
+      t1: parseInt(process.env.QUOTA_T1_TOKEN) || -1,
+      t2: parseInt(process.env.QUOTA_T2_TOKEN) || -1,
     },
     storage: {
-      object: parseInt(process.env.QUOTA_STORAGE_OBJECT) || 10 * 1024 * 1024 * 1024, // 10 GB
-      vector: parseInt(process.env.QUOTA_STORAGE_VECTOR) || 1024 * 1024 * 1024, // 1 GB
+      object: parseInt(process.env.QUOTA_STORAGE_OBJECT) || -1,
+      vector: parseInt(process.env.QUOTA_STORAGE_VECTOR) || -1,
     },
   },
   credentials: {

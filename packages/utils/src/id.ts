@@ -18,6 +18,8 @@ export enum IDPrefix {
   SKILL_TRIGGER = 'tr-',
   SKILL_JOB = 'sj-',
   CONTENT_SELECTOR = 'cs-',
+  MEMO = 'm-',
+  VERIFICATION_SESSION = 'vs-',
 }
 
 export function genUID(): string {
@@ -52,6 +54,10 @@ export function genCanvasID(): string {
   return IDPrefix.CANVAS + createId();
 }
 
+export function genMemoID(): string {
+  return IDPrefix.MEMO + createId();
+}
+
 export function genReferenceID(): string {
   return IDPrefix.REFERENCE + createId();
 }
@@ -74,6 +80,10 @@ export function genSkillTriggerID(): string {
 
 export function genContentSelectorID(): string {
   return IDPrefix.CONTENT_SELECTOR + createId();
+}
+
+export function genVerificationSessionID(): string {
+  return IDPrefix.VERIFICATION_SESSION + createId();
 }
 
 export const genUniqueId = () => {

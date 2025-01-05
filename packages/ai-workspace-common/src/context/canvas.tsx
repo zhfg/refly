@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { useCookie } from 'react-use';
+import * as Y from 'yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/types';
+import { IndexeddbPersistence } from 'y-indexeddb';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/types';
 import { Edge } from '@xyflow/react';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
@@ -9,44 +11,99 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 interface CanvasContextType {
   canvasId: string;
   provider: HocuspocusProvider;
+  localProvider: IndexeddbPersistence;
 }
 
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
-const providerCache = new Map<string, HocuspocusProvider>();
+const providerCache = new Map<string, { remote: HocuspocusProvider; local: IndexeddbPersistence }>();
+
+const getTitleFromYDoc = (ydoc: Y.Doc) => {
+  const title = ydoc.getText('title');
+  return title.toJSON();
+};
+
+const getNodesFromYDoc = (ydoc: Y.Doc) => {
+  const nodesArray = ydoc.getArray<CanvasNode>('nodes');
+  const nodes = nodesArray.toJSON();
+  const uniqueNodesMap = new Map();
+  nodes.forEach((node) => uniqueNodesMap.set(node.id, node));
+  return Array.from(uniqueNodesMap.values());
+};
+
+const getEdgesFromYDoc = (ydoc: Y.Doc) => {
+  const edgesArray = ydoc.getArray<Edge>('edges');
+  const edges = edgesArray.toJSON();
+  const uniqueEdgesMap = new Map();
+  edges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
+  return Array.from(uniqueEdgesMap.values());
+};
 
 export const CanvasProvider = ({ canvasId, children }: { canvasId: string; children: React.ReactNode }) => {
   const [token] = useCookie('_refly_ai_sid');
-
-  const provider = useMemo(() => {
-    const existingProvider = providerCache.get(canvasId);
-    if (existingProvider?.status === 'connected') {
-      return existingProvider;
-    }
-
-    const newProvider = new HocuspocusProvider({
-      url: getWsServerOrigin(),
-      name: canvasId,
-      token,
-      connect: true,
-      forceSyncInterval: 5000,
-    });
-
-    providerCache.set(canvasId, newProvider);
-    return newProvider;
-  }, [canvasId, token]);
-
-  const { setNodes, setEdges, setTitle } = useCanvasStoreShallow((state) => ({
-    setNodes: state.setNodes,
-    setEdges: state.setEdges,
-    setTitle: state.setTitle,
-  }));
-
-  // Add connection status management
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const MAX_RETRIES = 3;
   const RETRY_DELAY = 2000;
 
+  const { setCanvasLocalSynced, setCanvasRemoteSynced } = useCanvasStoreShallow((state) => ({
+    setCanvasLocalSynced: state.setCanvasLocalSynced,
+    setCanvasRemoteSynced: state.setCanvasRemoteSynced,
+  }));
+
+  const { setTitle, setNodes, setEdges } = useCanvasStoreShallow((state) => ({
+    setTitle: state.setTitle,
+    setNodes: state.setNodes,
+    setEdges: state.setEdges,
+  }));
+
+  const setCanvasDataFromYDoc = useCallback(
+    (ydoc: Y.Doc) => {
+      setTitle(canvasId, getTitleFromYDoc(ydoc));
+      setNodes(canvasId, getNodesFromYDoc(ydoc));
+      setEdges(canvasId, getEdgesFromYDoc(ydoc));
+    },
+    [canvasId, setTitle, setNodes, setEdges],
+  );
+
+  const { remote: provider, local: localProvider } = useMemo(() => {
+    const existingProvider = providerCache.get(canvasId);
+    if (existingProvider?.remote?.status === 'connected') {
+      return existingProvider;
+    }
+
+    const doc = new Y.Doc();
+
+    const remoteProvider = new HocuspocusProvider({
+      url: getWsServerOrigin(),
+      name: canvasId,
+      token,
+      document: doc,
+      connect: true,
+      forceSyncInterval: 5000,
+    });
+
+    const handleSync = () => {
+      setCanvasRemoteSynced(canvasId, Date.now());
+    };
+
+    remoteProvider.on('synced', handleSync);
+
+    const localProvider = new IndexeddbPersistence(canvasId, doc);
+
+    const handleLocalSync = () => {
+      setCanvasDataFromYDoc(doc);
+      setCanvasLocalSynced(canvasId, Date.now());
+    };
+
+    localProvider.on('synced', handleLocalSync);
+
+    const providers = { remote: remoteProvider, local: localProvider };
+    providerCache.set(canvasId, providers);
+
+    return providers;
+  }, [canvasId, token, setCanvasRemoteSynced, setCanvasLocalSynced, setCanvasDataFromYDoc]);
+
+  // Handle connection retries
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
 
@@ -60,16 +117,19 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       }
     };
 
-    provider.on('status', ({ status }) => {
+    const handleStatus = ({ status }: { status: string }) => {
       if (status === 'connected') {
         setConnectionAttempts(0);
       } else {
         handleConnection();
       }
-    });
+    };
+
+    provider.on('status', handleStatus);
 
     return () => {
       clearTimeout(timeoutId);
+      provider.off('status', handleStatus);
     };
   }, [provider, connectionAttempts]);
 
@@ -90,40 +150,24 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       if (isDestroyed) return;
 
       if (provider.status === 'connected') {
-        setTitle(canvasId, title.toJSON());
-
-        const initialNodes = nodesArray.toJSON();
-        const uniqueNodesMap = new Map();
-        initialNodes.forEach((node) => uniqueNodesMap.set(node.id, node));
-        setNodes(canvasId, Array.from(uniqueNodesMap.values()));
-
-        const initialEdges = edgesArray.toJSON();
-        const uniqueEdgesMap = new Map();
-        initialEdges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
-        setEdges(canvasId, Array.from(uniqueEdgesMap.values()));
+        setCanvasDataFromYDoc(ydoc);
       }
 
       const titleObserverCallback = () => {
         if (provider.status === 'connected') {
-          setTitle(canvasId, title.toJSON());
+          setTitle(canvasId, getTitleFromYDoc(ydoc));
         }
       };
 
       const nodesObserverCallback = () => {
         if (provider.status === 'connected') {
-          const nodes = nodesArray.toJSON();
-          const uniqueNodesMap = new Map();
-          nodes.forEach((node) => uniqueNodesMap.set(node.id, node));
-          setNodes(canvasId, Array.from(uniqueNodesMap.values()));
+          setNodes(canvasId, getNodesFromYDoc(ydoc));
         }
       };
 
       const edgesObserverCallback = () => {
         if (provider.status === 'connected') {
-          const edges = edgesArray.toJSON();
-          const uniqueEdgesMap = new Map();
-          edges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
-          setEdges(canvasId, Array.from(uniqueEdgesMap.values()));
+          setEdges(canvasId, getEdgesFromYDoc(ydoc));
         }
       };
 
@@ -147,24 +191,34 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       isDestroyed = true;
       cleanup?.(); // Clean up observers
       provider.off('connect', handleConnect);
-
-      // Ensure clean disconnection
-      if (provider.status === 'connected') {
-        provider.forceSync();
-      }
-
-      // Remove from cache and destroy
-      providerCache.delete(canvasId);
-      provider.destroy();
     };
-  }, [provider, canvasId, setNodes, setEdges, setTitle]);
+  }, [provider, canvasId, setNodes, setEdges, setTitle, setCanvasDataFromYDoc]);
 
-  // Add null check before rendering
-  if (!provider) {
-    return null;
-  }
+  // Add cleanup on unmount
+  useEffect(() => {
+    return () => {
+      const providers = providerCache.get(canvasId);
+      if (providers) {
+        if (providers.remote.status === 'connected') {
+          providers.remote.forceSync();
+        }
+        providers.remote.destroy();
+        providers.local.destroy();
+        providerCache.delete(canvasId);
+      }
+    };
+  }, [canvasId]);
 
-  return <CanvasContext.Provider value={{ canvasId, provider }}>{children}</CanvasContext.Provider>;
+  const value = useMemo(
+    () => ({
+      canvasId,
+      provider,
+      localProvider,
+    }),
+    [canvasId, provider, localProvider],
+  );
+
+  return <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>;
 };
 
 export const useCanvasContext = () => {

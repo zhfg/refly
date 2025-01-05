@@ -36,6 +36,28 @@ model Account {
   @@map("accounts")
 }
 
+model VerificationSession {
+  /// Primary key
+  pk             BigInt   @id @default(autoincrement())
+  /// Session id
+  sessionId      String   @unique @map("session_id")
+  /// Verification purpose
+  purpose        String   @map("purpose")
+  /// Email
+  email          String   @map("email")
+  /// Verification code
+  code           String   @map("code")
+  /// Hashed password
+  hashedPassword String?  @map("hashed_password")
+  /// Expiration timestamp
+  expiresAt      DateTime @map("expires_at") @db.Timestamptz()
+  /// Create timestamp
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([email, code])
+  @@map("verification_sessions")
+}
+
 model User {
   /// Primary key
   pk             BigInt    @id @default(autoincrement())
@@ -464,14 +486,18 @@ model LabelInstance {
   @@map("label_instances")
 }
 
-model SubscriptionUsageQuota {
+model SubscriptionPlan {
   /// Primary key
   pk                 BigInt   @id @default(autoincrement())
   /// Subscription plan type
-  planType           String   @unique @map("plan_type")
-  /// Token quota (T1)
+  planType           String   @map("plan_type")
+  /// Billing interval (monthly, yearly, etc.)
+  interval           String?  @map("interval")
+  /// Lookup key
+  lookupKey          String   @map("lookup_key")
+  /// Token quota per month (T1)
   t1TokenQuota       Int      @default(0) @map("t1_token_quota")
-  /// Token quota (T2)
+  /// Token quota per month (T2)
   t2TokenQuota       Int      @default(1000000) @map("t2_token_quota")
   /// Object storage quota (in bytes), including resource, canvas and static files
   objectStorageQuota BigInt   @default(1000000000) @map("object_storage_quota")
@@ -482,8 +508,8 @@ model SubscriptionUsageQuota {
   /// Update timestamp
   updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz()
 
-  @@index([planType])
-  @@map("subscription_usage_quotas")
+  @@unique([planType, interval])
+  @@map("subscription_plans")
 }
 
 model Subscription {
@@ -593,6 +619,8 @@ model ModelInfo {
   contextLimit Int      @default(0) @map("context_limit")
   /// Model max output length (in tokens)
   maxOutput    Int      @default(0) @map("max_output")
+  /// Model capabilities (JSON)
+  capabilities String   @default("{}") @map("capabilities")
   /// Model tier
   tier         String   @map("tier")
   /// Whether this model is enabled

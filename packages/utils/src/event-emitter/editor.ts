@@ -16,14 +16,8 @@ export interface CanvasEditConfig {
   inPlaceEditType?: InPlaceEditType;
 }
 
-export interface InPlaceSendMessagePayload {
-  userInput: string;
-  inPlaceActionType?: InPlaceActionType;
-  canvasEditConfig?: CanvasEditConfig;
-}
-
 export type Events = {
-  insertBlow: string;
+  insertBelow: string;
   replaceSelection: string;
   contineInChat: string;
   createNewNote: string;
@@ -37,25 +31,18 @@ export type Events = {
     isFirst: boolean;
     content: string;
   };
-  updateCanvasTitle: string;
   activeAskAI: { value: boolean; docId?: string };
-  inPlaceSendMessage: InPlaceSendMessagePayload;
-  askAIResponse: Omit<InPlaceSendMessagePayload, 'userInput'>;
   editorSynced: void;
   exitFullScreen: void;
 };
 
 export type EditorOperation =
-  | 'insertBlow'
+  | 'insertBelow'
   | 'replaceSelection'
   | 'contineInChat'
-  | 'createDocument'
   | 'streamCanvasContent'
   | 'streamEditCanvasContent'
-  | 'updateCanvasTitle'
-  | 'inPlaceSendMessage'
   | 'activeAskAI'
-  | 'askAIResponse'
   | 'editorSynced'
   | 'exitFullScreen';
 

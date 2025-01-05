@@ -7,8 +7,9 @@ import './action-menu.scss';
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 export enum ImportActionMode {
   CREATE_RESOURCE = 'createResource',
@@ -29,10 +30,13 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
   const { updateSourceListDrawer } = useKnowledgeBaseStore((state) => ({
     updateSourceListDrawer: state.updateSourceListDrawer,
   }));
-  const { addNode } = useCanvasControl();
+  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
 
   const { selectedItems, results, setSelectedItems } = useMultilingualSearchStore();
-  const setImportResourceModalVisible = useImportResourceStoreShallow((state) => state.setImportResourceModalVisible);
+  const { setImportResourceModalVisible, insertNodePosition } = useImportResourceStoreShallow((state) => ({
+    setImportResourceModalVisible: state.setImportResourceModalVisible,
+    insertNodePosition: state.insertNodePosition,
+  }));
   const [saveLoading, setSaveLoading] = useState(false);
 
   const handleSelectAll = (checked: boolean) => {
@@ -84,7 +88,13 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
           };
         });
 
-        resources.forEach((resource) => {
+        resources.forEach((resource, index) => {
+          const nodePosition = insertNodePosition
+            ? {
+                x: insertNodePosition?.x + index * 300,
+                y: insertNodePosition?.y,
+              }
+            : null;
           addNode({
             type: 'resource',
             data: {
@@ -95,6 +105,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
                 contentPreview: resource.contentPreview,
               },
             },
+            position: nodePosition,
           });
         });
       }

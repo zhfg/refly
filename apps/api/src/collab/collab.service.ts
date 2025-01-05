@@ -11,6 +11,7 @@ import { Prisma } from '@prisma/client';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { MiscService } from '@/misc/misc.service';
 import { ConfigService } from '@nestjs/config';
+import { RedisService } from '@/common/redis.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { PrismaService } from '@/common/prisma.service';
 import { IDPrefix, incrementalMarkdownUpdate, state2Markdown } from '@refly-packages/utils';
@@ -26,6 +27,7 @@ export class CollabService {
   constructor(
     private rag: RAGService,
     private prisma: PrismaService,
+    private redis: RedisService,
     private elasticsearch: ElasticsearchService,
     private config: ConfigService,
     private miscService: MiscService,
@@ -43,12 +45,7 @@ export class CollabService {
       onDisconnect: async (payload) => {
         this.logger.log(`onDisconnect ${payload.documentName}`);
       },
-      extensions: [
-        new Redis({
-          host: this.config.get('redis.host'),
-          port: this.config.get('redis.port'),
-        }),
-      ],
+      extensions: [new Redis({ redis: this.redis })],
     });
   }
 
@@ -77,14 +74,34 @@ export class CollabService {
 
     let context: CollabContext;
     if (documentName.startsWith(IDPrefix.DOCUMENT)) {
-      const doc = await this.prisma.document.findFirst({
+      let doc = await this.prisma.document.findFirst({
         where: { docId: documentName, deletedAt: null },
       });
+      if (!doc) {
+        doc = await this.prisma.document.create({
+          data: {
+            docId: documentName,
+            uid: payload.uid,
+            title: '',
+          },
+        });
+        this.logger.log(`document created: ${documentName}`);
+      }
       context = { user, entity: doc, entityType: 'document' };
     } else if (documentName.startsWith(IDPrefix.CANVAS)) {
-      const canvas = await this.prisma.canvas.findFirst({
+      let canvas = await this.prisma.canvas.findFirst({
         where: { canvasId: documentName, deletedAt: null },
       });
+      if (!canvas) {
+        canvas = await this.prisma.canvas.create({
+          data: {
+            canvasId: documentName,
+            uid: payload.uid,
+            title: '',
+          },
+        });
+        this.logger.log(`canvas created: ${documentName}`);
+      }
       context = { user, entity: canvas, entityType: 'canvas' };
     } else {
       throw new Error(`unknown document name: ${documentName}`);
@@ -110,6 +127,11 @@ export class CollabService {
       const readable = await this.minio.client.getObject(stateStorageKey);
       const state = await streamToBuffer(readable);
       Y.applyUpdate(document, state);
+
+      const title = document.getText('title')?.toJSON();
+      if (!title) {
+        document.getText('title').insert(0, entity.title);
+      }
     } catch (err) {
       this.logger.error(`fetch state failed for ${stateStorageKey}, err: ${err.stack}`);
       return null;
@@ -118,9 +140,11 @@ export class CollabService {
 
   private async storeDocumentEntity({
     state,
+    document,
     context,
   }: {
     state: Buffer;
+    document: Y.Doc;
     context: Extract<CollabContext, { entityType: 'document' }>;
   }) {
     const { user, entity: doc } = context;
@@ -129,6 +153,8 @@ export class CollabService {
       this.logger.warn(`document is empty for context: ${JSON.stringify(context)}`);
       return;
     }
+
+    const title = document.getText('title').toJSON();
 
     const content = state2Markdown(state);
     const storageKey = doc.storageKey || `doc/${doc.docId}.txt`;
@@ -140,7 +166,7 @@ export class CollabService {
       this.minio.client.putObject(stateStorageKey, state),
     ]);
 
-    // Prepare canvas updates
+    // Prepare document updates
     const docUpdates: Prisma.DocumentUpdateInput = {};
     if (!doc.storageKey) {
       docUpdates.storageKey = storageKey;
@@ -150,6 +176,9 @@ export class CollabService {
     }
     if (doc.contentPreview !== content.slice(0, 500)) {
       docUpdates.contentPreview = content.slice(0, 500);
+    }
+    if (doc.title !== title) {
+      docUpdates.title = title;
     }
 
     // Re-calculate storage size
@@ -164,7 +193,9 @@ export class CollabService {
       this.elasticsearch.upsertDocument({
         id: doc.docId,
         content,
+        title,
         uid: doc.uid,
+        updatedAt: new Date().toJSON(),
       }),
       this.rag.indexDocument(user, {
         pageContent: content,
@@ -240,6 +271,13 @@ export class CollabService {
     });
     context.entity = updatedCanvas;
 
+    await this.elasticsearch.upsertCanvas({
+      id: canvas.canvasId,
+      title,
+      uid: canvas.uid,
+      updatedAt: new Date().toJSON(),
+    });
+
     await this.subscriptionService.syncStorageUsage({
       uid: user.uid,
       timestamp: new Date(),
@@ -250,7 +288,7 @@ export class CollabService {
     const state = Buffer.from(Y.encodeStateAsUpdate(document));
 
     if (isDocumentContext(context)) {
-      return this.storeDocumentEntity({ state, context });
+      return this.storeDocumentEntity({ state, document, context });
     } else if (isCanvasContext(context)) {
       return this.storeCanvasEntity({ state, document, context });
     } else {

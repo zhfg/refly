@@ -213,31 +213,99 @@ export class RAGService {
   async indexDocument(user: User, doc: Document<NodeMeta>): Promise<{ size: number }> {
     const { uid } = user;
     const { pageContent, metadata } = doc;
-    const { nodeType, docId: canvasId, resourceId } = metadata;
-    const docId = nodeType === 'document' ? canvasId : resourceId;
+    const { nodeType, docId, resourceId } = metadata;
+    const entityId = nodeType === 'document' ? docId : resourceId;
 
-    const chunks = await this.chunkText(pageContent);
-    const chunkEmbeds = await this.embeddings.embedDocuments(chunks);
+    // Get new chunks
+    const newChunks = await this.chunkText(pageContent);
 
-    const points: PointStruct[] = [];
-    for (let i = 0; i < chunks.length; i++) {
-      points.push({
-        id: genResourceUuid(`${docId}-${i}`),
-        vector: chunkEmbeds[i],
-        payload: {
-          ...metadata,
-          seq: i,
-          content: chunks[i],
-          tenantId: uid,
+    // Get existing points for this document using scroll
+    const existingPoints = await this.qdrant.scroll({
+      filter: {
+        must: [
+          { key: 'tenantId', match: { value: uid } },
+          { key: nodeType === 'document' ? 'docId' : 'resourceId', match: { value: entityId } },
+        ],
+      },
+      with_payload: true,
+      with_vector: true,
+    });
+
+    // Create a map of existing chunks for quick lookup
+    const existingChunksMap = new Map(
+      existingPoints.map((point) => [
+        point.payload.content,
+        {
+          id: point.id,
+          vector: point.vector as number[],
         },
+      ]),
+    );
+
+    // Prepare points for new or updated chunks
+    const pointsToUpsert: PointStruct[] = [];
+    const chunksNeedingEmbeddings: string[] = [];
+    const chunkIndices: number[] = [];
+
+    // Identify which chunks need new embeddings
+    for (let i = 0; i < newChunks.length; i++) {
+      const chunk = newChunks[i];
+      const existing = existingChunksMap.get(chunk);
+
+      if (existing) {
+        // Reuse existing embedding for identical chunks
+        pointsToUpsert.push({
+          id: genResourceUuid(`${entityId}-${i}`),
+          vector: existing.vector,
+          payload: {
+            ...metadata,
+            seq: i,
+            content: chunk,
+            tenantId: uid,
+          },
+        });
+      } else {
+        // Mark for new embedding computation
+        chunksNeedingEmbeddings.push(chunk);
+        chunkIndices.push(i);
+      }
+    }
+
+    // Compute embeddings only for new or modified chunks
+    if (chunksNeedingEmbeddings.length > 0) {
+      const newEmbeddings = await this.embeddings.embedDocuments(chunksNeedingEmbeddings);
+
+      // Create points for chunks with new embeddings
+      chunkIndices.forEach((originalIndex, embeddingIndex) => {
+        pointsToUpsert.push({
+          id: genResourceUuid(`${entityId}-${originalIndex}`),
+          vector: newEmbeddings[embeddingIndex],
+          payload: {
+            ...metadata,
+            seq: originalIndex,
+            content: chunksNeedingEmbeddings[embeddingIndex],
+            tenantId: uid,
+          },
+        });
       });
     }
 
-    if (points.length > 0) {
-      await this.qdrant.batchSaveData(points);
+    // Delete existing points for this document
+    if (existingPoints.length > 0) {
+      await this.qdrant.batchDelete({
+        must: [
+          { key: 'tenantId', match: { value: uid } },
+          { key: nodeType === 'document' ? 'docId' : 'resourceId', match: { value: entityId } },
+        ],
+      });
     }
 
-    return { size: QdrantService.estimatePointsSize(points) };
+    // Save new points
+    if (pointsToUpsert.length > 0) {
+      await this.qdrant.batchSaveData(pointsToUpsert);
+    }
+
+    return { size: QdrantService.estimatePointsSize(pointsToUpsert) };
   }
 
   async deleteResourceNodes(user: User, resourceId: string) {
@@ -249,11 +317,11 @@ export class RAGService {
     });
   }
 
-  async deleteCanvasNodes(user: User, canvasId: string) {
+  async deleteDocumentNodes(user: User, docId: string) {
     return this.qdrant.batchDelete({
       must: [
         { key: 'tenantId', match: { value: user.uid } },
-        { key: 'canvasId', match: { value: canvasId } },
+        { key: 'docId', match: { value: docId } },
       ],
     });
   }
@@ -285,7 +353,7 @@ export class RAGService {
     }
     if (param.filter?.docIds?.length > 0) {
       conditions.push({
-        key: 'canvasId',
+        key: 'docId',
         match: { any: param.filter?.docIds },
       });
     }

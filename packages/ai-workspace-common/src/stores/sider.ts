@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 
-interface SiderData {
+export interface SiderData {
   id: string;
   name: string;
   updatedAt: string;
@@ -27,6 +27,7 @@ interface SiderState {
   setShowCanvasListModal: (val: boolean) => void;
   setShowLibraryModal: (val: boolean) => void;
   setShowSettingModal: (val: boolean) => void;
+  updateCanvasTitle: (canvasId: string, title: string) => void;
 }
 
 export const useSiderStore = create<SiderState>()(
@@ -46,6 +47,14 @@ export const useSiderStore = create<SiderState>()(
     setShowCanvasListModal: (val: boolean) => set({ showCanvasListModal: val }),
     setShowLibraryModal: (val: boolean) => set({ showLibraryModal: val }),
     setShowSettingModal: (val: boolean) => set({ showSettingModal: val }),
+    updateCanvasTitle: (canvasId: string, title: string) => {
+      set((state) => {
+        const canvasList = state.canvasList.map((canvas) =>
+          canvas.id === canvasId ? { ...canvas, name: title } : canvas,
+        );
+        return { canvasList };
+      });
+    },
   })),
 );
 

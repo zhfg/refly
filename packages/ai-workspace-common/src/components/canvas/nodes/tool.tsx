@@ -1,10 +1,10 @@
 import { Position, NodeProps, useReactFlow } from '@xyflow/react';
-import { CanvasNodeData, ToolNodeMeta } from './types';
+import { CanvasNodeData, ToolNodeMeta } from './shared/types';
 import { Node } from '@xyflow/react';
 import { Wrench, MoreHorizontal } from 'lucide-react';
-import { CustomHandle } from './custom-handle';
+import { CustomHandle } from './shared/custom-handle';
 import { useState, useCallback } from 'react';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 
@@ -28,7 +28,7 @@ const getToolTitle = (toolType: string | undefined) => {
 
 export const ToolNode = ({ data, selected, id }: NodeProps<ToolNode>) => {
   const [isHovered, setIsHovered] = useState(false);
-  const { edges } = useCanvasControl();
+  const { edges } = useCanvasData();
   const { setEdges } = useReactFlow();
   const edgeStyles = useEdgeStyles();
 

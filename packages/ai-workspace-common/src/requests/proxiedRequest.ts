@@ -9,7 +9,7 @@ import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/util
 import { getServerOrigin } from '@refly/utils/url';
 import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { LOCALE, MessageName } from '@refly/common-types';
-import { ConnectionError, getErrorMessage, UnknownError } from '@refly/errors';
+import { ConnectionError, getErrorMessage, OperationTooFrequent, UnknownError } from '@refly/errors';
 import { safeParseJSON, safeStringifyJSON } from '@refly-packages/utils/parse';
 import { BaseResponse } from '@refly/openapi-schema';
 
@@ -40,10 +40,15 @@ export interface CheckResponseResult {
 
 export const extractBaseResp = async (response: Response): Promise<BaseResponse> => {
   if (!response.ok) {
-    return {
-      success: false,
-      errCode: new UnknownError().code,
-    };
+    return response.status === 429
+      ? {
+          success: false,
+          errCode: new OperationTooFrequent().code,
+        }
+      : {
+          success: false,
+          errCode: new UnknownError().code,
+        };
   }
 
   if (response.headers.get('Content-Type')?.includes('application/json')) {

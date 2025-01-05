@@ -3,12 +3,15 @@ import { HiOutlinePencil } from 'react-icons/hi';
 import { useEffect, useState } from 'react';
 
 // utils
-import { useImportResourceStore } from '@refly-packages/ai-workspace-common/stores/import-resource';
+import {
+  useImportResourceStore,
+  useImportResourceStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/import-resource';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 
 const { TextArea } = Input;
@@ -18,7 +21,10 @@ export const ImportFromText = () => {
   const { t } = useTranslation();
   const importResourceStore = useImportResourceStore();
   const { copiedTextPayload } = useImportResourceStore.getState();
-  const { addNode } = useCanvasControl();
+  const { addNode } = useAddNode();
+  const { insertNodePosition } = useImportResourceStoreShallow((state) => ({
+    insertNodePosition: state.insertNodePosition,
+  }));
 
   const [saveLoading, setSaveLoading] = useState(false);
   const { getLibraryList } = useHandleSiderData();
@@ -56,6 +62,7 @@ export const ImportFromText = () => {
           entityId: data?.data?.resourceId,
           contentPreview: data?.data?.contentPreview,
         },
+        position: insertNodePosition,
       });
     }
   };

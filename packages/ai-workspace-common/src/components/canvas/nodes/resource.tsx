@@ -1,303 +1,341 @@
+import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Position, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
-import { CanvasNodeData, ResourceNodeMeta, CanvasNode, ResourceNodeProps } from './types';
+import { CanvasNodeData, ResourceNodeMeta, CanvasNode, ResourceNodeProps } from './shared/types';
 import { Node } from '@xyflow/react';
-import { CustomHandle } from './custom-handle';
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { CustomHandle } from './shared/custom-handle';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
-import { ActionButtons } from './action-buttons';
-import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/use-add-to-context';
-import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/use-delete-node';
+import { ActionButtons } from './shared/action-buttons';
+import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
+import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
-import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { useThrottledCallback } from 'use-debounce';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
-import Moveable from 'react-moveable';
 import classNames from 'classnames';
+import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
+import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
+import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
+import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { genSkillID } from '@refly-packages/utils/id';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-data';
+import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
+import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
+import { NodeHeader } from './shared/node-header';
+import { ContentPreview } from './shared/content-preview';
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
 
-export const ResourceNode = ({
-  data,
-  selected,
-  id,
-  isPreview = false,
-  hideActions = false,
-  hideHandles = false,
-  onNodeClick,
-}: ResourceNodeProps) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const { edges, setNodeDataByEntity } = useCanvasControl();
-  const { setEdges } = useReactFlow();
-  const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
+export const ResourceNode = memo(
+  ({ id, data, isPreview, selected, hideActions, hideHandles, onNodeClick }: ResourceNodeProps) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const [shouldPoll, setShouldPoll] = useState(false);
+    const { edges } = useCanvasData();
+    const setNodeDataByEntity = useSetNodeDataByEntity();
+    const { getNode, setEdges } = useReactFlow();
+    const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
 
-  const { i18n, t } = useTranslation();
-  const language = i18n.languages?.[0];
+    const { i18n, t } = useTranslation();
+    const language = i18n.languages?.[0];
 
-  const targetRef = useRef<HTMLDivElement>(null);
-  const { getNode } = useReactFlow();
-  const node = getNode(id);
-  const [size, setSize] = useState({
-    width: node?.measured?.width ?? 288,
-    height: node?.measured?.height ?? 384,
-  });
+    const targetRef = useRef<HTMLDivElement>(null);
 
-  // Check if node has any connections
-  const isTargetConnected = edges?.some((edge) => edge.target === id);
-  const isSourceConnected = edges?.some((edge) => edge.source === id);
+    const { operatingNodeId } = useCanvasStoreShallow((state) => ({
+      operatingNodeId: state.operatingNodeId,
+    }));
 
-  const edgeStyles = useEdgeStyles();
+    const isOperating = operatingNodeId === id;
+    const sizeMode = data?.metadata?.sizeMode || 'adaptive';
+    const node = useMemo(() => getNode(id), [id, data?.metadata?.sizeMode, getNode]);
 
-  // 立即更新hover状态，但节流更新边缘样式
-  const updateEdgeStyles = useThrottledCallback(
-    (hoveredState: boolean) => {
-      setEdges((eds) =>
-        eds.map((edge) => {
-          if (edge.source === id || edge.target === id) {
-            return {
-              ...edge,
-              style: hoveredState ? edgeStyles.hover : edgeStyles.default,
-            };
-          }
-          return edge;
-        }),
-      );
-    },
-    500,
-    { leading: true, trailing: false },
-  );
-
-  const handleMouseEnter = useCallback(() => {
-    if (!isHovered) {
-      setIsHovered(true);
-      updateEdgeStyles(true);
-    }
-  }, [isHovered, updateEdgeStyles]);
-
-  const handleMouseLeave = useCallback(() => {
-    if (isHovered) {
-      setIsHovered(false);
-      updateEdgeStyles(false);
-    }
-  }, [isHovered, updateEdgeStyles]);
-
-  const handleAddToContext = useAddToContext(
-    {
+    const { containerStyle, handleResize } = useNodeSize({
       id,
-      type: 'resource',
-      data,
-      position: { x: 0, y: 0 },
-    } as CanvasNode,
-    'resource',
-  );
+      node,
+      sizeMode,
+      isOperating,
+      minWidth: 100,
+      maxWidth: 800,
+      minHeight: 80,
+      defaultWidth: 288,
+      defaultHeight: 384,
+    });
 
-  const handleDelete = useDeleteNode(
-    {
-      id,
-      type: 'resource',
-      data,
-      position: { x: 0, y: 0 },
-    } as CanvasNode,
-    'resource',
-  );
+    // Check if node has any connections
+    const isTargetConnected = edges?.some((edge) => edge.target === id);
+    const isSourceConnected = edges?.some((edge) => edge.source === id);
 
-  const handleHelpLink = useCallback(() => {
-    // Implement help link logic
-    console.log('Open help link');
-  }, []);
+    const edgeStyles = useEdgeStyles();
 
-  const handleAbout = useCallback(() => {
-    // Implement about logic
-    console.log('Show about info');
-  }, []);
+    // Update hover state and edge styles
+    const updateEdgeStyles = useThrottledCallback(
+      (hoveredState: boolean) => {
+        setEdges((eds) =>
+          eds.map((edge) => {
+            if (edge.source === id || edge.target === id) {
+              return {
+                ...edge,
+                style: hoveredState ? edgeStyles.hover : edgeStyles.default,
+              };
+            }
+            return edge;
+          }),
+        );
+      },
+      500,
+      { leading: true, trailing: false },
+    );
 
-  const { operatingNodeId } = useCanvasStoreShallow((state) => ({
-    operatingNodeId: state.operatingNodeId,
-  }));
+    const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
 
-  const isOperating = operatingNodeId === id;
+    const handleMouseEnter = useCallback(() => {
+      if (!isHovered) {
+        setIsHovered(true);
+        onHoverStart();
+      }
+    }, [isHovered, onHoverStart]);
 
-  const [shouldPoll, setShouldPoll] = useState(false);
-  const { data: result } = useGetResourceDetail(
-    {
-      query: { resourceId: data?.entityId },
-    },
-    null,
-    {
-      enabled: shouldPoll,
-      refetchInterval: 2000,
-    },
-  );
-  const remoteResult = result?.data;
+    const handleMouseLeave = useCallback(() => {
+      if (isHovered) {
+        setIsHovered(false);
+        onHoverEnd();
+      }
+    }, [isHovered, onHoverEnd]);
 
-  useEffect(() => {
-    if (!data.contentPreview) {
-      setNodeDataByEntity(
+    const { addToContext } = useAddToContext();
+
+    const handleAddToContext = useCallback(() => {
+      addToContext({
+        type: 'resource',
+        title: data.title,
+        entityId: data.entityId,
+        metadata: data.metadata,
+      });
+    }, [id, data, addToContext]);
+
+    const { deleteNode } = useDeleteNode();
+
+    const handleDelete = useCallback(() => {
+      deleteNode({
+        id,
+        type: 'resource',
+        data,
+        position: { x: 0, y: 0 },
+      } as CanvasNode);
+    }, [id, data, deleteNode]);
+
+    const handleHelpLink = useCallback(() => {
+      // Implement help link logic
+      console.log('Open help link');
+    }, []);
+
+    const handleAbout = useCallback(() => {
+      // Implement about logic
+      console.log('Show about info');
+    }, []);
+
+    const { addNode } = useAddNode();
+
+    const handleAskAI = useCallback(() => {
+      addNode(
         {
-          entityId: data.entityId,
-          type: 'resource',
+          type: 'skill',
+          data: {
+            title: 'Skill',
+            entityId: genSkillID(),
+            metadata: {
+              contextItems: [
+                {
+                  type: 'resource',
+                  title: data.title,
+                  entityId: data.entityId,
+                  metadata: data.metadata,
+                },
+              ] as IContextItem[],
+            },
+          },
         },
-        {
-          contentPreview: remoteResult?.contentPreview,
-        },
+        [{ type: 'resource', entityId: data.entityId }],
       );
-      if (remoteResult?.indexStatus === 'wait_parse') {
-        setShouldPoll(true);
+    }, [id, data, addNode]);
+
+    const { data: result } = useGetResourceDetail(
+      {
+        query: { resourceId: data?.entityId },
+      },
+      null,
+      {
+        enabled: shouldPoll,
+        refetchInterval: shouldPoll ? 2000 : false,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
+        staleTime: 60 * 1000, // Data fresh for 1 minute
+        gcTime: 5 * 60 * 1000, // Cache for 5 minutes
+      },
+    );
+    const remoteResult = result?.data;
+
+    useEffect(() => {
+      if (!data.contentPreview) {
+        setNodeDataByEntity(
+          {
+            entityId: data.entityId,
+            type: 'resource',
+          },
+          {
+            contentPreview: remoteResult?.contentPreview,
+          },
+        );
+        if (remoteResult?.indexStatus === 'wait_parse') {
+          setShouldPoll(true);
+        } else {
+          setShouldPoll(false);
+        }
       } else {
         setShouldPoll(false);
       }
-    } else {
-      setShouldPoll(false);
-    }
-  }, [data.contentPreview, remoteResult]);
+    }, [data.contentPreview, remoteResult]);
 
-  return (
-    <div className={classNames({ nowheel: isOperating })}>
-      <div
-        ref={targetRef}
-        className="relative group"
-        onMouseEnter={!isPreview ? handleMouseEnter : undefined}
-        onMouseLeave={!isPreview ? handleMouseLeave : undefined}
-        onClick={onNodeClick}
-        style={{
-          width: `${size.width}px`,
-          height: `${size.height}px`,
-          userSelect: isOperating ? 'text' : 'none',
-          cursor: isOperating ? 'text' : 'grab',
-        }}
-      >
-        {!isPreview && !hideActions && (
-          <ActionButtons
-            type="resource"
-            nodeId={id}
-            onAddToContext={handleAddToContext}
-            onDelete={handleDelete}
-            onHelpLink={handleHelpLink}
-            onAbout={handleAbout}
-            isProcessing={false}
-          />
-        )}
+    // Add event handling
+    useEffect(() => {
+      // Create node-specific event handlers
+      const handleNodeAddToContext = () => handleAddToContext();
+      const handleNodeDelete = () => handleDelete();
+      const handleNodeAskAI = () => handleAskAI();
 
+      // Register events with node ID
+      nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
+      nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
+      nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
+
+      return () => {
+        // Cleanup events when component unmounts
+        nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
+        nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
+        nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
+
+        // Clean up all node events
+        cleanupNodeEvents(id);
+      };
+    }, [id, handleAddToContext, handleDelete, handleAskAI]);
+
+    return (
+      <div className={classNames({ nowheel: isOperating })}>
         <div
-          className={`
-          relative
-          h-full
-          ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
-        `}
+          ref={targetRef}
+          style={containerStyle}
+          onMouseEnter={!isPreview ? handleMouseEnter : undefined}
+          onMouseLeave={!isPreview ? handleMouseLeave : undefined}
+          onClick={onNodeClick}
         >
-          <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
+          {!isPreview && !hideActions && <ActionButtons type="resource" nodeId={id} isNodeHovered={isHovered} />}
 
-          <div className="flex flex-col h-full">
-            <div className="flex-shrink-0 mb-3">
-              <div className="flex items-center gap-2">
+          <div
+            className={`
+            relative
+            h-full
+            p-3
+            ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
+          `}
+          >
+            {/* Gradient overlay for entire node */}
+            <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
+
+            <div className="flex flex-col h-full relative">
+              <NodeHeader title={data.title} Icon={ResourceIcon} iconBgColor="#17B26A" />
+
+              <div className="relative flex-grow min-h-0">
                 <div
-                  className="
-                  w-6 
-                  h-6 
-                  rounded 
-                  bg-[#17B26A] 
-                  shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)]
-                  flex 
-                  items-center 
-                  justify-center
-                  flex-shrink-0
-                "
+                  style={{
+                    height: '100%',
+                    overflowY: 'auto',
+                    maxHeight: sizeMode === 'compact' ? '40px' : '384px',
+                    paddingBottom: '40px',
+                  }}
                 >
-                  <ResourceIcon className="w-4 h-4 text-white" />
+                  <ContentPreview
+                    content={data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
+                    sizeMode={sizeMode}
+                    isOperating={isOperating}
+                    isLoading={remoteResult?.indexStatus === 'wait_parse'}
+                    maxCompactLength={10}
+                  />
                 </div>
 
-                <span
-                  className="
-                  text-sm
-                  font-medium
-                  leading-normal
-                  text-[rgba(0,0,0,0.8)]
-                  truncate
-                "
-                >
-                  {data.title}
-                </span>
+                {/* Timestamp container */}
+                <div className="absolute bottom-0 left-0 right-0 z-[20]">
+                  <div className="flex justify-end items-center text-[10px] text-gray-400 mt-1 px-1">
+                    {time(data.createdAt, language as LOCALE)
+                      ?.utc()
+                      ?.fromNow()}
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="flex-grow overflow-y-auto pr-2 -mr-2">
-              <Markdown
-                className={`text-xs ${isOperating ? 'pointer-events-auto' : 'pointer-events-none'}`}
-                content={data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
-              />
-            </div>
-
-            <div className="flex justify-end items-center flex-shrink-0 mt-2 text-[10px] text-gray-400 z-20">
-              {time(data.createdAt, language as LOCALE)
-                ?.utc()
-                ?.fromNow()}
-            </div>
+            {/* Handles */}
+            {!isPreview && !hideHandles && (
+              <>
+                <CustomHandle
+                  type="target"
+                  position={Position.Left}
+                  isConnected={isTargetConnected}
+                  isNodeHovered={isHovered}
+                  nodeType="resource"
+                />
+                <CustomHandle
+                  type="source"
+                  position={Position.Right}
+                  isConnected={isSourceConnected}
+                  isNodeHovered={isHovered}
+                  nodeType="resource"
+                />
+              </>
+            )}
           </div>
-
-          {!isPreview && !hideHandles && (
-            <>
-              <CustomHandle
-                type="target"
-                position={Position.Left}
-                isConnected={isTargetConnected}
-                isNodeHovered={isHovered}
-                nodeType="resource"
-              />
-              <CustomHandle
-                type="source"
-                position={Position.Right}
-                isConnected={isSourceConnected}
-                isNodeHovered={isHovered}
-                nodeType="resource"
-              />
-            </>
-          )}
         </div>
+
+        {!isPreview && selected && sizeMode === 'adaptive' && (
+          <NodeResizerComponent
+            targetRef={targetRef}
+            isSelected={selected}
+            isHovered={isHovered}
+            isPreview={isPreview}
+            sizeMode={sizeMode}
+            onResize={handleResize}
+          />
+        )}
       </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Compare style and sizeMode
+    const prevStyle = prevProps.data?.metadata?.style;
+    const nextStyle = nextProps.data?.metadata?.style;
+    const styleEqual = JSON.stringify(prevStyle) === JSON.stringify(nextStyle);
 
-      {!isPreview && selected && (
-        <Moveable
-          target={targetRef}
-          resizable={true}
-          edge={false}
-          throttleResize={1}
-          renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
-          onResizeStart={({ setOrigin, dragStart }) => {
-            setOrigin(['%', '%']);
-            if (dragStart && dragStart instanceof MouseEvent) {
-              dragStart.preventDefault();
-            }
-          }}
-          onResize={({ target, width, height, direction }) => {
-            const newWidth = Math.max(100, width);
-            const newHeight = Math.max(80, height);
+    const prevSizeMode = prevProps.data?.metadata?.sizeMode;
+    const nextSizeMode = nextProps.data?.metadata?.sizeMode;
+    const sizeModeEqual = prevSizeMode === nextSizeMode;
 
-            let newLeft = (target as HTMLElement).offsetLeft;
-            let newTop = (target as HTMLElement).offsetTop;
-
-            if (direction[0] === -1) {
-              newLeft = (target as HTMLElement).offsetLeft - (newWidth - (target as HTMLElement).offsetWidth);
-            }
-            if (direction[1] === -1) {
-              newTop = (target as HTMLElement).offsetTop - (newHeight - (target as HTMLElement).offsetHeight);
-            }
-
-            target.style.width = `${newWidth}px`;
-            target.style.height = `${newHeight}px`;
-            target.style.left = `${newLeft}px`;
-            target.style.top = `${newTop}px`;
-
-            setSize({ width: newWidth, height: newHeight });
-          }}
-          hideDefaultLines={true}
-          className={`!pointer-events-auto ${!isHovered ? 'moveable-control-hidden' : 'moveable-control-show'}`}
-        />
-      )}
-    </div>
-  );
-};
+    return (
+      prevProps.id === nextProps.id &&
+      prevProps.selected === nextProps.selected &&
+      prevProps.isPreview === nextProps.isPreview &&
+      prevProps.hideActions === nextProps.hideActions &&
+      prevProps.hideHandles === nextProps.hideHandles &&
+      prevProps.data.title === nextProps.data.title &&
+      prevProps.data.contentPreview === nextProps.data.contentPreview &&
+      prevProps.data.createdAt === nextProps.data.createdAt &&
+      JSON.stringify(prevProps.data.metadata) === JSON.stringify(nextProps.data.metadata) &&
+      styleEqual &&
+      sizeModeEqual // Add sizeMode comparison
+    );
+  },
+);

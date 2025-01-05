@@ -13,7 +13,7 @@ import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/wo
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { Resource } from '@refly/openapi-schema';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
-import { useCanvasControl } from '@refly-packages/ai-workspace-common/hooks/use-canvas-control';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 
 const { Meta } = Card;
 
@@ -24,7 +24,7 @@ export const ResourceList = () => {
     showLibraryModal: state.showLibraryModal,
     setShowLibraryModal: state.setShowLibraryModal,
   }));
-  const { addNode } = useCanvasControl();
+  const { addNode } = useAddNode();
 
   const { getLibraryList } = useHandleSiderData();
   const { dataList, setDataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({

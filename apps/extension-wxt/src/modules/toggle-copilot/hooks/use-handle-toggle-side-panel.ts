@@ -1,11 +1,7 @@
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { onMessage, sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { BackgroundMessage, CopilotMsgName } from '@refly/common-types';
-import { useEffect, useRef } from 'react';
-import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
-import { ToggleCopilotStatus } from '@/types/sidePanel';
-import { useHandleContextWorkflow } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-handle-context-workflow';
-import { safeParseJSON } from '@refly/utils/parse';
+import { useRef } from 'react';
 
 export const useToggleSidePanel = () => {
   const messageListenerEventRef = useRef<any>();

@@ -73,14 +73,11 @@ initSentry()
 
 // Update App component to remove Suspense (moved to router definition)
 export const App = () => {
-  const userStore = useUserStoreShallow(state => ({
-    setRuntime: state.setRuntime,
-  }))
+  const setRuntime = useUserStoreShallow(state => state.setRuntime)
 
   useEffect(() => {
     setRuntime("web")
-    userStore.setRuntime("web")
-  }, [])
+  }, [setRuntime])
 
   return (
     <ConfigProvider

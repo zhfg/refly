@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Divider, Empty, message, Skeleton } from 'antd';
+import { Button, Empty, message, Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useChatStore } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/use-invoke-action';
+import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { genActionResultID } from '@refly-packages/utils/id';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
-import { InvokeSkillRequest } from '@refly-packages/ai-workspace-common/requests/types.gen';
-import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { convertContextItemsToContext } from '@refly-packages/ai-workspace-common/utils/map-context-items';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
 
 interface RecommendQuestionsPanelProps {
   isOpen: boolean;
@@ -26,39 +23,32 @@ export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = (
   const { invokeAction } = useInvokeAction();
   const { setNewQAText } = useChatStore();
 
+  const skill = useFindSkill('recommendQuestions');
+
   const fetchRecommendQuestions = async (refresh = false) => {
     setLoading(true);
     const resultId = genActionResultID();
     const { selectedModel, newQAText } = useChatStore.getState();
-    const { historyItems, contextItems } = useContextPanelStore.getState();
-    const { localSettings } = useUserStore.getState();
+    const { contextItems } = useContextPanelStore.getState();
 
-    const param: InvokeSkillRequest = {
-      resultId,
-      input: {
+    invokeAction(
+      {
         query: newQAText,
-      },
-      target: null,
-      context: convertContextItemsToContext(contextItems),
-      skillName: 'recommendQuestions',
-      modelName: selectedModel?.name,
-      resultHistory: historyItems.map((item) => ({
-        resultId: item?.data?.entityId,
-        title: item?.data?.title,
-        steps: item?.data?.metadata?.steps,
-      })),
-      tplConfig: {
-        refresh: {
-          value: refresh,
-          label: t('copilot.recommendQuestions.refresh'),
-          displayValue: refresh ? t('copilot.recommendQuestions.refresh') : '',
-          configScope: ['runtime'],
+        resultId,
+        contextItems,
+        selectedSkill: skill,
+        modelInfo: selectedModel,
+        tplConfig: {
+          refresh: {
+            value: refresh,
+            label: t('copilot.recommendQuestions.refresh'),
+            displayValue: refresh ? t('copilot.recommendQuestions.refresh') : '',
+            configScope: ['runtime'],
+          },
         },
       },
-      locale: localSettings?.outputLocale,
-    };
-
-    invokeAction(param);
+      null,
+    );
   };
 
   const handleQuestionClick = (question: string) => {
@@ -146,7 +136,7 @@ export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = (
   if (!isOpen) return null;
 
   return (
-    <div className="w-full border border-solid border-black/10 shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)] max-w-4xl mx-auto p-3 pb-1 space-y-1 rounded-lg bg-white mb-1">
+    <div className="w-full border border-solid border-black/10 shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)] max-w-7xl mx-auto p-3 pb-1 space-y-1 rounded-lg bg-white mb-1">
       <div className="text-gray-800 font-bold flex items-center justify-between">
         <div className="flex items-center space-x-1 pl-1">
           <span>{t('copilot.recommendQuestions.title')}</span>

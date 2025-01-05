@@ -3,24 +3,25 @@ import { useMatch, useNavigate } from '@refly-packages/ai-workspace-common/utils
 
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { LocalSettings, defaultLocalSettings, useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import {
+  LocalSettings,
+  defaultLocalSettings,
+  useUserStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/user';
 import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { mapDefaultLocale } from '@refly-packages/ai-workspace-common/utils/locale';
 import { useCookie } from 'react-use';
 import { LOCALE } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
-import { getClientOrigin, getWebLogin } from '@refly-packages/utils/url';
-import { getRuntime } from '../utils/env';
 import { GetUserSettingsResponse } from '@refly/openapi-schema';
 
 export const useGetUserSettings = () => {
-  const userStore = useUserStore((state) => ({
+  const userStore = useUserStoreShallow((state) => ({
     setUserProfile: state.setUserProfile,
     setLocalSettings: state.setLocalSettings,
     setToken: state.setToken,
     setIsCheckingLoginStatus: state.setIsCheckingLoginStatus,
     setIsLogin: state.setIsLogin,
-    loginModalVisible: state.loginModalVisible,
     userProfile: state.userProfile,
     localSettings: state.localSettings,
     isCheckingLoginStatus: state.isCheckingLoginStatus,
@@ -38,8 +39,8 @@ export const useGetUserSettings = () => {
   const routeFeedDetailPageMatch = useMatch('/feed/:feedId');
   const routeAIGCContentDetailPageMatch = useMatch('/content/:digestId');
   const routeThreadDetailPageMatch = useMatch('/thread/:threadId');
-  const isWebLogin = useMatch('/login');
   const isShareContent = useMatch('/share/:shareCode');
+  const isPricing = useMatch('/pricing');
 
   const getLoginStatus = async () => {
     let error: any;
@@ -60,7 +61,7 @@ export const useGetUserSettings = () => {
       userStore.setToken('');
       userStore.setIsLogin(false);
 
-      if (!isShareContent) {
+      if (!isShareContent && !isPricing) {
         navigate('/'); // Extension should navigate to home
       }
 
@@ -110,54 +111,7 @@ export const useGetUserSettings = () => {
     userStore.setIsCheckingLoginStatus(false);
   };
 
-  const getLoginStatusForLogin = async () => {
-    let error: any;
-    let res: GetUserSettingsResponse;
-
-    userStore.setIsCheckingLoginStatus(true);
-
-    if (token) {
-      const resp = await getClient().getSettings();
-      error = resp.error;
-      res = resp.data;
-    }
-
-    if (!token || error || !res?.data) {
-      userStore.setIsCheckingLoginStatus(false);
-      userStore.setUserProfile(undefined);
-      userStore.setLocalSettings(defaultLocalSettings);
-      userStore.setToken('');
-      userStore.setIsLogin(false);
-
-      if (
-        routeLandingPageMatch ||
-        routePrivacyPageMatch ||
-        routeTermsPageMatch ||
-        routeLoginPageMatch ||
-        routeDigestDetailPageMatch ||
-        routeFeedDetailPageMatch ||
-        routeAIGCContentDetailPageMatch ||
-        routeThreadDetailPageMatch ||
-        isWebLogin ||
-        isShareContent
-      ) {
-        console.log("Matched a page that doesn't require authentication, display directly");
-      } else {
-        navigate('/');
-      }
-    } else {
-      userStore.setIsCheckingLoginStatus(false);
-      userStore.setIsLogin(true);
-      // Authentication successful, redirect to home
-      navigate('/');
-    }
-  };
-
   useEffect(() => {
-    if (isWebLogin) {
-      getLoginStatusForLogin();
-    } else {
-      getLoginStatus();
-    }
+    getLoginStatus();
   }, [token]);
 };

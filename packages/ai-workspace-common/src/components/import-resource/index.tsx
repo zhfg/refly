@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 
 // 样式
 import './index.scss';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { IconSearch } from '@arco-design/web-react/icon';
@@ -29,10 +29,17 @@ export const ImportResourceModal = () => {
     setImportResourceModalVisible: state.setImportResourceModalVisible,
     selectedMenuItem: state.selectedMenuItem,
     setSelectedMenuItem: state.setSelectedMenuItem,
+    setInsertNodePosition: state.setInsertNodePosition,
   }));
 
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
+
+  useEffect(() => {
+    return () => {
+      importResourceStore.setInsertNodePosition(null);
+    };
+  }, []);
 
   return (
     <Modal

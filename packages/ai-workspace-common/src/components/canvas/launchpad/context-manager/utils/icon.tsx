@@ -1,35 +1,30 @@
-import { IconLink } from '@arco-design/web-react/icon';
-import { IconCanvas, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { MarkType } from '@refly/common-types';
-import { CanvasNodeType } from '@refly/openapi-schema';
-import { FileText } from 'lucide-react';
-import { HiOutlineDocumentText, HiOutlineSquare3Stack3D } from 'react-icons/hi2';
+import {
+  IconMemo,
+  IconThreadHistory,
+  IconResponseFilled,
+  IconResourceFilled,
+  IconDocumentFilled,
+  IconThreadHistoryFilled,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
+import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/colors';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
-export const getTypeIcon = (markType: MarkType, style?: any) => {
-  switch (markType) {
-    case 'resource':
-      return <HiOutlineSquare3Stack3D style={style} />;
-    case 'resourceSelection':
-      return <HiOutlineSquare3Stack3D style={style} />;
-    case 'document':
-      return <HiOutlineDocumentText style={style} />;
-    case 'documentSelection':
-      return <HiOutlineDocumentText style={style} />;
-    case 'extensionWeblink':
-      return <IconLink style={style} />;
-    case 'extensionWeblinkSelection':
-      return <IconLink style={style} />;
-  }
-};
+export const getContextItemIcon = (item: IContextItem, style?: React.CSSProperties) => {
+  const color = NODE_COLORS[item.type];
 
-export const getNodeIcon = (node: CanvasNodeType, style?: any) => {
-  switch (node) {
+  switch (item.type) {
     case 'resource':
-      return <HiOutlineSquare3Stack3D style={style} />;
+      return <IconResourceFilled style={{ color, ...style }} />;
     case 'document':
-      return <HiOutlineDocumentText style={style} />;
+      return <IconDocumentFilled style={{ color, ...style }} />;
+    case 'memo':
+      return <IconMemo style={{ color, ...style }} />;
     case 'skillResponse':
-      return <IconCanvas />;
+      return item.metadata?.withHistory ? (
+        <IconThreadHistoryFilled style={{ color: NODE_COLORS['threadHistory'], ...style }} />
+      ) : (
+        <IconResponseFilled style={{ color, ...style }} />
+      );
     default:
       return null;
   }

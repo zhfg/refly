@@ -1,6 +1,6 @@
 import { Button, Popover } from 'antd';
 import { Check, Trash } from 'lucide-react';
-import { useEditor } from '../../core/components';
+import { useEditor, EditorInstance } from '../../core/components';
 import { useEffect, useRef } from 'react';
 import { Link as LucideLink } from 'lucide-react';
 
@@ -25,11 +25,13 @@ export function getUrlFromString(str: string) {
 interface LinkSelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  triggerEditor?: EditorInstance;
 }
 
-export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
+export const LinkSelector = ({ open, onOpenChange, triggerEditor }: LinkSelectorProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { editor } = useEditor();
+  const { editor: currentEditor } = useEditor();
+  const editor = triggerEditor || currentEditor;
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -86,8 +88,8 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
       placement="bottom"
       overlayClassName="editor-link-popover"
     >
-      <Button type="text" className="gap-2 rounded-none border-none px-2">
-        <LucideLink className="h-4 w-4 font-medium" />
+      <Button type="text" className="gap-2 rounded-none border-none px-1.5">
+        <LucideLink className="h-3.5 w-3.5 font-medium" />
       </Button>
     </Popover>
   );

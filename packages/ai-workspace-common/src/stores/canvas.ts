@@ -9,11 +9,17 @@ interface CanvasData {
   nodes: CanvasNode<any>[];
   edges: Edge[];
   title: string;
-  mode: 'pointer' | 'hand';
+  initialFitViewCompleted?: boolean;
 }
 
+type NodePreview = CanvasNode<any> & {
+  isPinned?: boolean;
+};
+
 interface CanvasConfig {
-  pinnedNodes: CanvasNode<any>[];
+  localSyncedAt?: number;
+  remoteSyncedAt?: number;
+  nodePreviews: NodePreview[];
 }
 
 export interface CanvasState {
@@ -26,50 +32,66 @@ export interface CanvasState {
   interactionMode: 'mouse' | 'touchpad';
   operatingNodeId: string | null;
   showEdges: boolean;
+  clickToPreview: boolean;
+  nodeSizeMode: 'compact' | 'adaptive';
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
   setTitle: (canvasId: string, title: string) => void;
+  setInitialFitViewCompleted: (canvasId: string, completed: boolean) => void;
   deleteCanvasData: (canvasId: string) => void;
   setCurrentCanvasId: (canvasId: string) => void;
-  setMode: (canvasId: string, mode: 'pointer' | 'hand') => void;
-  addPinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
-  removePinnedNode: (canvasId: string, node: CanvasNode<any>) => void;
+  addNodePreview: (canvasId: string, node: NodePreview) => void;
+  setNodePreview: (canvasId: string, node: NodePreview) => void;
+  removeNodePreview: (canvasId: string, nodeId: string) => void;
+  setCanvasLocalSynced: (canvasId: string, syncedAt: number) => void;
+  setCanvasRemoteSynced: (canvasId: string, syncedAt: number) => void;
   setShowPreview: (show: boolean) => void;
   setShowMaxRatio: (show: boolean) => void;
   setShowLaunchpad: (show: boolean) => void;
   setInteractionMode: (mode: 'mouse' | 'touchpad') => void;
   setOperatingNodeId: (nodeId: string | null) => void;
   setShowEdges: (show: boolean) => void;
+  setClickToPreview: (enabled: boolean) => void;
+  setNodeSizeMode: (mode: 'compact' | 'adaptive') => void;
+
+  clearState: () => void;
 }
 
-const defaultCanvasState: () => CanvasData = () => ({
+const defaultCanvasData: () => CanvasData = () => ({
   nodes: [],
   edges: [],
   title: '',
-  mode: 'hand',
+  initialFitViewCompleted: false,
 });
 
 const defaultCanvasConfig: () => CanvasConfig = () => ({
-  pinnedNodes: [],
+  nodePreviews: [],
+});
+
+const defaultCanvasState = () => ({
+  data: {},
+  config: {},
+  currentCanvasId: null,
+  showPreview: true,
+  showMaxRatio: false,
+  showLaunchpad: true,
+  interactionMode: 'touchpad' as const,
+  operatingNodeId: null,
+  showEdges: false,
+  clickToPreview: true,
+  nodeSizeMode: 'adaptive' as const,
 });
 
 export const useCanvasStore = create<CanvasState>()(
   persist(
     immer((set) => ({
-      data: {},
-      config: {},
-      currentCanvasId: null,
-      showPreview: true,
-      showMaxRatio: false,
-      showLaunchpad: true,
-      interactionMode: 'touchpad',
-      operatingNodeId: null,
-      showEdges: false,
+      ...defaultCanvasState(),
 
       deleteCanvasData: (canvasId) =>
         set((state) => {
           delete state.data[canvasId];
+          delete state.config[canvasId];
         }),
       setCurrentCanvasId: (canvasId) =>
         set((state) => {
@@ -89,36 +111,89 @@ export const useCanvasStore = create<CanvasState>()(
         }),
       setNodes: (canvasId, nodes) =>
         set((state) => {
-          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId] ??= defaultCanvasData();
           state.data[canvasId].nodes = nodes;
         }),
       setEdges: (canvasId, edges) =>
         set((state) => {
-          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId] ??= defaultCanvasData();
           state.data[canvasId].edges = edges;
         }),
       setTitle: (canvasId, title) =>
         set((state) => {
-          state.data[canvasId] ??= defaultCanvasState();
+          state.data[canvasId] ??= defaultCanvasData();
           state.data[canvasId].title = title;
         }),
-      setMode: (canvasId, mode) =>
+      setInitialFitViewCompleted: (canvasId, completed) =>
         set((state) => {
-          state.data[canvasId] ??= defaultCanvasState();
-          state.data[canvasId].mode = mode;
+          state.data[canvasId] ??= defaultCanvasData();
+          state.data[canvasId].initialFitViewCompleted = completed;
         }),
-      addPinnedNode: (canvasId, node) =>
+      setCanvasLocalSynced: (canvasId, syncedAt) =>
+        set((state) => {
+          state.config[canvasId] ??= defaultCanvasConfig();
+          state.config[canvasId].localSyncedAt = syncedAt;
+        }),
+      setCanvasRemoteSynced: (canvasId, syncedAt) =>
+        set((state) => {
+          state.config[canvasId] ??= defaultCanvasConfig();
+          state.config[canvasId].remoteSyncedAt = syncedAt;
+        }),
+      addNodePreview: (canvasId, node) =>
         set((state) => {
           if (!node) return;
           state.config[canvasId] ??= defaultCanvasConfig();
+          state.config[canvasId].nodePreviews ??= [];
 
-          state.config[canvasId].pinnedNodes = state.config[canvasId].pinnedNodes.filter((n) => n.id !== node.id);
-          state.config[canvasId].pinnedNodes.unshift(node);
+          const previews = state.config[canvasId].nodePreviews;
+          const existingNodeIndex = previews.findIndex((n) => n.id === node.id);
+
+          // Do nothing if the node already exists
+          if (existingNodeIndex !== -1) {
+            return;
+          }
+
+          if (node.isPinned) {
+            // Find the first pinned node index
+            const firstPinnedIndex = previews.findIndex((n) => n.isPinned);
+
+            if (firstPinnedIndex === -1) {
+              // If no pinned nodes, add after the unpinned node (if exists)
+              previews.length > 0 ? previews.splice(1, 0, node) : previews.push(node);
+            } else {
+              // Insert before the first pinned node
+              previews.splice(firstPinnedIndex, 0, node);
+            }
+          } else {
+            // For unpinned node: remove any existing unpinned node and add new one at start
+            const unpinnedIndex = previews.findIndex((n) => !n.isPinned);
+            if (unpinnedIndex !== -1) {
+              previews.splice(unpinnedIndex, 1);
+            }
+            previews.unshift(node);
+          }
         }),
-      removePinnedNode: (canvasId, node) =>
+      setNodePreview: (canvasId, node) =>
+        set((state) => {
+          if (!node) return;
+          state.config[canvasId] ??= defaultCanvasConfig();
+          state.config[canvasId].nodePreviews ??= [];
+          const existingNodeIndex = state.config[canvasId].nodePreviews.findIndex((n) => n.id === node.id);
+          if (existingNodeIndex !== -1) {
+            // If the node is unpinned and not the first one, remove it
+            if (!node.isPinned && existingNodeIndex > 0) {
+              state.config[canvasId].nodePreviews.splice(existingNodeIndex, 1);
+            } else {
+              // Otherwise, update the node
+              state.config[canvasId].nodePreviews[existingNodeIndex] = node;
+            }
+          }
+        }),
+      removeNodePreview: (canvasId, nodeId) =>
         set((state) => {
           state.config[canvasId] ??= defaultCanvasConfig();
-          state.config[canvasId].pinnedNodes = state.config[canvasId].pinnedNodes.filter((n) => n.id !== node.id);
+          state.config[canvasId].nodePreviews ??= [];
+          state.config[canvasId].nodePreviews = state.config[canvasId].nodePreviews.filter((n) => n.id !== nodeId);
         }),
       setInteractionMode: (mode) =>
         set((state) => {
@@ -129,6 +204,15 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.showEdges = show;
         }),
+      setClickToPreview: (enabled) =>
+        set((state) => {
+          state.clickToPreview = enabled;
+        }),
+      setNodeSizeMode: (mode) =>
+        set((state) => {
+          state.nodeSizeMode = mode;
+        }),
+      clearState: () => set(defaultCanvasState()),
     })),
     {
       name: 'canvas-storage',
@@ -138,6 +222,8 @@ export const useCanvasStore = create<CanvasState>()(
         interactionMode: state.interactionMode,
         showEdges: state.showEdges,
         showLaunchpad: state.showLaunchpad,
+        clickToPreview: state.clickToPreview,
+        nodeSizeMode: state.nodeSizeMode,
       }),
     },
   ),

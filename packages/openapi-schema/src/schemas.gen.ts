@@ -1183,13 +1183,7 @@ export const SubscriptionIntervalSchema = {
 export const SubscriptionPlanTypeSchema = {
   type: 'string',
   description: 'Subscription plan type',
-  enum: ['free', 'pro'],
-} as const;
-
-export const PriceLookupKeySchema = {
-  type: 'string',
-  description: 'Price lookup key',
-  enum: ['refly_pro_monthly', 'refly_pro_yearly'],
+  enum: ['free', 'plus', 'pro', 'max'],
 } as const;
 
 export const SubscriptionStatusSchema = {
@@ -1205,10 +1199,6 @@ export const SubscriptionSchema = {
     subscriptionId: {
       type: 'string',
       description: 'Subscription ID',
-    },
-    lookupKey: {
-      type: 'string',
-      description: 'Lookup key',
     },
     planType: {
       type: 'string',
@@ -1397,6 +1387,242 @@ export const UserSettingsSchema = {
       default: false,
     },
   },
+} as const;
+
+export const AuthProviderSchema = {
+  type: 'string',
+  description: 'Auth provider',
+  enum: ['email', 'google', 'github'],
+} as const;
+
+export const AuthConfigItemSchema = {
+  type: 'object',
+  required: ['provider'],
+  properties: {
+    provider: {
+      description: 'Auth provider',
+      $ref: '#/components/schemas/AuthProvider',
+    },
+  },
+} as const;
+
+export const AuthConfigResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Auth providers',
+          items: {
+            $ref: '#/components/schemas/AuthConfigItem',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const EmailSignupRequestSchema = {
+  type: 'object',
+  description: 'Email signup request',
+  required: ['email', 'password'],
+  properties: {
+    email: {
+      type: 'string',
+      description: 'Email',
+    },
+    password: {
+      type: 'string',
+      description: 'Password',
+    },
+  },
+} as const;
+
+export const EmailSignupDataSchema = {
+  type: 'object',
+  properties: {
+    accessToken: {
+      type: 'string',
+      description: 'Access token (only returned if the email verification is turned off)',
+    },
+    sessionId: {
+      type: 'string',
+      description: 'Verification session ID',
+    },
+  },
+} as const;
+
+export const EmailSignupResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/EmailSignupData',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const VerificationPurposeSchema = {
+  type: 'string',
+  description: 'Verification purpose',
+  enum: ['signup', 'resetPassword'],
+} as const;
+
+export const CreateVerificationRequestSchema = {
+  type: 'object',
+  description: 'Create verification session request',
+  required: ['email', 'purpose'],
+  properties: {
+    email: {
+      type: 'string',
+      description: 'Email',
+    },
+    purpose: {
+      type: 'string',
+      description: 'Verification purpose',
+      $ref: '#/components/schemas/VerificationPurpose',
+    },
+    password: {
+      type: 'string',
+      description: 'Password',
+    },
+  },
+} as const;
+
+export const CreateVerificationDataSchema = {
+  type: 'object',
+  properties: {
+    sessionId: {
+      type: 'string',
+      description: 'Verification session ID',
+    },
+  },
+} as const;
+
+export const CreateVerificationResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/CreateVerificationData',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const ResendVerificationRequestSchema = {
+  type: 'object',
+  description: 'Resend verification request',
+  required: ['sessionId'],
+  properties: {
+    sessionId: {
+      type: 'string',
+      description: 'Verification session ID',
+    },
+  },
+} as const;
+
+export const CheckVerificationRequestSchema = {
+  type: 'object',
+  description: 'Check verification code request',
+  required: ['sessionId', 'code'],
+  properties: {
+    sessionId: {
+      type: 'string',
+      description: 'Verification session ID',
+    },
+    code: {
+      type: 'string',
+      description: 'Verification code',
+    },
+  },
+} as const;
+
+export const CheckVerificationDataSchema = {
+  type: 'object',
+  properties: {
+    accessToken: {
+      type: 'string',
+      description: 'Access token',
+    },
+    purpose: {
+      type: 'string',
+      description: 'Verification purpose',
+    },
+  },
+} as const;
+
+export const CheckVerificationResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/CheckVerificationData',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const EmailLoginRequestSchema = {
+  type: 'object',
+  description: 'Email login request',
+  required: ['email', 'password'],
+  properties: {
+    email: {
+      type: 'string',
+      description: 'Email',
+    },
+    password: {
+      type: 'string',
+      description: 'Password',
+    },
+  },
+} as const;
+
+export const EmailLoginDataSchema = {
+  type: 'object',
+  properties: {
+    accessToken: {
+      type: 'string',
+      description: 'Access token',
+    },
+  },
+} as const;
+
+export const EmailLoginResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/EmailLoginData',
+        },
+      },
+    },
+  ],
 } as const;
 
 export const GetUserSettingsResponseSchema = {
@@ -3068,11 +3294,15 @@ export const CheckSettingsFieldResponseSchema = {
 
 export const CreateCheckoutSessionRequestSchema = {
   type: 'object',
-  required: ['lookupKey'],
+  required: ['planType'],
   properties: {
-    lookupKey: {
-      description: 'Price lookup key',
-      $ref: '#/components/schemas/PriceLookupKey',
+    planType: {
+      description: 'Subscription plan type',
+      $ref: '#/components/schemas/SubscriptionPlanType',
+    },
+    interval: {
+      description: 'Subscription billing interval',
+      $ref: '#/components/schemas/SubscriptionInterval',
     },
   },
 } as const;
@@ -3116,6 +3346,52 @@ export const CreatePortalSessionResponseSchema = {
               type: 'string',
               description: 'Portal session URL',
             },
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const SubscriptionPlanSchema = {
+  type: 'object',
+  properties: {
+    planType: {
+      type: 'string',
+      description: 'Subscription plan type',
+    },
+    t1TokenQuota: {
+      type: 'number',
+      description: 'Token quota per month (T1)',
+    },
+    t2TokenQuota: {
+      type: 'number',
+      description: 'Token quota per month (T2)',
+    },
+    objectStorageQuota: {
+      type: 'string',
+      description: 'Object storage quota (in bytes)',
+    },
+    vectorStorageQuota: {
+      type: 'string',
+      description: 'Vector storage quota (in bytes)',
+    },
+  },
+} as const;
+
+export const GetSubscriptionPlansResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Subscription plans',
+          items: {
+            $ref: '#/components/schemas/SubscriptionPlan',
           },
         },
       },
@@ -3561,6 +3837,20 @@ export const UploadResponseSchema = {
   ],
 } as const;
 
+export const ModelCapabilitiesSchema = {
+  type: 'object',
+  properties: {
+    functionCall: {
+      type: 'boolean',
+      description: 'Whether this model supports function calling',
+    },
+    vision: {
+      type: 'boolean',
+      description: 'Whether this model can take images as input',
+    },
+  },
+} as const;
+
 export const ModelInfoSchema = {
   type: 'object',
   required: ['name', 'label', 'provider', 'tier', 'contextLimit', 'maxOutput'],
@@ -3589,6 +3879,10 @@ export const ModelInfoSchema = {
     maxOutput: {
       type: 'number',
       description: 'Model max output length (in tokens)',
+    },
+    capabilities: {
+      description: 'Model capabilities',
+      $ref: '#/components/schemas/ModelCapabilities',
     },
   },
 } as const;
@@ -3654,7 +3948,7 @@ export const InMemorySearchResponseSchema = {
 
 export const CanvasNodeTypeSchema = {
   type: 'string',
-  enum: ['document', 'resource', 'skill', 'tool', 'skillResponse', 'toolResponse'],
+  enum: ['document', 'resource', 'skill', 'tool', 'skillResponse', 'toolResponse', 'memo', 'group'],
 } as const;
 
 export const CanvasNodeDataSchema = {

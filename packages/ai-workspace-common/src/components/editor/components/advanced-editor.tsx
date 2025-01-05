@@ -14,6 +14,7 @@ import { configureSuggestionItems } from './slash-command';
 
 import './styles/globals.css';
 import './styles/prosemirror.css';
+import { CreateMemoSelector } from '@refly-packages/ai-workspace-common/components/editor/components/selectors/create-memo-selector';
 
 export const CollabEditorCommand = (props: { entityId: string; entityType: string }) => {
   const suggestionItems = configureSuggestionItems(props);
@@ -47,6 +48,7 @@ interface CollabGenAIMenuSwitchProps {
   contentSelector: {
     text: string;
     handleClick: () => void;
+    createMemo: () => void;
   };
 }
 export const CollabGenAIMenuSwitch: React.FC<CollabGenAIMenuSwitchProps> = (props) => {
@@ -60,6 +62,7 @@ export const CollabGenAIMenuSwitch: React.FC<CollabGenAIMenuSwitchProps> = (prop
     <GenerativeMenuSwitch open={openAI} onOpenChange={setOpenAI}>
       <AIBtnSelector open={openAI} onOpenChange={setOpenAI} />
       <ContentSelectorButtons text={contentSelector?.text} handleClick={contentSelector?.handleClick} />
+      <CreateMemoSelector text={contentSelector?.text} handleClick={contentSelector?.createMemo} />
       <Divider className="mx-0 h-8" type="vertical" />
       <NodeSelector open={openNode} onOpenChange={setOpenNode} />
       <Divider className="mx-0 h-8" type="vertical" />

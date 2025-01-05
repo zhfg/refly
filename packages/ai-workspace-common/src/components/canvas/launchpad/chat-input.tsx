@@ -1,56 +1,51 @@
-import { FormInstance, Input } from '@arco-design/web-react';
-import { useEffect, useRef } from 'react';
+import { Input } from 'antd';
+import { memo, useRef, useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
-import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-
-// styles
-import './index.scss';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
-import { ContextManager } from './context-manager';
-import { SelectedSkillHeader } from './selected-skill-header';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import type { SearchDomain, Skill } from '@refly/openapi-schema';
+import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components/search-list';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
-import { ConfigManager } from './config-manager';
-import { ChatActions } from './chat-actions';
-import { ChatHistory } from './chat-history';
 
 const TextArea = Input.TextArea;
 
 interface ChatInputProps {
+  query: string;
+  setQuery: (text: string) => void;
+  selectedSkillName: string | null;
   handleSendMessage: () => void;
-  handleAbort: () => void;
-  form: FormInstance;
+  handleSelectSkill?: (skill: Skill) => void;
 }
 
-export const ChatInput = (props: ChatInputProps) => {
-  const { handleSendMessage, handleAbort, form } = props;
+const ChatInputComponent = ({
+  query,
+  setQuery,
+  selectedSkillName,
+  handleSendMessage,
+  handleSelectSkill,
+}: ChatInputProps) => {
   const { t } = useTranslation();
   const inputRef = useRef<RefTextAreaType>(null);
-
-  const { formErrors, setFormErrors } = useContextPanelStore((state) => ({
-    formErrors: state.formErrors,
-    setFormErrors: state.setFormErrors,
-  }));
-
-  const skillStore = useSkillStoreShallow((state) => ({
-    selectedSkill: state.selectedSkill,
-    setSelectedSkill: state.setSelectedSkill,
-  }));
-  const selectedSkill = skillStore.selectedSkill;
-
-  const chatStore = useChatStoreShallow((state) => ({
-    newQAText: state.newQAText,
-    setNewQAText: state.setNewQAText,
-  }));
   const searchStore = useSearchStoreShallow((state) => ({
     setIsSearchOpen: state.setIsSearchOpen,
   }));
+  const { setSelectedSkill, setSkillManagerModalVisible } = useSkillStoreShallow((state) => ({
+    setSelectedSkill: state.setSelectedSkill,
+    setSkillManagerModalVisible: state.setSkillManagerModalVisible,
+  }));
+  const [showSkillSelector, setShowSkillSelector] = useState(false);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (!chatStore?.newQAText?.trim()) {
+    if (e.key === '/' && !query) {
+      setShowSkillSelector(true);
+      return;
+    } else {
+      showSkillSelector && setShowSkillSelector(false);
+    }
+
+    if (!query?.trim()) {
       if (e.keyCode === 13) {
-        e.preventDefault(); // Prevent empty lines when text is empty
+        e.preventDefault();
         return;
       }
       return;
@@ -58,16 +53,23 @@ export const ChatInput = (props: ChatInputProps) => {
 
     const preventEmptyLine = () => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        e.preventDefault();
-
         const cursorPos = e.target.selectionStart ?? 0;
-        const text = chatStore.newQAText;
+        const text = query;
 
-        // Simply insert newline at cursor position
+        let currentLineStart = text.lastIndexOf('\n', cursorPos - 1) + 1;
+        if (currentLineStart === -1) currentLineStart = 0;
+        const currentLineEnd = text.indexOf('\n', cursorPos);
+        const currentLine = text.slice(currentLineStart, currentLineEnd === -1 ? text.length : currentLineEnd);
+
+        if (!currentLine.trim()) {
+          e.preventDefault();
+          return;
+        }
+
+        e.preventDefault();
         const newValue = text.slice(0, cursorPos) + '\n' + text.slice(cursorPos);
-        chatStore.setNewQAText(newValue);
+        setQuery(newValue);
 
-        // Restore cursor position
         setTimeout(() => {
           if (e.target instanceof HTMLTextAreaElement) {
             e.target.selectionStart = e.target.selectionEnd = cursorPos + 1;
@@ -81,7 +83,7 @@ export const ChatInput = (props: ChatInputProps) => {
         preventEmptyLine();
       } else {
         e.preventDefault();
-        if (chatStore?.newQAText?.trim()) {
+        if (query?.trim()) {
           handleSendMessage();
         }
       }
@@ -93,89 +95,81 @@ export const ChatInput = (props: ChatInputProps) => {
     }
   };
 
-  useEffect(() => {
-    if (!selectedSkill?.configSchema?.items?.length) {
-      form.setFieldValue('tplConfig', undefined);
-    } else {
-      // Create default config from schema if no config exists
-      const defaultConfig = {};
-      selectedSkill?.configSchema?.items?.forEach((item) => {
-        if (item.defaultValue !== undefined) {
-          defaultConfig[item.key] = {
-            value: item.defaultValue,
-            label: item.labelDict?.['en'] ?? item.key,
-            displayValue: String(item.defaultValue),
-          };
-        }
-      });
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const value = e.target.value;
+      setQuery(value);
+    },
+    [setQuery],
+  );
 
-      // Use existing config or fallback to default config
-      const initialConfig = selectedSkill?.tplConfig ?? defaultConfig;
-      form.setFieldValue('tplConfig', initialConfig);
-    }
-  }, [selectedSkill?.name]);
+  const triggerElement = useMemo(() => {
+    return (
+      <div className="relative w-full">
+        <TextArea
+          ref={inputRef}
+          autoFocus
+          onBlur={() => {
+            setTimeout(() => {
+              setShowSkillSelector(false);
+            }, 100);
+          }}
+          value={query ?? ''}
+          onChange={handleInputChange}
+          onKeyDownCapture={(e) => handleKeyDown(e)}
+          className="mb-0 bg-transparent outline-none box-border border-none resize-none focus:outline-none focus:shadow-none focus:border-none"
+          placeholder={
+            selectedSkillName
+              ? t(`${selectedSkillName}.placeholder`, {
+                  ns: 'skill',
+                  defaultValue: t(`commonQnA.placeholder`, { ns: 'skill' }),
+                })
+              : t(`commonQnA.placeholder`, { ns: 'skill' })
+          }
+          autoSize={{
+            minRows: 1,
+            maxRows: 6,
+          }}
+        />
+      </div>
+    );
+  }, [query, selectedSkillName, handleKeyDown, t]);
+
+  const handleSearchListConfirm = useCallback(
+    (items: any[]) => {
+      if (handleSelectSkill) {
+        handleSelectSkill(items[0].metadata?.originalItem as Skill);
+      } else {
+        setQuery('');
+        setSelectedSkill(items[0].metadata?.originalItem as Skill);
+      }
+    },
+    [setSelectedSkill, handleSelectSkill],
+  );
 
   return (
-    <div className="ai-copilot-chat-container">
-      <div className="chat-input-container">
-        <SelectedSkillHeader
-          skill={selectedSkill}
-          onClose={() => skillStore.setSelectedSkill(null)}
-          className="rounded-t-[7px]"
-        />
-        <ContextManager />
-        <ChatHistory />
-        <div className="chat-input-body">
-          <div className="ai-copilot-chat-input-container">
-            <div className="ai-copilot-chat-input-body">
-              <TextArea
-                ref={inputRef}
-                autoFocus
-                value={chatStore?.newQAText === '' ? '' : chatStore?.newQAText}
-                onChange={(value) => {
-                  chatStore.setNewQAText(value);
-                }}
-                onKeyDownCapture={(e) => handleKeyDown(e)}
-                style={{
-                  borderRadius: 8,
-                  resize: 'none',
-                }}
-                placeholder={
-                  selectedSkill
-                    ? t(`${selectedSkill?.name}.placeholder`, {
-                        ns: 'skill',
-                        defaultValue: t(`commonQnA.placeholder`, { ns: 'skill' }),
-                      })
-                    : t(`commonQnA.placeholder`, { ns: 'skill' })
-                }
-                autoSize={{
-                  minRows: 1,
-                  maxRows: 6,
-                }}
-              ></TextArea>
-            </div>
-          </div>
-        </div>
-
-        {selectedSkill?.configSchema?.items?.length > 0 && (
-          <ConfigManager
-            key={selectedSkill?.name}
-            form={form}
-            formErrors={formErrors}
-            setFormErrors={setFormErrors}
-            schema={selectedSkill?.configSchema}
-            tplConfig={selectedSkill?.tplConfig}
-            fieldPrefix="tplConfig"
-            configScope="runtime"
-            resetConfig={() => {
-              const defaultConfig = selectedSkill?.tplConfig ?? {};
-              form.setFieldValue('tplConfig', defaultConfig);
-            }}
-          />
-        )}
-
-        <ChatActions form={form} handleSendMessage={handleSendMessage} handleAbort={handleAbort} />
-      </div>
+    <div className="w-full flex flex-col">
+      <SearchList
+        domain={'skill' as SearchDomain}
+        placement="bottomLeft"
+        trigger={[]}
+        mode="single"
+        handleConfirm={handleSearchListConfirm}
+        open={showSkillSelector}
+        setOpen={setShowSkillSelector}
+      >
+        {triggerElement}
+      </SearchList>
     </div>
   );
 };
+
+export const ChatInput = memo(ChatInputComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.query === nextProps.query &&
+    prevProps.selectedSkillName === nextProps.selectedSkillName &&
+    prevProps.handleSelectSkill === nextProps.handleSelectSkill
+  );
+});
+
+ChatInput.displayName = 'ChatInput';

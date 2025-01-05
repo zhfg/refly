@@ -39,6 +39,9 @@ const translations = {
     name: '网络搜索',
     placeholder: '搜索网络并获取答案...',
     steps: {
+      analyzeContext: {
+        name: '上下文分析',
+      },
       webSearch: {
         name: '网络搜索',
       },

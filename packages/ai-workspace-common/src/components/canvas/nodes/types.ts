@@ -6,8 +6,11 @@ import {
   Artifact,
   CanvasNodeType,
   ModelInfo,
+  Skill,
+  SkillTemplateConfig,
   TokenUsageItem,
 } from '@refly/openapi-schema';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export type CanvasNodeData<T = Record<string, unknown>> = {
   title: string;
@@ -19,22 +22,33 @@ export type CanvasNodeData<T = Record<string, unknown>> = {
   sourceHandle?: string;
 };
 
-export type CanvasNode<T = Record<string, unknown>> = Node<CanvasNodeData<T>, CanvasNodeType>;
+export type CanvasNode<T = Record<string, unknown>> = Node<CanvasNodeData<T>, CanvasNodeType> & {
+  className?: string;
+  style?: React.CSSProperties;
+};
 
 // Node specific metadata types
-export type DocumentNodeMeta = {
+export interface DocumentNodeMeta {
   status: ActionStatus;
-};
+  sizeMode?: 'compact' | 'adaptive';
+  style?: React.CSSProperties;
+  originalWidth?: number;
+}
 
-export type ResourceNodeMeta = {
-  resourceType: string;
-};
+export interface ResourceNodeMeta {
+  resourceType?: string;
+  sizeMode?: 'compact' | 'adaptive';
+  style?: React.CSSProperties;
+  originalWidth?: number;
+}
 
 export type SkillNodeMeta = {
   query: string;
-  skillType: 'prompt' | 'prompt-struct' | 'skill' | 'code' | 'http' | string;
-  // 如果是 prompt 类型，可能需要额外的模型信息
-  model?: string;
+  resultId?: string;
+  selectedSkill?: Skill;
+  modelInfo?: ModelInfo;
+  contextItems?: IContextItem[];
+  tplConfig?: SkillTemplateConfig;
 };
 
 export type ToolNodeMeta = {
@@ -49,6 +63,7 @@ export type ResponseNodeMeta = {
   artifacts?: Artifact[];
   currentLog?: ActionLog;
   structuredData?: Record<string, unknown>;
+  contextItems?: IContextItem[];
 };
 
 // Type mapping for node metadata
@@ -73,3 +88,4 @@ export type DocumentNodeProps = NodeProps<Node<CanvasNodeData<DocumentNodeMeta>,
 export type ResourceNodeProps = NodeProps<Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>> & CommonNodeProps;
 export type SkillResponseNodeProps = NodeProps<Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>> &
   CommonNodeProps;
+export type MemoNodeProps = NodeProps<Node<CanvasNodeData, 'memo'>> & CommonNodeProps;
