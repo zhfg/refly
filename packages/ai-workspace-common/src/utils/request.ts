@@ -14,14 +14,15 @@ export function getAuthTokenFromCookie() {
 
 client.setConfig({
   baseUrl: getServerOrigin() + '/v1',
+  credentials: 'include',
   throwOnError: false, // If you want to handle errors on `onError` callback of `useQuery` and `useMutation`, set this to `true`
 });
 
 client.interceptors.request.use((request) => {
-  const token = getAuthTokenFromCookie();
-  if (token) {
-    request.headers.set('Authorization', `Bearer ${token}`);
-  }
+  // const token = getAuthTokenFromCookie();
+  // if (token) {
+  //   request.headers.set('Authorization', `Bearer ${token}`);
+  // }
   return request;
 });
 

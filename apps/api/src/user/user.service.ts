@@ -13,6 +13,12 @@ export class UserService {
 
   constructor(private prisma: PrismaService) {}
 
+  async getUserSettings(user: User) {
+    return this.prisma.user.findUnique({
+      where: { uid: user.uid },
+    });
+  }
+
   async updateSettings(user: User, data: UpdateUserSettingsRequest) {
     return this.prisma.user.update({
       where: { uid: user.uid },

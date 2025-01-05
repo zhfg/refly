@@ -13,13 +13,13 @@ import { ConnectionError, getErrorMessage, OperationTooFrequent, UnknownError } 
 import { safeParseJSON, safeStringifyJSON } from '@refly-packages/utils/parse';
 import { BaseResponse } from '@refly/openapi-schema';
 
-client.setConfig({ baseUrl: getServerOrigin() + '/v1' });
+client.setConfig({ baseUrl: getServerOrigin() + '/v1', credentials: 'include' });
 
 client.interceptors.request.use((request) => {
-  const token = getAuthTokenFromCookie();
-  if (token) {
-    request.headers.set('Authorization', `Bearer ${token}`);
-  }
+  // const token = getAuthTokenFromCookie();
+  // if (token) {
+  //   request.headers.set('Authorization', `Bearer ${token}`);
+  // }
   return request;
 });
 

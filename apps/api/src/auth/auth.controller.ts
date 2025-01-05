@@ -1,10 +1,9 @@
 import { Controller, Logger, Get, Post, Res, UseGuards, Body, Req } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { User as UserModel } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedError } from '@refly-packages/errors';
 
-import { User } from '@/utils/decorators/user.decorator';
+import { LoginedUser } from '@/utils/decorators/user.decorator';
 import { AuthService } from './auth.service';
 import { GithubOauthGuard } from './guard/github-oauth.guard';
 import { GoogleOauthGuard } from './guard/google-oauth.guard';
@@ -21,6 +20,7 @@ import {
   EmailLoginResponse,
   CreateVerificationResponse,
   ResendVerificationResponse,
+  User,
 } from '@refly-packages/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
 import { hours, minutes, seconds, Throttle } from '@nestjs/throttler';
@@ -46,9 +46,9 @@ export class AuthController {
 
   @Throttle({ default: { limit: 5, ttl: minutes(10) } })
   @Post('email/login')
-  async emailLogin(@Body() { email, password }: EmailLoginRequest): Promise<EmailLoginResponse> {
-    const { accessToken } = await this.authService.emailLogin(email, password);
-    return buildSuccessResponse({ accessToken });
+  async emailLogin(@Body() { email, password }: EmailLoginRequest, @Res() res: Response) {
+    const tokens = await this.authService.emailLogin(email, password);
+    return this.authService.setAuthCookie(res, tokens).json(buildSuccessResponse());
   }
 
   @Throttle({ default: { limit: 5, ttl: minutes(10) } })
@@ -92,12 +92,14 @@ export class AuthController {
 
   @UseGuards(GithubOauthGuard)
   @Get('callback/github')
-  async githubAuthCallback(@User() user: UserModel, @Res() res: Response) {
+  async githubAuthCallback(@LoginedUser() user: User, @Res() res: Response) {
     try {
       this.logger.log(`github oauth callback success, req.user = ${user?.email}`);
 
       const tokens = await this.authService.login(user);
-      this.authService.redirect(res, tokens);
+      this.authService
+        .setAuthCookie(res, tokens)
+        .redirect(this.configService.get('auth.redirectUrl'));
     } catch (error) {
       this.logger.error('GitHub OAuth callback failed:', error.stack);
       throw new OAuthError();
@@ -106,12 +108,14 @@ export class AuthController {
 
   @UseGuards(GoogleOauthGuard)
   @Get('callback/google')
-  async googleAuthCallback(@User() user: UserModel, @Res() res: Response) {
+  async googleAuthCallback(@LoginedUser() user: User, @Res() res: Response) {
     try {
       this.logger.log(`google oauth callback success, req.user = ${user?.email}`);
 
       const tokens = await this.authService.login(user);
-      this.authService.redirect(res, tokens);
+      this.authService
+        .setAuthCookie(res, tokens)
+        .redirect(this.configService.get('auth.redirectUrl'));
     } catch (error) {
       this.logger.error('Google OAuth callback failed:', error.stack);
       throw new OAuthError();
@@ -140,9 +144,9 @@ export class AuthController {
     return buildSuccessResponse({ accessToken });
   }
 
-  @Post('logout')
   @UseGuards(JwtAuthGuard)
-  async logout(@User() user: UserModel, @Res() res: Response) {
+  @Post('logout')
+  async logout(@LoginedUser() user: User, @Res() res: Response) {
     await this.authService.revokeAllRefreshTokens(user.uid);
 
     // Clear cookies

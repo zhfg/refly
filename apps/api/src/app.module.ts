@@ -45,6 +45,7 @@ class CustomThrottlerGuard extends ThrottlerGuard {
   imports: [
     ConfigModule.forRoot({
       load: [configuration],
+      isGlobal: true,
       cache: true,
       expandVariables: true,
     }),

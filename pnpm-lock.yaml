@@ -179,6 +179,9 @@ importers:
       module-alias:
         specifier: ~2.2.3
         version: 2.2.3
+      ms:
+        specifier: ^2.1.3
+        version: 2.1.3
       nestjs-pino:
         specifier: ^4.0.0
         version: 4.1.0(@nestjs/common@10.3.10)(pino-http@10.3.0)
@@ -261,6 +264,9 @@ importers:
       '@types/markdown-it':
         specifier: ~14.1.1
         version: 14.1.2
+      '@types/ms':
+        specifier: ^0.7.34
+        version: 0.7.34
       '@types/multer':
         specifier: ~1.4.11
         version: 1.4.12
@@ -8724,7 +8730,6 @@ packages:
 
   /@types/ms@0.7.34:
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
-    dev: false
 
   /@types/multer@1.4.12:
     resolution: {integrity: sha512-pQ2hoqvXiJt2FP9WQVLPRO+AmiIm/ZYkavPlIQnx282u4ZrVdztx0pkh3jjpQt0Kz+YI0YhSG264y08UJKoUQg==}

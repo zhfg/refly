@@ -1,17 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
 import argon2 from 'argon2';
+import ms from 'ms';
 import { Profile } from 'passport';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { User as UserModel, VerificationSession, RefreshToken } from '@prisma/client';
-import { JwtPayload } from './dto';
-import { genUID, genVerificationSessionID } from '@refly-packages/utils';
+import { User as UserModel, VerificationSession } from '@prisma/client';
+import { TokenData } from './auth.dto';
+import { genUID, genVerificationSessionID, pick } from '@refly-packages/utils';
 import { PrismaService } from '@/common/prisma.service';
 import { MiscService } from '@/misc/misc.service';
 import { Resend } from 'resend';
 import {
+  User,
   AuthConfigItem,
   CheckVerificationRequest,
   CreateVerificationRequest,
@@ -59,11 +61,11 @@ export class AuthService {
     return items;
   }
 
-  async login(user: UserModel) {
-    const payload: JwtPayload = { uid: user.uid, email: user.email };
+  async login(user: User): Promise<TokenData> {
+    const payload: User = pick(user, ['uid', 'email']);
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get('auth.jwt.secret'),
-      expiresIn: '15m', // Short-lived access token
+      expiresIn: this.configService.get('auth.jwt.expiresIn'),
     });
 
     // Generate refresh token
@@ -86,7 +88,7 @@ export class AuthService {
         jti,
         uid,
         hashedToken,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        expiresAt: new Date(Date.now() + ms(this.configService.get('auth.jwt.refreshExpiresIn'))),
       },
     });
 
@@ -149,25 +151,19 @@ export class AuthService {
     });
   }
 
-  redirect(
-    res: Response,
-    { accessToken, refreshToken }: { accessToken: string; refreshToken: string },
-  ) {
-    res
+  setAuthCookie(res: Response, { accessToken, refreshToken }: TokenData) {
+    return res
       .cookie(this.configService.get('auth.cookieTokenField'), accessToken, {
         domain: this.configService.get('auth.cookieDomain'),
-        httpOnly: true,
         secure: true,
         sameSite: 'strict',
       })
-      .cookie('refreshToken', refreshToken, {
+      .cookie(this.configService.get('auth.cookieRefreshTokenField'), refreshToken, {
         domain: this.configService.get('auth.cookieDomain'),
         httpOnly: true,
         secure: true,
         sameSite: 'strict',
-        path: '/api/v1/auth/refresh',
-      })
-      .redirect(this.configService.get('auth.redirectUrl'));
+      });
   }
 
   async genUniqueUsername(candidate: string) {

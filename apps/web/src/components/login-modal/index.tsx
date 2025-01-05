@@ -80,7 +80,6 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
 
       if (data?.success) {
         authStore.setLoginModalOpen(false)
-        document.cookie = `_refly_ai_sid=${data.data?.accessToken ?? ""}; path=/`
         authStore.reset()
         window.location.replace("/")
       }

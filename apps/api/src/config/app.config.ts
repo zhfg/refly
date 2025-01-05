@@ -47,11 +47,13 @@ export default () => ({
   },
   auth: {
     cookieTokenField: '_refly_ai_sid',
+    cookieRefreshTokenField: '_refly_ai_refresh',
     cookieDomain: process.env.REFLY_COOKIE_DOMAIN || '.refly.ai',
     redirectUrl: process.env.LOGIN_REDIRECT_URL,
     jwt: {
       secret: process.env.JWT_SECRET || 'test',
-      expiresIn: process.env.JWT_EXPIRATION_TIME || '14d',
+      expiresIn: process.env.JWT_EXPIRATION_TIME || '1m',
+      refreshExpiresIn: process.env.JWT_REFRESH_EXPIRATION_TIME || '5m',
     },
     email: {
       enabled: process.env.EMAIL_AUTH_ENABLED === 'true' || true,

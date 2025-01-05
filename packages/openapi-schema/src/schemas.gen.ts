@@ -2,24 +2,16 @@
 
 export const UserSchema = {
   type: 'object',
-  description: 'Refly user',
+  description: 'Refly user, used as JWT payload',
   required: ['uid'],
   properties: {
     uid: {
       type: 'string',
       description: 'UID',
     },
-    uiLocale: {
+    email: {
       type: 'string',
-      description: 'UI locale',
-    },
-    outputLocale: {
-      type: 'string',
-      description: 'Output locale',
-    },
-    planId: {
-      type: 'string',
-      description: 'Subscription plan ID',
+      description: 'Email',
     },
   },
 } as const;

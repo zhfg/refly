@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { ConfigModule } from '@nestjs/config';
 import { KnowledgeModule } from '@/knowledge/knowledge.module';
 import { SkillService } from './skill.service';
 import { SkillController } from './skill.controller';
@@ -17,7 +16,6 @@ import { CollabModule } from '@/collab/collab.module';
 @Module({
   imports: [
     CommonModule,
-    ConfigModule,
     LabelModule,
     SearchModule,
     CanvasModule,
