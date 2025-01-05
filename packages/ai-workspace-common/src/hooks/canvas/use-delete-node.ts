@@ -2,10 +2,7 @@ import { useCallback } from 'react';
 import { message } from 'antd';
 import { useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
-import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 interface DeleteNodeOptions {
   showMessage?: boolean;
@@ -14,10 +11,6 @@ interface DeleteNodeOptions {
 export const useDeleteNode = () => {
   const { setNodes, setEdges } = useReactFlow();
   const { t } = useTranslation();
-  const { canvasId } = useCanvasContext();
-  const { removeContextItem } = useContextPanelStoreShallow((state) => ({
-    removeContextItem: state.removeContextItem,
-  }));
 
   const deleteSingleNode = useCallback(
     (node: CanvasNode<any>, options: DeleteNodeOptions = {}) => {
@@ -28,11 +21,6 @@ export const useDeleteNode = () => {
 
       // Delete connected edges
       setEdges((edges) => edges.filter((e) => e.source !== node.id && e.target !== node.id));
-
-      // Delete node preview from canvas store
-      const canvasStore = useCanvasStore.getState();
-      canvasStore.removeNodePreview(canvasId, node.id);
-      removeContextItem(node.id);
 
       if (showMessage) {
         // Get node title based on node type

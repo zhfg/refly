@@ -18,11 +18,11 @@ export interface TableOfContentsItem {
   textContent: string;
 }
 
-interface DocumentState {
+interface DocumentData {
+  document?: Document;
   documentCharsCount?: number;
   lastCursorPosRef?: number;
   tocItems?: TableOfContentsItem[];
-  currentDocument?: Document;
 }
 
 interface DocumentConfig {
@@ -35,11 +35,11 @@ interface DocumentBaseState {
   // Canvas specific states stored by docId
   activeDocumentId: string;
   hasEditorSelection: boolean;
-  documentStates: Record<string, DocumentState>;
+  data: Record<string, DocumentData>;
   config: Record<string, DocumentConfig>;
 
   setHasEditorSelection: (hasEditorSelection: boolean) => void;
-  updateCurrentDocument: (docId: string, document: Document) => void;
+  updateDocument: (docId: string, document: Document) => void;
   updateDocumentCharsCount: (docId: string, count: number) => void;
   updateLastCursorPosRef: (docId: string, pos: number) => void;
   updateTocItems: (docId: string, items: TableOfContentsItem[]) => void;
@@ -57,8 +57,8 @@ interface DocumentBaseState {
 
 export const defaultState = () => ({
   hasEditorSelection: false,
-  documentStates: {},
   activeDocumentId: '',
+  data: {},
   config: {},
 });
 
@@ -72,28 +72,28 @@ export const useDocumentStore = create<DocumentBaseState>()(
           state.hasEditorSelection = hasEditorSelection;
         }),
 
-      updateCurrentDocument: (docId: string, document: Document) =>
+      updateDocument: (docId: string, document: Document) =>
         set((state) => {
-          state.documentStates[docId] ??= {};
-          state.documentStates[docId].currentDocument = document;
+          state.data[docId] ??= {};
+          state.data[docId].document = document;
         }),
 
       updateDocumentCharsCount: (docId: string, count: number) =>
         set((state) => {
-          state.documentStates[docId] ??= {};
-          state.documentStates[docId].documentCharsCount = count;
+          state.data[docId] ??= {};
+          state.data[docId].documentCharsCount = count;
         }),
 
       updateLastCursorPosRef: (docId: string, pos: number) =>
         set((state) => {
-          state.documentStates[docId] ??= {};
-          state.documentStates[docId].lastCursorPosRef = pos;
+          state.data[docId] ??= {};
+          state.data[docId].lastCursorPosRef = pos;
         }),
 
       updateTocItems: (docId: string, items: TableOfContentsItem[]) =>
         set((state) => {
-          state.documentStates[docId] ??= {};
-          state.documentStates[docId].tocItems = items;
+          state.data[docId] ??= {};
+          state.data[docId].tocItems = items;
         }),
 
       setActiveDocumentId: (docId: string) =>
@@ -122,12 +122,12 @@ export const useDocumentStore = create<DocumentBaseState>()(
       deleteDocumentData: (docId: string) =>
         set((state) => {
           delete state.config[docId];
-          delete state.documentStates[docId];
+          delete state.data[docId];
         }),
 
       resetState: (docId: string) =>
         set((state) => {
-          state.documentStates[docId] = {};
+          state.data[docId] = {};
         }),
 
       clearState: () => set(defaultState()),

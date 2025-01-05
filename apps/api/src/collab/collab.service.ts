@@ -193,7 +193,9 @@ export class CollabService {
       this.elasticsearch.upsertDocument({
         id: doc.docId,
         content,
+        title,
         uid: doc.uid,
+        updatedAt: new Date().toJSON(),
       }),
       this.rag.indexDocument(user, {
         pageContent: content,
@@ -268,6 +270,13 @@ export class CollabService {
       data: canvasUpdates,
     });
     context.entity = updatedCanvas;
+
+    await this.elasticsearch.upsertCanvas({
+      id: canvas.canvasId,
+      title,
+      uid: canvas.uid,
+      updatedAt: new Date().toJSON(),
+    });
 
     await this.subscriptionService.syncStorageUsage({
       uid: user.uid,
