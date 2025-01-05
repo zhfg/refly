@@ -48,7 +48,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const { t } = useTranslation();
   const { getNode } = useReactFlow();
   const { canvasId } = useCanvasContext();
-  const { addNode } = useAddNode();
   const { setNodeSizeMode } = useNodeOperations();
 
   const { activeDocumentId } = useDocumentStoreShallow((state) => ({
