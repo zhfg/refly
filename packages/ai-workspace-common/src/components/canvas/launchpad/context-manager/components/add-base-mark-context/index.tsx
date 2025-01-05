@@ -24,7 +24,7 @@ export const AddBaseMarkContext = ({ contextItems, setContextItems }: AddBaseMar
   };
 
   const handleSelect = (item: IContextItem) => {
-    const isSelected = contextItems.find((item) => item.entityId === item.entityId);
+    const isSelected = contextItems.find((contextItem) => contextItem.entityId === item.entityId);
 
     if (!isSelected) {
       // Adding node
