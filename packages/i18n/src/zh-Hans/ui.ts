@@ -550,15 +550,13 @@ const translations = {
       title: '连接超时',
       extra: '服务器似乎繁忙，请稍后再试。',
     },
-    launchpad: {
-      pinChat: '固定对话',
-      unpinChat: '取消固定对话',
-      removeChat: '移除对话',
-    },
     action: {
       nodeAlreadyExists: '该{{type}}已存在于当前画布中',
       deleteSuccess: '删除画布成功',
       addSuccess: '画布添加好啦，开始创作吧~',
+    },
+    skill: {
+      askAI: 'AI 提问',
     },
     skillResponse: {
       executionFailed: '执行失败，点击重试',

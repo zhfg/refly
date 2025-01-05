@@ -558,15 +558,13 @@ const translations = {
       title: 'Connection Timeout',
       extra: 'The server seems to be busy, please try again.',
     },
-    launchpad: {
-      pinChat: 'Pin chat',
-      unpinChat: 'Unpin chat',
-      removeChat: 'Remove chat',
-    },
     action: {
       nodeAlreadyExists: 'The {{type}} with the same entity already exists',
       deleteSuccess: 'Canvas deleted successfully',
       addSuccess: 'Canvas added successfully, start creating!',
+    },
+    skill: {
+      askAI: 'Ask AI',
     },
     skillResponse: {
       executionFailed: 'Execution failed, click to retry',

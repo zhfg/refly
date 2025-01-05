@@ -21,7 +21,7 @@ export const CustomHandle = ({ type, position, isConnected, isNodeHovered, nodeT
   const baseHandleStyle = {
     width: '2px',
     height: '8px',
-    background: '#00968F',
+    background: isNodeHovered ? '#00968F' : 'transparent',
     border: 'none',
     minHeight: '8px',
     minWidth: '2px',

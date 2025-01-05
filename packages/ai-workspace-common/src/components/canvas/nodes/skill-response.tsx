@@ -75,7 +75,7 @@ const NodeHeader = memo(({ query, skillName, skill }: { query: string; skillName
 });
 
 const ModelIcon = memo(({ provider }: { provider: string }) => {
-  return <img className="w-3 h-3 mx-1" src={ModelProviderIcons[provider]} alt={provider} />;
+  return <img className="w-3 h-3" src={ModelProviderIcons[provider]} alt={provider} />;
 });
 
 ModelIcon.displayName = 'ModelIcon';

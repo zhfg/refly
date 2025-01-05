@@ -6,6 +6,7 @@ import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/store
 import type { SearchDomain, Skill } from '@refly/openapi-schema';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components/search-list';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
+import { cn } from '@refly-packages/utils/cn';
 
 const TextArea = Input.TextArea;
 
@@ -13,6 +14,7 @@ interface ChatInputProps {
   query: string;
   setQuery: (text: string) => void;
   selectedSkillName: string | null;
+  inputClassName?: string;
   handleSendMessage: () => void;
   handleSelectSkill?: (skill: Skill) => void;
 }
@@ -21,6 +23,7 @@ const ChatInputComponent = ({
   query,
   setQuery,
   selectedSkillName,
+  inputClassName,
   handleSendMessage,
   handleSelectSkill,
 }: ChatInputProps) => {
@@ -117,7 +120,10 @@ const ChatInputComponent = ({
           value={query ?? ''}
           onChange={handleInputChange}
           onKeyDownCapture={(e) => handleKeyDown(e)}
-          className="mb-0 bg-transparent outline-none box-border border-none resize-none focus:outline-none focus:shadow-none focus:border-none"
+          className={cn(
+            'mb-0 bg-transparent outline-none box-border border-none resize-none focus:outline-none focus:shadow-none focus:border-none',
+            inputClassName,
+          )}
           placeholder={
             selectedSkillName
               ? t(`${selectedSkillName}.placeholder`, {

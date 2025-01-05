@@ -5,14 +5,21 @@ import { AddBaseMarkContext } from './components/add-base-mark-context';
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
 import { FilterErrorInfo, IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useReactFlow } from '@xyflow/react';
+import { cn } from '@refly-packages/utils/cn';
 
 interface ContextManagerProps {
+  className?: string;
   contextItems: IContextItem[];
   setContextItems: (items: IContextItem[]) => void;
   filterErrorInfo?: FilterErrorInfo;
 }
 
-const ContextManagerComponent = ({ contextItems = [], setContextItems, filterErrorInfo }: ContextManagerProps) => {
+const ContextManagerComponent = ({
+  className,
+  contextItems = [],
+  setContextItems,
+  filterErrorInfo,
+}: ContextManagerProps) => {
   const { getNodes } = useReactFlow();
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
 
@@ -33,20 +40,18 @@ const ContextManagerComponent = ({ contextItems = [], setContextItems, filterErr
   };
 
   return (
-    <div className="flex flex-col h-full p-2 px-3">
-      <div className="flex flex-col">
-        <div className="flex flex-wrap content-start gap-1 w-full">
-          <AddBaseMarkContext contextItems={contextItems} setContextItems={setContextItems} />
-          {contextItems.filter(Boolean).map((item) => (
-            <ContextItem
-              key={item.entityId}
-              item={item}
-              isLimit={!!filterErrorInfo?.[mapSelectionTypeToContentList(item?.type)]}
-              isActive={itemSelected.get(item.entityId)}
-              onRemove={handleRemoveItem}
-            />
-          ))}
-        </div>
+    <div className={cn('flex flex-col', className)}>
+      <div className="flex flex-wrap content-start gap-1 w-full">
+        <AddBaseMarkContext contextItems={contextItems} setContextItems={setContextItems} />
+        {contextItems.filter(Boolean).map((item) => (
+          <ContextItem
+            key={item.entityId}
+            item={item}
+            isLimit={!!filterErrorInfo?.[mapSelectionTypeToContentList(item?.type)]}
+            isActive={itemSelected.get(item.entityId)}
+            onRemove={handleRemoveItem}
+          />
+        ))}
       </div>
     </div>
   );

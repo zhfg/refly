@@ -47,16 +47,18 @@ const NodeHeader = memo(
     return (
       <div className="flex justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-[#6172F3] shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)] flex items-center justify-center flex-shrink-0">
+          <div className="w-6 h-6 rounded bg-[#6172F3] shadow-lg flex items-center justify-center flex-shrink-0">
             <IconAskAI className="w-4 h-4 text-white" />
           </div>
-          <span className="text-[13px] font-medium leading-normal text-[rgba(0,0,0,0.8)] font-['PingFang_SC'] truncate">
-            {selectedSkillName ? t(`${selectedSkillName}.name`, { ns: 'skill' }) : 'Prompt'}
+          <span className="text-sm font-medium leading-normal text-[rgba(0,0,0,0.8)] truncate">
+            {selectedSkillName ? t(`${selectedSkillName}.name`, { ns: 'skill' }) : t('canvas.skill.askAI')}
           </span>
         </div>
         {selectedSkillName && (
           <Button
             type="text"
+            size="small"
+            className="p-0"
             icon={<IconClose />}
             onClick={() => {
               setSelectedSkill?.(null);
@@ -256,18 +258,19 @@ export const SkillNode = memo(
             nodeType="skill"
           />
 
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-3">
             <NodeHeader
               query={localQuery}
               selectedSkillName={selectedSkill?.name}
               setSelectedSkill={setSelectedSkill}
             />
 
-            <ContextManager contextItems={contextItems} setContextItems={setContextItems} />
+            <ContextManager className="px-0.5" contextItems={contextItems} setContextItems={setContextItems} />
             <ChatInput
               query={localQuery}
               setQuery={setQuery}
               selectedSkillName={selectedSkill?.name}
+              inputClassName="px-1 py-0"
               handleSendMessage={handleSendMessage}
               handleSelectSkill={(skill) => {
                 setQuery('');

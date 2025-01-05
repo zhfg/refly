@@ -156,26 +156,29 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
     );
   }
 
+  const isPending = result?.status === 'executing' || result?.status === 'waiting' || loading;
+
   return (
     <div className="flex flex-col space-y-4 p-4 h-full">
-      {editMode ? (
-        <EditChatInput
-          resultId={resultId}
-          contextItems={contextItems}
-          query={title}
-          actionMeta={actionMeta}
-          modelInfo={modelInfo}
-          setEditMode={setEditMode}
-        />
-      ) : (
-        <PreviewChatInput
-          readonly
-          contextItems={contextItems}
-          query={title}
-          actionMeta={actionMeta}
-          setEditMode={setEditMode}
-        />
-      )}
+      {!isPending &&
+        (editMode ? (
+          <EditChatInput
+            resultId={resultId}
+            contextItems={contextItems}
+            query={title}
+            actionMeta={actionMeta}
+            modelInfo={modelInfo}
+            setEditMode={setEditMode}
+          />
+        ) : (
+          <PreviewChatInput
+            readonly
+            contextItems={contextItems}
+            query={title}
+            actionMeta={actionMeta}
+            setEditMode={setEditMode}
+          />
+        ))}
 
       <div
         className={cn('h-full', {
@@ -183,9 +186,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
           'pointer-events-none': editMode,
         })}
       >
-        {steps.length === 0 && (result?.status === 'executing' || result?.status === 'waiting' || loading) && (
-          <Skeleton active />
-        )}
+        {steps.length === 0 && isPending && <Skeleton active paragraph={{ rows: 5 }} />}
         <StepsList steps={steps} result={result} title={title} />
       </div>
 

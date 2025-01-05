@@ -117,7 +117,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
             }}
           />
         )}
-        <ContextManager contextItems={editContextItems} setContextItems={setEditContextItems} />
+        <ContextManager className="p-2 px-3" contextItems={editContextItems} setContextItems={setEditContextItems} />
         <ChatInput
           query={editQuery}
           setQuery={setEditQuery}
@@ -129,6 +129,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
           }}
         />
         <ChatActions
+          className="p-2 px-3"
           query={editQuery}
           model={editModelInfo}
           setModel={setEditModelInfo}
