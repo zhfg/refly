@@ -1,4 +1,4 @@
-import { CanvasNode } from '../nodes/types';
+import { CanvasNode } from '../nodes/shared/types';
 import { SkillResponseNodePreview } from './skill-response';
 import { ResourceNodePreview } from './resource';
 import { SkillNodePreview } from './skill';

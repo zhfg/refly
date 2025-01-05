@@ -1,8 +1,8 @@
 import { NodeProps, Position, useReactFlow } from '@xyflow/react';
-import { CanvasNode, CanvasNodeData, SkillNodeMeta } from './types';
+import { CanvasNode, CanvasNodeData, SkillNodeMeta } from './shared/types';
 import { Node } from '@xyflow/react';
 import { Button } from 'antd';
-import { CustomHandle } from './custom-handle';
+import { CustomHandle } from './shared/custom-handle';
 import { useState, useCallback, useEffect, useMemo, memo } from 'react';
 
 import { getNodeCommonStyles } from './index';
@@ -16,7 +16,7 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
-import { ActionButtons } from '@refly-packages/ai-workspace-common/components/canvas/nodes/action-buttons';
+import { ActionButtons } from './shared/action-buttons';
 import { cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';

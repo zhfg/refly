@@ -1,12 +1,12 @@
 import { Position, useReactFlow } from '@xyflow/react';
-import { CanvasNode, CanvasNodeData, MemoNodeProps } from './types';
+import { CanvasNode, CanvasNodeData, MemoNodeProps } from '../shared/types';
 import { Node } from '@xyflow/react';
-import { CustomHandle } from './custom-handle';
+import { CustomHandle } from '../shared/custom-handle';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
-import { getNodeCommonStyles } from './index';
-import { ActionButtons } from './action-buttons';
+import { getNodeCommonStyles } from '../index';
+import { ActionButtons } from '../shared/action-buttons';
 import { useTranslation } from 'react-i18next';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';

@@ -5,7 +5,7 @@ import { ResourceNode } from './resource';
 import { SkillNode } from './skill';
 import { ToolNode } from './tool';
 import { SkillResponseNode } from './skill-response';
-import { MemoNode } from './memo';
+import { MemoNode } from './memo/memo';
 import { GroupNode } from './group';
 import {
   NodeMetadataMap,
@@ -15,18 +15,18 @@ import {
   SkillNodeMeta,
   ToolNodeMeta,
   ResponseNodeMeta,
-} from './types';
+} from './shared/types';
 import { t } from 'i18next';
 import { genUniqueId } from '@refly-packages/utils/id';
 
 // Export all components and types
-export * from './types';
+export * from './shared/types';
 export * from './document';
 export * from './resource';
 export * from './skill';
 export * from './tool';
 export * from './skill-response';
-export * from './memo';
+export * from './memo/memo';
 export * from './group';
 
 // Node types mapping

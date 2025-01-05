@@ -3,7 +3,7 @@ import { useCookie } from 'react-use';
 import * as Y from 'yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { IndexeddbPersistence } from 'y-indexeddb';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/types';
+import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/types';
 import { Edge } from '@xyflow/react';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';

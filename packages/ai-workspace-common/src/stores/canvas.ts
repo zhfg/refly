@@ -33,6 +33,7 @@ export interface CanvasState {
   operatingNodeId: string | null;
   showEdges: boolean;
   clickToPreview: boolean;
+  nodeSizeMode: 'compact' | 'adaptive';
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -52,6 +53,7 @@ export interface CanvasState {
   setOperatingNodeId: (nodeId: string | null) => void;
   setShowEdges: (show: boolean) => void;
   setClickToPreview: (enabled: boolean) => void;
+  setNodeSizeMode: (mode: 'compact' | 'adaptive') => void;
 
   clearState: () => void;
 }
@@ -78,6 +80,7 @@ const defaultCanvasState = () => ({
   operatingNodeId: null,
   showEdges: false,
   clickToPreview: true,
+  nodeSizeMode: 'adaptive' as const,
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -205,6 +208,10 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.clickToPreview = enabled;
         }),
+      setNodeSizeMode: (mode) =>
+        set((state) => {
+          state.nodeSizeMode = mode;
+        }),
       clearState: () => set(defaultCanvasState()),
     })),
     {
@@ -216,6 +223,7 @@ export const useCanvasStore = create<CanvasState>()(
         showEdges: state.showEdges,
         showLaunchpad: state.showLaunchpad,
         clickToPreview: state.clickToPreview,
+        nodeSizeMode: state.nodeSizeMode,
       }),
     },
   ),

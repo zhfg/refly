@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 import Moveable from 'react-moveable';
 import classNames from 'classnames';
 import { Divider, message } from 'antd';
-import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './types';
+import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './shared/types';
 import { Node } from '@xyflow/react';
 import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
-import { CustomHandle } from './custom-handle';
+import { CustomHandle } from './shared/custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
 import { getNodeCommonStyles } from './index';
-import { ActionButtons } from './action-buttons';
+import { ActionButtons } from './shared/action-buttons';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
@@ -26,7 +26,6 @@ import {
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
-import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
@@ -45,26 +44,15 @@ import { genSkillID } from '@refly-packages/utils/id';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { convertContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
+import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
+import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
+// import { NodeHeader } from '../shared/node-header';
+import { ContentPreview } from './shared/content-preview';
+
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
 const POLLING_INTERVAL = 3000;
 const POLLING_COOLDOWN_TIME = 10000;
-
-const NodeContent = memo(
-  ({ content, sources, isOperating }: { content: string; sources: Source[]; isOperating: boolean }) => {
-    return (
-      <div className="skill-response-node-content">
-        <Markdown
-          content={String(content)}
-          sources={sources}
-          className={`text-xs ${
-            isOperating ? 'pointer-events-auto skill-response-node-content' : 'pointer-events-none'
-          }`}
-        />
-      </div>
-    );
-  },
-);
 
 const NodeHeader = memo(({ query, skillName, skill }: { query: string; skillName: string; skill: any }) => {
   return (
@@ -175,16 +163,22 @@ export const SkillResponseNode = memo(
     }));
 
     const { title, contentPreview: content, metadata, createdAt, entityId } = data ?? {};
-    const node = useMemo(() => getNode(id), [id, getNode]);
-    const initialSize = useMemo(
-      () => ({
-        width: node?.measured?.width ?? 288,
-        height: node?.measured?.height ?? ('auto' as const),
-      }),
-      [node?.measured?.width, node?.measured?.height],
-    );
 
-    const [size, setSize] = useState<{ width: number | 'auto'; height: number | 'auto' }>(initialSize);
+    const isOperating = operatingNodeId === id;
+    const sizeMode = data?.metadata?.sizeMode || 'adaptive';
+    const node = useMemo(() => getNode(id), [id, data?.metadata?.sizeMode, getNode]);
+
+    const { containerStyle, handleResize, updateSize } = useNodeSize({
+      id,
+      node,
+      sizeMode,
+      isOperating,
+      minWidth: 100,
+      maxWidth: 800,
+      minHeight: 80,
+      defaultWidth: 288,
+      defaultHeight: 384,
+    });
     const moveableRef = useRef<Moveable>(null);
 
     const { status, artifacts, currentLog: log, modelInfo, structuredData, actionMeta, tokenUsage } = metadata ?? {};
@@ -303,7 +297,7 @@ export const SkillResponseNode = memo(
       message.info(t('canvas.skillResponse.startRerun'));
 
       // Disable polling temporarily after rerun
-      setSize({ width: 288, height: 'auto' });
+      updateSize({ width: 288, height: 'auto' });
       setShouldPoll(false);
       setTimeout(() => setShouldPoll(true), POLLING_COOLDOWN_TIME);
 
@@ -375,8 +369,6 @@ export const SkillResponseNode = memo(
         query: query,
       });
     }, [sources, query]);
-
-    const isOperating = operatingNodeId === id;
 
     const resizeMoveable = useCallback((width: number, height: number) => {
       moveableRef.current?.request('resizable', { width, height });
@@ -492,40 +484,6 @@ export const SkillResponseNode = memo(
       };
     }, [id, handleRerun, handleAddToContext, handleInsertToDoc, handleCreateDocument, deleteNode]);
 
-    // 使用 useMemo 缓存计算值
-    const nodeStyle = useMemo(
-      () =>
-        ({
-          width: typeof size.width === 'number' ? `${size.width}px` : 'auto',
-          height: typeof size.height === 'number' ? `${size.height}px` : 'auto',
-          userSelect: isOperating ? 'text' : 'none',
-          cursor: isOperating ? 'text' : 'grab',
-        }) as const,
-      [size.width, size.height, isOperating],
-    );
-
-    // 使用 useCallback 优化事件处理函数
-    const handleResize = useCallback(({ target, width, height, direction }) => {
-      const newWidth = Math.max(100, width);
-      const newHeight = Math.max(80, height);
-
-      setSize({ width: newWidth, height: newHeight });
-
-      // Update target style directly
-      if (target) {
-        target.style.width = `${newWidth}px`;
-        target.style.height = `${newHeight}px`;
-
-        // Update position if needed
-        if (direction[0] === -1) {
-          target.style.left = `${target.offsetLeft - (newWidth - target.offsetWidth)}px`;
-        }
-        if (direction[1] === -1) {
-          target.style.top = `${target.offsetTop - (newHeight - target.offsetHeight)}px`;
-        }
-      }
-    }, []);
-
     // 在组件挂载时预加载图标
     useEffect(() => {
       preloadModelIcons();
@@ -536,7 +494,7 @@ export const SkillResponseNode = memo(
         <div
           ref={targetRef}
           className="relative"
-          style={nodeStyle}
+          style={containerStyle}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           onClick={onNodeClick}
@@ -629,7 +587,15 @@ export const SkillResponseNode = memo(
                     </div>
                   )}
 
-                  {content && <NodeContent content={content} sources={sources} isOperating={isOperating} />}
+                  {content && (
+                    <ContentPreview
+                      content={content || t('canvas.nodePreview.resource.noContentPreview')}
+                      sizeMode={sizeMode}
+                      isOperating={isOperating}
+                      maxCompactLength={10}
+                      isLoading={false}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -644,29 +610,29 @@ export const SkillResponseNode = memo(
           </div>
         </div>
 
-        {!isPreview && selected && (
-          <Moveable
-            ref={moveableRef}
-            target={targetRef}
-            resizable={true}
-            edge={false}
-            throttleResize={1}
-            renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
-            onResizeStart={({ setOrigin, dragStart }) => {
-              setOrigin(['%', '%']);
-              if (dragStart && dragStart instanceof MouseEvent) {
-                dragStart.preventDefault();
-              }
-            }}
+        {!isPreview && selected && sizeMode === 'adaptive' && (
+          <NodeResizerComponent
+            targetRef={targetRef}
+            isSelected={selected}
+            isHovered={isHovered}
+            isPreview={isPreview}
+            sizeMode={sizeMode}
             onResize={handleResize}
-            hideDefaultLines={true}
-            className={`!pointer-events-auto ${!isHovered ? 'moveable-control-hidden' : 'moveable-control-show'}`}
           />
         )}
       </div>
     );
   },
   (prevProps, nextProps) => {
+    // Compare style and sizeMode
+    const prevStyle = prevProps.data?.metadata?.style;
+    const nextStyle = nextProps.data?.metadata?.style;
+    const styleEqual = JSON.stringify(prevStyle) === JSON.stringify(nextStyle);
+
+    const prevSizeMode = prevProps.data?.metadata?.sizeMode;
+    const nextSizeMode = nextProps.data?.metadata?.sizeMode;
+    const sizeModeEqual = prevSizeMode === nextSizeMode;
+
     return (
       prevProps.id === nextProps.id &&
       prevProps.selected === nextProps.selected &&
@@ -676,7 +642,9 @@ export const SkillResponseNode = memo(
       prevProps.data?.title === nextProps.data?.title &&
       prevProps.data?.contentPreview === nextProps.data?.contentPreview &&
       prevProps.data?.createdAt === nextProps.data?.createdAt &&
-      JSON.stringify(prevProps.data?.metadata) === JSON.stringify(nextProps.data?.metadata)
+      JSON.stringify(prevProps.data?.metadata) === JSON.stringify(nextProps.data?.metadata) &&
+      styleEqual &&
+      sizeModeEqual
     );
   },
 );

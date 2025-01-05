@@ -38,6 +38,9 @@ import { IoLibraryOutline } from 'react-icons/io5';
 import { HiOutlineChevronDown } from 'react-icons/hi';
 import { RxExit } from 'react-icons/rx';
 
+import { AiOutlineShrink } from 'react-icons/ai';
+import { RiExpandDiagonalLine } from 'react-icons/ri';
+
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
 import ClaudeIcon from '@refly-packages/ai-workspace-common/assets/claude.svg';
 import GeminiIcon from '@refly-packages/ai-workspace-common/assets/gemini.svg';
@@ -83,6 +86,8 @@ export const IconModel = LuBrain;
 export const IconDown = HiOutlineChevronDown;
 export const IconSubscription = LuGift;
 export const IconExit = RxExit;
+export const IconExpand = RiExpandDiagonalLine;
+export const IconShrink = AiOutlineShrink;
 
 export const ModelProviderIcons = {
   openai: OpenAIIcon,

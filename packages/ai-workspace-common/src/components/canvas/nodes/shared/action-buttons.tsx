@@ -1,8 +1,8 @@
 import { FC, memo, useState, useMemo } from 'react';
-import { NodeActionMenu } from '../node-action-menu';
+import { NodeActionMenu } from '../../node-action-menu';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useReactFlow } from '@xyflow/react';
-import { CanvasNode } from './index';
+import { CanvasNode } from '../index';
 
 type ActionButtonsProps = {
   nodeId: string;
@@ -56,7 +56,7 @@ export const ActionButtons: FC<ActionButtonsProps> = memo(
             e.preventDefault();
           }}
         >
-          <NodeActionMenu nodeId={nodeId} nodeType={type} />
+          {shouldShowMenu && <NodeActionMenu nodeId={nodeId} nodeType={type} />}
         </div>
       </>
     );

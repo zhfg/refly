@@ -1,54 +1,44 @@
+import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Position, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
-import { CanvasNodeData, ResourceNodeMeta, CanvasNode, ResourceNodeProps } from './types';
+import { CanvasNodeData, ResourceNodeMeta, CanvasNode, ResourceNodeProps } from './shared/types';
 import { Node } from '@xyflow/react';
-import { CustomHandle } from './custom-handle';
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { CustomHandle } from './shared/custom-handle';
 import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
-import { ActionButtons } from './action-buttons';
+import { ActionButtons } from './shared/action-buttons';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
-import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { useThrottledCallback } from 'use-debounce';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
-import Moveable from 'react-moveable';
 import classNames from 'classnames';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
-import { memo } from 'react';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-data';
+import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
+import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
+import { NodeHeader } from './shared/node-header';
+import { ContentPreview } from './shared/content-preview';
 
 type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
-
-const NodeHeader = memo(({ title, ResourceIcon }: { title: string; ResourceIcon: any }) => {
-  return (
-    <div className="flex-shrink-0 mb-3">
-      <div className="flex items-center gap-2">
-        <div className="w-6 h-6 rounded bg-[#17B26A] shadow-[0px_2px_4px_-2px_rgba(16,24,60,0.06),0px_4px_8px_-2px_rgba(16,24,60,0.1)] flex items-center justify-center flex-shrink-0">
-          <ResourceIcon className="w-4 h-4 text-white" />
-        </div>
-        <span className="text-sm font-medium leading-normal text-[rgba(0,0,0,0.8)] truncate">{title}</span>
-      </div>
-    </div>
-  );
-});
 
 export const ResourceNode = memo(
   ({ id, data, isPreview, selected, hideActions, hideHandles, onNodeClick }: ResourceNodeProps) => {
     const [isHovered, setIsHovered] = useState(false);
+    const [shouldPoll, setShouldPoll] = useState(false);
     const { edges } = useCanvasData();
     const setNodeDataByEntity = useSetNodeDataByEntity();
-    const { setEdges, getNode } = useReactFlow();
+    const { getNode, setEdges } = useReactFlow();
     const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
 
     const { i18n, t } = useTranslation();
@@ -56,17 +46,25 @@ export const ResourceNode = memo(
 
     const targetRef = useRef<HTMLDivElement>(null);
 
-    // Memoize node and its measurements
-    const node = useMemo(() => getNode(id), [id, getNode]);
-    const initialSize = useMemo(
-      () => ({
-        width: node?.measured?.width ?? 288,
-        height: node?.measured?.height ?? 384,
-      }),
-      [node?.measured?.width, node?.measured?.height],
-    );
+    const { operatingNodeId } = useCanvasStoreShallow((state) => ({
+      operatingNodeId: state.operatingNodeId,
+    }));
 
-    const [size, setSize] = useState(initialSize);
+    const isOperating = operatingNodeId === id;
+    const sizeMode = data?.metadata?.sizeMode || 'adaptive';
+    const node = useMemo(() => getNode(id), [id, data?.metadata?.sizeMode, getNode]);
+
+    const { containerStyle, handleResize } = useNodeSize({
+      id,
+      node,
+      sizeMode,
+      isOperating,
+      minWidth: 100,
+      maxWidth: 800,
+      minHeight: 80,
+      defaultWidth: 288,
+      defaultHeight: 384,
+    });
 
     // Check if node has any connections
     const isTargetConnected = edges?.some((edge) => edge.target === id);
@@ -74,7 +72,7 @@ export const ResourceNode = memo(
 
     const edgeStyles = useEdgeStyles();
 
-    // 立即更新hover状态，但节流更新边缘样式
+    // Update hover state and edge styles
     const updateEdgeStyles = useThrottledCallback(
       (hoveredState: boolean) => {
         setEdges((eds) =>
@@ -166,13 +164,6 @@ export const ResourceNode = memo(
       );
     }, [id, data, addNode]);
 
-    const { operatingNodeId } = useCanvasStoreShallow((state) => ({
-      operatingNodeId: state.operatingNodeId,
-    }));
-
-    const isOperating = operatingNodeId === id;
-
-    const [shouldPoll, setShouldPoll] = useState(false);
     const { data: result } = useGetResourceDetail(
       {
         query: { resourceId: data?.entityId },
@@ -234,85 +225,61 @@ export const ResourceNode = memo(
       };
     }, [id, handleAddToContext, handleDelete, handleAskAI]);
 
-    const nodeStyle = useMemo(
-      () => ({
-        width: `${size.width}px`,
-        height: `${size.height}px`,
-        userSelect: isOperating ? 'text' : 'none',
-        cursor: isOperating ? 'text' : 'grab',
-      }),
-      [size.width, size.height, isOperating],
-    );
-
-    const handleResize = useCallback(({ target, width, height, direction }) => {
-      const newWidth = Math.max(100, width);
-      const newHeight = Math.max(80, height);
-
-      let newLeft = target.offsetLeft;
-      let newTop = target.offsetTop;
-
-      if (direction[0] === -1) {
-        newLeft = target.offsetLeft - (newWidth - target.offsetWidth);
-      }
-      if (direction[1] === -1) {
-        newTop = target.offsetTop - (newHeight - target.offsetHeight);
-      }
-
-      target.style.width = `${newWidth}px`;
-      target.style.height = `${newHeight}px`;
-      target.style.left = `${newLeft}px`;
-      target.style.top = `${newTop}px`;
-
-      setSize({ width: newWidth, height: newHeight });
-    }, []);
-
-    // console.log('isOperating', isOperating);
-
     return (
       <div className={classNames({ nowheel: isOperating })}>
         <div
           ref={targetRef}
-          className="relative"
+          style={containerStyle}
           onMouseEnter={!isPreview ? handleMouseEnter : undefined}
           onMouseLeave={!isPreview ? handleMouseLeave : undefined}
           onClick={onNodeClick}
-          style={
-            {
-              width: `${size.width}px`,
-              height: `${size.height}px`,
-              userSelect: isOperating ? 'text' : 'none',
-              cursor: isOperating ? 'text' : 'grab',
-            } as React.CSSProperties
-          }
         >
           {!isPreview && !hideActions && <ActionButtons type="resource" nodeId={id} isNodeHovered={isHovered} />}
 
           <div
             className={`
-          relative
-          h-full
-          ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
-        `}
+            relative
+            h-full
+            p-3
+            ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
+          `}
           >
+            {/* Gradient overlay for entire node */}
             <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
 
-            <div className="flex flex-col h-full">
-              <NodeHeader title={data.title} ResourceIcon={ResourceIcon} />
+            <div className="flex flex-col h-full relative">
+              <NodeHeader title={data.title} Icon={ResourceIcon} iconBgColor="#17B26A" />
 
-              <div className="flex-grow overflow-y-auto pr-2 -mr-2">
-                <Markdown
-                  className={`text-xs ${isOperating ? 'pointer-events-auto' : 'pointer-events-none'}`}
-                  content={data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
-                />
-              </div>
+              <div className="relative flex-grow min-h-0">
+                <div
+                  style={{
+                    height: '100%',
+                    overflowY: 'auto',
+                    maxHeight: sizeMode === 'compact' ? '40px' : '384px',
+                    paddingBottom: '40px',
+                  }}
+                >
+                  <ContentPreview
+                    content={data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
+                    sizeMode={sizeMode}
+                    isOperating={isOperating}
+                    isLoading={remoteResult?.indexStatus === 'wait_parse'}
+                    maxCompactLength={10}
+                  />
+                </div>
 
-              <div className="flex justify-end items-center flex-shrink-0 mt-2 text-[10px] text-gray-400 z-20">
-                {time(data.createdAt, language as LOCALE)
-                  ?.utc()
-                  ?.fromNow()}
+                {/* Timestamp container */}
+                <div className="absolute bottom-0 left-0 right-0 z-[20]">
+                  <div className="flex justify-end items-center text-[10px] text-gray-400 mt-1 px-1">
+                    {time(data.createdAt, language as LOCALE)
+                      ?.utc()
+                      ?.fromNow()}
+                  </div>
+                </div>
               </div>
             </div>
 
+            {/* Handles */}
             {!isPreview && !hideHandles && (
               <>
                 <CustomHandle
@@ -334,49 +301,29 @@ export const ResourceNode = memo(
           </div>
         </div>
 
-        {!isPreview && selected && (
-          <Moveable
-            target={targetRef}
-            resizable={true}
-            edge={false}
-            throttleResize={1}
-            renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
-            onResizeStart={({ setOrigin, dragStart }) => {
-              setOrigin(['%', '%']);
-              if (dragStart && dragStart instanceof MouseEvent) {
-                dragStart.preventDefault();
-              }
-            }}
-            onResize={({ target, width, height, direction }) => {
-              const newWidth = Math.max(100, width);
-              const newHeight = Math.max(80, height);
-
-              const htmlTarget = target as HTMLElement;
-              let newLeft = htmlTarget.offsetLeft;
-              let newTop = htmlTarget.offsetTop;
-
-              if (direction[0] === -1) {
-                newLeft = htmlTarget.offsetLeft - (newWidth - htmlTarget.offsetWidth);
-              }
-              if (direction[1] === -1) {
-                newTop = htmlTarget.offsetTop - (newHeight - htmlTarget.offsetHeight);
-              }
-
-              htmlTarget.style.width = `${newWidth}px`;
-              htmlTarget.style.height = `${newHeight}px`;
-              htmlTarget.style.left = `${newLeft}px`;
-              htmlTarget.style.top = `${newTop}px`;
-
-              setSize({ width: newWidth, height: newHeight });
-            }}
-            hideDefaultLines={true}
-            className={`!pointer-events-auto ${!isHovered ? 'moveable-control-hidden' : 'moveable-control-show'}`}
+        {!isPreview && selected && sizeMode === 'adaptive' && (
+          <NodeResizerComponent
+            targetRef={targetRef}
+            isSelected={selected}
+            isHovered={isHovered}
+            isPreview={isPreview}
+            sizeMode={sizeMode}
+            onResize={handleResize}
           />
         )}
       </div>
     );
   },
   (prevProps, nextProps) => {
+    // Compare style and sizeMode
+    const prevStyle = prevProps.data?.metadata?.style;
+    const nextStyle = nextProps.data?.metadata?.style;
+    const styleEqual = JSON.stringify(prevStyle) === JSON.stringify(nextStyle);
+
+    const prevSizeMode = prevProps.data?.metadata?.sizeMode;
+    const nextSizeMode = nextProps.data?.metadata?.sizeMode;
+    const sizeModeEqual = prevSizeMode === nextSizeMode;
+
     return (
       prevProps.id === nextProps.id &&
       prevProps.selected === nextProps.selected &&
@@ -386,7 +333,9 @@ export const ResourceNode = memo(
       prevProps.data.title === nextProps.data.title &&
       prevProps.data.contentPreview === nextProps.data.contentPreview &&
       prevProps.data.createdAt === nextProps.data.createdAt &&
-      JSON.stringify(prevProps.data.metadata) === JSON.stringify(nextProps.data.metadata)
+      JSON.stringify(prevProps.data.metadata) === JSON.stringify(nextProps.data.metadata) &&
+      styleEqual &&
+      sizeModeEqual // Add sizeMode comparison
     );
   },
 );

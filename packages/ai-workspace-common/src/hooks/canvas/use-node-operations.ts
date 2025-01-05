@@ -55,8 +55,99 @@ export const useNodeOperations = () => {
     [canvasId, updateNodesWithSync],
   );
 
+  const setNodeSizeMode = useCallback(
+    (nodeId: string, mode: 'compact' | 'adaptive') => {
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
+
+      const updatedNodes = nodes.map((node) => {
+        if (node.id === nodeId) {
+          const newNode = { ...node };
+          newNode.data = { ...node.data };
+          newNode.data.metadata = { ...(node?.data?.metadata || {}) };
+
+          // Store original width if switching to compact mode
+          if (mode === 'compact') {
+            newNode.data.metadata.originalWidth =
+              newNode.measured?.width || parseInt(newNode.style?.width as string) || 288;
+
+            newNode.style = {
+              ...newNode.style,
+              width: '288px',
+              height: 'auto',
+              maxHeight: '384px',
+            };
+          } else {
+            // For adaptive mode, use originalWidth or default width
+            const width = newNode.data.metadata.originalWidth || 288;
+            newNode.style = {
+              ...newNode.style,
+              width: `${width}px`,
+              height: 'auto',
+              maxHeight: undefined,
+            };
+          }
+
+          newNode.data.metadata.sizeMode = mode;
+
+          console.log('newNode', newNode);
+          return newNode;
+        }
+        return node;
+      });
+
+      updateNodesWithSync(updatedNodes);
+    },
+    [canvasId, updateNodesWithSync],
+  );
+
+  const updateAllNodesSizeMode = useCallback(
+    (mode: 'compact' | 'adaptive') => {
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
+
+      const updatedNodes = nodes.map((node) => {
+        if (node.data.metadata?.sizeMode === mode) {
+          return node;
+        }
+
+        const newNode = { ...node };
+        newNode.data = { ...node.data };
+        newNode.data.metadata = { ...(node?.data?.metadata || {}) };
+
+        if (mode === 'compact') {
+          newNode.data.metadata.originalWidth =
+            newNode.measured?.width || parseInt(newNode.style?.width as string) || 288;
+
+          newNode.style = {
+            ...newNode.style,
+            width: '288px',
+            height: 'auto',
+            maxHeight: '384px',
+          };
+        } else {
+          const width = newNode.data.metadata.originalWidth || 288;
+          newNode.style = {
+            ...newNode.style,
+            width: `${width}px`,
+            height: 'auto',
+            maxHeight: undefined,
+          };
+        }
+
+        newNode.data.metadata.sizeMode = mode;
+        return newNode;
+      });
+
+      updateNodesWithSync(updatedNodes);
+    },
+    [canvasId, updateNodesWithSync],
+  );
+
   return {
     onNodesChange,
     updateNodesWithSync,
+    setNodeSizeMode,
+    updateAllNodesSizeMode,
   };
 };

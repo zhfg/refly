@@ -64,6 +64,9 @@ export type ResponseNodeMeta = {
   currentLog?: ActionLog;
   structuredData?: Record<string, unknown>;
   contextItems?: IContextItem[];
+  sizeMode?: 'compact' | 'adaptive';
+  style?: React.CSSProperties;
+  originalWidth?: number;
 };
 
 // Type mapping for node metadata

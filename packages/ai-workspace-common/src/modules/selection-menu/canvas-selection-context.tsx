@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useReactFlow, Node } from '@xyflow/react';
 import { SelectionBubble } from './selection-bubble';
 import { useSelectionContext } from './use-selection-context';
-import { CanvasNode } from '../../components/canvas/nodes/types';
+import { CanvasNode } from '../../components/canvas/nodes/shared/types';
 
 interface CanvasSelectionContextProps {
   containerClass?: string;
