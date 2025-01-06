@@ -7,7 +7,7 @@ import { useState, useCallback, useEffect, useMemo, memo } from 'react';
 
 import { getNodeCommonStyles } from './index';
 import { ChatInput } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-input';
-import { IconAskAI } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { getSkillIcon, IconAskAI } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { ModelInfo, Skill } from '@refly/openapi-schema';
 import { useDebouncedCallback } from 'use-debounce';
 import { ChatActions } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
@@ -48,7 +48,7 @@ const NodeHeader = memo(
       <div className="flex justify-between">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded bg-[#6172F3] shadow-lg flex items-center justify-center flex-shrink-0">
-            <IconAskAI className="w-4 h-4 text-white" />
+            {getSkillIcon(selectedSkillName, 'w-4 h-4 text-white')}
           </div>
           <span className="text-sm font-medium leading-normal text-[rgba(0,0,0,0.8)] truncate">
             {selectedSkillName ? t(`${selectedSkillName}.name`, { ns: 'skill' }) : t('canvas.skill.askAI')}

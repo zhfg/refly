@@ -474,13 +474,6 @@ const translations = {
       addToContextSuccess: 'Successfully added to context',
       untitled: 'Untitled',
       deleteSuccessWithTitle: 'Successfully deleted [{{type}}] "{{title}}"',
-      nodeTypes: {
-        document: 'Document',
-        resource: 'Resource',
-        skillResponse: 'Skill Response',
-        memo: 'Memo',
-        skill: 'Skill',
-      },
       memoPlaceholder: 'Record your inspiration...',
       noContent: 'No content available to insert',
       noEditor: 'No opened document',
@@ -503,8 +496,19 @@ const translations = {
     generating: 'Generating',
     completed: 'Completed',
   },
+  resourceType: {
+    weblink: 'Web Link',
+    pastedText: 'Pasted Text',
+  },
   canvas: {
     emptyText: 'Double-click to ask AI, or',
+    nodeTypes: {
+      document: 'Document',
+      resource: 'Resource',
+      skillResponse: 'Skill Response',
+      memo: 'Memo',
+      skill: 'Skill',
+    },
     contextMenu: {
       createGroup: 'Create Group',
       enableClickPreview: 'Enable Click Preview',

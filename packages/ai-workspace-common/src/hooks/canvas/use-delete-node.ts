@@ -30,7 +30,7 @@ export const useDeleteNode = () => {
         message.success(
           t('knowledgeBase.context.deleteSuccessWithTitle', {
             title: nodeTitle,
-            type: t(`knowledgeBase.context.nodeTypes.${node.type}`),
+            type: t(`canvas.nodeTypes.${node.type}`),
           }),
         );
       }

@@ -140,7 +140,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     const memoId = genMemoID();
     addNode({
       type: 'memo',
-      data: { title: t('knowledgeBase.context.nodeTypes.memo'), entityId: memoId },
+      data: { title: t('canvas.nodeTypes.memo'), entityId: memoId },
       position: position,
     });
   };

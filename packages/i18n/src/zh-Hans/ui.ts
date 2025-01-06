@@ -466,13 +466,6 @@ const translations = {
       addToContextSuccess: '已成功添加到上下文',
       untitled: '未命名',
       deleteSuccessWithTitle: '已成功删除 [{{type}}] "{{title}}"',
-      nodeTypes: {
-        document: '文档',
-        resource: '资源',
-        skillResponse: '技能响应',
-        memo: '备忘录',
-        skill: '技能',
-      },
       memoPlaceholder: '记录当下的灵感...',
       noContent: '没有可插入的内容',
       noEditor: '没有打开的文档',
@@ -495,8 +488,19 @@ const translations = {
     generating: '生成中',
     completed: '已完成',
   },
+  resourceType: {
+    weblink: '网页链接',
+    pastedText: '粘贴文本',
+  },
   canvas: {
     emptyText: '双击向 AI 提问, 或',
+    nodeTypes: {
+      document: '文档',
+      resource: '资源',
+      skillResponse: '技能响应',
+      memo: '备忘录',
+      skill: '技能',
+    },
     contextMenu: {
       createGroup: '创建分组',
       enableClickPreview: '启用点击预览',
