@@ -110,7 +110,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   }, [nodeId, nodeData?.contentPreview]);
 
   const handlePreview = useCallback(() => {
-    console.log('handlePreview', nodeId, canvasId);
     addNodePreview(canvasId, node);
     locateToNodePreviewEmitter.emit('locateToNodePreview', { id: nodeId, canvasId });
     onClose?.();
