@@ -119,7 +119,7 @@ export const GroupNode = memo(
     const handleAskAI = useCallback(() => {
       const childNodes = getNodes().filter((node) => {
         const isInGroup = node.parentId === id;
-        return isInGroup && !['skill', 'memo'].includes(node.type);
+        return isInGroup && !['skill', 'memo', 'group'].includes(node.type);
       }) as CanvasNode[];
 
       if (childNodes.length > 0) {

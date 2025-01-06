@@ -614,7 +614,7 @@ const translations = {
       moreOptions: 'More Options',
       delete: 'Delete Node',
       ungroup: 'Ungroup',
-      group: 'Group',
+      group: 'Create Group',
       deleteAll: 'Delete',
       compactMode: 'Compact Mode',
       adaptiveMode: 'Adaptive Mode',

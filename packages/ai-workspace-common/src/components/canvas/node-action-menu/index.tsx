@@ -176,7 +176,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
       ];
     }
 
-    const baseItems: MenuItem[] = [
+    const commonItems: MenuItem[] = [
       {
         key: 'askAI',
         icon: IconAskAI,
@@ -203,7 +203,16 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
             },
           ]
         : []),
-      { key: 'divider-1', type: 'divider' } as MenuItem,
+      {
+        key: 'addToContext',
+        icon: MessageSquareDiff,
+        label: t('canvas.nodeActions.addToContext'),
+        onClick: handleAddToContext,
+        type: 'button' as const,
+      },
+    ];
+
+    const operationItems: MenuItem[] = [
       {
         key: 'preview',
         icon: IconPreview,
@@ -211,6 +220,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         onClick: handlePreview,
         type: 'button' as const,
       },
+      { key: 'divider-1', type: 'divider' } as MenuItem,
       {
         key: 'toggleSizeMode',
         icon: localSizeMode === 'compact' ? IconExpand : IconShrink,
@@ -221,24 +231,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     ].filter(Boolean);
 
     const nodeTypeItems: Record<string, MenuItem[]> = {
-      document: [
-        {
-          key: 'addToContext',
-          icon: MessageSquareDiff,
-          label: t('canvas.nodeActions.addToContext'),
-          onClick: handleAddToContext,
-          type: 'button' as const,
-        },
-      ],
-      resource: [
-        {
-          key: 'addToContext',
-          icon: MessageSquareDiff,
-          label: t('canvas.nodeActions.addToContext'),
-          onClick: handleAddToContext,
-          type: 'button' as const,
-        },
-      ],
+      document: [],
+      resource: [],
       memo: [
         {
           key: 'insertToDoc',
@@ -250,13 +244,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         },
       ],
       group: [
-        {
-          key: 'addToContext',
-          icon: MessageSquareDiff,
-          label: t('canvas.nodeActions.addToContext'),
-          onClick: handleAddToContext,
-          type: 'button' as const,
-        },
         {
           key: 'ungroup',
           icon: Ungroup,
@@ -282,13 +269,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
           onClick: handleInsertToDoc,
           type: 'button' as const,
           disabled: !activeDocumentId,
-        },
-        {
-          key: 'addToContext',
-          icon: MessageSquareDiff,
-          label: t('canvas.nodeActions.addToContext'),
-          onClick: handleAddToContext,
-          type: 'button' as const,
         },
         nodeData?.contentPreview
           ? {
@@ -337,9 +317,10 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     ];
 
     return [
-      ...(nodeType !== 'memo' && nodeType !== 'skill' ? baseItems : []),
+      ...(nodeType !== 'memo' && nodeType !== 'skill' ? commonItems : []),
+      ...(nodeType !== 'memo' && nodeType !== 'skill' && nodeType !== 'group' ? operationItems : []),
       ...(nodeTypeItems[nodeType] || []),
-      ...(nodeType !== 'memo' && nodeType !== 'skill' ? clusterItems : []),
+      ...(nodeType !== 'memo' && nodeType !== 'skill' && nodeType !== 'group' ? clusterItems : []),
       { key: 'divider-2', type: 'divider' } as MenuItem,
       deleteItem,
     ];

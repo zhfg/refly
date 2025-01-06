@@ -169,6 +169,8 @@ export const useAddNode = () => {
             { needSetCenter: needSetCenter, targetNodeId: newNode.id },
           );
         }, 0);
+      } else if (needSetCenter) {
+        setNodeCenter(newNode.id);
       }
 
       if (newNode.type === 'document' || (newNode.type === 'resource' && shouldPreview)) {

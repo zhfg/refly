@@ -407,6 +407,87 @@ const getRightmostPosition = (sourceNodes: Node[], nodes: Node[], edges: any[]):
   };
 };
 
+// Get the leftmost bottom position for new nodes
+const getLeftmostBottomPosition = (nodes: Node[], spacing = SPACING): XYPosition => {
+  if (nodes.length === 0) {
+    return {
+      x: SPACING.INITIAL_X,
+      y: SPACING.INITIAL_Y,
+    };
+  }
+
+  // Find the leftmost x position among all nodes
+  const leftmostX = Math.min(...nodes.map((n) => n.position.x));
+
+  // Find all nodes at the leftmost position
+  const leftmostNodes = nodes
+    .filter((n) => Math.abs(n.position.x - leftmostX) < spacing.X / 2)
+    .sort((a, b) => a.position.y - b.position.y);
+
+  if (leftmostNodes.length === 0) {
+    return {
+      x: leftmostX,
+      y: SPACING.INITIAL_Y,
+    };
+  }
+
+  // Find gaps between nodes
+  const gaps: { start: number; end: number }[] = [];
+  const fixedSpacing = spacing.Y;
+  const nodeHeight = 320; // Default node height
+
+  // Add gap before first node
+  const firstNode = leftmostNodes[0];
+  const firstNodeTop = firstNode.position.y - (firstNode.measured?.height ?? nodeHeight) / 2;
+  if (firstNodeTop > SPACING.INITIAL_Y + fixedSpacing + nodeHeight) {
+    gaps.push({
+      start: SPACING.INITIAL_Y,
+      end: firstNodeTop - fixedSpacing,
+    });
+  }
+
+  // Add gaps between nodes
+  for (let i = 0; i < leftmostNodes.length - 1; i++) {
+    const currentNode = leftmostNodes[i];
+    const nextNode = leftmostNodes[i + 1];
+    const currentNodeBottom = currentNode.position.y + (currentNode.measured?.height ?? nodeHeight) / 2;
+    const nextNodeTop = nextNode.position.y - (nextNode.measured?.height ?? nodeHeight) / 2;
+
+    if (nextNodeTop - currentNodeBottom >= fixedSpacing + nodeHeight) {
+      gaps.push({
+        start: currentNodeBottom + fixedSpacing,
+        end: nextNodeTop - fixedSpacing,
+      });
+    }
+  }
+
+  // Add gap after last node
+  const lastNode = leftmostNodes[leftmostNodes.length - 1];
+  const lastNodeBottom = lastNode.position.y + (lastNode.measured?.height ?? nodeHeight) / 2;
+  gaps.push({
+    start: lastNodeBottom + fixedSpacing,
+    end: lastNodeBottom + fixedSpacing + nodeHeight,
+  });
+
+  // If we found any suitable gaps, use the first one
+  if (gaps.length > 0) {
+    // Find the first gap that's big enough
+    const suitableGap = gaps.find((gap) => gap.end - gap.start >= nodeHeight);
+    if (suitableGap) {
+      return {
+        x: leftmostX,
+        y: suitableGap.start + nodeHeight / 2,
+      };
+    }
+  }
+
+  // If no suitable gaps found, place below the last node
+  return {
+    x: leftmostX,
+    y: lastNodeBottom + fixedSpacing + nodeHeight / 2,
+  };
+};
+
 export const calculateNodePosition = ({
   nodes,
   sourceNodes,
@@ -425,6 +506,11 @@ export const calculateNodePosition = ({
       x: SPACING.INITIAL_X,
       y: SPACING.INITIAL_Y,
     };
+  }
+
+  // Case 2: No source nodes - add to leftmost bottom position
+  if (!sourceNodes?.length) {
+    return getLeftmostBottomPosition(nodes);
   }
 
   // Case 3: Connected to existing nodes
