@@ -507,7 +507,7 @@ export const useNodePosition = () => {
         const renderedNode = getNode(nodeId);
         const currentZoom = reactFlowInstance.getZoom();
         if (renderedNode) {
-          setCenter(renderedNode.position.x, renderedNode.position.y, {
+          setCenter(renderedNode.position.x + 200, renderedNode.position.y + 200, {
             duration: 300,
             zoom: currentZoom,
           });
