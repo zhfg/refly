@@ -16,7 +16,7 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { FileInput, MessageSquareDiff, FilePlus, Ungroup, Group, MoveVertical } from 'lucide-react';
 import { GrClone } from 'react-icons/gr';
-import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
+import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
 import { nodeActionEmitter, createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { CanvasNodeType } from '@refly/openapi-schema';
@@ -110,8 +110,9 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   }, [nodeId, nodeData?.contentPreview]);
 
   const handlePreview = useCallback(() => {
+    console.log('handlePreview', nodeId, canvasId);
     addNodePreview(canvasId, node);
-    addPinnedNodeEmitter.emit('addPinnedNode', { id: nodeId, canvasId });
+    locateToNodePreviewEmitter.emit('locateToNodePreview', { id: nodeId, canvasId });
     onClose?.();
   }, [node, nodeId, canvasId]);
 
