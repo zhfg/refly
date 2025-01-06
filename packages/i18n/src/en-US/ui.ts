@@ -618,9 +618,10 @@ const translations = {
       deleteAll: 'Delete',
       compactMode: 'Compact Mode',
       adaptiveMode: 'Adaptive Mode',
-      selectCluster: 'Select Target Nodes',
-      groupCluster: 'Group Target Nodes',
-      layoutCluster: 'Layout Target Nodes',
+      selectCluster: 'Select Sub Nodes',
+      groupCluster: 'Group Sub Nodes',
+      layoutCluster: 'Layout Sub Nodes',
+      centerNode: 'Center Node Position',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',

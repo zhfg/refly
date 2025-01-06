@@ -542,25 +542,32 @@ export const calculateNodePosition = ({
 };
 
 export const useNodePosition = () => {
-  const { getNode, setCenter, getNodes, setNodes } = useReactFlow();
-  const reactFlowInstance = useReactFlow();
+  const { getNode, setCenter, getZoom, setNodes } = useReactFlow();
 
   const calculatePosition = useCallback((params: CalculateNodePositionParams) => calculateNodePosition(params), []);
 
   const setNodeCenter = useCallback(
-    (nodeId: string) => {
+    (nodeId: string, shouldSelect: boolean = false) => {
       requestAnimationFrame(() => {
         const renderedNode = getNode(nodeId);
-        const currentZoom = reactFlowInstance.getZoom();
+        const currentZoom = getZoom();
         if (renderedNode) {
           setCenter(renderedNode.position.x + 200, renderedNode.position.y + 200, {
             duration: 300,
             zoom: currentZoom,
           });
+          if (shouldSelect) {
+            setNodes((nodes) =>
+              nodes.map((node) => ({
+                ...node,
+                selected: node.id === nodeId,
+              })),
+            );
+          }
         }
       });
     },
-    [setCenter, getNode],
+    [setCenter, getNode, getZoom, setNodes],
   );
 
   const layoutBranchAndUpdatePositions = useCallback(
