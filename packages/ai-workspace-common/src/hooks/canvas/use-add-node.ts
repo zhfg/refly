@@ -114,6 +114,7 @@ export const useAddNode = () => {
         sourceNodes,
         connectTo,
         defaultPosition: node.position,
+        edges,
       });
 
       const enrichedData = {

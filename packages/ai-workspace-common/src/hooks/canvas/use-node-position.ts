@@ -2,6 +2,7 @@ import { Node, useReactFlow, XYPosition } from '@xyflow/react';
 import { CanvasNodeFilter } from './use-node-selection';
 import { useCallback } from 'react';
 import Dagre from '@dagrejs/dagre';
+import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 interface NodeData extends Record<string, unknown> {
   connections?: string[];
@@ -428,7 +429,54 @@ export const calculateNodePosition = ({
 
   // Case 3: Connected to existing nodes
   if (sourceNodes?.length > 0) {
-    // Calculate position based on source nodes and their right connections
+    const { autoLayout } = useCanvasStore.getState();
+
+    if (!autoLayout) {
+      // For each source node, find all its connected target nodes
+      const connectedNodes = new Set<Node>();
+
+      sourceNodes.forEach((sourceNode) => {
+        // Find all direct target nodes of this source node
+        edges.forEach((edge) => {
+          if (edge.source === sourceNode.id) {
+            const targetNode = nodes.find((n) => n.id === edge.target);
+            if (targetNode) {
+              connectedNodes.add(targetNode);
+            }
+          }
+        });
+      });
+
+      // Calculate X position - place to the right of rightmost source node
+      const rightmostSourceX = Math.max(...sourceNodes.map((n) => n.position.x));
+      const targetX = rightmostSourceX + SPACING.X;
+
+      if (connectedNodes.size > 0) {
+        // Find the bottommost node among all connected nodes
+        const bottomNode = Array.from(connectedNodes).reduce((bottom, current) => {
+          const bottomY = bottom.position.y + (bottom.measured?.height ?? 320) / 2;
+          const currentY = current.position.y + (current.measured?.height ?? 320) / 2;
+          return currentY > bottomY ? current : bottom;
+        });
+
+        // Position new node below the bottommost connected node
+        const bottomY = bottomNode.position.y + (bottomNode.measured?.height ?? 320) / 2;
+
+        return {
+          x: targetX,
+          y: bottomY + SPACING.Y + 320 / 2, // Add spacing and half height for centering
+        };
+      } else {
+        // If no connected nodes, place at average Y of source nodes
+        const avgSourceY = sourceNodes.reduce((sum, n) => sum + n.position.y, 0) / sourceNodes.length;
+        return {
+          x: targetX,
+          y: avgSourceY,
+        };
+      }
+    }
+
+    // If auto-layout is enabled or no branch nodes found, use original positioning logic
     return getRightmostPosition(sourceNodes, nodes, edges);
   }
 
@@ -443,7 +491,6 @@ export const calculateNodePosition = ({
     for (let i = 0; i < sortedRootNodes.length - 1; i++) {
       const gap = sortedRootNodes[i + 1].position.y - sortedRootNodes[i].position.y;
       if (gap >= 30) {
-        // Further reduced from 80
         return {
           x: sortedRootNodes[i].position.x,
           y: sortedRootNodes[i].position.y + gap / 2,
@@ -472,7 +519,6 @@ export const calculateNodePosition = ({
     for (let i = 0; i < rightmostNodes.length - 1; i++) {
       const gap = rightmostNodes[i + 1].position.y - rightmostNodes[i].position.y;
       if (gap >= 30) {
-        // Further reduced from 80
         return {
           x: Math.max(...rightmostNodes.map((n) => n.position.x)) + SPACING.X,
           y: rightmostNodes[i].position.y + gap / 2,
