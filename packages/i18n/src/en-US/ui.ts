@@ -1398,6 +1398,7 @@ const translations = {
     skillDisplay: {
       skillManager: 'Skill Manage',
       manager: 'Manage',
+      more: 'More',
     },
     chatInput: {
       placeholder: 'Let Refly write something for you, or search anything you are interested in...',

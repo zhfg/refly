@@ -1,9 +1,9 @@
 import { Button } from 'antd';
 import { IconClose } from '@arco-design/web-react/icon';
-import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
 import { useTranslation } from 'react-i18next';
 import { Skill } from '@refly/openapi-schema';
 import classNames from 'classnames';
+import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
 import './index.scss';
 
 interface SelectedSkillHeaderProps {
@@ -27,7 +27,7 @@ export const SelectedSkillHeader = ({
   return skill ? (
     <div className={classNames('selected-skill', className)}>
       <div className="selected-skill-profile">
-        <SkillAvatar size={20} shape="circle" icon={skill?.icon} displayName={skillDisplayName} />
+        {getSkillIcon(skill?.name)}
         <p>{skillDisplayName}</p>
       </div>
       {!readonly && (

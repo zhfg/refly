@@ -1389,6 +1389,7 @@ const translations = {
     skillDisplay: {
       skillManager: '技能管理',
       manager: '管理',
+      more: '更多',
     },
     chatInput: {
       placeholder: '让 Refly 帮你写点什么，或者搜索任何感兴趣的内容...',
