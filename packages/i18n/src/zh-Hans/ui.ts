@@ -610,6 +610,9 @@ const translations = {
       deleteAll: '删除',
       compactMode: '紧凑模式',
       adaptiveMode: '自适应模式',
+      selectCluster: '选中子节点蔟',
+      groupCluster: '基于子节点蔟建立组',
+      layoutCluster: '子节点蔟自动布局',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',

@@ -618,6 +618,9 @@ const translations = {
       deleteAll: 'Delete',
       compactMode: 'Compact Mode',
       adaptiveMode: 'Adaptive Mode',
+      selectCluster: 'Select Target Nodes',
+      groupCluster: 'Group Target Nodes',
+      layoutCluster: 'Layout Target Nodes',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',
