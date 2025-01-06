@@ -13,6 +13,7 @@ import {
 import { useEdgeStyles } from '../../components/canvas/constants';
 import { CanvasNodeFilter } from './use-node-selection';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
 
 const deduplicateNodes = (nodes: any[]) => {
   const uniqueNodesMap = new Map();
@@ -180,6 +181,7 @@ export const useAddNode = () => {
 
       if (newNode.type === 'document' || (newNode.type === 'resource' && shouldPreview)) {
         addNodePreview(canvasId, newNode);
+        locateToNodePreviewEmitter.emit('locateToNodePreview', { canvasId, id: newNode.id });
       }
     },
     [canvasId, setNodes, setEdges, edgeStyles, setSelectedNode, setNodeCenter, addNodePreview, t],

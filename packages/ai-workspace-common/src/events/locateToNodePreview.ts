@@ -1,10 +1,10 @@
 import mitt from 'mitt';
 
 export type Events = {
-  addPinnedNode: {
+  locateToNodePreview: {
     canvasId: string;
     id: string;
   };
 };
 
-export const addPinnedNodeEmitter = mitt<Events>();
+export const locateToNodePreviewEmitter = mitt<Events>();
