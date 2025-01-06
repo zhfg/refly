@@ -6,7 +6,6 @@ import {
   IconRerun,
   IconDelete,
   IconAskAI,
-  IconLoading,
   IconRun,
   IconPreview,
   IconExpand,
@@ -14,7 +13,7 @@ import {
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { FileInput, MessageSquareDiff, FilePlus, Ungroup, Group, MoveVertical } from 'lucide-react';
+import { FileInput, MessageSquareDiff, FilePlus, Ungroup } from 'lucide-react';
 import { GrClone } from 'react-icons/gr';
 import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
 import { nodeActionEmitter, createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
@@ -134,7 +133,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   }, [nodeId, localSizeMode, setNodeSizeMode, onClose]);
 
   const getMenuItems = (activeDocumentId: string): MenuItem[] => {
-    console.log('getMenuItems cloneAskAIRunning', cloneAskAIRunning);
     if (isMultiSelection) {
       return [
         {
@@ -325,8 +323,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
       handleToggleSizeMode,
     ],
   );
-
-  console.log('cloneAskAIRunning', cloneAskAIRunning);
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-2 w-[200px] border border-[rgba(0,0,0,0.06)]">

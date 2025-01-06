@@ -159,7 +159,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   const isPending = result?.status === 'executing' || result?.status === 'waiting' || loading;
 
   return (
-    <div className="flex flex-col space-y-4 p-4 h-full">
+    <div className="flex flex-col space-y-4 p-4 h-full max-w-[1024px] mx-auto">
       {!isPending && (
         <>
           <EditChatInput

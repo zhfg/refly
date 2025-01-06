@@ -1,7 +1,6 @@
 import { Button, Divider } from 'antd';
 import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { RiUploadCloud2Line } from 'react-icons/ri';
-import { MdOutlineAutoAwesomeMotion } from 'react-icons/md';
 
 import { useTranslation } from 'react-i18next';
 import { FC, useEffect, useRef, useState } from 'react';
@@ -10,7 +9,12 @@ import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-s
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { CanvasNodeType, SearchDomain } from '@refly/openapi-schema';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
-import { IconAskAI, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconAskAI,
+  IconDocument,
+  IconMemo,
+  IconResource,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { genMemoID, genSkillID } from '@refly-packages/utils/id';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
@@ -57,7 +61,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     { key: 'askAI', icon: IconAskAI, type: 'button', primary: true },
     { key: 'divider-1', type: 'divider' },
     { key: 'createDocument', icon: HiOutlineDocumentAdd, type: 'button' },
-    { key: 'createMemo', icon: MdOutlineAutoAwesomeMotion, type: 'button' },
+    { key: 'createMemo', icon: IconMemo, type: 'button' },
     {
       key: 'addResource',
       icon: IconResource,
