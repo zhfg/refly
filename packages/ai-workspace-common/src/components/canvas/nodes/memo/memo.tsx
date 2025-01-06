@@ -113,6 +113,7 @@ export const MemoNode = ({
 
   const insertToDoc = useInsertToDocument(data.entityId);
   const handleInsertToDoc = useCallback(async () => {
+    if (!data?.contentPreview) return;
     await insertToDoc('insertBelow', data?.contentPreview);
   }, [insertToDoc, data.entityId, data]);
 
