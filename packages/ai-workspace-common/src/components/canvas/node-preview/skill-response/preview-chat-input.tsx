@@ -5,6 +5,7 @@ import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
 
 interface PreviewChatInputProps {
+  enabled: boolean;
   contextItems: IContextItem[];
   query: string;
   actionMeta?: {
@@ -16,12 +17,16 @@ interface PreviewChatInputProps {
 }
 
 const PreviewChatInputComponent = (props: PreviewChatInputProps) => {
-  const { contextItems, query, actionMeta, setEditMode, readonly } = props;
+  const { enabled, contextItems, query, actionMeta, setEditMode, readonly } = props;
 
   const hideSelectedSkillHeader = useMemo(
     () => !actionMeta || actionMeta?.name === 'commonQnA' || !actionMeta?.name,
     [actionMeta?.name],
   );
+
+  if (!enabled) {
+    return null;
+  }
 
   return (
     <div className={cn('border border-solid border-gray-200 rounded-lg')} onClick={() => setEditMode(true)}>
@@ -58,6 +63,7 @@ const PreviewChatInputComponent = (props: PreviewChatInputProps) => {
 
 const arePropsEqual = (prevProps: PreviewChatInputProps, nextProps: PreviewChatInputProps) => {
   return (
+    prevProps.enabled === nextProps.enabled &&
     prevProps.query === nextProps.query &&
     prevProps.readonly === nextProps.readonly &&
     prevProps.contextItems === nextProps.contextItems &&

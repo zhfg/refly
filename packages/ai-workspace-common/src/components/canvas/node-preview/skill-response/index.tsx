@@ -160,9 +160,10 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
 
   return (
     <div className="flex flex-col space-y-4 p-4 h-full">
-      {!isPending &&
-        (editMode ? (
+      {!isPending && (
+        <>
           <EditChatInput
+            enabled={editMode}
             resultId={resultId}
             contextItems={contextItems}
             query={title}
@@ -170,21 +171,24 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
             modelInfo={modelInfo}
             setEditMode={setEditMode}
           />
-        ) : (
           <PreviewChatInput
+            enabled={!editMode}
             readonly
             contextItems={contextItems}
             query={title}
             actionMeta={actionMeta}
             setEditMode={setEditMode}
           />
-        ))}
+        </>
+      )}
 
       <div
-        className={cn('h-full', {
-          'opacity-30': editMode,
-          'pointer-events-none': editMode,
-        })}
+        className={cn('h-full transition-opacity duration-500', { 'opacity-30': editMode })}
+        onClick={() => {
+          if (editMode) {
+            setEditMode(false);
+          }
+        }}
       >
         {steps.length === 0 && isPending && <Skeleton active paragraph={{ rows: 5 }} />}
         <StepsList steps={steps} result={result} title={title} />

@@ -13,11 +13,12 @@ import { ModelInfo, Skill } from '@refly-packages/ai-workspace-common/requests/t
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { convertContextItemsToEdges } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { IconExit } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useReactFlow } from '@xyflow/react';
+import { GrRevert } from 'react-icons/gr';
 import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
 
 interface EditChatInputProps {
+  enabled: boolean;
   resultId: string;
   contextItems: IContextItem[];
   query: string;
@@ -31,7 +32,7 @@ interface EditChatInputProps {
 }
 
 const EditChatInputComponent = (props: EditChatInputProps) => {
-  const { resultId, contextItems, query, modelInfo, actionMeta, setEditMode, readonly } = props;
+  const { enabled, resultId, contextItems, query, modelInfo, actionMeta, setEditMode, readonly } = props;
 
   const { getEdges, getNodes, deleteElements, addEdges } = useReactFlow();
   const [editQuery, setEditQuery] = useState<string>(query);
@@ -84,10 +85,13 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
   const customActions: CustomAction[] = useMemo(
     () => [
       {
-        icon: <IconExit />,
-        title: t('copilot.chatActions.exitEdit'),
+        icon: <GrRevert />,
+        title: t('copilot.chatActions.discard'),
         onClick: () => {
           setEditMode(false);
+          setEditQuery(query);
+          setEditContextItems(contextItems);
+          setEditModelInfo(modelInfo);
         },
       },
     ],
@@ -100,6 +104,10 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
       name: skill.name,
     });
   }, []);
+
+  if (!enabled) {
+    return null;
+  }
 
   return (
     <div className="ai-copilot-chat-container">
@@ -159,6 +167,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
 
 const arePropsEqual = (prevProps: EditChatInputProps, nextProps: EditChatInputProps) => {
   return (
+    prevProps.enabled === nextProps.enabled &&
     prevProps.resultId === nextProps.resultId &&
     prevProps.query === nextProps.query &&
     prevProps.modelInfo === nextProps.modelInfo &&

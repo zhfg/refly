@@ -1415,7 +1415,7 @@ const translations = {
       replace: 'Replace Selection',
       reject: 'Reject',
       copy: 'Copy Answer',
-      exitEdit: 'Exit Edit Mode',
+      discard: 'Discard Changes',
     },
     configManager: {
       title: 'Skill Configuration',

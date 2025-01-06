@@ -1406,7 +1406,7 @@ const translations = {
       replace: '替换选中',
       reject: '拒绝',
       copy: '复制回答',
-      exitEdit: '退出编辑模式',
+      discard: '放弃修改',
     },
     configManager: {
       title: '技能配置',
