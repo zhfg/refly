@@ -116,6 +116,11 @@ const getNodeHeight = (node: Node): number => {
   return node.measured?.height ?? 320;
 };
 
+// Add helper function to get node width
+const getNodeWidth = (node: Node): number => {
+  return node.measured?.width ?? 288;
+};
+
 // Layout a branch using Dagre while preserving root positions
 const layoutBranch = (
   branchNodes: Node[],
@@ -125,21 +130,27 @@ const layoutBranch = (
 ): Node[] => {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
-  // Configure the layout
+  // Configure the layout with consistent spacing
   g.setGraph({
     rankdir: 'LR',
     nodesep: SPACING.Y,
+    // Use consistent spacing as calculatePosition
     ranksep: SPACING.X,
     marginx: 50,
     marginy: 50,
   });
 
-  // Add all nodes to the graph
+  // Add all nodes to the graph with their actual dimensions
   branchNodes.forEach((node) => {
+    const nodeWidth = getNodeWidth(node);
+    const nodeHeight = getNodeHeight(node);
     g.setNode(node.id, {
       ...node,
-      width: node.measured?.width ?? 288,
-      height: node.measured?.height ?? 320,
+      width: nodeWidth,
+      height: nodeHeight,
+      // Store original dimensions for later use
+      originalWidth: nodeWidth,
+      originalHeight: nodeHeight,
     });
   });
 
@@ -160,9 +171,10 @@ const layoutBranch = (
     const shouldFixPosition = options.fromRoot ? isRoot : level < maxLevel;
 
     if (shouldFixPosition) {
+      const nodeWidth = getNodeWidth(node);
       g.setNode(node.id, {
         ...g.node(node.id),
-        x: node.position.x,
+        x: node.position.x + nodeWidth / 2, // Adjust x position to account for node width
         y: node.position.y,
         fixed: true,
       });
@@ -172,7 +184,7 @@ const layoutBranch = (
   // Apply layout
   Dagre.layout(g);
 
-  // Return nodes with updated positions
+  // Return nodes with updated positions, adjusting for node widths
   return branchNodes.map((node) => {
     const nodeWithPosition = g.node(node.id);
     const level = getNodeLevel(node.id, branchNodes, edges, rootNodes);
@@ -180,7 +192,7 @@ const layoutBranch = (
     const shouldPreservePosition = options.fromRoot ? isRoot : level < maxLevel;
 
     if (shouldPreservePosition) {
-      return node; // Keep original position
+      return node; // Keep original position for fixed nodes
     }
 
     // For non-fixed nodes, ensure they maintain relative Y position to their source nodes
@@ -192,20 +204,23 @@ const layoutBranch = (
 
       if (sourceNodes.length > 0) {
         const avgSourceY = sourceNodes.reduce((sum, n) => sum + n.position.y, 0) / sourceNodes.length;
+        const nodeWidth = getNodeWidth(node);
         return {
           ...node,
           position: {
-            x: nodeWithPosition.x,
-            y: avgSourceY, // Keep similar Y position as source nodes
+            x: nodeWithPosition.x - nodeWidth / 2, // Adjust back from Dagre's center position
+            y: avgSourceY,
           },
         };
       }
     }
 
+    // For other nodes, adjust position based on node width
+    const nodeWidth = getNodeWidth(node);
     return {
       ...node,
       position: {
-        x: nodeWithPosition.x,
+        x: nodeWithPosition.x - nodeWidth / 2, // Adjust back from Dagre's center position
         y: nodeWithPosition.y,
       },
     };
@@ -285,11 +300,12 @@ const getRightmostPosition = (sourceNodes: Node[], nodes: Node[], edges: any[]):
   const sourceNodesAbsolute = sourceNodes.map((node) => ({
     ...node,
     position: getNodeAbsolutePosition(node, nodes),
+    width: getNodeWidth(node),
   }));
 
-  // Calculate X position
-  const rightmostSourceX = Math.max(...sourceNodesAbsolute.map((n) => n.position.x));
-  const targetX = rightmostSourceX + SPACING.X;
+  // Calculate X position considering node width
+  const rightmostX = Math.max(...sourceNodesAbsolute.map((n) => n.position.x + n.width / 2));
+  const targetX = rightmostX + SPACING.X;
 
   // Get all nodes at the same X level
   const nodesAtTargetLevel = nodes
@@ -558,6 +574,7 @@ export const calculateNodePosition = ({
     const sourceNodesAbsolute = sourceNodes.map((node) => ({
       ...node,
       position: getNodeAbsolutePosition(node, nodes),
+      width: getNodeWidth(node),
     }));
 
     if (!autoLayout) {
@@ -576,8 +593,8 @@ export const calculateNodePosition = ({
         });
       });
 
-      // Calculate X position - place to the right of rightmost source node
-      const rightmostSourceX = Math.max(...sourceNodesAbsolute.map((n) => n.position.x));
+      // Calculate X position considering node width
+      const rightmostSourceX = Math.max(...sourceNodesAbsolute.map((n) => n.position.x + n.width / 2));
       const targetX = rightmostSourceX + SPACING.X;
 
       if (connectedNodes.size > 0) {
@@ -585,6 +602,7 @@ export const calculateNodePosition = ({
         const connectedNodesAbsolute = Array.from(connectedNodes).map((node) => ({
           ...node,
           position: getNodeAbsolutePosition(node, nodes),
+          width: getNodeWidth(node),
         }));
 
         // Find the bottommost node among all connected nodes
@@ -599,7 +617,7 @@ export const calculateNodePosition = ({
 
         return {
           x: targetX,
-          y: bottomY + SPACING.Y + 320 / 2, // Add spacing and half height for centering
+          y: bottomY + SPACING.Y + 320 / 2,
         };
       } else {
         // If no connected nodes, place at average Y of source nodes
@@ -773,14 +791,22 @@ export const useNodePosition = () => {
 
       // Process each level
       Array.from(nodeLevels.entries()).forEach(([level, nodes]) => {
-        // Calculate X position for this level
-        const levelX = Math.max(...sourceNodes.map((n) => n.position.x)) + level * SPACING.X;
+        // Calculate X position consistently with calculatePosition
+        const levelX =
+          level === 0
+            ? Math.max(...sourceNodes.map((n) => n.position.x + getNodeWidth(n) / 2))
+            : Math.max(
+                ...Array.from(nodeLevels.get(level - 1) || []).map((n) => {
+                  const nodeWidth = getNodeWidth(n);
+                  return n.position.x + nodeWidth / 2;
+                }),
+              ) + SPACING.X;
 
         // Calculate total height needed for this level
         const totalHeight = nodes.reduce((sum, node) => {
           const nodeHeight = getNodeHeight(node);
           return sum + nodeHeight + fixedSpacing;
-        }, -fixedSpacing); // Subtract one spacing since we don't need it after the last node
+        }, -fixedSpacing);
 
         // Calculate starting Y position (centered around average source Y)
         const avgSourceY = sourceNodes.reduce((sum, n) => sum + n.position.y, 0) / sourceNodes.length;
@@ -789,6 +815,7 @@ export const useNodePosition = () => {
         // Calculate center positions for nodes in this level
         nodes.forEach((node, index) => {
           const nodeHeight = getNodeHeight(node);
+          const nodeWidth = getNodeWidth(node);
 
           // Get direct source nodes for this node
           const directSourceNodes = edges
@@ -805,8 +832,8 @@ export const useNodePosition = () => {
           }
 
           nodePositions.set(node.id, {
-            x: levelX,
-            y: currentY + nodeHeight / 2, // Add half height to position at center
+            x: levelX, // Don't add half width here since we already considered it in levelX
+            y: currentY + nodeHeight / 2,
           });
 
           currentY += nodeHeight + fixedSpacing;
