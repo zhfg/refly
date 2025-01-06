@@ -148,6 +148,8 @@ export const GroupNode = memo(
             },
           },
           connectTo,
+          false,
+          true,
         );
       }
     }, [id, getNodes, addNode]);

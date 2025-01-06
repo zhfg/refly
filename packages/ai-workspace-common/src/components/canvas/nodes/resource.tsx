@@ -161,6 +161,8 @@ export const ResourceNode = memo(
           },
         },
         [{ type: 'resource', entityId: data.entityId }],
+        false,
+        true,
       );
     }, [id, data, addNode]);
 
