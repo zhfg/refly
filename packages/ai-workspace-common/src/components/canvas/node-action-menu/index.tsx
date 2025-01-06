@@ -185,15 +185,24 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         type: 'button' as const,
         primary: true,
       },
-      nodeType === 'skillResponse'
-        ? {
-            key: 'cloneAskAI',
-            icon: GrClone,
-            label: t('canvas.nodeActions.cloneAskAI'),
-            onClick: handleCloneAskAI,
-            type: 'button' as const,
-          }
-        : null,
+      ...(nodeType === 'skillResponse'
+        ? [
+            {
+              key: 'cloneAskAI',
+              icon: GrClone,
+              label: t('canvas.nodeActions.cloneAskAI'),
+              onClick: handleCloneAskAI,
+              type: 'button' as const,
+            },
+            {
+              key: 'rerun',
+              icon: IconRerun,
+              label: t('canvas.nodeActions.rerun'),
+              onClick: handleRerun,
+              type: 'button' as const,
+            },
+          ]
+        : []),
       { key: 'divider-1', type: 'divider' } as MenuItem,
       {
         key: 'preview',
@@ -266,13 +275,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         },
       ],
       skillResponse: [
-        {
-          key: 'rerun',
-          icon: IconRerun,
-          label: t('canvas.nodeActions.rerun'),
-          onClick: handleRerun,
-          type: 'button' as const,
-        },
         {
           key: 'insertToDoc',
           icon: FileInput,
