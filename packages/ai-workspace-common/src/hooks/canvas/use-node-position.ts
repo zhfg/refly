@@ -497,11 +497,34 @@ export const calculateNodePosition = ({
 
 export const useNodePosition = () => {
   const { getNode, setCenter, getNodes, setNodes } = useReactFlow();
+  const reactFlowInstance = useReactFlow();
 
   const calculatePosition = useCallback((params: CalculateNodePositionParams) => calculateNodePosition(params), []);
 
+  const setNodeCenter = useCallback(
+    (nodeId: string) => {
+      requestAnimationFrame(() => {
+        const renderedNode = getNode(nodeId);
+        const currentZoom = reactFlowInstance.getZoom();
+        if (renderedNode) {
+          setCenter(renderedNode.position.x, renderedNode.position.y, {
+            duration: 300,
+            zoom: currentZoom,
+          });
+        }
+      });
+    },
+    [setCenter, getNode],
+  );
+
   const layoutBranchAndUpdatePositions = useCallback(
-    (startNodeIds: string[], allNodes: Node[], edges: any[], options: LayoutBranchOptions = {}) => {
+    (
+      startNodeIds: string[],
+      allNodes: Node[],
+      edges: any[],
+      options: LayoutBranchOptions = {},
+      needSetCenter: { targetNodeId: string; needSetCenter: boolean } = { targetNodeId: '', needSetCenter: true },
+    ) => {
       // Get source nodes
       const sourceNodes = allNodes.filter((node) => startNodeIds.includes(node.id));
 
@@ -664,23 +687,13 @@ export const useNodePosition = () => {
       });
 
       setNodes(updatedNodes);
-    },
-    [setNodes],
-  );
 
-  const setNodeCenter = useCallback(
-    (nodeId: string) => {
-      requestAnimationFrame(() => {
-        const renderedNode = getNode(nodeId);
-        if (renderedNode) {
-          setCenter(renderedNode.position.x, renderedNode.position.y, {
-            duration: 300,
-            zoom: 1,
-          });
-        }
-      });
+      // Set center on the specified target node
+      if (needSetCenter.needSetCenter && needSetCenter.targetNodeId) {
+        setNodeCenter(needSetCenter.targetNodeId);
+      }
     },
-    [setCenter, getNode],
+    [setNodes, setNodeCenter],
   );
 
   return { calculatePosition, setNodeCenter, layoutBranchAndUpdatePositions };

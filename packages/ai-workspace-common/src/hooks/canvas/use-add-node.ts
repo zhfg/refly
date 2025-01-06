@@ -28,6 +28,8 @@ const deduplicateEdges = (edges: any[]) => {
   return Array.from(uniqueEdgesMap.values());
 };
 
+const padding = 200;
+
 export const useAddNode = () => {
   const { t } = useTranslation();
   const edgeStyles = useEdgeStyles();
@@ -41,20 +43,24 @@ export const useAddNode = () => {
     addNodePreview: state.addNodePreview,
   }));
 
+  const reactFlowInstance = useReactFlow();
+
   const setNodeCenter = useCallback(
     (nodeId: string) => {
-      // Center view on new node after it's rendered
+      const currentZoom = reactFlowInstance.getZoom();
+      const zoomAdjustedPadding = padding;
+
       requestAnimationFrame(() => {
         const renderedNode = getNode(nodeId);
         if (renderedNode) {
-          setCenter(renderedNode.position.x, renderedNode.position.y, {
+          setCenter(renderedNode.position.x + zoomAdjustedPadding, renderedNode.position.y + zoomAdjustedPadding, {
             duration: 300,
-            zoom: 1,
+            zoom: currentZoom,
           });
         }
       });
     },
-    [setCenter],
+    [setCenter, reactFlowInstance],
   );
 
   const setSelectedNode = useCallback(
@@ -155,12 +161,10 @@ export const useAddNode = () => {
             sourceNodes.map((n) => n.id),
             updatedNodes,
             updatedEdges,
+            {},
+            { needSetCenter: needSetCenter, targetNodeId: newNode.id },
           );
         }, 0);
-      }
-
-      if (needSetCenter) {
-        setNodeCenter(newNode.id);
       }
 
       if (newNode.type === 'document' || (newNode.type === 'resource' && shouldPreview)) {
