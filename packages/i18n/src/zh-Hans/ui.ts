@@ -1476,6 +1476,7 @@ const translations = {
       memo: '备忘录',
       skillResponse: 'AI 回答',
       threadHistory: '对话历史',
+      quote: '引用内容',
       extensionWeblink: '网页',
     },
     modelSelector: {

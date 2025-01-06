@@ -2819,6 +2819,7 @@ export const SelectionKeySchema = {
   enum: [
     'documentSelection',
     'resourceSelection',
+    'skillResponseSelection',
     'extensionWeblinkSelection',
     'documentCursorSelection',
     'documentBeforeCursorSelection',

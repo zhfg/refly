@@ -418,7 +418,7 @@ export const SkillResponseNode = memo(
 
       // Create new skill node with context, similar to group node implementation
       const connectTo = contextItems.map((item) => ({
-        type: item.type,
+        type: item.type as CanvasNodeType,
         entityId: item.entityId,
       }));
 

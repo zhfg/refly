@@ -42,6 +42,7 @@ import { AiOutlineShrink } from 'react-icons/ai';
 import { RiExpandDiagonalLine } from 'react-icons/ri';
 import { TbWorldSearch } from 'react-icons/tb';
 import { GrCircleQuestion } from 'react-icons/gr';
+import { FaNoteSticky, FaRegNoteSticky } from 'react-icons/fa6';
 
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
 import ClaudeIcon from '@refly-packages/ai-workspace-common/assets/claude.svg';
@@ -57,7 +58,8 @@ export const IconDocument = HiOutlineDocumentText;
 export const IconDocumentFilled = HiDocumentText;
 export const IconResource = HiOutlineSquare3Stack3D;
 export const IconResourceFilled = HiSquare3Stack3D;
-export const IconMemo = PiNotePencilLight;
+export const IconMemo = FaRegNoteSticky;
+export const IconMemoFilled = FaNoteSticky;
 export const IconResponse = HiOutlineSparkles;
 export const IconResponseFilled = HiSparkles;
 export const IconLibrary = IoLibraryOutline;

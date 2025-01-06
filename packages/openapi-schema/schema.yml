@@ -3562,6 +3562,7 @@ components:
       enum:
         - documentSelection
         - resourceSelection
+        - skillResponseSelection
         - extensionWeblinkSelection
         - documentCursorSelection
         - documentBeforeCursorSelection

@@ -12,7 +12,7 @@ const skillItemTitleClasses = 'inline-block max-w-[calc(100% - 8px)] overflow-hi
 
 const skillItemClasses =
   'h-7 px-1.5 rounded-md border border-solid border-gray-200 text-gray-500 bg-white flex items-center justify-center ' +
-  'text-xs font-medium transition-all duration-200 ease-in-out hover:bg-gray-100 hover:text-black cursor-pointer';
+  'text-xs font-medium transition-all duration-200 ease-in-out hover:bg-gray-100 hover:text-green-600 cursor-pointer';
 
 export const SkillDisplay = () => {
   const { t } = useTranslation();

@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { convertMarkToNode } from '../../utils/mark-to-node';
-import { SelectedTextDomain } from '@refly/common-types';
-import { genUniqueId } from '@refly-packages/utils/id';
-import { useContextPanelStore } from '../../stores/context-panel';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { CanvasNodeType } from '@refly/openapi-schema';
+import { IContextItem, useContextPanelStoreShallow } from '../../stores/context-panel';
 import { getSelectionNodesMarkdown } from '@refly-packages/ai-workspace-common/modules/content-selector/utils/highlight-selection';
 
 interface UseSelectionContextProps {
@@ -16,7 +11,9 @@ interface UseSelectionContextProps {
 export const useSelectionContext = ({ containerClass, containerRef, enabled = true }: UseSelectionContextProps) => {
   const [selectedText, setSelectedText] = useState<string>('');
   const [isSelecting, setIsSelecting] = useState(false);
-  const { addContextItem } = useContextPanelStore();
+  const { addContextItem } = useContextPanelStoreShallow((state) => ({
+    addContextItem: state.addContextItem,
+  }));
 
   const handleSelection = useCallback(() => {
     if (!enabled) return;
@@ -38,7 +35,7 @@ export const useSelectionContext = ({ containerClass, containerRef, enabled = tr
         return;
       }
 
-      // 优先使用 ref 检查容器
+      // Prefer containerRef to check container
       const container =
         containerRef?.current || (containerClass ? document.querySelector(`.${containerClass}`) : document.body);
 
@@ -59,10 +56,10 @@ export const useSelectionContext = ({ containerClass, containerRef, enabled = tr
 
   // Add selected text to context
   const addToContext = useCallback(
-    (node: CanvasNode) => {
+    (item: IContextItem) => {
       if (!selectedText) return;
 
-      addContextItem(node);
+      addContextItem(item);
 
       // Clear selection
       window.getSelection()?.removeAllRanges();

@@ -24,7 +24,6 @@ import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-data';
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { NodeHeader } from './shared/node-header';
@@ -330,10 +329,10 @@ export const ResourceNode = memo(
       prevProps.isPreview === nextProps.isPreview &&
       prevProps.hideActions === nextProps.hideActions &&
       prevProps.hideHandles === nextProps.hideHandles &&
-      prevProps.data.title === nextProps.data.title &&
-      prevProps.data.contentPreview === nextProps.data.contentPreview &&
-      prevProps.data.createdAt === nextProps.data.createdAt &&
-      JSON.stringify(prevProps.data.metadata) === JSON.stringify(nextProps.data.metadata) &&
+      prevProps.data?.title === nextProps.data?.title &&
+      prevProps.data?.contentPreview === nextProps.data?.contentPreview &&
+      prevProps.data?.createdAt === nextProps.data?.createdAt &&
+      JSON.stringify(prevProps.data?.metadata) === JSON.stringify(nextProps.data?.metadata) &&
       styleEqual &&
       sizeModeEqual // Add sizeMode comparison
     );

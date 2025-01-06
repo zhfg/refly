@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 import { Mark } from '@refly/common-types';
-import { CanvasNodeType } from '@refly/openapi-schema';
+import { CanvasNodeType, SelectionKey } from '@refly/openapi-schema';
 
 export interface FilterErrorInfo {
   [key: string]: {
@@ -12,10 +12,18 @@ export interface FilterErrorInfo {
   };
 }
 
+export interface Selection {
+  content: string;
+  sourceTitle?: string;
+  sourceEntityId?: string;
+  sourceEntityType?: CanvasNodeType;
+}
+
 export interface IContextItem {
   title: string;
   entityId: string;
-  type: CanvasNodeType;
+  type: CanvasNodeType | SelectionKey;
+  selection?: Selection;
   metadata?: Record<string, any>;
   isPreview?: boolean; // is preview mode
   isCurrentContext?: boolean;

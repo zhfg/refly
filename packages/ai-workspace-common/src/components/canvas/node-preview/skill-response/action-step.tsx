@@ -18,8 +18,8 @@ import { RecommendQuestions } from '@refly-packages/ai-workspace-common/componen
 import { getClientOrigin } from '@refly-packages/utils/url';
 import { memo } from 'react';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
-import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 const parseStructuredData = (structuredData: Record<string, unknown>, field: string) => {
   return typeof structuredData[field] === 'string'
@@ -27,7 +27,6 @@ const parseStructuredData = (structuredData: Record<string, unknown>, field: str
     : (structuredData[field] as Source[]);
 };
 
-// 抽离日志组件
 const LogBox = memo(
   ({
     logs,
@@ -133,12 +132,12 @@ const StepContent = memo(
   ({
     content,
     sources,
-    buildNodeData,
+    buildContextItem,
     step,
   }: {
     content: string;
     sources: Source[];
-    buildNodeData: (text: string) => CanvasNode;
+    buildContextItem: (text: string) => IContextItem;
     step: ActionStep;
   }) => {
     // console.log('stepcontent', step);
@@ -147,7 +146,7 @@ const StepContent = memo(
       <div className="my-3 text-gray-600 text-base skill-response-content">
         <Markdown content={content} sources={sources} />
         {step?.name === 'answerGeneration' ? (
-          <SelectionContext containerClass="skill-response-content" getNodeData={buildNodeData} />
+          <SelectionContext containerClass="skill-response-content" getContextItem={buildContextItem} />
         ) : null}
       </div>
     );
@@ -220,30 +219,27 @@ export const ActionStepCard = memo(
       }
     }, [result?.status]);
 
-    const buildNodeData = useCallback(
+    const buildContextItem = useCallback(
       (text: string) => {
         const id = genUniqueId();
 
-        const node: CanvasNode = {
-          id,
-          type: 'skillResponse',
-          position: { x: 0, y: 0 },
-          data: {
-            entityId: result.resultId ?? '',
-            title: result.title ?? 'Selected Content',
-            metadata: {
-              contentPreview: text,
-              selectedContent: text,
-              xPath: id,
-              sourceEntityId: result.resultId ?? '',
-              sourceEntityType: 'skillResponse',
-              sourceType: 'skillResponseSelection',
-              url: getClientOrigin(),
-            },
+        const item: IContextItem = {
+          type: 'skillResponseSelection',
+          entityId: genUniqueId(),
+          title: text.slice(0, 50),
+
+          metadata: {
+            contentPreview: text,
+            selectedContent: text,
+            xPath: id,
+            sourceEntityId: result.resultId ?? '',
+            sourceEntityType: 'skillResponse',
+            sourceType: 'skillResponseSelection',
+            url: getClientOrigin(),
           },
         };
 
-        return node;
+        return item;
       },
       [result.resultId, result.title],
     );
@@ -297,7 +293,12 @@ export const ActionStepCard = memo(
         {parsedData.sources && <SourceViewer sources={parsedData.sources} query={query} />}
 
         {step.content && (
-          <StepContent content={step.content} sources={parsedData.sources} buildNodeData={buildNodeData} step={step} />
+          <StepContent
+            content={step.content}
+            sources={parsedData.sources}
+            buildContextItem={buildContextItem}
+            step={step}
+          />
         )}
 
         {step.artifacts?.map((artifact) => (

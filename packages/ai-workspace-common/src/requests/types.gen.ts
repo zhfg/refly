@@ -1963,7 +1963,7 @@ export type SkillContext = {
 
 export type SkillContextKey = 'resources' | 'documents' | 'contentList' | 'urls';
 
-export type SelectionKey = 'documentSelection' | 'resourceSelection' | 'extensionWeblinkSelection' | 'documentCursorSelection' | 'documentBeforeCursorSelection' | 'documentAfterCursorSelection';
+export type SelectionKey = 'documentSelection' | 'resourceSelection' | 'skillResponseSelection' | 'extensionWeblinkSelection' | 'documentCursorSelection' | 'documentBeforeCursorSelection' | 'documentAfterCursorSelection';
 
 export type SkillContextRule = {
     /**
