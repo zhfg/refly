@@ -439,6 +439,8 @@ export const SkillResponseNode = memo(
         },
         connectTo,
       );
+
+      nodeActionEmitter.emit(createNodeEventName(id, 'cloneAskAI.completed'));
     }, [id, data?.entityId, addNode, t]);
 
     // Update size when content changes

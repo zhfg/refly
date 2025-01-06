@@ -60,6 +60,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const nodeData = useMemo(() => node?.data, [node]);
   const [localSizeMode, setLocalSizeMode] = useState(() => nodeData?.metadata?.sizeMode || 'adaptive');
 
+  const [cloneAskAIRunning, setCloneAskAIRunning] = useState(false);
+
   useEffect(() => {
     setLocalSizeMode(nodeData?.metadata?.sizeMode || 'adaptive');
   }, [nodeData?.metadata?.sizeMode]);
@@ -78,7 +80,11 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   }, [nodeId]);
 
   const handleCloneAskAI = useCallback(() => {
+    setCloneAskAIRunning(true);
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'cloneAskAI'));
+    nodeActionEmitter.on(createNodeEventName(nodeId, 'cloneAskAI.completed'), () => {
+      setCloneAskAIRunning(false);
+    });
     onClose?.();
   }, [nodeId, onClose]);
 
@@ -128,6 +134,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   }, [nodeId, localSizeMode, setNodeSizeMode, onClose]);
 
   const getMenuItems = (activeDocumentId: string): MenuItem[] => {
+    console.log('getMenuItems cloneAskAIRunning', cloneAskAIRunning);
     if (isMultiSelection) {
       return [
         {
@@ -171,6 +178,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         ? {
             key: 'cloneAskAI',
             icon: GrClone,
+            loading: cloneAskAIRunning,
             label: t('canvas.nodeActions.cloneAskAI'),
             onClick: handleCloneAskAI,
             type: 'button' as const,
@@ -303,6 +311,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     () => getMenuItems(activeDocumentId),
     [
       activeDocumentId,
+      cloneAskAIRunning,
       nodeType,
       nodeData?.contentPreview,
       handleRerun,
@@ -316,6 +325,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
       handleToggleSizeMode,
     ],
   );
+
+  console.log('cloneAskAIRunning', cloneAskAIRunning);
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-2 w-[200px] border border-[rgba(0,0,0,0.06)]">
@@ -343,11 +354,12 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
               ${item.loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
             `}
             type="text"
+            icon={<item.icon className="w-4 h-4" />}
             loading={item.loading}
             onClick={item.onClick}
             disabled={item.disabled}
           >
-            {item.loading ? <IconLoading className="w-4 h-4" /> : <item.icon className="w-4 h-4" />}
+            {/* {item.loading ? <IconLoading className="w-4 h-4" /> : <item.icon className="w-4 h-4" />} */}
             <span className="flex-1 text-left truncate">{item.label}</span>
           </Button>
         );
