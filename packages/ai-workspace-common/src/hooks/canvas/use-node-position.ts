@@ -281,17 +281,30 @@ const getRightwardNodes = (nodeId: string, nodes: Node[], edges: any[]): Node[] 
 
 // Get the rightmost position for a new node
 const getRightmostPosition = (sourceNodes: Node[], nodes: Node[], edges: any[]): XYPosition => {
+  // Convert source nodes to absolute positions if they are in groups
+  const sourceNodesAbsolute = sourceNodes.map((node) => ({
+    ...node,
+    position: getNodeAbsolutePosition(node, nodes),
+  }));
+
   // Calculate X position
-  const rightmostSourceX = Math.max(...sourceNodes.map((n) => n.position.x));
+  const rightmostSourceX = Math.max(...sourceNodesAbsolute.map((n) => n.position.x));
   const targetX = rightmostSourceX + SPACING.X;
 
   // Get all nodes at the same X level
   const nodesAtTargetLevel = nodes
-    .filter((node) => Math.abs(node.position.x - targetX) < SPACING.X / 2)
+    .filter((node) => {
+      const absPos = getNodeAbsolutePosition(node, nodes);
+      return Math.abs(absPos.x - targetX) < SPACING.X / 2;
+    })
+    .map((node) => ({
+      ...node,
+      position: getNodeAbsolutePosition(node, nodes),
+    }))
     .sort((a, b) => a.position.y - b.position.y);
 
   // Calculate average Y of source nodes
-  const avgSourceY = sourceNodes.reduce((sum, n) => sum + n.position.y, 0) / sourceNodes.length;
+  const avgSourceY = sourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) / sourceNodesAbsolute.length;
 
   // If no nodes at this level, place at average Y of source nodes
   if (nodesAtTargetLevel.length === 0) {
@@ -416,11 +429,17 @@ const getLeftmostBottomPosition = (nodes: Node[], spacing = SPACING): XYPosition
     };
   }
 
+  // Convert nodes to absolute positions
+  const nodesAbsolute = nodes.map((node) => ({
+    ...node,
+    position: getNodeAbsolutePosition(node, nodes),
+  }));
+
   // Find the leftmost x position among all nodes
-  const leftmostX = Math.min(...nodes.map((n) => n.position.x));
+  const leftmostX = Math.min(...nodesAbsolute.map((n) => n.position.x));
 
   // Find all nodes at the leftmost position
-  const leftmostNodes = nodes
+  const leftmostNodes = nodesAbsolute
     .filter((n) => Math.abs(n.position.x - leftmostX) < spacing.X / 2)
     .sort((a, b) => a.position.y - b.position.y);
 
@@ -488,6 +507,24 @@ const getLeftmostBottomPosition = (nodes: Node[], spacing = SPACING): XYPosition
   };
 };
 
+// Add this helper function before calculateNodePosition
+const getNodeAbsolutePosition = (node: Node, nodes: Node[]): XYPosition => {
+  if (!node.parentId) {
+    return node.position;
+  }
+
+  const parent = nodes.find((n) => n.id === node.parentId);
+  if (!parent) {
+    return node.position;
+  }
+
+  const parentPos = getNodeAbsolutePosition(parent, nodes);
+  return {
+    x: parentPos.x + node.position.x,
+    y: parentPos.y + node.position.y,
+  };
+};
+
 export const calculateNodePosition = ({
   nodes,
   sourceNodes,
@@ -517,6 +554,12 @@ export const calculateNodePosition = ({
   if (sourceNodes?.length > 0) {
     const { autoLayout } = useCanvasStore.getState();
 
+    // Convert relative positions to absolute positions for calculations
+    const sourceNodesAbsolute = sourceNodes.map((node) => ({
+      ...node,
+      position: getNodeAbsolutePosition(node, nodes),
+    }));
+
     if (!autoLayout) {
       // For each source node, find all its connected target nodes
       const connectedNodes = new Set<Node>();
@@ -534,12 +577,18 @@ export const calculateNodePosition = ({
       });
 
       // Calculate X position - place to the right of rightmost source node
-      const rightmostSourceX = Math.max(...sourceNodes.map((n) => n.position.x));
+      const rightmostSourceX = Math.max(...sourceNodesAbsolute.map((n) => n.position.x));
       const targetX = rightmostSourceX + SPACING.X;
 
       if (connectedNodes.size > 0) {
+        // Convert connected nodes to absolute positions
+        const connectedNodesAbsolute = Array.from(connectedNodes).map((node) => ({
+          ...node,
+          position: getNodeAbsolutePosition(node, nodes),
+        }));
+
         // Find the bottommost node among all connected nodes
-        const bottomNode = Array.from(connectedNodes).reduce((bottom, current) => {
+        const bottomNode = connectedNodesAbsolute.reduce((bottom, current) => {
           const bottomY = bottom.position.y + (bottom.measured?.height ?? 320) / 2;
           const currentY = current.position.y + (current.measured?.height ?? 320) / 2;
           return currentY > bottomY ? current : bottom;
@@ -554,7 +603,7 @@ export const calculateNodePosition = ({
         };
       } else {
         // If no connected nodes, place at average Y of source nodes
-        const avgSourceY = sourceNodes.reduce((sum, n) => sum + n.position.y, 0) / sourceNodes.length;
+        const avgSourceY = sourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) / sourceNodesAbsolute.length;
         return {
           x: targetX,
           y: avgSourceY,
@@ -563,7 +612,7 @@ export const calculateNodePosition = ({
     }
 
     // If auto-layout is enabled or no branch nodes found, use original positioning logic
-    return getRightmostPosition(sourceNodes, nodes, edges);
+    return getRightmostPosition(sourceNodesAbsolute, nodes, edges);
   }
 
   // Case 2: No specific connections - add to a new branch
