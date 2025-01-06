@@ -164,7 +164,7 @@ const ChatInputComponent = ({
         setSelectedSkill(skill);
       }
     },
-    [setSelectedSkill, handleSelectSkill],
+    [skills, setSelectedSkill, handleSelectSkill],
   );
 
   return (
