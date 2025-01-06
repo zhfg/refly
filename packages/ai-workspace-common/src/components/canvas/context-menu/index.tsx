@@ -15,6 +15,7 @@ import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
 import { MdOutlineCompareArrows } from 'react-icons/md';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
+import { RiLayoutLine } from 'react-icons/ri';
 
 interface ContextMenuProps {
   open: boolean;
@@ -45,6 +46,8 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
     setShowLaunchpad,
     setClickToPreview,
     setNodeSizeMode,
+    autoLayout,
+    setAutoLayout,
   } = useCanvasStoreShallow((state) => ({
     showEdges: state.showEdges,
     showLaunchpad: state.showLaunchpad,
@@ -54,6 +57,8 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
     setShowLaunchpad: state.setShowLaunchpad,
     setClickToPreview: state.setClickToPreview,
     setNodeSizeMode: state.setNodeSizeMode,
+    autoLayout: state.autoLayout,
+    setAutoLayout: state.setAutoLayout,
   }));
   const { showEdges: edgeVisible, toggleEdgeVisible } = useEdgeVisible();
   const { updateAllNodesSizeMode } = useNodeOperations();
@@ -86,6 +91,13 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       type: 'button',
       active: nodeSizeMode === 'compact',
       title: nodeSizeMode === 'compact' ? t('canvas.contextMenu.adaptiveMode') : t('canvas.contextMenu.compactMode'),
+    },
+    {
+      key: 'toggleAutoLayout',
+      icon: RiLayoutLine,
+      type: 'button',
+      active: autoLayout,
+      title: autoLayout ? t('canvas.contextMenu.disableAutoLayout') : t('canvas.contextMenu.enableAutoLayout'),
     },
   ];
 
@@ -132,6 +144,9 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
         const newMode = nodeSizeMode === 'compact' ? 'adaptive' : 'compact';
         setNodeSizeMode(newMode);
         updateAllNodesSizeMode(newMode);
+        break;
+      case 'toggleAutoLayout':
+        setAutoLayout(!autoLayout);
         break;
     }
     setOpen(false);

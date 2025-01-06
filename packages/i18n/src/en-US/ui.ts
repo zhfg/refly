@@ -516,6 +516,8 @@ const translations = {
       toggleNodeSizeMode: 'Toggle Node Size Mode',
       compactMode: 'Compact Mode',
       adaptiveMode: 'Adaptive Mode',
+      enableAutoLayout: 'Enable Auto Layout',
+      disableAutoLayout: 'Disable Auto Layout',
     },
     toolbar: {
       enablePointerMode: 'Enable Pointer Mode',

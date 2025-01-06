@@ -508,6 +508,8 @@ const translations = {
       toggleNodeSizeMode: '切换节点大小模式',
       compactMode: '紧凑模式',
       adaptiveMode: '自适应模式',
+      enableAutoLayout: '启用自动布局',
+      disableAutoLayout: '禁用自动布局',
     },
     toolbar: {
       enablePointerMode: '启用框选模式',
