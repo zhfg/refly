@@ -1,13 +1,13 @@
-import { AutoComplete, AutoCompleteProps, Input } from 'antd';
+import { AutoComplete, AutoCompleteProps, DropdownProps, Input } from 'antd';
 import { memo, useRef, useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
 import { useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
-import type { SearchDomain, Skill } from '@refly/openapi-schema';
-import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components/search-list';
+import type { Skill } from '@refly/openapi-schema';
 import { useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
 import { cn } from '@refly-packages/utils/cn';
 import { useListSkills } from '@refly-packages/ai-workspace-common/queries/queries';
+import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 const TextArea = Input.TextArea;
 
@@ -16,6 +16,7 @@ interface ChatInputProps {
   setQuery: (text: string) => void;
   selectedSkillName: string | null;
   inputClassName?: string;
+  autoCompletionPlacement?: 'bottomLeft' | 'bottomRight' | 'topLeft' | 'topRight';
   handleSendMessage: () => void;
   handleSelectSkill?: (skill: Skill) => void;
 }
@@ -25,17 +26,19 @@ const ChatInputComponent = ({
   setQuery,
   selectedSkillName,
   inputClassName,
+  autoCompletionPlacement,
   handleSendMessage,
   handleSelectSkill,
 }: ChatInputProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language;
+
   const inputRef = useRef<RefTextAreaType>(null);
   const searchStore = useSearchStoreShallow((state) => ({
     setIsSearchOpen: state.setIsSearchOpen,
   }));
-  const { setSelectedSkill, setSkillManagerModalVisible } = useSkillStoreShallow((state) => ({
+  const { setSelectedSkill } = useSkillStoreShallow((state) => ({
     setSelectedSkill: state.setSelectedSkill,
-    setSkillManagerModalVisible: state.setSkillManagerModalVisible,
   }));
   const [showSkillSelector, setShowSkillSelector] = useState(false);
 
@@ -46,8 +49,21 @@ const ChatInputComponent = ({
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
-
   const skills = data?.data ?? [];
+
+  const skillOptions = useMemo(() => {
+    return skills.map((skill) => ({
+      value: skill.name,
+      label: (
+        <div className="flex items-center gap-2 h-6">
+          {getSkillIcon(skill.name)}
+          <span className="text-sm font-medium">{t(`${skill.name}.name`, { ns: 'skill' })}</span>
+          <span className="text-sm text-gray-500">{t(`${skill.name}.description`, { ns: 'skill' })}</span>
+        </div>
+      ),
+      textLabel: t(`${skill.name}.name`, { ns: 'skill' }),
+    }));
+  }, [data, language]);
 
   const [options, setOptions] = useState<AutoCompleteProps['options']>([]);
 
@@ -95,6 +111,10 @@ const ChatInputComponent = ({
     };
 
     if (e.keyCode === 13) {
+      if (options.length > 0) {
+        e.preventDefault();
+        return;
+      }
       if (e.ctrlKey || e.shiftKey || e.metaKey) {
         preventEmptyLine();
       } else {
@@ -114,17 +134,12 @@ const ChatInputComponent = ({
   const handleSearch = useCallback(
     (value: string) => {
       if (value.startsWith('/')) {
-        setOptions(
-          skills.map((skill) => ({
-            value: skill.name,
-            label: t(`${skill.name}.name`, { ns: 'skill' }),
-          })),
-        );
+        setOptions(skillOptions);
       } else {
         setOptions([]);
       }
     },
-    [skills],
+    [skillOptions],
   );
 
   const handleInputChange = useCallback(
@@ -135,48 +150,18 @@ const ChatInputComponent = ({
     [setQuery],
   );
 
-  const triggerElement = useMemo(() => {
-    return (
-      <div className="relative w-full">
-        <TextArea
-          ref={inputRef}
-          autoFocus
-          onBlur={() => {
-            setTimeout(() => {
-              setShowSkillSelector(false);
-            }, 100);
-          }}
-          value={query ?? ''}
-          onChange={handleInputChange}
-          onKeyDownCapture={(e) => handleKeyDown(e)}
-          className={cn(
-            'mb-0 bg-transparent outline-none box-border border-none resize-none focus:outline-none focus:shadow-none focus:border-none',
-            inputClassName,
-          )}
-          placeholder={
-            selectedSkillName
-              ? t(`${selectedSkillName}.placeholder`, {
-                  ns: 'skill',
-                  defaultValue: t(`commonQnA.placeholder`, { ns: 'skill' }),
-                })
-              : t(`commonQnA.placeholder`, { ns: 'skill' })
-          }
-          autoSize={{
-            minRows: 1,
-            maxRows: 6,
-          }}
-        />
-      </div>
-    );
-  }, [query, selectedSkillName, handleKeyDown, t]);
-
   const handleSearchListConfirm = useCallback(
-    (items: any[]) => {
+    (value: string) => {
+      setOptions([]);
+      const skill = skills.find((skill) => skill.name === value);
+      if (!skill) {
+        return;
+      }
       if (handleSelectSkill) {
-        handleSelectSkill(items[0].metadata?.originalItem as Skill);
+        handleSelectSkill(skill);
       } else {
         setQuery('');
-        setSelectedSkill(items[0].metadata?.originalItem as Skill);
+        setSelectedSkill(skill);
       }
     },
     [setSelectedSkill, handleSelectSkill],
@@ -185,12 +170,20 @@ const ChatInputComponent = ({
   return (
     <div className="w-full flex flex-col">
       <AutoComplete
+        autoFocus
         options={options}
         popupMatchSelectWidth={false}
+        placement={autoCompletionPlacement}
         value={query ?? ''}
-        onSelect={(value, option) => {
-          console.log('onSelect', value, option);
+        filterOption={(inputValue, option) => {
+          const searchVal = inputValue.slice(1).toLowerCase();
+          return (
+            !searchVal ||
+            option.value.toString().toLowerCase().includes(searchVal) ||
+            option.textLabel.toLowerCase().includes(searchVal)
+          );
         }}
+        onSelect={(value) => handleSearchListConfirm(value)}
         onSearch={(value) => handleSearch(value)}
       >
         <TextArea

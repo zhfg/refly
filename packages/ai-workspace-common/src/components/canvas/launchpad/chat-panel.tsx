@@ -194,6 +194,7 @@ export const ChatPanel = () => {
           query={chatStore.newQAText}
           setQuery={chatStore.setNewQAText}
           selectedSkillName={selectedSkill?.name}
+          autoCompletionPlacement={'topLeft'}
           handleSendMessage={handleSendMessage}
         />
 

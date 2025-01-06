@@ -40,6 +40,8 @@ import { RxExit } from 'react-icons/rx';
 
 import { AiOutlineShrink } from 'react-icons/ai';
 import { RiExpandDiagonalLine } from 'react-icons/ri';
+import { TbWorldSearch } from 'react-icons/tb';
+import { GrCircleQuestion } from 'react-icons/gr';
 
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
 import ClaudeIcon from '@refly-packages/ai-workspace-common/assets/claude.svg';
@@ -107,4 +109,21 @@ export const preloadModelIcons = () => {
       iconCache.set(provider, icon);
     }
   });
+};
+
+export const getSkillIcon = (skillName: string, className?: string) => {
+  switch (skillName) {
+    case 'commonQnA':
+      return <IconAskAI className={className} />;
+    case 'webSearch':
+      return <TbWorldSearch className={className} />;
+    case 'generateDoc':
+      return <IconDocument className={className} />;
+    case 'librarySearch':
+      return <IconSearch className={className} />;
+    case 'recommendQuestions':
+      return <GrCircleQuestion className={className} />;
+    default:
+      return <IconAskAI className={className} />;
+  }
 };
