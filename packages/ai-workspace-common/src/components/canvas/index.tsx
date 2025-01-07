@@ -33,7 +33,6 @@ import {
 } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
-import { useGroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-group-nodes';
 import { MultiSelectionMenus } from './multi-selection-menu';
 
 import '@xyflow/react/dist/style.css';
@@ -51,8 +50,6 @@ const selectionStyles = `
     border: 0.5px solid #00968F !important;
   }
 `;
-
-const POLLING_COOLDOWN_TIME = 5000;
 
 interface ContextMenuState {
   open: boolean;
@@ -79,8 +76,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   const { onNodesChange } = useNodeOperations();
   const { setSelectedNode } = useNodeSelection();
-
-  console.log('nodes', nodes);
 
   const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();

@@ -102,8 +102,8 @@ export const CollaborativeEditor = memo(
     const createPlaceholderExtension = useCallback(() => {
       return Placeholder.configure({
         placeholder: ({ node }) => {
-          const defaultPlaceholder = t('knowledgeBase.canvas.editor.placeholder.default', {
-            defaultValue: "Write something, or press 'space' for AI, '/' for commands",
+          const defaultPlaceholder = t('editor.placeholder.default', {
+            defaultValue: "Press 'space' for AI, '/' for commands",
           });
 
           switch (node.type.name) {

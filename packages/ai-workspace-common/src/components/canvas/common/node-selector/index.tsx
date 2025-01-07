@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from 'antd';
 import classNames from 'classnames';
 import { Command } from 'cmdk';
 import { Home } from '../../launchpad/context-manager/components/base-mark-context-selector/home';
 import { getContextItemIcon } from '../../launchpad/context-manager/utils/icon';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
+import { CanvasNodeType } from '@refly/openapi-schema';
 
 interface NodeSelectorProps {
   onClickOutside?: () => void;
@@ -68,23 +68,21 @@ export const NodeSelector = (props: NodeSelectorProps) => {
     metadata: node.data?.metadata,
   }));
 
-  const processedNodes = useMemo(() => {
+  const processedItems = useMemo(() => {
     return sortedItems?.filter((item) => item?.title?.toLowerCase().includes(searchValue.toLowerCase())) ?? [];
   }, [sortedItems, searchValue]);
 
   const sortedRenderData = useMemo(() => {
-    return processedNodes.map((item) => ({
+    return processedItems.map((item) => ({
       data: item,
-      type: item?.type,
-      icon: getContextItemIcon(item, { width: 12, height: 12 }),
+      type: item?.type as CanvasNodeType,
+      icon: getContextItemIcon(item.type, { width: 12, height: 12 }),
       isSelected: selectedItems?.some((selected) => selected?.entityId === item?.entityId),
       onItemClick: (item: IContextItem) => {
         onSelect?.(item);
       },
     }));
-  }, [processedNodes, selectedItems, onSelect]);
-
-  console.log('node selector sortedRenderData', sortedRenderData);
+  }, [processedItems, selectedItems, onSelect]);
 
   return (
     <div className={classNames('refly-base-context-selector', className)}>
@@ -96,9 +94,9 @@ export const NodeSelector = (props: NodeSelectorProps) => {
         className={'search-active'}
         onKeyDownCapture={(e: React.KeyboardEvent) => {
           if (e.key === 'Enter' && !isComposing) {
-            const selectedNode = processedNodes.find((node) => node.entityId === activeValue);
-            if (selectedNode) {
-              onSelect?.(selectedNode);
+            const selectedItem = processedItems.find((node) => node.entityId === activeValue);
+            if (selectedItem) {
+              onSelect?.(selectedItem);
             }
           }
         }}

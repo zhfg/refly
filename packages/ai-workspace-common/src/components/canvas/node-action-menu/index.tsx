@@ -389,7 +389,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   return (
     <div className="bg-white rounded-lg shadow-lg p-2 w-[200px] border border-[rgba(0,0,0,0.06)]">
       {menuItems.map((item, index) => {
-        console.log('node action menu item', item);
         if (item?.type === 'divider') {
           return <Divider key={index} className="my-1 h-[1px] bg-gray-100" />;
         }
