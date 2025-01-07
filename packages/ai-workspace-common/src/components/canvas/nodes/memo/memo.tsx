@@ -113,6 +113,7 @@ export const MemoNode = ({
 
   const insertToDoc = useInsertToDocument(data.entityId);
   const handleInsertToDoc = useCallback(async () => {
+    if (!data?.contentPreview) return;
     await insertToDoc('insertBelow', data?.contentPreview);
   }, [insertToDoc, data.entityId, data]);
 
@@ -230,7 +231,20 @@ export const MemoNode = ({
     );
   }, 500);
 
-  const [bgColor, setBgColor] = useState('#E7F5FF');
+  const [bgColor, setBgColor] = useState((data?.metadata?.bgColor ?? '#FFFEE7') as string);
+  const onUpdateBgColor = useCallback(
+    (color: string) => {
+      setBgColor(color);
+      setNodeDataByEntity(
+        {
+          entityId: data?.entityId,
+          type: 'memo',
+        },
+        { metadata: { bgColor: color } },
+      );
+    },
+    [data?.entityId, setNodeDataByEntity],
+  );
 
   return (
     <div className={classNames({ nowheel: isOperating })}>
@@ -247,7 +261,9 @@ export const MemoNode = ({
           cursor: isOperating ? 'default' : 'grab',
         }}
       >
-        {!isPreview && selected && <MemoEditor editor={editor} bgColor={bgColor} onChangeBackground={setBgColor} />}
+        {!isPreview && selected && (
+          <MemoEditor editor={editor} bgColor={bgColor} onChangeBackground={onUpdateBgColor} />
+        )}
         {!isPreview && !hideActions && <ActionButtons type="memo" nodeId={id} isNodeHovered={isHovered} />}
 
         <div

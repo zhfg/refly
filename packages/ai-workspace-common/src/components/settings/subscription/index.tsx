@@ -239,7 +239,7 @@ export const Subscription = () => {
               type="primary"
               className="subscribe-btn"
               onClick={() => {
-                setShowSettingModal(false);
+                // setShowSettingModal(false);
                 setSubscribeModalVisible(true);
               }}
             >

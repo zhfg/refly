@@ -83,6 +83,7 @@ export const NodePreview = memo(
 
     return (
       <div
+        data-preview-id={node?.id}
         className="pointer-events-none border border-solid border-gray-100 rounded-lg shadow-lg bg-transparent"
         ref={previewRef}
       >

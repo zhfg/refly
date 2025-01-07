@@ -24,7 +24,7 @@ import { LibraryModal } from '@refly-packages/ai-workspace-common/components/wor
 import { useCanvasNodesStore } from '@refly-packages/ai-workspace-common/stores/canvas-nodes';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { LayoutControl } from './layout-control';
-import { addPinnedNodeEmitter } from '@refly-packages/ai-workspace-common/events/addPinnedNode';
+import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
 import { MenuPopper } from './menu-popper';
 import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-preview-control';
 import {
@@ -77,8 +77,10 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   }));
   const selectedNodes = nodes.filter((node) => node.selected) || [];
 
-  const { onNodesChange } = useNodeOperations(canvasId);
+  const { onNodesChange } = useNodeOperations();
   const { setSelectedNode } = useNodeSelection();
+
+  console.log('nodes', nodes);
 
   const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
@@ -273,11 +275,19 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   }, [provider?.status]);
 
   useEffect(() => {
-    const unsubscribe = addPinnedNodeEmitter.on('addPinnedNode', ({ canvasId: emittedCanvasId }) => {
+    const unsubscribe = locateToNodePreviewEmitter.on('locateToNodePreview', ({ canvasId: emittedCanvasId, id }) => {
       if (emittedCanvasId === canvasId) {
-        previewContainerRef.current?.scrollTo({
-          left: 0,
-          behavior: 'smooth',
+        requestAnimationFrame(() => {
+          const previewContainer = document.querySelector('.preview-container');
+          const targetPreview = document.querySelector(`[data-preview-id="${id}"]`);
+
+          if (previewContainer && targetPreview) {
+            targetPreview.scrollIntoView({
+              behavior: 'smooth',
+              block: 'nearest',
+              inline: 'center',
+            });
+          }
         });
       }
     });
@@ -508,6 +518,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             // onlyRenderVisibleElements={true}
             elevateNodesOnSelect={false}
             onSelectionContextMenu={onSelectionContextMenu}
+            deleteKeyCode={['Backspace', 'Delete']}
+            multiSelectionKeyCode={['Shift', 'Meta']}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">

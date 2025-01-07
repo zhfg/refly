@@ -11,15 +11,20 @@ export const useCreateMemo = () => {
   const createMemo = (options: { content: string; position?: XYPosition }) => {
     const memoId = genMemoID();
 
-    addNode({
-      type: 'memo',
-      data: {
-        title: t('canvas.nodeTypes.memo'),
-        contentPreview: options.content,
-        entityId: memoId,
+    addNode(
+      {
+        type: 'memo',
+        data: {
+          title: t('canvas.nodeTypes.memo'),
+          contentPreview: options.content,
+          entityId: memoId,
+        },
+        position: options.position,
       },
-      position: options.position,
-    });
+      undefined,
+      false,
+      true,
+    );
   };
 
   return { createMemo };

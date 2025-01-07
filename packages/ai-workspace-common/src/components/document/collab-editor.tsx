@@ -248,7 +248,7 @@ export const CollaborativeEditor = memo(
           editor.off('blur', handleBlur);
         };
       }
-    }, [readOnly, docId, documentActions]);
+    }, [readOnly, docId, documentActions, editorRef.current]);
 
     useEffect(() => {
       const insertBelow = (content: string) => {

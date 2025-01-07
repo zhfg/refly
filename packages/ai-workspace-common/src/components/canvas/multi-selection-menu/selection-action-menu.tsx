@@ -5,7 +5,7 @@ import { useReactFlow, useStore } from '@xyflow/react';
 import { IconDelete, IconAskAI, IconLoading } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { CanvasNode, SkillNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { MessageSquareDiff, Group } from 'lucide-react';
+import { MessageSquareDiff, Group, Target, Layout } from 'lucide-react';
 import { genActionResultID, genSkillID } from '@refly-packages/utils/id';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
@@ -16,6 +16,7 @@ import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canva
 import { CanvasNodeData } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/types';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { convertContextItemsToNodeFilters } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { useNodeCluster } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-cluster';
 
 interface MenuItem {
   key: string;
@@ -42,6 +43,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
   const { addContextItems } = useAddToContext();
   const { deleteNodes } = useDeleteNode();
   const { invokeAction } = useInvokeAction();
+  const { selectNodeCluster, groupNodeCluster, layoutNodeCluster } = useNodeCluster();
   const nodes = useStore((state) => state.nodes);
 
   const checkHasSkill = useCallback(() => {
@@ -86,6 +88,8 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
           },
         },
         connectTo,
+        false,
+        false,
       );
     }
 
@@ -182,6 +186,27 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
     onClose?.();
   }, [getNodes, invokeAction, canvasId, deleteNodes, onClose]);
 
+  const handleSelectCluster = useCallback(() => {
+    const selectedNodes = getNodes().filter((node) => node.selected);
+    if (selectedNodes.length > 0) {
+      selectNodeCluster(selectedNodes.map((node) => node.id));
+    }
+  }, [getNodes, selectNodeCluster]);
+
+  const handleGroupCluster = useCallback(() => {
+    const selectedNodes = getNodes().filter((node) => node.selected);
+    if (selectedNodes.length > 0) {
+      groupNodeCluster(selectedNodes.map((node) => node.id));
+    }
+  }, [getNodes, groupNodeCluster]);
+
+  const handleLayoutCluster = useCallback(() => {
+    const selectedNodes = getNodes().filter((node) => node.selected);
+    if (selectedNodes.length > 0) {
+      layoutNodeCluster(selectedNodes.map((node) => node.id));
+    }
+  }, [getNodes, layoutNodeCluster]);
+
   const getMenuItems = (): MenuItem[] => {
     return [
       allSelectedNodesAreSkill
@@ -220,6 +245,29 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
         onClick: handleGroup,
         type: 'button' as const,
       },
+      { key: 'divider-3', type: 'divider' } as MenuItem,
+      {
+        key: 'selectCluster',
+        icon: Target,
+        label: t('canvas.nodeActions.selectCluster'),
+        onClick: handleSelectCluster,
+        type: 'button' as const,
+      },
+      {
+        key: 'groupCluster',
+        icon: Group,
+        label: t('canvas.nodeActions.groupCluster'),
+        onClick: handleGroupCluster,
+        type: 'button' as const,
+      },
+      {
+        key: 'layoutCluster',
+        icon: Layout,
+        label: t('canvas.nodeActions.layoutCluster'),
+        onClick: handleLayoutCluster,
+        type: 'button' as const,
+      },
+      { key: 'divider-4', type: 'divider' } as MenuItem,
       {
         key: 'delete',
         icon: IconDelete,

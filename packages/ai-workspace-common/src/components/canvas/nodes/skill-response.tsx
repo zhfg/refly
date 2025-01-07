@@ -399,6 +399,8 @@ export const SkillResponseNode = memo(
           },
         },
         [{ type: 'skillResponse', entityId: data.entityId }],
+        false,
+        true,
       );
     }, [id, data.entityId, addNode]); // Add new handler for compare run
 
