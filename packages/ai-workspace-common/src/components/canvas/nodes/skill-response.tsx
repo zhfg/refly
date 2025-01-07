@@ -177,7 +177,7 @@ export const SkillResponseNode = memo(
       maxWidth: 800,
       minHeight: 80,
       defaultWidth: 288,
-      defaultHeight: 384,
+      defaultHeight: 'auto',
     });
     const moveableRef = useRef<Moveable>(null);
 
@@ -447,11 +447,11 @@ export const SkillResponseNode = memo(
 
     // Update size when content changes
     useEffect(() => {
-      if (!targetRef.current) return;
+      if (!targetRef.current || status === 'finish') return;
 
       const { offsetWidth, offsetHeight } = targetRef.current;
       resizeMoveable(offsetWidth, offsetHeight);
-    }, [content, artifacts?.length, sources.length]);
+    }, [targetRef?.current?.offsetHeight, resizeMoveable, status]);
 
     // Update event handling
     useEffect(() => {
@@ -616,6 +616,7 @@ export const SkillResponseNode = memo(
 
         {!isPreview && selected && sizeMode === 'adaptive' && (
           <NodeResizerComponent
+            moveableRef={moveableRef}
             targetRef={targetRef}
             isSelected={selected}
             isHovered={isHovered}

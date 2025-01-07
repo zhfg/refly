@@ -3,6 +3,7 @@ import Moveable from 'react-moveable';
 import classNames from 'classnames';
 
 interface NodeResizerProps {
+  moveableRef?: React.RefObject<Moveable>;
   targetRef: React.RefObject<HTMLElement>;
   isSelected: boolean;
   isHovered: boolean;
@@ -12,6 +13,7 @@ interface NodeResizerProps {
 }
 
 export const NodeResizer: React.FC<NodeResizerProps> = ({
+  moveableRef,
   targetRef,
   isSelected,
   isHovered,
@@ -25,6 +27,7 @@ export const NodeResizer: React.FC<NodeResizerProps> = ({
 
   return (
     <Moveable
+      ref={moveableRef}
       target={targetRef}
       resizable={true}
       edge={false}

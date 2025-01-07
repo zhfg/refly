@@ -34,6 +34,7 @@ import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/us
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import classNames from 'classnames';
+import Moveable from 'react-moveable';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
 
@@ -87,13 +88,14 @@ export const SkillNode = memo(
     const { addNode } = useAddNode();
     const { deleteNode } = useDeleteNode();
 
+    const moveableRef = useRef<Moveable>(null);
     const targetRef = useRef<HTMLDivElement>(null);
     const { operatingNodeId } = useCanvasStoreShallow((state) => ({
       operatingNodeId: state.operatingNodeId,
     }));
     const isOperating = operatingNodeId === id;
     const node = useMemo(() => getNode(id), [id, getNode]);
-    const { containerStyle, handleResize } = useNodeSize({
+    const { containerStyle, handleResize, updateSize } = useNodeSize({
       id,
       node,
       isOperating,
@@ -172,6 +174,17 @@ export const SkillNode = memo(
       },
       [id, canvasId, patchNodeData, addEdges, deleteElements, edgeStyles.hover],
     );
+
+    const resizeMoveable = useCallback((width: number, height: number) => {
+      moveableRef.current?.request('resizable', { width, height });
+    }, []);
+
+    useEffect(() => {
+      if (!targetRef.current) return;
+
+      const { offsetWidth, offsetHeight } = targetRef.current;
+      resizeMoveable(offsetWidth, offsetHeight);
+    }, [targetRef?.current?.offsetHeight, resizeMoveable]);
 
     useEffect(() => {
       if (selectedModel && !modelInfo) {
@@ -296,7 +309,10 @@ export const SkillNode = memo(
 
               <ChatInput
                 query={localQuery}
-                setQuery={setQuery}
+                setQuery={(value) => {
+                  setQuery(value);
+                  updateSize({ height: 'auto' });
+                }}
                 selectedSkillName={selectedSkill?.name}
                 inputClassName="px-1 py-0"
                 maxRows={100}
@@ -319,6 +335,7 @@ export const SkillNode = memo(
         </div>
 
         <NodeResizerComponent
+          moveableRef={moveableRef}
           targetRef={targetRef}
           isSelected={selected}
           isHovered={isHovered}

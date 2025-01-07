@@ -17,7 +17,7 @@ interface UseNodeSizeProps {
   maxWidth?: number;
   minHeight?: number;
   defaultWidth?: number;
-  defaultHeight?: number;
+  defaultHeight?: number | 'auto';
 }
 
 export const useNodeSize = ({
