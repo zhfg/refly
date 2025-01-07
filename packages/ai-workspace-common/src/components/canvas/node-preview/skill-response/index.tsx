@@ -8,7 +8,7 @@ import { CanvasNode, ResponseNodeMeta } from '@refly-packages/ai-workspace-commo
 
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { ActionStepCard } from './action-step';
-import { convertContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { convertResultContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 import { PreviewChatInput } from './preview-chat-input';
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
@@ -78,12 +78,12 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
     if (node && remoteResult) {
       patchNodeData(node.id, {
         title: remoteResult.title,
+        contentPreview: remoteResult.steps
+          ?.map((s) => s.content)
+          .filter(Boolean)
+          .join('\n'),
         metadata: {
           status: remoteResult.status,
-          contentPreview: remoteResult.steps
-            ?.map((s) => s.content)
-            .filter(Boolean)
-            .join('\n'),
         },
       });
     }
@@ -132,7 +132,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
     }
 
     // Fallback to contextItems from context (could be legacy nodes)
-    return convertContextToItems(context, history);
+    return convertResultContextToItems(context, history);
   }, [context, history]);
 
   const handleDelete = useCallback(() => {

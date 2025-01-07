@@ -1,13 +1,8 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
-import { CanvasNode, prepareNodeData } from '../../components/canvas/nodes';
-import { useCanvasData } from './use-canvas-data';
+import { CanvasNode } from '../../components/canvas/nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
-import { useAddNode } from './use-add-node';
-import { genUniqueId } from '@refly-packages/utils/id';
-import { CoordinateExtent, Node } from '@xyflow/react';
-import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 
 export interface CanvasNodeFilter {
   type: CanvasNodeType;
@@ -20,7 +15,6 @@ export const useNodeSelection = () => {
   const { setNodes } = useCanvasStoreShallow((state) => ({
     setNodes: state.setNodes,
   }));
-  const { updateNodesWithSync } = useNodeOperations(canvasId);
 
   const setSelectedNode = useCallback(
     (node: CanvasNode<any> | null) => {

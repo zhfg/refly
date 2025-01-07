@@ -56,7 +56,10 @@ export const SelectionPreview: React.FC<SelectionPreviewProps> = ({ item }) => {
           cursor-pointer 
           hover:bg-gray-50
         "
-        onClick={handleSourceClick}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleSourceClick();
+        }}
       >
         <div className="flex items-center gap-2">
           {getContextItemIcon(selection?.sourceEntityType)}

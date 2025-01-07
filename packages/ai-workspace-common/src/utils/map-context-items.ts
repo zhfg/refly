@@ -1,5 +1,6 @@
 import {
   ActionResult,
+  CanvasNodeType,
   SkillContext,
   SkillContextContentItem,
   SkillContextDocumentItem,
@@ -8,8 +9,9 @@ import {
 import { Node, Edge } from '@xyflow/react';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getClientOrigin } from '@refly-packages/utils/url';
+import { CanvasNodeFilter } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 
-export const convertContextToItems = (context: SkillContext, history: ActionResult[]): IContextItem[] => {
+export const convertResultContextToItems = (context: SkillContext, history: ActionResult[]): IContextItem[] => {
   if (!context) return [];
 
   const items: IContextItem[] = [];
@@ -71,13 +73,29 @@ export const convertContextToItems = (context: SkillContext, history: ActionResu
   return items;
 };
 
+export const convertContextItemsToNodeFilters = (items: IContextItem[]): CanvasNodeFilter[] => {
+  const uniqueItems = new Map<string, CanvasNodeFilter>();
+
+  items.forEach((item) => {
+    const type = item.selection?.sourceEntityType ?? (item.type as CanvasNodeType);
+    const entityId = item.selection?.sourceEntityId ?? item.entityId;
+
+    const key = `${type}-${entityId}`;
+    if (!uniqueItems.has(key)) {
+      uniqueItems.set(key, { type, entityId });
+    }
+  });
+
+  return Array.from(uniqueItems.values());
+};
+
 export const convertContextItemsToInvokeParams = (
   items: IContextItem[],
   getHistory: (item: IContextItem) => ActionResult[],
 ): { context: SkillContext; resultHistory: ActionResult[] } => {
   const context = {
     contentList: items
-      ?.filter((item) => ['resourceSelection', 'documentSelection'].includes(item.type))
+      ?.filter((item) => item.selection)
       ?.map((item) => ({
         content: item.selection?.content ?? '',
         metadata: {

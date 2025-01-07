@@ -42,7 +42,7 @@ import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canva
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { convertContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { convertResultContextToItems } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
@@ -414,7 +414,7 @@ export const SkillResponseNode = memo(
       }
 
       const { context, history, title, modelInfo, actionMeta } = resultData.data;
-      const contextItems = context ? convertContextToItems(context, history) : [];
+      const contextItems = context ? convertResultContextToItems(context, history) : [];
 
       // Create new skill node with context, similar to group node implementation
       const connectTo = contextItems.map((item) => ({

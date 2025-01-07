@@ -29,6 +29,7 @@ import { genActionResultID } from '@refly-packages/utils/id';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useTranslation } from 'react-i18next';
 import { IconClose } from '@arco-design/web-react/icon';
+import { convertContextItemsToNodeFilters } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
 
@@ -207,10 +208,7 @@ export const SkillNode = memo(
           },
           position: node.position,
         },
-        contextItems.map((item) => ({
-          type: item.type,
-          entityId: item.entityId,
-        })),
+        convertContextItemsToNodeFilters(contextItems),
       );
     }, [id, getNode, deleteElements, invokeAction, canvasId, addNode]);
 
