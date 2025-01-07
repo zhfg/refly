@@ -230,7 +230,7 @@ export const ResourceNode = memo(
       <div className={classNames({ nowheel: isOperating })}>
         <div
           ref={targetRef}
-          style={containerStyle}
+          style={isPreview ? { width: 288, height: 200 } : containerStyle}
           onMouseEnter={!isPreview ? handleMouseEnter : undefined}
           onMouseLeave={!isPreview ? handleMouseLeave : undefined}
           onClick={onNodeClick}
@@ -256,7 +256,7 @@ export const ResourceNode = memo(
                   style={{
                     height: '100%',
                     overflowY: 'auto',
-                    maxHeight: sizeMode === 'compact' ? '40px' : '384px',
+                    maxHeight: sizeMode === 'compact' ? '40px' : '',
                     paddingBottom: '40px',
                   }}
                 >
