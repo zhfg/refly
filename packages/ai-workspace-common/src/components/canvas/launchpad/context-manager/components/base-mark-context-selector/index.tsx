@@ -15,6 +15,7 @@ import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canva
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 
 import './index.scss';
+import '@refly-packages/ai-workspace-common/components/canvas/common/node-selector/index.scss';
 
 interface CustomProps {
   onClickOutside?: () => void;

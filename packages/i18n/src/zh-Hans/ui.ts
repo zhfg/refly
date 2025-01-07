@@ -445,6 +445,7 @@ const translations = {
           navigate: '导航',
           toggle: '切换',
           done: '完成',
+          position: '定位',
         },
       },
       contextFilter: {
@@ -516,6 +517,7 @@ const translations = {
       disableAutoLayout: '禁用自动布局',
     },
     toolbar: {
+      searchNode: '搜索节点',
       enablePointerMode: '启用框选模式',
       disablePointerMode: '关闭框选模式',
       importResource: '导入资源',
@@ -589,7 +591,7 @@ const translations = {
       descriptionPlaceholder: '请输入画布描述',
     },
     contextSelector: {
-      placeholder: '输入关键词搜索画布内节点...',
+      placeholder: '搜索节点...',
     },
     contextManager: {
       nodeNotFound: '源节点未找到或已被删除，请先添加到画布',

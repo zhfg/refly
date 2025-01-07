@@ -202,17 +202,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         type: 'button' as const,
         primary: true,
       },
-      nodeType === 'skillResponse'
-        ? {
-            key: 'cloneAskAI',
-            icon: GrClone,
-            loading: cloneAskAIRunning,
-            label: t('canvas.nodeActions.cloneAskAI'),
-            onClick: handleCloneAskAI,
-            type: 'button' as const,
-          }
-        : null,
-      { key: 'divider-1', type: 'divider' } as MenuItem,
       ...(nodeType === 'skillResponse'
         ? [
             {

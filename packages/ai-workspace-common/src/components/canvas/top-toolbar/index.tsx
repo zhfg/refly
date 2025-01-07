@@ -1,5 +1,5 @@
 import { useEffect, useRef, FC, useState, useCallback, memo } from 'react';
-import { Button, Divider, Tooltip, Input, Modal, Skeleton } from 'antd';
+import { Button, Divider, Tooltip, Input, Modal, Skeleton, Popover } from 'antd';
 import { useSiderStore, useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
@@ -7,7 +7,7 @@ import { useDebounce } from 'use-debounce';
 
 import { MdOutlineImage, MdOutlineAspectRatio } from 'react-icons/md';
 import { AiOutlineMenuUnfold } from 'react-icons/ai';
-import { IconEdit } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconEdit, IconSearch } from '@refly-packages/ai-workspace-common/components/common/icon';
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { Helmet } from 'react-helmet';
@@ -15,6 +15,8 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { ActionDropdown } from './action-dropdown';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
+import { NodeSelector } from '../common/node-selector';
+import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -138,9 +140,50 @@ const ToolbarButtons = memo(
     setShowMaxRatio: (show: boolean) => void;
   }) => {
     const { t } = useTranslation();
+    const { canvasId } = useCanvasContext();
+    const [searchOpen, setSearchOpen] = useState(false);
+    const { setNodeCenter } = useNodePosition();
+
+    const handleNodeSelect = useCallback(
+      (item: any) => {
+        const { data } = useCanvasStore.getState();
+        const nodes = data?.[canvasId]?.nodes || [];
+
+        const node = nodes.find((n) => n.data?.entityId === item.entityId);
+        if (node) {
+          setNodeCenter(node.id, true);
+          // setSearchOpen(false);
+        }
+      },
+      [setNodeCenter],
+    );
 
     return (
       <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
+        <Popover
+          open={searchOpen}
+          onOpenChange={setSearchOpen}
+          overlayInnerStyle={{ padding: 0, boxShadow: 'none' }}
+          trigger="click"
+          placement="bottomRight"
+          destroyTooltipOnHide
+          content={
+            <NodeSelector
+              onSelect={handleNodeSelect}
+              showFooterActions={true}
+              onClickOutside={() => setSearchOpen(false)}
+            />
+          }
+          overlayClassName="node-search-popover"
+        >
+          <Tooltip title={t('canvas.toolbar.searchNode')} destroyTooltipOnHide>
+            <Button
+              type="text"
+              icon={<IconSearch style={{ color: searchOpen ? '#000' : '#9CA3AF' }} />}
+              className="w-8 h-6 flex items-center justify-center mr-1"
+            />
+          </Tooltip>
+        </Popover>
         <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)} destroyTooltipOnHide>
           <Button
             type="text"
