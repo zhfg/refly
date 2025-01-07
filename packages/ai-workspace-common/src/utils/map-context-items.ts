@@ -153,7 +153,7 @@ export const convertContextItemsToEdges = (
 ): { edgesToAdd: Edge[]; edgesToDelete: Edge[] } => {
   // Initialize arrays for new edges and edges to be deleted
   const edgesToAdd: Edge[] = [];
-  const edgesToDelete = edges ?? [];
+  const edgesToDelete: Edge[] = [];
 
   // Return early if no items to process
   if (!items?.length) {
