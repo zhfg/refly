@@ -174,7 +174,13 @@ export async function extractStructuredData<T extends z.ZodType>(
           : ''
       }`;
 
-      const response = await Promise.resolve(model.invoke(fullPrompt, config)).catch(error => {
+      const response = await Promise.resolve(model.invoke(fullPrompt, {
+        ...config,
+        metadata: {
+          ...config.metadata,
+          suppressOutput: true,
+        },
+      })).catch(error => {
         throw new Error(`Model invocation failed: ${error.message}`);
       });
 
