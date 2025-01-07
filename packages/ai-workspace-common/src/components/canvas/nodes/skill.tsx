@@ -183,35 +183,37 @@ export const SkillNode = memo(
 
       deleteElements({ nodes: [node] });
 
-      const resultId = genActionResultID();
-      invokeAction(
-        {
-          resultId,
-          ...data?.metadata,
-        },
-        {
-          entityId: canvasId,
-          entityType: 'canvas',
-        },
-      );
-      addNode(
-        {
-          type: 'skillResponse',
-          data: {
-            title: query,
-            entityId: resultId,
-            metadata: {
-              status: 'executing',
-              contextItems,
-            },
+      setTimeout(() => {
+        const resultId = genActionResultID();
+        invokeAction(
+          {
+            resultId,
+            ...data?.metadata,
           },
-          position: node.position,
-        },
-        contextItems.map((item) => ({
-          type: item.type,
-          entityId: item.entityId,
-        })),
-      );
+          {
+            entityId: canvasId,
+            entityType: 'canvas',
+          },
+        );
+        addNode(
+          {
+            type: 'skillResponse',
+            data: {
+              title: query,
+              entityId: resultId,
+              metadata: {
+                status: 'executing',
+                contextItems,
+              },
+            },
+            position: node.position,
+          },
+          contextItems.map((item) => ({
+            type: item.type,
+            entityId: item.entityId,
+          })),
+        );
+      });
     }, [id, getNode, deleteElements, invokeAction, canvasId, addNode]);
 
     const handleDelete = useCallback(() => {
