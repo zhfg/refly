@@ -14,7 +14,6 @@ export default {
         DEFAULT: {
           css: {
             img: {
-              // 移除所有图片样式
               margin: "0",
               padding: "0",
               border: "none",
@@ -24,7 +23,6 @@ export default {
               height: "auto",
             },
           },
-          // 添加 blockquote 样式覆盖
           blockquote: {
             quotes: "none",
             "&::before": {
@@ -33,7 +31,6 @@ export default {
             "&::after": {
               content: "none",
             },
-            // 重要：覆盖 blockquote 内 p 元素的样式
             "p::before": {
               content: "none",
             },
@@ -137,11 +134,6 @@ export default {
       },
       scale: {
         98: ".98",
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
         "accordion-down": {
