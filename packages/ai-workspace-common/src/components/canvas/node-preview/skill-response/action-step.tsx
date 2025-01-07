@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Steps, Button } from 'antd';
 import { ActionResult, ActionStep, Source } from '@refly/openapi-schema';
@@ -8,17 +8,13 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@refly-packages/utils/cn';
 import { IconCheck, IconLoading } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { genUniqueId } from '@refly-packages/utils/id';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { SelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/selection-context';
 import { ActionContainer } from './action-container';
 import { safeParseJSON } from '@refly-packages/utils/parse';
 import { SourceViewer } from './source-viewer';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { RecommendQuestions } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/recommend-questions';
-import { getClientOrigin } from '@refly-packages/utils/url';
-import { memo } from 'react';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
-import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 const parseStructuredData = (structuredData: Record<string, unknown>, field: string) => {
@@ -127,33 +123,32 @@ const LogBox = memo(
   },
 );
 
-// 抽离内容组件
 const StepContent = memo(
   ({
+    resultId,
     content,
     sources,
     buildContextItem,
     step,
   }: {
+    resultId: string;
     content: string;
     sources: Source[];
     buildContextItem: (text: string) => IContextItem;
     step: ActionStep;
   }) => {
-    // console.log('stepcontent', step);
-
     return (
-      <div className="my-3 text-gray-600 text-base skill-response-content">
+      <div className={cn('my-3 text-gray-600 text-base', `skill-response-content-${resultId}-${step.name}`)}>
         <Markdown content={content} sources={sources} />
-        {step?.name === 'answerGeneration' ? (
-          <SelectionContext containerClass="skill-response-content" getContextItem={buildContextItem} />
-        ) : null}
+        <SelectionContext
+          containerClass={`skill-response-content-${resultId}-${step.name}`}
+          getContextItem={buildContextItem}
+        />
       </div>
     );
   },
 );
 
-// 抽离 Artifact 组件
 const ArtifactItem = memo(({ artifact, onSelect }: { artifact: any; onSelect: () => void }) => {
   const { t } = useTranslation();
 
@@ -205,11 +200,8 @@ export const ActionStepCard = memo(
     query: string;
   }) => {
     const { t } = useTranslation();
-    const canvasId = useCanvasId();
     const { setSelectedNodeByEntity } = useNodeSelection();
     const [logBoxCollapsed, setLogBoxCollapsed] = useState(false);
-
-    // console.log('ActionStepCard', result);
 
     useEffect(() => {
       if (result?.status === 'finish') {
@@ -221,21 +213,15 @@ export const ActionStepCard = memo(
 
     const buildContextItem = useCallback(
       (text: string) => {
-        const id = genUniqueId();
-
         const item: IContextItem = {
           type: 'skillResponseSelection',
           entityId: genUniqueId(),
           title: text.slice(0, 50),
-
-          metadata: {
-            contentPreview: text,
-            selectedContent: text,
-            xPath: id,
-            sourceEntityId: result.resultId ?? '',
+          selection: {
+            content: text,
             sourceEntityType: 'skillResponse',
-            sourceType: 'skillResponseSelection',
-            url: getClientOrigin(),
+            sourceEntityId: result.resultId ?? '',
+            sourceTitle: result.title ?? '',
           },
         };
 
@@ -244,7 +230,6 @@ export const ActionStepCard = memo(
       [result.resultId, result.title],
     );
 
-    // 使用 useMemo 缓存解析数据
     const parsedData = useMemo(
       () => ({
         sources: parseStructuredData(step?.structuredData, 'sources'),
@@ -256,7 +241,6 @@ export const ActionStepCard = memo(
     const logs = step?.logs?.filter((log) => log?.key);
     const skillName = result.actionMeta?.name || 'commonQnA';
 
-    // 使用 useCallback 缓存事件处理函数
     const handleArtifactSelect = useCallback(
       (artifact) => {
         setSelectedNodeByEntity({
@@ -294,6 +278,7 @@ export const ActionStepCard = memo(
 
         {step.content && (
           <StepContent
+            resultId={result.resultId}
             content={step.content}
             sources={parsedData.sources}
             buildContextItem={buildContextItem}

@@ -59,7 +59,7 @@ export const SelectionPreview: React.FC<SelectionPreviewProps> = ({ item }) => {
         onClick={handleSourceClick}
       >
         <div className="flex items-center gap-2">
-          {getContextItemIcon(selection.sourceEntityType)}
+          {getContextItemIcon(selection?.sourceEntityType)}
           <span className="text-gray-500">{selection?.sourceTitle}</span>
         </div>
         <LuChevronRight className="w-4 h-4 text-gray-300" />

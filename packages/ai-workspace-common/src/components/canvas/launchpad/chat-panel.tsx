@@ -23,6 +23,7 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { useSyncSelectedNodesToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-sync-selected-nodes-to-context';
 import { PiMagicWand } from 'react-icons/pi';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { CanvasNodeType } from '@refly/openapi-schema';
 
 export const ChatPanel = () => {
   const { t } = useTranslation();
@@ -143,7 +144,7 @@ export const ChatPanel = () => {
         },
       },
       contextItems.map((item) => ({
-        type: item.type,
+        type: item.type as CanvasNodeType,
         entityId: item.entityId,
       })),
     );

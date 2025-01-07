@@ -43,8 +43,8 @@ export const ContextPreview = memo(
       case 'memo':
         return <MemoNode {...(commonProps as MemoNodeProps)} />;
       case 'resourceSelection':
-        return <SelectionPreview item={item} />;
       case 'documentSelection':
+      case 'skillResponseSelection':
         return <SelectionPreview item={item} />;
       default:
         return null;

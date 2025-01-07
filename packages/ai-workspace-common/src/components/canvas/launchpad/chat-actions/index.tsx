@@ -60,8 +60,8 @@ export const ChatActions = memo(
           <ModelSelector model={model} setModel={setModel} briefMode={false} trigger={['click']} />
         </div>
         <div className="flex flex-row items-center gap-2">
-          {customActions?.map((action) => (
-            <Tooltip destroyTooltipOnHide title={action.title}>
+          {customActions?.map((action, index) => (
+            <Tooltip key={index} destroyTooltipOnHide title={action.title}>
               <Button size="small" onClick={action.onClick} className="mr-0">
                 {action.icon}
               </Button>

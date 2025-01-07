@@ -77,21 +77,20 @@ export const convertContextItemsToInvokeParams = (
 ): { context: SkillContext; resultHistory: ActionResult[] } => {
   const context = {
     contentList: items
-      ?.filter((item) => item?.metadata?.sourceType?.includes('Selection'))
+      ?.filter((item) => ['resourceSelection', 'documentSelection'].includes(item.type))
       ?.map((item) => ({
-        content: item.metadata?.selectedContent ?? '',
+        content: item.selection?.content ?? '',
         metadata: {
-          domain: item.metadata?.sourceType ?? '',
-          entityId: item.entityId ?? '',
-          title: item.title ?? '',
-          nodeId: item.entityId,
+          domain: item.selection?.sourceEntityType ?? '',
+          entityId: item.selection?.sourceEntityId ?? '',
+          title: item.selection?.sourceTitle ?? '',
           ...(item.metadata?.sourceType === 'extensionWeblinkSelection' && {
             url: item.metadata?.url || getClientOrigin(),
           }),
         },
       })),
     resources: items
-      ?.filter((item) => item?.type === 'resource' && !item?.metadata?.sourceType?.includes('Selection'))
+      ?.filter((item) => item?.type === 'resource')
       .map((item) => ({
         resourceId: item.entityId,
         resource: {
@@ -102,11 +101,10 @@ export const convertContextItemsToInvokeParams = (
         isCurrent: item.isCurrentContext,
         metadata: {
           ...item.metadata,
-          nodeId: item.entityId,
         },
       })),
     documents: items
-      ?.filter((item) => item?.type === 'document' && !item?.metadata?.sourceType?.includes('Selection'))
+      ?.filter((item) => item?.type === 'document')
       .map((item) => ({
         docId: item.entityId,
         document: {
@@ -116,7 +114,6 @@ export const convertContextItemsToInvokeParams = (
         isCurrent: item.isCurrentContext,
         metadata: {
           ...item.metadata,
-          nodeId: item.entityId,
           url: getClientOrigin(),
         },
       })),

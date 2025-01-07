@@ -30,8 +30,8 @@ export const getContextItemIcon = (
         <IconResponseFilled style={{ color, ...style }} />
       );
     case 'resourceSelection':
-      return <IconQuote style={{ color, ...style }} />;
     case 'documentSelection':
+    case 'skillResponseSelection':
       return <IconQuote style={{ color, ...style }} />;
     default:
       return null;

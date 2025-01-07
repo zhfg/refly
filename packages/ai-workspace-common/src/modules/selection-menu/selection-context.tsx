@@ -57,8 +57,9 @@ export const SelectionContext: React.FC<SelectionContextProps> = ({ containerCla
   return (
     <SelectionBubble containerClass={containerClass} placement="top" offset={[0, 10]}>
       <div className="refly-selector-hover-menu flex flex-col bg-white border border-solid border-gray-200 shadow-lg rounded-lg px-1 py-1">
-        {buttons.map((button) => (
+        {buttons.map((button, index) => (
           <Button
+            key={index}
             type="text"
             className={button.className}
             icon={button.icon}
