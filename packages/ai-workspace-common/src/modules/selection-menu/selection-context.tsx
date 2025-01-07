@@ -3,7 +3,6 @@ import { Button, message } from 'antd';
 import { SelectionBubble } from './selection-bubble';
 import { useTranslation } from 'react-i18next';
 import { useSelectionContext } from './use-selection-context';
-import { MessageSquareDiff } from 'lucide-react';
 import { IconMemo, IconQuote } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCreateMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-memo';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';

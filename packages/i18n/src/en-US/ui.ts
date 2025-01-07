@@ -70,7 +70,7 @@ const translations = {
   },
   editor: {
     placeholder: {
-      default: "Write something, or press 'space' for AI, press '/' for commands",
+      default: "Press 'space' for AI, press '/' for commands",
       title: 'Enter The Title',
     },
     aiSelector: {
@@ -407,7 +407,7 @@ const translations = {
     canvas: {
       editor: {
         placeholder: {
-          default: "Write something, or press 'space' for AI, '/' for commands",
+          default: "Press 'space' for AI, '/' for commands",
           heading: 'Heading {{level}}',
         },
         toolbar: {

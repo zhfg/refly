@@ -70,7 +70,7 @@ const translations = {
   },
   editor: {
     placeholder: {
-      default: "写点什么，或按空格键激活 AI，按 '/' 键激活命令",
+      default: "按空格键激活 AI，按 '/' 键激活命令",
       title: '请输入标题',
     },
     aiSelector: {
@@ -400,7 +400,7 @@ const translations = {
     canvas: {
       editor: {
         placeholder: {
-          default: "写点什么，或按空格键或 ++ 激活 AI，按 '/' 键激活命令",
+          default: "按空格键或 ++ 激活 AI，按 '/' 键激活命令",
           heading: '标题 {{level}}',
         },
         toolbar: {
