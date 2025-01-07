@@ -125,16 +125,18 @@ export async function extractStructuredData<T extends z.ZodType>(
         try {
           const structuredLLM = model.withStructuredOutput(schema, {
             includeRaw: true,
-            name: schema.description ?? 'structured_output',
+            name: 'structured_output',
           });
 
-          const result = await Promise.resolve(structuredLLM.invoke(prompt, {
-            ...config,
-            metadata: {
-              ...config.metadata,
-              suppressOutput: true,
-            },
-          })).catch(error => {
+          const result = await Promise.resolve(
+            structuredLLM.invoke(prompt, {
+              ...config,
+              metadata: {
+                ...config.metadata,
+                suppressOutput: true,
+              },
+            }),
+          ).catch((error) => {
             throw new Error(`Structured output invocation failed: ${error.message}`);
           });
 
@@ -174,19 +176,21 @@ export async function extractStructuredData<T extends z.ZodType>(
           : ''
       }`;
 
-      const response = await Promise.resolve(model.invoke(fullPrompt, {
-        ...config,
-        metadata: {
-          ...config.metadata,
-          suppressOutput: true,
-        },
-      })).catch(error => {
+      const response = await Promise.resolve(
+        model.invoke(fullPrompt, {
+          ...config,
+          metadata: {
+            ...config.metadata,
+            suppressOutput: true,
+          },
+        }),
+      ).catch((error) => {
         throw new Error(`Model invocation failed: ${error.message}`);
       });
 
       const content = await processResponse(response);
       const parsed = await tryParseContent(content);
-      
+
       if (parsed) {
         return parsed;
       }
