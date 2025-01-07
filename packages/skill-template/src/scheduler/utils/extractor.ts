@@ -86,51 +86,87 @@ export async function extractStructuredData<T extends z.ZodType>(
   // Check if model supports structured output
   const useStructuredOutput = checkIsSupportedModel(modelInfo);
 
+  const tryParseContent = async (content: string): Promise<z.infer<T> | null> => {
+    try {
+      const extractedJson = extractJsonFromMarkdown(content);
+      return await schema.parseAsync(extractedJson);
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const processResponse = async (response: any): Promise<string> => {
+    if (typeof response === 'string') {
+      return response;
+    }
+    if (response?.content === 'string') {
+      return response.content;
+    }
+    if (response instanceof AIMessageChunk) {
+      if (typeof response.content === 'string') {
+        return response.content;
+      }
+      if (Array.isArray(response.content)) {
+        return response.content
+          .map((item) => {
+            if (typeof item === 'string') return item;
+            if ('type' in item && item.type === 'text') return item.text;
+            return '';
+          })
+          .join('');
+      }
+    }
+    return String(response);
+  };
+
   for (let i = 0; i < maxRetries; i++) {
     try {
       if (useStructuredOutput && !structuredOutputFailed) {
         try {
-          // Use withStructuredOutput for supported models
           const structuredLLM = model.withStructuredOutput(schema, {
             includeRaw: true,
             name: schema.description ?? 'structured_output',
           });
 
-          const result = await structuredLLM.invoke(prompt, {
+          const result = await Promise.resolve(structuredLLM.invoke(prompt, {
             ...config,
             metadata: {
               ...config.metadata,
               suppressOutput: true,
             },
+          })).catch(error => {
+            throw new Error(`Structured output invocation failed: ${error.message}`);
           });
 
           // Try to get parsed result first
-          if (result?.parsed) return result.parsed;
-
-          // Fall back to raw content if available
-          if (result?.raw?.content) {
-            const extractedJson = extractJsonFromMarkdown(String(result.raw.content));
-            return schema.parse(extractedJson);
+          if (result?.parsed) {
+            return result.parsed;
           }
 
-          // Try to extract from tool calls if available
+          // Try different result formats
+          if (result?.raw?.content) {
+            const parsed = await tryParseContent(String(result.raw.content));
+            if (parsed) return parsed;
+          }
+
           const rawMessage = result?.raw as ExtendedAIMessage;
           if (rawMessage?.tool_calls?.[0]?.args) {
-            return schema.parse(rawMessage.tool_calls[0].args);
+            try {
+              return await schema.parseAsync(rawMessage.tool_calls[0].args);
+            } catch {
+              // Continue to next attempt if parsing fails
+            }
           }
 
-          // If we reach here, structured output didn't provide usable results
           throw new Error('Structured output did not provide valid results');
         } catch (structuredError) {
-          // Log the structured output error
           console.error('Structured output failed:', structuredError);
-          // Mark structured output as failed and switch to fallback
           structuredOutputFailed = true;
-          // Continue to fallback in the same iteration
+          lastError = structuredError instanceof Error ? structuredError.message : 'Unknown structured output error';
         }
       }
 
-      // Fallback for unsupported models or when structured output fails
+      // Fallback approach
       const schemaInstructions = generateSchemaInstructions(schema);
       const fullPrompt = `${prompt}\n\n${schemaInstructions}${
         lastError
@@ -138,36 +174,22 @@ export async function extractStructuredData<T extends z.ZodType>(
           : ''
       }`;
 
-      const response = await model.invoke(fullPrompt, config);
-      let content = '';
+      const response = await Promise.resolve(model.invoke(fullPrompt, config)).catch(error => {
+        throw new Error(`Model invocation failed: ${error.message}`);
+      });
 
-      if (typeof response === 'string') {
-        content = response;
-      } else if (response?.content === 'string') {
-        content = response.content;
-      } else if (response instanceof AIMessageChunk) {
-        if (typeof response.content === 'string') {
-          content = response.content;
-        } else if (Array.isArray(response.content)) {
-          // Handle array content by joining text parts
-          content = response.content
-            .map((item) => {
-              if (typeof item === 'string') return item;
-              if ('type' in item && item.type === 'text') return item.text;
-              return '';
-            })
-            .join('');
-        }
-      } else {
-        content = String(response);
+      const content = await processResponse(response);
+      const parsed = await tryParseContent(content);
+      
+      if (parsed) {
+        return parsed;
       }
 
-      const extractedJson = extractJsonFromMarkdown(content);
-      return schema.parse(extractedJson);
+      throw new Error('Failed to parse response as valid JSON matching schema');
     } catch (error) {
       lastError = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error(`Attempt ${i + 1}/${maxRetries} failed:`, lastError);
 
-      // On last retry, throw the error
       if (i === maxRetries - 1) {
         throw new Error(`Failed to extract structured data after ${maxRetries} attempts. Last error: ${lastError}`);
       }
