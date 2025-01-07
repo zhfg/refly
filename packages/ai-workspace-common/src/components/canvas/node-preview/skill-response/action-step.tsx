@@ -102,22 +102,6 @@ const LogBox = memo(
             />
           </>
         )}
-
-        {(status === 'waiting' || status === 'executing') && (
-          <div className="flex items-center gap-2 bg-gray-100 rounded-sm p-2">
-            <IconLoading className="h-3 w-3 animate-spin text-green-500" />
-            <span className="text-xs text-gray-500 max-w-48 truncate">
-              {log ? (
-                <>
-                  <span className="text-green-500 font-medium">{logTitle + ' '}</span>
-                  <span className="text-gray-500">{logDescription}</span>
-                </>
-              ) : (
-                t('canvas.skillResponse.aiThinking')
-              )}
-            </span>
-          </div>
-        )}
       </div>
     );
   },
