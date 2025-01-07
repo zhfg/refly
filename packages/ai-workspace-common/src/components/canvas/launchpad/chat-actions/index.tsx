@@ -61,7 +61,7 @@ export const ChatActions = memo(
         </div>
         <div className="flex flex-row items-center gap-2">
           {customActions?.map((action, index) => (
-            <Tooltip key={index} destroyTooltipOnHide title={action.title}>
+            <Tooltip destroyTooltipOnHide title={action.title} key={index}>
               <Button size="small" onClick={action.onClick} className="mr-0">
                 {action.icon}
               </Button>

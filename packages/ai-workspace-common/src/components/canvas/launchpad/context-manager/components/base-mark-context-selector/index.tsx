@@ -8,14 +8,13 @@ import { Command } from 'cmdk';
 import { Home } from './home';
 import { RenderItem } from './type';
 import { getContextItemIcon } from '../../utils/icon';
-
+import { CanvasNodeType } from '@refly/openapi-schema';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { IContextItem, useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 
 import './index.scss';
-import { CanvasNodeType } from '@refly/openapi-schema';
+import '@refly-packages/ai-workspace-common/components/canvas/common/node-selector/index.scss';
 
 interface CustomProps {
   onClickOutside?: () => void;

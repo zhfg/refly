@@ -453,6 +453,7 @@ const translations = {
           navigate: 'Navigate',
           toggle: 'Toggle',
           done: 'Done',
+          position: 'Position',
         },
       },
       contextFilter: {
@@ -524,6 +525,7 @@ const translations = {
       disableAutoLayout: 'Disable Auto Layout',
     },
     toolbar: {
+      searchNode: 'Search Node',
       enablePointerMode: 'Enable Pointer Mode',
       disablePointerMode: 'Disable Pointer Mode',
       importResource: 'Import Resource',
@@ -597,12 +599,13 @@ const translations = {
       descriptionPlaceholder: 'Please enter the description of the canvas',
     },
     contextSelector: {
-      placeholder: 'Enter keywords to search for nodes in the canvas...',
+      placeholder: 'Search nodes...',
     },
     contextManager: {
       nodeNotFound: 'Source node not found or has been deleted. Please add it to the canvas first.',
     },
     nodeActions: {
+      copy: 'Copy Node Content',
       askAI: 'Ask AI',
       cloneAskAI: 'Clone Ask AI',
       batchRun: 'Batch Run',

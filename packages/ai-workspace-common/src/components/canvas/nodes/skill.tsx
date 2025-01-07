@@ -7,7 +7,7 @@ import { useState, useCallback, useEffect, useMemo, memo } from 'react';
 
 import { getNodeCommonStyles } from './index';
 import { ChatInput } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-input';
-import { getSkillIcon, IconAskAI } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { ModelInfo, Skill } from '@refly/openapi-schema';
 import { useDebouncedCallback } from 'use-debounce';
 import { ChatActions } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-actions';
@@ -184,32 +184,34 @@ export const SkillNode = memo(
 
       deleteElements({ nodes: [node] });
 
-      const resultId = genActionResultID();
-      invokeAction(
-        {
-          resultId,
-          ...data?.metadata,
-        },
-        {
-          entityId: canvasId,
-          entityType: 'canvas',
-        },
-      );
-      addNode(
-        {
-          type: 'skillResponse',
-          data: {
-            title: query,
-            entityId: resultId,
-            metadata: {
-              status: 'executing',
-              contextItems,
-            },
+      setTimeout(() => {
+        const resultId = genActionResultID();
+        invokeAction(
+          {
+            resultId,
+            ...data?.metadata,
           },
-          position: node.position,
-        },
-        convertContextItemsToNodeFilters(contextItems),
-      );
+          {
+            entityId: canvasId,
+            entityType: 'canvas',
+          },
+        );
+        addNode(
+          {
+            type: 'skillResponse',
+            data: {
+              title: query,
+              entityId: resultId,
+              metadata: {
+                status: 'executing',
+                contextItems,
+              },
+            },
+            position: node.position,
+          },
+          convertContextItemsToNodeFilters(contextItems),
+        );
+      });
     }, [id, getNode, deleteElements, invokeAction, canvasId, addNode]);
 
     const handleDelete = useCallback(() => {
@@ -293,8 +295,8 @@ export const SkillNode = memo(
     return (
       prevProps.id === nextProps.id &&
       prevProps.selected === nextProps.selected &&
-      prevProps.data.title === nextProps.data.title &&
-      JSON.stringify(prevProps.data.metadata) === JSON.stringify(nextProps.data.metadata)
+      prevProps.data?.title === nextProps.data?.title &&
+      JSON.stringify(prevProps.data?.metadata) === JSON.stringify(nextProps.data?.metadata)
     );
   },
 );
