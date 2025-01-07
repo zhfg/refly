@@ -28,7 +28,7 @@ export const useFindThreadHistory = () => {
 
         const sourceId = targetToSourceMap.get(nodeId);
         const sourceNode = getNode(sourceId);
-        if (sourceNode) {
+        if (sourceNode?.type === 'skillResponse') {
           history.push(sourceNode as CanvasNode<ResponseNodeMeta>);
           findSourceNodes(sourceId, visited);
         }

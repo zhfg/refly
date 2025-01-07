@@ -115,6 +115,7 @@ export const ChatPanel = () => {
 
     // Reset selected skill after sending message
     skillStore.setSelectedSkill(null);
+    setContextItems([]);
 
     invokeAction(
       {
