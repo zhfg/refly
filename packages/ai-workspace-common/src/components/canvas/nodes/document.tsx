@@ -161,7 +161,7 @@ export const DocumentNode = memo(
           onMouseEnter={!isPreview ? handleMouseEnter : undefined}
           onMouseLeave={!isPreview ? handleMouseLeave : undefined}
           onClick={onNodeClick}
-          style={containerStyle}
+          style={isPreview ? { width: 288, height: 200 } : containerStyle}
         >
           {!isPreview && !hideActions && <ActionButtons type="document" nodeId={id} isNodeHovered={isHovered} />}
 

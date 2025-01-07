@@ -498,7 +498,7 @@ export const SkillResponseNode = memo(
         <div
           ref={targetRef}
           className="relative"
-          style={containerStyle}
+          style={isPreview ? { width: 288, height: 200 } : containerStyle}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           onClick={onNodeClick}
