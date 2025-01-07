@@ -311,13 +311,17 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     };
 
     const footerItems: MenuItem[] = [
-      {
-        key: 'copy',
-        icon: IconCopy,
-        label: t('canvas.nodeActions.copy'),
-        onClick: handleCopy,
-        type: 'button' as const,
-      },
+      ...(nodeType !== 'skill' && nodeType !== 'group'
+        ? [
+            {
+              key: 'copy',
+              icon: IconCopy,
+              label: t('canvas.nodeActions.copy'),
+              onClick: handleCopy,
+              type: 'button' as const,
+            },
+          ]
+        : []),
       {
         key: 'delete',
         icon: IconDelete,
