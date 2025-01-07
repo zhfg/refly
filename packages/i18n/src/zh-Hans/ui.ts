@@ -597,6 +597,7 @@ const translations = {
       nodeNotFound: '源节点未找到或已被删除，请先添加到画布',
     },
     nodeActions: {
+      copy: '复制节点内容',
       askAI: '问问 AI',
       cloneAskAI: '克隆 AI 提问',
       batchRun: '批量运行',

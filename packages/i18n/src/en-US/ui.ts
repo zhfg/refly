@@ -605,6 +605,7 @@ const translations = {
       nodeNotFound: 'Source node not found or has been deleted. Please add it to the canvas first.',
     },
     nodeActions: {
+      copy: 'Copy Node Content',
       askAI: 'Ask AI',
       cloneAskAI: 'Clone Ask AI',
       batchRun: 'Batch Run',
