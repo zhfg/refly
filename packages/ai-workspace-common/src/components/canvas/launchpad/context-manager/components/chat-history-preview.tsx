@@ -50,7 +50,7 @@ const ChatHistoryItem = ({ node }: { node: CanvasNode<ResponseNodeMeta> }) => {
   );
 };
 
-export const ChatHistory: React.FC<ChatHistoryProps> = ({ item }) => {
+export const ChatHistoryPreview: React.FC<ChatHistoryProps> = ({ item }) => {
   const { t } = useTranslation();
 
   const findThreadHistory = useFindThreadHistory();

@@ -15,6 +15,7 @@ import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { CanvasNodeData } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/types';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { convertContextItemsToNodeFilters } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useNodeCluster } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-cluster';
 
 interface MenuItem {
@@ -168,10 +169,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
           },
           position: node.position,
         },
-        contextItems.map((item) => ({
-          type: item.type,
-          entityId: item.entityId,
-        })),
+        convertContextItemsToNodeFilters(contextItems),
       );
 
       // Delete the skill node after invoking

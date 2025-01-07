@@ -1,18 +1,22 @@
 import {
   IconMemo,
-  IconThreadHistory,
   IconResponseFilled,
   IconResourceFilled,
   IconDocumentFilled,
   IconThreadHistoryFilled,
+  IconQuote,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/colors';
-import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { CanvasNodeType, SelectionKey } from '@refly/openapi-schema';
 
-export const getContextItemIcon = (item: IContextItem, style?: React.CSSProperties) => {
-  const color = NODE_COLORS[item.type];
+export const getContextItemIcon = (
+  type: CanvasNodeType | SelectionKey,
+  style?: React.CSSProperties,
+  options?: { withHistory?: boolean },
+) => {
+  const color = NODE_COLORS[type];
 
-  switch (item.type) {
+  switch (type) {
     case 'resource':
       return <IconResourceFilled style={{ color, ...style }} />;
     case 'document':
@@ -20,11 +24,15 @@ export const getContextItemIcon = (item: IContextItem, style?: React.CSSProperti
     case 'memo':
       return <IconMemo style={{ color, ...style }} />;
     case 'skillResponse':
-      return item.metadata?.withHistory ? (
+      return options?.withHistory ? (
         <IconThreadHistoryFilled style={{ color: NODE_COLORS['threadHistory'], ...style }} />
       ) : (
         <IconResponseFilled style={{ color, ...style }} />
       );
+    case 'resourceSelection':
+    case 'documentSelection':
+    case 'skillResponseSelection':
+      return <IconQuote style={{ color, ...style }} />;
     default:
       return null;
   }

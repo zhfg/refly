@@ -23,6 +23,7 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { useSyncSelectedNodesToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-sync-selected-nodes-to-context';
 import { PiMagicWand } from 'react-icons/pi';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { convertContextItemsToNodeFilters } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 
 export const ChatPanel = () => {
   const { t } = useTranslation();
@@ -114,6 +115,7 @@ export const ChatPanel = () => {
 
     // Reset selected skill after sending message
     skillStore.setSelectedSkill(null);
+    setContextItems([]);
 
     invokeAction(
       {
@@ -142,10 +144,7 @@ export const ChatPanel = () => {
           },
         },
       },
-      contextItems.map((item) => ({
-        type: item.type,
-        entityId: item.entityId,
-      })),
+      convertContextItemsToNodeFilters(contextItems),
     );
   };
 

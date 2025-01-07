@@ -10,13 +10,12 @@ import { IconQuote } from '@refly-packages/ai-workspace-common/components/common
 import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useContentSelectorStoreShallow } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { SelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/selection-context';
 import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
-import { getClientOrigin } from '@refly-packages/utils/url';
 import { Resource } from '@refly/openapi-schema';
 
 import './index.scss';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 interface ResourceViewProps {
   resourceId: string;
@@ -122,27 +121,19 @@ const ResourceContent = memo(
     showContentSelector: boolean;
     scope: string;
   }) => {
-    const buildNodeData = useCallback(
+    const buildContextItem = useCallback(
       (text: string) => {
-        const id = genUniqueId();
         return {
-          id,
-          type: 'resource',
-          position: { x: 0, y: 0 },
-          data: {
-            entityId: resourceDetail.resourceId ?? '',
-            title: resourceDetail.title ?? 'Selected Content',
-            metadata: {
-              contentPreview: text,
-              selectedContent: text,
-              xPath: id,
-              sourceEntityId: resourceDetail.resourceId ?? '',
-              sourceEntityType: 'resource',
-              sourceType: 'resourceSelection',
-              url: resourceDetail.data?.url || getClientOrigin(),
-            },
+          type: 'resourceSelection',
+          entityId: genUniqueId(),
+          title: text.slice(0, 50),
+          selection: {
+            content: text,
+            sourceTitle: resourceDetail.title,
+            sourceEntityId: resourceDetail.resourceId,
+            sourceEntityType: 'resource',
           },
-        } as CanvasNode;
+        } as IContextItem;
       },
       [resourceDetail],
     );
@@ -157,7 +148,7 @@ const ResourceContent = memo(
       >
         <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>
         <Markdown content={resourceDetail?.content || ''} className="text-base" />
-        <SelectionContext containerClass={`resource-content-${resourceId}`} getNodeData={buildNodeData} />
+        <SelectionContext containerClass={`resource-content-${resourceId}`} getContextItem={buildContextItem} />
       </div>
     );
   },

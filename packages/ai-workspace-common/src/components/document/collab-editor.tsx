@@ -41,6 +41,7 @@ import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useCreateMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-memo';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export const CollaborativeEditor = memo(
   ({ docId }: { docId: string }) => {
@@ -152,39 +153,29 @@ export const CollaborativeEditor = memo(
       [ydoc, docId, documentActions, createPlaceholderExtension],
     );
 
-    // console.log('CollaborativeEditor', docId);
-
     const { addToContext, selectedText } = useSelectionContext({
       containerClass: 'ai-note-editor-content-container',
     });
 
-    const buildNodeData = (text: string) => {
+    const buildContextItem = (text: string): IContextItem => {
       const { document } = useDocumentStore.getState()?.data?.[docId] ?? {};
 
       return {
-        id: genUniqueId(),
-        type: 'document' as CanvasNodeType,
-        position: { x: 0, y: 0 },
-        data: {
-          entityId: document?.docId ?? '',
-          title: document?.title ?? 'Selected Content',
-          metadata: {
-            contentPreview: text,
-            selectedContent: text,
-            xPath: genUniqueId(),
-            sourceEntityId: document?.docId ?? '',
-            sourceEntityType: 'document',
-            sourceType: 'documentSelection',
-            url: getClientOrigin(),
-          },
+        title: text.slice(0, 50),
+        entityId: genUniqueId(),
+        type: 'documentSelection',
+        selection: {
+          content: text,
+          sourceTitle: document?.title ?? 'Selected Content',
+          sourceEntityId: document?.docId ?? '',
+          sourceEntityType: 'document',
         },
       };
     };
 
     const handleAddToContext = (text: string) => {
-      const node = buildNodeData(text);
-
-      addToContext(node);
+      const item = buildContextItem(text);
+      addToContext(item);
     };
 
     const { createMemo } = useCreateMemo();

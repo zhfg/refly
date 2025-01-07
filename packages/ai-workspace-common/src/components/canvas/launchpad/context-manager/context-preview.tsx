@@ -9,7 +9,8 @@ import {
 import { DocumentNode, ResourceNode, MemoNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { ChatHistory } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-history';
+import { ChatHistoryPreview } from './components/chat-history-preview';
+import { SelectionPreview } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager/components/selection-preview';
 
 export const ContextPreview = memo(
   ({ item }: { item: IContextItem }) => {
@@ -20,7 +21,11 @@ export const ContextPreview = memo(
       isPreview: true,
       hideActions: true,
       hideHandles: true,
-      data: node?.data,
+      data: {
+        ...node?.data,
+        // Overwrite contentPreview if this is a selection
+        ...(item.selection ? { contentPreview: item.selection.content } : {}),
+      },
       selected: false,
       id: node?.id,
     };
@@ -32,11 +37,15 @@ export const ContextPreview = memo(
         return <ResourceNode {...(commonProps as ResourceNodeProps)} />;
       case 'skillResponse':
         if (item.metadata?.withHistory) {
-          return <ChatHistory item={item} />;
+          return <ChatHistoryPreview item={item} />;
         }
         return <SkillResponseNode {...(commonProps as SkillResponseNodeProps)} />;
       case 'memo':
         return <MemoNode {...(commonProps as MemoNodeProps)} />;
+      case 'resourceSelection':
+      case 'documentSelection':
+      case 'skillResponseSelection':
+        return <SelectionPreview item={item} />;
       default:
         return null;
     }

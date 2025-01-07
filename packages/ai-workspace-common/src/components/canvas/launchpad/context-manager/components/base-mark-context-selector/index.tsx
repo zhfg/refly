@@ -8,10 +8,9 @@ import { Command } from 'cmdk';
 import { Home } from './home';
 import { RenderItem } from './type';
 import { getContextItemIcon } from '../../utils/icon';
-
+import { CanvasNodeType } from '@refly/openapi-schema';
 import { IconRefresh } from '@arco-design/web-react/icon';
 import { IContextItem, useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 
 import './index.scss';
@@ -97,8 +96,8 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
   const sortedRenderData = useMemo(() => {
     return processedNodes.map((item) => ({
       data: item,
-      type: item?.type,
-      icon: getContextItemIcon(item, { width: 12, height: 12 }),
+      type: item?.type as CanvasNodeType,
+      icon: getContextItemIcon(item.type, { width: 12, height: 12 }),
       isSelected: selectedItems?.some((selected) => selected?.entityId === item?.entityId),
       onItemClick: (item: IContextItem) => {
         onSelect?.(item);

@@ -29,8 +29,8 @@ export const ContextItem = ({
   onRemove?: (item: IContextItem) => void;
 }) => {
   const { t } = useTranslation();
-  const { title, entityId, type, metadata, isCurrentContext } = item ?? {};
-  const icon = getContextItemIcon(item);
+  const { title, entityId, type, selection, metadata, isCurrentContext } = item ?? {};
+  const icon = getContextItemIcon(item.type, null, { withHistory: metadata?.withHistory });
   const { setSelectedNode } = useNodeSelection();
   const { nodes } = useCanvasData();
   const { getNodes } = useReactFlow();
@@ -45,11 +45,9 @@ export const ContextItem = ({
 
     setNodeCenter(node.id);
 
-    const isSelectionNode = metadata?.sourceType?.includes('Selection');
-
-    if (isSelectionNode) {
-      const sourceEntityId = metadata?.sourceEntityId;
-      const sourceEntityType = metadata?.sourceEntityType;
+    if (selection) {
+      const sourceEntityId = selection.sourceEntityId;
+      const sourceEntityType = selection.sourceEntityType;
 
       if (!sourceEntityId || !sourceEntityType) {
         console.warn('Missing source entity information for selection node');
@@ -69,7 +67,7 @@ export const ContextItem = ({
     } else {
       setSelectedNode(node as CanvasNode<any>);
     }
-  }, [entityId, setSelectedNode, t]);
+  }, [entityId, selection, setSelectedNode, t]);
 
   const content = <ContextPreview item={item} />;
 
@@ -118,7 +116,6 @@ export const ContextItem = ({
                 'text-red-500': isLimit,
               },
             )}
-            title={title ?? ''}
           >
             {title}
           </span>

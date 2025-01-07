@@ -1988,6 +1988,7 @@ export type SkillContextKey = 'resources' | 'documents' | 'contentList' | 'urls'
 export type SelectionKey =
   | 'documentSelection'
   | 'resourceSelection'
+  | 'skillResponseSelection'
   | 'extensionWeblinkSelection'
   | 'documentCursorSelection'
   | 'documentBeforeCursorSelection'
