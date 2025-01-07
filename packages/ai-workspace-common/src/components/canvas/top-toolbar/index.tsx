@@ -9,7 +9,7 @@ import { MdOutlineImage, MdOutlineAspectRatio } from 'react-icons/md';
 import { AiOutlineMenuUnfold } from 'react-icons/ai';
 import { IconEdit, IconSearch } from '@refly-packages/ai-workspace-common/components/common/icon';
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { Helmet } from 'react-helmet';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
