@@ -79,7 +79,6 @@ export const CanvasProvider = ({ canvasId, children }: { canvasId: string; child
       token,
       document: doc,
       connect: true,
-      forceSyncInterval: 5000,
     });
 
     const handleSync = () => {

@@ -37,7 +37,6 @@ export const DocumentProvider = ({ docId, children }: { docId: string; children:
       token,
       document: doc,
       connect: true,
-      forceSyncInterval: 5000,
     });
 
     remoteProvider.on('synced', () => {

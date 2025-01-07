@@ -1,19 +1,16 @@
 import { Button, Tooltip } from 'antd';
 import { FormInstance } from '@arco-design/web-react';
-import { useRef, useState, useMemo, useCallback } from 'react';
+import { useRef, useMemo, useCallback } from 'react';
 import { memo } from 'react';
 
 import { IconSend } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
-import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 
-// styles
-import './index.scss';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { useGetSubscriptionUsage } from '@refly-packages/ai-workspace-common/queries/queries';
 import { ModelSelector } from './model-selector';
 import { ModelInfo } from '@refly/openapi-schema';
+import { cn } from '@refly-packages/utils/index';
 
 export interface CustomAction {
   icon: React.ReactNode;
@@ -25,6 +22,7 @@ interface ChatActionsProps {
   query: string;
   model: ModelInfo;
   setModel: (model: ModelInfo) => void;
+  className?: string;
   form?: FormInstance;
   handleSendMessage: () => void;
   handleAbort: () => void;
@@ -33,7 +31,7 @@ interface ChatActionsProps {
 
 export const ChatActions = memo(
   (props: ChatActionsProps) => {
-    const { query, model, setModel, handleSendMessage, handleAbort, customActions } = props;
+    const { query, model, setModel, handleSendMessage, handleAbort, customActions, className } = props;
     const { t } = useTranslation();
 
     const handleSendClick = useCallback(() => {
@@ -57,11 +55,11 @@ export const ChatActions = memo(
     const containerRef = useRef<HTMLDivElement>(null);
 
     return (
-      <div className="chat-actions" ref={containerRef}>
-        <div className="left-actions">
+      <div className={cn('flex justify-between items-center', className)} ref={containerRef}>
+        <div className="flex gap-2.5">
           <ModelSelector model={model} setModel={setModel} briefMode={false} trigger={['click']} />
         </div>
-        <div className="right-actions">
+        <div className="flex flex-row items-center gap-2">
           {customActions?.map((action) => (
             <Tooltip destroyTooltipOnHide title={action.title}>
               <Button size="small" onClick={action.onClick} className="mr-0">
@@ -75,7 +73,7 @@ export const ChatActions = memo(
               size="small"
               type="primary"
               disabled={!canSendMessage}
-              className="text-xs gap-1"
+              className="text-xs flex items-center gap-1"
               onClick={handleSendClick}
             >
               <IconSend />

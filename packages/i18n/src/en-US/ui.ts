@@ -474,13 +474,6 @@ const translations = {
       addToContextSuccess: 'Successfully added to context',
       untitled: 'Untitled',
       deleteSuccessWithTitle: 'Successfully deleted [{{type}}] "{{title}}"',
-      nodeTypes: {
-        document: 'Document',
-        resource: 'Resource',
-        skillResponse: 'Skill Response',
-        memo: 'Memo',
-        skill: 'Skill',
-      },
       memoPlaceholder: 'Record your inspiration...',
       noContent: 'No content available to insert',
       noEditor: 'No opened document',
@@ -503,8 +496,19 @@ const translations = {
     generating: 'Generating',
     completed: 'Completed',
   },
+  resourceType: {
+    weblink: 'Web Link',
+    pastedText: 'Pasted Text',
+  },
   canvas: {
     emptyText: 'Double-click to ask AI, or',
+    nodeTypes: {
+      document: 'Document',
+      resource: 'Resource',
+      skillResponse: 'Skill Response',
+      memo: 'Memo',
+      skill: 'Skill',
+    },
     contextMenu: {
       createGroup: 'Create Group',
       enableClickPreview: 'Enable Click Preview',
@@ -560,15 +564,13 @@ const translations = {
       title: 'Connection Timeout',
       extra: 'The server seems to be busy, please try again.',
     },
-    launchpad: {
-      pinChat: 'Pin chat',
-      unpinChat: 'Unpin chat',
-      removeChat: 'Remove chat',
-    },
     action: {
       nodeAlreadyExists: 'The {{type}} with the same entity already exists',
       deleteSuccess: 'Canvas deleted successfully',
       addSuccess: 'Canvas added successfully, start creating!',
+    },
+    skill: {
+      askAI: 'Ask AI',
     },
     skillResponse: {
       executionFailed: 'Execution failed, click to retry',
@@ -1406,6 +1408,7 @@ const translations = {
     skillDisplay: {
       skillManager: 'Skill Manage',
       manager: 'Manage',
+      more: 'More',
     },
     chatInput: {
       placeholder: 'Let Refly write something for you, or search anything you are interested in...',
@@ -1422,7 +1425,7 @@ const translations = {
       replace: 'Replace Selection',
       reject: 'Reject',
       copy: 'Copy Answer',
-      exitEdit: 'Exit Edit Mode',
+      discard: 'Discard Changes',
     },
     configManager: {
       title: 'Skill Configuration',

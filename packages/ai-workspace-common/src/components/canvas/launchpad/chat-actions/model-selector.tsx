@@ -336,7 +336,7 @@ export const ModelSelector = memo(
 
       return (
         <>
-          <img className="w-3 h-3 mx-1" src={ModelProviderIcons[model.provider]} alt={model.provider} />
+          <img className="w-3 h-3" src={ModelProviderIcons[model.provider]} alt={model.provider} />
           {model.label}
         </>
       );
@@ -361,7 +361,7 @@ export const ModelSelector = memo(
         getPopupContainer={getPopupContainer}
       >
         {!briefMode ? (
-          <span className={classNames('model-selector', 'chat-action-item')}>
+          <span className="text-xs flex items-center gap-1.5 text-gray-500 cursor-pointer transition-all duration-300 hover:text-gray-700">
             <SelectedModelDisplay model={model} />
             <IconDown />
           </span>

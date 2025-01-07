@@ -1,5 +1,4 @@
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 import { genMemoID } from '@refly-packages/utils/id';
 import { XYPosition } from '@xyflow/react';
@@ -16,7 +15,7 @@ export const useCreateMemo = () => {
       {
         type: 'memo',
         data: {
-          title: t('knowledgeBase.context.nodeTypes.memo'),
+          title: t('canvas.nodeTypes.memo'),
           contentPreview: options.content,
           entityId: memoId,
         },

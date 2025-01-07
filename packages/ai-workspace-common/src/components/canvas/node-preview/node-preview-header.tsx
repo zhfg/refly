@@ -30,6 +30,7 @@ import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-preview-control';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { TFunction } from 'i18next';
 
 // Get icon component based on node type and metadata
 const getNodeIcon = (node: CanvasNode<any>) => {
@@ -62,40 +63,20 @@ const getNodeIcon = (node: CanvasNode<any>) => {
 };
 
 // Get node title based on node type and metadata
-const getNodeTitle = (node: CanvasNode<any>) => {
+const getNodeTitle = (node: CanvasNode<any>, t: TFunction) => {
   switch (node.type) {
     case 'document':
-      return 'Document';
+      return t('canvas.nodeTypes.document');
     case 'resource':
-      return node.data?.metadata?.resourceType === 'weblink' ? 'Web Link' : 'Plain Text';
+      return node.data?.metadata?.resourceType === 'weblink' ? t('resourceType.weblink') : t('resourceType.pastedText');
     case 'skillResponse':
-      return node.data?.metadata?.modelName ?? 'Skill Response';
+      return t('canvas.nodeTypes.skillResponse');
     case 'toolResponse':
-      return node.data?.metadata?.modelName ?? 'Tool Response';
+      return t('canvas.nodeTypes.toolResponse');
     case 'skill':
-      const skillType = node.data?.metadata?.skillType;
-      switch (skillType) {
-        case 'prompt':
-          return 'Prompt';
-        case 'prompt-struct':
-          return 'Structured Prompt';
-        case 'code':
-          return 'Code';
-        case 'http':
-          return 'HTTP Request';
-        default:
-          return skillType ?? 'Skill';
-      }
-    case 'tool':
-      const toolType = node.data?.metadata?.toolType;
-      if (!toolType) return 'Unknown Tool';
-      const toolTitles: Record<string, string> = {
-        TextToSpeech: 'Text To Speech',
-        SpeechToText: 'Speech To Text',
-        CodeInterpreter: 'Code Interpreter',
-        WebSearch: 'Web Search',
-      };
-      return toolTitles[toolType] ?? toolType.split(/(?=[A-Z])/).join(' ');
+      return t('canvas.nodeTypes.skill');
+    case 'memo':
+      return t('canvas.nodeTypes.memo');
     default:
       return 'Unknown Node';
   }
@@ -109,10 +90,11 @@ interface NodePreviewHeaderProps {
 }
 
 export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, onMaximize, isMaximized = false }) => {
+  const { t } = useTranslation();
   const IconComponent = getNodeIcon(node);
   const nodeColor = NODE_COLORS[node.type];
-  const nodeTitle = getNodeTitle(node);
-  const { t } = useTranslation();
+  const nodeTitle = getNodeTitle(node, t);
+
   const { addToContext } = useAddToContext();
 
   const { deleteNode } = useDeleteNode();

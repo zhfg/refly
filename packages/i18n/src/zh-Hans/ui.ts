@@ -466,13 +466,6 @@ const translations = {
       addToContextSuccess: '已成功添加到上下文',
       untitled: '未命名',
       deleteSuccessWithTitle: '已成功删除 [{{type}}] "{{title}}"',
-      nodeTypes: {
-        document: '文档',
-        resource: '资源',
-        skillResponse: '技能响应',
-        memo: '备忘录',
-        skill: '技能',
-      },
       memoPlaceholder: '记录当下的灵感...',
       noContent: '没有可插入的内容',
       noEditor: '没有打开的文档',
@@ -495,8 +488,19 @@ const translations = {
     generating: '生成中',
     completed: '已完成',
   },
+  resourceType: {
+    weblink: '网页链接',
+    pastedText: '粘贴文本',
+  },
   canvas: {
     emptyText: '双击向 AI 提问, 或',
+    nodeTypes: {
+      document: '文档',
+      resource: '资源',
+      skillResponse: '技能响应',
+      memo: '备忘录',
+      skill: '技能',
+    },
     contextMenu: {
       createGroup: '创建分组',
       enableClickPreview: '启用点击预览',
@@ -552,15 +556,13 @@ const translations = {
       title: '连接超时',
       extra: '服务器似乎繁忙，请稍后再试。',
     },
-    launchpad: {
-      pinChat: '固定对话',
-      unpinChat: '取消固定对话',
-      removeChat: '移除对话',
-    },
     action: {
       nodeAlreadyExists: '该{{type}}已存在于当前画布中',
       deleteSuccess: '删除画布成功',
       addSuccess: '画布添加好啦，开始创作吧~',
+    },
+    skill: {
+      askAI: 'AI 提问',
     },
     skillResponse: {
       executionFailed: '执行失败，点击重试',
@@ -1397,6 +1399,7 @@ const translations = {
     skillDisplay: {
       skillManager: '技能管理',
       manager: '管理',
+      more: '更多',
     },
     chatInput: {
       placeholder: '让 Refly 帮你写点什么，或者搜索任何感兴趣的内容...',
@@ -1413,7 +1416,7 @@ const translations = {
       replace: '替换选中',
       reject: '拒绝',
       copy: '复制回答',
-      exitEdit: '退出编辑模式',
+      discard: '放弃修改',
     },
     configManager: {
       title: '技能配置',

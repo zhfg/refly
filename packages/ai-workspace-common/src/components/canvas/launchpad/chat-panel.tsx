@@ -185,6 +185,7 @@ export const ChatPanel = () => {
           className="rounded-t-[7px]"
         />
         <ContextManager
+          className="p-2 px-3"
           contextItems={contextItems}
           setContextItems={setContextItems}
           filterErrorInfo={filterErrorInfo}
@@ -193,6 +194,7 @@ export const ChatPanel = () => {
           query={chatStore.newQAText}
           setQuery={chatStore.setNewQAText}
           selectedSkillName={selectedSkill?.name}
+          autoCompletionPlacement={'topLeft'}
           handleSendMessage={handleSendMessage}
         />
 
@@ -214,6 +216,7 @@ export const ChatPanel = () => {
         )}
 
         <ChatActions
+          className="p-2 px-3"
           query={chatStore.newQAText}
           model={chatStore.selectedModel}
           setModel={chatStore.setSelectedModel}

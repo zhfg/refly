@@ -40,7 +40,7 @@ export const useAddToContext = () => {
         message.warning(
           t('knowledgeBase.context.alreadyAddedWithTitle', {
             title: nodeTitle,
-            type: t(`knowledgeBase.context.nodeTypes.${nodeType}`),
+            type: t(`canvas.nodeTypes.${nodeType}`),
           }),
         );
         return false;
@@ -52,7 +52,7 @@ export const useAddToContext = () => {
       message.success(
         t('knowledgeBase.context.addSuccessWithTitle', {
           title: nodeTitle,
-          type: t(`knowledgeBase.context.nodeTypes.${nodeType}`),
+          type: t(`canvas.nodeTypes.${nodeType}`),
         }),
       );
 

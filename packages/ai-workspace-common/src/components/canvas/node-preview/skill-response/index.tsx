@@ -156,36 +156,41 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
     );
   }
 
+  const isPending = result?.status === 'executing' || result?.status === 'waiting' || loading;
+
   return (
-    <div className="flex flex-col space-y-4 p-4 h-full">
-      {editMode ? (
-        <EditChatInput
-          resultId={resultId}
-          contextItems={contextItems}
-          query={title}
-          actionMeta={actionMeta}
-          modelInfo={modelInfo}
-          setEditMode={setEditMode}
-        />
-      ) : (
-        <PreviewChatInput
-          readonly
-          contextItems={contextItems}
-          query={title}
-          actionMeta={actionMeta}
-          setEditMode={setEditMode}
-        />
+    <div className="flex flex-col space-y-4 p-4 h-full max-w-[1024px] mx-auto">
+      {!isPending && (
+        <>
+          <EditChatInput
+            enabled={editMode}
+            resultId={resultId}
+            contextItems={contextItems}
+            query={title}
+            actionMeta={actionMeta}
+            modelInfo={modelInfo}
+            setEditMode={setEditMode}
+          />
+          <PreviewChatInput
+            enabled={!editMode}
+            readonly
+            contextItems={contextItems}
+            query={title}
+            actionMeta={actionMeta}
+            setEditMode={setEditMode}
+          />
+        </>
       )}
 
       <div
-        className={cn('h-full', {
-          'opacity-30': editMode,
-          'pointer-events-none': editMode,
-        })}
+        className={cn('h-full transition-opacity duration-500', { 'opacity-30': editMode })}
+        onClick={() => {
+          if (editMode) {
+            setEditMode(false);
+          }
+        }}
       >
-        {steps.length === 0 && (result?.status === 'executing' || result?.status === 'waiting' || loading) && (
-          <Skeleton active />
-        )}
+        {steps.length === 0 && isPending && <Skeleton active paragraph={{ rows: 5 }} />}
         <StepsList steps={steps} result={result} title={title} />
       </div>
 

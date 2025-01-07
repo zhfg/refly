@@ -103,7 +103,7 @@ export const DocumentNode = memo(
         type: 'document',
         data,
         position: { x: 0, y: 0 },
-      } as CanvasNode);
+      });
     }, [id, data, deleteNode]);
 
     const { addNode } = useAddNode();
@@ -246,10 +246,10 @@ export const DocumentNode = memo(
       prevProps.isPreview === nextProps.isPreview &&
       prevProps.hideActions === nextProps.hideActions &&
       prevProps.hideHandles === nextProps.hideHandles &&
-      prevProps.data.title === nextProps.data.title &&
-      prevProps.data.contentPreview === nextProps.data.contentPreview &&
-      prevProps.data.createdAt === nextProps.data.createdAt &&
-      JSON.stringify(prevProps.data.metadata) === JSON.stringify(nextProps.data.metadata) &&
+      prevProps.data?.title === nextProps.data?.title &&
+      prevProps.data?.contentPreview === nextProps.data?.contentPreview &&
+      prevProps.data?.createdAt === nextProps.data?.createdAt &&
+      JSON.stringify(prevProps.data?.metadata) === JSON.stringify(nextProps.data?.metadata) &&
       styleEqual &&
       sizeModeEqual
     );

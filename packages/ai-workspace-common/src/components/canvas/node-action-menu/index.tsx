@@ -6,7 +6,6 @@ import {
   IconRerun,
   IconDelete,
   IconAskAI,
-  IconLoading,
   IconRun,
   IconPreview,
   IconExpand,
@@ -61,6 +60,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const nodeData = useMemo(() => node?.data, [node]);
   const [localSizeMode, setLocalSizeMode] = useState(() => nodeData?.metadata?.sizeMode || 'adaptive');
 
+  const [cloneAskAIRunning, setCloneAskAIRunning] = useState(false);
+
   useEffect(() => {
     setLocalSizeMode(nodeData?.metadata?.sizeMode || 'adaptive');
   }, [nodeData?.metadata?.sizeMode]);
@@ -79,7 +80,11 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   }, [nodeId]);
 
   const handleCloneAskAI = useCallback(() => {
+    setCloneAskAIRunning(true);
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'cloneAskAI'));
+    nodeActionEmitter.on(createNodeEventName(nodeId, 'cloneAskAI.completed'), () => {
+      setCloneAskAIRunning(false);
+    });
     onClose?.();
   }, [nodeId, onClose]);
 
@@ -197,11 +202,23 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         type: 'button' as const,
         primary: true,
       },
+      nodeType === 'skillResponse'
+        ? {
+            key: 'cloneAskAI',
+            icon: GrClone,
+            loading: cloneAskAIRunning,
+            label: t('canvas.nodeActions.cloneAskAI'),
+            onClick: handleCloneAskAI,
+            type: 'button' as const,
+          }
+        : null,
+      { key: 'divider-1', type: 'divider' } as MenuItem,
       ...(nodeType === 'skillResponse'
         ? [
             {
               key: 'cloneAskAI',
               icon: GrClone,
+              loading: cloneAskAIRunning,
               label: t('canvas.nodeActions.cloneAskAI'),
               onClick: handleCloneAskAI,
               type: 'button' as const,
@@ -342,6 +359,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     () => getMenuItems(activeDocumentId),
     [
       activeDocumentId,
+      cloneAskAIRunning,
       nodeType,
       nodeData?.contentPreview,
       handleRerun,
@@ -382,11 +400,12 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
               ${item.loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
             `}
             type="text"
+            icon={<item.icon className="w-4 h-4" />}
             loading={item.loading}
             onClick={item.onClick}
             disabled={item.disabled}
           >
-            {item.loading ? <IconLoading className="w-4 h-4" /> : <item.icon className="w-4 h-4" />}
+            {/* {item.loading ? <IconLoading className="w-4 h-4" /> : <item.icon className="w-4 h-4" />} */}
             <span className="flex-1 text-left truncate">{item.label}</span>
           </Button>
         );
