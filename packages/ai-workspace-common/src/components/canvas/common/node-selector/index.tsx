@@ -60,7 +60,7 @@ export const NodeSelector = (props: NodeSelectorProps) => {
 
   const { nodes } = useCanvasData();
 
-  const targetNodes = nodes.filter((node) => !['skill', 'memo', 'group'].includes(node?.type));
+  const targetNodes = nodes.filter((node) => !['group'].includes(node?.type));
   const sortedItems: IContextItem[] = targetNodes.map((node) => ({
     title: node.data?.title,
     entityId: node.data?.entityId,
