@@ -16,6 +16,7 @@ interface ChatInputProps {
   setQuery: (text: string) => void;
   selectedSkillName: string | null;
   inputClassName?: string;
+  maxRows?: number;
   autoCompletionPlacement?: 'bottomLeft' | 'bottomRight' | 'topLeft' | 'topRight';
   handleSendMessage: () => void;
   handleSelectSkill?: (skill: Skill) => void;
@@ -27,6 +28,7 @@ const ChatInputComponent = ({
   selectedSkillName,
   inputClassName,
   autoCompletionPlacement,
+  maxRows,
   handleSendMessage,
   handleSelectSkill,
 }: ChatInputProps) => {
@@ -168,8 +170,9 @@ const ChatInputComponent = ({
   );
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full h-full flex flex-col flex-grow overflow-y-auto">
       <AutoComplete
+        className="h-full"
         autoFocus
         options={options}
         popupMatchSelectWidth={false}
@@ -198,7 +201,7 @@ const ChatInputComponent = ({
           onChange={handleInputChange}
           onKeyDownCapture={(e) => handleKeyDown(e)}
           className={cn(
-            'mb-0 bg-transparent outline-none box-border border-none resize-none focus:outline-none focus:shadow-none focus:border-none',
+            '!m-0 bg-transparent outline-none box-border border-none resize-none focus:outline-none focus:shadow-none focus:border-none',
             inputClassName,
           )}
           placeholder={
@@ -211,7 +214,7 @@ const ChatInputComponent = ({
           }
           autoSize={{
             minRows: 1,
-            maxRows: 6,
+            maxRows: maxRows ?? 6,
           }}
         />
       </AutoComplete>

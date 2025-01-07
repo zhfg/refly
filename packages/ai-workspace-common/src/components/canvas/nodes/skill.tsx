@@ -3,7 +3,7 @@ import { CanvasNode, CanvasNodeData, SkillNodeMeta } from './shared/types';
 import { Node } from '@xyflow/react';
 import { Button } from 'antd';
 import { CustomHandle } from './shared/custom-handle';
-import { useState, useCallback, useEffect, useMemo, memo } from 'react';
+import { useState, useCallback, useEffect, useMemo, memo, useRef } from 'react';
 
 import { getNodeCommonStyles } from './index';
 import { ChatInput } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/chat-input';
@@ -30,6 +30,11 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { useTranslation } from 'react-i18next';
 import { IconClose } from '@arco-design/web-react/icon';
 import { convertContextItemsToNodeFilters } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
+import classNames from 'classnames';
+import Moveable from 'react-moveable';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
 
@@ -82,6 +87,24 @@ export const SkillNode = memo(
     const { getNode, getNodes, getEdges, addEdges, deleteElements } = useReactFlow();
     const { addNode } = useAddNode();
     const { deleteNode } = useDeleteNode();
+
+    const moveableRef = useRef<Moveable>(null);
+    const targetRef = useRef<HTMLDivElement>(null);
+    const { operatingNodeId } = useCanvasStoreShallow((state) => ({
+      operatingNodeId: state.operatingNodeId,
+    }));
+    const isOperating = operatingNodeId === id;
+    const node = useMemo(() => getNode(id), [id, getNode]);
+    const { containerStyle, handleResize, updateSize } = useNodeSize({
+      id,
+      node,
+      isOperating,
+      minWidth: 100,
+      maxWidth: 800,
+      minHeight: 200,
+      defaultWidth: 384,
+      defaultHeight: 200,
+    });
 
     const { query, selectedSkill, modelInfo, contextItems = [] } = data.metadata;
 
@@ -151,6 +174,17 @@ export const SkillNode = memo(
       },
       [id, canvasId, patchNodeData, addEdges, deleteElements, edgeStyles.hover],
     );
+
+    const resizeMoveable = useCallback((width: number, height: number) => {
+      moveableRef.current?.request('resizable', { width, height });
+    }, []);
+
+    useEffect(() => {
+      if (!targetRef.current) return;
+
+      const { offsetWidth, offsetHeight } = targetRef.current;
+      resizeMoveable(offsetWidth, offsetHeight);
+    }, [targetRef?.current?.offsetHeight, resizeMoveable]);
 
     useEffect(() => {
       if (selectedModel && !modelInfo) {
@@ -239,54 +273,75 @@ export const SkillNode = memo(
     }, [id, handleSendMessage, handleDelete]);
 
     return (
-      <div className="relative group" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-        <div className={`w-[384px] max-h-[400px] ${getNodeCommonStyles({ selected, isHovered })}`}>
+      <div className={classNames({ nowheel: isOperating })}>
+        <div
+          ref={targetRef}
+          className="relative group"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          style={containerStyle}
+        >
           <ActionButtons type="skill" nodeId={id} isNodeHovered={isHovered} />
-
-          <CustomHandle
-            type="target"
-            position={Position.Left}
-            isConnected={isTargetConnected}
-            isNodeHovered={isHovered}
-            nodeType="skill"
-          />
-          <CustomHandle
-            type="source"
-            position={Position.Right}
-            isConnected={isSourceConnected}
-            isNodeHovered={isHovered}
-            nodeType="skill"
-          />
-
-          <div className="flex flex-col gap-3">
-            <NodeHeader
-              query={localQuery}
-              selectedSkillName={selectedSkill?.name}
-              setSelectedSkill={setSelectedSkill}
+          <div className={`w-full h-full ${getNodeCommonStyles({ selected, isHovered })}`}>
+            <CustomHandle
+              type="target"
+              position={Position.Left}
+              isConnected={isTargetConnected}
+              isNodeHovered={isHovered}
+              nodeType="skill"
+            />
+            <CustomHandle
+              type="source"
+              position={Position.Right}
+              isConnected={isSourceConnected}
+              isNodeHovered={isHovered}
+              nodeType="skill"
             />
 
-            <ContextManager className="px-0.5" contextItems={contextItems} setContextItems={setContextItems} />
-            <ChatInput
-              query={localQuery}
-              setQuery={setQuery}
-              selectedSkillName={selectedSkill?.name}
-              inputClassName="px-1 py-0"
-              handleSendMessage={handleSendMessage}
-              handleSelectSkill={(skill) => {
-                setQuery('');
-                setSelectedSkill(skill);
-              }}
-            />
+            <div className="flex flex-col gap-3 h-full">
+              <NodeHeader
+                query={localQuery}
+                selectedSkillName={selectedSkill?.name}
+                setSelectedSkill={setSelectedSkill}
+              />
 
-            <ChatActions
-              query={localQuery}
-              model={modelInfo}
-              setModel={setModelInfo}
-              handleSendMessage={handleSendMessage}
-              handleAbort={abortAction}
-            />
+              <ContextManager className="px-0.5" contextItems={contextItems} setContextItems={setContextItems} />
+
+              <ChatInput
+                query={localQuery}
+                setQuery={(value) => {
+                  setQuery(value);
+                  updateSize({ height: 'auto' });
+                }}
+                selectedSkillName={selectedSkill?.name}
+                inputClassName="px-1 py-0"
+                maxRows={100}
+                handleSendMessage={handleSendMessage}
+                handleSelectSkill={(skill) => {
+                  setQuery('');
+                  setSelectedSkill(skill);
+                }}
+              />
+
+              <ChatActions
+                query={localQuery}
+                model={modelInfo}
+                setModel={setModelInfo}
+                handleSendMessage={handleSendMessage}
+                handleAbort={abortAction}
+              />
+            </div>
           </div>
         </div>
+
+        <NodeResizerComponent
+          moveableRef={moveableRef}
+          targetRef={targetRef}
+          isSelected={selected}
+          isHovered={isHovered}
+          isPreview={false}
+          onResize={handleResize}
+        />
       </div>
     );
   },
