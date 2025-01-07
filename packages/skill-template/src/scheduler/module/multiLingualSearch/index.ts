@@ -85,32 +85,39 @@ export const callMultiLingualWebSearch = async (
     // Step 1: Rewrite query (now optional)
     if (enableQueryRewrite) {
       timeTracker.startStep('rewriteQuery');
-      const rewriteResult = await extractStructuredData(
-        model,
-        rewriteQueryOutputSchema,
-        buildRewriteQuerySystemPrompt() + '\n\n' + buildRewriteQueryUserPrompt({ query }),
-        config,
-        3,
-        ctx?.config?.configurable?.modelInfo,
-      );
+      try {
+        const rewriteResult = await extractStructuredData(
+          model,
+          rewriteQueryOutputSchema,
+          buildRewriteQuerySystemPrompt() + '\n\n' + buildRewriteQueryUserPrompt({ query }),
+          config,
+          3,
+          ctx?.config?.configurable?.modelInfo,
+        );
 
-      queries = rewriteResult?.queries?.rewrittenQueries || [query];
-      const rewriteDuration = timeTracker.endStep('rewriteQuery');
-      engine.logger.log(`Rewrite queries completed in ${rewriteDuration}ms`);
-      ctxThis.emitEvent(
-        {
-          log: {
-            key: 'rewriteQuery',
-            descriptionArgs: {
-              duration: rewriteDuration,
-              rewrittenQueries: rewriteResult.queries.rewrittenQueries.join(', '),
+        queries = rewriteResult?.queries?.rewrittenQueries || [query];
+        const rewriteDuration = timeTracker.endStep('rewriteQuery');
+        engine.logger.log(`Rewrite queries completed in ${rewriteDuration}ms`);
+        ctxThis.emitEvent(
+          {
+            log: {
+              key: 'rewriteQuery',
+              descriptionArgs: {
+                duration: rewriteDuration,
+                rewrittenQueries: rewriteResult.queries.rewrittenQueries.join(', '),
+              },
             },
           },
-        },
-        config,
-      );
+          config,
+        );
 
-      engine.logger.log(`Search analysis: ${JSON.stringify(rewriteResult.analysis)}`);
+        engine.logger.log(`Search analysis: ${JSON.stringify(rewriteResult.analysis)}`);
+      } catch (error) {
+        engine.logger.error(`Error in query rewrite: ${error.stack}`);
+        // Fallback to original query
+        queries = [query];
+        timeTracker.endStep('rewriteQuery');
+      }
     }
 
     // Determine display locale
@@ -124,7 +131,6 @@ export const callMultiLingualWebSearch = async (
     // Step 2: Translate query (if enabled)
     const queryMap: Record<string, string[]> = {};
 
-    // TODO: try/catch 处理报错，如果报错，则不进行翻译，走和 else 一样的流程
     if (enableTranslateQuery) {
       timeTracker.startStep('translateQuery');
       try {
@@ -133,19 +139,25 @@ export const callMultiLingualWebSearch = async (
 
         // 为每个目标语言进行翻译
         for (const targetLocale of searchLocaleList) {
-          // 使用标准化的 locale 进行比较
-          if (normalizeLocale(targetLocale) === normalizeLocale(resultDisplayLocale)) {
-            queryMap[targetLocale] = queries;
-            continue;
-          }
+          try {
+            // 使用标准化的 locale 进行比较
+            if (normalizeLocale(targetLocale) === normalizeLocale(resultDisplayLocale)) {
+              queryMap[targetLocale] = queries;
+              continue;
+            }
 
-          // 批量翻译查询，使用标准化的 locale 进行翻译
-          const translatedQueries = await batchTranslateText(
-            queries,
-            normalizeLocale(targetLocale),
-            normalizeLocale(resultDisplayLocale),
-          );
-          queryMap[targetLocale] = translatedQueries;
+            // 批量翻译查询，使用标准化的 locale 进行翻译
+            const translatedQueries = await batchTranslateText(
+              queries,
+              normalizeLocale(targetLocale),
+              normalizeLocale(resultDisplayLocale),
+            );
+            queryMap[targetLocale] = translatedQueries;
+          } catch (localeError) {
+            engine.logger.error(`Error translating for locale ${targetLocale}: ${localeError.stack}`);
+            // Fallback to original queries for this locale
+            queryMap[targetLocale] = queries;
+          }
         }
 
         const translateQueryDuration = timeTracker.endStep('translateQuery');
@@ -165,10 +177,11 @@ export const callMultiLingualWebSearch = async (
         );
       } catch (error) {
         engine.logger.error(`Error in query translation: ${error.stack}`);
-        // 翻译失败时，使用原始查询
+        // Fallback to original queries for all locales
         for (const locale of searchLocaleList) {
           queryMap[locale] = queries;
         }
+        timeTracker.endStep('translateQuery');
       }
     } else {
       // If translation is disabled, use original queries for all locales
@@ -179,76 +192,89 @@ export const callMultiLingualWebSearch = async (
 
     // Step 3: Perform concurrent web search
     timeTracker.startStep('webSearch');
-    const allResults = await performConcurrentWebSearch({
-      queryMap,
-      searchLimit,
-      concurrencyLimit: webSearchConcurrencyLimit,
-      user: config.configurable.user,
-      engine: engine,
-      enableTranslateQuery,
-    });
-    const webSearchDuration = timeTracker.endStep('webSearch');
-    engine.logger.log(`Web search completed in ${webSearchDuration}ms`);
-
-    // Make merging results optional
-    finalResults = mergeSearchResults(allResults);
-
-    ctxThis.emitEvent(
-      {
-        log: {
-          key: 'webSearchCompleted',
-          descriptionArgs: {
-            duration: webSearchDuration,
-            totalResults: finalResults?.length,
-          },
-        },
-      },
-      config,
-    );
-
-    if (enableTranslateResult) {
-      // Step 4: Translate merged results to display locale
-      timeTracker.startStep('translateResults');
-      const translatedResults = await translateResults({
-        sources: finalResults,
-        targetLocale: displayLocale,
-        model,
-        config,
-        concurrencyLimit: translateConcurrencyLimit,
-        batchSize,
+    let allResults = [];
+    try {
+      allResults = await performConcurrentWebSearch({
+        queryMap,
+        searchLimit,
+        concurrencyLimit: webSearchConcurrencyLimit,
+        user: config.configurable.user,
+        engine: engine,
+        enableTranslateQuery,
       });
-      const translateResultsDuration = timeTracker.endStep('translateResults');
-      engine.logger.log(`Translate results completed in ${translateResultsDuration}ms`);
+      const webSearchDuration = timeTracker.endStep('webSearch');
+      engine.logger.log(`Web search completed in ${webSearchDuration}ms`);
+
       ctxThis.emitEvent(
         {
           log: {
-            key: 'translateResults',
+            key: 'webSearchCompleted',
             descriptionArgs: {
-              duration: translateResultsDuration,
-              totalResults: finalResults?.length,
+              duration: webSearchDuration,
+              totalResults: allResults?.length,
             },
           },
         },
         config,
       );
-
-      // Map translated results back to Source format
-      // TODO: 这里需要记录 original locale 和 translated locale
-      const translatedSources = translatedResults.translations.map((translation, index) => ({
-        ...finalResults[index],
-        title: translation.title,
-        pageContent: translation.snippet,
-        url: translation.originalUrl,
-        metadata: {
-          originalLocale: finalResults[index]?.metadata?.originalLocale,
-          translatedDisplayLocale: displayLocale,
-        },
-      }));
-
-      finalResults = translatedSources;
+    } catch (error) {
+      engine.logger.error(`Error in web search: ${error.stack}`);
+      timeTracker.endStep('webSearch');
+      // Continue with empty results if web search fails
+      allResults = [];
     }
 
-    if (enableRerank) {
+    // Make merging results optional
+    finalResults = mergeSearchResults(allResults);
+
+    if (enableTranslateResult && finalResults.length > 0) {
+      // Step 4: Translate merged results to display locale
+      timeTracker.startStep('translateResults');
+      try {
+        const translatedResults = await translateResults({
+          sources: finalResults,
+          targetLocale: displayLocale,
+          model,
+          config,
+          concurrencyLimit: translateConcurrencyLimit,
+          batchSize,
+        });
+        const translateResultsDuration = timeTracker.endStep('translateResults');
+        engine.logger.log(`Translate results completed in ${translateResultsDuration}ms`);
+        ctxThis.emitEvent(
+          {
+            log: {
+              key: 'translateResults',
+              descriptionArgs: {
+                duration: translateResultsDuration,
+                totalResults: finalResults?.length,
+              },
+            },
+          },
+          config,
+        );
+
+        // Map translated results back to Source format
+        const translatedSources = translatedResults.translations.map((translation, index) => ({
+          ...finalResults[index],
+          title: translation.title || finalResults[index].title,
+          pageContent: translation.snippet || finalResults[index].pageContent,
+          url: translation.originalUrl || finalResults[index].url,
+          metadata: {
+            originalLocale: finalResults[index]?.metadata?.originalLocale,
+            translatedDisplayLocale: displayLocale,
+          },
+        }));
+
+        finalResults = translatedSources;
+      } catch (error) {
+        engine.logger.error(`Error in translating results: ${error.stack}`);
+        timeTracker.endStep('translateResults');
+        // Keep original results if translation fails
+      }
+    }
+
+    if (enableRerank && finalResults.length > 0) {
       // Step 5: Rerank results
       timeTracker.startStep('rerank');
       try {
@@ -262,36 +288,43 @@ export const callMultiLingualWebSearch = async (
         });
 
         // Convert back to Source format
-        finalResults = searchResultsToSources(rerankResponse.data);
+        if (rerankResponse?.data) {
+          finalResults = searchResultsToSources(rerankResponse.data);
+        }
 
-        engine.logger.log(`Reranked results count: ${finalResults.length}`);
-      } catch (error) {
-        engine.logger.error(`Error in reranking: ${error.stack}`);
-        // Fallback to translated sources without reranking
-      }
-      const rerankDuration = timeTracker.endStep('rerank');
-      engine.logger.log(`Rerank completed in ${rerankDuration}ms`);
-      ctxThis.emitEvent(
-        {
-          log: {
-            key: 'rerankResults',
-            descriptionArgs: {
-              duration: rerankDuration,
-              totalResults: finalResults.length,
+        const rerankDuration = timeTracker.endStep('rerank');
+        engine.logger.log(`Rerank completed in ${rerankDuration}ms`);
+        ctxThis.emitEvent(
+          {
+            log: {
+              key: 'rerankResults',
+              descriptionArgs: {
+                duration: rerankDuration,
+                totalResults: finalResults.length,
+              },
             },
           },
-        },
-        config,
-      );
+          config,
+        );
+      } catch (error) {
+        engine.logger.error(`Error in reranking: ${error.stack}`);
+        timeTracker.endStep('rerank');
+        // Keep original results order if reranking fails
+      }
     }
 
     const stepSummary = timeTracker.getSummary();
     const totalDuration = stepSummary.totalDuration;
     engine.logger.log(`Total duration: ${totalDuration}`);
-    engine.logger.log(`Reranked results count: before: ${finalResults.length}`);
+    engine.logger.log(`Results count: ${finalResults.length}`);
 
     // Deduplicate sources by title
-    finalResults = deduplicateSourcesByTitle(finalResults);
+    try {
+      finalResults = deduplicateSourcesByTitle(finalResults);
+    } catch (error) {
+      engine.logger.error(`Error in deduplicating results: ${error.stack}`);
+      // Keep original results if deduplication fails
+    }
 
     ctxThis.emitEvent({ structuredData: { multiLingualSearchResult: finalResults } }, config);
 
@@ -301,6 +334,9 @@ export const callMultiLingualWebSearch = async (
     };
   } catch (error) {
     engine.logger.error(`Error in multilingual search: ${error.stack}`);
-    throw error;
+    // Return empty results in case of catastrophic failure
+    return {
+      sources: [],
+    };
   }
 };
