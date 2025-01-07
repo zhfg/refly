@@ -225,8 +225,9 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
               contentPreview: item?.contentPreview || contentPreview,
             },
           },
-          [],
+          undefined,
           false,
+          true,
         );
       });
     },

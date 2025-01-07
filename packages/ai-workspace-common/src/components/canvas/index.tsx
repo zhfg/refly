@@ -80,6 +80,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { onNodesChange } = useNodeOperations();
   const { setSelectedNode } = useNodeSelection();
 
+  console.log('nodes', nodes);
+
   const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
 
@@ -516,6 +518,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             // onlyRenderVisibleElements={true}
             elevateNodesOnSelect={false}
             onSelectionContextMenu={onSelectionContextMenu}
+            deleteKeyCode={['Backspace', 'Delete']}
+            multiSelectionKeyCode={['Shift', 'Meta']}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">

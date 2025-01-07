@@ -7,20 +7,25 @@ import { useTranslation } from 'react-i18next';
 
 export const useCreateMemo = () => {
   const { t } = useTranslation();
-  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
+  const { addNode } = useAddNode();
 
   const createMemo = (options: { content: string; position?: XYPosition }) => {
     const memoId = genMemoID();
 
-    addNode({
-      type: 'memo',
-      data: {
-        title: t('knowledgeBase.context.nodeTypes.memo'),
-        contentPreview: options.content,
-        entityId: memoId,
+    addNode(
+      {
+        type: 'memo',
+        data: {
+          title: t('knowledgeBase.context.nodeTypes.memo'),
+          contentPreview: options.content,
+          entityId: memoId,
+        },
+        position: options.position,
       },
-      position: options.position,
-    });
+      undefined,
+      false,
+      true,
+    );
   };
 
   return { createMemo };

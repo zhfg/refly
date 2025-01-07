@@ -128,6 +128,8 @@ export const DocumentNode = memo(
           },
         },
         [{ type: 'document', entityId: data.entityId }],
+        false,
+        true,
       );
     }, [id, data.entityId, addNode]);
 

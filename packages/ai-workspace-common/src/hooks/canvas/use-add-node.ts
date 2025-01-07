@@ -14,6 +14,7 @@ import { useEdgeStyles } from '../../components/canvas/constants';
 import { CanvasNodeFilter } from './use-node-selection';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
+import { useNodePosition } from './use-node-position';
 
 const deduplicateNodes = (nodes: any[]) => {
   const uniqueNodesMap = new Map();
@@ -27,11 +28,14 @@ const deduplicateEdges = (edges: any[]) => {
   return Array.from(uniqueEdgesMap.values());
 };
 
+const padding = 200;
+
 export const useAddNode = () => {
   const { t } = useTranslation();
   const edgeStyles = useEdgeStyles();
   const { setCenter, getNode } = useReactFlow();
   const { canvasId } = useCanvasContext();
+  const { calculatePosition, layoutBranchAndUpdatePositions } = useNodePosition();
 
   const { setNodes, setEdges, addNodePreview } = useCanvasStoreShallow((state) => ({
     setNodes: state.setNodes,
@@ -39,20 +43,24 @@ export const useAddNode = () => {
     addNodePreview: state.addNodePreview,
   }));
 
+  const reactFlowInstance = useReactFlow();
+
   const setNodeCenter = useCallback(
     (nodeId: string) => {
-      // Center view on new node after it's rendered
+      const currentZoom = reactFlowInstance.getZoom();
+      const zoomAdjustedPadding = padding;
+
       requestAnimationFrame(() => {
         const renderedNode = getNode(nodeId);
         if (renderedNode) {
-          setCenter(renderedNode.position.x, renderedNode.position.y, {
+          setCenter(renderedNode.position.x + zoomAdjustedPadding, renderedNode.position.y + zoomAdjustedPadding, {
             duration: 300,
-            zoom: 1,
+            zoom: currentZoom,
           });
         }
       });
     },
-    [setCenter],
+    [setCenter, reactFlowInstance],
   );
 
   const setSelectedNode = useCallback(
@@ -73,6 +81,7 @@ export const useAddNode = () => {
       node: { type: CanvasNodeType; data: CanvasNodeData<any>; position?: XYPosition },
       connectTo?: CanvasNodeFilter[],
       shouldPreview: boolean = true,
+      needSetCenter: boolean = true,
     ) => {
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
@@ -82,8 +91,6 @@ export const useAddNode = () => {
         console.warn('Invalid node data provided');
         return;
       }
-
-      let needSetCenter = true;
 
       // Check for existing node
       const existingNode = nodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId);
@@ -101,44 +108,14 @@ export const useAddNode = () => {
         ?.map((filter) => nodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId))
         .filter(Boolean);
 
-      // Calculate new node position
-      let newPosition: XYPosition;
-
-      if (sourceNodes?.length) {
-        // Get all existing target nodes that are connected to any of the source nodes
-        const existingTargetNodeIds = new Set(
-          edges.filter((edge) => sourceNodes.some((source) => source.id === edge.source)).map((edge) => edge.target),
-        );
-
-        const existingTargetNodes = nodes.filter((n) => existingTargetNodeIds.has(n.id));
-
-        if (existingTargetNodes.length) {
-          // Position based on existing target nodes
-          const minTargetX = Math.min(...existingTargetNodes.map((n) => n.position.x));
-          const maxTargetY = Math.max(...existingTargetNodes.map((n) => n.position.y + (n.measured?.height ?? 100)));
-
-          newPosition = {
-            x: minTargetX,
-            y: maxTargetY + 40,
-          };
-        } else {
-          // First connection - position based on source nodes
-          const avgSourceX = sourceNodes.reduce((sum, n) => sum + n.position.x, 0) / sourceNodes.length;
-          const maxSourceY = Math.max(...sourceNodes.map((n) => n.position.y + (n.measured?.height ?? 100)));
-
-          newPosition = {
-            x: avgSourceX + 400, // Offset to the right of source nodes
-            y: maxSourceY + 40,
-          };
-        }
-      } else {
-        // Default position if no source nodes
-        newPosition = node.position ?? {
-          x: Math.max(...nodes.map((n) => n.position.x), 0) + 400,
-          y: Math.max(...nodes.map((n) => n.position.y), 0),
-        };
-        needSetCenter = true;
-      }
+      // Calculate new node position using the utility function
+      const newPosition = calculatePosition({
+        nodes,
+        sourceNodes,
+        connectTo,
+        defaultPosition: node.position,
+        edges,
+      });
 
       const enrichedData = {
         createdAt: new Date().toISOString(),
@@ -155,27 +132,44 @@ export const useAddNode = () => {
         position: newPosition,
         selected: true,
       });
+
+      // Create updated nodes array with the new node
       const updatedNodes = deduplicateNodes([...nodes.map((n) => ({ ...n, selected: false })), newNode]);
 
-      setNodes(canvasId, updatedNodes);
+      // Create new edges if connecting to source nodes
+      let updatedEdges = edges;
+      if (connectTo?.length > 0 && sourceNodes?.length > 0) {
+        const newEdges = sourceNodes.map((sourceNode) => ({
+          id: `edge-${genUniqueId()}`,
+          source: sourceNode.id,
+          target: newNode.id,
+          style: edgeStyles.default,
+          type: 'default',
+        }));
 
-      if (connectTo?.length > 0) {
-        const newEdges =
-          sourceNodes?.map((sourceNode) => ({
-            id: `edge-${genUniqueId()}`,
-            source: sourceNode.id,
-            target: newNode.id,
-            style: edgeStyles.default,
-            type: 'default',
-          })) ?? [];
-
-        if (newEdges.length > 0) {
-          const updatedEdges = deduplicateEdges([...edges, ...newEdges]);
-          setEdges(canvasId, updatedEdges);
-        }
+        updatedEdges = deduplicateEdges([...edges, ...newEdges]);
       }
 
-      if (needSetCenter) {
+      // Update nodes and edges
+      setNodes(canvasId, updatedNodes);
+      setEdges(canvasId, updatedEdges);
+
+      // Apply branch layout if we're connecting to existing nodes
+      if (sourceNodes?.length > 0) {
+        // Use setTimeout to ensure the new node and edges are added before layout
+        setTimeout(() => {
+          const { autoLayout } = useCanvasStore.getState();
+          if (!autoLayout) return;
+
+          layoutBranchAndUpdatePositions(
+            sourceNodes,
+            updatedNodes,
+            updatedEdges,
+            {},
+            { needSetCenter: needSetCenter, targetNodeId: newNode.id },
+          );
+        }, 0);
+      } else if (needSetCenter) {
         setNodeCenter(newNode.id);
       }
 
@@ -184,7 +178,18 @@ export const useAddNode = () => {
         locateToNodePreviewEmitter.emit('locateToNodePreview', { canvasId, id: newNode.id });
       }
     },
-    [canvasId, setNodes, setEdges, edgeStyles, setSelectedNode, setNodeCenter, addNodePreview, t],
+    [
+      canvasId,
+      setNodes,
+      setEdges,
+      edgeStyles,
+      setSelectedNode,
+      setNodeCenter,
+      addNodePreview,
+      t,
+      calculatePosition,
+      layoutBranchAndUpdatePositions,
+    ],
   );
 
   return { addNode };
