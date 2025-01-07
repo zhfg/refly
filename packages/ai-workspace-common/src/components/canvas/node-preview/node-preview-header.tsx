@@ -13,11 +13,13 @@ import {
   Globe,
   FilePlus,
   Trash2,
+  Target,
 } from 'lucide-react';
 import { NODE_COLORS } from '../nodes/shared/colors';
 import { CanvasNode } from '../nodes/shared/types';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
+import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
 import {
   IconDocument,
   IconPin,
@@ -117,8 +119,20 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
     }
   }, [isPinned, pinNode, unpinNode, node]);
 
+  const { setNodeCenter } = useNodePosition();
+
   // Define dropdown menu items
   const menuItems: MenuProps['items'] = [
+    {
+      key: 'centerNode',
+      label: (
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <Target className="w-4 h-4 flex-shrink-0" />
+          {t('canvas.nodeActions.centerNode')}
+        </div>
+      ),
+      onClick: () => setNodeCenter(node.id, true),
+    },
     {
       key: 'addToContext',
       label: (

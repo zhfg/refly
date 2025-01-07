@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { CanvasNode } from '../../components/canvas/nodes';
-import { addPinnedNodeEmitter } from '../../events/addPinnedNode';
+import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
 
 interface UseNodePreviewControlOptions {
   canvasId: string;
@@ -58,7 +58,6 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
   const pinNode = useCallback(
     (node: CanvasNode) => {
       setNodePreview(canvasId, { ...node, isPinned: true });
-      addPinnedNodeEmitter.emit('addPinnedNode', { id: node.id, canvasId });
     },
     [canvasId, setNodePreview],
   );
@@ -103,6 +102,7 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
         return false;
       }
       addNodePreview(canvasId, node);
+      locateToNodePreviewEmitter.emit('locateToNodePreview', { canvasId, id: node.id });
       return true;
     },
     [canvasId, clickToPreview, addNodePreview],

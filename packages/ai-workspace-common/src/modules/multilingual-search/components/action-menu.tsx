@@ -30,7 +30,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
   const { updateSourceListDrawer } = useKnowledgeBaseStore((state) => ({
     updateSourceListDrawer: state.updateSourceListDrawer,
   }));
-  const { addNode } = useAddNode(useCanvasStore.getState().currentCanvasId);
+  const { addNode } = useAddNode();
 
   const { selectedItems, results, setSelectedItems } = useMultilingualSearchStore();
   const { setImportResourceModalVisible, insertNodePosition } = useImportResourceStoreShallow((state) => ({

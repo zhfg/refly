@@ -34,6 +34,7 @@ export interface CanvasState {
   showEdges: boolean;
   clickToPreview: boolean;
   nodeSizeMode: 'compact' | 'adaptive';
+  autoLayout: boolean;
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -54,6 +55,7 @@ export interface CanvasState {
   setShowEdges: (show: boolean) => void;
   setClickToPreview: (enabled: boolean) => void;
   setNodeSizeMode: (mode: 'compact' | 'adaptive') => void;
+  setAutoLayout: (enabled: boolean) => void;
 
   clearState: () => void;
 }
@@ -74,13 +76,14 @@ const defaultCanvasState = () => ({
   config: {},
   currentCanvasId: null,
   showPreview: true,
-  showMaxRatio: false,
+  showMaxRatio: true,
   showLaunchpad: true,
   interactionMode: 'touchpad' as const,
   operatingNodeId: null,
   showEdges: false,
   clickToPreview: true,
   nodeSizeMode: 'adaptive' as const,
+  autoLayout: true,
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -212,6 +215,10 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.nodeSizeMode = mode;
         }),
+      setAutoLayout: (enabled) =>
+        set((state) => {
+          state.autoLayout = enabled;
+        }),
       clearState: () => set(defaultCanvasState()),
     })),
     {
@@ -224,6 +231,7 @@ export const useCanvasStore = create<CanvasState>()(
         showLaunchpad: state.showLaunchpad,
         clickToPreview: state.clickToPreview,
         nodeSizeMode: state.nodeSizeMode,
+        autoLayout: state.autoLayout,
       }),
     },
   ),
