@@ -52,7 +52,7 @@ import { ContentPreview } from './shared/content-preview';
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
 const POLLING_INTERVAL = 3000;
-const POLLING_COOLDOWN_TIME = 10000;
+const POLLING_COOLDOWN_TIME = 15000;
 
 const NodeHeader = memo(({ query, skillName, skill }: { query: string; skillName: string; skill: any }) => {
   return (
@@ -158,9 +158,6 @@ export const SkillResponseNode = memo(
     const language = i18n.languages?.[0];
 
     const { canvasId } = useCanvasContext();
-    const { addContextItem } = useContextPanelStoreShallow((state) => ({
-      addContextItem: state.addContextItem,
-    }));
 
     const { title, contentPreview: content, metadata, createdAt, entityId } = data ?? {};
 
@@ -210,7 +207,7 @@ export const SkillResponseNode = memo(
         clearTimeout(timer);
         setShouldPoll(false);
       };
-    }, [data]);
+    }, [content, status, artifacts?.length, sources.length]);
 
     const statusShouldPoll = !status || status === 'executing' || status === 'waiting';
 
