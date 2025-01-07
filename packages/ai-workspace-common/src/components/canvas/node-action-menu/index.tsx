@@ -1,4 +1,4 @@
-import { Button, Divider } from 'antd';
+import { Button, Divider, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FC, useCallback, useMemo, useEffect, useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
@@ -10,6 +10,7 @@ import {
   IconPreview,
   IconExpand,
   IconShrink,
+  IconCopy,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
@@ -23,6 +24,7 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 import { useNodeCluster } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-cluster';
+import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 
 interface MenuItem {
   key: string;
@@ -162,6 +164,14 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     onClose?.();
   }, [nodeId, nodeType, layoutNodeCluster, onClose]);
 
+  const handleCopy = useCallback(() => {
+    const content = nodeData?.contentPreview;
+
+    copyToClipboard(content || '');
+    message.success(t('copilot.message.copySuccess'));
+    onClose?.();
+  }, [nodeData?.contentPreview, onClose]);
+
   const getMenuItems = (activeDocumentId: string): MenuItem[] => {
     if (isMultiSelection) {
       return [
@@ -202,17 +212,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
         type: 'button' as const,
         primary: true,
       },
-      nodeType === 'skillResponse'
-        ? {
-            key: 'cloneAskAI',
-            icon: GrClone,
-            loading: cloneAskAIRunning,
-            label: t('canvas.nodeActions.cloneAskAI'),
-            onClick: handleCloneAskAI,
-            type: 'button' as const,
-          }
-        : null,
-      { key: 'divider-1', type: 'divider' } as MenuItem,
       ...(nodeType === 'skillResponse'
         ? [
             {
@@ -311,14 +310,27 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
       ].filter(Boolean),
     };
 
-    const deleteItem: MenuItem = {
-      key: 'delete',
-      icon: IconDelete,
-      label: t('canvas.nodeActions.delete'),
-      onClick: handleDelete,
-      danger: true,
-      type: 'button' as const,
-    };
+    const footerItems: MenuItem[] = [
+      ...(nodeType !== 'skill' && nodeType !== 'group'
+        ? [
+            {
+              key: 'copy',
+              icon: IconCopy,
+              label: t('canvas.nodeActions.copy'),
+              onClick: handleCopy,
+              type: 'button' as const,
+            },
+          ]
+        : []),
+      {
+        key: 'delete',
+        icon: IconDelete,
+        label: t('canvas.nodeActions.delete'),
+        onClick: handleDelete,
+        danger: true,
+        type: 'button' as const,
+      },
+    ];
 
     const clusterItems: MenuItem[] = [
       { key: 'divider-cluster', type: 'divider' } as MenuItem,
@@ -351,8 +363,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
       ...(nodeTypeItems[nodeType] || []),
       ...(nodeType !== 'memo' && nodeType !== 'skill' ? clusterItems : []),
       { key: 'divider-2', type: 'divider' } as MenuItem,
-      deleteItem,
-    ];
+      ...footerItems,
+    ].filter(Boolean);
   };
 
   const menuItems = useMemo(
@@ -376,14 +388,15 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-2 w-[200px] border border-[rgba(0,0,0,0.06)]">
-      {menuItems.map((item) => {
-        if (item.type === 'divider') {
-          return <Divider key={item.key} className="my-1 h-[1px] bg-gray-100" />;
+      {menuItems.map((item, index) => {
+        console.log('node action menu item', item);
+        if (item?.type === 'divider') {
+          return <Divider key={index} className="my-1 h-[1px] bg-gray-100" />;
         }
 
         return (
           <Button
-            key={item.key}
+            key={index}
             className={`
               w-full
               h-8

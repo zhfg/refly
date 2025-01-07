@@ -67,10 +67,11 @@ export const SelectionContext: React.FC<SelectionContextProps> = ({ containerCla
           padding: '2px 4px',
         }}
       >
-        {buttons.map((button) => (
+        {buttons.map((button, index) => (
           <Button
             type="text"
             size="small"
+            key={index}
             className={button.className}
             icon={button.icon}
             onMouseDown={(e) => {
