@@ -3,543 +3,18 @@ import { CanvasNodeFilter } from './use-node-selection';
 import { useCallback } from 'react';
 import Dagre from '@dagrejs/dagre';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
-
-interface NodeData extends Record<string, unknown> {
-  connections?: string[];
-}
-
-interface CalculateNodePositionParams {
-  nodes: Node<NodeData>[];
-  sourceNodes?: Node<NodeData>[];
-  connectTo?: CanvasNodeFilter[];
-  defaultPosition?: XYPosition;
-  edges?: any[];
-}
-
-interface LayoutBranchOptions {
-  fromRoot?: boolean; // 是否从根节点开始布局
-}
-
-const SPACING = {
-  X: 400, // Keep original X spacing
-  Y: 30, // Fixed vertical spacing between nodes
-  INITIAL_X: 100,
-  INITIAL_Y: 300,
-};
-
-// Helper function to get root nodes (nodes with no incoming edges)
-const getRootNodes = (nodes: Node[], edges: any[]): Node[] => {
-  return nodes.filter((node) => !edges.some((edge) => edge.target === node.id));
-};
-
-// Helper function to get all nodes in a branch starting from specific nodes
-const getBranchNodes = (
-  startNodeIds: string[],
-  nodes: Node[],
-  edges: any[],
-  visited: Set<string> = new Set(),
-): Node[] => {
-  const branchNodes: Node[] = [];
-  const queue = [...startNodeIds];
-
-  while (queue.length > 0) {
-    const currentId = queue.shift()!;
-    if (visited.has(currentId)) continue;
-    visited.add(currentId);
-
-    const node = nodes.find((n) => n.id === currentId);
-    if (node) {
-      branchNodes.push(node);
-
-      // Only get outgoing connections to maintain hierarchy
-      const outgoingIds = edges.filter((e) => e.source === currentId).map((e) => e.target);
-
-      queue.push(...outgoingIds);
-    }
-  }
-
-  return branchNodes;
-};
-
-// Get nodes at specific level
-const getNodesAtLevel = (nodes: Node[], edges: any[], level: number, rootNodes: Node[]): Node[] => {
-  const result: Node[] = [];
-  const visited = new Set<string>();
-  const queue: Array<{ node: Node; level: number }> = rootNodes.map((node) => ({ node, level: 0 }));
-
-  while (queue.length > 0) {
-    const { node, level: currentLevel } = queue.shift()!;
-
-    if (visited.has(node.id)) continue;
-    visited.add(node.id);
-
-    if (currentLevel === level) {
-      result.push(node);
-      continue;
-    }
-
-    // Add next level nodes to queue
-    const nextNodes = edges
-      .filter((edge) => edge.source === node.id)
-      .map((edge) => nodes.find((n) => n.id === edge.target))
-      .filter((n): n is Node => n !== undefined)
-      .map((node) => ({ node, level: currentLevel + 1 }));
-
-    queue.push(...nextNodes);
-  }
-
-  return result;
-};
-
-// Get the level of a node from root
-const getNodeLevel = (nodeId: string, nodes: Node[], edges: any[], rootNodes: Node[]): number => {
-  const visited = new Set<string>();
-  const queue: Array<{ id: string; level: number }> = rootNodes.map((node) => ({ id: node.id, level: 0 }));
-
-  while (queue.length > 0) {
-    const { id, level } = queue.shift()!;
-
-    if (id === nodeId) return level;
-    if (visited.has(id)) continue;
-    visited.add(id);
-
-    const nextIds = edges.filter((edge) => edge.source === id).map((edge) => ({ id: edge.target, level: level + 1 }));
-
-    queue.push(...nextIds);
-  }
-
-  return -1;
-};
-
-// Helper function to get node height
-const getNodeHeight = (node: Node): number => {
-  return node.measured?.height ?? 320;
-};
-
-// Add helper function to get node width
-const getNodeWidth = (node: Node): number => {
-  return node.measured?.width ?? 288;
-};
-
-// Layout a branch using Dagre while preserving root positions
-const layoutBranch = (
-  branchNodes: Node[],
-  edges: any[],
-  rootNodes: Node[],
-  options: LayoutBranchOptions = {},
-): Node[] => {
-  const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
-
-  // Configure the layout with consistent spacing
-  g.setGraph({
-    rankdir: 'LR',
-    nodesep: SPACING.Y,
-    // Use consistent spacing as calculatePosition
-    ranksep: SPACING.X,
-    marginx: 50,
-    marginy: 50,
-  });
-
-  // Add all nodes to the graph with their actual dimensions
-  branchNodes.forEach((node) => {
-    const nodeWidth = getNodeWidth(node);
-    const nodeHeight = getNodeHeight(node);
-    g.setNode(node.id, {
-      ...node,
-      width: nodeWidth,
-      height: nodeHeight,
-      // Store original dimensions for later use
-      originalWidth: nodeWidth,
-      originalHeight: nodeHeight,
-    });
-  });
-
-  // Add edges
-  edges.forEach((edge) => {
-    if (branchNodes.some((n) => n.id === edge.source) && branchNodes.some((n) => n.id === edge.target)) {
-      g.setEdge(edge.source, edge.target);
-    }
-  });
-
-  // Get the maximum level in the branch
-  const maxLevel = Math.max(...branchNodes.map((node) => getNodeLevel(node.id, branchNodes, edges, rootNodes)));
-
-  // Fix positions based on mode
-  branchNodes.forEach((node) => {
-    const level = getNodeLevel(node.id, branchNodes, edges, rootNodes);
-    const isRoot = rootNodes.some((root) => root.id === node.id);
-    const shouldFixPosition = options.fromRoot ? isRoot : level < maxLevel;
-
-    if (shouldFixPosition) {
-      const nodeWidth = getNodeWidth(node);
-      g.setNode(node.id, {
-        ...g.node(node.id),
-        x: node.position.x + nodeWidth / 2, // Adjust x position to account for node width
-        y: node.position.y,
-        fixed: true,
-      });
-    }
-  });
-
-  // Apply layout
-  Dagre.layout(g);
-
-  // Return nodes with updated positions, adjusting for node widths
-  return branchNodes.map((node) => {
-    const nodeWithPosition = g.node(node.id);
-    const level = getNodeLevel(node.id, branchNodes, edges, rootNodes);
-    const isRoot = rootNodes.some((root) => root.id === node.id);
-    const shouldPreservePosition = options.fromRoot ? isRoot : level < maxLevel;
-
-    if (shouldPreservePosition) {
-      return node; // Keep original position for fixed nodes
-    }
-
-    // For non-fixed nodes, ensure they maintain relative Y position to their source nodes
-    const sourceEdges = edges.filter((edge) => edge.target === node.id);
-    if (sourceEdges.length > 0 && !options.fromRoot) {
-      const sourceNodes = sourceEdges
-        .map((edge) => branchNodes.find((n) => n.id === edge.source))
-        .filter((n): n is Node => n !== undefined);
-
-      if (sourceNodes.length > 0) {
-        const avgSourceY = sourceNodes.reduce((sum, n) => sum + n.position.y, 0) / sourceNodes.length;
-        const nodeWidth = getNodeWidth(node);
-        return {
-          ...node,
-          position: {
-            x: nodeWithPosition.x - nodeWidth / 2, // Adjust back from Dagre's center position
-            y: avgSourceY,
-          },
-        };
-      }
-    }
-
-    // For other nodes, adjust position based on node width
-    const nodeWidth = getNodeWidth(node);
-    return {
-      ...node,
-      position: {
-        x: nodeWithPosition.x - nodeWidth / 2, // Adjust back from Dagre's center position
-        y: nodeWithPosition.y,
-      },
-    };
-  });
-};
-
-// Get the branch cluster that a node belongs to
-const getBranchCluster = (nodeId: string, nodes: Node[], edges: any[]): Node[] => {
-  const visited = new Set<string>();
-  const cluster = new Set<string>();
-  const queue = [nodeId];
-
-  // First traverse upwards to find root
-  while (queue.length > 0) {
-    const currentId = queue.shift()!;
-    if (visited.has(currentId)) continue;
-    visited.add(currentId);
-    cluster.add(currentId);
-
-    // Add parent nodes
-    const parentIds = edges.filter((edge) => edge.target === currentId).map((edge) => edge.source);
-    queue.push(...parentIds);
-  }
-
-  // Then traverse downwards from all found nodes
-  const downQueue = Array.from(cluster);
-  visited.clear();
-
-  while (downQueue.length > 0) {
-    const currentId = downQueue.shift()!;
-    if (visited.has(currentId)) continue;
-    visited.add(currentId);
-
-    // Add child nodes
-    const childIds = edges.filter((edge) => edge.source === currentId).map((edge) => edge.target);
-    downQueue.push(...childIds);
-    childIds.forEach((id) => cluster.add(id));
-  }
-
-  return nodes.filter((node) => cluster.has(node.id));
-};
-
-// Get all connected nodes to the right of a given node
-const getRightwardNodes = (nodeId: string, nodes: Node[], edges: any[]): Node[] => {
-  const visited = new Set<string>();
-  const rightwardNodes: Node[] = [];
-  const queue = [nodeId];
-
-  while (queue.length > 0) {
-    const currentId = queue.shift()!;
-    if (visited.has(currentId)) continue;
-    visited.add(currentId);
-
-    const currentNode = nodes.find((n) => n.id === currentId);
-    if (currentNode) {
-      rightwardNodes.push(currentNode);
-
-      // Only follow outgoing edges to nodes that are to the right
-      const outgoingIds = edges
-        .filter((edge) => edge.source === currentId)
-        .map((edge) => edge.target)
-        .filter((targetId) => {
-          const targetNode = nodes.find((n) => n.id === targetId);
-          return targetNode && targetNode.position.x >= currentNode.position.x;
-        });
-
-      queue.push(...outgoingIds);
-    }
-  }
-
-  return rightwardNodes;
-};
-
-// Get the rightmost position for a new node
-const getRightmostPosition = (sourceNodes: Node[], nodes: Node[], edges: any[]): XYPosition => {
-  // Convert source nodes to absolute positions if they are in groups
-  const sourceNodesAbsolute = sourceNodes.map((node) => ({
-    ...node,
-    position: getNodeAbsolutePosition(node, nodes),
-    width: getNodeWidth(node),
-  }));
-
-  // Calculate X position considering node width
-  const rightmostX = Math.max(...sourceNodesAbsolute.map((n) => n.position.x + n.width / 2));
-  const targetX = rightmostX + SPACING.X;
-
-  // Get all nodes at the same X level
-  const nodesAtTargetLevel = nodes
-    .filter((node) => {
-      const absPos = getNodeAbsolutePosition(node, nodes);
-      return Math.abs(absPos.x - targetX) < SPACING.X / 2;
-    })
-    .map((node) => ({
-      ...node,
-      position: getNodeAbsolutePosition(node, nodes),
-    }))
-    .sort((a, b) => a.position.y - b.position.y);
-
-  // Calculate average Y of source nodes
-  const avgSourceY = sourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) / sourceNodesAbsolute.length;
-
-  // If no nodes at this level, place at average Y of source nodes
-  if (nodesAtTargetLevel.length === 0) {
-    return {
-      x: targetX,
-      y: avgSourceY,
-    };
-  }
-
-  // Calculate the best position based on existing nodes
-  const fixedSpacing = SPACING.Y;
-
-  // Calculate position for new node
-  let bestY = avgSourceY;
-  let minOverlap = Infinity;
-
-  // Try different Y positions around the average source Y
-  const range = Math.max(fixedSpacing * 3, getNodeHeight(nodesAtTargetLevel[0]));
-  const step = fixedSpacing / 4;
-
-  for (let y = avgSourceY - range; y <= avgSourceY + range; y += step) {
-    let hasOverlap = false;
-    let totalOverlap = 0;
-
-    // Check overlap with existing nodes considering node heights
-    for (const node of nodesAtTargetLevel) {
-      const nodeHeight = getNodeHeight(node);
-      const newNodeHeight = 320; // Default height for new node
-
-      // Calculate the vertical overlap between the two nodes
-      const nodeTop = node.position.y - nodeHeight / 2;
-      const nodeBottom = node.position.y + nodeHeight / 2;
-      const newNodeTop = y - newNodeHeight / 2;
-      const newNodeBottom = y + newNodeHeight / 2;
-
-      // Check if the nodes overlap vertically
-      if (!(newNodeBottom < nodeTop - fixedSpacing || newNodeTop > nodeBottom + fixedSpacing)) {
-        hasOverlap = true;
-        // Calculate the amount of overlap
-        const overlap = Math.min(Math.abs(newNodeBottom - nodeTop), Math.abs(newNodeTop - nodeBottom));
-        totalOverlap += overlap;
-      }
-    }
-
-    // If this position has less overlap, use it
-    if (totalOverlap < minOverlap) {
-      minOverlap = totalOverlap;
-      bestY = y;
-    }
-
-    // If we found a position with no overlap, use it immediately
-    if (!hasOverlap) {
-      bestY = y;
-      break;
-    }
-  }
-
-  // If we still have overlap, try to find the largest gap
-  if (minOverlap > 0) {
-    const gaps: { start: number; end: number }[] = [];
-    const firstNode = nodesAtTargetLevel[0];
-    const firstNodeHeight = getNodeHeight(firstNode);
-
-    // Add gap before first node
-    gaps.push({
-      start: avgSourceY - range,
-      end: firstNode.position.y - firstNodeHeight / 2 - fixedSpacing,
-    });
-
-    // Add gaps between nodes
-    for (let i = 0; i < nodesAtTargetLevel.length - 1; i++) {
-      const currentNode = nodesAtTargetLevel[i];
-      const nextNode = nodesAtTargetLevel[i + 1];
-      const currentNodeHeight = getNodeHeight(currentNode);
-      const nextNodeHeight = getNodeHeight(nextNode);
-
-      gaps.push({
-        start: currentNode.position.y + currentNodeHeight / 2 + fixedSpacing,
-        end: nextNode.position.y - nextNodeHeight / 2 - fixedSpacing,
-      });
-    }
-
-    // Add gap after last node
-    const lastNode = nodesAtTargetLevel[nodesAtTargetLevel.length - 1];
-    const lastNodeHeight = getNodeHeight(lastNode);
-    gaps.push({
-      start: lastNode.position.y + lastNodeHeight / 2 + fixedSpacing,
-      end: avgSourceY + range,
-    });
-
-    // Find the best gap
-    let bestGap = { start: 0, end: 0, size: 0, distanceToAvg: Infinity };
-    gaps.forEach((gap) => {
-      const size = gap.end - gap.start;
-      if (size >= fixedSpacing + 320) {
-        // Consider minimum space needed for new node
-        const gapCenter = (gap.start + gap.end) / 2;
-        const distanceToAvg = Math.abs(gapCenter - avgSourceY);
-        if (distanceToAvg < bestGap.distanceToAvg) {
-          bestGap = { ...gap, size, distanceToAvg };
-        }
-      }
-    });
-
-    if (bestGap.size > 0) {
-      bestY = (bestGap.start + bestGap.end) / 2;
-    }
-  }
-
-  return {
-    x: targetX,
-    y: bestY,
-  };
-};
-
-// Get the leftmost bottom position for new nodes
-const getLeftmostBottomPosition = (nodes: Node[], spacing = SPACING): XYPosition => {
-  if (nodes.length === 0) {
-    return {
-      x: SPACING.INITIAL_X,
-      y: SPACING.INITIAL_Y,
-    };
-  }
-
-  // Convert nodes to absolute positions
-  const nodesAbsolute = nodes.map((node) => ({
-    ...node,
-    position: getNodeAbsolutePosition(node, nodes),
-  }));
-
-  // Find the leftmost x position among all nodes
-  const leftmostX = Math.min(...nodesAbsolute.map((n) => n.position.x));
-
-  // Find all nodes at the leftmost position
-  const leftmostNodes = nodesAbsolute
-    .filter((n) => Math.abs(n.position.x - leftmostX) < spacing.X / 2)
-    .sort((a, b) => a.position.y - b.position.y);
-
-  if (leftmostNodes.length === 0) {
-    return {
-      x: leftmostX,
-      y: SPACING.INITIAL_Y,
-    };
-  }
-
-  // Find gaps between nodes
-  const gaps: { start: number; end: number }[] = [];
-  const fixedSpacing = spacing.Y;
-  const nodeHeight = 320; // Default node height
-
-  // Add gap before first node
-  const firstNode = leftmostNodes[0];
-  const firstNodeTop = firstNode.position.y - (firstNode.measured?.height ?? nodeHeight) / 2;
-  if (firstNodeTop > SPACING.INITIAL_Y + fixedSpacing + nodeHeight) {
-    gaps.push({
-      start: SPACING.INITIAL_Y,
-      end: firstNodeTop - fixedSpacing,
-    });
-  }
-
-  // Add gaps between nodes
-  for (let i = 0; i < leftmostNodes.length - 1; i++) {
-    const currentNode = leftmostNodes[i];
-    const nextNode = leftmostNodes[i + 1];
-    const currentNodeBottom = currentNode.position.y + (currentNode.measured?.height ?? nodeHeight) / 2;
-    const nextNodeTop = nextNode.position.y - (nextNode.measured?.height ?? nodeHeight) / 2;
-
-    if (nextNodeTop - currentNodeBottom >= fixedSpacing + nodeHeight) {
-      gaps.push({
-        start: currentNodeBottom + fixedSpacing,
-        end: nextNodeTop - fixedSpacing,
-      });
-    }
-  }
-
-  // Add gap after last node
-  const lastNode = leftmostNodes[leftmostNodes.length - 1];
-  const lastNodeBottom = lastNode.position.y + (lastNode.measured?.height ?? nodeHeight) / 2;
-  gaps.push({
-    start: lastNodeBottom + fixedSpacing,
-    end: lastNodeBottom + fixedSpacing + nodeHeight,
-  });
-
-  // If we found any suitable gaps, use the first one
-  if (gaps.length > 0) {
-    // Find the first gap that's big enough
-    const suitableGap = gaps.find((gap) => gap.end - gap.start >= nodeHeight);
-    if (suitableGap) {
-      return {
-        x: leftmostX,
-        y: suitableGap.start + nodeHeight / 2,
-      };
-    }
-  }
-
-  // If no suitable gaps found, place below the last node
-  return {
-    x: leftmostX,
-    y: lastNodeBottom + fixedSpacing + nodeHeight / 2,
-  };
-};
-
-// Add this helper function before calculateNodePosition
-const getNodeAbsolutePosition = (node: Node, nodes: Node[]): XYPosition => {
-  if (!node.parentId) {
-    return node.position;
-  }
-
-  const parent = nodes.find((n) => n.id === node.parentId);
-  if (!parent) {
-    return node.position;
-  }
-
-  const parentPos = getNodeAbsolutePosition(parent, nodes);
-  return {
-    x: parentPos.x + node.position.x,
-    y: parentPos.y + node.position.y,
-  };
-};
+import { CalculateNodePositionParams, LayoutBranchOptions } from './use-node-position-utils/types';
+import {
+  getAbsolutePosition,
+  getNodeHeight,
+  getNodeWidth,
+  getRootNodes,
+  getLeftmostBottomPosition,
+  getRightmostPosition,
+  getNodeAbsolutePosition,
+} from './use-node-position-utils/utils';
+import { SPACING } from './use-node-position-utils/constants';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
 export const calculateNodePosition = ({
   nodes,
@@ -696,6 +171,7 @@ export const calculateNodePosition = ({
 
 export const useNodePosition = () => {
   const { getNode, setCenter, getZoom, setNodes } = useReactFlow();
+  const { canvasId } = useCanvasContext();
 
   const calculatePosition = useCallback((params: CalculateNodePositionParams) => calculateNodePosition(params), []);
 
@@ -703,9 +179,15 @@ export const useNodePosition = () => {
     (nodeId: string, shouldSelect: boolean = false) => {
       requestAnimationFrame(() => {
         const renderedNode = getNode(nodeId);
+        const { data } = useCanvasStore.getState();
+        const nodes = data?.[canvasId]?.nodes || [];
+        if (!nodes) return;
+
+        const renderedNodeAbsolute = getNodeAbsolutePosition(renderedNode, nodes);
+
         const currentZoom = getZoom();
         if (renderedNode) {
-          setCenter(renderedNode.position.x + 200, renderedNode.position.y + 200, {
+          setCenter(renderedNodeAbsolute.x + 200, renderedNodeAbsolute.y + 200, {
             duration: 300,
             zoom: currentZoom,
           });
@@ -725,18 +207,23 @@ export const useNodePosition = () => {
 
   const layoutBranchAndUpdatePositions = useCallback(
     (
-      startNodeIds: string[],
+      sourceNodes: Node[],
       allNodes: Node[],
       edges: any[],
       options: LayoutBranchOptions = {},
       needSetCenter: { targetNodeId: string; needSetCenter: boolean } = { targetNodeId: '', needSetCenter: true },
     ) => {
-      // Get source nodes
-      const sourceNodes = allNodes.filter((node) => startNodeIds.includes(node.id));
+      // Collect all source nodes including children of group nodes
+      const sourceNodesAbsolute = sourceNodes.map((node) => ({
+        ...node,
+        position: getNodeAbsolutePosition(node, allNodes),
+        width: getNodeWidth(node),
+      }));
+      if (sourceNodesAbsolute.length === 0) return;
 
       // Find all nodes directly connected to source nodes and their connections
       const targetNodeIds = new Set<string>();
-      const queue = [...startNodeIds];
+      const queue = [...sourceNodes.map((n) => n.id)];
       const visited = new Set<string>();
 
       // Find all connected nodes in the branch
@@ -746,7 +233,7 @@ export const useNodePosition = () => {
         visited.add(currentId);
 
         edges.forEach((edge) => {
-          if (edge.source === currentId && !startNodeIds.includes(edge.target)) {
+          if (edge.source === currentId && !sourceNodes.some((n) => n.id === edge.target)) {
             targetNodeIds.add(edge.target);
             queue.push(edge.target);
           }
@@ -778,7 +265,7 @@ export const useNodePosition = () => {
       };
 
       // Start level calculation from source nodes
-      sourceNodes.forEach((node) => calculateLevels(node.id, 0));
+      sourceNodesAbsolute.forEach((node) => calculateLevels(node.id, 0));
 
       // Sort nodes within each level by their Y position
       nodeLevels.forEach((nodes) => {
@@ -787,18 +274,19 @@ export const useNodePosition = () => {
 
       // First pass: Calculate initial positions
       const nodePositions = new Map<string, { x: number; y: number }>();
-      const fixedSpacing = SPACING.Y; // Use fixed spacing between nodes
+      const fixedSpacing = SPACING.Y;
 
       // Process each level
       Array.from(nodeLevels.entries()).forEach(([level, nodes]) => {
         // Calculate X position consistently with calculatePosition
         const levelX =
           level === 0
-            ? Math.max(...sourceNodes.map((n) => n.position.x + getNodeWidth(n) / 2))
+            ? Math.max(...sourceNodesAbsolute.map((n) => n.position.x + getNodeWidth(n) / 2))
             : Math.max(
                 ...Array.from(nodeLevels.get(level - 1) || []).map((n) => {
                   const nodeWidth = getNodeWidth(n);
-                  return n.position.x + nodeWidth / 2;
+                  const pos = n.position;
+                  return pos.x + nodeWidth / 2;
                 }),
               ) + SPACING.X;
 
@@ -809,7 +297,7 @@ export const useNodePosition = () => {
         }, -fixedSpacing);
 
         // Calculate starting Y position (centered around average source Y)
-        const avgSourceY = sourceNodes.reduce((sum, n) => sum + n.position.y, 0) / sourceNodes.length;
+        const avgSourceY = sourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) / sourceNodesAbsolute.length;
         let currentY = avgSourceY - totalHeight / 2;
 
         // Calculate center positions for nodes in this level
@@ -822,17 +310,22 @@ export const useNodePosition = () => {
             .filter((edge) => edge.target === node.id)
             .map((edge) => allNodes.find((n) => n.id === edge.source))
             .filter((n): n is Node => n !== undefined);
+          const directSourceNodesAbsolute = directSourceNodes.map((node) => ({
+            ...node,
+            position: getNodeAbsolutePosition(node, allNodes),
+            width: getNodeWidth(node),
+          }));
 
-          if (directSourceNodes.length > 0) {
+          if (directSourceNodesAbsolute.length > 0) {
             // Try to align with average Y of source nodes
             const avgDirectSourceY =
-              directSourceNodes.reduce((sum, n) => sum + n.position.y, 0) / directSourceNodes.length;
+              directSourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) / directSourceNodesAbsolute.length;
             // Adjust currentY to be closer to direct source nodes while maintaining spacing
             currentY = avgDirectSourceY - totalHeight / 2 + index * (nodeHeight + fixedSpacing);
           }
 
           nodePositions.set(node.id, {
-            x: levelX, // Don't add half width here since we already considered it in levelX
+            x: levelX,
             y: currentY + nodeHeight / 2,
           });
 

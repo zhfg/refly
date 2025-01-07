@@ -131,19 +131,31 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
   const { selectNodeCluster, groupNodeCluster, layoutNodeCluster } = useNodeCluster();
 
   const handleSelectCluster = useCallback(() => {
-    selectNodeCluster(nodeId);
+    if (nodeType === 'group') {
+      nodeActionEmitter.emit(createNodeEventName(nodeId, 'selectCluster'));
+    } else {
+      selectNodeCluster(nodeId);
+    }
     onClose?.();
-  }, [nodeId, selectNodeCluster]);
+  }, [nodeId, nodeType, selectNodeCluster, onClose]);
 
   const handleGroupCluster = useCallback(() => {
-    groupNodeCluster(nodeId);
+    if (nodeType === 'group') {
+      nodeActionEmitter.emit(createNodeEventName(nodeId, 'groupCluster'));
+    } else {
+      groupNodeCluster(nodeId);
+    }
     onClose?.();
-  }, [nodeId, groupNodeCluster]);
+  }, [nodeId, nodeType, groupNodeCluster, onClose]);
 
   const handleLayoutCluster = useCallback(() => {
-    layoutNodeCluster(nodeId);
+    if (nodeType === 'group') {
+      nodeActionEmitter.emit(createNodeEventName(nodeId, 'layoutCluster'));
+    } else {
+      layoutNodeCluster(nodeId);
+    }
     onClose?.();
-  }, [nodeId, layoutNodeCluster]);
+  }, [nodeId, nodeType, layoutNodeCluster, onClose]);
 
   const getMenuItems = (activeDocumentId: string): MenuItem[] => {
     if (isMultiSelection) {
@@ -320,7 +332,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
       ...(nodeType !== 'memo' && nodeType !== 'skill' ? commonItems : []),
       ...(nodeType !== 'memo' && nodeType !== 'skill' && nodeType !== 'group' ? operationItems : []),
       ...(nodeTypeItems[nodeType] || []),
-      ...(nodeType !== 'memo' && nodeType !== 'skill' && nodeType !== 'group' ? clusterItems : []),
+      ...(nodeType !== 'memo' && nodeType !== 'skill' ? clusterItems : []),
       { key: 'divider-2', type: 'divider' } as MenuItem,
       deleteItem,
     ];

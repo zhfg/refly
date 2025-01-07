@@ -14,7 +14,7 @@ export const useNodeCluster = () => {
   const { updateNodesWithSync } = useNodeOperations();
 
   // Helper function to get all target nodes recursively
-  const getTargetNodesCluster = useCallback((canvasId: string, nodeId: string): Node[] => {
+  const getTargetNodesCluster = useCallback((canvasId: string, nodeIds: string | string[]): Node[] => {
     const { data } = useCanvasStore.getState();
     const nodes = data[canvasId]?.nodes ?? [];
     const edges = data[canvasId]?.edges ?? [];
@@ -33,16 +33,19 @@ export const useNodeCluster = () => {
       }
     };
 
-    traverse(nodeId);
+    // Support both single nodeId and array of nodeIds
+    const sourceNodeIds = Array.isArray(nodeIds) ? nodeIds : [nodeIds];
+    sourceNodeIds.forEach((nodeId) => traverse(nodeId));
+
     return cluster;
   }, []);
 
   // Select all target nodes in the cluster
   const selectNodeCluster = useCallback(
-    (nodeId: string) => {
+    (nodeIds: string | string[]) => {
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
-      const cluster = getTargetNodesCluster(canvasId, nodeId);
+      const cluster = getTargetNodesCluster(canvasId, nodeIds);
 
       const updatedNodes = nodes.map((node) => ({
         ...node,
@@ -56,9 +59,9 @@ export const useNodeCluster = () => {
 
   // Create a group from the node cluster
   const groupNodeCluster = useCallback(
-    (nodeId: string) => {
+    (nodeIds: string | string[]) => {
       // First select all nodes in the cluster
-      selectNodeCluster(nodeId);
+      selectNodeCluster(nodeIds);
       // Then create a group from the selected nodes
       createGroupFromSelectedNodes();
     },
@@ -67,17 +70,23 @@ export const useNodeCluster = () => {
 
   // Layout the node cluster
   const layoutNodeCluster = useCallback(
-    (nodeId: string) => {
+    (nodeIds: string | string[]) => {
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
       const edges = data[canvasId]?.edges ?? [];
 
+      const sourceNodeIds = Array.isArray(nodeIds) ? nodeIds : [nodeIds];
+      const sourceNodes = nodes.filter((node) => sourceNodeIds.includes(node.id));
+
       layoutBranchAndUpdatePositions(
-        [nodeId],
+        sourceNodes,
         nodes,
         edges,
         { fromRoot: true },
-        { targetNodeId: nodeId, needSetCenter: true },
+        {
+          targetNodeId: sourceNodeIds[0],
+          needSetCenter: false,
+        },
       );
     },
     [layoutBranchAndUpdatePositions, canvasId],

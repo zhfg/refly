@@ -162,7 +162,7 @@ export const useAddNode = () => {
           if (!autoLayout) return;
 
           layoutBranchAndUpdatePositions(
-            sourceNodes.map((n) => n.id),
+            sourceNodes,
             updatedNodes,
             updatedEdges,
             {},

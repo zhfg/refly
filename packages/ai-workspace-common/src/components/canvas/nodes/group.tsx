@@ -15,6 +15,7 @@ import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context
 import { genSkillID } from '@refly-packages/utils/id';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useNodeCluster } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-cluster';
 import Moveable from 'react-moveable';
 
 interface GroupMetadata {
@@ -34,6 +35,15 @@ type GroupNodeProps = Omit<NodeProps, 'data'> & {
   data: GroupData;
 } & CommonNodeProps;
 
+const getChildNodes = (id: string, nodes: CanvasNode[]) => {
+  const childNodes = nodes.filter((node) => {
+    const isInGroup = node.parentId === id;
+    return isInGroup && !['skill', 'memo', 'group'].includes(node.type);
+  }) as CanvasNode[];
+
+  return childNodes;
+};
+
 export const GroupNode = memo(
   ({
     id,
@@ -51,6 +61,7 @@ export const GroupNode = memo(
     const { deleteNodes, deleteNode } = useDeleteNode();
     const { addContextItems } = useAddToContext();
     const { addNode } = useAddNode();
+    const { selectNodeCluster, groupNodeCluster, layoutNodeCluster } = useNodeCluster();
 
     // Memoize node and its measurements
     const node = useMemo(() => getNode(id), [id, getNode]);
@@ -117,10 +128,7 @@ export const GroupNode = memo(
     }, [id, data, getNodes, addContextItems]);
 
     const handleAskAI = useCallback(() => {
-      const childNodes = getNodes().filter((node) => {
-        const isInGroup = node.parentId === id;
-        return isInGroup && !['skill', 'memo', 'group'].includes(node.type);
-      }) as CanvasNode[];
+      const childNodes = getChildNodes(id, getNodes() as CanvasNode[]);
 
       if (childNodes.length > 0) {
         const connectTo = childNodes.map((node) => ({
@@ -154,6 +162,30 @@ export const GroupNode = memo(
       }
     }, [id, getNodes, addNode]);
 
+    const handleSelectCluster = useCallback(() => {
+      const childNodes = getChildNodes(id, getNodes() as CanvasNode[]);
+
+      if (childNodes.length > 0) {
+        selectNodeCluster(childNodes.map((node) => node.id));
+      }
+    }, [id, getNodes, selectNodeCluster]);
+
+    const handleGroupCluster = useCallback(() => {
+      const childNodes = getChildNodes(id, getNodes() as CanvasNode[]);
+
+      if (childNodes.length > 0) {
+        groupNodeCluster(childNodes.map((node) => node.id));
+      }
+    }, [id, getNodes, groupNodeCluster]);
+
+    const handleLayoutCluster = useCallback(() => {
+      const childNodes = getChildNodes(id, getNodes() as CanvasNode[]);
+
+      if (childNodes.length > 0) {
+        layoutNodeCluster(childNodes.map((node) => node.id));
+      }
+    }, [id, getNodes, layoutNodeCluster]);
+
     useEffect(() => {
       const handleNodeUngroup = () => {
         ungroupNodes(id);
@@ -161,18 +193,35 @@ export const GroupNode = memo(
       const handleNodeAskAI = () => {
         handleAskAI();
       };
+      const handleNodeSelectCluster = () => handleSelectCluster();
+      const handleNodeGroupCluster = () => handleGroupCluster();
+      const handleNodeLayoutCluster = () => handleLayoutCluster();
 
       nodeActionEmitter.on(createNodeEventName(id, 'ungroup'), handleNodeUngroup);
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
+      nodeActionEmitter.on(createNodeEventName(id, 'selectCluster'), handleNodeSelectCluster);
+      nodeActionEmitter.on(createNodeEventName(id, 'groupCluster'), handleNodeGroupCluster);
+      nodeActionEmitter.on(createNodeEventName(id, 'layoutCluster'), handleNodeLayoutCluster);
 
       return () => {
         nodeActionEmitter.off(createNodeEventName(id, 'ungroup'), handleNodeUngroup);
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
+        nodeActionEmitter.off(createNodeEventName(id, 'selectCluster'), handleNodeSelectCluster);
+        nodeActionEmitter.off(createNodeEventName(id, 'groupCluster'), handleNodeGroupCluster);
+        nodeActionEmitter.off(createNodeEventName(id, 'layoutCluster'), handleNodeLayoutCluster);
         cleanupNodeEvents(id);
       };
-    }, [id, ungroupNodes, handleAddToContext, handleAskAI]);
+    }, [
+      id,
+      ungroupNodes,
+      handleAddToContext,
+      handleAskAI,
+      handleSelectCluster,
+      handleGroupCluster,
+      handleLayoutCluster,
+    ]);
 
     const handleMouseEnter = useCallback(() => {
       setIsHovered(true);
