@@ -41,7 +41,7 @@ const PreviewChatInputComponent = (props: PreviewChatInputProps) => {
         />
       )}
       {contextItems?.length > 0 && <PreviewContextManager contextItems={contextItems} />}
-      <div className="text-sm m-2">{query}</div>
+      <div className="text-sm m-2 break-all">{query}</div>
 
       {/* {skillStore.selectedSkill?.configSchema?.items?.length > 0 && (
       <ConfigManager

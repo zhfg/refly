@@ -4,7 +4,6 @@ import { Node } from '@xyflow/react';
 import { CustomHandle } from './shared/custom-handle';
 import { useState, useCallback, useRef, useEffect, memo, useMemo } from 'react';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
-import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './shared/action-buttons';
 import { useTranslation } from 'react-i18next';
@@ -68,8 +67,6 @@ export const DocumentNode = memo(
     // Check if node has any connections
     const isTargetConnected = edges?.some((edge) => edge.target === id);
     const isSourceConnected = edges?.some((edge) => edge.source === id);
-
-    const edgeStyles = useEdgeStyles();
 
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
 
