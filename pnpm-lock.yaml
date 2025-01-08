@@ -751,9 +751,6 @@ importers:
       vite-tsconfig-paths:
         specifier: ~4.3.2
         version: 4.3.2(typescript@5.3.3)(vite@5.4.8)
-      wxt:
-        specifier: workspace:*
-        version: link:../../packages/wxt
       zustand:
         specifier: ~4.5.1
         version: 4.5.5(@types/react@18.3.10)(immer@10.1.1)(react@18.3.1)
@@ -869,9 +866,6 @@ importers:
       '@sentry/react':
         specifier: ^7.113.0
         version: 7.119.0(react@18.3.1)
-      '@sentry/vite-plugin':
-        specifier: ^2.16.1
-        version: 2.22.4
       '@tailwindcss/forms':
         specifier: ^0.5.3
         version: 0.5.9(tailwindcss@3.4.13)

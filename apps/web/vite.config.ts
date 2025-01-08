@@ -27,16 +27,16 @@ export default defineConfig(({ mode }) => {
         bundler: "vite",
         editor: "code",
       }),
-      ...(process.env.SENTRY_AUTH_TOKEN
-        ? [
-            sentryVitePlugin({
-              org: "refly-ai",
-              project: "web",
-              authToken: process.env.SENTRY_AUTH_TOKEN,
-              errorHandler: err => console.warn(err),
-            }),
-          ]
-        : []),
+      sentryVitePlugin({
+        debug: true,
+        org: "refly-ai",
+        project: "web",
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        errorHandler: err => console.warn(err),
+        sourcemaps: {
+          filesToDeleteAfterUpload: ["**/*.js.map"],
+        },
+      }),
     ],
     css: {
       postcss,
@@ -55,7 +55,7 @@ export default defineConfig(({ mode }) => {
       commonjsOptions: {
         transformMixedEsModules: true,
       },
-      sourcemap: isDev,
+      sourcemap: true,
       minify: "terser",
       terserOptions: {
         compress: {
