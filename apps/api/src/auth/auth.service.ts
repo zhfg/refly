@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
 import argon2 from 'argon2';
 import ms from 'ms';
@@ -26,7 +26,6 @@ import {
   OAuthError,
   ParamsError,
   PasswordIncorrect,
-  InvalidRefreshToken,
 } from '@refly-packages/errors';
 import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
@@ -100,7 +99,7 @@ export class AuthService {
       const [jti, token] = refreshToken.split('.');
 
       if (!jti || !token) {
-        throw new InvalidRefreshToken();
+        throw new UnauthorizedException();
       }
 
       // Find the refresh token in the database
@@ -109,13 +108,13 @@ export class AuthService {
       });
 
       if (!storedToken || storedToken.revoked || storedToken.expiresAt < new Date()) {
-        throw new InvalidRefreshToken();
+        throw new UnauthorizedException();
       }
 
       // Verify the token
       const isValid = await argon2.verify(storedToken.hashedToken, token);
       if (!isValid) {
-        throw new InvalidRefreshToken();
+        throw new UnauthorizedException();
       }
 
       // Revoke the current refresh token (one-time use)
@@ -136,11 +135,11 @@ export class AuthService {
       // Generate new tokens
       return this.login(user);
     } catch (error) {
-      if (error instanceof InvalidRefreshToken) {
+      if (error instanceof UnauthorizedException) {
         throw error;
       }
       this.logger.error('Error refreshing token:', error);
-      throw new InvalidRefreshToken();
+      throw error;
     }
   }
 

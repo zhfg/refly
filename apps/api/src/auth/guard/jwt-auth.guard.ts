@@ -1,8 +1,7 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { UnauthorizedError } from '@refly-packages/errors';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -12,7 +11,7 @@ export class JwtAuthGuard implements CanActivate {
     const request: Request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromRequest(request);
     if (!token) {
-      throw new UnauthorizedError();
+      throw new UnauthorizedException();
     }
     try {
       const payload = await this.jwtService.verifyAsync(token, {
@@ -23,7 +22,7 @@ export class JwtAuthGuard implements CanActivate {
       // so that we can access it in our route handlers
       request['user'] = payload;
     } catch {
-      throw new UnauthorizedError();
+      throw new UnauthorizedException();
     }
     return true;
   }

@@ -16,14 +16,6 @@ export class ConnectionError extends BaseError {
   };
 }
 
-export class UnauthorizedError extends BaseError {
-  code = 'E0002';
-  messageDict = {
-    en: 'Unauthorized, please login',
-    'zh-CN': '未授权，请登录',
-  };
-}
-
 export class ParamsError extends BaseError {
   code = 'E0003';
   messageDict = {
@@ -85,14 +77,6 @@ export class OperationTooFrequent extends BaseError {
   messageDict = {
     en: 'Operation too frequent, please try again later',
     'zh-CN': '操作过于频繁，请稍后再试',
-  };
-}
-
-export class InvalidRefreshToken extends BaseError {
-  code = 'E0011';
-  messageDict = {
-    en: 'Invalid or expired refresh token',
-    'zh-CN': '无效或已过期的刷新令牌',
   };
 }
 
@@ -204,7 +188,6 @@ export class ModelNotSupportedError extends BaseError {
 const errorMap = {
   E0000: UnknownError,
   E0001: ConnectionError,
-  E0002: UnauthorizedError,
   E0003: ParamsError,
   E0004: OAuthError,
   E0005: AccountNotFoundError,
@@ -213,7 +196,6 @@ const errorMap = {
   E0008: InvalidVerificationSession,
   E0009: IncorrectVerificationCode,
   E0010: OperationTooFrequent,
-  E0011: InvalidRefreshToken,
   E1000: CanvasNotFoundError,
   E1002: ResourceNotFoundError,
   E1003: DocumentNotFoundError,

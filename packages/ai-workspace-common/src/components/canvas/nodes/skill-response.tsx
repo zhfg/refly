@@ -23,7 +23,6 @@ import {
   IconToken,
   preloadModelIcons,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';

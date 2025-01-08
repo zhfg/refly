@@ -1,7 +1,16 @@
-import { Controller, Logger, Get, Post, Res, UseGuards, Body, Req } from '@nestjs/common';
+import {
+  Controller,
+  Logger,
+  Get,
+  Post,
+  Res,
+  UseGuards,
+  Body,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Response, Request } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { UnauthorizedError } from '@refly-packages/errors';
 
 import { LoginedUser } from '@/utils/decorators/user.decorator';
 import { AuthService } from './auth.service';
@@ -126,7 +135,7 @@ export class AuthController {
   async refreshToken(@Req() req: Request): Promise<EmailLoginResponse> {
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
-      throw new UnauthorizedError();
+      throw new UnauthorizedException();
     }
 
     const { accessToken, refreshToken: newRefreshToken } =
@@ -137,7 +146,7 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
-      path: '/api/v1/auth/refresh',
+      path: '/v1/auth/refresh',
       domain: this.configService.get('auth.cookieDomain'),
     });
 
@@ -156,7 +165,7 @@ export class AuthController {
       })
       .clearCookie('refreshToken', {
         domain: this.configService.get('auth.cookieDomain'),
-        path: '/api/v1/auth/refresh',
+        path: '/v1/auth/refresh',
       })
       .status(200)
       .json(buildSuccessResponse());
