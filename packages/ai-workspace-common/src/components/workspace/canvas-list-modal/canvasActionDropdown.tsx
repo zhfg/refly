@@ -5,20 +5,22 @@ import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/canva
 import { useTranslation } from 'react-i18next';
 import { CanvasRename } from '@refly-packages/ai-workspace-common/components/canvas/top-toolbar/canvas-rename';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+import { useUpdateCanvas } from '@refly-packages/ai-workspace-common/queries';
 
 interface CanvasActionDropdown {
   canvasId: string;
   canvasName: string;
   updateShowStatus?: (canvasId: string | null) => void;
   afterDelete?: () => void;
+  afterRename?: (newTitle: string, canvasId: string) => void;
 }
 
 export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
-  const { canvasId, canvasName, updateShowStatus, afterDelete } = props;
+  const { canvasId, canvasName, updateShowStatus, afterDelete, afterRename } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
   const { deleteCanvas } = useDeleteCanvas();
-
+  const { mutate: updateCanvas } = useUpdateCanvas();
   const { updateCanvasTitle } = useSiderStoreShallow((state) => ({
     updateCanvasTitle: state.updateCanvasTitle,
   }));
@@ -88,8 +90,10 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
   const handleModalOk = (newTitle: string) => {
     if (newTitle?.trim()) {
       // TODO: syncTitleToYDoc(newTitle);
+      updateCanvas({ body: { canvasId, title: newTitle } });
       updateCanvasTitle(canvasId, newTitle);
       setIsModalOpen(false);
+      afterRename?.(newTitle, canvasId);
     }
   };
 
