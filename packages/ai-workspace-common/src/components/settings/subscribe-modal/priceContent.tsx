@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Button, Divider, Tooltip } from 'antd';
+import { Button, Divider, Tooltip, Row, Col } from 'antd';
 
 // styles
 import './index.scss';
@@ -18,6 +18,14 @@ export type PriceSource = 'page' | 'modal';
 
 const premiumModels = 'GPT-4o, Claude 3.5 Sonnet, Gemini Pro 1.5 and more';
 const basicModels = 'GPT-4o Mini, Claude 3 Haiku, Gemini Flash 1.5 and more';
+const gridSpan = {
+  xs: 24,
+  sm: 12,
+  md: 12,
+  lg: 6,
+  xl: 6,
+  xxl: 4,
+};
 
 interface ModelFeatures {
   name: string;
@@ -85,7 +93,7 @@ const PlanItem = (props: {
   };
 
   return (
-    <div className={`flex flex-col flex-1 shrink-0 p-1 ${title === 'max' ? 'pro-plan' : ''}`}>
+    <div className={`w-full h-full flex flex-col ${title === 'max' ? 'pro-plan' : ''}`}>
       <div className="h-[20px] text-center text-xs text-white font-bold">
         {title === 'max' && t('settings.subscription.mostPopular')}
       </div>
@@ -104,7 +112,7 @@ const PlanItem = (props: {
         <div className="description">{t(`settings.subscription.subscribe.${title}.description`)}</div>
 
         <div className="subscribe-content-plans-item-price">
-          <span className="price">
+          <span className="price text-3xl">
             {title !== 'free' ? (
               <>
                 ${getPrice(title)}
@@ -118,12 +126,17 @@ const PlanItem = (props: {
               t('settings.subscription.subscribe.forFree')
             )}
           </span>
-          <span className="period">
+          <span className="period !text-xs">
             {' '}
             /{' '}
-            {title === 'free'
-              ? t('settings.subscription.subscribe.period')
-              : t(`settings.subscription.subscribe.${lookupKey === 'monthly' ? 'month' : 'year'}`)}
+            {title === 'free' ? (
+              t('settings.subscription.subscribe.period')
+            ) : (
+              <span className="whitespace-nowrap">
+                {t(`settings.subscription.subscribe.${lookupKey === 'monthly' ? 'month' : 'firstYear'}`)}
+              </span>
+            )}
+            {title !== 'free' && lookupKey === 'yearly' && '*'}
           </span>
         </div>
 
@@ -378,7 +391,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
   };
 
   return (
-    <div className="subscribe-content min-w-[800px]">
+    <div className="subscribe-content w-full">
       <div className="flex items-center justify-center">
         <div className="text-base ml-1 border border-solid border-yellow-500 rounded-xl px-4 py-1 w-fit mb-4 flex items-center gap-2">
           <span>🎉</span>
@@ -406,52 +419,56 @@ export const PriceContent = (props: { source: PriceSource }) => {
         </div>
       </div>
 
-      <div className="subscribe-content-plans">
-        <PlanItem
-          title="free"
-          features={freeFeatures}
-          handleClick={() => {
-            isLogin
-              ? source === 'modal'
-                ? setVisible(false)
-                : navigate('/', { replace: true })
-              : setLoginModalOpen(true);
-          }}
-          lookupKey={lookupKey}
-          loadingInfo={loadingInfo}
-        />
+      <Row gutter={[4, 4]} className="subscribe-content-plans" justify="center" align="stretch">
+        <Col {...gridSpan}>
+          <PlanItem
+            title="free"
+            features={freeFeatures}
+            handleClick={() => {
+              isLogin
+                ? source === 'modal'
+                  ? setVisible(false)
+                  : navigate('/', { replace: true })
+                : setLoginModalOpen(true);
+            }}
+            lookupKey={lookupKey}
+            loadingInfo={loadingInfo}
+          />
+        </Col>
 
-        {/* <PlanItem
-          title="plus"
-          features={plusFeatures}
-          handleClick={() => createCheckoutSession('plus')}
-          lookupKey={lookupKey}
-          loadingInfo={loadingInfo}
-        /> */}
+        <Col {...gridSpan}>
+          <PlanItem
+            title="pro"
+            features={proFeatures}
+            handleClick={() => createCheckoutSession('pro')}
+            lookupKey={lookupKey}
+            loadingInfo={loadingInfo}
+          />
+        </Col>
 
-        <PlanItem
-          title="pro"
-          features={proFeatures}
-          handleClick={() => createCheckoutSession('pro')}
-          lookupKey={lookupKey}
-          loadingInfo={loadingInfo}
-        />
+        <Col {...gridSpan}>
+          <PlanItem
+            title="max"
+            features={maxFeatures}
+            handleClick={() => createCheckoutSession('max')}
+            lookupKey={lookupKey}
+            loadingInfo={loadingInfo}
+          />
+        </Col>
 
-        <PlanItem
-          title="max"
-          features={maxFeatures}
-          handleClick={() => createCheckoutSession('max')}
-          lookupKey={lookupKey}
-          loadingInfo={loadingInfo}
-        />
+        <Col {...gridSpan}>
+          <PlanItem
+            title="ultra"
+            features={ultraFeatures}
+            handleClick={() => createCheckoutSession('ultra')}
+            lookupKey={lookupKey}
+            loadingInfo={loadingInfo}
+          />
+        </Col>
+      </Row>
 
-        <PlanItem
-          title="ultra"
-          features={ultraFeatures}
-          handleClick={() => createCheckoutSession('ultra')}
-          lookupKey={lookupKey}
-          loadingInfo={loadingInfo}
-        />
+      <div className="px-4 text-center text-gray-600 mt-4">
+        * {t('settings.subscription.subscribe.firstYearOffCountDescription')}
       </div>
 
       {isLogin && (

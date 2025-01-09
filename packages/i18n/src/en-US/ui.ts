@@ -165,7 +165,7 @@ const translations = {
       title: 'Plans and Pricing',
       subtitle: 'Embark on your AI content creation journey with Refly',
       description: 'Sign up and get a free trial of a million standard model tokens. No credit card required.',
-      limitedOffer: 'First-year subscription - 50% off for a limited time!',
+      limitedOffer: 'Save 50% on your first year  - Limited time offer',
     },
     footer: {
       cta: {
@@ -1151,6 +1151,9 @@ const translations = {
         period: 'Permanent',
         month: 'Month',
         year: 'Year',
+        firstYear: 'First Year',
+        firstYearOffCountDescription:
+          'Enjoy 50% off for the first year. Price will revert to original from the 2nd year.',
         forFree: 'Free',
         resetAt: 'reset at {{date}}',
       },

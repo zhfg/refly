@@ -1133,6 +1133,8 @@ const translations = {
         period: '永久',
         month: '月',
         year: '年',
+        firstYear: '首年',
+        firstYearOffCountDescription: '首年享受五折优惠，次年将恢复原价',
         forFree: '免费',
         resetAt: '将于 {{date}} 重置',
       },
