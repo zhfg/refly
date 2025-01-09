@@ -43,7 +43,6 @@ export const ImportResourceModal = () => {
 
   return (
     <Modal
-      unmountOnExit
       visible={importResourceStore.importResourceModalVisible}
       footer={null}
       onCancel={() => {
