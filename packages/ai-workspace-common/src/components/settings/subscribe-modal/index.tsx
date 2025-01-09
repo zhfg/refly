@@ -31,7 +31,7 @@ export const SubscribeModal = () => {
     //   className="subscribe-modal !p-0"
     //   onCancel={() => setVisible(false)}
     // >
-    //   <div className="w-full h-full overflow-auto px-[15%] flex flex-col items-center gap-3">
+    //   <div className="w-full h-full overflow-auto flex flex-col items-center gap-3">
     //     <div className="font-bold text-3xl m-auto flex items-center gap-2">
     //       <IconSubscription /> {t('settings.subscription.subscribe.title')}
     //     </div>
