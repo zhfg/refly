@@ -6,6 +6,7 @@ import { IndexeddbPersistence } from 'y-indexeddb';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
+import { ACCESS_TOKEN_COOKIE } from '@refly-packages/utils/cookie';
 
 interface DocumentContextType {
   docId: string;
@@ -17,7 +18,7 @@ interface DocumentContextType {
 const DocumentContext = createContext<DocumentContextType | null>(null);
 
 export const DocumentProvider = ({ docId, children }: { docId: string; children: React.ReactNode }) => {
-  const [token] = useCookie('_refly_ai_sid');
+  const [token] = useCookie(ACCESS_TOKEN_COOKIE);
   const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt, updateDocument } = useDocumentStoreShallow((state) => ({
     setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
     setDocumentRemoteSyncedAt: state.setDocumentRemoteSyncedAt,

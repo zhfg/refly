@@ -2716,6 +2716,10 @@ export type GetAuthConfigResponse = (AuthConfigResponse);
 
 export type GetAuthConfigError = unknown;
 
+export type RefreshTokenResponse = (unknown);
+
+export type RefreshTokenError = unknown;
+
 export type EmailSignupData2 = {
     body: EmailSignupRequest;
 };

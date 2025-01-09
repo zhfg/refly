@@ -48,6 +48,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthConfigResponse'
+  /auth/refreshToken:
+    post:
+      tags:
+        - auth
+      summary: Refresh token
+      description: Refresh token
+      operationId: refreshToken
+      responses:
+        '200':
+          description: Successful operation
   /auth/email/signup:
     post:
       tags:

@@ -7,6 +7,7 @@ import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canva
 import { Edge } from '@xyflow/react';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { ACCESS_TOKEN_COOKIE } from '@refly-packages/utils/cookie';
 
 interface CanvasContextType {
   canvasId: string;
@@ -40,7 +41,7 @@ const getEdgesFromYDoc = (ydoc: Y.Doc) => {
 };
 
 export const CanvasProvider = ({ canvasId, children }: { canvasId: string; children: React.ReactNode }) => {
-  const [token] = useCookie('_refly_ai_sid');
+  const [token] = useCookie(ACCESS_TOKEN_COOKIE);
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const MAX_RETRIES = 3;
   const RETRY_DELAY = 2000;

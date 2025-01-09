@@ -26,7 +26,6 @@ import {
   EmailSignupResponse,
   ResendVerificationRequest,
   AuthConfigResponse,
-  EmailLoginResponse,
   CreateVerificationResponse,
   ResendVerificationResponse,
   User,
@@ -34,6 +33,7 @@ import {
 import { buildSuccessResponse } from '@/utils';
 import { hours, minutes, seconds, Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
+import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from '@refly-packages/utils';
 
 @Controller('v1/auth')
 export class AuthController {
@@ -131,26 +131,17 @@ export class AuthController {
     }
   }
 
-  @Post('refresh')
-  async refreshToken(@Req() req: Request): Promise<EmailLoginResponse> {
-    const refreshToken = req.cookies?.refreshToken;
+  @Post('refreshToken')
+  async refreshToken(@Req() req: Request, @Res() res: Response) {
+    const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
     if (!refreshToken) {
       throw new UnauthorizedException();
     }
 
-    const { accessToken, refreshToken: newRefreshToken } =
-      await this.authService.refreshAccessToken(refreshToken);
+    const tokens = await this.authService.refreshAccessToken(refreshToken);
 
-    // Set the new refresh token in the cookie
-    req.res?.cookie('refreshToken', newRefreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      path: '/v1/auth/refresh',
-      domain: this.configService.get('auth.cookieDomain'),
-    });
-
-    return buildSuccessResponse({ accessToken });
+    this.authService.setAuthCookie(res, tokens);
+    res.status(200).json(buildSuccessResponse());
   }
 
   @UseGuards(JwtAuthGuard)
@@ -160,12 +151,11 @@ export class AuthController {
 
     // Clear cookies
     res
-      .clearCookie(this.configService.get('auth.cookieTokenField'), {
+      .clearCookie(ACCESS_TOKEN_COOKIE, {
         domain: this.configService.get('auth.cookieDomain'),
       })
-      .clearCookie('refreshToken', {
+      .clearCookie(REFRESH_TOKEN_COOKIE, {
         domain: this.configService.get('auth.cookieDomain'),
-        path: '/v1/auth/refresh',
       })
       .status(200)
       .json(buildSuccessResponse());

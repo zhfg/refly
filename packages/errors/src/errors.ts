@@ -80,6 +80,14 @@ export class OperationTooFrequent extends BaseError {
   };
 }
 
+export class AuthenticationExpiredError extends BaseError {
+  code = 'E0011';
+  messageDict = {
+    en: 'Authentication expired, please sign in again',
+    'zh-CN': '身份验证已过期，请重新登录',
+  };
+}
+
 export class CanvasNotFoundError extends BaseError {
   code = 'E1000';
   messageDict = {
@@ -196,6 +204,7 @@ const errorMap = {
   E0008: InvalidVerificationSession,
   E0009: IncorrectVerificationCode,
   E0010: OperationTooFrequent,
+  E0011: AuthenticationExpiredError,
   E1000: CanvasNotFoundError,
   E1002: ResourceNotFoundError,
   E1003: DocumentNotFoundError,

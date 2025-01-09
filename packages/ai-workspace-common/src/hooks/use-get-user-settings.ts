@@ -14,6 +14,7 @@ import { useCookie } from 'react-use';
 import { LOCALE } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
 import { GetUserSettingsResponse } from '@refly/openapi-schema';
+import { ACCESS_TOKEN_COOKIE } from '@refly-packages/utils/cookie';
 
 export const useGetUserSettings = () => {
   const userStore = useUserStoreShallow((state) => ({
@@ -28,7 +29,7 @@ export const useGetUserSettings = () => {
   }));
   const navigate = useNavigate();
 
-  const [token] = useCookie('_refly_ai_sid');
+  const [token] = useCookie(ACCESS_TOKEN_COOKIE);
   const { i18n } = useTranslation();
 
   const routeLandingPageMatch = useMatch('/');

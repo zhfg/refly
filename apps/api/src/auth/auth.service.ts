@@ -8,7 +8,13 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { User as UserModel, VerificationSession } from '@prisma/client';
 import { TokenData } from './auth.dto';
-import { genUID, genVerificationSessionID, pick } from '@refly-packages/utils';
+import {
+  ACCESS_TOKEN_COOKIE,
+  genUID,
+  genVerificationSessionID,
+  pick,
+  REFRESH_TOKEN_COOKIE,
+} from '@refly-packages/utils';
 import { PrismaService } from '@/common/prisma.service';
 import { MiscService } from '@/misc/misc.service';
 import { Resend } from 'resend';
@@ -152,12 +158,12 @@ export class AuthService {
 
   setAuthCookie(res: Response, { accessToken, refreshToken }: TokenData) {
     return res
-      .cookie(this.configService.get('auth.cookieTokenField'), accessToken, {
+      .cookie(ACCESS_TOKEN_COOKIE, accessToken, {
         domain: this.configService.get('auth.cookieDomain'),
         secure: true,
         sameSite: 'strict',
       })
-      .cookie(this.configService.get('auth.cookieRefreshTokenField'), refreshToken, {
+      .cookie(REFRESH_TOKEN_COOKIE, refreshToken, {
         domain: this.configService.get('auth.cookieDomain'),
         httpOnly: true,
         secure: true,

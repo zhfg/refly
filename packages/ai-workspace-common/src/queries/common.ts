@@ -2,7 +2,7 @@
 
 import { type Options } from "@hey-api/client-fetch";
 import { UseQueryResult } from "@tanstack/react-query";
-import { addReferences, batchCreateResource, batchUpdateDocument, checkSettingsField, checkVerification, createCanvas, createCheckoutSession, createDocument, createLabelClass, createLabelInstance, createPortalSession, createResource, createShare, createSkillInstance, createSkillTrigger, createVerification, deleteCanvas, deleteDocument, deleteLabelClass, deleteLabelInstance, deleteReferences, deleteResource, deleteShare, deleteSkillInstance, deleteSkillTrigger, emailLogin, emailSignup, getActionResult, getAuthConfig, getDocumentDetail, getResourceDetail, getSettings, getShareContent, getSubscriptionPlans, getSubscriptionUsage, invokeAction, invokeSkill, listActions, listCanvases, listDocuments, listLabelClasses, listLabelInstances, listModels, listResources, listSkillInstances, listSkills, listSkillTriggers, multiLingualWebSearch, pinSkillInstance, queryReferences, reindexResource, resendVerification, scrape, search, serveStatic, streamInvokeAction, streamInvokeSkill, unpinSkillInstance, updateCanvas, updateDocument, updateLabelClass, updateLabelInstance, updateResource, updateSettings, updateSkillInstance, updateSkillTrigger, upload } from "../requests/services.gen";
+import { addReferences, batchCreateResource, batchUpdateDocument, checkSettingsField, checkVerification, createCanvas, createCheckoutSession, createDocument, createLabelClass, createLabelInstance, createPortalSession, createResource, createShare, createSkillInstance, createSkillTrigger, createVerification, deleteCanvas, deleteDocument, deleteLabelClass, deleteLabelInstance, deleteReferences, deleteResource, deleteShare, deleteSkillInstance, deleteSkillTrigger, emailLogin, emailSignup, getActionResult, getAuthConfig, getDocumentDetail, getResourceDetail, getSettings, getShareContent, getSubscriptionPlans, getSubscriptionUsage, invokeAction, invokeSkill, listActions, listCanvases, listDocuments, listLabelClasses, listLabelInstances, listModels, listResources, listSkillInstances, listSkills, listSkillTriggers, multiLingualWebSearch, pinSkillInstance, queryReferences, refreshToken, reindexResource, resendVerification, scrape, search, serveStatic, streamInvokeAction, streamInvokeSkill, unpinSkillInstance, updateCanvas, updateDocument, updateLabelClass, updateLabelInstance, updateResource, updateSettings, updateSkillInstance, updateSkillTrigger, upload } from "../requests/services.gen";
 export type GetAuthConfigDefaultResponse = Awaited<ReturnType<typeof getAuthConfig>>["data"];
 export type GetAuthConfigQueryResult<TData = GetAuthConfigDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
 export const useGetAuthConfigKey = "GetAuthConfig";
@@ -83,6 +83,9 @@ export type ServeStaticDefaultResponse = Awaited<ReturnType<typeof serveStatic>>
 export type ServeStaticQueryResult<TData = ServeStaticDefaultResponse, TError = unknown> = UseQueryResult<TData, TError>;
 export const useServeStaticKey = "ServeStatic";
 export const UseServeStaticKeyFn = (clientOptions: Options<unknown, true> = {}, queryKey?: Array<unknown>) => [useServeStaticKey, ...(queryKey ?? [clientOptions])];
+export type RefreshTokenMutationResult = Awaited<ReturnType<typeof refreshToken>>;
+export const useRefreshTokenKey = "RefreshToken";
+export const UseRefreshTokenKeyFn = (mutationKey?: Array<unknown>) => [useRefreshTokenKey, ...(mutationKey ?? [])];
 export type EmailSignupMutationResult = Awaited<ReturnType<typeof emailSignup>>;
 export const useEmailSignupKey = "EmailSignup";
 export const UseEmailSignupKeyFn = (mutationKey?: Array<unknown>) => [useEmailSignupKey, ...(mutationKey ?? [])];

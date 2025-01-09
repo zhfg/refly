@@ -7,6 +7,7 @@ import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { ACCESS_TOKEN_COOKIE } from '@refly-packages/utils/cookie';
 
 export const useLogout = () => {
   const { t } = useTranslation();
@@ -23,7 +24,7 @@ export const useLogout = () => {
     resetState: state.resetState,
   }));
   const [modal, contextHolder] = Modal.useModal();
-  const [_, __, deleteCookie] = useCookie('_refly_ai_sid');
+  const [_, __, deleteCookie] = useCookie(ACCESS_TOKEN_COOKIE);
 
   const handleLogout = () => {
     modal.confirm?.({
@@ -56,7 +57,6 @@ export const useLogout = () => {
 
         // Clear cookies
         deleteCookie?.();
-        Cookies?.remove?.('_refly_ai_sid', { domain: getCookieOrigin() });
 
         // Reset local state
         userStore.resetState();

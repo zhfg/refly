@@ -1,10 +1,19 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+  Logger,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { ACCESS_TOKEN_COOKIE } from '../../../../../packages/utils/src/cookie';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
+  private readonly logger = new Logger(JwtAuthGuard.name);
+
   constructor(private jwtService: JwtService, private configService: ConfigService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -21,7 +30,8 @@ export class JwtAuthGuard implements CanActivate {
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers
       request['user'] = payload;
-    } catch {
+    } catch (error) {
+      this.logger.warn(`jwt verify not valid: ${error}`);
       throw new UnauthorizedException();
     }
     return true;
@@ -38,9 +48,9 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     // Try to get token from cookie
-    const sid = request.cookies?._refly_ai_sid;
-    if (sid) {
-      return sid;
+    const token = request.cookies?.[ACCESS_TOKEN_COOKIE];
+    if (token) {
+      return token;
     }
 
     return undefined;

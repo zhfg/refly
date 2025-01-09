@@ -4,6 +4,8 @@ import { createClient, createConfig, type Options, formDataBodySerializer } from
 import type {
   GetAuthConfigError,
   GetAuthConfigResponse,
+  RefreshTokenError,
+  RefreshTokenResponse,
   EmailSignupData2,
   EmailSignupError,
   EmailSignupResponse2,
@@ -206,6 +208,17 @@ export const getAuthConfig = <ThrowOnError extends boolean = false>(options?: Op
   return (options?.client ?? client).get<GetAuthConfigResponse, GetAuthConfigError, ThrowOnError>({
     ...options,
     url: '/auth/config',
+  });
+};
+
+/**
+ * Refresh token
+ * Refresh token
+ */
+export const refreshToken = <ThrowOnError extends boolean = false>(options?: Options<unknown, ThrowOnError>) => {
+  return (options?.client ?? client).post<RefreshTokenResponse, RefreshTokenError, ThrowOnError>({
+    ...options,
+    url: '/auth/refreshToken',
   });
 };
 
