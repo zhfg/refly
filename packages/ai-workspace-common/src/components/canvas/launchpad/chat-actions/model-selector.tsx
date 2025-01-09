@@ -146,6 +146,29 @@ const GroupHeader = memo(
 
 GroupHeader.displayName = 'GroupHeader';
 
+// Memoize the selected model display
+const SelectedModelDisplay = memo(({ model }: { model: ModelInfo | null }) => {
+  const { t } = useTranslation();
+
+  if (!model) {
+    return (
+      <>
+        <PiWarningCircleBold className="text-yellow-600" />
+        <span className="text-yellow-600">{t('copilot.modelSelector.noModelAvailable')}</span>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <img className="w-3 h-3" src={ModelProviderIcons[model.provider]} alt={model.provider} />
+      {model.label}
+    </>
+  );
+});
+
+SelectedModelDisplay.displayName = 'SelectedModelDisplay';
+
 export const ModelSelector = memo(
   ({ placement = 'bottomLeft', trigger = ['click'], briefMode = false, model, setModel }: ModelSelectorProps) => {
     const { t } = useTranslation();
@@ -320,29 +343,6 @@ export const ModelSelector = memo(
       },
       [modelList, setModel],
     );
-
-    // Memoize the selected model display
-    const SelectedModelDisplay = memo(({ model }: { model: ModelInfo | null }) => {
-      const { t } = useTranslation();
-
-      if (!model) {
-        return (
-          <>
-            <PiWarningCircleBold className="text-yellow-600" />
-            <span className="text-yellow-600">{t('copilot.modelSelector.noModelAvailable')}</span>
-          </>
-        );
-      }
-
-      return (
-        <>
-          <img className="w-3 h-3" src={ModelProviderIcons[model.provider]} alt={model.provider} />
-          {model.label}
-        </>
-      );
-    });
-
-    SelectedModelDisplay.displayName = 'SelectedModelDisplay';
 
     if (isModelListLoading || isTokenUsageLoading) {
       return <Skeleton className="w-28" active paragraph={false} />;

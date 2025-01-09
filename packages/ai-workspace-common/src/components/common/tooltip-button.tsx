@@ -6,7 +6,6 @@ interface TooltipWrapperProps {
   children: React.ReactElement;
 }
 
-// 使用 memo 包裹组件以避免不必要的重渲染
 const TooltipWrapper = memo(
   ({
     tooltip,
@@ -16,10 +15,8 @@ const TooltipWrapper = memo(
     placement = 'right',
     overlayClassName = '!px-2 !py-1',
     arrow = false,
-    destroyTooltipOnHide = true,
     ...tooltipProps
   }: TooltipWrapperProps & TooltipProps) => {
-    // 如果没有 tooltip，直接返回子元素
     if (!tooltip) {
       return children;
     }
@@ -32,7 +29,6 @@ const TooltipWrapper = memo(
         placement={placement}
         overlayClassName={overlayClassName}
         arrow={arrow}
-        destroyTooltipOnHide={destroyTooltipOnHide}
         {...tooltipProps}
       >
         {children}

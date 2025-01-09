@@ -122,12 +122,14 @@ const StepContent = memo(
     step: ActionStep;
   }) => {
     return (
-      <div className={cn('my-3 text-gray-600 text-base', `skill-response-content-${resultId}-${step.name}`)}>
-        <Markdown content={content} sources={sources} />
-        <SelectionContext
-          containerClass={`skill-response-content-${resultId}-${step.name}`}
-          getContextItem={buildContextItem}
-        />
+      <div className="my-3 text-gray-600 text-base">
+        <div className={`skill-response-content-${resultId}-${step.name}`}>
+          <Markdown content={content} sources={sources} />
+          <SelectionContext
+            containerClass={`skill-response-content-${resultId}-${step.name}`}
+            getContextItem={buildContextItem}
+          />
+        </div>
       </div>
     );
   },

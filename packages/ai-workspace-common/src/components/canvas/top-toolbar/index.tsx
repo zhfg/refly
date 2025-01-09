@@ -166,7 +166,6 @@ const ToolbarButtons = memo(
           overlayInnerStyle={{ padding: 0, boxShadow: 'none' }}
           trigger="click"
           placement="bottomRight"
-          destroyTooltipOnHide
           content={
             <NodeSelector
               onSelect={handleNodeSelect}
@@ -176,7 +175,7 @@ const ToolbarButtons = memo(
           }
           overlayClassName="node-search-popover"
         >
-          <Tooltip title={t('canvas.toolbar.searchNode')} destroyTooltipOnHide>
+          <Tooltip title={t('canvas.toolbar.searchNode')}>
             <Button
               type="text"
               icon={<IconSearch style={{ color: '#000' }} />}
@@ -184,7 +183,7 @@ const ToolbarButtons = memo(
             />
           </Tooltip>
         </Popover>
-        <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)} destroyTooltipOnHide>
+        <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)}>
           <Button
             type="text"
             icon={<MdOutlineImage style={{ color: showPreview ? '#000' : '#9CA3AF' }} />}
@@ -192,7 +191,7 @@ const ToolbarButtons = memo(
             className="w-8 h-6 flex items-center justify-center mr-1"
           />
         </Tooltip>
-        <Tooltip title={t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`)} destroyTooltipOnHide>
+        <Tooltip title={t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`)}>
           <Button
             type="text"
             icon={<MdOutlineAspectRatio style={{ color: showMaxRatio ? '#000' : '#9CA3AF' }} />}
