@@ -28,18 +28,20 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
   const items: MenuProps['items'] = [
     {
       label: (
-        <Popconfirm
-          title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', { canvas: canvasName })}
-          onConfirm={handleDelete}
-          onCancel={() => setPopupVisible(false)}
-          okText={t('common.confirm')}
-          cancelText={t('common.cancel')}
-        >
-          <div className="flex items-center text-red-600">
-            <IconDelete size={16} className="mr-2" />
-            {t('workspace.deleteDropdownMenu.delete')}
-          </div>
-        </Popconfirm>
+        <div onClick={(e) => e.stopPropagation()}>
+          <Popconfirm
+            title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', { canvas: canvasName })}
+            onConfirm={handleDelete}
+            onCancel={() => setPopupVisible(false)}
+            okText={t('common.confirm')}
+            cancelText={t('common.cancel')}
+          >
+            <div className="flex items-center text-red-600" onClick={(e) => e.stopPropagation()}>
+              <IconDelete size={16} className="mr-2" />
+              {t('workspace.deleteDropdownMenu.delete')}
+            </div>
+          </Popconfirm>
+        </div>
       ),
       key: 'delete',
     },

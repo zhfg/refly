@@ -165,7 +165,7 @@ const translations = {
       title: 'Plans and Pricing',
       subtitle: 'Embark on your AI content creation journey with Refly',
       description: 'Sign up and get a free trial of a million standard model tokens. No credit card required.',
-      limitedOffer: 'Annual subscription - 50% off for a limited time!',
+      limitedOffer: 'First-year subscription - 50% off for a limited time!',
     },
     footer: {
       cta: {
@@ -1082,7 +1082,7 @@ const translations = {
       subscriptionManagement: 'Manage Billing and Subscriptions',
       subscriptionStatus: {
         free: 'FREE',
-        plus: 'PLUS',
+        ultra: 'ULTRA',
         pro: 'PRO',
         max: 'MAX',
       },
@@ -1098,11 +1098,13 @@ const translations = {
           vectorStorage: 'Used for storing semantic embeddings of resources and canvases',
           fileStorage:
             'Used for storing resource texts, text and history versions of canvases, and uploaded files (images)',
+          mediaCredit: 'Used for generating one image or one second of video',
         },
         vectorStorage: 'Vector Storage',
         fileStorage: 'File Storage',
         t1Model: 'Advanced Models',
         t2Model: 'Standard Models',
+        mediaCredit: 'Media Credit',
         fileStorageType: {
           note: 'Canvases',
           resource: 'Resources',
@@ -1119,25 +1121,25 @@ const translations = {
             details: 'Community support (Discord)',
           },
         },
-        plus: {
+        ultra: {
+          description: 'Unlimited creativity without boundaries',
+          serviceSupport: {
+            name: 'Service Support',
+            details: 'Exclusive WeChat/Discord Group',
+          },
+        },
+        pro: {
           description: 'Unlock more possibilities with advanced models',
           serviceSupport: {
             name: 'Service Support',
             details: 'Priority Email Support',
           },
         },
-        pro: {
+        max: {
           description: 'Ideal choice for professional creators',
           serviceSupport: {
             name: 'Service Support',
             details: 'Priority Email Support',
-          },
-        },
-        max: {
-          description: 'Unlimited creativity without boundaries',
-          serviceSupport: {
-            name: 'Service Support',
-            details: 'Exclusive WeChat/Discord Group',
           },
         },
 

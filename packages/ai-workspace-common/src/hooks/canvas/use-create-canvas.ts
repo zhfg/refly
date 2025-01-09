@@ -25,10 +25,12 @@ export const useCreateCanvas = () => {
       const { canvasList, setCanvasList } = useSiderStore.getState();
       const canvasTitle = t('common.newCanvas');
 
-      setCanvasList([
-        { id: canvasId, name: canvasTitle, updatedAt: new Date().toJSON(), type: 'canvas' },
-        ...canvasList,
-      ]);
+      setCanvasList(
+        [
+          { id: canvasId, name: canvasTitle, updatedAt: new Date().toJSON(), type: 'canvas' as const },
+          ...canvasList,
+        ].slice(0, 10),
+      );
       setTitle(canvasId, canvasTitle);
 
       // Initialize YJS document

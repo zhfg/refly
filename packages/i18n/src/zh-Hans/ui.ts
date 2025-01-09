@@ -163,7 +163,7 @@ const translations = {
       title: '计划与定价',
       subtitle: '踏上您的 AI 内容创作之旅',
       description: '注册并获得一百万标准模型 token 的免费试用。无需绑定信用卡。',
-      limitedOffer: '年订限时五折优惠！',
+      limitedOffer: '首年订阅限时五折优惠！',
     },
     footer: {
       cta: {
@@ -1066,7 +1066,7 @@ const translations = {
       subscriptionManagement: '管理账单及订阅',
       subscriptionStatus: {
         free: 'FREE',
-        plus: 'PLUS',
+        ultra: 'ULTRA',
         pro: 'PRO',
         max: 'MAX',
       },
@@ -1081,11 +1081,13 @@ const translations = {
           modelToken: 'Token 同时包括模型输入和输出',
           vectorStorage: '用于存储资源和画布的语义化向量数据',
           fileStorage: '用于存储资源文本、画布文本和历史版本、以及上传的文件（图片）数据',
+          mediaCredit: '用于生成一张图或一秒视频',
         },
         vectorStorage: '向量存储',
         fileStorage: '文件存储',
         t1Model: '高阶模型',
         t2Model: '基础模型',
+        mediaCredit: '多媒体积分',
         fileStorageType: {
           note: '画布',
           resource: '资源',
@@ -1102,25 +1104,25 @@ const translations = {
             details: '社区支持（微信或飞书群）',
           },
         },
-        plus: {
-          description: '释放更多创作潜能，体验进阶模型',
+        ultra: {
+          description: '突破所有限制，尽情释放无限创意',
           serviceSupport: {
             name: '服务支持',
-            details: '高优邮件支持',
+            details: '专属微信/ Discord 群聊',
           },
         },
         pro: {
-          description: '专业创作者的理想之选',
+          description: '释放创作潜能，体验进阶模型',
           serviceSupport: {
             name: '服务支持',
             details: '高优邮件支持',
           },
         },
         max: {
-          description: '突破所有限制，尽情释放无限创意',
+          description: '专业创作者的理想之选',
           serviceSupport: {
             name: '服务支持',
-            details: '专属微信/ Discord 群聊',
+            details: '高优邮件支持',
           },
         },
         description: '可随时取消订阅。订阅即表示您同意Refly的',

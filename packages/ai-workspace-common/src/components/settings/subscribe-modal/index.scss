@@ -82,7 +82,7 @@
 
     .pro-plan {
       border-radius: 12px;
-      background: rgb(143, 163, 212);
+      background: rgb(232, 178, 102);
     }
 
     &-item {
@@ -105,7 +105,7 @@
         }
       }
 
-      &.item-plus {
+      &.item-ultra {
         &:hover {
           box-shadow: rgb(0, 134, 201) 0px 0px 0px 2px;
         }
@@ -167,7 +167,7 @@
           background: transparent;
         }
 
-        &--plus {
+        &--ultra {
           border: 1px solid #016aa2;
           &.ant-btn-default {
             &:hover {
