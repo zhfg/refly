@@ -33,7 +33,7 @@ import {
 import { buildSuccessResponse } from '@/utils';
 import { hours, minutes, seconds, Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
-import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from '@refly-packages/utils';
+import { REFRESH_TOKEN_COOKIE } from '@refly-packages/utils';
 
 @Controller('v1/auth')
 export class AuthController {
@@ -135,29 +135,37 @@ export class AuthController {
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
     if (!refreshToken) {
+      this.authService.clearAuthCookie(res);
       throw new UnauthorizedException();
     }
 
-    const tokens = await this.authService.refreshAccessToken(refreshToken);
-
-    this.authService.setAuthCookie(res, tokens);
-    res.status(200).json(buildSuccessResponse());
+    try {
+      const tokens = await this.authService.refreshAccessToken(refreshToken);
+      this.authService.setAuthCookie(res, tokens);
+      res.status(200).json(buildSuccessResponse());
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        this.authService.clearAuthCookie(res);
+      }
+      throw error;
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   async logout(@LoginedUser() user: User, @Res() res: Response) {
-    await this.authService.revokeAllRefreshTokens(user.uid);
+    try {
+      this.logger.log(`Logging out user: ${user.uid}`);
 
-    // Clear cookies
-    res
-      .clearCookie(ACCESS_TOKEN_COOKIE, {
-        domain: this.configService.get('auth.cookieDomain'),
-      })
-      .clearCookie(REFRESH_TOKEN_COOKIE, {
-        domain: this.configService.get('auth.cookieDomain'),
-      })
-      .status(200)
-      .json(buildSuccessResponse());
+      await this.authService.revokeAllRefreshTokens(user.uid);
+
+      this.authService.clearAuthCookie(res);
+
+      this.logger.log(`Successfully logged out user: ${user.uid}`);
+      return res.status(200).json(buildSuccessResponse());
+    } catch (error) {
+      this.logger.error(`Logout failed for user ${user.uid}:`, error.stack);
+      throw error;
+    }
   }
 }

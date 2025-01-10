@@ -5,6 +5,7 @@ import { AuthenticationExpiredError } from '@refly/errors';
 import { extractBaseResp } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getLocale } from '@refly-packages/ai-workspace-common/utils/locale';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/utils/notification';
+import { logout } from '@refly-packages/ai-workspace-common/hooks/use-logout';
 
 let isRefreshing = false;
 let refreshPromise: Promise<void> | null = null;
@@ -80,8 +81,7 @@ export const responseInterceptorWithTokenRefresh = async (response: Response, re
       return retryResponse;
     } catch (error) {
       if (error instanceof AuthenticationExpiredError) {
-        // TODO: Logout
-        return response;
+        await logout();
       } else {
         throw new UnknownError();
       }

@@ -103,52 +103,44 @@ export class AuthService {
   }
 
   async refreshAccessToken(refreshToken: string) {
-    try {
-      const [jti, token] = refreshToken.split('.');
+    const [jti, token] = refreshToken.split('.');
 
-      if (!jti || !token) {
-        throw new UnauthorizedException();
-      }
-
-      // Find the refresh token in the database
-      const storedToken = await this.prisma.refreshToken.findUnique({
-        where: { jti },
-      });
-
-      if (!storedToken || storedToken.revoked || storedToken.expiresAt < new Date()) {
-        throw new UnauthorizedException();
-      }
-
-      // Verify the token
-      const isValid = await argon2.verify(storedToken.hashedToken, token);
-      if (!isValid) {
-        throw new UnauthorizedException();
-      }
-
-      // Revoke the current refresh token (one-time use)
-      await this.prisma.refreshToken.update({
-        where: { jti },
-        data: { revoked: true },
-      });
-
-      // Get the user
-      const user = await this.prisma.user.findUnique({
-        where: { uid: storedToken.uid },
-      });
-
-      if (!user) {
-        throw new AccountNotFoundError();
-      }
-
-      // Generate new tokens
-      return this.login(user);
-    } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-      this.logger.error('Error refreshing token:', error);
-      throw error;
+    if (!jti || !token) {
+      throw new UnauthorizedException();
     }
+
+    // Find the refresh token in the database
+    const storedToken = await this.prisma.refreshToken.findUnique({
+      where: { jti },
+    });
+
+    if (!storedToken || storedToken.revoked || storedToken.expiresAt < new Date()) {
+      throw new UnauthorizedException();
+    }
+
+    // Verify the token
+    const isValid = await argon2.verify(storedToken.hashedToken, token);
+    if (!isValid) {
+      throw new UnauthorizedException();
+    }
+
+    // Revoke the current refresh token (one-time use)
+    await this.prisma.refreshToken.update({
+      where: { jti },
+      data: { revoked: true },
+    });
+
+    // Get the user
+    const user = await this.prisma.user.findUnique({
+      where: { uid: storedToken.uid },
+    });
+
+    if (!user) {
+      throw new AccountNotFoundError();
+    }
+
+    // Generate new tokens
+    return this.login(user);
   }
 
   async revokeAllRefreshTokens(uid: string) {
@@ -177,6 +169,13 @@ export class AuthService {
         secure: true,
         sameSite: 'strict',
       });
+  }
+
+  clearAuthCookie(res: Response) {
+    return res
+      .clearCookie(UID_COOKIE)
+      .clearCookie(ACCESS_TOKEN_COOKIE)
+      .clearCookie(REFRESH_TOKEN_COOKIE);
   }
 
   async genUniqueUsername(candidate: string) {

@@ -21,6 +21,8 @@ import type {
   CheckVerificationData2,
   CheckVerificationError,
   CheckVerificationResponse2,
+  LogoutError,
+  LogoutResponse,
   GetCollabTokenError,
   GetCollabTokenResponse2,
   ListCanvasesData,
@@ -282,6 +284,17 @@ export const checkVerification = <ThrowOnError extends boolean = false>(
   return (options?.client ?? client).post<CheckVerificationResponse2, CheckVerificationError, ThrowOnError>({
     ...options,
     url: '/auth/verification/check',
+  });
+};
+
+/**
+ * Logout
+ * Logout
+ */
+export const logout = <ThrowOnError extends boolean = false>(options?: Options<unknown, ThrowOnError>) => {
+  return (options?.client ?? client).post<LogoutResponse, LogoutError, ThrowOnError>({
+    ...options,
+    url: '/auth/logout',
   });
 };
 

@@ -158,6 +158,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CheckVerificationResponse'
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: Logout
+      description: Logout
+      operationId: logout
+      responses:
+        '200':
+          description: Successful operation
   /collab/getToken:
     get:
       tags:

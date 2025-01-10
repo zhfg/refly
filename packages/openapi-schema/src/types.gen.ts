@@ -2808,6 +2808,10 @@ export type CheckVerificationResponse2 = CheckVerificationResponse;
 
 export type CheckVerificationError = unknown;
 
+export type LogoutResponse = unknown;
+
+export type LogoutError = unknown;
+
 export type GetCollabTokenResponse2 = GetCollabTokenResponse;
 
 export type GetCollabTokenError = unknown;
