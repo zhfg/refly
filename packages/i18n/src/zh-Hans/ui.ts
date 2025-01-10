@@ -180,7 +180,9 @@ const translations = {
       },
       resource: {
         title: '资源',
-        list: ['推特'],
+        twitter: '推特',
+        github: 'GitHub',
+        discord: 'Discord',
       },
       about: {
         title: '关于',

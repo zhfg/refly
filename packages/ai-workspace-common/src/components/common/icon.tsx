@@ -31,7 +31,8 @@ import { RiErrorWarningLine, RiDoubleQuotesL, RiChatHistoryLine, RiChatHistoryFi
 
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BiText } from 'react-icons/bi';
-import { PiNotePencil, PiNotePencilLight } from 'react-icons/pi';
+import { BsDiscord, BsTwitterX, BsGithub, BsEnvelope } from 'react-icons/bs';
+import { PiNotePencil } from 'react-icons/pi';
 import { TfiBlackboard } from 'react-icons/tfi';
 
 import { IoLibraryOutline } from 'react-icons/io5';
@@ -42,7 +43,7 @@ import { AiOutlineShrink } from 'react-icons/ai';
 import { RiExpandDiagonalLine } from 'react-icons/ri';
 import { TbWorldSearch } from 'react-icons/tb';
 import { GrCircleQuestion } from 'react-icons/gr';
-import { FaNoteSticky, FaRegNoteSticky } from 'react-icons/fa6';
+import { FaNoteSticky, FaRegNoteSticky, FaX } from 'react-icons/fa6';
 
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
 import ClaudeIcon from '@refly-packages/ai-workspace-common/assets/claude.svg';
@@ -92,6 +93,11 @@ export const IconSubscription = LuGift;
 export const IconExit = RxExit;
 export const IconExpand = RiExpandDiagonalLine;
 export const IconShrink = AiOutlineShrink;
+
+export const IconX = BsTwitterX;
+export const IconGithub = BsGithub;
+export const IconDiscord = BsDiscord;
+export const IconEmail = BsEnvelope;
 
 export const ModelProviderIcons = {
   openai: OpenAIIcon,
