@@ -146,6 +146,15 @@ const translations = {
       pink: '粉色',
       gray: '灰色',
     },
+    table: {
+      addRowBefore: '在上方插入行',
+      addRowAfter: '在下方插入行',
+      deleteRow: '删除行',
+      addColumnBefore: '在左侧插入列',
+      addColumnAfter: '在右侧插入列',
+      deleteColumn: '删除列',
+      deleteTable: '删除表格',
+    },
   },
   systemMaintenanceShutdown: {
     title: '尊敬的用户，您好！',

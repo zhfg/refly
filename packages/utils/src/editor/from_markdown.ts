@@ -14,7 +14,7 @@ function listIsTight(tokens: readonly Token[], i: number) {
 /// without inline HTML, and producing a document in the basic schema.
 export const defaultMarkdownParser = new MarkdownParser(
   schema,
-  MarkdownIt('commonmark', { html: false }),
+  MarkdownIt('commonmark', { html: false, tables: true }),
   {
     blockquote: { block: 'blockquote' },
     paragraph: { block: 'paragraph' },
@@ -57,6 +57,18 @@ export const defaultMarkdownParser = new MarkdownParser(
       }),
     },
     hardbreak: { node: 'hardBreak' },
+
+    table: { block: 'table' },
+    table_row: { block: 'table_row' },
+    table_cell: {
+      block: 'table_cell',
+      getAttrs: (tok) => ({
+        header: tok.tag === 'th',
+        align: tok.attrGet('style')?.match(/text-align:\s*(left|right|center)/)?.[1] ?? null,
+      }),
+    },
+    thead: { block: 'table_header' },
+    tbody: { block: 'table_body' },
 
     em: {
       mark: 'italic',

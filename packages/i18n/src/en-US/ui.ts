@@ -138,6 +138,15 @@ const translations = {
       pink: 'Pink',
       gray: 'Gray',
     },
+    table: {
+      addRowBefore: 'Add Row Before',
+      addRowAfter: 'Add Row After',
+      deleteRow: 'Delete Row',
+      addColumnBefore: 'Add Column Before',
+      addColumnAfter: 'Add Column After',
+      deleteColumn: 'Delete Column',
+      deleteTable: 'Delete Table',
+    },
   },
   systemMaintenanceShutdown: {
     title: 'Dear Valued Users,',
