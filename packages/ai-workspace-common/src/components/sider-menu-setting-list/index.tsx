@@ -55,7 +55,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
     } else if (key === 'logout') {
       handleLogout();
     } else if (key === 'getHelp') {
-      window.open(`https://twitter.com/tuturetom`, '_blank');
+      window.open(`https://twitter.com/reflyai`, '_blank');
     }
   };
 

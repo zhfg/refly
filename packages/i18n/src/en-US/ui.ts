@@ -189,7 +189,9 @@ const translations = {
       },
       resource: {
         title: 'Resources',
-        list: ['Twitter'],
+        twitter: 'Twitter',
+        github: 'GitHub',
+        discord: 'Discord',
       },
       about: {
         title: 'About',

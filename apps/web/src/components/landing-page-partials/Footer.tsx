@@ -3,9 +3,30 @@ import Logo from "@/assets/logo.svg"
 import { useTranslation } from "react-i18next"
 import "./footer.scss"
 import { Button } from "antd"
-import { IconDown, IconTwitter } from "@arco-design/web-react/icon"
+import { IconDown } from "@arco-design/web-react/icon"
 import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
 import { useAuthStoreShallow } from "@refly-packages/ai-workspace-common/stores/auth"
+import {
+  IconX,
+  IconGithub,
+  IconDiscord,
+  IconEmail,
+} from "@refly-packages/ai-workspace-common/components/common/icon"
+
+const resources = [
+  {
+    title: "twitter",
+    link: "https://twitter.com/reflyai",
+  },
+  {
+    title: "github",
+    link: "https://github.com/refly-ai",
+  },
+  {
+    title: "discord",
+    link: "https://discord.gg/bWjffrb89h",
+  },
+]
 
 function Footer() {
   const { t } = useTranslation()
@@ -82,23 +103,37 @@ function Footer() {
                 <p className="mb-6 max-w-[320px] text-base leading-relaxed text-gray-600">
                   {t("landingPage.anotherDescription")}
                 </p>
-                <div className="flex items-center justify-start gap-8">
+                <div className="flex items-center justify-start gap-4">
                   {/* Social Media Links */}
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
                     <Link
-                      to="https://twitter.com/tuturetom"
+                      to="https://twitter.com/reflyai"
                       target="_blank"
-                      className="rounded-md px-2 py-1 text-gray-600 no-underline transition hover:bg-gray-200"
+                      className="rounded-md px-2 py-1 text-gray-500 no-underline transition hover:text-gray-700"
                       aria-label="Twitter">
-                      <IconTwitter />
+                      <IconX className="flex items-center text-base" />
                     </Link>
-                    {/* <Link
-                      to="https://github.com/pftom/refly"
+                    <Link
+                      to="https://github.com/refly-ai"
                       target="_blank"
-                      className="rounded-md px-2 py-1 text-gray-600 no-underline transition hover:bg-gray-200"
+                      className="rounded-md px-2 py-1 text-gray-500 no-underline transition hover:text-gray-700"
                       aria-label="GitHub">
-                      <IconGithub />
-                    </Link> */}
+                      <IconGithub className="flex items-center text-base" />
+                    </Link>
+                    <Link
+                      to="https://discord.gg/bWjffrb89h"
+                      target="_blank"
+                      className="rounded-md px-2 py-1 text-gray-500 no-underline transition hover:text-gray-700"
+                      aria-label="Discord">
+                      <IconDiscord className="flex items-center text-base" />
+                    </Link>
+                    <Link
+                      to="mailto:support@refly.ai"
+                      target="_blank"
+                      className="rounded-md px-2 py-1 text-gray-500 no-underline transition hover:text-gray-700"
+                      aria-label="Discord">
+                      <IconEmail className="flex items-center text-base" />
+                    </Link>
                   </div>
 
                   {/* Divider */}
@@ -152,15 +187,13 @@ function Footer() {
                       {t("landingPage.footer.resource.title")}
                     </h6>
                     <ul className="list-none text-sm">
-                      {t("landingPage.footer.resource.list", {
-                        returnObjects: true,
-                      })?.map((item: string, index: number) => (
+                      {resources.map((item, index) => (
                         <li key={index} className="mb-1">
                           <Link
-                            to="https://twitter.com/tuturetom"
+                            to={item.link}
                             target="_blank"
                             className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
-                            {item}
+                            {t(`landingPage.footer.resource.${item.title}`)}
                           </Link>
                         </li>
                       ))}
