@@ -1,13 +1,14 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import * as Y from 'yjs';
 import { Request } from 'express';
 import { WebSocket } from 'ws';
 import { Server, Hocuspocus } from '@hocuspocus/server';
-import { verify, JwtPayload } from 'jsonwebtoken';
 import { MINIO_INTERNAL } from '@/common/minio.service';
 import { MinioService } from '@/common/minio.service';
 import { RAGService } from '@/rag/rag.service';
 import { Prisma } from '@prisma/client';
+import { User } from '@refly-packages/openapi-schema';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { MiscService } from '@/misc/misc.service';
 import { ConfigService } from '@nestjs/config';
@@ -53,20 +54,26 @@ export class CollabService {
     this.server.handleConnection(connection, request);
   }
 
+  async signCollabToken(user: User) {
+    const token = randomUUID();
+    // Store token in Redis with 5 minutes expiration
+    await this.redis.setex(`collab:token:${token}`, 5 * 60, user.uid);
+    return token;
+  }
+
+  private async validateCollabToken(token: string): Promise<string | null> {
+    return this.redis.get(`collab:token:${token}`);
+  }
+
   async authenticate({ token, documentName }: { token: string; documentName: string }) {
-    const decoded = verify(token, this.config.getOrThrow('auth.jwt.secret'));
-    if (!decoded) {
-      throw new Error('Not authorized!');
-    }
-    let payload: JwtPayload;
-    if (typeof decoded === 'string') {
-      payload = JSON.parse(decoded);
-    } else {
-      payload = decoded as JwtPayload;
+    // First validate the token from Redis
+    const uid = await this.validateCollabToken(token);
+    if (!uid) {
+      throw new Error('Invalid or expired collab token');
     }
 
     const user = await this.prisma.user.findFirst({
-      where: { uid: payload.uid },
+      where: { uid },
     });
     if (!user) {
       throw new Error(`user not found`);
@@ -81,7 +88,7 @@ export class CollabService {
         doc = await this.prisma.document.create({
           data: {
             docId: documentName,
-            uid: payload.uid,
+            uid: user.uid,
             title: '',
           },
         });
@@ -96,7 +103,7 @@ export class CollabService {
         canvas = await this.prisma.canvas.create({
           data: {
             canvasId: documentName,
-            uid: payload.uid,
+            uid: user.uid,
             title: '',
           },
         });
@@ -107,7 +114,7 @@ export class CollabService {
       throw new Error(`unknown document name: ${documentName}`);
     }
 
-    if (context.entity.uid !== payload.uid) {
+    if (context.entity.uid !== user.uid) {
       throw new Error(`user not authorized: ${documentName}`);
     }
 

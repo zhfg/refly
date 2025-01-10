@@ -158,6 +158,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CheckVerificationResponse'
+  /collab/getToken:
+    get:
+      tags:
+        - collab
+      summary: Get collab token
+      description: Get collab token
+      operationId: getCollabToken
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetCollabTokenResponse'
   /canvas/list:
     get:
       tags:
@@ -2800,6 +2814,21 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/UserSettings'
+    CollabTokenData:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Collab token
+    GetCollabTokenResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CollabTokenData'
     BaseResponse:
       type: object
       required:

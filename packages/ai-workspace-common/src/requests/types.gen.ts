@@ -1263,6 +1263,17 @@ export type GetUserSettingsResponse = BaseResponse & {
     data?: UserSettings;
 };
 
+export type CollabTokenData = {
+    /**
+     * Collab token
+     */
+    token: string;
+};
+
+export type GetCollabTokenResponse = BaseResponse & {
+    data?: CollabTokenData;
+};
+
 export type BaseResponse = {
     /**
      * Whether the operation was successful
@@ -2759,6 +2770,10 @@ export type CheckVerificationData2 = {
 export type CheckVerificationResponse2 = (CheckVerificationResponse);
 
 export type CheckVerificationError = unknown;
+
+export type GetCollabTokenResponse2 = (GetCollabTokenResponse);
+
+export type GetCollabTokenError = unknown;
 
 export type ListCanvasesData = {
     query?: {

@@ -1633,6 +1633,33 @@ export const GetUserSettingsResponseSchema = {
   ],
 } as const;
 
+export const CollabTokenDataSchema = {
+  type: 'object',
+  required: ['token'],
+  properties: {
+    token: {
+      type: 'string',
+      description: 'Collab token',
+    },
+  },
+} as const;
+
+export const GetCollabTokenResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/CollabTokenData',
+        },
+      },
+    },
+  ],
+} as const;
+
 export const BaseResponseSchema = {
   type: 'object',
   required: ['success'],

@@ -21,6 +21,8 @@ import type {
   CheckVerificationData2,
   CheckVerificationError,
   CheckVerificationResponse2,
+  GetCollabTokenError,
+  GetCollabTokenResponse2,
   ListCanvasesData,
   ListCanvasesError,
   ListCanvasesResponse,
@@ -280,6 +282,17 @@ export const checkVerification = <ThrowOnError extends boolean = false>(
   return (options?.client ?? client).post<CheckVerificationResponse2, CheckVerificationError, ThrowOnError>({
     ...options,
     url: '/auth/verification/check',
+  });
+};
+
+/**
+ * Get collab token
+ * Get collab token
+ */
+export const getCollabToken = <ThrowOnError extends boolean = false>(options?: Options<unknown, ThrowOnError>) => {
+  return (options?.client ?? client).get<GetCollabTokenResponse2, GetCollabTokenError, ThrowOnError>({
+    ...options,
+    url: '/collab/getToken',
   });
 };
 

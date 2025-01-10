@@ -8,7 +8,7 @@ import {
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { ACCESS_TOKEN_COOKIE } from '../../../../../packages/utils/src/cookie';
+import { ACCESS_TOKEN_COOKIE } from '@refly-packages/utils';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {

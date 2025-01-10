@@ -14,6 +14,7 @@ import {
   genVerificationSessionID,
   pick,
   REFRESH_TOKEN_COOKIE,
+  UID_COOKIE,
 } from '@refly-packages/utils';
 import { PrismaService } from '@/common/prisma.service';
 import { MiscService } from '@/misc/misc.service';
@@ -77,6 +78,7 @@ export class AuthService {
     const refreshToken = await this.generateRefreshToken(user.uid);
 
     return {
+      uid: user.uid,
       accessToken,
       refreshToken,
     };
@@ -156,10 +158,16 @@ export class AuthService {
     });
   }
 
-  setAuthCookie(res: Response, { accessToken, refreshToken }: TokenData) {
+  setAuthCookie(res: Response, { uid, accessToken, refreshToken }: TokenData) {
     return res
+      .cookie(UID_COOKIE, uid, {
+        domain: this.configService.get('auth.cookieDomain'),
+        secure: true,
+        sameSite: 'strict',
+      })
       .cookie(ACCESS_TOKEN_COOKIE, accessToken, {
         domain: this.configService.get('auth.cookieDomain'),
+        httpOnly: true,
         secure: true,
         sameSite: 'strict',
       })
