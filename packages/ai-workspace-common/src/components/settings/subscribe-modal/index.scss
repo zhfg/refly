@@ -82,7 +82,7 @@
 
     .pro-plan {
       border-radius: 12px;
-      background: rgb(143, 163, 212);
+      background: rgb(232, 178, 102);
     }
 
     &-item {
@@ -105,7 +105,7 @@
         }
       }
 
-      &.item-plus {
+      &.item-ultra {
         &:hover {
           box-shadow: rgb(0, 134, 201) 0px 0px 0px 2px;
         }
@@ -167,7 +167,7 @@
           background: transparent;
         }
 
-        &--plus {
+        &--ultra {
           border: 1px solid #016aa2;
           &.ant-btn-default {
             &:hover {
@@ -181,12 +181,8 @@
         &--pro {
           border: 1px solid #3537cc;
           &.ant-btn-default {
-            background: linear-gradient(to right, #068cd4, #3537cc);
-            color: #fff;
-            border-color: #068cd4;
-
             &:hover {
-              background: linear-gradient(to right, #005f8c, #2a2a9a);
+              background: linear-gradient(to right, #068cd4, #3537cc);
               color: #fff;
               border-color: #068cd4;
             }
@@ -195,11 +191,14 @@
 
         &--max {
           border: 1px solid #f26725;
+          background: linear-gradient(to right, #f69e75, #f26725);
+          color: #fff;
+          border-color: #f69e75;
           &.ant-btn-default {
             &:hover {
-              background: linear-gradient(to right, #f69e75, #f26725);
+              background: linear-gradient(to right, #f7a985, #d34b0c);
               color: #fff;
-              border-color: #f69e75;
+              border-color: #f7a985;
             }
           }
         }

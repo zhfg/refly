@@ -971,7 +971,7 @@ export type SubscriptionInterval = 'monthly' | 'yearly';
 /**
  * Subscription plan type
  */
-export type SubscriptionPlanType = 'free' | 'plus' | 'pro' | 'max';
+export type SubscriptionPlanType = 'free' | 'plus' | 'pro' | 'max' | 'ultra';
 
 /**
  * Subscription status

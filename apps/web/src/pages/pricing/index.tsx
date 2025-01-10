@@ -24,7 +24,7 @@ const PricingPage = () => {
           <Header />
         </>
       )}
-      <div className="mx-auto my-10 w-[70%] max-w-7xl bg-white">
+      <div className="my-10 bg-white">
         <div className="my-10 flex flex-col items-center justify-center gap-5">
           <div className="w-fit bg-gradient-to-r from-green-700 to-green-400 bg-clip-text text-lg font-bold text-transparent">
             {t("landingPage.pricing.title")}

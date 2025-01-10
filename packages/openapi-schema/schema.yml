@@ -2459,6 +2459,7 @@ components:
         - plus
         - pro
         - max
+        - ultra
     SubscriptionStatus:
       type: string
       description: Subscription status

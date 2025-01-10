@@ -302,7 +302,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
           ? "h-[calc(100vh)]"
           : "h-[calc(100vh-100px)] rounded-r-lg",
       )}>
-      <div className="flex h-full flex-col">
+      <div className="flex h-full flex-col overflow-y-auto">
         <SiderLogo
           source={source}
           navigate={path => navigate(path)}
