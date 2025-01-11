@@ -130,10 +130,10 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
 
   const { data } = node;
 
-  const title = data?.title ?? result?.title;
-  const actionMeta = data?.metadata?.actionMeta ?? result?.actionMeta;
-  const version = data?.metadata?.version ?? result?.version ?? 0;
-  const modelInfo = data?.metadata?.modelInfo ?? result?.modelInfo;
+  const title = result?.title ?? data?.title;
+  const actionMeta = result?.actionMeta ?? data?.metadata?.actionMeta;
+  const version = result?.version ?? data?.metadata?.version ?? 0;
+  const modelInfo = result?.modelInfo ?? data?.metadata?.modelInfo;
 
   const { steps = [], context, history = [] } = result ?? {};
   const contextItems = useMemo(() => {

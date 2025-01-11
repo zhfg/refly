@@ -343,6 +343,8 @@ export const useInvokeAction = () => {
 
   const invokeAction = (payload: SkillNodeMeta, target: Entity) => {
     payload.resultId ||= genActionResultID();
+    payload.selectedSkill ||= { name: 'commonQnA' };
+
     const { query, modelInfo, contextItems, selectedSkill, resultId, version = 0 } = payload;
     const { context, resultHistory } = convertContextItemsToInvokeParams(contextItems, (item) =>
       findThreadHistory({ resultId: item.entityId }).map((node) => ({
