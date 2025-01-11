@@ -260,7 +260,7 @@ export const SearchList = (props: SearchListProps) => {
         ],
       }}
     >
-      {children}
+      <div>{children}</div>
     </Popover>
   );
 };
