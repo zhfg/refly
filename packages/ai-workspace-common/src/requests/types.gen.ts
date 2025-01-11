@@ -896,6 +896,10 @@ export type ActionResult = {
      */
     readonly resultId: string;
     /**
+     * Action result version
+     */
+    version?: number;
+    /**
      * Action result title
      */
     title?: string;
@@ -966,7 +970,7 @@ export type SubscriptionInterval = 'monthly' | 'yearly';
 /**
  * Subscription plan type
  */
-export type SubscriptionPlanType = 'free' | 'plus' | 'pro' | 'max';
+export type SubscriptionPlanType = 'free' | 'plus' | 'pro' | 'max' | 'ultra';
 
 /**
  * Subscription status
@@ -1516,6 +1520,10 @@ export type SkillEvent = {
      * Result ID
      */
     resultId?: string;
+    /**
+     * Result version
+     */
+    version?: number;
     /**
      * Event content. Only present when `event` is `stream`.
      */
@@ -3167,6 +3175,10 @@ export type GetActionResultData = {
          * Action result ID
          */
         resultId: string;
+        /**
+         * Action result version
+         */
+        version?: number;
     };
 };
 

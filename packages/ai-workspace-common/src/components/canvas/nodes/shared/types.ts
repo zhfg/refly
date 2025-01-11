@@ -45,6 +45,7 @@ export interface ResourceNodeMeta {
 export type SkillNodeMeta = {
   query: string;
   resultId?: string;
+  version?: number;
   selectedSkill?: Skill;
   modelInfo?: ModelInfo;
   contextItems?: IContextItem[];
@@ -57,6 +58,7 @@ export type ToolNodeMeta = {
 
 export type ResponseNodeMeta = {
   status: ActionStatus;
+  version?: number;
   modelInfo?: ModelInfo;
   tokenUsage?: TokenUsageItem[];
   actionMeta?: ActionMeta;

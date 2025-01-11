@@ -125,6 +125,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   const { data } = node;
   const { title, steps = [], context, history = [], actionMeta, modelInfo } = result ?? {};
 
+  const version = data?.metadata?.version ?? result?.version ?? 0;
   const contextItems = useMemo(() => {
     // Prefer contextItems from node metadata
     if (data.metadata?.contextItems) {
@@ -160,11 +161,12 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
 
   return (
     <div className="flex flex-col space-y-4 p-4 h-full max-w-[1024px] mx-auto">
-      {!isPending && (
+      {result && (
         <>
           <EditChatInput
             enabled={editMode}
             resultId={resultId}
+            version={version}
             contextItems={contextItems}
             query={title}
             actionMeta={actionMeta}

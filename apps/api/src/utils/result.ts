@@ -97,7 +97,13 @@ export class ResultAggregator {
     this.data[step.name] = step;
   }
 
-  getSteps({ resultId }: { resultId: string }): Prisma.ActionStepCreateManyInput[] {
+  getSteps({
+    resultId,
+    version,
+  }: {
+    resultId: string;
+    version: number;
+  }): Prisma.ActionStepCreateManyInput[] {
     return this.stepNames.map((stepName, order) => {
       const { name, content, structuredData, artifacts, usageItems, logs } = this.data[stepName];
       const aggregatedUsage = aggregateTokenUsage(usageItems);
@@ -106,6 +112,7 @@ export class ResultAggregator {
         name,
         content,
         resultId,
+        version,
         order,
         structuredData: JSON.stringify(structuredData),
         artifacts: JSON.stringify(Object.values(artifacts)),

@@ -20,6 +20,7 @@ import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find
 interface EditChatInputProps {
   enabled: boolean;
   resultId: string;
+  version?: number;
   contextItems: IContextItem[];
   query: string;
   modelInfo: ModelInfo;
@@ -32,7 +33,7 @@ interface EditChatInputProps {
 }
 
 const EditChatInputComponent = (props: EditChatInputProps) => {
-  const { enabled, resultId, contextItems, query, modelInfo, actionMeta, setEditMode, readonly } = props;
+  const { enabled, resultId, version, contextItems, query, modelInfo, actionMeta, setEditMode, readonly } = props;
 
   const { getEdges, getNodes, deleteElements, addEdges } = useReactFlow();
   const [editQuery, setEditQuery] = useState<string>(query);
@@ -69,6 +70,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
     invokeAction(
       {
         resultId,
+        version: (version ?? 0) + 1,
         query: editQuery,
         contextItems: editContextItems,
         modelInfo: editModelInfo,

@@ -56,6 +56,7 @@ export const useInvokeAction = () => {
           status: payload.status,
           actionMeta: payload.actionMeta,
           modelInfo: payload.modelInfo,
+          version: event?.version ?? payload.version,
         },
       };
 
@@ -342,7 +343,7 @@ export const useInvokeAction = () => {
 
   const invokeAction = (payload: SkillNodeMeta, target: Entity) => {
     payload.resultId ||= genActionResultID();
-    const { query, modelInfo, contextItems, selectedSkill, resultId } = payload;
+    const { query, modelInfo, contextItems, selectedSkill, resultId, version = 0 } = payload;
     const { context, resultHistory } = convertContextItemsToInvokeParams(contextItems, (item) =>
       findThreadHistory({ resultId: item.entityId }).map((node) => ({
         title: node.data?.title,
@@ -364,6 +365,7 @@ export const useInvokeAction = () => {
 
     onUpdateResult(resultId, {
       resultId,
+      version,
       type: 'skill',
       actionMeta: selectedSkill,
       modelInfo,

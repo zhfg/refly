@@ -23,7 +23,6 @@ import {
   IconToken,
   preloadModelIcons,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
@@ -178,7 +177,16 @@ export const SkillResponseNode = memo(
     });
     const moveableRef = useRef<Moveable>(null);
 
-    const { status, artifacts, currentLog: log, modelInfo, structuredData, actionMeta, tokenUsage } = metadata ?? {};
+    const {
+      status,
+      artifacts,
+      currentLog: log,
+      modelInfo,
+      structuredData,
+      actionMeta,
+      tokenUsage,
+      version,
+    } = metadata ?? {};
     const sources = Array.isArray(structuredData?.sources) ? structuredData?.sources : [];
 
     const logTitle = log
@@ -196,16 +204,16 @@ export const SkillResponseNode = memo(
         })
       : '';
 
-    const [shouldPoll, setShouldPoll] = useState(false);
+    const [pollingEnabled, setPollingEnabled] = useState(false);
 
     useEffect(() => {
       const timer = setTimeout(() => {
-        setShouldPoll(true);
+        setPollingEnabled(true);
       }, POLLING_COOLDOWN_TIME);
 
       return () => {
         clearTimeout(timer);
-        setShouldPoll(false);
+        setPollingEnabled(false);
       };
     }, [content, status, artifacts?.length, sources.length]);
 
@@ -213,14 +221,14 @@ export const SkillResponseNode = memo(
 
     const updateActionResult = useActionResultStoreShallow((state) => state.updateActionResult);
 
-    const { data: result, error } = useGetActionResult({ query: { resultId: entityId } }, null, {
-      enabled: Boolean(entityId) && statusShouldPoll && shouldPoll,
+    const { data: result, error } = useGetActionResult({ query: { resultId: entityId, version } }, null, {
+      enabled: Boolean(entityId) && statusShouldPoll && pollingEnabled,
       refetchInterval: POLLING_INTERVAL,
     });
 
     useEffect(() => {
       if ((result && !result.success) || error) {
-        setShouldPoll(false);
+        setPollingEnabled(false);
       }
     }, [result, error]);
 
@@ -237,7 +245,12 @@ export const SkillResponseNode = memo(
       const remoteStatus = remoteResult?.status;
       const nodeStatus = data?.metadata?.status;
 
-      if (shouldPoll && remoteStatus && (remoteStatus === 'finish' || remoteStatus === 'failed')) {
+      // If the version doesn't match, skill update the node
+      if (remoteResult?.version !== data?.metadata?.version) {
+        return;
+      }
+
+      if (pollingEnabled && remoteStatus && (remoteStatus === 'finish' || remoteStatus === 'failed')) {
         let shouldUpdate = false;
         let nodeDataUpdates: Partial<CanvasNodeData<ResponseNodeMeta>> = {};
 
@@ -263,7 +276,7 @@ export const SkillResponseNode = memo(
           updateActionResult(entityId, remoteResult);
         }
       }
-    }, [shouldPoll, remoteResult, data]);
+    }, [pollingEnabled, remoteResult, data]);
 
     // Get query and response content from result
     const query = title;
@@ -295,8 +308,8 @@ export const SkillResponseNode = memo(
 
       // Disable polling temporarily after rerun
       updateSize({ width: 288, height: 'auto' });
-      setShouldPoll(false);
-      setTimeout(() => setShouldPoll(true), POLLING_COOLDOWN_TIME);
+      setPollingEnabled(false);
+      setTimeout(() => setPollingEnabled(true), POLLING_COOLDOWN_TIME);
 
       patchNodeData(id, {
         ...data,
@@ -306,7 +319,6 @@ export const SkillResponseNode = memo(
         },
       });
 
-      // TODO: check if rerun will drop other param
       invokeAction(
         {
           resultId: entityId,

@@ -24,6 +24,7 @@ export interface SkillTimeoutCheckJobData {
   uid: string;
   type: 'idle' | 'execution';
   resultId: string;
+  version?: number;
 }
 
 export function skillInstancePO2DTO(skill: SkillInstanceModel): SkillInstance {
