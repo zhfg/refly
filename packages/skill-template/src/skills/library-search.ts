@@ -81,7 +81,7 @@ export class LibrarySearch extends BaseSkill {
     const { contextStr, sources } = librarySearchContext;
 
     // Set current step for answer generation
-    config.metadata.step = { name: 'answerGeneration' };
+    config.metadata.step = { name: 'answerQuestion' };
 
     // Build messages for the model
     const module = {

@@ -48,7 +48,7 @@ const translations = {
       webSearch: {
         name: 'Web Search',
       },
-      answerGeneration: {
+      answerQuestion: {
         name: 'Answer Generation',
       },
     },
@@ -61,7 +61,7 @@ const translations = {
       librarySearch: {
         name: 'Library Search',
       },
-      answerGeneration: {
+      answerQuestion: {
         name: 'Answer Generation',
       },
     },

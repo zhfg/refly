@@ -48,7 +48,7 @@ const translations = {
       webSearch: {
         name: '网络搜索',
       },
-      answerGeneration: {
+      answerQuestion: {
         name: '生成答案',
       },
     },
@@ -61,7 +61,7 @@ const translations = {
       librarySearch: {
         name: '知识库搜索',
       },
-      answerGeneration: {
+      answerQuestion: {
         name: '生成答案',
       },
     },
