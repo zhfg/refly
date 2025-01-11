@@ -80,7 +80,7 @@ model User {
   /// Output language setting
   outputLocale   String?   @map("output_locale")
   /// Whether the user has beta access
-  hasBetaAccess  Boolean   @default(false) @map("has_beta_access")
+  hasBetaAccess  Boolean   @default(true) @map("has_beta_access")
   /// Stripe customer ID
   customerId     String?   @map("customer_id")
   /// Stripe subscription ID
