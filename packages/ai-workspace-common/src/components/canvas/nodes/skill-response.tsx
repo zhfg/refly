@@ -28,13 +28,11 @@ import { LOCALE } from '@refly/common-types';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useGetActionResult } from '@refly-packages/ai-workspace-common/queries';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
 import { ModelProviderIcons } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
-import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { usePatchNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-patch-node-data';
 import { CanvasNodeType, Source } from '@refly/openapi-schema';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
@@ -45,13 +43,9 @@ import { convertResultContextToItems } from '@refly-packages/ai-workspace-common
 
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
-// import { NodeHeader } from '../shared/node-header';
 import { ContentPreview } from './shared/content-preview';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
-
-const POLLING_INTERVAL = 3000;
-const POLLING_COOLDOWN_TIME = 15000;
 
 const NodeHeader = memo(({ query, skillName, skill }: { query: string; skillName: string; skill: any }) => {
   return (
@@ -177,16 +171,7 @@ export const SkillResponseNode = memo(
     });
     const moveableRef = useRef<Moveable>(null);
 
-    const {
-      status,
-      artifacts,
-      currentLog: log,
-      modelInfo,
-      structuredData,
-      actionMeta,
-      tokenUsage,
-      version,
-    } = metadata ?? {};
+    const { status, artifacts, currentLog: log, modelInfo, structuredData, actionMeta, tokenUsage } = metadata ?? {};
     const sources = Array.isArray(structuredData?.sources) ? structuredData?.sources : [];
 
     const logTitle = log
@@ -204,89 +189,12 @@ export const SkillResponseNode = memo(
         })
       : '';
 
-    const [pollingEnabled, setPollingEnabled] = useState(false);
-
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        setPollingEnabled(true);
-      }, POLLING_COOLDOWN_TIME);
-
-      return () => {
-        clearTimeout(timer);
-        setPollingEnabled(false);
-      };
-    }, [content, status, artifacts?.length, sources.length]);
-
-    const statusShouldPoll = !status || status === 'executing' || status === 'waiting';
-
-    const updateActionResult = useActionResultStoreShallow((state) => state.updateActionResult);
-
-    const { data: result, error } = useGetActionResult({ query: { resultId: entityId, version } }, null, {
-      enabled: Boolean(entityId) && statusShouldPoll && pollingEnabled,
-      refetchInterval: POLLING_INTERVAL,
-    });
-
-    useEffect(() => {
-      if ((result && !result.success) || error) {
-        setPollingEnabled(false);
-      }
-    }, [result, error]);
-
-    const remoteResult = result?.data;
-
     const skill = {
       name: actionMeta?.name || '',
       icon: actionMeta?.icon,
     };
     const skillName = actionMeta?.name;
     const model = modelInfo?.label;
-
-    useEffect(() => {
-      const remoteStatus = remoteResult?.status;
-      const nodeStatus = data?.metadata?.status;
-      const remoteVersion = remoteResult?.version ?? 0;
-      const nodeVersion = data?.metadata?.version ?? 0;
-
-      // If the remote version is less than the node version, skill update the node
-      if (remoteVersion < nodeVersion) {
-        return;
-      }
-
-      if (pollingEnabled && remoteStatus && (remoteStatus === 'finish' || remoteStatus === 'failed')) {
-        let shouldUpdate = false;
-        let nodeDataUpdates: Partial<CanvasNodeData<ResponseNodeMeta>> = {};
-
-        if (nodeStatus !== remoteStatus) {
-          shouldUpdate = true;
-          nodeDataUpdates.metadata = {
-            status: remoteStatus,
-          };
-        }
-
-        if (remoteVersion > nodeVersion) {
-          shouldUpdate = true;
-          nodeDataUpdates.metadata = {
-            status: remoteStatus,
-            version: remoteVersion,
-          };
-        }
-
-        const remoteContent = remoteResult?.steps
-          ?.map((s) => s.content)
-          .filter(Boolean)
-          .join('\n');
-
-        if (remoteStatus === 'finish' && data?.contentPreview !== remoteContent) {
-          shouldUpdate = true;
-          nodeDataUpdates.contentPreview = remoteContent;
-        }
-
-        if (shouldUpdate) {
-          patchNodeData(id, nodeDataUpdates);
-          updateActionResult(entityId, remoteResult);
-        }
-      }
-    }, [pollingEnabled, remoteResult, data]);
 
     // Get query and response content from result
     const query = title;
@@ -316,10 +224,7 @@ export const SkillResponseNode = memo(
 
       message.info(t('canvas.skillResponse.startRerun'));
 
-      // Disable polling temporarily after rerun
       updateSize({ width: 288, height: 'auto' });
-      setPollingEnabled(false);
-      setTimeout(() => setPollingEnabled(true), POLLING_COOLDOWN_TIME);
 
       patchNodeData(id, {
         ...data,
@@ -561,7 +466,7 @@ export const SkillResponseNode = memo(
                     </div>
                   )}
 
-                  {(status === 'waiting' || status === 'executing') && !content && !artifacts?.length && (
+                  {(status === 'waiting' || status === 'executing') && (
                     <div className="flex items-center gap-2 bg-gray-100 rounded-sm p-2">
                       <IconLoading className="h-3 w-3 animate-spin text-green-500" />
                       <span className="text-xs text-gray-500 max-w-48 truncate">
