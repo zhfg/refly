@@ -244,9 +244,11 @@ export const SkillResponseNode = memo(
     useEffect(() => {
       const remoteStatus = remoteResult?.status;
       const nodeStatus = data?.metadata?.status;
+      const remoteVersion = remoteResult?.version ?? 0;
+      const nodeVersion = data?.metadata?.version ?? 0;
 
-      // If the version doesn't match, skill update the node
-      if (remoteResult?.version !== data?.metadata?.version) {
+      // If the remote version is less than the node version, skill update the node
+      if (remoteVersion < nodeVersion) {
         return;
       }
 
@@ -258,6 +260,14 @@ export const SkillResponseNode = memo(
           shouldUpdate = true;
           nodeDataUpdates.metadata = {
             status: remoteStatus,
+          };
+        }
+
+        if (remoteVersion > nodeVersion) {
+          shouldUpdate = true;
+          nodeDataUpdates.metadata = {
+            status: remoteStatus,
+            version: remoteVersion,
           };
         }
 
@@ -420,7 +430,6 @@ export const SkillResponseNode = memo(
       });
 
       if (!resultData?.success || !resultData.data) {
-        message.error(t('canvas.nodePreview.resultNotFound'));
         return;
       }
 
@@ -497,7 +506,6 @@ export const SkillResponseNode = memo(
       };
     }, [id, handleRerun, handleAddToContext, handleInsertToDoc, handleCreateDocument, deleteNode]);
 
-    // 在组件挂载时预加载图标
     useEffect(() => {
       preloadModelIcons();
     }, []);
@@ -569,7 +577,7 @@ export const SkillResponseNode = memo(
                     </div>
                   )}
 
-                  {sources.length > 0 && (
+                  {status !== 'failed' && sources.length > 0 && (
                     <div
                       className="flex items-center justify-between gap-2 border-gray-100 border-solid rounded-sm p-2 hover:bg-gray-50 cursor-pointer"
                       onClick={handleClickSources}
@@ -584,7 +592,7 @@ export const SkillResponseNode = memo(
                     </div>
                   )}
 
-                  {artifacts?.length > 0 && (
+                  {status !== 'failed' && artifacts?.length > 0 && (
                     <div className="flex items-center gap-2">
                       {artifacts.map((artifact) => (
                         <div
@@ -600,7 +608,7 @@ export const SkillResponseNode = memo(
                     </div>
                   )}
 
-                  {content && (
+                  {status !== 'failed' && content && (
                     <ContentPreview
                       content={content || t('canvas.nodePreview.resource.noContentPreview')}
                       sizeMode={sizeMode}

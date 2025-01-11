@@ -43,7 +43,7 @@ export interface ResourceNodeMeta {
 }
 
 export type SkillNodeMeta = {
-  query: string;
+  query?: string;
   resultId?: string;
   version?: number;
   selectedSkill?: Skill;
