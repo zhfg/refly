@@ -33,7 +33,7 @@ import {
 import { buildSuccessResponse } from '@/utils';
 import { hours, minutes, seconds, Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
-import { REFRESH_TOKEN_COOKIE } from '@refly-packages/utils';
+import { LEGACY_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from '@refly-packages/utils';
 
 @Controller('v1/auth')
 export class AuthController {
@@ -133,6 +133,13 @@ export class AuthController {
 
   @Post('refreshToken')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
+    const legacyToken = req.cookies?.[LEGACY_TOKEN_COOKIE];
+    if (legacyToken) {
+      await this.authService.processLegacyToken(legacyToken, res);
+      res.status(200).json(buildSuccessResponse());
+      return;
+    }
+
     const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
     if (!refreshToken) {
       this.authService.clearAuthCookie(res);

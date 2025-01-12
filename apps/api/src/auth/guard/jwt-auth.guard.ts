@@ -8,7 +8,7 @@ import {
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { ACCESS_TOKEN_COOKIE } from '@refly-packages/utils';
+import { ACCESS_TOKEN_COOKIE, LEGACY_TOKEN_COOKIE } from '@refly-packages/utils';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -51,6 +51,13 @@ export class JwtAuthGuard implements CanActivate {
     const token = request.cookies?.[ACCESS_TOKEN_COOKIE];
     if (token) {
       return token;
+    }
+
+    // Try to get token from legacy cookie
+    // TODO: remove this after all users have migrated to new token
+    const legacyToken = request.cookies?.[LEGACY_TOKEN_COOKIE];
+    if (legacyToken) {
+      return legacyToken;
     }
 
     return undefined;

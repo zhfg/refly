@@ -15,12 +15,9 @@ const requestQueue: Array<{
   failedRequest: Request;
 }> = [];
 
-export const refreshTokenAndRetry = async (failedRequest: Request): Promise<Response> => {
-  // If there's already a refresh in progress, queue this request
+export const refreshToken = async (): Promise<void> => {
   if (isRefreshing) {
-    return new Promise<Response>((resolve, reject) => {
-      requestQueue.push({ resolve, reject, failedRequest });
-    });
+    return refreshPromise!;
   }
 
   try {
@@ -31,9 +28,6 @@ export const refreshTokenAndRetry = async (failedRequest: Request): Promise<Resp
         credentials: 'include',
       });
 
-      console.log('refreshTokenAndRetry response', response);
-
-      // Refresh token returns 401 again, which means the refresh token is expired
       if (response.status === 401) {
         throw new AuthenticationExpiredError();
       }
@@ -43,10 +37,26 @@ export const refreshTokenAndRetry = async (failedRequest: Request): Promise<Resp
       }
     })();
 
-    // Wait for the refresh token request to complete
-    await refreshPromise;
+    return await refreshPromise;
+  } catch (error) {
+    throw error;
+  } finally {
+    isRefreshing = false;
+    refreshPromise = null;
+  }
+};
 
-    // Process all queued requests
+export const refreshTokenAndRetry = async (failedRequest: Request): Promise<Response> => {
+  if (requestQueue.length > 0) {
+    return new Promise<Response>((resolve, reject) => {
+      requestQueue.push({ resolve, reject, failedRequest });
+    });
+  }
+
+  try {
+    await refreshToken();
+
+    // Process the current request
     const retryResponse = await fetch(failedRequest);
 
     // Retry all queued requests
@@ -68,9 +78,6 @@ export const refreshTokenAndRetry = async (failedRequest: Request): Promise<Resp
       reject(error);
     }
     throw error;
-  } finally {
-    isRefreshing = false;
-    refreshPromise = null;
   }
 };
 

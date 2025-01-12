@@ -12,6 +12,7 @@ import {
   ACCESS_TOKEN_COOKIE,
   genUID,
   genVerificationSessionID,
+  LEGACY_TOKEN_COOKIE,
   pick,
   REFRESH_TOKEN_COOKIE,
   UID_COOKIE,
@@ -150,6 +151,22 @@ export class AuthService {
     });
   }
 
+  async processLegacyToken(token: string, res: Response) {
+    let payload: User;
+    try {
+      payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get('auth.jwt.secret'),
+      });
+    } catch (error) {
+      this.logger.warn(`legacy token verify not valid: ${error}`);
+      throw new UnauthorizedException();
+    }
+
+    const tokens = await this.login(payload);
+    this.setAuthCookie(res, tokens);
+    res.clearCookie(LEGACY_TOKEN_COOKIE);
+  }
+
   setAuthCookie(res: Response, { uid, accessToken, refreshToken }: TokenData) {
     return res
       .cookie(UID_COOKIE, uid, {
@@ -229,7 +246,6 @@ export class AuthService {
     }
 
     // oauth profile returns no email, this is invalid
-    // TODO: Optimize error code
     if (emails?.length === 0) {
       this.logger.warn(`emails is empty, invalid oauth`);
       throw new OAuthError();
