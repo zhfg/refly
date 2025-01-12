@@ -121,12 +121,12 @@ ModeSelector.displayName = 'ModeSelector';
 const ZoomControls = memo(({ currentZoom, onZoomIn, onZoomOut, canZoomIn, canZoomOut, t }: ZoomControlsProps) => (
   <>
     <TooltipButton
-      tooltip={t('canvas.toolbar.tooltip.zoomIn')}
-      onClick={onZoomIn}
-      disabled={!canZoomIn}
-      className={`${buttonClass} ${!canZoomIn ? 'opacity-50 cursor-not-allowed' : ''}`}
+      tooltip={t('canvas.toolbar.tooltip.zoomOut')}
+      onClick={onZoomOut}
+      disabled={!canZoomOut}
+      className={`${buttonClass} ${!canZoomOut ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
-      <LuZoomIn className={iconClass} size={16} />
+      <LuZoomOut className={iconClass} size={16} />
     </TooltipButton>
 
     <TooltipButton tooltip={t('canvas.toolbar.tooltip.zoom')} className={`${buttonClass} pointer-events-none mx-1.5`}>
@@ -134,12 +134,12 @@ const ZoomControls = memo(({ currentZoom, onZoomIn, onZoomOut, canZoomIn, canZoo
     </TooltipButton>
 
     <TooltipButton
-      tooltip={t('canvas.toolbar.tooltip.zoomOut')}
-      onClick={onZoomOut}
-      disabled={!canZoomOut}
-      className={`${buttonClass} ${!canZoomOut ? 'opacity-50 cursor-not-allowed' : ''}`}
+      tooltip={t('canvas.toolbar.tooltip.zoomIn')}
+      onClick={onZoomIn}
+      disabled={!canZoomIn}
+      className={`${buttonClass} ${!canZoomIn ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
-      <LuZoomOut className={iconClass} size={16} />
+      <LuZoomIn className={iconClass} size={16} />
     </TooltipButton>
   </>
 ));
