@@ -1,3 +1,5 @@
+import "./utils/dom-patch"
+
 import React, { Suspense, useEffect, lazy } from "react"
 import { ConfigProvider } from "antd"
 import ReactDOM from "react-dom/client"
