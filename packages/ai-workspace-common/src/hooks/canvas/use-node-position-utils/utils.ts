@@ -513,6 +513,10 @@ export const getLeftmostBottomPosition = (nodes: Node[], spacing = SPACING): XYP
 
 // Add this helper function before calculateNodePosition
 export const getNodeAbsolutePosition = (node: Node, nodes: Node[]): XYPosition => {
+  if (!node) {
+    return { x: 0, y: 0 };
+  }
+
   if (!node.parentId) {
     return node.position;
   }
