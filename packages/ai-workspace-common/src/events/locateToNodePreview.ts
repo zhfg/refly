@@ -4,6 +4,7 @@ export type Events = {
   locateToNodePreview: {
     canvasId: string;
     id: string;
+    type?: 'editResponse';
   };
 };
 

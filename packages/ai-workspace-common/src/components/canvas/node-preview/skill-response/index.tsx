@@ -22,6 +22,7 @@ import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canva
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { IconRerun } from '@refly-packages/ai-workspace-common/components/common/icon';
 
+import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
 interface SkillResponseNodePreviewProps {
   node: CanvasNode<ResponseNodeMeta>;
   resultId: string;
@@ -167,6 +168,20 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
       },
     );
   }, [resultId, title]);
+
+  useEffect(() => {
+    const handleLocateToPreview = (event: { id: string; type?: 'editResponse' }) => {
+      if (event.id === node.id && event.type === 'editResponse') {
+        setEditMode(true);
+      }
+    };
+
+    locateToNodePreviewEmitter.on('locateToNodePreview', handleLocateToPreview);
+
+    return () => {
+      locateToNodePreviewEmitter.off('locateToNodePreview', handleLocateToPreview);
+    };
+  }, [node.id]);
 
   if (!result && !loading) {
     return (

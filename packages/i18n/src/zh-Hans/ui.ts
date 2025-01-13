@@ -622,6 +622,7 @@ const translations = {
       groupCluster: '基于子节点建立组',
       layoutCluster: '子节点自动布局',
       centerNode: '定位节点',
+      editQuery: '编辑提问',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',
