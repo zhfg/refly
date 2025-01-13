@@ -1,9 +1,8 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { ShareService } from '@/share/share.service';
-import { CreateShareRequest, DeleteShareRequest } from '@refly-packages/openapi-schema';
+import { User, CreateShareRequest, DeleteShareRequest } from '@refly-packages/openapi-schema';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
-import { User } from '@/utils/decorators/user.decorator';
-import { User as UserModel } from '@prisma/client';
+import { LoginedUser } from '@/utils/decorators/user.decorator';
 import { buildSuccessResponse } from '@/utils';
 
 @Controller('v1/share')
@@ -12,14 +11,14 @@ export class ShareController {
 
   @UseGuards(JwtAuthGuard)
   @Post('new')
-  async createShare(@User() user: UserModel, @Body() body: CreateShareRequest) {
+  async createShare(@LoginedUser() user: User, @Body() body: CreateShareRequest) {
     const result = await this.shareService.createShare(user, body);
     return buildSuccessResponse(result);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('delete')
-  async deleteShare(@User() user: UserModel, @Body() body: DeleteShareRequest) {
+  async deleteShare(@LoginedUser() user: User, @Body() body: DeleteShareRequest) {
     await this.shareService.deleteShare(user, body);
     return buildSuccessResponse(null);
   }

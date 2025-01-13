@@ -610,19 +610,24 @@ export class SkillService {
     },
   ): Promise<SkillRunnableConfig> {
     const { context, tplConfig, modelInfo, resultHistory, eventListener } = data;
+    const userPo = await this.prisma.user.findUnique({
+      select: { uiLocale: true, outputLocale: true },
+      where: { uid: user.uid },
+    });
+    const outputLocale = data?.locale || userPo?.outputLocale;
 
     const displayLocale =
-      (data?.locale === 'auto' ? await detectLanguage(data?.input?.query) : data?.locale) ||
-      user?.uiLocale ||
+      (outputLocale === 'auto' ? await detectLanguage(data?.input?.query) : outputLocale) ||
+      userPo.uiLocale ||
       'en';
 
     const config: SkillRunnableConfig = {
       configurable: {
         ...context,
-        user: pick(user, ['uid', 'uiLocale', 'outputLocale']),
+        user,
         modelInfo,
         locale: displayLocale,
-        uiLocale: user.uiLocale,
+        uiLocale: userPo.uiLocale,
         tplConfig,
         resultId: data.result?.resultId,
       },

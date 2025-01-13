@@ -4,6 +4,8 @@ import { createClient, createConfig, type Options, formDataBodySerializer } from
 import type {
   GetAuthConfigError,
   GetAuthConfigResponse,
+  RefreshTokenError,
+  RefreshTokenResponse,
   EmailSignupData2,
   EmailSignupError,
   EmailSignupResponse2,
@@ -19,6 +21,10 @@ import type {
   CheckVerificationData2,
   CheckVerificationError,
   CheckVerificationResponse2,
+  LogoutError,
+  LogoutResponse,
+  GetCollabTokenError,
+  GetCollabTokenResponse2,
   ListCanvasesData,
   ListCanvasesError,
   ListCanvasesResponse,
@@ -210,6 +216,17 @@ export const getAuthConfig = <ThrowOnError extends boolean = false>(options?: Op
 };
 
 /**
+ * Refresh token
+ * Refresh token
+ */
+export const refreshToken = <ThrowOnError extends boolean = false>(options?: Options<unknown, ThrowOnError>) => {
+  return (options?.client ?? client).post<RefreshTokenResponse, RefreshTokenError, ThrowOnError>({
+    ...options,
+    url: '/auth/refreshToken',
+  });
+};
+
+/**
  * Sign up with email
  * Sign up with email
  */
@@ -267,6 +284,28 @@ export const checkVerification = <ThrowOnError extends boolean = false>(
   return (options?.client ?? client).post<CheckVerificationResponse2, CheckVerificationError, ThrowOnError>({
     ...options,
     url: '/auth/verification/check',
+  });
+};
+
+/**
+ * Logout
+ * Logout
+ */
+export const logout = <ThrowOnError extends boolean = false>(options?: Options<unknown, ThrowOnError>) => {
+  return (options?.client ?? client).post<LogoutResponse, LogoutError, ThrowOnError>({
+    ...options,
+    url: '/auth/logout',
+  });
+};
+
+/**
+ * Get collab token
+ * Get collab token
+ */
+export const getCollabToken = <ThrowOnError extends boolean = false>(options?: Options<unknown, ThrowOnError>) => {
+  return (options?.client ?? client).get<GetCollabTokenResponse2, GetCollabTokenError, ThrowOnError>({
+    ...options,
+    url: '/collab/getToken',
   });
 };
 

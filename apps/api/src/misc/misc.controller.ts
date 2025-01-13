@@ -14,14 +14,14 @@ import {
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { MiscService } from '@/misc/misc.service';
 import {
+  User,
   ScrapeWeblinkRequest,
   ScrapeWeblinkResponse,
   UploadRequest,
   UploadResponse,
 } from '@refly-packages/openapi-schema';
 import { buildSuccessResponse } from '@/utils';
-import { User as UserModel } from '@prisma/client';
-import { User } from '@/utils/decorators/user.decorator';
+import { LoginedUser } from '@/utils/decorators/user.decorator';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ParamsError } from '@refly-packages/errors';
@@ -41,7 +41,7 @@ export class MiscController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadStaticFile(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @UploadedFile() file: Express.Multer.File,
     @Body() body: UploadRequest,
   ): Promise<UploadResponse> {

@@ -48,6 +48,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthConfigResponse'
+  /auth/refreshToken:
+    post:
+      tags:
+        - auth
+      summary: Refresh token
+      description: Refresh token
+      operationId: refreshToken
+      responses:
+        '200':
+          description: Successful operation
   /auth/email/signup:
     post:
       tags:
@@ -148,6 +158,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CheckVerificationResponse'
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: Logout
+      description: Logout
+      operationId: logout
+      responses:
+        '200':
+          description: Successful operation
+  /collab/getToken:
+    get:
+      tags:
+        - collab
+      summary: Get collab token
+      description: Get collab token
+      operationId: getCollabToken
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetCollabTokenResponse'
   /canvas/list:
     get:
       tags:
@@ -1501,22 +1535,16 @@ components:
   schemas:
     User:
       type: object
-      description: Refly user
+      description: Refly user, used as JWT payload
       required:
         - uid
       properties:
         uid:
           type: string
           description: UID
-        uiLocale:
+        email:
           type: string
-          description: UI locale
-        outputLocale:
-          type: string
-          description: Output locale
-        planId:
-          type: string
-          description: Subscription plan ID
+          description: Email
     ListOrder:
       type: string
       description: List order
@@ -2797,6 +2825,21 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/UserSettings'
+    CollabTokenData:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Collab token
+    GetCollabTokenResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CollabTokenData'
     BaseResponse:
       type: object
       required:

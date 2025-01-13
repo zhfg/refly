@@ -5,7 +5,7 @@ import { QUEUE_SEND_VERIFICATION_EMAIL } from '@/utils/const';
 import { Processor } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { SendVerificationEmailJobData } from '@/skill/auth.dto';
+import { SendVerificationEmailJobData } from './auth.dto';
 
 @Processor(QUEUE_SEND_VERIFICATION_EMAIL)
 export class AuthProcessor extends WorkerHost {

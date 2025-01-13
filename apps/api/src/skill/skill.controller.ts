@@ -12,9 +12,9 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { SkillService } from './skill.service';
-import { User } from '@/utils/decorators/user.decorator';
-import { User as UserModel } from '@prisma/client';
+import { LoginedUser } from '@/utils/decorators/user.decorator';
 import {
+  User,
   DeleteSkillInstanceRequest,
   DeleteSkillInstanceResponse,
   DeleteSkillTriggerRequest,
@@ -54,7 +54,7 @@ export class SkillController {
   @UseGuards(JwtAuthGuard)
   @Post('/invoke')
   async invokeSkill(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: InvokeSkillRequest,
   ): Promise<InvokeSkillResponse> {
     const { resultId } = await this.skillService.sendInvokeSkillTask(user, body);
@@ -64,7 +64,7 @@ export class SkillController {
   @UseGuards(JwtAuthGuard)
   @Post('/streamInvoke')
   async streamInvokeSkill(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: InvokeSkillRequest,
     @Res() res: Response,
   ) {
@@ -74,7 +74,7 @@ export class SkillController {
   @UseGuards(JwtAuthGuard)
   @Get('/instance/list')
   async listSkillInstances(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Query('skillId') skillId: string,
     @Query('sortByPin', new DefaultValuePipe(false), ParseBoolPipe) sortByPin: boolean,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -92,7 +92,7 @@ export class SkillController {
   @UseGuards(JwtAuthGuard)
   @Post('/instance/new')
   async createSkillInstance(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: CreateSkillInstanceRequest,
   ): Promise<CreateSkillInstanceResponse> {
     const skillInstanceList = await this.skillService.createSkillInstance(user, body);
@@ -102,7 +102,7 @@ export class SkillController {
   @UseGuards(JwtAuthGuard)
   @Post('/instance/update')
   async updateSkillInstance(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: UpdateSkillInstanceRequest,
   ): Promise<UpdateSkillInstanceResponse> {
     const skillInstance = await this.skillService.updateSkillInstance(user, body);
@@ -112,7 +112,7 @@ export class SkillController {
   @UseGuards(JwtAuthGuard)
   @Post('/instance/pin')
   async pinSkillInstance(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: PinSkillInstanceRequest,
   ): Promise<PinSkillInstanceResponse> {
     await this.skillService.pinSkillInstance(user, body);
@@ -122,7 +122,7 @@ export class SkillController {
   @UseGuards(JwtAuthGuard)
   @Post('/instance/unpin')
   async unpinSkillInstance(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: UnpinSkillInstanceRequest,
   ): Promise<UnpinSkillInstanceResponse> {
     await this.skillService.unpinSkillInstance(user, body);
@@ -132,7 +132,7 @@ export class SkillController {
   @UseGuards(JwtAuthGuard)
   @Post('/instance/delete')
   async deleteSkillInstance(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: DeleteSkillInstanceRequest,
   ): Promise<DeleteSkillInstanceResponse> {
     await this.skillService.deleteSkillInstance(user, body);
@@ -142,7 +142,7 @@ export class SkillController {
   @UseGuards(JwtAuthGuard)
   @Get('/trigger/list')
   async listSkillTriggers(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Query('skillId') skillId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
@@ -158,7 +158,7 @@ export class SkillController {
   @UseGuards(JwtAuthGuard)
   @Post('/trigger/new')
   async createSkillTrigger(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: CreateSkillTriggerRequest,
   ): Promise<CreateSkillTriggerResponse> {
     const triggers = await this.skillService.createSkillTrigger(user, body);
@@ -168,7 +168,7 @@ export class SkillController {
   @UseGuards(JwtAuthGuard)
   @Post('/trigger/update')
   async updateSkillTrigger(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: UpdateSkillTriggerRequest,
   ): Promise<UpdateSkillTriggerResponse> {
     const trigger = await this.skillService.updateSkillTrigger(user, body);
@@ -178,7 +178,7 @@ export class SkillController {
   @UseGuards(JwtAuthGuard)
   @Post('/trigger/delete')
   async deleteSkillTrigger(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: DeleteSkillTriggerRequest,
   ): Promise<DeleteSkillTriggerResponse> {
     await this.skillService.deleteSkillTrigger(user, body);

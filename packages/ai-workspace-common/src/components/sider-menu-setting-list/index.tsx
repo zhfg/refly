@@ -3,7 +3,7 @@ import { MenuProps, Dropdown } from 'antd';
 import { LuSettings, LuLogOut } from 'react-icons/lu';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
-import { useLogout } from '@refly-packages/ai-workspace-common/hooks/useLogout';
+import { useLogout } from '@refly-packages/ai-workspace-common/hooks/use-logout';
 
 // styles
 import { AiOutlineTwitter } from 'react-icons/ai';

@@ -11,7 +11,7 @@ import {
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { CanvasService } from './canvas.service';
 import { User as UserType } from '@prisma/client';
-import { User } from '@/utils/decorators/user.decorator';
+import { LoginedUser } from '@/utils/decorators/user.decorator';
 import { canvasPO2DTO } from '@/canvas/canvas.dto';
 import { buildSuccessResponse } from '@/utils';
 import { UpsertCanvasRequest, DeleteCanvasRequest } from '@refly-packages/openapi-schema';
@@ -23,7 +23,7 @@ export class CanvasController {
   @UseGuards(JwtAuthGuard)
   @Get('list')
   async listCanvases(
-    @User() user: UserType,
+    @LoginedUser() user: UserType,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ) {
@@ -33,21 +33,21 @@ export class CanvasController {
 
   @UseGuards(JwtAuthGuard)
   @Post('create')
-  async createCanvas(@User() user: UserType, @Body() body: UpsertCanvasRequest) {
+  async createCanvas(@LoginedUser() user: UserType, @Body() body: UpsertCanvasRequest) {
     const canvas = await this.canvasService.createCanvas(user, body);
     return buildSuccessResponse(canvasPO2DTO(canvas));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('update')
-  async updateCanvas(@User() user: UserType, @Body() body: UpsertCanvasRequest) {
+  async updateCanvas(@LoginedUser() user: UserType, @Body() body: UpsertCanvasRequest) {
     const canvas = await this.canvasService.updateCanvas(user, body);
     return buildSuccessResponse(canvasPO2DTO(canvas));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('delete')
-  async deleteCanvas(@User() user: UserType, @Body() body: DeleteCanvasRequest) {
+  async deleteCanvas(@LoginedUser() user: UserType, @Body() body: DeleteCanvasRequest) {
     await this.canvasService.deleteCanvas(user, body);
     return buildSuccessResponse({});
   }

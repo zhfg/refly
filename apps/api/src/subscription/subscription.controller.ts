@@ -1,9 +1,9 @@
 import { Controller, UseGuards, Post, Body, Get } from '@nestjs/common';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
-import { User } from '@/utils/decorators/user.decorator';
-import { User as UserModel } from '@prisma/client';
+import { LoginedUser } from '@/utils/decorators/user.decorator';
 import {
+  User,
   CreateCheckoutSessionRequest,
   CreateCheckoutSessionResponse,
   CreatePortalSessionResponse,
@@ -21,7 +21,7 @@ export class SubscriptionController {
   @UseGuards(JwtAuthGuard)
   @Post('/createCheckoutSession')
   async createCheckoutSession(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() param: CreateCheckoutSessionRequest,
   ): Promise<CreateCheckoutSessionResponse> {
     const session = await this.subscriptionService.createCheckoutSession(user, param);
@@ -30,7 +30,7 @@ export class SubscriptionController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/createPortalSession')
-  async createPortalSession(@User() user: UserModel): Promise<CreatePortalSessionResponse> {
+  async createPortalSession(@LoginedUser() user: User): Promise<CreatePortalSessionResponse> {
     const session = await this.subscriptionService.createPortalSession(user);
     return buildSuccessResponse({ url: session.url });
   }
@@ -43,7 +43,7 @@ export class SubscriptionController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/usage')
-  async getUsage(@User() user: UserModel): Promise<GetSubscriptionUsageResponse> {
+  async getUsage(@LoginedUser() user: User): Promise<GetSubscriptionUsageResponse> {
     const usage = await this.subscriptionService.getOrCreateUsageMeter(user);
     return buildSuccessResponse(usage);
   }
