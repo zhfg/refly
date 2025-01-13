@@ -80,6 +80,67 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
         showSkillSelector && setShowSkillSelector(false);
       }
 
+      // Handle arrow key navigation
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        if (showSkillSelector && options.length > 0) {
+          return;
+        }
+
+        const textarea = e.target as HTMLTextAreaElement;
+        const { selectionStart, value } = textarea;
+        const lines = value.split('\n');
+
+        let currentLineIndex = 0;
+        let charCount = 0;
+        let columnPosition = 0;
+
+        for (let i = 0; i < lines.length; i++) {
+          if (selectionStart > charCount && selectionStart <= charCount + lines[i].length + 1) {
+            currentLineIndex = i;
+            columnPosition = selectionStart - charCount;
+            break;
+          }
+          charCount += lines[i].length + 1; // +1 for newline
+        }
+
+        let newPosition = selectionStart;
+
+        if (e.key === 'ArrowUp' && currentLineIndex > 0) {
+          const targetLine = lines[currentLineIndex - 1];
+          const prevLinesLength = lines.slice(0, currentLineIndex - 1).reduce((sum, line) => sum + line.length + 1, 0);
+          const targetColumn = Math.min(columnPosition, targetLine.length);
+          newPosition = prevLinesLength + targetColumn;
+        } else if (e.key === 'ArrowDown' && currentLineIndex < lines.length - 1) {
+          const targetLine = lines[currentLineIndex + 1];
+          const prevLinesLength = lines.slice(0, currentLineIndex + 1).reduce((sum, line) => sum + line.length + 1, 0);
+          const targetColumn = Math.min(columnPosition, targetLine.length);
+          newPosition = prevLinesLength + targetColumn;
+        }
+
+        if (newPosition !== selectionStart) {
+          e.preventDefault();
+
+          // set new cursor position
+          textarea.setSelectionRange(newPosition, newPosition);
+
+          // handle scroll
+          const computedStyle = window.getComputedStyle(textarea);
+          const lineHeight = parseInt(computedStyle.lineHeight) || parseInt(computedStyle.height) / (maxRows ?? 6);
+          const scrollTop = textarea.scrollTop;
+          const viewportHeight = textarea.clientHeight;
+
+          // calculate target line position
+          const targetLinePosition = (currentLineIndex + (e.key === 'ArrowDown' ? 1 : -1)) * lineHeight;
+
+          // if target line is not in viewport, scroll
+          if (targetLinePosition < scrollTop) {
+            textarea.scrollTop = targetLinePosition;
+          } else if (targetLinePosition > scrollTop + viewportHeight - lineHeight) {
+            textarea.scrollTop = targetLinePosition - viewportHeight + lineHeight;
+          }
+        }
+      }
+
       if (e.keyCode === 13) {
         if (showSkillSelector && options.length > 0) {
           e.preventDefault();
@@ -94,7 +155,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
             const newValue = query.slice(0, cursorPos) + '\n' + query.slice(cursorPos);
             setQuery(newValue);
 
-            // Set cursor position after the new line
+            // set cursor position after the new line
             setTimeout(() => {
               if (e.target instanceof HTMLTextAreaElement) {
                 e.target.selectionStart = e.target.selectionEnd = cursorPos + 1;
