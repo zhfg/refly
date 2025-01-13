@@ -18,6 +18,6 @@ export const userPO2Settings = (
       'customerId',
       'hasBetaAccess',
     ]),
-    subscription: subscriptionPO2DTO(user.subscription),
+    subscription: user.subscription ? subscriptionPO2DTO(user.subscription) : null,
   };
 };

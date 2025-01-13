@@ -535,6 +535,7 @@ model Subscription {
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@index([uid])
+  @@index([status, cancelAt])
   @@map("subscriptions")
 }
 

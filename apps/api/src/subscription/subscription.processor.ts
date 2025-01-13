@@ -3,7 +3,11 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 
 import { SubscriptionService } from './subscription.service';
-import { QUEUE_SYNC_TOKEN_USAGE, QUEUE_SYNC_STORAGE_USAGE } from '../utils/const';
+import {
+  QUEUE_SYNC_TOKEN_USAGE,
+  QUEUE_SYNC_STORAGE_USAGE,
+  QUEUE_CHECK_CANCELED_SUBSCRIPTIONS,
+} from '../utils/const';
 import { SyncTokenUsageJobData, SyncStorageUsageJobData } from './subscription.dto';
 
 @Processor(QUEUE_SYNC_TOKEN_USAGE)
@@ -39,6 +43,27 @@ export class SyncStorageUsageProcessor extends WorkerHost {
       await this.subscriptionService.syncStorageUsage(job.data);
     } catch (error) {
       this.logger.error(`[${QUEUE_SYNC_STORAGE_USAGE}] error: ${error?.stack}`);
+      throw error;
+    }
+  }
+}
+
+@Processor(QUEUE_CHECK_CANCELED_SUBSCRIPTIONS)
+export class CheckCanceledSubscriptionsProcessor extends WorkerHost {
+  private readonly logger = new Logger(CheckCanceledSubscriptionsProcessor.name);
+
+  constructor(private subscriptionService: SubscriptionService) {
+    super();
+  }
+
+  async process() {
+    this.logger.log(
+      `[${QUEUE_CHECK_CANCELED_SUBSCRIPTIONS}] Starting check for canceled subscriptions`,
+    );
+    try {
+      await this.subscriptionService.checkCanceledSubscriptions();
+    } catch (error) {
+      this.logger.error(`[${QUEUE_CHECK_CANCELED_SUBSCRIPTIONS}] error: ${error?.stack}`);
       throw error;
     }
   }
