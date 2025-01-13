@@ -74,10 +74,9 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
     const [options, setOptions] = useState<AutoCompleteProps['options']>([]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === '/' && !query) {
+      if (e.key === '/') {
         setShowSkillSelector(true);
-        return;
-      } else {
+      } else if (!['ArrowUp', 'ArrowDown', 'Enter'].includes(e.key)) {
         showSkillSelector && setShowSkillSelector(false);
       }
 
@@ -117,7 +116,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
       };
 
       if (e.keyCode === 13) {
-        if (options.length > 0) {
+        if (showSkillSelector && options.length > 0) {
           e.preventDefault();
           return;
         }
@@ -139,10 +138,13 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
 
     const handleSearch = useCallback(
       (value: string) => {
-        if (value.startsWith('/')) {
+        const lastSlashIndex = value.lastIndexOf('/');
+        if (lastSlashIndex !== -1) {
           setOptions(skillOptions);
+          setShowSkillSelector(true);
         } else {
           setOptions([]);
+          setShowSkillSelector(false);
         }
       },
       [skillOptions],
@@ -159,6 +161,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
     const handleSearchListConfirm = useCallback(
       (value: string) => {
         setOptions([]);
+        setShowSkillSelector(false);
         const skill = skills.find((skill) => skill.name === value);
         if (!skill) {
           return;
@@ -166,11 +169,13 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
         if (handleSelectSkill) {
           handleSelectSkill(skill);
         } else {
-          setQuery('');
+          const lastSlashIndex = query.lastIndexOf('/');
+          const prefix = lastSlashIndex !== -1 ? query.slice(0, lastSlashIndex) : '';
+          setQuery(prefix);
           setSelectedSkill(skill);
         }
       },
-      [skills, setSelectedSkill, handleSelectSkill],
+      [skills, setSelectedSkill, handleSelectSkill, query],
     );
 
     return (
@@ -178,12 +183,15 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
         <AutoComplete
           className="h-full"
           autoFocus
+          open={showSkillSelector}
           options={options}
           popupMatchSelectWidth={false}
           placement={autoCompletionPlacement}
           value={query ?? ''}
           filterOption={(inputValue, option) => {
-            const searchVal = inputValue.slice(1).toLowerCase();
+            const lastSlashIndex = inputValue.lastIndexOf('/');
+            const searchText = lastSlashIndex !== -1 ? inputValue.slice(lastSlashIndex + 1) : inputValue;
+            const searchVal = searchText.toLowerCase();
             return (
               !searchVal ||
               option.value.toString().toLowerCase().includes(searchVal) ||
