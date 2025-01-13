@@ -57,7 +57,7 @@ export abstract class BaseSkill extends StructuredTool {
    * Emit a skill event.
    */
   emitEvent(data: Partial<SkillEvent>, config: SkillRunnableConfig) {
-    const { emitter, resultId } = config?.configurable || {};
+    const { emitter } = config?.configurable || {};
 
     if (!emitter) {
       return;
@@ -66,7 +66,6 @@ export abstract class BaseSkill extends StructuredTool {
     const eventData: SkillEvent = {
       event: data.event,
       step: config.metadata?.step,
-      resultId,
       ...data,
     };
 
@@ -103,8 +102,6 @@ export abstract class BaseSkill extends StructuredTool {
       icon: this.icon,
     };
 
-    this.emitEvent({ event: 'start' }, config);
-
     const response = await this.toRunnable().invoke(input, {
       ...config,
       metadata: {
@@ -113,8 +110,6 @@ export abstract class BaseSkill extends StructuredTool {
         resultId: config.configurable.resultId,
       },
     });
-
-    this.emitEvent({ event: 'end' }, config);
 
     return response;
   }

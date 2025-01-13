@@ -3,7 +3,7 @@ import { Button, Divider, Result, Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { ActionResult } from '@refly/openapi-schema';
+import { ActionResult, ActionStep } from '@refly/openapi-schema';
 import { CanvasNode, ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
@@ -18,13 +18,16 @@ import { EditChatInput } from '@refly-packages/ai-workspace-common/components/ca
 import { cn } from '@refly-packages/utils/cn';
 import { useReactFlow } from '@xyflow/react';
 import { usePatchNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-patch-node-data';
+import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { IconRerun } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 interface SkillResponseNodePreviewProps {
   node: CanvasNode<ResponseNodeMeta>;
   resultId: string;
 }
 
-const StepsList = memo(({ steps, result, title }: { steps: any[]; result: any; title: string }) => {
+const StepsList = memo(({ steps, result, title }: { steps: ActionStep[]; result: ActionResult; title: string }) => {
   return (
     <>
       {steps.map((step, index) => (
@@ -55,6 +58,9 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   const { getNodes } = useReactFlow();
   const patchNodeData = usePatchNodeData();
   const { deleteNode } = useDeleteNode();
+
+  const { canvasId } = useCanvasContext();
+  const { invokeAction } = useInvokeAction();
 
   const { t } = useTranslation();
   const [editMode, setEditMode] = useState(false);
@@ -123,8 +129,13 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
   }, []);
 
   const { data } = node;
-  const { title, steps = [], context, history = [], actionMeta, modelInfo } = result ?? {};
 
+  const title = result?.title ?? data?.title;
+  const actionMeta = result?.actionMeta ?? data?.metadata?.actionMeta;
+  const version = result?.version ?? data?.metadata?.version ?? 0;
+  const modelInfo = result?.modelInfo ?? data?.metadata?.modelInfo;
+
+  const { steps = [], context, history = [] } = result ?? {};
   const contextItems = useMemo(() => {
     // Prefer contextItems from node metadata
     if (data.metadata?.contextItems) {
@@ -133,7 +144,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
 
     // Fallback to contextItems from context (could be legacy nodes)
     return convertResultContextToItems(context, history);
-  }, [context, history]);
+  }, [data, context, history]);
 
   const handleDelete = useCallback(() => {
     deleteNode({
@@ -143,6 +154,19 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
       position: node.position || { x: 0, y: 0 },
     });
   }, [node, deleteNode]);
+
+  const handleRetry = useCallback(() => {
+    invokeAction(
+      {
+        resultId,
+        query: title,
+      },
+      {
+        entityId: canvasId,
+        entityType: 'canvas',
+      },
+    );
+  }, [resultId, title]);
 
   if (!result && !loading) {
     return (
@@ -160,11 +184,12 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
 
   return (
     <div className="flex flex-col space-y-4 p-4 h-full max-w-[1024px] mx-auto">
-      {!isPending && (
+      {title && (
         <>
           <EditChatInput
             enabled={editMode}
             resultId={resultId}
+            version={version}
             contextItems={contextItems}
             query={title}
             actionMeta={actionMeta}
@@ -190,8 +215,24 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
           }
         }}
       >
-        {steps.length === 0 && isPending && <Skeleton active paragraph={{ rows: 5 }} />}
-        <StepsList steps={steps} result={result} title={title} />
+        {result?.status === 'failed' ? (
+          <div className="h-full w-full flex items-center justify-center">
+            <Result
+              status="500"
+              subTitle={t('canvas.skillResponse.executionFailed')}
+              extra={
+                <Button icon={<IconRerun className="text-sm flex items-center justify-center" />} onClick={handleRetry}>
+                  {t('canvas.nodeActions.rerun')}
+                </Button>
+              }
+            />
+          </div>
+        ) : (
+          <>
+            {steps.length === 0 && isPending && <Skeleton className="mt-1" active paragraph={{ rows: 5 }} />}
+            <StepsList steps={steps} result={result} title={title} />
+          </>
+        )}
       </div>
 
       {knowledgeBaseStore?.sourceListDrawerVisible ? <SourceListModal classNames="source-list-modal" /> : null}

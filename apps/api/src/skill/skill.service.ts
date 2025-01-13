@@ -373,7 +373,10 @@ export class SkillService {
     const resultId = param.resultId || genActionResultID();
 
     // Check if the result already exists
-    const existingResult = await this.prisma.actionResult.findFirst({ where: { resultId } });
+    const existingResult = await this.prisma.actionResult.findFirst({
+      where: { resultId },
+      orderBy: { version: 'desc' },
+    });
     if (existingResult) {
       if (existingResult.uid !== uid) {
         throw new ParamsError(`action result ${resultId} already exists for another user`);
@@ -444,9 +447,12 @@ export class SkillService {
 
     if (existingResult) {
       const [result] = await this.prisma.$transaction([
-        this.prisma.actionResult.update({
-          where: { resultId },
+        this.prisma.actionResult.create({
           data: {
+            resultId,
+            uid,
+            version: (existingResult.version ?? 0) + 1,
+            type: 'skill',
             status: 'executing',
             title: param.input.query,
             targetId: param.target?.entityId,
@@ -476,6 +482,7 @@ export class SkillService {
         data: {
           resultId,
           uid,
+          version: 0,
           targetId: param.target?.entityId,
           targetType: param.target?.entityType,
           title: param.input?.query,
@@ -664,12 +671,15 @@ export class SkillService {
       res.status(200);
     }
 
+    const { resultId, version } = data.result;
+
     try {
       await this.timeoutCheckQueue.add(
-        `execution_timeout_check:${data.result?.resultId}`,
+        `execution_timeout_check:${resultId}`,
         {
           uid: user.uid,
-          resultId: data.result?.resultId,
+          resultId,
+          version,
           type: 'execution',
         },
         { delay: this.config.get('skill.executionTimeout') },
@@ -680,6 +690,8 @@ export class SkillService {
       if (res) {
         writeSSEResponse(res, {
           event: 'error',
+          resultId,
+          version,
           content: JSON.stringify(genBaseRespDataFromError(err)),
         });
       }
@@ -692,14 +704,17 @@ export class SkillService {
   }
 
   async checkSkillTimeout(param: SkillTimeoutCheckJobData) {
-    const { uid, resultId, type } = param;
+    const { uid, resultId, type, version } = param;
 
     const timeout: number =
       type === 'idle'
         ? this.config.get('skill.idleTimeout')
         : this.config.get('skill.executionTimeout');
 
-    const result = await this.prisma.actionResult.findUnique({ where: { uid, resultId } });
+    const result = await this.prisma.actionResult.findFirst({
+      where: { uid, resultId, version },
+      orderBy: { version: 'desc' },
+    });
     if (!result) {
       this.logger.warn(`result not found for resultId: ${resultId}`);
       return;
@@ -708,7 +723,7 @@ export class SkillService {
     if (result.status === 'executing' && result.updatedAt < new Date(Date.now() - timeout)) {
       this.logger.warn(`skill invocation ${type} timeout for resultId: ${resultId}`);
       await this.prisma.actionResult.update({
-        where: { resultId },
+        where: { pk: result.pk, status: 'executing' },
         data: { status: 'failed', errors: JSON.stringify(['Execution timeout']) },
       });
     } else {
@@ -718,7 +733,7 @@ export class SkillService {
 
   private async _invokeSkill(user: User, data: InvokeSkillJobData, res?: Response) {
     const { input, result } = data;
-    const { resultId, actionMeta } = result;
+    const { resultId, version, actionMeta } = result;
 
     let aborted = false;
 
@@ -734,6 +749,7 @@ export class SkillService {
       {
         uid: user.uid,
         resultId,
+        version,
         type: 'idle',
       },
       { delay: parseInt(this.config.get('skill.idleTimeout')) },
@@ -765,7 +781,7 @@ export class SkillService {
         await throttledResetIdleTimeout();
 
         if (res) {
-          writeSSEResponse(res, data);
+          writeSSEResponse(res, { ...data, resultId, version });
         }
 
         const { event, structuredData, artifact, log } = data;
@@ -842,6 +858,8 @@ export class SkillService {
         trailing: true,
       },
     );
+
+    writeSSEResponse(res, { event: 'start', resultId, version });
 
     try {
       for await (const event of skill.streamEvents(input, { ...config, version: 'v2' })) {
@@ -934,6 +952,7 @@ export class SkillService {
         writeSSEResponse(res, {
           event: 'error',
           resultId,
+          version,
           error: genBaseRespDataFromError(err),
         });
       }
@@ -943,11 +962,11 @@ export class SkillService {
         artifact.connection?.disconnect();
       });
 
-      const steps = resultAggregator.getSteps({ resultId });
+      const steps = resultAggregator.getSteps({ resultId, version });
 
       await this.prisma.$transaction([
-        this.prisma.actionResult.update({
-          where: { resultId },
+        this.prisma.actionResult.updateMany({
+          where: { resultId, version },
           data: {
             status: result.errors.length > 0 ? 'failed' : 'finish',
             errors: JSON.stringify(result.errors),
@@ -955,6 +974,8 @@ export class SkillService {
         }),
         this.prisma.actionStep.createMany({ data: steps }),
       ]);
+
+      writeSSEResponse(res, { event: 'end', resultId, version });
     }
   }
 

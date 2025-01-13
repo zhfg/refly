@@ -12,13 +12,15 @@ export class ActionService {
   ) {}
 
   async getActionResult(user: User, param: GetActionResultData['query']) {
-    const { resultId } = param;
+    const { resultId, version } = param;
 
-    const result = await this.prisma.actionResult.findUnique({
+    const result = await this.prisma.actionResult.findFirst({
       where: {
         resultId,
+        version,
         uid: user.uid,
       },
+      orderBy: { version: 'desc' },
     });
     if (!result) {
       throw new ActionResultNotFoundError();
@@ -28,7 +30,10 @@ export class ActionService {
     // mark it as failed.
     if (result.status === 'executing' && result.updatedAt < new Date(Date.now() - 1000 * 60 * 3)) {
       const updatedResult = await this.prisma.actionResult.update({
-        where: { resultId, status: 'executing' },
+        where: {
+          pk: result.pk,
+          status: 'executing',
+        },
         data: {
           status: 'failed',
           errors: `["Execution timeout"]`,
@@ -41,9 +46,14 @@ export class ActionService {
     const modelInfo = modelList.find((model) => model.name === result.modelName);
 
     const steps = await this.prisma.actionStep.findMany({
-      where: { resultId, deletedAt: null },
+      where: {
+        resultId: result.resultId,
+        version: result.version,
+        deletedAt: null,
+      },
       orderBy: { order: 'asc' },
     });
+
     return { ...result, steps, modelInfo };
   }
 }

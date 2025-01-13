@@ -1086,6 +1086,10 @@ export const ActionResultSchema = {
       description: 'Action result ID',
       example: 'ar-g30e1b80b5g1itbemc0g5jj3',
     },
+    version: {
+      type: 'number',
+      description: 'Action result version',
+    },
     title: {
       type: 'string',
       description: 'Action result title',
@@ -2142,6 +2146,10 @@ export const SkillEventSchema = {
     resultId: {
       type: 'string',
       description: 'Result ID',
+    },
+    version: {
+      type: 'number',
+      description: 'Result version',
     },
     content: {
       type: 'string',

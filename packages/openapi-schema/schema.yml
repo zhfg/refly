@@ -996,6 +996,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: version
+          in: query
+          description: Action result version
+          required: false
+          schema:
+            type: number
       responses:
         '200':
           description: successful operation
@@ -2409,6 +2415,9 @@ components:
           readOnly: true
           description: Action result ID
           example: ar-g30e1b80b5g1itbemc0g5jj3
+        version:
+          type: number
+          description: Action result version
         title:
           type: string
           description: Action result title
@@ -3141,6 +3150,9 @@ components:
         resultId:
           type: string
           description: Result ID
+        version:
+          type: number
+          description: Result version
         content:
           type: string
           description: Event content. Only present when `event` is `stream`.
