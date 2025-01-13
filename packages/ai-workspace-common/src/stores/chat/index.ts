@@ -36,6 +36,7 @@ export interface ChatState {
   messageIntentContext: MessageIntentContext | undefined; // has messageIntentContext means sendMessage interaction, otherwise means route jump interaction
 
   selectedModel: ModelInfo;
+  skillSelectedModel: ModelInfo;
   enableWebSearch: boolean;
   enableDeepReasonWebSearch: boolean;
   enableKnowledgeBaseSearch: boolean;
@@ -44,6 +45,7 @@ export interface ChatState {
   setNewQAText: (val: string) => void;
   setMessageIntentContext: (val: MessageIntentContext) => void;
   setSelectedModel: (val: ModelInfo) => void;
+  setSkillSelectedModel: (val: ModelInfo) => void;
   setEnableWebSearch: (val: boolean) => void;
   setEnableDeepReasonWebSearch: (val: boolean) => void;
   setEnableKnowledgeBaseSearch: (val: boolean) => void;
@@ -52,6 +54,14 @@ export interface ChatState {
 
 const defaultConfigurableState = {
   selectedModel: {
+    label: 'GPT-4o Mini',
+    name: 'openai/gpt-4o-mini',
+    provider: 'openai',
+    tier: 't2' as const,
+    contextLimit: 128000,
+    maxOutput: 16384,
+  },
+  skillSelectedModel: {
     label: 'GPT-4o Mini',
     name: 'openai/gpt-4o-mini',
     provider: 'openai',
@@ -83,6 +93,7 @@ export const useChatStore = create<ChatState>()(
         setNewQAText: (val: string) => set({ newQAText: val }),
         setMessageIntentContext: (val: MessageIntentContext) => set({ messageIntentContext: val }),
         setSelectedModel: (val: ModelInfo) => set({ selectedModel: val }),
+        setSkillSelectedModel: (val: ModelInfo) => set({ skillSelectedModel: val }),
         setEnableWebSearch: (val: boolean) => set({ enableWebSearch: val }),
         setEnableDeepReasonWebSearch: (val: boolean) => set({ enableDeepReasonWebSearch: val }),
         setEnableKnowledgeBaseSearch: (val: boolean) => set({ enableKnowledgeBaseSearch: val }),
@@ -95,6 +106,7 @@ export const useChatStore = create<ChatState>()(
         partialize: (state) => ({
           newQAText: state.newQAText,
           selectedModel: state.selectedModel,
+          skillSelectedModel: state.skillSelectedModel,
         }),
       },
     ),

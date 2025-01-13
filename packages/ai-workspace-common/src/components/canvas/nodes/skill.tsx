@@ -135,8 +135,9 @@ export const SkillNode = memo(
       patchNodeData(id, data);
     }, 50);
 
-    const { selectedModel } = useChatStoreShallow((state) => ({
-      selectedModel: state.selectedModel,
+    const { skillSelectedModel, setSkillSelectedModel } = useChatStoreShallow((state) => ({
+      skillSelectedModel: state.skillSelectedModel,
+      setSkillSelectedModel: state.setSkillSelectedModel,
     }));
 
     const { invokeAction, abortAction } = useInvokeAction();
@@ -153,8 +154,9 @@ export const SkillNode = memo(
     const setModelInfo = useCallback(
       (modelInfo: ModelInfo | null) => {
         patchNodeData(id, { metadata: { modelInfo } });
+        setSkillSelectedModel(modelInfo);
       },
-      [id, patchNodeData],
+      [id, patchNodeData, setSkillSelectedModel],
     );
 
     const setContextItems = useCallback(
@@ -204,10 +206,10 @@ export const SkillNode = memo(
     }, [targetRef?.current?.offsetHeight, resizeMoveable]);
 
     useEffect(() => {
-      if (selectedModel && !modelInfo) {
-        setModelInfo(selectedModel);
+      if (skillSelectedModel && !modelInfo) {
+        setModelInfo(skillSelectedModel);
       }
-    }, [selectedModel, modelInfo, setModelInfo]);
+    }, [skillSelectedModel, modelInfo, setModelInfo]);
 
     const setSelectedSkill = useCallback(
       (skill: Skill | null) => {
