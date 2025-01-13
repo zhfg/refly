@@ -157,7 +157,7 @@ export const Subscription = () => {
   const { userProfile } = useUserStoreShallow((state) => ({
     userProfile: state.userProfile,
   }));
-  const subscription = userProfile?.subscription;
+  const { subscription, customerId } = userProfile ?? {};
 
   const {
     isRequest,
@@ -252,15 +252,17 @@ export const Subscription = () => {
               {t('settings.subscription.subscribeNow')}
             </Button>
           ) : (
-            <Button
-              type="default"
-              className="text-gray-500 font-medium border-none shadow-lg"
-              loading={portalLoading}
-              onClick={createPortalSession}
-              icon={<PiInvoiceBold className="flex items-center justify-center text-base" />}
-            >
-              {t('settings.subscription.manage')}
-            </Button>
+            customerId && (
+              <Button
+                type="default"
+                className="text-gray-500 font-medium border-none shadow-lg"
+                loading={portalLoading}
+                onClick={createPortalSession}
+                icon={<PiInvoiceBold className="flex items-center justify-center text-base" />}
+              >
+                {t('settings.subscription.manage')}
+              </Button>
+            )
           )}
         </div>
 
