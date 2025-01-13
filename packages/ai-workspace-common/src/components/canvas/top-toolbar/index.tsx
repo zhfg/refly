@@ -88,7 +88,7 @@ const CanvasTitle = memo(
           ) : (
             canvasTitle || t('common.untitled')
           )}
-          <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
+          <IconEdit />
         </div>
 
         <CanvasRename
