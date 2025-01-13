@@ -1076,6 +1076,7 @@ const translations = {
       mostPopular: 'Most Popular',
       getStarted: 'Get Started',
       subscribeNow: 'Subscribe Now',
+      manage: 'Manage Subscription',
       currentPlan: 'Current Plan',
       t1TokenUsed: 'Advanced Model Token Usage',
       t1TokenUsedDescription:
@@ -1097,6 +1098,7 @@ const translations = {
         yearly: 'Yearly',
         monthlyPlan: 'Monthly Auto-Renewal',
         yearlyPlan: 'Yearly Auto-Renewal',
+        cancelAt: 'Will be canceled at {{date}}',
         tooltip: {
           modelToken: 'Usage includes both model input and output tokens',
           vectorStorage: 'Used for storing semantic embeddings of resources and canvases',
@@ -1108,7 +1110,8 @@ const translations = {
         fileStorage: 'File Storage',
         t1Model: 'Advanced Models',
         t2Model: 'Standard Models',
-        mediaCredit: 'Media Credit',
+        freeModel: 'Free Models',
+        mediaCredit: 'Media Credit (Coming Soon)',
         fileStorageType: {
           note: 'Canvases',
           resource: 'Resources',

@@ -47,7 +47,9 @@ const SiderLogo = (props: {
         className="flex cursor-pointer flex-row items-center gap-2"
         onClick={() => navigate("/")}>
         <img src={Logo} alt="Refly" className="h-8 w-8" />
-        <span className="text-xl font-bold text-black">Refly </span>
+        <span className="text-xl font-bold text-black" translate="no">
+          Refly{" "}
+        </span>
         <Tag color="green" className="text-[10px] leading-4">
           Beta
         </Tag>

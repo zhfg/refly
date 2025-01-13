@@ -1060,6 +1060,7 @@ const translations = {
       mostPopular: '最受欢迎',
       getStarted: '开始使用',
       subscribeNow: '立即订阅',
+      manage: '管理订阅',
       currentPlan: '当前套餐',
       t1TokenUsed: '高阶模型 Token 使用量',
       t1TokenUsedDescription:
@@ -1081,6 +1082,7 @@ const translations = {
         yearly: '按年',
         monthlyPlan: '每月自动续费',
         yearlyPlan: '每年自动续费',
+        cancelAt: '将于 {{date}} 取消',
         tooltip: {
           modelToken: 'Token 同时包括模型输入和输出',
           vectorStorage: '用于存储资源和画布的语义化向量数据',
@@ -1091,7 +1093,8 @@ const translations = {
         fileStorage: '文件存储',
         t1Model: '高阶模型',
         t2Model: '基础模型',
-        mediaCredit: '多媒体积分',
+        freeModel: '免费模型',
+        mediaCredit: '多媒体积分（即将推出）',
         fileStorageType: {
           note: '画布',
           resource: '资源',
@@ -1109,7 +1112,7 @@ const translations = {
           },
         },
         ultra: {
-          description: '突破所有限制，尽情释放无限创意',
+          description: '尽情释放无限创意',
           serviceSupport: {
             name: '服务支持',
             details: '专属微信/ Discord 群聊',
