@@ -340,7 +340,7 @@ export const SkillNode = memo(
                 maxRows={100}
                 handleSendMessage={handleSendMessage}
                 handleSelectSkill={(skill) => {
-                  setQuery('');
+                  setQuery(localQuery?.slice(0, -1));
                   setSelectedSkill(skill);
                 }}
               />

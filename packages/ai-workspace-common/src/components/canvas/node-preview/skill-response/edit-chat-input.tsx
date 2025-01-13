@@ -148,7 +148,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
           selectedSkillName={localActionMeta?.name}
           handleSendMessage={handleSendMessage}
           handleSelectSkill={(skill) => {
-            setEditQuery('');
+            setEditQuery(editQuery?.slice(0, -1));
             handleSelectSkill(skill);
           }}
         />
