@@ -1,17 +1,27 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
 import argon2 from 'argon2';
+import ms from 'ms';
 import { Profile } from 'passport';
 import { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { User as UserModel, VerificationSession } from '@prisma/client';
-import { JwtPayload } from './dto';
-import { genUID, genVerificationSessionID } from '@refly-packages/utils';
+import { TokenData } from './auth.dto';
+import {
+  ACCESS_TOKEN_COOKIE,
+  genUID,
+  genVerificationSessionID,
+  LEGACY_TOKEN_COOKIE,
+  pick,
+  REFRESH_TOKEN_COOKIE,
+  UID_COOKIE,
+} from '@refly-packages/utils';
 import { PrismaService } from '@/common/prisma.service';
 import { MiscService } from '@/misc/misc.service';
 import { Resend } from 'resend';
 import {
+  User,
   AuthConfigItem,
   CheckVerificationRequest,
   CreateVerificationRequest,
@@ -58,21 +68,131 @@ export class AuthService {
     return items;
   }
 
-  async login(user: UserModel) {
-    const payload: JwtPayload = { uid: user.uid, email: user.email };
+  async login(user: User): Promise<TokenData> {
+    const payload: User = pick(user, ['uid', 'email']);
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.get('auth.jwt.secret'),
+      expiresIn: this.configService.get('auth.jwt.expiresIn'),
+    });
+
+    // Generate refresh token
+    const refreshToken = await this.generateRefreshToken(user.uid);
+
     return {
-      accessToken: this.jwtService.sign(payload, {
-        secret: this.configService.get('auth.jwt.secret'),
-      }),
+      uid: user.uid,
+      accessToken,
+      refreshToken,
     };
   }
 
-  redirect(res: Response, accessToken: string) {
-    res
-      .cookie(this.configService.get('auth.cookieTokenField'), accessToken, {
+  private async generateRefreshToken(uid: string): Promise<string> {
+    const jti = randomBytes(32).toString('hex');
+    const token = randomBytes(64).toString('hex');
+    const hashedToken = await argon2.hash(token);
+
+    // Store the hashed refresh token
+    await this.prisma.refreshToken.create({
+      data: {
+        jti,
+        uid,
+        hashedToken,
+        expiresAt: new Date(Date.now() + ms(this.configService.get('auth.jwt.refreshExpiresIn'))),
+      },
+    });
+
+    return `${jti}.${token}`;
+  }
+
+  async refreshAccessToken(refreshToken: string) {
+    const [jti, token] = refreshToken.split('.');
+
+    if (!jti || !token) {
+      throw new UnauthorizedException();
+    }
+
+    // Find the refresh token in the database
+    const storedToken = await this.prisma.refreshToken.findUnique({
+      where: { jti },
+    });
+
+    if (!storedToken || storedToken.revoked || storedToken.expiresAt < new Date()) {
+      throw new UnauthorizedException();
+    }
+
+    // Verify the token
+    const isValid = await argon2.verify(storedToken.hashedToken, token);
+    if (!isValid) {
+      throw new UnauthorizedException();
+    }
+
+    // Revoke the current refresh token (one-time use)
+    await this.prisma.refreshToken.update({
+      where: { jti },
+      data: { revoked: true },
+    });
+
+    // Get the user
+    const user = await this.prisma.user.findUnique({
+      where: { uid: storedToken.uid },
+    });
+
+    if (!user) {
+      throw new AccountNotFoundError();
+    }
+
+    // Generate new tokens
+    return this.login(user);
+  }
+
+  async revokeAllRefreshTokens(uid: string) {
+    await this.prisma.refreshToken.updateMany({
+      where: { uid },
+      data: { revoked: true },
+    });
+  }
+
+  async processLegacyToken(token: string, res: Response) {
+    let payload: User;
+    try {
+      payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get('auth.jwt.secret'),
+      });
+    } catch (error) {
+      this.logger.warn(`legacy token verify not valid: ${error}`);
+      throw new UnauthorizedException();
+    }
+
+    const tokens = await this.login(payload);
+    this.setAuthCookie(res, tokens);
+    res.clearCookie(LEGACY_TOKEN_COOKIE);
+  }
+
+  setAuthCookie(res: Response, { uid, accessToken, refreshToken }: TokenData) {
+    return res
+      .cookie(UID_COOKIE, uid, {
         domain: this.configService.get('auth.cookieDomain'),
+        secure: true,
+        sameSite: 'strict',
       })
-      .redirect(this.configService.get('auth.redirectUrl'));
+      .cookie(ACCESS_TOKEN_COOKIE, accessToken, {
+        domain: this.configService.get('auth.cookieDomain'),
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+      })
+      .cookie(REFRESH_TOKEN_COOKIE, refreshToken, {
+        domain: this.configService.get('auth.cookieDomain'),
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+      });
+  }
+
+  clearAuthCookie(res: Response) {
+    return res
+      .clearCookie(UID_COOKIE)
+      .clearCookie(ACCESS_TOKEN_COOKIE)
+      .clearCookie(REFRESH_TOKEN_COOKIE);
   }
 
   async genUniqueUsername(candidate: string) {
@@ -126,7 +246,6 @@ export class AuthService {
     }
 
     // oauth profile returns no email, this is invalid
-    // TODO: Optimize error code
     if (emails?.length === 0) {
       this.logger.warn(`emails is empty, invalid oauth`);
       throw new OAuthError();

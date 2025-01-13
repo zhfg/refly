@@ -25,7 +25,6 @@ import {
 import { pick } from '@/utils';
 import {
   Subscription as SubscriptionModel,
-  User as UserModel,
   ModelInfo as ModelInfoModel,
   SubscriptionPlan as SubscriptionPlanModel,
   Prisma,
@@ -71,7 +70,7 @@ export class SubscriptionService implements OnModuleInit {
     this.subscriptionPlans = await this.prisma.subscriptionPlan.findMany();
   }
 
-  async createCheckoutSession(user: UserModel, param: CreateCheckoutSessionRequest) {
+  async createCheckoutSession(user: User, param: CreateCheckoutSessionRequest) {
     const { uid } = user;
     const { planType, interval } = param;
     const plan = this.subscriptionPlans.find(
@@ -111,9 +110,17 @@ export class SubscriptionService implements OnModuleInit {
     return session;
   }
 
-  async createPortalSession(user: UserModel) {
+  async createPortalSession(user: User) {
+    const { customerId } = await this.prisma.user.findUnique({
+      select: { customerId: true },
+      where: { uid: user.uid },
+    });
+    if (!customerId) {
+      throw new ParamsError(`No customer found for user ${user.uid}`);
+    }
+
     const session = await this.stripeClient.billingPortal.sessions.create({
-      customer: user.customerId,
+      customer: customerId,
       return_url: this.config.get('stripe.portalReturnUrl'),
     });
     return session;
@@ -427,12 +434,21 @@ export class SubscriptionService implements OnModuleInit {
     return result;
   }
 
-  async getOrCreateTokenUsageMeter(user: UserModel, sub?: SubscriptionModel) {
+  async getOrCreateTokenUsageMeter(user: User, sub?: SubscriptionModel) {
     const { uid } = user;
+    const userPo = await this.prisma.user.findUnique({
+      select: { subscriptionId: true },
+      where: { uid },
+    });
 
-    if (user.subscriptionId && !sub) {
+    if (!userPo) {
+      this.logger.error(`No user found for uid ${uid}`);
+      return null;
+    }
+
+    if (userPo.subscriptionId && !sub) {
       sub = await this.prisma.subscription.findUnique({
-        where: { subscriptionId: user.subscriptionId },
+        where: { subscriptionId: userPo.subscriptionId },
       });
     }
 
@@ -481,12 +497,21 @@ export class SubscriptionService implements OnModuleInit {
     });
   }
 
-  async getOrCreateStorageUsageMeter(user: UserModel, sub?: SubscriptionModel) {
+  async getOrCreateStorageUsageMeter(user: User, sub?: SubscriptionModel) {
     const { uid } = user;
+    const userPo = await this.prisma.user.findUnique({
+      select: { subscriptionId: true },
+      where: { uid },
+    });
 
-    if (user.subscriptionId && !sub) {
+    if (!userPo) {
+      this.logger.error(`No user found for uid ${uid}`);
+      return null;
+    }
+
+    if (userPo.subscriptionId && !sub) {
       sub = await this.prisma.subscription.findUnique({
-        where: { subscriptionId: user.subscriptionId },
+        where: { subscriptionId: userPo.subscriptionId },
       });
     }
 
@@ -518,10 +543,21 @@ export class SubscriptionService implements OnModuleInit {
     });
   }
 
-  async getOrCreateUsageMeter(user: UserModel, sub?: SubscriptionModel) {
-    if (user.subscriptionId && !sub) {
+  async getOrCreateUsageMeter(user: User, sub?: SubscriptionModel) {
+    const { uid } = user;
+    const userPo = await this.prisma.user.findUnique({
+      select: { subscriptionId: true },
+      where: { uid },
+    });
+
+    if (!userPo) {
+      this.logger.error(`No user found for uid ${uid}`);
+      return null;
+    }
+
+    if (userPo.subscriptionId && !sub) {
       sub = await this.prisma.subscription.findUnique({
-        where: { subscriptionId: user.subscriptionId },
+        where: { subscriptionId: userPo.subscriptionId },
       });
     }
 

@@ -1,7 +1,7 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { GetActionResultResponse } from '@refly-packages/openapi-schema';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
-import { User } from '@/utils/decorators/user.decorator';
+import { LoginedUser } from '@/utils/decorators/user.decorator';
 import { User as UserModel } from '@prisma/client';
 import { buildSuccessResponse } from '@/utils/response';
 import { ActionService } from '@/action/action.service';
@@ -14,7 +14,7 @@ export class ActionController {
   @UseGuards(JwtAuthGuard)
   @Get('/result')
   async getActionResult(
-    @User() user: UserModel,
+    @LoginedUser() user: UserModel,
     @Query('resultId') resultId: string,
   ): Promise<GetActionResultResponse> {
     const result = await this.actionService.getActionResult(user, { resultId });

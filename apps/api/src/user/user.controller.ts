@@ -2,18 +2,18 @@ import { Controller, Logger, Get, Body, UseGuards, Put, Query } from '@nestjs/co
 
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
-import { User } from '@/utils/decorators/user.decorator';
+import { LoginedUser } from '@/utils/decorators/user.decorator';
 import {
   BaseResponse,
   CheckSettingsFieldResponse,
   GetUserSettingsResponse,
   UpdateUserSettingsRequest,
-  UserSettings,
+  User,
 } from '@refly-packages/openapi-schema';
-import { buildSuccessResponse, pick } from '@/utils';
-import { User as UserModel } from '@prisma/client';
+import { buildSuccessResponse } from '@/utils';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import { subscriptionPO2DTO } from '@/subscription/subscription.dto';
+import { userPO2Settings } from '@/user/user.dto';
 
 @Controller('v1/user')
 export class UserController {
@@ -23,24 +23,12 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('settings')
-  async getSettings(@User() user: UserModel): Promise<GetUserSettingsResponse> {
-    const settings: UserSettings = {
-      ...pick(user, [
-        'uid',
-        'avatar',
-        'name',
-        'nickname',
-        'email',
-        'uiLocale',
-        'outputLocale',
-        'customerId',
-        'hasBetaAccess',
-      ]),
-      emailVerified: !!user.emailVerified,
-    };
+  async getSettings(@LoginedUser() user: User): Promise<GetUserSettingsResponse> {
+    const userPo = await this.userService.getUserSettings(user);
+    const settings = userPO2Settings(userPo);
 
-    if (user.subscriptionId) {
-      const subscription = await this.subscriptionService.getSubscription(user.subscriptionId);
+    if (userPo.subscriptionId) {
+      const subscription = await this.subscriptionService.getSubscription(userPo.subscriptionId);
       settings.subscription = subscriptionPO2DTO(subscription);
     }
 
@@ -50,7 +38,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Put('settings')
   async updateSettings(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: UpdateUserSettingsRequest,
   ): Promise<BaseResponse> {
     await this.userService.updateSettings(user, body);
@@ -60,7 +48,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get('checkSettingsField')
   async checkSettingsField(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Query('field') field: 'name' | 'email',
     @Query('value') value: string,
   ): Promise<CheckSettingsFieldResponse> {

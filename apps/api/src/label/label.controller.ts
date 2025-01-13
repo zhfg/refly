@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  User,
   BaseResponse,
   CreateLabelClassRequest,
   CreateLabelInstanceRequest,
@@ -25,8 +26,7 @@ import {
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { buildSuccessResponse } from '@/utils';
 import { LabelService } from '@/label/label.service';
-import { User } from '@/utils/decorators/user.decorator';
-import { User as UserModel } from '@prisma/client';
+import { LoginedUser } from '@/utils/decorators/user.decorator';
 import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
 
 @Controller('v1/label')
@@ -36,7 +36,7 @@ export class LabelController {
   @UseGuards(JwtAuthGuard)
   @Get('class/list')
   async listLabelClasses(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number,
   ): Promise<ListLabelClassesResponse> {
@@ -47,7 +47,7 @@ export class LabelController {
   @UseGuards(JwtAuthGuard)
   @Post('class/new')
   async createLabelClass(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: CreateLabelClassRequest,
   ): Promise<UpsertLabelClassResponse> {
     const lc = await this.labelService.createLabelClass(user, body);
@@ -57,7 +57,7 @@ export class LabelController {
   @UseGuards(JwtAuthGuard)
   @Post('class/update')
   async updateLabelClass(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: UpdateLabelClassRequest,
   ): Promise<UpsertLabelClassResponse> {
     const lc = await this.labelService.updateLabelClass(user, body);
@@ -67,7 +67,7 @@ export class LabelController {
   @UseGuards(JwtAuthGuard)
   @Post('class/delete')
   async deleteLabelClass(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: DeleteLabelClassRequest,
   ): Promise<BaseResponse> {
     await this.labelService.deleteLabelClass(user, body);
@@ -77,7 +77,7 @@ export class LabelController {
   @UseGuards(JwtAuthGuard)
   @Get('instance/list')
   async listLabelInstances(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Query('entityType') entityType: EntityType,
     @Query('entityId') entityId: string,
     @Query('classId') classId: string,
@@ -99,7 +99,7 @@ export class LabelController {
   @UseGuards(JwtAuthGuard)
   @Post('instance/new')
   async createLabelInstance(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: CreateLabelInstanceRequest,
   ): Promise<UpsertLabelInstanceResponse> {
     const labels = await this.labelService.createLabelInstance(user, body);
@@ -109,7 +109,7 @@ export class LabelController {
   @UseGuards(JwtAuthGuard)
   @Post('instance/update')
   async updateLabelInstance(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: UpdateLabelInstanceRequest,
   ): Promise<UpsertLabelInstanceResponse> {
     const label = await this.labelService.updateLabelInstance(user, body);
@@ -119,7 +119,7 @@ export class LabelController {
   @UseGuards(JwtAuthGuard)
   @Post('instance/delete')
   async deleteLabelInstance(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: DeleteLabelInstanceRequest,
   ): Promise<BaseResponse> {
     await this.labelService.deleteLabelInstance(user, body);

@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
-import { useCookie } from 'react-use';
 import * as Y from 'yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import { getWsServerOrigin } from '@refly-packages/utils/url';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
+import { useCollabToken } from '@refly-packages/ai-workspace-common/hooks/use-collab-token';
 
 interface DocumentContextType {
   docId: string;
@@ -17,7 +17,8 @@ interface DocumentContextType {
 const DocumentContext = createContext<DocumentContextType | null>(null);
 
 export const DocumentProvider = ({ docId, children }: { docId: string; children: React.ReactNode }) => {
-  const [token] = useCookie('_refly_ai_sid');
+  const { token, refreshToken } = useCollabToken();
+
   const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt, updateDocument } = useDocumentStoreShallow((state) => ({
     setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
     setDocumentRemoteSyncedAt: state.setDocumentRemoteSyncedAt,
@@ -37,6 +38,9 @@ export const DocumentProvider = ({ docId, children }: { docId: string; children:
       token,
       document: doc,
       connect: true,
+      onAuthenticationFailed: () => {
+        refreshToken();
+      },
     });
 
     remoteProvider.on('synced', () => {

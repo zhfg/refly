@@ -1,7 +1,7 @@
 import { Result, Button, Modal, Typography } from '@arco-design/web-react';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useTranslation } from 'react-i18next';
-import { useLogout } from '@refly-packages/ai-workspace-common/hooks/useLogout';
+import { useLogout } from '@refly-packages/ai-workspace-common/hooks/use-logout';
 
 import './index.scss';
 

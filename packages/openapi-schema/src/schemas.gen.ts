@@ -2,24 +2,16 @@
 
 export const UserSchema = {
   type: 'object',
-  description: 'Refly user',
+  description: 'Refly user, used as JWT payload',
   required: ['uid'],
   properties: {
     uid: {
       type: 'string',
       description: 'UID',
     },
-    uiLocale: {
+    email: {
       type: 'string',
-      description: 'UI locale',
-    },
-    outputLocale: {
-      type: 'string',
-      description: 'Output locale',
-    },
-    planId: {
-      type: 'string',
-      description: 'Subscription plan ID',
+      description: 'Email',
     },
   },
 } as const;
@@ -1639,6 +1631,33 @@ export const GetUserSettingsResponseSchema = {
       properties: {
         data: {
           $ref: '#/components/schemas/UserSettings',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const CollabTokenDataSchema = {
+  type: 'object',
+  required: ['token'],
+  properties: {
+    token: {
+      type: 'string',
+      description: 'Collab token',
+    },
+  },
+} as const;
+
+export const GetCollabTokenResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          $ref: '#/components/schemas/CollabTokenData',
         },
       },
     },

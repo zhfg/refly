@@ -1,12 +1,11 @@
 import { getServerOrigin } from '@refly/utils/url';
-import { BaseResponse, InvokeSkillRequest, SkillEvent } from '@refly/openapi-schema';
+import { InvokeSkillRequest, SkillEvent } from '@refly/openapi-schema';
 import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
 import { extractBaseResp } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { ConnectionError } from '@refly/errors';
 
 export const ssePost = async ({
   controller,
-  token,
   payload,
   onStart,
   onSkillLog,
@@ -21,7 +20,6 @@ export const ssePost = async ({
   onCompleted,
 }: {
   controller: AbortController;
-  token: string;
   payload: InvokeSkillRequest;
   onStart: () => void;
   onSkillLog: (event: SkillEvent) => void;
@@ -42,8 +40,8 @@ export const ssePost = async ({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
       },
+      credentials: 'include',
       signal: controller.signal,
       body: JSON.stringify(payload),
     });

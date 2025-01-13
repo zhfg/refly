@@ -3,11 +3,10 @@ import { ActionResult, ActionStep, ActionStepMeta, Entity, SkillEvent } from '@r
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
 import { LOCALE } from '@refly/common-types';
-import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/utils/request';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
-import { showErrorNotification } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { showErrorNotification } from '@refly-packages/ai-workspace-common/utils/notification';
 import {
   useActionResultStore,
   useActionResultStoreShallow,
@@ -294,7 +293,6 @@ export const useInvokeAction = () => {
     const locale = localSettings?.uiLocale as LOCALE;
 
     const { error, resultId } = skillEvent;
-    console.log('error', error);
     showErrorNotification(error, locale);
 
     const { resultMap } = useActionResultStore.getState();
@@ -400,7 +398,6 @@ export const useInvokeAction = () => {
     ssePost({
       controller: globalAbortControllerRef.current,
       payload: param,
-      token: getAuthTokenFromCookie(),
       onStart: wrapEventHandler(onStart),
       onSkillStart: wrapEventHandler(onSkillStart),
       onSkillStream: wrapEventHandler(onSkillStream),

@@ -1,6 +1,6 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { User as UserModel } from '@prisma/client';
 import {
+  User,
   MultiLingualWebSearchRequest,
   SearchRequest,
   SearchResponse,
@@ -9,7 +9,7 @@ import {
 
 import { buildSuccessResponse } from '@/utils';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
-import { User } from '@/utils/decorators/user.decorator';
+import { LoginedUser } from '@/utils/decorators/user.decorator';
 import { SearchService } from '@/search/search.service';
 
 @Controller('v1/search')
@@ -18,14 +18,14 @@ export class SearchController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async search(@User() user: UserModel, @Body() body: SearchRequest): Promise<SearchResponse> {
+  async search(@LoginedUser() user: User, @Body() body: SearchRequest): Promise<SearchResponse> {
     return buildSuccessResponse(await this.searchService.search(user, body));
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('/multilingualSearch')
   async multiLingualWebSearch(
-    @User() user: UserModel,
+    @LoginedUser() user: User,
     @Body() body: MultiLingualWebSearchRequest,
   ): Promise<MultiLingualWebSearchResponse> {
     const result = await this.searchService.multiLingualWebSearch(user, body);

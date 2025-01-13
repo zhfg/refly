@@ -12,3 +12,4 @@ export * from './event-emitter/editor';
 export * from './timeTracker';
 export * from './search-source-converter';
 export * from './translate';
+export * from './cookie';

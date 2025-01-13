@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 
 import { KnowledgeController } from './knowledge.controller';
@@ -14,7 +13,6 @@ import { QUEUE_RESOURCE, QUEUE_SIMPLE_EVENT, QUEUE_SYNC_STORAGE_USAGE } from '@/
 @Module({
   imports: [
     CommonModule,
-    ConfigModule,
     RAGModule,
     MiscModule,
     SubscriptionModule,

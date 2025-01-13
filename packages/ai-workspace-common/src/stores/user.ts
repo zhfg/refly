@@ -17,7 +17,6 @@ export interface UserState {
   isCheckingLoginStatus: boolean | undefined;
   isLogin: boolean;
   userProfile?: UserSettings;
-  token?: string;
   localSettings: LocalSettings; // 在获取 user 信息的时候记录这个 settings，并 host 到 localStorage，每次保存更新，类似 userProfile
 
   runtime: IRuntime;
@@ -26,7 +25,6 @@ export interface UserState {
   setIsCheckingLoginStatus: (val: boolean) => void;
   setIsLogin: (val: boolean) => void;
   setUserProfile: (val?: UserSettings) => void;
-  setToken: (val?: string) => void;
   setLocalSettings: (val: LocalSettings) => void;
   setRuntime: (val: IRuntime) => void;
   resetState: () => void;
@@ -49,7 +47,7 @@ const getDefaultLocale = () => {
 export const defaultLocalSettings = {
   uiLocale: getDefaultLocale(),
   outputLocale: navigator.language,
-  isLocaleInitialized: false, // locale 是否是初始化状态，用于展示语言
+  isLocaleInitialized: false,
 } as LocalSettings;
 
 const defaultCheckingLoginStatus = {
@@ -57,11 +55,9 @@ const defaultCheckingLoginStatus = {
 };
 
 export const defaultExtraState = {
-  // messages: fakeMessages as any,
   isCheckingLoginStatus: false,
   isLogin: false,
   userProfile: undefined,
-  token: '',
   runtime: 'web' as IRuntime,
   localSettings: { ...defaultLocalSettings }, // 默认使用浏览器的 navigator 获取语言，插件里面使用 chrome.i18n.detectLanguage
 };
@@ -78,7 +74,6 @@ export const useUserStore = create<UserState>()(
     setIsCheckingLoginStatus: (val: boolean) => set((state) => ({ ...state, isCheckingLoginStatus: val })),
     setIsLogin: (val: boolean) => set((state) => ({ ...state, isLogin: val })),
     setUserProfile: (val?: UserSettings) => set((state) => ({ ...state, userProfile: val })),
-    setToken: (val?: string) => set((state) => ({ ...state, token: val })),
     setLocalSettings: (val: LocalSettings) => set((state) => ({ ...state, localSettings: val })),
     setRuntime: (val: IRuntime) => set((state) => ({ ...state, runtime: val })),
     resetState: () => set((state) => ({ ...state, ...defaultExtraState })),
