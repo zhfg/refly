@@ -549,6 +549,7 @@ const translations = {
       showLaunchpad: 'Show Ask AI',
       editTitle: 'Edit Canvas Title',
       editTitlePlaceholder: 'Please enter the title of the canvas',
+      rename: 'Rename',
       syncingChanges: 'Syncing Changes',
       synced: 'Last synced at {{time}}',
       mouse: 'Mouse Mode',

@@ -1,22 +1,31 @@
 import { useEffect, useState } from 'react';
 import { Button, Dropdown, DropdownProps, Popconfirm, MenuProps, message } from 'antd';
-import { IconMoreHorizontal, IconDelete } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconMoreHorizontal, IconDelete, IconEdit } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-canvas';
 import { useTranslation } from 'react-i18next';
+import { CanvasRename } from '@refly-packages/ai-workspace-common/components/canvas/top-toolbar/canvas-rename';
+import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+import { useUpdateCanvas } from '@refly-packages/ai-workspace-common/queries';
 
 interface CanvasActionDropdown {
   canvasId: string;
   canvasName: string;
   updateShowStatus?: (canvasId: string | null) => void;
   afterDelete?: () => void;
+  afterRename?: (newTitle: string, canvasId: string) => void;
 }
 
 export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
-  const { canvasId, canvasName, updateShowStatus, afterDelete } = props;
+  const { canvasId, canvasName, updateShowStatus, afterDelete, afterRename } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
   const { deleteCanvas } = useDeleteCanvas();
+  const { mutate: updateCanvas } = useUpdateCanvas();
+  const { updateCanvasTitle } = useSiderStoreShallow((state) => ({
+    updateCanvasTitle: state.updateCanvasTitle,
+  }));
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const handleDelete = async () => {
     const success = await deleteCanvas(canvasId);
     if (success) {
@@ -28,7 +37,27 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
   const items: MenuProps['items'] = [
     {
       label: (
-        <div onClick={(e) => e.stopPropagation()}>
+        <div
+          className="flex items-center"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsModalOpen(true);
+            setPopupVisible(false);
+          }}
+        >
+          <IconEdit size={16} className="mr-2" />
+          {t('canvas.toolbar.rename')}
+        </div>
+      ),
+      key: 'rename',
+    },
+    {
+      label: (
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
           <Popconfirm
             title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', { canvas: canvasName })}
             onConfirm={handleDelete}
@@ -36,7 +65,12 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
             okText={t('common.confirm')}
             cancelText={t('common.cancel')}
           >
-            <div className="flex items-center text-red-600" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="flex items-center text-red-600"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
               <IconDelete size={16} className="mr-2" />
               {t('workspace.deleteDropdownMenu.delete')}
             </div>
@@ -53,6 +87,20 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
     }
   };
 
+  const handleModalOk = (newTitle: string) => {
+    if (newTitle?.trim()) {
+      // TODO: syncTitleToYDoc(newTitle);
+      updateCanvas({ body: { canvasId, title: newTitle } });
+      updateCanvasTitle(canvasId, newTitle);
+      setIsModalOpen(false);
+      afterRename?.(newTitle, canvasId);
+    }
+  };
+
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
+  };
+
   useEffect(() => {
     if (popupVisible) {
       updateShowStatus?.(canvasId);
@@ -62,15 +110,26 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
   }, [popupVisible]);
 
   return (
-    <Dropdown
-      trigger={['click']}
-      open={popupVisible}
-      onOpenChange={handleOpenChange}
-      menu={{
-        items,
-      }}
-    >
-      <Button onClick={(e) => e.stopPropagation()} size="small" type="text" icon={<IconMoreHorizontal />} />
-    </Dropdown>
+    <>
+      <Dropdown
+        trigger={['click']}
+        open={popupVisible}
+        onOpenChange={handleOpenChange}
+        menu={{
+          items,
+        }}
+      >
+        <Button onClick={(e) => e.stopPropagation()} size="small" type="text" icon={<IconMoreHorizontal />} />
+      </Dropdown>
+
+      <div onClick={(e) => e.stopPropagation()}>
+        <CanvasRename
+          canvasTitle={canvasName}
+          isModalOpen={isModalOpen}
+          handleModalOk={handleModalOk}
+          handleModalCancel={handleModalCancel}
+        />
+      </div>
+    </>
   );
 };

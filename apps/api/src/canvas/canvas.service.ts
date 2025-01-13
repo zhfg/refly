@@ -88,6 +88,19 @@ export class CanvasService {
       throw new CanvasNotFoundError();
     }
 
+    // Update title in yjs document
+    const connection = await this.collabService.openDirectConnection(canvasId, {
+      user,
+      entity: updatedCanvas,
+      entityType: 'canvas',
+    });
+    connection.document.transact(() => {
+      const title = connection.document.getText('title');
+      title.delete(0, title.length);
+      title.insert(0, param.title);
+    });
+    await connection.disconnect();
+
     await this.elasticsearch.upsertCanvas({
       id: updatedCanvas.canvasId,
       title: updatedCanvas.title,
