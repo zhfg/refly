@@ -80,48 +80,27 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
         showSkillSelector && setShowSkillSelector(false);
       }
 
-      if (!query?.trim()) {
-        if (e.keyCode === 13) {
-          e.preventDefault();
-          return;
-        }
-        return;
-      }
-
-      const preventEmptyLine = () => {
-        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-          const cursorPos = e.target.selectionStart ?? 0;
-          const text = query;
-
-          let currentLineStart = text.lastIndexOf('\n', cursorPos - 1) + 1;
-          if (currentLineStart === -1) currentLineStart = 0;
-          const currentLineEnd = text.indexOf('\n', cursorPos);
-          const currentLine = text.slice(currentLineStart, currentLineEnd === -1 ? text.length : currentLineEnd);
-
-          if (!currentLine.trim()) {
-            e.preventDefault();
-            return;
-          }
-
-          e.preventDefault();
-          const newValue = text.slice(0, cursorPos) + '\n' + text.slice(cursorPos);
-          setQuery(newValue);
-
-          setTimeout(() => {
-            if (e.target instanceof HTMLTextAreaElement) {
-              e.target.selectionStart = e.target.selectionEnd = cursorPos + 1;
-            }
-          }, 0);
-        }
-      };
-
       if (e.keyCode === 13) {
         if (showSkillSelector && options.length > 0) {
           e.preventDefault();
           return;
         }
+
         if (e.ctrlKey || e.shiftKey || e.metaKey) {
-          preventEmptyLine();
+          e.preventDefault();
+          // Insert new line at cursor position
+          if (e.target instanceof HTMLTextAreaElement) {
+            const cursorPos = e.target.selectionStart ?? 0;
+            const newValue = query.slice(0, cursorPos) + '\n' + query.slice(cursorPos);
+            setQuery(newValue);
+
+            // Set cursor position after the new line
+            setTimeout(() => {
+              if (e.target instanceof HTMLTextAreaElement) {
+                e.target.selectionStart = e.target.selectionEnd = cursorPos + 1;
+              }
+            }, 0);
+          }
         } else {
           e.preventDefault();
           if (query?.trim()) {
