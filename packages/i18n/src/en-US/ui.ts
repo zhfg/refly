@@ -1095,6 +1095,7 @@ const translations = {
         yearly: 'Yearly',
         monthlyPlan: 'Monthly Auto-Renewal',
         yearlyPlan: 'Yearly Auto-Renewal',
+        cancelAt: 'Will be canceled at {{date}}',
         tooltip: {
           modelToken: 'Usage includes both model input and output tokens',
           vectorStorage: 'Used for storing semantic embeddings of resources and canvases',

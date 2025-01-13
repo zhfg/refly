@@ -1079,6 +1079,7 @@ const translations = {
         yearly: '按年',
         monthlyPlan: '每月自动续费',
         yearlyPlan: '每年自动续费',
+        cancelAt: '将于 {{date}} 取消',
         tooltip: {
           modelToken: 'Token 同时包括模型输入和输出',
           vectorStorage: '用于存储资源和画布的语义化向量数据',

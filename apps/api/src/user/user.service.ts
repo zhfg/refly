@@ -5,18 +5,30 @@ import {
   UpdateUserSettingsRequest,
   User,
 } from '@refly-packages/openapi-schema';
+import { Subscription } from '@prisma/client';
 import { pick } from '@refly-packages/utils';
+import { SubscriptionService } from '@/subscription/subscription.service';
 
 @Injectable()
 export class UserService {
   private logger = new Logger(UserService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private subscriptionService: SubscriptionService) {}
 
   async getUserSettings(user: User) {
-    return this.prisma.user.findUnique({
+    const userPo = await this.prisma.user.findUnique({
       where: { uid: user.uid },
     });
+
+    let subscription: Subscription | null = null;
+    if (userPo.subscriptionId) {
+      subscription = await this.subscriptionService.getSubscription(userPo.subscriptionId);
+    }
+
+    return {
+      ...userPo,
+      subscription,
+    };
   }
 
   async updateSettings(user: User, data: UpdateUserSettingsRequest) {

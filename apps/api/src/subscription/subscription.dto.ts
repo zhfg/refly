@@ -48,6 +48,7 @@ export function subscriptionPO2DTO(sub: SubscriptionModel): Subscription {
     planType: sub.planType as SubscriptionPlanType,
     interval: sub.interval as SubscriptionInterval,
     status: sub.status as SubscriptionStatus,
+    cancelAt: sub.cancelAt?.toJSON(),
   };
 }
 
