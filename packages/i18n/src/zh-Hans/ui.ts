@@ -1057,6 +1057,7 @@ const translations = {
       mostPopular: '最受欢迎',
       getStarted: '开始使用',
       subscribeNow: '立即订阅',
+      manage: '管理订阅',
       currentPlan: '当前套餐',
       t1TokenUsed: '高阶模型 Token 使用量',
       t1TokenUsedDescription:
@@ -1088,7 +1089,8 @@ const translations = {
         fileStorage: '文件存储',
         t1Model: '高阶模型',
         t2Model: '基础模型',
-        mediaCredit: '多媒体积分',
+        freeModel: '免费模型',
+        mediaCredit: '多媒体积分（即将推出）',
         fileStorageType: {
           note: '画布',
           resource: '资源',
@@ -1106,7 +1108,7 @@ const translations = {
           },
         },
         ultra: {
-          description: '突破所有限制，尽情释放无限创意',
+          description: '尽情释放无限创意',
           serviceSupport: {
             name: '服务支持',
             details: '专属微信/ Discord 群聊',

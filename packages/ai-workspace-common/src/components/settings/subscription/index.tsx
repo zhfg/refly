@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
-
+import dayjs from 'dayjs';
 import { Button, Progress, Tooltip, Tag, Space } from 'antd';
 import { HiOutlineQuestionMarkCircle } from 'react-icons/hi2';
-import { HiOutlineExternalLink } from 'react-icons/hi';
 import { RiBillLine } from 'react-icons/ri';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { formatStorage } from '@refly-packages/ai-workspace-common/modules/entity-selector/utils';
@@ -16,8 +14,9 @@ import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { StorageUsageMeter } from '@refly/openapi-schema';
-import dayjs from 'dayjs';
-import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+
+import { PiInvoiceBold } from 'react-icons/pi';
+import { IconSubscription } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 const UsageItem = ({
   title,
@@ -159,9 +158,6 @@ export const Subscription = () => {
   const userStore = useUserStoreShallow((state) => ({
     userProfile: state.userProfile,
   }));
-  const { setShowSettingModal } = useSiderStoreShallow((state) => ({
-    setShowSettingModal: state.setShowSettingModal,
-  }));
 
   const {
     isRequest,
@@ -185,8 +181,6 @@ export const Subscription = () => {
     setStorageUsage: state.setStorageUsage,
   }));
 
-  const navigate = useNavigate();
-
   const getSubscriptionStatus = async () => {
     const { userProfile } = useUserStore.getState();
     if (!userProfile) return;
@@ -200,12 +194,12 @@ export const Subscription = () => {
     setIsRequest(false);
   };
 
-  const [loading, setLoading] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
   const createPortalSession = async () => {
-    if (loading) return;
-    setLoading(true);
+    if (portalLoading) return;
+    setPortalLoading(true);
     const { data } = await getClient().createPortalSession();
-    setLoading(false);
+    setPortalLoading(false);
     if (data?.data?.url) {
       window.location.href = data.data.url;
     }
@@ -234,16 +228,26 @@ export const Subscription = () => {
               )}
             </div>
           </div>
-          {subscriptionStatus === 'free' && (
+          {subscriptionStatus === 'free' ? (
             <Button
               type="primary"
               className="subscribe-btn"
+              icon={<IconSubscription className="flex items-center justify-center text-base" />}
               onClick={() => {
-                // setShowSettingModal(false);
                 setSubscribeModalVisible(true);
               }}
             >
               {t('settings.subscription.subscribeNow')}
+            </Button>
+          ) : (
+            <Button
+              type="default"
+              className="text-gray-500 font-medium border-none shadow-lg"
+              loading={portalLoading}
+              onClick={createPortalSession}
+              icon={<PiInvoiceBold className="flex items-center justify-center text-base" />}
+            >
+              {t('settings.subscription.manage')}
             </Button>
           )}
         </div>
@@ -274,20 +278,6 @@ export const Subscription = () => {
           />
           <FileStorageUsageItem storage={storageUsage} />
         </div>
-
-        {userStore.userProfile?.customerId && (
-          <div className="subscription-management-wrapper">
-            <Spin spinning={loading} style={{ width: '100%' }}>
-              <div className="subscription-management" onClick={createPortalSession}>
-                <div className="subscription-management-left">
-                  <RiBillLine style={{ marginRight: 8 }} />
-                  {t('settings.subscription.subscriptionManagement')}
-                </div>
-                <HiOutlineExternalLink className="subscription-management-right" />
-              </div>
-            </Spin>
-          </div>
-        )}
       </div>
     </Spin>
   );

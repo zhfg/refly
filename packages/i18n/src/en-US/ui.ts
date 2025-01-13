@@ -1073,6 +1073,7 @@ const translations = {
       mostPopular: 'Most Popular',
       getStarted: 'Get Started',
       subscribeNow: 'Subscribe Now',
+      manage: 'Manage Subscription',
       currentPlan: 'Current Plan',
       t1TokenUsed: 'Advanced Model Token Usage',
       t1TokenUsedDescription:
@@ -1105,7 +1106,8 @@ const translations = {
         fileStorage: 'File Storage',
         t1Model: 'Advanced Models',
         t2Model: 'Standard Models',
-        mediaCredit: 'Media Credit',
+        freeModel: 'Free Models',
+        mediaCredit: 'Media Credit (Coming Soon)',
         fileStorageType: {
           note: 'Canvases',
           resource: 'Resources',
