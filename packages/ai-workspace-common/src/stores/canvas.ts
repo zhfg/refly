@@ -78,7 +78,7 @@ const defaultCanvasState = () => ({
   showPreview: true,
   showMaxRatio: true,
   showLaunchpad: true,
-  interactionMode: 'touchpad' as const,
+  interactionMode: 'mouse' as const,
   operatingNodeId: null,
   showEdges: false,
   clickToPreview: true,
