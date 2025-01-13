@@ -630,6 +630,7 @@ const translations = {
       groupCluster: 'Group Sub Nodes',
       layoutCluster: 'Layout Sub Nodes',
       centerNode: 'Center Node Position',
+      editQuery: 'Edit Query',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',

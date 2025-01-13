@@ -88,6 +88,23 @@ export const SkillNode = memo(
     const { addNode } = useAddNode();
     const { deleteNode } = useDeleteNode();
 
+    // Add ref for ChatInput component
+    const chatInputRef = useRef<HTMLDivElement>(null);
+
+    // Add useEffect for auto focus
+    useEffect(() => {
+      if (selected) {
+        setTimeout(() => {
+          if (chatInputRef.current) {
+            const textArea = chatInputRef.current.querySelector('textarea');
+            if (textArea) {
+              textArea.focus();
+            }
+          }
+        }, 100);
+      }
+    }, [selected]);
+
     const moveableRef = useRef<Moveable>(null);
     const targetRef = useRef<HTMLDivElement>(null);
     const { operatingNodeId } = useCanvasStoreShallow((state) => ({
@@ -103,7 +120,7 @@ export const SkillNode = memo(
       maxWidth: 800,
       minHeight: 200,
       defaultWidth: 384,
-      defaultHeight: 200,
+      defaultHeight: 'auto',
     });
 
     const { query, selectedSkill, modelInfo, contextItems = [] } = data.metadata;
@@ -118,8 +135,9 @@ export const SkillNode = memo(
       patchNodeData(id, data);
     }, 50);
 
-    const { selectedModel } = useChatStoreShallow((state) => ({
-      selectedModel: state.selectedModel,
+    const { skillSelectedModel, setSkillSelectedModel } = useChatStoreShallow((state) => ({
+      skillSelectedModel: state.skillSelectedModel,
+      setSkillSelectedModel: state.setSkillSelectedModel,
     }));
 
     const { invokeAction, abortAction } = useInvokeAction();
@@ -136,8 +154,9 @@ export const SkillNode = memo(
     const setModelInfo = useCallback(
       (modelInfo: ModelInfo | null) => {
         patchNodeData(id, { metadata: { modelInfo } });
+        setSkillSelectedModel(modelInfo);
       },
-      [id, patchNodeData],
+      [id, patchNodeData, setSkillSelectedModel],
     );
 
     const setContextItems = useCallback(
@@ -187,10 +206,10 @@ export const SkillNode = memo(
     }, [targetRef?.current?.offsetHeight, resizeMoveable]);
 
     useEffect(() => {
-      if (selectedModel && !modelInfo) {
-        setModelInfo(selectedModel);
+      if (skillSelectedModel && !modelInfo) {
+        setModelInfo(skillSelectedModel);
       }
-    }, [selectedModel, modelInfo, setModelInfo]);
+    }, [skillSelectedModel, modelInfo, setModelInfo]);
 
     const setSelectedSkill = useCallback(
       (skill: Skill | null) => {
@@ -276,7 +295,9 @@ export const SkillNode = memo(
       <div className={classNames({ nowheel: isOperating })}>
         <div
           ref={targetRef}
-          className="relative group"
+          className={classNames({
+            'relative group nodrag nopan select-text': isOperating,
+          })}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           style={containerStyle}
@@ -308,6 +329,7 @@ export const SkillNode = memo(
               <ContextManager className="px-0.5" contextItems={contextItems} setContextItems={setContextItems} />
 
               <ChatInput
+                ref={chatInputRef}
                 query={localQuery}
                 setQuery={(value) => {
                   setQuery(value);
@@ -318,7 +340,7 @@ export const SkillNode = memo(
                 maxRows={100}
                 handleSendMessage={handleSendMessage}
                 handleSelectSkill={(skill) => {
-                  setQuery('');
+                  setQuery(localQuery?.slice(0, -1));
                   setSelectedSkill(skill);
                 }}
               />

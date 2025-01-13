@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { useMemo, memo, useState, useCallback } from 'react';
+import { useMemo, memo, useState, useCallback, useEffect, useRef } from 'react';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
 import { ContextManager } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager';
@@ -53,6 +53,19 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
   const { canvasId } = useCanvasContext();
   const { invokeAction } = useInvokeAction();
   const skill = useFindSkill(localActionMeta?.name);
+
+  const textareaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (enabled && textareaRef.current) {
+      const textarea = textareaRef.current.querySelector('textarea');
+      if (textarea) {
+        const length = textarea.value.length;
+        textarea.focus();
+        textarea.setSelectionRange(length, length);
+      }
+    }
+  }, [enabled]);
 
   const handleSendMessage = useCallback(() => {
     // Synchronize edges with latest context items
@@ -129,12 +142,13 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
         )}
         <ContextManager className="p-2 px-3" contextItems={editContextItems} setContextItems={setEditContextItems} />
         <ChatInput
+          ref={textareaRef}
           query={editQuery}
           setQuery={setEditQuery}
           selectedSkillName={localActionMeta?.name}
           handleSendMessage={handleSendMessage}
           handleSelectSkill={(skill) => {
-            setEditQuery('');
+            setEditQuery(editQuery?.slice(0, -1));
             handleSelectSkill(skill);
           }}
         />

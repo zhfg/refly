@@ -157,7 +157,9 @@ export const DocumentNode = memo(
       <div className={classNames({ nowheel: isOperating })}>
         <div
           ref={targetRef}
-          className="relative"
+          className={classNames({
+            'relative nodrag nopan select-text': isOperating,
+          })}
           onMouseEnter={!isPreview ? handleMouseEnter : undefined}
           onMouseLeave={!isPreview ? handleMouseLeave : undefined}
           onClick={onNodeClick}

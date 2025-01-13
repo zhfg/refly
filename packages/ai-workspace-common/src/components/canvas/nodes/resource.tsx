@@ -234,6 +234,9 @@ export const ResourceNode = memo(
           onMouseEnter={!isPreview ? handleMouseEnter : undefined}
           onMouseLeave={!isPreview ? handleMouseLeave : undefined}
           onClick={onNodeClick}
+          className={classNames({
+            'nodrag nopan select-text': isOperating,
+          })}
         >
           {!isPreview && !hideActions && <ActionButtons type="resource" nodeId={id} isNodeHovered={isHovered} />}
 

@@ -14,7 +14,17 @@ import {
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { FileInput, MessageSquareDiff, FilePlus, Ungroup, Group, MoveVertical, Target, Layout } from 'lucide-react';
+import {
+  FileInput,
+  MessageSquareDiff,
+  FilePlus,
+  Ungroup,
+  Group,
+  MoveVertical,
+  Target,
+  Layout,
+  Edit,
+} from 'lucide-react';
 import { GrClone } from 'react-icons/gr';
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
 import { nodeActionEmitter, createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
@@ -172,6 +182,20 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     onClose?.();
   }, [nodeData?.contentPreview, onClose]);
 
+  const handleEditQuery = useCallback(() => {
+    addNodePreview(canvasId, node);
+
+    setTimeout(() => {
+      locateToNodePreviewEmitter.emit('locateToNodePreview', {
+        id: nodeId,
+        canvasId,
+        type: 'editResponse',
+      });
+    }, 100);
+
+    onClose?.();
+  }, [nodeId, canvasId, node, addNodePreview, onClose]);
+
   const getMenuItems = (activeDocumentId: string): MenuItem[] => {
     if (isMultiSelection) {
       return [
@@ -220,6 +244,13 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
               loading: cloneAskAIRunning,
               label: t('canvas.nodeActions.cloneAskAI'),
               onClick: handleCloneAskAI,
+              type: 'button' as const,
+            },
+            {
+              key: 'editQuery',
+              icon: Edit,
+              label: t('canvas.nodeActions.editQuery'),
+              onClick: handleEditQuery,
               type: 'button' as const,
             },
             {
