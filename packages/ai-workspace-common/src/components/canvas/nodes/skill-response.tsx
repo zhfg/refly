@@ -419,7 +419,9 @@ export const SkillResponseNode = memo(
       <div className={classNames({ nowheel: isOperating })}>
         <div
           ref={targetRef}
-          className="relative"
+          className={classNames({
+            'relative nodrag nopan select-text': isOperating,
+          })}
           style={isPreview ? { width: 288, height: 200 } : containerStyle}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}

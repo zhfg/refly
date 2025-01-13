@@ -295,7 +295,9 @@ export const SkillNode = memo(
       <div className={classNames({ nowheel: isOperating })}>
         <div
           ref={targetRef}
-          className="relative group"
+          className={classNames({
+            'relative group nodrag nopan select-text': isOperating,
+          })}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           style={containerStyle}
