@@ -74,88 +74,29 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
     const [options, setOptions] = useState<AutoCompleteProps['options']>([]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && !showSkillSelector) {
+        e.stopPropagation();
+        return;
+      }
+
       if (e.key === '/') {
         setShowSkillSelector(true);
       } else if (!['ArrowUp', 'ArrowDown', 'Enter'].includes(e.key)) {
         showSkillSelector && setShowSkillSelector(false);
       }
 
-      // Handle arrow key navigation
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        if (showSkillSelector && options.length > 0) {
-          return;
-        }
-
-        const textarea = e.target as HTMLTextAreaElement;
-        const { selectionStart, value } = textarea;
-        const lines = value.split('\n');
-
-        let currentLineIndex = 0;
-        let charCount = 0;
-        let columnPosition = 0;
-
-        for (let i = 0; i < lines.length; i++) {
-          if (selectionStart > charCount && selectionStart <= charCount + lines[i].length + 1) {
-            currentLineIndex = i;
-            columnPosition = selectionStart - charCount;
-            break;
-          }
-          charCount += lines[i].length + 1; // +1 for newline
-        }
-
-        let newPosition = selectionStart;
-
-        if (e.key === 'ArrowUp' && currentLineIndex > 0) {
-          const targetLine = lines[currentLineIndex - 1];
-          const prevLinesLength = lines.slice(0, currentLineIndex - 1).reduce((sum, line) => sum + line.length + 1, 0);
-          const targetColumn = Math.min(columnPosition, targetLine.length);
-          newPosition = prevLinesLength + targetColumn;
-        } else if (e.key === 'ArrowDown' && currentLineIndex < lines.length - 1) {
-          const targetLine = lines[currentLineIndex + 1];
-          const prevLinesLength = lines.slice(0, currentLineIndex + 1).reduce((sum, line) => sum + line.length + 1, 0);
-          const targetColumn = Math.min(columnPosition, targetLine.length);
-          newPosition = prevLinesLength + targetColumn;
-        }
-
-        if (newPosition !== selectionStart) {
-          e.preventDefault();
-
-          // set new cursor position
-          textarea.setSelectionRange(newPosition, newPosition);
-
-          // handle scroll
-          const computedStyle = window.getComputedStyle(textarea);
-          const lineHeight = parseInt(computedStyle.lineHeight) || parseInt(computedStyle.height) / (maxRows ?? 6);
-          const scrollTop = textarea.scrollTop;
-          const viewportHeight = textarea.clientHeight;
-
-          // calculate target line position
-          const targetLinePosition = (currentLineIndex + (e.key === 'ArrowDown' ? 1 : -1)) * lineHeight;
-
-          // if target line is not in viewport, scroll
-          if (targetLinePosition < scrollTop) {
-            textarea.scrollTop = targetLinePosition;
-          } else if (targetLinePosition > scrollTop + viewportHeight - lineHeight) {
-            textarea.scrollTop = targetLinePosition - viewportHeight + lineHeight;
-          }
-        }
-      }
-
       if (e.keyCode === 13) {
-        if (showSkillSelector && options.length > 0) {
+        if (showSkillSelector && options?.length > 0) {
           e.preventDefault();
           return;
         }
 
         if (e.ctrlKey || e.shiftKey || e.metaKey) {
           e.preventDefault();
-          // Insert new line at cursor position
           if (e.target instanceof HTMLTextAreaElement) {
             const cursorPos = e.target.selectionStart ?? 0;
             const newValue = query.slice(0, cursorPos) + '\n' + query.slice(cursorPos);
             setQuery(newValue);
-
-            // set cursor position after the new line
             setTimeout(() => {
               if (e.target instanceof HTMLTextAreaElement) {
                 e.target.selectionStart = e.target.selectionEnd = cursorPos + 1;
@@ -251,6 +192,13 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
             }}
             value={query ?? ''}
             onChange={handleInputChange}
+            // onKeyDownCapture={(e) => {
+            //   // 使用 onKeyDownCapture 确保最先捕获事件
+            //   console.log('onKeyDownCapture', e.key, showSkillSelector);
+            //   if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && !showSkillSelector) {
+            //     e.stopPropagation(); // 阻止事件传播到 AutoComplete
+            //   }
+            // }}
             onKeyDownCapture={(e) => handleKeyDown(e)}
             className={cn(
               '!m-0 bg-transparent outline-none box-border border-none resize-none focus:outline-none focus:shadow-none focus:border-none',
