@@ -67,13 +67,19 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
 
   const { nodes } = useCanvasData();
 
-  const targetNodes = nodes.filter((node) => !['skill', 'memo', 'group'].includes(node?.type));
+  const targetNodes = nodes.filter((node) => !['skill', 'group'].includes(node?.type));
+  console.log('targetNodes', targetNodes);
   const sortedItems: IContextItem[] = [
     ...(selectedItems || []),
     ...(
       targetNodes?.filter((node) => !selectedItems.some((selected) => selected.entityId === node.data?.entityId)) || []
     ).map((node) => ({
-      title: node.data?.title,
+      title:
+        node?.type === 'memo'
+          ? node.data?.contentPreview
+            ? `${node.data?.title} - ${node.data?.contentPreview?.slice(0, 10)}`
+            : node.data?.title
+          : node.data?.title,
       entityId: node.data?.entityId,
       type: node.type,
       metadata: node.data?.metadata,

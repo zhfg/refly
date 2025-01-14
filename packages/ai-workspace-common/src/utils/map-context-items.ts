@@ -92,21 +92,36 @@ export const convertContextItemsToNodeFilters = (items: IContextItem[]): CanvasN
 export const convertContextItemsToInvokeParams = (
   items: IContextItem[],
   getHistory: (item: IContextItem) => ActionResult[],
+  getMemo?: (item: IContextItem) => { content: string; title: string }[],
 ): { context: SkillContext; resultHistory: ActionResult[] } => {
   const context = {
-    contentList: items
-      ?.filter((item) => item.selection)
-      ?.map((item) => ({
-        content: item.selection?.content ?? '',
-        metadata: {
-          domain: item.selection?.sourceEntityType ?? '',
-          entityId: item.selection?.sourceEntityId ?? '',
-          title: item.selection?.sourceTitle ?? '',
-          ...(item.metadata?.sourceType === 'extensionWeblinkSelection' && {
-            url: item.metadata?.url || getClientOrigin(),
-          }),
-        },
-      })),
+    contentList: [
+      ...(items
+        ?.filter((item) => item.selection)
+        ?.map((item) => ({
+          content: item.selection?.content ?? '',
+          metadata: {
+            domain: item.selection?.sourceEntityType ?? '',
+            entityId: item.selection?.sourceEntityId ?? '',
+            title: item.selection?.sourceTitle ?? '',
+            ...(item.metadata?.sourceType === 'extensionWeblinkSelection' && {
+              url: item.metadata?.url || getClientOrigin(),
+            }),
+          },
+        })) ?? []),
+      ...(items
+        ?.filter((item) => item.type === 'memo' && getMemo)
+        ?.flatMap((item) =>
+          getMemo(item).map((memo) => ({
+            content: memo.content,
+            metadata: {
+              domain: 'memo',
+              entityId: item.entityId,
+              title: memo.title,
+            },
+          })),
+        ) ?? []),
+    ],
     resources: items
       ?.filter((item) => item?.type === 'resource')
       .map((item) => ({
