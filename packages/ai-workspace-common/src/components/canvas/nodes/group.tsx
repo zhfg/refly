@@ -38,7 +38,7 @@ type GroupNodeProps = Omit<NodeProps, 'data'> & {
 const getChildNodes = (id: string, nodes: CanvasNode[]) => {
   const childNodes = nodes.filter((node) => {
     const isInGroup = node.parentId === id;
-    return isInGroup && !['skill', 'memo', 'group'].includes(node.type);
+    return isInGroup && !['skill', 'group'].includes(node.type);
   }) as CanvasNode[];
 
   return childNodes;

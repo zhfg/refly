@@ -57,9 +57,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
 
   const handleAskAI = useCallback(() => {
     // Get all selected nodes except skills
-    const selectedNodes = getNodes().filter(
-      (node) => node.selected && !['skill', 'memo'].includes(node.type),
-    ) as CanvasNode[];
+    const selectedNodes = getNodes().filter((node) => node.selected && !['skill'].includes(node.type)) as CanvasNode[];
 
     const connectTo = selectedNodes.map((node) => ({
       type: node.type as CanvasNodeType,
