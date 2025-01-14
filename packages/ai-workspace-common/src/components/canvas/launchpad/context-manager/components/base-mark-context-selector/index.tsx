@@ -75,7 +75,11 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
       targetNodes?.filter((node) => !selectedItems.some((selected) => selected.entityId === node.data?.entityId)) || []
     ).map((node) => ({
       title:
-        node?.type === 'memo' ? `${node.data?.title} - ${node.data?.contentPreview?.slice(0, 10)}` : node.data?.title,
+        node?.type === 'memo'
+          ? node.data?.title
+            ? `${node.data?.title} - ${node.data?.contentPreview?.slice(0, 10)}`
+            : node.data?.title
+          : node.data?.title,
       entityId: node.data?.entityId,
       type: node.type,
       metadata: node.data?.metadata,
