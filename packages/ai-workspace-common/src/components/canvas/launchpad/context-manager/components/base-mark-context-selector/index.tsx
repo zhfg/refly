@@ -76,7 +76,7 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
     ).map((node) => ({
       title:
         node?.type === 'memo'
-          ? node.data?.title
+          ? node.data?.contentPreview
             ? `${node.data?.title} - ${node.data?.contentPreview?.slice(0, 10)}`
             : node.data?.title
           : node.data?.title,

@@ -98,7 +98,7 @@ export const MemoNode = ({
   const handleAddToContext = useCallback(() => {
     addToContext({
       type: 'memo',
-      title: data?.title ? `${data.title} - ${data.contentPreview?.slice(0, 10)}` : data.title,
+      title: data?.contentPreview ? `${data.title} - ${data.contentPreview?.slice(0, 10)}` : data.title,
       entityId: data.entityId,
       metadata: data.metadata,
     });
@@ -132,7 +132,7 @@ export const MemoNode = ({
             contextItems: [
               {
                 type: 'memo',
-                title: data?.title ? `${data.title} - ${data.contentPreview?.slice(0, 10)}` : data.title,
+                title: data?.contentPreview ? `${data.title} - ${data.contentPreview?.slice(0, 10)}` : data.title,
                 entityId: data.entityId,
                 metadata: data.metadata,
               },
