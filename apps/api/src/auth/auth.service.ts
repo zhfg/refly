@@ -164,7 +164,11 @@ export class AuthService {
 
     const tokens = await this.login(payload);
     this.setAuthCookie(res, tokens);
-    res.clearCookie(LEGACY_TOKEN_COOKIE);
+    res.clearCookie(LEGACY_TOKEN_COOKIE, {
+      domain: this.configService.get('auth.cookieDomain'),
+      secure: true,
+      sameSite: 'strict',
+    });
   }
 
   setAuthCookie(res: Response, { uid, accessToken, refreshToken }: TokenData) {
@@ -204,6 +208,11 @@ export class AuthService {
       .clearCookie(REFRESH_TOKEN_COOKIE, {
         domain: this.configService.get('auth.cookieDomain'),
         httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+      })
+      .clearCookie(LEGACY_TOKEN_COOKIE, {
+        domain: this.configService.get('auth.cookieDomain'),
         secure: true,
         sameSite: 'strict',
       });
