@@ -3,7 +3,7 @@ import { IconCopy } from '@refly-packages/ai-workspace-common/components/common/
 import React from 'react';
 import { Button, notification } from 'antd';
 import { LOCALE } from '@refly/common-types';
-import { getErrorMessage } from '@refly/errors';
+import { ActionResultNotFoundError, getErrorMessage } from '@refly/errors';
 
 import { UnknownError } from '@refly/errors';
 import { BaseResponse } from '@refly/openapi-schema';
@@ -13,8 +13,14 @@ const errTitle = {
   'zh-CN': '哎呀，出错了',
 };
 
+const ignoredErrorCodes = [new ActionResultNotFoundError().code];
+
 export const showErrorNotification = (res: BaseResponse, locale: LOCALE) => {
   const { errCode, traceId } = res;
+  if (ignoredErrorCodes.includes(errCode)) {
+    return;
+  }
+
   const errMsg = getErrorMessage(errCode || new UnknownError().code, locale);
 
   const description = React.createElement(

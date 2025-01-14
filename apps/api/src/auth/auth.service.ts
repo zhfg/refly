@@ -190,9 +190,23 @@ export class AuthService {
 
   clearAuthCookie(res: Response) {
     return res
-      .clearCookie(UID_COOKIE)
-      .clearCookie(ACCESS_TOKEN_COOKIE)
-      .clearCookie(REFRESH_TOKEN_COOKIE);
+      .clearCookie(UID_COOKIE, {
+        domain: this.configService.get('auth.cookieDomain'),
+        secure: true,
+        sameSite: 'strict',
+      })
+      .clearCookie(ACCESS_TOKEN_COOKIE, {
+        domain: this.configService.get('auth.cookieDomain'),
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+      })
+      .clearCookie(REFRESH_TOKEN_COOKIE, {
+        domain: this.configService.get('auth.cookieDomain'),
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+      });
   }
 
   async genUniqueUsername(candidate: string) {
