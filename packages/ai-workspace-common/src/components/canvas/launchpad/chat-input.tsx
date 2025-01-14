@@ -192,13 +192,6 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
             }}
             value={query ?? ''}
             onChange={handleInputChange}
-            // onKeyDownCapture={(e) => {
-            //   // 使用 onKeyDownCapture 确保最先捕获事件
-            //   console.log('onKeyDownCapture', e.key, showSkillSelector);
-            //   if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && !showSkillSelector) {
-            //     e.stopPropagation(); // 阻止事件传播到 AutoComplete
-            //   }
-            // }}
             onKeyDownCapture={(e) => handleKeyDown(e)}
             className={cn(
               '!m-0 bg-transparent outline-none box-border border-none resize-none focus:outline-none focus:shadow-none focus:border-none',
