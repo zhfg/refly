@@ -47,7 +47,9 @@ const SiderLogo = (props: {
         className="flex cursor-pointer flex-row items-center gap-2"
         onClick={() => navigate("/")}>
         <img src={Logo} alt="Refly" className="h-8 w-8" />
-        <span className="text-xl font-bold text-black">Refly </span>
+        <span className="text-xl font-bold text-black" translate="no">
+          Refly{" "}
+        </span>
         <Tag color="green" className="text-[10px] leading-4">
           Beta
         </Tag>
@@ -383,21 +385,40 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
             </div>
 
             <div className="mt-auto">
-              <Alert
-                message={
-                  <div className="flex cursor-pointer items-center justify-center">
-                    <a
-                      href="https://powerformer.feishu.cn/wiki/Syrsw7DJxiaExSkoSiXcTF1inBg?from=canvas"
-                      target="_blank">
-                      👉{"    "}
-                      <span>{t("loggedHomePage.siderMenu.joinFeedback")}</span>
-                    </a>
-                  </div>
-                }
-                type="success"
-                closable
-                className="mb-2"
-              />
+              <div className="mb-2 flex flex-col gap-2">
+                <Alert
+                  message={
+                    <div className="flex cursor-pointer items-center justify-center">
+                      <a
+                        href="https://powerformer.feishu.cn/wiki/Syrsw7DJxiaExSkoSiXcTF1inBg?from=canvas"
+                        target="_blank">
+                        👉{"    "}
+                        <span>
+                          {t("loggedHomePage.siderMenu.joinFeedback")}
+                        </span>
+                      </a>
+                    </div>
+                  }
+                  type="success"
+                  closable
+                />
+                <Alert
+                  message={
+                    <div className="flex cursor-pointer items-center justify-center">
+                      <a
+                        href="https://powerformer.feishu.cn/wiki/Syrsw7DJxiaExSkoSiXcTF1inBg"
+                        target="_blank">
+                        📖{"    "}
+                        <span>
+                          {t("loggedHomePage.siderMenu.viewTutorial")}
+                        </span>
+                      </a>
+                    </div>
+                  }
+                  type="info"
+                  closable
+                />
+              </div>
               {!!userStore.userProfile?.uid && (
                 <MenuItem
                   key="Settings"

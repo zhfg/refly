@@ -543,6 +543,7 @@ const translations = {
       showLaunchpad: '显示 AI 提问框',
       editTitle: '编辑画布标题',
       editTitlePlaceholder: '请输入画布标题',
+      rename: '重命名',
       syncingChanges: '同步中',
       synced: '上次同步于{{time}}',
       mouse: '鼠标模式',
@@ -599,6 +600,7 @@ const translations = {
       nodeNotFound: '源节点未找到或已被删除，请先添加到画布',
     },
     nodeActions: {
+      createMemo: '创建空备忘录',
       copy: '复制节点内容',
       askAI: '问问 AI',
       cloneAskAI: '克隆 AI 提问',
@@ -621,6 +623,8 @@ const translations = {
       groupCluster: '基于子节点建立组',
       layoutCluster: '子节点自动布局',
       centerNode: '定位节点',
+      editQuery: '编辑提问',
+      duplicateDocument: '创建文档副本',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',
@@ -821,6 +825,7 @@ const translations = {
       recentChats: '最近会话',
       viewMore: '查看更多',
       joinFeedback: '加入反馈群',
+      viewTutorial: '查看教程',
     },
   },
   knowledgeLibrary: {
@@ -1058,6 +1063,7 @@ const translations = {
       mostPopular: '最受欢迎',
       getStarted: '开始使用',
       subscribeNow: '立即订阅',
+      manage: '管理订阅',
       currentPlan: '当前套餐',
       t1TokenUsed: '高阶模型 Token 使用量',
       t1TokenUsedDescription:
@@ -1079,6 +1085,7 @@ const translations = {
         yearly: '按年',
         monthlyPlan: '每月自动续费',
         yearlyPlan: '每年自动续费',
+        cancelAt: '将于 {{date}} 取消',
         tooltip: {
           modelToken: 'Token 同时包括模型输入和输出',
           vectorStorage: '用于存储资源和画布的语义化向量数据',
@@ -1089,7 +1096,8 @@ const translations = {
         fileStorage: '文件存储',
         t1Model: '高阶模型',
         t2Model: '基础模型',
-        mediaCredit: '多媒体积分',
+        freeModel: '免费模型',
+        mediaCredit: '多媒体积分（即将推出）',
         fileStorageType: {
           note: '画布',
           resource: '资源',
@@ -1107,7 +1115,7 @@ const translations = {
           },
         },
         ultra: {
-          description: '突破所有限制，尽情释放无限创意',
+          description: '尽情释放无限创意',
           serviceSupport: {
             name: '服务支持',
             details: '专属微信/ Discord 群聊',

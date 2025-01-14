@@ -1,25 +1,21 @@
 import { useEffect } from 'react';
+import { useCookie } from 'react-use';
+import { useTranslation } from 'react-i18next';
 import { useMatch, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
-// request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import {
-  LocalSettings,
-  defaultLocalSettings,
-  useUserStoreShallow,
-} from '@refly-packages/ai-workspace-common/stores/user';
+import { LocalSettings, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { mapDefaultLocale } from '@refly-packages/ai-workspace-common/utils/locale';
-import { useCookie } from 'react-use';
 import { LOCALE } from '@refly/common-types';
-import { useTranslation } from 'react-i18next';
 import { GetUserSettingsResponse } from '@refly/openapi-schema';
+import { LEGACY_TOKEN_COOKIE, UID_COOKIE } from '@refly-packages/utils/cookie';
+import { refreshToken } from '@refly-packages/ai-workspace-common/utils/auth';
 
 export const useGetUserSettings = () => {
   const userStore = useUserStoreShallow((state) => ({
     setUserProfile: state.setUserProfile,
     setLocalSettings: state.setLocalSettings,
-    setToken: state.setToken,
     setIsCheckingLoginStatus: state.setIsCheckingLoginStatus,
     setIsLogin: state.setIsLogin,
     userProfile: state.userProfile,
@@ -28,17 +24,19 @@ export const useGetUserSettings = () => {
   }));
   const navigate = useNavigate();
 
-  const [token] = useCookie('_refly_ai_sid');
+  const [uid] = useCookie(UID_COOKIE);
+  const [legacyToken] = useCookie(LEGACY_TOKEN_COOKIE);
+
+  useEffect(() => {
+    if (legacyToken) {
+      refreshToken();
+    }
+  }, [legacyToken]);
+
+  const hasLoginCredentials = !!uid || !!legacyToken;
+
   const { i18n } = useTranslation();
 
-  const routeLandingPageMatch = useMatch('/');
-  const routePrivacyPageMatch = useMatch('/privacy');
-  const routeTermsPageMatch = useMatch('/terms');
-  const routeLoginPageMatch = useMatch('/login');
-  const routeDigestDetailPageMatch = useMatch('/digest/:digestId');
-  const routeFeedDetailPageMatch = useMatch('/feed/:feedId');
-  const routeAIGCContentDetailPageMatch = useMatch('/content/:digestId');
-  const routeThreadDetailPageMatch = useMatch('/thread/:threadId');
   const isShareContent = useMatch('/share/:shareCode');
   const isPricing = useMatch('/pricing');
 
@@ -47,7 +45,7 @@ export const useGetUserSettings = () => {
     let res: GetUserSettingsResponse;
 
     userStore.setIsCheckingLoginStatus(true);
-    if (token) {
+    if (hasLoginCredentials) {
       const resp = await getClient().getSettings();
       error = resp.error;
       res = resp.data;
@@ -55,10 +53,9 @@ export const useGetUserSettings = () => {
     let { localSettings } = userStore;
 
     // Handle
-    if (!token || error || !res?.data) {
+    if (!hasLoginCredentials || error || !res?.data) {
       userStore.setIsCheckingLoginStatus(false);
       userStore.setUserProfile(undefined);
-      userStore.setToken('');
       userStore.setIsLogin(false);
 
       if (!isShareContent && !isPricing) {
@@ -113,5 +110,5 @@ export const useGetUserSettings = () => {
 
   useEffect(() => {
     getLoginStatus();
-  }, [token]);
+  }, [hasLoginCredentials]);
 };

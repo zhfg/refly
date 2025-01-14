@@ -15,6 +15,7 @@ export default () => ({
     port: parseInt(process.env.REDIS_PORT) || 6379,
     password: process.env.REDIS_PASSWORD || '',
   },
+  origin: process.env.ORIGIN || 'http://localhost:5173',
   staticEndpoint: process.env.STATIC_ENDPOINT || 'http://localhost:3000/v1/misc/',
   minio: {
     internal: {
@@ -46,12 +47,12 @@ export default () => ({
     password: process.env.ELASTICSEARCH_PASSWORD,
   },
   auth: {
-    cookieTokenField: '_refly_ai_sid',
     cookieDomain: process.env.REFLY_COOKIE_DOMAIN || '.refly.ai',
     redirectUrl: process.env.LOGIN_REDIRECT_URL,
     jwt: {
       secret: process.env.JWT_SECRET || 'test',
-      expiresIn: process.env.JWT_EXPIRATION_TIME || '14d',
+      expiresIn: process.env.JWT_EXPIRATION_TIME || '15m',
+      refreshExpiresIn: process.env.JWT_REFRESH_EXPIRATION_TIME || '7d',
     },
     email: {
       enabled: process.env.EMAIL_AUTH_ENABLED === 'true' || true,

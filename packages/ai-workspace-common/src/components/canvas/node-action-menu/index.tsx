@@ -11,10 +11,21 @@ import {
   IconExpand,
   IconShrink,
   IconCopy,
+  IconMemo,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { FileInput, MessageSquareDiff, FilePlus, Ungroup, Group, MoveVertical, Target, Layout } from 'lucide-react';
+import {
+  FileInput,
+  MessageSquareDiff,
+  FilePlus,
+  Ungroup,
+  Group,
+  MoveVertical,
+  Target,
+  Layout,
+  Edit,
+} from 'lucide-react';
 import { GrClone } from 'react-icons/gr';
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
 import { nodeActionEmitter, createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
@@ -25,6 +36,7 @@ import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canva
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 import { useNodeCluster } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-cluster';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
+import { useCreateMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-memo';
 
 interface MenuItem {
   key: string;
@@ -172,6 +184,38 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     onClose?.();
   }, [nodeData?.contentPreview, onClose]);
 
+  const handleEditQuery = useCallback(() => {
+    addNodePreview(canvasId, node);
+
+    setTimeout(() => {
+      locateToNodePreviewEmitter.emit('locateToNodePreview', {
+        id: nodeId,
+        canvasId,
+        type: 'editResponse',
+      });
+    }, 100);
+
+    onClose?.();
+  }, [nodeId, canvasId, node, addNodePreview, onClose]);
+  const { createMemo } = useCreateMemo();
+
+  const handleCreateMemo = useCallback(() => {
+    createMemo({
+      content: '',
+      position: undefined,
+      sourceNode: {
+        type: nodeType,
+        entityId: nodeData?.entityId,
+      },
+    });
+    onClose?.();
+  }, [nodeData, node?.position, nodeType, createMemo, onClose]);
+
+  const handleDuplicateDocument = useCallback(() => {
+    nodeActionEmitter.emit(createNodeEventName(nodeId, 'duplicateDocument'));
+    onClose?.();
+  }, [nodeId, onClose]);
+
   const getMenuItems = (activeDocumentId: string): MenuItem[] => {
     if (isMultiSelection) {
       return [
@@ -220,6 +264,13 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
               loading: cloneAskAIRunning,
               label: t('canvas.nodeActions.cloneAskAI'),
               onClick: handleCloneAskAI,
+              type: 'button' as const,
+            },
+            {
+              key: 'editQuery',
+              icon: Edit,
+              label: t('canvas.nodeActions.editQuery'),
+              onClick: handleEditQuery,
               type: 'button' as const,
             },
             {
@@ -313,6 +364,24 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     const footerItems: MenuItem[] = [
       ...(nodeType !== 'skill' && nodeType !== 'group'
         ? [
+            ...(nodeType === 'document'
+              ? [
+                  {
+                    key: 'duplicateDocument',
+                    icon: GrClone,
+                    label: t('canvas.nodeActions.duplicateDocument'),
+                    onClick: handleDuplicateDocument,
+                    type: 'button' as const,
+                  },
+                ]
+              : []),
+            {
+              key: 'createMemo',
+              icon: IconMemo,
+              label: t('canvas.nodeActions.createMemo'),
+              onClick: handleCreateMemo,
+              type: 'button' as const,
+            },
             {
               key: 'copy',
               icon: IconCopy,

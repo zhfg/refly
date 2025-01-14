@@ -1,13 +1,12 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { ActionResult, ActionStep, ActionStepMeta, Entity, SkillEvent } from '@refly/openapi-schema';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
 import { LOCALE } from '@refly/common-types';
-import { getAuthTokenFromCookie } from '@refly-packages/ai-workspace-common/utils/request';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
-import { showErrorNotification } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { showErrorNotification } from '@refly-packages/ai-workspace-common/utils/notification';
 import {
   useActionResultStore,
   useActionResultStoreShallow,
@@ -20,9 +19,9 @@ import {
   SkillNodeMeta,
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useGetSubscriptionUsage } from '@refly-packages/ai-workspace-common/queries';
-
 import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
+import { useActionPolling } from './use-action-polling';
 
 export const useInvokeAction = () => {
   const { addNode } = useAddNode();
@@ -38,9 +37,11 @@ export const useInvokeAction = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    staleTime: 60 * 1000, // Consider data fresh for 1 minute
-    gcTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
+
+  const { createTimeoutHandler } = useActionPolling();
 
   const onUpdateResult = (resultId: string, payload: ActionResult, event?: SkillEvent) => {
     actionEmitter.emit('updateResult', { resultId, payload });
@@ -56,6 +57,7 @@ export const useInvokeAction = () => {
           status: payload.status,
           actionMeta: payload.actionMeta,
           modelInfo: payload.modelInfo,
+          version: event?.version ?? payload.version,
         },
       };
 
@@ -291,7 +293,6 @@ export const useInvokeAction = () => {
     const locale = localSettings?.uiLocale as LOCALE;
 
     const { error, resultId } = skillEvent;
-    console.log('error', error);
     showErrorNotification(error, locale);
 
     const { resultMap } = useActionResultStore.getState();
@@ -335,14 +336,14 @@ export const useInvokeAction = () => {
   );
 
   const onCompleted = () => {};
-
   const onStart = () => {};
-
   const findThreadHistory = useFindThreadHistory();
 
   const invokeAction = (payload: SkillNodeMeta, target: Entity) => {
     payload.resultId ||= genActionResultID();
-    const { query, modelInfo, contextItems, selectedSkill, resultId } = payload;
+    payload.selectedSkill ||= { name: 'commonQnA' };
+
+    const { query, modelInfo, contextItems, selectedSkill, resultId, version = 0 } = payload;
     const { context, resultHistory } = convertContextItemsToInvokeParams(contextItems, (item) =>
       findThreadHistory({ resultId: item.entityId }).map((node) => ({
         title: node.data?.title,
@@ -364,6 +365,7 @@ export const useInvokeAction = () => {
 
     onUpdateResult(resultId, {
       resultId,
+      version,
       type: 'skill',
       actionMeta: selectedSkill,
       modelInfo,
@@ -380,22 +382,36 @@ export const useInvokeAction = () => {
 
     globalAbortControllerRef.current = new AbortController();
 
+    // Create timeout handler for this action
+    const { resetTimeout, cleanup } = createTimeoutHandler(resultId, version);
+
+    // Wrap event handlers to reset timeout
+    const wrapEventHandler =
+      (handler: Function) =>
+      (...args: any[]) => {
+        resetTimeout();
+        handler(...args);
+      };
+
+    resetTimeout();
+
     ssePost({
       controller: globalAbortControllerRef.current,
       payload: param,
-      token: getAuthTokenFromCookie(),
-      onStart,
-      onSkillStart,
-      onSkillStream,
-      onSkillLog,
-      onSkillArtifact,
-      onSkillStructedData,
-      onSkillCreateNode,
-      onSkillEnd,
-      onCompleted,
-      onSkillError,
-      onSkillTokenUsage,
+      onStart: wrapEventHandler(onStart),
+      onSkillStart: wrapEventHandler(onSkillStart),
+      onSkillStream: wrapEventHandler(onSkillStream),
+      onSkillLog: wrapEventHandler(onSkillLog),
+      onSkillArtifact: wrapEventHandler(onSkillArtifact),
+      onSkillStructedData: wrapEventHandler(onSkillStructedData),
+      onSkillCreateNode: wrapEventHandler(onSkillCreateNode),
+      onSkillEnd: wrapEventHandler(onSkillEnd),
+      onCompleted: wrapEventHandler(onCompleted),
+      onSkillError: wrapEventHandler(onSkillError),
+      onSkillTokenUsage: wrapEventHandler(onSkillTokenUsage),
     });
+
+    return cleanup;
   };
 
   return { invokeAction, abortAction };

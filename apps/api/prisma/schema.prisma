@@ -97,7 +97,9 @@ model ActionResult {
   /// Primary key
   pk         BigInt       @id @default(autoincrement())
   /// Action result id
-  resultId   String       @unique @map("result_id")
+  resultId   String       @map("result_id")
+  /// Action result version
+  version    Int          @default(0) @map("version")
   /// Action type
   type       String       @map("type")
   /// UID
@@ -131,6 +133,7 @@ model ActionResult {
   /// Update timestamp
   updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamptz()
 
+  @@unique([resultId, version])
   @@index([targetType, targetId])
   @@map("action_results")
 }
@@ -140,6 +143,8 @@ model ActionStep {
   pk             BigInt    @id @default(autoincrement())
   /// Action result id which this step belongs to
   resultId       String    @map("result_id")
+  /// Action result version
+  version        Int       @default(0) @map("version")
   /// Step order
   order          Int       @default(0) @map("order")
   /// Step name
@@ -161,7 +166,7 @@ model ActionStep {
   /// Soft delete timestamp
   deletedAt      DateTime? @map("deleted_at") @db.Timestamptz()
 
-  @@index([resultId, order])
+  @@index([resultId, version, order])
   @@map("action_steps")
 }
 
@@ -535,6 +540,7 @@ model Subscription {
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
 
   @@index([uid])
+  @@index([status, cancelAt])
   @@map("subscriptions")
 }
 
@@ -663,4 +669,26 @@ enum MessageType {
   ai
   human
   system
+}
+
+model RefreshToken {
+  /// Primary key
+  pk          BigInt   @id @default(autoincrement())
+  /// Token ID
+  jti         String   @unique @map("jti")
+  /// User ID
+  uid         String   @map("uid")
+  /// Hashed refresh token
+  hashedToken String   @map("hashed_token")
+  /// Whether the token has been revoked
+  revoked     Boolean  @default(false) @map("revoked")
+  /// Expiration timestamp
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz()
+  /// Create timestamp
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([uid])
+  @@map("refresh_tokens")
 }

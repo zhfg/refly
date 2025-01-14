@@ -117,9 +117,8 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
 
     case 'skillResponse':
       return {
-        modelName: 'Skill Response',
         status: 'waiting',
-        executionTime: null,
+        version: 0,
       } as ResponseNodeMeta;
 
     case 'toolResponse':

@@ -7,6 +7,7 @@ import { useDebounce } from 'use-debounce';
 
 import { MdOutlineImage, MdOutlineAspectRatio } from 'react-icons/md';
 import { AiOutlineMenuUnfold } from 'react-icons/ai';
+import { BiErrorCircle } from 'react-icons/bi';
 import { IconEdit, IconSearch } from '@refly-packages/ai-workspace-common/components/common/icon';
 import SiderPopover from '../../../../../../apps/web/src/pages/sider-popover';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
@@ -19,6 +20,7 @@ import { NodeSelector } from '../common/node-selector';
 import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useReactFlow } from '@xyflow/react';
+import { CanvasRename } from './canvas-rename';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -39,23 +41,20 @@ const CanvasTitle = memo(
     language: LOCALE;
   }) => {
     const { t } = useTranslation();
-    const [editedTitle, setEditedTitle] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const inputRef = useRef(null);
     const { syncTitleToYDoc } = useCanvasSync();
     const { updateCanvasTitle } = useSiderStoreShallow((state) => ({
       updateCanvasTitle: state.updateCanvasTitle,
     }));
 
     const handleEditClick = () => {
-      setEditedTitle(canvasTitle ?? '');
       setIsModalOpen(true);
     };
 
-    const handleModalOk = () => {
-      if (editedTitle?.trim()) {
-        syncTitleToYDoc(editedTitle);
-        updateCanvasTitle(canvasId, editedTitle);
+    const handleModalOk = (newTitle: string) => {
+      if (newTitle?.trim()) {
+        syncTitleToYDoc(newTitle);
+        updateCanvasTitle(canvasId, newTitle);
         setIsModalOpen(false);
       }
     };
@@ -90,40 +89,15 @@ const CanvasTitle = memo(
           ) : (
             canvasTitle || t('common.untitled')
           )}
-          <IconEdit className="opacity-0 group-hover:opacity-100 transition-opacity" />
+          <IconEdit />
         </div>
 
-        <Modal
-          centered
-          title={t('canvas.toolbar.editTitle')}
-          open={isModalOpen}
-          okText={t('common.confirm')}
-          cancelText={t('common.cancel')}
-          onOk={handleModalOk}
-          onCancel={handleModalCancel}
-          okButtonProps={{ disabled: !editedTitle?.trim() }}
-          afterOpenChange={(open) => {
-            if (open) {
-              inputRef.current?.focus();
-            }
-          }}
-        >
-          <Input
-            autoFocus
-            ref={inputRef}
-            value={editedTitle}
-            onChange={(e) => setEditedTitle(e.target.value)}
-            placeholder={t('canvas.toolbar.editTitlePlaceholder')}
-            onKeyDown={(e) => {
-              if (e.keyCode === 13 && !e.nativeEvent.isComposing) {
-                e.preventDefault();
-                if (editedTitle?.trim()) {
-                  handleModalOk();
-                }
-              }
-            }}
-          />
-        </Modal>
+        <CanvasRename
+          canvasTitle={canvasTitle}
+          isModalOpen={isModalOpen}
+          handleModalOk={handleModalOk}
+          handleModalCancel={handleModalCancel}
+        />
       </>
     );
   },
@@ -204,6 +178,26 @@ const ToolbarButtons = memo(
   },
 );
 
+const WarningButton = memo(({ show }: { show: boolean }) => {
+  const { t } = useTranslation();
+
+  if (!show) return null;
+
+  return (
+    <Tooltip title={t('canvas.connectionTimeout.extra')}>
+      <Button
+        type="text"
+        danger
+        icon={<BiErrorCircle style={{ fontSize: '16px' }} />}
+        onClick={() => window.location.reload()}
+        className="flex items-center gap-1 ml-2 text-red-500 hover:text-red-600"
+      >
+        {t('canvas.connectionTimeout.title')}
+      </Button>
+    </Tooltip>
+  );
+});
+
 export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
   const { i18n, t } = useTranslation();
   const language = i18n.language as LOCALE;
@@ -239,8 +233,29 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
     }),
   );
 
+  const [connectionTimeout, setConnectionTimeout] = useState(false);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    if (provider?.status !== 'connected') {
+      timeoutId = setTimeout(() => {
+        setConnectionTimeout(true);
+      }, 10000);
+    } else {
+      setConnectionTimeout(false);
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [provider?.status]);
+
   const canvasTitle = data?.title;
   const hasCanvasSynced = config?.localSyncedAt > 0 && config?.remoteSyncedAt > 0;
+  const showWarning = connectionTimeout && !hasCanvasSynced && provider.status !== 'connected';
 
   return (
     <>
@@ -274,6 +289,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             debouncedUnsyncedChanges={debouncedUnsyncedChanges}
             language={language}
           />
+          <WarningButton show={showWarning} />
         </div>
 
         <div className="flex items-center gap-2 relative z-10">

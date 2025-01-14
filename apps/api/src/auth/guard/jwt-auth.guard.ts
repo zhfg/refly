@@ -1,14 +1,65 @@
-import { Injectable } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { UnauthorizedError } from '@refly-packages/errors';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+  Logger,
+} from '@nestjs/common';
+import { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { ACCESS_TOKEN_COOKIE, LEGACY_TOKEN_COOKIE } from '@refly-packages/utils';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
-  handleRequest(err: any, user: any) {
-    // If there's an error or no user, throw custom error
-    if (err || !user) {
-      throw new UnauthorizedError('Invalid or expired token');
+export class JwtAuthGuard implements CanActivate {
+  private readonly logger = new Logger(JwtAuthGuard.name);
+
+  constructor(private jwtService: JwtService, private configService: ConfigService) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request: Request = context.switchToHttp().getRequest();
+    const token = this.extractTokenFromRequest(request);
+    if (!token) {
+      throw new UnauthorizedException();
     }
-    return user;
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get('auth.jwt.secret'),
+      });
+
+      // 💡 We're assigning the payload to the request object here
+      // so that we can access it in our route handlers
+      request['user'] = payload;
+    } catch (error) {
+      this.logger.warn(`jwt verify not valid: ${error}`);
+      throw new UnauthorizedException();
+    }
+    return true;
+  }
+
+  private extractTokenFromRequest(request: Request): string | undefined {
+    // Try to get token from Authorization header
+    const authHeader = request.headers?.authorization;
+    if (authHeader) {
+      const [type, token] = authHeader.split(' ');
+      if (type === 'Bearer') {
+        return token;
+      }
+    }
+
+    // Try to get token from cookie
+    const token = request.cookies?.[ACCESS_TOKEN_COOKIE];
+    if (token) {
+      return token;
+    }
+
+    // Try to get token from legacy cookie
+    // TODO: remove this after all users have migrated to new token
+    const legacyToken = request.cookies?.[LEGACY_TOKEN_COOKIE];
+    if (legacyToken) {
+      return legacyToken;
+    }
+
+    return undefined;
   }
 }

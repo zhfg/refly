@@ -89,7 +89,7 @@ export class WebSearch extends BaseSkill {
     );
 
     // Set current step for answer generation
-    config.metadata.step = { name: 'answerGeneration' };
+    config.metadata.step = { name: 'answerQuestion' };
 
     // Build messages for the model
     const module = {

@@ -23,19 +23,16 @@ import {
   IconToken,
   preloadModelIcons,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useGetActionResult } from '@refly-packages/ai-workspace-common/queries';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
 import { ModelProviderIcons } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
-import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { usePatchNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-patch-node-data';
 import { CanvasNodeType, Source } from '@refly/openapi-schema';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
@@ -46,13 +43,9 @@ import { convertResultContextToItems } from '@refly-packages/ai-workspace-common
 
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
-// import { NodeHeader } from '../shared/node-header';
 import { ContentPreview } from './shared/content-preview';
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
-
-const POLLING_INTERVAL = 3000;
-const POLLING_COOLDOWN_TIME = 15000;
 
 const NodeHeader = memo(({ query, skillName, skill }: { query: string; skillName: string; skill: any }) => {
   return (
@@ -62,7 +55,9 @@ const NodeHeader = memo(({ query, skillName, skill }: { query: string; skillName
           <div className="w-6 h-6 rounded bg-[#F79009] shadow-lg flex items-center justify-center flex-shrink-0">
             <IconResponse className="w-4 h-4 text-white" />
           </div>
-          <span className="text-sm font-medium leading-normal truncate cursor-help">{query}</span>
+          <span className="text-sm font-medium leading-normal truncate block cursor-pointer" title={query}>
+            {query}
+          </span>
         </div>
       </div>
       {skillName && skillName !== 'commonQnA' && (
@@ -196,74 +191,12 @@ export const SkillResponseNode = memo(
         })
       : '';
 
-    const [shouldPoll, setShouldPoll] = useState(false);
-
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        setShouldPoll(true);
-      }, POLLING_COOLDOWN_TIME);
-
-      return () => {
-        clearTimeout(timer);
-        setShouldPoll(false);
-      };
-    }, [content, status, artifacts?.length, sources.length]);
-
-    const statusShouldPoll = !status || status === 'executing' || status === 'waiting';
-
-    const updateActionResult = useActionResultStoreShallow((state) => state.updateActionResult);
-
-    const { data: result, error } = useGetActionResult({ query: { resultId: entityId } }, null, {
-      enabled: Boolean(entityId) && statusShouldPoll && shouldPoll,
-      refetchInterval: POLLING_INTERVAL,
-    });
-
-    useEffect(() => {
-      if ((result && !result.success) || error) {
-        setShouldPoll(false);
-      }
-    }, [result, error]);
-
-    const remoteResult = result?.data;
-
     const skill = {
       name: actionMeta?.name || '',
       icon: actionMeta?.icon,
     };
     const skillName = actionMeta?.name;
     const model = modelInfo?.label;
-
-    useEffect(() => {
-      const remoteStatus = remoteResult?.status;
-      const nodeStatus = data?.metadata?.status;
-
-      if (shouldPoll && remoteStatus && (remoteStatus === 'finish' || remoteStatus === 'failed')) {
-        let shouldUpdate = false;
-        let nodeDataUpdates: Partial<CanvasNodeData<ResponseNodeMeta>> = {};
-
-        if (nodeStatus !== remoteStatus) {
-          shouldUpdate = true;
-          nodeDataUpdates.metadata = {
-            status: remoteStatus,
-          };
-        }
-
-        const remoteContent = remoteResult?.steps
-          ?.map((s) => s.content)
-          .filter(Boolean)
-          .join('\n');
-
-        if (remoteStatus === 'finish' && data?.contentPreview !== remoteContent) {
-          shouldUpdate = true;
-          nodeDataUpdates.contentPreview = remoteContent;
-        }
-
-        if (shouldUpdate) {
-          patchNodeData(id, nodeDataUpdates);
-          updateActionResult(entityId, remoteResult);
-        }
-      }
-    }, [shouldPoll, remoteResult, data]);
 
     // Get query and response content from result
     const query = title;
@@ -293,10 +226,7 @@ export const SkillResponseNode = memo(
 
       message.info(t('canvas.skillResponse.startRerun'));
 
-      // Disable polling temporarily after rerun
       updateSize({ width: 288, height: 'auto' });
-      setShouldPoll(false);
-      setTimeout(() => setShouldPoll(true), POLLING_COOLDOWN_TIME);
 
       patchNodeData(id, {
         ...data,
@@ -306,7 +236,6 @@ export const SkillResponseNode = memo(
         },
       });
 
-      // TODO: check if rerun will drop other param
       invokeAction(
         {
           resultId: entityId,
@@ -408,7 +337,6 @@ export const SkillResponseNode = memo(
       });
 
       if (!resultData?.success || !resultData.data) {
-        message.error(t('canvas.nodePreview.resultNotFound'));
         return;
       }
 
@@ -485,7 +413,6 @@ export const SkillResponseNode = memo(
       };
     }, [id, handleRerun, handleAddToContext, handleInsertToDoc, handleCreateDocument, deleteNode]);
 
-    // 在组件挂载时预加载图标
     useEffect(() => {
       preloadModelIcons();
     }, []);
@@ -494,7 +421,9 @@ export const SkillResponseNode = memo(
       <div className={classNames({ nowheel: isOperating })}>
         <div
           ref={targetRef}
-          className="relative"
+          className={classNames({
+            'relative nodrag nopan select-text': isOperating,
+          })}
           style={isPreview ? { width: 288, height: 200 } : containerStyle}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
@@ -541,7 +470,7 @@ export const SkillResponseNode = memo(
                     </div>
                   )}
 
-                  {(status === 'waiting' || status === 'executing') && !content && !artifacts?.length && (
+                  {(status === 'waiting' || status === 'executing') && (
                     <div className="flex items-center gap-2 bg-gray-100 rounded-sm p-2">
                       <IconLoading className="h-3 w-3 animate-spin text-green-500" />
                       <span className="text-xs text-gray-500 max-w-48 truncate">
@@ -557,7 +486,7 @@ export const SkillResponseNode = memo(
                     </div>
                   )}
 
-                  {sources.length > 0 && (
+                  {status !== 'failed' && sources.length > 0 && (
                     <div
                       className="flex items-center justify-between gap-2 border-gray-100 border-solid rounded-sm p-2 hover:bg-gray-50 cursor-pointer"
                       onClick={handleClickSources}
@@ -572,7 +501,7 @@ export const SkillResponseNode = memo(
                     </div>
                   )}
 
-                  {artifacts?.length > 0 && (
+                  {status !== 'failed' && artifacts?.length > 0 && (
                     <div className="flex items-center gap-2">
                       {artifacts.map((artifact) => (
                         <div
@@ -588,7 +517,7 @@ export const SkillResponseNode = memo(
                     </div>
                   )}
 
-                  {content && (
+                  {status !== 'failed' && content && (
                     <ContentPreview
                       content={content || t('canvas.nodePreview.resource.noContentPreview')}
                       sizeMode={sizeMode}

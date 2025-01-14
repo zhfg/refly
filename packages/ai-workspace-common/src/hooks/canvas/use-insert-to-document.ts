@@ -42,9 +42,7 @@ export const useInsertToDocument = (resultId: string) => {
         const { resultMap } = useActionResultStore.getState();
         const result = resultMap?.[resultId] || (await fetchActionResult(resultId));
 
-        const answerQuestionStep = result?.steps?.find((step) =>
-          ['answerGeneration', 'answerQuestion'].includes(step?.name),
-        );
+        const answerQuestionStep = result?.steps?.find((step) => step?.name === 'answerQuestion');
         if (!answerQuestionStep?.content) {
           message.warning(t('knowledgeBase.context.noContent'));
           return;

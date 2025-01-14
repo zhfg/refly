@@ -13,18 +13,21 @@ import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
 import { SubscriptionPlanType } from '@refly/openapi-schema';
 
-export type PriceLookupKey = 'monthly' | 'yearly';
+export type SubscriptionInterval = 'monthly' | 'yearly';
 export type PriceSource = 'page' | 'modal';
 
-const premiumModels = 'GPT-4o, Claude 3.5 Sonnet, Gemini Pro 1.5 and more';
-const basicModels = 'GPT-4o Mini, Claude 3 Haiku, Gemini Flash 1.5 and more';
+const premiumModels = 'GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro and more';
+const basicModels = 'GPT-4o Mini, DeepSeek V3, Llama 3.1 70B, Qwen 2.5 72B and more';
+const freeModels = 'Gemini 2.0 Flash and more';
+const mediaModels = 'FLUX1.1 [pro], Ideogram V2, Recraft V3, Kling 1.6, Haiper 2.0 and more';
+
 const gridSpan = {
   xs: 24,
   sm: 12,
-  md: 12,
-  lg: 6,
+  md: 8,
+  lg: 7,
   xl: 6,
-  xxl: 4,
+  xxl: 5,
 };
 
 interface ModelFeatures {
@@ -38,14 +41,14 @@ const PlanItem = (props: {
   title: SubscriptionPlanType;
   features: ModelFeatures[];
   handleClick?: () => void;
-  lookupKey: string;
+  interval: SubscriptionInterval;
   loadingInfo: {
     isLoading: boolean;
     plan: string;
   };
 }) => {
   const { t } = useTranslation();
-  const { title, features, handleClick, lookupKey, loadingInfo } = props;
+  const { title, features, handleClick, interval, loadingInfo } = props;
   const { isLogin } = useUserStoreShallow((state) => ({
     isLogin: state.isLogin,
   }));
@@ -56,12 +59,10 @@ const PlanItem = (props: {
 
   const getPrice = (plan: SubscriptionPlanType) => {
     switch (plan) {
-      case 'ultra':
-        return lookupKey === 'monthly' ? 49.9 : 249.5;
       case 'max':
-        return lookupKey === 'monthly' ? 29.9 : 149.5;
+        return interval === 'monthly' ? 19.9 : 99.5;
       case 'pro':
-        return lookupKey === 'monthly' ? 9.9 : 49.5;
+        return interval === 'monthly' ? 9.9 : 49.5;
       case 'free':
         return 0;
     }
@@ -70,7 +71,6 @@ const PlanItem = (props: {
   const getButtonText = (plan: SubscriptionPlanType) => {
     if (isLogin) {
       switch (plan) {
-        case 'ultra':
         case 'max':
         case 'pro':
           return t('settings.subscription.subscribe.upgrade');
@@ -101,7 +101,6 @@ const PlanItem = (props: {
         className={`
         subscribe-content-plans-item
         ${title === 'free' && 'item-free bg-gray-50'}
-        ${title === 'ultra' && 'item-ultra bg-[#E8F4FC]'}
         ${title === 'pro' && 'item-pro bg-[#EBF1FF]'}
         ${title === 'max' && 'item-max bg-[#FFF5EB]'}`}
       >
@@ -111,33 +110,41 @@ const PlanItem = (props: {
 
         <div className="description">{t(`settings.subscription.subscribe.${title}.description`)}</div>
 
-        <div className="subscribe-content-plans-item-price">
-          <span className="price text-3xl">
-            {title !== 'free' ? (
-              <>
+        <div className="h-16">
+          <div className="subscribe-content-plans-item-price">
+            <span className="price text-3xl">
+              {title !== 'free' ? (
+                <>${interval === 'monthly' ? getPrice(title) : Math.round((getPrice(title) / 12) * 10) / 10}</>
+              ) : (
+                t('settings.subscription.subscribe.forFree')
+              )}
+            </span>
+            <span className="period !text-xs">
+              {' '}
+              /{' '}
+              {title === 'free' ? (
+                t('settings.subscription.subscribe.period')
+              ) : (
+                <span className="whitespace-nowrap">{t(`settings.subscription.subscribe.month`)}</span>
+              )}
+            </span>
+          </div>
+
+          {interval === 'yearly' && title !== 'free' && (
+            <div className="">
+              <span className="price text-base">
                 ${getPrice(title)}
-                {lookupKey === 'yearly' && (
-                  <span className="text-sm text-gray-500 ml-1">
-                    <span className="line-through decoration-gray-700 ">${getPrice(title) * 2}</span>
-                  </span>
-                )}
-              </>
-            ) : (
-              t('settings.subscription.subscribe.forFree')
-            )}
-          </span>
-          <span className="period !text-xs">
-            {' '}
-            /{' '}
-            {title === 'free' ? (
-              t('settings.subscription.subscribe.period')
-            ) : (
-              <span className="whitespace-nowrap">
-                {t(`settings.subscription.subscribe.${lookupKey === 'monthly' ? 'month' : 'firstYear'}`)}
+                <span className="text-sm text-gray-500 ml-1">
+                  <span className="line-through decoration-gray-700 ">${getPrice(title) * 2}</span>
+                </span>
               </span>
-            )}
-            {title !== 'free' && lookupKey === 'yearly' && '*'}
-          </span>
+              <span className="period !text-xs">
+                {' '}
+                / <span className="whitespace-nowrap">{t(`settings.subscription.subscribe.${'firstYear'}`)}</span>
+                {'*'}
+              </span>
+            </div>
+          )}
         </div>
 
         <Button
@@ -216,7 +223,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
     isLogin: state.isLogin,
   }));
 
-  const [lookupKey, setLookupKey] = useState<PriceLookupKey>('yearly');
+  const [interval, setInterval] = useState<SubscriptionInterval>('yearly');
   const [loadingInfo, setLoadingInfo] = useState<{
     isLoading: boolean;
     plan: string;
@@ -227,6 +234,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
 
   const t1ModelName = t('settings.subscription.subscribe.t1Model');
   const t2ModelName = t('settings.subscription.subscribe.t2Model');
+  const freeModelName = t('settings.subscription.subscribe.freeModel');
   const vectorStorageName = t('settings.subscription.subscribe.vectorStorage');
   const fileStorageName = t('settings.subscription.subscribe.fileStorage');
   const mediaCreditName = t('settings.subscription.subscribe.mediaCredit');
@@ -246,8 +254,15 @@ export const PriceContent = (props: { source: PriceSource }) => {
       tooltip: modalTooltipContent,
     },
     {
+      name: freeModelName,
+      count: unlimited,
+      details: freeModels,
+      tooltip: modalTooltipContent,
+    },
+    {
       name: mediaCreditName,
       count: '5',
+      details: mediaModels,
       tooltip: mediaCreditTooltipContent,
     },
     {
@@ -269,19 +284,26 @@ export const PriceContent = (props: { source: PriceSource }) => {
   const proFeatures: ModelFeatures[] = [
     {
       name: t1ModelName,
-      count: `0.5M tokens / ${month}`,
+      count: `1M tokens / ${month}`,
       details: premiumModels,
       tooltip: modalTooltipContent,
     },
     {
       name: t2ModelName,
-      count: `5M tokens / ${month}`,
+      count: unlimited,
       details: basicModels,
+      tooltip: modalTooltipContent,
+    },
+    {
+      name: freeModelName,
+      count: unlimited,
+      details: freeModels,
       tooltip: modalTooltipContent,
     },
     {
       name: mediaCreditName,
       count: '50',
+      details: mediaModels,
       tooltip: mediaCreditTooltipContent,
     },
     {
@@ -303,7 +325,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
   const maxFeatures: ModelFeatures[] = [
     {
       name: t1ModelName,
-      count: `2M tokens / ${month}`,
+      count: unlimited,
       details: premiumModels,
       tooltip: modalTooltipContent,
     },
@@ -314,8 +336,15 @@ export const PriceContent = (props: { source: PriceSource }) => {
       tooltip: modalTooltipContent,
     },
     {
+      name: freeModelName,
+      count: unlimited,
+      details: freeModels,
+      tooltip: modalTooltipContent,
+    },
+    {
       name: mediaCreditName,
       count: '100',
+      details: mediaModels,
       tooltip: mediaCreditTooltipContent,
     },
     {
@@ -334,40 +363,6 @@ export const PriceContent = (props: { source: PriceSource }) => {
     },
   ];
 
-  const ultraFeatures: ModelFeatures[] = [
-    {
-      name: t1ModelName,
-      count: unlimited,
-      details: premiumModels,
-      tooltip: modalTooltipContent,
-    },
-    {
-      name: t2ModelName,
-      count: unlimited,
-      details: basicModels,
-      tooltip: modalTooltipContent,
-    },
-    {
-      name: mediaCreditName,
-      count: '500',
-      tooltip: mediaCreditTooltipContent,
-    },
-    {
-      name: vectorStorageName,
-      count: '500MB',
-      tooltip: vectorStorageTooltipContent,
-    },
-    {
-      name: fileStorageName,
-      count: '5G',
-      tooltip: fileStorageTooltipContent,
-    },
-    {
-      name: t('settings.subscription.subscribe.ultra.serviceSupport.name'),
-      count: t('settings.subscription.subscribe.ultra.serviceSupport.details'),
-    },
-  ];
-
   const createCheckoutSession = async (plan: 'max' | 'pro' | 'ultra') => {
     if (loadingInfo.isLoading) return;
     setLoadingInfo({
@@ -377,7 +372,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
     const { data } = await getClient().createCheckoutSession({
       body: {
         planType: plan,
-        interval: lookupKey,
+        interval: interval,
       },
     });
     setLoadingInfo({
@@ -404,15 +399,15 @@ export const PriceContent = (props: { source: PriceSource }) => {
       <div className="subscribe-content-type">
         <div className="subscribe-content-type-inner">
           <div
-            className={`subscribe-content-type-inner-item ${lookupKey === 'yearly' ? 'active' : ''}`}
-            onClick={() => setLookupKey('yearly')}
+            className={`subscribe-content-type-inner-item ${interval === 'yearly' ? 'active' : ''}`}
+            onClick={() => setInterval('yearly')}
           >
             <span>{t('settings.subscription.subscribe.yearly')}</span>
           </div>
 
           <div
-            className={`subscribe-content-type-inner-item ${lookupKey === 'monthly' ? 'active' : ''}`}
-            onClick={() => setLookupKey('monthly')}
+            className={`subscribe-content-type-inner-item ${interval === 'monthly' ? 'active' : ''}`}
+            onClick={() => setInterval('monthly')}
           >
             {t('settings.subscription.subscribe.monthly')}
           </div>
@@ -431,7 +426,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
                   : navigate('/', { replace: true })
                 : setLoginModalOpen(true);
             }}
-            lookupKey={lookupKey}
+            interval={interval}
             loadingInfo={loadingInfo}
           />
         </Col>
@@ -441,7 +436,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
             title="pro"
             features={proFeatures}
             handleClick={() => createCheckoutSession('pro')}
-            lookupKey={lookupKey}
+            interval={interval}
             loadingInfo={loadingInfo}
           />
         </Col>
@@ -451,17 +446,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
             title="max"
             features={maxFeatures}
             handleClick={() => createCheckoutSession('max')}
-            lookupKey={lookupKey}
-            loadingInfo={loadingInfo}
-          />
-        </Col>
-
-        <Col {...gridSpan}>
-          <PlanItem
-            title="ultra"
-            features={ultraFeatures}
-            handleClick={() => createCheckoutSession('ultra')}
-            lookupKey={lookupKey}
+            interval={interval}
             loadingInfo={loadingInfo}
           />
         </Col>

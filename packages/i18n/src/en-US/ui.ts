@@ -551,6 +551,7 @@ const translations = {
       showLaunchpad: 'Show Ask AI',
       editTitle: 'Edit Canvas Title',
       editTitlePlaceholder: 'Please enter the title of the canvas',
+      rename: 'Rename',
       syncingChanges: 'Syncing Changes',
       synced: 'Last synced at {{time}}',
       mouse: 'Mouse Mode',
@@ -607,6 +608,7 @@ const translations = {
       nodeNotFound: 'Source node not found or has been deleted. Please add it to the canvas first.',
     },
     nodeActions: {
+      createMemo: 'Create Empty Memo',
       copy: 'Copy Node Content',
       askAI: 'Ask AI',
       cloneAskAI: 'Clone Ask AI',
@@ -629,6 +631,8 @@ const translations = {
       groupCluster: 'Group Sub Nodes',
       layoutCluster: 'Layout Sub Nodes',
       centerNode: 'Center Node Position',
+      editQuery: 'Edit Query',
+      duplicateDocument: 'Duplicate Document',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',
@@ -824,6 +828,7 @@ const translations = {
       recentChats: 'Recent Chats',
       viewMore: 'View More',
       joinFeedback: 'Join Feedback Group',
+      viewTutorial: 'View Tutorial',
     },
   },
   knowledgeLibrary: {
@@ -1074,6 +1079,7 @@ const translations = {
       mostPopular: 'Most Popular',
       getStarted: 'Get Started',
       subscribeNow: 'Subscribe Now',
+      manage: 'Manage Subscription',
       currentPlan: 'Current Plan',
       t1TokenUsed: 'Advanced Model Token Usage',
       t1TokenUsedDescription:
@@ -1095,6 +1101,7 @@ const translations = {
         yearly: 'Yearly',
         monthlyPlan: 'Monthly Auto-Renewal',
         yearlyPlan: 'Yearly Auto-Renewal',
+        cancelAt: 'Will be canceled at {{date}}',
         tooltip: {
           modelToken: 'Usage includes both model input and output tokens',
           vectorStorage: 'Used for storing semantic embeddings of resources and canvases',
@@ -1106,7 +1113,8 @@ const translations = {
         fileStorage: 'File Storage',
         t1Model: 'Advanced Models',
         t2Model: 'Standard Models',
-        mediaCredit: 'Media Credit',
+        freeModel: 'Free Models',
+        mediaCredit: 'Media Credit (Coming Soon)',
         fileStorageType: {
           note: 'Canvases',
           resource: 'Resources',

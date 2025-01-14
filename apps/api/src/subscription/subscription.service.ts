@@ -2,6 +2,8 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import Stripe from 'stripe';
 import { InjectStripeClient, StripeWebhookHandler } from '@golevelup/nestjs-stripe';
 import { PrismaService } from '@/common/prisma.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import {
   CreateCheckoutSessionRequest,
   SubscriptionInterval,
@@ -25,13 +27,13 @@ import {
 import { pick } from '@/utils';
 import {
   Subscription as SubscriptionModel,
-  User as UserModel,
   ModelInfo as ModelInfoModel,
   SubscriptionPlan as SubscriptionPlanModel,
   Prisma,
 } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { ParamsError } from '@refly-packages/errors';
+import { QUEUE_CHECK_CANCELED_SUBSCRIPTIONS } from '@/utils/const';
 
 @Injectable()
 export class SubscriptionService implements OnModuleInit {
@@ -44,9 +46,11 @@ export class SubscriptionService implements OnModuleInit {
   private subscriptionPlans: SubscriptionPlanModel[];
 
   constructor(
-    private readonly prisma: PrismaService,
+    protected readonly prisma: PrismaService,
     private readonly config: ConfigService,
     @InjectStripeClient() private readonly stripeClient: Stripe,
+    @InjectQueue(QUEUE_CHECK_CANCELED_SUBSCRIPTIONS)
+    private readonly checkCanceledSubscriptionsQueue: Queue,
   ) {}
 
   async onModuleInit() {
@@ -69,9 +73,44 @@ export class SubscriptionService implements OnModuleInit {
     this.modelListSyncedAt = new Date();
 
     this.subscriptionPlans = await this.prisma.subscriptionPlan.findMany();
+
+    // Set up the recurring job for checking canceled subscriptions
+    await this.setupCanceledSubscriptionsCheck();
   }
 
-  async createCheckoutSession(user: UserModel, param: CreateCheckoutSessionRequest) {
+  private async setupCanceledSubscriptionsCheck() {
+    // Remove any existing recurring jobs
+    const existingJobs = await this.checkCanceledSubscriptionsQueue.getRepeatableJobs();
+    await Promise.all(
+      existingJobs.map((job) =>
+        this.checkCanceledSubscriptionsQueue.removeRepeatableByKey(job.key),
+      ),
+    );
+
+    // Add the new recurring job with concurrency options
+    await this.checkCanceledSubscriptionsQueue.add(
+      'check-canceled',
+      {},
+      {
+        repeat: {
+          pattern: '0 * * * *', // Run every hour
+        },
+        removeOnComplete: true,
+        removeOnFail: false,
+        // Add job options for distributed environment
+        jobId: 'check-canceled-subscriptions', // Unique job ID to prevent duplicates
+        attempts: 3, // Number of retry attempts
+        backoff: {
+          type: 'exponential',
+          delay: 1000, // Initial delay in milliseconds
+        },
+      },
+    );
+
+    this.logger.log('Canceled subscriptions check job scheduled');
+  }
+
+  async createCheckoutSession(user: User, param: CreateCheckoutSessionRequest) {
     const { uid } = user;
     const { planType, interval } = param;
     const plan = this.subscriptionPlans.find(
@@ -111,9 +150,17 @@ export class SubscriptionService implements OnModuleInit {
     return session;
   }
 
-  async createPortalSession(user: UserModel) {
+  async createPortalSession(user: User) {
+    const { customerId } = await this.prisma.user.findUnique({
+      select: { customerId: true },
+      where: { uid: user.uid },
+    });
+    if (!customerId) {
+      throw new ParamsError(`No customer found for user ${user.uid}`);
+    }
+
     const session = await this.stripeClient.billingPortal.sessions.create({
-      customer: user.customerId,
+      customer: customerId,
       return_url: this.config.get('stripe.portalReturnUrl'),
     });
     return session;
@@ -253,6 +300,23 @@ export class SubscriptionService implements OnModuleInit {
         },
       });
     });
+  }
+
+  async checkCanceledSubscriptions() {
+    const now = new Date();
+    const canceledSubscriptions = await this.prisma.subscription.findMany({
+      where: {
+        status: 'active',
+        cancelAt: {
+          lte: now,
+        },
+      },
+    });
+
+    for (const subscription of canceledSubscriptions) {
+      this.logger.log(`Processing canceled subscription: ${subscription.subscriptionId}`);
+      await this.cancelSubscription(subscription);
+    }
   }
 
   @StripeWebhookHandler('checkout.session.completed')
@@ -427,12 +491,21 @@ export class SubscriptionService implements OnModuleInit {
     return result;
   }
 
-  async getOrCreateTokenUsageMeter(user: UserModel, sub?: SubscriptionModel) {
+  async getOrCreateTokenUsageMeter(user: User, sub?: SubscriptionModel) {
     const { uid } = user;
+    const userPo = await this.prisma.user.findUnique({
+      select: { subscriptionId: true },
+      where: { uid },
+    });
 
-    if (user.subscriptionId && !sub) {
+    if (!userPo) {
+      this.logger.error(`No user found for uid ${uid}`);
+      return null;
+    }
+
+    if (userPo.subscriptionId && !sub) {
       sub = await this.prisma.subscription.findUnique({
-        where: { subscriptionId: user.subscriptionId },
+        where: { subscriptionId: userPo.subscriptionId },
       });
     }
 
@@ -481,12 +554,21 @@ export class SubscriptionService implements OnModuleInit {
     });
   }
 
-  async getOrCreateStorageUsageMeter(user: UserModel, sub?: SubscriptionModel) {
+  async getOrCreateStorageUsageMeter(user: User, sub?: SubscriptionModel) {
     const { uid } = user;
+    const userPo = await this.prisma.user.findUnique({
+      select: { subscriptionId: true },
+      where: { uid },
+    });
 
-    if (user.subscriptionId && !sub) {
+    if (!userPo) {
+      this.logger.error(`No user found for uid ${uid}`);
+      return null;
+    }
+
+    if (userPo.subscriptionId && !sub) {
       sub = await this.prisma.subscription.findUnique({
-        where: { subscriptionId: user.subscriptionId },
+        where: { subscriptionId: userPo.subscriptionId },
       });
     }
 
@@ -518,10 +600,21 @@ export class SubscriptionService implements OnModuleInit {
     });
   }
 
-  async getOrCreateUsageMeter(user: UserModel, sub?: SubscriptionModel) {
-    if (user.subscriptionId && !sub) {
+  async getOrCreateUsageMeter(user: User, sub?: SubscriptionModel) {
+    const { uid } = user;
+    const userPo = await this.prisma.user.findUnique({
+      select: { subscriptionId: true },
+      where: { uid },
+    });
+
+    if (!userPo) {
+      this.logger.error(`No user found for uid ${uid}`);
+      return null;
+    }
+
+    if (userPo.subscriptionId && !sub) {
       sub = await this.prisma.subscription.findUnique({
-        where: { subscriptionId: user.subscriptionId },
+        where: { subscriptionId: userPo.subscriptionId },
       });
     }
 

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from './prisma.service';
 import { MINIO_EXTERNAL, MINIO_INTERNAL, MinioService } from './minio.service';
 import { RedisService } from './redis.service';
@@ -7,7 +7,6 @@ import { QdrantService } from './qdrant.service';
 import { ElasticsearchService } from './elasticsearch.service';
 
 @Module({
-  imports: [ConfigModule],
   providers: [
     PrismaService,
     RedisService,

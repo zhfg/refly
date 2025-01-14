@@ -79,6 +79,9 @@ export const CanvasListModal = (props: CanvasListProps) => {
             canvasId={canvas.canvasId}
             canvasName={canvas.title}
             afterDelete={() => setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId))}
+            afterRename={(newTitle, canvasId) => {
+              setDataList(dataList.map((n) => (n.canvasId === canvasId ? { ...n, title: newTitle } : n)));
+            }}
           />
         </div>
       </div>
