@@ -15,6 +15,7 @@ export default () => ({
     port: parseInt(process.env.REDIS_PORT) || 6379,
     password: process.env.REDIS_PASSWORD || '',
   },
+  origin: process.env.ORIGIN || 'http://localhost:5173',
   staticEndpoint: process.env.STATIC_ENDPOINT || 'http://localhost:3000/v1/misc/',
   minio: {
     internal: {

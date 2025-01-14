@@ -51,7 +51,7 @@ async function bootstrap() {
   app.use(setTraceID);
   app.use(helmet());
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: configService.get('origin').split(','),
     credentials: true,
   });
   app.use(cookieParser());
