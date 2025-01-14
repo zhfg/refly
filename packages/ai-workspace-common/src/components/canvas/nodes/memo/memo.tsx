@@ -39,6 +39,9 @@ import {
 import { useInsertToDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-insert-to-document';
 import { MemoEditor } from './memo-editor';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { genSkillID } from '@refly-packages/utils/id';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 type MemoNode = Node<CanvasNodeData, 'memo'>;
 
@@ -56,6 +59,7 @@ export const MemoNode = ({
   const setNodeDataByEntity = useSetNodeDataByEntity();
   const { i18n, t } = useTranslation();
   const language = i18n.languages?.[0];
+  const { addNode } = useAddNode();
 
   // console.log('memo', id);
 
@@ -94,7 +98,7 @@ export const MemoNode = ({
   const handleAddToContext = useCallback(() => {
     addToContext({
       type: 'memo',
-      title: data.title,
+      title: `${data.title} - ${data.contentPreview?.slice(0, 10)}`,
       entityId: data.entityId,
       metadata: data.metadata,
     });
@@ -117,28 +121,56 @@ export const MemoNode = ({
     await insertToDoc('insertBelow', data?.contentPreview);
   }, [insertToDoc, data.entityId, data]);
 
+  const handleAskAI = useCallback(() => {
+    addNode(
+      {
+        type: 'skill',
+        data: {
+          title: 'Skill',
+          entityId: genSkillID(),
+          metadata: {
+            contextItems: [
+              {
+                type: 'memo',
+                title: `${data.title} - ${data.contentPreview?.slice(0, 10)}`,
+                entityId: data.entityId,
+                metadata: data.metadata,
+              },
+            ] as IContextItem[],
+          },
+        },
+      },
+      [{ type: 'memo', entityId: data.entityId }],
+      false,
+      true,
+    );
+  }, [data, addNode]);
+
   // Add event handling
   useEffect(() => {
     // Create node-specific event handlers
     const handleNodeAddToContext = () => handleAddToContext();
     const handleNodeDelete = () => handleDelete();
     const handleNodeInsertToDoc = () => handleInsertToDoc();
+    const handleNodeAskAI = () => handleAskAI();
 
     // Register events with node ID
     nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
     nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
     nodeActionEmitter.on(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
+    nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
     return () => {
       // Cleanup events when component unmounts
       nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
       nodeActionEmitter.off(createNodeEventName(id, 'insertToDoc'), handleNodeInsertToDoc);
+      nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
       // Clean up all node events
       cleanupNodeEvents(id);
     };
-  }, [id, handleAddToContext, deleteNode, handleInsertToDoc]);
+  }, [id, handleAddToContext, handleDelete, handleInsertToDoc, handleAskAI]);
 
   const editor = useEditor({
     extensions: [

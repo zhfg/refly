@@ -22,6 +22,7 @@ import { useGetSubscriptionUsage } from '@refly-packages/ai-workspace-common/que
 import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 import { useActionPolling } from './use-action-polling';
+import { useFindMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-memo';
 
 export const useInvokeAction = () => {
   const { addNode } = useAddNode();
@@ -338,17 +339,25 @@ export const useInvokeAction = () => {
   const onCompleted = () => {};
   const onStart = () => {};
   const findThreadHistory = useFindThreadHistory();
+  const findMemo = useFindMemo();
 
   const invokeAction = (payload: SkillNodeMeta, target: Entity) => {
     payload.resultId ||= genActionResultID();
     payload.selectedSkill ||= { name: 'commonQnA' };
 
     const { query, modelInfo, contextItems, selectedSkill, resultId, version = 0 } = payload;
-    const { context, resultHistory } = convertContextItemsToInvokeParams(contextItems, (item) =>
-      findThreadHistory({ resultId: item.entityId }).map((node) => ({
-        title: node.data?.title,
-        resultId: node.data?.entityId,
-      })),
+    const { context, resultHistory } = convertContextItemsToInvokeParams(
+      contextItems,
+      (item) =>
+        findThreadHistory({ resultId: item.entityId }).map((node) => ({
+          title: node.data?.title,
+          resultId: node.data?.entityId,
+        })),
+      (item) =>
+        findMemo({ resultId: item.entityId }).map((node) => ({
+          content: node.data?.contentPreview ?? '',
+          title: node.data?.title ?? 'Memo',
+        })),
     );
 
     const param = {

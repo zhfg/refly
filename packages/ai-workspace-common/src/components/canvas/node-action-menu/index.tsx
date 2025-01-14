@@ -427,7 +427,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({ nodeId, nodeType, onCl
     ];
 
     return [
-      ...(nodeType !== 'memo' && nodeType !== 'skill' ? commonItems : []),
+      ...(nodeType !== 'skill' ? commonItems : []),
       ...(nodeType !== 'memo' && nodeType !== 'skill' && nodeType !== 'group' ? operationItems : []),
       ...(nodeTypeItems[nodeType] || []),
       ...(nodeType !== 'memo' && nodeType !== 'skill' ? clusterItems : []),
