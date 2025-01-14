@@ -600,6 +600,7 @@ const translations = {
       nodeNotFound: '源节点未找到或已被删除，请先添加到画布',
     },
     nodeActions: {
+      createMemo: '创建空备忘录',
       copy: '复制节点内容',
       askAI: '问问 AI',
       cloneAskAI: '克隆 AI 提问',
@@ -623,6 +624,7 @@ const translations = {
       layoutCluster: '子节点自动布局',
       centerNode: '定位节点',
       editQuery: '编辑提问',
+      duplicateDocument: '创建文档副本',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',
@@ -823,6 +825,7 @@ const translations = {
       recentChats: '最近会话',
       viewMore: '查看更多',
       joinFeedback: '加入反馈群',
+      viewTutorial: '查看教程',
     },
   },
   knowledgeLibrary: {

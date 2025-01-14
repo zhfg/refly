@@ -608,6 +608,7 @@ const translations = {
       nodeNotFound: 'Source node not found or has been deleted. Please add it to the canvas first.',
     },
     nodeActions: {
+      createMemo: 'Create Empty Memo',
       copy: 'Copy Node Content',
       askAI: 'Ask AI',
       cloneAskAI: 'Clone Ask AI',
@@ -631,6 +632,7 @@ const translations = {
       layoutCluster: 'Layout Sub Nodes',
       centerNode: 'Center Node Position',
       editQuery: 'Edit Query',
+      duplicateDocument: 'Duplicate Document',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',
@@ -826,6 +828,7 @@ const translations = {
       recentChats: 'Recent Chats',
       viewMore: 'View More',
       joinFeedback: 'Join Feedback Group',
+      viewTutorial: 'View Tutorial',
     },
   },
   knowledgeLibrary: {
