@@ -4,9 +4,7 @@ import { LuSettings, LuLogOut } from 'react-icons/lu';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useLogout } from '@refly-packages/ai-workspace-common/hooks/use-logout';
-
-// styles
-import { AiOutlineTwitter } from 'react-icons/ai';
+import { IconDiscord } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
   const { t } = useTranslation();
@@ -44,7 +42,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
     },
     {
       key: 'getHelp',
-      icon: <AiOutlineTwitter />,
+      icon: <IconDiscord />,
       label: t('loggedHomePage.siderMenu.getHelp'),
     },
   ];
@@ -55,7 +53,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
     } else if (key === 'logout') {
       handleLogout();
     } else if (key === 'getHelp') {
-      window.open(`https://twitter.com/reflyai`, '_blank');
+      window.open(`https://discord.gg/bWjffrb89h`, '_blank');
     }
   };
 
