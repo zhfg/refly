@@ -807,6 +807,7 @@ const translations = {
       },
     },
     siderMenu: {
+      subscription: 'Subscription',
       canvas: 'Canvas',
       newCanvas: 'New Canvas',
       news: "What's new?",
@@ -1540,6 +1541,10 @@ const translations = {
       webSearchTab: 'Web Search',
       libraryTab: 'Library Search',
       noUrl: 'This source does not have a link, you can select it and import to canvas',
+    },
+    premiumBanner: {
+      message: 'Need more tokens? Get higher limits with Premium.',
+      upgrade: 'Upgrade Plan',
     },
   },
   hooks: {

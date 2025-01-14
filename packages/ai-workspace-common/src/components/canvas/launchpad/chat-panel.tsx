@@ -1,5 +1,5 @@
 import { Form } from '@arco-design/web-react';
-import { notification } from 'antd';
+import { notification, Button } from 'antd';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -11,6 +11,7 @@ import { useContextFilterErrorTip } from './context-manager/hooks/use-context-fi
 import { genActionResultID } from '@refly-packages/utils/id';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
+import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 
 import { SelectedSkillHeader } from './selected-skill-header';
 import { useSkillStore, useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
@@ -24,6 +25,47 @@ import { useSyncSelectedNodesToContext } from '@refly-packages/ai-workspace-comm
 import { PiMagicWand } from 'react-icons/pi';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { convertContextItemsToNodeFilters } from '@refly-packages/ai-workspace-common/utils/map-context-items';
+import { IoClose } from 'react-icons/io5';
+
+const PremiumBanner = () => {
+  const { t } = useTranslation();
+  const { showPremiumBanner, setShowPremiumBanner } = useLaunchpadStoreShallow((state) => ({
+    showPremiumBanner: state.showPremiumBanner,
+    setShowPremiumBanner: state.setShowPremiumBanner,
+  }));
+  const setShowSettingModal = useSiderStoreShallow((state) => state.setShowSettingModal);
+
+  if (!showPremiumBanner) return null;
+
+  const handleUpgrade = () => {
+    setShowSettingModal(true);
+  };
+
+  return (
+    <div className="flex items-center justify-between px-3 py-0.5 bg-gray-50 border-b">
+      <div className="flex items-center justify-between gap-2 w-full">
+        <span className="text-xs text-gray-600 flex-1 whitespace-nowrap">{t('copilot.premiumBanner.message')}</span>
+        <div className="flex items-center gap-0.5">
+          <Button
+            type="text"
+            size="small"
+            className="text-xs text-teal-600 hover:text-teal-600 hover:font-medium px-2"
+            onClick={handleUpgrade}
+          >
+            {t('copilot.premiumBanner.upgrade')}
+          </Button>
+          <Button
+            type="text"
+            size="small"
+            icon={<IoClose size={14} />}
+            onClick={() => setShowPremiumBanner(false)}
+            className="text-gray-400 hover:text-gray-500 flex items-center justify-center w-5 h-5 min-w-0 p-0"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const ChatPanel = () => {
   const { t } = useTranslation();
@@ -175,55 +217,57 @@ export const ChatPanel = () => {
   );
 
   return (
-    <div className="ai-copilot-chat-container">
-      <div className="chat-input-container">
-        <SelectedSkillHeader
-          skill={selectedSkill}
-          setSelectedSkill={setSelectedSkill}
-          onClose={() => setSelectedSkill(null)}
-          className="rounded-t-[7px]"
-        />
-        <ContextManager
-          className="p-2 px-3"
-          contextItems={contextItems}
-          setContextItems={setContextItems}
-          filterErrorInfo={filterErrorInfo}
-        />
-        <ChatInput
-          query={chatStore.newQAText}
-          setQuery={chatStore.setNewQAText}
-          selectedSkillName={selectedSkill?.name}
-          autoCompletionPlacement={'topLeft'}
-          handleSendMessage={handleSendMessage}
-        />
-
-        {selectedSkill?.configSchema?.items?.length > 0 && (
-          <ConfigManager
-            key={selectedSkill?.name}
-            form={form}
-            formErrors={formErrors}
-            setFormErrors={setFormErrors}
-            schema={selectedSkill?.configSchema}
-            tplConfig={selectedSkill?.tplConfig}
-            fieldPrefix="tplConfig"
-            configScope="runtime"
-            resetConfig={() => {
-              const defaultConfig = selectedSkill?.tplConfig ?? {};
-              form.setFieldValue('tplConfig', defaultConfig);
-            }}
+    <div className="relative w-full">
+      <div className="ai-copilot-chat-container">
+        <div className="chat-input-container rounded-[7px] overflow-hidden">
+          <SelectedSkillHeader
+            skill={selectedSkill}
+            setSelectedSkill={setSelectedSkill}
+            onClose={() => setSelectedSkill(null)}
           />
-        )}
+          <PremiumBanner />
+          <ContextManager
+            className="p-2 px-3"
+            contextItems={contextItems}
+            setContextItems={setContextItems}
+            filterErrorInfo={filterErrorInfo}
+          />
+          <ChatInput
+            query={chatStore.newQAText}
+            setQuery={chatStore.setNewQAText}
+            selectedSkillName={selectedSkill?.name}
+            autoCompletionPlacement={'topLeft'}
+            handleSendMessage={handleSendMessage}
+          />
 
-        <ChatActions
-          className="p-2 px-3"
-          query={chatStore.newQAText}
-          model={chatStore.selectedModel}
-          setModel={chatStore.setSelectedModel}
-          form={form}
-          handleSendMessage={handleSendMessage}
-          handleAbort={handleAbort}
-          customActions={customActions}
-        />
+          {selectedSkill?.configSchema?.items?.length > 0 && (
+            <ConfigManager
+              key={selectedSkill?.name}
+              form={form}
+              formErrors={formErrors}
+              setFormErrors={setFormErrors}
+              schema={selectedSkill?.configSchema}
+              tplConfig={selectedSkill?.tplConfig}
+              fieldPrefix="tplConfig"
+              configScope="runtime"
+              resetConfig={() => {
+                const defaultConfig = selectedSkill?.tplConfig ?? {};
+                form.setFieldValue('tplConfig', defaultConfig);
+              }}
+            />
+          )}
+
+          <ChatActions
+            className="p-2 px-3"
+            query={chatStore.newQAText}
+            model={chatStore.selectedModel}
+            setModel={chatStore.setSelectedModel}
+            form={form}
+            handleSendMessage={handleSendMessage}
+            handleAbort={handleAbort}
+            customActions={customActions}
+          />
+        </div>
       </div>
     </div>
   );
