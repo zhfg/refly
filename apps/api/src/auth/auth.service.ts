@@ -192,7 +192,8 @@ export class AuthService {
     return res
       .clearCookie(UID_COOKIE)
       .clearCookie(ACCESS_TOKEN_COOKIE)
-      .clearCookie(REFRESH_TOKEN_COOKIE);
+      .clearCookie(REFRESH_TOKEN_COOKIE)
+      .clearCookie(LEGACY_TOKEN_COOKIE);
   }
 
   async genUniqueUsername(candidate: string) {
