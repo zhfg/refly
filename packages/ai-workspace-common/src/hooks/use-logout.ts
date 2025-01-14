@@ -32,11 +32,6 @@ export const logout = async ({ callRemoteLogout }: { callRemoteLogout?: boolean 
       await getClient().logout();
     }
 
-    // Clear all cookies
-    document.cookie.split(';').forEach((cookie) => {
-      document.cookie = cookie.replace(/^ +/, '').replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`);
-    });
-
     // Clear IndexedDB
     await deleteIndexedDB();
 
