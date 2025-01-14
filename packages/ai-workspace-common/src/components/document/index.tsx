@@ -220,7 +220,7 @@ const DocumentEditorHeader = memo(
       <div className="w-full">
         <div className="mx-0 mt-4 max-w-screen-lg">
           <Input
-            className="text-3xl font-bold bg-transparent focus:border-transparent focus:bg-transparent"
+            className="!text-3xl font-bold bg-transparent focus:border-transparent focus:bg-transparent"
             placeholder={t('editor.placeholder.title')}
             value={document?.title}
             style={{ paddingLeft: 6 }}
