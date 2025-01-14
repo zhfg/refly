@@ -70,6 +70,7 @@ import { TbWorldSearch } from 'react-icons/tb';
 import { GrCircleQuestion } from 'react-icons/gr';
 import { TbInputSpark } from 'react-icons/tb';
 import { AiOutlineLink } from 'react-icons/ai';
+import { HiOutlineTableCells } from 'react-icons/hi2';
 
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
 import ClaudeIcon from '@refly-packages/ai-workspace-common/assets/claude.svg';
@@ -140,6 +141,7 @@ export const IconTouchpad = LuTouchpad;
 export const IconThinking = PiAtom;
 export const IconCodeArtifact = FiCode;
 export const IconWebsite = AiOutlineLink;
+export const IconTable = HiOutlineTableCells;
 
 export const IconX = BsTwitterX;
 export const IconGithub = BsGithub;
