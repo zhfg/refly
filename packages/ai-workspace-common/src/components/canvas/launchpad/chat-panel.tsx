@@ -26,6 +26,8 @@ import { PiMagicWand } from 'react-icons/pi';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { convertContextItemsToNodeFilters } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { IoClose } from 'react-icons/io5';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 
 const PremiumBanner = () => {
   const { t } = useTranslation();
@@ -33,16 +35,16 @@ const PremiumBanner = () => {
     showPremiumBanner: state.showPremiumBanner,
     setShowPremiumBanner: state.setShowPremiumBanner,
   }));
-  const setShowSettingModal = useSiderStoreShallow((state) => state.setShowSettingModal);
+  const setSubscribeModalVisible = useSubscriptionStoreShallow((state) => state.setSubscribeModalVisible);
 
   if (!showPremiumBanner) return null;
 
   const handleUpgrade = () => {
-    setShowSettingModal(true);
+    setSubscribeModalVisible(true);
   };
 
   return (
-    <div className="flex items-center justify-between px-3 py-0.5 bg-gray-50 border-b">
+    <div className="flex items-center justify-between px-3 py-0.5 bg-gray-100 border-b">
       <div className="flex items-center justify-between gap-2 w-full">
         <span className="text-xs text-gray-600 flex-1 whitespace-nowrap">{t('copilot.premiumBanner.message')}</span>
         <div className="flex items-center gap-0.5">
@@ -75,6 +77,7 @@ export const ChatPanel = () => {
   }));
 
   // stores
+  const userProfile = useUserStoreShallow((state) => state.userProfile);
   const { selectedSkill, setSelectedSkill } = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
     setSelectedSkill: state.setSelectedSkill,
@@ -225,7 +228,7 @@ export const ChatPanel = () => {
             setSelectedSkill={setSelectedSkill}
             onClose={() => setSelectedSkill(null)}
           />
-          <PremiumBanner />
+          {!userProfile?.subscription && <PremiumBanner />}
           <ContextManager
             className="p-2 px-3"
             contextItems={contextItems}
