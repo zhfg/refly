@@ -805,6 +805,7 @@ const translations = {
       },
     },
     siderMenu: {
+      subscription: '订阅',
       canvas: '画布',
       newCanvas: '新建画布',
       news: '新特性',
@@ -1530,6 +1531,10 @@ const translations = {
       webSearchTab: '全网搜索',
       libraryTab: '知识库搜索',
       noUrl: '该来源没有链接，可选中之后导入画布',
+    },
+    premiumBanner: {
+      message: '需要更多消息额度？升级到高级版获取更高限制。',
+      upgrade: '升级方案',
     },
   },
   title: '欢迎 {{name}}，使用 react-i18next 完全类型安全的 React',

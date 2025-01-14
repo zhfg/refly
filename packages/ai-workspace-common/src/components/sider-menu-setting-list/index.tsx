@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { MenuProps, Dropdown } from 'antd';
-import { LuSettings, LuLogOut } from 'react-icons/lu';
+import { LuSettings, LuLogOut, LuCreditCard } from 'react-icons/lu';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useLogout } from '@refly-packages/ai-workspace-common/hooks/use-logout';
@@ -31,6 +31,11 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
       type: 'divider',
     },
     {
+      key: 'subscription',
+      icon: <LuCreditCard />,
+      label: t('loggedHomePage.siderMenu.subscription'),
+    },
+    {
       key: 'settings',
       icon: <LuSettings />,
       label: t('loggedHomePage.siderMenu.settings'),
@@ -48,7 +53,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
   ];
 
   const handleMenuClick = (key: string) => {
-    if (key === 'settings') {
+    if (key === 'settings' || key === 'subscription') {
       setShowSettingModal(true);
     } else if (key === 'logout') {
       handleLogout();
