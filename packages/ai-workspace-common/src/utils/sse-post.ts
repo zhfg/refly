@@ -2,7 +2,38 @@ import { getServerOrigin } from '@refly/utils/url';
 import { InvokeSkillRequest, SkillEvent } from '@refly/openapi-schema';
 import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
 import { extractBaseResp } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { ConnectionError } from '@refly/errors';
+import { ConnectionError, AuthenticationExpiredError } from '@refly/errors';
+import { refreshToken } from './auth';
+
+const makeSSERequest = async (
+  payload: InvokeSkillRequest,
+  controller: AbortController,
+  isRetry = false,
+): Promise<Response> => {
+  const response = await fetch(`${getServerOrigin()}/v1/skill/streamInvoke`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    signal: controller.signal,
+    body: JSON.stringify(payload),
+  });
+
+  if (response.status === 401 && !isRetry) {
+    try {
+      await refreshToken();
+      return makeSSERequest(payload, controller, true);
+    } catch (error) {
+      if (error instanceof AuthenticationExpiredError) {
+        throw error;
+      }
+      throw new ConnectionError(error);
+    }
+  }
+
+  return response;
+};
 
 export const ssePost = async ({
   controller,
@@ -36,15 +67,7 @@ export const ssePost = async ({
   let reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
 
   try {
-    const response = await fetch(`${getServerOrigin()}/v1/skill/streamInvoke`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      signal: controller.signal,
-      body: JSON.stringify(payload),
-    });
+    const response = await makeSSERequest(payload, controller);
 
     const baseResp = await extractBaseResp(response);
     if (!baseResp.success) {
