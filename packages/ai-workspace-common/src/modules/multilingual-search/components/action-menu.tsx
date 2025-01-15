@@ -73,7 +73,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
         body: batchCreateResourceData,
       });
 
-      if (data.success) {
+      if (data?.success) {
         getLibraryList();
         message.success(t('common.putSuccess'));
         setSelectedItems([]);
