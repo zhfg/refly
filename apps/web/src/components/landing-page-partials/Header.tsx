@@ -30,10 +30,10 @@ function Header() {
       label: t("landingPage.tab.price"),
       value: "pricing",
     },
-    // {
-    //   label: t("landingPage.tab.docs"),
-    //   value: "docs",
-    // },
+    {
+      label: t("landingPage.tab.docs"),
+      value: "docs",
+    },
     {
       label: (
         <div

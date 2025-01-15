@@ -193,6 +193,7 @@ const translations = {
         twitter: 'Twitter',
         github: 'GitHub',
         discord: 'Discord',
+        docs: 'Docs',
       },
       about: {
         title: 'About',
@@ -1095,6 +1096,7 @@ const translations = {
         ultra: 'ULTRA',
         pro: 'PRO',
         max: 'MAX',
+        plus: 'PLUS',
       },
       subscribe: {
         title: 'Choose the plan that suits you best',
@@ -1140,18 +1142,25 @@ const translations = {
             details: 'Exclusive WeChat/Discord Group',
           },
         },
-        pro: {
+        plus: {
           description: 'Unlock more possibilities with advanced models',
           serviceSupport: {
             name: 'Service Support',
             details: 'Priority Email Support',
           },
         },
-        max: {
+        pro: {
           description: 'Ideal choice for professional creators',
           serviceSupport: {
             name: 'Service Support',
             details: 'Priority Email Support',
+          },
+        },
+        max: {
+          description: 'Unlimited creativity without boundaries',
+          serviceSupport: {
+            name: 'Service Support',
+            details: 'Exclusive WeChat/Discord Group',
           },
         },
 

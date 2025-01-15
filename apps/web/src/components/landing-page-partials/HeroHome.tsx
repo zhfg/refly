@@ -216,6 +216,21 @@ function HeroHome() {
             </div>
           </div>
 
+          <div className="flex justify-center">
+            <a
+              href="https://www.producthunt.com/posts/refly-3?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-refly&#0045;3"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block transition-opacity hover:opacity-80">
+              <img
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=785558&theme=light&t=1736929638628"
+                alt="Refly - The AI Native Content Creation Engine | Product Hunt"
+                className="w-[170px]"
+                loading="lazy"
+              />
+            </a>
+          </div>
+
           {/* Hero image */}
           <div className="relative mt-6 flex justify-center overflow-hidden sm:mt-10">
             <div

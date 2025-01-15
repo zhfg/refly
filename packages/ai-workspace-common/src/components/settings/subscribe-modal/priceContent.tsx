@@ -24,10 +24,10 @@ const mediaModels = 'FLUX1.1 [pro], Ideogram V2, Recraft V3, Kling 1.6, Haiper 2
 const gridSpan = {
   xs: 24,
   sm: 12,
-  md: 8,
-  lg: 7,
-  xl: 6,
-  xxl: 5,
+  md: 12,
+  lg: 6,
+  xl: 5,
+  xxl: 4,
 };
 
 interface ModelFeatures {
@@ -63,6 +63,8 @@ const PlanItem = (props: {
         return interval === 'monthly' ? 19.9 : 99.5;
       case 'pro':
         return interval === 'monthly' ? 9.9 : 49.5;
+      case 'plus':
+        return interval === 'monthly' ? 4.9 : 24.5;
       case 'free':
         return 0;
     }
@@ -93,14 +95,15 @@ const PlanItem = (props: {
   };
 
   return (
-    <div className={`w-full h-full flex flex-col ${title === 'max' ? 'pro-plan' : ''}`}>
+    <div className={`w-full h-full flex flex-col ${title === 'pro' ? 'pro-plan' : ''}`}>
       <div className="h-[20px] text-center text-xs text-white font-bold">
-        {title === 'max' && t('settings.subscription.mostPopular')}
+        {title === 'pro' && t('settings.subscription.mostPopular')}
       </div>
       <div
         className={`
         subscribe-content-plans-item
         ${title === 'free' && 'item-free bg-gray-50'}
+        ${title === 'plus' && 'item-plus bg-[#E8F4FC]'}
         ${title === 'pro' && 'item-pro bg-[#EBF1FF]'}
         ${title === 'max' && 'item-max bg-[#FFF5EB]'}`}
       >
@@ -281,10 +284,51 @@ export const PriceContent = (props: { source: PriceSource }) => {
     },
   ];
 
-  const proFeatures: ModelFeatures[] = [
+  const plusFeatures: ModelFeatures[] = [
     {
       name: t1ModelName,
       count: `1M tokens / ${month}`,
+      details: premiumModels,
+      tooltip: modalTooltipContent,
+    },
+    {
+      name: t2ModelName,
+      count: `5M tokens / ${month}`,
+      details: basicModels,
+      tooltip: modalTooltipContent,
+    },
+    {
+      name: freeModelName,
+      count: unlimited,
+      details: freeModels,
+      tooltip: modalTooltipContent,
+    },
+    {
+      name: mediaCreditName,
+      count: '20',
+      details: mediaModels,
+      tooltip: mediaCreditTooltipContent,
+    },
+    {
+      name: vectorStorageName,
+      count: '50MB',
+      tooltip: vectorStorageTooltipContent,
+    },
+    {
+      name: fileStorageName,
+      count: '500MB',
+      tooltip: fileStorageTooltipContent,
+    },
+    {
+      name: t('settings.subscription.subscribe.plus.serviceSupport.name'),
+      count: t('settings.subscription.subscribe.plus.serviceSupport.details'),
+    },
+  ];
+
+  const proFeatures: ModelFeatures[] = [
+    {
+      name: t1ModelName,
+      count: `2M tokens / ${month}`,
       details: premiumModels,
       tooltip: modalTooltipContent,
     },
@@ -308,12 +352,12 @@ export const PriceContent = (props: { source: PriceSource }) => {
     },
     {
       name: vectorStorageName,
-      count: '50MB',
+      count: '100MB',
       tooltip: vectorStorageTooltipContent,
     },
     {
       name: fileStorageName,
-      count: '500MB',
+      count: '1G',
       tooltip: fileStorageTooltipContent,
     },
     {
@@ -349,12 +393,12 @@ export const PriceContent = (props: { source: PriceSource }) => {
     },
     {
       name: vectorStorageName,
-      count: '100MB',
+      count: '500MB',
       tooltip: vectorStorageTooltipContent,
     },
     {
       name: fileStorageName,
-      count: '1G',
+      count: '5G',
       tooltip: fileStorageTooltipContent,
     },
     {
@@ -363,7 +407,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
     },
   ];
 
-  const createCheckoutSession = async (plan: 'max' | 'pro' | 'ultra') => {
+  const createCheckoutSession = async (plan: SubscriptionPlanType) => {
     if (loadingInfo.isLoading) return;
     setLoadingInfo({
       isLoading: true,
@@ -426,6 +470,16 @@ export const PriceContent = (props: { source: PriceSource }) => {
                   : navigate('/', { replace: true })
                 : setLoginModalOpen(true);
             }}
+            interval={interval}
+            loadingInfo={loadingInfo}
+          />
+        </Col>
+
+        <Col {...gridSpan}>
+          <PlanItem
+            title="plus"
+            features={plusFeatures}
+            handleClick={() => createCheckoutSession('plus')}
             interval={interval}
             loadingInfo={loadingInfo}
           />
