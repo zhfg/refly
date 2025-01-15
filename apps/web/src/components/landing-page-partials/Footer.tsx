@@ -15,6 +15,10 @@ import {
 
 const resources = [
   {
+    title: "docs",
+    link: "https://docs.refly.ai",
+  },
+  {
     title: "twitter",
     link: "https://twitter.com/reflyai",
   },

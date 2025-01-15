@@ -117,6 +117,7 @@ const translations = {
     messageText: 'Experience AI Free-form Canvas and ignite your creativity!',
     tryForFree: 'Get Started',
     contactUs: 'Join Feedback Group',
+    watchVideo: 'Watch Video',
     joinBtn: 'Join for free',
     downloadBtn: 'Download Extension',
     loginBtn: 'Login',
@@ -192,6 +193,7 @@ const translations = {
         twitter: 'Twitter',
         github: 'GitHub',
         discord: 'Discord',
+        docs: 'Docs',
       },
       about: {
         title: 'About',
@@ -829,7 +831,7 @@ const translations = {
       recentChats: 'Recent Chats',
       viewMore: 'View More',
       joinFeedback: 'Join Feedback Group',
-      viewTutorial: 'View Tutorial',
+      viewTutorial: 'View Docs',
     },
   },
   knowledgeLibrary: {
@@ -1094,6 +1096,7 @@ const translations = {
         ultra: 'ULTRA',
         pro: 'PRO',
         max: 'MAX',
+        plus: 'PLUS',
       },
       subscribe: {
         title: 'Choose the plan that suits you best',
@@ -1139,18 +1142,25 @@ const translations = {
             details: 'Exclusive WeChat/Discord Group',
           },
         },
-        pro: {
+        plus: {
           description: 'Unlock more possibilities with advanced models',
           serviceSupport: {
             name: 'Service Support',
             details: 'Priority Email Support',
           },
         },
-        max: {
+        pro: {
           description: 'Ideal choice for professional creators',
           serviceSupport: {
             name: 'Service Support',
             details: 'Priority Email Support',
+          },
+        },
+        max: {
+          description: 'Unlimited creativity without boundaries',
+          serviceSupport: {
+            name: 'Service Support',
+            details: 'Exclusive WeChat/Discord Group',
           },
         },
 

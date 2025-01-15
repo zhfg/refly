@@ -42,3 +42,21 @@
   opacity: 0;
   --rotation: 0deg;
 }
+
+.video-modal {
+  .ant-modal-content {
+    padding: 8px !important;
+    background: #000 !important;
+  }
+
+  .ant-modal-close {
+    color: white !important;
+    width: 50px !important;
+    height: 50px !important;
+    top: -50px !important;
+    right: -50px !important;
+    .ant-modal-close-icon {
+      font-size: 24px !important;
+    }
+  }
+}

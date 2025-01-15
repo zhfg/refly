@@ -386,28 +386,23 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
 
             <div className="mt-auto">
               <div className="mb-2 flex flex-col gap-2">
+                <a
+                  href="https://www.producthunt.com/posts/refly-3?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-refly&#0045;3"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block transition-opacity hover:opacity-80">
+                  <img
+                    src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=785558&theme=light&t=1736929638628"
+                    alt="Refly - The AI Native Content Creation Engine | Product Hunt"
+                    className="w-[200px]"
+                    loading="lazy"
+                  />
+                </a>
+
                 <Alert
                   message={
                     <div className="flex cursor-pointer items-center justify-center">
-                      <a
-                        href="https://powerformer.feishu.cn/wiki/Syrsw7DJxiaExSkoSiXcTF1inBg?from=canvas"
-                        target="_blank">
-                        👉{"    "}
-                        <span>
-                          {t("loggedHomePage.siderMenu.joinFeedback")}
-                        </span>
-                      </a>
-                    </div>
-                  }
-                  type="success"
-                  closable
-                />
-                <Alert
-                  message={
-                    <div className="flex cursor-pointer items-center justify-center">
-                      <a
-                        href="https://powerformer.feishu.cn/wiki/Syrsw7DJxiaExSkoSiXcTF1inBg"
-                        target="_blank">
+                      <a href="https://docs.refly.ai" target="_blank">
                         📖{"    "}
                         <span>
                           {t("loggedHomePage.siderMenu.viewTutorial")}

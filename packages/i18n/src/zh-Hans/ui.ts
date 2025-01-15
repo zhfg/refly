@@ -115,6 +115,7 @@ const translations = {
     messageText: '立即体验 AI 自由画布，激发创作灵感！',
     tryForFree: '开始使用',
     contactUs: '加入反馈群',
+    watchVideo: '观看视频',
     joinBtn: '免费使用',
     downloadBtn: '下载插件',
     loginBtn: '登录',
@@ -183,6 +184,7 @@ const translations = {
         twitter: '推特',
         github: 'GitHub',
         discord: 'Discord',
+        docs: '文档',
       },
       about: {
         title: '关于',
@@ -826,7 +828,7 @@ const translations = {
       recentChats: '最近会话',
       viewMore: '查看更多',
       joinFeedback: '加入反馈群',
-      viewTutorial: '查看教程',
+      viewTutorial: '查看文档',
     },
   },
   knowledgeLibrary: {
@@ -1078,6 +1080,7 @@ const translations = {
         ultra: 'ULTRA',
         pro: 'PRO',
         max: 'MAX',
+        plus: 'PLUS',
       },
       subscribe: {
         title: '选择适合您的套餐',
@@ -1122,18 +1125,25 @@ const translations = {
             details: '专属微信/ Discord 群聊',
           },
         },
-        pro: {
+        plus: {
           description: '释放创作潜能，体验进阶模型',
           serviceSupport: {
             name: '服务支持',
             details: '高优邮件支持',
           },
         },
-        max: {
+        pro: {
           description: '专业创作者的理想之选',
           serviceSupport: {
             name: '服务支持',
             details: '高优邮件支持',
+          },
+        },
+        max: {
+          description: '尽情释放无限创意',
+          serviceSupport: {
+            name: '服务支持',
+            details: '专属微信/ Discord 群聊',
           },
         },
         description: '可随时取消订阅。订阅即表示您同意Refly的',
