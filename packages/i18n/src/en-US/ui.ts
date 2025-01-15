@@ -831,7 +831,7 @@ const translations = {
       recentChats: 'Recent Chats',
       viewMore: 'View More',
       joinFeedback: 'Join Feedback Group',
-      viewTutorial: 'View Tutorial',
+      viewTutorial: 'View Docs',
     },
   },
   knowledgeLibrary: {
