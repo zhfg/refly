@@ -117,6 +117,7 @@ const translations = {
     messageText: 'Experience AI Free-form Canvas and ignite your creativity!',
     tryForFree: 'Get Started',
     contactUs: 'Join Feedback Group',
+    watchVideo: 'Watch Video',
     joinBtn: 'Join for free',
     downloadBtn: 'Download Extension',
     loginBtn: 'Login',

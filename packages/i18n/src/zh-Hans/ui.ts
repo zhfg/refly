@@ -115,6 +115,7 @@ const translations = {
     messageText: '立即体验 AI 自由画布，激发创作灵感！',
     tryForFree: '开始使用',
     contactUs: '加入反馈群',
+    watchVideo: '观看视频',
     joinBtn: '免费使用',
     downloadBtn: '下载插件',
     loginBtn: '登录',
