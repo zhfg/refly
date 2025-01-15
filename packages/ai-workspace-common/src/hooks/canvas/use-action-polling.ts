@@ -8,6 +8,7 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 
 const POLLING_INTERVAL = 3000;
 const TIMEOUT_DURATION = 10000;
+const MAX_NOT_FOUND_RETRIES = 3;
 
 export const useActionPolling = () => {
   const {
@@ -34,84 +35,6 @@ export const useActionPolling = () => {
 
   const pollingTimeoutsRef = useRef<Record<string, NodeJS.Timeout>>({});
 
-  const startPolling = useCallback(
-    async (resultId: string, version: number) => {
-      const { pollingStateMap } = useActionResultStore.getState();
-      const pollingState = pollingStateMap[resultId];
-      console.log('startPolling', resultId, pollingState);
-
-      // Don't start if already polling
-      if (pollingState?.isPolling) {
-        return;
-      }
-
-      // Clear timeout state when starting polling
-      clearTimeoutState(resultId);
-
-      try {
-        startPollingState(resultId, version);
-        const { data: result } = await getClient().getActionResult({
-          query: { resultId, version },
-        });
-
-        if (!result.success) {
-          if (result.errCode === new ActionResultNotFoundError().code) {
-            incrementErrorCount(resultId);
-            const newErrorCount = (pollingStateMap[resultId]?.notFoundErrorCount ?? 0) + 1;
-
-            if (newErrorCount >= 3) {
-              // Stop polling after 3 consecutive not found errors
-              stopPolling(resultId);
-              const currentResult = useActionResultStore.getState().resultMap[resultId];
-              updateActionResult(resultId, {
-                ...currentResult,
-                status: 'failed',
-                errors: ['Action result not found after 3 retries'],
-              });
-              return;
-            }
-          } else {
-            // Stop polling for other errors
-            stopPolling(resultId);
-            return;
-          }
-        } else {
-          // Reset error count on successful response
-          resetErrorCount(resultId);
-
-          if (result.data) {
-            updateActionResult(resultId, result.data);
-
-            // Stop polling if the action is complete
-            if (result.data.status === 'finish' || result.data.status === 'failed') {
-              stopPolling(resultId);
-              return;
-            }
-          }
-        }
-
-        updateLastPollTime(resultId);
-
-        // Schedule next poll
-        pollingTimeoutsRef.current[resultId] = setTimeout(() => {
-          startPolling(resultId, version);
-        }, POLLING_INTERVAL);
-      } catch (error) {
-        console.error('Polling error:', error);
-        stopPolling(resultId);
-      }
-    },
-    [
-      startPollingState,
-      stopPollingState,
-      incrementErrorCount,
-      resetErrorCount,
-      updateLastPollTime,
-      updateActionResult,
-      clearTimeoutState,
-    ],
-  );
-
   const stopPolling = useCallback(
     (resultId: string) => {
       stopPollingState(resultId);
@@ -121,6 +44,87 @@ export const useActionPolling = () => {
       }
     },
     [stopPollingState],
+  );
+
+  const pollActionResult = useCallback(
+    async (resultId: string, version: number) => {
+      const { pollingStateMap, resultMap } = useActionResultStore.getState();
+      const pollingState = pollingStateMap[resultId];
+
+      if (!pollingState?.isPolling) {
+        return;
+      }
+
+      try {
+        const { data: result } = await getClient().getActionResult({
+          query: { resultId, version },
+        });
+
+        if (!result.success) {
+          if (result.errCode === new ActionResultNotFoundError().code) {
+            incrementErrorCount(resultId);
+            const newErrorCount = (pollingStateMap[resultId]?.notFoundErrorCount ?? 0) + 1;
+
+            if (newErrorCount >= MAX_NOT_FOUND_RETRIES) {
+              stopPolling(resultId);
+              const currentResult = resultMap[resultId];
+              updateActionResult(resultId, {
+                ...currentResult,
+                status: 'failed',
+                errors: ['Action result not found after 3 retries'],
+              });
+              return;
+            }
+          } else {
+            stopPolling(resultId);
+            return;
+          }
+        } else {
+          resetErrorCount(resultId);
+
+          const status = result.data?.status;
+
+          if (status === 'finish' || status === 'failed') {
+            updateActionResult(resultId, result.data);
+            stopPolling(resultId);
+            return;
+          }
+        }
+
+        updateLastPollTime(resultId);
+      } catch (error) {
+        console.error('Polling error:', error);
+        // Don't stop polling on network errors, let it retry
+      }
+
+      // Schedule next poll if still polling
+      if (pollingStateMap[resultId]?.isPolling) {
+        pollingTimeoutsRef.current[resultId] = setTimeout(() => {
+          pollActionResult(resultId, version);
+        }, POLLING_INTERVAL);
+      }
+    },
+    [incrementErrorCount, resetErrorCount, stopPolling, updateActionResult, updateLastPollTime],
+  );
+
+  const startPolling = useCallback(
+    async (resultId: string, version: number) => {
+      const { pollingStateMap } = useActionResultStore.getState();
+      const pollingState = pollingStateMap[resultId];
+
+      if (pollingState?.isPolling) {
+        console.log('already polling', resultId);
+        return;
+      }
+
+      clearTimeoutState(resultId);
+      startPollingState(resultId, version);
+      console.log('start polling', resultId, version);
+
+      // Start the polling cycle
+      await pollActionResult(resultId, version);
+    },
+    [clearTimeoutState, startPollingState, pollActionResult],
   );
 
   const checkAndRestoreTimeouts = useCallback(() => {
