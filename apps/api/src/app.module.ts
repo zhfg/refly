@@ -61,7 +61,7 @@ class CustomThrottlerGuard extends ThrottlerGuard {
           },
         ],
         getTracker: (req) => (req.ips?.length ? req.ips[0] : req.ip),
-        storage: new ThrottlerStorageRedisService(redis),
+        // storage: new ThrottlerStorageRedisService(redis),
       }),
     }),
     LoggerModule.forRoot({

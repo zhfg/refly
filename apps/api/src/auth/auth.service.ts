@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto';
 import argon2 from 'argon2';
 import ms from 'ms';
 import { Profile } from 'passport';
-import { Response } from 'express';
+import { CookieOptions, Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { User as UserModel, VerificationSession } from '@prisma/client';
@@ -13,6 +13,7 @@ import {
   genUID,
   genVerificationSessionID,
   LEGACY_TOKEN_COOKIE,
+  omit,
   pick,
   REFRESH_TOKEN_COOKIE,
   UID_COOKIE,
@@ -171,51 +172,52 @@ export class AuthService {
     });
   }
 
+  cookieOptions(key: string): CookieOptions {
+    const baseOptions: CookieOptions = {
+      domain: this.configService.get('auth.cookieDomain') ?? '',
+      secure: true,
+      sameSite: 'strict',
+      path: '/',
+    };
+
+    switch (key) {
+      case UID_COOKIE:
+        return {
+          ...baseOptions,
+          expires: new Date(Date.now() + ms(this.configService.get('auth.jwt.refreshExpiresIn'))),
+        };
+      case ACCESS_TOKEN_COOKIE:
+        return {
+          ...baseOptions,
+          httpOnly: true,
+          expires: new Date(Date.now() + ms(this.configService.get('auth.jwt.expiresIn'))),
+        };
+      case REFRESH_TOKEN_COOKIE:
+        return {
+          ...baseOptions,
+          httpOnly: true,
+          expires: new Date(Date.now() + ms(this.configService.get('auth.jwt.refreshExpiresIn'))),
+        };
+      default:
+        return baseOptions;
+    }
+  }
+
   setAuthCookie(res: Response, { uid, accessToken, refreshToken }: TokenData) {
     return res
-      .cookie(UID_COOKIE, uid, {
-        domain: this.configService.get('auth.cookieDomain'),
-        secure: true,
-        sameSite: 'strict',
-      })
-      .cookie(ACCESS_TOKEN_COOKIE, accessToken, {
-        domain: this.configService.get('auth.cookieDomain'),
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-      })
-      .cookie(REFRESH_TOKEN_COOKIE, refreshToken, {
-        domain: this.configService.get('auth.cookieDomain'),
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-      });
+      .cookie(UID_COOKIE, uid, this.cookieOptions(UID_COOKIE))
+      .cookie(ACCESS_TOKEN_COOKIE, accessToken, this.cookieOptions(ACCESS_TOKEN_COOKIE))
+      .cookie(REFRESH_TOKEN_COOKIE, refreshToken, this.cookieOptions(REFRESH_TOKEN_COOKIE));
   }
 
   clearAuthCookie(res: Response) {
+    const clearOptions = omit(this.cookieOptions(UID_COOKIE), ['expires']);
+
     return res
-      .clearCookie(UID_COOKIE, {
-        domain: this.configService.get('auth.cookieDomain'),
-        secure: true,
-        sameSite: 'strict',
-      })
-      .clearCookie(ACCESS_TOKEN_COOKIE, {
-        domain: this.configService.get('auth.cookieDomain'),
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-      })
-      .clearCookie(REFRESH_TOKEN_COOKIE, {
-        domain: this.configService.get('auth.cookieDomain'),
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-      })
-      .clearCookie(LEGACY_TOKEN_COOKIE, {
-        domain: this.configService.get('auth.cookieDomain'),
-        secure: true,
-        sameSite: 'strict',
-      });
+      .clearCookie(UID_COOKIE, clearOptions)
+      .clearCookie(ACCESS_TOKEN_COOKIE, clearOptions)
+      .clearCookie(REFRESH_TOKEN_COOKIE, clearOptions)
+      .clearCookie(LEGACY_TOKEN_COOKIE, clearOptions);
   }
 
   async genUniqueUsername(candidate: string) {

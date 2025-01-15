@@ -44,6 +44,9 @@ import { convertResultContextToItems } from '@refly-packages/ai-workspace-common
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { ContentPreview } from './shared/content-preview';
+import { useActionPolling } from '@refly-packages/ai-workspace-common/hooks/canvas/use-action-polling';
+
+const POLLING_WAIT_TIME = 15000;
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
@@ -173,7 +176,25 @@ export const SkillResponseNode = memo(
     });
     const moveableRef = useRef<Moveable>(null);
 
-    const { status, artifacts, currentLog: log, modelInfo, structuredData, actionMeta, tokenUsage } = metadata ?? {};
+    const {
+      status,
+      artifacts,
+      currentLog: log,
+      modelInfo,
+      structuredData,
+      actionMeta,
+      tokenUsage,
+      version,
+    } = metadata ?? {};
+
+    const { startPolling } = useActionPolling();
+
+    useEffect(() => {
+      if (createdAt && Date.now() - new Date(createdAt).getTime() >= POLLING_WAIT_TIME && status === 'executing') {
+        startPolling(entityId, version);
+      }
+    }, [createdAt, status, startPolling, entityId, version]);
+
     const sources = Array.isArray(structuredData?.sources) ? structuredData?.sources : [];
 
     const logTitle = log

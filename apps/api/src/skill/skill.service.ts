@@ -756,7 +756,19 @@ export class SkillService {
     );
 
     const throttledResetIdleTimeout = throttle(
-      async () => await job.changeDelay(this.config.get('skill.idleTimeout')),
+      async () => {
+        try {
+          // Get current job state
+          const jobState = await job.getState();
+
+          // Only attempt to change delay if job is in delayed state
+          if (jobState === 'delayed') {
+            await job.changeDelay(this.config.get('skill.idleTimeout'));
+          }
+        } catch (err) {
+          this.logger.warn(`Failed to reset idle timeout: ${err.message}`);
+        }
+      },
       100,
       { leading: true, trailing: true },
     );

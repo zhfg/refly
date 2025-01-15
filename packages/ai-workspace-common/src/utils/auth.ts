@@ -29,11 +29,11 @@ export const refreshToken = async (): Promise<void> => {
       });
 
       if (response.status === 401) {
-        throw new AuthenticationExpiredError();
+        throw new AuthenticationExpiredError('Authentication token has expired');
       }
 
       if (!response.ok) {
-        throw new UnknownError();
+        throw new UnknownError('Failed to refresh authentication token');
       }
     })();
 
@@ -90,7 +90,7 @@ export const responseInterceptorWithTokenRefresh = async (response: Response, re
       if (error instanceof AuthenticationExpiredError) {
         await logout();
       } else {
-        throw new UnknownError();
+        throw new UnknownError('An unexpected error occurred during token refresh');
       }
     }
   }
