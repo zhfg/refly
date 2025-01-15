@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import * as Y from 'yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { IndexeddbPersistence } from 'y-indexeddb';
@@ -12,12 +12,14 @@ interface DocumentContextType {
   ydoc: Y.Doc;
   provider: HocuspocusProvider;
   localProvider: IndexeddbPersistence;
+  isLoading: boolean;
 }
 
 const DocumentContext = createContext<DocumentContextType | null>(null);
 
 export const DocumentProvider = ({ docId, children }: { docId: string; children: React.ReactNode }) => {
   const { token, refreshToken } = useCollabToken();
+  const [isLoading, setIsLoading] = useState(true);
 
   const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt, updateDocument } = useDocumentStoreShallow((state) => ({
     setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
@@ -46,6 +48,7 @@ export const DocumentProvider = ({ docId, children }: { docId: string; children:
     remoteProvider.on('synced', () => {
       setDocumentRemoteSyncedAt(docId, Date.now());
       editorEmitter.emit('editorSynced');
+      setIsLoading(false);
     });
 
     // Add local provider
@@ -53,6 +56,7 @@ export const DocumentProvider = ({ docId, children }: { docId: string; children:
 
     localProvider.on('synced', () => {
       setDocumentLocalSyncedAt(docId, Date.now());
+      setIsLoading(false);
     });
 
     return { remote: remoteProvider, local: localProvider, doc };
@@ -70,6 +74,11 @@ export const DocumentProvider = ({ docId, children }: { docId: string; children:
 
     title.observe(titleObserverCallback);
 
+    // Initial title update
+    if (title?.toJSON()) {
+      titleObserverCallback();
+    }
+
     return () => {
       title.unobserve(titleObserverCallback);
 
@@ -81,13 +90,13 @@ export const DocumentProvider = ({ docId, children }: { docId: string; children:
     };
   }, [provider, docId, token, localProvider]);
 
-  // Add null check before rendering
-  if (!provider) {
+  // Add loading state check
+  if (!provider || isLoading) {
     return null;
   }
 
   return (
-    <DocumentContext.Provider value={{ docId, provider, localProvider, ydoc: doc }}>
+    <DocumentContext.Provider value={{ docId, provider, localProvider, ydoc: doc, isLoading }}>
       {children}
     </DocumentContext.Provider>
   );
