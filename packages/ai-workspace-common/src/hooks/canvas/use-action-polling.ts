@@ -5,6 +5,7 @@ import {
 } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { ActionResultNotFoundError } from '@refly/errors';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useUpdateActionResult } from './use-update-action-result';
 
 const POLLING_INTERVAL = 3000;
 const TIMEOUT_DURATION = 10000;
@@ -12,7 +13,6 @@ const MAX_NOT_FOUND_RETRIES = 3;
 
 export const useActionPolling = () => {
   const {
-    updateActionResult,
     startPolling: startPollingState,
     stopPolling: stopPollingState,
     incrementErrorCount,
@@ -22,7 +22,6 @@ export const useActionPolling = () => {
     updateLastEventTime,
     clearTimeout: clearTimeoutState,
   } = useActionResultStoreShallow((state) => ({
-    updateActionResult: state.updateActionResult,
     startPolling: state.startPolling,
     stopPolling: state.stopPolling,
     incrementErrorCount: state.incrementErrorCount,
@@ -33,6 +32,7 @@ export const useActionPolling = () => {
     clearTimeout: state.clearTimeout,
   }));
 
+  const onUpdateResult = useUpdateActionResult();
   const pollingTimeoutsRef = useRef<Record<string, NodeJS.Timeout>>({});
 
   const stopPolling = useCallback(
@@ -68,7 +68,7 @@ export const useActionPolling = () => {
             if (newErrorCount >= MAX_NOT_FOUND_RETRIES) {
               stopPolling(resultId);
               const currentResult = resultMap[resultId];
-              updateActionResult(resultId, {
+              onUpdateResult(resultId, {
                 ...currentResult,
                 status: 'failed',
                 errors: ['Action result not found after 3 retries'],
@@ -85,7 +85,7 @@ export const useActionPolling = () => {
           const status = result.data?.status;
 
           if (status === 'finish' || status === 'failed') {
-            updateActionResult(resultId, result.data);
+            onUpdateResult(resultId, result.data);
             stopPolling(resultId);
             return;
           }
@@ -104,7 +104,7 @@ export const useActionPolling = () => {
         }, POLLING_INTERVAL);
       }
     },
-    [incrementErrorCount, resetErrorCount, stopPolling, updateActionResult, updateLastPollTime],
+    [incrementErrorCount, resetErrorCount, stopPolling, onUpdateResult, updateLastPollTime],
   );
 
   const startPolling = useCallback(
@@ -113,77 +113,17 @@ export const useActionPolling = () => {
       const pollingState = pollingStateMap[resultId];
 
       if (pollingState?.isPolling) {
-        console.log('already polling', resultId);
         return;
       }
 
       clearTimeoutState(resultId);
       startPollingState(resultId, version);
-      console.log('start polling', resultId, version);
 
       // Start the polling cycle
       await pollActionResult(resultId, version);
     },
     [clearTimeoutState, startPollingState, pollActionResult],
   );
-
-  const checkAndRestoreTimeouts = useCallback(() => {
-    const { pollingStateMap } = useActionResultStore.getState();
-    Object.entries(pollingStateMap).forEach(([resultId, state]) => {
-      const { timeoutStartTime, lastEventTime, isPolling } = state;
-
-      // Skip if not in a timeout state or already polling
-      if (!timeoutStartTime || !lastEventTime || isPolling) {
-        return;
-      }
-
-      const result = useActionResultStore.getState().resultMap[resultId];
-      if (!result || result.status === 'finish' || result.status === 'failed') {
-        clearTimeoutState(resultId);
-        return;
-      }
-
-      const now = Date.now();
-      const timeSinceLastEvent = now - lastEventTime;
-
-      // If more than timeout duration since last event, start polling
-      if (timeSinceLastEvent >= TIMEOUT_DURATION) {
-        startPolling(resultId, state.version);
-        updateActionResult(resultId, {
-          ...result,
-          status: 'executing',
-        });
-      } else {
-        // Schedule the remaining timeout
-        const remainingTime = TIMEOUT_DURATION - timeSinceLastEvent;
-        pollingTimeoutsRef.current[resultId] = setTimeout(() => {
-          startPolling(resultId, state.version);
-          updateActionResult(resultId, {
-            ...result,
-            status: 'executing',
-          });
-        }, remainingTime);
-      }
-    });
-  }, [clearTimeoutState, startPolling, updateActionResult]);
-
-  // Restore polling for in-progress actions on mount
-  useEffect(() => {
-    const { pollingStateMap } = useActionResultStore.getState();
-    Object.entries(pollingStateMap).forEach(([resultId, state]) => {
-      if (state.isPolling) {
-        const result = useActionResultStore.getState().resultMap[resultId];
-        if (result?.status !== 'finish' && result?.status !== 'failed') {
-          startPolling(resultId, state.version);
-        }
-      }
-    });
-  }, []);
-
-  // Check for pending timeouts on mount
-  useEffect(() => {
-    checkAndRestoreTimeouts();
-  }, [checkAndRestoreTimeouts]);
 
   // Cleanup all polling on unmount
   useEffect(() => {
@@ -227,7 +167,7 @@ export const useActionPolling = () => {
         },
       };
     },
-    [startTimeout, updateLastEventTime, startPolling, updateActionResult, clearTimeoutState, stopPolling],
+    [startTimeout, updateLastEventTime, startPolling, onUpdateResult, clearTimeoutState, stopPolling],
   );
 
   return {

@@ -1,5 +1,5 @@
-import { useCallback, useRef } from 'react';
-import { ActionResult, ActionStep, ActionStepMeta, Entity, SkillEvent } from '@refly/openapi-schema';
+import { useCallback } from 'react';
+import { ActionStep, ActionStepMeta, Entity, SkillEvent } from '@refly/openapi-schema';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';
 import { LOCALE } from '@refly/common-types';
@@ -7,29 +7,19 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/utils/notification';
-import {
-  useActionResultStore,
-  useActionResultStoreShallow,
-} from '@refly-packages/ai-workspace-common/stores/action-result';
-import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
+import { useActionResultStore } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { aggregateTokenUsage, genActionResultID } from '@refly-packages/utils/index';
-import {
-  CanvasNodeData,
-  ResponseNodeMeta,
-  SkillNodeMeta,
-} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import { CanvasNodeData, SkillNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useGetSubscriptionUsage } from '@refly-packages/ai-workspace-common/queries';
 import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 import { useActionPolling } from './use-action-polling';
-import { useFindMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-memo';
+import { useFindMemo } from './use-find-memo';
+import { useUpdateActionResult } from './use-update-action-result';
 
 export const useInvokeAction = () => {
   const { addNode } = useAddNode();
   const setNodeDataByEntity = useSetNodeDataByEntity();
-  const { updateActionResult } = useActionResultStoreShallow((state) => ({
-    updateActionResult: state.updateActionResult,
-  }));
 
   const globalAbortControllerRef = { current: null as AbortController | null };
   const globalIsAbortedRef = { current: false as boolean };
@@ -43,58 +33,7 @@ export const useInvokeAction = () => {
   });
 
   const { createTimeoutHandler } = useActionPolling();
-
-  const onUpdateResult = (resultId: string, payload: ActionResult, event?: SkillEvent) => {
-    actionEmitter.emit('updateResult', { resultId, payload });
-    updateActionResult(resultId, payload);
-
-    // Update canvas node data
-    if (payload.targetType === 'canvas') {
-      const { title, steps = [] } = payload ?? {};
-      const nodeData: Partial<CanvasNodeData<ResponseNodeMeta>> = {
-        title,
-        entityId: resultId,
-        metadata: {
-          status: payload.status,
-          actionMeta: payload.actionMeta,
-          modelInfo: payload.modelInfo,
-          version: event?.version ?? payload.version,
-        },
-      };
-
-      const { event: eventType, log } = event ?? {};
-
-      if (eventType === 'stream') {
-        nodeData.contentPreview = steps
-          .map((s) => s.content)
-          ?.filter(Boolean)
-          ?.join('\n');
-      } else if (eventType === 'artifact') {
-        nodeData.metadata = {
-          status: payload.status,
-          artifacts: steps.flatMap((s) => s.artifacts),
-        };
-      } else if (eventType === 'log') {
-        nodeData.metadata = {
-          status: payload.status,
-          currentLog: log,
-        };
-      } else if (eventType === 'structured_data') {
-        const structuredData = steps.reduce((acc, step) => ({ ...acc, ...step.structuredData }), {});
-        nodeData.metadata = {
-          status: payload.status,
-          structuredData: structuredData,
-        };
-      } else if (eventType === 'token_usage') {
-        nodeData.metadata = {
-          status: payload.status,
-          tokenUsage: aggregateTokenUsage(steps.flatMap((s) => s.tokenUsage).filter(Boolean)),
-        };
-      }
-
-      setNodeDataByEntity<ResponseNodeMeta>({ type: 'skillResponse', entityId: resultId }, nodeData);
-    }
-  };
+  const onUpdateResult = useUpdateActionResult();
 
   const onSkillStart = (skillEvent: SkillEvent) => {};
 
