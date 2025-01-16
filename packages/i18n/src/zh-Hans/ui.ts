@@ -114,7 +114,7 @@ const translations = {
     },
     messageText: '立即体验 AI 自由画布，激发创作灵感！',
     tryForFree: '开始使用',
-    contactUs: '加入反馈群',
+    contactUs: '联系我们',
     watchVideo: '观看视频',
     joinBtn: '免费使用',
     downloadBtn: '下载插件',
@@ -188,11 +188,13 @@ const translations = {
       },
       about: {
         title: '关于',
-        list: ['隐私政策', '服务条款'],
+        privacy: '隐私政策',
+        terms: '服务条款',
       },
       contactUs: {
         title: '联系我们',
-        list: ['support@refly.ai'],
+        community: '社区',
+        mail: '邮箱',
       },
     },
     loginFailed: {
@@ -243,7 +245,7 @@ const translations = {
     faq: {
       title: '常见问题',
       Q1: 'Refly 可以免费使用吗？',
-      A1: 'Refly 作为开源项目，对于个人用户，您可以通过自行部署社区版使用其所有功能。为了更多用户快速上手体验 Refly，我们推出了 Cloud 版本，并为所有注册用户提供了一次性一百万标准模型 token 和足够体验使用的存储空间。如果您需要体验进阶模型或扩大用量，可升级付费订阅套餐。',
+      A1: '为了更多用户快速上手体验 Refly，我们为所有注册用户提供了一次性一百万标准模型 token 和足够体验使用的存储空间。如果您需要体验进阶模型或扩大用量，可升级付费订阅套餐。',
       Q2: '你们支持哪些付款方式？',
       A2: '我们支持银行卡、支付宝、Amazon Pay 和 Cash App Pay。支持的付款方式可能随时有变，请以 Stripe 收银台显示的付款方式为准。',
       Q3: '如何更改或取消订阅方案？',
@@ -827,7 +829,6 @@ const translations = {
       recentProjects: '最近项目',
       recentChats: '最近会话',
       viewMore: '查看更多',
-      joinFeedback: '加入反馈群',
       viewTutorial: '查看文档',
     },
   },

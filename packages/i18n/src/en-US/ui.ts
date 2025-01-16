@@ -116,7 +116,7 @@ const translations = {
     },
     messageText: 'Experience AI Free-form Canvas and ignite your creativity!',
     tryForFree: 'Get Started',
-    contactUs: 'Join Feedback Group',
+    contactUs: 'Contact Us',
     watchVideo: 'Watch Video',
     joinBtn: 'Join for free',
     downloadBtn: 'Download Extension',
@@ -197,11 +197,13 @@ const translations = {
       },
       about: {
         title: 'About',
-        list: ['Privacy Policy', 'Terms of Service'],
+        privacy: 'Privacy Policy',
+        terms: 'Terms of Service',
       },
       contactUs: {
-        title: 'Contact us',
-        list: ['support@refly.ai'],
+        title: 'Contact Us',
+        community: 'Community',
+        mail: 'Email',
       },
     },
     loginFailed: {
@@ -252,7 +254,7 @@ const translations = {
     faq: {
       title: 'Frequently Asked Questions',
       Q1: 'Can Refly be used for free?',
-      A1: 'As an open-source project, for individual users, you can deploy the community version by yourself to use all its features. To enable more users to quickly start and experience Refly, we have launched the Cloud version and provided all registered users with a one-time allocation of one million standard model tokens and sufficient storage space for trial use. If you wish to experience advanced models or increase the usage amount, you can upgrade to a paid subscription plan.',
+      A1: 'To enable more users to quickly start and experience Refly, we have provided all registered users with a one-time allocation of one million standard model tokens and sufficient storage space for trial use. If you wish to experience advanced models or increase the usage amount, you can upgrade to a paid subscription plan.',
       Q2: 'What payment methods do you support?',
       A2: 'We support bank cards, Alipay, Amazon Pay, and Cash App Pay. The supported payment methods may be subject to change at any time. Please refer to the payment methods displayed in the Stripe checkout page for the most accurate information.',
       Q3: 'How can I change or cancel my subscription plan?',
@@ -830,7 +832,6 @@ const translations = {
       recentProjects: 'Recent Projects',
       recentChats: 'Recent Chats',
       viewMore: 'View More',
-      joinFeedback: 'Join Feedback Group',
       viewTutorial: 'View Docs',
     },
   },

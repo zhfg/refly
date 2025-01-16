@@ -3,7 +3,10 @@ import { Button } from "antd"
 import { useTranslation } from "react-i18next"
 import { useAuthStoreShallow } from "@refly-packages/ai-workspace-common/stores/auth"
 import { UILocaleList } from "@refly-packages/ai-workspace-common/components/ui-locale-list"
-import { IconDown } from "@refly-packages/ai-workspace-common/components/common/icon"
+import {
+  IconDown,
+  IconLanguage,
+} from "@refly-packages/ai-workspace-common/components/common/icon"
 import { useState, useEffect } from "react"
 import {
   useNavigate,
@@ -95,22 +98,17 @@ function Header() {
 
         <div className="flex items-center gap-2">
           <UILocaleList>
-            <Button type="text" size="small">
+            <Button
+              type="text"
+              size="middle"
+              className="px-2 text-gray-600 hover:text-[#00968f]">
+              <IconLanguage className="h-4 w-4" />
               {t("language")}{" "}
               <IconDown className="ml-1 transition-transform duration-200 group-hover:rotate-180" />
             </Button>
           </UILocaleList>
           <Button type="primary" onClick={() => setLoginModalOpen(true)}>
             {t("landingPage.tryForFree")}
-          </Button>
-          <Button
-            onClick={() => {
-              window.open(
-                "https://powerformer.feishu.cn/wiki/Syrsw7DJxiaExSkoSiXcTF1inBg?from=landingPage",
-                "_blank",
-              )
-            }}>
-            {t("landingPage.contactUs")}
           </Button>
         </div>
       </div>

@@ -188,7 +188,14 @@ export class SubscriptionService implements OnModuleInit {
 
       // Create a new subscription if needed
       const sub = await prisma.subscription.create({
-        data: { ...param, uid },
+        data: {
+          subscriptionId: param.subscriptionId,
+          lookupKey: param.lookupKey,
+          planType: param.planType,
+          interval: param.interval,
+          uid,
+          status: param.status,
+        },
       });
 
       // Update user's subscriptionId
