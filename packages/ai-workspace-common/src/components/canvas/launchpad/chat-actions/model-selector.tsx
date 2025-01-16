@@ -200,11 +200,11 @@ export const ModelSelector = memo(
     const modelList = useMemo(() => modelListData?.data, [modelListData?.data]);
     const tokenUsage = useMemo(() => tokenUsageData?.data?.token, [tokenUsageData?.data?.token]);
     const t1Disabled = useMemo(
-      () => tokenUsage?.t1TokenUsed >= tokenUsage?.t1TokenQuota && tokenUsage?.t1TokenQuota > 0,
+      () => tokenUsage?.t1TokenUsed >= tokenUsage?.t1TokenQuota && tokenUsage?.t1TokenQuota >= 0,
       [tokenUsage?.t1TokenUsed, tokenUsage?.t1TokenQuota],
     );
     const t2Disabled = useMemo(
-      () => tokenUsage?.t2TokenUsed >= tokenUsage?.t2TokenQuota && tokenUsage?.t2TokenQuota > 0,
+      () => tokenUsage?.t2TokenUsed >= tokenUsage?.t2TokenQuota && tokenUsage?.t2TokenQuota >= 0,
       [tokenUsage?.t2TokenUsed, tokenUsage?.t2TokenQuota],
     );
 
