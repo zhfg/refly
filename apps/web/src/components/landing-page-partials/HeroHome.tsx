@@ -210,6 +210,9 @@ function HeroHome() {
               <Button
                 onClick={() => setIsVideoModalOpen(true)}
                 size="large"
+                icon={
+                  <MdOutlinePlayCircleFilled className="flex h-5 w-5 items-center justify-center" />
+                }
                 className="cursor-pointer">
                 {t("landingPage.watchVideo")}
               </Button>

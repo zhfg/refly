@@ -11,6 +11,7 @@ import {
   IconGithub,
   IconDiscord,
   IconEmail,
+  IconLanguage,
 } from "@refly-packages/ai-workspace-common/components/common/icon"
 
 const resources = [
@@ -107,7 +108,7 @@ function Footer() {
                 <p className="mb-6 max-w-[320px] text-base leading-relaxed text-gray-600">
                   {t("landingPage.anotherDescription")}
                 </p>
-                <div className="flex items-center justify-start gap-4">
+                <div className="flex items-center justify-start gap-3">
                   {/* Social Media Links */}
                   <div className="flex items-center gap-2">
                     <Link
@@ -146,7 +147,11 @@ function Footer() {
                   {/* Language Selector */}
                   <div className="flex cursor-pointer items-center text-gray-600 hover:text-[#00968f]">
                     <UILocaleList>
-                      <Button type="text" size="small">
+                      <Button
+                        type="text"
+                        size="middle"
+                        className="px-2 text-gray-600 hover:text-[#00968f]">
+                        <IconLanguage className="h-4 w-4" />
                         {t("language")}{" "}
                         <IconDown className="ml-1 transition-transform duration-200 group-hover:rotate-180" />
                       </Button>
@@ -213,17 +218,22 @@ function Footer() {
                       {t("landingPage.footer.about.title")}
                     </h6>
                     <ul className="list-none text-sm">
-                      {t("landingPage.footer.about.list", {
-                        returnObjects: true,
-                      })?.map((item: string, index: number) => (
-                        <li key={index} className="mb-1">
-                          <Link
-                            to={index === 0 ? "/privacy" : "/terms"}
-                            className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
-                            {item}
-                          </Link>
-                        </li>
-                      ))}
+                      <li key={0} className="mb-1">
+                        <Link
+                          to="https://docs.refly.ai/about/privacy-policy"
+                          target="_blank"
+                          className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                          {t("landingPage.footer.about.privacy")}
+                        </Link>
+                      </li>
+                      <li key={0} className="mb-1">
+                        <Link
+                          to="https://docs.refly.ai/about/terms-of-service"
+                          target="_blank"
+                          className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                          {t("landingPage.footer.about.terms")}
+                        </Link>
+                      </li>
                     </ul>
                   </div>
 
@@ -233,17 +243,21 @@ function Footer() {
                       {t("landingPage.footer.contactUs.title")}
                     </h6>
                     <ul className="list-none text-sm">
-                      {t("landingPage.footer.contactUs.list", {
-                        returnObjects: true,
-                      })?.map((item: string, index: number) => (
-                        <li key={index} className="mb-1">
-                          <Link
-                            to={`mailto:${item}`}
-                            className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
-                            {item}
-                          </Link>
-                        </li>
-                      ))}
+                      <li key={0} className="mb-1">
+                        <Link
+                          to="https://docs.refly.ai/community/contact-us"
+                          target="_blank"
+                          className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                          {t("landingPage.footer.contactUs.community")}
+                        </Link>
+                      </li>
+                      <li key={1} className="mb-1">
+                        <Link
+                          to={`mailto:support@refly.ai`}
+                          className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">
+                          {t("landingPage.footer.contactUs.mail")}
+                        </Link>
+                      </li>
                     </ul>
                   </div>
                 </div>
