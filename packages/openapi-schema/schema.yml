@@ -157,7 +157,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CheckVerificationResponse'
+                $ref: '#/components/schemas/BaseResponse'
   /auth/logout:
     post:
       tags:
@@ -2785,22 +2785,6 @@ components:
         code:
           type: string
           description: Verification code
-    CheckVerificationData:
-      type: object
-      properties:
-        accessToken:
-          type: string
-          description: Access token
-        purpose:
-          type: string
-          description: Verification purpose
-    CheckVerificationResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              $ref: '#/components/schemas/CheckVerificationData'
     EmailLoginRequest:
       type: object
       description: Email login request

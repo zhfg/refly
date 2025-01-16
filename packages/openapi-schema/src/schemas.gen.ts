@@ -1549,36 +1549,6 @@ export const CheckVerificationRequestSchema = {
   },
 } as const;
 
-export const CheckVerificationDataSchema = {
-  type: 'object',
-  properties: {
-    accessToken: {
-      type: 'string',
-      description: 'Access token',
-    },
-    purpose: {
-      type: 'string',
-      description: 'Verification purpose',
-    },
-  },
-} as const;
-
-export const CheckVerificationResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          $ref: '#/components/schemas/CheckVerificationData',
-        },
-      },
-    },
-  ],
-} as const;
-
 export const EmailLoginRequestSchema = {
   type: 'object',
   description: 'Email login request',

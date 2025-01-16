@@ -22,7 +22,6 @@ import {
   EmailLoginRequest,
   CreateVerificationRequest,
   CheckVerificationRequest,
-  CheckVerificationResponse,
   EmailSignupResponse,
   ResendVerificationRequest,
   AuthConfigResponse,
@@ -80,11 +79,9 @@ export class AuthController {
 
   @Throttle({ default: { limit: 5, ttl: minutes(10) } })
   @Post('verification/check')
-  async checkVerification(
-    @Body() params: CheckVerificationRequest,
-  ): Promise<CheckVerificationResponse> {
-    const { verification, accessToken } = await this.authService.checkVerification(params);
-    return buildSuccessResponse({ accessToken, purpose: verification.purpose });
+  async checkVerification(@Body() params: CheckVerificationRequest, @Res() res: Response) {
+    const tokens = await this.authService.checkVerification(params);
+    return this.authService.setAuthCookie(res, tokens).json(buildSuccessResponse());
   }
 
   @UseGuards(GithubOauthGuard)

@@ -457,8 +457,6 @@ export class AuthService {
       throw new ParamsError(`Invalid verification purpose: ${purpose}`);
     }
 
-    const { accessToken } = await this.login(user);
-
-    return { user, verification, accessToken };
+    return this.login(user);
   }
 }
