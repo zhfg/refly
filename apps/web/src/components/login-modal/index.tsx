@@ -268,7 +268,8 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
         <div className="mt-2 text-center text-xs text-gray-500">
           {t("landingPage.loginModal.utilText")}
           <Link
-            to={`/terms`}
+            to="https://docs.refly.ai/about/terms-of-service"
+            target="_blank"
             className="mx-1 text-xs text-green-600 underline"
             onClick={() => {
               authStore.setLoginModalOpen(false)
@@ -277,7 +278,8 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
           </Link>
           {t("landingPage.loginModal.and")}
           <Link
-            to={`/privacy`}
+            to="https://docs.refly.ai/about/privacy-policy"
+            target="_blank"
             className="mx-1 text-xs text-green-600 underline"
             onClick={() => {
               authStore.setLoginModalOpen(false)
