@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react"
 import { Menu } from "@arco-design/web-react"
-import { Alert, Avatar, Button, Layout, Skeleton, Divider, Tag } from "antd"
+import { Alert, Avatar, Button, Layout, Skeleton, Divider } from "antd"
 import {
   useLocation,
   useNavigate,
@@ -48,11 +48,8 @@ const SiderLogo = (props: {
         onClick={() => navigate("/")}>
         <img src={Logo} alt="Refly" className="h-8 w-8" />
         <span className="text-xl font-bold text-black" translate="no">
-          Refly{" "}
+          Refly
         </span>
-        <Tag color="green" className="text-[10px] leading-4">
-          Beta
-        </Tag>
       </div>
       {source === "sider" && (
         <div>
