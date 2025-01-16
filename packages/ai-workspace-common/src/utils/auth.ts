@@ -1,8 +1,8 @@
-import { UnknownError } from '@refly/errors';
+import { ConnectionError, UnknownError } from '@refly/errors';
 
 import { getServerOrigin } from '@refly-packages/utils/url';
 import { AuthenticationExpiredError } from '@refly/errors';
-import { extractBaseResp } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient, { extractBaseResp } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getLocale } from '@refly-packages/ai-workspace-common/utils/locale';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/utils/notification';
 import { logout } from '@refly-packages/ai-workspace-common/hooks/use-logout';
@@ -23,17 +23,14 @@ export const refreshToken = async (): Promise<void> => {
   try {
     isRefreshing = true;
     refreshPromise = (async () => {
-      const response = await fetch(`${getServerOrigin()}/v1/auth/refreshToken`, {
-        method: 'POST',
-        credentials: 'include',
-      });
+      const { response, error } = await getClient().refreshToken();
 
-      if (response.status === 401) {
+      if (response?.status === 401) {
         throw new AuthenticationExpiredError('Authentication token has expired');
       }
 
-      if (!response.ok) {
-        throw new UnknownError('Failed to refresh authentication token');
+      if (error) {
+        throw new UnknownError(String(error) ?? 'Failed to refresh authentication token');
       }
     })();
 
@@ -82,6 +79,10 @@ export const refreshTokenAndRetry = async (failedRequest: Request): Promise<Resp
 };
 
 export const responseInterceptorWithTokenRefresh = async (response: Response, request: Request) => {
+  if (request.url.includes('/v1/auth/refreshToken')) {
+    return response;
+  }
+
   if (response.status === 401) {
     try {
       const retryResponse = await refreshTokenAndRetry(request);

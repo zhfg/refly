@@ -173,22 +173,17 @@ export class SubscriptionService implements OnModuleInit {
   }
 
   async createSubscription(uid: string, param: CreateSubscriptionParam) {
+    this.logger.log(`Creating subscription for user ${uid}: ${JSON.stringify(param)}`);
+
     return this.prisma.$transaction(async (prisma) => {
       const now = new Date();
 
-      const user = await prisma.user.findUnique({ where: { uid } });
-
-      // Check for existing subscription
-      if (user.subscriptionId) {
-        const subscription = await prisma.subscription.findUnique({
-          where: { subscriptionId: user.subscriptionId },
-        });
-        if (
-          subscription?.status === 'active' &&
-          (!subscription.cancelAt || subscription.cancelAt > now)
-        ) {
-          return subscription;
-        }
+      const existingSub = await prisma.subscription.findUnique({
+        where: { subscriptionId: param.subscriptionId },
+      });
+      if (existingSub) {
+        this.logger.log(`Subscription ${param.subscriptionId} already exists`);
+        return existingSub;
       }
 
       // Create a new subscription if needed
@@ -199,7 +194,7 @@ export class SubscriptionService implements OnModuleInit {
       // Update user's subscriptionId
       await prisma.user.update({
         where: { uid },
-        data: { subscriptionId: sub.subscriptionId },
+        data: { subscriptionId: param.subscriptionId, customerId: param.customerId },
       });
 
       const plan = this.subscriptionPlans.find((p) => p.planType === sub.planType);
@@ -331,6 +326,7 @@ export class SubscriptionService implements OnModuleInit {
 
     const uid = session.client_reference_id;
     const customerId = session.customer as string;
+    const subscriptionId = session.subscription as string;
 
     const checkoutSession = await this.prisma.checkoutSession.findFirst({
       where: { sessionId: session.id },
@@ -355,14 +351,21 @@ export class SubscriptionService implements OnModuleInit {
       },
     });
 
-    if (session.payment_status !== 'paid') {
-      this.logger.log(`Checkout session ${session.id} is not paid`);
+    const plan = this.subscriptionPlans.find((p) => p.lookupKey === checkoutSession.lookupKey);
+    if (!plan) {
+      this.logger.error(`No plan found for lookup key: ${checkoutSession.lookupKey}`);
       return;
     }
 
-    await this.prisma.user.update({
-      where: { uid },
-      data: { customerId },
+    const { planType, interval } = plan;
+
+    await this.createSubscription(uid, {
+      planType: planType as SubscriptionPlanType,
+      interval: interval as SubscriptionInterval,
+      lookupKey: checkoutSession.lookupKey,
+      status: 'active',
+      subscriptionId,
+      customerId,
     });
 
     this.logger.log(`Successfully processed checkout session ${session.id} for user ${uid}`);
@@ -372,34 +375,6 @@ export class SubscriptionService implements OnModuleInit {
   async handleSubscriptionCreated(event: Stripe.Event) {
     const subscription = event.data.object as Stripe.Subscription;
     this.logger.log(`New subscription created: ${subscription.id}`);
-
-    const checkoutSession = await this.prisma.checkoutSession.findFirst({
-      where: { subscriptionId: subscription.id },
-      orderBy: { pk: 'desc' },
-    });
-    if (!checkoutSession) {
-      this.logger.error(`No checkout session found for subscription ${subscription.id}`);
-      return;
-    }
-    const { uid } = checkoutSession;
-
-    const plan = this.subscriptionPlans.find((p) => p.lookupKey === checkoutSession.lookupKey);
-    if (!plan) {
-      this.logger.error(`No plan found for lookup key: ${checkoutSession.lookupKey}`);
-      return;
-    }
-
-    const { planType, interval } = plan;
-
-    const sub = await this.createSubscription(uid, {
-      planType: planType as SubscriptionPlanType,
-      interval: interval as SubscriptionInterval,
-      lookupKey: checkoutSession.lookupKey,
-      status: subscription.status,
-      subscriptionId: subscription.id,
-    });
-
-    this.logger.log(`Subscription ${sub.subscriptionId} created for user ${uid}`);
   }
 
   @StripeWebhookHandler('customer.subscription.updated')

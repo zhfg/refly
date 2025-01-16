@@ -17,6 +17,7 @@ import { pick } from '@/utils';
 
 export interface CreateSubscriptionParam {
   subscriptionId: string;
+  customerId: string;
   lookupKey: string;
   status: SubscriptionStatus;
   planType: SubscriptionPlanType;
