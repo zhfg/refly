@@ -42,7 +42,6 @@ export const logout = async ({ callRemoteLogout }: { callRemoteLogout?: boolean 
     window.location.reload();
   } catch (error) {
     console.error('Failed to logout:', error);
-    throw error;
   } finally {
     isLoggingOut = false;
   }
