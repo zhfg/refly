@@ -16,6 +16,7 @@ import { StorageUsageMeter } from '@refly/openapi-schema';
 
 import { PiInvoiceBold } from 'react-icons/pi';
 import { IconSubscription } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 
 const formatDate = (date: string) => {
   return dayjs(date).format('YYYY-MM-DD');
@@ -181,6 +182,10 @@ export const Subscription = () => {
     setStorageUsage: state.setStorageUsage,
   }));
 
+  const { setShowSettingModal } = useSiderStoreShallow((state) => ({
+    setShowSettingModal: state.setShowSettingModal,
+  }));
+
   const getSubscriptionStatus = async () => {
     const { userProfile } = useUserStore.getState();
     if (!userProfile) return;
@@ -246,6 +251,7 @@ export const Subscription = () => {
               className="subscribe-btn"
               icon={<IconSubscription className="flex items-center justify-center text-base" />}
               onClick={() => {
+                setShowSettingModal(false);
                 setSubscribeModalVisible(true);
               }}
             >
