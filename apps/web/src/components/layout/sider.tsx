@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react"
 import { Menu } from "@arco-design/web-react"
-import { Alert, Avatar, Button, Layout, Skeleton, Divider, Tag } from "antd"
+import { Alert, Avatar, Button, Layout, Skeleton, Divider } from "antd"
 import {
   useLocation,
   useNavigate,
@@ -48,11 +48,8 @@ const SiderLogo = (props: {
         onClick={() => navigate("/")}>
         <img src={Logo} alt="Refly" className="h-8 w-8" />
         <span className="text-xl font-bold text-black" translate="no">
-          Refly{" "}
+          Refly
         </span>
-        <Tag color="green" className="text-[10px] leading-4">
-          Beta
-        </Tag>
       </div>
       {source === "sider" && (
         <div>
@@ -386,7 +383,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
 
             <div className="mt-auto">
               <div className="mb-2 flex flex-col gap-2">
-                <a
+                {/* <a
                   href="https://www.producthunt.com/posts/refly-3?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-refly&#0045;3"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -397,7 +394,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                     className="w-[200px]"
                     loading="lazy"
                   />
-                </a>
+                </a> */}
 
                 <Alert
                   message={

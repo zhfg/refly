@@ -513,11 +513,11 @@ export const PriceContent = (props: { source: PriceSource }) => {
       {isLogin && (
         <div className="subscribe-content-description">
           {t('settings.subscription.subscribe.description')}{' '}
-          <a href={`/privacy`} target="_blank" rel="noreferrer">
+          <a href="https://docs.refly.ai/about/privacy-policy" target="_blank" rel="noreferrer">
             {t('settings.subscription.subscribe.privacy')}
           </a>{' '}
           {t('settings.subscription.subscribe.and')}{' '}
-          <a href={`/terms`} target="_blank" rel="noreferrer">
+          <a href="https://docs.refly.ai/about/terms-of-service" target="_blank" rel="noreferrer">
             {t('settings.subscription.subscribe.terms')}
           </a>
         </div>
