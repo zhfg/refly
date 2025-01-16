@@ -218,7 +218,7 @@ function Footer() {
                       {t("landingPage.footer.about.title")}
                     </h6>
                     <ul className="list-none text-sm">
-                      <li key={0} className="mb-1">
+                      <li key="privacy" className="mb-1">
                         <Link
                           to="https://docs.refly.ai/about/privacy-policy"
                           target="_blank"
@@ -226,7 +226,7 @@ function Footer() {
                           {t("landingPage.footer.about.privacy")}
                         </Link>
                       </li>
-                      <li key={0} className="mb-1">
+                      <li key="terms" className="mb-1">
                         <Link
                           to="https://docs.refly.ai/about/terms-of-service"
                           target="_blank"
@@ -243,7 +243,7 @@ function Footer() {
                       {t("landingPage.footer.contactUs.title")}
                     </h6>
                     <ul className="list-none text-sm">
-                      <li key={0} className="mb-1">
+                      <li key="community" className="mb-1">
                         <Link
                           to="https://docs.refly.ai/community/contact-us"
                           target="_blank"
@@ -251,7 +251,7 @@ function Footer() {
                           {t("landingPage.footer.contactUs.community")}
                         </Link>
                       </li>
-                      <li key={1} className="mb-1">
+                      <li key="mail" className="mb-1">
                         <Link
                           to={`mailto:support@refly.ai`}
                           className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700">

@@ -1,17 +1,15 @@
-import React, { ReactNode } from "react"
+import { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { AiOutlineAppstore, AiOutlineExperiment } from "react-icons/ai"
 import { FaRegPaperPlane } from "react-icons/fa"
 import { LuSearch } from "react-icons/lu"
 import { MdOutlineNoteAlt } from "react-icons/md"
-import BlurImage from "@/components/common/BlurImage"
 
 // Feature type definition for better type safety
 interface Feature {
   tag: string
   tagIcon?: string | ReactNode
   title: string
-  description: string
   bulletPoints: string[]
   imageSrc: string
   isReversed?: boolean
@@ -120,7 +118,6 @@ function FeaturesBlocks() {
       tag: t("landingPage.features.featureOne.tag"),
       tagIcon: <FaRegPaperPlane className="inline-block" />,
       title: t("landingPage.features.featureOne.title"),
-      description: t("landingPage.features.featureOne.description"),
       bulletPoints: t("landingPage.features.featureOne.bulletPoints", {
         returnObjects: true,
       }) as string[],
@@ -135,7 +132,6 @@ function FeaturesBlocks() {
       tag: t("landingPage.features.featureTwo.tag"),
       tagIcon: <LuSearch className="inline-block" />,
       title: t("landingPage.features.featureTwo.title"),
-      description: t("landingPage.features.featureTwo.description"),
       bulletPoints: t("landingPage.features.featureTwo.bulletPoints", {
         returnObjects: true,
       }) as string[],
@@ -150,7 +146,6 @@ function FeaturesBlocks() {
       tag: t("landingPage.features.featureThree.tag"),
       tagIcon: <AiOutlineExperiment className="inline-block" />,
       title: t("landingPage.features.featureThree.title"),
-      description: t("landingPage.features.featureThree.description"),
       bulletPoints: t("landingPage.features.featureThree.bulletPoints", {
         returnObjects: true,
       }) as string[],
@@ -165,7 +160,6 @@ function FeaturesBlocks() {
       tag: t("landingPage.features.featureFour.tag"),
       tagIcon: <MdOutlineNoteAlt className="inline-block" />,
       title: t("landingPage.features.featureFour.title"),
-      description: t("landingPage.features.featureFour.description"),
       bulletPoints: t("landingPage.features.featureFour.bulletPoints", {
         returnObjects: true,
       }) as string[],
