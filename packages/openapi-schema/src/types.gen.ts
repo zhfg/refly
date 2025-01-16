@@ -1236,21 +1236,6 @@ export type CheckVerificationRequest = {
   code: string;
 };
 
-export type CheckVerificationData = {
-  /**
-   * Access token
-   */
-  accessToken?: string;
-  /**
-   * Verification purpose
-   */
-  purpose?: string;
-};
-
-export type CheckVerificationResponse = BaseResponse & {
-  data?: CheckVerificationData;
-};
-
 /**
  * Email login request
  */
@@ -2808,11 +2793,11 @@ export type ResendVerificationResponse = BaseResponse;
 
 export type ResendVerificationError = unknown;
 
-export type CheckVerificationData2 = {
+export type CheckVerificationData = {
   body: CheckVerificationRequest;
 };
 
-export type CheckVerificationResponse2 = CheckVerificationResponse;
+export type CheckVerificationResponse = BaseResponse;
 
 export type CheckVerificationError = unknown;
 

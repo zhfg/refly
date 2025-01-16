@@ -18,9 +18,9 @@ import type {
   ResendVerificationData,
   ResendVerificationError,
   ResendVerificationResponse,
-  CheckVerificationData2,
+  CheckVerificationData,
   CheckVerificationError,
-  CheckVerificationResponse2,
+  CheckVerificationResponse,
   LogoutError,
   LogoutResponse,
   GetCollabTokenError,
@@ -279,9 +279,9 @@ export const resendVerification = <ThrowOnError extends boolean = false>(
  * Verify account creation
  */
 export const checkVerification = <ThrowOnError extends boolean = false>(
-  options: Options<CheckVerificationData2, ThrowOnError>,
+  options: Options<CheckVerificationData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<CheckVerificationResponse2, CheckVerificationError, ThrowOnError>({
+  return (options?.client ?? client).post<CheckVerificationResponse, CheckVerificationError, ThrowOnError>({
     ...options,
     url: '/auth/verification/check',
   });
