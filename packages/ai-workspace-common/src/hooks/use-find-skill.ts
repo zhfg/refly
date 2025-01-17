@@ -9,7 +9,6 @@ export const useFindSkill = (skillName: string) => {
     staleTime: 60 * 1000, // Data fresh for 1 minute
     gcTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
-  console.log('skillData', skillData);
   const skill = useMemo(() => skillData?.data?.find((skill) => skill.name === skillName), [skillData?.data, skillName]);
   return skill;
 };
