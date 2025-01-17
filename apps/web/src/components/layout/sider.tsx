@@ -17,6 +17,7 @@ import {
 import {
   IconCanvas,
   IconPlus,
+  IconSubscription,
 } from "@refly-packages/ai-workspace-common/components/common/icon"
 import cn from "classnames"
 
@@ -224,6 +225,7 @@ const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
 }
 
 const SubscriptionHint = () => {
+  const { t } = useTranslation()
   const { setSubscribeModalVisible } = useSubscriptionStoreShallow(state => ({
     setSubscribeModalVisible: state.setSubscribeModalVisible,
   }))
@@ -234,31 +236,49 @@ const SubscriptionHint = () => {
 
   return (
     <div className="w-full rounded-md bg-[#f3f4f8] p-2">
-      <div className="text-sm font-medium">当前套餐：FREE</div>
-      <div className="flex items-center justify-between">
-        <div className="text-xs text-gray-500">已使用</div>
-        <div className="text-xs text-gray-500">剩余</div>
+      <div className="mb-1 text-sm font-medium">
+        {t("settings.subscription.currentPlan")}：
+        {t(`settings.subscription.subscriptionStatus.free`)}
+      </div>
+      <div className="-mb-2.5 flex items-center justify-between">
+        <div className="text-xs text-gray-500">
+          {t("settings.subscription.subscribe.t1Model")}
+        </div>
+        <div className="text-xs text-gray-500">
+          <span className="text-gray-700">1/4</span>/天
+        </div>
       </div>
       <Progress
-        className="!line-height-[10px]"
         strokeColor="#00968f"
         percent={50}
-        size="small"
+        size={{ height: 4 }}
         showInfo={false}
       />
-      <div className="flex items-center justify-between">
-        <div className="text-xs text-gray-500">已使用</div>
-        <div className="text-xs text-gray-500">剩余</div>
+      <div className="-mb-2.5 flex items-center justify-between">
+        <div className="text-xs text-gray-500">
+          {t("settings.subscription.subscribe.t2Model")}
+        </div>
+        <div className="text-xs text-gray-500">
+          <span className="text-gray-700">1/4</span>/天
+        </div>
       </div>
       <Progress
         strokeColor="#00968f"
         percent={50}
-        size="small"
+        size={{ height: 4 }}
         showInfo={false}
       />
       <div className="mt-2 flex justify-center">
-        <Button size="small" onClick={handleUpgrade}>
-          <span className="text-xs">立即升级</span>
+        <Button
+          className="w-full"
+          size="middle"
+          icon={
+            <IconSubscription className="flex items-center justify-center text-base" />
+          }
+          onClick={handleUpgrade}>
+          <span className="text-sm">
+            {t("settings.subscription.subscribeNow")}
+          </span>
         </Button>
       </div>
     </div>
