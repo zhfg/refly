@@ -1,14 +1,6 @@
 import React, { useState, useMemo } from "react"
 import { Menu } from "@arco-design/web-react"
-import {
-  Alert,
-  Avatar,
-  Button,
-  Layout,
-  Skeleton,
-  Divider,
-  Progress,
-} from "antd"
+import { Alert, Avatar, Button, Layout, Skeleton, Divider } from "antd"
 import {
   useLocation,
   useNavigate,
@@ -17,7 +9,6 @@ import {
 import {
   IconCanvas,
   IconPlus,
-  IconSubscription,
 } from "@refly-packages/ai-workspace-common/components/common/icon"
 import cn from "classnames"
 
@@ -39,7 +30,7 @@ import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/canva
 import { IconLibrary } from "@refly-packages/ai-workspace-common/components/common/icon"
 import { CanvasActionDropdown } from "@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown"
 import { AiOutlineMenuFold, AiOutlineUser } from "react-icons/ai"
-import { useSubscriptionStoreShallow } from "@refly-packages/ai-workspace-common/stores/subscription"
+import { SubscriptionHint } from "@refly-packages/ai-workspace-common/components/subscription/hint"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -79,9 +70,11 @@ const MenuItemTooltipContent = (props: { title: string }) => {
 }
 
 const SettingItem = () => {
-  const userStore = useUserStoreShallow(state => ({
+  const { userProfile } = useUserStoreShallow(state => ({
     userProfile: state.userProfile,
   }))
+  const planType = userProfile?.subscription?.planType || "free"
+
   const { t } = useTranslation()
 
   return (
@@ -91,18 +84,16 @@ const SettingItem = () => {
           <div className="flex items-center">
             <Avatar
               size={32}
-              src={userStore?.userProfile?.avatar}
+              src={userProfile?.avatar}
               icon={<AiOutlineUser />}
             />
             <span className="ml-2 max-w-[80px] truncate font-semibold text-gray-600">
-              {userStore?.userProfile?.nickname}
+              {userProfile?.nickname}
             </span>
           </div>
 
           <div className="flex h-6 items-center justify-center rounded-full bg-gray-100 px-3 text-xs font-medium group-hover:bg-white">
-            {t(
-              `settings.subscription.subscriptionStatus.${userStore?.userProfile?.subscription?.planType || "free"}`,
-            )}
+            {t(`settings.subscription.subscriptionStatus.${planType}`)}
           </div>
         </div>
       </SiderMenuSettingList>
@@ -224,67 +215,6 @@ const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
   )
 }
 
-const SubscriptionHint = () => {
-  const { t } = useTranslation()
-  const { setSubscribeModalVisible } = useSubscriptionStoreShallow(state => ({
-    setSubscribeModalVisible: state.setSubscribeModalVisible,
-  }))
-
-  const handleUpgrade = () => {
-    setSubscribeModalVisible(true)
-  }
-
-  return (
-    <div className="w-full rounded-md bg-[#f3f4f8] p-2">
-      <div className="mb-1 text-sm font-medium">
-        {t("settings.subscription.currentPlan")}：
-        {t(`settings.subscription.subscriptionStatus.free`)}
-      </div>
-      <div className="-mb-2.5 flex items-center justify-between">
-        <div className="text-xs text-gray-500">
-          {t("settings.subscription.subscribe.t1Model")}
-        </div>
-        <div className="text-xs text-gray-500">
-          <span className="text-gray-700">1/4</span>/天
-        </div>
-      </div>
-      <Progress
-        strokeColor="#00968f"
-        percent={50}
-        size={{ height: 4 }}
-        showInfo={false}
-      />
-      <div className="-mb-2.5 flex items-center justify-between">
-        <div className="text-xs text-gray-500">
-          {t("settings.subscription.subscribe.t2Model")}
-        </div>
-        <div className="text-xs text-gray-500">
-          <span className="text-gray-700">1/4</span>/天
-        </div>
-      </div>
-      <Progress
-        strokeColor="#00968f"
-        percent={50}
-        size={{ height: 4 }}
-        showInfo={false}
-      />
-      <div className="mt-2 flex justify-center">
-        <Button
-          className="w-full"
-          size="middle"
-          icon={
-            <IconSubscription className="flex items-center justify-center text-base" />
-          }
-          onClick={handleUpgrade}>
-          <span className="text-sm">
-            {t("settings.subscription.subscribeNow")}
-          </span>
-        </Button>
-      </div>
-    </div>
-  )
-}
-
 const getSelectedKey = (pathname: string) => {
   if (pathname.startsWith("/canvas")) {
     const arr = pathname?.split("?")[0]?.split("/")
@@ -310,9 +240,10 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
   }))
 
   const navigate = useNavigate()
-  const userStore = useUserStoreShallow(state => ({
+  const { userProfile } = useUserStoreShallow(state => ({
     userProfile: state.userProfile,
   }))
+  const planType = userProfile?.subscription?.planType || "free"
 
   const { isLoadingCanvas } = useHandleSiderData(true)
 
@@ -482,12 +413,12 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                   closable
                 />
 
-                <SubscriptionHint />
+                {planType === "free" && <SubscriptionHint />}
               </div>
-              {!!userStore.userProfile?.uid && (
+              {!!userProfile?.uid && (
                 <MenuItem
                   key="Settings"
-                  className="flex h-10 items-center justify-between"
+                  className="flex h-12 items-center justify-between"
                   renderItemInTooltip={() => (
                     <MenuItemTooltipContent
                       title={t("loggedHomePage.siderMenu.settings")}

@@ -7,8 +7,13 @@ import {
   QUEUE_SYNC_TOKEN_USAGE,
   QUEUE_SYNC_STORAGE_USAGE,
   QUEUE_CHECK_CANCELED_SUBSCRIPTIONS,
+  QUEUE_SYNC_REQUEST_USAGE,
 } from '../utils/const';
-import { SyncTokenUsageJobData, SyncStorageUsageJobData } from './subscription.dto';
+import {
+  SyncTokenUsageJobData,
+  SyncStorageUsageJobData,
+  SyncRequestUsageJobData,
+} from './subscription.dto';
 
 @Processor(QUEUE_SYNC_TOKEN_USAGE)
 export class SyncTokenUsageProcessor extends WorkerHost {
@@ -64,6 +69,25 @@ export class CheckCanceledSubscriptionsProcessor extends WorkerHost {
       await this.subscriptionService.checkCanceledSubscriptions();
     } catch (error) {
       this.logger.error(`[${QUEUE_CHECK_CANCELED_SUBSCRIPTIONS}] error: ${error?.stack}`);
+      throw error;
+    }
+  }
+}
+
+@Processor(QUEUE_SYNC_REQUEST_USAGE)
+export class SyncRequestUsageProcessor extends WorkerHost {
+  private readonly logger = new Logger(SyncRequestUsageProcessor.name);
+
+  constructor(private subscriptionService: SubscriptionService) {
+    super();
+  }
+
+  async process(job: Job<SyncRequestUsageJobData>) {
+    this.logger.log(`[${QUEUE_SYNC_REQUEST_USAGE}] job: ${JSON.stringify(job)}`);
+    try {
+      await this.subscriptionService.syncRequestUsage(job.data);
+    } catch (error) {
+      this.logger.error(`[${QUEUE_SYNC_REQUEST_USAGE}] error: ${error?.stack}`);
       throw error;
     }
   }

@@ -119,7 +119,7 @@ export class KnowledgeService {
   ) {
     if (options?.checkStorageQuota) {
       const usageResult = await this.subscriptionService.checkStorageUsage(user);
-      if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+      if (!usageResult.available) {
         throw new StorageQuotaExceeded();
       }
     }
@@ -207,7 +207,7 @@ export class KnowledgeService {
 
   async batchCreateResource(user: User, params: UpsertResourceRequest[]) {
     const usageResult = await this.subscriptionService.checkStorageUsage(user);
-    if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+    if (!usageResult.available) {
       throw new StorageQuotaExceeded();
     }
 
@@ -501,7 +501,7 @@ export class KnowledgeService {
 
   async createDocument(user: User, param: UpsertDocumentRequest) {
     const usageResult = await this.subscriptionService.checkStorageUsage(user);
-    if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+    if (!usageResult.available) {
       throw new StorageQuotaExceeded();
     }
 

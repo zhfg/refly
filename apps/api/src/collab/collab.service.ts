@@ -93,6 +93,11 @@ export class CollabService {
           },
         });
         this.logger.log(`document created: ${documentName}`);
+
+        await this.subscriptionService.syncStorageUsage({
+          uid: user.uid,
+          timestamp: new Date(),
+        });
       }
       context = { user, entity: doc, entityType: 'document' };
     } else if (documentName.startsWith(IDPrefix.CANVAS)) {
@@ -221,11 +226,6 @@ export class CollabService {
     });
     context.entity = updatedDoc;
 
-    await this.subscriptionService.syncStorageUsage({
-      uid: user.uid,
-      timestamp: new Date(),
-    });
-
     // Vacuum unused files
     // const staticPrefix = this.config.get('staticEndpoint');
     // const fileKeys = content
@@ -283,11 +283,6 @@ export class CollabService {
       title,
       uid: canvas.uid,
       updatedAt: new Date().toJSON(),
-    });
-
-    await this.subscriptionService.syncStorageUsage({
-      uid: user.uid,
-      timestamp: new Date(),
     });
   }
 

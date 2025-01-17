@@ -1,15 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bullmq';
 import * as Y from 'yjs';
-import { Queue } from 'bullmq';
 import { MINIO_INTERNAL } from '@/common/minio.service';
 import { MinioService } from '@/common/minio.service';
 import { PrismaService } from '@/common/prisma.service';
 import { MiscService } from '@/misc/misc.service';
 import { CollabService } from '@/collab/collab.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
-import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
-import { QUEUE_SYNC_STORAGE_USAGE } from '@/utils/const';
 import { CanvasNotFoundError } from '@refly-packages/errors';
 import {
   DeleteCanvasRequest,
@@ -29,7 +25,6 @@ export class CanvasService {
     private collabService: CollabService,
     private miscService: MiscService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
-    @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
   ) {}
 
   async listCanvases(user: User, param: ListCanvasesData['query']) {
@@ -151,11 +146,5 @@ export class CanvasService {
     }
 
     await Promise.all(cleanups);
-
-    // Sync storage usage
-    await this.ssuQueue.add('syncStorageUsage', {
-      uid,
-      timestamp: new Date(),
-    });
   }
 }

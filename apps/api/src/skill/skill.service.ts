@@ -60,6 +60,7 @@ import {
   pick,
   QUEUE_SYNC_TOKEN_USAGE,
   QUEUE_SKILL_TIMEOUT_CHECK,
+  QUEUE_SYNC_REQUEST_USAGE,
 } from '@/utils';
 import { InvokeSkillJobData, SkillTimeoutCheckJobData } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
@@ -69,7 +70,7 @@ import { SearchService } from '@/search/search.service';
 import { RAGService } from '@/rag/rag.service';
 import { LabelService } from '@/label/label.service';
 import { labelClassPO2DTO, labelPO2DTO } from '@/label/label.dto';
-import { SyncTokenUsageJobData } from '@/subscription/subscription.dto';
+import { SyncRequestUsageJobData, SyncTokenUsageJobData } from '@/subscription/subscription.dto';
 import { SubscriptionService } from '@/subscription/subscription.service';
 import {
   ModelNotSupportedError,
@@ -141,6 +142,8 @@ export class SkillService {
     @InjectQueue(QUEUE_SKILL_TIMEOUT_CHECK)
     private timeoutCheckQueue: Queue<SkillTimeoutCheckJobData>,
     @InjectQueue(QUEUE_SYNC_TOKEN_USAGE) private usageReportQueue: Queue<SyncTokenUsageJobData>,
+    @InjectQueue(QUEUE_SYNC_REQUEST_USAGE)
+    private requestUsageQueue: Queue<SyncRequestUsageJobData>,
   ) {
     this.skillEngine = new SkillEngine(this.logger, this.buildReflyService(), {
       defaultModel: this.config.get('skill.defaultModel'),
@@ -396,8 +399,8 @@ export class SkillService {
     param.modelName ||= this.config.get('skill.defaultModel');
     param.skillName ||= 'commonQnA';
 
-    // Check for token quota
-    const usageResult = await this.subscription.checkTokenUsage(user);
+    // Check for usage quota
+    const usageResult = await this.subscription.checkRequestUsage(user);
 
     const modelName = param.modelName;
     const modelInfo = await this.prisma.modelInfo.findUnique({ where: { name: modelName } });
@@ -453,6 +456,7 @@ export class SkillService {
             uid,
             version: (existingResult.version ?? 0) + 1,
             type: 'skill',
+            tier: modelInfo.tier,
             status: 'executing',
             title: param.input.query,
             targetId: param.target?.entityId,
@@ -483,6 +487,7 @@ export class SkillService {
           resultId,
           uid,
           version: 0,
+          tier: modelInfo.tier,
           targetId: param.target?.entityId,
           targetType: param.target?.entityType,
           title: param.input?.query,
@@ -733,7 +738,13 @@ export class SkillService {
 
   private async _invokeSkill(user: User, data: InvokeSkillJobData, res?: Response) {
     const { input, result } = data;
-    const { resultId, version, actionMeta } = result;
+    const { resultId, version, actionMeta, tier } = result;
+
+    await this.requestUsageQueue.add('syncRequestUsage', {
+      uid: user.uid,
+      tier,
+      timestamp: new Date(),
+    });
 
     let aborted = false;
 
@@ -988,6 +999,12 @@ export class SkillService {
       ]);
 
       writeSSEResponse(res, { event: 'end', resultId, version });
+
+      await this.requestUsageQueue.add('syncRequestUsage', {
+        uid: user.uid,
+        tier,
+        timestamp: new Date(),
+      });
     }
   }
 
