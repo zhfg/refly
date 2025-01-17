@@ -1,4 +1,4 @@
-import { useEffect, useState, memo } from 'react';
+import { useEffect, useState, memo, useCallback } from 'react';
 import { useDebounce } from 'use-debounce';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
@@ -115,11 +115,16 @@ const StatusBar = memo(
     const [unsyncedChanges, setUnsyncedChanges] = useState(provider?.unsyncedChanges || 0);
     const [debouncedUnsyncedChanges] = useDebounce(unsyncedChanges, 500);
 
+    const handleUnsyncedChanges = useCallback((data: number) => {
+      setUnsyncedChanges(data);
+    }, []);
+
     useEffect(() => {
-      provider.on('unsyncedChanges', (data) => {
-        setUnsyncedChanges(data);
-      });
-    }, [provider]);
+      provider.on('unsyncedChanges', handleUnsyncedChanges);
+      return () => {
+        provider.off('unsyncedChanges', handleUnsyncedChanges);
+      };
+    }, [provider, handleUnsyncedChanges]);
 
     const { config, setDocumentReadOnly } = useDocumentStoreShallow((state) => ({
       config: state.config[docId],
