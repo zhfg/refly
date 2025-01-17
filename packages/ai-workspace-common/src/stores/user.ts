@@ -20,6 +20,7 @@ export interface UserState {
   localSettings: LocalSettings; // 在获取 user 信息的时候记录这个 settings，并 host 到 localStorage，每次保存更新，类似 userProfile
 
   runtime: IRuntime;
+  showTourModal: boolean;
 
   // method
   setIsCheckingLoginStatus: (val: boolean) => void;
@@ -28,6 +29,7 @@ export interface UserState {
   setLocalSettings: (val: LocalSettings) => void;
   setRuntime: (val: IRuntime) => void;
   resetState: () => void;
+  setShowTourModal: (val: boolean) => void;
 }
 
 const getDefaultLocale = () => {
@@ -65,6 +67,7 @@ export const defaultExtraState = {
 export const defaultState = {
   ...defaultExtraState,
   ...defaultCheckingLoginStatus,
+  showTourModal: true,
 };
 
 export const useUserStore = create<UserState>()(
@@ -77,6 +80,7 @@ export const useUserStore = create<UserState>()(
     setLocalSettings: (val: LocalSettings) => set((state) => ({ ...state, localSettings: val })),
     setRuntime: (val: IRuntime) => set((state) => ({ ...state, runtime: val })),
     resetState: () => set((state) => ({ ...state, ...defaultExtraState })),
+    setShowTourModal: (val: boolean) => set((state) => ({ ...state, showTourModal: val })),
   })),
 );
 

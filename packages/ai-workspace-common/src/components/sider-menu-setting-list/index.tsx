@@ -1,16 +1,20 @@
 import { useTranslation } from 'react-i18next';
 import { MenuProps, Dropdown } from 'antd';
 import { LuSettings, LuLogOut, LuCreditCard } from 'react-icons/lu';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useLogout } from '@refly-packages/ai-workspace-common/hooks/use-logout';
 import { IconDiscord } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { PiVideoBold } from 'react-icons/pi';
 
 export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
   const { t } = useTranslation();
   const userStore = useUserStore();
   const { setShowSettingModal } = useSiderStoreShallow((state) => ({
     setShowSettingModal: state.setShowSettingModal,
+  }));
+  const { setShowTourModal } = useUserStoreShallow((state) => ({
+    setShowTourModal: state.setShowTourModal,
   }));
   const { handleLogout, contextHolder } = useLogout();
 
@@ -46,6 +50,11 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
       label: t('loggedHomePage.siderMenu.logout'),
     },
     {
+      key: 'tour',
+      icon: <PiVideoBold />,
+      label: t('loggedHomePage.siderMenu.tour'),
+    },
+    {
       key: 'getHelp',
       icon: <IconDiscord />,
       label: t('loggedHomePage.siderMenu.getHelp'),
@@ -55,6 +64,8 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
   const handleMenuClick = (key: string) => {
     if (key === 'settings' || key === 'subscription') {
       setShowSettingModal(true);
+    } else if (key === 'tour') {
+      setShowTourModal(true);
     } else if (key === 'logout') {
       handleLogout();
     } else if (key === 'getHelp') {

@@ -833,6 +833,7 @@ const translations = {
       recentChats: 'Recent Chats',
       viewMore: 'View More',
       viewTutorial: 'View Docs',
+      tour: 'View Tutorial',
     },
   },
   knowledgeLibrary: {
@@ -1607,6 +1608,24 @@ const translations = {
     submit: 'Verify',
     success: 'Verification successful',
     error: 'Verification failed. Please try again.',
+  },
+  tour: {
+    onboardingModal: {
+      title: {
+        1: 'Multi-threaded conversation: You can ask follow-up questions based on any branch, which is convenient for divergent thinking',
+        2: 'Knowledge base integration: Import any external resources to the knowledge base, and add them to the canvas as needed',
+        3: 'Context selection: Any node in the canvas can be added as context, making the question more targeted and obtaining a more ideal answer',
+        4: 'Document output: Select the "AI Writing" skill, and the AI will automatically output a document for you, which can be freely modified later',
+        5: 'AI editing: After drawing a line in the document, the AI will modify and polish it according to your needs',
+      },
+      description: {
+        1: 'Refly is an AI-native content creation platform built on the concept of "Free Canvas". Through multi-threaded conversations, knowledge base integration, context memory, intelligent search, and a WYSIWYG AI document editor, it provides a one-stop solution from creative ideation to finished content',
+        2: 'Please fill in xxxxx',
+        3: 'Please fill in xxxxx',
+        4: 'Please fill in xxxxx',
+        5: 'Please fill in xxxxx',
+      },
+    },
   },
 };
 
