@@ -13,7 +13,7 @@ import { AddBaseMarkContext } from '@refly-packages/ai-workspace-common/componen
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { useInvokeAction } from '@refly-packages/ai-workspace-common/hooks/canvas/use-invoke-action';
 import { useTranslation } from 'react-i18next';
-import { ActionResult, ActionStatus, ConfigScope, InvokeSkillRequest } from '@refly/openapi-schema';
+import { ActionResult, ActionStatus, ConfigScope, InvokeSkillRequest, Skill } from '@refly/openapi-schema';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
 import { genActionResultID, getClientOrigin } from '@refly-packages/utils/index';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
@@ -94,7 +94,6 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
   const [resultStatus, setResultStatus] = useState<ActionStatus>('waiting');
   const { docId } = useDocumentContext();
   const { invokeAction } = useInvokeAction();
-  const skill = useFindSkill('editDoc');
 
   const { selectedModel, setSelectedModel } = useChatStoreShallow((state) => ({
     selectedModel: state.selectedModel,
@@ -158,6 +157,18 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
       contextItems[hasCurrentDoc].isCurrentContext = true;
     }
 
+    const currentSkill: Skill = {
+      name: 'editDoc',
+      icon: {
+        type: 'emoji',
+        value: '🖊️',
+      },
+      description: 'Edit document',
+      configSchema: {
+        items: [],
+      },
+    };
+
     setIsLoading(true);
     invokeAction(
       {
@@ -165,7 +176,7 @@ export const AISelector = memo(({ onOpenChange, handleBubbleClose, inPlaceEditTy
         resultId,
         modelInfo: selectedModel,
         contextItems,
-        selectedSkill: skill,
+        selectedSkill: currentSkill,
         tplConfig: {
           canvasEditConfig: {
             value: canvasEditConfig as { [key: string]: unknown },
