@@ -178,7 +178,7 @@ export class EditDoc extends BaseSkill {
   callEditDoc = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
     const { currentSkill, documents, tplConfig } = config.configurable;
 
-    const currentDoc = documents?.find((doc) => doc?.metadata?.isCurrentContext);
+    const currentDoc = documents?.find((doc) => doc?.metadata?.isCurrentContext || doc?.isCurrent);
     const canvasEditConfig = tplConfig?.canvasEditConfig?.value as CanvasEditConfig;
 
     if (!currentDoc?.document) {
@@ -188,7 +188,7 @@ export class EditDoc extends BaseSkill {
     // Filter out documents with isCurrent before proceeding
     if (config?.configurable?.documents) {
       config.configurable.documents =
-        config.configurable.documents.filter((doc) => !doc?.metadata?.isCurrentContext) || [];
+        config.configurable.documents.filter((doc) => !(doc?.metadata?.isCurrentContext || doc?.isCurrent)) || [];
     }
 
     // Get selected range and edit type from metadata

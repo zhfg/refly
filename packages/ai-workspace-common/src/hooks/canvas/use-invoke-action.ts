@@ -284,7 +284,7 @@ export const useInvokeAction = () => {
     payload.resultId ||= genActionResultID();
     payload.selectedSkill ||= { name: 'commonQnA' };
 
-    const { query, modelInfo, contextItems, selectedSkill, resultId, version = 0 } = payload;
+    const { query, modelInfo, contextItems, selectedSkill, resultId, version = 0, tplConfig = {} } = payload;
     const { context, resultHistory } = convertContextItemsToInvokeParams(
       contextItems,
       (item) =>
@@ -309,6 +309,7 @@ export const useInvokeAction = () => {
       context,
       resultHistory,
       skillName: selectedSkill?.name,
+      tplConfig,
     };
 
     onUpdateResult(resultId, {
@@ -322,7 +323,7 @@ export const useInvokeAction = () => {
       targetType: target?.entityType,
       context,
       history: resultHistory,
-      tplConfig: {},
+      tplConfig,
       status: 'waiting',
       steps: [],
       errors: [],
