@@ -1,41 +1,75 @@
-import { AuthenticationExpiredError } from '@refly/errors';
+import { AuthenticationExpiredError, ConnectionError } from '@refly/errors';
 import getClient, { extractBaseResp } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getLocale } from '@refly-packages/ai-workspace-common/utils/locale';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/utils/notification';
 import { logout } from '@refly-packages/ai-workspace-common/hooks/use-logout';
 
+interface RefreshResult {
+  isRefreshed: boolean;
+  error?: unknown;
+}
+
 let isRefreshing = false;
-let refreshPromise: Promise<boolean> | null = null;
+let refreshPromise: Promise<RefreshResult> | null = null;
 const requestQueue: Array<{
   resolve: (value: Response) => void;
   reject: (error: unknown) => void;
   failedRequest: Request;
 }> = [];
 
-export const refreshToken = async (): Promise<boolean> => {
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 100;
+
+export const refreshToken = async (): Promise<RefreshResult> => {
   if (isRefreshing) {
     return refreshPromise!;
   }
 
   isRefreshing = true;
   refreshPromise = (async () => {
-    try {
-      const { response, error } = await getClient().refreshToken();
+    let retryCount = 0;
 
-      if (error || response?.status === 401) {
-        return false;
+    while (retryCount <= MAX_RETRIES) {
+      try {
+        const { response, error } = await getClient().refreshToken();
+
+        // Don't retry on 401 status
+        if (response?.status === 401) {
+          return { isRefreshed: false };
+        }
+
+        if (error) {
+          throw error;
+        }
+
+        return { isRefreshed: true };
+      } catch (error) {
+        console.error('Error refreshing token:', error);
+
+        // If we have retries left, retry with fixed delay
+        if (retryCount < MAX_RETRIES) {
+          console.warn(`Refresh token attempt ${retryCount + 1} failed, retrying in ${RETRY_DELAY}ms`);
+          await delay(RETRY_DELAY);
+          retryCount++;
+          continue;
+        }
+
+        return { isRefreshed: false, error };
       }
-      return true;
-    } catch (error) {
-      console.error(error);
-      return false;
-    } finally {
-      isRefreshing = false;
-      refreshPromise = null;
     }
+
+    return { isRefreshed: false };
   })();
 
-  return refreshPromise;
+  try {
+    const result = await refreshPromise;
+    return result;
+  } finally {
+    isRefreshing = false;
+    refreshPromise = null;
+  }
 };
 
 export const refreshTokenAndRetry = async (failedRequest: Request): Promise<Response> => {
@@ -45,14 +79,21 @@ export const refreshTokenAndRetry = async (failedRequest: Request): Promise<Resp
     });
   }
 
-  const isRefreshed = await refreshToken();
-  if (!isRefreshed) {
+  const { isRefreshed, error } = await refreshToken();
+  if (!isRefreshed || error) {
     // Clear queue and reject all pending requests
     while (requestQueue.length > 0) {
       const { reject } = requestQueue.shift()!;
       reject(new AuthenticationExpiredError());
     }
-    throw new AuthenticationExpiredError();
+
+    if (!isRefreshed) {
+      throw new AuthenticationExpiredError();
+    }
+    if (error) {
+      console.error('Error refreshing token:', error);
+      throw new ConnectionError();
+    }
   }
 
   // Process the current request
