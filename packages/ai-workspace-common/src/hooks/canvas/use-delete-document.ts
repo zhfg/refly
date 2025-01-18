@@ -1,19 +1,18 @@
 import { useState } from 'react';
-import { message } from 'antd';
 import * as Y from 'yjs';
-import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useDebouncedCallback } from 'use-debounce';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { IndexeddbPersistence } from 'y-indexeddb';
+import { useSubscriptionUsage } from '../use-subscription-usage';
 
 export const useDeleteDocument = () => {
   const [isRemoving, setIsRemoving] = useState(false);
-  const { t } = useTranslation();
-
   const { deleteDocumentData } = useDocumentStoreShallow((state) => ({
     deleteDocumentData: state.deleteDocumentData,
   }));
+
+  const { refetchUsage } = useSubscriptionUsage();
 
   const deleteDocument = async (docId: string) => {
     if (isRemoving) return;
@@ -37,6 +36,14 @@ export const useDeleteDocument = () => {
       }
     } finally {
       setIsRemoving(false);
+
+      setTimeout(async () => {
+        try {
+          await refetchUsage();
+        } catch (error) {
+          console.error('Failed to refetch usage:', error);
+        }
+      }, 2000);
     }
     return success;
   };

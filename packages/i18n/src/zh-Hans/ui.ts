@@ -1069,12 +1069,15 @@ const translations = {
       subscribeNow: '立即订阅',
       manage: '管理订阅',
       currentPlan: '当前套餐',
+      t1Requests: '高阶模型请求',
       t1TokenUsed: '高阶模型 Token 使用量',
       t1TokenUsedDescription:
         '高阶模型包括 OpenAI GPT-4o、Anthropic Claude 3.5 Sonnet；使用量包括模型输入和输出 Token 消耗',
+      t2Requests: '基础模型请求',
       t2TokenUsed: '基础模型 Token 使用量',
       t2TokenUsedDescription:
         '基础模型包括 OpenAI GPT-4o-mini、OpenAI GPT-3.5-turbo；使用量包括模型输入和输出 Token 消耗',
+      fileCount: '文件存储数量',
       subscriptionManagement: '管理账单及订阅',
       subscriptionStatus: {
         free: 'FREE',

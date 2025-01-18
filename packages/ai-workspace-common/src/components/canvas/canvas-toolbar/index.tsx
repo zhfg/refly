@@ -265,7 +265,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
         return <SearchListWrapper key={index} tool={tool} handleConfirm={handleConfirm} />;
       })}
 
-      {importResourceModalVisible && <ImportResourceModal />}
+      <ImportResourceModal />
       {modals.sourceList && <SourceListModal classNames="source-list-modal" />}
     </div>
   );

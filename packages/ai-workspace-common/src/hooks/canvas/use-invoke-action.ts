@@ -10,12 +10,12 @@ import { showErrorNotification } from '@refly-packages/ai-workspace-common/utils
 import { useActionResultStore } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { aggregateTokenUsage, genActionResultID } from '@refly-packages/utils/index';
 import { CanvasNodeData, SkillNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { useGetSubscriptionUsage } from '@refly-packages/ai-workspace-common/queries';
 import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 import { useActionPolling } from './use-action-polling';
 import { useFindMemo } from './use-find-memo';
 import { useUpdateActionResult } from './use-update-action-result';
+import { useSubscriptionUsage } from '../use-subscription-usage';
 
 export const useInvokeAction = () => {
   const { addNode } = useAddNode();
@@ -24,13 +24,7 @@ export const useInvokeAction = () => {
   const globalAbortControllerRef = { current: null as AbortController | null };
   const globalIsAbortedRef = { current: false as boolean };
 
-  const { refetch: refetchTokenUsage } = useGetSubscriptionUsage({}, [], {
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    staleTime: 60 * 1000,
-    gcTime: 5 * 60 * 1000,
-  });
+  const { refetchUsage } = useSubscriptionUsage();
 
   const { createTimeoutHandler } = useActionPolling();
   const onUpdateResult = useUpdateActionResult();
@@ -224,7 +218,7 @@ export const useInvokeAction = () => {
       });
     }
 
-    setTimeout(() => refetchTokenUsage(), 2000);
+    setTimeout(() => refetchUsage(), 2000);
   };
 
   const onSkillError = (skillEvent: SkillEvent) => {

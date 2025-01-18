@@ -1085,12 +1085,15 @@ const translations = {
       subscribeNow: 'Subscribe Now',
       manage: 'Manage Subscription',
       currentPlan: 'Current Plan',
+      t1Requests: 'Pro Requests',
       t1TokenUsed: 'Advanced Model Token Usage',
       t1TokenUsedDescription:
-        'Advanced models include OpenAI GPT-4o and Anthropic Claude 3.5 Sonnet, usage includes both model input and output tokens.',
+        'Pro models include OpenAI GPT-4o and Anthropic Claude 3.5 Sonnet, usage includes both model input and output tokens.',
+      t2Requests: 'Standard Requests',
       t2TokenUsed: 'Standard Model Token Usage',
       t2TokenUsedDescription:
         'Standard models include OpenAI GPT-4o-mini and Anthropic Claude 3 Haiku, usage includes both model input and output tokens.',
+      fileCount: 'File Storage',
       subscriptionManagement: 'Manage Billing and Subscriptions',
       subscriptionStatus: {
         free: 'FREE',
