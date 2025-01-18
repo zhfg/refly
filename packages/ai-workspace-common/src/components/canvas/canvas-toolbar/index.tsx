@@ -20,8 +20,8 @@ import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/can
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
 import { ToolButton } from './tool-button';
+import { TbPlugConnected } from 'react-icons/tb';
 
-// Define toolbar item interface
 interface ToolbarItem {
   type: 'button' | 'popover' | 'divider';
   icon?: React.ElementType;
@@ -35,7 +35,6 @@ interface ToolbarProps {
   onToolSelect?: (tool: string) => void;
 }
 
-// 1. 将工具栏配置抽离为独立的组件
 const useToolbarConfig = () => {
   const { t } = useTranslation();
   const { showLaunchpad, showEdges } = useCanvasStoreShallow((state) => ({
@@ -43,7 +42,6 @@ const useToolbarConfig = () => {
     showEdges: state.showEdges,
   }));
 
-  // 不在 useMemo 中调用 hook
   const sourceListDrawerVisible = useKnowledgeBaseStoreShallow((state) => state.sourceListDrawer.visible);
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
@@ -52,7 +50,7 @@ const useToolbarConfig = () => {
     () => ({
       tools: [
         {
-          icon: RiUploadCloud2Line,
+          icon: TbPlugConnected,
           value: 'importResource',
           type: 'button',
           domain: 'resource',
@@ -112,7 +110,6 @@ const useToolbarConfig = () => {
   );
 };
 
-// 2. 抽离搜索列表组件
 const SearchListWrapper = memo(
   ({ tool, handleConfirm }: { tool: ToolbarItem; handleConfirm: (items: ContextItem[]) => void }) => {
     const handleToolSelect = useCallback((event: React.MouseEvent) => {
@@ -150,7 +147,6 @@ const SearchListWrapper = memo(
   },
 );
 
-// 3. 优化主组件
 export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
   const { t } = useTranslation();
   const { addNode } = useAddNode();
@@ -171,10 +167,8 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
   const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
   const { toggleEdgeVisible } = useEdgeVisible();
 
-  // 5. 使用工具栏配置
   const { tools, modals } = useToolbarConfig();
 
-  // 6. 缓存回调函数
   const getIconColor = useCallback(
     (tool: string) => {
       if (tool === 'showEdges' && !showEdges) return '#9CA3AF';

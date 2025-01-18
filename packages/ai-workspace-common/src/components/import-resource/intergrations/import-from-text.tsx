@@ -1,4 +1,5 @@
-import { Button, Divider, Input, Message as message, Affix, Form } from '@arco-design/web-react';
+import { Form } from '@arco-design/web-react';
+import { Button, Divider, Input, message } from 'antd';
 import { HiOutlinePencil } from 'react-icons/hi';
 import { useEffect, useState } from 'react';
 
@@ -13,6 +14,7 @@ import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+import { TbClipboard } from 'react-icons/tb';
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
@@ -68,7 +70,6 @@ export const ImportFromText = () => {
   };
 
   useEffect(() => {
-    // 使用 copiedTextPayload 中的值初始化表单
     const { title, content, url } = importResourceStore.copiedTextPayload;
     if (title) importResourceStore.setCopiedTextPayload({ title });
     if (content) importResourceStore.setCopiedTextPayload({ content });
@@ -83,30 +84,28 @@ export const ImportFromText = () => {
   return (
     <div className="h-full flex flex-col min-w-[500px] box-border intergation-import-from-weblink">
       {/* header */}
-      <div className="flex items-center gap-x-[8px] pt-[12px] px-[12px]">
-        <span className="w-[18px] h-[18px] rounded-[4px] bg-[#f1f1f0] box-shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] flex items-center justify-center">
-          <HiOutlinePencil />
+      <div className="flex items-center gap-2 p-6">
+        <span className="flex items-center justify-center">
+          <TbClipboard className="text-lg" />
         </span>
-        <div className="text-[16px] font-bold">{t('resource.import.fromWeblink')}</div>
+        <div className="text-base font-bold">{t('resource.import.fromText')}</div>
       </div>
 
-      <Divider style={{ marginTop: 10, marginBottom: 10 }} />
-
       {/* content */}
-      <div className="flex-grow overflow-y-auto px-[12px] box-border">
+      <div className="flex-grow overflow-y-auto px-6 box-border">
         <Form>
           <FormItem layout="vertical" label={t('resource.import.textTitlePlaceholder')}>
             <Input
               // placeholder={t('resource.import.textTitlePlaceholder')}
               value={importResourceStore.copiedTextPayload?.title}
-              onChange={(value) => importResourceStore.setCopiedTextPayload({ title: value })}
+              onChange={(e) => importResourceStore.setCopiedTextPayload({ title: e.target.value })}
             />
           </FormItem>
           <FormItem layout="vertical" label={t('resource.import.textUrlPlaceholder')}>
             <Input
               // placeholder={t('resource.import.textUrlPlaceholder')}
               value={importResourceStore.copiedTextPayload?.url}
-              onChange={(value) => importResourceStore.setCopiedTextPayload({ url: value })}
+              onChange={(e) => importResourceStore.setCopiedTextPayload({ url: e.target.value })}
             />
           </FormItem>
           <FormItem required layout="vertical" label={t('resource.import.textContentPlaceholder')}>
@@ -117,11 +116,10 @@ export const ImportFromText = () => {
                 minRows: 4,
                 maxRows: 7,
               }}
-              showWordLimit
               maxLength={100000}
               value={importResourceStore.copiedTextPayload?.content}
               allowClear
-              onChange={(value) => importResourceStore.setCopiedTextPayload({ content: value })}
+              onChange={(e) => importResourceStore.setCopiedTextPayload({ content: e.target.value })}
             />
           </FormItem>
         </Form>
@@ -134,7 +132,7 @@ export const ImportFromText = () => {
             {t('common.cancel')}
           </Button>
           <Button type="primary" loading={saveLoading} disabled={!copiedTextPayload?.content} onClick={handleSave}>
-            {t('common.save')}
+            {t('common.saveToCanvas')}
           </Button>
         </div>
       </div>
