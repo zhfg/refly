@@ -856,6 +856,7 @@ const translations = {
       },
     },
     siderMenu: {
+      documentation: 'Documentation',
       canvasTitle: 'Canvas',
       canvasDescription:
         'Create, edit, and view canvas, unlike traditional Chatbot applications, Refly completes the entire process of dialogue thinking, content consumption, and creation through an infinite two-dimensional canvas.',
@@ -1136,12 +1137,14 @@ const translations = {
       subscribeNow: 'Subscribe Now',
       manage: 'Manage Subscription',
       currentPlan: 'Current Plan',
-      t1TokenUsed: 'Advanced Model Token Usage',
-      t1TokenUsedDescription:
-        'Advanced models include OpenAI GPT-4o and Anthropic Claude 3.5 Sonnet, usage includes both model input and output tokens.',
-      t2TokenUsed: 'Standard Model Token Usage',
-      t2TokenUsedDescription:
-        'Standard models include OpenAI GPT-4o-mini and Anthropic Claude 3 Haiku, usage includes both model input and output tokens.',
+      t1Requests: 'Pro Requests',
+      t1RequestsDescription:
+        'Pro models include GPT-4o, Claude 3.5 Sonnet and others. Each successful skill call to pro models counts as one request.',
+      t2Requests: 'Standard Requests',
+      t2RequestsDescription:
+        'Standard models include GPT-4o Mini, DeepSeek V3 and others. Each successful skill call to standard models counts as one request.',
+      fileCount: 'File Count',
+      fileCountDescription: 'Each resource and document in your library counts as one file.',
       subscriptionManagement: 'Manage Billing and Subscriptions',
       subscriptionStatus: {
         free: 'FREE',
@@ -1167,7 +1170,7 @@ const translations = {
         },
         vectorStorage: 'Vector Storage',
         fileStorage: 'File Storage',
-        t1Model: 'Advanced Models',
+        t1Model: 'Pro Models',
         t2Model: 'Standard Models',
         freeModel: 'Free Models',
         mediaCredit: 'Media Credit (Coming Soon)',
@@ -1578,9 +1581,9 @@ const translations = {
     modelSelector: {
       unlimited: 'Unlimited',
       noModelAvailable: 'No model available',
-      premium: 'Advanced',
-      standard: 'Standard',
-      free: 'Free',
+      premium: 'Pro Models',
+      standard: 'Standard Models',
+      free: 'Free Models',
       tokenUsed: 'Used {{used}} / {{quota}}',
       upgrade: 'Upgrade',
       quotaExceeded: 'Quota exceeded, click to upgrade subscription',
@@ -1605,7 +1608,7 @@ const translations = {
       noUrl: 'This source does not have a link, you can select it and import to canvas',
     },
     premiumBanner: {
-      message: 'Need more tokens? Get higher limits with Premium.',
+      message: 'Need more requests? Get higher limits with Premium.',
       upgrade: 'Upgrade Plan',
     },
   },

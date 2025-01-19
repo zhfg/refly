@@ -74,6 +74,13 @@ export class KnowledgeService {
     @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
   ) {}
 
+  async syncStorageUsage(user: User) {
+    await this.ssuQueue.add('syncStorageUsage', {
+      uid: user.uid,
+      timestamp: new Date(),
+    });
+  }
+
   async listResources(user: User, param: ListResourcesData['query']) {
     const { resourceId, resourceType, page = 1, pageSize = 10, order = 'creationDesc' } = param;
 
@@ -119,7 +126,7 @@ export class KnowledgeService {
   ) {
     if (options?.checkStorageQuota) {
       const usageResult = await this.subscriptionService.checkStorageUsage(user);
-      if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+      if (!usageResult.available) {
         throw new StorageQuotaExceeded();
       }
     }
@@ -207,7 +214,7 @@ export class KnowledgeService {
 
   async batchCreateResource(user: User, params: UpsertResourceRequest[]) {
     const usageResult = await this.subscriptionService.checkStorageUsage(user);
-    if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+    if (!usageResult.available) {
       throw new StorageQuotaExceeded();
     }
 
@@ -363,10 +370,7 @@ export class KnowledgeService {
     });
 
     // Sync storage usage
-    await this.ssuQueue.add('syncStorageUsage', {
-      uid: user.uid,
-      timestamp: new Date(),
-    });
+    await this.syncStorageUsage(user);
 
     return resource;
   }
@@ -443,10 +447,7 @@ export class KnowledgeService {
       this.minio.client.removeObject(resource.storageKey),
       this.ragService.deleteResourceNodes(user, resourceId),
       this.elasticsearch.deleteResource(resourceId),
-      this.ssuQueue.add('syncStorageUsage', {
-        uid: user.uid,
-        timestamp: new Date(),
-      }),
+      this.syncStorageUsage(user),
     ]);
   }
 
@@ -501,7 +502,7 @@ export class KnowledgeService {
 
   async createDocument(user: User, param: UpsertDocumentRequest) {
     const usageResult = await this.subscriptionService.checkStorageUsage(user);
-    if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+    if (!usageResult.available) {
       throw new StorageQuotaExceeded();
     }
 
@@ -561,10 +562,7 @@ export class KnowledgeService {
       updatedAt: doc.updatedAt.toJSON(),
     });
 
-    await this.ssuQueue.add('syncStorageUsage', {
-      uid: user.uid,
-      timestamp: new Date(),
-    });
+    await this.syncStorageUsage(user);
 
     return doc;
   }
@@ -637,10 +635,7 @@ export class KnowledgeService {
     await Promise.all(cleanups);
 
     // Sync storage usage after all the cleanups
-    await this.ssuQueue.add('syncStorageUsage', {
-      uid: user.uid,
-      timestamp: new Date(),
-    });
+    await this.syncStorageUsage(user);
   }
 
   async queryReferences(

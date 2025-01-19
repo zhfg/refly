@@ -13,8 +13,9 @@ import { parseMarkdown } from '@refly-packages/utils/editor';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { prosemirrorToYXmlFragment } from 'y-prosemirror';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 
-const createLocalDocument = async (docId: string, title: string, content: string) => {
+const createLocalDocument = async (docId: string, title: string, content: string, refetchUsage: () => void) => {
   const ydoc = new Y.Doc();
   const localProvider = new IndexeddbPersistence(docId, ydoc);
 
@@ -28,6 +29,8 @@ const createLocalDocument = async (docId: string, title: string, content: string
 
   const node = parseMarkdown(content);
   prosemirrorToYXmlFragment(node, ydoc.getXmlFragment('default'));
+
+  refetchUsage();
 };
 
 export const useCreateDocument = () => {
@@ -35,6 +38,7 @@ export const useCreateDocument = () => {
   const { canvasId } = useCanvasContext();
   const { t } = useTranslation();
   const { addNode } = useAddNode();
+  const { refetchUsage } = useSubscriptionUsage();
 
   const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt } = useDocumentStoreShallow((state) => ({
     setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
@@ -52,7 +56,7 @@ export const useCreateDocument = () => {
       const docId = genDocumentID();
       const parsedContent = parseMarkdownCitationsAndCanvasTags(content, []);
 
-      await createLocalDocument(docId, title, parsedContent);
+      await createLocalDocument(docId, title, parsedContent, refetchUsage);
 
       setDocumentLocalSyncedAt(docId, Date.now());
       setDocumentRemoteSyncedAt(docId, Date.now());
@@ -106,7 +110,7 @@ export const useCreateDocument = () => {
     const docId = genDocumentID();
     const title = t('common.newDocument');
 
-    await createLocalDocument(docId, title, '');
+    await createLocalDocument(docId, title, '', refetchUsage);
 
     setDocumentLocalSyncedAt(docId, Date.now());
     setDocumentRemoteSyncedAt(docId, Date.now());
@@ -132,7 +136,7 @@ export const useCreateDocument = () => {
     const docId = genDocumentID();
     const newTitle = `${title} ${t('canvas.nodeActions.copy')}`;
 
-    await createLocalDocument(docId, newTitle, content);
+    await createLocalDocument(docId, newTitle, content, refetchUsage);
 
     setDocumentLocalSyncedAt(docId, Date.now());
     setDocumentRemoteSyncedAt(docId, Date.now());

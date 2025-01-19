@@ -901,6 +901,10 @@ export type ActionResult = {
    */
   title?: string;
   /**
+   * Model tier
+   */
+  tier?: ModelTier;
+  /**
    * Step status
    */
   status?: ActionStatus;
@@ -1027,19 +1031,39 @@ export type TokenUsageMeter = {
    */
   endAt?: string;
   /**
+   * Request count quota (T1)
+   */
+  t1CountQuota?: number;
+  /**
+   * Request count used (T1)
+   */
+  t1CountUsed?: number;
+  /**
    * Token quota (T1)
+   * @deprecated
    */
   t1TokenQuota: number;
   /**
    * Token used (T1)
+   * @deprecated
    */
   t1TokenUsed: number;
   /**
+   * Request count quota (T2)
+   */
+  t2CountQuota?: number;
+  /**
+   * Request count used (T2)
+   */
+  t2CountUsed?: number;
+  /**
    * Token quota (T2)
+   * @deprecated
    */
   t2TokenQuota: number;
   /**
    * Token used (T2)
+   * @deprecated
    */
   t2TokenUsed: number;
 };
@@ -1058,27 +1082,41 @@ export type StorageUsageMeter = {
    */
   subscriptionId?: string;
   /**
+   * File count used
+   */
+  fileCountUsed?: number;
+  /**
+   * File count quota
+   */
+  fileCountQuota?: number;
+  /**
    * Object storage quota (in bytes), including resource, canvas and static files
+   * @deprecated
    */
   objectStorageQuota: string;
   /**
    * Resource storage size in use (in bytes)
+   * @deprecated
    */
   resourceSize: string;
   /**
    * Canvas storage size in use (in bytes)
+   * @deprecated
    */
   canvasSize: string;
   /**
    * Static file storage size in use (in bytes)
+   * @deprecated
    */
   fileSize: string;
   /**
    * Vector storage quota (in bytes)
+   * @deprecated
    */
   vectorStorageQuota: string;
   /**
    * Vector storage size used (in bytes)
+   * @deprecated
    */
   vectorStorageUsed: string;
 };
