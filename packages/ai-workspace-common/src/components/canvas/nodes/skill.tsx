@@ -2,6 +2,7 @@ import { NodeProps, Position, useReactFlow } from '@xyflow/react';
 import { CanvasNode, CanvasNodeData, SkillNodeMeta } from './shared/types';
 import { Node } from '@xyflow/react';
 import { Button } from 'antd';
+import { Form, FormInstance } from '@arco-design/web-react';
 import { CustomHandle } from './shared/custom-handle';
 import { useState, useCallback, useEffect, useMemo, memo, useRef } from 'react';
 
@@ -22,6 +23,7 @@ import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/no
 import { createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { ContextManager } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/context-manager';
+import { ConfigManager } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/config-manager';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { usePatchNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-patch-node-data';
 import { useEdgeStyles } from '@refly-packages/ai-workspace-common/components/canvas/constants';
@@ -87,6 +89,8 @@ export const SkillNode = memo(
     const { getNode, getNodes, getEdges, addEdges, deleteElements } = useReactFlow();
     const { addNode } = useAddNode();
     const { deleteNode } = useDeleteNode();
+    const [form] = Form.useForm();
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
     // Add ref for ChatInput component
     const chatInputRef = useRef<HTMLDivElement>(null);
@@ -212,10 +216,29 @@ export const SkillNode = memo(
     }, [skillSelectedModel, modelInfo, setModelInfo]);
 
     const setSelectedSkill = useCallback(
-      (skill: Skill | null) => {
-        patchNodeData(id, { metadata: { selectedSkill: skill } });
+      (newSelectedSkill: Skill | null) => {
+        const selectedSkill = newSelectedSkill;
+
+        // Reset form when skill changes
+        if (selectedSkill?.configSchema?.items?.length) {
+          const defaultConfig = {};
+          selectedSkill.configSchema.items.forEach((item) => {
+            if (item.defaultValue !== undefined) {
+              defaultConfig[item.key] = {
+                value: item.defaultValue,
+                label: item.labelDict?.['en'] ?? item.key,
+                displayValue: String(item.defaultValue),
+              };
+            }
+          });
+          form.setFieldValue('tplConfig', defaultConfig);
+        } else {
+          form.setFieldValue('tplConfig', undefined);
+        }
+
+        patchNodeData(id, { metadata: { selectedSkill } });
       },
-      [id, updateNodeData],
+      [id, form, patchNodeData],
     );
 
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
@@ -235,6 +258,8 @@ export const SkillNode = memo(
       const data = node?.data as CanvasNodeData<SkillNodeMeta>;
       const { query = '', contextItems = [] } = data?.metadata ?? {};
 
+      const tplConfig = form.getFieldValue('tplConfig');
+
       deleteElements({ nodes: [node] });
 
       setTimeout(() => {
@@ -243,6 +268,7 @@ export const SkillNode = memo(
           {
             resultId,
             ...data?.metadata,
+            tplConfig,
           },
           {
             entityId: canvasId,
@@ -265,7 +291,7 @@ export const SkillNode = memo(
           convertContextItemsToNodeFilters(contextItems),
         );
       });
-    }, [id, getNode, deleteElements, invokeAction, canvasId, addNode]);
+    }, [id, getNode, deleteElements, invokeAction, canvasId, addNode, form]);
 
     const handleDelete = useCallback(() => {
       const currentNode = getNode(id);
@@ -344,6 +370,23 @@ export const SkillNode = memo(
                   setSelectedSkill(skill);
                 }}
               />
+
+              {selectedSkill?.configSchema?.items?.length > 0 && (
+                <ConfigManager
+                  key={selectedSkill?.name}
+                  form={form}
+                  formErrors={formErrors}
+                  setFormErrors={setFormErrors}
+                  schema={selectedSkill?.configSchema}
+                  tplConfig={selectedSkill?.tplConfig}
+                  fieldPrefix="tplConfig"
+                  configScope="runtime"
+                  resetConfig={() => {
+                    const defaultConfig = selectedSkill?.tplConfig ?? {};
+                    form.setFieldValue('tplConfig', defaultConfig);
+                  }}
+                />
+              )}
 
               <ChatActions
                 query={localQuery}
