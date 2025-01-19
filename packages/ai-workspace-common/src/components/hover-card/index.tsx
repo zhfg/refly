@@ -62,9 +62,9 @@ export const HoverCard: FC<HoverCardProps> = ({
   }, [handlePlay]);
 
   const renderContent = () => (
-    <div className="hover-card-content">
+    <div className="w-[325px] bg-white rounded-lg overflow-hidden">
       {videoUrl && (
-        <div className="hover-card-video">
+        <div className="p-3 pb-2 overflow-hidden">
           <video
             ref={videoRef}
             width="325"
@@ -75,12 +75,13 @@ export const HoverCard: FC<HoverCardProps> = ({
             loop
             playsInline
             onPlay={handlePlay}
+            className="w-full h-[216px] object-cover rounded-lg bg-black"
           />
         </div>
       )}
-      <div className="hover-card-info">
-        <h3 className="hover-card-title">{title}</h3>
-        <p className="hover-card-description">{description}</p>
+      <div className="px-4 py-3">
+        <h3 className="m-0 mb-2 text-base font-medium text-gray-800 leading-[1.4]">{title}</h3>
+        <p className="m-0 text-sm text-gray-500 leading-[1.5]">{description}</p>
       </div>
     </div>
   );
