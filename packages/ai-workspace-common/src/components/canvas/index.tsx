@@ -34,6 +34,7 @@ import {
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
 import { MultiSelectionMenus } from './multi-selection-menu';
+import { useCanvasTour, CanvasTour } from './joyride';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';
@@ -466,6 +467,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     [reactFlowInstance, nodes],
   );
 
+  const { runTour, stepIndex, steps, handleJoyrideCallback, handleStartTour } = useCanvasTour(nodes);
+
   return (
     <Spin
       className="w-full h-full"
@@ -473,6 +476,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       spinning={!hasCanvasSynced && provider.status !== 'connected' && !connectionTimeout}
       tip={connectionTimeout ? t('common.connectionFailed') : t('common.loading')}
     >
+      <CanvasTour steps={steps} run={runTour} stepIndex={stepIndex} callback={handleJoyrideCallback} />
       <div className="w-full h-screen relative flex flex-col overflow-hidden">
         <CanvasToolbar onToolSelect={handleToolSelect} />
         <TopToolbar canvasId={canvasId} />
@@ -512,6 +516,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
                 <div className="flex items-center justify-center text-gray-500 text-center">
                   <div className="text-[20px]">{t('canvas.emptyText')}</div>
                   <Button
+                    data-tour="create-document"
                     loading={isCreatingDocument}
                     icon={<HiOutlineDocumentAdd className="-mr-1 flex items-center justify-center" />}
                     type="text"
@@ -528,7 +533,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             {memoizedMiniMap}
           </ReactFlow>
 
-          <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} />
+          <LayoutControl mode={interactionMode} changeMode={toggleInteractionMode} onStartTour={handleStartTour} />
 
           {memoizedLaunchPad}
         </div>

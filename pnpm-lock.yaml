@@ -700,6 +700,9 @@ importers:
       react-infinite-scroll-component:
         specifier: ~6.1.0
         version: 6.1.0(react@18.3.1)
+      react-joyride:
+        specifier: ^2.9.3
+        version: 2.9.3(@types/react@18.3.10)(react-dom@18.3.1)(react@18.3.1)
       react-markdown:
         specifier: ^8.0.7
         version: 8.0.7(@types/react@18.3.10)(react@18.3.1)
@@ -773,6 +776,9 @@ importers:
       '@types/react-helmet':
         specifier: ^6.1.11
         version: 6.1.11
+      '@types/react-joyride':
+        specifier: ^2.0.5
+        version: 2.0.5(@types/react@18.3.10)(react-dom@18.3.1)(react@18.3.1)
       '@typescript-eslint/eslint-plugin':
         specifier: ^7.0.2
         version: 7.11.0(@typescript-eslint/parser@7.11.0)(eslint@8.57.1)(typescript@5.3.3)
@@ -1067,6 +1073,9 @@ importers:
       react-infinite-scroll-component:
         specifier: ~6.1.0
         version: 6.1.0(react@18.3.1)
+      react-joyride:
+        specifier: ^2.9.3
+        version: 2.9.3(@types/react@18.3.10)(react-dom@18.3.1)(react@18.3.1)
       react-markdown:
         specifier: ^8.0.7
         version: 8.0.7(@types/react@18.3.10)(react@18.3.1)
@@ -1176,6 +1185,9 @@ importers:
       '@types/react-helmet':
         specifier: ^6.1.11
         version: 6.1.11
+      '@types/react-joyride':
+        specifier: ^2.0.5
+        version: 2.0.5(@types/react@18.3.10)(react-dom@18.3.1)(react@18.3.1)
       '@typescript-eslint/eslint-plugin':
         specifier: ^7.2.0
         version: 7.11.0(@typescript-eslint/parser@7.11.0)(eslint@8.57.1)(typescript@5.3.3)
@@ -3250,6 +3262,12 @@ packages:
   /@floating-ui/utils@0.2.8:
     resolution: {integrity: sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==}
     dev: false
+
+  /@gilbarbara/deep-equal@0.1.2:
+    resolution: {integrity: sha512-jk+qzItoEb0D0xSSmrKDDzf9sheQj/BAPxlgNxgmOaA3mxpUa6ndJLYGZKsJnIVEQSD8zcTbyILz7I0HcnBCRA==}
+
+  /@gilbarbara/deep-equal@0.3.1:
+    resolution: {integrity: sha512-I7xWjLs2YSVMc5gGx1Z3ZG1lgFpITPndpi8Ku55GeEIKpACCPQNS/OTqQbxgTCfq0Ncvcc+CrFov96itVh6Qvw==}
 
   /@golevelup/nestjs-common@2.0.0(@nestjs/common@10.3.10):
     resolution: {integrity: sha512-D9RLXgkqn9SDLnZ2VoMER9l/+g5CM9Z7sZXa+10+0rZs6yevMepoiWmMVsFoUXLzYG2GwfixHLExwUr3XBCHFw==}
@@ -8939,6 +8957,17 @@ packages:
       '@types/react': 18.3.10
     dev: true
 
+  /@types/react-joyride@2.0.5(@types/react@18.3.10)(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-N3bd0w3D42gZRpXy/wYsSZ8JvhyuyN0qAFTkg2iNsJ1NueMqfI0TJL+BZhhFkAqNhEETJEpDc8t4bj3DEJyLoQ==}
+    deprecated: This is a stub types definition. react-joyride provides its own type definitions, so you do not need this installed.
+    dependencies:
+      react-joyride: 2.9.3(@types/react@18.3.10)(react-dom@18.3.1)(react@18.3.1)
+    transitivePeerDependencies:
+      - '@types/react'
+      - react
+      - react-dom
+    dev: true
+
   /@types/react-syntax-highlighter@15.5.13:
     resolution: {integrity: sha512-uLGJ87j6Sz8UaBAooU0T6lWJ0dBmjZgN1PZTrj05TNql2/XpC6+4HhMT5syIdFUUt+FASfCeLLv4kBygNU+8qA==}
     dependencies:
@@ -11240,6 +11269,9 @@ packages:
       babel-plugin-macros:
         optional: true
     dev: true
+
+  /deep-diff@1.0.2:
+    resolution: {integrity: sha512-aWS3UIVH+NPGCD1kki+DCU9Dua032iSsO43LqQpcs4R3+dVv7tX0qBGjiVHJHjplsoUM2XRO/KB92glqc68awg==}
 
   /deep-eql@4.1.4:
     resolution: {integrity: sha512-SUwdGfqdKOwxCPeVYjwSyRpJ7Z+fhpwIAtmCUdZIWZ/YP5R9WAsyuSgpLVDi9bjWoN2LXHNss/dk3urXtdQxGg==}
@@ -13722,6 +13754,12 @@ packages:
     engines: {node: '>=12'}
     dev: false
 
+  /is-lite@0.8.2:
+    resolution: {integrity: sha512-JZfH47qTsslwaAsqbMI3Q6HNNjUuq6Cmzzww50TdP5Esb6e1y2sK2UAaZZuzfAzpoI2AkxoPQapZdlDuP6Vlsw==}
+
+  /is-lite@1.2.1:
+    resolution: {integrity: sha512-pgF+L5bxC+10hLBgf6R2P4ZZUBOQIIacbdo8YvuCP8/JvsWxG7aZ9p10DYuLtifFci4l3VITphhMlMV4Y+urPw==}
+
   /is-negative-zero@2.0.3:
     resolution: {integrity: sha512-5KoIu2Ngpyek75jXodFvnafB6DJgr3u8uuK0LEZJjrU19DrMD3EVERaR8sjz8CCGgpZvxPl9SuE1GMVPFHx1mw==}
     engines: {node: '>= 0.4'}
@@ -15126,7 +15164,6 @@ packages:
     hasBin: true
     dependencies:
       js-tokens: 4.0.0
-    dev: false
 
   /loupe@2.3.7:
     resolution: {integrity: sha512-zSMINGVYkdpYSOBmLi0D1Uo7JU9nVdQKrHxC8eYlV+9YKK9WePqAlL7lSlorG/U2Fw1w0hTBmaa/jrQ3UbPHtA==}
@@ -17020,6 +17057,10 @@ packages:
       fsevents: 2.3.2
     dev: false
 
+  /popper.js@1.16.1:
+    resolution: {integrity: sha512-Wb4p1J4zyFTbM+u6WuO4XstYx4Ky9Cewe4DWrel7B0w6VVICvPwdOpotjzcf6eD8TsckVnIMNONQyPIUFOUbCQ==}
+    deprecated: You can find the new Popper v2 at @popperjs/core, this package is dedicated to the legacy v1
+
   /portfinder@1.0.32:
     resolution: {integrity: sha512-on2ZJVVDXRADWE6jnQaX0ioEylzgBpQk8r55NE4wjXW1ZxO+BgDlY6DXwj20i0V8eB4SenDQ00WEaxfiIQPcxg==}
     engines: {node: '>= 0.12.0'}
@@ -17359,7 +17400,6 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       react-is: 16.13.1
-    dev: false
 
   /property-information@5.6.0:
     resolution: {integrity: sha512-YUHSPk+A30YPv+0Qf8i9Mbfe/C0hdPXk1s1jPVToV8pk8BQtpw10ct89Eo7OWkutrwqvT0eicAxlOg3dOAu8JA==}
@@ -18235,7 +18275,6 @@ packages:
       loose-envify: 1.4.0
       react: 18.3.1
       scheduler: 0.23.2
-    dev: false
 
   /react-draggable@4.4.6(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-LtY5Xw1zTPqHkVmtM3X8MUOxNDOUhv/khTgBgrUvwaS064bwVvxT+q5El0uUFNx5IEPKXuRejr7UqLwBIg5pdw==}
@@ -18261,6 +18300,20 @@ packages:
   /react-fast-compare@3.2.2:
     resolution: {integrity: sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==}
     dev: false
+
+  /react-floater@0.7.9(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-NXqyp9o8FAXOATOEo0ZpyaQ2KPb4cmPMXGWkx377QtJkIXHlHRAGer7ai0r0C1kG5gf+KJ6Gy+gdNIiosvSicg==}
+    peerDependencies:
+      react: 15 - 18
+      react-dom: 15 - 18
+    dependencies:
+      deepmerge: 4.3.1
+      is-lite: 0.8.2
+      popper.js: 1.16.1
+      prop-types: 15.8.1
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      tree-changes: 0.9.3
 
   /react-focus-lock@2.13.2(@types/react@18.3.10)(react@18.3.1):
     resolution: {integrity: sha512-T/7bsofxYqnod2xadvuwjGKHOoL5GH7/EIPI5UyEvaU/c2CcphvGI371opFtuY/SYdbMsNiuF4HsHQ50nA/TKQ==}
@@ -18330,12 +18383,42 @@ packages:
       throttle-debounce: 2.3.0
     dev: false
 
+  /react-innertext@1.1.5(@types/react@18.3.10)(react@18.3.1):
+    resolution: {integrity: sha512-PWAqdqhxhHIv80dT9znP2KvS+hfkbRovFp4zFYHFFlOoQLRiawIic81gKb3U1wEyJZgMwgs3JoLtwryASRWP3Q==}
+    peerDependencies:
+      '@types/react': '>=0.0.0 <=99'
+      react: '>=0.0.0 <=99'
+    dependencies:
+      '@types/react': 18.3.10
+      react: 18.3.1
+
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
-    dev: false
 
   /react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
+
+  /react-joyride@2.9.3(@types/react@18.3.10)(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-1+Mg34XK5zaqJ63eeBhqdbk7dlGCFp36FXwsEvgpjqrtyywX2C6h9vr3jgxP0bGHCw8Ilsp/nRDzNVq6HJ3rNw==}
+    peerDependencies:
+      react: 15 - 18
+      react-dom: 15 - 18
+    dependencies:
+      '@gilbarbara/deep-equal': 0.3.1
+      deep-diff: 1.0.2
+      deepmerge: 4.3.1
+      is-lite: 1.2.1
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      react-floater: 0.7.9(react-dom@18.3.1)(react@18.3.1)
+      react-innertext: 1.1.5(@types/react@18.3.10)(react@18.3.1)
+      react-is: 16.13.1
+      scroll: 3.0.1
+      scrollparent: 2.1.0
+      tree-changes: 0.11.3
+      type-fest: 4.32.0
+    transitivePeerDependencies:
+      - '@types/react'
 
   /react-markdown@8.0.7(@types/react@18.3.10)(react@18.3.1):
     resolution: {integrity: sha512-bvWbzG4MtOU62XqBx3Xx+zB2raaFFsq4mYiAzfjXJMEz2sixgeAfraA3tvzULF02ZdOMUOKTBFFaZJDDrq+BJQ==}
@@ -18577,7 +18660,6 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       loose-envify: 1.4.0
-    dev: false
 
   /read-cache@1.0.0:
     resolution: {integrity: sha512-Owdv/Ft7IjOgm/i0xvNDZ1LrRANRfew4b2prF3OWMQLxLfu3bS8FVhCsrSCMK4lR56Y9ya+AThoTpDCTxCmpRA==}
@@ -19125,7 +19207,6 @@ packages:
     resolution: {integrity: sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==}
     dependencies:
       loose-envify: 1.4.0
-    dev: false
 
   /screenfull@5.2.0:
     resolution: {integrity: sha512-9BakfsO2aUQN2K9Fdbj87RJIEZ82Q9IGim7FqM5OsebfoFC6ZHXgDq/KvniuLTPdeM8wY2o6Dj3WQ7KeQCj3cA==}
@@ -19143,6 +19224,12 @@ packages:
     dependencies:
       compute-scroll-into-view: 3.1.0
     dev: false
+
+  /scroll@3.0.1:
+    resolution: {integrity: sha512-pz7y517OVls1maEzlirKO5nPYle9AXsFzTMNJrRGmT951mzpIBy7sNHOg5o/0MQd/NqliCiWnAi0kZneMPFLcg==}
+
+  /scrollparent@2.1.0:
+    resolution: {integrity: sha512-bnnvJL28/Rtz/kz2+4wpBjHzWoEzXhVg/TE8BeVGJHUqE8THNIRnDxDWMktwM+qahvlRdvlLdsQfYe+cuqfZeA==}
 
   /scule@1.3.0:
     resolution: {integrity: sha512-6FtHJEvt+pVMIB9IBY+IcCJ6Z5f1iQnytgyfKMhDKgmzYG+TeH/wx1y3l27rshSbLiSanrR9ffZDrEsmjlQF2g==}
@@ -20170,6 +20257,18 @@ packages:
       punycode: 2.3.1
     dev: true
 
+  /tree-changes@0.11.3:
+    resolution: {integrity: sha512-r14mvDZ6tqz8PRQmlFKjhUVngu4VZ9d92ON3tp0EGpFBE6PAHOq8Bx8m8ahbNoGE3uI/npjYcJiqVydyOiYXag==}
+    dependencies:
+      '@gilbarbara/deep-equal': 0.3.1
+      is-lite: 1.2.1
+
+  /tree-changes@0.9.3:
+    resolution: {integrity: sha512-vvvS+O6kEeGRzMglTKbc19ltLWNtmNt1cpBoSYLj/iEcPVvpJasemKOlxBrmZaCtDJoF+4bwv3m01UKYi8mukQ==}
+    dependencies:
+      '@gilbarbara/deep-equal': 0.1.2
+      is-lite: 0.8.2
+
   /tree-kill@1.2.2:
     resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
     hasBin: true
@@ -20494,6 +20593,10 @@ packages:
     resolution: {integrity: sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==}
     engines: {node: '>=14.16'}
     dev: false
+
+  /type-fest@4.32.0:
+    resolution: {integrity: sha512-rfgpoi08xagF3JSdtJlCwMq9DGNDE0IMh3Mkpc1wUypg9vPi786AiqeBBKcqvIkq42azsBM85N490fyZjeUftw==}
+    engines: {node: '>=16'}
 
   /type-is@1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}

@@ -21,18 +21,18 @@ import {
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { IoAnalyticsOutline } from 'react-icons/io5';
+import { TbPlugConnected } from 'react-icons/tb';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
-import { ToolButton } from './tool-button';
-import { TbPlugConnected } from 'react-icons/tb';
+import { ToolButton, ToolbarItem } from './tool-button';
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { genMemoID, genSkillID } from '@refly-packages/utils/id';
 
 interface ToolbarItem {
   type: 'button' | 'popover' | 'divider';
   icon?: React.ElementType;
-  value?: string;
+  value?: ToolValue;
   isPrimary?: boolean;
   domain?: string;
   tooltip?: string;

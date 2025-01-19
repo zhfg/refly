@@ -4,6 +4,7 @@ import { MdOutlineMouse } from 'react-icons/md';
 import { LuTouchpad } from 'react-icons/lu';
 import { LuLayoutDashboard } from 'react-icons/lu';
 import { RiFullscreenFill } from 'react-icons/ri';
+import { FiHelpCircle } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { LuZoomIn, LuZoomOut } from 'react-icons/lu';
 import { IconDown } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -18,6 +19,7 @@ import { IconExpand, IconShrink } from '@refly-packages/ai-workspace-common/comp
 interface LayoutControlProps {
   mode: 'mouse' | 'touchpad';
   changeMode: (mode: 'mouse' | 'touchpad') => void;
+  onStartTour?: () => void;
 }
 
 const iconClass = 'flex items-center justify-center';
@@ -145,7 +147,7 @@ const ZoomControls = memo(({ currentZoom, onZoomIn, onZoomOut, canZoomIn, canZoo
 ));
 ZoomControls.displayName = 'ZoomControls';
 
-export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeMode }) => {
+export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeMode, onStartTour }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { onLayout } = useCanvasLayout();
@@ -242,6 +244,22 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
     updateAllNodesSizeMode(newMode);
   }, [nodeSizeMode, setNodeSizeMode, updateAllNodesSizeMode]);
 
+  const helpMenuItems = useMemo(
+    () => [
+      {
+        key: 'docs',
+        label: <Space>{t('canvas.toolbar.openDocs')}</Space>,
+        onClick: () => window.open('https://docs.refly.ai', '_blank'),
+      },
+      {
+        key: 'tour',
+        label: <Space>{t('canvas.toolbar.startTour')}</Space>,
+        onClick: onStartTour,
+      },
+    ],
+    [t, onStartTour],
+  );
+
   return (
     <div className="absolute bottom-2 left-2.5 px-1 h-[32px] border-box flex items-center justify-center bg-white rounded-md shadow-md">
       <ZoomControls
@@ -264,6 +282,16 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
       />
 
       <ModeSelector mode={mode} open={open} setOpen={setOpen} items={items} onModeChange={changeMode} t={t} />
+
+      <Divider type="vertical" className="h-full mx-0.5" />
+
+      <Dropdown menu={{ items: helpMenuItems }} trigger={['click']}>
+        <Tooltip title={t('canvas.toolbar.tooltip.help')} arrow={false}>
+          <Button type="text" className={buttonClass}>
+            <FiHelpCircle className={iconClass} size={16} />
+          </Button>
+        </Tooltip>
+      </Dropdown>
     </div>
   );
 });

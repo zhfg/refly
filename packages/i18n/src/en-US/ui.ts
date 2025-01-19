@@ -587,7 +587,10 @@ const translations = {
         fitView: 'Fit View',
         layout: 'Auto Layout',
         mode: 'Interaction Mode',
+        help: 'Help & Documentation',
       },
+      openDocs: 'Open Documentation',
+      startTour: 'Start Product Tour',
     },
     connectionTimeout: {
       title: 'Connection Timeout',
@@ -1661,6 +1664,11 @@ const translations = {
     submit: 'Verify',
     success: 'Verification successful',
     error: 'Verification failed. Please try again.',
+  },
+  tour: {
+    newCanvas: 'Click here to create a new canvas where you can organize your content.',
+    createDocument: 'Create your first document to start writing and organizing your thoughts.',
+    askAI: 'Click here to ask AI for help with your writing, research, or any other questions.',
   },
 };
 

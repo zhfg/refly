@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react"
 import { Menu } from "@arco-design/web-react"
-import { Alert, Avatar, Button, Layout, Skeleton, Divider } from "antd"
+import { Avatar, Button, Layout, Skeleton, Divider } from "antd"
 import {
   useLocation,
   useNavigate,
@@ -169,7 +169,8 @@ const NewCanvasItem = () => {
     <MenuItem
       key="newCanvas"
       className="ml-2.5 flex h-8 items-center"
-      onClick={debouncedCreateCanvas}>
+      onClick={debouncedCreateCanvas}
+      data-tour="new-canvas">
       <Button
         loading={createCanvasLoading}
         type="text"

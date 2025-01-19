@@ -578,7 +578,10 @@ const translations = {
         fitView: '适应画布',
         layout: '自动布局',
         mode: '交互模式',
+        help: '帮助与文档',
       },
+      openDocs: '打开文档',
+      startTour: '开始产品导览',
     },
     connectionTimeout: {
       title: '连接超时',
@@ -1624,6 +1627,11 @@ const translations = {
   deck: {
     references: '引用',
     referencedBy: '被引用',
+  },
+  tour: {
+    newCanvas: '点击此处创建一个新的画布，您可以在这里组织您的内容。',
+    createDocument: '创建您的第一篇文档，开始写作和组织您的想法。',
+    askAI: '点击此处向 AI 寻求帮助，无论是写作、研究还是其他问题。',
   },
 };
 
