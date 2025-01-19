@@ -218,7 +218,7 @@ export const useInvokeAction = () => {
       });
     }
 
-    setTimeout(() => refetchUsage(), 2000);
+    refetchUsage();
   };
 
   const onSkillError = (skillEvent: SkillEvent) => {

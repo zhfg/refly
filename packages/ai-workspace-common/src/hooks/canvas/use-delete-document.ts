@@ -36,14 +36,7 @@ export const useDeleteDocument = () => {
       }
     } finally {
       setIsRemoving(false);
-
-      setTimeout(async () => {
-        try {
-          await refetchUsage();
-        } catch (error) {
-          console.error('Failed to refetch usage:', error);
-        }
-      }, 2000);
+      refetchUsage();
     }
     return success;
   };

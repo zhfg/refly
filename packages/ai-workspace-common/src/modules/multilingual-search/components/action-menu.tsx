@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Affix, Button, Checkbox, message } from 'antd';
 import { useMultilingualSearchStore } from '../stores/multilingual-search';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,7 @@ import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
-import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 
 export enum ImportActionMode {
   CREATE_RESOURCE = 'createResource',
@@ -31,6 +31,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
     updateSourceListDrawer: state.updateSourceListDrawer,
   }));
   const { addNode } = useAddNode();
+  const { refetchUsage } = useSubscriptionUsage();
 
   const { selectedItems, results, setSelectedItems } = useMultilingualSearchStore();
   const { setImportResourceModalVisible, insertNodePosition } = useImportResourceStoreShallow((state) => ({
@@ -74,6 +75,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
       });
 
       if (data?.success) {
+        refetchUsage();
         getLibraryList();
         message.success(t('common.putSuccess'));
         setSelectedItems([]);

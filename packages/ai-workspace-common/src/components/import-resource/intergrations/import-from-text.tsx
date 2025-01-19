@@ -1,6 +1,5 @@
 import { Form } from '@arco-design/web-react';
-import { Button, Divider, Input, message } from 'antd';
-import { HiOutlinePencil } from 'react-icons/hi';
+import { Button, Input, message } from 'antd';
 import { useEffect, useState } from 'react';
 
 // utils
@@ -15,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { TbClipboard } from 'react-icons/tb';
+import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
@@ -24,6 +24,7 @@ export const ImportFromText = () => {
   const importResourceStore = useImportResourceStore();
   const { copiedTextPayload } = useImportResourceStore.getState();
   const { addNode } = useAddNode();
+  const { refetchUsage } = useSubscriptionUsage();
   const { insertNodePosition } = useImportResourceStoreShallow((state) => ({
     insertNodePosition: state.insertNodePosition,
   }));
@@ -56,6 +57,7 @@ export const ImportFromText = () => {
     importResourceStore.setImportResourceModalVisible(false);
 
     if (data?.success) {
+      refetchUsage();
       getLibraryList();
       addNode({
         type: 'resource',

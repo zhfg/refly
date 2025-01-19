@@ -4,7 +4,7 @@ export const useSubscriptionUsage = () => {
   const {
     data,
     isLoading: isUsageLoading,
-    refetch: refetchUsage,
+    refetch,
   } = useGetSubscriptionUsage({}, [], {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -13,6 +13,15 @@ export const useSubscriptionUsage = () => {
     gcTime: 60 * 1000, // Cache for 1 minute
   });
   const { token, storage } = data?.data ?? {};
+
+  const refetchUsage = () =>
+    setTimeout(async () => {
+      try {
+        await refetch();
+      } catch (error) {
+        console.error('Failed to refetch usage:', error);
+      }
+    }, 2000);
 
   return { tokenUsage: token, storageUsage: storage, isUsageLoading, refetchUsage };
 };

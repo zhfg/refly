@@ -15,7 +15,7 @@ import { prosemirrorToYXmlFragment } from 'y-prosemirror';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 
-const createLocalDocument = async (docId: string, title: string, content: string, refetchUsage: () => Promise<any>) => {
+const createLocalDocument = async (docId: string, title: string, content: string, refetchUsage: () => void) => {
   const ydoc = new Y.Doc();
   const localProvider = new IndexeddbPersistence(docId, ydoc);
 
@@ -30,13 +30,7 @@ const createLocalDocument = async (docId: string, title: string, content: string
   const node = parseMarkdown(content);
   prosemirrorToYXmlFragment(node, ydoc.getXmlFragment('default'));
 
-  setTimeout(async () => {
-    try {
-      await refetchUsage();
-    } catch (error) {
-      console.error('Failed to refetch usage:', error);
-    }
-  }, 2000);
+  refetchUsage();
 };
 
 export const useCreateDocument = () => {

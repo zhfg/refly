@@ -14,28 +14,16 @@ import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { Resource } from '@refly/openapi-schema';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 
 const { Meta } = Card;
 
-export const ResourceList = () => {
-  const { t, i18n } = useTranslation();
-  const language = i18n.languages?.[0];
-  const { showLibraryModal, setShowLibraryModal } = useSiderStoreShallow((state) => ({
-    showLibraryModal: state.showLibraryModal,
+const ActionView = ({ resource }: { resource: Resource }) => {
+  const { t } = useTranslation();
+  const { addNode } = useAddNode();
+  const { setShowLibraryModal } = useSiderStoreShallow((state) => ({
     setShowLibraryModal: state.setShowLibraryModal,
   }));
-  const { addNode } = useAddNode();
-
-  const { getLibraryList } = useHandleSiderData();
-  const { dataList, setDataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
-    fetchData: async (queryPayload) => {
-      const res = await getClient().listResources({
-        query: queryPayload,
-      });
-      return res?.data;
-    },
-    pageSize: 20,
-  });
 
   const handleEdit = (resource: Resource) => {
     addNode({
@@ -49,69 +37,98 @@ export const ResourceList = () => {
     setShowLibraryModal(false);
   };
 
-  const ActionView = ({ resource }: { resource: Resource }) => {
-    return (
-      <Tooltip title={t('workspace.addToCanvas')}>
-        <Button type="text" icon={<IconEdit />} onClick={() => handleEdit(resource)} />
-      </Tooltip>
-    );
-  };
+  return (
+    <Tooltip title={t('workspace.addToCanvas')}>
+      <Button type="text" icon={<IconEdit />} onClick={() => handleEdit(resource)} />
+    </Tooltip>
+  );
+};
 
-  const ActionDropdown = ({ resource }: { resource: Resource }) => {
-    const [popupVisible, setPopupVisible] = useState(false);
-
-    const handleDelete = async () => {
-      const { data } = await getClient().deleteResource({
-        body: {
-          resourceId: resource.resourceId,
-        },
+const ActionDropdown = ({ resource }: { resource: Resource }) => {
+  const { t } = useTranslation();
+  const [popupVisible, setPopupVisible] = useState(false);
+  const { refetchUsage } = useSubscriptionUsage();
+  const { getLibraryList } = useHandleSiderData();
+  const { dataList, setDataList } = useFetchDataList({
+    fetchData: async (queryPayload) => {
+      const res = await getClient().listResources({
+        query: queryPayload,
       });
-      if (data?.success) {
-        message.success(t('common.putSuccess'));
-        setDataList(dataList.filter((n) => n.resourceId !== resource.resourceId));
-        getLibraryList();
-      }
-    };
+      return res?.data;
+    },
+    pageSize: 20,
+  });
 
-    const items: MenuProps['items'] = [
-      {
-        label: (
-          <Popconfirm
-            title={t('workspace.deleteDropdownMenu.deleteConfirmForResource')}
-            onConfirm={handleDelete}
-            onCancel={() => setPopupVisible(false)}
-            okText={t('common.confirm')}
-            cancelText={t('common.cancel')}
-          >
-            <div className="flex items-center text-red-600">
-              <IconDelete size={16} className="mr-2" />
-              {t('workspace.deleteDropdownMenu.delete')}
-            </div>
-          </Popconfirm>
-        ),
-        key: 'delete',
+  const handleDelete = async () => {
+    const { data } = await getClient().deleteResource({
+      body: {
+        resourceId: resource.resourceId,
       },
-    ];
-
-    const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
-      if (info.source === 'trigger') {
-        setPopupVisible(open);
-      }
-    };
-
-    return (
-      <Dropdown
-        trigger={['click']}
-        open={popupVisible}
-        onOpenChange={handleOpenChange}
-        menu={{
-          items,
-        }}
-      >
-        <Button type="text" icon={<IconMoreHorizontal />} />
-      </Dropdown>
-    );
+    });
+    if (data?.success) {
+      message.success(t('common.putSuccess'));
+      refetchUsage();
+      setDataList(dataList.filter((n) => n.resourceId !== resource.resourceId));
+      getLibraryList();
+    }
   };
+
+  const items: MenuProps['items'] = [
+    {
+      label: (
+        <Popconfirm
+          title={t('workspace.deleteDropdownMenu.deleteConfirmForResource')}
+          onConfirm={handleDelete}
+          onCancel={() => setPopupVisible(false)}
+          okText={t('common.confirm')}
+          cancelText={t('common.cancel')}
+        >
+          <div className="flex items-center text-red-600">
+            <IconDelete size={16} className="mr-2" />
+            {t('workspace.deleteDropdownMenu.delete')}
+          </div>
+        </Popconfirm>
+      ),
+      key: 'delete',
+    },
+  ];
+
+  const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
+    if (info.source === 'trigger') {
+      setPopupVisible(open);
+    }
+  };
+
+  return (
+    <Dropdown
+      trigger={['click']}
+      open={popupVisible}
+      onOpenChange={handleOpenChange}
+      menu={{
+        items,
+      }}
+    >
+      <Button type="text" icon={<IconMoreHorizontal />} />
+    </Dropdown>
+  );
+};
+
+export const ResourceList = () => {
+  const { t, i18n } = useTranslation();
+  const language = i18n.languages?.[0];
+  const { showLibraryModal } = useSiderStoreShallow((state) => ({
+    showLibraryModal: state.showLibraryModal,
+  }));
+
+  const { dataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
+    fetchData: async (queryPayload) => {
+      const res = await getClient().listResources({
+        query: queryPayload,
+      });
+      return res?.data;
+    },
+    pageSize: 20,
+  });
 
   useEffect(() => {
     if (showLibraryModal) {

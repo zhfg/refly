@@ -16,6 +16,7 @@ import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 
 const { TextArea } = Input;
 
@@ -31,6 +32,7 @@ export const ImportFromWeblink = () => {
     }));
 
   const { addNode } = useAddNode();
+  const { refetchUsage } = useSubscriptionUsage();
 
   const [saveLoading, setSaveLoading] = useState(false);
   const { getLibraryList } = useHandleSiderData();
@@ -125,6 +127,8 @@ export const ImportFromWeblink = () => {
     if (!data?.success) {
       return;
     }
+
+    refetchUsage();
     getLibraryList();
     message.success(t('common.putSuccess'));
     setScrapeLinks([]);
