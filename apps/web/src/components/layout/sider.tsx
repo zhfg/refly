@@ -398,7 +398,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                   />
                 </a> */}
 
-                <Alert
+                {/* <Alert
                   message={
                     <div className="flex cursor-pointer items-center justify-center">
                       <a href="https://docs.refly.ai" target="_blank">
@@ -411,7 +411,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                   }
                   type="info"
                   closable
-                />
+                /> */}
 
                 {planType === "free" && <SubscriptionHint />}
               </div>

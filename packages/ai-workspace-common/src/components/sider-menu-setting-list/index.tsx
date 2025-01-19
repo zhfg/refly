@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { MenuProps, Dropdown } from 'antd';
-import { LuSettings, LuLogOut, LuCreditCard } from 'react-icons/lu';
+import { LuSettings, LuLogOut, LuCircleHelp } from 'react-icons/lu';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useLogout } from '@refly-packages/ai-workspace-common/hooks/use-logout';
@@ -31,29 +31,31 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
       type: 'divider',
     },
     {
-      key: 'subscription',
-      icon: <LuCreditCard />,
-      label: t('loggedHomePage.siderMenu.subscription'),
-    },
-    {
       key: 'settings',
       icon: <LuSettings />,
       label: t('loggedHomePage.siderMenu.settings'),
     },
     {
-      key: 'logout',
-      icon: <LuLogOut />,
-      label: t('loggedHomePage.siderMenu.logout'),
+      key: 'documentation',
+      icon: <LuCircleHelp />,
+      label: t('loggedHomePage.siderMenu.documentation'),
     },
     {
       key: 'getHelp',
       icon: <IconDiscord />,
       label: t('loggedHomePage.siderMenu.getHelp'),
     },
+    {
+      key: 'logout',
+      icon: <LuLogOut />,
+      label: t('loggedHomePage.siderMenu.logout'),
+    },
   ];
 
   const handleMenuClick = (key: string) => {
-    if (key === 'settings' || key === 'subscription') {
+    if (key === 'documentation') {
+      window.open(`https://docs.refly.ai`, '_blank');
+    } else if (key === 'settings') {
       setShowSettingModal(true);
     } else if (key === 'logout') {
       handleLogout();

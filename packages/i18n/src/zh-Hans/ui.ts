@@ -809,7 +809,7 @@ const translations = {
       },
     },
     siderMenu: {
-      subscription: '订阅',
+      documentation: '帮助文档',
       canvas: '画布',
       newCanvas: '新建画布',
       news: '新特性',

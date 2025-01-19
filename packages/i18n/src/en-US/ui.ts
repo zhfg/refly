@@ -811,7 +811,7 @@ const translations = {
       },
     },
     siderMenu: {
-      subscription: 'Subscription',
+      documentation: 'Documentation',
       canvas: 'Canvas',
       newCanvas: 'New Canvas',
       news: "What's new?",
