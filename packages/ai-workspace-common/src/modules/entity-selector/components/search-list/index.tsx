@@ -123,7 +123,6 @@ export const SearchList = (props: SearchListProps) => {
   };
 
   const handleItemClick = (item: ContextItem) => {
-    console.log('skill', item.title);
     if (mode === 'single') {
       handleConfirm?.([item]);
       setOpen(false);

@@ -9,8 +9,7 @@ import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/par
 import { mapDefaultLocale } from '@refly-packages/ai-workspace-common/utils/locale';
 import { LOCALE } from '@refly/common-types';
 import { GetUserSettingsResponse } from '@refly/openapi-schema';
-import { LEGACY_TOKEN_COOKIE, UID_COOKIE } from '@refly-packages/utils/cookie';
-import { refreshToken } from '@refly-packages/ai-workspace-common/utils/auth';
+import { UID_COOKIE } from '@refly-packages/utils/cookie';
 
 export const useGetUserSettings = () => {
   const userStore = useUserStoreShallow((state) => ({
@@ -25,15 +24,8 @@ export const useGetUserSettings = () => {
   const navigate = useNavigate();
 
   const [uid] = useCookie(UID_COOKIE);
-  const [legacyToken] = useCookie(LEGACY_TOKEN_COOKIE);
 
-  useEffect(() => {
-    if (legacyToken) {
-      refreshToken();
-    }
-  }, [legacyToken]);
-
-  const hasLoginCredentials = !!uid || !!legacyToken;
+  const hasLoginCredentials = !!uid;
 
   const { i18n } = useTranslation();
 

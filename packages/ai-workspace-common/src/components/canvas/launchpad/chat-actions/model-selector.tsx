@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo, useCallback, memo } from 'react';
 import { Button, Dropdown, DropdownProps, MenuProps, Progress, Skeleton, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { IconDown } from '@arco-design/web-react/icon';
-import classNames from 'classnames';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
@@ -10,10 +9,11 @@ import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common
 import { PiWarningCircleBold } from 'react-icons/pi';
 import { ModelInfo, TokenUsageMeter } from '@refly/openapi-schema';
 import { IconModel, ModelProviderIcons } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { useGetSubscriptionUsage, useListModels } from '@refly-packages/ai-workspace-common/queries';
+import { useListModels } from '@refly-packages/ai-workspace-common/queries';
 import { IconSubscription } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { LuInfinity } from 'react-icons/lu';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 
 interface ModelSelectorProps {
   model: ModelInfo | null;
@@ -113,8 +113,8 @@ const GroupHeader = memo(
             </Button>
           ) : (
             <UsageProgress
-              used={tokenUsage?.t1TokenUsed}
-              quota={tokenUsage?.t1TokenQuota}
+              used={tokenUsage?.t1CountUsed}
+              quota={tokenUsage?.t1CountQuota}
               setDropdownOpen={setDropdownOpen}
             />
           )}
@@ -127,8 +127,8 @@ const GroupHeader = memo(
         <div className="flex justify-between items-center">
           <div className="text-sm">{t('copilot.modelSelector.standard')}</div>
           <UsageProgress
-            used={tokenUsage?.t2TokenUsed}
-            quota={tokenUsage?.t2TokenQuota}
+            used={tokenUsage?.t2CountUsed}
+            quota={tokenUsage?.t2CountQuota}
             setDropdownOpen={setDropdownOpen}
           />
         </div>
@@ -189,23 +189,16 @@ export const ModelSelector = memo(
       gcTime: 10 * 60 * 1000, // Cache for 10 minutes
     });
 
-    const { data: tokenUsageData, isLoading: isTokenUsageLoading } = useGetSubscriptionUsage({}, [], {
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      staleTime: 60 * 1000, // Consider data fresh for 1 minute
-      gcTime: 5 * 60 * 1000, // Cache for 5 minutes
-    });
+    const { tokenUsage, isUsageLoading, refetchUsage } = useSubscriptionUsage();
 
     const modelList = useMemo(() => modelListData?.data, [modelListData?.data]);
-    const tokenUsage = useMemo(() => tokenUsageData?.data?.token, [tokenUsageData?.data?.token]);
     const t1Disabled = useMemo(
-      () => tokenUsage?.t1TokenUsed >= tokenUsage?.t1TokenQuota && tokenUsage?.t1TokenQuota >= 0,
-      [tokenUsage?.t1TokenUsed, tokenUsage?.t1TokenQuota],
+      () => tokenUsage?.t1CountUsed >= tokenUsage?.t1CountQuota && tokenUsage?.t1CountQuota >= 0,
+      [tokenUsage?.t1CountUsed, tokenUsage?.t1CountQuota],
     );
     const t2Disabled = useMemo(
-      () => tokenUsage?.t2TokenUsed >= tokenUsage?.t2TokenQuota && tokenUsage?.t2TokenQuota >= 0,
-      [tokenUsage?.t2TokenUsed, tokenUsage?.t2TokenQuota],
+      () => tokenUsage?.t2CountUsed >= tokenUsage?.t2CountQuota && tokenUsage?.t2CountQuota >= 0,
+      [tokenUsage?.t2CountUsed, tokenUsage?.t2CountQuota],
     );
 
     const planTier = useMemo(
@@ -315,9 +308,9 @@ export const ModelSelector = memo(
     const isModelDisabled = useCallback((meter: TokenUsageMeter, model: ModelInfo) => {
       if (meter && model) {
         if (model.tier === 't1') {
-          return meter.t1TokenUsed >= meter.t1TokenQuota && meter.t1TokenQuota > 0;
+          return meter.t1CountUsed >= meter.t1CountQuota && meter.t1CountQuota >= 0;
         } else if (model.tier === 't2') {
-          return meter.t2TokenUsed >= meter.t2TokenQuota && meter.t2TokenQuota > 0;
+          return meter.t2CountUsed >= meter.t2CountQuota && meter.t2CountQuota >= 0;
         }
       }
       return false;
@@ -344,7 +337,7 @@ export const ModelSelector = memo(
       [modelList, setModel],
     );
 
-    if (isModelListLoading || isTokenUsageLoading) {
+    if (isModelListLoading || isUsageLoading) {
       return <Skeleton className="w-28" active paragraph={false} />;
     }
 

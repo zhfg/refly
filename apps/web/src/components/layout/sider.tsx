@@ -31,6 +31,11 @@ import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/canva
 import { IconLibrary } from "@refly-packages/ai-workspace-common/components/common/icon"
 import { CanvasActionDropdown } from "@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown"
 import { AiOutlineMenuFold, AiOutlineUser } from "react-icons/ai"
+import { SubscriptionHint } from "@refly-packages/ai-workspace-common/components/subscription/hint"
+import {
+  HoverCard,
+  HoverContent,
+} from "@refly-packages/ai-workspace-common/components/hover-card"
 
 const Sider = Layout.Sider
 const MenuItem = Menu.Item
@@ -70,9 +75,11 @@ const MenuItemTooltipContent = (props: { title: string }) => {
 }
 
 const SettingItem = () => {
-  const userStore = useUserStoreShallow(state => ({
+  const { userProfile } = useUserStoreShallow(state => ({
     userProfile: state.userProfile,
   }))
+  const planType = userProfile?.subscription?.planType || "free"
+
   const { t } = useTranslation()
 
   return (
@@ -82,18 +89,16 @@ const SettingItem = () => {
           <div className="flex items-center">
             <Avatar
               size={32}
-              src={userStore?.userProfile?.avatar}
+              src={userProfile?.avatar}
               icon={<AiOutlineUser />}
             />
             <span className="ml-2 max-w-[80px] truncate font-semibold text-gray-600">
-              {userStore?.userProfile?.nickname}
+              {userProfile?.nickname}
             </span>
           </div>
 
           <div className="flex h-6 items-center justify-center rounded-full bg-gray-100 px-3 text-xs font-medium group-hover:bg-white">
-            {t(
-              `settings.subscription.subscriptionStatus.${userStore?.userProfile?.subscription?.planType || "free"}`,
-            )}
+            {t(`settings.subscription.subscriptionStatus.${planType}`)}
           </div>
         </div>
       </SiderMenuSettingList>
@@ -107,8 +112,9 @@ const MenuItemContent = (props: {
   type: string
   collapse?: boolean
   position?: "left" | "right"
+  hoverContent?: HoverContent
 }) => {
-  const { position = "left", type } = props
+  const { position = "left", type, hoverContent } = props
 
   const { setShowLibraryModal, setShowCanvasListModal } = useSiderStoreShallow(
     state => ({
@@ -124,7 +130,8 @@ const MenuItemContent = (props: {
       setShowLibraryModal(true)
     }
   }
-  return (
+
+  const content = (
     <div
       className="relative flex items-center"
       style={{
@@ -138,6 +145,20 @@ const MenuItemContent = (props: {
       </div>
     </div>
   )
+
+  if (hoverContent) {
+    return (
+      <HoverCard
+        title={hoverContent?.title}
+        description={hoverContent?.description}
+        videoUrl={hoverContent?.videoUrl}
+        placement={hoverContent?.placement || "right"}>
+        {content}
+      </HoverCard>
+    )
+  }
+
+  return content
 }
 
 const NewCanvasItem = () => {
@@ -240,9 +261,10 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
   }))
 
   const navigate = useNavigate()
-  const userStore = useUserStoreShallow(state => ({
+  const { userProfile } = useUserStoreShallow(state => ({
     userProfile: state.userProfile,
   }))
+  const planType = userProfile?.subscription?.planType || "free"
 
   const { isLoadingCanvas } = useHandleSiderData(true)
 
@@ -263,6 +285,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
     icon: React.ReactNode
     showDivider?: boolean
     onClick?: () => void
+    hoverContent?: HoverContent
   }
 
   const siderSections: SiderCenterProps[][] = [
@@ -278,6 +301,12 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
             style={{ fontSize: 20 }}
           />
         ),
+        hoverContent: {
+          title: t("loggedHomePage.siderMenu.canvasTitle"),
+          description: t("loggedHomePage.siderMenu.canvasDescription"),
+          videoUrl: "https://static.refly.ai/static/20250118-182618.mp4",
+          placement: "rightBottom",
+        },
       },
       {
         key: "Library",
@@ -289,6 +318,11 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
             style={{ fontSize: 20 }}
           />
         ),
+        hoverContent: {
+          title: t("loggedHomePage.siderMenu.libraryTitle"),
+          description: t("loggedHomePage.siderMenu.libraryDescription"),
+          videoUrl: "https://static.refly.ai/static/20250118-182618.mp4",
+        },
       },
     ],
   ]
@@ -330,6 +364,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                             type={item.key}
                             icon={item.icon}
                             title={t(`loggedHomePage.siderMenu.${item.name}`)}
+                            hoverContent={item.hoverContent}
                           />
                         }>
                         {item.key === "Canvas" && (
@@ -397,7 +432,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                   />
                 </a> */}
 
-                <Alert
+                {/* <Alert
                   message={
                     <div className="flex cursor-pointer items-center justify-center">
                       <a href="https://docs.refly.ai" target="_blank">
@@ -410,12 +445,14 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
                   }
                   type="info"
                   closable
-                />
+                /> */}
+
+                {planType === "free" && <SubscriptionHint />}
               </div>
-              {!!userStore.userProfile?.uid && (
+              {!!userProfile?.uid && (
                 <MenuItem
                   key="Settings"
-                  className="flex h-10 items-center justify-between"
+                  className="flex h-12 items-center justify-between"
                   renderItemInTooltip={() => (
                     <MenuItemTooltipContent
                       title={t("loggedHomePage.siderMenu.settings")}

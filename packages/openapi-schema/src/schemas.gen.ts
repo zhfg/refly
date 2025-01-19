@@ -1094,6 +1094,10 @@ export const ActionResultSchema = {
       type: 'string',
       description: 'Action result title',
     },
+    tier: {
+      description: 'Model tier',
+      $ref: '#/components/schemas/ModelTier',
+    },
     status: {
       type: 'string',
       description: 'Step status',
@@ -1244,25 +1248,49 @@ export const TokenUsageMeterSchema = {
       format: 'date-time',
       description: 'Token usage meter end time',
     },
+    t1CountQuota: {
+      type: 'number',
+      description: 'Request count quota (T1)',
+      example: 1000000,
+    },
+    t1CountUsed: {
+      type: 'number',
+      description: 'Request count used (T1)',
+      example: 100000,
+    },
     t1TokenQuota: {
       type: 'number',
       description: 'Token quota (T1)',
       example: 1000000,
+      deprecated: true,
     },
     t1TokenUsed: {
       type: 'number',
       description: 'Token used (T1)',
+      example: 100000,
+      deprecated: true,
+    },
+    t2CountQuota: {
+      type: 'number',
+      description: 'Request count quota (T2)',
+      example: 1000000,
+    },
+    t2CountUsed: {
+      type: 'number',
+      description: 'Request count used (T2)',
       example: 100000,
     },
     t2TokenQuota: {
       type: 'number',
       description: 'Token quota (T2)',
       example: 1000000,
+      deprecated: true,
     },
     t2TokenUsed: {
       type: 'number',
       description: 'Token used (T2)',
       example: 100000,
+      deprecated: true,
     },
   },
 } as const;
@@ -1292,35 +1320,51 @@ export const StorageUsageMeterSchema = {
       type: 'string',
       description: 'Subscription ID',
     },
+    fileCountUsed: {
+      type: 'number',
+      description: 'File count used',
+      example: 100,
+    },
+    fileCountQuota: {
+      type: 'number',
+      description: 'File count quota',
+      example: 1000,
+    },
     objectStorageQuota: {
       type: 'string',
       description: 'Object storage quota (in bytes), including resource, canvas and static files',
       example: '104857600',
+      deprecated: true,
     },
     resourceSize: {
       type: 'string',
       description: 'Resource storage size in use (in bytes)',
       example: '1048576',
+      deprecated: true,
     },
     canvasSize: {
       type: 'string',
       description: 'Canvas storage size in use (in bytes)',
       example: '1048576',
+      deprecated: true,
     },
     fileSize: {
       type: 'string',
       description: 'Static file storage size in use (in bytes)',
       example: '1048576',
+      deprecated: true,
     },
     vectorStorageQuota: {
       type: 'string',
       description: 'Vector storage quota (in bytes)',
       example: '1048576',
+      deprecated: true,
     },
     vectorStorageUsed: {
       type: 'string',
       description: 'Vector storage size used (in bytes)',
       example: '1048576',
+      deprecated: true,
     },
   },
 } as const;

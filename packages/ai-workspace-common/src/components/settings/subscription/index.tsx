@@ -1,9 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import dayjs from 'dayjs';
-import { Button, Progress, Tooltip, Tag, Space } from 'antd';
+import { Button, Progress, Tooltip, Tag } from 'antd';
 import { HiOutlineQuestionMarkCircle } from 'react-icons/hi2';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
-import { formatStorage } from '@refly-packages/ai-workspace-common/modules/entity-selector/utils';
 
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 
@@ -12,7 +11,6 @@ import './index.scss';
 import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { StorageUsageMeter } from '@refly/openapi-schema';
 
 import { PiInvoiceBold } from 'react-icons/pi';
 import { IconSubscription } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -27,23 +25,18 @@ const UsageItem = ({
   used,
   quota,
   description,
-  type,
   endAt,
 }: {
   title: string;
   used: number;
   quota: number;
   description: string;
-  type: string;
   endAt?: string;
 }) => {
   const { t } = useTranslation();
   const formatNumber = (num: number) => {
     if (num < 0) {
       return '∞';
-    }
-    if (type === 'vectorStorage') {
-      return formatStorage(num);
     }
     return num?.toLocaleString() || '0';
   };
@@ -71,84 +64,11 @@ const UsageItem = ({
       <div className="subscription-usage-item-progress">
         <Progress
           strokeWidth={10}
-          strokeColor={!quota ? '#C9CDD4' : '#00968F'}
+          strokeColor={quota >= 0 && used >= quota ? '#dc2626' : '#00968F'}
           percent={(used / quota) * 100}
           showInfo={false}
         />
       </div>
-    </div>
-  );
-};
-
-const FileStorageUsageItem = (props: { storage: StorageUsageMeter }) => {
-  const { t } = useTranslation();
-  const { storage } = props;
-  const canvasSize = Number(storage?.canvasSize || 0);
-  const resourceSize = Number(storage?.resourceSize || 0);
-  const fileSize = Number(storage?.fileSize || 0);
-
-  const used = canvasSize + resourceSize + fileSize;
-  const total = Number(storage?.objectStorageQuota || 0);
-
-  const notePercentage = total > 0 ? (canvasSize / total) * 100 : 0;
-  const resourcePercentage = total > 0 ? (resourceSize / total) * 100 : 0;
-  const knowledgePercentage = total > 0 ? (fileSize / total) * 100 : 0;
-
-  const categories = [
-    {
-      name: t('settings.subscription.subscribe.fileStorageType.note'),
-      color: '#fa5163',
-      percentage: notePercentage,
-    },
-    {
-      name: t('settings.subscription.subscribe.fileStorageType.resource'),
-      color: '#915dcf',
-      percentage: resourcePercentage,
-    },
-    {
-      name: t('settings.subscription.subscribe.fileStorageType.file'),
-      color: '#ffbf00',
-      percentage: knowledgePercentage,
-    },
-  ].sort((a, b) => b.percentage - a.percentage);
-
-  return (
-    <div className="file-storage-usage-bar">
-      <div className="file-storage-usage-bar-title">
-        <span className="title-left">
-          {t('settings.subscription.subscribe.fileStorage')}
-          <Tooltip
-            color="white"
-            title={<div style={{ color: '#000' }}>{t('settings.subscription.subscribe.tooltip.fileStorage')}</div>}
-          >
-            <HiOutlineQuestionMarkCircle className="info-icon" />
-          </Tooltip>
-        </span>
-        <span className="title-right">
-          {formatStorage(used)} / {formatStorage(total)}
-        </span>
-      </div>
-      <div className="file-storage-usage-bar-progress">
-        {categories.map((category, index) => (
-          <div
-            key={index}
-            style={{ width: `${category.percentage}%`, height: '100%', backgroundColor: category.color }}
-          />
-        ))}
-      </div>
-      <Space size="middle" style={{ marginTop: '8px' }}>
-        {categories.map((category, index) => (
-          <div key={index} className="file-storage-usage-bar-category">
-            <div
-              className="file-storage-usage-bar-category-dot"
-              style={{
-                backgroundColor: category.color,
-              }}
-            />
-            <span className="file-storage-usage-bar-category-name">{category.name}</span>
-          </div>
-        ))}
-      </Space>
     </div>
   );
 };
@@ -274,29 +194,25 @@ export const Subscription = () => {
 
         <div className="subscription-usage">
           <UsageItem
-            title={t('settings.subscription.t1TokenUsed')}
-            description={t('settings.subscription.t1TokenUsedDescription')}
-            used={tokenUsage?.t1TokenUsed}
-            quota={tokenUsage?.t1TokenQuota}
+            title={t('settings.subscription.t1Requests')}
+            description={t('settings.subscription.t1RequestsDescription')}
+            used={tokenUsage?.t1CountUsed}
+            quota={tokenUsage?.t1CountQuota}
             endAt={tokenUsage?.endAt}
-            type="t1Token"
           />
           <UsageItem
-            title={t('settings.subscription.t2TokenUsed')}
-            description={t('settings.subscription.t2TokenUsedDescription')}
-            used={tokenUsage?.t2TokenUsed}
-            quota={tokenUsage?.t2TokenQuota}
+            title={t('settings.subscription.t2Requests')}
+            description={t('settings.subscription.t2RequestsDescription')}
+            used={tokenUsage?.t2CountUsed}
+            quota={tokenUsage?.t2CountQuota}
             endAt={tokenUsage?.endAt}
-            type="t2Token"
           />
           <UsageItem
-            title={t('settings.subscription.subscribe.vectorStorage')}
-            description={t('settings.subscription.subscribe.tooltip.vectorStorage')}
-            used={parseFloat(storageUsage?.vectorStorageUsed)}
-            quota={parseFloat(storageUsage?.vectorStorageQuota)}
-            type="vectorStorage"
+            title={t('settings.subscription.fileCount')}
+            description={t('settings.subscription.fileCountDescription')}
+            used={storageUsage?.fileCountUsed}
+            quota={storageUsage?.fileCountQuota}
           />
-          <FileStorageUsageItem storage={storageUsage} />
         </div>
       </div>
     </Spin>

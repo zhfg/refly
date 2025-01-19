@@ -81,6 +81,7 @@ export class KnowledgeController {
     const resource = await this.knowledgeService.createResource(user, body, {
       checkStorageQuota: true,
     });
+    await this.knowledgeService.syncStorageUsage(user);
     return buildSuccessResponse(resourcePO2DTO(resource));
   }
 
@@ -91,6 +92,7 @@ export class KnowledgeController {
     @Body() body: UpsertResourceRequest[],
   ): Promise<BatchCreateResourceResponse> {
     const resources = await this.knowledgeService.batchCreateResource(user, body);
+    await this.knowledgeService.syncStorageUsage(user);
     return buildSuccessResponse(resources.map(resourcePO2DTO));
   }
 

@@ -1,6 +1,5 @@
-import React, { useMemo } from 'react';
-import { Input, Select, Space, Divider } from 'antd';
-import { Search } from 'lucide-react';
+import React from 'react';
+import { Input, Space } from 'antd';
 import { useMultilingualSearchStoreShallow } from '../stores/multilingual-search';
 import { useTranslation } from 'react-i18next';
 

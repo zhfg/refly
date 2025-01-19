@@ -48,18 +48,13 @@ const PremiumBanner = () => {
       <div className="flex items-center justify-between gap-2 w-full">
         <span className="text-xs text-gray-600 flex-1 whitespace-nowrap">{t('copilot.premiumBanner.message')}</span>
         <div className="flex items-center gap-0.5">
-          <Button
-            type="text"
-            size="small"
-            className="text-xs text-teal-600 hover:text-teal-600 hover:font-medium px-2"
-            onClick={handleUpgrade}
-          >
+          <Button type="text" size="small" className="text-xs text-green-600 px-2" onClick={handleUpgrade}>
             {t('copilot.premiumBanner.upgrade')}
           </Button>
           <Button
             type="text"
             size="small"
-            icon={<IoClose size={14} />}
+            icon={<IoClose size={14} className="flex items-center justify-center" />}
             onClick={() => setShowPremiumBanner(false)}
             className="text-gray-400 hover:text-gray-500 flex items-center justify-center w-5 h-5 min-w-0 p-0"
           />

@@ -29,8 +29,6 @@ import { configureSlashCommand } from '@refly-packages/ai-workspace-common/compo
 import Collaboration from '@tiptap/extension-collaboration';
 import { handleImageDrop, handleImagePaste } from '@refly-packages/ai-workspace-common/components/editor/core/plugins';
 import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
-
-import { getClientOrigin } from '@refly-packages/utils/url';
 import { useDocumentStore, useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
@@ -50,6 +48,7 @@ export const CollaborativeEditor = memo(
     const { isNodeDragging } = useEditorPerformance();
     const editorRef = useRef<EditorInstance>();
     const { provider, ydoc } = useDocumentContext();
+    const forceUpdateRef = useRef<number>(0);
 
     // Move hooks to top level
     const documentActions = useDocumentStoreShallow((state) => ({
@@ -355,6 +354,64 @@ export const CollaborativeEditor = memo(
       };
     }, [docId]);
 
+    // Add effect to handle remote updates
+    useEffect(() => {
+      if (!provider || !editorRef.current) return;
+
+      const handleRemoteUpdate = () => {
+        if (editorRef.current && provider.status === 'connected') {
+          try {
+            // Force editor to re-render with latest content
+            forceUpdateRef.current += 1;
+            editorRef.current.commands.focus();
+
+            // Update document stats
+            const markdown = editorRef.current.storage.markdown.getMarkdown();
+            documentActions.updateDocumentCharsCount(docId, wordsCount(markdown));
+
+            // Ensure TOC is updated
+            const tocExtension = editorRef.current.extensionManager.extensions.find(
+              (ext) => ext.name === 'tableOfContents',
+            );
+            if (tocExtension && tocExtension.options.onUpdate) {
+              const { state } = editorRef.current;
+              // Let the extension handle the TOC update internally
+              tocExtension.options.onUpdate(state.doc.content);
+            }
+          } catch (error) {
+            console.error('Error handling remote update:', error);
+          }
+        }
+      };
+
+      provider.on('update', handleRemoteUpdate);
+      provider.on('synced', handleRemoteUpdate);
+
+      return () => {
+        provider.off('update', handleRemoteUpdate);
+        provider.off('synced', handleRemoteUpdate);
+      };
+    }, [provider, docId, documentActions]);
+
+    // Add effect to handle connection status changes
+    useEffect(() => {
+      if (!provider || !editorRef.current) return;
+
+      const handleStatus = ({ status }: { status: string }) => {
+        if (status === 'connected') {
+          // Force sync when connection is established
+          provider.forceSync();
+          handleEditorUpdate(editorRef.current!);
+        }
+      };
+
+      provider.on('status', handleStatus);
+
+      return () => {
+        provider.off('status', handleStatus);
+      };
+    }, [provider, handleEditorUpdate]);
+
     return (
       <div
         className={classNames('w-full', 'ai-note-editor-content-container', {
@@ -364,12 +421,16 @@ export const CollaborativeEditor = memo(
         })}
       >
         <div className="w-full h-full">
-          <EditorRoot>
+          <EditorRoot key={forceUpdateRef.current}>
             <EditorContent
               extensions={extensions}
               onCreate={({ editor }) => {
                 editorRef.current = editor;
                 documentActions.setActiveDocumentId(docId);
+                // Force initial sync
+                if (provider?.status === 'connected') {
+                  provider.forceSync();
+                }
               }}
               editable={!readOnly}
               className="w-full h-full border-muted sm:rounded-lg"
