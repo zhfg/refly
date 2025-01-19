@@ -45,6 +45,7 @@ import { RiExpandDiagonalLine } from 'react-icons/ri';
 import { TbWorldSearch } from 'react-icons/tb';
 import { GrCircleQuestion } from 'react-icons/gr';
 import { FaNoteSticky, FaRegNoteSticky, FaX } from 'react-icons/fa6';
+import { TbInputSpark } from 'react-icons/tb';
 
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
 import ClaudeIcon from '@refly-packages/ai-workspace-common/assets/claude.svg';
@@ -56,6 +57,7 @@ import MistralIcon from '@refly-packages/ai-workspace-common/assets/mistral.svg'
 
 export const IconCanvas = TfiBlackboard;
 export const IconAskAI = LuSparkles;
+export const IconAskAIInput = TbInputSpark;
 export const IconDocument = HiOutlineDocumentText;
 export const IconDocumentFilled = HiDocumentText;
 export const IconResource = HiOutlineSquare3Stack3D;
