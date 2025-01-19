@@ -850,6 +850,7 @@ const translations = {
       },
     },
     siderMenu: {
+      documentation: '帮助文档',
       canvasTitle: '画布',
       canvasDescription:
         '创建、编辑和查看画布, 不同于传统的 Chatbot 应用，Refly 通过无限延伸的二维画布来完成对话思考、内容消费和创作的全流程。',
@@ -1115,12 +1116,12 @@ const translations = {
       subscribeNow: '立即订阅',
       manage: '管理订阅',
       currentPlan: '当前套餐',
-      t1TokenUsed: '高阶模型 Token 使用量',
-      t1TokenUsedDescription:
-        '高阶模型包括 OpenAI GPT-4o、Anthropic Claude 3.5 Sonnet；使用量包括模型输入和输出 Token 消耗',
-      t2TokenUsed: '基础模型 Token 使用量',
-      t2TokenUsedDescription:
-        '基础模型包括 OpenAI GPT-4o-mini、OpenAI GPT-3.5-turbo；使用量包括模型输入和输出 Token 消耗',
+      t1Requests: '高阶模型请求',
+      t1RequestsDescription: '高阶模型包括 GPT-4o, Claude 3.5 Sonnet 等其它模型。每个成功的技能调用计为一次请求。',
+      t2Requests: '标准模型请求',
+      t2RequestsDescription: '标准模型包括 GPT-4o Mini, DeepSeek V3 等其它模型。每个成功的技能调用计为一次请求。',
+      fileCount: '文件存储数量',
+      fileCountDescription: '知识库中每个资源和文档计为一个文件。',
       subscriptionManagement: '管理账单及订阅',
       subscriptionStatus: {
         free: 'FREE',
@@ -1590,7 +1591,7 @@ const translations = {
       noUrl: '该来源没有链接，可选中之后导入画布',
     },
     premiumBanner: {
-      message: '需要更多消息额度？升级到高级版获取更高限制。',
+      message: '需要更多使用次数？升级到高级版解锁更高限制。',
       upgrade: '升级方案',
     },
   },

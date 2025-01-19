@@ -1,9 +1,8 @@
-import { Button, Divider, Empty, Input, List, Avatar, Message as message, Affix, Spin } from '@arco-design/web-react';
+import { useState } from 'react';
+import { Avatar, Button, Divider, Input, List, message, Empty } from 'antd';
 import { HiLink } from 'react-icons/hi';
 import { HiOutlineXMark } from 'react-icons/hi2';
-import { useEffect, useState } from 'react';
-
-// utils
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { isUrl } from '@refly/utils/isUrl';
 import { genUniqueId } from '@refly-packages/utils/id';
 import {
@@ -17,6 +16,7 @@ import { UpsertResourceRequest } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
+import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 
 const { TextArea } = Input;
 
@@ -32,6 +32,7 @@ export const ImportFromWeblink = () => {
     }));
 
   const { addNode } = useAddNode();
+  const { refetchUsage } = useSubscriptionUsage();
 
   const [saveLoading, setSaveLoading] = useState(false);
   const { getLibraryList } = useHandleSiderData();
@@ -126,6 +127,8 @@ export const ImportFromWeblink = () => {
     if (!data?.success) {
       return;
     }
+
+    refetchUsage();
     getLibraryList();
     message.success(t('common.putSuccess'));
     setScrapeLinks([]);
@@ -160,18 +163,16 @@ export const ImportFromWeblink = () => {
   return (
     <div className="h-full flex flex-col min-w-[500px] box-border intergation-import-from-weblink">
       {/* header */}
-      <div className="flex items-center gap-x-[8px] pt-[12px] px-[12px]">
-        <span className="w-[18px] h-[18px] rounded-[4px] bg-[#f1f1f0] box-shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] flex items-center justify-center">
-          <HiLink />
+      <div className="flex items-center gap-x-[8px] pt-6 px-6">
+        <span className="flex items-center justify-center">
+          <HiLink className="text-lg" />
         </span>
-        <div className="text-[16px] font-bold">{t('resource.import.fromWeblink')}</div>
+        <div className="text-base font-bold">{t('resource.import.fromWeblink')}</div>
       </div>
 
-      <Divider style={{ marginTop: 10, marginBottom: 10 }} />
-
       {/* content */}
-      <div className="flex-grow overflow-y-auto px-[12px] box-border">
-        <div>
+      <div className="flex-grow overflow-y-auto p-6 box-border">
+        <div className="w-full">
           <TextArea
             placeholder={t('resource.import.webLinkPlaceholer')}
             rows={4}
@@ -180,12 +181,12 @@ export const ImportFromWeblink = () => {
               maxRows: 4,
             }}
             value={linkStr}
-            onChange={(value) => setLinkStr(value)}
+            onChange={(e) => setLinkStr(e.target.value)}
           />
           <Button
             type="primary"
-            long
             style={{ marginTop: 16 }}
+            className="w-full"
             disabled={!linkStr}
             onClick={() => {
               scrapeLink(linkStr);
@@ -202,7 +203,7 @@ export const ImportFromWeblink = () => {
               <List
                 style={{ marginBottom: 48, border: 'none' }}
                 dataSource={scrapeLinks}
-                render={(item, index) => <RenderItem item={item} key={index} />}
+                renderItem={(item, index) => <RenderItem item={item} key={index} />}
               />
             ) : (
               <Empty />
@@ -224,7 +225,7 @@ export const ImportFromWeblink = () => {
             {t('common.cancel')}
           </Button>
           <Button type="primary" onClick={handleSave} disabled={scrapeLinks.length === 0} loading={saveLoading}>
-            {t('common.save')}
+            {t('common.saveToCanvas')}
           </Button>
         </div>
       </div>
@@ -238,7 +239,7 @@ const RenderItem = (props: { item: LinkMeta }) => {
   const { t } = useTranslation();
 
   return (
-    <Spin loading={!item.isHandled && !item.isError} style={{ width: '100%', minHeight: 80 }}>
+    <Spin spinning={!item.isHandled && !item.isError} style={{ width: '100%', minHeight: 80 }}>
       <List.Item
         actions={[
           <Button
@@ -267,7 +268,7 @@ const RenderItem = (props: { item: LinkMeta }) => {
         className="intergation-result-list-item"
       >
         <List.Item.Meta
-          avatar={<Avatar shape="square">{<img src={item?.image} style={{ objectFit: 'contain' }} />}</Avatar>}
+          avatar={<Avatar src={item.image} />}
           title={
             <div className="intergation-result-intro">
               <p>

@@ -12,7 +12,6 @@ import {
   ACCESS_TOKEN_COOKIE,
   genUID,
   genVerificationSessionID,
-  LEGACY_TOKEN_COOKIE,
   omit,
   pick,
   REFRESH_TOKEN_COOKIE,
@@ -152,26 +151,6 @@ export class AuthService {
     });
   }
 
-  async processLegacyToken(token: string, res: Response) {
-    let payload: User;
-    try {
-      payload = await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get('auth.jwt.secret'),
-      });
-    } catch (error) {
-      this.logger.warn(`legacy token verify not valid: ${error}`);
-      throw new UnauthorizedException();
-    }
-
-    const tokens = await this.login(payload);
-    this.setAuthCookie(res, tokens);
-    res.clearCookie(LEGACY_TOKEN_COOKIE, {
-      domain: this.configService.get('auth.cookieDomain'),
-      secure: true,
-      sameSite: 'strict',
-    });
-  }
-
   cookieOptions(key: string): CookieOptions {
     const baseOptions: CookieOptions = {
       domain: this.configService.get('auth.cookieDomain') ?? '',
@@ -216,8 +195,7 @@ export class AuthService {
     return res
       .clearCookie(UID_COOKIE, clearOptions)
       .clearCookie(ACCESS_TOKEN_COOKIE, clearOptions)
-      .clearCookie(REFRESH_TOKEN_COOKIE, clearOptions)
-      .clearCookie(LEGACY_TOKEN_COOKIE, clearOptions);
+      .clearCookie(REFRESH_TOKEN_COOKIE, clearOptions);
   }
 
   async genUniqueUsername(candidate: string) {

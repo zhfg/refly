@@ -21,8 +21,9 @@ import {
   SyncStorageUsageJobData,
   tokenUsageMeterPO2DTO,
   storageUsageMeterPO2DTO,
-  CheckTokenUsageResult,
+  CheckRequestUsageResult,
   CheckStorageUsageResult,
+  SyncRequestUsageJobData,
 } from '@/subscription/subscription.dto';
 import { pick } from '@/utils';
 import {
@@ -437,8 +438,8 @@ export class SubscriptionService implements OnModuleInit {
     await this.cancelSubscription(sub);
   }
 
-  async checkTokenUsage(user: User): Promise<CheckTokenUsageResult> {
-    const result: CheckTokenUsageResult = { t1: false, t2: false, free: true };
+  async checkRequestUsage(user: User): Promise<CheckRequestUsageResult> {
+    const result: CheckRequestUsageResult = { t1: false, t2: false, free: true };
     const userModel = await this.prisma.user.findUnique({ where: { uid: user.uid } });
     if (!userModel) {
       this.logger.error(`No user found for uid ${user.uid}`);
@@ -447,14 +448,14 @@ export class SubscriptionService implements OnModuleInit {
 
     const meter = await this.getOrCreateTokenUsageMeter(userModel);
 
-    result.t1 = meter.t1TokenQuota < 0 || meter.t1TokenUsed < meter.t1TokenQuota;
-    result.t2 = meter.t2TokenQuota < 0 || meter.t2TokenUsed < meter.t2TokenQuota;
+    result.t1 = meter.t1CountQuota < 0 || meter.t1CountUsed < meter.t1CountQuota;
+    result.t2 = meter.t2CountQuota < 0 || meter.t2CountUsed < meter.t2CountQuota;
 
     return result;
   }
 
   async checkStorageUsage(user: User): Promise<CheckStorageUsageResult> {
-    const result = { objectStorageAvailable: false, vectorStorageAvailable: false };
+    const result = { available: false };
 
     const userModel = await this.prisma.user.findUnique({ where: { uid: user.uid } });
     if (!userModel) {
@@ -464,11 +465,7 @@ export class SubscriptionService implements OnModuleInit {
 
     const meter = await this.getOrCreateStorageUsageMeter(userModel);
 
-    result.objectStorageAvailable =
-      meter.objectStorageQuota < 0 ||
-      meter.resourceSize + meter.canvasSize + meter.fileSize < meter.objectStorageQuota;
-    result.vectorStorageAvailable =
-      meter.vectorStorageQuota < 0 || meter.vectorStorageUsed < meter.vectorStorageQuota;
+    result.available = meter.fileCountUsed < meter.fileCountQuota;
 
     return result;
   }
@@ -513,9 +510,12 @@ export class SubscriptionService implements OnModuleInit {
       // Otherwise, create a new meter
       const startAt = lastMeter?.endAt ?? startOfDay(now);
       const planType = sub?.planType || 'free';
+
+      // For free plan, the meter ends at the next day
+      // For paid plan, the meter ends at the next month
       const endAt =
         planType === 'free'
-          ? null
+          ? new Date(startAt.getFullYear(), startAt.getMonth(), startAt.getDate() + 1)
           : new Date(startAt.getFullYear(), startAt.getMonth() + 1, startAt.getDate());
 
       const plan = this.subscriptionPlans.find((p) => p.planType === planType);
@@ -527,8 +527,12 @@ export class SubscriptionService implements OnModuleInit {
           subscriptionId: sub?.subscriptionId,
           startAt,
           endAt,
+          t1CountQuota: plan?.t1CountQuota ?? this.config.get('quota.request.t1'),
+          t1CountUsed: 0,
           t1TokenQuota: plan?.t1TokenQuota ?? this.config.get('quota.token.t1'),
           t1TokenUsed: 0,
+          t2CountQuota: plan?.t2CountQuota ?? this.config.get('quota.request.t2'),
+          t2CountUsed: 0,
           t2TokenQuota: plan?.t2TokenQuota ?? this.config.get('quota.token.t2'),
           t2TokenUsed: 0,
         },
@@ -575,6 +579,8 @@ export class SubscriptionService implements OnModuleInit {
           meterId: genStorageUsageMeterID(),
           uid,
           subscriptionId: sub?.subscriptionId,
+          fileCountQuota: plan?.fileCountQuota ?? this.config.get('quota.storage.file'),
+          fileCountUsed: 0,
           objectStorageQuota: plan?.objectStorageQuota ?? this.config.get('quota.storage.object'),
           vectorStorageQuota: plan?.vectorStorageQuota ?? this.config.get('quota.storage.vector'),
         },
@@ -609,6 +615,43 @@ export class SubscriptionService implements OnModuleInit {
       token: tokenUsageMeterPO2DTO(tokenMeter),
       storage: storageUsageMeterPO2DTO(storageMeter),
     };
+  }
+
+  async syncRequestUsage(data: SyncRequestUsageJobData) {
+    const { uid, tier } = data;
+
+    const user = await this.prisma.user.findUnique({ where: { uid } });
+    if (!user) {
+      this.logger.warn(`No user found for uid ${uid}`);
+      return;
+    }
+
+    const meter = await this.getOrCreateTokenUsageMeter(user);
+    if (!meter) {
+      this.logger.warn(`No token usage meter found for user ${uid}`);
+      return;
+    }
+
+    const requestCount = await this.prisma.actionResult.count({
+      where: {
+        uid,
+        tier,
+        createdAt: {
+          gte: meter.startAt,
+          ...(meter.endAt && { lte: meter.endAt }),
+        },
+        status: {
+          in: ['waiting', 'executing', 'finish'],
+        },
+      },
+    });
+
+    await this.prisma.tokenUsageMeter.update({
+      where: { pk: meter.pk },
+      data: {
+        [tier === 't1' ? 't1CountUsed' : 't2CountUsed']: requestCount,
+      },
+    });
   }
 
   async syncTokenUsage(data: SyncTokenUsageJobData) {
@@ -690,9 +733,15 @@ export class SubscriptionService implements OnModuleInit {
         }),
       ]);
 
+      const [resourceCount, docCount] = await Promise.all([
+        prisma.resource.count({ where: { uid, deletedAt: null } }),
+        prisma.document.count({ where: { uid, deletedAt: null } }),
+      ]);
+
       await prisma.storageUsageMeter.update({
         where: { meterId: activeMeter.meterId },
         data: {
+          fileCountUsed: resourceCount + docCount,
           resourceSize: resourceSizeSum._sum.storageSize ?? BigInt(0),
           canvasSize: docSizeSum._sum.storageSize ?? BigInt(0),
           fileSize: fileSizeSum._sum.storageSize ?? BigInt(0),
