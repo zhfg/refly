@@ -165,7 +165,7 @@ const translations = {
     pricing: {
       title: 'Plans and Pricing',
       subtitle: 'Embark on your AI content creation journey with Refly',
-      description: 'Sign up and get a free trial of a million standard model tokens. No credit card required.',
+      description: 'Sign up and enjoy a unlimited trial with 20 standard model calls per day. No credit card required.',
       limitedOffer: 'Save 50% on your first year  - Limited time offer',
     },
     footer: {
@@ -262,6 +262,52 @@ const translations = {
       Q4: 'Is a refund available?',
       A4: 'Currently, there is no refund option available. If you have a strong demand for a refund, please contact the Refly team, and we will assist you in resolving the issue.',
     },
+  },
+  priceContent: {
+    freeCapabilities: [
+      {
+        before: 'Free-form canvas based on ',
+        highlight: 'multi-threaded sessions',
+        after: ' where you can ask questions by freely combining contexts',
+      },
+      {
+        before: 'Powerful skills driven by ',
+        highlight: 'standard models',
+        after: ': Generate documents, recommend questions, web search, and library search.',
+      },
+      {
+        before: 'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
+        highlight: 'limited size',
+        after: '.',
+      },
+      {
+        before: 'Content creation with AI markdown editor, powered by ',
+        highlight: 'standard models',
+        after: '',
+      },
+    ],
+    premiumCapabilities: [
+      {
+        before: 'Free-form canvas based on ',
+        highlight: 'multi-threaded sessions',
+        after: ' where you can ask questions by freely combining contexts',
+      },
+      {
+        before: 'Powerful skills driven by ',
+        highlight: 'pro models',
+        after: ': Generate documents, recommend questions, web search, and library search.',
+      },
+      {
+        before: 'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
+        highlight: 'large capacity',
+        after: '.',
+      },
+      {
+        before: 'Content creation with AI markdown editor, powered by ',
+        highlight: 'pro models',
+        after: '',
+      },
+    ],
   },
   emailVerification: {
     title: 'Email Verification',
@@ -1186,6 +1232,10 @@ const translations = {
         continueFree: 'Continue Free',
         oneTime: 'One-Time',
         unlimited: 'Unlimited',
+        libraryStorage: 'Library Storage',
+        fileCounts: '{{count}} files',
+        dailyCounts: '{{count}} times/day',
+        monthlyCounts: '{{count}} times/month',
         free: {
           description: 'Everything you need to get started',
           serviceSupport: {
