@@ -1404,10 +1404,6 @@ export const OnboardingConfigSchema = {
       description: 'Tour onboarding status',
       $ref: '#/components/schemas/OnboardingStatus',
     },
-    interactiveTutorial: {
-      description: 'Interactive tutorial onboarding status',
-      $ref: '#/components/schemas/OnboardingStatus',
-    },
   },
 } as const;
 

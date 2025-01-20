@@ -2690,9 +2690,6 @@ components:
         tour:
           description: Tour onboarding status
           $ref: '#/components/schemas/OnboardingStatus'
-        interactiveTutorial:
-          description: Interactive tutorial onboarding status
-          $ref: '#/components/schemas/OnboardingStatus'
     UserSettings:
       type: object
       required:

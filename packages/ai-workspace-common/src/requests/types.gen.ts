@@ -1137,10 +1137,6 @@ export type OnboardingConfig = {
      * Tour onboarding status
      */
     tour?: OnboardingStatus;
-    /**
-     * Interactive tutorial onboarding status
-     */
-    interactiveTutorial?: OnboardingStatus;
 };
 
 export type UserSettings = {
