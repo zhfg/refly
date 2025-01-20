@@ -150,6 +150,13 @@ ZoomControls.displayName = 'ZoomControls';
 
 // Add new HelpModal component
 const HelpModal = memo(({ visible, onClose }: { visible: boolean; onClose: () => void }) => {
+  const { i18n } = useTranslation();
+  const displayLanguage = i18n.language === 'zh' ? 'zh' : 'en';
+
+  console.log('displayLanguage', displayLanguage);
+
+  const enVersion = `https://app.tango.us/app/embed/c73a9215-4556-481d-9232-5852c34c6477?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false`;
+  const zhVersion = `https://app.tango.us/app/embed/765107d0-5edc-4f8c-8621-0676601587d2?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false`;
   return (
     <Modal
       open={visible}
@@ -172,7 +179,7 @@ const HelpModal = memo(({ visible, onClose }: { visible: boolean; onClose: () =>
           }}
         >
           <iframe
-            src="https://app.tango.us/app/embed/765107d0-5edc-4f8c-8621-0676601587d2?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false"
+            src={displayLanguage === 'zh' ? zhVersion : enVersion}
             style={{
               width: '100%',
               height: '100%',
