@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useCallback, memo, useMemo, useRef } from 'react';
 import { Button, Dropdown, Space, Divider, Tooltip, Modal } from 'antd';
-import { MdOutlineMouse } from 'react-icons/md';
-import { LuTouchpad } from 'react-icons/lu';
-import { LuLayoutDashboard } from 'react-icons/lu';
+import { LuCompass, LuLayoutDashboard, LuLightbulb, LuShipWheel } from 'react-icons/lu';
 import { RiFullscreenFill } from 'react-icons/ri';
 import { FiHelpCircle } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { LuZoomIn, LuZoomOut } from 'react-icons/lu';
-import { IconDown } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconDocumentation,
+  IconDown,
+  IconMouse,
+  IconTouchpad,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useReactFlow, useOnViewportChange } from '@xyflow/react';
 import { useCanvasLayout } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-layout';
 import { TFunction } from 'i18next';
@@ -17,13 +20,14 @@ import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/can
 import { IconExpand, IconShrink } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 import './index.scss';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 interface LayoutControlProps {
   mode: 'mouse' | 'touchpad';
   changeMode: (mode: 'mouse' | 'touchpad') => void;
 }
 
-const iconClass = 'flex items-center justify-center';
+const iconClass = 'flex items-center justify-center text-base';
 const buttonClass = '!p-0 h-[30px] w-[30px] flex items-center justify-center ';
 
 // Add interface for TooltipButton props
@@ -112,7 +116,7 @@ const ModeSelector = memo(({ mode, open, setOpen, items, onModeChange, t }: Mode
         type="text"
         className="!p-0 h-[30px] w-[48px] flex items-center justify-center hover:bg-gray-100 transition-colors duration-200 group"
       >
-        {mode === 'mouse' ? <MdOutlineMouse className={iconClass} /> : <LuTouchpad className={iconClass} />}
+        {mode === 'mouse' ? <IconMouse className={iconClass} /> : <IconTouchpad className={iconClass} />}
         <IconDown className={`ml-[-6px] ${iconClass} ${open ? 'rotate-180' : ''}`} />
       </Button>
     </Tooltip>
@@ -184,12 +188,19 @@ HelpModal.displayName = 'HelpModal';
 export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeMode }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [helpModalVisible, setHelpModalVisible] = useState(false);
   const { onLayout } = useCanvasLayout();
   const reactFlowInstance = useReactFlow();
   const [currentZoom, setCurrentZoom] = useState(reactFlowInstance?.getZoom() ?? 1);
   const minZoom = 0.1;
   const maxZoom = 2;
+  const { helpModalVisible, setShowTourModal, setShowSettingsGuideModal, setHelpModalVisible } = useUserStoreShallow(
+    (state) => ({
+      helpModalVisible: state.helpModalVisible,
+      setShowTourModal: state.setShowTourModal,
+      setShowSettingsGuideModal: state.setShowSettingsGuideModal,
+      setHelpModalVisible: state.setHelpModalVisible,
+    }),
+  );
 
   // Use ref to avoid recreating the timeout on each render
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -247,7 +258,7 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
         key: 'mouse',
         label: (
           <Space>
-            <MdOutlineMouse className={iconClass} />
+            <IconMouse className={iconClass} />
             {t('canvas.toolbar.mouse')}
           </Space>
         ),
@@ -256,7 +267,7 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
         key: 'touchpad',
         label: (
           <Space>
-            <LuTouchpad className={iconClass} />
+            <IconTouchpad className={iconClass} />
             {t('canvas.toolbar.touchpad')}
           </Space>
         ),
@@ -282,14 +293,28 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
   const helpMenuItems = useMemo(
     () => [
       {
-        key: 'docs',
-        label: <Space>{t('canvas.toolbar.openDocs')}</Space>,
-        onClick: () => window.open('https://docs.refly.ai', '_blank'),
+        key: 'settings',
+        icon: <LuShipWheel className={iconClass} size={14} />,
+        label: <Space>{t('canvas.toolbar.openSettings')}</Space>,
+        onClick: () => setShowSettingsGuideModal(true),
+      },
+      {
+        key: 'tour',
+        icon: <LuLightbulb className={iconClass} size={14} />,
+        label: <Space>{t('canvas.toolbar.openTour')}</Space>,
+        onClick: () => setShowTourModal(true),
       },
       {
         key: 'guide',
+        icon: <LuCompass className={iconClass} size={14} />,
         label: <Space>{t('canvas.toolbar.openGuide')}</Space>,
         onClick: () => setHelpModalVisible(true),
+      },
+      {
+        key: 'docs',
+        icon: <IconDocumentation className={iconClass} size={14} />,
+        label: <Space>{t('canvas.toolbar.openDocs')}</Space>,
+        onClick: () => window.open('https://docs.refly.ai', '_blank'),
       },
     ],
     [t],

@@ -34,11 +34,12 @@ import {
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
 import { MultiSelectionMenus } from './multi-selection-menu';
-import { useCanvasTour, CanvasTour } from './joyride';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';
 import { SelectionContextMenu } from '@refly-packages/ai-workspace-common/components/canvas/selection-context-menu';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -81,16 +82,12 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
 
-  const { nodePreviews, showPreview, showLaunchpad, showMaxRatio, interactionMode, setInteractionMode, showEdges } =
-    useCanvasStoreShallow((state) => ({
-      nodePreviews: state.config[canvasId]?.nodePreviews,
-      showPreview: state.showPreview,
-      showLaunchpad: state.showLaunchpad,
-      showMaxRatio: state.showMaxRatio,
-      interactionMode: state.interactionMode,
-      setInteractionMode: state.setInteractionMode,
-      showEdges: state.showEdges,
-    }));
+  const { nodePreviews, showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow((state) => ({
+    nodePreviews: state.config[canvasId]?.nodePreviews,
+    showPreview: state.showPreview,
+    showLaunchpad: state.showLaunchpad,
+    showMaxRatio: state.showMaxRatio,
+  }));
 
   const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } = useSiderStoreShallow(
     (state) => ({
@@ -120,8 +117,21 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   const { handleNodePreview } = useNodePreviewControl({ canvasId });
 
+  const interactionMode = useUserStore.getState().localSettings.canvasMode;
+  const { localSettings, setLocalSettings } = useUserStore.getState();
+  const { mutate: updateSettings } = useUpdateSettings();
   const toggleInteractionMode = (mode: 'mouse' | 'touchpad') => {
-    setInteractionMode(mode);
+    setLocalSettings({
+      ...localSettings,
+      canvasMode: mode,
+    });
+    updateSettings({
+      body: {
+        preferences: {
+          operationMode: mode,
+        },
+      },
+    });
   };
 
   useEffect(() => {
