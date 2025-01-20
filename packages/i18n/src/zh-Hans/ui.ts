@@ -1162,6 +1162,10 @@ const translations = {
         continueFree: '继续免费',
         oneTime: '一次性',
         unlimited: '无限量',
+        library: '知识库存储',
+        fileCounts: '{{count}} 个文件',
+        dailyCounts: '{{count}} 次/每天',
+        monthlyCounts: '{{count}} 次/每月',
         free: {
           description: '开启创意之旅的完美起点',
           serviceSupport: {

@@ -235,177 +235,62 @@ export const PriceContent = (props: { source: PriceSource }) => {
     plan: '',
   });
 
-  const t1ModelName = t('settings.subscription.subscribe.t1Model');
-  const t2ModelName = t('settings.subscription.subscribe.t2Model');
-  const freeModelName = t('settings.subscription.subscribe.freeModel');
-  const vectorStorageName = t('settings.subscription.subscribe.vectorStorage');
-  const fileStorageName = t('settings.subscription.subscribe.fileStorage');
-  const mediaCreditName = t('settings.subscription.subscribe.mediaCredit');
-  const modalTooltipContent = t('settings.subscription.subscribe.tooltip.modelToken');
-  const vectorStorageTooltipContent = t('settings.subscription.subscribe.tooltip.vectorStorage');
-  const fileStorageTooltipContent = t('settings.subscription.subscribe.tooltip.fileStorage');
-  const mediaCreditTooltipContent = t('settings.subscription.subscribe.tooltip.mediaCredit');
+  const t1ModelName = t('settings.subscription.t1Requests');
+  const t2ModelName = t('settings.subscription.t2Requests');
+  const t1ModalTooltipContent = t('settings.subscription.t1RequestsDescription');
+  const t2ModalTooltipContent = t('settings.subscription.t2RequestsDescription');
+  const libraryTooltipContent = t('settings.subscription.fileCountDescription');
   const unlimited = t('settings.subscription.subscribe.unlimited');
-  const oneTime = t('settings.subscription.subscribe.oneTime');
-  const month = t('settings.subscription.subscribe.month');
+  const fileCount = t('settings.subscription.fileCount');
 
-  const freeFeatures: ModelFeatures[] = [
-    {
-      name: t2ModelName,
-      count: `1M tokens / ${oneTime}`,
-      details: basicModels,
-      tooltip: modalTooltipContent,
-    },
-    {
-      name: freeModelName,
-      count: unlimited,
-      details: freeModels,
-      tooltip: modalTooltipContent,
-    },
-    {
-      name: mediaCreditName,
-      count: '5',
-      details: mediaModels,
-      tooltip: mediaCreditTooltipContent,
-    },
-    {
-      name: vectorStorageName,
-      count: '10MB',
-      tooltip: vectorStorageTooltipContent,
-    },
-    {
-      name: fileStorageName,
-      count: '100MB',
-      tooltip: fileStorageTooltipContent,
-    },
-    {
-      name: t('settings.subscription.subscribe.free.serviceSupport.name'),
-      count: t('settings.subscription.subscribe.free.serviceSupport.details'),
-    },
-  ];
+  const createFeatures = (plan: 'free' | 'plus' | 'pro' | 'max'): ModelFeatures[] => {
+    const configs = {
+      free: { t1Count: 0, t2Count: 20, fileLimit: 10, t2Period: 'daily' },
+      plus: { t1Count: 100, t2Count: 1500, fileLimit: 200, t2Period: 'monthly' },
+      pro: { t1Count: 300, t2Count: -1, fileLimit: 500, t2Period: 'monthly' },
+      max: { t1Count: -1, t2Count: -1, fileLimit: 2000, t2Period: 'monthly' },
+    };
 
-  const plusFeatures: ModelFeatures[] = [
-    {
-      name: t1ModelName,
-      count: `1M tokens / ${month}`,
-      details: premiumModels,
-      tooltip: modalTooltipContent,
-    },
-    {
-      name: t2ModelName,
-      count: `5M tokens / ${month}`,
-      details: basicModels,
-      tooltip: modalTooltipContent,
-    },
-    {
-      name: freeModelName,
-      count: unlimited,
-      details: freeModels,
-      tooltip: modalTooltipContent,
-    },
-    {
-      name: mediaCreditName,
-      count: '20',
-      details: mediaModels,
-      tooltip: mediaCreditTooltipContent,
-    },
-    {
-      name: vectorStorageName,
-      count: '50MB',
-      tooltip: vectorStorageTooltipContent,
-    },
-    {
-      name: fileStorageName,
-      count: '500MB',
-      tooltip: fileStorageTooltipContent,
-    },
-    {
-      name: t('settings.subscription.subscribe.plus.serviceSupport.name'),
-      count: t('settings.subscription.subscribe.plus.serviceSupport.details'),
-    },
-  ];
+    const config = configs[plan];
+    return [
+      ...(config.t1Count !== 0
+        ? [
+            {
+              name: t1ModelName,
+              count:
+                config.t1Count === -1
+                  ? unlimited
+                  : t('settings.subscription.subscribe.monthlyCounts', { count: config.t1Count }),
+              details: premiumModels,
+              tooltip: t1ModalTooltipContent,
+            },
+          ]
+        : []),
+      {
+        name: t2ModelName,
+        count:
+          config.t2Count === -1
+            ? unlimited
+            : t(`settings.subscription.subscribe.${config.t2Period}Counts`, { count: config.t2Count }),
+        details: basicModels,
+        tooltip: t2ModalTooltipContent,
+      },
+      {
+        name: fileCount,
+        count: t('settings.subscription.subscribe.fileCounts', { count: config.fileLimit }),
+        tooltip: libraryTooltipContent,
+      },
+      {
+        name: t(`settings.subscription.subscribe.${plan}.serviceSupport.name`),
+        count: t(`settings.subscription.subscribe.${plan}.serviceSupport.details`),
+      },
+    ];
+  };
 
-  const proFeatures: ModelFeatures[] = [
-    {
-      name: t1ModelName,
-      count: `2M tokens / ${month}`,
-      details: premiumModels,
-      tooltip: modalTooltipContent,
-    },
-    {
-      name: t2ModelName,
-      count: unlimited,
-      details: basicModels,
-      tooltip: modalTooltipContent,
-    },
-    {
-      name: freeModelName,
-      count: unlimited,
-      details: freeModels,
-      tooltip: modalTooltipContent,
-    },
-    {
-      name: mediaCreditName,
-      count: '50',
-      details: mediaModels,
-      tooltip: mediaCreditTooltipContent,
-    },
-    {
-      name: vectorStorageName,
-      count: '100MB',
-      tooltip: vectorStorageTooltipContent,
-    },
-    {
-      name: fileStorageName,
-      count: '1G',
-      tooltip: fileStorageTooltipContent,
-    },
-    {
-      name: t('settings.subscription.subscribe.pro.serviceSupport.name'),
-      count: t('settings.subscription.subscribe.pro.serviceSupport.details'),
-    },
-  ];
-
-  const maxFeatures: ModelFeatures[] = [
-    {
-      name: t1ModelName,
-      count: unlimited,
-      details: premiumModels,
-      tooltip: modalTooltipContent,
-    },
-    {
-      name: t2ModelName,
-      count: unlimited,
-      details: basicModels,
-      tooltip: modalTooltipContent,
-    },
-    {
-      name: freeModelName,
-      count: unlimited,
-      details: freeModels,
-      tooltip: modalTooltipContent,
-    },
-    {
-      name: mediaCreditName,
-      count: '100',
-      details: mediaModels,
-      tooltip: mediaCreditTooltipContent,
-    },
-    {
-      name: vectorStorageName,
-      count: '500MB',
-      tooltip: vectorStorageTooltipContent,
-    },
-    {
-      name: fileStorageName,
-      count: '5G',
-      tooltip: fileStorageTooltipContent,
-    },
-    {
-      name: t('settings.subscription.subscribe.max.serviceSupport.name'),
-      count: t('settings.subscription.subscribe.max.serviceSupport.details'),
-    },
-  ];
+  const freeFeatures = createFeatures('free');
+  const plusFeatures = createFeatures('plus');
+  const proFeatures = createFeatures('pro');
+  const maxFeatures = createFeatures('max');
 
   const createCheckoutSession = async (plan: SubscriptionPlanType) => {
     if (loadingInfo.isLoading) return;
