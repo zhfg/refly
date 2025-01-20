@@ -1095,6 +1095,7 @@ const translations = {
     },
     guide: {
       title: '设置向导',
+      description: '👋 欢迎使用 Refly！让我们开始进行一些必要的设置。',
     },
     account: {
       title: '我的账号',

@@ -1108,6 +1108,7 @@ const translations = {
     title: 'Settings',
     guide: {
       title: 'Settings Wizard',
+      description: "👋 Welcome to Refly! Let's proceed with some necessary configurations.",
     },
     tabs: {
       account: 'Account',
