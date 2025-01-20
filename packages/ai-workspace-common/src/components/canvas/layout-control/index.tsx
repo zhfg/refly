@@ -21,6 +21,7 @@ import { IconExpand, IconShrink } from '@refly-packages/ai-workspace-common/comp
 
 import './index.scss';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 
 interface LayoutControlProps {
   mode: 'mouse' | 'touchpad';
@@ -154,6 +155,13 @@ ZoomControls.displayName = 'ZoomControls';
 
 // Add new HelpModal component
 const HelpModal = memo(({ visible, onClose }: { visible: boolean; onClose: () => void }) => {
+  const { i18n, t } = useTranslation();
+  const displayLanguage = i18n.language === 'en' ? 'en' : 'zh';
+  const [isLoading, setIsLoading] = useState(true);
+
+  const enVersion = `https://app.tango.us/app/embed/c73a9215-4556-481d-9232-5852c34c6477?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false`;
+  const zhVersion = `https://app.tango.us/app/embed/765107d0-5edc-4f8c-8621-0676601587d2?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false`;
+
   return (
     <Modal
       open={visible}
@@ -167,18 +175,41 @@ const HelpModal = memo(({ visible, onClose }: { visible: boolean; onClose: () =>
       }}
       className="help-modal !p-0"
     >
-      <iframe
-        src="https://app.tango.us/app/embed/dee5047a-9014-4263-be2d-1e622fc615ca?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false"
-        style={{
-          width: '100%',
-          height: 'calc(100vh)', // Account for modal header
-          border: 'none',
-        }}
-        sandbox="allow-scripts allow-top-navigation-by-user-activation allow-popups allow-same-origin"
-        security="restricted"
-        title="Using Refly: A Step-by-Step Guide to Creating and Managing Content"
-        referrerPolicy="strict-origin-when-cross-origin"
-      />
+      <div className="flex items-center justify-center w-full h-full bg-black">
+        <div
+          className="h-screen relative"
+          style={{
+            width: 'calc(100vh * 680/540)', // Calculate width based on viewport height and aspect ratio
+            maxWidth: '100vw', // Prevent overflow
+          }}
+        >
+          {isLoading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1a1a1a] z-50">
+              <Spin className="w-6 h-6 text-white" />
+              <div className="text-white/80 text-sm mt-2">{t('canvas.toolbar.interativeTutorialLoading')}</div>
+            </div>
+          )}
+          <iframe
+            src={displayLanguage === 'en' ? enVersion : zhVersion}
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              backgroundColor: '#1a1a1a',
+              opacity: isLoading ? 0 : 1,
+              transition: 'opacity 0.3s ease-in-out',
+            }}
+            sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-top-navigation-by-user-activation"
+            allow="fullscreen"
+            title={t('canvas.toolbar.interativeTutorial')}
+            referrerPolicy="origin"
+            onLoad={() => {
+              // Add a small delay to ensure iframe content is fully rendered
+              setTimeout(() => setIsLoading(false), 500);
+            }}
+          />
+        </div>
+      </div>
     </Modal>
   );
 });

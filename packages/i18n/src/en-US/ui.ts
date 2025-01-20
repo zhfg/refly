@@ -641,6 +641,8 @@ const translations = {
       openTour: 'Feature Highlights',
       openGuide: 'Interactive Guide',
       openSettings: 'Settings Wizard',
+      interativeTutorialLoading: 'Interactive tutorial loading... Estimated 3~6 seconds',
+      interativeTutorial: 'Refly Product Interactive Guide',
     },
     connectionTimeout: {
       title: 'Connection Timeout',

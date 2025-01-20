@@ -632,6 +632,8 @@ const translations = {
       openTour: '功能亮点',
       openGuide: '交互式指南',
       openSettings: '设置向导',
+      interativeTutorialLoading: '交互式教程加载中... 预计 3~6 秒',
+      interativeTutorial: 'Refly 产品交互式教程',
     },
     connectionTimeout: {
       title: '连接超时',
