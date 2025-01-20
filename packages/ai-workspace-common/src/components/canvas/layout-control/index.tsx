@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, memo, useMemo, useRef } from 'react';
-import { Button, Dropdown, Space, Divider, Tooltip, Modal, Spin } from 'antd';
+import { Button, Dropdown, Space, Divider, Tooltip, Modal } from 'antd';
 import { LuCompass, LuLayoutDashboard, LuLightbulb, LuShipWheel } from 'react-icons/lu';
 import { RiFullscreenFill } from 'react-icons/ri';
 import { FiHelpCircle } from 'react-icons/fi';
@@ -14,7 +14,6 @@ import {
 import { useReactFlow, useOnViewportChange } from '@xyflow/react';
 import { useCanvasLayout } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-layout';
 import { TFunction } from 'i18next';
-import { LoadingOutlined } from '@ant-design/icons';
 
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
@@ -22,6 +21,7 @@ import { IconExpand, IconShrink } from '@refly-packages/ai-workspace-common/comp
 
 import './index.scss';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 
 interface LayoutControlProps {
   mode: 'mouse' | 'touchpad';
@@ -185,7 +185,7 @@ const HelpModal = memo(({ visible, onClose }: { visible: boolean; onClose: () =>
         >
           {isLoading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1a1a1a] z-50">
-              <Spin indicator={<LoadingOutlined spin className="w-6 h-6 text-white" />} />
+              <Spin className="w-6 h-6 text-white" />
               <div className="text-white/80 text-sm mt-2">{t('canvas.toolbar.interativeTutorialLoading')}</div>
             </div>
           )}
