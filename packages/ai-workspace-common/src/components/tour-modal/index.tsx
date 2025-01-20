@@ -1,7 +1,9 @@
-import { Modal, Input, Button, Tour, TourProps } from 'antd';
+import { Tour, TourProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import './index.scss';
+import { useState } from 'react';
 
 const steps = [
   {
@@ -47,10 +49,17 @@ const TourContent = (props: { description: string; videoUrl: string }) => {
 
 export const TourModal = () => {
   const { t } = useTranslation();
-  const { showTourModal, setShowTourModal } = useUserStoreShallow((state) => ({
+  const { showTourModal, setShowTourModal, userProfile, setUserProfile } = useUserStoreShallow((state) => ({
     showTourModal: state.showTourModal,
     setShowTourModal: state.setShowTourModal,
+    userProfile: state.userProfile,
+    setUserProfile: state.setUserProfile,
   }));
+  const [finishedOnboardingTour, setFinishedOnboardingTour] = useState<boolean>(
+    ['skipped', 'completed'].includes(userProfile?.onboarding?.tour),
+  );
+
+  const { mutate: updateSettings } = useUpdateSettings();
 
   const tourSteps: TourProps['steps'] = steps.map((step) => ({
     title: <div className="text-xl font-bold">{t(`tour.onboardingModal.title.${step.key}`)}</div>,
@@ -60,10 +69,36 @@ export const TourModal = () => {
     target: null,
   }));
 
-  const handleClose = () => {
-    console.log('close');
+  const handleClose = (status: 'skipped' | 'completed') => {
     setShowTourModal(false);
+    if (!finishedOnboardingTour) {
+      setUserProfile({
+        ...userProfile,
+        onboarding: {
+          ...userProfile?.onboarding,
+          tour: status,
+        },
+      });
+
+      updateSettings({
+        body: {
+          onboarding: {
+            ...userProfile?.onboarding,
+            tour: status,
+          },
+        },
+      });
+      setFinishedOnboardingTour(true);
+    }
   };
 
-  return <Tour rootClassName="onboarding-modal" open={showTourModal} onClose={handleClose} steps={tourSteps} />;
+  return (
+    <Tour
+      rootClassName="onboarding-modal"
+      open={showTourModal}
+      onClose={() => handleClose('skipped')}
+      onFinish={() => handleClose('completed')}
+      steps={tourSteps}
+    />
+  );
 };

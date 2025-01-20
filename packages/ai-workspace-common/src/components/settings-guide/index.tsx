@@ -1,30 +1,105 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Typography, Radio, Space, Button } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { UILocaleList } from '../ui-locale-list';
 import { OutputLocaleList } from '../output-locale-list';
-import { IconDown, IconSettings } from '@arco-design/web-react/icon';
+import { IconDown } from '@arco-design/web-react/icon';
 import { LOCALE } from '@refly/common-types';
 import { IconMouse, IconTouchpad } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { LuShipWheel } from 'react-icons/lu';
+import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 
 export const SettingsGuideModal = React.memo(() => {
   const { t, i18n } = useTranslation();
-  const [canvasMode, setCanvasMode] = useState<'mouse' | 'touchpad'>('mouse');
-  const { showSettingsGuideModal, setShowSettingsGuideModal } = useUserStoreShallow((state) => ({
+
+  const {
+    userProfile,
+    setUserProfile,
+    showSettingsGuideModal,
+    setShowSettingsGuideModal,
+    localSettings,
+    setLocalSettings,
+    setShowTourModal,
+  } = useUserStoreShallow((state) => ({
+    userProfile: state.userProfile,
+    setUserProfile: state.setUserProfile,
     showSettingsGuideModal: state.showSettingsGuideModal,
     setShowSettingsGuideModal: state.setShowSettingsGuideModal,
+    localSettings: state.localSettings,
+    setLocalSettings: state.setLocalSettings,
+    setShowTourModal: state.setShowTourModal,
   }));
 
+  const [canvasMode, setCanvasMode] = useState<'mouse' | 'touchpad'>(localSettings?.canvasMode || 'mouse');
+  const [finishedOnboardingSettings, setFinishedOnboardingSettings] = useState<boolean>(false);
+  const [shouldShowTourModal, setShouldShowTourModal] = useState<boolean>(false);
+
+  const { mutate: updateUserSettings } = useUpdateSettings();
+
+  const handleSetOnboardingSettingStatus = (status: 'skipped' | 'completed', operationMode?: 'mouse' | 'touchpad') => {
+    const settings = finishedOnboardingSettings ? userProfile?.onboarding?.settings : status;
+    const preferences =
+      status === 'skipped'
+        ? userProfile?.preferences
+        : {
+            ...userProfile?.preferences,
+            operationMode: operationMode || userProfile?.preferences?.operationMode,
+          };
+
+    setUserProfile({
+      ...userProfile,
+      onboarding: {
+        ...userProfile?.onboarding,
+        settings,
+      },
+      preferences,
+    });
+
+    updateUserSettings({
+      body: {
+        onboarding: {
+          settings,
+        },
+        preferences,
+      },
+    });
+  };
+
+  const handleCancel = () => {
+    handleSetOnboardingSettingStatus('skipped');
+    setShowSettingsGuideModal(false);
+    if (shouldShowTourModal) {
+      setShowTourModal(true);
+    }
+  };
+
   const handleSave = () => {
-    const { localSettings, setLocalSettings } = useUserStore.getState();
     setLocalSettings({
       ...localSettings,
       canvasMode,
     });
+
+    handleSetOnboardingSettingStatus('completed', canvasMode);
     setShowSettingsGuideModal(false);
+    if (shouldShowTourModal) {
+      setShowTourModal(true);
+    }
   };
+
+  useEffect(() => {
+    setFinishedOnboardingSettings(['skipped', 'completed'].includes(userProfile?.onboarding?.settings));
+  }, [userProfile?.onboarding?.settings]);
+
+  useEffect(() => {
+    setCanvasMode(localSettings.canvasMode);
+  }, [localSettings.canvasMode]);
+
+  useEffect(() => {
+    setShouldShowTourModal(
+      !finishedOnboardingSettings && !['skipped', 'completed'].includes(userProfile?.onboarding?.tour),
+    );
+  }, [finishedOnboardingSettings, userProfile?.onboarding?.tour]);
 
   return (
     <Modal
@@ -36,13 +111,14 @@ export const SettingsGuideModal = React.memo(() => {
         </div>
       }
       open={showSettingsGuideModal}
+      maskClosable={false}
       okText={t('common.finish')}
       cancelText={t('common.skip')}
       onOk={handleSave}
-      onCancel={() => setShowSettingsGuideModal(false)}
+      onCancel={handleCancel}
       width={700}
       footer={[
-        <Button key="cancel" onClick={() => setShowSettingsGuideModal(false)}>
+        <Button key="cancel" onClick={handleCancel}>
           {t('common.skip')}
         </Button>,
         <Button key="primary" type="primary" onClick={handleSave}>
