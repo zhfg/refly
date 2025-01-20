@@ -188,16 +188,19 @@ HelpModal.displayName = 'HelpModal';
 export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeMode }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [helpModalVisible, setHelpModalVisible] = useState(false);
   const { onLayout } = useCanvasLayout();
   const reactFlowInstance = useReactFlow();
   const [currentZoom, setCurrentZoom] = useState(reactFlowInstance?.getZoom() ?? 1);
   const minZoom = 0.1;
   const maxZoom = 2;
-  const { setShowTourModal, setShowSettingsGuideModal } = useUserStoreShallow((state) => ({
-    setShowTourModal: state.setShowTourModal,
-    setShowSettingsGuideModal: state.setShowSettingsGuideModal,
-  }));
+  const { helpModalVisible, setShowTourModal, setShowSettingsGuideModal, setHelpModalVisible } = useUserStoreShallow(
+    (state) => ({
+      helpModalVisible: state.helpModalVisible,
+      setShowTourModal: state.setShowTourModal,
+      setShowSettingsGuideModal: state.setShowSettingsGuideModal,
+      setHelpModalVisible: state.setHelpModalVisible,
+    }),
+  );
 
   // Use ref to avoid recreating the timeout on each render
   const timeoutRef = useRef<NodeJS.Timeout>();
