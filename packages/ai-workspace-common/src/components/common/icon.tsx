@@ -27,6 +27,8 @@ import {
   LuPlay,
   LuPin,
   LuPinOff,
+  LuTouchpad,
+  LuBookOpen,
 } from 'react-icons/lu';
 import { RiErrorWarningLine, RiDoubleQuotesL, RiChatHistoryLine, RiChatHistoryFill } from 'react-icons/ri';
 
@@ -54,6 +56,7 @@ import QwenIcon from '@refly-packages/ai-workspace-common/assets/qwen.svg';
 import MetaLlamaIcon from '@refly-packages/ai-workspace-common/assets/meta.svg';
 import DeepSeekIcon from '@refly-packages/ai-workspace-common/assets/deepseek.svg';
 import MistralIcon from '@refly-packages/ai-workspace-common/assets/mistral.svg';
+import { MdOutlineMouse } from 'react-icons/md';
 
 export const IconCanvas = TfiBlackboard;
 export const IconAskAI = LuSparkles;
@@ -96,6 +99,9 @@ export const IconSubscription = LuGift;
 export const IconExit = RxExit;
 export const IconExpand = RiExpandDiagonalLine;
 export const IconShrink = AiOutlineShrink;
+export const IconDocumentation = LuBookOpen;
+export const IconMouse = MdOutlineMouse;
+export const IconTouchpad = LuTouchpad;
 
 export const IconX = BsTwitterX;
 export const IconGithub = BsGithub;

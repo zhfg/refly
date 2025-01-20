@@ -15,6 +15,8 @@ const translations = {
     edit: '编辑',
     save: '保存',
     saveToCanvas: '添加到画布',
+    skip: '跳过',
+    finish: '完成',
     add: '添加',
     remove: '移除',
     library: '知识库',
@@ -580,8 +582,10 @@ const translations = {
         mode: '交互模式',
         help: '帮助与文档',
       },
-      openDocs: '打开文档',
-      openGuide: '打开交互式指南',
+      openDocs: '帮助文档',
+      openTour: '功能导览',
+      openGuide: '交互式指南',
+      openSettings: '设置向导',
     },
     connectionTimeout: {
       title: '连接超时',
@@ -693,6 +697,13 @@ const translations = {
         contentPreview: '技能响应内容加载中...',
         noContentPreview: '暂无内容预览',
       },
+    },
+    operationMode: {
+      title: '画布操作模式',
+      mouse: '鼠标友好模式',
+      mouseDesc: '鼠标左键拖动画布，滚轮缩放',
+      touchpad: '触控板友好模式',
+      touchpadDesc: '双指同向移动拖动，双指张开捏合缩放',
     },
   },
   resource: {
@@ -1082,7 +1093,9 @@ const translations = {
       language: '语言',
       subscription: '订阅',
     },
-
+    guide: {
+      title: '设置向导',
+    },
     account: {
       title: '我的账号',
       avatar: '头像',
@@ -1108,10 +1121,12 @@ const translations = {
       title: '语言设置',
       uiLocale: {
         title: '界面语言',
+        description: '设置 Refly 产品中所有交互内容的语言。',
       },
       outputLocale: {
         title: '对话语言',
-        description: 'AI 将按照此语言设置回答您的问题。您可以在对话中单独设置语言以覆盖此选项。',
+        description: 'AI 将按照此语言设置回答您的问题。',
+        auto: '自动检测',
       },
     },
     subscription: {

@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next"
 import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/components/sider-menu-setting-list"
 import { SettingModal } from "@refly-packages/ai-workspace-common/components/settings"
 import { TourModal } from "@refly-packages/ai-workspace-common/components/tour-modal"
+import { SettingsGuideModal } from "@refly-packages/ai-workspace-common/components/settings-guide"
 // hooks
 import { useHandleSiderData } from "@refly-packages/ai-workspace-common/hooks/use-handle-sider-data"
 import {
@@ -470,6 +471,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
           setVisible={setShowSettingModal}
         />
 
+        <SettingsGuideModal />
         <TourModal />
       </div>
     </Sider>

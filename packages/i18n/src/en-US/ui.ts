@@ -15,6 +15,8 @@ const translations = {
     edit: 'Edit',
     save: 'Save',
     saveToCanvas: 'Add to Canvas',
+    skip: 'Skip',
+    finish: 'Finish',
     add: 'Add',
     remove: 'Remove',
     library: 'Library',
@@ -589,8 +591,10 @@ const translations = {
         mode: 'Interaction Mode',
         help: 'Help & Documentation',
       },
-      openDocs: 'Open Documentation',
-      openGuide: 'Open Interactive Guide',
+      openDocs: 'Documentation',
+      openTour: 'Feature Highlights',
+      openGuide: 'Interactive Guide',
+      openSettings: 'Settings Wizard',
     },
     connectionTimeout: {
       title: 'Connection Timeout',
@@ -705,6 +709,13 @@ const translations = {
         contentPreview: 'Loading skill response content...',
         noContentPreview: 'No content preview available...',
       },
+    },
+    operationMode: {
+      title: 'Canvas Operation Mode',
+      mouse: 'Mouse-Friendly Mode',
+      mouseDesc: 'Left-click drag to pan, scroll wheel to zoom',
+      touchpad: 'Touchpad-Friendly Mode',
+      touchpadDesc: 'Two-finger pan to move, pinch to zoom',
     },
   },
   resource: {
@@ -1095,12 +1106,14 @@ const translations = {
   },
   settings: {
     title: 'Settings',
+    guide: {
+      title: 'Settings Wizard',
+    },
     tabs: {
       account: 'Account',
       language: 'Language',
       subscription: 'Subscription',
     },
-
     account: {
       title: 'My Account',
       avatar: 'Avatar',
@@ -1125,14 +1138,15 @@ const translations = {
     },
 
     language: {
-      title: 'Language',
+      title: 'Language Settings',
       uiLocale: {
-        title: 'Interface Display Language',
+        title: 'Interface Language',
+        description: 'Set the language of all interactive content in the Refly product.',
       },
       outputLocale: {
-        title: 'Chat Language',
-        description:
-          'AI will respond to your questions in the language set here. You can override this option by setting the language individually within the conversation.',
+        title: 'Output Language',
+        description: 'AI will respond in this language.',
+        auto: 'Auto Detect',
       },
     },
     subscription: {

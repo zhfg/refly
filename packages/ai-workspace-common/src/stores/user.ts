@@ -7,9 +7,10 @@ import { OutputLocale } from '@refly-packages/ai-workspace-common/utils/i18n';
 import { IRuntime } from '@refly/common-types';
 
 export interface LocalSettings {
-  uiLocale: LOCALE; // UI 相关的
-  outputLocale: OutputLocale; // 模型输出相关的
-  isLocaleInitialized: boolean; // locale 是否是初始化状态，用于展示语言
+  uiLocale: LOCALE;
+  outputLocale: OutputLocale;
+  isLocaleInitialized: boolean;
+  canvasMode: 'mouse' | 'touchpad'; // Canvas operation mode
 }
 
 export interface UserState {
@@ -17,10 +18,11 @@ export interface UserState {
   isCheckingLoginStatus: boolean | undefined;
   isLogin: boolean;
   userProfile?: UserSettings;
-  localSettings: LocalSettings; // 在获取 user 信息的时候记录这个 settings，并 host 到 localStorage，每次保存更新，类似 userProfile
+  localSettings: LocalSettings;
 
   runtime: IRuntime;
   showTourModal: boolean;
+  showSettingsGuideModal: boolean;
 
   // method
   setIsCheckingLoginStatus: (val: boolean) => void;
@@ -30,6 +32,7 @@ export interface UserState {
   setRuntime: (val: IRuntime) => void;
   resetState: () => void;
   setShowTourModal: (val: boolean) => void;
+  setShowSettingsGuideModal: (val: boolean) => void;
 }
 
 const getDefaultLocale = () => {
@@ -50,6 +53,7 @@ export const defaultLocalSettings = {
   uiLocale: getDefaultLocale(),
   outputLocale: navigator.language,
   isLocaleInitialized: false,
+  canvasMode: 'mouse',
 } as LocalSettings;
 
 const defaultCheckingLoginStatus = {
@@ -61,13 +65,14 @@ export const defaultExtraState = {
   isLogin: false,
   userProfile: undefined,
   runtime: 'web' as IRuntime,
-  localSettings: { ...defaultLocalSettings }, // 默认使用浏览器的 navigator 获取语言，插件里面使用 chrome.i18n.detectLanguage
+  localSettings: { ...defaultLocalSettings },
 };
 
 export const defaultState = {
   ...defaultExtraState,
   ...defaultCheckingLoginStatus,
-  showTourModal: true,
+  showTourModal: false,
+  showSettingsGuideModal: false,
 };
 
 export const useUserStore = create<UserState>()(
@@ -81,6 +86,7 @@ export const useUserStore = create<UserState>()(
     setRuntime: (val: IRuntime) => set((state) => ({ ...state, runtime: val })),
     resetState: () => set((state) => ({ ...state, ...defaultExtraState })),
     setShowTourModal: (val: boolean) => set((state) => ({ ...state, showTourModal: val })),
+    setShowSettingsGuideModal: (val: boolean) => set((state) => ({ ...state, showSettingsGuideModal: val })),
   })),
 );
 
