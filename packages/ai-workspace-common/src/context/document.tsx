@@ -40,9 +40,7 @@ export const DocumentProvider = ({ docId, children }: { docId: string; children:
   const updateDocumentData = useCallback(
     (ydoc: Y.Doc) => {
       const title = getTitleFromYDoc(ydoc);
-      if (title) {
-        updateDocument(docId, { docId, title });
-      }
+      updateDocument(docId, { docId, title });
     },
     [docId, updateDocument],
   );
