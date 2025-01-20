@@ -870,7 +870,7 @@ const translations = {
       },
     },
     siderMenu: {
-      documentation: 'Documentation',
+      contactUs: 'Contact Us',
       canvasTitle: 'Canvas',
       canvasDescription:
         'Create, edit, and view canvas, unlike traditional Chatbot applications, Refly completes the entire process of dialogue thinking, content consumption, and creation through an infinite two-dimensional canvas.',

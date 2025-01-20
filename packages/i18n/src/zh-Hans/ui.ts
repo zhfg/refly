@@ -864,7 +864,7 @@ const translations = {
       },
     },
     siderMenu: {
-      documentation: '帮助文档',
+      contactUs: '联系我们',
       canvasTitle: '画布',
       canvasDescription:
         '创建、编辑和查看画布, 不同于传统的 Chatbot 应用，Refly 通过无限延伸的二维画布来完成对话思考、内容消费和创作的全流程。',
