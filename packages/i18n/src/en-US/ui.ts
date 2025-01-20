@@ -20,6 +20,7 @@ const translations = {
     library: 'Library',
     untitled: 'Untitled',
     loading: 'Loading...',
+    interativeTutorialLoading: 'Interactive tutorial loading... Estimated 3~6 seconds',
     loadMore: 'Load More',
     appStarting: 'Application is starting',
     more: 'More',

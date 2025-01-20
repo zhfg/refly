@@ -20,6 +20,7 @@ const translations = {
     library: '知识库',
     untitled: '未命名',
     loading: '加载中...',
+    interativeTutorialLoading: '交互式教程加载中... 预计 3~6 秒',
     loadMore: '加载更多',
     appStarting: '应用启动中',
     more: '更多',

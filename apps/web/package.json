@@ -11,6 +11,7 @@
     "analyze": "source-map-explorer 'dist/assets/*.js'"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.5.2",
     "@arco-design/web-react": "^2.47.1",
     "@arco-themes/react-refly-ai": "0.0.3",
     "@radix-ui/react-popover": "^1.0.7",

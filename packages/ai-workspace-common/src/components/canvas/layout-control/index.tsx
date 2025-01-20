@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, memo, useMemo, useRef } from 'react';
-import { Button, Dropdown, Space, Divider, Tooltip, Modal } from 'antd';
+import { Button, Dropdown, Space, Divider, Tooltip, Modal, Spin } from 'antd';
 import { MdOutlineMouse } from 'react-icons/md';
 import { LuTouchpad } from 'react-icons/lu';
 import { LuLayoutDashboard } from 'react-icons/lu';
@@ -7,10 +7,11 @@ import { RiFullscreenFill } from 'react-icons/ri';
 import { FiHelpCircle } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { LuZoomIn, LuZoomOut } from 'react-icons/lu';
-import { IconDown } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconDown, IconLoading } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useReactFlow, useOnViewportChange } from '@xyflow/react';
 import { useCanvasLayout } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-layout';
 import { TFunction } from 'i18next';
+import { LoadingOutlined } from '@ant-design/icons';
 
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
@@ -150,13 +151,13 @@ ZoomControls.displayName = 'ZoomControls';
 
 // Add new HelpModal component
 const HelpModal = memo(({ visible, onClose }: { visible: boolean; onClose: () => void }) => {
-  const { i18n } = useTranslation();
-  const displayLanguage = i18n.language === 'zh' ? 'zh' : 'en';
-
-  console.log('displayLanguage', displayLanguage);
+  const { i18n, t } = useTranslation();
+  const displayLanguage = i18n.language === 'en' ? 'en' : 'zh';
+  const [isLoading, setIsLoading] = useState(true);
 
   const enVersion = `https://app.tango.us/app/embed/c73a9215-4556-481d-9232-5852c34c6477?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false`;
   const zhVersion = `https://app.tango.us/app/embed/765107d0-5edc-4f8c-8621-0676601587d2?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false`;
+
   return (
     <Modal
       open={visible}
@@ -172,25 +173,37 @@ const HelpModal = memo(({ visible, onClose }: { visible: boolean; onClose: () =>
     >
       <div className="flex items-center justify-center w-full h-full bg-black">
         <div
-          className="h-screen"
+          className="h-screen relative"
           style={{
             width: 'calc(100vh * 680/540)', // Calculate width based on viewport height and aspect ratio
             maxWidth: '100vw', // Prevent overflow
           }}
         >
+          {isLoading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1a1a1a] z-50">
+              <Spin indicator={<LoadingOutlined spin className="w-6 h-6 text-white" />} />
+              <div className="text-white/80 text-sm mt-2">{t('common.interativeTutorialLoading')}</div>
+            </div>
+          )}
           <iframe
-            src={displayLanguage === 'zh' ? zhVersion : enVersion}
+            src={displayLanguage === 'en' ? enVersion : zhVersion}
             style={{
               width: '100%',
               height: '100%',
               border: 'none',
-              backgroundColor: '#000',
+              backgroundColor: '#1a1a1a',
+              opacity: isLoading ? 0 : 1,
+              transition: 'opacity 0.3s ease-in-out',
             }}
             sandbox="allow-scripts allow-top-navigation-by-user-activation allow-popups allow-same-origin"
             security="restricted"
             title="Refly 使用指南"
             referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen={true}
+            onLoad={() => {
+              // Add a small delay to ensure iframe content is fully rendered
+              setTimeout(() => setIsLoading(false), 500);
+            }}
           />
         </div>
       </div>
