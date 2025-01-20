@@ -20,7 +20,6 @@ const translations = {
     library: 'Library',
     untitled: 'Untitled',
     loading: 'Loading...',
-    interativeTutorialLoading: 'Interactive tutorial loading... Estimated 3~6 seconds',
     loadMore: 'Load More',
     appStarting: 'Application is starting',
     more: 'More',
@@ -592,6 +591,8 @@ const translations = {
       },
       openDocs: 'Open Documentation',
       openGuide: 'Open Interactive Guide',
+      interativeTutorialLoading: 'Interactive tutorial loading... Estimated 3~6 seconds',
+      interativeTutorial: 'Refly Product Interactive Guide',
     },
     connectionTimeout: {
       title: 'Connection Timeout',

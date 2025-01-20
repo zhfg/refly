@@ -182,7 +182,7 @@ const HelpModal = memo(({ visible, onClose }: { visible: boolean; onClose: () =>
           {isLoading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1a1a1a] z-50">
               <Spin indicator={<LoadingOutlined spin className="w-6 h-6 text-white" />} />
-              <div className="text-white/80 text-sm mt-2">{t('common.interativeTutorialLoading')}</div>
+              <div className="text-white/80 text-sm mt-2">{t('canvas.toolbar.interativeTutorialLoading')}</div>
             </div>
           )}
           <iframe
@@ -195,11 +195,10 @@ const HelpModal = memo(({ visible, onClose }: { visible: boolean; onClose: () =>
               opacity: isLoading ? 0 : 1,
               transition: 'opacity 0.3s ease-in-out',
             }}
-            sandbox="allow-scripts allow-top-navigation-by-user-activation allow-popups allow-same-origin"
-            security="restricted"
-            title="Refly 使用指南"
-            referrerPolicy="strict-origin-when-cross-origin"
-            allowFullScreen={true}
+            sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-top-navigation-by-user-activation"
+            allow="fullscreen"
+            title={t('canvas.toolbar.interativeTutorial')}
+            referrerPolicy="origin"
             onLoad={() => {
               // Add a small delay to ensure iframe content is fully rendered
               setTimeout(() => setIsLoading(false), 500);
