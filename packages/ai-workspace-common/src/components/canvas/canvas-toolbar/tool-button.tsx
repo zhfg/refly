@@ -72,7 +72,6 @@ export const ToolButton: FC<ToolButtonProps> = memo(
         </Badge>
       ) : (
         <Button
-          data-tour={tool.value === 'askAI' ? 'ask-ai' : undefined}
           type="text"
           onClick={(event) => handleToolSelect(event, tool.value as string)}
           className={`

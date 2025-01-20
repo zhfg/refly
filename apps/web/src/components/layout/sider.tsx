@@ -169,8 +169,7 @@ const NewCanvasItem = () => {
     <MenuItem
       key="newCanvas"
       className="ml-2.5 flex h-8 items-center"
-      onClick={debouncedCreateCanvas}
-      data-tour="new-canvas">
+      onClick={debouncedCreateCanvas}>
       <Button
         loading={createCanvasLoading}
         type="text"

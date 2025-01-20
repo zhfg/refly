@@ -120,8 +120,7 @@
     "y-prosemirror": "^1.2.6",
     "y-protocols": "^1.0.6",
     "yjs": "^13.6.16",
-    "zustand": "~4.5.1",
-    "react-joyride": "^2.9.3"
+    "zustand": "~4.5.1"
   },
   "devDependencies": {
     "@7nohe/openapi-react-query-codegen": "2.0.0-beta.3",
@@ -146,7 +145,6 @@
     "sass": "1.71.1",
     "tailwindcss": "^3.2.6",
     "vite": "^5.2.0",
-    "wxt": "workspace:*",
-    "@types/react-joyride": "^2.0.5"
+    "wxt": "workspace:*"
   }
 }

@@ -21,7 +21,6 @@ import './index.scss';
 interface LayoutControlProps {
   mode: 'mouse' | 'touchpad';
   changeMode: (mode: 'mouse' | 'touchpad') => void;
-  onStartTour?: () => void;
 }
 
 const iconClass = 'flex items-center justify-center';
@@ -182,7 +181,7 @@ const HelpModal = memo(({ visible, onClose }: { visible: boolean; onClose: () =>
 
 HelpModal.displayName = 'HelpModal';
 
-export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeMode, onStartTour }) => {
+export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeMode }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [helpModalVisible, setHelpModalVisible] = useState(false);
@@ -293,7 +292,7 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
         onClick: () => setHelpModalVisible(true),
       },
     ],
-    [t, onStartTour],
+    [t],
   );
 
   return (
