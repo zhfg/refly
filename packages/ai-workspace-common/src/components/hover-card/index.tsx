@@ -1,6 +1,7 @@
-import React, { FC, ReactNode, useRef, useEffect, useCallback } from 'react';
+import React, { FC, ReactNode } from 'react';
 import { Popover } from 'antd';
 import type { TooltipPlacement } from 'antd/es/tooltip';
+import { useVideo } from '../../hooks/use-video';
 import './index.scss';
 
 export interface HoverContent {
@@ -33,33 +34,7 @@ export const HoverCard: FC<HoverCardProps> = ({
   overlayStyle = { marginLeft: '8px', marginTop: '8px' },
   align = { offset: [8, 8] },
 }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const handlePlay = useCallback(() => {
-    const video = videoRef.current;
-    if (video) {
-      // 尝试取消静音并设置音量
-      video.muted = false;
-      video.volume = 0.5;
-    }
-  }, []);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (video) {
-      // 添加事件监听器
-      video.addEventListener('play', handlePlay);
-      // 初始化音量
-      video.volume = 0.5;
-    }
-
-    return () => {
-      // 清理事件监听器
-      if (video) {
-        video.removeEventListener('play', handlePlay);
-      }
-    };
-  }, [handlePlay]);
+  const { videoRef, handlePlay } = useVideo();
 
   const renderContent = () => (
     <div className="w-[325px] bg-white rounded-lg overflow-hidden">

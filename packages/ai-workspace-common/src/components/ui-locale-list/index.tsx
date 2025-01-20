@@ -5,19 +5,25 @@ import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/par
 import { LOCALE } from '@refly/common-types';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-export const UILocaleList = (props: { children: React.ReactNode; width?: number }) => {
+export const UILocaleList = (props: {
+  children: React.ReactNode;
+  width?: number;
+  onChange?: (lng: LOCALE) => void;
+}) => {
   const { t, i18n } = useTranslation();
   const userStore = useUserStoreShallow((state) => ({
     isLogin: state.isLogin,
     userProfile: state.userProfile,
     setLocalSettings: state.setLocalSettings,
+    setUserProfile: state.setUserProfile,
   }));
 
   const changeLang = async (lng: LOCALE) => {
-    const { localSettings } = useUserStore.getState();
+    const { localSettings, userProfile } = useUserStore.getState();
 
     i18n.changeLanguage(lng);
     userStore.setLocalSettings({ ...localSettings, uiLocale: lng });
+    userStore.setUserProfile({ ...userProfile, uiLocale: lng });
     localStorage.setItem('refly-local-settings', safeStringifyJSON({ ...localSettings, uiLocale: lng }));
 
     if (userStore.isLogin) {
@@ -27,8 +33,11 @@ export const UILocaleList = (props: { children: React.ReactNode; width?: number 
 
       if (error || !res?.success) {
         message.error(t('settings.action.putErrorNotify'));
+        return;
       }
     }
+
+    props.onChange?.(lng);
   };
 
   const dropList: MenuProps['items'] = [

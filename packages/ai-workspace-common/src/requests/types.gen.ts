@@ -1108,6 +1108,37 @@ export type StorageUsageMeter = {
     vectorStorageUsed: string;
 };
 
+/**
+ * Operation mode
+ */
+export type OperationMode = 'mouse' | 'touchpad';
+
+/**
+ * User preferences
+ */
+export type UserPreferences = {
+    /**
+     * Operation mode
+     */
+    operationMode?: OperationMode;
+};
+
+/**
+ * Onboarding status
+ */
+export type OnboardingStatus = 'not_started' | 'skipped' | 'completed';
+
+export type OnboardingConfig = {
+    /**
+     * Settings onboarding status
+     */
+    settings?: OnboardingStatus;
+    /**
+     * Tour onboarding status
+     */
+    tour?: OnboardingStatus;
+};
+
 export type UserSettings = {
     /**
      * User ID
@@ -1153,6 +1184,14 @@ export type UserSettings = {
      * Whether the user has beta access
      */
     hasBetaAccess?: boolean;
+    /**
+     * User preferences
+     */
+    preferences?: UserPreferences;
+    /**
+     * Onboarding config
+     */
+    onboarding?: OnboardingConfig;
 };
 
 /**
@@ -2284,6 +2323,14 @@ export type UpdateUserSettingsRequest = {
      * Output locale
      */
     outputLocale?: string;
+    /**
+     * User preferences
+     */
+    preferences?: UserPreferences;
+    /**
+     * Onboarding config
+     */
+    onboarding?: OnboardingConfig;
 };
 
 export type CheckSettingsFieldResult = {

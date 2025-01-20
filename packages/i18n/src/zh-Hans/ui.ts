@@ -15,6 +15,8 @@ const translations = {
     edit: '编辑',
     save: '保存',
     saveToCanvas: '添加到画布',
+    skip: '跳过',
+    finish: '完成',
     add: '添加',
     remove: '移除',
     library: '知识库',
@@ -580,8 +582,10 @@ const translations = {
         mode: '交互模式',
         help: '帮助与文档',
       },
-      openDocs: '打开文档',
-      openGuide: '打开交互式指南',
+      openDocs: '帮助文档',
+      openTour: '功能亮点',
+      openGuide: '交互式指南',
+      openSettings: '设置向导',
       interativeTutorialLoading: '交互式教程加载中... 预计 3~6 秒',
       interativeTutorial: 'Refly 产品交互式教程',
     },
@@ -695,6 +699,13 @@ const translations = {
         contentPreview: '技能响应内容加载中...',
         noContentPreview: '暂无内容预览',
       },
+    },
+    operationMode: {
+      title: '画布操作模式',
+      mouse: '鼠标友好模式',
+      mouseDesc: '鼠标左键拖动画布，滚轮缩放',
+      touchpad: '触控板友好模式',
+      touchpadDesc: '双指同向移动拖动，双指张开捏合缩放',
     },
   },
   resource: {
@@ -855,7 +866,7 @@ const translations = {
       },
     },
     siderMenu: {
-      documentation: '帮助文档',
+      contactUs: '联系我们',
       canvasTitle: '画布',
       canvasDescription:
         '创建、编辑和查看画布, 不同于传统的 Chatbot 应用，Refly 通过无限延伸的二维画布来完成对话思考、内容消费和创作的全流程。',
@@ -882,6 +893,7 @@ const translations = {
       recentChats: '最近会话',
       viewMore: '查看更多',
       viewTutorial: '查看文档',
+      tour: '查看教程',
     },
   },
   knowledgeLibrary: {
@@ -1083,7 +1095,10 @@ const translations = {
       language: '语言',
       subscription: '订阅',
     },
-
+    guide: {
+      title: '设置向导',
+      description: '👋 欢迎使用 Refly！让我们开始进行一些必要的设置。',
+    },
     account: {
       title: '我的账号',
       avatar: '头像',
@@ -1109,10 +1124,12 @@ const translations = {
       title: '语言设置',
       uiLocale: {
         title: '界面语言',
+        description: '设置 Refly 产品中所有交互内容的语言。',
       },
       outputLocale: {
         title: '对话语言',
-        description: 'AI 将按照此语言设置回答您的问题。您可以在对话中单独设置语言以覆盖此选项。',
+        description: 'AI 将按照此语言设置回答您的问题。',
+        auto: '自动检测',
       },
     },
     subscription: {
@@ -1629,6 +1646,30 @@ const translations = {
   deck: {
     references: '引用',
     referencedBy: '被引用',
+  },
+  tour: {
+    onboardingModal: {
+      prev: '上一页',
+      next: '下一页',
+      startInteractive: '开始交互式教程',
+      title: '功能亮点',
+      highlight: {
+        1: '多线程对话',
+        2: 'AI 驱动的技能',
+        3: '上下文',
+        4: '知识库整合',
+        5: '引文',
+        6: 'AI 文档编辑',
+      },
+      description: {
+        1: 'Refly 采用创新的多线程对话机制，让您能够自由切换多个独立对话主题，实现更流畅自然的思维发散与深入探讨，有效突破传统对话的局限性。',
+        2: '借助 AI 模型驱动，输入问题后，可灵活选取画布中的任一节点作为上下文，生成新的节点内容。',
+        3: '为每次对话提供精确的临时知识库支持，确保AI模型能准确理解和回应您的问题。您可以灵活选择画布中的任意节点或添加引用作为上下文。',
+        4: '支持导入多样化的外部资源，根据需求智能整合到画布中，构建完整的知识体系，打造个性化的思维空间。',
+        5: '支持从各类资源、文档、备忘录或技能输出中灵活选取内容，一键添加为上下文引用，提升对话的准确性和深度。',
+        6: '除提供强大的Markdown实时编辑功能外，支持智能选中文档内容，根据您的需求进行AI辅助的精准修改和润色。',
+      },
+    },
   },
 };
 

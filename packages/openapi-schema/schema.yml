@@ -2660,6 +2660,36 @@ components:
           description: Vector storage size used (in bytes)
           example: '1048576'
           deprecated: true
+    OperationMode:
+      type: string
+      description: Operation mode
+      enum:
+        - mouse
+        - touchpad
+    UserPreferences:
+      type: object
+      description: User preferences
+      properties:
+        operationMode:
+          type: string
+          description: Operation mode
+          $ref: '#/components/schemas/OperationMode'
+    OnboardingStatus:
+      type: string
+      description: Onboarding status
+      enum:
+        - not_started
+        - skipped
+        - completed
+    OnboardingConfig:
+      type: object
+      properties:
+        settings:
+          description: Settings onboarding status
+          $ref: '#/components/schemas/OnboardingStatus'
+        tour:
+          description: Tour onboarding status
+          $ref: '#/components/schemas/OnboardingStatus'
     UserSettings:
       type: object
       required:
@@ -2710,6 +2740,12 @@ components:
           type: boolean
           description: Whether the user has beta access
           default: false
+        preferences:
+          description: User preferences
+          $ref: '#/components/schemas/UserPreferences'
+        onboarding:
+          description: Onboarding config
+          $ref: '#/components/schemas/OnboardingConfig'
     AuthProvider:
       type: string
       description: Auth provider
@@ -3937,6 +3973,12 @@ components:
           type: string
           description: Output locale
           example: en
+        preferences:
+          description: User preferences
+          $ref: '#/components/schemas/UserPreferences'
+        onboarding:
+          description: Onboarding config
+          $ref: '#/components/schemas/OnboardingConfig'
     CheckSettingsFieldResult:
       type: object
       required:
