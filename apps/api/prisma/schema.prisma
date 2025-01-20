@@ -81,6 +81,8 @@ model User {
   outputLocale   String?   @map("output_locale")
   /// Whether the user has beta access
   hasBetaAccess  Boolean   @default(true) @map("has_beta_access")
+  /// User preferences (JSON)
+  preferences    String?   @map("preferences")
   /// Onboarding config (JSON of `OnboardingConfig`)
   onboarding     String?   @map("onboarding")
   /// Stripe customer ID

@@ -2660,6 +2660,20 @@ components:
           description: Vector storage size used (in bytes)
           example: '1048576'
           deprecated: true
+    OperationMode:
+      type: string
+      description: Operation mode
+      enum:
+        - mouse
+        - touchpad
+    UserPreferences:
+      type: object
+      description: User preferences
+      properties:
+        operationMode:
+          type: string
+          description: Operation mode
+          $ref: '#/components/schemas/OperationMode'
     OnboardingStatus:
       type: string
       description: Onboarding status
@@ -2729,6 +2743,9 @@ components:
           type: boolean
           description: Whether the user has beta access
           default: false
+        preferences:
+          description: User preferences
+          $ref: '#/components/schemas/UserPreferences'
         onboarding:
           description: Onboarding config
           $ref: '#/components/schemas/OnboardingConfig'
@@ -3959,6 +3976,9 @@ components:
           type: string
           description: Output locale
           example: en
+        preferences:
+          description: User preferences
+          $ref: '#/components/schemas/UserPreferences'
         onboarding:
           description: Onboarding config
           $ref: '#/components/schemas/OnboardingConfig'

@@ -36,6 +36,7 @@ export class UserService {
       where: { uid: user.uid },
       data: {
         ...pick(data, ['name', 'nickname', 'uiLocale', 'outputLocale']),
+        preferences: JSON.stringify(data.preferences),
         onboarding: JSON.stringify(data.onboarding),
       },
     });

@@ -1109,6 +1109,21 @@ export type StorageUsageMeter = {
 };
 
 /**
+ * Operation mode
+ */
+export type OperationMode = 'mouse' | 'touchpad';
+
+/**
+ * User preferences
+ */
+export type UserPreferences = {
+    /**
+     * Operation mode
+     */
+    operationMode?: OperationMode;
+};
+
+/**
  * Onboarding status
  */
 export type OnboardingStatus = 'not_started' | 'skipped' | 'completed';
@@ -1173,6 +1188,10 @@ export type UserSettings = {
      * Whether the user has beta access
      */
     hasBetaAccess?: boolean;
+    /**
+     * User preferences
+     */
+    preferences?: UserPreferences;
     /**
      * Onboarding config
      */
@@ -2308,6 +2327,10 @@ export type UpdateUserSettingsRequest = {
      * Output locale
      */
     outputLocale?: string;
+    /**
+     * User preferences
+     */
+    preferences?: UserPreferences;
     /**
      * Onboarding config
      */

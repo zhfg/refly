@@ -1369,6 +1369,24 @@ export const StorageUsageMeterSchema = {
   },
 } as const;
 
+export const OperationModeSchema = {
+  type: 'string',
+  description: 'Operation mode',
+  enum: ['mouse', 'touchpad'],
+} as const;
+
+export const UserPreferencesSchema = {
+  type: 'object',
+  description: 'User preferences',
+  properties: {
+    operationMode: {
+      type: 'string',
+      description: 'Operation mode',
+      $ref: '#/components/schemas/OperationMode',
+    },
+  },
+} as const;
+
 export const OnboardingStatusSchema = {
   type: 'string',
   description: 'Onboarding status',
@@ -1449,6 +1467,10 @@ export const UserSettingsSchema = {
       type: 'boolean',
       description: 'Whether the user has beta access',
       default: false,
+    },
+    preferences: {
+      description: 'User preferences',
+      $ref: '#/components/schemas/UserPreferences',
     },
     onboarding: {
       description: 'Onboarding config',
@@ -3322,6 +3344,10 @@ export const UpdateUserSettingsRequestSchema = {
       type: 'string',
       description: 'Output locale',
       example: 'en',
+    },
+    preferences: {
+      description: 'User preferences',
+      $ref: '#/components/schemas/UserPreferences',
     },
     onboarding: {
       description: 'Onboarding config',

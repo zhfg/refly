@@ -18,6 +18,7 @@ export const userPO2Settings = (
       'customerId',
       'hasBetaAccess',
     ]),
+    preferences: JSON.parse(user.preferences ?? '{}'),
     onboarding: JSON.parse(user.onboarding ?? '{}'),
     subscription: user.subscription ? subscriptionPO2DTO(user.subscription) : null,
   };
