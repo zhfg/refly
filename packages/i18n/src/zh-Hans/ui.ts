@@ -163,7 +163,7 @@ const translations = {
     pricing: {
       title: '计划与定价',
       subtitle: '踏上您的 AI 内容创作之旅',
-      description: '注册并获得一百万标准模型 token 的免费试用。无需绑定信用卡。',
+      description: '注册并体验每天 20 次标准模型调用的无限期试用套餐。无需绑定信用卡。',
       limitedOffer: '首年订阅限时五折优惠！',
     },
     footer: {
@@ -253,6 +253,52 @@ const translations = {
       Q4: '是否支持退款？',
       A4: '目前暂不开放退款入口，如果您有强烈的退款需求，请联系 Refly 团队为您解决。',
     },
+  },
+  priceContent: {
+    freeCapabilities: [
+      {
+        before: '基于',
+        highlight: '多线程会话',
+        after: '的自由画布，任意组合上下文进行提问',
+      },
+      {
+        before: '',
+        highlight: '基础模型',
+        after: '驱动的强大技能：生成文档、推荐问题、全网搜索、知识库搜索',
+      },
+      {
+        before: '通过全网搜索或任意粘贴链接导入资源，构建',
+        highlight: '有限大小',
+        after: '的个人知识库',
+      },
+      {
+        before: '借助',
+        highlight: '基础模型',
+        after: '驱动的 AI Markdown 编辑器',
+      },
+    ],
+    premiumCapabilities: [
+      {
+        before: '基于',
+        highlight: '多线程会话',
+        after: '的自由画布，任意组合上下文进行提问',
+      },
+      {
+        before: '',
+        highlight: '高级模型',
+        after: '驱动的强大技能：生成文档、推荐问题、全网搜索、知识库搜索',
+      },
+      {
+        before: '通过全网搜索或任意粘贴链接导入资源，构建',
+        highlight: '庞大',
+        after: '的个人知识库',
+      },
+      {
+        before: '借助',
+        highlight: '高级模型',
+        after: '驱动的 AI Markdown 编辑器',
+      },
+    ],
   },
   emailVerification: {
     title: '邮箱验证',
@@ -1119,8 +1165,8 @@ const translations = {
       subscribeNow: '立即订阅',
       manage: '管理订阅',
       currentPlan: '当前套餐',
-      t1Requests: '高阶模型请求',
-      t1RequestsDescription: '高阶模型包括 GPT-4o, Claude 3.5 Sonnet 等其它模型。每个成功的技能调用计为一次请求。',
+      t1Requests: '高级模型请求',
+      t1RequestsDescription: '高级模型包括 GPT-4o, Claude 3.5 Sonnet 等其它模型。每个成功的技能调用计为一次请求。',
       t2Requests: '标准模型请求',
       t2RequestsDescription: '标准模型包括 GPT-4o Mini, DeepSeek V3 等其它模型。每个成功的技能调用计为一次请求。',
       fileCount: '文件存储数量',
@@ -1149,7 +1195,7 @@ const translations = {
         },
         vectorStorage: '向量存储',
         fileStorage: '文件存储',
-        t1Model: '高阶模型',
+        t1Model: '高级模型',
         t2Model: '基础模型',
         freeModel: '免费模型',
         mediaCredit: '多媒体积分（即将推出）',
@@ -1571,7 +1617,7 @@ const translations = {
     modelSelector: {
       unlimited: '无限量',
       noModelAvailable: '无可用模型',
-      premium: '高阶模型',
+      premium: '高级模型',
       standard: '标准模型',
       free: '免费模型',
       tokenUsed: '已使用 {{used}} / {{quota}}',

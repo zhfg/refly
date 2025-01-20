@@ -83,7 +83,7 @@
     .pro-plan {
       padding: 0 2px 2px 2px;
       border-radius: 12px;
-      background: rgb(143, 163, 212);
+      background: rgba(0, 150, 143, 0.8);
     }
 
     &-item {
@@ -116,11 +116,8 @@
       }
 
       &.item-pro {
-        &:hover {
-          box-shadow: rgb(143, 163, 212) 0px 0px 0px 2px;
-        }
         .subscribe-content-plans-item-title {
-          color: #3537cc;
+          color: #00968f;
         }
       }
 
@@ -180,12 +177,12 @@
         }
 
         &--pro {
-          background: linear-gradient(to right, #068cd4, #3537cc);
+          background: linear-gradient(to right, #00a49c, #02857f);
           color: #fff;
-          border-color: #068cd4;
+          border-color: #00968f;
           &.ant-btn-default {
             &:hover {
-              background: linear-gradient(to right, #005f8c, #2a2a9a);
+              background: linear-gradient(to right, #00b7ae, #009d95);
               color: #fff;
               border-color: #068cd4;
             }
