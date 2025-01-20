@@ -1186,7 +1186,7 @@ const translations = {
         continueFree: 'Continue Free',
         oneTime: 'One-Time',
         unlimited: 'Unlimited',
-        library: 'Library Storage',
+        libraryStorage: 'Library Storage',
         fileCounts: '{{count}} files',
         dailyCounts: '{{count}} times/day',
         monthlyCounts: '{{count}} times/month',

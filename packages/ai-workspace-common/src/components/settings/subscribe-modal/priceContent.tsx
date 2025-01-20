@@ -241,7 +241,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
   const t2ModalTooltipContent = t('settings.subscription.t2RequestsDescription');
   const libraryTooltipContent = t('settings.subscription.fileCountDescription');
   const unlimited = t('settings.subscription.subscribe.unlimited');
-  const fileCount = t('settings.subscription.fileCount');
+  const libraryStorage = t('settings.subscription.subscribe.libraryStorage');
 
   const createFeatures = (plan: 'free' | 'plus' | 'pro' | 'max'): ModelFeatures[] => {
     const configs = {
@@ -276,7 +276,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
         tooltip: t2ModalTooltipContent,
       },
       {
-        name: fileCount,
+        name: libraryStorage,
         count: t('settings.subscription.subscribe.fileCounts', { count: config.fileLimit }),
         tooltip: libraryTooltipContent,
       },
