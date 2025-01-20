@@ -163,21 +163,30 @@ const HelpModal = memo(({ visible, onClose }: { visible: boolean; onClose: () =>
       }}
       className="help-modal !p-0"
     >
-      <iframe
-        src="https://app.tango.us/app/embed/765107d0-5edc-4f8c-8621-0676601587d2?skipCover=true&defaultListView=false&skipBranding=true&makeViewOnly=true&hideAuthorAndDetails=true"
-        style={{
-          width: '100%',
-          height: 'calc(100vh)', // Account for modal header
-          border: 'none',
-          minHeight: 640,
-        }}
-        sandbox="allow-scripts allow-top-navigation-by-user-activation allow-popups allow-same-origin"
-        security="restricted"
-        title="Refly 使用指南"
-        referrerPolicy="strict-origin-when-cross-origin"
-        frameBorder="0"
-        allowFullScreen={true}
-      ></iframe>
+      <div className="flex items-center justify-center w-full h-full bg-black">
+        <div
+          className="h-screen"
+          style={{
+            width: 'calc(100vh * 680/540)', // Calculate width based on viewport height and aspect ratio
+            maxWidth: '100vw', // Prevent overflow
+          }}
+        >
+          <iframe
+            src="https://app.tango.us/app/embed/765107d0-5edc-4f8c-8621-0676601587d2?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false"
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              backgroundColor: '#000',
+            }}
+            sandbox="allow-scripts allow-top-navigation-by-user-activation allow-popups allow-same-origin"
+            security="restricted"
+            title="Refly 使用指南"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen={true}
+          />
+        </div>
+      </div>
     </Modal>
   );
 });
