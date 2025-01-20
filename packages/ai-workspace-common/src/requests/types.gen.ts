@@ -1108,6 +1108,26 @@ export type StorageUsageMeter = {
     vectorStorageUsed: string;
 };
 
+/**
+ * Onboarding status
+ */
+export type OnboardingStatus = 'not_started' | 'skipped' | 'completed';
+
+export type OnboardingConfig = {
+    /**
+     * Settings onboarding status
+     */
+    settings?: OnboardingStatus;
+    /**
+     * Tour onboarding status
+     */
+    tour?: OnboardingStatus;
+    /**
+     * Interactive tutorial onboarding status
+     */
+    interactiveTutorial?: OnboardingStatus;
+};
+
 export type UserSettings = {
     /**
      * User ID
@@ -1153,6 +1173,10 @@ export type UserSettings = {
      * Whether the user has beta access
      */
     hasBetaAccess?: boolean;
+    /**
+     * Onboarding config
+     */
+    onboarding?: OnboardingConfig;
 };
 
 /**
@@ -2284,6 +2308,10 @@ export type UpdateUserSettingsRequest = {
      * Output locale
      */
     outputLocale?: string;
+    /**
+     * Onboarding config
+     */
+    onboarding?: OnboardingConfig;
 };
 
 export type CheckSettingsFieldResult = {

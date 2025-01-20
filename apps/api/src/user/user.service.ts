@@ -34,7 +34,10 @@ export class UserService {
   async updateSettings(user: User, data: UpdateUserSettingsRequest) {
     return this.prisma.user.update({
       where: { uid: user.uid },
-      data: pick(data, ['name', 'nickname', 'uiLocale', 'outputLocale']),
+      data: {
+        ...pick(data, ['name', 'nickname', 'uiLocale', 'outputLocale']),
+        onboarding: JSON.stringify(data.onboarding),
+      },
     });
   }
 

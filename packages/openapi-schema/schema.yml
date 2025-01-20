@@ -2660,6 +2660,25 @@ components:
           description: Vector storage size used (in bytes)
           example: '1048576'
           deprecated: true
+    OnboardingStatus:
+      type: string
+      description: Onboarding status
+      enum:
+        - not_started
+        - skipped
+        - completed
+    OnboardingConfig:
+      type: object
+      properties:
+        settings:
+          description: Settings onboarding status
+          $ref: '#/components/schemas/OnboardingStatus'
+        tour:
+          description: Tour onboarding status
+          $ref: '#/components/schemas/OnboardingStatus'
+        interactiveTutorial:
+          description: Interactive tutorial onboarding status
+          $ref: '#/components/schemas/OnboardingStatus'
     UserSettings:
       type: object
       required:
@@ -2710,6 +2729,9 @@ components:
           type: boolean
           description: Whether the user has beta access
           default: false
+        onboarding:
+          description: Onboarding config
+          $ref: '#/components/schemas/OnboardingConfig'
     AuthProvider:
       type: string
       description: Auth provider
@@ -3937,6 +3959,9 @@ components:
           type: string
           description: Output locale
           example: en
+        onboarding:
+          description: Onboarding config
+          $ref: '#/components/schemas/OnboardingConfig'
     CheckSettingsFieldResult:
       type: object
       required:
