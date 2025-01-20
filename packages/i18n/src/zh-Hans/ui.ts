@@ -581,6 +581,7 @@ const translations = {
         help: '帮助与文档',
       },
       openDocs: '打开文档',
+      openGuide: '打开交互式指南',
       startTour: '开始产品导览',
     },
     connectionTimeout: {

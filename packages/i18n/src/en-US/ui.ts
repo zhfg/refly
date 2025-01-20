@@ -590,6 +590,7 @@ const translations = {
         help: 'Help & Documentation',
       },
       openDocs: 'Open Documentation',
+      openGuide: 'Open Interactive Guide',
       startTour: 'Start Product Tour',
     },
     connectionTimeout: {

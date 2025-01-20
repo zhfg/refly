@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, memo, useMemo, useRef } from 'react';
-import { Button, Dropdown, Space, Divider, Tooltip } from 'antd';
+import { Button, Dropdown, Space, Divider, Tooltip, Modal } from 'antd';
 import { MdOutlineMouse } from 'react-icons/md';
 import { LuTouchpad } from 'react-icons/lu';
 import { LuLayoutDashboard } from 'react-icons/lu';
@@ -15,6 +15,8 @@ import { TFunction } from 'i18next';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 import { IconExpand, IconShrink } from '@refly-packages/ai-workspace-common/components/common/icon';
+
+import './index.scss';
 
 interface LayoutControlProps {
   mode: 'mouse' | 'touchpad';
@@ -147,9 +149,43 @@ const ZoomControls = memo(({ currentZoom, onZoomIn, onZoomOut, canZoomIn, canZoo
 ));
 ZoomControls.displayName = 'ZoomControls';
 
+// Add new HelpModal component
+const HelpModal = memo(({ visible, onClose }: { visible: boolean; onClose: () => void }) => {
+  return (
+    <Modal
+      open={visible}
+      onCancel={onClose}
+      footer={null}
+      width="100vw"
+      style={{
+        top: 0,
+        paddingBottom: 0,
+        maxWidth: '100vw',
+      }}
+      className="help-modal !p-0"
+    >
+      <iframe
+        src="https://app.tango.us/app/embed/dee5047a-9014-4263-be2d-1e622fc615ca?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false"
+        style={{
+          width: '100%',
+          height: 'calc(100vh)', // Account for modal header
+          border: 'none',
+        }}
+        sandbox="allow-scripts allow-top-navigation-by-user-activation allow-popups allow-same-origin"
+        security="restricted"
+        title="Using Refly: A Step-by-Step Guide to Creating and Managing Content"
+        referrerPolicy="strict-origin-when-cross-origin"
+      />
+    </Modal>
+  );
+});
+
+HelpModal.displayName = 'HelpModal';
+
 export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeMode, onStartTour }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [helpModalVisible, setHelpModalVisible] = useState(false);
   const { onLayout } = useCanvasLayout();
   const reactFlowInstance = useReactFlow();
   const [currentZoom, setCurrentZoom] = useState(reactFlowInstance?.getZoom() ?? 1);
@@ -252,47 +288,50 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
         onClick: () => window.open('https://docs.refly.ai', '_blank'),
       },
       {
-        key: 'tour',
-        label: <Space>{t('canvas.toolbar.startTour')}</Space>,
-        onClick: onStartTour,
+        key: 'guide',
+        label: <Space>{t('canvas.toolbar.openGuide')}</Space>,
+        onClick: () => setHelpModalVisible(true),
       },
     ],
     [t, onStartTour],
   );
 
   return (
-    <div className="absolute bottom-2 left-2.5 px-1 h-[32px] border-box flex items-center justify-center bg-white rounded-md shadow-md">
-      <ZoomControls
-        currentZoom={currentZoom}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        canZoomIn={canZoomIn}
-        canZoomOut={canZoomOut}
-        t={t}
-      />
+    <>
+      <div className="absolute bottom-2 left-2.5 px-1 h-[32px] border-box flex items-center justify-center bg-white rounded-md shadow-md">
+        <ZoomControls
+          currentZoom={currentZoom}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          canZoomIn={canZoomIn}
+          canZoomOut={canZoomOut}
+          t={t}
+        />
 
-      <Divider type="vertical" className="h-full" />
+        <Divider type="vertical" className="h-full" />
 
-      <ActionButtons
-        onFitView={handleFitView}
-        onLayout={onLayout}
-        onToggleSizeMode={handleToggleSizeMode}
-        nodeSizeMode={nodeSizeMode}
-        t={t}
-      />
+        <ActionButtons
+          onFitView={handleFitView}
+          onLayout={onLayout}
+          onToggleSizeMode={handleToggleSizeMode}
+          nodeSizeMode={nodeSizeMode}
+          t={t}
+        />
 
-      <ModeSelector mode={mode} open={open} setOpen={setOpen} items={items} onModeChange={changeMode} t={t} />
+        <ModeSelector mode={mode} open={open} setOpen={setOpen} items={items} onModeChange={changeMode} t={t} />
 
-      <Divider type="vertical" className="h-full mx-0.5" />
+        <Divider type="vertical" className="h-full mx-0.5" />
 
-      <Dropdown menu={{ items: helpMenuItems }} trigger={['click']}>
-        <Tooltip title={t('canvas.toolbar.tooltip.help')} arrow={false}>
-          <Button type="text" className={buttonClass}>
-            <FiHelpCircle className={iconClass} size={16} />
-          </Button>
-        </Tooltip>
-      </Dropdown>
-    </div>
+        <Dropdown menu={{ items: helpMenuItems }} trigger={['click']}>
+          <Tooltip title={t('canvas.toolbar.tooltip.help')} arrow={false}>
+            <Button type="text" className={buttonClass}>
+              <FiHelpCircle className={iconClass} size={16} />
+            </Button>
+          </Tooltip>
+        </Dropdown>
+      </div>
+      <HelpModal visible={helpModalVisible} onClose={() => setHelpModalVisible(false)} />
+    </>
   );
 });
 
