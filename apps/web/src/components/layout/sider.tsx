@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react"
 import { Menu } from "@arco-design/web-react"
-import { Alert, Avatar, Button, Layout, Skeleton, Divider } from "antd"
+import { Avatar, Button, Layout, Skeleton, Divider } from "antd"
 import {
   useLocation,
   useNavigate,

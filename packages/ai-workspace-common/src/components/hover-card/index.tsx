@@ -93,8 +93,8 @@ export const HoverCard: FC<HoverCardProps> = ({
       trigger="hover"
       onOpenChange={onOpenChange}
       overlayClassName="hover-card-popover"
-      mouseEnterDelay={0.2}
-      mouseLeaveDelay={0.3}
+      mouseEnterDelay={0.5}
+      mouseLeaveDelay={0.5}
       overlayStyle={overlayStyle}
       align={align}
     >
