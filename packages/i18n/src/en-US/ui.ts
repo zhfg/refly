@@ -587,7 +587,10 @@ const translations = {
         fitView: 'Fit View',
         layout: 'Auto Layout',
         mode: 'Interaction Mode',
+        help: 'Help & Documentation',
       },
+      openDocs: 'Open Documentation',
+      openGuide: 'Open Interactive Guide',
     },
     connectionTimeout: {
       title: 'Connection Timeout',

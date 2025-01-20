@@ -34,6 +34,7 @@ import {
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
 import { MultiSelectionMenus } from './multi-selection-menu';
+import { useCanvasTour, CanvasTour } from './joyride';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';

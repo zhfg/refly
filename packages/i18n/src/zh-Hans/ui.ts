@@ -578,7 +578,10 @@ const translations = {
         fitView: '适应画布',
         layout: '自动布局',
         mode: '交互模式',
+        help: '帮助与文档',
       },
+      openDocs: '打开文档',
+      openGuide: '打开交互式指南',
     },
     connectionTimeout: {
       title: '连接超时',
