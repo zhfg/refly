@@ -715,7 +715,6 @@ const translations = {
       moreOptions: 'More Options',
       delete: 'Delete Node',
       deleteDescription: 'Delete the selected node',
-      deleteFileDescription: 'Delete the {{type}} associated with this node',
       ungroup: 'Ungroup',
       ungroupDescription: 'Cancel the grouping of the selected node',
       group: 'Create Group',
@@ -738,6 +737,8 @@ const translations = {
       editQueryDescription: 'Edit the query of the selected node',
       duplicateDocument: 'Duplicate Document',
       duplicateDocumentDescription: 'Create a duplicate of the selected node document',
+      deleteFileDescription: 'Delete the {{type}} associated with this node',
+      deleteFileConfirm: 'Confirm to delete this {{type}}? This action will remove this {{type}} from all canvases',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',

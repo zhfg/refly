@@ -1,4 +1,4 @@
-import { Button, Divider, message } from 'antd';
+import { Button, Divider, message, Popconfirm } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FC, useCallback, useMemo, useEffect, useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
@@ -43,8 +43,8 @@ import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/com
 interface MenuItem {
   key: string;
   icon: React.ElementType;
-  label: string;
-  onClick: () => void;
+  label: string | React.ReactNode;
+  onClick: (e?: React.MouseEvent) => void;
   loading?: boolean;
   danger?: boolean;
   primary?: boolean;
@@ -518,8 +518,25 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
             {
               key: 'deleteFile',
               icon: IconDeleteFile,
-              label: `${t('common.delete')}${nodeType === 'document' ? t('common.document') : t('common.resource')}`,
-              onClick: handleDeleteFile,
+              label: (
+                <Popconfirm
+                  title={t('common.deleteConfirmMessage')}
+                  description={t('canvas.nodeActions.deleteFileConfirm', {
+                    type: t(`common.${nodeType}`),
+                  })}
+                  onConfirm={handleDeleteFile}
+                  placement="top"
+                  okText={t('common.delete')}
+                  cancelText={t('common.cancel')}
+                  overlayStyle={{ maxWidth: '300px' }}
+                >
+                  <span>{`${t('common.delete')}${nodeType === 'document' ? t('common.document') : t('common.resource')}`}</span>
+                </Popconfirm>
+              ),
+              onClick: (e) => {
+                // Prevent the click event from triggering both Popconfirm and menu item click
+                e?.stopPropagation();
+              },
               danger: true,
               type: 'button' as const,
               hoverContent: {
