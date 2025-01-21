@@ -64,7 +64,7 @@ export const useAddToContext = () => {
   const addContextItems = useCallback(
     (items: IContextItem[]) => {
       // Filter out memo, skill, and group nodes
-      const validNodes = items.filter((item) => !['skill', 'memo', 'group'].includes(item.type));
+      const validNodes = items.filter((item) => !['skill', 'group'].includes(item.type));
 
       if (!showLaunchpad) {
         setShowLaunchpad(true);
