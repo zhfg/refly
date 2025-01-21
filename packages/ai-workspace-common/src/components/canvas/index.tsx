@@ -7,7 +7,6 @@ import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
 import { TopToolbar } from './top-toolbar';
 import { NodePreview } from './node-preview';
-import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { ContextMenu } from './context-menu';
 import { NodeContextMenu } from './node-context-menu';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
@@ -40,6 +39,7 @@ import './index.scss';
 import { SelectionContextMenu } from '@refly-packages/ai-workspace-common/components/canvas/selection-context-menu';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
+import { IconCreateDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -524,7 +524,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
                   <div className="text-[20px]">{t('canvas.emptyText')}</div>
                   <Button
                     loading={isCreatingDocument}
-                    icon={<HiOutlineDocumentAdd className="-mr-1 flex items-center justify-center" />}
+                    icon={<IconCreateDocument className="-mr-1 flex items-center justify-center" />}
                     type="text"
                     className="ml-0.5 text-[20px] text-[#00968F] py-[4px] px-[8px]"
                     onClick={() => createSingleDocumentInCanvas()}
