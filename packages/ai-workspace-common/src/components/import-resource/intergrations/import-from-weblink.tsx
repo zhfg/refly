@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
+import { StorageLimit } from './storageLimit';
 
 const { TextArea } = Input;
 
@@ -32,7 +33,7 @@ export const ImportFromWeblink = () => {
     }));
 
   const { addNode } = useAddNode();
-  const { refetchUsage } = useSubscriptionUsage();
+  const { refetchUsage, storageUsage } = useSubscriptionUsage();
 
   const [saveLoading, setSaveLoading] = useState(false);
   const { getLibraryList } = useHandleSiderData();
@@ -160,6 +161,11 @@ export const ImportFromWeblink = () => {
     });
   };
 
+  const canImportCount = storageUsage?.fileCountQuota - (storageUsage?.fileCountUsed ?? 0);
+  const disableSave = () => {
+    return scrapeLinks.length === 0 || scrapeLinks.length > canImportCount;
+  };
+
   return (
     <div className="h-full flex flex-col min-w-[500px] box-border intergation-import-from-weblink">
       {/* header */}
@@ -206,7 +212,7 @@ export const ImportFromWeblink = () => {
                 renderItem={(item, index) => <RenderItem item={item} key={index} />}
               />
             ) : (
-              <Empty />
+              <Empty description={t('resource.import.emptyLink')} />
             )}
           </div>
         </div>
@@ -218,13 +224,12 @@ export const ImportFromWeblink = () => {
           <p className="font-bold whitespace-nowrap text-md text-[#00968f]">
             {t('resource.import.linkCount', { count: scrapeLinks?.length || 0 })}
           </p>
+          <StorageLimit resourceCount={scrapeLinks?.length || 0} />
         </div>
 
         <div className="flex items-center gap-x-[8px] flex-shrink-0">
-          <Button style={{ marginRight: 8 }} onClick={() => setImportResourceModalVisible(false)}>
-            {t('common.cancel')}
-          </Button>
-          <Button type="primary" onClick={handleSave} disabled={scrapeLinks.length === 0} loading={saveLoading}>
+          <Button onClick={() => setImportResourceModalVisible(false)}>{t('common.cancel')}</Button>
+          <Button type="primary" onClick={handleSave} disabled={disableSave()} loading={saveLoading}>
             {t('common.saveToCanvas')}
           </Button>
         </div>

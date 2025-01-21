@@ -50,7 +50,7 @@ export const ImportResourceModal = () => {
       }}
       getPopupContainer={getPopupContainer}
       className="import-resource-modal"
-      style={{ height: '70%', minHeight: 500, maxHeight: 660, width: '60%', minWidth: '300px', maxWidth: '950px' }}
+      style={{ height: '70%', minHeight: 500, maxHeight: 660, width: '65%', minWidth: '300px', maxWidth: '1050px' }}
     >
       <div className="import-resource-container">
         <Splitter>
