@@ -25,7 +25,7 @@ import { TbPlugConnected } from 'react-icons/tb';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
-import { ToolButton, ToolbarItem } from './tool-button';
+import { ToolButton, ToolValue } from './tool-button';
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { genMemoID, genSkillID } from '@refly-packages/utils/id';
 

@@ -323,7 +323,7 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
           </Tooltip>
         </Dropdown>
       </div>
-      <HelpModal visible={helpModalVisible} onClose={() => setHelpModalVisible(false)} />
+      {helpModalVisible ? <HelpModal visible={helpModalVisible} onClose={() => setHelpModalVisible(false)} /> : null}
     </>
   );
 });

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Modal, Button } from 'antd';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { LuLightbulb } from 'react-icons/lu';
 import { useVideo } from '@refly-packages/ai-workspace-common/hooks/use-video';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
@@ -38,6 +38,10 @@ const TourContent = ({ description, videoUrl }: { description: string; videoUrl:
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    setTimeout(() => setIsLoading(false), 2000);
+  }, []);
+
   return (
     <div className="flex flex-col gap-4">
       <p className="text-base text-gray-600">{description}</p>
@@ -62,9 +66,6 @@ const TourContent = ({ description, videoUrl }: { description: string; videoUrl:
             style={{
               opacity: isLoading ? 0 : 1,
               transition: 'opacity 0.3s ease-in-out',
-            }}
-            onLoad={() => {
-              setTimeout(() => setIsLoading(false), 500);
             }}
           />
         </div>

@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { Modal, Button, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
@@ -52,6 +52,10 @@ export const HelpModal = memo(({ visible, onClose }: HelpModalProps) => {
     setIsFullscreen(!isFullscreen);
   };
 
+  useEffect(() => {
+    setTimeout(() => setIsLoading(false), 3000);
+  }, []);
+
   return (
     <Modal
       centered={!isFullscreen}
@@ -104,9 +108,6 @@ export const HelpModal = memo(({ visible, onClose }: HelpModalProps) => {
               allow="fullscreen"
               title={t('canvas.toolbar.interativeTutorial')}
               referrerPolicy="origin"
-              onLoad={() => {
-                setTimeout(() => setIsLoading(false), 500);
-              }}
             />
           </div>
         </div>
