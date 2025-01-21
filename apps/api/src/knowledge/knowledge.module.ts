@@ -8,7 +8,12 @@ import { RAGModule } from '@/rag/rag.module';
 import { MiscModule } from '@/misc/misc.module';
 import { SubscriptionModule } from '@/subscription/subscription.module';
 import { ResourceProcessor } from './knowledge.processor';
-import { QUEUE_RESOURCE, QUEUE_SIMPLE_EVENT, QUEUE_SYNC_STORAGE_USAGE } from '@/utils';
+import {
+  QUEUE_RESOURCE,
+  QUEUE_SIMPLE_EVENT,
+  QUEUE_SYNC_STORAGE_USAGE,
+  QUEUE_CLEAR_CANVAS_ENTITY,
+} from '@/utils';
 
 @Module({
   imports: [
@@ -19,6 +24,7 @@ import { QUEUE_RESOURCE, QUEUE_SIMPLE_EVENT, QUEUE_SYNC_STORAGE_USAGE } from '@/
     BullModule.registerQueue({ name: QUEUE_RESOURCE }),
     BullModule.registerQueue({ name: QUEUE_SIMPLE_EVENT }),
     BullModule.registerQueue({ name: QUEUE_SYNC_STORAGE_USAGE }),
+    BullModule.registerQueue({ name: QUEUE_CLEAR_CANVAS_ENTITY }),
   ],
   controllers: [KnowledgeController],
   providers: [KnowledgeService, ResourceProcessor],

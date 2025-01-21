@@ -35,6 +35,7 @@ import {
   QUEUE_RESOURCE,
   streamToString,
   QUEUE_SYNC_STORAGE_USAGE,
+  QUEUE_CLEAR_CANVAS_ENTITY,
 } from '@/utils';
 import {
   genResourceID,
@@ -57,6 +58,7 @@ import {
   ReferenceObjectMissingError,
   DocumentNotFoundError,
 } from '@refly-packages/errors';
+import { DeleteCanvasNodesJobData } from '@/canvas/canvas.dto';
 
 @Injectable()
 export class KnowledgeService {
@@ -72,13 +74,22 @@ export class KnowledgeService {
     @InjectQueue(QUEUE_RESOURCE) private queue: Queue<FinalizeResourceParam>,
     @InjectQueue(QUEUE_SIMPLE_EVENT) private simpleEventQueue: Queue<SimpleEventData>,
     @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
+    @InjectQueue(QUEUE_CLEAR_CANVAS_ENTITY) private canvasQueue: Queue<DeleteCanvasNodesJobData>,
   ) {}
 
   async syncStorageUsage(user: User) {
-    await this.ssuQueue.add('syncStorageUsage', {
-      uid: user.uid,
-      timestamp: new Date(),
-    });
+    await this.ssuQueue.add(
+      'syncStorageUsage',
+      {
+        uid: user.uid,
+        timestamp: new Date(),
+      },
+      {
+        jobId: user.uid,
+        removeOnComplete: true,
+        removeOnFail: true,
+      },
+    );
   }
 
   async listResources(user: User, param: ListResourcesData['query']) {
@@ -448,6 +459,9 @@ export class KnowledgeService {
       this.ragService.deleteResourceNodes(user, resourceId),
       this.elasticsearch.deleteResource(resourceId),
       this.syncStorageUsage(user),
+      this.canvasQueue.add('deleteNodes', {
+        entities: [{ entityId: resourceId, entityType: 'resource' }],
+      }),
     ]);
   }
 
@@ -621,6 +635,10 @@ export class KnowledgeService {
       this.miscService.removeFilesByEntity(user, {
         entityId: docId,
         entityType: 'document',
+      }),
+      // Add canvas node deletion
+      this.canvasQueue.add('deleteNodes', {
+        entities: [{ entityId: docId, entityType: 'document' }],
       }),
     ];
 

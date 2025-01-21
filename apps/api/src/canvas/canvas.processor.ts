@@ -3,11 +3,8 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 
 import { CanvasService } from './canvas.service';
-import { QUEUE_SYNC_CANVAS_ENTITY } from '@/utils/const';
-
-interface SyncCanvasEntityJobData {
-  canvasId: string;
-}
+import { QUEUE_CLEAR_CANVAS_ENTITY, QUEUE_SYNC_CANVAS_ENTITY } from '@/utils/const';
+import { DeleteCanvasNodesJobData, SyncCanvasEntityJobData } from './canvas.dto';
 
 @Processor(QUEUE_SYNC_CANVAS_ENTITY)
 export class SyncCanvasEntityProcessor extends WorkerHost {
@@ -18,12 +15,33 @@ export class SyncCanvasEntityProcessor extends WorkerHost {
   }
 
   async process(job: Job<SyncCanvasEntityJobData>) {
-    this.logger.log(`[${QUEUE_SYNC_CANVAS_ENTITY}] job: ${JSON.stringify(job)}`);
+    this.logger.log(`[${QUEUE_SYNC_CANVAS_ENTITY}] job: ${JSON.stringify(job.data)}`);
 
     try {
       await this.canvasService.syncCanvasEntityRelation(job.data.canvasId);
     } catch (error) {
       this.logger.error(`[${QUEUE_SYNC_CANVAS_ENTITY}] error: ${error?.stack}`);
+      throw error;
+    }
+  }
+}
+
+@Processor(QUEUE_CLEAR_CANVAS_ENTITY)
+export class ClearCanvasEntityProcessor extends WorkerHost {
+  private logger = new Logger(ClearCanvasEntityProcessor.name);
+
+  constructor(private canvasService: CanvasService) {
+    super();
+  }
+
+  async process(job: Job<DeleteCanvasNodesJobData>) {
+    this.logger.log(`[${QUEUE_CLEAR_CANVAS_ENTITY}] job: ${JSON.stringify(job.data)}`);
+    const { entities } = job.data;
+
+    try {
+      await this.canvasService.deleteEntityNodesFromCanvases(entities);
+    } catch (error) {
+      this.logger.error(`[${QUEUE_CLEAR_CANVAS_ENTITY}] error ${job.id}: ${error?.stack}`);
       throw error;
     }
   }

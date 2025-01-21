@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import * as Y from 'yjs';
+import pLimit from 'p-limit';
 import { MINIO_INTERNAL } from '@/common/minio.service';
 import { MinioService } from '@/common/minio.service';
 import { PrismaService } from '@/common/prisma.service';
@@ -212,5 +213,84 @@ export class CanvasService {
         skipDuplicates: true,
       }),
     ]);
+  }
+
+  async deleteEntityNodesFromCanvases(entities: Entity[]) {
+    this.logger.log(`Deleting entity nodes from canvases: ${JSON.stringify(entities)}`);
+
+    // Find all canvases that have relations with these entities
+    const relations = await this.prisma.canvasEntityRelation.findMany({
+      where: {
+        entityId: { in: entities.map((e) => e.entityId) },
+        entityType: { in: entities.map((e) => e.entityType) },
+        deletedAt: null,
+      },
+      distinct: ['canvasId'],
+    });
+
+    const canvasIds = relations.map((r) => r.canvasId);
+    if (canvasIds.length === 0) {
+      this.logger.log(`No related canvases found for entities: ${JSON.stringify(entities)}`);
+      return;
+    }
+    this.logger.log(`Found related canvases: ${JSON.stringify(canvasIds)}`);
+
+    // Load each canvas and remove the nodes
+    const limit = pLimit(3);
+    await Promise.all(
+      canvasIds.map((canvasId) =>
+        limit(async () => {
+          const canvas = await this.prisma.canvas.findUnique({
+            where: { canvasId },
+          });
+          if (!canvas) return;
+
+          // Open connection to get the document
+          const connection = await this.collabService.openDirectConnection(canvasId, {
+            user: { uid: canvas.uid },
+            entity: canvas,
+            entityType: 'canvas',
+          });
+
+          // Remove nodes matching the entities
+          connection.document.transact(() => {
+            const nodes = connection.document.getArray('nodes');
+            const toRemove: number[] = [];
+
+            nodes.forEach((node: any, index: number) => {
+              const entityId = node?.data?.entityId;
+              const entityType = node?.type;
+
+              if (entityId && entityType) {
+                const matchingEntity = entities.find(
+                  (e) => e.entityId === entityId && e.entityType === entityType,
+                );
+                if (matchingEntity) {
+                  toRemove.push(index);
+                }
+              }
+            });
+
+            // Remove nodes in reverse order to maintain correct indices
+            toRemove.reverse().forEach((index) => {
+              nodes.delete(index, 1);
+            });
+          });
+
+          await connection.disconnect();
+
+          // Update relations
+          await this.prisma.canvasEntityRelation.updateMany({
+            where: {
+              canvasId,
+              entityId: { in: entities.map((e) => e.entityId) },
+              entityType: { in: entities.map((e) => e.entityType) },
+              deletedAt: null,
+            },
+            data: { deletedAt: new Date() },
+          });
+        }),
+      ),
+    );
   }
 }
