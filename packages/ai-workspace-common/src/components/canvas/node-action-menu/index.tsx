@@ -12,6 +12,7 @@ import {
   IconShrink,
   IconCopy,
   IconMemo,
+  IconDeleteFile,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
@@ -120,6 +121,11 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'delete'));
     onClose?.();
   }, [nodeId]);
+
+  const handleDeleteFile = useCallback(() => {
+    nodeActionEmitter.emit(createNodeEventName(nodeId, 'deleteFile'));
+    onClose?.();
+  }, [nodeId, onClose]);
 
   const handleAddToContext = useCallback(() => {
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'addToContext'));
@@ -507,6 +513,25 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
         },
       },
+      ...(['document', 'resource'].includes(nodeType)
+        ? [
+            {
+              key: 'deleteFile',
+              icon: IconDeleteFile,
+              label: `${t('common.delete')}${nodeType === 'document' ? t('common.document') : t('common.resource')}`,
+              onClick: handleDeleteFile,
+              danger: true,
+              type: 'button' as const,
+              hoverContent: {
+                title: `${t('common.delete')}${nodeType === 'document' ? t('common.document') : t('common.resource')}`,
+                description: t('canvas.nodeActions.deleteFileDescription', {
+                  type: t(`common.${nodeType}`),
+                }),
+                videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+              },
+            },
+          ]
+        : []),
     ];
 
     const clusterItems: MenuItem[] = [

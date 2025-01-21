@@ -715,6 +715,7 @@ const translations = {
       moreOptions: 'More Options',
       delete: 'Delete Node',
       deleteDescription: 'Delete the selected node',
+      deleteFileDescription: 'Delete the {{type}} associated with this node',
       ungroup: 'Ungroup',
       ungroupDescription: 'Cancel the grouping of the selected node',
       group: 'Create Group',

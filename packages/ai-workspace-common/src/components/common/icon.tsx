@@ -40,7 +40,7 @@ import {
   RiChatHistoryFill,
   RiUploadCloud2Line,
 } from 'react-icons/ri';
-
+import { TiDocumentDelete } from 'react-icons/ti';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BiText } from 'react-icons/bi';
 import { BsDiscord, BsTwitterX, BsGithub, BsEnvelope } from 'react-icons/bs';
@@ -120,6 +120,7 @@ export const IconDiscord = BsDiscord;
 export const IconEmail = BsEnvelope;
 
 export const IconLanguage = IoLanguage;
+export const IconDeleteFile = TiDocumentDelete;
 
 export const ModelProviderIcons = {
   openai: OpenAIIcon,

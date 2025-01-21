@@ -732,6 +732,7 @@ const translations = {
       editQueryDescription: '编辑选中的节点提问',
       duplicateDocument: '创建文档副本',
       duplicateDocumentDescription: '创建选中的节点文档副本',
+      deleteFileDescription: '删除当前节点对应的{{type}}',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',
