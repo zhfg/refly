@@ -553,7 +553,10 @@ const translations = {
       addTool: 'Add Tool',
       autoLayout: 'Auto Layout',
       askAI: 'Ask AI',
+      askAIDescription:
+        'Ask AI, select context or switch skill, input requirements, get help with writing, reading comprehension, or question answering',
       createMemo: 'Create Memo',
+      createMemoDescription: 'Create a memo for quick recording ideas, supporting Markdown format',
       addMemo: 'Add Memo',
       createDocument: 'Create Document',
       createDocumentDescription: 'Create a document for writing.',
