@@ -68,7 +68,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       hoverContent: {
         title: t('canvas.toolbar.askAI'),
         description: t('canvas.toolbar.askAIDescription'),
-        videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-askAI.mp4',
       },
     },
     { key: 'divider-1', type: 'divider' },
@@ -79,7 +79,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       hoverContent: {
         title: t('canvas.toolbar.createDocument'),
         description: t('canvas.toolbar.createDocumentDescription'),
-        videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-createDocument.mp4',
       },
     },
     {
@@ -89,7 +89,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       hoverContent: {
         title: t('canvas.toolbar.createMemo'),
         description: t('canvas.toolbar.createMemoDescription'),
-        videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-createMemo.mp4',
       },
     },
     {
@@ -99,11 +99,6 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       domain: 'resource',
       showSearchList: showSearchResourceList,
       setShowSearchList: setShowSearchResourceList,
-      hoverContent: {
-        title: t('canvas.toolbar.addResource'),
-        description: t('canvas.toolbar.addResourceDescription'),
-        videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
-      },
     },
     {
       key: 'addDocument',
@@ -112,11 +107,6 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       domain: 'document',
       showSearchList: showSearchDocumentList,
       setShowSearchList: setShowSearchDocumentList,
-      hoverContent: {
-        title: t('canvas.toolbar.addDocument'),
-        description: t('canvas.toolbar.addDocumentDescription'),
-        videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
-      },
     },
     { key: 'divider-2', type: 'divider' },
     {
@@ -126,7 +116,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       hoverContent: {
         title: t('canvas.toolbar.importResource'),
         description: t('canvas.toolbar.importResourceDescription'),
-        videoUrl: 'https://static.refly.ai/static/20250118-182618.mp4',
+        videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.mp4',
       },
     },
   ];

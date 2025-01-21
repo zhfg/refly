@@ -306,7 +306,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
           title: t("loggedHomePage.siderMenu.canvasTitle"),
           description: t("loggedHomePage.siderMenu.canvasDescription"),
           videoUrl:
-            "https://www.youtube.com/embed/7aAFcsV_Ts0?si=rT6iYZZYjg4VTn5l",
+            "https://static.refly.ai/onboarding/siderMenu/siderMenu-canvas.mp4",
           placement: "rightBottom",
         },
       },
@@ -324,7 +324,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
           title: t("loggedHomePage.siderMenu.libraryTitle"),
           description: t("loggedHomePage.siderMenu.libraryDescription"),
           videoUrl:
-            "https://www.youtube.com/embed/P7Hfq3nfFvY?si=TnYYJQc7LsQmYX-R",
+            "https://static.refly.ai/onboarding/siderMenu/siderMenu-knowledgebase.mp4",
         },
       },
     ],

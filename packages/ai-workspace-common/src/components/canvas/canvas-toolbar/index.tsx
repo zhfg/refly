@@ -68,7 +68,7 @@ const useToolbarConfig = () => {
           hoverContent: {
             title: t('canvas.toolbar.askAI'),
             description: t('canvas.toolbar.askAIDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-askAI.mp4',
           },
         },
         {
@@ -80,7 +80,7 @@ const useToolbarConfig = () => {
           hoverContent: {
             title: t('canvas.toolbar.createMemo'),
             description: t('canvas.toolbar.createMemoDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-createMemo.mp4',
           },
         },
         {
@@ -92,7 +92,7 @@ const useToolbarConfig = () => {
           hoverContent: {
             title: t('canvas.toolbar.importResource'),
             description: t('canvas.toolbar.importResourceDescription'),
-            videoUrl: 'https://static.refly.ai/static/20250118-182618.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.mp4',
           },
         },
         {
@@ -111,7 +111,7 @@ const useToolbarConfig = () => {
           hoverContent: {
             title: t('canvas.toolbar.createDocument'),
             description: t('canvas.toolbar.createDocumentDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-create-document.mp4',
           },
         },
         {
@@ -132,7 +132,7 @@ const useToolbarConfig = () => {
           tooltip: t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`),
           hoverContent: {
             title: t('canvas.toolbar.toggleLaunchpadTitle'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.mp4',
           },
         },
         {
@@ -143,7 +143,7 @@ const useToolbarConfig = () => {
           tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
           hoverContent: {
             title: t('canvas.toolbar.toggleEdgeTitle'),
-            videoUrl: 'https://static.refly.ai/static/20250118-182618.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.mp4',
           },
         },
       ] as ToolbarItem[],

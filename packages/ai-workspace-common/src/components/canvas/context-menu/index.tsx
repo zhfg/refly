@@ -75,7 +75,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       active: showLaunchpad,
       title: showLaunchpad ? t('canvas.contextMenu.hideLaunchpad') : t('canvas.contextMenu.showLaunchpad'),
       description: t('canvas.contextMenu.toggleLaunchpadDescription'),
-      videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+      videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.mp4',
     },
     {
       key: 'toggleEdges',
@@ -84,7 +84,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       active: showEdges,
       title: showEdges ? t('canvas.contextMenu.hideEdges') : t('canvas.contextMenu.showEdges'),
       description: t('canvas.contextMenu.toggleEdgeDescription'),
-      videoUrl: 'https://static.refly.ai/static/20250118-182618.mp4',
+      videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.mp4',
     },
     {
       key: 'toggleClickPreview',
@@ -93,7 +93,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       active: clickToPreview,
       title: clickToPreview ? t('canvas.contextMenu.disableClickPreview') : t('canvas.contextMenu.enableClickPreview'),
       description: t('canvas.contextMenu.toggleClickPreviewDescription'),
-      videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+      videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleClickView.mp4',
     },
     {
       key: 'toggleNodeSizeMode',
@@ -102,7 +102,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       active: nodeSizeMode === 'compact',
       title: nodeSizeMode === 'compact' ? t('canvas.contextMenu.adaptiveMode') : t('canvas.contextMenu.compactMode'),
       description: t('canvas.contextMenu.toggleNodeSizeModeDescription'),
-      videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+      videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAdaptive.mp4',
     },
     {
       key: 'toggleAutoLayout',
@@ -111,7 +111,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       active: autoLayout,
       title: autoLayout ? t('canvas.contextMenu.disableAutoLayout') : t('canvas.contextMenu.enableAutoLayout'),
       description: t('canvas.contextMenu.toggleAutoLayoutDescription'),
-      videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+      videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAutoLayout.mp4',
     },
   ];
 

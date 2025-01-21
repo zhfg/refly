@@ -238,7 +238,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           hoverContent: {
             title: t('canvas.nodeActions.askAI'),
             description: t('canvas.nodeActions.askAIDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-askAI.mp4',
           },
         },
         { key: 'divider-1', type: 'divider' } as MenuItem,
@@ -251,7 +251,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           hoverContent: {
             title: t('canvas.nodeActions.addToContext'),
             description: t('canvas.nodeActions.addToContextDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-addToContext.mp4',
           },
         },
         { key: 'divider-2', type: 'divider' } as MenuItem,
@@ -265,7 +265,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           hoverContent: {
             title: t('canvas.nodeActions.delete'),
             description: t('canvas.nodeActions.deleteDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-delete.mp4',
           },
         },
       ];
@@ -282,7 +282,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
         hoverContent: {
           title: t('canvas.nodeActions.askAI'),
           description: t('canvas.nodeActions.askAIDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-askAI.mp4',
         },
       },
       ...(nodeType === 'skillResponse'
@@ -297,7 +297,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
               hoverContent: {
                 title: t('canvas.nodeActions.cloneAskAI'),
                 description: t('canvas.nodeActions.cloneAskAIDescription'),
-                videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+                videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-cloneAskAI.mp4',
               },
             },
             {
@@ -309,7 +309,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
               hoverContent: {
                 title: t('canvas.nodeActions.editQuery'),
                 description: t('canvas.nodeActions.editQueryDescription'),
-                videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+                videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-editQuery.mp4',
               },
             },
             {
@@ -321,7 +321,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
               hoverContent: {
                 title: t('canvas.nodeActions.rerun'),
                 description: t('canvas.nodeActions.rerunDescription'),
-                videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+                videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-rerun.mp4',
               },
             },
           ]
@@ -335,7 +335,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
         hoverContent: {
           title: t('canvas.nodeActions.addToContext'),
           description: t('canvas.nodeActions.addToContextDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-addToContext.mp4',
         },
       },
     ];
@@ -350,7 +350,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
         hoverContent: {
           title: t('canvas.nodeActions.preview'),
           description: t('canvas.nodeActions.previewDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeActionMenu-openPreview.mp4',
         },
       },
       { key: 'divider-1', type: 'divider' } as MenuItem,
@@ -367,7 +367,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
             localSizeMode === 'compact'
               ? t('canvas.nodeActions.adaptiveModeDescription')
               : t('canvas.nodeActions.compactModeDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-adaptiveMode.mp4',
         },
       },
     ].filter(Boolean);
@@ -386,7 +386,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           hoverContent: {
             title: t('canvas.nodeActions.insertToDoc'),
             description: t('canvas.nodeActions.insertToDocDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-insertDocument.mp4',
           },
         },
       ],
@@ -400,7 +400,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           hoverContent: {
             title: t('canvas.nodeActions.ungroup'),
             description: t('canvas.nodeActions.ungroupDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/selection-node-action/selection-nodeAction-ungroup.mp4',
           },
         },
       ],
@@ -414,7 +414,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           hoverContent: {
             title: t('canvas.nodeActions.run'),
             description: t('canvas.nodeActions.runDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-run.mp4',
           },
         },
       ],
@@ -429,7 +429,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           hoverContent: {
             title: t('canvas.nodeActions.insertToDoc'),
             description: t('canvas.nodeActions.insertToDocDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-insertDocument.mp4',
           },
         },
         nodeData?.contentPreview
@@ -442,7 +442,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
               hoverContent: {
                 title: t('canvas.nodeStatus.createDocument'),
                 description: t('canvas.nodeActions.createDocumentDescription'),
-                videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+                videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-createDocument.mp4',
               },
             }
           : null,
@@ -463,7 +463,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
                     hoverContent: {
                       title: t('canvas.nodeActions.duplicateDocument'),
                       description: t('canvas.nodeActions.duplicateDocumentDescription'),
-                      videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+                      videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-createDocument.mp4',
                     },
                   },
                 ]
@@ -477,7 +477,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
               hoverContent: {
                 title: t('canvas.nodeActions.createMemo'),
                 description: t('canvas.nodeActions.createMemoDescription'),
-                videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+                videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-createEmptyMemo.mp4',
               },
             },
             {
@@ -489,7 +489,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
               hoverContent: {
                 title: t('canvas.nodeActions.copy'),
                 description: t('canvas.nodeActions.copyDescription'),
-                videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+                videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-copyContent.mp4',
               },
             },
           ]
@@ -504,7 +504,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
         hoverContent: {
           title: t('canvas.nodeActions.delete'),
           description: t('canvas.nodeActions.deleteDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-delete.mp4',
         },
       },
     ];
@@ -520,7 +520,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
         hoverContent: {
           title: t('canvas.nodeActions.selectCluster'),
           description: t('canvas.nodeActions.selectClusterDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-selectOrLayout.mp4',
         },
       },
       {
@@ -532,7 +532,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
         hoverContent: {
           title: t('canvas.nodeActions.groupCluster'),
           description: t('canvas.nodeActions.groupClusterDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-groupChildNodes.mp4',
         },
       },
       {
@@ -544,7 +544,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
         hoverContent: {
           title: t('canvas.nodeActions.layoutCluster'),
           description: t('canvas.nodeActions.layoutClusterDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-selectOrLayout.mp4',
         },
       },
     ];
