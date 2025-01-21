@@ -101,11 +101,6 @@ const useToolbarConfig = () => {
           type: 'popover',
           domain: 'resource',
           tooltip: t('canvas.toolbar.addResource'),
-          hoverContent: {
-            title: t('canvas.toolbar.addResource'),
-            description: t('canvas.toolbar.addResourceDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
-          },
         },
         {
           icon: HiOutlineDocumentAdd,
@@ -125,11 +120,6 @@ const useToolbarConfig = () => {
           type: 'popover',
           domain: 'document',
           tooltip: t('canvas.toolbar.addDocument'),
-          hoverContent: {
-            title: t('canvas.toolbar.addDocument'),
-            description: t('canvas.toolbar.addDocumentDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
-          },
         },
         {
           type: 'divider',
