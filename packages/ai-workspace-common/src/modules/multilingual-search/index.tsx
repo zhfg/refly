@@ -66,7 +66,7 @@ function MultilingualSearch() {
         </div>
       </div>
 
-      <div className="multilingual-search-inner-container">
+      <div className="multilingual-search-inner-container px-6 py-4">
         {pageState === 'home' ? (
           <SearchHome />
         ) : (
