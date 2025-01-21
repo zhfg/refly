@@ -11,13 +11,14 @@ import { IoAlertCircle } from 'react-icons/io5';
 interface CanvasActionDropdown {
   canvasId: string;
   canvasName: string;
+  btnSize?: 'small' | 'large';
   updateShowStatus?: (canvasId: string | null) => void;
   afterDelete?: () => void;
   afterRename?: (newTitle: string, canvasId: string) => void;
 }
 
 export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
-  const { canvasId, canvasName, updateShowStatus, afterDelete, afterRename } = props;
+  const { canvasId, canvasName, btnSize = 'small', updateShowStatus, afterDelete, afterRename } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
   const { deleteCanvas } = useDeleteCanvas();
@@ -69,7 +70,7 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
           }}
         >
           <IconDelete size={16} className="mr-2" />
-          {t('workspace.deleteDropdownMenu.delete')}
+          {t('canvas.toolbar.deleteCanvas')}
         </div>
       ),
       key: 'delete',
@@ -116,7 +117,7 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
           items,
         }}
       >
-        <Button onClick={(e) => e.stopPropagation()} size="small" type="text" icon={<IconMoreHorizontal />} />
+        <Button size={btnSize} onClick={(e) => e.stopPropagation()} type="text" icon={<IconMoreHorizontal />} />
       </Dropdown>
 
       <div onClick={(e) => e.stopPropagation()}>
@@ -132,10 +133,11 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
         title={
           <div className="flex items-center gap-2">
             <IoAlertCircle size={26} className="mr-2 text-[#faad14]" />
-            {t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', { canvas: canvasName })}
+            {t('common.deleteConfirmMessage')}
           </div>
         }
         centered
+        width={416}
         open={isDeleteModalOpen}
         onOk={handleDelete}
         onCancel={() => setIsDeleteModalOpen(false)}
@@ -146,7 +148,14 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
         closeIcon={null}
       >
         <div className="pl-10">
-          <Checkbox onChange={onChange}>{t('canvas.toolbar.deleteCanvasFile')}</Checkbox>
+          <div className="mb-2">
+            {t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', {
+              canvas: canvasName || t('common.untitled'),
+            })}
+          </div>
+          <Checkbox onChange={onChange} className="mb-2 text-[13px]">
+            {t('canvas.toolbar.deleteCanvasFile')}
+          </Checkbox>
         </div>
       </Modal>
     </>

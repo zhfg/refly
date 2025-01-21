@@ -32,6 +32,8 @@ import {
   LuStickyNote,
   LuFileText,
   LuFilePlus,
+  LuLockOpen,
+  LuLock,
 } from 'react-icons/lu';
 import {
   RiErrorWarningLine,
@@ -104,6 +106,8 @@ export const IconError = RiErrorWarningLine;
 export const IconLoading = AiOutlineLoading3Quarters;
 export const IconSettings = LuSettings;
 export const IconCopy = LuCopy;
+export const IconLock = LuLock;
+export const IconUnlock = LuLockOpen;
 export const IconModel = LuBrain;
 export const IconDown = HiOutlineChevronDown;
 export const IconSubscription = LuGift;

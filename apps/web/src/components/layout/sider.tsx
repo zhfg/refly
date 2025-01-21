@@ -229,6 +229,7 @@ const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
               : "opacity-0 group-hover:opacity-100",
           )}>
           <CanvasActionDropdown
+            btnSize="small"
             canvasId={canvas.id}
             canvasName={canvas.name}
             updateShowStatus={canvasId => {

@@ -105,10 +105,10 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
 
   const handleDeleteFile = useCallback(() => {
     Modal.confirm({
+      centered: true,
       title: t('common.deleteConfirmMessage'),
-      content: t('canvas.nodeActions.deleteFileConfirm', {
-        type: t(`common.${node.type}`),
-        title: node.data?.title,
+      content: t(`canvas.nodeActions.${node.type}DeleteConfirm`, {
+        title: node.data?.title || t('common.untitled'),
       }),
       okText: t('common.delete'),
       cancelText: t('common.cancel'),
@@ -171,6 +171,9 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
       onClick: handleAddToContext,
     },
     {
+      type: 'divider',
+    },
+    {
       key: 'delete',
       label: (
         <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
@@ -181,12 +184,25 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
       onClick: () => deleteNode(node),
       className: 'hover:bg-red-50',
     },
-    ['document', 'resource'].includes(node.type) && {
+    node.type === 'document' && {
       key: 'deleteFile',
       label: (
         <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
           <IconDeleteFile className="w-4 h-4 flex-shrink-0" />
-          {`${t('common.delete')}${node.type === 'document' ? t('common.document') : t('common.resource')}`}
+          <span>{t('canvas.nodeActions.deleteDocument')}</span>
+        </div>
+      ),
+      onClick: () => {
+        handleDeleteFile();
+      },
+      className: 'hover:bg-red-50',
+    },
+    node.type === 'resource' && {
+      key: 'deleteFile',
+      label: (
+        <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
+          <IconDeleteFile className="w-4 h-4 flex-shrink-0" />
+          <span>{t('canvas.nodeActions.deleteResource')}</span>
         </div>
       ),
       onClick: () => {

@@ -113,7 +113,9 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({ canvasId, canvas
       />
 
       <Modal
-        title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', { canvas: canvasTitle })}
+        title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', {
+          canvas: canvasTitle || t('common.untitled'),
+        })}
         centered
         open={isDeleteModalOpen}
         onOk={handleDelete}

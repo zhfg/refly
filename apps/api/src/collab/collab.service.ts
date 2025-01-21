@@ -308,7 +308,6 @@ export class CollabService {
         jobId: canvas.canvasId, // Use consistent jobId for deduplication
         removeOnComplete: true,
         removeOnFail: true,
-        delay: 3000,
       },
     );
   }

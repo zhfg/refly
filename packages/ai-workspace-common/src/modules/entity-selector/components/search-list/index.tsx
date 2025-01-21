@@ -197,9 +197,7 @@ export const SearchList = (props: SearchListProps) => {
                 onClick={() => handleItemClick(option)}
               >
                 {renderItemIcon(option)}
-                <span className="flex-grow truncate">
-                  {domain === 'skill' ? t(`${option.id}.name`, { ns: 'skill' }) : option.title}
-                </span>
+                <span className="flex-grow truncate">{option.title || t('common.untitled')}</span>
                 {mode === 'multiple' && option.isSelected && (
                   <div className="flex-shrink-0">
                     <IconCheck className="text-[#00968F] w-4 h-4" />

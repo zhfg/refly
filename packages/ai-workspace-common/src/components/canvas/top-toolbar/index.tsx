@@ -1,5 +1,5 @@
-import { useEffect, useRef, FC, useState, useCallback, memo } from 'react';
-import { Button, Divider, Tooltip, Input, Modal, Skeleton, Popover } from 'antd';
+import { useEffect, FC, useState, useCallback, memo } from 'react';
+import { Button, Divider, Tooltip, Skeleton, Popover } from 'antd';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
@@ -321,7 +321,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             setShowMaxRatio={setShowMaxRatio}
           />
 
-          <CanvasActionDropdown canvasId={canvasId} canvasName={canvasTitle} />
+          <CanvasActionDropdown canvasId={canvasId} canvasName={canvasTitle} btnSize="large" />
         </div>
       </div>
     </>
