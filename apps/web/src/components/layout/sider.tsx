@@ -187,6 +187,7 @@ const NewCanvasItem = () => {
 }
 
 const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [showCanvasIdActionDropdown, setShowCanvasIdActionDropdown] = useState<
     string | null
@@ -215,7 +216,9 @@ const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
           <IconCanvas
             className={cn({ "text-green-600": selectedKey === canvas.id })}
           />
-          <div className="w-28 truncate">{canvas?.name ?? ""}</div>
+          <div className="w-28 truncate">
+            {canvas?.name || t("common.untitled")}
+          </div>
         </div>
 
         <div

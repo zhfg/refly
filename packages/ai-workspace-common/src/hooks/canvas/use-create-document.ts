@@ -129,7 +129,7 @@ export const useCreateDocument = () => {
       }
 
       const docId = genDocumentID();
-      const title = t('common.newDocument');
+      const title = '';
 
       await createLocalDocument(docId, title, '', refetchUsage);
 

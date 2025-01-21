@@ -205,7 +205,11 @@ export const DocumentNode = memo(
               </>
             )}
             <div className="flex flex-col h-full">
-              <NodeHeader title={data.title} Icon={HiOutlineDocumentText} iconBgColor="#00968F" />
+              <NodeHeader
+                title={data.title || t('common.untitled')}
+                Icon={HiOutlineDocumentText}
+                iconBgColor="#00968F"
+              />
 
               <div
                 className={`flex-grow overflow-y-auto pr-2 -mr-2 ${isOperating ? 'overflow-auto' : 'overflow-hidden'}`}

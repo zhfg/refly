@@ -288,7 +288,7 @@ export const SkillResponseNode = memo(
     const { debouncedCreateDocument } = useCreateDocument();
 
     const handleCreateDocument = useCallback(async () => {
-      await debouncedCreateDocument(title ?? t('common.newDocument'), content, {
+      await debouncedCreateDocument(title ?? '', content, {
         sourceNodeId: entityId,
         addToCanvas: true,
       });
