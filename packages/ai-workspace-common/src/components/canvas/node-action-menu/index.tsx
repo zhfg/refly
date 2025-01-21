@@ -1,4 +1,4 @@
-import { Button, Divider, message, Popconfirm } from 'antd';
+import { Button, Divider, message, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FC, useCallback, useMemo, useEffect, useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
@@ -123,8 +123,21 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
   }, [nodeId]);
 
   const handleDeleteFile = useCallback(() => {
-    nodeActionEmitter.emit(createNodeEventName(nodeId, 'deleteFile'));
-    onClose?.();
+    Modal.confirm({
+      title: t('common.deleteConfirmMessage'),
+      content: t('canvas.nodeActions.deleteFileConfirm', {
+        type: t(`common.${nodeType}`),
+        title: nodeData?.title,
+      }),
+      okText: t('common.delete'),
+      cancelButtonProps: { className: 'hover:!border-[#00968F] hover:!text-[#00968F] ' },
+      cancelText: t('common.cancel'),
+      okButtonProps: { danger: true },
+      onOk: () => {
+        nodeActionEmitter.emit(createNodeEventName(nodeId, 'deleteFile'));
+        onClose?.();
+      },
+    });
   }, [nodeId, onClose]);
 
   const handleAddToContext = useCallback(() => {
@@ -518,25 +531,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
             {
               key: 'deleteFile',
               icon: IconDeleteFile,
-              label: (
-                <Popconfirm
-                  title={t('common.deleteConfirmMessage')}
-                  description={t('canvas.nodeActions.deleteFileConfirm', {
-                    type: t(`common.${nodeType}`),
-                  })}
-                  onConfirm={handleDeleteFile}
-                  placement="top"
-                  okText={t('common.delete')}
-                  cancelText={t('common.cancel')}
-                  overlayStyle={{ maxWidth: '300px' }}
-                >
-                  <span>{`${t('common.delete')}${nodeType === 'document' ? t('common.document') : t('common.resource')}`}</span>
-                </Popconfirm>
-              ),
-              onClick: (e) => {
-                // Prevent the click event from triggering both Popconfirm and menu item click
-                e?.stopPropagation();
-              },
+              label: `${t('common.delete')}${nodeType === 'document' ? t('common.document') : t('common.resource')}`,
+              onClick: handleDeleteFile,
               danger: true,
               type: 'button' as const,
               hoverContent: {

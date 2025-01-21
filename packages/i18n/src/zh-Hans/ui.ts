@@ -733,7 +733,7 @@ const translations = {
       duplicateDocument: '创建文档副本',
       duplicateDocumentDescription: '创建选中的节点文档副本',
       deleteFileDescription: '删除当前节点对应的{{type}}',
-      deleteFileConfirm: '确认要删除此{{type}}吗？该操作将从知识库以及所有画布中移除此{{type}}',
+      deleteFileConfirm: '确认要删除{{type}} [ {{title}} ]吗？该操作将从知识库以及所有画布中移除此{{type}}',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',

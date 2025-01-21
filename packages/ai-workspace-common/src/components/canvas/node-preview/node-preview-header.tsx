@@ -1,5 +1,5 @@
 import { FC, useCallback } from 'react';
-import { Button, Dropdown } from 'antd';
+import { Button, Dropdown, Modal } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   FileText,
@@ -25,12 +25,14 @@ import {
   IconPin,
   IconResponse,
   IconUnpin,
+  IconDeleteFile,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-preview-control';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { TFunction } from 'i18next';
+import { useDeleteResource, useDeleteDocument } from '@refly-packages/ai-workspace-common/queries';
 
 // Get icon component based on node type and metadata
 const getNodeIcon = (node: CanvasNode<any>) => {
@@ -98,6 +100,31 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
   const { addToContext } = useAddToContext();
 
   const { deleteNode } = useDeleteNode();
+  const { mutate: deleteResource } = useDeleteResource();
+  const { mutate: deleteDocument } = useDeleteDocument();
+
+  const handleDeleteFile = useCallback(() => {
+    Modal.confirm({
+      title: t('common.deleteConfirmMessage'),
+      content: t('canvas.nodeActions.deleteFileConfirm', {
+        type: t(`common.${node.type}`),
+        title: node.data?.title,
+      }),
+      okText: t('common.delete'),
+      cancelText: t('common.cancel'),
+      okButtonProps: { danger: true },
+      cancelButtonProps: { className: 'hover:!border-[#00968F] hover:!text-[#00968F] ' },
+      onOk: () => {
+        node.type === 'document'
+          ? deleteDocument({ body: { docId: node.data?.entityId } })
+          : deleteResource({
+              body: { resourceId: node.data?.entityId },
+            });
+        deleteNode(node);
+      },
+    });
+  }, [node, deleteResource, deleteDocument, deleteNode, t]);
+
   const handleAddToContext = useCallback(() => {
     addToContext({
       type: node.type,
@@ -152,6 +179,19 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
         </div>
       ),
       onClick: () => deleteNode(node),
+      className: 'hover:bg-red-50',
+    },
+    ['document', 'resource'].includes(node.type) && {
+      key: 'deleteFile',
+      label: (
+        <div className="flex items-center gap-2 text-red-600 whitespace-nowrap">
+          <IconDeleteFile className="w-4 h-4 flex-shrink-0" />
+          {`${t('common.delete')}${node.type === 'document' ? t('common.document') : t('common.resource')}`}
+        </div>
+      ),
+      onClick: () => {
+        handleDeleteFile();
+      },
       className: 'hover:bg-red-50',
     },
   ];

@@ -184,7 +184,7 @@ const StatusBar = memo(
             icon={readOnly ? <HiOutlineLockClosed style={{ color: '#00968F' }} /> : <HiOutlineLockOpen />}
             onClick={() => toggleReadOnly()}
           />
-          <ActionDropdown docId={docId} node={node} />
+          {/* <ActionDropdown docId={docId} node={node} /> */}
         </div>
       </div>
     );

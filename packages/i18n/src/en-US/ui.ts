@@ -738,7 +738,8 @@ const translations = {
       duplicateDocument: 'Duplicate Document',
       duplicateDocumentDescription: 'Create a duplicate of the selected node document',
       deleteFileDescription: 'Delete the {{type}} associated with this node',
-      deleteFileConfirm: 'Confirm to delete this {{type}}? This action will remove this {{type}} from all canvases',
+      deleteFileConfirm:
+        'Confirm to delete {{type}} [ {{title}} ]? This action will remove this {{type}} from all canvases',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',

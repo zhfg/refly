@@ -12,7 +12,6 @@ import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { Resource } from '@refly/openapi-schema';
-import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 
@@ -44,20 +43,10 @@ const ActionView = ({ resource }: { resource: Resource }) => {
   );
 };
 
-const ActionDropdown = ({ resource }: { resource: Resource }) => {
+const ActionDropdown = ({ resource, afterDelete }: { resource: Resource; afterDelete: () => void }) => {
   const { t } = useTranslation();
   const [popupVisible, setPopupVisible] = useState(false);
   const { refetchUsage } = useSubscriptionUsage();
-  const { getLibraryList } = useHandleSiderData();
-  const { dataList, setDataList } = useFetchDataList({
-    fetchData: async (queryPayload) => {
-      const res = await getClient().listResources({
-        query: queryPayload,
-      });
-      return res?.data;
-    },
-    pageSize: 20,
-  });
 
   const handleDelete = async () => {
     const { data } = await getClient().deleteResource({
@@ -67,9 +56,9 @@ const ActionDropdown = ({ resource }: { resource: Resource }) => {
     });
     if (data?.success) {
       message.success(t('common.putSuccess'));
+      setPopupVisible(false);
       refetchUsage();
-      setDataList(dataList.filter((n) => n.resourceId !== resource.resourceId));
-      getLibraryList();
+      afterDelete?.();
     }
   };
 
@@ -77,11 +66,15 @@ const ActionDropdown = ({ resource }: { resource: Resource }) => {
     {
       label: (
         <Popconfirm
-          title={t('workspace.deleteDropdownMenu.deleteConfirmForResource')}
+          title={t('canvas.nodeActions.deleteFileConfirm', {
+            type: t(`common.resource`),
+            title: resource.title || t('common.unTitle'),
+          })}
           onConfirm={handleDelete}
           onCancel={() => setPopupVisible(false)}
           okText={t('common.confirm')}
           cancelText={t('common.cancel')}
+          overlayStyle={{ maxWidth: '300px' }}
         >
           <div className="flex items-center text-red-600">
             <IconDelete size={16} className="mr-2" />
@@ -120,7 +113,7 @@ export const ResourceList = () => {
     showLibraryModal: state.showLibraryModal,
   }));
 
-  const { dataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
+  const { dataList, loadMore, reload, hasMore, isRequesting, setDataList } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listResources({
         query: queryPayload,
@@ -162,7 +155,14 @@ export const ResourceList = () => {
               <Card
                 hoverable
                 cover={<div className="h-[100px] bg-gray-200"></div>}
-                actions={[<ActionView key="view" resource={item} />, <ActionDropdown resource={item} key="ellipsis" />]}
+                actions={[
+                  <ActionView key="view" resource={item} />,
+                  <ActionDropdown
+                    resource={item}
+                    key="ellipsis"
+                    afterDelete={() => setDataList(dataList.filter((n) => n.resourceId !== item.resourceId))}
+                  />,
+                ]}
               >
                 <Meta
                   title={item.title || t('common.unTitle')}
