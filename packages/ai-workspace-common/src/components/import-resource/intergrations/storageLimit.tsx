@@ -36,7 +36,7 @@ export const StorageLimit: FC<StorageLimitProps> = memo(({ resourceCount }) => {
         type="warning"
         showIcon
         action={
-          <Button type="text" size="small" className="text-[#00968f] px-1 rounded-sm font-bold" onClick={handleUpgrade}>
+          <Button type="text" size="small" className="text-green-500 ml-2 rounded-sm font-bold" onClick={handleUpgrade}>
             {t('resource.import.upgrade')}
           </Button>
         }
