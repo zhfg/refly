@@ -89,7 +89,6 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
 
   const handleModalOk = (newTitle: string) => {
     if (newTitle?.trim()) {
-      // TODO: syncTitleToYDoc(newTitle);
       updateCanvas({ body: { canvasId, title: newTitle } });
       updateCanvasTitle(canvasId, newTitle);
       setIsModalOpen(false);
