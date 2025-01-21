@@ -130,12 +130,13 @@ export const defaultMarkdownSerializer = new MarkdownSerializer(
     },
 
     image(state, node) {
+      const src = typeof node.attrs?.src === 'string' ? node.attrs.src : String(node.attrs?.src ?? '');
       state.write(
         '![' +
-          state.esc(node.attrs.alt || '') +
+          state.esc(node.attrs?.alt ?? '') +
           '](' +
-          node.attrs.src.replace(/[\(\)]/g, '\\$&') +
-          (node.attrs.title ? ' "' + node.attrs.title.replace(/"/g, '\\"') + '"' : '') +
+          src.replace(/[\(\)]/g, '\\$&') +
+          (node.attrs?.title ? ' "' + node.attrs.title.replace(/"/g, '\\"') + '"' : '') +
           ')',
       );
     },
