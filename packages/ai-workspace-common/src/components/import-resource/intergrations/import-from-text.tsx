@@ -15,6 +15,7 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { TbClipboard } from 'react-icons/tb';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
+import { StorageLimit } from './storageLimit';
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
@@ -24,13 +25,18 @@ export const ImportFromText = () => {
   const importResourceStore = useImportResourceStore();
   const { copiedTextPayload } = useImportResourceStore.getState();
   const { addNode } = useAddNode();
-  const { refetchUsage } = useSubscriptionUsage();
+  const { refetchUsage, storageUsage } = useSubscriptionUsage();
   const { insertNodePosition } = useImportResourceStoreShallow((state) => ({
     insertNodePosition: state.insertNodePosition,
   }));
 
   const [saveLoading, setSaveLoading] = useState(false);
   const { getLibraryList } = useHandleSiderData();
+
+  const canImportCount = storageUsage?.fileCountQuota - (storageUsage?.fileCountUsed ?? 0);
+  const disableSave = () => {
+    return !copiedTextPayload?.content || canImportCount < 1;
+  };
 
   const handleSave = async () => {
     if (!copiedTextPayload?.content) {
@@ -98,21 +104,18 @@ export const ImportFromText = () => {
         <Form>
           <FormItem layout="vertical" label={t('resource.import.textTitlePlaceholder')}>
             <Input
-              // placeholder={t('resource.import.textTitlePlaceholder')}
               value={importResourceStore.copiedTextPayload?.title}
               onChange={(e) => importResourceStore.setCopiedTextPayload({ title: e.target.value })}
             />
           </FormItem>
           <FormItem layout="vertical" label={t('resource.import.textUrlPlaceholder')}>
             <Input
-              // placeholder={t('resource.import.textUrlPlaceholder')}
               value={importResourceStore.copiedTextPayload?.url}
               onChange={(e) => importResourceStore.setCopiedTextPayload({ url: e.target.value })}
             />
           </FormItem>
           <FormItem required layout="vertical" label={t('resource.import.textContentPlaceholder')}>
             <TextArea
-              // placeholder={t('resource.import.textContentPlaceholder')}
               rows={4}
               autoSize={{
                 minRows: 4,
@@ -128,12 +131,13 @@ export const ImportFromText = () => {
       </div>
 
       {/* footer */}
-      <div className="w-full flex justify-end items-center border-t border-solid border-[#e5e5e5] border-x-0 border-b-0 p-[16px] rounded-none">
+      <div className="w-full flex justify-between items-center border-t border-solid border-[#e5e5e5] border-x-0 border-b-0 p-[16px] rounded-none">
         <div className="flex items-center gap-x-[8px]">
-          <Button style={{ marginRight: 8 }} onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
-            {t('common.cancel')}
-          </Button>
-          <Button type="primary" loading={saveLoading} disabled={!copiedTextPayload?.content} onClick={handleSave}>
+          <StorageLimit resourceCount={1} />
+        </div>
+        <div className="flex items-center gap-x-[8px] flex-shrink-0">
+          <Button onClick={() => importResourceStore.setImportResourceModalVisible(false)}>{t('common.cancel')}</Button>
+          <Button type="primary" loading={saveLoading} disabled={disableSave()} onClick={handleSave}>
             {t('common.saveToCanvas')}
           </Button>
         </div>

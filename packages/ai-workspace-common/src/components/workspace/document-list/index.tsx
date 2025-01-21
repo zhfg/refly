@@ -13,11 +13,68 @@ import { useTranslation } from 'react-i18next';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
-import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-document';
 
 const { Meta } = Card;
+
+const ActionDropdown = ({ doc, afterDelete }: { doc: Document; afterDelete: () => void }) => {
+  const { t } = useTranslation();
+  const [popupVisible, setPopupVisible] = useState(false);
+  const { deleteDocument } = useDeleteDocument();
+
+  const handleDelete = async () => {
+    const success = await deleteDocument(doc.docId);
+    if (success) {
+      message.success(t('common.putSuccess'));
+      setPopupVisible(false);
+      afterDelete?.();
+    }
+  };
+
+  const items: MenuProps['items'] = [
+    {
+      label: (
+        <Popconfirm
+          title={t('canvas.nodeActions.deleteFileConfirm', {
+            type: t(`common.document`),
+            title: doc.title || t('common.unTitle'),
+          })}
+          onConfirm={handleDelete}
+          onCancel={() => setPopupVisible(false)}
+          okText={t('common.confirm')}
+          cancelText={t('common.cancel')}
+          overlayStyle={{ maxWidth: '300px' }}
+        >
+          <div className="flex items-center text-red-600">
+            <IconDelete size={16} className="mr-2" />
+            {t('workspace.deleteDropdownMenu.delete')}
+          </div>
+        </Popconfirm>
+      ),
+      key: 'delete',
+    },
+  ];
+
+  const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
+    if (info.source === 'trigger') {
+      setPopupVisible(open);
+    }
+  };
+
+  return (
+    <Dropdown
+      trigger={['click']}
+      open={popupVisible}
+      onOpenChange={handleOpenChange}
+      menu={{
+        items,
+      }}
+    >
+      <Button type="text" icon={<IconMoreHorizontal />} />
+    </Dropdown>
+  );
+};
 
 export const DocumentList = () => {
   const { t, i18n } = useTranslation();
@@ -28,7 +85,6 @@ export const DocumentList = () => {
     showLibraryModal: state.showLibraryModal,
     setShowLibraryModal: state.setShowLibraryModal,
   }));
-  const { getLibraryList } = useHandleSiderData();
   const { dataList, setDataList, loadMore, reload, hasMore, isRequesting } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listDocuments({
@@ -56,58 +112,6 @@ export const DocumentList = () => {
       <Tooltip title={t('workspace.addToCanvas')}>
         <Button type="text" icon={<IconEdit />} onClick={() => handleEdit(doc)} />
       </Tooltip>
-    );
-  };
-
-  const ActionDropdown = ({ doc }: { doc: Document }) => {
-    const [popupVisible, setPopupVisible] = useState(false);
-    const { deleteDocument } = useDeleteDocument();
-
-    const handleDelete = async () => {
-      const success = await deleteDocument(doc.docId);
-      if (success) {
-        setDataList(dataList.filter((n) => n.docId !== doc.docId));
-        getLibraryList();
-      }
-    };
-
-    const items: MenuProps['items'] = [
-      {
-        label: (
-          <Popconfirm
-            title={t('workspace.deleteDropdownMenu.deleteConfirmForDocument')}
-            onConfirm={handleDelete}
-            onCancel={() => setPopupVisible(false)}
-            okText={t('common.confirm')}
-            cancelText={t('common.cancel')}
-          >
-            <div className="flex items-center text-red-600">
-              <IconDelete size={16} className="mr-2" />
-              {t('workspace.deleteDropdownMenu.delete')}
-            </div>
-          </Popconfirm>
-        ),
-        key: 'delete',
-      },
-    ];
-
-    const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
-      if (info.source === 'trigger') {
-        setPopupVisible(open);
-      }
-    };
-
-    return (
-      <Dropdown
-        trigger={['click']}
-        open={popupVisible}
-        onOpenChange={handleOpenChange}
-        menu={{
-          items,
-        }}
-      >
-        <Button type="text" icon={<IconMoreHorizontal />} />
-      </Dropdown>
     );
   };
 
@@ -143,7 +147,14 @@ export const DocumentList = () => {
               <Card
                 hoverable
                 cover={<div className="h-[100px] bg-gray-200"></div>}
-                actions={[<ActionEdit key="edit" doc={item} />, <ActionDropdown doc={item} key="ellipsis" />]}
+                actions={[
+                  <ActionEdit key="edit" doc={item} />,
+                  <ActionDropdown
+                    doc={item}
+                    key="ellipsis"
+                    afterDelete={() => setDataList(dataList.filter((n) => n.docId !== item.docId))}
+                  />,
+                ]}
               >
                 <Meta
                   title={item.title || t('common.unTitle')}

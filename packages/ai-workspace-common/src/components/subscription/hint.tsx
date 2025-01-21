@@ -28,11 +28,13 @@ export const SubscriptionHint = memo(() => {
       </div>
       <div className="-mb-2.5 flex items-center justify-between">
         <div className="text-xs text-gray-500 flex items-center gap-1">
-          <span>{t('settings.subscription.t2Requests')}</span>
           <Tooltip
-            color="white"
-            title={<div style={{ color: '#000' }}>{t('settings.subscription.t2RequestsDescription')}</div>}
+            className="flex flex-row items-center gap-1 cursor-pointer"
+            title={
+              t('settings.subscription.t2RequestsDescription') + ' ' + t('settings.subscription.t2RequestsRefresh')
+            }
           >
+            <span>{t('settings.subscription.t2Requests')}</span>
             <HiOutlineQuestionMarkCircle className="text-sm flex items-center justify-center cursor-pointer" />
           </Tooltip>
         </div>
@@ -50,11 +52,11 @@ export const SubscriptionHint = memo(() => {
       />
       <div className="-mb-2.5 flex items-center justify-between">
         <div className="text-xs text-gray-500 flex items-center gap-1">
-          <span>{t('settings.subscription.fileCount')}</span>
           <Tooltip
-            color="white"
-            title={<div style={{ color: '#000' }}>{t('settings.subscription.fileCountDescription')}</div>}
+            className="flex flex-row items-center gap-1 cursor-pointer"
+            title={t('settings.subscription.fileCountDescription')}
           >
+            <span>{t('settings.subscription.fileCount')}</span>
             <HiOutlineQuestionMarkCircle className="text-sm flex items-center justify-center cursor-pointer" />
           </Tooltip>
         </div>

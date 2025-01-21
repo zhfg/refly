@@ -23,7 +23,7 @@ export const useCreateCanvas = () => {
     async () => {
       const canvasId = genCanvasID();
       const { canvasList, setCanvasList } = useSiderStore.getState();
-      const canvasTitle = t('common.newCanvas');
+      const canvasTitle = '';
 
       setCanvasList(
         [

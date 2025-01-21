@@ -163,9 +163,9 @@ export class MiscService {
       },
     });
 
-    this.logger.log(`Files to remove: ${files.map((file) => file.storageKey).join(',')}`);
-
     if (files.length > 0) {
+      this.logger.log(`Files to remove: ${files.map((file) => file.storageKey).join(',')}`);
+
       await Promise.all([
         this.minio.client.removeObjects(files.map((file) => file.storageKey)),
         this.prisma.staticFile.updateMany({

@@ -27,7 +27,7 @@ const translations = {
     more: 'More',
     putErr: 'Failed to perform operation. Please try again!',
     putSuccess: 'Operation Successful',
-    deleteConfirmMessage: 'Are you sure you want to delete?',
+    deleteConfirmMessage: 'Are you sure to delete?',
     multiSelect: 'Multi-select',
     input: 'Input',
     context: 'Context',
@@ -417,7 +417,7 @@ const translations = {
       unbindSuccessful: 'Unbind successfully!',
       failed: 'Failed to delete',
       deleteConfirmForDocument: 'Are you sure you want to delete this document?',
-      deleteConfirmForCanvas: 'Are you sure you want to delete [{{canvas}}]?',
+      deleteConfirmForCanvas: 'Canvas {{canvas}} will be deleted permanently, are you sure to continue?',
       deleteConfirmForResource: 'Are you sure you want to delete this resource?',
       deleteConfirmForResourceProject: 'Are you sure to remove this resource from the project?',
       delete: 'Delete',
@@ -547,6 +547,10 @@ const translations = {
       exitFullScreen: 'Exit Full Screen',
     },
   },
+  document: {
+    setReadOnly: 'Set to Read-Only',
+    enableEdit: 'Enable Edit',
+  },
   artifact: {
     generating: 'Generating',
     completed: 'Completed',
@@ -589,6 +593,7 @@ const translations = {
       searchNodeDescription: 'Search nodes in the canvas, click to locate.',
       enablePointerMode: 'Enable Pointer Mode',
       disablePointerMode: 'Disable Pointer Mode',
+      deleteCanvas: 'Delete Canvas',
       importResource: 'Import Resource',
       importResourceDescription:
         'Import resources through online search, manual addition of web links or text to add writing materials for consumption in the canvas.',
@@ -643,6 +648,8 @@ const translations = {
       openSettings: 'Settings Wizard',
       interativeTutorialLoading: 'Interactive tutorial loading... Estimated 3~6 seconds',
       interativeTutorial: 'Refly Product Interactive Guide',
+      deleteCanvasConfirm: 'Confirm to delete canvas {{title}} permanently?',
+      deleteCanvasFile: 'Delete resources and documents in the canvas',
     },
     connectionTimeout: {
       title: 'Connection Timeout',
@@ -737,6 +744,14 @@ const translations = {
       editQueryDescription: 'Edit the query of the selected node',
       duplicateDocument: 'Duplicate Document',
       duplicateDocumentDescription: 'Create a duplicate of the selected node document',
+      deleteResource: 'Delete Resource',
+      deleteResourceDescription: 'Delete the resource from the library and all canvases',
+      resourceDeleteConfirm:
+        'Confirm to delete resource {{title}}? This action will remove this resource from library and all canvases.',
+      deleteDocument: 'Delete Document',
+      deleteDocumentDescription: 'Delete the document from the library and all canvases',
+      documentDeleteConfirm:
+        'Confirm to delete document {{title}}? This action will remove this document from library and all canvases.',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',
@@ -840,6 +855,9 @@ const translations = {
       },
       saveResourceFailed: 'Save failed, please try to save again',
       isSaving: 'Saving...',
+      storageLimited: 'Storage quota exceeded',
+      storagePartialLimited: 'Insufficient storage: only {{count}} files can be saved',
+      upgrade: 'Upgrade Now',
     },
     wait_parse: 'Parsing',
     parse_failed: 'Parse Failed, click to retry',
@@ -994,27 +1012,6 @@ const translations = {
       title: 'No categories available at the moment. Download the plugin to access new content!',
       download: 'Download Plugin',
       seeOther: 'Explore Content from Other Dates',
-    },
-  },
-  topicDetail: {
-    breadcrumb: {
-      homePage: 'Home',
-      allTopics: 'All Topics',
-    },
-    footer: {
-      noMoreText: "You've reached the end of the list!",
-    },
-    item: {
-      askFollow: 'Ask',
-      share: 'Share',
-      copy: 'Copy Link',
-      copyNotify: 'Link Copied to Clipboard',
-      noMoreText: "You've reached the end of the list!",
-      linkMore: '{{count}} more',
-    },
-    empty: {
-      title: 'No content available in this category at the moment. Download the plugin to access new content!',
-      download: 'Download Plugin',
     },
   },
   threadLibrary: {
@@ -1210,7 +1207,8 @@ const translations = {
       t2Requests: 'Standard Requests',
       t2RequestsDescription:
         'Standard models include GPT-4o Mini, DeepSeek V3 and others. Each successful skill call to standard models counts as one request.',
-      fileCount: 'File Count',
+      t2RequestsRefresh: 'Request count will be reset every day for users on free plan.',
+      fileCount: 'Library Storage',
       fileCountDescription: 'Each resource and document in your library counts as one file.',
       subscriptionManagement: 'Manage Billing and Subscriptions',
       subscriptionStatus: {
@@ -1755,6 +1753,14 @@ const translations = {
         5: 'Effortlessly select quotes from various sources - resources, documents, memos, or skill responses - enriching your context with relevant references.',
         6: 'Beyond powerful real-time Markdown editing, enjoy AI-assisted document refinement by selecting specific content for intelligent modifications and enhancements.',
       },
+    },
+  },
+  subscription: {
+    storageExceeded: {
+      title: 'Storage Quota Exceeded',
+      description:
+        'You have reached your storage limit. Upgrade your plan to continue using our services with expanded storage capacity.',
+      upgrade: 'Upgrade Now',
     },
   },
 };

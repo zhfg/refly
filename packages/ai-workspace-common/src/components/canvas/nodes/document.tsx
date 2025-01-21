@@ -24,6 +24,7 @@ import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { NodeHeader } from './shared/node-header';
 import { ContentPreview } from './shared/content-preview';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
+import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-document';
 
 type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
 
@@ -104,6 +105,13 @@ export const DocumentNode = memo(
       });
     }, [id, data, deleteNode]);
 
+    const { deleteDocument } = useDeleteDocument();
+
+    const handleDeleteFile = useCallback(() => {
+      deleteDocument(data.entityId);
+      handleDelete();
+    }, [data.entityId, deleteDocument, handleDelete]);
+
     const { addNode } = useAddNode();
 
     const handleAskAI = useCallback(() => {
@@ -142,12 +150,14 @@ export const DocumentNode = memo(
       // Create node-specific event handlers
       const handleNodeAddToContext = () => handleAddToContext();
       const handleNodeDelete = () => handleDelete();
+      const handleNodeDeleteFile = () => handleDeleteFile();
       const handleNodeAskAI = () => handleAskAI();
       const handleNodeDuplicateDocument = () => handleDuplicateDocument();
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
+      nodeActionEmitter.on(createNodeEventName(id, 'deleteFile'), handleNodeDeleteFile);
       nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
       nodeActionEmitter.on(createNodeEventName(id, 'duplicateDocument'), handleNodeDuplicateDocument);
 
@@ -155,13 +165,14 @@ export const DocumentNode = memo(
         // Cleanup events when component unmounts
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
+        nodeActionEmitter.off(createNodeEventName(id, 'deleteFile'), handleNodeDeleteFile);
         nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
         nodeActionEmitter.off(createNodeEventName(id, 'duplicateDocument'), handleNodeDuplicateDocument);
 
         // Clean up all node events
         cleanupNodeEvents(id);
       };
-    }, [id, handleAddToContext, handleDelete, handleAskAI, handleDuplicateDocument]);
+    }, [id, handleAddToContext, handleDelete, handleDeleteFile, handleAskAI, handleDuplicateDocument]);
 
     return (
       <div className={classNames({ nowheel: isOperating })}>
@@ -205,7 +216,11 @@ export const DocumentNode = memo(
               </>
             )}
             <div className="flex flex-col h-full">
-              <NodeHeader title={data.title} Icon={HiOutlineDocumentText} iconBgColor="#00968F" />
+              <NodeHeader
+                title={data.title || t('common.untitled')}
+                Icon={HiOutlineDocumentText}
+                iconBgColor="#00968F"
+              />
 
               <div
                 className={`flex-grow overflow-y-auto pr-2 -mr-2 ${isOperating ? 'overflow-auto' : 'overflow-hidden'}`}

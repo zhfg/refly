@@ -45,7 +45,7 @@ export interface SyncStorageUsageJobData {
 export type CheckRequestUsageResult = Record<ModelTier, boolean>;
 
 export type CheckStorageUsageResult = {
-  available: boolean;
+  available: number;
 };
 
 export function subscriptionPO2DTO(sub: SubscriptionModel): Subscription {

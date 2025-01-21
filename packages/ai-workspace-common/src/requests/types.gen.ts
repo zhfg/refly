@@ -1397,6 +1397,10 @@ export type DeleteCanvasRequest = {
      * Canvas ID to delete
      */
     canvasId: string;
+    /**
+     * Whether to delete all files in the canvas
+     */
+    deleteAllFiles?: boolean;
 };
 
 export type UpsertResourceRequest = {

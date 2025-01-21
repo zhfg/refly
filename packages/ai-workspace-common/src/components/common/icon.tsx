@@ -29,9 +29,20 @@ import {
   LuPinOff,
   LuTouchpad,
   LuBookOpen,
+  LuStickyNote,
+  LuFileText,
+  LuFilePlus,
+  LuLockOpen,
+  LuLock,
 } from 'react-icons/lu';
-import { RiErrorWarningLine, RiDoubleQuotesL, RiChatHistoryLine, RiChatHistoryFill } from 'react-icons/ri';
-
+import {
+  RiErrorWarningLine,
+  RiDoubleQuotesL,
+  RiChatHistoryLine,
+  RiChatHistoryFill,
+  RiUploadCloud2Line,
+} from 'react-icons/ri';
+import { TiDocumentDelete } from 'react-icons/ti';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BiText } from 'react-icons/bi';
 import { BsDiscord, BsTwitterX, BsGithub, BsEnvelope } from 'react-icons/bs';
@@ -61,12 +72,14 @@ import { MdOutlineMouse } from 'react-icons/md';
 export const IconCanvas = TfiBlackboard;
 export const IconAskAI = LuSparkles;
 export const IconAskAIInput = TbInputSpark;
-export const IconDocument = HiOutlineDocumentText;
+export const IconDocument = LuFileText;
 export const IconDocumentFilled = HiDocumentText;
+export const IconCreateDocument = LuFilePlus;
 export const IconResource = HiOutlineSquare3Stack3D;
 export const IconResourceFilled = HiSquare3Stack3D;
-export const IconMemo = FaRegNoteSticky;
-export const IconMemoFilled = FaNoteSticky;
+export const IconImportResource = RiUploadCloud2Line;
+export const IconMemo = LuStickyNote;
+export const IconMemoFilled = LuStickyNote;
 export const IconResponse = HiOutlineSparkles;
 export const IconResponseFilled = HiSparkles;
 export const IconLibrary = IoLibraryOutline;
@@ -93,6 +106,8 @@ export const IconError = RiErrorWarningLine;
 export const IconLoading = AiOutlineLoading3Quarters;
 export const IconSettings = LuSettings;
 export const IconCopy = LuCopy;
+export const IconLock = LuLock;
+export const IconUnlock = LuLockOpen;
 export const IconModel = LuBrain;
 export const IconDown = HiOutlineChevronDown;
 export const IconSubscription = LuGift;
@@ -109,6 +124,7 @@ export const IconDiscord = BsDiscord;
 export const IconEmail = BsEnvelope;
 
 export const IconLanguage = IoLanguage;
+export const IconDeleteFile = TiDocumentDelete;
 
 export const ModelProviderIcons = {
   openai: OpenAIIcon,

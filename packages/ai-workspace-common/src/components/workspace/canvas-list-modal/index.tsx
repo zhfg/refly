@@ -52,7 +52,7 @@ export const CanvasListModal = (props: CanvasListProps) => {
       <div className="px-4 py-3 min-w-[600px] flex items-center justify-between border-b border-solid border-1 border-x-0 border-t-0 border-black/5">
         <div>
           <div className="flex items-center gap-2">
-            <div className="font-medium">{canvas.title}</div>
+            <div className="font-medium">{canvas.title || t('common.untitled')}</div>
           </div>
 
           <div className="mt-1">

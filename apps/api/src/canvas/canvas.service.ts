@@ -1,5 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import * as Y from 'yjs';
+import pLimit from 'p-limit';
+import { Queue } from 'bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
 import { MINIO_INTERNAL } from '@/common/minio.service';
 import { MinioService } from '@/common/minio.service';
 import { PrismaService } from '@/common/prisma.service';
@@ -9,11 +12,15 @@ import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { CanvasNotFoundError } from '@refly-packages/errors';
 import {
   DeleteCanvasRequest,
+  Entity,
+  EntityType,
   ListCanvasesData,
   UpsertCanvasRequest,
   User,
 } from '@refly-packages/openapi-schema';
 import { genCanvasID } from '@refly-packages/utils';
+import { DeleteKnowledgeEntityJobData } from '@/knowledge/knowledge.dto';
+import { QUEUE_DELETE_KNOWLEDGE_ENTITY } from '@/utils/const';
 
 @Injectable()
 export class CanvasService {
@@ -25,6 +32,8 @@ export class CanvasService {
     private collabService: CollabService,
     private miscService: MiscService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
+    @InjectQueue(QUEUE_DELETE_KNOWLEDGE_ENTITY)
+    private deleteKnowledgeQueue: Queue<DeleteKnowledgeEntityJobData>,
   ) {}
 
   async listCanvases(user: User, param: ListCanvasesData['query']) {
@@ -133,6 +142,36 @@ export class CanvasService {
       cleanups.push(this.minio.client.removeObject(canvas.stateStorageKey));
     }
 
+    if (param.deleteAllFiles) {
+      const relations = await this.prisma.canvasEntityRelation.findMany({
+        where: { canvasId, deletedAt: null },
+      });
+      const entities = relations.map((r) => ({
+        entityId: r.entityId,
+        entityType: r.entityType as EntityType,
+      }));
+      this.logger.log(`Entities to be deleted: ${JSON.stringify(entities)}`);
+
+      entities.forEach((entity) => {
+        cleanups.push(
+          this.deleteKnowledgeQueue.add(
+            'deleteKnowledgeEntity',
+            {
+              uid: canvas.uid,
+              entityId: entity.entityId,
+              entityType: entity.entityType,
+            },
+            {
+              jobId: entity.entityId,
+              removeOnComplete: true,
+              removeOnFail: true,
+              attempts: 3,
+            },
+          ),
+        );
+      });
+    }
+
     const files = await this.prisma.staticFile.findMany({
       where: { entityId: canvas.canvasId, entityType: 'canvas' },
     });
@@ -146,5 +185,154 @@ export class CanvasService {
     }
 
     await Promise.all(cleanups);
+  }
+
+  async syncCanvasEntityRelation(canvasId: string) {
+    this.logger.log(`syncCanvasEntityRelation called for ${canvasId}`);
+
+    const canvas = await this.prisma.canvas.findUnique({
+      where: { canvasId },
+    });
+    if (!canvas) {
+      throw new CanvasNotFoundError();
+    }
+
+    const ydoc = new Y.Doc();
+    await this.collabService.loadDocument({
+      document: ydoc,
+      documentName: canvas.canvasId,
+      context: {
+        user: { uid: canvas.uid },
+        entity: canvas,
+        entityType: 'canvas',
+      },
+    });
+    const nodes = ydoc.getArray('nodes').toJSON();
+
+    const entities: Entity[] = nodes
+      .map((node) => ({
+        entityId: node.data?.entityId,
+        entityType: node.type,
+      }))
+      .filter((entity) => entity.entityId && entity.entityType);
+
+    const existingRelations = await this.prisma.canvasEntityRelation.findMany({
+      where: { canvasId, deletedAt: null },
+    });
+
+    // Find relations to be removed (soft delete)
+    const entityIds = new Set(entities.map((e) => e.entityId));
+    const relationsToRemove = existingRelations.filter(
+      (relation) => !entityIds.has(relation.entityId),
+    );
+
+    // Find new relations to be created
+    const existingEntityIds = new Set(existingRelations.map((r) => r.entityId));
+    const relationsToCreate = entities.filter((entity) => !existingEntityIds.has(entity.entityId));
+
+    // Perform bulk operations
+    await Promise.all([
+      // Soft delete removed relations in bulk
+      this.prisma.canvasEntityRelation.updateMany({
+        where: {
+          canvasId,
+          entityId: { in: relationsToRemove.map((r) => r.entityId) },
+          deletedAt: null,
+        },
+        data: { deletedAt: new Date() },
+      }),
+      // Create new relations in bulk
+      this.prisma.canvasEntityRelation.createMany({
+        data: relationsToCreate.map((entity) => ({
+          canvasId,
+          entityId: entity.entityId,
+          entityType: entity.entityType,
+        })),
+        skipDuplicates: true,
+      }),
+    ]);
+  }
+
+  /**
+   * Delete entity nodes from all related canvases
+   * @param entities
+   */
+  async deleteEntityNodesFromCanvases(entities: Entity[]) {
+    this.logger.log(`Deleting entity nodes from canvases: ${JSON.stringify(entities)}`);
+
+    // Find all canvases that have relations with these entities
+    const relations = await this.prisma.canvasEntityRelation.findMany({
+      where: {
+        entityId: { in: entities.map((e) => e.entityId) },
+        entityType: { in: entities.map((e) => e.entityType) },
+        deletedAt: null,
+      },
+      distinct: ['canvasId'],
+    });
+
+    const canvasIds = relations.map((r) => r.canvasId);
+    if (canvasIds.length === 0) {
+      this.logger.log(`No related canvases found for entities: ${JSON.stringify(entities)}`);
+      return;
+    }
+    this.logger.log(`Found related canvases: ${JSON.stringify(canvasIds)}`);
+
+    // Load each canvas and remove the nodes
+    const limit = pLimit(3);
+    await Promise.all(
+      canvasIds.map((canvasId) =>
+        limit(async () => {
+          const canvas = await this.prisma.canvas.findUnique({
+            where: { canvasId },
+          });
+          if (!canvas) return;
+
+          // Open connection to get the document
+          const connection = await this.collabService.openDirectConnection(canvasId, {
+            user: { uid: canvas.uid },
+            entity: canvas,
+            entityType: 'canvas',
+          });
+
+          // Remove nodes matching the entities
+          connection.document.transact(() => {
+            const nodes = connection.document.getArray('nodes');
+            const toRemove: number[] = [];
+
+            nodes.forEach((node: any, index: number) => {
+              const entityId = node?.data?.entityId;
+              const entityType = node?.type;
+
+              if (entityId && entityType) {
+                const matchingEntity = entities.find(
+                  (e) => e.entityId === entityId && e.entityType === entityType,
+                );
+                if (matchingEntity) {
+                  toRemove.push(index);
+                }
+              }
+            });
+
+            // Remove nodes in reverse order to maintain correct indices
+            toRemove.reverse().forEach((index) => {
+              nodes.delete(index, 1);
+            });
+          });
+
+          await connection.disconnect();
+
+          // Update relations
+          await this.prisma.canvasEntityRelation.updateMany({
+            where: {
+              canvasId,
+              entityId: { in: entities.map((e) => e.entityId) },
+              entityType: { in: entities.map((e) => e.entityType) },
+              deletedAt: null,
+            },
+            data: { deletedAt: new Date() },
+          });
+        }),
+      ),
+    );
   }
 }
