@@ -9,6 +9,7 @@ import { ElasticsearchService } from '@/common/elasticsearch.service';
 import { CanvasNotFoundError } from '@refly-packages/errors';
 import {
   DeleteCanvasRequest,
+  Entity,
   ListCanvasesData,
   UpsertCanvasRequest,
   User,
@@ -146,5 +147,70 @@ export class CanvasService {
     }
 
     await Promise.all(cleanups);
+  }
+
+  async syncCanvasEntityRelation(canvasId: string) {
+    this.logger.log(`syncCanvasEntityRelation called for ${canvasId}`);
+
+    const canvas = await this.prisma.canvas.findUnique({
+      where: { canvasId },
+    });
+    if (!canvas) {
+      throw new CanvasNotFoundError();
+    }
+
+    const ydoc = new Y.Doc();
+    await this.collabService.loadDocument({
+      document: ydoc,
+      context: {
+        user: { uid: canvas.uid },
+        entity: canvas,
+        entityType: 'canvas',
+      },
+    });
+    const nodes = ydoc.getArray('nodes').toJSON();
+
+    const entities: Entity[] = nodes
+      .map((node) => ({
+        entityId: node.data?.entityId,
+        entityType: node.type,
+      }))
+      .filter((entity) => entity.entityId && entity.entityType);
+
+    const existingRelations = await this.prisma.canvasEntityRelation.findMany({
+      where: { canvasId, deletedAt: null },
+    });
+
+    // Find relations to be removed (soft delete)
+    const entityIds = new Set(entities.map((e) => e.entityId));
+    const relationsToRemove = existingRelations.filter(
+      (relation) => !entityIds.has(relation.entityId),
+    );
+
+    // Find new relations to be created
+    const existingEntityIds = new Set(existingRelations.map((r) => r.entityId));
+    const relationsToCreate = entities.filter((entity) => !existingEntityIds.has(entity.entityId));
+
+    // Perform bulk operations
+    await Promise.all([
+      // Soft delete removed relations in bulk
+      this.prisma.canvasEntityRelation.updateMany({
+        where: {
+          canvasId,
+          entityId: { in: relationsToRemove.map((r) => r.entityId) },
+          deletedAt: null,
+        },
+        data: { deletedAt: new Date() },
+      }),
+      // Create new relations in bulk
+      this.prisma.canvasEntityRelation.createMany({
+        data: relationsToCreate.map((entity) => ({
+          canvasId,
+          entityId: entity.entityId,
+          entityType: entity.entityType,
+        })),
+        skipDuplicates: true,
+      }),
+    ]);
   }
 }

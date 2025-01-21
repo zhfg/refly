@@ -1,21 +1,24 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
-import { CanvasService } from './canvas.service';
 import { CanvasController } from './canvas.controller';
+import { CanvasService } from './canvas.service';
 import { CommonModule } from '@/common/common.module';
 import { CollabModule } from '@/collab/collab.module';
 import { MiscModule } from '@/misc/misc.module';
-import { QUEUE_SYNC_STORAGE_USAGE } from '@/utils/const';
+import { QUEUE_SYNC_CANVAS_ENTITY } from '@/utils/const';
+import { SyncCanvasEntityProcessor } from './canvas.processor';
 
 @Module({
   imports: [
     CommonModule,
     CollabModule,
     MiscModule,
-    BullModule.registerQueue({ name: QUEUE_SYNC_STORAGE_USAGE }),
+    BullModule.registerQueue({
+      name: QUEUE_SYNC_CANVAS_ENTITY,
+    }),
   ],
-  providers: [CanvasService],
   controllers: [CanvasController],
+  providers: [CanvasService, SyncCanvasEntityProcessor],
   exports: [CanvasService],
 })
 export class CanvasModule {}

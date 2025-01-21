@@ -1,4 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Queue } from 'bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
 import { randomUUID } from 'crypto';
 import * as Y from 'yjs';
 import { Request } from 'express';
@@ -19,6 +21,7 @@ import { IDPrefix, incrementalMarkdownUpdate, state2Markdown } from '@refly-pack
 import { streamToBuffer } from '@/utils/stream';
 import { CollabContext, isCanvasContext, isDocumentContext } from './collab.dto';
 import { Redis } from '@hocuspocus/extension-redis';
+import { QUEUE_SYNC_CANVAS_ENTITY } from '@/utils/const';
 
 @Injectable()
 export class CollabService {
@@ -34,6 +37,7 @@ export class CollabService {
     private miscService: MiscService,
     private subscriptionService: SubscriptionService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
+    @InjectQueue(QUEUE_SYNC_CANVAS_ENTITY) private canvasQueue: Queue,
   ) {
     this.server = Server.configure({
       port: this.config.get<number>('wsPort'),
@@ -129,11 +133,14 @@ export class CollabService {
     return context;
   }
 
-  private async loadDocument({ document, context }: { document: Y.Doc; context: CollabContext }) {
+  async loadDocument({ document, context }: { document: Y.Doc; context: CollabContext }) {
     const { entity } = context;
     const { stateStorageKey } = entity;
 
-    if (!stateStorageKey) return null;
+    if (!stateStorageKey) {
+      this.logger.warn(`stateStorageKey not found for ${JSON.stringify(entity)}`);
+      return null;
+    }
 
     try {
       const readable = await this.minio.client.getObject(stateStorageKey);
@@ -284,6 +291,18 @@ export class CollabService {
       uid: canvas.uid,
       updatedAt: new Date().toJSON(),
     });
+
+    // Add sync canvas entity job with debouncing
+    await this.canvasQueue.add(
+      'syncCanvasEntity',
+      { canvasId: canvas.canvasId },
+      {
+        jobId: canvas.canvasId, // Use consistent jobId for deduplication
+        removeOnComplete: true,
+        removeOnFail: true,
+        delay: 3000,
+      },
+    );
   }
 
   async storeDocument({ document, context }: { document: Y.Doc; context: CollabContext }) {
