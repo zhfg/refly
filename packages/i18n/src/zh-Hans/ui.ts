@@ -641,7 +641,7 @@ const translations = {
       openSettings: '设置向导',
       interativeTutorialLoading: '交互式教程加载中... 预计 3~6 秒',
       interativeTutorial: 'Refly 产品交互式教程',
-      deleteCanvasFile: '勾选将删除画布所有文件',
+      deleteCanvasFile: '同时删除画布所有资源和文档',
     },
     connectionTimeout: {
       title: '连接超时',

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { CanvasRename } from '@refly-packages/ai-workspace-common/components/canvas/top-toolbar/canvas-rename';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useUpdateCanvas } from '@refly-packages/ai-workspace-common/queries';
+import { IoAlertCircle } from 'react-icons/io5';
 
 interface CanvasActionDropdown {
   canvasId: string;
@@ -33,9 +34,10 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
   };
 
   const handleDelete = async () => {
-    const success = await deleteCanvas(canvasId);
+    const success = await deleteCanvas(canvasId, isDeleteFile);
+    setPopupVisible(false);
     if (success) {
-      setPopupVisible(false);
+      setIsDeleteModalOpen(false);
       afterDelete?.();
     }
   };
@@ -99,6 +101,9 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
     } else {
       updateShowStatus?.(null);
     }
+    return () => {
+      setIsDeleteFile(false);
+    };
   }, [popupVisible]);
 
   return (
@@ -124,7 +129,12 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
       </div>
 
       <Modal
-        title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', { canvas: canvasName })}
+        title={
+          <div className="flex items-center gap-2">
+            <IoAlertCircle size={26} className="mr-2 text-[#faad14]" />
+            {t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', { canvas: canvasName })}
+          </div>
+        }
         centered
         open={isDeleteModalOpen}
         onOk={handleDelete}
@@ -133,8 +143,11 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
         cancelText={t('common.cancel')}
         okButtonProps={{ danger: true }}
         destroyOnClose
+        closeIcon={null}
       >
-        <Checkbox onChange={onChange}>{t('canvas.toolbar.deleteCanvasFile')}</Checkbox>
+        <div className="pl-10">
+          <Checkbox onChange={onChange}>{t('canvas.toolbar.deleteCanvasFile')}</Checkbox>
+        </div>
       </Modal>
     </>
   );

@@ -15,7 +15,7 @@ export const useDeleteCanvas = () => {
   const navigate = useNavigate();
   const { getCanvasList, canvasList } = useHandleSiderData();
 
-  const deleteCanvas = async (canvasId: string) => {
+  const deleteCanvas = async (canvasId: string, deleteAllFiles: boolean = false) => {
     if (isRemoving) return;
     let success = false;
     try {
@@ -23,6 +23,7 @@ export const useDeleteCanvas = () => {
       const { data } = await getClient().deleteCanvas({
         body: {
           canvasId,
+          deleteAllFiles,
         },
       });
 
@@ -61,8 +62,8 @@ export const useDeleteCanvas = () => {
   };
 
   const debouncedDeleteCanvas = useDebouncedCallback(
-    (canvasId: string) => {
-      return deleteCanvas(canvasId);
+    (canvasId: string, deleteAllFiles: boolean = false) => {
+      return deleteCanvas(canvasId, deleteAllFiles);
     },
     300,
     { leading: true },

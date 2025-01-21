@@ -14,7 +14,6 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 import { Helmet } from 'react-helmet';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { ActionDropdown } from './action-dropdown';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 import { NodeSelector } from '../common/node-selector';
 import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
@@ -22,6 +21,7 @@ import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context
 import { useReactFlow } from '@xyflow/react';
 import { CanvasRename } from './canvas-rename';
 import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
+import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -321,7 +321,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             setShowMaxRatio={setShowMaxRatio}
           />
 
-          <ActionDropdown canvasId={canvasId} canvasTitle={canvasTitle} />
+          <CanvasActionDropdown canvasId={canvasId} canvasName={canvasTitle} />
         </div>
       </div>
     </>

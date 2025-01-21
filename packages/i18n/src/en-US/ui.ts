@@ -643,7 +643,7 @@ const translations = {
       openSettings: 'Settings Wizard',
       interativeTutorialLoading: 'Interactive tutorial loading... Estimated 3~6 seconds',
       interativeTutorial: 'Refly Product Interactive Guide',
-      deleteCanvasFile: 'Check to delete all files in the canvas',
+      deleteCanvasFile: 'Delete all resources and documents in the canvas',
     },
     connectionTimeout: {
       title: 'Connection Timeout',
