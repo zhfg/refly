@@ -646,6 +646,7 @@ const translations = {
       openSettings: 'Settings Wizard',
       interativeTutorialLoading: 'Interactive tutorial loading... Estimated 3~6 seconds',
       interativeTutorial: 'Refly Product Interactive Guide',
+      videoLoading: 'Video loading...',
       enterFullscreen: 'Enter Fullscreen',
       exitFullscreen: 'Exit Fullscreen',
       completeTutorial: 'Complete Tutorial',

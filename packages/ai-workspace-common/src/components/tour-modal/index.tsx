@@ -5,51 +5,69 @@ import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { useMemo, useState } from 'react';
 import { LuLightbulb } from 'react-icons/lu';
 import { useVideo } from '@refly-packages/ai-workspace-common/hooks/use-video';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 
 const steps = [
   {
     key: '1',
-    videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+    videoUrl: 'https://www.youtube.com/embed/7aAFcsV_Ts0?si=rT6iYZZYjg4VTn5l',
   },
   {
     key: '2',
-    videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+    videoUrl: 'https://www.youtube.com/embed/P7Hfq3nfFvY?si=TnYYJQc7LsQmYX-R',
   },
   {
     key: '3',
-    videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+    videoUrl: 'https://www.youtube.com/embed/yofLxuAKiNM?si=7erwVv-7P4TIwP9g',
   },
   {
     key: '4',
-    videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+    videoUrl: 'https://www.youtube.com/embed/_EaxsxXH5V0?si=KjgwkQeInjq3RDju',
   },
   {
     key: '5',
-    videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+    videoUrl: 'https://www.youtube.com/embed/rNuvdNRQGDw?si=Vk1Y57TGLtDqpVdW',
   },
   {
     key: '6',
-    videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+    videoUrl: 'https://www.youtube.com/embed/0JRg52MJMBs?si=KO133RQyQzXgDK3O',
   },
 ];
 
 const TourContent = ({ description, videoUrl }: { description: string; videoUrl: string }) => {
-  const { videoRef, handlePlay } = useVideo();
+  const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(true);
 
   return (
     <div className="flex flex-col gap-4">
       <p className="text-base text-gray-600">{description}</p>
       <div className="flex justify-center">
-        <video
-          ref={videoRef}
-          src={videoUrl}
-          controls
-          controlsList="nodownload"
-          loop
-          playsInline
-          onPlay={handlePlay}
-          className="w-full h-auto object-cover rounded-lg bg-black"
-        />
+        <div className="relative w-full" style={{ height: '400px' }}>
+          {isLoading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 z-50 rounded-lg">
+              <Spin className="w-6 h-6" />
+              <div className="text-gray-600 text-sm mt-2">{t('canvas.toolbar.videoLoading')}</div>
+            </div>
+          )}
+          <iframe
+            width="100%"
+            height="100%"
+            src={videoUrl}
+            title="Tutorial video"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+            className="w-full rounded-lg bg-black"
+            style={{
+              opacity: isLoading ? 0 : 1,
+              transition: 'opacity 0.3s ease-in-out',
+            }}
+            onLoad={() => {
+              setTimeout(() => setIsLoading(false), 500);
+            }}
+          />
+        </div>
       </div>
     </div>
   );

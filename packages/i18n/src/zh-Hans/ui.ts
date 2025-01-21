@@ -634,6 +634,7 @@ const translations = {
       openSettings: '设置向导',
       interativeTutorialLoading: '交互式教程加载中... 预计 3~6 秒',
       interativeTutorial: 'Refly 产品交互式教程',
+      videoLoading: '视频加载中...',
       enterFullscreen: '进入全屏',
       exitFullscreen: '退出全屏',
       completeTutorial: '完成教程',
