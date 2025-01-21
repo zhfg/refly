@@ -191,7 +191,6 @@ export const SettingsGuideModal = React.memo(() => {
         </div>
       }
       open={showSettingsGuideModal}
-      maskClosable={false}
       okText={t('common.finish')}
       cancelText={t('common.skip')}
       onOk={handleSave}
