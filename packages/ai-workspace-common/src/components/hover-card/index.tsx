@@ -1,7 +1,7 @@
-import React, { FC, ReactNode } from 'react';
+import React, { FC, ReactNode, useState } from 'react';
 import { Popover } from 'antd';
 import type { TooltipPlacement } from 'antd/es/tooltip';
-import { useVideo } from '../../hooks/use-video';
+import { Spin } from '../common/spin';
 import './index.scss';
 
 export interface HoverContent {
@@ -34,23 +34,35 @@ export const HoverCard: FC<HoverCardProps> = ({
   overlayStyle = { marginLeft: '8px', marginTop: '8px' },
   align = { offset: [8, 8] },
 }) => {
-  const { videoRef, handlePlay } = useVideo();
+  const [isLoading, setIsLoading] = useState(true);
 
   const renderContent = () => (
     <div className="w-[325px] bg-white rounded-lg overflow-hidden">
       {videoUrl && (
-        <div className="p-3 pb-2 overflow-hidden">
-          <video
-            ref={videoRef}
-            width="325"
-            height="216"
+        <div key={videoUrl} className="p-3 pb-2 overflow-hidden relative" style={{ height: '216px' }}>
+          {isLoading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 z-50 rounded-lg">
+              <Spin className="w-6 h-6" />
+              <div className="text-gray-600 text-sm mt-2">Loading...</div>
+            </div>
+          )}
+          <iframe
+            width="100%"
+            height="100%"
             src={videoUrl}
-            controls
-            controlsList="nodownload"
-            loop
-            playsInline
-            onPlay={handlePlay}
-            className="w-full h-[216px] object-cover rounded-lg bg-black"
+            title={title}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+            className="w-full h-full rounded-lg bg-black"
+            style={{
+              opacity: isLoading ? 0 : 1,
+              transition: 'opacity 0.3s ease-in-out',
+            }}
+            onLoad={() => {
+              setTimeout(() => setIsLoading(false), 500);
+            }}
           />
         </div>
       )}

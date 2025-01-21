@@ -42,7 +42,7 @@ const TourContent = ({ description, videoUrl }: { description: string; videoUrl:
     <div className="flex flex-col gap-4">
       <p className="text-base text-gray-600">{description}</p>
       <div className="flex justify-center">
-        <div className="relative w-full" style={{ height: '400px' }}>
+        <div key={videoUrl} className="relative w-full" style={{ height: '400px' }}>
           {isLoading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 z-50 rounded-lg">
               <Spin className="w-6 h-6" />
