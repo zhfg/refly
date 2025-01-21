@@ -1757,6 +1757,14 @@ const translations = {
       },
     },
   },
+  subscription: {
+    storageExceeded: {
+      title: 'Storage Quota Exceeded',
+      description:
+        'You have reached your storage limit. Upgrade your plan to continue using our services with expanded storage capacity.',
+      upgrade: 'Upgrade Now',
+    },
+  },
 };
 
 export default translations;

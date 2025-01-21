@@ -21,6 +21,7 @@ import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/compon
 import { SettingModal } from "@refly-packages/ai-workspace-common/components/settings"
 import { TourModal } from "@refly-packages/ai-workspace-common/components/tour-modal"
 import { SettingsGuideModal } from "@refly-packages/ai-workspace-common/components/settings-guide"
+import { StorageExceededModal } from "@refly-packages/ai-workspace-common/components/subscription/storage-exceeded-modal"
 // hooks
 import { useHandleSiderData } from "@refly-packages/ai-workspace-common/hooks/use-handle-sider-data"
 import {
@@ -473,6 +474,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
 
         <SettingsGuideModal />
         <TourModal />
+        <StorageExceededModal />
       </div>
     </Sider>
   )

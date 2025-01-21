@@ -2,6 +2,13 @@ const translations = {
   language: '简体中文',
   productName: 'Refly',
   welcomeMessage: '今天准备写点什么?',
+  subscription: {
+    storageExceeded: {
+      title: '存储空间已满',
+      description: '您的存储空间已达到上限。升级您的订阅计划以获得更大的存储空间，继续使用我们的服务。',
+      upgrade: '立即升级',
+    },
+  },
   privacyPage: {
     title: '隐私政策',
   },
