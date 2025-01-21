@@ -7,7 +7,7 @@ import { CommonModule } from '@/common/common.module';
 import { RAGModule } from '@/rag/rag.module';
 import { MiscModule } from '@/misc/misc.module';
 import { SubscriptionModule } from '@/subscription/subscription.module';
-import { ResourceProcessor } from './knowledge.processor';
+import { DeleteKnowledgeEntityProcessor, ResourceProcessor } from './knowledge.processor';
 import {
   QUEUE_RESOURCE,
   QUEUE_SIMPLE_EVENT,
@@ -27,7 +27,7 @@ import {
     BullModule.registerQueue({ name: QUEUE_CLEAR_CANVAS_ENTITY }),
   ],
   controllers: [KnowledgeController],
-  providers: [KnowledgeService, ResourceProcessor],
+  providers: [KnowledgeService, ResourceProcessor, DeleteKnowledgeEntityProcessor],
   exports: [KnowledgeService],
 })
 export class KnowledgeModule {}

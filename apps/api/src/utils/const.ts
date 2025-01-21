@@ -7,6 +7,8 @@ export const QUEUE_SYNC_TOKEN_USAGE = 'syncTokenUsage';
 export const QUEUE_SYNC_STORAGE_USAGE = 'syncStorageUsage';
 export const QUEUE_SYNC_CANVAS_ENTITY = 'syncCanvasEntity';
 export const QUEUE_CLEAR_CANVAS_ENTITY = 'clearCanvasEntity';
+export const QUEUE_DELETE_KNOWLEDGE_ENTITY = 'deleteKnowledgeEntity';
+
 export const QUEUE_SEND_VERIFICATION_EMAIL = 'sendVerificationEmail';
 export const QUEUE_CHECK_CANCELED_SUBSCRIPTIONS = 'checkCanceledSubscriptions';
 export const QUEUE_SYNC_REQUEST_USAGE = 'syncRequestUsage';

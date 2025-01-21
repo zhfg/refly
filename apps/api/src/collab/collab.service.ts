@@ -133,12 +133,20 @@ export class CollabService {
     return context;
   }
 
-  async loadDocument({ document, context }: { document: Y.Doc; context: CollabContext }) {
+  async loadDocument({
+    document,
+    documentName,
+    context,
+  }: {
+    document: Y.Doc;
+    documentName: string;
+    context: CollabContext;
+  }) {
     const { entity } = context;
     const { stateStorageKey } = entity;
 
     if (!stateStorageKey) {
-      this.logger.warn(`stateStorageKey not found for ${JSON.stringify(entity)}`);
+      this.logger.warn(`stateStorageKey not found for ${documentName}`);
       return null;
     }
 
