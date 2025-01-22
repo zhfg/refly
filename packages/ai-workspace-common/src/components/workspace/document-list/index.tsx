@@ -1,10 +1,9 @@
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { Dropdown, Button, Popconfirm, message, Empty, Tooltip, Divider } from 'antd';
+import { Dropdown, Button, Popconfirm, message, Empty, Divider } from 'antd';
 import type { MenuProps, DropdownProps } from 'antd';
 
 import {
   IconMoreHorizontal,
-  IconEdit,
   IconDelete,
   IconDocumentFilled,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -109,7 +108,10 @@ const DocumentCard = ({ item, onDelete }: { item: Document; onDelete: () => void
   return (
     <div className="bg-white rounded-lg overflow-hidden border border-solid cursor-pointer border-gray-200 hover:border-green-500 transition-colors duration-200">
       <div className="h-36 px-4 py-3 overflow-hidden">
-        <Markdown content={item.contentPreview} className="text-xs text-gray-600" />
+        <Markdown
+          content={item.contentPreview || t('canvas.nodePreview.document.noContentPreview')}
+          className="text-xs opacity-80"
+        />
       </div>
       <Divider className="m-0 text-gray-200" />
       <div className="px-3 pt-2 pb-1 flex justify-between items-center bg-gray-50">

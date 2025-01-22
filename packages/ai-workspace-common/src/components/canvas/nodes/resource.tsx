@@ -14,7 +14,7 @@ import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { useThrottledCallback } from 'use-debounce';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useDeleteResource, useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
+import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
 import classNames from 'classnames';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
@@ -22,6 +22,7 @@ import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hook
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-resource';
 import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
@@ -128,12 +129,10 @@ export const ResourceNode = memo(
       } as CanvasNode);
     }, [id, data, deleteNode]);
 
-    const { mutate: deleteResource } = useDeleteResource();
+    const { deleteResource } = useDeleteResource();
 
     const handleDeleteFile = useCallback(() => {
-      deleteResource({
-        body: { resourceId: data.entityId },
-      });
+      deleteResource(data.entityId);
       handleDelete();
     }, [data.entityId, deleteResource, handleDelete]);
 

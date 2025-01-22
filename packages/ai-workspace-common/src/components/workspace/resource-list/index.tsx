@@ -1,5 +1,5 @@
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { Dropdown, Button, Popconfirm, message, Empty, Tooltip, Divider, Spin } from 'antd';
+import { Dropdown, Button, Popconfirm, message, Empty, Divider } from 'antd';
 import type { MenuProps, DropdownProps } from 'antd';
 import {
   IconMoreHorizontal,
@@ -13,6 +13,7 @@ import { LOCALE } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
 
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { ScrollLoading } from '@refly-packages/ai-workspace-common/components/workspace/scroll-loading';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { Resource } from '@refly/openapi-schema';
@@ -21,6 +22,7 @@ import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/
 import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/colors';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { LuPlus } from 'react-icons/lu';
+import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-resource';
 
 const ActionDropdown = ({ resource, afterDelete }: { resource: Resource; afterDelete: () => void }) => {
   const { t } = useTranslation();
@@ -30,14 +32,11 @@ const ActionDropdown = ({ resource, afterDelete }: { resource: Resource; afterDe
   const { setShowLibraryModal } = useSiderStoreShallow((state) => ({
     setShowLibraryModal: state.setShowLibraryModal,
   }));
+  const { deleteResource } = useDeleteResource();
 
   const handleDelete = async () => {
-    const { data } = await getClient().deleteResource({
-      body: {
-        resourceId: resource.resourceId,
-      },
-    });
-    if (data?.success) {
+    const success = await deleteResource(resource.resourceId);
+    if (success) {
       message.success(t('common.putSuccess'));
       setPopupVisible(false);
       refetchUsage();
@@ -111,14 +110,17 @@ const ResourceCard = ({ item, onDelete }: { item: Resource; onDelete: () => void
   return (
     <div className="bg-white rounded-lg overflow-hidden border border-solid cursor-pointer border-gray-200 hover:border-green-500 transition-colors duration-200">
       <div className="h-36 px-4 py-3 overflow-hidden">
-        <Markdown content={item.contentPreview} className="text-xs text-gray-600" />
+        <Markdown
+          content={item.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
+          className="text-xs opacity-80"
+        />
       </div>
       <Divider className="m-0 text-gray-200" />
       <div className="px-3 pt-2 pb-1 flex justify-between items-center bg-gray-50">
         <div className="flex items-center gap-3 mb-2">
           <IconResourceFilled color={NODE_COLORS['resource']} size={24} />
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-medium max-w-48 truncate">{item.title || t('common.unTitle')}</h3>
+            <h3 className="text-sm font-medium max-w-48 truncate">{item.title || t('common.untitled')}</h3>
             <p className="text-xs text-gray-500">
               {time(item.updatedAt, language as LOCALE)
                 .utc()

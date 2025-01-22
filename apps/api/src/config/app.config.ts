@@ -51,8 +51,11 @@ export default () => ({
     redirectUrl: process.env.LOGIN_REDIRECT_URL,
     jwt: {
       secret: process.env.JWT_SECRET || 'test',
-      expiresIn: process.env.JWT_EXPIRATION_TIME || '15m',
+      expiresIn: process.env.JWT_EXPIRATION_TIME || '1h',
       refreshExpiresIn: process.env.JWT_REFRESH_EXPIRATION_TIME || '7d',
+    },
+    collab: {
+      tokenExpiry: process.env.COLLAB_TOKEN_EXPIRY || '5s',
     },
     email: {
       enabled: process.env.EMAIL_AUTH_ENABLED === 'true' || true,

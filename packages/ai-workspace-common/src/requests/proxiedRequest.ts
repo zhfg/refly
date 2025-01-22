@@ -11,6 +11,23 @@ import { responseInterceptorWithTokenRefresh } from '@refly-packages/ai-workspac
 import { getLocale } from '@refly-packages/ai-workspace-common/utils/locale';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/utils/notification';
 
+// Create a WeakMap to store cloned requests
+const requestCache = new WeakMap<Request, Request>();
+
+// Function to cache a cloned request
+const cacheClonedRequest = (originalRequest: Request, clonedRequest: Request) => {
+  requestCache.set(originalRequest, clonedRequest);
+};
+
+// Function to get and clear cached request
+const getAndClearCachedRequest = (originalRequest: Request): Request | undefined => {
+  const cachedRequest = requestCache.get(originalRequest);
+  if (cachedRequest) {
+    requestCache.delete(originalRequest);
+  }
+  return cachedRequest;
+};
+
 client.setConfig({ baseUrl: getServerOrigin() + '/v1', credentials: 'include' });
 
 export interface CheckResponseResult {
@@ -39,8 +56,19 @@ export const extractBaseResp = async (response: Response): Promise<BaseResponse>
   return { success: true };
 };
 
+client.interceptors.request.use(async (request) => {
+  // Clone and cache the request before processing
+  // Since we may resend the request after refreshing access tokens
+  const clonedRequest = request.clone();
+  cacheClonedRequest(request, clonedRequest);
+
+  return request;
+});
+
 client.interceptors.response.use(async (response, request) => {
-  return responseInterceptorWithTokenRefresh(response, request);
+  // Get the cached request and clear it from cache
+  const cachedRequest = getAndClearCachedRequest(request);
+  return responseInterceptorWithTokenRefresh(response, cachedRequest ?? request);
 });
 
 const wrapFunctions = (module: any) => {

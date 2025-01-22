@@ -14,8 +14,7 @@ let tokenFetchPromise: Promise<string> | null = null;
 let tokenExpirationTime: number | null = null;
 
 // Constants for token management
-const TOKEN_EXPIRY_BUFFER = 1 * 60 * 1000; // 1 minutes buffer before actual expiration
-const TOKEN_VALIDITY_DURATION = 5 * 60 * 1000; // 5 minutes (adjust based on your token's actual validity)
+const TOKEN_EXPIRY_BUFFER = 1000; // 1 second buffer before actual expiration
 
 const isTokenValid = () => {
   if (!tokenExpirationTime || !cachedToken) return false;
@@ -50,7 +49,7 @@ export function useCollabToken(): UseCollabTokenResult {
         const newToken = res.data.token;
         cachedToken = newToken;
         // Set expiration time when new token is received
-        tokenExpirationTime = Date.now() + TOKEN_VALIDITY_DURATION;
+        tokenExpirationTime = res.data.expiresAt;
         return newToken;
       })
       .finally(() => {

@@ -14,6 +14,7 @@ interface NodePreviewControl {
   toggleClickToPreview: () => void;
   previewNode: (node: CanvasNode) => void;
   closeNodePreview: (node: CanvasNode) => void;
+  closeNodePreviewByEntityId: (entityId: string) => void;
   pinNode: (node: CanvasNode) => void;
   unpinNode: (node: CanvasNode) => void;
   isNodePinned: (nodeId: string) => boolean;
@@ -68,6 +69,16 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
       removeNodePreview(canvasId, node.id);
     },
     [canvasId, removeNodePreview],
+  );
+
+  const closeNodePreviewByEntityId = useCallback(
+    (entityId: string) => {
+      const node = nodePreviews.find((node) => node.data?.entityId === entityId);
+      if (node) {
+        removeNodePreview(canvasId, node.id);
+      }
+    },
+    [canvasId, nodePreviews, removeNodePreview],
   );
 
   const pinNode = useCallback(
@@ -132,6 +143,7 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
     toggleClickToPreview,
     previewNode,
     closeNodePreview,
+    closeNodePreviewByEntityId,
     pinNode,
     unpinNode,
     isNodePinned,
