@@ -1753,6 +1753,7 @@ const translations = {
         4: 'Knowledge Base Integration',
         5: 'Quotes',
         6: 'Document Editing with AI',
+        7: 'Help Documentation',
       },
       description: {
         1: 'Experience seamless multi-threaded conversations that allow natural topic transitions and parallel discussions, enabling deeper exploration of ideas and enhanced problem-solving capabilities.',
@@ -1761,6 +1762,7 @@ const translations = {
         4: 'Seamlessly integrate external resources into your knowledge ecosystem, creating a comprehensive and personalized information network from scratch.',
         5: 'Effortlessly select quotes from various sources - resources, documents, memos, or skill responses - enriching your context with relevant references.',
         6: 'Beyond powerful real-time Markdown editing, enjoy AI-assisted document refinement by selecting specific content for intelligent modifications and enhancements.',
+        7: 'Refly provides comprehensive help documentation to help you get started quickly. Click the "Help" button in the bottom left corner of the canvas to view more help documents.',
       },
     },
   },
