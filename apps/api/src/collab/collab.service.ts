@@ -22,6 +22,7 @@ import { streamToBuffer } from '@/utils/stream';
 import { CollabContext, isCanvasContext, isDocumentContext } from './collab.dto';
 import { Redis } from '@hocuspocus/extension-redis';
 import { QUEUE_SYNC_CANVAS_ENTITY } from '@/utils/const';
+import ms from 'ms';
 
 @Injectable()
 export class CollabService {
@@ -60,9 +61,11 @@ export class CollabService {
 
   async signCollabToken(user: User) {
     const token = randomUUID();
-    // Store token in Redis with 5 minutes expiration
-    await this.redis.setex(`collab:token:${token}`, 5 * 60, user.uid);
-    return token;
+    const tokenExpiry = ms(String(this.config.get('auth.collab.tokenExpiry')));
+    const expiresAt = Date.now() + tokenExpiry;
+    await this.redis.setex(`collab:token:${token}`, tokenExpiry / 1000, user.uid);
+
+    return { token, expiresAt };
   }
 
   private async validateCollabToken(token: string): Promise<string | null> {

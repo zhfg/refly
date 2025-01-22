@@ -2899,6 +2899,9 @@ components:
         token:
           type: string
           description: Collab token
+        expiresAt:
+          type: number
+          description: Token expiration time (in unix milliseconds)
     GetCollabTokenResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

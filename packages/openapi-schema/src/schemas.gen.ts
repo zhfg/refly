@@ -1705,6 +1705,10 @@ export const CollabTokenDataSchema = {
       type: 'string',
       description: 'Collab token',
     },
+    expiresAt: {
+      type: 'number',
+      description: 'Token expiration time (in unix milliseconds)',
+    },
   },
 } as const;
 

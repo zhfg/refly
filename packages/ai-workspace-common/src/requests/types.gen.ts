@@ -1334,6 +1334,10 @@ export type CollabTokenData = {
      * Collab token
      */
     token: string;
+    /**
+     * Token expiration time (in unix milliseconds)
+     */
+    expiresAt?: number;
 };
 
 export type GetCollabTokenResponse = BaseResponse & {

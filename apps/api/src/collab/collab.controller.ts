@@ -12,7 +12,7 @@ export class CollabController {
   @UseGuards(JwtAuthGuard)
   @Get('getToken')
   async getToken(@LoginedUser() user: User): Promise<GetCollabTokenResponse> {
-    const token = await this.collabService.signCollabToken(user);
-    return buildSuccessResponse({ token });
+    const { token, expiresAt } = await this.collabService.signCollabToken(user);
+    return buildSuccessResponse({ token, expiresAt });
   }
 }
