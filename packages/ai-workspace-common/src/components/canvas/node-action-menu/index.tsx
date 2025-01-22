@@ -514,9 +514,9 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
                 videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-copyContent.webm',
               },
             },
+            { type: 'divider' },
           ]
         : []),
-      { type: 'divider' },
       {
         key: 'delete',
         icon: IconDelete,
