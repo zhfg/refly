@@ -1,5 +1,5 @@
-import { useEffect, useRef, FC, useState, useCallback, memo } from 'react';
-import { Button, Divider, Tooltip, Input, Modal, Skeleton, Popover } from 'antd';
+import { useEffect, FC, useState, useCallback, memo } from 'react';
+import { Button, Divider, Tooltip, Skeleton, Popover } from 'antd';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
@@ -14,13 +14,14 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 import { Helmet } from 'react-helmet';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { ActionDropdown } from './action-dropdown';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 import { NodeSelector } from '../common/node-selector';
 import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useReactFlow } from '@xyflow/react';
 import { CanvasRename } from './canvas-rename';
+import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
+import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -132,6 +133,24 @@ const ToolbarButtons = memo(
       [getNodes, setNodeCenter],
     );
 
+    const previewButton = (
+      <Button
+        type="text"
+        icon={<MdOutlineImage style={{ color: showPreview ? '#000' : '#9CA3AF' }} />}
+        onClick={() => setShowPreview(!showPreview)}
+        className="w-8 h-6 flex items-center justify-center mr-1"
+      />
+    );
+
+    const maxRatioButton = (
+      <Button
+        type="text"
+        icon={<MdOutlineAspectRatio style={{ color: showMaxRatio ? '#000' : '#9CA3AF' }} />}
+        onClick={() => setShowMaxRatio(!showMaxRatio)}
+        className="w-8 h-6 flex items-center justify-center"
+      />
+    );
+
     return (
       <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
         <Popover
@@ -157,22 +176,24 @@ const ToolbarButtons = memo(
             />
           </Tooltip>
         </Popover>
-        <Tooltip title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)}>
-          <Button
-            type="text"
-            icon={<MdOutlineImage style={{ color: showPreview ? '#000' : '#9CA3AF' }} />}
-            onClick={() => setShowPreview(!showPreview)}
-            className="w-8 h-6 flex items-center justify-center mr-1"
-          />
-        </Tooltip>
-        <Tooltip title={t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`)}>
-          <Button
-            type="text"
-            icon={<MdOutlineAspectRatio style={{ color: showMaxRatio ? '#000' : '#9CA3AF' }} />}
-            onClick={() => setShowMaxRatio(!showMaxRatio)}
-            className="w-8 h-6 flex items-center justify-center"
-          />
-        </Tooltip>
+
+        <HoverCard
+          title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)}
+          description={t(`canvas.toolbar.togglePreviewDescription`)}
+          videoUrl="https://static.refly.ai/onboarding/top-toolbar/topToolbar-togglePreview.webm"
+          placement="bottom"
+        >
+          {previewButton}
+        </HoverCard>
+
+        <HoverCard
+          title={t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`)}
+          description={t(`canvas.toolbar.toggleMaxRatioDescription`)}
+          videoUrl="https://static.refly.ai/onboarding/top-toolbar/topToolbar-toogleMaxRatio.webm"
+          placement="bottom"
+        >
+          {maxRatioButton}
+        </HoverCard>
       </div>
     );
   },
@@ -300,7 +321,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             setShowMaxRatio={setShowMaxRatio}
           />
 
-          <ActionDropdown canvasId={canvasId} canvasTitle={canvasTitle} />
+          <CanvasActionDropdown canvasId={canvasId} canvasName={canvasTitle} btnSize="large" />
         </div>
       </div>
     </>

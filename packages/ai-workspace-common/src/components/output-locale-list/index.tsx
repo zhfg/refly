@@ -10,7 +10,12 @@ import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui'
 import { IconDown, IconTranslate } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
 
-export const OutputLocaleList = (props: { children?: any; width?: number; position?: 'tl' | 'tr' | 'bl' | 'br' }) => {
+export const OutputLocaleList = (props: {
+  children?: any;
+  width?: number;
+  position?: 'tl' | 'tr' | 'bl' | 'br';
+  onChange?: (lng: OutputLocale) => void;
+}) => {
   // i18n
   const { t, i18n } = useTranslation();
   const uiLocale = i18n?.languages?.[0] as LOCALE;
@@ -20,9 +25,10 @@ export const OutputLocaleList = (props: { children?: any; width?: number; positi
   outputLocale = outputLocale || 'auto';
 
   const changeLang = async (lng: OutputLocale) => {
-    const { localSettings } = useUserStore.getState();
+    const { localSettings, userProfile } = useUserStore.getState();
 
     userStore.setLocalSettings({ ...localSettings, outputLocale: lng });
+    userStore.setUserProfile({ ...userProfile, outputLocale: lng });
     localStorage.setItem('refly-local-settings', safeStringifyJSON({ ...localSettings, outputLocale: lng }));
 
     const { data: res, error } = await getClient().updateSettings({
@@ -31,7 +37,10 @@ export const OutputLocaleList = (props: { children?: any; width?: number; positi
 
     if (error || !res?.success) {
       message.error(t('settings.action.putErrorNotify'));
+      return;
     }
+
+    props.onChange?.(lng);
   };
 
   const dropList: MenuProps['items'] = enLocale.map((item: OutputLocale) => ({

@@ -31,16 +31,21 @@ export interface SyncTokenUsageJobData {
   timestamp: Date;
 }
 
+export interface SyncRequestUsageJobData {
+  uid: string;
+  tier: ModelTier;
+  timestamp: Date;
+}
+
 export interface SyncStorageUsageJobData {
   uid: string;
   timestamp: Date;
 }
 
-export type CheckTokenUsageResult = Record<ModelTier, boolean>;
+export type CheckRequestUsageResult = Record<ModelTier, boolean>;
 
 export type CheckStorageUsageResult = {
-  objectStorageAvailable: boolean;
-  vectorStorageAvailable: boolean;
+  available: number;
 };
 
 export function subscriptionPO2DTO(sub: SubscriptionModel): Subscription {
@@ -59,6 +64,10 @@ export function tokenUsageMeterPO2DTO(usage: TokenUsageMeterModel): TokenUsageMe
       'meterId',
       'uid',
       'subscriptionId',
+      't1CountQuota',
+      't1CountUsed',
+      't2CountQuota',
+      't2CountUsed',
       't1TokenQuota',
       't1TokenUsed',
       't2TokenQuota',
@@ -71,7 +80,7 @@ export function tokenUsageMeterPO2DTO(usage: TokenUsageMeterModel): TokenUsageMe
 
 export function storageUsageMeterPO2DTO(usage: StorageUsageMeterModel): StorageUsageMeter {
   return {
-    ...pick(usage, ['meterId', 'uid', 'subscriptionId']),
+    ...pick(usage, ['meterId', 'uid', 'subscriptionId', 'fileCountQuota', 'fileCountUsed']),
     objectStorageQuota: usage.objectStorageQuota.toString(),
     resourceSize: usage.resourceSize.toString(),
     canvasSize: usage.canvasSize.toString(),

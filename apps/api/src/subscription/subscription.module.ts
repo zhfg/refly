@@ -5,6 +5,7 @@ import { SubscriptionService } from './subscription.service';
 import {
   SyncTokenUsageProcessor,
   SyncStorageUsageProcessor,
+  SyncRequestUsageProcessor,
   CheckCanceledSubscriptionsProcessor,
 } from './subscription.processor';
 import { SubscriptionController } from './subscription.controller';
@@ -28,6 +29,7 @@ import { QUEUE_CHECK_CANCELED_SUBSCRIPTIONS } from '@/utils/const';
     SubscriptionService,
     SyncTokenUsageProcessor,
     SyncStorageUsageProcessor,
+    SyncRequestUsageProcessor,
     CheckCanceledSubscriptionsProcessor,
   ],
   controllers: [SubscriptionController],

@@ -13,13 +13,14 @@ type ActionButtonsProps = {
 export const ActionButtons: FC<ActionButtonsProps> = memo(
   ({ nodeId, type, isNodeHovered }) => {
     const [isMenuHovered, setIsMenuHovered] = useState(false);
+    const [isHoverCardOpen, setIsHoverCardOpen] = useState(false);
     const { getNode } = useReactFlow();
 
     // 获取节点数据，检查是否为临时组
     const node = useMemo(() => getNode(nodeId) as CanvasNode, [nodeId, getNode]);
 
-    // 如果是临时组或者节点被hover，显示操作按钮
-    const shouldShowMenu = isNodeHovered || isMenuHovered;
+    // 如果是临时组或者节点被hover，或者HoverCard打开，显示操作按钮
+    const shouldShowMenu = isNodeHovered || isMenuHovered || isHoverCardOpen;
 
     return (
       <>
@@ -44,19 +45,38 @@ export const ActionButtons: FC<ActionButtonsProps> = memo(
             duration-200
             ease-in-out
             z-50
-            w-[150px]
-            bg-white
-            rounded-lg
             ${shouldShowMenu ? 'opacity-100' : 'opacity-0 pointer-events-none'}
           `}
-          onMouseEnter={() => setIsMenuHovered(true)}
-          onMouseLeave={() => setIsMenuHovered(false)}
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-          }}
         >
-          {shouldShowMenu && <NodeActionMenu nodeId={nodeId} nodeType={type} />}
+          {/* Menu container */}
+          <div
+            className="w-[150px] bg-white rounded-lg"
+            onMouseEnter={() => setIsMenuHovered(true)}
+            onMouseLeave={() => setIsMenuHovered(false)}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+          >
+            {shouldShowMenu && (
+              <NodeActionMenu nodeId={nodeId} nodeType={type} onHoverCardStateChange={setIsHoverCardOpen} />
+            )}
+          </div>
+
+          {/* Transparent bridge layer */}
+          <div
+            className={`
+              absolute 
+              top-0 
+              right-[-20px] 
+              w-[20px] 
+              h-full 
+              bg-transparent
+              ${shouldShowMenu ? '' : 'pointer-events-none'}
+            `}
+            onMouseEnter={() => setIsMenuHovered(true)}
+            onMouseLeave={() => setIsMenuHovered(false)}
+          />
         </div>
       </>
     );

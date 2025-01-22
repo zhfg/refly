@@ -1,5 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Button, Dropdown, MenuProps, Popconfirm, DropdownProps } from 'antd';
+import { Button, Dropdown, MenuProps, Modal, DropdownProps, Checkbox } from 'antd';
+import type { CheckboxProps } from 'antd';
+
 import { useTranslation } from 'react-i18next';
 import { IconDelete, IconMoreHorizontal, IconEdit } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-canvas';
@@ -15,15 +17,21 @@ interface ActionDropdownProps {
 export const ActionDropdown: React.FC<ActionDropdownProps> = ({ canvasId, canvasTitle }) => {
   const [popupVisible, setPopupVisible] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { t } = useTranslation();
   const { deleteCanvas } = useDeleteCanvas();
   const { mutate: updateCanvas } = useUpdateCanvas();
   const { updateCanvasTitle } = useSiderStoreShallow((state) => ({
     updateCanvasTitle: state.updateCanvasTitle,
   }));
+  const [isDeleteFile, setIsDeleteFile] = useState(false);
+  const onChange: CheckboxProps['onChange'] = (e) => {
+    setIsDeleteFile(e.target.checked);
+  };
 
   const handleDelete = async () => {
     await deleteCanvas(canvasId);
+    setIsDeleteModalOpen(false);
     setPopupVisible(false);
   };
 
@@ -58,23 +66,21 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({ canvasId, canvas
       },
       {
         label: (
-          <Popconfirm
-            title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', { canvas: canvasTitle })}
-            onConfirm={handleDelete}
-            onCancel={() => setPopupVisible(false)}
-            okText={t('common.confirm')}
-            cancelText={t('common.cancel')}
+          <div
+            className="flex items-center text-red-600"
+            onClick={() => {
+              setIsDeleteModalOpen(true);
+              setPopupVisible(false);
+            }}
           >
-            <div className="flex items-center text-red-600">
-              <IconDelete size={16} className="mr-2" />
-              {t('workspace.deleteDropdownMenu.delete')}
-            </div>
-          </Popconfirm>
+            <IconDelete size={16} className="mr-2" />
+            {t('workspace.deleteDropdownMenu.delete')}
+          </div>
         ),
         key: 'delete',
       },
     ],
-    [handleDelete, canvasTitle],
+    [],
   );
 
   const handleOpenChange = useCallback<DropdownProps['onOpenChange']>((open: boolean, info: any) => {
@@ -105,6 +111,22 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({ canvasId, canvas
         handleModalOk={handleModalOk}
         handleModalCancel={handleModalCancel}
       />
+
+      <Modal
+        title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', {
+          canvas: canvasTitle || t('common.untitled'),
+        })}
+        centered
+        open={isDeleteModalOpen}
+        onOk={handleDelete}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
+        okButtonProps={{ danger: true }}
+        destroyOnClose
+      >
+        <Checkbox onChange={onChange}>{t('canvas.toolbar.deleteCanvasFile')}</Checkbox>
+      </Modal>
     </>
   );
 };

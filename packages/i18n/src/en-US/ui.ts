@@ -15,6 +15,8 @@ const translations = {
     edit: 'Edit',
     save: 'Save',
     saveToCanvas: 'Add to Canvas',
+    skip: 'Skip',
+    finish: 'Finish',
     add: 'Add',
     remove: 'Remove',
     library: 'Library',
@@ -25,7 +27,7 @@ const translations = {
     more: 'More',
     putErr: 'Failed to perform operation. Please try again!',
     putSuccess: 'Operation Successful',
-    deleteConfirmMessage: 'Are you sure you want to delete?',
+    deleteConfirmMessage: 'Are you sure to delete?',
     multiSelect: 'Multi-select',
     input: 'Input',
     context: 'Context',
@@ -59,7 +61,6 @@ const translations = {
     login: 'Login',
     share: 'Share',
     noMoreText: 'No more~',
-    unTitle: 'Untitled',
   },
   verifyRules: {
     emailRequired: 'Email cannot be empty',
@@ -87,11 +88,6 @@ const translations = {
       title: 'The AI Native Creation Engine',
       description:
         'Refly is a free-form canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, intelligent search and WYSIWYG AI editor, easily transforms ideas into quality content.',
-    },
-    digestTopics: {
-      title: 'All Topics',
-      description:
-        'Topic categories derived from your browsing and session history, representing your reading and learning trends',
     },
     threadLibrary: {
       title: 'Threads',
@@ -165,7 +161,7 @@ const translations = {
     pricing: {
       title: 'Plans and Pricing',
       subtitle: 'Embark on your AI content creation journey with Refly',
-      description: 'Sign up and get a free trial of a million standard model tokens. No credit card required.',
+      description: 'Sign up and enjoy a unlimited trial with 20 standard model calls per day. No credit card required.',
       limitedOffer: 'Save 50% on your first year  - Limited time offer',
     },
     footer: {
@@ -262,6 +258,52 @@ const translations = {
       Q4: 'Is a refund available?',
       A4: 'Currently, there is no refund option available. If you have a strong demand for a refund, please contact the Refly team, and we will assist you in resolving the issue.',
     },
+  },
+  priceContent: {
+    freeCapabilities: [
+      {
+        before: 'Free-form canvas based on ',
+        highlight: 'multi-threaded sessions',
+        after: ' where you can ask questions by freely combining contexts',
+      },
+      {
+        before: 'Powerful skills driven by ',
+        highlight: 'standard models',
+        after: ': Generate documents, recommend questions, web search, and library search.',
+      },
+      {
+        before: 'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
+        highlight: 'limited size',
+        after: '.',
+      },
+      {
+        before: 'Content creation with AI markdown editor, powered by ',
+        highlight: 'standard models',
+        after: '',
+      },
+    ],
+    premiumCapabilities: [
+      {
+        before: 'Free-form canvas based on ',
+        highlight: 'multi-threaded sessions',
+        after: ' where you can ask questions by freely combining contexts',
+      },
+      {
+        before: 'Powerful skills driven by ',
+        highlight: 'pro models',
+        after: ': Generate documents, recommend questions, web search, and library search.',
+      },
+      {
+        before: 'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
+        highlight: 'large capacity',
+        after: '.',
+      },
+      {
+        before: 'Content creation with AI markdown editor, powered by ',
+        highlight: 'pro models',
+        after: '',
+      },
+    ],
   },
   emailVerification: {
     title: 'Email Verification',
@@ -369,7 +411,7 @@ const translations = {
       unbindSuccessful: 'Unbind successfully!',
       failed: 'Failed to delete',
       deleteConfirmForDocument: 'Are you sure you want to delete this document?',
-      deleteConfirmForCanvas: 'Are you sure you want to delete [{{canvas}}]?',
+      deleteConfirmForCanvas: 'Canvas {{canvas}} will be deleted permanently, are you sure to continue?',
       deleteConfirmForResource: 'Are you sure you want to delete this resource?',
       deleteConfirmForResourceProject: 'Are you sure to remove this resource from the project?',
       delete: 'Delete',
@@ -499,6 +541,10 @@ const translations = {
       exitFullScreen: 'Exit Full Screen',
     },
   },
+  document: {
+    setReadOnly: 'Set to Read-Only',
+    enableEdit: 'Enable Edit',
+  },
   artifact: {
     generating: 'Generating',
     completed: 'Completed',
@@ -520,39 +566,63 @@ const translations = {
       createGroup: 'Create Group',
       enableClickPreview: 'Enable Click Preview',
       disableClickPreview: 'Disable Click Preview',
+      toggleClickPreviewDescription: 'Whether to display the preview card when clicking on a node in the canvas.',
       hideLaunchpad: 'Hide Ask AI',
       showLaunchpad: 'Show Ask AI',
+      toggleLaunchpadDescription: 'Whether to display the AI input box.',
       hideEdges: 'Hide Edges',
       showEdges: 'Show Edges',
+      toggleEdgeDescription: 'Whether to display the edges when clicking on a node in the canvas.',
       toggleNodeSizeMode: 'Toggle Node Size Mode',
+      toggleNodeSizeModeDescription:
+        'Toggle node size mode, compact mode has smaller node spacing, adaptive mode has node spacing that adjusts automatically according to the canvas size.',
       compactMode: 'Compact Mode',
       adaptiveMode: 'Adaptive Mode',
       enableAutoLayout: 'Enable Auto Layout',
       disableAutoLayout: 'Disable Auto Layout',
+      toggleAutoLayoutDescription: 'Whether to enable auto layout when creating a new node.',
     },
     toolbar: {
       searchNode: 'Search Node',
+      searchNodeDescription: 'Search nodes in the canvas, click to locate.',
       enablePointerMode: 'Enable Pointer Mode',
       disablePointerMode: 'Disable Pointer Mode',
+      deleteCanvas: 'Delete Canvas',
       importResource: 'Import Resource',
+      importResourceDescription:
+        'Import resources through online search, manual addition of web links or text to add writing materials for consumption in the canvas.',
       addResource: 'Add Resource',
+      addResourceDescription:
+        'Import or upload any content (such as web pages, files, images, etc.) from external sources, which can be consumed and used in multiple canvases as needed.',
       addSkill: 'Add Skill',
       addTool: 'Add Tool',
       autoLayout: 'Auto Layout',
       askAI: 'Ask AI',
+      askAIDescription:
+        'Ask AI, select context or switch skill, input requirements, get help with writing, reading comprehension, or question answering',
       createMemo: 'Create Memo',
+      createMemoDescription: 'Create a memo for quick recording ideas, supporting Markdown format',
       addMemo: 'Add Memo',
       createDocument: 'Create Document',
+      createDocumentDescription: 'Create a document for writing.',
       addDocument: 'Add Document',
+      addDocumentDescription:
+        'User-created content in Refly, created through AI writing or manually creating a new document, which can be searched and answered through the AI knowledge base.',
       addHighlight: 'Add Highlight',
       hidePreview: 'Hide Node Preview',
       showPreview: 'Show Node Preview',
+      togglePreviewDescription:
+        'When there is a preview card, show or hide the preview card on the right side of the canvas.',
       hideEdges: 'Hide Connections',
       showEdges: 'Show Connections',
+      toggleEdgeTitle: 'Toggle Edge State',
       hideMaxRatio: 'Cancel Preview Max Ratio',
       showMaxRatio: 'Use Preview Max Ratio',
+      toggleMaxRatioDescription:
+        'When there is a preview card, control the size of the preview card displayed in the canvas.',
       hideLaunchpad: 'Hide Ask AI',
       showLaunchpad: 'Show Ask AI',
+      toggleLaunchpadTitle: 'Toggle Ask AI Display State',
       editTitle: 'Edit Canvas Title',
       editTitlePlaceholder: 'Please enter the title of the canvas',
       rename: 'Rename',
@@ -567,7 +637,20 @@ const translations = {
         fitView: 'Fit View',
         layout: 'Auto Layout',
         mode: 'Interaction Mode',
+        help: 'Help & Documentation',
       },
+      openDocs: 'Documentation',
+      openTour: 'Feature Highlights',
+      openGuide: 'Interactive Guide',
+      openSettings: 'Settings Wizard',
+      interativeTutorialLoading: 'Interactive tutorial loading... Estimated 3~6 seconds',
+      interativeTutorial: 'Refly Product Interactive Guide',
+      videoLoading: 'Video loading...',
+      enterFullscreen: 'Enter Fullscreen',
+      exitFullscreen: 'Exit Fullscreen',
+      completeTutorial: 'Complete Tutorial',
+      deleteCanvasConfirm: 'Confirm to delete canvas {{title}} permanently?',
+      deleteCanvasFile: 'Delete resources and documents in the canvas',
     },
     connectionTimeout: {
       title: 'Connection Timeout',
@@ -613,30 +696,63 @@ const translations = {
     },
     nodeActions: {
       createMemo: 'Create Empty Memo',
+      createMemoDescription: 'Create an empty memo for quick recording ideas, supporting Markdown format',
       copy: 'Copy Node Content',
+      copyDescription: 'Copy the content of the selected node to the clipboard in Markdown format',
       askAI: 'Ask AI',
+      askAIDescription:
+        'Ask AI, select context or switch skill, input requirements, get help with writing, reading comprehension, or question answering',
       cloneAskAI: 'Clone Ask AI',
+      cloneAskAIDescription: 'Clone the existing AI answer node and create a new skill node for comparison experiments',
       batchRun: 'Batch Run',
+      batchRunDescription: 'Run multiple selected skill nodes at the same time',
       addToContext: 'Add to Context',
+      addToContextDescription: 'Add temporary knowledge support for single queries to improve AI answer accuracy',
       processingVector: 'Processing Vector',
       run: 'Run',
+      runDescription: 'Run the selected skill node',
       rerun: 'Rerun',
+      rerunDescription: 'Use the current parameter settings to re-execute the AI node',
       preview: 'Open Preview',
+      previewDescription:
+        'Display the complete content of the node in the preview panel on the right side of the canvas',
       insertToDoc: 'Insert to Document',
+      insertToDocDescription: 'Integrate the node content into the document, supporting iterative writing',
       askFollowUp: 'Ask Follow-up',
+      askFollowUpDescription: 'Continue to ask based on the current node content',
       moreOptions: 'More Options',
       delete: 'Delete Node',
+      deleteDescription: 'Delete the selected node',
       ungroup: 'Ungroup',
+      ungroupDescription: 'Cancel the grouping of the selected node',
       group: 'Create Group',
+      groupDescription: 'Create a group based on the selected node',
       deleteAll: 'Delete',
+      deleteAllDescription: 'Delete all nodes in the canvas',
       compactMode: 'Compact Mode',
+      compactModeDescription: 'Compact mode, smaller node spacing',
       adaptiveMode: 'Adaptive Mode',
+      adaptiveModeDescription: 'Adaptive mode, node spacing automatically adjusts according to the canvas size',
       selectCluster: 'Select Sub Nodes',
+      selectClusterDescription: 'Select all sub-nodes of the selected node',
       groupCluster: 'Group Sub Nodes',
+      groupClusterDescription: 'Create a group based on all sub-nodes of the selected node',
       layoutCluster: 'Layout Sub Nodes',
+      layoutClusterDescription: 'Automatically layout all sub-nodes of the selected node',
       centerNode: 'Center Node Position',
+      centerNodeDescription: 'Center the selected node on the canvas',
       editQuery: 'Edit Query',
+      editQueryDescription: 'Edit the query of the selected node',
       duplicateDocument: 'Duplicate Document',
+      duplicateDocumentDescription: 'Create a duplicate of the selected node document',
+      deleteResource: 'Delete Resource',
+      deleteResourceDescription: 'Delete the resource from the library and all canvases',
+      resourceDeleteConfirm:
+        'Confirm to delete resource {{title}}? This action will remove this resource from library and all canvases.',
+      deleteDocument: 'Delete Document',
+      deleteDocumentDescription: 'Delete the document from the library and all canvases',
+      documentDeleteConfirm:
+        'Confirm to delete document {{title}}? This action will remove this document from library and all canvases.',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',
@@ -657,6 +773,13 @@ const translations = {
         contentPreview: 'Loading skill response content...',
         noContentPreview: 'No content preview available...',
       },
+    },
+    operationMode: {
+      title: 'Canvas Operation Mode',
+      mouse: 'Mouse-Friendly Mode',
+      mouseDesc: 'Left-click drag to pan, scroll wheel to zoom',
+      touchpad: 'Touchpad-Friendly Mode',
+      touchpadDesc: 'Two-finger pan to move, pinch to zoom',
     },
   },
   resource: {
@@ -733,6 +856,9 @@ const translations = {
       },
       saveResourceFailed: 'Save failed, please try to save again',
       isSaving: 'Saving...',
+      storageLimited: 'Storage quota exceeded',
+      storagePartialLimited: 'Insufficient storage: only {{count}} files can be saved',
+      upgrade: 'Upgrade Now',
     },
     wait_parse: 'Parsing',
     parse_failed: 'Parse Failed, click to retry',
@@ -811,6 +937,13 @@ const translations = {
       },
     },
     siderMenu: {
+      contactUs: 'Contact Us',
+      canvasTitle: 'Canvas',
+      canvasDescription:
+        'Create, edit, and view canvas, unlike traditional Chatbot applications, Refly completes the entire process of dialogue thinking, content consumption, and creation through an infinite two-dimensional canvas.',
+      libraryTitle: 'Knowledge Base',
+      libraryDescription:
+        'Create, edit, and view knowledge base, including all imported resources and created documents, supporting AI semantic search and answering.',
       subscription: 'Subscription',
       canvas: 'Canvas',
       newCanvas: 'New Canvas',
@@ -833,6 +966,7 @@ const translations = {
       recentChats: 'Recent Chats',
       viewMore: 'View More',
       viewTutorial: 'View Docs',
+      tour: 'View Tutorial',
     },
   },
   knowledgeLibrary: {
@@ -862,44 +996,6 @@ const translations = {
       archiveTitle: "You haven't read any content yet. Download the plugin to start exploring new material!",
       download: 'Download Plugin',
       seeOther: 'View Knowledge from Other Dates',
-    },
-  },
-  topics: {
-    breadcrumb: {
-      homePage: 'Home',
-      allTopics: 'All Topics',
-    },
-    title: 'All Topics',
-    description:
-      'Topic categories derived from your browsing and session history, representing your reading and learning trends',
-    footer: {
-      noMoreText: "You've reached the end of the list!",
-    },
-    empty: {
-      title: 'No categories available at the moment. Download the plugin to access new content!',
-      download: 'Download Plugin',
-      seeOther: 'Explore Content from Other Dates',
-    },
-  },
-  topicDetail: {
-    breadcrumb: {
-      homePage: 'Home',
-      allTopics: 'All Topics',
-    },
-    footer: {
-      noMoreText: "You've reached the end of the list!",
-    },
-    item: {
-      askFollow: 'Ask',
-      share: 'Share',
-      copy: 'Copy Link',
-      copyNotify: 'Link Copied to Clipboard',
-      noMoreText: "You've reached the end of the list!",
-      linkMore: '{{count}} more',
-    },
-    empty: {
-      title: 'No content available in this category at the moment. Download the plugin to access new content!',
-      download: 'Download Plugin',
     },
   },
   threadLibrary: {
@@ -1039,12 +1135,15 @@ const translations = {
   },
   settings: {
     title: 'Settings',
+    guide: {
+      title: 'Settings Wizard',
+      description: "👋 Welcome to Refly! Let's proceed with some necessary configurations.",
+    },
     tabs: {
       account: 'Account',
       language: 'Language',
       subscription: 'Subscription',
     },
-
     account: {
       title: 'My Account',
       avatar: 'Avatar',
@@ -1069,14 +1168,15 @@ const translations = {
     },
 
     language: {
-      title: 'Language',
+      title: 'Language Settings',
       uiLocale: {
-        title: 'Interface Display Language',
+        title: 'Interface Language',
+        description: 'Set the language of all interactive content in the Refly product.',
       },
       outputLocale: {
-        title: 'Chat Language',
-        description:
-          'AI will respond to your questions in the language set here. You can override this option by setting the language individually within the conversation.',
+        title: 'Output Language',
+        description: 'AI will respond in this language.',
+        auto: 'Auto Detect',
       },
     },
     subscription: {
@@ -1085,12 +1185,15 @@ const translations = {
       subscribeNow: 'Subscribe Now',
       manage: 'Manage Subscription',
       currentPlan: 'Current Plan',
-      t1TokenUsed: 'Advanced Model Token Usage',
-      t1TokenUsedDescription:
-        'Advanced models include OpenAI GPT-4o and Anthropic Claude 3.5 Sonnet, usage includes both model input and output tokens.',
-      t2TokenUsed: 'Standard Model Token Usage',
-      t2TokenUsedDescription:
-        'Standard models include OpenAI GPT-4o-mini and Anthropic Claude 3 Haiku, usage includes both model input and output tokens.',
+      t1Requests: 'Pro Requests',
+      t1RequestsDescription:
+        'Pro models include GPT-4o, Claude 3.5 Sonnet and others. Each successful skill call to pro models counts as one request.',
+      t2Requests: 'Standard Requests',
+      t2RequestsDescription:
+        'Standard models include GPT-4o Mini, DeepSeek V3 and others. Each successful skill call to standard models counts as one request.',
+      requestsRefresh: 'Request count will be reset every day for users on free plan.',
+      fileCount: 'Library Storage',
+      fileCountDescription: 'Each resource and document in your library counts as one file.',
       subscriptionManagement: 'Manage Billing and Subscriptions',
       subscriptionStatus: {
         free: 'FREE',
@@ -1116,7 +1219,7 @@ const translations = {
         },
         vectorStorage: 'Vector Storage',
         fileStorage: 'File Storage',
-        t1Model: 'Advanced Models',
+        t1Model: 'Pro Models',
         t2Model: 'Standard Models',
         freeModel: 'Free Models',
         mediaCredit: 'Media Credit (Coming Soon)',
@@ -1129,6 +1232,10 @@ const translations = {
         continueFree: 'Continue Free',
         oneTime: 'One-Time',
         unlimited: 'Unlimited',
+        libraryStorage: 'Library Storage',
+        fileCounts: '{{count}} files',
+        dailyCounts: '{{count}} times/day',
+        monthlyCounts: '{{count}} times/month',
         free: {
           description: 'Everything you need to get started',
           serviceSupport: {
@@ -1527,9 +1634,9 @@ const translations = {
     modelSelector: {
       unlimited: 'Unlimited',
       noModelAvailable: 'No model available',
-      premium: 'Advanced',
-      standard: 'Standard',
-      free: 'Free',
+      premium: 'Pro Models',
+      standard: 'Standard Models',
+      free: 'Free Models',
       tokenUsed: 'Used {{used}} / {{quota}}',
       upgrade: 'Upgrade',
       quotaExceeded: 'Quota exceeded, click to upgrade subscription',
@@ -1554,7 +1661,7 @@ const translations = {
       noUrl: 'This source does not have a link, you can select it and import to canvas',
     },
     premiumBanner: {
-      message: 'Need more tokens? Get higher limits with Premium.',
+      message: 'Need more requests? Get higher limits with Premium.',
       upgrade: 'Upgrade Plan',
     },
   },
@@ -1607,6 +1714,40 @@ const translations = {
     submit: 'Verify',
     success: 'Verification successful',
     error: 'Verification failed. Please try again.',
+  },
+  tour: {
+    onboardingModal: {
+      title: 'Feature Highlights',
+      prev: 'Previous',
+      next: 'Next',
+      startInteractive: 'Start Interactive Tutorial',
+      highlight: {
+        1: 'Multi-threaded conversation',
+        2: 'AI-powered skills',
+        3: 'Context',
+        4: 'Knowledge Base Integration',
+        5: 'Quotes',
+        6: 'Document Editing with AI',
+        7: 'Help Documentation',
+      },
+      description: {
+        1: 'Experience seamless multi-threaded conversations that allow natural topic transitions and parallel discussions, enabling deeper exploration of ideas and enhanced problem-solving capabilities.',
+        2: 'Driven by an AI model, after inputting your question, you can flexibly select any node in the canvas as the context to generate new node content.',
+        3: 'Enhanced contextual understanding through temporary memory systems, enabling more precise and relevant AI responses. Freely select nodes or add references as context within the canvas.',
+        4: 'Seamlessly integrate external resources into your knowledge ecosystem, creating a comprehensive and personalized information network from scratch.',
+        5: 'Effortlessly select quotes from various sources - resources, documents, memos, or skill responses - enriching your context with relevant references.',
+        6: 'Beyond powerful real-time Markdown editing, enjoy AI-assisted document refinement by selecting specific content for intelligent modifications and enhancements.',
+        7: 'Refly provides comprehensive help documentation to help you get started quickly. Click the "Help" button in the bottom left corner of the canvas to view more help documents.',
+      },
+    },
+  },
+  subscription: {
+    storageExceeded: {
+      title: 'Storage Quota Exceeded',
+      description:
+        'You have reached your storage limit. Upgrade your plan to continue using our services with expanded storage capacity.',
+      upgrade: 'Upgrade Now',
+    },
   },
 };
 

@@ -1,6 +1,14 @@
 import { Canvas as CanvasModel } from '@prisma/client';
-import { Canvas } from '@refly-packages/openapi-schema';
+import { Canvas, Entity } from '@refly-packages/openapi-schema';
 import { pick } from '@/utils';
+
+export interface SyncCanvasEntityJobData {
+  canvasId: string;
+}
+
+export interface DeleteCanvasNodesJobData {
+  entities: Entity[];
+}
 
 export function canvasPO2DTO(canvas: CanvasModel): Canvas {
   return {

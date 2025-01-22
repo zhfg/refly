@@ -1,5 +1,3 @@
-import { LOCALE } from '@refly/common-types';
-
 export const languageNameToLocale = {
   en: {
     'Auto (Detect Input)': 'auto',
@@ -100,78 +98,9 @@ export const localeToLanguageName = {
   },
 };
 
-export const depLocaleToLanguageName = {
-  en: {
-    auto: 'Auto (Detect Input)',
-    en: 'English',
-    'zh-CN': 'Simplified Chinese (简体中文)',
-    'zh-Hant': 'Traditional Chinese (繁體中文)',
-    ja: 'Japanese (Japanese)',
-    fr: 'French (Français)',
-    'de-DE': 'Standard German (Deutsch)',
-    ko: 'Korean (한국어)',
-    hi: 'Hindi (हिंदी)',
-    'fr-FR': 'French (Français)',
-    es: 'Spanish (Español)',
-    ru: 'Russian (русский)',
-    de: 'German (Deutsch)',
-    it: 'Italian (italiano)',
-    tr: 'Turkish (Türkçe)',
-    pt: 'Portuguese (português)',
-    vi: 'Vietnamese (Tiếng Việt)',
-    id: 'Indonesian (Indonesia)',
-    th: 'Thai (ไทย)',
-    ar: 'Arabic (العربية)',
-    mn: 'Mongolian (蒙古语)',
-    fa: 'Persian (فارسی)',
-  },
-  'zh-CN': {
-    auto: '自动检测 (Auto Detect)',
-    en: '英语 (English)',
-    'zh-CN': '简体中文',
-    'zh-Hant': '繁體中文',
-    ja: '日语 (Japanese)',
-    fr: '法语 (Français)',
-    'de-DE': '标准德语 (Deutsch)',
-    ko: '韩语 (한국어)',
-    hi: '印地语 (हिंदी)',
-    'fr-FR': '法语 (Français)',
-    es: '西班牙语 (Español)',
-    ru: '俄语 (русский)',
-    de: '德语 (Deutsch)',
-    it: '意大利语 (italiano)',
-    tr: '土耳其语 (Türkçe)',
-    pt: '葡萄牙语 (português)',
-    vi: '越南语 (Tiếng Việt)',
-    id: '印度尼西亚语 (Indonesia)',
-    th: '泰语 (Thai)',
-    ar: '阿拉伯语 (العربية)',
-    mn: '蒙古语 (蒙古语)',
-    fa: '波斯语 (فارسی)',
-  },
-};
-
 export const enLanguageName = Object.keys(languageNameToLocale.en);
 export const zhCNLanguageName = Object.keys(languageNameToLocale['zh-CN']);
 export const enLocale = Object.keys(localeToLanguageName.en) as OutputLocale[];
 export const zhCNLocale = Object.keys(localeToLanguageName['zh-CN']);
 
 export type OutputLocale = keyof typeof localeToLanguageName.en;
-
-// TODO: 国际化后续要改造
-export const getOutputLocale = (uiLocale: LOCALE) => {
-  if (uiLocale === LOCALE.EN) {
-    return enLocale;
-  } else {
-    return zhCNLocale;
-  }
-};
-
-// TODO: 国际化后续要改造
-export const getOutputLanguage = (uiLocale: LOCALE) => {
-  if (uiLocale === LOCALE.EN) {
-    return enLanguageName;
-  } else {
-    return zhCNLanguageName;
-  }
-};

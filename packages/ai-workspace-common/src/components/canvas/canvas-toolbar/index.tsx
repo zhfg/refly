@@ -1,6 +1,4 @@
 import { Button, Divider } from 'antd';
-import { HiOutlineDocumentAdd } from 'react-icons/hi';
-import { RiUploadCloud2Line } from 'react-icons/ri';
 import { useTranslation } from 'react-i18next';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
@@ -12,30 +10,29 @@ import { ImportResourceModal } from '@refly-packages/ai-workspace-common/compone
 import { SourceListModal } from '@refly-packages/ai-workspace-common/components/source-list/source-list-modal';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { IconAskAI, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconAskAI,
+  IconAskAIInput,
+  IconCreateDocument,
+  IconDocument,
+  IconImportResource,
+  IconMemo,
+  IconResource,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
-import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
-import { ToolButton } from './tool-button';
-
-// Define toolbar item interface
-interface ToolbarItem {
-  type: 'button' | 'popover' | 'divider';
-  icon?: React.ElementType;
-  value?: string;
-  domain?: string;
-  tooltip?: string;
-  active?: boolean;
-}
+import { ToolButton, ToolValue } from './tool-button';
+import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
+import { genMemoID, genSkillID } from '@refly-packages/utils/id';
 
 interface ToolbarProps {
   onToolSelect?: (tool: string) => void;
 }
 
-// 1. 将工具栏配置抽离为独立的组件
 const useToolbarConfig = () => {
   const { t } = useTranslation();
   const { showLaunchpad, showEdges } = useCanvasStoreShallow((state) => ({
@@ -43,7 +40,6 @@ const useToolbarConfig = () => {
     showEdges: state.showEdges,
   }));
 
-  // 不在 useMemo 中调用 hook
   const sourceListDrawerVisible = useKnowledgeBaseStoreShallow((state) => state.sourceListDrawer.visible);
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
@@ -52,11 +48,41 @@ const useToolbarConfig = () => {
     () => ({
       tools: [
         {
-          icon: RiUploadCloud2Line,
+          icon: IconAskAI,
+          value: 'askAI',
+          type: 'button',
+          isPrimary: true,
+          domain: 'skill',
+          tooltip: t('canvas.toolbar.askAI'),
+          hoverContent: {
+            title: t('canvas.toolbar.askAI'),
+            description: t('canvas.toolbar.askAIDescription'),
+            videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-askAI.webm',
+          },
+        },
+        {
+          icon: IconMemo,
+          value: 'createMemo',
+          type: 'button',
+          domain: 'memo',
+          tooltip: t('canvas.toolbar.createMemo'),
+          hoverContent: {
+            title: t('canvas.toolbar.createMemo'),
+            description: t('canvas.toolbar.createMemoDescription'),
+            videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-createMemo.webm',
+          },
+        },
+        {
+          icon: IconImportResource,
           value: 'importResource',
           type: 'button',
           domain: 'resource',
           tooltip: t('canvas.toolbar.importResource'),
+          hoverContent: {
+            title: t('canvas.toolbar.importResource'),
+            description: t('canvas.toolbar.importResourceDescription'),
+            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
+          },
         },
         {
           icon: IconResource,
@@ -65,19 +91,17 @@ const useToolbarConfig = () => {
           domain: 'resource',
           tooltip: t('canvas.toolbar.addResource'),
         },
-        // {
-        //   icon: Sparkles,
-        //   value: 'addSkill',
-        //   type: 'popover',
-        //   domain: 'skill',
-        //   tooltip: t('canvas.toolbar.addSkill'),
-        // },
         {
-          icon: HiOutlineDocumentAdd,
+          icon: IconCreateDocument,
           value: 'createDocument',
           type: 'button',
           domain: 'document',
           tooltip: t('canvas.toolbar.createDocument'),
+          hoverContent: {
+            title: t('canvas.toolbar.createDocument'),
+            description: t('canvas.toolbar.createDocumentDescription'),
+            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-create-document.webm',
+          },
         },
         {
           icon: IconDocument,
@@ -90,11 +114,15 @@ const useToolbarConfig = () => {
           type: 'divider',
         },
         {
-          icon: IconAskAI,
+          icon: IconAskAIInput,
           value: 'handleLaunchpad',
           type: 'button',
           domain: 'launchpad',
           tooltip: t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`),
+          hoverContent: {
+            title: t('canvas.toolbar.toggleLaunchpadTitle'),
+            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.webm',
+          },
         },
         {
           icon: IoAnalyticsOutline,
@@ -102,6 +130,10 @@ const useToolbarConfig = () => {
           type: 'button',
           domain: 'edges',
           tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
+          hoverContent: {
+            title: t('canvas.toolbar.toggleEdgeTitle'),
+            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm',
+          },
         },
       ] as ToolbarItem[],
       modals: {
@@ -112,7 +144,6 @@ const useToolbarConfig = () => {
   );
 };
 
-// 2. 抽离搜索列表组件
 const SearchListWrapper = memo(
   ({ tool, handleConfirm }: { tool: ToolbarItem; handleConfirm: (items: ContextItem[]) => void }) => {
     const handleToolSelect = useCallback((event: React.MouseEvent) => {
@@ -120,6 +151,22 @@ const SearchListWrapper = memo(
     }, []);
 
     const [open, setOpen] = useState(false);
+
+    const button = (
+      <Button
+        type="text"
+        onClick={handleToolSelect}
+        className={`
+          h-[32px] w-[32px] 
+          flex items-center justify-center 
+          hover:bg-gray-100 rounded-lg 
+          transition-colors duration-200 
+          group
+          ${tool.active ? 'bg-gray-100' : ''}
+        `}
+        icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
+      />
+    );
 
     return (
       <SearchList
@@ -130,27 +177,25 @@ const SearchListWrapper = memo(
         open={open}
         setOpen={setOpen}
       >
-        <TooltipWrapper tooltip={tool.tooltip}>
-          <Button
-            type="text"
-            onClick={handleToolSelect}
-            className={`
-            h-[32px] w-[32px] 
-            flex items-center justify-center 
-            hover:bg-gray-100 rounded-lg 
-            transition-colors duration-200 
-            group
-            ${tool.active ? 'bg-gray-100' : ''}
-          `}
-            icon={<tool.icon className="h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900" />}
-          />
-        </TooltipWrapper>
+        {tool.hoverContent ? (
+          <HoverCard
+            title={tool.hoverContent.title}
+            description={tool.hoverContent.description}
+            videoUrl={tool.hoverContent.videoUrl}
+            placement="right"
+            overlayStyle={{ marginLeft: '12px' }}
+            align={{ offset: [12, 0] }}
+          >
+            {button}
+          </HoverCard>
+        ) : (
+          <TooltipWrapper tooltip={tool.tooltip}>{button}</TooltipWrapper>
+        )}
       </SearchList>
     );
   },
 );
 
-// 3. 优化主组件
 export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
   const { t } = useTranslation();
   const { addNode } = useAddNode();
@@ -171,10 +216,8 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
   const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
   const { toggleEdgeVisible } = useEdgeVisible();
 
-  // 5. 使用工具栏配置
   const { tools, modals } = useToolbarConfig();
 
-  // 6. 缓存回调函数
   const getIconColor = useCallback(
     (tool: string) => {
       if (tool === 'showEdges' && !showEdges) return '#9CA3AF';
@@ -191,6 +234,21 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
     [isCreating],
   );
 
+  const createSkillNode = useCallback(() => {
+    addNode({
+      type: 'skill',
+      data: { title: 'Skill', entityId: genSkillID() },
+    });
+  }, [addNode]);
+
+  const createMemo = useCallback(() => {
+    const memoId = genMemoID();
+    addNode({
+      type: 'memo',
+      data: { title: t('canvas.nodeTypes.memo'), entityId: memoId },
+    });
+  }, [addNode, t]);
+
   const handleToolSelect = useCallback(
     (event: React.MouseEvent, tool: string) => {
       switch (tool) {
@@ -206,10 +264,24 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
         case 'showEdges':
           toggleEdgeVisible();
           break;
+        case 'askAI':
+          createSkillNode();
+          break;
+        case 'createMemo':
+          createMemo();
+          break;
       }
       onToolSelect?.(tool);
     },
-    [setImportResourceModalVisible, createSingleDocumentInCanvas, setShowLaunchpad, toggleEdgeVisible, onToolSelect],
+    [
+      setImportResourceModalVisible,
+      createSingleDocumentInCanvas,
+      setShowLaunchpad,
+      toggleEdgeVisible,
+      createSkillNode,
+      createMemo,
+      onToolSelect,
+    ],
   );
 
   const handleConfirm = useCallback(
@@ -265,7 +337,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
         return <SearchListWrapper key={index} tool={tool} handleConfirm={handleConfirm} />;
       })}
 
-      {importResourceModalVisible && <ImportResourceModal />}
+      <ImportResourceModal />
       {modals.sourceList && <SourceListModal classNames="source-list-modal" />}
     </div>
   );

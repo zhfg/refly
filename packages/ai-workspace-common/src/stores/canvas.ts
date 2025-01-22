@@ -29,7 +29,6 @@ export interface CanvasState {
   showPreview: boolean;
   showMaxRatio: boolean;
   showLaunchpad: boolean;
-  interactionMode: 'mouse' | 'touchpad';
   operatingNodeId: string | null;
   showEdges: boolean;
   clickToPreview: boolean;
@@ -50,7 +49,6 @@ export interface CanvasState {
   setShowPreview: (show: boolean) => void;
   setShowMaxRatio: (show: boolean) => void;
   setShowLaunchpad: (show: boolean) => void;
-  setInteractionMode: (mode: 'mouse' | 'touchpad') => void;
   setOperatingNodeId: (nodeId: string | null) => void;
   setShowEdges: (show: boolean) => void;
   setClickToPreview: (enabled: boolean) => void;
@@ -78,7 +76,6 @@ const defaultCanvasState = () => ({
   showPreview: true,
   showMaxRatio: true,
   showLaunchpad: true,
-  interactionMode: 'mouse' as const,
   operatingNodeId: null,
   showEdges: false,
   clickToPreview: true,
@@ -198,10 +195,6 @@ export const useCanvasStore = create<CanvasState>()(
           state.config[canvasId].nodePreviews ??= [];
           state.config[canvasId].nodePreviews = state.config[canvasId].nodePreviews.filter((n) => n.id !== nodeId);
         }),
-      setInteractionMode: (mode) =>
-        set((state) => {
-          state.interactionMode = mode;
-        }),
       setOperatingNodeId: (nodeId) => set({ operatingNodeId: nodeId }),
       setShowEdges: (show) =>
         set((state) => {
@@ -226,7 +219,6 @@ export const useCanvasStore = create<CanvasState>()(
       partialize: (state) => ({
         config: state.config,
         currentCanvasId: state.currentCanvasId,
-        interactionMode: state.interactionMode,
         showEdges: state.showEdges,
         showLaunchpad: state.showLaunchpad,
         clickToPreview: state.clickToPreview,

@@ -1,26 +1,35 @@
 import React, { useState, useEffect, useCallback, memo, useMemo, useRef } from 'react';
-import { Button, Dropdown, Space, Divider, Tooltip } from 'antd';
-import { MdOutlineMouse } from 'react-icons/md';
-import { LuTouchpad } from 'react-icons/lu';
-import { LuLayoutDashboard } from 'react-icons/lu';
+import { Button, Dropdown, Space, Divider, Tooltip, Modal } from 'antd';
+import { LuCompass, LuLayoutDashboard, LuLightbulb, LuShipWheel } from 'react-icons/lu';
 import { RiFullscreenFill } from 'react-icons/ri';
+import { FiHelpCircle } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { LuZoomIn, LuZoomOut } from 'react-icons/lu';
-import { IconDown } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconDocumentation,
+  IconDown,
+  IconMouse,
+  IconTouchpad,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useReactFlow, useOnViewportChange } from '@xyflow/react';
 import { useCanvasLayout } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-layout';
 import { TFunction } from 'i18next';
+import { HelpModal } from './help-modal';
 
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 import { IconExpand, IconShrink } from '@refly-packages/ai-workspace-common/components/common/icon';
+
+import './index.scss';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 
 interface LayoutControlProps {
   mode: 'mouse' | 'touchpad';
   changeMode: (mode: 'mouse' | 'touchpad') => void;
 }
 
-const iconClass = 'flex items-center justify-center';
+const iconClass = 'flex items-center justify-center text-base';
 const buttonClass = '!p-0 h-[30px] w-[30px] flex items-center justify-center ';
 
 // Add interface for TooltipButton props
@@ -109,7 +118,7 @@ const ModeSelector = memo(({ mode, open, setOpen, items, onModeChange, t }: Mode
         type="text"
         className="!p-0 h-[30px] w-[48px] flex items-center justify-center hover:bg-gray-100 transition-colors duration-200 group"
       >
-        {mode === 'mouse' ? <MdOutlineMouse className={iconClass} /> : <LuTouchpad className={iconClass} />}
+        {mode === 'mouse' ? <IconMouse className={iconClass} /> : <IconTouchpad className={iconClass} />}
         <IconDown className={`ml-[-6px] ${iconClass} ${open ? 'rotate-180' : ''}`} />
       </Button>
     </Tooltip>
@@ -153,6 +162,14 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
   const [currentZoom, setCurrentZoom] = useState(reactFlowInstance?.getZoom() ?? 1);
   const minZoom = 0.1;
   const maxZoom = 2;
+  const { helpModalVisible, setShowTourModal, setShowSettingsGuideModal, setHelpModalVisible } = useUserStoreShallow(
+    (state) => ({
+      helpModalVisible: state.helpModalVisible,
+      setShowTourModal: state.setShowTourModal,
+      setShowSettingsGuideModal: state.setShowSettingsGuideModal,
+      setHelpModalVisible: state.setHelpModalVisible,
+    }),
+  );
 
   // Use ref to avoid recreating the timeout on each render
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -210,7 +227,7 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
         key: 'mouse',
         label: (
           <Space>
-            <MdOutlineMouse className={iconClass} />
+            <IconMouse className={iconClass} />
             {t('canvas.toolbar.mouse')}
           </Space>
         ),
@@ -219,7 +236,7 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
         key: 'touchpad',
         label: (
           <Space>
-            <LuTouchpad className={iconClass} />
+            <IconTouchpad className={iconClass} />
             {t('canvas.toolbar.touchpad')}
           </Space>
         ),
@@ -242,29 +259,72 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
     updateAllNodesSizeMode(newMode);
   }, [nodeSizeMode, setNodeSizeMode, updateAllNodesSizeMode]);
 
+  const helpMenuItems = useMemo(
+    () => [
+      {
+        key: 'settings',
+        icon: <LuShipWheel className={iconClass} size={14} />,
+        label: <Space>{t('canvas.toolbar.openSettings')}</Space>,
+        onClick: () => setShowSettingsGuideModal(true),
+      },
+      {
+        key: 'tour',
+        icon: <LuLightbulb className={iconClass} size={14} />,
+        label: <Space>{t('canvas.toolbar.openTour')}</Space>,
+        onClick: () => setShowTourModal(true),
+      },
+      {
+        key: 'guide',
+        icon: <LuCompass className={iconClass} size={14} />,
+        label: <Space>{t('canvas.toolbar.openGuide')}</Space>,
+        onClick: () => setHelpModalVisible(true),
+      },
+      {
+        key: 'docs',
+        icon: <IconDocumentation className={iconClass} size={14} />,
+        label: <Space>{t('canvas.toolbar.openDocs')}</Space>,
+        onClick: () => window.open('https://docs.refly.ai', '_blank'),
+      },
+    ],
+    [t],
+  );
+
   return (
-    <div className="absolute bottom-2 left-2.5 px-1 h-[32px] border-box flex items-center justify-center bg-white rounded-md shadow-md">
-      <ZoomControls
-        currentZoom={currentZoom}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        canZoomIn={canZoomIn}
-        canZoomOut={canZoomOut}
-        t={t}
-      />
+    <>
+      <div className="absolute bottom-2 left-2.5 px-1 h-[32px] border-box flex items-center justify-center bg-white rounded-md shadow-md">
+        <ZoomControls
+          currentZoom={currentZoom}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          canZoomIn={canZoomIn}
+          canZoomOut={canZoomOut}
+          t={t}
+        />
 
-      <Divider type="vertical" className="h-full" />
+        <Divider type="vertical" className="h-full" />
 
-      <ActionButtons
-        onFitView={handleFitView}
-        onLayout={onLayout}
-        onToggleSizeMode={handleToggleSizeMode}
-        nodeSizeMode={nodeSizeMode}
-        t={t}
-      />
+        <ActionButtons
+          onFitView={handleFitView}
+          onLayout={onLayout}
+          onToggleSizeMode={handleToggleSizeMode}
+          nodeSizeMode={nodeSizeMode}
+          t={t}
+        />
 
-      <ModeSelector mode={mode} open={open} setOpen={setOpen} items={items} onModeChange={changeMode} t={t} />
-    </div>
+        <ModeSelector mode={mode} open={open} setOpen={setOpen} items={items} onModeChange={changeMode} t={t} />
+
+        <Divider type="vertical" className="h-full mx-0.5" />
+
+        <Dropdown menu={{ items: helpMenuItems }} trigger={['click']}>
+          <Tooltip title={t('canvas.toolbar.tooltip.help')} arrow={false}>
+            <Button type="text" className={buttonClass}>
+              <FiHelpCircle className={iconClass} size={16} />
+            </Button>
+          </Tooltip>
+        </Dropdown>
+      </div>
+      {helpModalVisible ? <HelpModal visible={helpModalVisible} onClose={() => setHelpModalVisible(false)} /> : null}
+    </>
   );
 });
 

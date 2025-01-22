@@ -1,4 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Queue } from 'bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
 import { randomUUID } from 'crypto';
 import * as Y from 'yjs';
 import { Request } from 'express';
@@ -19,6 +21,7 @@ import { IDPrefix, incrementalMarkdownUpdate, state2Markdown } from '@refly-pack
 import { streamToBuffer } from '@/utils/stream';
 import { CollabContext, isCanvasContext, isDocumentContext } from './collab.dto';
 import { Redis } from '@hocuspocus/extension-redis';
+import { QUEUE_SYNC_CANVAS_ENTITY } from '@/utils/const';
 
 @Injectable()
 export class CollabService {
@@ -34,6 +37,7 @@ export class CollabService {
     private miscService: MiscService,
     private subscriptionService: SubscriptionService,
     @Inject(MINIO_INTERNAL) private minio: MinioService,
+    @InjectQueue(QUEUE_SYNC_CANVAS_ENTITY) private canvasQueue: Queue,
   ) {
     this.server = Server.configure({
       port: this.config.get<number>('wsPort'),
@@ -93,6 +97,11 @@ export class CollabService {
           },
         });
         this.logger.log(`document created: ${documentName}`);
+
+        await this.subscriptionService.syncStorageUsage({
+          uid: user.uid,
+          timestamp: new Date(),
+        });
       }
       context = { user, entity: doc, entityType: 'document' };
     } else if (documentName.startsWith(IDPrefix.CANVAS)) {
@@ -124,11 +133,22 @@ export class CollabService {
     return context;
   }
 
-  private async loadDocument({ document, context }: { document: Y.Doc; context: CollabContext }) {
+  async loadDocument({
+    document,
+    documentName,
+    context,
+  }: {
+    document: Y.Doc;
+    documentName: string;
+    context: CollabContext;
+  }) {
     const { entity } = context;
     const { stateStorageKey } = entity;
 
-    if (!stateStorageKey) return null;
+    if (!stateStorageKey) {
+      this.logger.warn(`stateStorageKey not found for ${documentName}`);
+      return null;
+    }
 
     try {
       const readable = await this.minio.client.getObject(stateStorageKey);
@@ -221,11 +241,6 @@ export class CollabService {
     });
     context.entity = updatedDoc;
 
-    await this.subscriptionService.syncStorageUsage({
-      uid: user.uid,
-      timestamp: new Date(),
-    });
-
     // Vacuum unused files
     // const staticPrefix = this.config.get('staticEndpoint');
     // const fileKeys = content
@@ -285,10 +300,16 @@ export class CollabService {
       updatedAt: new Date().toJSON(),
     });
 
-    await this.subscriptionService.syncStorageUsage({
-      uid: user.uid,
-      timestamp: new Date(),
-    });
+    // Add sync canvas entity job with debouncing
+    await this.canvasQueue.add(
+      'syncCanvasEntity',
+      { canvasId: canvas.canvasId },
+      {
+        jobId: canvas.canvasId, // Use consistent jobId for deduplication
+        removeOnComplete: true,
+        removeOnFail: true,
+      },
+    );
   }
 
   async storeDocument({ document, context }: { document: Y.Doc; context: CollabContext }) {

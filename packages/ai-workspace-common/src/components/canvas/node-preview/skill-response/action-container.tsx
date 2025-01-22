@@ -74,7 +74,7 @@ const ActionContainerComponent = ({ result, step }: ActionContainerProps) => {
       if (type === 'insertBelow' || type === 'replaceSelection') {
         editorEmitter.emit(type, parsedContent);
       } else if (type === 'createDocument') {
-        await debouncedCreateDocument(title ?? t('common.newDocument'), content, {
+        await debouncedCreateDocument(title ?? '', content, {
           sourceNodeId: result.resultId,
           addToCanvas: true,
         });

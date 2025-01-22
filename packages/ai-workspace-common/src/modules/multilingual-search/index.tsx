@@ -9,6 +9,7 @@ import { useMultilingualSearchStoreShallow } from './stores/multilingual-search'
 import './index.scss';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
+import { TbWorldSearch } from 'react-icons/tb';
 
 const { Header, Content } = Layout;
 
@@ -39,7 +40,7 @@ function MultilingualSearch() {
 
   return (
     <div className="multilingual-search-container">
-      <div className="intergration-header">
+      <div className="intergration-header p-6">
         <div className="breadcrumb-nav">
           {pageState === 'results' ? (
             <>
@@ -56,16 +57,16 @@ function MultilingualSearch() {
             </>
           ) : (
             <>
-              <span className="menu-item-icon">
-                <IconSearch />
+              <span className="menu-item-icon flex items-center justify-center">
+                <TbWorldSearch className="text-lg" />
               </span>
               <span className="intergration-header-title">{t('resource.import.fromWebSearch')}</span>
             </>
           )}
         </div>
       </div>
-      <Divider style={{ marginTop: 10, marginBottom: 10 }} />
-      <div className="multilingual-search-inner-container">
+
+      <div className="multilingual-search-inner-container px-6 py-4">
         {pageState === 'home' ? (
           <SearchHome />
         ) : (

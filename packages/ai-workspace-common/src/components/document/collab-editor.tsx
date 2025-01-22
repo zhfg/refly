@@ -3,7 +3,6 @@ import { useThrottledCallback } from 'use-debounce';
 import classNames from 'classnames';
 import wordsCount from 'words-count';
 import { useTranslation } from 'react-i18next';
-import { CanvasNodeType } from '@refly/openapi-schema';
 import {
   CollabEditorCommand,
   CollabGenAIMenuSwitch,

@@ -81,6 +81,10 @@ model User {
   outputLocale   String?   @map("output_locale")
   /// Whether the user has beta access
   hasBetaAccess  Boolean   @default(true) @map("has_beta_access")
+  /// User preferences (JSON)
+  preferences    String?   @map("preferences")
+  /// Onboarding config (JSON of `OnboardingConfig`)
+  onboarding     String?   @map("onboarding")
   /// Stripe customer ID
   customerId     String?   @map("customer_id")
   /// Stripe subscription ID
@@ -106,6 +110,8 @@ model ActionResult {
   uid        String       @default("") @map("uid")
   /// Result title
   title      String       @default("") @map("title")
+  /// Used model tier
+  tier       String       @default("") @map("tier")
   /// Used model
   modelName  String?      @map("model_name")
   /// Action target type
@@ -256,6 +262,25 @@ model Canvas {
   @@index([uid, updatedAt])
   @@index([shareCode])
   @@map("canvases")
+}
+
+model CanvasEntityRelation {
+  /// Primary key
+  pk         BigInt    @id @default(autoincrement())
+  /// Canvas id
+  canvasId   String    @map("canvas_id")
+  /// Entity id
+  entityId   String    @map("entity_id")
+  /// Entity type
+  entityType String    @map("entity_type")
+  /// Create timestamp
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@index([canvasId, deletedAt])
+  @@index([entityType, entityId, deletedAt])
+  @@map("canvas_entity_relations")
 }
 
 model Resource {
@@ -500,10 +525,16 @@ model SubscriptionPlan {
   interval           String?  @map("interval")
   /// Lookup key
   lookupKey          String   @map("lookup_key")
-  /// Token quota per month (T1)
+  /// Request count quota (T1)
+  t1CountQuota       Int      @default(0) @map("t1_count_quota")
+  /// Request count quota (T2)
+  t2CountQuota       Int      @default(0) @map("t2_count_quota")
+  /// Token quota per month (T1) (Deprecated)
   t1TokenQuota       Int      @default(0) @map("t1_token_quota")
-  /// Token quota per month (T2)
+  /// Token quota per month (T2) (Deprecated)
   t2TokenQuota       Int      @default(1000000) @map("t2_token_quota")
+  /// File count quota
+  fileCountQuota     Int      @default(10) @map("file_count_quota")
   /// Object storage quota (in bytes), including resource, canvas and static files
   objectStorageQuota BigInt   @default(1000000000) @map("object_storage_quota")
   /// Vector storage quota (in bytes)
@@ -557,10 +588,18 @@ model TokenUsageMeter {
   startAt        DateTime  @map("start_at") @db.Timestamptz()
   /// Meter end timestamp
   endAt          DateTime? @map("end_at") @db.Timestamptz()
+  /// Request count quota (T1)
+  t1CountQuota   Int       @default(0) @map("t1_count_quota")
+  /// Request count used (T1)
+  t1CountUsed    Int       @default(0) @map("t1_count_used")
   /// Token quota (T1)
   t1TokenQuota   Int       @default(0) @map("t1_token_quota")
   /// Token used (T1)
   t1TokenUsed    Int       @default(0) @map("t1_token_used")
+  /// Request count quota (T2)
+  t2CountQuota   Int       @default(0) @map("t2_count_quota")
+  /// Request count used (T2)
+  t2CountUsed    Int       @default(0) @map("t2_count_used")
   /// Token quota (T2)
   t2TokenQuota   Int       @default(0) @map("t2_token_quota")
   /// Token used (T2)
@@ -585,6 +624,10 @@ model StorageUsageMeter {
   uid                String    @map("uid")
   /// Subscription ID
   subscriptionId     String?   @map("subscription_id")
+  /// File count quota
+  fileCountQuota     Int       @default(10) @map("file_count_quota")
+  /// File count used
+  fileCountUsed      Int       @default(0) @map("file_count_used")
   /// Object storage quota (in bytes), including resource, canvas and static files
   objectStorageQuota BigInt    @default(0) @map("object_storage_quota")
   /// Resource storage size in use (in bytes)

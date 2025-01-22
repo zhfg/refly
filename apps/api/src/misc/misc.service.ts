@@ -9,7 +9,6 @@ import {
   User,
 } from '@refly-packages/openapi-schema';
 import { PrismaService } from '@/common/prisma.service';
-import { SubscriptionService } from '@/subscription/subscription.service';
 import { MINIO_EXTERNAL, MinioService } from '@/common/minio.service';
 import { randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
@@ -18,7 +17,6 @@ import { QUEUE_SYNC_STORAGE_USAGE } from '@/utils';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
 import {
   CanvasNotFoundError,
-  StorageQuotaExceeded,
   ParamsError,
   ResourceNotFoundError,
   DocumentNotFoundError,
@@ -31,7 +29,6 @@ export class MiscService {
   constructor(
     private config: ConfigService,
     private prisma: PrismaService,
-    private subscription: SubscriptionService,
     @Inject(MINIO_EXTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
   ) {}
@@ -109,19 +106,12 @@ export class MiscService {
       entityId?: string;
       entityType?: EntityType;
     },
-    options?: { checkEntity?: boolean; checkStorageQuota?: boolean },
+    options?: { checkEntity?: boolean },
   ): Promise<UploadResponse['data']> {
     const { file, entityId, entityType } = param;
 
     if (options?.checkEntity) {
       await this.checkEntity(user, entityId, entityType);
-    }
-
-    if (options?.checkStorageQuota) {
-      const usageResult = await this.subscription.checkStorageUsage(user);
-      if (!usageResult.objectStorageAvailable) {
-        throw new StorageQuotaExceeded();
-      }
     }
 
     const objectKey = randomUUID();
@@ -173,9 +163,9 @@ export class MiscService {
       },
     });
 
-    this.logger.log(`Files to remove: ${files.map((file) => file.storageKey).join(',')}`);
-
     if (files.length > 0) {
+      this.logger.log(`Files to remove: ${files.map((file) => file.storageKey).join(',')}`);
+
       await Promise.all([
         this.minio.client.removeObjects(files.map((file) => file.storageKey)),
         this.prisma.staticFile.updateMany({

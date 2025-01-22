@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { MenuProps, Dropdown } from 'antd';
-import { LuSettings, LuLogOut, LuCreditCard } from 'react-icons/lu';
+import { LuSettings, LuLogOut } from 'react-icons/lu';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useLogout } from '@refly-packages/ai-workspace-common/hooks/use-logout';
-import { IconDiscord } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { GrGroup } from 'react-icons/gr';
 
 export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
   const { t } = useTranslation();
@@ -31,34 +31,32 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
       type: 'divider',
     },
     {
-      key: 'subscription',
-      icon: <LuCreditCard />,
-      label: t('loggedHomePage.siderMenu.subscription'),
-    },
-    {
       key: 'settings',
-      icon: <LuSettings />,
+      icon: <LuSettings size={14} />,
       label: t('loggedHomePage.siderMenu.settings'),
     },
     {
-      key: 'logout',
-      icon: <LuLogOut />,
-      label: t('loggedHomePage.siderMenu.logout'),
+      key: 'contactUs',
+      icon: <GrGroup size={14} />,
+      label: t('loggedHomePage.siderMenu.contactUs'),
     },
     {
-      key: 'getHelp',
-      icon: <IconDiscord />,
-      label: t('loggedHomePage.siderMenu.getHelp'),
+      type: 'divider',
+    },
+    {
+      key: 'logout',
+      icon: <LuLogOut size={14} />,
+      label: t('loggedHomePage.siderMenu.logout'),
     },
   ];
 
   const handleMenuClick = (key: string) => {
-    if (key === 'settings' || key === 'subscription') {
+    if (key === 'contactUs') {
+      window.open(`https://docs.refly.ai/community/contact-us`, '_blank');
+    } else if (key === 'settings') {
       setShowSettingModal(true);
     } else if (key === 'logout') {
       handleLogout();
-    } else if (key === 'getHelp') {
-      window.open(`https://discord.gg/bWjffrb89h`, '_blank');
     }
   };
 

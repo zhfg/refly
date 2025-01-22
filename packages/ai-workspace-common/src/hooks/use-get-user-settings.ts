@@ -17,6 +17,8 @@ export const useGetUserSettings = () => {
     setLocalSettings: state.setLocalSettings,
     setIsCheckingLoginStatus: state.setIsCheckingLoginStatus,
     setIsLogin: state.setIsLogin,
+    setShowTourModal: state.setShowTourModal,
+    setShowSettingsGuideModal: state.setShowSettingsGuideModal,
     userProfile: state.userProfile,
     localSettings: state.localSettings,
     isCheckingLoginStatus: state.isCheckingLoginStatus,
@@ -61,6 +63,12 @@ export const useGetUserSettings = () => {
     localStorage.setItem('refly-user-profile', safeStringifyJSON(res.data));
     userStore.setIsLogin(true);
 
+    // set tour guide
+    const showSettingsGuideModal = !['skipped', 'completed'].includes(res?.data?.onboarding?.settings);
+    userStore.setShowSettingsGuideModal(showSettingsGuideModal);
+    const showTourModal = !showSettingsGuideModal && !['skipped', 'completed'].includes(res?.data?.onboarding?.tour);
+    userStore.setShowTourModal(showTourModal);
+
     // Add localSettings
     let uiLocale = mapDefaultLocale(res?.data?.uiLocale as LOCALE) as LOCALE;
     let outputLocale = res?.data?.outputLocale as LOCALE;
@@ -71,6 +79,7 @@ export const useGetUserSettings = () => {
       uiLocale,
       outputLocale,
       isLocaleInitialized: true,
+      canvasMode: res?.data?.preferences?.operationMode || 'mouse',
     };
 
     // This indicates it's the first time registering and using, so there's no locale set. We need to write it back.

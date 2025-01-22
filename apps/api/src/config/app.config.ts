@@ -103,7 +103,12 @@ export default () => ({
       t1: parseInt(process.env.QUOTA_T1_TOKEN) || -1,
       t2: parseInt(process.env.QUOTA_T2_TOKEN) || -1,
     },
+    request: {
+      t1: parseInt(process.env.QUOTA_T1_REQUEST) || -1,
+      t2: parseInt(process.env.QUOTA_T2_REQUEST) || -1,
+    },
     storage: {
+      file: parseInt(process.env.QUOTA_STORAGE_FILE) || -1,
       object: parseInt(process.env.QUOTA_STORAGE_OBJECT) || -1,
       vector: parseInt(process.env.QUOTA_STORAGE_VECTOR) || -1,
     },

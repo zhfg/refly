@@ -35,6 +35,7 @@ import {
   QUEUE_RESOURCE,
   streamToString,
   QUEUE_SYNC_STORAGE_USAGE,
+  QUEUE_CLEAR_CANVAS_ENTITY,
 } from '@/utils';
 import {
   genResourceID,
@@ -57,6 +58,7 @@ import {
   ReferenceObjectMissingError,
   DocumentNotFoundError,
 } from '@refly-packages/errors';
+import { DeleteCanvasNodesJobData } from '@/canvas/canvas.dto';
 
 @Injectable()
 export class KnowledgeService {
@@ -72,7 +74,23 @@ export class KnowledgeService {
     @InjectQueue(QUEUE_RESOURCE) private queue: Queue<FinalizeResourceParam>,
     @InjectQueue(QUEUE_SIMPLE_EVENT) private simpleEventQueue: Queue<SimpleEventData>,
     @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
+    @InjectQueue(QUEUE_CLEAR_CANVAS_ENTITY) private canvasQueue: Queue<DeleteCanvasNodesJobData>,
   ) {}
+
+  async syncStorageUsage(user: User) {
+    await this.ssuQueue.add(
+      'syncStorageUsage',
+      {
+        uid: user.uid,
+        timestamp: new Date(),
+      },
+      {
+        jobId: user.uid,
+        removeOnComplete: true,
+        removeOnFail: true,
+      },
+    );
+  }
 
   async listResources(user: User, param: ListResourcesData['query']) {
     const { resourceId, resourceType, page = 1, pageSize = 10, order = 'creationDesc' } = param;
@@ -119,7 +137,7 @@ export class KnowledgeService {
   ) {
     if (options?.checkStorageQuota) {
       const usageResult = await this.subscriptionService.checkStorageUsage(user);
-      if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+      if (usageResult.available < 1) {
         throw new StorageQuotaExceeded();
       }
     }
@@ -207,7 +225,7 @@ export class KnowledgeService {
 
   async batchCreateResource(user: User, params: UpsertResourceRequest[]) {
     const usageResult = await this.subscriptionService.checkStorageUsage(user);
-    if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+    if (usageResult.available < params.length) {
       throw new StorageQuotaExceeded();
     }
 
@@ -363,10 +381,7 @@ export class KnowledgeService {
     });
 
     // Sync storage usage
-    await this.ssuQueue.add('syncStorageUsage', {
-      uid: user.uid,
-      timestamp: new Date(),
-    });
+    await this.syncStorageUsage(user);
 
     return resource;
   }
@@ -443,9 +458,9 @@ export class KnowledgeService {
       this.minio.client.removeObject(resource.storageKey),
       this.ragService.deleteResourceNodes(user, resourceId),
       this.elasticsearch.deleteResource(resourceId),
-      this.ssuQueue.add('syncStorageUsage', {
-        uid: user.uid,
-        timestamp: new Date(),
+      this.syncStorageUsage(user),
+      this.canvasQueue.add('deleteNodes', {
+        entities: [{ entityId: resourceId, entityType: 'resource' }],
       }),
     ]);
   }
@@ -501,7 +516,7 @@ export class KnowledgeService {
 
   async createDocument(user: User, param: UpsertDocumentRequest) {
     const usageResult = await this.subscriptionService.checkStorageUsage(user);
-    if (!usageResult.objectStorageAvailable || !usageResult.vectorStorageAvailable) {
+    if (usageResult.available < 1) {
       throw new StorageQuotaExceeded();
     }
 
@@ -561,10 +576,7 @@ export class KnowledgeService {
       updatedAt: doc.updatedAt.toJSON(),
     });
 
-    await this.ssuQueue.add('syncStorageUsage', {
-      uid: user.uid,
-      timestamp: new Date(),
-    });
+    await this.syncStorageUsage(user);
 
     return doc;
   }
@@ -624,6 +636,10 @@ export class KnowledgeService {
         entityId: docId,
         entityType: 'document',
       }),
+      // Add canvas node deletion
+      this.canvasQueue.add('deleteNodes', {
+        entities: [{ entityId: docId, entityType: 'document' }],
+      }),
     ];
 
     if (doc.storageKey) {
@@ -637,10 +653,7 @@ export class KnowledgeService {
     await Promise.all(cleanups);
 
     // Sync storage usage after all the cleanups
-    await this.ssuQueue.add('syncStorageUsage', {
-      uid: user.uid,
-      timestamp: new Date(),
-    });
+    await this.syncStorageUsage(user);
   }
 
   async queryReferences(

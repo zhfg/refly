@@ -1,8 +1,6 @@
 .multilingual-search-container {
   height: 100%;
   position: relative;
-  padding: 0 12px;
-  padding-top: 16px;
   box-sizing: border-box;
 
   .intergration-header {
@@ -47,8 +45,7 @@
 
   .multilingual-search-inner-container {
     overflow-y: auto;
-    padding-top: 12px;
-    height: calc(100% - 115px);
+    height: calc(100% - 140px);
     box-sizing: border-box;
     position: relative;
 

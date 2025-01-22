@@ -1,7 +1,4 @@
 import { Button, Divider } from 'antd';
-import { HiOutlineDocumentAdd } from 'react-icons/hi';
-import { RiUploadCloud2Line } from 'react-icons/ri';
-
 import { useTranslation } from 'react-i18next';
 import { FC, useEffect, useRef, useState } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
@@ -11,7 +8,9 @@ import { CanvasNodeType, SearchDomain } from '@refly/openapi-schema';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 import {
   IconAskAI,
+  IconCreateDocument,
   IconDocument,
+  IconImportResource,
   IconMemo,
   IconResource,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -20,6 +19,7 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useReactFlow } from '@xyflow/react';
 import { cn } from '@refly-packages/utils/cn';
+import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -32,6 +32,7 @@ interface ToolbarItem {
   loading?: boolean;
   showSearchList?: boolean;
   setShowSearchList?: (show: boolean) => void;
+  hoverContent?: HoverContent;
 }
 
 interface MenuPopperProps {
@@ -58,10 +59,38 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
   }));
 
   const menuItems: ToolbarItem[] = [
-    { key: 'askAI', icon: IconAskAI, type: 'button', primary: true },
+    {
+      key: 'askAI',
+      icon: IconAskAI,
+      type: 'button',
+      primary: true,
+      hoverContent: {
+        title: t('canvas.toolbar.askAI'),
+        description: t('canvas.toolbar.askAIDescription'),
+        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-askAI.webm',
+      },
+    },
     { key: 'divider-1', type: 'divider' },
-    { key: 'createDocument', icon: HiOutlineDocumentAdd, type: 'button' },
-    { key: 'createMemo', icon: IconMemo, type: 'button' },
+    {
+      key: 'createDocument',
+      icon: IconCreateDocument,
+      type: 'button',
+      hoverContent: {
+        title: t('canvas.toolbar.createDocument'),
+        description: t('canvas.toolbar.createDocumentDescription'),
+        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-createDocument.webm',
+      },
+    },
+    {
+      key: 'createMemo',
+      icon: IconMemo,
+      type: 'button',
+      hoverContent: {
+        title: t('canvas.toolbar.createMemo'),
+        description: t('canvas.toolbar.createMemoDescription'),
+        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-createMemo.webm',
+      },
+    },
     {
       key: 'addResource',
       icon: IconResource,
@@ -78,10 +107,17 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       showSearchList: showSearchDocumentList,
       setShowSearchList: setShowSearchDocumentList,
     },
-    // { key: 'addMemo', icon: MdOutlineAutoAwesomeMotion, type: 'button' },
-    // { key: 'addHighlight', icon: HiOutlineBars2, type: 'button' },
     { key: 'divider-2', type: 'divider' },
-    { key: 'importResource', icon: RiUploadCloud2Line, type: 'button' },
+    {
+      key: 'importResource',
+      icon: IconImportResource,
+      type: 'button',
+      hoverContent: {
+        title: t('canvas.toolbar.importResource'),
+        description: t('canvas.toolbar.importResourceDescription'),
+        videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
+      },
+    },
   ];
 
   const handleConfirm = (selectedItems: ContextItem[]) => {
@@ -217,6 +253,41 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     };
   }, [open]);
 
+  const renderButton = (item: ToolbarItem) => {
+    const button = (
+      <Button
+        loading={getIsLoading(item.key)}
+        className={cn(`w-full px-2 justify-start`, {
+          'bg-gray-100': activeKey === item.key,
+          'text-primary-600': item.primary,
+          'text-red-600': item.danger,
+        })}
+        type="text"
+        icon={<item.icon className="text-base flex items-center" />}
+        onClick={() => handleMenuClick({ key: item.key })}
+      >
+        <span>{t(`canvas.toolbar.${item.key}`)}</span>
+      </Button>
+    );
+
+    if (item.hoverContent) {
+      return (
+        <HoverCard
+          title={item.hoverContent.title}
+          description={item.hoverContent.description}
+          videoUrl={item.hoverContent.videoUrl}
+          placement="right"
+          overlayStyle={{ marginLeft: '12px' }}
+          align={{ offset: [12, 0] }}
+        >
+          {button}
+        </HoverCard>
+      );
+    }
+
+    return button;
+  };
+
   return (
     open && (
       <div
@@ -231,19 +302,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
           if (item.type === 'button') {
             return (
               <div key={item.key} className="flex items-center w-full">
-                <Button
-                  loading={getIsLoading(item.key)}
-                  className={cn(`w-full px-2 justify-start`, {
-                    'bg-gray-100': activeKey === item.key,
-                    'text-primary-600': item.primary,
-                    'text-red-600': item.danger,
-                  })}
-                  type="text"
-                  icon={<item.icon className="flex items-center" />}
-                  onClick={() => handleMenuClick({ key: item.key })}
-                >
-                  <span>{t(`canvas.toolbar.${item.key}`)}</span>
-                </Button>
+                {renderButton(item)}
               </div>
             );
           }
@@ -261,19 +320,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
                 setOpen={item.setShowSearchList}
               >
                 <div key={item.key} className="flex items-center w-full">
-                  <Button
-                    loading={getIsLoading(item.key)}
-                    className={cn(`w-full px-2 justify-start`, {
-                      'bg-gray-100': activeKey === item.key,
-                      'text-primary-600': item.primary,
-                      'text-red-600': item.danger,
-                    })}
-                    type="text"
-                    icon={<item.icon className="flex items-center" />}
-                    onClick={() => handleMenuClick({ key: item.key })}
-                  >
-                    <span>{t(`canvas.toolbar.${item.key}`)}</span>
-                  </Button>
+                  {renderButton(item)}
                 </div>
               </SearchList>
             );

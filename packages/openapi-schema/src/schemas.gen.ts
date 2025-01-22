@@ -1094,6 +1094,10 @@ export const ActionResultSchema = {
       type: 'string',
       description: 'Action result title',
     },
+    tier: {
+      description: 'Model tier',
+      $ref: '#/components/schemas/ModelTier',
+    },
     status: {
       type: 'string',
       description: 'Step status',
@@ -1244,25 +1248,49 @@ export const TokenUsageMeterSchema = {
       format: 'date-time',
       description: 'Token usage meter end time',
     },
+    t1CountQuota: {
+      type: 'number',
+      description: 'Request count quota (T1)',
+      example: 1000000,
+    },
+    t1CountUsed: {
+      type: 'number',
+      description: 'Request count used (T1)',
+      example: 100000,
+    },
     t1TokenQuota: {
       type: 'number',
       description: 'Token quota (T1)',
       example: 1000000,
+      deprecated: true,
     },
     t1TokenUsed: {
       type: 'number',
       description: 'Token used (T1)',
+      example: 100000,
+      deprecated: true,
+    },
+    t2CountQuota: {
+      type: 'number',
+      description: 'Request count quota (T2)',
+      example: 1000000,
+    },
+    t2CountUsed: {
+      type: 'number',
+      description: 'Request count used (T2)',
       example: 100000,
     },
     t2TokenQuota: {
       type: 'number',
       description: 'Token quota (T2)',
       example: 1000000,
+      deprecated: true,
     },
     t2TokenUsed: {
       type: 'number',
       description: 'Token used (T2)',
       example: 100000,
+      deprecated: true,
     },
   },
 } as const;
@@ -1292,35 +1320,89 @@ export const StorageUsageMeterSchema = {
       type: 'string',
       description: 'Subscription ID',
     },
+    fileCountUsed: {
+      type: 'number',
+      description: 'File count used',
+      example: 100,
+    },
+    fileCountQuota: {
+      type: 'number',
+      description: 'File count quota',
+      example: 1000,
+    },
     objectStorageQuota: {
       type: 'string',
       description: 'Object storage quota (in bytes), including resource, canvas and static files',
       example: '104857600',
+      deprecated: true,
     },
     resourceSize: {
       type: 'string',
       description: 'Resource storage size in use (in bytes)',
       example: '1048576',
+      deprecated: true,
     },
     canvasSize: {
       type: 'string',
       description: 'Canvas storage size in use (in bytes)',
       example: '1048576',
+      deprecated: true,
     },
     fileSize: {
       type: 'string',
       description: 'Static file storage size in use (in bytes)',
       example: '1048576',
+      deprecated: true,
     },
     vectorStorageQuota: {
       type: 'string',
       description: 'Vector storage quota (in bytes)',
       example: '1048576',
+      deprecated: true,
     },
     vectorStorageUsed: {
       type: 'string',
       description: 'Vector storage size used (in bytes)',
       example: '1048576',
+      deprecated: true,
+    },
+  },
+} as const;
+
+export const OperationModeSchema = {
+  type: 'string',
+  description: 'Operation mode',
+  enum: ['mouse', 'touchpad'],
+} as const;
+
+export const UserPreferencesSchema = {
+  type: 'object',
+  description: 'User preferences',
+  properties: {
+    operationMode: {
+      type: 'string',
+      description: 'Operation mode',
+      $ref: '#/components/schemas/OperationMode',
+    },
+  },
+} as const;
+
+export const OnboardingStatusSchema = {
+  type: 'string',
+  description: 'Onboarding status',
+  enum: ['not_started', 'skipped', 'completed'],
+} as const;
+
+export const OnboardingConfigSchema = {
+  type: 'object',
+  properties: {
+    settings: {
+      description: 'Settings onboarding status',
+      $ref: '#/components/schemas/OnboardingStatus',
+    },
+    tour: {
+      description: 'Tour onboarding status',
+      $ref: '#/components/schemas/OnboardingStatus',
     },
   },
 } as const;
@@ -1381,6 +1463,14 @@ export const UserSettingsSchema = {
       type: 'boolean',
       description: 'Whether the user has beta access',
       default: false,
+    },
+    preferences: {
+      description: 'User preferences',
+      $ref: '#/components/schemas/UserPreferences',
+    },
+    onboarding: {
+      description: 'Onboarding config',
+      $ref: '#/components/schemas/OnboardingConfig',
     },
   },
 } as const;
@@ -1741,6 +1831,11 @@ export const DeleteCanvasRequestSchema = {
       type: 'string',
       description: 'Canvas ID to delete',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    deleteAllFiles: {
+      type: 'boolean',
+      description: 'Whether to delete all files in the canvas',
+      default: false,
     },
   },
 } as const;
@@ -3250,6 +3345,14 @@ export const UpdateUserSettingsRequestSchema = {
       type: 'string',
       description: 'Output locale',
       example: 'en',
+    },
+    preferences: {
+      description: 'User preferences',
+      $ref: '#/components/schemas/UserPreferences',
+    },
+    onboarding: {
+      description: 'Onboarding config',
+      $ref: '#/components/schemas/OnboardingConfig',
     },
   },
 } as const;

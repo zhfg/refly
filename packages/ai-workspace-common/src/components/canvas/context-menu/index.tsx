@@ -10,12 +10,14 @@ import {
   IconPreview,
   IconExpand,
   IconShrink,
+  IconAskAIInput,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
 import { MdOutlineCompareArrows } from 'react-icons/md';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 import { RiLayoutLine } from 'react-icons/ri';
+import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
 
 interface ContextMenuProps {
   open: boolean;
@@ -31,6 +33,8 @@ interface MenuItem {
   type: 'button' | 'divider';
   active?: boolean;
   title?: string;
+  description?: string;
+  videoUrl?: string;
 }
 
 export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isSelection, onCreateGroup }) => {
@@ -66,10 +70,12 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
   const menuItems: MenuItem[] = [
     {
       key: 'toggleLaunchpad',
-      icon: IconAskAI,
+      icon: IconAskAIInput,
       type: 'button',
       active: showLaunchpad,
       title: showLaunchpad ? t('canvas.contextMenu.hideLaunchpad') : t('canvas.contextMenu.showLaunchpad'),
+      description: t('canvas.contextMenu.toggleLaunchpadDescription'),
+      videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.webm',
     },
     {
       key: 'toggleEdges',
@@ -77,6 +83,8 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       type: 'button',
       active: showEdges,
       title: showEdges ? t('canvas.contextMenu.hideEdges') : t('canvas.contextMenu.showEdges'),
+      description: t('canvas.contextMenu.toggleEdgeDescription'),
+      videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm',
     },
     {
       key: 'toggleClickPreview',
@@ -84,6 +92,8 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       type: 'button',
       active: clickToPreview,
       title: clickToPreview ? t('canvas.contextMenu.disableClickPreview') : t('canvas.contextMenu.enableClickPreview'),
+      description: t('canvas.contextMenu.toggleClickPreviewDescription'),
+      videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleClickView.webm',
     },
     {
       key: 'toggleNodeSizeMode',
@@ -91,6 +101,8 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       type: 'button',
       active: nodeSizeMode === 'compact',
       title: nodeSizeMode === 'compact' ? t('canvas.contextMenu.adaptiveMode') : t('canvas.contextMenu.compactMode'),
+      description: t('canvas.contextMenu.toggleNodeSizeModeDescription'),
+      videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAdaptive.webm',
     },
     {
       key: 'toggleAutoLayout',
@@ -98,6 +110,8 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       type: 'button',
       active: autoLayout,
       title: autoLayout ? t('canvas.contextMenu.disableAutoLayout') : t('canvas.contextMenu.enableAutoLayout'),
+      description: t('canvas.contextMenu.toggleAutoLayoutDescription'),
+      videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAutoLayout.webm',
     },
   ];
 
@@ -192,8 +206,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
         }
 
         const isLoading = item.key === 'createDocument' && isCreating;
-
-        return (
+        const button = (
           <Button
             key={item.key}
             className="w-full h-8 flex items-center gap-2 px-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -205,6 +218,24 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
             <span className="flex-1 text-left truncate">{item.title}</span>
           </Button>
         );
+
+        if (item.description) {
+          return (
+            <HoverCard
+              key={item.key}
+              title={item.title}
+              description={item.description}
+              videoUrl={item.videoUrl}
+              placement="right"
+              overlayStyle={{ marginLeft: '12px' }}
+              align={{ offset: [12, 0] }}
+            >
+              {button}
+            </HoverCard>
+          );
+        }
+
+        return button;
       })}
     </div>
   );

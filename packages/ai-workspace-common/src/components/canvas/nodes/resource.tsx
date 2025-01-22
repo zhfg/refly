@@ -14,7 +14,7 @@ import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { useThrottledCallback } from 'use-debounce';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
-import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
+import { useDeleteResource, useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
 import classNames from 'classnames';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
@@ -128,15 +128,14 @@ export const ResourceNode = memo(
       } as CanvasNode);
     }, [id, data, deleteNode]);
 
-    const handleHelpLink = useCallback(() => {
-      // Implement help link logic
-      console.log('Open help link');
-    }, []);
+    const { mutate: deleteResource } = useDeleteResource();
 
-    const handleAbout = useCallback(() => {
-      // Implement about logic
-      console.log('Show about info');
-    }, []);
+    const handleDeleteFile = useCallback(() => {
+      deleteResource({
+        body: { resourceId: data.entityId },
+      });
+      handleDelete();
+    }, [data.entityId, deleteResource, handleDelete]);
 
     const { addNode } = useAddNode();
 
@@ -208,23 +207,26 @@ export const ResourceNode = memo(
       // Create node-specific event handlers
       const handleNodeAddToContext = () => handleAddToContext();
       const handleNodeDelete = () => handleDelete();
+      const handleNodeDeleteFile = () => handleDeleteFile();
       const handleNodeAskAI = () => handleAskAI();
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
+      nodeActionEmitter.on(createNodeEventName(id, 'deleteFile'), handleNodeDeleteFile);
       nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
       return () => {
         // Cleanup events when component unmounts
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
+        nodeActionEmitter.off(createNodeEventName(id, 'deleteFile'), handleNodeDeleteFile);
         nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
 
         // Clean up all node events
         cleanupNodeEvents(id);
       };
-    }, [id, handleAddToContext, handleDelete, handleAskAI]);
+    }, [id, handleAddToContext, handleDelete, handleDeleteFile, handleAskAI]);
 
     return (
       <div className={classNames({ nowheel: isOperating })}>

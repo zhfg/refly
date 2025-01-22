@@ -13,8 +13,10 @@ import { parseMarkdown } from '@refly-packages/utils/editor';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { prosemirrorToYXmlFragment } from 'y-prosemirror';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
+import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 
-const createLocalDocument = async (docId: string, title: string, content: string) => {
+const createLocalDocument = async (docId: string, title: string, content: string, refetchUsage: () => void) => {
   const ydoc = new Y.Doc();
   const localProvider = new IndexeddbPersistence(docId, ydoc);
 
@@ -28,6 +30,8 @@ const createLocalDocument = async (docId: string, title: string, content: string
 
   const node = parseMarkdown(content);
   prosemirrorToYXmlFragment(node, ydoc.getXmlFragment('default'));
+
+  refetchUsage();
 };
 
 export const useCreateDocument = () => {
@@ -35,11 +39,23 @@ export const useCreateDocument = () => {
   const { canvasId } = useCanvasContext();
   const { t } = useTranslation();
   const { addNode } = useAddNode();
+  const { storageUsage, refetchUsage } = useSubscriptionUsage();
 
+  const { setStorageExceededModalVisible } = useSubscriptionStoreShallow((state) => ({
+    setStorageExceededModalVisible: state.setStorageExceededModalVisible,
+  }));
   const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt } = useDocumentStoreShallow((state) => ({
     setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
     setDocumentRemoteSyncedAt: state.setDocumentRemoteSyncedAt,
   }));
+
+  const checkStorageUsage = useCallback(() => {
+    if (storageUsage?.fileCountUsed >= storageUsage?.fileCountQuota) {
+      setStorageExceededModalVisible(true);
+      return false;
+    }
+    return true;
+  }, [storageUsage, setStorageExceededModalVisible]);
 
   const createDocument = useCallback(
     async (
@@ -47,12 +63,16 @@ export const useCreateDocument = () => {
       content: string,
       { sourceNodeId, addToCanvas }: { sourceNodeId?: string; addToCanvas?: boolean },
     ) => {
+      if (!checkStorageUsage()) {
+        return null;
+      }
+
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
       const docId = genDocumentID();
       const parsedContent = parseMarkdownCitationsAndCanvasTags(content, []);
 
-      await createLocalDocument(docId, title, parsedContent);
+      await createLocalDocument(docId, title, parsedContent, refetchUsage);
 
       setDocumentLocalSyncedAt(docId, Date.now());
       setDocumentRemoteSyncedAt(docId, Date.now());
@@ -87,7 +107,7 @@ export const useCreateDocument = () => {
 
       return docId;
     },
-    [addNode, canvasId],
+    [addNode, canvasId, checkStorageUsage],
   );
 
   const debouncedCreateDocument = useDebouncedCallback(
@@ -102,62 +122,76 @@ export const useCreateDocument = () => {
     { leading: true },
   );
 
-  const createSingleDocumentInCanvas = async (position?: { x: number; y: number }) => {
-    const docId = genDocumentID();
-    const title = t('common.newDocument');
+  const createSingleDocumentInCanvas = useCallback(
+    async (position?: { x: number; y: number }) => {
+      if (!checkStorageUsage()) {
+        return null;
+      }
 
-    await createLocalDocument(docId, title, '');
+      const docId = genDocumentID();
+      const title = '';
 
-    setDocumentLocalSyncedAt(docId, Date.now());
-    setDocumentRemoteSyncedAt(docId, Date.now());
+      await createLocalDocument(docId, title, '', refetchUsage);
 
-    message.success(t('common.putSuccess'));
+      setDocumentLocalSyncedAt(docId, Date.now());
+      setDocumentRemoteSyncedAt(docId, Date.now());
 
-    if (canvasId && canvasId !== 'empty') {
-      const newNode = {
-        type: 'document' as CanvasNodeType,
-        data: {
-          title,
-          entityId: docId,
-          contentPreview: '',
-        },
-        position: position,
-      };
+      message.success(t('common.putSuccess'));
 
-      addNode(newNode);
-    }
-  };
-
-  const duplicateDocument = async (title: string, content: string, sourceDocId: string, metadata?: any) => {
-    const docId = genDocumentID();
-    const newTitle = `${title} ${t('canvas.nodeActions.copy')}`;
-
-    await createLocalDocument(docId, newTitle, content);
-
-    setDocumentLocalSyncedAt(docId, Date.now());
-    setDocumentRemoteSyncedAt(docId, Date.now());
-
-    message.success(t('common.putSuccess'));
-
-    if (canvasId && canvasId !== 'empty') {
-      const newNode = {
-        type: 'document' as CanvasNodeType,
-        data: {
-          title: newTitle,
-          entityId: docId,
-          contentPreview: content.slice(0, 500),
-          metadata: {
-            ...metadata,
-            status: 'finish',
+      if (canvasId && canvasId !== 'empty') {
+        const newNode = {
+          type: 'document' as CanvasNodeType,
+          data: {
+            title,
+            entityId: docId,
+            contentPreview: '',
           },
-        },
-      };
+          position: position,
+        };
 
-      addNode(newNode, [{ type: 'document', entityId: sourceDocId }], false, true);
-    }
+        addNode(newNode);
+      }
+    },
+    [checkStorageUsage, canvasId, addNode, t, refetchUsage, setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt],
+  );
 
-    return docId;
-  };
+  const duplicateDocument = useCallback(
+    async (title: string, content: string, sourceDocId: string, metadata?: any) => {
+      if (!checkStorageUsage()) {
+        return null;
+      }
+
+      const docId = genDocumentID();
+      const newTitle = `${title} ${t('canvas.nodeActions.copy')}`;
+
+      await createLocalDocument(docId, newTitle, content, refetchUsage);
+
+      setDocumentLocalSyncedAt(docId, Date.now());
+      setDocumentRemoteSyncedAt(docId, Date.now());
+
+      message.success(t('common.putSuccess'));
+
+      if (canvasId && canvasId !== 'empty') {
+        const newNode = {
+          type: 'document' as CanvasNodeType,
+          data: {
+            title: newTitle,
+            entityId: docId,
+            contentPreview: content.slice(0, 500),
+            metadata: {
+              ...metadata,
+              status: 'finish',
+            },
+          },
+        };
+
+        addNode(newNode, [{ type: 'document', entityId: sourceDocId }], false, true);
+      }
+
+      return docId;
+    },
+    [checkStorageUsage, canvasId, addNode, t, refetchUsage, setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt],
+  );
 
   return { createDocument, debouncedCreateDocument, isCreating, createSingleDocumentInCanvas, duplicateDocument };
 };
