@@ -25,7 +25,7 @@ import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
-import { ToolButton, ToolbarItem } from './tool-button';
+import { ToolButton, ToolValue } from './tool-button';
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { genMemoID, genSkillID } from '@refly-packages/utils/id';
 
@@ -57,7 +57,7 @@ const useToolbarConfig = () => {
           hoverContent: {
             title: t('canvas.toolbar.askAI'),
             description: t('canvas.toolbar.askAIDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-askAI.webm',
           },
         },
         {
@@ -69,7 +69,7 @@ const useToolbarConfig = () => {
           hoverContent: {
             title: t('canvas.toolbar.createMemo'),
             description: t('canvas.toolbar.createMemoDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-createMemo.webm',
           },
         },
         {
@@ -81,7 +81,7 @@ const useToolbarConfig = () => {
           hoverContent: {
             title: t('canvas.toolbar.importResource'),
             description: t('canvas.toolbar.importResourceDescription'),
-            videoUrl: 'https://static.refly.ai/static/20250118-182618.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
           },
         },
         {
@@ -90,11 +90,6 @@ const useToolbarConfig = () => {
           type: 'popover',
           domain: 'resource',
           tooltip: t('canvas.toolbar.addResource'),
-          hoverContent: {
-            title: t('canvas.toolbar.addResource'),
-            description: t('canvas.toolbar.addResourceDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
-          },
         },
         {
           icon: IconCreateDocument,
@@ -105,7 +100,7 @@ const useToolbarConfig = () => {
           hoverContent: {
             title: t('canvas.toolbar.createDocument'),
             description: t('canvas.toolbar.createDocumentDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-create-document.webm',
           },
         },
         {
@@ -114,11 +109,6 @@ const useToolbarConfig = () => {
           type: 'popover',
           domain: 'document',
           tooltip: t('canvas.toolbar.addDocument'),
-          hoverContent: {
-            title: t('canvas.toolbar.addDocument'),
-            description: t('canvas.toolbar.addDocumentDescription'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
-          },
         },
         {
           type: 'divider',
@@ -131,7 +121,7 @@ const useToolbarConfig = () => {
           tooltip: t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`),
           hoverContent: {
             title: t('canvas.toolbar.toggleLaunchpadTitle'),
-            videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.webm',
           },
         },
         {
@@ -142,7 +132,7 @@ const useToolbarConfig = () => {
           tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
           hoverContent: {
             title: t('canvas.toolbar.toggleEdgeTitle'),
-            videoUrl: 'https://static.refly.ai/static/20250118-182618.mp4',
+            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm',
           },
         },
       ] as ToolbarItem[],

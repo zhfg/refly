@@ -221,7 +221,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
             hoverContent: {
               title: t('canvas.nodeActions.askAI'),
               description: t('canvas.nodeActions.askAIDescription'),
-              videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+              videoUrl: 'https://static.refly.ai/onboarding/selection-node-action/selection-nodeAction-askAI.webm',
             },
           },
       hasSkill
@@ -235,7 +235,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
             hoverContent: {
               title: t('canvas.nodeActions.batchRun'),
               description: t('canvas.nodeActions.batchRunDescription'),
-              videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+              videoUrl: 'https://static.refly.ai/onboarding/selection-node-action/selection-node-action-batchRun.webm',
             },
           }
         : null,
@@ -249,7 +249,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
         hoverContent: {
           title: t('canvas.nodeActions.addToContext'),
           description: t('canvas.nodeActions.addToContextDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/selection-node-action/selection-nodeAction-addToContext.webm',
         },
       },
       { key: 'divider-2', type: 'divider' } as MenuItem,
@@ -262,7 +262,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
         hoverContent: {
           title: t('canvas.nodeActions.group'),
           description: t('canvas.nodeActions.groupDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/selection-node-action/selection-nodeAction-group.webm',
         },
       },
       { key: 'divider-3', type: 'divider' } as MenuItem,
@@ -275,7 +275,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
         hoverContent: {
           title: t('canvas.nodeActions.selectCluster'),
           description: t('canvas.nodeActions.selectClusterDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-selectOrLayout.webm',
         },
       },
       {
@@ -287,7 +287,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
         hoverContent: {
           title: t('canvas.nodeActions.groupCluster'),
           description: t('canvas.nodeActions.groupClusterDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-groupChildNodes.webm',
         },
       },
       {
@@ -299,7 +299,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
         hoverContent: {
           title: t('canvas.nodeActions.layoutCluster'),
           description: t('canvas.nodeActions.layoutClusterDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-selectOrLayout.webm',
         },
       },
       { key: 'divider-4', type: 'divider' } as MenuItem,
@@ -313,7 +313,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
         hoverContent: {
           title: t('canvas.nodeActions.deleteAll'),
           description: t('canvas.nodeActions.deleteAllDescription'),
-          videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+          videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-delete.webm',
         },
       },
     ].filter(Boolean);

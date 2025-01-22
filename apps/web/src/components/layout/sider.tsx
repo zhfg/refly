@@ -310,7 +310,8 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
         hoverContent: {
           title: t("loggedHomePage.siderMenu.canvasTitle"),
           description: t("loggedHomePage.siderMenu.canvasDescription"),
-          videoUrl: "https://static.refly.ai/static/20250118-182618.mp4",
+          videoUrl:
+            "https://static.refly.ai/onboarding/siderMenu/siderMenu-canvas.webm",
           placement: "rightBottom",
         },
       },
@@ -327,7 +328,8 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
         hoverContent: {
           title: t("loggedHomePage.siderMenu.libraryTitle"),
           description: t("loggedHomePage.siderMenu.libraryDescription"),
-          videoUrl: "https://static.refly.ai/static/20250118-182618.mp4",
+          videoUrl:
+            "https://static.refly.ai/onboarding/siderMenu/siderMenu-knowledgebase.webm",
         },
       },
     ],
