@@ -68,7 +68,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       hoverContent: {
         title: t('canvas.toolbar.askAI'),
         description: t('canvas.toolbar.askAIDescription'),
-        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-askAI.mp4',
+        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-askAI.webm',
       },
     },
     { key: 'divider-1', type: 'divider' },
@@ -79,7 +79,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       hoverContent: {
         title: t('canvas.toolbar.createDocument'),
         description: t('canvas.toolbar.createDocumentDescription'),
-        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-createDocument.mp4',
+        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-createDocument.webm',
       },
     },
     {
@@ -89,7 +89,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       hoverContent: {
         title: t('canvas.toolbar.createMemo'),
         description: t('canvas.toolbar.createMemoDescription'),
-        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-createMemo.mp4',
+        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-createMemo.webm',
       },
     },
     {
@@ -116,7 +116,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       hoverContent: {
         title: t('canvas.toolbar.importResource'),
         description: t('canvas.toolbar.importResourceDescription'),
-        videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.mp4',
+        videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
       },
     },
   ];

@@ -46,7 +46,7 @@ const steps: Step[] = [
   },
   {
     key: '7',
-    videoUrl: 'https://static.refly.ai/onboarding/tour/help.mp4',
+    videoUrl: 'https://static.refly.ai/onboarding/tour/help.webm',
     videoType: 'nativeVideo',
   },
 ];

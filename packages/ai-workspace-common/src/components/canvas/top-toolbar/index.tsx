@@ -180,7 +180,7 @@ const ToolbarButtons = memo(
         <HoverCard
           title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)}
           description={t(`canvas.toolbar.togglePreviewDescription`)}
-          videoUrl="https://static.refly.ai/onboarding/top-toolbar/topToolbar-togglePreview.mp4"
+          videoUrl="https://static.refly.ai/onboarding/top-toolbar/topToolbar-togglePreview.webm"
           placement="bottom"
         >
           {previewButton}
@@ -189,7 +189,7 @@ const ToolbarButtons = memo(
         <HoverCard
           title={t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`)}
           description={t(`canvas.toolbar.toggleMaxRatioDescription`)}
-          videoUrl="https://static.refly.ai/onboarding/top-toolbar/topToolbar-toogleMaxRatio.mp4"
+          videoUrl="https://static.refly.ai/onboarding/top-toolbar/topToolbar-toogleMaxRatio.webm"
           placement="bottom"
         >
           {maxRatioButton}
