@@ -1,7 +1,11 @@
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { List, Card, Dropdown, Button, Popconfirm, message, Empty, Tooltip } from 'antd';
+import { Dropdown, Button, Popconfirm, message, Empty, Tooltip, Divider, Spin } from 'antd';
 import type { MenuProps, DropdownProps } from 'antd';
-import { IconMoreHorizontal, IconEdit, IconDelete } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconMoreHorizontal,
+  IconDelete,
+  IconResourceFilled,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 
 import { useEffect, useState } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -14,39 +18,18 @@ import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { Resource } from '@refly/openapi-schema';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
-
-const { Meta } = Card;
-
-const ActionView = ({ resource }: { resource: Resource }) => {
-  const { t } = useTranslation();
-  const { addNode } = useAddNode();
-  const { setShowLibraryModal } = useSiderStoreShallow((state) => ({
-    setShowLibraryModal: state.setShowLibraryModal,
-  }));
-
-  const handleEdit = (resource: Resource) => {
-    addNode({
-      type: 'resource',
-      data: {
-        title: resource.title,
-        entityId: resource.resourceId,
-        contentPreview: resource.contentPreview,
-      },
-    });
-    setShowLibraryModal(false);
-  };
-
-  return (
-    <Tooltip title={t('workspace.addToCanvas')}>
-      <Button type="text" icon={<IconEdit />} onClick={() => handleEdit(resource)} />
-    </Tooltip>
-  );
-};
+import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/colors';
+import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
+import { LuPlus } from 'react-icons/lu';
 
 const ActionDropdown = ({ resource, afterDelete }: { resource: Resource; afterDelete: () => void }) => {
   const { t } = useTranslation();
   const [popupVisible, setPopupVisible] = useState(false);
   const { refetchUsage } = useSubscriptionUsage();
+  const { addNode } = useAddNode();
+  const { setShowLibraryModal } = useSiderStoreShallow((state) => ({
+    setShowLibraryModal: state.setShowLibraryModal,
+  }));
 
   const handleDelete = async () => {
     const { data } = await getClient().deleteResource({
@@ -62,13 +45,35 @@ const ActionDropdown = ({ resource, afterDelete }: { resource: Resource; afterDe
     }
   };
 
+  const handleAddToCanvas = () => {
+    addNode({
+      type: 'resource',
+      data: {
+        title: resource.title,
+        entityId: resource.resourceId,
+        contentPreview: resource.contentPreview,
+      },
+    });
+    setShowLibraryModal(false);
+  };
+
   const items: MenuProps['items'] = [
     {
       label: (
+        <div className="flex items-center">
+          <LuPlus size={16} className="mr-2" />
+          {t('workspace.addToCanvas')}
+        </div>
+      ),
+      key: 'addToCanvas',
+      onClick: () => handleAddToCanvas(),
+    },
+    {
+      label: (
         <Popconfirm
-          title={t('canvas.nodeActions.deleteFileConfirm', {
-            type: t(`common.resource`),
-            title: resource.title || t('common.unTitle'),
+          placement="bottomLeft"
+          title={t('canvas.nodeActions.resourceDeleteConfirm', {
+            title: resource.title || t('common.untitled'),
           })}
           onConfirm={handleDelete}
           onCancel={() => setPopupVisible(false)}
@@ -93,22 +98,42 @@ const ActionDropdown = ({ resource, afterDelete }: { resource: Resource; afterDe
   };
 
   return (
-    <Dropdown
-      trigger={['click']}
-      open={popupVisible}
-      onOpenChange={handleOpenChange}
-      menu={{
-        items,
-      }}
-    >
+    <Dropdown trigger={['click']} open={popupVisible} onOpenChange={handleOpenChange} menu={{ items }}>
       <Button type="text" icon={<IconMoreHorizontal />} />
     </Dropdown>
   );
 };
 
-export const ResourceList = () => {
+const ResourceCard = ({ item, onDelete }: { item: Resource; onDelete: () => void }) => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
+
+  return (
+    <div className="bg-white rounded-lg overflow-hidden border border-solid cursor-pointer border-gray-200 hover:border-green-500 transition-colors duration-200">
+      <div className="h-36 px-4 py-3 overflow-hidden">
+        <Markdown content={item.contentPreview} className="text-xs text-gray-600" />
+      </div>
+      <Divider className="m-0 text-gray-200" />
+      <div className="px-3 pt-2 pb-1 flex justify-between items-center bg-gray-50">
+        <div className="flex items-center gap-3 mb-2">
+          <IconResourceFilled color={NODE_COLORS['resource']} size={24} />
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-medium max-w-48 truncate">{item.title || t('common.unTitle')}</h3>
+            <p className="text-xs text-gray-500">
+              {time(item.updatedAt, language as LOCALE)
+                .utc()
+                .fromNow()}
+            </p>
+          </div>
+        </div>
+        <ActionDropdown resource={item} afterDelete={onDelete} />
+      </div>
+    </div>
+  );
+};
+
+export const ResourceList = () => {
+  const { t } = useTranslation();
   const { showLibraryModal } = useSiderStoreShallow((state) => ({
     showLibraryModal: state.showLibraryModal,
   }));
@@ -120,7 +145,7 @@ export const ResourceList = () => {
       });
       return res?.data;
     },
-    pageSize: 20,
+    pageSize: 12,
   });
 
   useEffect(() => {
@@ -130,59 +155,27 @@ export const ResourceList = () => {
   }, [showLibraryModal]);
 
   return (
-    <div className="w-full px-[8px] h-[calc(50vh-60px)] overflow-y-auto">
-      {isRequesting || dataList.length > 0 ? (
-        <List
-          grid={{
-            gutter: 16,
-            xs: 1,
-            sm: 2,
-            md: 3,
-            lg: 4,
-            xl: 4,
-            xxl: 4,
-          }}
-          dataSource={dataList}
-          locale={{ emptyText: t('common.empty') }}
-          loading={isRequesting}
-          loadMore={
-            dataList.length > 0 ? (
-              <ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />
-            ) : null
-          }
-          renderItem={(item) => (
-            <List.Item>
-              <Card
-                hoverable
-                cover={<div className="h-[100px] bg-gray-200"></div>}
-                actions={[
-                  <ActionView key="view" resource={item} />,
-                  <ActionDropdown
-                    resource={item}
-                    key="ellipsis"
-                    afterDelete={() => setDataList(dataList.filter((n) => n.resourceId !== item.resourceId))}
-                  />,
-                ]}
-              >
-                <Meta
-                  title={item.title || t('common.unTitle')}
-                  description={
-                    <div className="text-xs text-black/40">
-                      {time(item.updatedAt, language as LOCALE)
-                        .utc()
-                        .fromNow()}
-                    </div>
-                  }
+    <Spin className="w-full h-full" spinning={isRequesting}>
+      <div className="w-full h-[calc(50vh-60px)] overflow-y-auto">
+        {isRequesting || dataList.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+              {dataList.map((item) => (
+                <ResourceCard
+                  key={item.resourceId}
+                  item={item}
+                  onDelete={() => setDataList(dataList.filter((n) => n.resourceId !== item.resourceId))}
                 />
-              </Card>
-            </List.Item>
-          )}
-        ></List>
-      ) : (
-        <div className="h-full flex items-center justify-center">
-          <Empty description={t('common.empty')} />
-        </div>
-      )}
-    </div>
+              ))}
+            </div>
+            <ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />
+          </>
+        ) : (
+          <div className="h-full flex items-center justify-center">
+            <Empty description={t('common.empty')} />
+          </div>
+        )}
+      </div>
+    </Spin>
   );
 };

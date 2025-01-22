@@ -61,7 +61,6 @@ const translations = {
     login: 'Login',
     share: 'Share',
     noMoreText: 'No more~',
-    unTitle: 'Untitled',
   },
   verifyRules: {
     emailRequired: 'Email cannot be empty',
@@ -89,11 +88,6 @@ const translations = {
       title: 'The AI Native Creation Engine',
       description:
         'Refly is a free-form canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, intelligent search and WYSIWYG AI editor, easily transforms ideas into quality content.',
-    },
-    digestTopics: {
-      title: 'All Topics',
-      description:
-        'Topic categories derived from your browsing and session history, representing your reading and learning trends',
     },
     threadLibrary: {
       title: 'Threads',
@@ -995,23 +989,6 @@ const translations = {
       archiveTitle: "You haven't read any content yet. Download the plugin to start exploring new material!",
       download: 'Download Plugin',
       seeOther: 'View Knowledge from Other Dates',
-    },
-  },
-  topics: {
-    breadcrumb: {
-      homePage: 'Home',
-      allTopics: 'All Topics',
-    },
-    title: 'All Topics',
-    description:
-      'Topic categories derived from your browsing and session history, representing your reading and learning trends',
-    footer: {
-      noMoreText: "You've reached the end of the list!",
-    },
-    empty: {
-      title: 'No categories available at the moment. Download the plugin to access new content!',
-      download: 'Download Plugin',
-      seeOther: 'Explore Content from Other Dates',
     },
   },
   threadLibrary: {
