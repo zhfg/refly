@@ -15,7 +15,6 @@ export const useHandleSiderData = (initData?: boolean) => {
   const [isLoadingCanvas, setIsLoadingCanvas] = useState(false);
 
   const getCanvasList = async () => {
-    if (isLoadingCanvas) return;
     setIsLoadingCanvas(true);
     const { data: res, error } = await getClient().listCanvases({
       query: { page: 1, pageSize: DATA_NUM },
@@ -23,17 +22,17 @@ export const useHandleSiderData = (initData?: boolean) => {
     setIsLoadingCanvas(false);
     if (error) {
       console.error('getCanvasList error', error);
-      return;
+      return [];
     }
     const canvases = res?.data || [];
-    updateCanvasList(
-      canvases.map((canvas) => ({
-        id: canvas.canvasId,
-        name: canvas.title,
-        updatedAt: canvas.updatedAt,
-        type: 'canvas',
-      })),
-    );
+    const formattedCanvases = canvases.map((canvas) => ({
+      id: canvas.canvasId,
+      name: canvas.title,
+      updatedAt: canvas.updatedAt,
+      type: 'canvas' as const,
+    }));
+    updateCanvasList(formattedCanvases);
+    return formattedCanvases;
   };
 
   const getDocumentList = async () => {

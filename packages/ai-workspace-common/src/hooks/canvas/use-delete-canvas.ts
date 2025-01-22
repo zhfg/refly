@@ -33,6 +33,7 @@ export const useDeleteCanvas = () => {
 
         // Check and remove canvasId from localStorage if matches
         const { currentCanvasId, setCurrentCanvasId, deleteCanvasData } = useCanvasStore.getState();
+        const latestCurrentCanvasId = currentCanvasId;
         if (currentCanvasId === canvasId) {
           setCurrentCanvasId(null);
         }
@@ -44,15 +45,22 @@ export const useDeleteCanvas = () => {
         await indexedDbProvider.clearData();
         await indexedDbProvider.destroy();
 
-        getCanvasList();
+        // Get updated canvas list
+        const updatedCanvasList = await getCanvasList();
 
-        if (currentCanvasId === canvasId) {
-          const firstCanvas = canvasList?.find((canvas) => canvas.id !== canvasId);
-          if (firstCanvas?.id) {
-            navigate(`/canvas/${firstCanvas?.id}`, { replace: true });
-          } else {
-            navigate('/canvas/empty', { replace: true });
-          }
+        // Only navigate if we're currently on the deleted canvas
+        if (latestCurrentCanvasId === canvasId) {
+          // Find the first available canvas that's not the deleted one
+          const remainingCanvas = updatedCanvasList?.find((canvas) => canvas.id !== canvasId);
+
+          // Use setTimeout to ensure all state updates are processed
+          setTimeout(() => {
+            if (remainingCanvas?.id) {
+              navigate(`/canvas/${remainingCanvas.id}`, { replace: true });
+            } else {
+              navigate('/canvas/empty', { replace: true });
+            }
+          }, 0);
         }
       }
     } finally {
