@@ -2,12 +2,10 @@ import {
   AIHighlight,
   CharacterCount,
   CodeBlockLowlight,
-  GlobalDragHandle,
   HorizontalRule,
   StarterKit,
   TaskItem,
   TaskList,
-  TiptapImage,
   TiptapLink,
   UpdatedImage,
   Youtube,
@@ -151,7 +149,7 @@ const tiptapLink = TiptapLink.configure({
   },
 });
 
-const tiptapImage = TiptapImage.extend({
+const tiptapImage = UpdatedImage.extend({
   addProseMirrorPlugins() {
     return [
       UploadImagesPlugin({
@@ -254,13 +252,11 @@ export const defaultExtensions = [
   taskItem,
   horizontalRule,
   aiHighlight,
-  // codeBlockLowlight,
   youtube,
   characterCount,
   SpaceAICommand,
   DoublePlusAICommand,
   PasteRuleExtension,
-  // GlobalDragHandle,
 ];
 
 export { Placeholder };
