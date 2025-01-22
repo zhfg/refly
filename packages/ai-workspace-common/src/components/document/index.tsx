@@ -121,7 +121,7 @@ const StatusBar = memo(
               type="text"
               icon={<IconCopy className="text-gray-500" />}
               onClick={() => handleCopy()}
-              title={t('common.copy')}
+              title={t('common.copy.title')}
             />
           </Tooltip>
         </div>

@@ -68,7 +68,6 @@ const translations = {
     login: '登录',
     share: '分享',
     noMoreText: '已经到底啦~',
-    unTitle: '未命名',
   },
   verifyRules: {
     emailRequired: '邮箱地址不能为空',
@@ -994,22 +993,6 @@ const translations = {
       archiveTitle: '还未阅读任何内容，赶快下载插件去阅读新内容吧~',
       download: '下载插件',
       seeOther: '查看其他日期内容',
-    },
-  },
-  unloginHomePage: {},
-  topics: {
-    breadcrumb: {
-      homePage: '主页',
-      allTopics: '所有主题',
-    },
-    title: '所有主题',
-    description: '基于您的浏览历史、会话历史分析提取出来的主题分类，代表您的阅读和学习趋势',
-    footer: {
-      noMoreText: '已经到底啦~',
-    },
-    empty: {
-      title: '暂无分类，赶快下载插件去阅读新内容吧~',
-      download: '下载插件',
     },
   },
   threadLibrary: {
