@@ -235,7 +235,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
             hoverContent: {
               title: t('canvas.nodeActions.batchRun'),
               description: t('canvas.nodeActions.batchRunDescription'),
-              videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+              videoUrl: 'https://static.refly.ai/onboarding/selection-node-action/selection-node-action-batchRun.mp4',
             },
           }
         : null,

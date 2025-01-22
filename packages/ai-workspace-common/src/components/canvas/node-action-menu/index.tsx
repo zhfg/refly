@@ -463,7 +463,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
                     hoverContent: {
                       title: t('canvas.nodeActions.duplicateDocument'),
                       description: t('canvas.nodeActions.duplicateDocumentDescription'),
-                      videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-createDocument.mp4',
+                      videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-duplicateDocument.mp4',
                     },
                   },
                 ]
