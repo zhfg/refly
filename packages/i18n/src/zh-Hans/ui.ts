@@ -1191,7 +1191,7 @@ const translations = {
       t1RequestsDescription: '高级模型包括 GPT-4o, Claude 3.5 Sonnet 等模型。每个成功的技能调用计为一次请求。',
       t2Requests: '标准模型请求',
       t2RequestsDescription: '标准模型包括 GPT-4o Mini, DeepSeek V3 等模型。每个成功的技能调用计为一次请求。',
-      t2RequestsRefresh: '免费用户每天会重置次数。',
+      requestsRefresh: '免费用户每天会重置次数。',
       fileCount: '知识库文件数',
       fileCountDescription: '知识库中每个资源和文档计为一个文件。',
       subscriptionManagement: '管理账单及订阅',

@@ -261,10 +261,10 @@ export const PriceContent = (props: { source: PriceSource }) => {
 
   const createFeatures = (plan: 'free' | 'plus' | 'pro' | 'max'): ModelFeatures[] => {
     const configs = {
-      free: { t1Count: 0, t2Count: 20, fileLimit: 10, t2Period: 'daily' },
-      plus: { t1Count: 100, t2Count: 1500, fileLimit: 200, t2Period: 'monthly' },
-      pro: { t1Count: 300, t2Count: -1, fileLimit: 500, t2Period: 'monthly' },
-      max: { t1Count: -1, t2Count: -1, fileLimit: 2000, t2Period: 'monthly' },
+      free: { t1Count: 3, t2Count: 20, fileLimit: 10, t1Period: 'daily', t2Period: 'daily' },
+      plus: { t1Count: 100, t2Count: 1500, fileLimit: 200, t1Period: 'monthly', t2Period: 'monthly' },
+      pro: { t1Count: 300, t2Count: -1, fileLimit: 500, t1Period: 'monthly', t2Period: 'monthly' },
+      max: { t1Count: -1, t2Count: -1, fileLimit: 2000, t1Period: 'monthly', t2Period: 'monthly' },
     };
 
     const config = configs[plan];
@@ -276,7 +276,7 @@ export const PriceContent = (props: { source: PriceSource }) => {
               count:
                 config.t1Count === -1
                   ? unlimited
-                  : t('settings.subscription.subscribe.monthlyCounts', { count: config.t1Count }),
+                  : t(`settings.subscription.subscribe.${config.t1Period}Counts`, { count: config.t1Count }),
               details: premiumModels,
               tooltip: t1ModalTooltipContent,
             },

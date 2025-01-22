@@ -1,10 +1,10 @@
 import { memo } from 'react';
-import { Button, Progress, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { IconSubscription } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
-import { HiOutlineQuestionMarkCircle } from 'react-icons/hi';
+import { UsageProgress } from './usage-progress';
+import { Button } from 'antd';
+import { IconSubscription } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 export const SubscriptionHint = memo(() => {
   const { t } = useTranslation();
@@ -12,66 +12,39 @@ export const SubscriptionHint = memo(() => {
     setSubscribeModalVisible: state.setSubscribeModalVisible,
   }));
 
+  const { tokenUsage, storageUsage } = useSubscriptionUsage();
+
   const handleUpgrade = () => {
     setSubscribeModalVisible(true);
   };
-
-  const { tokenUsage, storageUsage } = useSubscriptionUsage();
-
-  const requestPercent = ((tokenUsage?.t2CountUsed ?? 0) * 100) / (tokenUsage?.t2CountQuota ?? 1);
-  const storagePercent = ((storageUsage?.fileCountUsed ?? 0) * 100) / (storageUsage?.fileCountQuota ?? 1);
 
   return (
     <div className="w-full rounded-md bg-[#f3f4f8] p-2">
       <div className="mb-1 text-sm font-medium">
         {t('settings.subscription.currentPlan')}: {t(`settings.subscription.subscriptionStatus.free`)}
       </div>
-      <div className="-mb-2.5 flex items-center justify-between">
-        <div className="text-xs text-gray-500 flex items-center gap-1">
-          <Tooltip
-            className="flex flex-row items-center gap-1 cursor-pointer"
-            title={
-              t('settings.subscription.t2RequestsDescription') + ' ' + t('settings.subscription.t2RequestsRefresh')
-            }
-          >
-            <span>{t('settings.subscription.t2Requests')}</span>
-            <HiOutlineQuestionMarkCircle className="text-sm flex items-center justify-center cursor-pointer" />
-          </Tooltip>
-        </div>
-        <div className="text-xs text-gray-500">
-          <span className="text-gray-700">
-            {tokenUsage?.t2CountUsed}/{tokenUsage?.t2CountQuota}
-          </span>
-        </div>
-      </div>
-      <Progress
-        strokeColor={tokenUsage?.t2CountUsed >= tokenUsage?.t2CountQuota ? '#dc2626' : '#00968f'}
-        percent={requestPercent}
-        size={{ height: 4 }}
-        showInfo={false}
+
+      <UsageProgress
+        label={t('settings.subscription.t1Requests')}
+        tooltip={t('settings.subscription.t1RequestsDescription') + ' ' + t('settings.subscription.requestsRefresh')}
+        used={tokenUsage?.t1CountUsed ?? 0}
+        quota={tokenUsage?.t1CountQuota ?? 0}
       />
-      <div className="-mb-2.5 flex items-center justify-between">
-        <div className="text-xs text-gray-500 flex items-center gap-1">
-          <Tooltip
-            className="flex flex-row items-center gap-1 cursor-pointer"
-            title={t('settings.subscription.fileCountDescription')}
-          >
-            <span>{t('settings.subscription.fileCount')}</span>
-            <HiOutlineQuestionMarkCircle className="text-sm flex items-center justify-center cursor-pointer" />
-          </Tooltip>
-        </div>
-        <div className="text-xs text-gray-500">
-          <span className="text-gray-700">
-            {storageUsage?.fileCountUsed}/{storageUsage?.fileCountQuota}
-          </span>
-        </div>
-      </div>
-      <Progress
-        strokeColor={storageUsage?.fileCountUsed >= storageUsage?.fileCountQuota ? '#dc2626' : '#00968f'}
-        percent={storagePercent}
-        size={{ height: 4 }}
-        showInfo={false}
+
+      <UsageProgress
+        label={t('settings.subscription.t2Requests')}
+        tooltip={t('settings.subscription.t2RequestsDescription') + ' ' + t('settings.subscription.requestsRefresh')}
+        used={tokenUsage?.t2CountUsed ?? 0}
+        quota={tokenUsage?.t2CountQuota ?? 0}
       />
+
+      <UsageProgress
+        label={t('settings.subscription.fileCount')}
+        tooltip={t('settings.subscription.fileCountDescription')}
+        used={storageUsage?.fileCountUsed ?? 0}
+        quota={storageUsage?.fileCountQuota ?? 0}
+      />
+
       <div className="mt-2 flex justify-center">
         <Button
           className="w-full"
