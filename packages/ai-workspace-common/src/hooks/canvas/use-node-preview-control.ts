@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { CanvasNode } from '../../components/canvas/nodes';
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
@@ -34,8 +34,6 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
       nodePreviews: state.config[canvasId]?.nodePreviews || [],
     }));
 
-  const nodesCnt = getNodes().length;
-
   // Cleanup non-existent node previews
   useEffect(() => {
     if (!nodePreviews?.length) return;
@@ -47,7 +45,7 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
         removeNodePreview(canvasId, preview.id);
       }
     });
-  }, [canvasId, nodesCnt, nodePreviews, removeNodePreview]);
+  }, [canvasId, nodePreviews, removeNodePreview]);
 
   /**
    * Toggle click-to-preview functionality
