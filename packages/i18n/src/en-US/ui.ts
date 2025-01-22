@@ -1207,7 +1207,7 @@ const translations = {
       t2Requests: 'Standard Requests',
       t2RequestsDescription:
         'Standard models include GPT-4o Mini, DeepSeek V3 and others. Each successful skill call to standard models counts as one request.',
-      t2RequestsRefresh: 'Request count will be reset every day for users on free plan.',
+      requestsRefresh: 'Request count will be reset every day for users on free plan.',
       fileCount: 'Library Storage',
       fileCountDescription: 'Each resource and document in your library counts as one file.',
       subscriptionManagement: 'Manage Billing and Subscriptions',
