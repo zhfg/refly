@@ -29,7 +29,7 @@ export const useDeleteNode = () => {
         // Show success message
         message.success(
           t('knowledgeBase.context.deleteSuccessWithTitle', {
-            title: nodeTitle,
+            title: nodeTitle || t('common.untitled'),
             type: t(`canvas.nodeTypes.${node.type}`),
           }),
         );

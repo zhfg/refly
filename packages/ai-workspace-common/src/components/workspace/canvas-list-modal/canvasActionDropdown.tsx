@@ -7,6 +7,7 @@ import { CanvasRename } from '@refly-packages/ai-workspace-common/components/can
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useUpdateCanvas } from '@refly-packages/ai-workspace-common/queries';
 import { IoAlertCircle } from 'react-icons/io5';
+import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 
 interface CanvasActionDropdown {
   canvasId: string;
@@ -26,6 +27,7 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
   const { updateCanvasTitle } = useSiderStoreShallow((state) => ({
     updateCanvasTitle: state.updateCanvasTitle,
   }));
+  const { refetchUsage } = useSubscriptionUsage();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -44,6 +46,7 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
       if (success) {
         setIsDeleteModalOpen(false);
         afterDelete?.();
+        refetchUsage();
       }
     } finally {
       setIsLoading(false);

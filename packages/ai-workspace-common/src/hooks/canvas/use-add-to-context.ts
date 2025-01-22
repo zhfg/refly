@@ -51,7 +51,7 @@ export const useAddToContext = () => {
 
       message.success(
         t('knowledgeBase.context.addSuccessWithTitle', {
-          title: nodeTitle,
+          title: nodeTitle || t('common.untitled'),
           type: t(`canvas.nodeTypes.${nodeType}`),
         }),
       );
