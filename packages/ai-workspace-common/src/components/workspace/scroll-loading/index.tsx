@@ -21,12 +21,7 @@ export const ScrollLoading = (props: ScrollLoadingProps) => {
   }
 
   if (isRequesting) {
-    return (
-      <div className="w-full flex flex-col mt-6">
-        <Skeleton active style={{ width: '100%' }}></Skeleton>
-        <Skeleton active style={{ width: '100%', marginTop: 24 }}></Skeleton>
-      </div>
-    );
+    return null;
   }
 
   return (
