@@ -1,6 +1,7 @@
 import { FC, useCallback } from 'react';
 import { Button, Dropdown, Modal } from 'antd';
 import type { MenuProps } from 'antd';
+import { TFunction } from 'i18next';
 import {
   FileText,
   Sparkles,
@@ -31,8 +32,8 @@ import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
 import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-preview-control';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { TFunction } from 'i18next';
-import { useDeleteResource, useDeleteDocument } from '@refly-packages/ai-workspace-common/queries';
+import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-document';
+import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-resource';
 
 // Get icon component based on node type and metadata
 const getNodeIcon = (node: CanvasNode<any>) => {
@@ -100,8 +101,8 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
   const { addToContext } = useAddToContext();
 
   const { deleteNode } = useDeleteNode();
-  const { mutate: deleteResource } = useDeleteResource();
-  const { mutate: deleteDocument } = useDeleteDocument();
+  const { deleteResource } = useDeleteResource();
+  const { deleteDocument } = useDeleteDocument();
 
   const handleDeleteFile = useCallback(() => {
     Modal.confirm({
@@ -115,11 +116,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
       okButtonProps: { danger: true },
       cancelButtonProps: { className: 'hover:!border-[#00968F] hover:!text-[#00968F] ' },
       onOk: () => {
-        node.type === 'document'
-          ? deleteDocument({ body: { docId: node.data?.entityId } })
-          : deleteResource({
-              body: { resourceId: node.data?.entityId },
-            });
+        node.type === 'document' ? deleteDocument(node.data?.entityId) : deleteResource(node.data?.entityId);
         deleteNode(node);
       },
     });

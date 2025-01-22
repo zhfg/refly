@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { CanvasNode } from '../../components/canvas/nodes';
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
@@ -14,6 +14,7 @@ interface NodePreviewControl {
   toggleClickToPreview: () => void;
   previewNode: (node: CanvasNode) => void;
   closeNodePreview: (node: CanvasNode) => void;
+  closeNodePreviewByEntityId: (entityId: string) => void;
   pinNode: (node: CanvasNode) => void;
   unpinNode: (node: CanvasNode) => void;
   isNodePinned: (nodeId: string) => boolean;
@@ -33,6 +34,8 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
       nodePreviews: state.config[canvasId]?.nodePreviews || [],
     }));
 
+  const nodesCnt = getNodes().length;
+
   // Cleanup non-existent node previews
   useEffect(() => {
     if (!nodePreviews?.length) return;
@@ -44,7 +47,7 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
         removeNodePreview(canvasId, preview.id);
       }
     });
-  }, [canvasId, nodePreviews, removeNodePreview]);
+  }, [canvasId, nodesCnt, nodePreviews, removeNodePreview]);
 
   /**
    * Toggle click-to-preview functionality
@@ -68,6 +71,16 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
       removeNodePreview(canvasId, node.id);
     },
     [canvasId, removeNodePreview],
+  );
+
+  const closeNodePreviewByEntityId = useCallback(
+    (entityId: string) => {
+      const node = nodePreviews.find((node) => node.data?.entityId === entityId);
+      if (node) {
+        removeNodePreview(canvasId, node.id);
+      }
+    },
+    [canvasId, nodePreviews, removeNodePreview],
   );
 
   const pinNode = useCallback(
@@ -132,6 +145,7 @@ export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions
     toggleClickToPreview,
     previewNode,
     closeNodePreview,
+    closeNodePreviewByEntityId,
     pinNode,
     unpinNode,
     isNodePinned,

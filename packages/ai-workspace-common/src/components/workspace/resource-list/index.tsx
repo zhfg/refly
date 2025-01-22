@@ -1,5 +1,5 @@
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
-import { Dropdown, Button, Popconfirm, message, Empty, Tooltip, Divider, Spin } from 'antd';
+import { Dropdown, Button, Popconfirm, message, Empty, Divider, Spin } from 'antd';
 import type { MenuProps, DropdownProps } from 'antd';
 import {
   IconMoreHorizontal,
@@ -21,6 +21,7 @@ import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/
 import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/colors';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { LuPlus } from 'react-icons/lu';
+import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-resource';
 
 const ActionDropdown = ({ resource, afterDelete }: { resource: Resource; afterDelete: () => void }) => {
   const { t } = useTranslation();
@@ -30,14 +31,11 @@ const ActionDropdown = ({ resource, afterDelete }: { resource: Resource; afterDe
   const { setShowLibraryModal } = useSiderStoreShallow((state) => ({
     setShowLibraryModal: state.setShowLibraryModal,
   }));
+  const { deleteResource } = useDeleteResource();
 
   const handleDelete = async () => {
-    const { data } = await getClient().deleteResource({
-      body: {
-        resourceId: resource.resourceId,
-      },
-    });
-    if (data?.success) {
+    const success = await deleteResource(resource.resourceId);
+    if (success) {
       message.success(t('common.putSuccess'));
       setPopupVisible(false);
       refetchUsage();
