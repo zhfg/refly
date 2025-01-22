@@ -30,16 +30,23 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleteFile, setIsDeleteFile] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const onChange: CheckboxProps['onChange'] = (e) => {
     setIsDeleteFile(e.target.checked);
   };
 
   const handleDelete = async () => {
-    const success = await deleteCanvas(canvasId, isDeleteFile);
-    setPopupVisible(false);
-    if (success) {
-      setIsDeleteModalOpen(false);
-      afterDelete?.();
+    if (isLoading) return;
+    try {
+      setIsLoading(true);
+      const success = await deleteCanvas(canvasId, isDeleteFile);
+      setPopupVisible(false);
+      if (success) {
+        setIsDeleteModalOpen(false);
+        afterDelete?.();
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -143,9 +150,10 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
         onCancel={() => setIsDeleteModalOpen(false)}
         okText={t('common.confirm')}
         cancelText={t('common.cancel')}
-        okButtonProps={{ danger: true }}
+        okButtonProps={{ danger: true, loading: isLoading }}
         destroyOnClose
         closeIcon={null}
+        confirmLoading={isLoading}
       >
         <div className="pl-10">
           <div className="mb-2">
