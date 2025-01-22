@@ -55,7 +55,7 @@ export default () => ({
       refreshExpiresIn: process.env.JWT_REFRESH_EXPIRATION_TIME || '7d',
     },
     collab: {
-      tokenExpiry: process.env.COLLAB_TOKEN_EXPIRY || '5s',
+      tokenExpiry: process.env.COLLAB_TOKEN_EXPIRY || '1h',
     },
     email: {
       enabled: process.env.EMAIL_AUTH_ENABLED === 'true' || true,
