@@ -91,7 +91,7 @@ export class KnowledgeController {
     @LoginedUser() user: User,
     @Body() body: UpsertResourceRequest[],
   ): Promise<BatchCreateResourceResponse> {
-    const resources = await this.knowledgeService.batchCreateResource(user, body);
+    const resources = await this.knowledgeService.batchCreateResource(user, body ?? []);
     await this.knowledgeService.syncStorageUsage(user);
     return buildSuccessResponse(resources.map(resourcePO2DTO));
   }

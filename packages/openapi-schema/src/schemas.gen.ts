@@ -1832,6 +1832,11 @@ export const DeleteCanvasRequestSchema = {
       description: 'Canvas ID to delete',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
     },
+    deleteAllFiles: {
+      type: 'boolean',
+      description: 'Whether to delete all files in the canvas',
+      default: false,
+    },
   },
 } as const;
 

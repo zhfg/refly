@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react';
-import { Button, Dropdown, DropdownProps, Popconfirm, MenuProps, message } from 'antd';
+import { Button, Dropdown, DropdownProps, Popconfirm, MenuProps, message, Modal, Checkbox, CheckboxProps } from 'antd';
 import { IconMoreHorizontal, IconDelete, IconEdit } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-canvas';
 import { useTranslation } from 'react-i18next';
 import { CanvasRename } from '@refly-packages/ai-workspace-common/components/canvas/top-toolbar/canvas-rename';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useUpdateCanvas } from '@refly-packages/ai-workspace-common/queries';
+import { IoAlertCircle } from 'react-icons/io5';
 
 interface CanvasActionDropdown {
   canvasId: string;
   canvasName: string;
+  btnSize?: 'small' | 'large';
   updateShowStatus?: (canvasId: string | null) => void;
   afterDelete?: () => void;
   afterRename?: (newTitle: string, canvasId: string) => void;
 }
 
 export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
-  const { canvasId, canvasName, updateShowStatus, afterDelete, afterRename } = props;
+  const { canvasId, canvasName, btnSize = 'small', updateShowStatus, afterDelete, afterRename } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
   const { deleteCanvas } = useDeleteCanvas();
@@ -26,10 +28,17 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
   }));
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleteFile, setIsDeleteFile] = useState(false);
+  const onChange: CheckboxProps['onChange'] = (e) => {
+    setIsDeleteFile(e.target.checked);
+  };
+
   const handleDelete = async () => {
-    const success = await deleteCanvas(canvasId);
+    const success = await deleteCanvas(canvasId, isDeleteFile);
+    setPopupVisible(false);
     if (success) {
-      setPopupVisible(false);
+      setIsDeleteModalOpen(false);
       afterDelete?.();
     }
   };
@@ -54,27 +63,14 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
     {
       label: (
         <div
-          onClick={(e) => {
-            e.stopPropagation();
+          className="flex items-center text-red-600"
+          onClick={() => {
+            setIsDeleteModalOpen(true);
+            setPopupVisible(false);
           }}
         >
-          <Popconfirm
-            title={t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', { canvas: canvasName })}
-            onConfirm={handleDelete}
-            onCancel={() => setPopupVisible(false)}
-            okText={t('common.confirm')}
-            cancelText={t('common.cancel')}
-          >
-            <div
-              className="flex items-center text-red-600"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              <IconDelete size={16} className="mr-2" />
-              {t('workspace.deleteDropdownMenu.delete')}
-            </div>
-          </Popconfirm>
+          <IconDelete size={16} className="mr-2" />
+          {t('canvas.toolbar.deleteCanvas')}
         </div>
       ),
       key: 'delete',
@@ -89,7 +85,6 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
 
   const handleModalOk = (newTitle: string) => {
     if (newTitle?.trim()) {
-      // TODO: syncTitleToYDoc(newTitle);
       updateCanvas({ body: { canvasId, title: newTitle } });
       updateCanvasTitle(canvasId, newTitle);
       setIsModalOpen(false);
@@ -107,6 +102,9 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
     } else {
       updateShowStatus?.(null);
     }
+    return () => {
+      setIsDeleteFile(false);
+    };
   }, [popupVisible]);
 
   return (
@@ -119,7 +117,7 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
           items,
         }}
       >
-        <Button onClick={(e) => e.stopPropagation()} size="small" type="text" icon={<IconMoreHorizontal />} />
+        <Button size={btnSize} onClick={(e) => e.stopPropagation()} type="text" icon={<IconMoreHorizontal />} />
       </Dropdown>
 
       <div onClick={(e) => e.stopPropagation()}>
@@ -130,6 +128,36 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
           handleModalCancel={handleModalCancel}
         />
       </div>
+
+      <Modal
+        title={
+          <div className="flex items-center gap-2">
+            <IoAlertCircle size={26} className="mr-2 text-[#faad14]" />
+            {t('common.deleteConfirmMessage')}
+          </div>
+        }
+        centered
+        width={416}
+        open={isDeleteModalOpen}
+        onOk={handleDelete}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
+        okButtonProps={{ danger: true }}
+        destroyOnClose
+        closeIcon={null}
+      >
+        <div className="pl-10">
+          <div className="mb-2">
+            {t('workspace.deleteDropdownMenu.deleteConfirmForCanvas', {
+              canvas: canvasName || t('common.untitled'),
+            })}
+          </div>
+          <Checkbox onChange={onChange} className="mb-2 text-[13px]">
+            {t('canvas.toolbar.deleteCanvasFile')}
+          </Checkbox>
+        </div>
+      </Modal>
     </>
   );
 };

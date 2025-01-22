@@ -1,5 +1,4 @@
 import { Button, Divider } from 'antd';
-import { HiOutlineDocumentAdd } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
@@ -14,31 +13,21 @@ import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import {
   IconAskAI,
   IconAskAIInput,
+  IconCreateDocument,
   IconDocument,
+  IconImportResource,
   IconMemo,
   IconResource,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { IoAnalyticsOutline } from 'react-icons/io5';
-import { TbPlugConnected } from 'react-icons/tb';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
 import { ToolButton, ToolValue } from './tool-button';
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { genMemoID, genSkillID } from '@refly-packages/utils/id';
-
-interface ToolbarItem {
-  type: 'button' | 'popover' | 'divider';
-  icon?: React.ElementType;
-  value?: ToolValue;
-  isPrimary?: boolean;
-  domain?: string;
-  tooltip?: string;
-  active?: boolean;
-  hoverContent?: HoverContent;
-}
 
 interface ToolbarProps {
   onToolSelect?: (tool: string) => void;
@@ -84,7 +73,7 @@ const useToolbarConfig = () => {
           },
         },
         {
-          icon: TbPlugConnected,
+          icon: IconImportResource,
           value: 'importResource',
           type: 'button',
           domain: 'resource',
@@ -103,7 +92,7 @@ const useToolbarConfig = () => {
           tooltip: t('canvas.toolbar.addResource'),
         },
         {
-          icon: HiOutlineDocumentAdd,
+          icon: IconCreateDocument,
           value: 'createDocument',
           type: 'button',
           domain: 'document',

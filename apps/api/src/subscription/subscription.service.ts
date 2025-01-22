@@ -455,19 +455,15 @@ export class SubscriptionService implements OnModuleInit {
   }
 
   async checkStorageUsage(user: User): Promise<CheckStorageUsageResult> {
-    const result = { available: false };
-
     const userModel = await this.prisma.user.findUnique({ where: { uid: user.uid } });
     if (!userModel) {
       this.logger.error(`No user found for uid ${user.uid}`);
-      return result;
+      return { available: 0 };
     }
 
     const meter = await this.getOrCreateStorageUsageMeter(userModel);
 
-    result.available = meter.fileCountUsed < meter.fileCountQuota;
-
-    return result;
+    return { available: meter.fileCountQuota - meter.fileCountUsed };
   }
 
   async getOrCreateTokenUsageMeter(user: User, sub?: SubscriptionModel) {

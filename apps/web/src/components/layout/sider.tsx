@@ -21,6 +21,7 @@ import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/compon
 import { SettingModal } from "@refly-packages/ai-workspace-common/components/settings"
 import { TourModal } from "@refly-packages/ai-workspace-common/components/tour-modal"
 import { SettingsGuideModal } from "@refly-packages/ai-workspace-common/components/settings-guide"
+import { StorageExceededModal } from "@refly-packages/ai-workspace-common/components/subscription/storage-exceeded-modal"
 // hooks
 import { useHandleSiderData } from "@refly-packages/ai-workspace-common/hooks/use-handle-sider-data"
 import {
@@ -186,6 +187,7 @@ const NewCanvasItem = () => {
 }
 
 const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [showCanvasIdActionDropdown, setShowCanvasIdActionDropdown] = useState<
     string | null
@@ -214,7 +216,9 @@ const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
           <IconCanvas
             className={cn({ "text-green-600": selectedKey === canvas.id })}
           />
-          <div className="w-28 truncate">{canvas?.name ?? ""}</div>
+          <div className="w-28 truncate">
+            {canvas?.name || t("common.untitled")}
+          </div>
         </div>
 
         <div
@@ -225,6 +229,7 @@ const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
               : "opacity-0 group-hover:opacity-100",
           )}>
           <CanvasActionDropdown
+            btnSize="small"
             canvasId={canvas.id}
             canvasName={canvas.name}
             updateShowStatus={canvasId => {
@@ -475,6 +480,7 @@ export const SiderLayout = (props: { source: "sider" | "popover" }) => {
 
         <SettingsGuideModal />
         <TourModal />
+        <StorageExceededModal />
       </div>
     </Sider>
   )

@@ -1,7 +1,4 @@
 import { Button, Divider } from 'antd';
-import { HiOutlineDocumentAdd } from 'react-icons/hi';
-import { RiUploadCloud2Line } from 'react-icons/ri';
-
 import { useTranslation } from 'react-i18next';
 import { FC, useEffect, useRef, useState } from 'react';
 import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
@@ -11,7 +8,9 @@ import { CanvasNodeType, SearchDomain } from '@refly/openapi-schema';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 import {
   IconAskAI,
+  IconCreateDocument,
   IconDocument,
+  IconImportResource,
   IconMemo,
   IconResource,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -74,7 +73,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     { key: 'divider-1', type: 'divider' },
     {
       key: 'createDocument',
-      icon: HiOutlineDocumentAdd,
+      icon: IconCreateDocument,
       type: 'button',
       hoverContent: {
         title: t('canvas.toolbar.createDocument'),
@@ -111,7 +110,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     { key: 'divider-2', type: 'divider' },
     {
       key: 'importResource',
-      icon: RiUploadCloud2Line,
+      icon: IconImportResource,
       type: 'button',
       hoverContent: {
         title: t('canvas.toolbar.importResource'),
@@ -264,7 +263,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
           'text-red-600': item.danger,
         })}
         type="text"
-        icon={<item.icon className="flex items-center" />}
+        icon={<item.icon className="text-base flex items-center" />}
         onClick={() => handleMenuClick({ key: item.key })}
       >
         <span>{t(`canvas.toolbar.${item.key}`)}</span>

@@ -264,6 +264,25 @@ model Canvas {
   @@map("canvases")
 }
 
+model CanvasEntityRelation {
+  /// Primary key
+  pk         BigInt    @id @default(autoincrement())
+  /// Canvas id
+  canvasId   String    @map("canvas_id")
+  /// Entity id
+  entityId   String    @map("entity_id")
+  /// Entity type
+  entityType String    @map("entity_type")
+  /// Create timestamp
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@index([canvasId, deletedAt])
+  @@index([entityType, entityId, deletedAt])
+  @@map("canvas_entity_relations")
+}
+
 model Resource {
   /// Primary key
   pk             BigInt    @id @default(autoincrement())

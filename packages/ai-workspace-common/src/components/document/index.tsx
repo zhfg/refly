@@ -4,9 +4,8 @@ import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canva
 
 import './index.scss';
 import { Input, Spin } from '@arco-design/web-react';
-import { Button, Dropdown, DropdownProps, MenuProps, message, Popconfirm } from 'antd';
-import { HiOutlineLockClosed, HiOutlineLockOpen } from 'react-icons/hi2';
-import { IconMoreHorizontal, IconDelete, IconCopy } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { Button, message, Tooltip } from 'antd';
+import { IconCopy, IconLock, IconUnlock } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useTranslation } from 'react-i18next';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 
@@ -14,86 +13,10 @@ import { CollaborativeEditor } from './collab-editor';
 import { DocumentProvider, useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
-import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
-import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-document';
 import { ydoc2Markdown } from '@refly-packages/utils/editor';
 import { time } from '@refly-packages/utils/time';
 import { LOCALE } from '@refly/common-types';
 import { useDocumentSync } from '@refly-packages/ai-workspace-common/hooks/use-document-sync';
-
-const ActionDropdown = ({ docId, node }: { docId: string; node?: CanvasNode }) => {
-  const { ydoc } = useDocumentContext();
-  const { t } = useTranslation();
-  const [popupVisible, setPopupVisible] = useState(false);
-  const { deleteNode } = useDeleteNode();
-  const { deleteDocument } = useDeleteDocument();
-
-  const handleDelete = async () => {
-    const success = await deleteDocument(docId);
-    if (success && node) {
-      deleteNode({
-        ...node,
-        position: node.position,
-      });
-    }
-  };
-
-  const handleCopy = () => {
-    const title = ydoc.getText('title').toJSON();
-    const content = ydoc2Markdown(ydoc);
-    copyToClipboard(`# ${title}\n\n${content}`);
-    message.success({ content: t('contentDetail.item.copySuccess') });
-  };
-
-  const items: MenuProps['items'] = [
-    {
-      key: 'copy',
-      label: (
-        <div className="flex items-center" onClick={handleCopy}>
-          <IconCopy size={16} className="mr-2" />
-          {t('contentDetail.item.copyContent')}
-        </div>
-      ),
-    },
-    {
-      label: (
-        <Popconfirm
-          placement="bottom"
-          title={t('workspace.deleteDropdownMenu.deleteConfirmForDocument')}
-          onConfirm={handleDelete}
-          onCancel={() => setPopupVisible(false)}
-          okText={t('common.confirm')}
-          cancelText={t('common.cancel')}
-        >
-          <div className="flex items-center text-red-600">
-            <IconDelete size={16} className="mr-2" />
-            {t('workspace.deleteDropdownMenu.delete')}
-          </div>
-        </Popconfirm>
-      ),
-      key: 'delete',
-    },
-  ];
-
-  const handleOpenChange: DropdownProps['onOpenChange'] = (open: boolean, info: any) => {
-    if (info.source === 'trigger') {
-      setPopupVisible(open);
-    }
-  };
-
-  return (
-    <Dropdown
-      trigger={['click']}
-      open={popupVisible}
-      onOpenChange={handleOpenChange}
-      menu={{
-        items,
-      }}
-    >
-      <Button type="text" icon={<IconMoreHorizontal />} />
-    </Dropdown>
-  );
-};
 
 const StatusBar = memo(
   ({
@@ -161,6 +84,13 @@ const StatusBar = memo(
       readOnly ? message.success(t('knowledgeBase.note.edit')) : message.warning(t('knowledgeBase.note.readOnly'));
     };
 
+    const handleCopy = () => {
+      const title = ydoc.getText('title').toJSON();
+      const content = ydoc2Markdown(ydoc);
+      copyToClipboard(`# ${title}\n\n${content}`);
+      message.success({ content: t('contentDetail.item.copySuccess') });
+    };
+
     return (
       <div className="w-full h-10 p-3 border-x-0 border-t-0 border-b border-solid border-gray-100 flex flex-row items-center justify-between">
         <div className="flex items-center gap-2">
@@ -179,12 +109,21 @@ const StatusBar = memo(
         </div>
 
         <div className="flex items-center gap-1">
-          <Button
-            type="text"
-            icon={readOnly ? <HiOutlineLockClosed style={{ color: '#00968F' }} /> : <HiOutlineLockOpen />}
-            onClick={() => toggleReadOnly()}
-          />
-          <ActionDropdown docId={docId} node={node} />
+          <Tooltip placement="bottom" title={readOnly ? t('document.enableEdit') : t('document.setReadOnly')}>
+            <Button
+              type="text"
+              icon={readOnly ? <IconLock className="text-green-500" /> : <IconUnlock className="text-gray-500" />}
+              onClick={() => toggleReadOnly()}
+            />
+          </Tooltip>
+          <Tooltip placement="bottom" title={t('common.copy.title')}>
+            <Button
+              type="text"
+              icon={<IconCopy className="text-gray-500" />}
+              onClick={() => handleCopy()}
+              title={t('common.copy')}
+            />
+          </Tooltip>
         </div>
       </div>
     );

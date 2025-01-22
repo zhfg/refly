@@ -1,4 +1,4 @@
-import { Button, Divider, message } from 'antd';
+import { Button, Divider, message, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FC, useCallback, useMemo, useEffect, useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
@@ -12,6 +12,7 @@ import {
   IconShrink,
   IconCopy,
   IconMemo,
+  IconDeleteFile,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
@@ -40,14 +41,14 @@ import { useCreateMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
 
 interface MenuItem {
-  key: string;
-  icon: React.ElementType;
-  label: string;
-  onClick: () => void;
+  key?: string;
+  icon?: React.ElementType;
+  label?: string | React.ReactNode;
+  onClick?: (e?: React.MouseEvent) => void;
   loading?: boolean;
   danger?: boolean;
   primary?: boolean;
-  type: 'button' | 'divider';
+  type?: 'button' | 'divider';
   disabled?: boolean;
   hoverContent?: HoverContent;
 }
@@ -120,6 +121,27 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'delete'));
     onClose?.();
   }, [nodeId]);
+
+  const handleDeleteFile = useCallback(
+    (type: 'resource' | 'document') => {
+      Modal.confirm({
+        centered: true,
+        title: t('common.deleteConfirmMessage'),
+        content: t(`canvas.nodeActions.${type}DeleteConfirm`, {
+          title: nodeData?.title || t('common.untitled'),
+        }),
+        okText: t('common.delete'),
+        cancelButtonProps: { className: 'hover:!border-[#00968F] hover:!text-[#00968F] ' },
+        cancelText: t('common.cancel'),
+        okButtonProps: { danger: true },
+        onOk: () => {
+          nodeActionEmitter.emit(createNodeEventName(nodeId, 'deleteFile'));
+          onClose?.();
+        },
+      });
+    },
+    [nodeId, onClose],
+  );
 
   const handleAddToContext = useCallback(() => {
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'addToContext'));
@@ -494,6 +516,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
             },
           ]
         : []),
+      { type: 'divider' },
       {
         key: 'delete',
         icon: IconDelete,
@@ -507,6 +530,40 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-delete.webm',
         },
       },
+      ...(nodeType === 'document'
+        ? [
+            {
+              key: 'deleteDocument',
+              icon: IconDeleteFile,
+              label: t('canvas.nodeActions.deleteDocument'),
+              onClick: () => handleDeleteFile('document'),
+              danger: true,
+              type: 'button' as const,
+              hoverContent: {
+                title: t('canvas.nodeActions.deleteDocument'),
+                description: t('canvas.nodeActions.deleteDocumentDescription'),
+                videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+              },
+            },
+          ]
+        : []),
+      ...(nodeType === 'resource'
+        ? [
+            {
+              key: 'deleteResource',
+              icon: IconDeleteFile,
+              label: t('canvas.nodeActions.deleteResource'),
+              onClick: () => handleDeleteFile('resource'),
+              danger: true,
+              type: 'button' as const,
+              hoverContent: {
+                title: t('canvas.nodeActions.deleteResource'),
+                description: t('canvas.nodeActions.deleteResourceDescription'),
+                videoUrl: 'https://static.refly.ai/static/refly-docs.mp4',
+              },
+            },
+          ]
+        : []),
     ];
 
     const clusterItems: MenuItem[] = [

@@ -10,6 +10,7 @@ import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/store
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
+import { StorageLimit } from '@refly-packages/ai-workspace-common/components/import-resource/intergrations/storageLimit';
 
 export enum ImportActionMode {
   CREATE_RESOURCE = 'createResource',
@@ -31,7 +32,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
     updateSourceListDrawer: state.updateSourceListDrawer,
   }));
   const { addNode } = useAddNode();
-  const { refetchUsage } = useSubscriptionUsage();
+  const { refetchUsage, storageUsage } = useSubscriptionUsage();
 
   const { selectedItems, results, setSelectedItems } = useMultilingualSearchStore();
   const { setImportResourceModalVisible, insertNodePosition } = useImportResourceStoreShallow((state) => ({
@@ -133,6 +134,11 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
     handleClose();
   };
 
+  const canImportCount = storageUsage?.fileCountQuota - (storageUsage?.fileCountUsed ?? 0);
+  const disableSave = () => {
+    return selectedItems.length === 0 || selectedItems.length > canImportCount;
+  };
+
   return (
     <Affix offsetBottom={0} target={props.getTarget}>
       <div className="intergation-footer">
@@ -143,12 +149,11 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
             onChange={(e) => handleSelectAll(e.target.checked)}
           />
           <p className="footer-count text-item">{t('resource.import.linkCount', { count: selectedItems.length })}</p>
+          <StorageLimit resourceCount={selectedItems.length} />
         </div>
         <div className="footer-action">
-          <Button style={{ marginRight: 8 }} onClick={handleClose}>
-            {t('common.cancel')}
-          </Button>
-          <Button type="primary" onClick={handleSave} disabled={selectedItems.length === 0} loading={saveLoading}>
+          <Button onClick={handleClose}>{t('common.cancel')}</Button>
+          <Button type="primary" onClick={handleSave} disabled={disableSave()} loading={saveLoading}>
             {t('common.saveToCanvas')}
           </Button>
         </div>

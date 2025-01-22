@@ -11,12 +11,19 @@ import {
   ReferenceType,
   ReferenceMeta,
   Document,
+  EntityType,
 } from '@refly-packages/openapi-schema';
 import { pick } from '@/utils';
 
 export type FinalizeResourceParam = {
   resourceId: string;
   uid: string;
+};
+
+export type DeleteKnowledgeEntityJobData = {
+  uid: string;
+  entityId: string;
+  entityType: EntityType;
 };
 
 export const resourcePO2DTO = (

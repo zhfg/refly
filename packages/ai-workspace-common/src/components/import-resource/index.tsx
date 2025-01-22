@@ -1,24 +1,22 @@
 import { Modal } from '@arco-design/web-react';
 import { Menu, Divider, Splitter } from 'antd';
-import { AiOutlineImport } from 'react-icons/ai';
-import { HiOutlinePencil, HiLink } from 'react-icons/hi';
+import { HiLink } from 'react-icons/hi';
 import {
   ImportResourceMenuItem,
   useImportResourceStore,
 } from '@refly-packages/ai-workspace-common/stores/import-resource';
 
-// 组件
 import { ImportFromWeblink } from './intergrations/import-from-weblink';
 import { ImportFromText } from './intergrations/import-from-text';
 import { useTranslation } from 'react-i18next';
 
-// 样式
 import './index.scss';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import MultilingualSearch from '@refly-packages/ai-workspace-common/modules/multilingual-search';
 import { TbClipboard, TbPlugConnected, TbWorldSearch } from 'react-icons/tb';
+import { IconImportResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 const MenuItem = Menu.Item;
 
@@ -50,7 +48,7 @@ export const ImportResourceModal = () => {
       }}
       getPopupContainer={getPopupContainer}
       className="import-resource-modal"
-      style={{ height: '70%', minHeight: 500, maxHeight: 660, width: '60%', minWidth: '300px', maxWidth: '950px' }}
+      style={{ height: '70%', minHeight: 500, maxHeight: 660, width: '65%', minWidth: '300px', maxWidth: '1050px' }}
     >
       <div className="import-resource-container">
         <Splitter>
@@ -59,7 +57,7 @@ export const ImportResourceModal = () => {
               <div className="import-resource-left-panel">
                 <div className="left-panel-header">
                   <div className="left-panel-header-title">
-                    <TbPlugConnected className="text-2xl" />
+                    <IconImportResource className="text-2xl" />
                     <span className="left-panel-header-title-text">{t('resource.import.title')}</span>
                   </div>
                   <Divider style={{ margin: '12px 0' }} />

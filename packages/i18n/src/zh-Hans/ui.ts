@@ -2,6 +2,13 @@ const translations = {
   language: '简体中文',
   productName: 'Refly',
   welcomeMessage: '今天准备写点什么?',
+  subscription: {
+    storageExceeded: {
+      title: '存储空间已满',
+      description: '您的存储空间已达到上限。升级您的订阅计划以获得更大的存储空间，继续使用我们的服务。',
+      upgrade: '立即升级',
+    },
+  },
   privacyPage: {
     title: '隐私政策',
   },
@@ -409,7 +416,7 @@ const translations = {
       unbindSuccessful: '移除成功！',
       failed: '删除失败！',
       deleteConfirmForDocument: '确定删除该文档吗？',
-      deleteConfirmForCanvas: '确定删除画布 [{{canvas}}] 吗？',
+      deleteConfirmForCanvas: '画布 {{canvas}} 将被永久删除，是否继续？',
       deleteConfirmForProject: '确定删除该项目吗？',
       deleteConfirmForResource: '确定删除该资源吗？',
       deleteConfirmForResourceProject: '确认要从项目移除吗?',
@@ -539,6 +546,10 @@ const translations = {
       exitFullScreen: '退出全屏',
     },
   },
+  document: {
+    setReadOnly: '设置为只读',
+    enableEdit: '启用编辑',
+  },
   artifact: {
     generating: '生成中',
     completed: '已完成',
@@ -581,6 +592,7 @@ const translations = {
       searchNodeDescription: '搜索画布中的节点，点击节点进行定位。',
       enablePointerMode: '启用框选模式',
       disablePointerMode: '关闭框选模式',
+      deleteCanvas: '删除画布',
       importResource: '导入资源',
       importResourceDescription: '通过在线搜索、手动添加网页链接或文本的方式批量添加写作素材在画布中阅读或消费。',
       addResource: '添加资源',
@@ -638,6 +650,7 @@ const translations = {
       enterFullscreen: '进入全屏',
       exitFullscreen: '退出全屏',
       completeTutorial: '完成教程',
+      deleteCanvasFile: '同时删除画布中的资源和文档',
     },
     connectionTimeout: {
       title: '连接超时',
@@ -729,6 +742,12 @@ const translations = {
       editQueryDescription: '编辑选中的节点提问',
       duplicateDocument: '创建文档副本',
       duplicateDocumentDescription: '创建选中的节点文档副本',
+      deleteResource: '删除资源',
+      deleteResourceDescription: '从知识库以及所有画布中删除该资源',
+      resourceDeleteConfirm: '确认要删除资源 {{title}} 吗？该操作将从知识库以及所有画布中移除此资源。',
+      deleteDocument: '删除文档',
+      deleteDocumentDescription: '从知识库以及所有画布中删除该文档',
+      documentDeleteConfirm: '确认要删除文档 {{title}} 吗？该操作将从知识库以及所有画布中移除此文档。',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',
@@ -832,6 +851,9 @@ const translations = {
       },
       saveResourceFailed: '保存失败，请尝试重新保存',
       isSaving: '保存中...',
+      storageLimited: '存储空间已满',
+      storagePartialLimited: '存储空间不足，仅能保存 {{count}} 个资源',
+      upgrade: '升级订阅',
     },
     wait_parse: '内容解析中',
     parse_failed: '解析失败，点击重试',
@@ -987,29 +1009,6 @@ const translations = {
     },
     empty: {
       title: '暂无分类，赶快下载插件去阅读新内容吧~',
-      download: '下载插件',
-    },
-  },
-  topicDetail: {
-    breadcrumb: {
-      homePage: '主页',
-      allTopics: '所有主题',
-    },
-    title: '所有主题',
-    description: '基于您的浏览历史、会话历史分析提取出来的主题分类，代表您的阅读和学习趋势',
-    footer: {
-      noMoreText: '已经到底啦~',
-    },
-    item: {
-      askFollow: '追问阅读',
-      share: '分享',
-      copy: '复制链接',
-      copyNotify: '链接已复制到剪切板',
-      noMoreText: '已经到底啦~',
-      linkMore: '{{count}} 条更多',
-    },
-    empty: {
-      title: '暂无此分类下的内容，赶快下载插件去阅读新内容吧~',
       download: '下载插件',
     },
   },
@@ -1189,10 +1188,11 @@ const translations = {
       manage: '管理订阅',
       currentPlan: '当前套餐',
       t1Requests: '高级模型请求',
-      t1RequestsDescription: '高级模型包括 GPT-4o, Claude 3.5 Sonnet 等其它模型。每个成功的技能调用计为一次请求。',
+      t1RequestsDescription: '高级模型包括 GPT-4o, Claude 3.5 Sonnet 等模型。每个成功的技能调用计为一次请求。',
       t2Requests: '标准模型请求',
-      t2RequestsDescription: '标准模型包括 GPT-4o Mini, DeepSeek V3 等其它模型。每个成功的技能调用计为一次请求。',
-      fileCount: '文件存储数量',
+      t2RequestsDescription: '标准模型包括 GPT-4o Mini, DeepSeek V3 等模型。每个成功的技能调用计为一次请求。',
+      t2RequestsRefresh: '免费用户每天会重置次数。',
+      fileCount: '知识库文件数',
       fileCountDescription: '知识库中每个资源和文档计为一个文件。',
       subscriptionManagement: '管理账单及订阅',
       subscriptionStatus: {
