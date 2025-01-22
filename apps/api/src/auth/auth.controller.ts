@@ -132,12 +132,20 @@ export class AuthController {
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
     if (!refreshToken) {
+      this.authService.clearAuthCookie(res);
       throw new UnauthorizedException();
     }
 
-    const tokens = await this.authService.refreshAccessToken(refreshToken);
-    this.authService.setAuthCookie(res, tokens);
-    res.status(200).json(buildSuccessResponse());
+    try {
+      const tokens = await this.authService.refreshAccessToken(refreshToken);
+      this.authService.setAuthCookie(res, tokens);
+      res.status(200).json(buildSuccessResponse());
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        this.authService.clearAuthCookie(res);
+      }
+      throw error;
+    }
   }
 
   @UseGuards(JwtAuthGuard)
