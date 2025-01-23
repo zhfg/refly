@@ -157,11 +157,11 @@ We're incredibly grateful to the community for providing such powerful yet simpl
 
 There is significant overlap in the atomic "building blocks" between these applications. They are not open source, nor do they have a plugin system like VSCode for contributors to customize. We aim to create a tool that includes all the features we love and goes even further.
 
-Thank you for your interest in ReflyAI, and we sincerely hope ReflyAI resonates with you! 🎵 Visit https://reflyai.com/ for more details.
+Thank you for your interest in ReflyAI, and we sincerely hope ReflyAI resonates with you! 🎵 Visit https://refly.ai/ for more details.
 
 ## Security Issues
 
-To protect your privacy, please avoid posting security-related issues on GitHub. Instead, send your questions to [security@reflyai.com](mailto:security@reflyai.com), and we will provide you with a more detailed response.
+To protect your privacy, please avoid posting security-related issues on GitHub. Instead, send your questions to [support@refly.ai](mailto:support@refly.ai), and we will provide you with a more detailed response.
 
 ## License
 

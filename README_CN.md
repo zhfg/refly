@@ -159,11 +159,11 @@ Bash
 
 这些应用程序之间的原子"构建块"有很大的重叠。它们不是开源的，也没有像 VSCode 那样的插件系统供贡献者自定义。我们希望创造一个包含我们喜爱的所有功能，并更进一步的工具。
 
-感谢您关注 ReflyAI，我们真诚地希望 ReflyAI 能引起您的共鸣！🎵 请访问 https://reflyai.com/ 了解更多详情。
+感谢您关注 ReflyAI，我们真诚地希望 ReflyAI 能引起您的共鸣！🎵 请访问 https://refly.ai/ 了解更多详情。
 
 ## 安全问题
 
-为保护您的隐私，请避免在 GitHub 上发布安全相关问题。相反，请将您的问题发送至 [security@reflyai.com](mailto:security@reflyai.com)，我们将为您提供更详细的答复。
+为保护您的隐私，请避免在 GitHub 上发布安全相关问题。相反，请将您的问题发送至 [support@refly.ai](mailto:support@refly.ai)，我们将为您提供更详细的答复。
 
 ## 协议
 
