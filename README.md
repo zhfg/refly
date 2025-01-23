@@ -2,44 +2,20 @@
 
 <div align="center">
 
-# [Refly.AI](https://refly.ai/)
-
-## 🌟 The AI Native Creation Engine 🌟
+<h1 align="center" style="border-bottom: none">
+    <b>
+        <a href="https://www.refly.ai">Refly.AI</a><br>
+    </b>
+    ⭐️  The AI Native Creation Engine ⭐️ <br>
+</h1>
 
 Refly is an open-source AI-native creation engine. Refly's intuitive free-form canvas interface combines multi-threaded conversations, knowledge base RAG integration, contextual memory, intelligent search, WYSIWYG AI editor and more, empowering you to effortlessly transform ideas into production-ready content.
 
-[🚀 Refly v0.2.3 Released! Featuring Enhanced Product Onboarding and Professional Knowledge Base Interface Upgrades!](https://docs.refly.ai/changelog/v0.2.3)
+[🚀 Refly v0.2.3 Released! Featuring Enhanced Product Onboarding!](https://docs.refly.ai/changelog/v0.2.3)
 
 [Refly Cloud](https://refly.ai/) · [Self-hosting](https://refly.ai/) · [Forum](https://github.com/refly-ai/refly/discussions) · [Discord](https://discord.gg/bWjffrb89h) · [Twitter](https://x.com/reflyai) · [Documentation](https://x.com/reflyai)
 
-Refly is an open-source AI-native creation engine. Refly's intuitive free-form canvas interface combines multi-threaded conversations, knowledge base RAG integration, contextual memory, intelligent search, WYSIWYG AI editor and more, empowering you to effortlessly transform ideas into production-ready content.
-
 </div>
-
-## Features
-
-1. **Multi-threaded dialogues:** Refly implements an innovative multi-threaded dialogues mechanism that allows you to freely switch between multiple independent conversation topics. This enables more fluid and natural thought expansion and in-depth discussions, effectively breaking through the limitations of traditional conversations. It helps build complex and effective **Agentic Workflows** in **human-AI collaboration**.
-2. **AI-Powered Capabilities:** Leveraging AI models, after inputting a question, users can flexibly select any node on the canvas as context to generate new node content. This includes **AI web search, AI knowledge base search, AI-recommended questions, and AI document smart generation**. It integrates capabilities like Perplexity AI and Stanford Storm into a single workspace.
-3. **Context Memory:** Providing precise temporary knowledge base support for each conversation, ensuring the AI model can accurately understand and respond to your questions. Similar to Cursor, you can flexibly select any node in the canvas or add references as context.
-4. **Knowledge Base Integration:** Supports importing diverse external resources and intelligently integrating them into the canvas based on your needs. This helps build a comprehensive knowledge system and create a personalized thinking space. With intelligent retrieval technologies like RAG (Retrieval-Augmented Generation), you can make semantic queries, making it a true second brain.
-5. **Quotes:** Support flexible selection of content from various resources, documents, memos, or skill outputs, allowing one-click addition as contextual references to enhance the accuracy and depth of conversations.
-6. **AI Document Editing:** Beyond providing powerful real-time Markdown editing capabilities, it supports intelligent selection of document content and AI-assisted precise modifications and refinements based on your needs, offering you a Notion-like powerful AI editor.
-
-## How to Use?
-
-- **Cloud**
-  - We've deployed a Refly Cloud version that allows zero-configuration usage, offering all capabilities of the self-hosted version, including free access to GPT-4o-mini and limited trials of GPT-4o and Claude-3.5-Sonnet
-- **Self-hosting Refly Community Edition**
-  - Get started quickly with our [Getting Started Guide](https://docs.refly.ai/) to run Refly in your environment. For more detailed references and in-depth instructions, please refer to our documentation.
-- **Refly for enterprise / organizations**
-
-## Stay Updated
-
-> Star Us
-
-Star Refly on GitHub to receive instant notifications about new version releases.
-
-![stay-tuned](https://github.com/user-attachments/assets/877dfeb7-1088-41f1-9176-468d877ded0a)
 
 ## Quick Start
 
@@ -95,6 +71,31 @@ Visit [http://localhost:3000](http://localhost:3000/) to start using ReflyAI.
 Deploy ReflyAI to Azure with one click using terraform.
 
 - [Azure Terraform by @nikawang](https://github.com/douban/charts/tree/master/charts/dify)
+
+## Features
+
+1. **Multi-threaded dialogues:** Refly implements an innovative multi-threaded dialogues mechanism that allows you to freely switch between multiple independent conversation topics. This enables more fluid and natural thought expansion and in-depth discussions, effectively breaking through the limitations of traditional conversations. It helps build complex and effective **Agentic Workflows** in **human-AI collaboration**.
+2. **AI-Powered Capabilities:** Leveraging AI models, after inputting a question, users can flexibly select any node on the canvas as context to generate new node content. This includes **AI web search, AI knowledge base search, AI-recommended questions, and AI document smart generation**. It integrates capabilities like Perplexity AI and Stanford Storm into a single workspace.
+3. **Context Memory:** Providing precise temporary knowledge base support for each conversation, ensuring the AI model can accurately understand and respond to your questions. Similar to Cursor, you can flexibly select any node in the canvas or add references as context.
+4. **Knowledge Base Integration:** Supports importing diverse external resources and intelligently integrating them into the canvas based on your needs. This helps build a comprehensive knowledge system and create a personalized thinking space. With intelligent retrieval technologies like RAG (Retrieval-Augmented Generation), you can make semantic queries, making it a true second brain.
+5. **Quotes:** Support flexible selection of content from various resources, documents, memos, or skill outputs, allowing one-click addition as contextual references to enhance the accuracy and depth of conversations.
+6. **AI Document Editing:** Beyond providing powerful real-time Markdown editing capabilities, it supports intelligent selection of document content and AI-assisted precise modifications and refinements based on your needs, offering you a Notion-like powerful AI editor.
+
+## How to Use?
+
+- **Cloud**
+  - We've deployed a Refly Cloud version that allows zero-configuration usage, offering all capabilities of the self-hosted version, including free access to GPT-4o-mini and limited trials of GPT-4o and Claude-3.5-Sonnet
+- **Self-hosting Refly Community Edition**
+  - Get started quickly with our [Getting Started Guide](https://docs.refly.ai/) to run Refly in your environment. For more detailed references and in-depth instructions, please refer to our documentation.
+- **Refly for enterprise / organizations**
+
+## Stay Updated
+
+> Star Us
+
+Star Refly on GitHub to receive instant notifications about new version releases.
+
+![stay-tuned](https://github.com/user-attachments/assets/877dfeb7-1088-41f1-9176-468d877ded0a)
 
 ## Contributing Guidelines
 
