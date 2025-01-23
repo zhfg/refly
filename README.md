@@ -75,11 +75,28 @@ Deploy ReflyAI to Azure with one click using terraform.
 ## Features
 
 1. **Multi-threaded dialogues:** Refly implements an innovative multi-threaded dialogues mechanism that allows you to freely switch between multiple independent conversation topics. This enables more fluid and natural thought expansion and in-depth discussions, effectively breaking through the limitations of traditional conversations. It helps build complex and effective **Agentic Workflows** in **human-AI collaboration**.
+
+![multi-threaded-dialogues](https://github.com/user-attachments/assets/9dbff21f-cf01-42e7-a76f-eb16b1a11c97)
+
 2. **AI-Powered Capabilities:** Leveraging AI models, after inputting a question, users can flexibly select any node on the canvas as context to generate new node content. This includes **AI web search, AI knowledge base search, AI-recommended questions, and AI document smart generation**. It integrates capabilities like Perplexity AI and Stanford Storm into a single workspace.
+
+![ai-powered-capabilities](https://github.com/user-attachments/assets/be4e18f9-07bb-4b91-90a5-ee2c27bfbf6f)
+
 3. **Context Memory:** Providing precise temporary knowledge base support for each conversation, ensuring the AI model can accurately understand and respond to your questions. Similar to Cursor, you can flexibly select any node in the canvas or add references as context.
+
+![context-memory](https://github.com/user-attachments/assets/fd95abae-8090-4a6f-a67b-99246568f5d7)
+
 4. **Knowledge Base Integration:** Supports importing diverse external resources and intelligently integrating them into the canvas based on your needs. This helps build a comprehensive knowledge system and create a personalized thinking space. With intelligent retrieval technologies like RAG (Retrieval-Augmented Generation), you can make semantic queries, making it a true second brain.
+
+![knowledge-base-integration](https://github.com/user-attachments/assets/263425a8-ed18-4765-9c6a-020fcd867ab2)
+
 5. **Quotes:** Support flexible selection of content from various resources, documents, memos, or skill outputs, allowing one-click addition as contextual references to enhance the accuracy and depth of conversations.
+
+![quotes](https://github.com/user-attachments/assets/27725ad6-cca2-490a-ba50-59a9577dd174)
+
 6. **AI Document Editing:** Beyond providing powerful real-time Markdown editing capabilities, it supports intelligent selection of document content and AI-assisted precise modifications and refinements based on your needs, offering you a Notion-like powerful AI editor.
+
+![ai-document-editing](https://github.com/user-attachments/assets/9f11b8eb-dd9d-4691-aca1-d3f11ff801ab)
 
 ## How to Use?
 
