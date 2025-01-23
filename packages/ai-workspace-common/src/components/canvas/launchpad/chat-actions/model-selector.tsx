@@ -7,7 +7,7 @@ import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 
 import { PiWarningCircleBold } from 'react-icons/pi';
-import { ModelInfo, TokenUsageMeter } from '@refly/openapi-schema';
+import { ModelInfo, SubscriptionPlanType, TokenUsageMeter } from '@refly/openapi-schema';
 import { IconModel, ModelProviderIcons } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useListModels } from '@refly-packages/ai-workspace-common/queries';
 import { IconSubscription } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -86,8 +86,8 @@ const GroupHeader = memo(
     setSubscribeModalVisible,
   }: {
     type: 'premium' | 'standard' | 'free';
-    tokenUsage: any;
-    planTier: string;
+    tokenUsage: TokenUsageMeter;
+    planTier: SubscriptionPlanType;
     setDropdownOpen: (open: boolean) => void;
     setSubscribeModalVisible: (visible: boolean) => void;
   }) => {
@@ -97,7 +97,7 @@ const GroupHeader = memo(
       return (
         <div className="flex justify-between items-center">
           <span className="text-sm">{t('copilot.modelSelector.premium')}</span>
-          {planTier === 'free' && tokenUsage?.t1TokenQuota === 0 ? (
+          {planTier === 'free' && tokenUsage?.t1CountQuota === 0 ? (
             <Button
               type="text"
               size="small"
@@ -189,7 +189,7 @@ export const ModelSelector = memo(
       gcTime: 10 * 60 * 1000, // Cache for 10 minutes
     });
 
-    const { tokenUsage, isUsageLoading, refetchUsage } = useSubscriptionUsage();
+    const { tokenUsage, isUsageLoading } = useSubscriptionUsage();
 
     const modelList = useMemo(() => modelListData?.data, [modelListData?.data]);
     const t1Disabled = useMemo(
