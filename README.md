@@ -1,5 +1,3 @@
-![refly-cover](https://github.com/user-attachments/assets/6df63040-1708-462b-849e-5114f7f53f09)
-
 <div align="center">
 
 <h1 align="center" style="border-bottom: none">
@@ -16,6 +14,8 @@ Refly is an open-source AI-native creation engine. Refly's intuitive free-form c
 [Refly Cloud](https://refly.ai/) · [Self-hosting](https://refly.ai/) · [Forum](https://github.com/refly-ai/refly/discussions) · [Discord](https://discord.gg/bWjffrb89h) · [Twitter](https://x.com/reflyai) · [Documentation](https://x.com/reflyai)
 
 </div>
+
+![refly-cover](https://github.com/user-attachments/assets/6df63040-1708-462b-849e-5114f7f53f09)
 
 ## Quick Start
 
