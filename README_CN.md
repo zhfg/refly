@@ -1,20 +1,18 @@
-# README 中文版本
+![refly-cover](https://github.com/user-attachments/assets/6df63040-1708-462b-849e-5114f7f53f09)
 
-https://powerformer.feishu.cn/space/api/box/stream/download/asynccode/?code=MTMyZDg5ODgwMjY4YWI3NmQzNDY4YjA1MDRkM2U4MjhfVXNvSGpON283M1o5Sm50MUZRdjUxY25jN3dsZzdsc2NfVG9rZW46SjNpMmJKaXRabzMydGZ4VTVNZ2NzbHFWbk9kXzE3Mzc2MzQ1MzE6MTczNzYzODEzMV9WNA
+<div align="center">
 
 # [Refly.AI](https://refly.ai/)
 
 ## 🌟 AI Native 内容创作引擎 🌟
 
----
-
 Refly 是一个开源的 AI 原生创作引擎。Refly 直观的自由画布界面集成了多线程对话、RAG 检索流程、上下文记忆、智能搜索和 AI 文档编辑等功能，让您轻松地将创意转化为完整作品。
 
-[🚀 Refly v0.2.3 正式发布！全新升级产品引导体验和知识库专业界面升级！](https://x.com/reflyai)
+[🚀 Refly v0.2.3 正式发布！全新升级产品引导体验和知识库专业界面升级！](<[https://x.com/reflyai](https://docs.refly.ai/changelog/v0.2.3)>)
 
 [Refly Cloud](https://refly.ai/) · [Self-hosting](https://refly.ai/) · [Forum](https://github.com/refly-ai/refly/discussions) · [Discord](https://discord.gg/bWjffrb89h) · [Twitter](https://x.com/reflyai) · [Documentation](https://x.com/reflyai)
 
-https://powerformer.feishu.cn/space/api/box/stream/download/asynccode/?code=YjA0YzZiNGIwNjgxYWIyNjAxYWExZWJlMTMwNjZhOGZfN0NjbFdOckJOOTBFbmR6MUljdTd2TTJyemdOdEg5TTZfVG9rZW46V1ExVGIwWG45b3VxbzJ4ZWV0UGNKSXZmbkhlXzE3Mzc2MzQ1MzE6MTczNzYzODEzMV9WNA
+</div>
 
 ## 快速开始
 
@@ -97,7 +95,7 @@ Bash
 
 在 GitHub 上给 Refly 星标，即可即时接收新版本发布的通知。
 
-![stay-tuned](./assets/stay-tuned.gif)
+![stay-tuned](https://github.com/user-attachments/assets/877dfeb7-1088-41f1-9176-468d877ded0a)
 
 ## 贡献指南
 

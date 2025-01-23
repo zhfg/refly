@@ -1,18 +1,20 @@
 https://powerformer.feishu.cn/space/api/box/stream/download/asynccode/?code=NjI2NGUzNmJjZjI1NDgwMzBmMzg3ZDY3Nzg2ZDFkNThfM0hvdlg3NXA4R1Z3SkhTcUdES2Z1VE4yd1piaWQxMzFfVG9rZW46UEdyRWJ5Qktyb1ZvdGJ4U2gwQWNPYVhQbmJoXzE3Mzc2MzQ0NzQ6MTczNzYzODA3NF9WNA
 
+<div align="center">
+
 # [Refly.AI](https://refly.ai/)
 
 ## 🌟 The AI Native Creation Engine 🌟
 
 Refly is an open-source AI-native creation engine. Refly's intuitive free-form canvas interface combines multi-threaded conversations, knowledge base RAG integration, contextual memory, intelligent search, WYSIWYG AI editor and more, empowering you to effortlessly transform ideas into production-ready content.
 
-[🚀 Refly v0.2.3 Released! Featuring Enhanced Product Onboarding and Professional Knowledge Base Interface Upgrades!](https://x.com/reflyai)
+[🚀 Refly v0.2.3 Released! Featuring Enhanced Product Onboarding and Professional Knowledge Base Interface Upgrades!](https://docs.refly.ai/changelog/v0.2.3)
 
 [Refly Cloud](https://refly.ai/) · [Self-hosting](https://refly.ai/) · [Forum](https://github.com/refly-ai/refly/discussions) · [Discord](https://discord.gg/bWjffrb89h) · [Twitter](https://x.com/reflyai) · [Documentation](https://x.com/reflyai)
 
-https://powerformer.feishu.cn/space/api/box/stream/download/asynccode/?code=MGIzNjhhM2NmMGZkYjRhOGQxYjVkMzhkNDBhNmE1NmJfbVlEdVlmZEplUTlYQXFzeHoxajFQang4YTJqa05MWUJfVG9rZW46STl2RWJ5YVlab1BCeTF4ZjU5Q2NMbncybmVoXzE3Mzc2MzQ0NzQ6MTczNzYzODA3NF9WNA
-
 Refly is an open-source AI-native creation engine. Refly's intuitive free-form canvas interface combines multi-threaded conversations, knowledge base RAG integration, contextual memory, intelligent search, WYSIWYG AI editor and more, empowering you to effortlessly transform ideas into production-ready content.
+
+</div>
 
 ## Features
 
@@ -37,7 +39,7 @@ Refly is an open-source AI-native creation engine. Refly's intuitive free-form c
 
 Star Refly on GitHub to receive instant notifications about new version releases.
 
-https://powerformer.feishu.cn/space/api/box/stream/download/asynccode/?code=NjJjM2FhMmQ0NTA3OGI1MGIzMDM4Njg3OWIzYWIxNWFfbzNmY3Y4RFBiMG45Z0J3ajI3cHlSdVludklmNkVvS3pfVG9rZW46TXhkYmJvN2JJb0JmWDB4enBuSmNaUWpLbldmXzE3Mzc2MzQ0NzQ6MTczNzYzODA3NF9WNA
+![stay-tuned](https://github.com/user-attachments/assets/877dfeb7-1088-41f1-9176-468d877ded0a)
 
 ## Quick Start
 
@@ -113,51 +115,12 @@ Looking for other ways to contribute and don't know where to start? Check out th
 
 If you have any questions, feel free to reach out to us. One of the best places to get more information and learn is the [ReflyAI Community](https://community.affine.pro/home), where you can connect with other like-minded individuals.
 
-### Contributors
-
-Not needed at the moment...
-
 ## Community and Contact
 
 - [GitHub Discussion](https://github.com/refly-ai/refly/discussions): Best for sharing feedback and asking questions.
 - [GitHub Issues](https://github.com/refly-ai/refly/issues): Best for reporting bugs and suggesting features when using ReflyAI. Please refer to our contribution guidelines.
 - [Discord](https://discord.gg/bWjffrb89h): Best for sharing your applications and interacting with the community.
 - [Twitter](https://x.com/reflyai): Best for sharing your applications and staying connected with the community.
-
-## Star History
-
-Not needed at the moment...
-
-## Upstreams
-
-We also want to thank the following open-source projects that make ReflyAI possible:
-
-1. Blocksuite - 💠 The open-source collaborative editor project behind ReflyAI.
-2. OctoBase - 🐙 The open-source database behind ReflyAI, local-first yet collaborative. A lightweight, extensible data engine written in Rust.
-3. yjs - Provides foundational support for CRDTs in our state management and data sync implementation.
-4. electron - Build cross-platform desktop applications with JavaScript, HTML, and CSS.
-5. React - A library for web and native user interfaces.
-6. napi-rs - A framework for building compiled Node.js add-ons in Rust via Node-API.
-7. Jotai - Primitive and flexible state management for React.
-8. async-call-rpc - A lightweight JSON RPC client and server.
-9. Vite - Next generation frontend tooling.
-10. Other upstream dependencies.
-
-We're incredibly grateful to the community for providing such powerful yet simple libraries that allow us to focus more on implementing product logic. We hope our project will also provide more accessible knowledge bases for everyone in the future.
-
-## Acknowledgments
-
-"We shape our tools, and thereafter our tools shape us." Many pioneers have inspired us during our development, such as:
-
-- The great "everything is a block" concept from Quip and Notion
-- The kanban system from Trello
-- No-code programmable datatables from Airtable and Miro
-- Infinite visual whiteboards from Miro and Whimsical
-- Object-based tagging systems from Remote and Capacities
-
-There is significant overlap in the atomic "building blocks" between these applications. They are not open source, nor do they have a plugin system like VSCode for contributors to customize. We aim to create a tool that includes all the features we love and goes even further.
-
-Thank you for your interest in ReflyAI, and we sincerely hope ReflyAI resonates with you! 🎵 Visit https://refly.ai/ for more details.
 
 ## Security Issues
 
