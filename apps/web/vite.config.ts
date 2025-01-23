@@ -2,7 +2,7 @@ import { defineConfig, searchForWorkspaceRoot, UserConfig } from 'vite';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 import react from '@vitejs/plugin-react';
 import preload from 'vite-plugin-preload';
-import path from 'path';
+import path from 'node:path';
 import postcss from './postcss.config';
 import { vitePluginForArco } from '@refly/arco-vite-plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';

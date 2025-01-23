@@ -8,15 +8,15 @@ export interface MinioConfig {
 }
 
 export default () => ({
-  port: Number.parseInt(process.env.PORT) || 3000,
-  wsPort: Number.parseInt(process.env.WS_PORT) || 1234,
+  port: Number.parseInt(process.env.PORT) || 5800,
+  wsPort: Number.parseInt(process.env.WS_PORT) || 5801,
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
     port: Number.parseInt(process.env.REDIS_PORT) || 6379,
     password: process.env.REDIS_PASSWORD || '',
   },
-  origin: process.env.ORIGIN || 'http://localhost:5173',
-  staticEndpoint: process.env.STATIC_ENDPOINT || 'http://localhost:3000/v1/misc/',
+  origin: process.env.ORIGIN || 'http://localhost:5700',
+  staticEndpoint: process.env.STATIC_ENDPOINT || 'http://localhost:5800/v1/misc/',
   minio: {
     internal: {
       endPoint: process.env.MINIO_INTERNAL_ENDPOINT || 'localhost',

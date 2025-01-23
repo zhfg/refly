@@ -4,9 +4,9 @@ import { HocuspocusProvider } from '@hocuspocus/provider';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/types';
 import { Edge } from '@xyflow/react';
-import { getWsServerOrigin } from '@refly-packages/utils/url';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useCollabToken } from '@refly-packages/ai-workspace-common/hooks/use-collab-token';
+import { wsServerOrigin } from '@refly-packages/ai-workspace-common/utils/env';
 
 interface CanvasContextType {
   canvasId: string;
@@ -81,7 +81,7 @@ export const CanvasProvider = ({
     const doc = new Y.Doc();
 
     const remoteProvider = new HocuspocusProvider({
-      url: getWsServerOrigin(),
+      url: wsServerOrigin,
       name: canvasId,
       token,
       document: doc,
