@@ -59,7 +59,11 @@ export const ActionButtons: FC<ActionButtonsProps> = memo(
             }}
           >
             {shouldShowMenu && (
-              <NodeActionMenu nodeId={nodeId} nodeType={type} onHoverCardStateChange={setIsHoverCardOpen} />
+              <NodeActionMenu
+                nodeId={nodeId}
+                nodeType={type}
+                onHoverCardStateChange={setIsHoverCardOpen}
+              />
             )}
           </div>
 

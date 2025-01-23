@@ -1,8 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { useMatch } from '@refly-packages/ai-workspace-common/utils/router';
-import { useExtensionMessage } from '../use-extension-message';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { onMessage, sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 
 // utils
 import { saveMockedResource } from '@/utils/save-mocked-resource';
@@ -22,7 +20,11 @@ export const useSyncWeblinkResourceMeta = () => {
     const data = event as any as BackgroundMessage;
     const { name } = data || {};
 
-    if (name === 'reflyStatusCheck' && data?.type === 'others' && getRuntime() === 'extension-csui') {
+    if (
+      name === 'reflyStatusCheck' &&
+      data?.type === 'others' &&
+      getRuntime() === 'extension-csui'
+    ) {
       makeTempResourceAndSave();
     }
   };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Timeline, Button, Spin, Collapse } from 'antd';
+import { Timeline, Spin, Collapse } from 'antd';
 import { IconLoading } from '@arco-design/web-react/icon';
 import { useMultilingualSearchStore } from '../stores/multilingual-search';
 import './search-progress.scss';
@@ -11,13 +11,16 @@ const renderStepResult = (step: string, result: any, t: any) => {
       return (
         <ul>
           <li>
-            {t('resource.multilingualSearch.steps.rewriteQuery.rewrittenQueries')}: {result.rewrittenQueries.join(', ')}
+            {t('resource.multilingualSearch.steps.rewriteQuery.rewrittenQueries')}:{' '}
+            {result.rewrittenQueries.join(', ')}
           </li>
           <li>
-            {t('resource.multilingualSearch.steps.rewriteQuery.outputLocale')}: {result.outputLocale}
+            {t('resource.multilingualSearch.steps.rewriteQuery.outputLocale')}:{' '}
+            {result.outputLocale}
           </li>
           <li>
-            {t('resource.multilingualSearch.steps.rewriteQuery.searchLocales')}: {result.searchLocales.join(', ')}
+            {t('resource.multilingualSearch.steps.rewriteQuery.searchLocales')}:{' '}
+            {result.searchLocales.join(', ')}
           </li>
         </ul>
       );
@@ -88,15 +91,14 @@ const getStepName = (step: string, t: any) => {
 
 export const SearchProgress: React.FC = () => {
   const { t } = useTranslation();
-  const { searchSteps, isSearching, results, clearSearchSteps, setProcessingStep } = useMultilingualSearchStore(
-    (state) => ({
+  const { searchSteps, isSearching, results, clearSearchSteps, setProcessingStep } =
+    useMultilingualSearchStore((state) => ({
       searchSteps: state.searchSteps,
       isSearching: state.isSearching,
       results: state.results,
       clearSearchSteps: state.clearSearchSteps,
       setProcessingStep: state.setProcessingStep,
-    }),
-  );
+    }));
 
   // 添加折叠面板的状态控制
   const [activeKeys, setActiveKeys] = useState<string[]>([]);
@@ -114,7 +116,10 @@ export const SearchProgress: React.FC = () => {
 
   const finishStep = searchSteps.find((step) => step.step === 'finish');
   const summaryText = finishStep
-    ? t('resource.multilingualSearch.progress.summary', { count: results.length, duration: finishStep.duration })
+    ? t('resource.multilingualSearch.progress.summary', {
+        count: results.length,
+        duration: finishStep.duration,
+      })
     : t('resource.multilingualSearch.steps.processing');
 
   // 处理折叠面板变化
@@ -137,7 +142,9 @@ export const SearchProgress: React.FC = () => {
                 items={searchSteps.map((step) => ({
                   dot:
                     step.step === 'Processing...' ? (
-                      <Spin indicator={<IconLoading style={{ fontSize: 12, color: '#00968f' }} spin />} />
+                      <Spin
+                        indicator={<IconLoading style={{ fontSize: 12, color: '#00968f' }} spin />}
+                      />
                     ) : undefined,
                   children: (
                     <div className="step-content">
@@ -145,7 +152,9 @@ export const SearchProgress: React.FC = () => {
                       {step.result && renderStepResult(step.step, step.result, t)}
                       {step.duration > 0 && (
                         <span className="duration">
-                          {t('resource.multilingualSearch.progress.duration', { duration: step.duration })}
+                          {t('resource.multilingualSearch.progress.duration', {
+                            duration: step.duration,
+                          })}
                         </span>
                       )}
                     </div>

@@ -40,9 +40,8 @@ React.js is a JavaScript library for building user interfaces, developed by Face
   `;
 };
 
-
 export const buildLibrarySearchChatHistoryExamples = () => {
-    return `
+  return `
   ## Examples with Chat History
   
   1. Direct Query (No Chat History Relevance):
@@ -147,5 +146,4 @@ export const buildLibrarySearchChatHistoryExamples = () => {
   - IP-based tracking for better security
   - Custom rate limits available for premium clients
     `;
-  };
-  
+};

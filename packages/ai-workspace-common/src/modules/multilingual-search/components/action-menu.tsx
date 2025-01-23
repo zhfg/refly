@@ -35,10 +35,12 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
   const { refetchUsage, storageUsage } = useSubscriptionUsage();
 
   const { selectedItems, results, setSelectedItems } = useMultilingualSearchStore();
-  const { setImportResourceModalVisible, insertNodePosition } = useImportResourceStoreShallow((state) => ({
-    setImportResourceModalVisible: state.setImportResourceModalVisible,
-    insertNodePosition: state.insertNodePosition,
-  }));
+  const { setImportResourceModalVisible, insertNodePosition } = useImportResourceStoreShallow(
+    (state) => ({
+      setImportResourceModalVisible: state.setImportResourceModalVisible,
+      insertNodePosition: state.insertNodePosition,
+    }),
+  );
   const [saveLoading, setSaveLoading] = useState(false);
 
   const handleSelectAll = (checked: boolean) => {
@@ -148,12 +150,19 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
             indeterminate={selectedItems.length > 0 && selectedItems.length < results.length}
             onChange={(e) => handleSelectAll(e.target.checked)}
           />
-          <p className="footer-count text-item">{t('resource.import.linkCount', { count: selectedItems.length })}</p>
+          <p className="footer-count text-item">
+            {t('resource.import.linkCount', { count: selectedItems.length })}
+          </p>
           <StorageLimit resourceCount={selectedItems.length} />
         </div>
         <div className="footer-action">
           <Button onClick={handleClose}>{t('common.cancel')}</Button>
-          <Button type="primary" onClick={handleSave} disabled={disableSave()} loading={saveLoading}>
+          <Button
+            type="primary"
+            onClick={handleSave}
+            disabled={disableSave()}
+            loading={saveLoading}
+          >
             {t('common.saveToCanvas')}
           </Button>
         </div>

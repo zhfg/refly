@@ -20,7 +20,9 @@ const items: SelectorItem[] = [
     command: (editor) => editor.chain().focus().clearNodes().run(),
     // I feel like there has to be a more efficient way to do this – feel free to PR if you know how!
     isActive: (editor) =>
-      editor.isActive('paragraph') && !editor.isActive('bulletList') && !editor.isActive('orderedList'),
+      editor.isActive('paragraph') &&
+      !editor.isActive('bulletList') &&
+      !editor.isActive('orderedList'),
   },
   {
     name: 'Heading 1',

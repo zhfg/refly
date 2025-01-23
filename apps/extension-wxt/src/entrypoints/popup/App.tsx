@@ -1,4 +1,4 @@
-import { Button, Spin } from '@arco-design/web-react';
+import { Button } from '@arco-design/web-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { reflyEnv } from '@/utils/env';
@@ -119,7 +119,7 @@ const App = () => {
             </ul>
             <p className="page-unsupported-hint">
               您可以在另一个页面（
-              <a href="https://zh.wikipedia.org/wiki/ChatGPT" target="_blank">
+              <a href="https://zh.wikipedia.org/wiki/ChatGPT" target="_blank" rel="noreferrer">
                 例如此页面
               </a>
               ）上尝试 Refly。

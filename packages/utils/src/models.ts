@@ -94,7 +94,7 @@ export const defaultModelList: ModelInfo[] = Object.values(modelMap).sort((a, b)
  * Aggregate token usage items by model tier and name
  */
 export const aggregateTokenUsage = (usageItems: TokenUsageItem[]): TokenUsageItem[] => {
-  let aggregatedUsage: Record<
+  const aggregatedUsage: Record<
     string,
     {
       inputTokens: number;

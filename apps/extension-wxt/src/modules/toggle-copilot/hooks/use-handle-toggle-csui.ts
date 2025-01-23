@@ -15,11 +15,14 @@ export const useToggleCSUI = () => {
 
   // for listen to Popup event to toggle copilot
   const copilotStore = useCopilotStore();
-  const [copilotStatusData] = useExtensionMessage<CopilotStatus>('toggleCopilotFromPopup', (req, res) => {
-    console.log('toggleCopilotFromPopup', req, res);
-    const { isCopilotOpen } = useCopilotStore.getState();
-    res.send(isCopilotOpen ? 'true' : 'false');
-  });
+  const [copilotStatusData] = useExtensionMessage<CopilotStatus>(
+    'toggleCopilotFromPopup',
+    (req, res) => {
+      console.log('toggleCopilotFromPopup', req, res);
+      const { isCopilotOpen } = useCopilotStore.getState();
+      res.send(isCopilotOpen ? 'true' : 'false');
+    },
+  );
 
   const handlerCopilotOpen = (data?: CopilotStatus) => {
     if (data?.name === 'toggleCopilotFromPopup') {

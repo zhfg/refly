@@ -3,7 +3,12 @@ import { z } from 'zod';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { safeStringifyJSON } from '@refly-packages/utils';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition, Source } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+  Source,
+} from '@refly-packages/openapi-schema';
 import { createSkillTemplateInventory } from '../inventory';
 
 // types
@@ -46,17 +51,27 @@ export class CommonQnA extends BaseSkill {
     return this.skills.some((skill) => skill.name === name);
   };
 
-  commonPreprocess = async (state: GraphState, config: SkillRunnableConfig, module: SkillPromptModule) => {
+  commonPreprocess = async (
+    state: GraphState,
+    config: SkillRunnableConfig,
+    module: SkillPromptModule,
+  ) => {
     const { messages = [] } = state;
     const { locale = 'en', modelInfo } = config.configurable;
 
     // Use shared query processor
-    const { optimizedQuery, query, usedChatHistory, hasContext, remainingTokens, mentionedContext } =
-      await processQuery({
-        config,
-        ctxThis: this,
-        state,
-      });
+    const {
+      optimizedQuery,
+      query,
+      usedChatHistory,
+      hasContext,
+      remainingTokens,
+      mentionedContext,
+    } = await processQuery({
+      config,
+      ctxThis: this,
+      state,
+    });
 
     let context = '';
     let sources: Source[] = [];
@@ -107,7 +122,10 @@ export class CommonQnA extends BaseSkill {
     return { requestMessages, sources };
   };
 
-  callCommonQnA = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+  callCommonQnA = async (
+    state: GraphState,
+    config: SkillRunnableConfig,
+  ): Promise<Partial<GraphState>> => {
     const { currentSkill } = config.configurable;
 
     // common preprocess

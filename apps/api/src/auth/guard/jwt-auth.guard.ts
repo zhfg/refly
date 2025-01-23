@@ -14,7 +14,10 @@ import { ACCESS_TOKEN_COOKIE } from '@refly-packages/utils';
 export class JwtAuthGuard implements CanActivate {
   private readonly logger = new Logger(JwtAuthGuard.name);
 
-  constructor(private jwtService: JwtService, private configService: ConfigService) {}
+  constructor(
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();

@@ -28,7 +28,9 @@ export const useCreateMemo = () => {
         },
         position: options.position,
       },
-      options.sourceNode ? [{ type: options.sourceNode.type, entityId: options.sourceNode.entityId }] : undefined,
+      options.sourceNode
+        ? [{ type: options.sourceNode.type, entityId: options.sourceNode.entityId }]
+        : undefined,
       false,
       true,
     );

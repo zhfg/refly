@@ -9,7 +9,11 @@ export const ToCItem = ({ item, onItemClick }) => {
         '--level': item.level,
       }}
     >
-      <a href={`#${item.id}`} onClick={(e) => onItemClick(e, item.id)} data-item-index={item.itemIndex}>
+      <a
+        href={`#${item.id}`}
+        onClick={(e) => onItemClick(e, item.id)}
+        data-item-index={item.itemIndex}
+      >
         {item.textContent}
       </a>
     </div>

@@ -86,7 +86,9 @@ export const calculateGroupBoundaries = (nodesToGroup: Node[], currentNodes: Nod
   const left = Math.min(...nodesWithAbsolutePos.map((n) => n.absolutePos.x));
   const right = Math.max(...nodesWithAbsolutePos.map((n) => n.absolutePos.x + n.dimensions.width));
   const top = Math.min(...nodesWithAbsolutePos.map((n) => n.absolutePos.y));
-  const bottom = Math.max(...nodesWithAbsolutePos.map((n) => n.absolutePos.y + n.dimensions.height));
+  const bottom = Math.max(
+    ...nodesWithAbsolutePos.map((n) => n.absolutePos.y + n.dimensions.height),
+  );
 
   const dimensions = {
     width: right - left + PADDING,

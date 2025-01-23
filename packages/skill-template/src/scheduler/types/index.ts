@@ -16,7 +16,10 @@ export interface SkillContextContentItemMetadata {
   entityId?: string;
 }
 
-export type SelectedContentDomain = 'resourceSelection' | 'documentSelection' | 'extensionWeblinkSelection';
+export type SelectedContentDomain =
+  | 'resourceSelection'
+  | 'documentSelection'
+  | 'extensionWeblinkSelection';
 
 export interface Chunk {
   content: string;

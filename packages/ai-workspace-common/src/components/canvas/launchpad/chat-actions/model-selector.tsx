@@ -8,7 +8,10 @@ import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common
 
 import { PiWarningCircleBold } from 'react-icons/pi';
 import { ModelInfo, SubscriptionPlanType, TokenUsageMeter } from '@refly/openapi-schema';
-import { IconModel, ModelProviderIcons } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconModel,
+  ModelProviderIcons,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useListModels } from '@refly-packages/ai-workspace-common/queries';
 import { IconSubscription } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { LuInfinity } from 'react-icons/lu';
@@ -24,7 +27,11 @@ interface ModelSelectorProps {
 }
 
 const UsageProgress = memo(
-  ({ used, quota, setDropdownOpen }: { used: number; quota: number; setDropdownOpen: (open: boolean) => void }) => {
+  ({
+    used,
+    quota,
+    setDropdownOpen,
+  }: { used: number; quota: number; setDropdownOpen: (open: boolean) => void }) => {
     const { t } = useTranslation();
     const setShowSettingModal = useSiderStoreShallow((state) => state.setShowSettingModal);
 
@@ -33,8 +40,14 @@ const UsageProgress = memo(
       setShowSettingModal(true);
     }, [setDropdownOpen, setShowSettingModal]);
 
-    const formattedUsed = useMemo(() => used?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') ?? '0', [used]);
-    const formattedQuota = useMemo(() => quota?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') ?? '0', [quota]);
+    const formattedUsed = useMemo(
+      () => used?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') ?? '0',
+      [used],
+    );
+    const formattedQuota = useMemo(
+      () => quota?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') ?? '0',
+      [quota],
+    );
 
     return (
       <div className="flex items-center gap-1 cursor-pointer" onClick={handleShowSettingModal}>
@@ -170,7 +183,13 @@ const SelectedModelDisplay = memo(({ model }: { model: ModelInfo | null }) => {
 SelectedModelDisplay.displayName = 'SelectedModelDisplay';
 
 export const ModelSelector = memo(
-  ({ placement = 'bottomLeft', trigger = ['click'], briefMode = false, model, setModel }: ModelSelectorProps) => {
+  ({
+    placement = 'bottomLeft',
+    trigger = ['click'],
+    briefMode = false,
+    model,
+    setModel,
+  }: ModelSelectorProps) => {
     const { t } = useTranslation();
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -303,7 +322,15 @@ export const ModelSelector = memo(
       }
 
       return items;
-    }, [t1Models, t2Models, freeModels, tokenUsage, planTier, setDropdownOpen, setSubscribeModalVisible]);
+    }, [
+      t1Models,
+      t2Models,
+      freeModels,
+      tokenUsage,
+      planTier,
+      setDropdownOpen,
+      setSubscribeModalVisible,
+    ]);
 
     const isModelDisabled = useCallback((meter: TokenUsageMeter, model: ModelInfo) => {
       if (meter && model) {

@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useEffect, useState, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow, Node } from '@xyflow/react';
-import { Button, Modal, Result } from 'antd';
+import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow } from '@xyflow/react';
+import { Button } from 'antd';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
@@ -13,10 +13,16 @@ import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/can
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
-import { CanvasProvider, useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import {
+  CanvasProvider,
+  useCanvasContext,
+} from '@refly-packages/ai-workspace-common/context/canvas';
 import { useEdgeStyles } from './constants';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
-import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import {
+  useCanvasStore,
+  useCanvasStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/canvas';
 import { BigSearchModal } from '@refly-packages/ai-workspace-common/components/search/modal';
 import { CanvasListModal } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal';
 import { LibraryModal } from '@refly-packages/ai-workspace-common/components/workspace/library-modal';
@@ -82,35 +88,35 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
   const edgeStyles = useEdgeStyles();
 
-  const { nodePreviews, showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow((state) => ({
-    nodePreviews: state.config[canvasId]?.nodePreviews,
-    showPreview: state.showPreview,
-    showLaunchpad: state.showLaunchpad,
-    showMaxRatio: state.showMaxRatio,
-  }));
-
-  const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } = useSiderStoreShallow(
+  const { nodePreviews, showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow(
     (state) => ({
+      nodePreviews: state.config[canvasId]?.nodePreviews,
+      showPreview: state.showPreview,
+      showLaunchpad: state.showLaunchpad,
+      showMaxRatio: state.showMaxRatio,
+    }),
+  );
+
+  const { showCanvasListModal, showLibraryModal, setShowCanvasListModal, setShowLibraryModal } =
+    useSiderStoreShallow((state) => ({
       showCanvasListModal: state.showCanvasListModal,
       showLibraryModal: state.showLibraryModal,
       setShowCanvasListModal: state.setShowCanvasListModal,
       setShowLibraryModal: state.setShowLibraryModal,
-    }),
-  );
+    }));
 
   const reactFlowInstance = useReactFlow();
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
   const { provider } = useCanvasContext();
 
-  const { config, operatingNodeId, setOperatingNodeId, setInitialFitViewCompleted } = useCanvasStoreShallow(
-    (state) => ({
+  const { config, operatingNodeId, setOperatingNodeId, setInitialFitViewCompleted } =
+    useCanvasStoreShallow((state) => ({
       config: state.config[canvasId],
       operatingNodeId: state.operatingNodeId,
       setOperatingNodeId: state.setOperatingNodeId,
       setInitialFitViewCompleted: state.setInitialFitViewCompleted,
-    }),
-  );
+    }));
   const hasCanvasSynced = config?.localSyncedAt > 0 && config?.remoteSyncedAt > 0;
 
   const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } = useCreateDocument();
@@ -226,7 +232,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       if (!container) return;
 
       const shouldShowLeft = container.scrollLeft > 0;
-      const shouldShowRight = container.scrollLeft < container.scrollWidth - container.clientWidth - 1;
+      const shouldShowRight =
+        container.scrollLeft < container.scrollWidth - container.clientWidth - 1;
 
       if (shouldShowLeft !== showLeftIndicator) {
         setShowLeftIndicator(shouldShowLeft);
@@ -281,22 +288,25 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   }, [provider?.status]);
 
   useEffect(() => {
-    const unsubscribe = locateToNodePreviewEmitter.on('locateToNodePreview', ({ canvasId: emittedCanvasId, id }) => {
-      if (emittedCanvasId === canvasId) {
-        requestAnimationFrame(() => {
-          const previewContainer = document.querySelector('.preview-container');
-          const targetPreview = document.querySelector(`[data-preview-id="${id}"]`);
+    const unsubscribe = locateToNodePreviewEmitter.on(
+      'locateToNodePreview',
+      ({ canvasId: emittedCanvasId, id }) => {
+        if (emittedCanvasId === canvasId) {
+          requestAnimationFrame(() => {
+            const previewContainer = document.querySelector('.preview-container');
+            const targetPreview = document.querySelector(`[data-preview-id="${id}"]`);
 
-          if (previewContainer && targetPreview) {
-            targetPreview.scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest',
-              inline: 'center',
-            });
-          }
-        });
-      }
-    });
+            if (previewContainer && targetPreview) {
+              targetPreview.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center',
+              });
+            }
+          });
+        }
+      },
+    );
 
     return unsubscribe;
   }, [canvasId]);
@@ -555,9 +565,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
           >
             <div className="relative h-full">
               <div className="flex gap-2 h-full">
-                {nodePreviews
-                  ?.filter(Boolean)
-                  ?.map((node) => <NodePreview key={node?.id} node={node} canvasId={canvasId} />)}
+                {nodePreviews?.filter(Boolean)?.map((node) => (
+                  <NodePreview key={node?.id} node={node} canvasId={canvasId} />
+                ))}
               </div>
             </div>
           </div>
@@ -578,15 +588,18 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
           />
         )}
 
-        {contextMenu.open && contextMenu.type === 'node' && contextMenu.nodeId && contextMenu.nodeType && (
-          <NodeContextMenu
-            open={contextMenu.open}
-            position={contextMenu.position}
-            nodeId={contextMenu.nodeId}
-            nodeType={contextMenu.nodeType}
-            setOpen={(open) => setContextMenu((prev) => ({ ...prev, open }))}
-          />
-        )}
+        {contextMenu.open &&
+          contextMenu.type === 'node' &&
+          contextMenu.nodeId &&
+          contextMenu.nodeType && (
+            <NodeContextMenu
+              open={contextMenu.open}
+              position={contextMenu.position}
+              nodeId={contextMenu.nodeId}
+              nodeType={contextMenu.nodeType}
+              setOpen={(open) => setContextMenu((prev) => ({ ...prev, open }))}
+            />
+          )}
 
         {contextMenu.open && contextMenu.type === 'selection' && (
           <SelectionContextMenu

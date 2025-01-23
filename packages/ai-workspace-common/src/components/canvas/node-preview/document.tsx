@@ -1,8 +1,5 @@
-import { useEffect, useState, memo } from 'react';
-import { Splitter } from 'antd';
+import { useState, memo } from 'react';
 import { DocumentEditor } from '@refly-packages/ai-workspace-common/components/document';
-import ResourceDeck from '@refly-packages/ai-workspace-common/components/resource-view/resource-deck';
-import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 interface DocumentNodePreviewProps {
@@ -20,14 +17,23 @@ export const DocumentNodePreview = memo(
 
     // Early return if no node data
     if (!nodeData?.entityId || !nodeData?.entityType) {
-      return <div className="h-full flex items-center justify-center text-gray-500">No document data available</div>;
+      return (
+        <div className="h-full flex items-center justify-center text-gray-500">
+          No document data available
+        </div>
+      );
     }
 
     const { entityId, entityType, node } = nodeData;
 
     return (
       <div className="h-full overflow-hidden">
-        <DocumentEditor docId={entityId} deckSize={deckSize} setDeckSize={setDeckSize} node={node} />
+        <DocumentEditor
+          docId={entityId}
+          deckSize={deckSize}
+          setDeckSize={setDeckSize}
+          node={node}
+        />
       </div>
     );
   },

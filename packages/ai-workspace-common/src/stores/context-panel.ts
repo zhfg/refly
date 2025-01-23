@@ -80,16 +80,22 @@ export const useContextPanelStore = create<ContextPanelState>()(
     ...defaultState,
 
     // selected text
-    updateCurrentSelectedMark: (mark: Mark) => set((state) => ({ ...state, currentSelectedMark: mark })),
-    updateEnableMultiSelect: (enableMultiSelect: boolean) => set((state) => ({ ...state, enableMultiSelect })),
-    updateCurrentSelectedMarks: (marks: Mark[]) => set((state) => ({ ...state, currentSelectedMarks: marks })),
+    updateCurrentSelectedMark: (mark: Mark) =>
+      set((state) => ({ ...state, currentSelectedMark: mark })),
+    updateEnableMultiSelect: (enableMultiSelect: boolean) =>
+      set((state) => ({ ...state, enableMultiSelect })),
+    updateCurrentSelectedMarks: (marks: Mark[]) =>
+      set((state) => ({ ...state, currentSelectedMarks: marks })),
     updateFilterErrorInfo: (errorInfo: FilterErrorInfo) =>
       set((state) => ({ ...state, filterErrorInfo: { ...state.filterErrorInfo, ...errorInfo } })),
-    setFormErrors: (errors: Record<string, string>) => set((state) => ({ ...state, formErrors: errors })),
+    setFormErrors: (errors: Record<string, string>) =>
+      set((state) => ({ ...state, formErrors: errors })),
 
     addContextItem: (item: IContextItem) =>
       set((state) => {
-        const existingIndex = state.contextItems.findIndex((contextItem) => contextItem.entityId === item.entityId);
+        const existingIndex = state.contextItems.findIndex(
+          (contextItem) => contextItem.entityId === item.entityId,
+        );
 
         if (existingIndex >= 0) {
           // Update existing item

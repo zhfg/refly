@@ -72,7 +72,9 @@ export const truncateContext = (context: IContext, maxTokens: number): IContext 
   const truncatedContext: IContext = { ...context };
 
   // Helper function to truncate a list of items, truncate priority is resource > document > contentList
-  const truncateItems = <T extends SkillContextContentItem | SkillContextResourceItem | SkillContextDocumentItem>(
+  const truncateItems = <
+    T extends SkillContextContentItem | SkillContextResourceItem | SkillContextDocumentItem,
+  >(
     items: T[],
     getContent: (item: T) => string,
     setContent: (item: T, content: string) => T,
@@ -128,9 +130,9 @@ export async function mergeAndTruncateContexts(
 ): Promise<IContext> {
   // 1. Handle contentList (highest priority)
   const allContentList = [...relevantContext.contentList, ...containerLevelContext.contentList];
-  const uniqueContentList = Array.from(new Set(allContentList.map((item) => JSON.stringify(item)))).map((item) =>
-    JSON.parse(item),
-  );
+  const uniqueContentList = Array.from(
+    new Set(allContentList.map((item) => JSON.stringify(item))),
+  ).map((item) => JSON.parse(item));
 
   let sortedContentList: SkillContextContentItem[] = [];
   if (uniqueContentList.length > 1) {
@@ -152,9 +154,11 @@ export async function mergeAndTruncateContexts(
     new Set(
       combinedItems.map((item) => {
         const id =
-          (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextDocumentItem).document?.docId;
+          (item as SkillContextResourceItem).resource?.resourceId ||
+          (item as SkillContextDocumentItem).document?.docId;
         const content =
-          (item as SkillContextResourceItem).resource?.content || (item as SkillContextDocumentItem).document?.content;
+          (item as SkillContextResourceItem).resource?.content ||
+          (item as SkillContextDocumentItem).document?.content;
         return `${id}:${content}`;
       }),
     ),
@@ -162,9 +166,11 @@ export async function mergeAndTruncateContexts(
     (key) =>
       combinedItems.find((item) => {
         const id =
-          (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextDocumentItem).document?.docId;
+          (item as SkillContextResourceItem).resource?.resourceId ||
+          (item as SkillContextDocumentItem).document?.docId;
         const content =
-          (item as SkillContextResourceItem).resource?.content || (item as SkillContextDocumentItem).document?.content;
+          (item as SkillContextResourceItem).resource?.content ||
+          (item as SkillContextDocumentItem).document?.content;
         return `${id}:${content}` === key;
       })!,
   );
@@ -172,10 +178,13 @@ export async function mergeAndTruncateContexts(
   // 4. Sort by similarity
   const itemsForSorting = uniqueCombinedItems.map((item) => ({
     content:
-      (item as SkillContextResourceItem).resource?.content || (item as SkillContextDocumentItem).document?.content,
+      (item as SkillContextResourceItem).resource?.content ||
+      (item as SkillContextDocumentItem).document?.content,
     metadata: {
       type: 'resource' in item ? 'resource' : 'document',
-      id: (item as SkillContextResourceItem).resource?.resourceId || (item as SkillContextDocumentItem).document?.docId,
+      id:
+        (item as SkillContextResourceItem).resource?.resourceId ||
+        (item as SkillContextDocumentItem).document?.docId,
     },
   }));
 
@@ -198,7 +207,11 @@ export async function mergeAndTruncateContexts(
   );
 
   // 5. Truncate
-  const truncatedContext = truncateContextWithPriority(sortedContentList, sortedCombinedItems, maxTokens);
+  const truncatedContext = truncateContextWithPriority(
+    sortedContentList,
+    sortedCombinedItems,
+    maxTokens,
+  );
 
   return truncatedContext;
 }

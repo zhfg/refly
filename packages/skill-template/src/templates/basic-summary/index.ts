@@ -5,7 +5,10 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
+import {
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+} from '@refly-packages/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -34,7 +37,11 @@ export class BasicSummarySkill extends BaseSkill {
         {
           key: 'contentList',
           limit: 1,
-          preferredSelectionKeys: ['resourceSelection', 'documentSelection', 'extensionWeblinkSelection'],
+          preferredSelectionKeys: [
+            'resourceSelection',
+            'documentSelection',
+            'extensionWeblinkSelection',
+          ],
         },
       ],
     },
@@ -83,7 +90,9 @@ export class BasicSummarySkill extends BaseSkill {
     } else if (contextDocuments?.length > 0) {
       contentListText = contextDocuments[0].document?.content;
     } else if (contentList?.length > 0) {
-      contentListText = contentList.map((item, index) => `${index + 1}. ${item.content}`).join('\n\n');
+      contentListText = contentList
+        .map((item, index) => `${index + 1}. ${item.content}`)
+        .join('\n\n');
     }
 
     const llm = this.engine.chatModel({

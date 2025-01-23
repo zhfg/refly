@@ -50,7 +50,6 @@ export const buildQueryPriorityInstruction = () => {
   `;
 };
 
-
 export const buildSpecificQueryInstruction = () => {
   return `
   ## Specific Query Responses:

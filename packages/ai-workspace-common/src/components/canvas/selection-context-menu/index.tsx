@@ -11,7 +11,13 @@ interface SelectionContextMenuProps {
   setOpen: (open: boolean) => void;
 }
 
-export const SelectionContextMenu: FC<SelectionContextMenuProps> = ({ open, position, nodeId, nodeType, setOpen }) => {
+export const SelectionContextMenu: FC<SelectionContextMenuProps> = ({
+  open,
+  position,
+  nodeId,
+  nodeType,
+  setOpen,
+}) => {
   const reactFlowInstance = useReactFlow();
   const menuRef = useRef<HTMLDivElement>(null);
 

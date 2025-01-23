@@ -3,7 +3,11 @@ import { summarizeChatHistory, summarizeContext } from '../summarizer';
 import { z } from 'zod';
 import { BaseSkill, SkillRunnableConfig } from '../../../base';
 import { SkillTemplateConfig } from '@refly-packages/openapi-schema';
-import { MAX_CONTEXT_RATIO, MAX_QUERY_TOKENS_RATIO, DEFAULT_MODEL_CONTEXT_LIMIT } from '../constants';
+import {
+  MAX_CONTEXT_RATIO,
+  MAX_QUERY_TOKENS_RATIO,
+  DEFAULT_MODEL_CONTEXT_LIMIT,
+} from '../constants';
 import { truncateTextWithToken } from '../truncator';
 import { safeStringifyJSON } from '@refly-packages/utils';
 import { extractStructuredData } from '../extractor';
@@ -14,9 +18,18 @@ export const preprocessContext = (context: IContext): IContext => {
   const { resources = [], documents = [], contentList = [] } = context;
 
   const preprocessedContext = {
-    resources: resources.map((r, index) => ({ ...r, resource: { ...r.resource, resourceId: `resource-${index}` } })),
-    documents: documents.map((c, index) => ({ ...c, document: { ...c.document, docId: `document-${index}` } })),
-    contentList: contentList.map((c, index) => ({ ...c, metadata: { ...c.metadata, entityId: `content-${index}` } })),
+    resources: resources.map((r, index) => ({
+      ...r,
+      resource: { ...r.resource, resourceId: `resource-${index}` },
+    })),
+    documents: documents.map((c, index) => ({
+      ...c,
+      document: { ...c.document, docId: `document-${index}` },
+    })),
+    contentList: contentList.map((c, index) => ({
+      ...c,
+      metadata: { ...c.metadata, entityId: `content-${index}` },
+    })),
   };
 
   return preprocessedContext;
@@ -26,7 +39,7 @@ export const postprocessContext = (
   mentionedContextList: MentionedContextItem[],
   originalContext: IContext,
 ): IContext => {
-  let context: IContext = {
+  const context: IContext = {
     resources: [],
     documents: [],
     contentList: [],
@@ -35,7 +48,9 @@ export const postprocessContext = (
   mentionedContextList.forEach((item) => {
     if (item.type === 'document') {
       // Find original document from originalContext by entityId
-      const originalDocument = originalContext.documents.find((c, index) => `document-${index}` === item.entityId);
+      const originalDocument = originalContext.documents.find(
+        (c, index) => `document-${index}` === item.entityId,
+      );
       if (originalDocument) {
         context.documents.push({
           ...originalDocument,
@@ -44,7 +59,9 @@ export const postprocessContext = (
       }
     } else if (item.type === 'resource') {
       // Find original resource from originalContext by entityId
-      const originalResource = originalContext.resources.find((r, index) => `resource-${index}` === item.entityId);
+      const originalResource = originalContext.resources.find(
+        (r, index) => `resource-${index}` === item.entityId,
+      );
       if (originalResource) {
         context.resources.push({
           ...originalResource,
@@ -70,7 +87,9 @@ export const postprocessContext = (
 
 // Add schema for query analysis
 const queryAnalysisSchema = z.object({
-  rewrittenQuery: z.string().describe('The query after entity clarification, keeping original intent intact'),
+  rewrittenQuery: z
+    .string()
+    .describe('The query after entity clarification, keeping original intent intact'),
   mentionedContext: z
     .array(
       z.object({
@@ -81,14 +100,21 @@ const queryAnalysisSchema = z.object({
       }),
     )
     .describe('Array of referenced context items'),
-  intent: z.enum(['SEARCH_QA', 'WRITING', 'READING_COMPREHENSION', 'OTHER']).describe("The query's primary purpose"),
+  intent: z
+    .enum(['SEARCH_QA', 'WRITING', 'READING_COMPREHENSION', 'OTHER'])
+    .describe("The query's primary purpose"),
   confidence: z.number().min(0).max(1).describe('Confidence score for the analysis'),
   reasoning: z.string().describe('Explanation of why the query was kept or modified'),
 });
 
 export async function analyzeQueryAndContext(
   query: string,
-  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+  ctx: {
+    config: SkillRunnableConfig;
+    ctxThis: BaseSkill;
+    state: GraphState;
+    tplConfig: SkillTemplateConfig;
+  },
 ): Promise<QueryAnalysis> {
   // set current step
   ctx.config.metadata.step = { name: 'analyzeContext' };
@@ -200,10 +226,16 @@ Please analyze the query, focusing primarily on the current query and available 
 
 export const preprocessQuery = (
   query: string,
-  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+  ctx: {
+    config: SkillRunnableConfig;
+    ctxThis: BaseSkill;
+    state: GraphState;
+    tplConfig: SkillTemplateConfig;
+  },
 ) => {
   const { modelInfo } = ctx.config.configurable;
-  const maxQueryTokens = (modelInfo.contextLimit || DEFAULT_MODEL_CONTEXT_LIMIT) * MAX_QUERY_TOKENS_RATIO;
+  const maxQueryTokens =
+    (modelInfo.contextLimit || DEFAULT_MODEL_CONTEXT_LIMIT) * MAX_QUERY_TOKENS_RATIO;
 
   return truncateTextWithToken(query, maxQueryTokens);
 };

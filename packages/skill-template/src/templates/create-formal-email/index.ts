@@ -5,7 +5,11 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+} from '@refly-packages/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -134,7 +138,9 @@ Please craft an email based on the user's query and the provided context (if any
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
       ...chatHistory,
-      new HumanMessage(`Please write an email based on the provided query and context in ${locale} language.`),
+      new HumanMessage(
+        `Please write an email based on the provided query and context in ${locale} language.`,
+      ),
     ]);
 
     return { messages: [responseMessage] };

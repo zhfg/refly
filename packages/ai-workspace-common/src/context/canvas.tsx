@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
-import { useCookie } from 'react-use';
 import * as Y from 'yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { IndexeddbPersistence } from 'y-indexeddb';
@@ -17,7 +16,10 @@ interface CanvasContextType {
 
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
-const providerCache = new Map<string, { remote: HocuspocusProvider; local: IndexeddbPersistence }>();
+const providerCache = new Map<
+  string,
+  { remote: HocuspocusProvider; local: IndexeddbPersistence }
+>();
 
 const getTitleFromYDoc = (ydoc: Y.Doc) => {
   const title = ydoc.getText('title');
@@ -40,7 +42,10 @@ const getEdgesFromYDoc = (ydoc: Y.Doc) => {
   return Array.from(uniqueEdgesMap.values());
 };
 
-export const CanvasProvider = ({ canvasId, children }: { canvasId: string; children: React.ReactNode }) => {
+export const CanvasProvider = ({
+  canvasId,
+  children,
+}: { canvasId: string; children: React.ReactNode }) => {
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const MAX_RETRIES = 3;
   const RETRY_DELAY = 2000;

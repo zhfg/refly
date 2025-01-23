@@ -1,7 +1,5 @@
 import { useState, memo } from 'react';
-import { Splitter } from 'antd';
 import { ResourceView } from '@refly-packages/ai-workspace-common/components/resource-view';
-import ResourceDeck from '@refly-packages/ai-workspace-common/components/resource-view/resource-deck';
 
 interface ResourceNodePreviewProps {
   resourceId?: string;

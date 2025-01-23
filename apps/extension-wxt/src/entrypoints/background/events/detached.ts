@@ -1,4 +1,4 @@
-import { Tabs, browser } from 'wxt/browser';
+import { Tabs } from 'wxt/browser';
 
 export const onDetached = (tabId: number, detachInfo: Tabs.OnDetachedDetachInfoType) => {
   // 在此处处理标签切换

@@ -1,66 +1,63 @@
-import { useState, useEffect } from "react"
-import { Tabs } from "@arco-design/web-react"
-import { Helmet } from "react-helmet"
+import { useState, useEffect } from 'react';
+import { Tabs } from '@arco-design/web-react';
+import { Helmet } from 'react-helmet';
 
 // styles
-import "./index.scss"
+import './index.scss';
 // components
-import { useTranslation } from "react-i18next"
-import { useSearchParams } from "@refly-packages/ai-workspace-common/utils/router"
-import { useNavigate } from "@refly-packages/ai-workspace-common/utils/router"
+import { useTranslation } from 'react-i18next';
+import { useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
-import { AccountSetting } from "@refly-packages/ai-workspace-common/components/settings/account-setting"
-import { LanguageSetting } from "@refly-packages/ai-workspace-common/components/settings/language-setting"
-import { Subscription } from "@refly-packages/ai-workspace-common/components/settings/subscription"
+import { AccountSetting } from '@refly-packages/ai-workspace-common/components/settings/account-setting';
+import { LanguageSetting } from '@refly-packages/ai-workspace-common/components/settings/language-setting';
+import { Subscription } from '@refly-packages/ai-workspace-common/components/settings/subscription';
 
-import { RiAccountBoxLine } from "react-icons/ri"
-import { HiOutlineLanguage } from "react-icons/hi2"
-import { MdOutlineSubscriptions } from "react-icons/md"
+import { RiAccountBoxLine } from 'react-icons/ri';
+import { HiOutlineLanguage } from 'react-icons/hi2';
+import { MdOutlineSubscriptions } from 'react-icons/md';
 
-import PageTitle from "@/pages/page-title"
+import PageTitle from '@/pages/page-title';
 
-const TabPane = Tabs.TabPane
-const iconStyle = { fontSize: 16, marginRight: 8 }
+const TabPane = Tabs.TabPane;
+const iconStyle = { fontSize: 16, marginRight: 8 };
 
 const Settings = () => {
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const { t } = useTranslation()
-  const [tab, setTab] = useState<string>("account")
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { t } = useTranslation();
+  const [tab, setTab] = useState<string>('account');
 
   const handleTabChange = (key: string) => {
-    setTab(key)
-    navigate(`?tab=${key}`)
-  }
+    setTab(key);
+    navigate(`?tab=${key}`);
+  };
 
   useEffect(() => {
-    const tab = searchParams.get("tab") as string
-    setTab(tab || "account")
-  }, [searchParams])
+    const tab = searchParams.get('tab') as string;
+    setTab(tab || 'account');
+  }, [searchParams]);
 
   return (
     <div className="settings-container">
       <Helmet>
         <title>
-          {t("productName")} | {t("tabMeta.settings.title")}
+          {t('productName')} | {t('tabMeta.settings.title')}
         </title>
       </Helmet>
-      <PageTitle title={t("settings.title")} />
+      <PageTitle title={t('settings.title')} />
       <div className="settings-inner-container pt-4">
-        <Tabs
-          activeTab={tab}
-          tabPosition="left"
-          size="large"
-          onChange={handleTabChange}>
+        <Tabs activeTab={tab} tabPosition="left" size="large" onChange={handleTabChange}>
           <TabPane
             key="account"
             className="settings-tab"
             title={
               <span className="settings-tab-title">
                 <RiAccountBoxLine style={iconStyle} />
-                {t("settings.tabs.account")}
+                {t('settings.tabs.account')}
               </span>
-            }>
+            }
+          >
             <AccountSetting />
           </TabPane>
 
@@ -70,9 +67,10 @@ const Settings = () => {
             title={
               <span className="settings-tab-title">
                 <MdOutlineSubscriptions style={iconStyle} />
-                {t("settings.tabs.subscription")}
+                {t('settings.tabs.subscription')}
               </span>
-            }>
+            }
+          >
             <Subscription />
           </TabPane>
 
@@ -82,15 +80,16 @@ const Settings = () => {
             title={
               <span className="settings-tab-title">
                 <HiOutlineLanguage style={iconStyle} />
-                {t("settings.tabs.language")}
+                {t('settings.tabs.language')}
               </span>
-            }>
+            }
+          >
             <LanguageSetting />
           </TabPane>
         </Tabs>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Settings
+export default Settings;

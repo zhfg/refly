@@ -3,7 +3,10 @@ import { ContextItem } from './context-item';
 
 import { AddBaseMarkContext } from './components/add-base-mark-context';
 import { mapSelectionTypeToContentList } from './utils/contentListSelection';
-import { FilterErrorInfo, IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import {
+  FilterErrorInfo,
+  IContextItem,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useReactFlow } from '@xyflow/react';
 import { cn } from '@refly-packages/utils/cn';
 
@@ -28,7 +31,9 @@ const ContextManagerComponent = ({
     const entityIdNodeMap = new Map(
       nodes.filter((node) => node.data?.entityId).map((node) => [node.data?.entityId, node]),
     );
-    return new Map(contextItems.map((item) => [item.entityId, entityIdNodeMap.get(item.entityId)?.selected]));
+    return new Map(
+      contextItems.map((item) => [item.entityId, entityIdNodeMap.get(item.entityId)?.selected]),
+    );
   }, [contextItems]);
 
   const handleRemoveItem = (item: IContextItem) => {

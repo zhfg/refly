@@ -1,4 +1,4 @@
-import { Button, Modal } from 'antd';
+import { Modal } from 'antd';
 
 // styles
 import './index.scss';
@@ -9,12 +9,11 @@ import { IconSubscription } from '@refly-packages/ai-workspace-common/components
 
 export const SubscribeModal = () => {
   const { t } = useTranslation();
-  const { subscribeModalVisible: visible, setSubscribeModalVisible: setVisible } = useSubscriptionStoreShallow(
-    (state) => ({
+  const { subscribeModalVisible: visible, setSubscribeModalVisible: setVisible } =
+    useSubscriptionStoreShallow((state) => ({
       subscribeModalVisible: state.subscribeModalVisible,
       setSubscribeModalVisible: state.setSubscribeModalVisible,
-    }),
-  );
+    }));
 
   return (
     <Modal

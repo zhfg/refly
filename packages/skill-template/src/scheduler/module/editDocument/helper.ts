@@ -5,7 +5,7 @@ import { EditSection, EditResult } from './types';
 export const extractContentAroundSelection = (
   content: string,
   selection: { startIndex: number; endIndex: number },
-  contextWindow: number = 500,
+  contextWindow = 500,
 ) => {
   const start = Math.max(0, selection.startIndex - contextWindow);
   const end = Math.min(content.length, selection.endIndex + contextWindow);

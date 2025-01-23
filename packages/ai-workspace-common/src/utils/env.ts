@@ -1,6 +1,6 @@
 import { IRuntime } from '@refly/common-types';
 
-export const enum IENV {
+export enum IENV {
   PRODUCTION = 'production',
   STAGING = 'staging',
   TEST = 'test',
@@ -29,13 +29,13 @@ export class ReflyEnv {
   }
   async tryGetTab(t) {
     try {
-      return await chrome.tabs.get(parseInt(t));
+      return await chrome.tabs.get(Number.parseInt(t));
     } catch {
       return null;
     }
   }
   getOsType() {
-    let t = navigator.userAgent,
+    const t = navigator.userAgent,
       n = navigator.platform,
       a = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K', 'macOS'],
       i = ['Win32', 'Win64', 'Windows', 'WinCE'],
@@ -50,10 +50,11 @@ export class ReflyEnv {
             ? 'Android'
             : /Linux/.test(n)
               ? 'Linux'
-              : (console.error('unable to detect os type, use Windows as default', n, t), 'Windows');
+              : (console.error('unable to detect os type, use Windows as default', n, t),
+                'Windows');
   }
   isChrome() {
-    let t = navigator.userAgent,
+    const t = navigator.userAgent,
       n = t.includes('Chrome') && t.includes('Safari'),
       a = t.includes('Edg'),
       i = t.includes('OPR');

@@ -24,7 +24,13 @@ interface QueryProcessorResult {
 export async function processQuery(options: QueryProcessorOptions): Promise<QueryProcessorResult> {
   const { config, ctxThis, state } = options;
   const { query: originalQuery } = state;
-  const { modelInfo, chatHistory: rawChatHistory = [], resources, documents, contentList } = config.configurable;
+  const {
+    modelInfo,
+    chatHistory: rawChatHistory = [],
+    resources,
+    documents,
+    contentList,
+  } = config.configurable;
   const { tplConfig } = config?.configurable || {};
 
   let optimizedQuery = '';
@@ -66,7 +72,8 @@ export async function processQuery(options: QueryProcessorOptions): Promise<Quer
   if (checkIsSupportedModel(modelInfo)) {
     // Define query rewrite conditions
     const LONG_QUERY_TOKENS_THRESHOLD = 500;
-    const needRewriteQuery = queryTokens < LONG_QUERY_TOKENS_THRESHOLD && (hasContext || chatHistoryTokens > 0);
+    const needRewriteQuery =
+      queryTokens < LONG_QUERY_TOKENS_THRESHOLD && (hasContext || chatHistoryTokens > 0);
     ctxThis.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}`);
 
     if (needRewriteQuery) {

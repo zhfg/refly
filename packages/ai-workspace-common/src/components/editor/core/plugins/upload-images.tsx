@@ -100,7 +100,9 @@ export const createImageUpload =
         const node = schema.nodes.image?.create({ src: imageSrc });
         if (!node) return;
 
-        const transaction = view.state.tr.replaceWith(pos, pos, node).setMeta(uploadKey, { remove: { id } });
+        const transaction = view.state.tr
+          .replaceWith(pos, pos, node)
+          .setMeta(uploadKey, { remove: { id } });
         view.dispatch(transaction);
       },
       () => {
@@ -125,7 +127,12 @@ export const handleImagePaste = (view: EditorView, event: ClipboardEvent, upload
   return false;
 };
 
-export const handleImageDrop = (view: EditorView, event: DragEvent, moved: boolean, uploadFn: UploadFn) => {
+export const handleImageDrop = (
+  view: EditorView,
+  event: DragEvent,
+  moved: boolean,
+  uploadFn: UploadFn,
+) => {
   if (!moved && event.dataTransfer?.files.length) {
     event.preventDefault();
     const [file] = Array.from(event.dataTransfer.files);

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Avatar, Button, Divider, Input, List, message, Empty } from 'antd';
+import { Avatar, Button, Input, List, message, Empty } from 'antd';
 import { HiLink } from 'react-icons/hi';
 import { HiOutlineXMark } from 'react-icons/hi2';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
@@ -229,7 +229,12 @@ export const ImportFromWeblink = () => {
 
         <div className="flex items-center gap-x-[8px] flex-shrink-0">
           <Button onClick={() => setImportResourceModalVisible(false)}>{t('common.cancel')}</Button>
-          <Button type="primary" onClick={handleSave} disabled={disableSave()} loading={saveLoading}>
+          <Button
+            type="primary"
+            onClick={handleSave}
+            disabled={disableSave()}
+            loading={saveLoading}
+          >
             {t('common.saveToCanvas')}
           </Button>
         </div>
@@ -277,12 +282,19 @@ const RenderItem = (props: { item: LinkMeta }) => {
           title={
             <div className="intergation-result-intro">
               <p>
-                <span className="intergation-result-url" onClick={() => window.open(item?.url, '_blank')}>
+                <span
+                  className="intergation-result-url"
+                  onClick={() => window.open(item?.url, '_blank')}
+                >
                   {item?.url}
                 </span>
               </p>
               <p>
-                {item?.isError ? <span className="text-red-500">{t('resource.import.scrapeError')}</span> : item?.title}
+                {item?.isError ? (
+                  <span className="text-red-500">{t('resource.import.scrapeError')}</span>
+                ) : (
+                  item?.title
+                )}
               </p>
             </div>
           }

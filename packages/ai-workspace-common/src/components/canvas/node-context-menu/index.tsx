@@ -11,7 +11,13 @@ interface NodeContextMenuProps {
   setOpen: (open: boolean) => void;
 }
 
-export const NodeContextMenu: FC<NodeContextMenuProps> = ({ open, position, nodeId, nodeType, setOpen }) => {
+export const NodeContextMenu: FC<NodeContextMenuProps> = ({
+  open,
+  position,
+  nodeId,
+  nodeType,
+  setOpen,
+}) => {
   const reactFlowInstance = useReactFlow();
   const menuRef = useRef<HTMLDivElement>(null);
 

@@ -10,7 +10,10 @@ import {
   inlineOperationRulesPrompt,
 } from './core';
 import { contextualExamples, noContextExamples } from './examples';
-import { buildContextualInlineEditDocumentContext, buildNoContextInlineEditDocumentContext } from './context';
+import {
+  buildContextualInlineEditDocumentContext,
+  buildNoContextInlineEditDocumentContext,
+} from './context';
 import { commonQueryAndContextPriorityRules, editDocumentContextRules } from '../common';
 import { buildSpecificQueryInstruction } from '../../common/query';
 
@@ -104,7 +107,10 @@ ${importantRemindersPrompt}
 ${buildSpecificQueryInstruction()}
 `;
 
-export const buildInlineEditDocumentSystemPrompt = (locale: string, needPrepareContext: boolean) => {
+export const buildInlineEditDocumentSystemPrompt = (
+  locale: string,
+  needPrepareContext: boolean,
+) => {
   if (needPrepareContext) {
     return buildContextualInlineEditDocumentPrompt();
   }

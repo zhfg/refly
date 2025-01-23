@@ -13,7 +13,10 @@ import { SubscriptionService } from '@/subscription/subscription.service';
 export class UserService {
   private logger = new Logger(UserService.name);
 
-  constructor(private prisma: PrismaService, private subscriptionService: SubscriptionService) {}
+  constructor(
+    private prisma: PrismaService,
+    private subscriptionService: SubscriptionService,
+  ) {}
 
   async getUserSettings(user: User) {
     const userPo = await this.prisma.user.findUnique({

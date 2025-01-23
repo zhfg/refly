@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { useMatch, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { LocalSettings, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import {
+  LocalSettings,
+  useUserStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/user';
 import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { mapDefaultLocale } from '@refly-packages/ai-workspace-common/utils/locale';
 import { LOCALE } from '@refly/common-types';
@@ -64,9 +67,12 @@ export const useGetUserSettings = () => {
     userStore.setIsLogin(true);
 
     // set tour guide
-    const showSettingsGuideModal = !['skipped', 'completed'].includes(res?.data?.onboarding?.settings);
+    const showSettingsGuideModal = !['skipped', 'completed'].includes(
+      res?.data?.onboarding?.settings,
+    );
     userStore.setShowSettingsGuideModal(showSettingsGuideModal);
-    const showTourModal = !showSettingsGuideModal && !['skipped', 'completed'].includes(res?.data?.onboarding?.tour);
+    const showTourModal =
+      !showSettingsGuideModal && !['skipped', 'completed'].includes(res?.data?.onboarding?.tour);
     userStore.setShowTourModal(showTourModal);
 
     // Add localSettings

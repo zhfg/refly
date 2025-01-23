@@ -1,4 +1,4 @@
-import { memo, useRef } from 'react';
+import { useRef } from 'react';
 import { Message as message } from '@arco-design/web-react';
 
 import copyToClipboard from 'copy-to-clipboard';

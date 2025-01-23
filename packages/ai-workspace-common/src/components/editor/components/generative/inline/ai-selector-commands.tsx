@@ -1,4 +1,10 @@
-import { ArrowDownWideNarrow, CheckCheck, RefreshCcwDot, StepForward, WrapText } from 'lucide-react';
+import {
+  ArrowDownWideNarrow,
+  CheckCheck,
+  RefreshCcwDot,
+  StepForward,
+  WrapText,
+} from 'lucide-react';
 import { useEditor } from '../../../core/components';
 import { getPrevText } from '../../../core/utils';
 import { CommandGroup, CommandItem, CommandSeparator, CommandList } from '../../ui/command';

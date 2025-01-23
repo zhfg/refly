@@ -48,7 +48,10 @@ const RequestAccess = () => {
               <Button
                 type="primary"
                 onClick={() => {
-                  window.open('https://powerformer.feishu.cn/share/base/form/shrcnaVXPlMWxOC6cJDa7q3cPzd', '_blank');
+                  window.open(
+                    'https://powerformer.feishu.cn/share/base/form/shrcnaVXPlMWxOC6cJDa7q3cPzd',
+                    '_blank',
+                  );
                 }}
               >
                 {t('requestAccess.apply')}

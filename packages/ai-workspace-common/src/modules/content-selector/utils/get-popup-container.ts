@@ -8,5 +8,7 @@ export const getExtensionPopupContainer = () => {
 };
 
 export const getPopupContainer = () => {
-  return ['web', 'extension-sidepanel'].includes(getRuntime()) ? getWebPopupContainer() : getExtensionPopupContainer();
+  return ['web', 'extension-sidepanel'].includes(getRuntime())
+    ? getWebPopupContainer()
+    : getExtensionPopupContainer();
 };

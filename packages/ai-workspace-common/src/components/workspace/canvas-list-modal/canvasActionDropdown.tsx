@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Button, Dropdown, DropdownProps, Popconfirm, MenuProps, message, Modal, Checkbox, CheckboxProps } from 'antd';
-import { IconMoreHorizontal, IconDelete, IconEdit } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { Button, Dropdown, DropdownProps, MenuProps, Modal, Checkbox, CheckboxProps } from 'antd';
+import {
+  IconMoreHorizontal,
+  IconDelete,
+  IconEdit,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-canvas';
 import { useTranslation } from 'react-i18next';
 import { CanvasRename } from '@refly-packages/ai-workspace-common/components/canvas/top-toolbar/canvas-rename';
@@ -19,7 +23,14 @@ interface CanvasActionDropdown {
 }
 
 export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
-  const { canvasId, canvasName, btnSize = 'small', updateShowStatus, afterDelete, afterRename } = props;
+  const {
+    canvasId,
+    canvasName,
+    btnSize = 'small',
+    updateShowStatus,
+    afterDelete,
+    afterRename,
+  } = props;
   const [popupVisible, setPopupVisible] = useState(false);
   const { t } = useTranslation();
   const { deleteCanvas } = useDeleteCanvas();
@@ -127,7 +138,12 @@ export const CanvasActionDropdown = (props: CanvasActionDropdown) => {
           items,
         }}
       >
-        <Button size={btnSize} onClick={(e) => e.stopPropagation()} type="text" icon={<IconMoreHorizontal />} />
+        <Button
+          size={btnSize}
+          onClick={(e) => e.stopPropagation()}
+          type="text"
+          icon={<IconMoreHorizontal />}
+        />
       </Dropdown>
 
       <div onClick={(e) => e.stopPropagation()}>

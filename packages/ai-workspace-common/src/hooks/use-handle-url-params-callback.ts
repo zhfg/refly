@@ -41,7 +41,9 @@ export const useHandleUrlParamsCallback = () => {
     if (paySuccess || payCancel) {
       setShowModal(true);
       setTimeout(() => {
-        const title = paySuccess ? t('settings.action.paySuccessNotify') : t('settings.action.payCancelNotify');
+        const title = paySuccess
+          ? t('settings.action.paySuccessNotify')
+          : t('settings.action.payCancelNotify');
         const description = paySuccess
           ? t('settings.action.paySuccessDescription')
           : t('settings.action.payCancelDescription');

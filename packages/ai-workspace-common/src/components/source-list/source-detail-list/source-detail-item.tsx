@@ -62,7 +62,7 @@ export const SourceDetailItem = memo((props: SourceDetailItemProps) => {
           <>
             <div className="site-intro-content">
               <p className="site-intro-site-name">{item.title}</p>
-              <a className="site-intro-site-url" href={item.url} target="_blank">
+              <a className="site-intro-site-url" href={item.url} target="_blank" rel="noreferrer">
                 {item.url}
               </a>
             </div>
@@ -118,7 +118,9 @@ export const SourceDetailItemWrapper = memo((props: SourceDetailItemProps) => {
       mouseEnterDelay={0.5}
       getPopupContainer={(node: Element) => {
         const container = getPopupContainer();
-        return (!isWeb ? (container.querySelector('.ai-copilot-container') as Element) : container) as HTMLElement;
+        return (
+          !isWeb ? (container.querySelector('.ai-copilot-container') as Element) : container
+        ) as HTMLElement;
       }}
     >
       <div>

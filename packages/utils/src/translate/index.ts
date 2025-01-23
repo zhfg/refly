@@ -34,7 +34,7 @@ export async function detectLanguage(text: string): Promise<LangCode> {
 export async function translateText(
   text: string,
   targetLanguage: string,
-  sourceLanguage: string = 'auto',
+  sourceLanguage = 'auto',
 ): Promise<string> {
   try {
     // 如果目标语言是 auto，直接返回原文
@@ -44,10 +44,18 @@ export async function translateText(
 
     // 处理中文的特殊情况
     const normalizedTarget =
-      targetLanguage === 'zh-Hans' ? 'zh-CN' : targetLanguage === 'zh-Hant' ? 'zh-TW' : targetLanguage;
+      targetLanguage === 'zh-Hans'
+        ? 'zh-CN'
+        : targetLanguage === 'zh-Hant'
+          ? 'zh-TW'
+          : targetLanguage;
 
     const normalizedSource =
-      sourceLanguage === 'zh-Hans' ? 'zh-CN' : sourceLanguage === 'zh-Hant' ? 'zh-TW' : sourceLanguage;
+      sourceLanguage === 'zh-Hans'
+        ? 'zh-CN'
+        : sourceLanguage === 'zh-Hant'
+          ? 'zh-TW'
+          : sourceLanguage;
 
     const response = await fetch(
       `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=${normalizedSource}&tl=${normalizedTarget}&q=${encodeURIComponent(
@@ -77,7 +85,7 @@ export async function translateText(
 export async function batchTranslateText(
   texts: string[],
   targetLanguage: string,
-  sourceLanguage: string = 'auto',
+  sourceLanguage = 'auto',
 ): Promise<string[]> {
   // 使用 Promise.all 并发处理，但建议添加延迟避免请求过快
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

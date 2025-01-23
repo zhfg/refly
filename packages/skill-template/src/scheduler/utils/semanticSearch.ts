@@ -49,12 +49,15 @@ export async function sortContentBySimilarity(
   });
 
   // 2. index documents
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.configurable.user, {
-    content: documents,
-    query,
-    k: documents.length,
-    filter: undefined,
-  });
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(
+    ctx.config.configurable.user,
+    {
+      content: documents,
+      query,
+      k: documents.length,
+      filter: undefined,
+    },
+  );
   const sortedContent = res.data;
 
   // 4. return sorted content
@@ -85,17 +88,22 @@ export async function sortDocumentsBySimilarity(
   });
 
   // 2. index documents
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.configurable.user, {
-    content: documents,
-    query,
-    k: documents.length,
-    filter: undefined,
-  });
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(
+    ctx.config.configurable.user,
+    {
+      content: documents,
+      query,
+      k: documents.length,
+      filter: undefined,
+    },
+  );
   const sortedDocuments = res.data;
 
   // 4. return sorted documents
   return sortedDocuments
-    .map((item) => comingDocuments.find((document) => document.document?.docId === item.metadata.docId))
+    .map((item) =>
+      comingDocuments.find((document) => document.document?.docId === item.metadata.docId),
+    )
     .filter((document): document is SkillContextDocumentItem => document !== undefined);
 }
 
@@ -118,17 +126,22 @@ export async function sortResourcesBySimilarity(
   });
 
   // 2. index documents
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.configurable.user, {
-    content: documents,
-    query,
-    k: documents.length,
-    filter: undefined,
-  });
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(
+    ctx.config.configurable.user,
+    {
+      content: documents,
+      query,
+      k: documents.length,
+      filter: undefined,
+    },
+  );
   const sortedResources = res.data;
 
   // 4. return sorted resources
   return sortedResources
-    .map((item) => resources.find((resource) => resource.resource?.resourceId === item.metadata.resourceId))
+    .map((item) =>
+      resources.find((resource) => resource.resource?.resourceId === item.metadata.resourceId),
+    )
     .filter((resource): resource is SkillContextResourceItem => resource !== undefined);
 }
 
@@ -138,7 +151,9 @@ export async function processSelectedContentWithSimilarity(
   maxTokens: number,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextContentItem[]> {
-  const MAX_RAG_RELEVANT_CONTENT_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_CONTENT_RATIO);
+  const MAX_RAG_RELEVANT_CONTENT_MAX_TOKENS = Math.floor(
+    maxTokens * MAX_RAG_RELEVANT_CONTENT_RATIO,
+  );
   const MAX_SHORT_CONTENT_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_CONTENT_RATIO);
 
   if (contentList.length === 0) {
@@ -153,7 +168,7 @@ export async function processSelectedContentWithSimilarity(
     sortedContent = contentList;
   }
 
-  let result: SkillContextContentItem[] = [];
+  const result: SkillContextContentItem[] = [];
   let usedTokens = 0;
 
   // 2. 按相关度顺序处理 content
@@ -229,7 +244,9 @@ export async function processDocumentsWithSimilarity(
   maxTokens: number,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextDocumentItem[]> {
-  const MAX_RAG_RELEVANT_DOCUMENTS_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_DOCUMENTS_RATIO);
+  const MAX_RAG_RELEVANT_DOCUMENTS_MAX_TOKENS = Math.floor(
+    maxTokens * MAX_RAG_RELEVANT_DOCUMENTS_RATIO,
+  );
   const MAX_SHORT_DOCUMENTS_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_DOCUMENTS_RATIO);
 
   if (comingDocuments.length === 0) {
@@ -244,7 +261,7 @@ export async function processDocumentsWithSimilarity(
     sortedDocuments = comingDocuments;
   }
 
-  let result: SkillContextDocumentItem[] = [];
+  const result: SkillContextDocumentItem[] = [];
   let usedTokens = 0;
 
   // 2. 按相关度顺序处理 document
@@ -253,7 +270,8 @@ export async function processDocumentsWithSimilarity(
 
     if (
       documentTokens > MAX_NEED_RECALL_TOKEN ||
-      (typeof document?.metadata?.useWholeContent === 'boolean' && !document.metadata?.useWholeContent)
+      (typeof document?.metadata?.useWholeContent === 'boolean' &&
+        !document.metadata?.useWholeContent)
     ) {
       // 1.1 大内容，直接走召回
       let relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
@@ -343,7 +361,10 @@ export async function processDocumentsWithSimilarity(
 
       relevantChunks = truncateChunks(relevantChunks, remainingTokens);
       const relevantContent = assembleChunks(relevantChunks);
-      result.push({ ...remainingDocument, document: { ...remainingDocument.document!, content: relevantContent } });
+      result.push({
+        ...remainingDocument,
+        document: { ...remainingDocument.document!, content: relevantContent },
+      });
       usedTokens += countToken(relevantContent);
     }
   }
@@ -357,7 +378,9 @@ export async function processResourcesWithSimilarity(
   maxTokens: number,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextResourceItem[]> {
-  const MAX_RAG_RELEVANT_RESOURCES_MAX_TOKENS = Math.floor(maxTokens * MAX_RAG_RELEVANT_RESOURCES_RATIO);
+  const MAX_RAG_RELEVANT_RESOURCES_MAX_TOKENS = Math.floor(
+    maxTokens * MAX_RAG_RELEVANT_RESOURCES_RATIO,
+  );
   const MAX_SHORT_RESOURCES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_RESOURCES_RATIO);
 
   if (resources.length === 0) {
@@ -372,7 +395,7 @@ export async function processResourcesWithSimilarity(
     sortedResources = resources;
   }
 
-  let result: SkillContextResourceItem[] = [];
+  const result: SkillContextResourceItem[] = [];
   let usedTokens = 0;
 
   // 2. 按相关度顺序处理 resources
@@ -469,7 +492,10 @@ export async function processResourcesWithSimilarity(
 
       relevantChunks = truncateChunks(relevantChunks, remainingTokens);
       const relevantContent = assembleChunks(relevantChunks);
-      result.push({ ...remainingResource, resource: { ...remainingResource.resource!, content: relevantContent } });
+      result.push({
+        ...remainingResource,
+        resource: { ...remainingResource.resource!, content: relevantContent },
+      });
       usedTokens += countToken(relevantContent);
     }
   }
@@ -487,9 +513,15 @@ export async function processMentionedContextWithSimilarity(
   const MAX_RESOURCE_RAG_RELEVANT_RATIO = 0.3;
   const MAX_DOCUMENT_RAG_RELEVANT_RATIO = 0.3;
 
-  const MAX_CONTENT_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_CONTENT_RAG_RELEVANT_RATIO);
-  const MAX_RESOURCE_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_RESOURCE_RAG_RELEVANT_RATIO);
-  const MAX_DOCUMENT_RAG_RELEVANT_MAX_TOKENS = Math.floor(maxTokens * MAX_DOCUMENT_RAG_RELEVANT_RATIO);
+  const MAX_CONTENT_RAG_RELEVANT_MAX_TOKENS = Math.floor(
+    maxTokens * MAX_CONTENT_RAG_RELEVANT_RATIO,
+  );
+  const MAX_RESOURCE_RAG_RELEVANT_MAX_TOKENS = Math.floor(
+    maxTokens * MAX_RESOURCE_RAG_RELEVANT_RATIO,
+  );
+  const MAX_DOCUMENT_RAG_RELEVANT_MAX_TOKENS = Math.floor(
+    maxTokens * MAX_DOCUMENT_RAG_RELEVANT_RATIO,
+  );
 
   // 处理 contentList
   const processedContentList = await processSelectedContentWithSimilarity(
@@ -529,7 +561,7 @@ export async function processWholeSpaceWithSimilarity(
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<(SkillContextResourceItem | SkillContextDocumentItem)[]> {
   // 1. scope projects for get relevant chunks
-  let relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
+  const relevantChunks = await knowledgeBaseSearchGetRelevantChunks(
     query,
     {
       entities: [],
@@ -641,21 +673,27 @@ export async function inMemoryGetRelevantChunks(
       tenantId: ctx.config.configurable.user.uid,
     },
   };
-  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(ctx.config.configurable.user, {
-    content: doc,
-    query,
-    k: 10,
-    filter: undefined,
-    needChunk: true,
-    additionalMetadata: {},
-  });
+  const res = await ctx.ctxThis.engine.service.inMemorySearchWithIndexing(
+    ctx.config.configurable.user,
+    {
+      content: doc,
+      query,
+      k: 10,
+      filter: undefined,
+      needChunk: true,
+      additionalMetadata: {},
+    },
+  );
   const relevantChunks = res.data as DocumentInterface[];
 
   return relevantChunks;
 }
 
-export function truncateChunks(chunks: DocumentInterface[], maxTokens: number): DocumentInterface[] {
-  let result: DocumentInterface[] = [];
+export function truncateChunks(
+  chunks: DocumentInterface[],
+  maxTokens: number,
+): DocumentInterface[] {
+  const result: DocumentInterface[] = [];
   let usedTokens = 0;
 
   for (const chunk of chunks) {

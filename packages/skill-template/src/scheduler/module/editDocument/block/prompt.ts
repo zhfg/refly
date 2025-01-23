@@ -1,16 +1,24 @@
 import { Document } from '@refly-packages/openapi-schema';
 import { HighlightSelection } from '../types';
-import { 
-  commonQueryAndContextPriorityRules, 
+import {
+  commonQueryAndContextPriorityRules,
   referenceContextHandlingPrompt,
-  editDocumentCommonRules,
   editDocumentContextRules,
 } from '../common';
 import { buildLocaleFollowInstruction } from '../../common/locale-follow';
 import { contextualExamples, noContextExamples } from './examples';
 import { buildSpecificQueryInstruction } from '../../common/query';
-import { buildBlockEditDocumentCoreInstructionsPrompt, importantRemindersPrompt, editPriorityRulesPrompt, highlightContextEmphasisPrompt, highlightOperationRulesPrompt } from './core';
-import { buildContextualBlockEditDocumentContext, buildNoContextBlockEditDocumentContext } from './context';
+import {
+  buildBlockEditDocumentCoreInstructionsPrompt,
+  importantRemindersPrompt,
+  editPriorityRulesPrompt,
+  highlightContextEmphasisPrompt,
+  highlightOperationRulesPrompt,
+} from './core';
+import {
+  buildContextualBlockEditDocumentContext,
+  buildNoContextBlockEditDocumentContext,
+} from './context';
 
 export const buildNoContextBlockEditDocumentPrompt = () => `
 # Refly AI Block Content Editor (No Context Mode)
@@ -123,11 +131,15 @@ export const buildBlockEditDocumentUserPrompt = ({
 ## User Query (Primary)
 ${originalQuery}
 
-${rewrittenQuery !== originalQuery ? `
+${
+  rewrittenQuery !== originalQuery
+    ? `
 ## AI Rewritten Query (Secondary)
 // Consider this as supplementary context only
 ${rewrittenQuery}
-` : ''}
+`
+    : ''
+}
 
 ${importantRemindersPrompt}
 

@@ -1,5 +1,8 @@
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { onMessage, sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import {
+  onMessage,
+  sendMessage,
+} from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { BackgroundMessage, CopilotMsgName } from '@refly/common-types';
 import { useRef } from 'react';
 

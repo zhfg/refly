@@ -16,7 +16,12 @@ import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canva
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 
-const createLocalDocument = async (docId: string, title: string, content: string, refetchUsage: () => void) => {
+const createLocalDocument = async (
+  docId: string,
+  title: string,
+  content: string,
+  refetchUsage: () => void,
+) => {
   const ydoc = new Y.Doc();
   const localProvider = new IndexeddbPersistence(docId, ydoc);
 
@@ -44,10 +49,12 @@ export const useCreateDocument = () => {
   const { setStorageExceededModalVisible } = useSubscriptionStoreShallow((state) => ({
     setStorageExceededModalVisible: state.setStorageExceededModalVisible,
   }));
-  const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt } = useDocumentStoreShallow((state) => ({
-    setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
-    setDocumentRemoteSyncedAt: state.setDocumentRemoteSyncedAt,
-  }));
+  const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt } = useDocumentStoreShallow(
+    (state) => ({
+      setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
+      setDocumentRemoteSyncedAt: state.setDocumentRemoteSyncedAt,
+    }),
+  );
 
   const checkStorageUsage = useCallback(() => {
     if (storageUsage?.fileCountUsed >= storageUsage?.fileCountQuota) {
@@ -81,7 +88,9 @@ export const useCreateDocument = () => {
 
       if (addToCanvas) {
         // Find the source node
-        const sourceNode = nodes.find((n) => n.type === 'skillResponse' && n.data?.entityId === sourceNodeId);
+        const sourceNode = nodes.find(
+          (n) => n.type === 'skillResponse' && n.data?.entityId === sourceNodeId,
+        );
 
         if (!sourceNode) {
           console.warn('Source node not found');
@@ -152,7 +161,15 @@ export const useCreateDocument = () => {
         addNode(newNode);
       }
     },
-    [checkStorageUsage, canvasId, addNode, t, refetchUsage, setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt],
+    [
+      checkStorageUsage,
+      canvasId,
+      addNode,
+      t,
+      refetchUsage,
+      setDocumentLocalSyncedAt,
+      setDocumentRemoteSyncedAt,
+    ],
   );
 
   const duplicateDocument = useCallback(
@@ -190,8 +207,22 @@ export const useCreateDocument = () => {
 
       return docId;
     },
-    [checkStorageUsage, canvasId, addNode, t, refetchUsage, setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt],
+    [
+      checkStorageUsage,
+      canvasId,
+      addNode,
+      t,
+      refetchUsage,
+      setDocumentLocalSyncedAt,
+      setDocumentRemoteSyncedAt,
+    ],
   );
 
-  return { createDocument, debouncedCreateDocument, isCreating, createSingleDocumentInCanvas, duplicateDocument };
+  return {
+    createDocument,
+    debouncedCreateDocument,
+    isCreating,
+    createSingleDocumentInCanvas,
+    duplicateDocument,
+  };
 };

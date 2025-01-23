@@ -1,84 +1,81 @@
-import { Modal, Input, Button, message } from "antd"
-import { useTranslation } from "react-i18next"
-import { useState, useEffect } from "react"
-import {
-  useAuthStore,
-  useAuthStoreShallow,
-} from "@refly-packages/ai-workspace-common/stores/auth"
-import getClient from "@refly-packages/ai-workspace-common/requests/proxiedRequest"
-import { InvalidVerificationSession } from "@refly/errors"
+import { Modal, Input, Button, message } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { useState, useEffect } from 'react';
+import { useAuthStore, useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { InvalidVerificationSession } from '@refly/errors';
 
-const RESEND_INTERVAL = 30
+const RESEND_INTERVAL = 30;
 
 export const VerificationModal = () => {
-  const { t } = useTranslation()
-  const authStore = useAuthStoreShallow(state => ({
+  const { t } = useTranslation();
+  const authStore = useAuthStoreShallow((state) => ({
     email: state.email,
     verificationModalOpen: state.verificationModalOpen,
     setVerificationModalOpen: state.setVerificationModalOpen,
     reset: state.reset,
-  }))
-  const [isLoading, setIsLoading] = useState(false)
-  const [resendLoading, setResendLoading] = useState(false)
-  const [otp, setOtp] = useState("")
-  const [countdown, setCountdown] = useState(0)
+  }));
+  const [isLoading, setIsLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [countdown, setCountdown] = useState(0);
 
   useEffect(() => {
     if (countdown > 0) {
       const timer = setInterval(() => {
-        setCountdown(prev => prev - 1)
-      }, 1000)
-      return () => clearInterval(timer)
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
     }
-  }, [countdown])
+  }, [countdown]);
 
   useEffect(() => {
     if (authStore.verificationModalOpen) {
-      setCountdown(RESEND_INTERVAL)
+      setCountdown(RESEND_INTERVAL);
     }
-  }, [authStore.verificationModalOpen])
+  }, [authStore.verificationModalOpen]);
 
   const handleSubmit = async () => {
-    if (!otp) return
+    if (!otp) return;
 
-    const { sessionId } = useAuthStore.getState()
+    const { sessionId } = useAuthStore.getState();
     if (!sessionId) {
-      message.error(t("emailVerification.sessionNotFound"))
-      return
+      message.error(t('emailVerification.sessionNotFound'));
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
     const { data } = await getClient().checkVerification({
       body: {
         code: otp,
         sessionId: sessionId,
       },
-    })
-    setIsLoading(false)
+    });
+    setIsLoading(false);
 
     if (data?.errCode === new InvalidVerificationSession().code) {
-      authStore.reset()
-      return
+      authStore.reset();
+      return;
     }
 
     if (data?.success) {
-      authStore.reset()
-      window.location.replace("/")
+      authStore.reset();
+      window.location.replace('/');
     }
-  }
+  };
 
   const handleResend = async () => {
-    const { sessionId } = useAuthStore.getState()
-    if (!sessionId) return
+    const { sessionId } = useAuthStore.getState();
+    if (!sessionId) return;
 
-    setResendLoading(true)
-    await getClient().resendVerification({ body: { sessionId } })
-    setResendLoading(false)
+    setResendLoading(true);
+    await getClient().resendVerification({ body: { sessionId } });
+    setResendLoading(false);
 
-    setCountdown(RESEND_INTERVAL)
+    setCountdown(RESEND_INTERVAL);
 
-    message.success(t("emailVerification.resendSuccess"))
-  }
+    message.success(t('emailVerification.resendSuccess'));
+  };
 
   return (
     <Modal
@@ -87,23 +84,17 @@ export const VerificationModal = () => {
       onCancel={() => authStore.setVerificationModalOpen(false)}
       footer={null}
       destroyOnClose
-      title={t("emailVerification.title")}>
+      title={t('emailVerification.title')}
+    >
       <div className="flex flex-col gap-4 py-1">
         <p className="text-sm text-gray-700">
-          {t("emailVerification.description", { email: authStore.email })}
+          {t('emailVerification.description', { email: authStore.email })}
         </p>
         <div className="flex items-center justify-center">
-          <Input.OTP
-            size="large"
-            autoFocus
-            value={otp}
-            onChange={code => setOtp(code)}
-          />
+          <Input.OTP size="large" autoFocus value={otp} onChange={(code) => setOtp(code)} />
         </div>
         <div className="flex items-center text-sm">
-          <div className="text-gray-500">
-            {t("emailVerification.resendHint")}{" "}
-          </div>
+          <div className="text-gray-500">{t('emailVerification.resendHint')} </div>
 
           <Button
             type="link"
@@ -111,9 +102,9 @@ export const VerificationModal = () => {
             className="text-sm"
             loading={resendLoading}
             disabled={countdown > 0}
-            onClick={handleResend}>
-            {t("emailVerification.resend") +
-              (countdown > 0 ? ` (${countdown})` : "")}
+            onClick={handleResend}
+          >
+            {t('emailVerification.resend') + (countdown > 0 ? ` (${countdown})` : '')}
           </Button>
         </div>
 
@@ -122,10 +113,11 @@ export const VerificationModal = () => {
           onClick={handleSubmit}
           loading={isLoading}
           disabled={otp?.length !== 6}
-          className="w-full">
-          {t("emailVerification.submit")}
+          className="w-full"
+        >
+          {t('emailVerification.submit')}
         </Button>
       </div>
     </Modal>
-  )
-}
+  );
+};

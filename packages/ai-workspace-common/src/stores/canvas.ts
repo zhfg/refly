@@ -178,7 +178,9 @@ export const useCanvasStore = create<CanvasState>()(
           if (!node) return;
           state.config[canvasId] ??= defaultCanvasConfig();
           state.config[canvasId].nodePreviews ??= [];
-          const existingNodeIndex = state.config[canvasId].nodePreviews.findIndex((n) => n.id === node.id);
+          const existingNodeIndex = state.config[canvasId].nodePreviews.findIndex(
+            (n) => n.id === node.id,
+          );
           if (existingNodeIndex !== -1) {
             // If the node is unpinned and not the first one, remove it
             if (!node.isPinned && existingNodeIndex > 0) {
@@ -193,7 +195,9 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.config[canvasId] ??= defaultCanvasConfig();
           state.config[canvasId].nodePreviews ??= [];
-          state.config[canvasId].nodePreviews = state.config[canvasId].nodePreviews.filter((n) => n.id !== nodeId);
+          state.config[canvasId].nodePreviews = state.config[canvasId].nodePreviews.filter(
+            (n) => n.id !== nodeId,
+          );
         }),
       setOperatingNodeId: (nodeId) => set({ operatingNodeId: nodeId }),
       setShowEdges: (show) =>

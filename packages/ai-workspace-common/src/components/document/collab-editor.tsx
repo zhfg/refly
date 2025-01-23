@@ -26,9 +26,15 @@ import {
 import { createUploadFn } from '@refly-packages/ai-workspace-common/components/editor/components/image-upload';
 import { configureSlashCommand } from '@refly-packages/ai-workspace-common/components/editor/components/slash-command';
 import Collaboration from '@tiptap/extension-collaboration';
-import { handleImageDrop, handleImagePaste } from '@refly-packages/ai-workspace-common/components/editor/core/plugins';
+import {
+  handleImageDrop,
+  handleImagePaste,
+} from '@refly-packages/ai-workspace-common/components/editor/core/plugins';
 import { getHierarchicalIndexes, TableOfContents } from '@tiptap-pro/extension-table-of-contents';
-import { useDocumentStore, useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
+import {
+  useDocumentStore,
+  useDocumentStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/document';
 
 import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import { genUniqueId } from '@refly-packages/utils/id';
@@ -128,7 +134,10 @@ export const CollaborativeEditor = memo(
     }, [t]);
 
     // Memoize expensive computations
-    const uploadFn = useMemo(() => createUploadFn({ entityId: docId, entityType: 'document' }), [docId]);
+    const uploadFn = useMemo(
+      () => createUploadFn({ entityId: docId, entityType: 'document' }),
+      [docId],
+    );
 
     const extensions = useMemo(
       () => [
@@ -438,9 +447,11 @@ export const CollaborativeEditor = memo(
                   keydown: (_view, event) => handleCommandNavigation(event),
                 },
                 handlePaste: (view, event) => handleImagePaste(view, event, uploadFn),
-                handleDrop: (view, event, _slice, moved) => handleImageDrop(view, event, moved, uploadFn),
+                handleDrop: (view, event, _slice, moved) =>
+                  handleImageDrop(view, event, moved, uploadFn),
                 attributes: {
-                  class: 'prose prose-md prose-headings:font-title font-default focus:outline-none max-w-full',
+                  class:
+                    'prose prose-md prose-headings:font-title font-default focus:outline-none max-w-full',
                   'data-doc-id': docId,
                 },
               }}

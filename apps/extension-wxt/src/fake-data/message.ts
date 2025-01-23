@@ -1,12 +1,11 @@
-import type { Message } from '@/types';
-
 export const fakeRetrievalDocs = [
   {
     pageContent:
       '说明\n使用 chrome.history API 与浏览器的访问过网页记录进行交互。您可以在浏览器的历史记录中添加、移除和查询网址。要使用您自己的版本覆盖历史记录页面，请参阅覆盖网页。\n\n权限\nhistory\n\n\n\n如需与用户的浏览器历史记录进行交互，请使用 History API。\n\n\n\n如需使用 History API，请在扩展程序清单中声明 "history" 权限。例如：\n{\n  "name": "My extension",\n  ...\n  "permissions": [\n    "history"\n  ],\n  ...\n}\n\n概念和用法\n\n过渡类型\n\nHistory API 使用转场类型来描述浏览器如何在特定访问中导航到特定网址。例如，如果用户通过点击其他页面上的链接来访问某个页面，则转换类型为“链接”。如需查看过渡类型的列表，请参阅参考内容。\n\n示例\n\n如需试用此 API，请从 chrome-extension-samples 代码库安装历史记录 API 示例。\n\n类型\n  \n    \n      HistoryItem\n    用于封装历史记录查询结果的对象。\n属性\n    \n      id\n      string\n    商品的唯一标识符。\n\n    \n      lastVisitTime\n      数字可选\n    此网页的上次加载时间，以自纪元起经过的毫秒数表示。\n\n    \n      title\n      字符串（可选）\n    上次加载网页时的网页标题。\n\n    \n      typedCount\n      数字可选\n    用户通过输入地址导航到此页面的次数。\n\n    \n      网址\n      字符串（可选）\n    用户已导航到的网址。\n\n    \n      visitCount\n      数字可选\n    用户导航到此网页的次数。',
     metadata: {
       title: '谷歌搜索',
-      source: 'https://developer.chrome.com/docs/extensions/reference/api/history?hl=zh-cn#method-search',
+      source:
+        'https://developer.chrome.com/docs/extensions/reference/api/history?hl=zh-cn#method-search',
       loc: {
         lines: {
           from: 2177,

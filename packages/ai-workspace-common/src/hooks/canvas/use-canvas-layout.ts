@@ -4,11 +4,14 @@ import Dagre from '@dagrejs/dagre';
 import { CanvasNode } from '../../components/canvas/nodes';
 import { Edge } from '@xyflow/react';
 import { useCanvasStoreShallow } from '../../stores/canvas';
-import { useCanvasData } from './use-canvas-data';
 import { useCanvasSync } from './use-canvas-sync';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 
-const getLayoutedElements = (nodes: CanvasNode<any>[], edges: Edge[], options: { direction: 'TB' | 'LR' }) => {
+const getLayoutedElements = (
+  nodes: CanvasNode<any>[],
+  edges: Edge[],
+  options: { direction: 'TB' | 'LR' },
+) => {
   const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
   g.setGraph({
     rankdir: options.direction,

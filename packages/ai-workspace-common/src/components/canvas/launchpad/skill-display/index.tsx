@@ -8,7 +8,8 @@ import { getSkillIcon } from '@refly-packages/ai-workspace-common/components/com
 import { cn } from '@refly-packages/utils/cn';
 import { LuLayoutGrid } from 'react-icons/lu';
 
-const skillItemTitleClasses = 'inline-block max-w-[calc(100% - 8px)] overflow-hidden text-ellipsis whitespace-nowrap';
+const skillItemTitleClasses =
+  'inline-block max-w-[calc(100% - 8px)] overflow-hidden text-ellipsis whitespace-nowrap';
 
 const skillItemClasses =
   'h-7 px-1.5 rounded-md border border-solid border-gray-200 text-gray-500 bg-white flex items-center justify-center ' +
@@ -55,7 +56,11 @@ export const SkillDisplay = () => {
     return displayedSkills?.map((item, index) => {
       const displayName = t(`${item?.name}.name`, { ns: 'skill' });
       return (
-        <div key={item?.name || index} className={skillItemClasses} onClick={() => handleSkillSelect(item)}>
+        <div
+          key={item?.name || index}
+          className={skillItemClasses}
+          onClick={() => handleSkillSelect(item)}
+        >
           {getSkillIcon(item?.name)}
           <span className={cn(skillItemTitleClasses, 'ml-1')}>{displayName}</span>
         </div>
@@ -87,7 +92,9 @@ export const SkillDisplay = () => {
       >
         <div key="more" className={skillItemClasses}>
           <LuLayoutGrid className="" />
-          <span className={cn(skillItemTitleClasses, 'ml-1')}>{t('copilot.skillDisplay.more')}</span>
+          <span className={cn(skillItemTitleClasses, 'ml-1')}>
+            {t('copilot.skillDisplay.more')}
+          </span>
         </div>
       </Dropdown>
     ),

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Avatar, Button, Typography, Message as message, Tooltip } from '@arco-design/web-react';
+import { Button, Typography } from '@arco-design/web-react';
 import { NewSkillInstanceModal } from '@refly-packages/ai-workspace-common/components/skill/new-instance-modal';
 
 import { RiAddLargeLine } from 'react-icons/ri';
@@ -54,7 +54,12 @@ export const TemplateItem = (props: TemplateItemProps) => {
           </Button>
         </div>
       </div>
-      <NewSkillInstanceModal type="new" template={data} visible={visible} setVisible={(val) => setVisible(val)} />
+      <NewSkillInstanceModal
+        type="new"
+        template={data}
+        visible={visible}
+        setVisible={(val) => setVisible(val)}
+      />
     </div>
   );
 };

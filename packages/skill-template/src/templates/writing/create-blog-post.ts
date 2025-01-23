@@ -12,7 +12,11 @@ import {
   Icon,
 } from '@refly-packages/openapi-schema';
 // utils
-import { languageNameToLocale, localeToLanguageName, zhCNLocale } from '@refly-packages/common-types';
+import {
+  languageNameToLocale,
+  localeToLanguageName,
+  zhCNLocale,
+} from '@refly-packages/common-types';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -284,7 +288,12 @@ export class CreateBlogPostSkill extends BaseSkill {
   async generate(state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
-    const { locale = 'en', contentList = [], chatHistory = [], tplConfig } = config?.configurable || {};
+    const {
+      locale = 'en',
+      contentList = [],
+      chatHistory = [],
+      tplConfig,
+    } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,
@@ -333,7 +342,9 @@ LANGUAGE: {language}
 `;
 
     const contextString =
-      contentList.length > 0 ? contentList.map((item) => item?.content).join('\n') : 'No additional context provided.';
+      contentList.length > 0
+        ? contentList.map((item) => item?.content).join('\n')
+        : 'No additional context provided.';
 
     const { targetPlatform, topic, tone, length, language } = (tplConfig || {}) as any as {
       targetPlatform: DynamicConfigValue;

@@ -3,10 +3,13 @@ import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { GraphState } from '../scheduler/types';
 import { z } from 'zod';
-import { BaseMessage } from '@langchain/core/messages';
 import { extractStructuredData } from '../scheduler/utils/extractor';
 import { truncateMessages } from '../scheduler/utils/truncator';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+} from '@refly-packages/openapi-schema';
 
 // Schema for recommended questions with reasoning
 const recommendQuestionsSchema = z.object({
@@ -54,7 +57,10 @@ export class RecommendQuestions extends BaseSkill {
   };
 
   // Main method to generate related questions
-  genRecommendQuestions = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+  genRecommendQuestions = async (
+    state: GraphState,
+    config: SkillRunnableConfig,
+  ): Promise<Partial<GraphState>> => {
     const { messages = [], query } = state;
     const { locale = 'en', chatHistory = [], tplConfig } = config.configurable || {};
 

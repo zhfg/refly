@@ -1,11 +1,8 @@
 import { Node, useReactFlow, XYPosition } from '@xyflow/react';
-import { CanvasNodeFilter } from './use-node-selection';
 import { useCallback } from 'react';
-import Dagre from '@dagrejs/dagre';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { CalculateNodePositionParams, LayoutBranchOptions } from './use-node-position-utils/types';
 import {
-  getAbsolutePosition,
   getNodeHeight,
   getNodeWidth,
   getRootNodes,
@@ -69,7 +66,9 @@ export const calculateNodePosition = ({
       });
 
       // Calculate X position considering node width
-      const rightmostSourceX = Math.max(...sourceNodesAbsolute.map((n) => n.position.x + n.width / 2));
+      const rightmostSourceX = Math.max(
+        ...sourceNodesAbsolute.map((n) => n.position.x + n.width / 2),
+      );
       const targetX = rightmostSourceX + SPACING.X;
 
       if (connectedNodes.size > 0) {
@@ -96,7 +95,9 @@ export const calculateNodePosition = ({
         };
       } else {
         // If no connected nodes, place at average Y of source nodes
-        const avgSourceY = sourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) / sourceNodesAbsolute.length;
+        const avgSourceY =
+          sourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) /
+          sourceNodesAbsolute.length;
         return {
           x: targetX,
           y: avgSourceY,
@@ -173,10 +174,13 @@ export const useNodePosition = () => {
   const { getNode, setCenter, getZoom, setNodes } = useReactFlow();
   const { canvasId } = useCanvasContext();
 
-  const calculatePosition = useCallback((params: CalculateNodePositionParams) => calculateNodePosition(params), []);
+  const calculatePosition = useCallback(
+    (params: CalculateNodePositionParams) => calculateNodePosition(params),
+    [],
+  );
 
   const setNodeCenter = useCallback(
-    (nodeId: string, shouldSelect: boolean = false) => {
+    (nodeId: string, shouldSelect = false) => {
       requestAnimationFrame(() => {
         const renderedNode = getNode(nodeId);
         const { data } = useCanvasStore.getState();
@@ -211,7 +215,10 @@ export const useNodePosition = () => {
       allNodes: Node[],
       edges: any[],
       options: LayoutBranchOptions = {},
-      needSetCenter: { targetNodeId: string; needSetCenter: boolean } = { targetNodeId: '', needSetCenter: true },
+      needSetCenter: { targetNodeId: string; needSetCenter: boolean } = {
+        targetNodeId: '',
+        needSetCenter: true,
+      },
     ) => {
       // Collect all source nodes including children of group nodes
       const sourceNodesAbsolute = sourceNodes.map((node) => ({
@@ -261,7 +268,9 @@ export const useNodePosition = () => {
         }
 
         // Process children
-        edges.filter((edge) => edge.source === nodeId).forEach((edge) => calculateLevels(edge.target, level + 1));
+        edges
+          .filter((edge) => edge.source === nodeId)
+          .forEach((edge) => calculateLevels(edge.target, level + 1));
       };
 
       // Start level calculation from source nodes
@@ -297,7 +306,9 @@ export const useNodePosition = () => {
         }, -fixedSpacing);
 
         // Calculate starting Y position (centered around average source Y)
-        const avgSourceY = sourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) / sourceNodesAbsolute.length;
+        const avgSourceY =
+          sourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) /
+          sourceNodesAbsolute.length;
         let currentY = avgSourceY - totalHeight / 2;
 
         // Calculate center positions for nodes in this level
@@ -319,7 +330,8 @@ export const useNodePosition = () => {
           if (directSourceNodesAbsolute.length > 0) {
             // Try to align with average Y of source nodes
             const avgDirectSourceY =
-              directSourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) / directSourceNodesAbsolute.length;
+              directSourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) /
+              directSourceNodesAbsolute.length;
             // Adjust currentY to be closer to direct source nodes while maintaining spacing
             currentY = avgDirectSourceY - totalHeight / 2 + index * (nodeHeight + fixedSpacing);
           }
@@ -361,7 +373,9 @@ export const useNodePosition = () => {
               const node2Bottom = pos2.y + height2 / 2;
 
               // Check if the nodes overlap vertically
-              if (!(node1Bottom < node2Top - fixedSpacing || node1Top > node2Bottom + fixedSpacing)) {
+              if (
+                !(node1Bottom < node2Top - fixedSpacing || node1Top > node2Bottom + fixedSpacing)
+              ) {
                 hasOverlap = true;
                 // Move the node with higher Y value further down
                 if (pos1.y > pos2.y) {

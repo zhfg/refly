@@ -50,7 +50,9 @@ export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
   const { shouldTranslate, cacheKey } = useMemo(
     () => ({
       shouldTranslate:
-        enableTranslation && targetLanguage !== 'auto' && (!originalLocale || originalLocale !== targetLanguage),
+        enableTranslation &&
+        targetLanguage !== 'auto' &&
+        (!originalLocale || originalLocale !== targetLanguage),
       cacheKey: getCacheKey(content, originalLocale || 'auto', targetLanguage),
     }),
     [content, originalLocale, targetLanguage, enableTranslation],
@@ -139,7 +141,10 @@ export const TranslationWrapper: React.FC<TranslationWrapperProps> = ({
 };
 
 // Utility function for debouncing
-function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number,
+): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);

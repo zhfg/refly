@@ -44,7 +44,12 @@ import {
 } from '@refly-packages/openapi-schema';
 
 // TODO: unify with frontend
-export type ContentNodeType = 'resource' | 'document' | 'extensionWeblink' | 'resourceSelection' | 'documentSelection';
+export type ContentNodeType =
+  | 'resource'
+  | 'document'
+  | 'extensionWeblink'
+  | 'resourceSelection'
+  | 'documentSelection';
 
 export interface NodeMeta {
   title: string;
@@ -60,17 +65,32 @@ export interface ReflyService {
   createCanvas: (user: User, req: UpsertCanvasRequest) => Promise<CreateCanvasResponse>;
   listCanvases: (user: User, param: ListCanvasesData['query']) => Promise<ListCanvasesResponse>;
   deleteCanvas: (user: User, req: DeleteCanvasRequest) => Promise<DeleteCanvasResponse>;
-  getDocumentDetail: (user: User, req: GetDocumentDetailData['query']) => Promise<GetDocumentDetailResponse>;
+  getDocumentDetail: (
+    user: User,
+    req: GetDocumentDetailData['query'],
+  ) => Promise<GetDocumentDetailResponse>;
   createDocument: (user: User, req: UpsertDocumentRequest) => Promise<CreateDocumentResponse>;
   listDocuments: (user: User, param: ListDocumentsData['query']) => Promise<ListDocumentsResponse>;
   deleteDocument: (user: User, req: DeleteDocumentRequest) => Promise<DeleteDocumentResponse>;
-  getResourceDetail: (user: User, req: GetResourceDetailData['query']) => Promise<GetResourceDetailResponse>;
+  getResourceDetail: (
+    user: User,
+    req: GetResourceDetailData['query'],
+  ) => Promise<GetResourceDetailResponse>;
   createResource: (user: User, req: UpsertResourceRequest) => Promise<CreateResourceResponse>;
-  batchCreateResource: (user: User, req: UpsertResourceRequest[]) => Promise<BatchCreateResourceResponse>;
+  batchCreateResource: (
+    user: User,
+    req: UpsertResourceRequest[],
+  ) => Promise<BatchCreateResourceResponse>;
   updateResource: (user: User, req: UpsertResourceRequest) => Promise<UpdateResourceResponse>;
   createLabelClass: (user: User, req: CreateLabelClassRequest) => Promise<CreateLabelClassResponse>;
-  createLabelInstance: (user: User, req: CreateLabelInstanceRequest) => Promise<CreateLabelInstanceResponse>;
-  webSearch: (user: User, req: WebSearchRequest | BatchWebSearchRequest) => Promise<WebSearchResponse>;
+  createLabelInstance: (
+    user: User,
+    req: CreateLabelInstanceRequest,
+  ) => Promise<CreateLabelInstanceResponse>;
+  webSearch: (
+    user: User,
+    req: WebSearchRequest | BatchWebSearchRequest,
+  ) => Promise<WebSearchResponse>;
   search: (user: User, req: SearchRequest, options?: SearchOptions) => Promise<SearchResponse>;
   rerank: (
     query: string,
@@ -122,7 +142,11 @@ export interface Logger {
 export class SkillEngine {
   private config: SkillRunnableConfig;
 
-  constructor(public logger: Logger, public service: ReflyService, private options?: SkillEngineOptions) {
+  constructor(
+    public logger: Logger,
+    public service: ReflyService,
+    private options?: SkillEngineOptions,
+  ) {
     this.options = {
       defaultModel: 'openai/gpt-4o-mini',
       ...options,

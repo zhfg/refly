@@ -49,7 +49,8 @@ export const useSkillStore = create<SkillManageState>()(
 
     // skill
     setSkillState: (newState: SkillState) => set((state) => ({ ...state, skillState: newState })),
-    setSkillInstances: (skillInstances: SkillInstance[]) => set((state) => ({ ...state, skillInstances })),
+    setSkillInstances: (skillInstances: SkillInstance[]) =>
+      set((state) => ({ ...state, skillInstances })),
     setIsFetchingSkillInstances: (isFetching: boolean) =>
       set((state) => ({ ...state, isFetchingSkillInstances: isFetching })),
     setIsFetchingSkillTemplates: (isFetching: boolean) =>

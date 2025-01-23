@@ -57,7 +57,10 @@ const PasteRuleExtension = Extension.create({
                     const strong = document.createElement('strong');
                     strong.innerHTML = element.innerHTML;
                     element.replaceWith(strong);
-                  } else if (style.includes('font-style: italic') || style.includes('font-style:italic')) {
+                  } else if (
+                    style.includes('font-style: italic') ||
+                    style.includes('font-style:italic')
+                  ) {
                     const em = document.createElement('em');
                     em.innerHTML = element.innerHTML;
                     element.replaceWith(em);

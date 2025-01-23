@@ -5,7 +5,10 @@ import { useDebouncedCallback } from 'use-debounce';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useFetchDataList } from '@refly-packages/ai-workspace-common/hooks/use-fetch-data-list';
-import { DataFetcher, domainToFetchData } from '@refly-packages/ai-workspace-common/modules/entity-selector/utils';
+import {
+  DataFetcher,
+  domainToFetchData,
+} from '@refly-packages/ai-workspace-common/modules/entity-selector/utils';
 
 export type ListMode = 'fetch' | 'search';
 
@@ -50,8 +53,11 @@ export const useFetchOrSearchList = ({
   // whether search is requesting
   const [searchRequesting, setSearchRequesting] = useState(false);
 
-  const debouncedSearch: ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => any =
-    useDebouncedCallback(async ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => {
+  const debouncedSearch: ({
+    searchVal,
+    domains,
+  }: { searchVal: string; domains?: Array<SearchDomain> }) => any = useDebouncedCallback(
+    async ({ searchVal, domains }: { searchVal: string; domains?: Array<SearchDomain> }) => {
       try {
         setSearchRequesting(true);
         const res = await getClient().search({
@@ -69,7 +75,9 @@ export const useFetchOrSearchList = ({
       } finally {
         setSearchRequesting(false);
       }
-    }, 200);
+    },
+    200,
+  );
 
   const handleValueChange = async (searchVal: string, domains: SearchDomain[]) => {
     if (!searchVal) {

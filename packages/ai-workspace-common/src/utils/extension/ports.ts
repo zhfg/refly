@@ -1,4 +1,4 @@
-let portStore: { [key: string]: any } = {};
+const portStore: { [key: string]: any } = {};
 export const getPort = async (name: string) => {
   const { browser } = await import('wxt/browser');
   if (portStore?.[name]) return { isNew: false, port: portStore[name] };

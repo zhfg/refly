@@ -1,5 +1,5 @@
 import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
-import { Runtime, browser } from 'wxt/browser';
+import { Runtime } from 'wxt/browser';
 
 import { setToken } from '../index';
 

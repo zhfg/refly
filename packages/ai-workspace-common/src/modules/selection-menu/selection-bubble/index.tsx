@@ -1,4 +1,4 @@
-import React, { type ReactNode, forwardRef, useRef, useCallback } from 'react';
+import React, { type ReactNode, useRef, useCallback } from 'react';
 import Tippy from '@tippyjs/react';
 import type { TippyProps } from '@tippyjs/react';
 import { useSelectionBubble } from '../use-selection-bubble';

@@ -16,7 +16,10 @@ interface RecommendQuestionsPanelProps {
   onClose: () => void;
 }
 
-export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = ({ isOpen, onClose }) => {
+export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const { t } = useTranslation();
   const [questions, setQuestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -106,7 +109,11 @@ export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = (
         <Empty
           className="mb-2"
           imageStyle={{ height: 40, width: 40, margin: '4px auto' }}
-          description={<span className="text-[12px] text-[#00968f]">{t('copilot.recommendQuestions.empty')}</span>}
+          description={
+            <span className="text-[12px] text-[#00968f]">
+              {t('copilot.recommendQuestions.empty')}
+            </span>
+          }
         />
       );
     }

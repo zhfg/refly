@@ -1,8 +1,10 @@
-import { useStorage } from '@/hooks/use-storage';
 import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useEffect } from 'react';
-import { useCopilotTypeStore, copilotTypeEnums } from '@/modules/toggle-copilot/stores/use-copilot-type';
+import {
+  useCopilotTypeStore,
+  copilotTypeEnums,
+} from '@/modules/toggle-copilot/stores/use-copilot-type';
 import { ICopilotType } from '@refly/common-types';
 
 /**

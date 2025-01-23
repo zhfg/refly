@@ -1,8 +1,8 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-import type {} from "@redux-devtools/extension";
-import type { WebLinkItem } from "@/components/weblink-list/types";
-import { type Message, type SessionItem } from "@/types";
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type {} from '@redux-devtools/extension';
+import type { WebLinkItem } from '@/components/weblink-list/types';
+import { type Message } from '@/types';
 
 export interface Thread {
   id: string;
@@ -35,9 +35,7 @@ interface WeblinkState {
   updateHasMore: (hasMore: boolean) => void;
   updateIsRequest: (isRequest: boolean) => void;
   updateIsWebLinkListVisible: (isWebLinkListVisible: boolean) => void;
-  updateSelectedRow: (
-    selectedRow: { key: number | string; content: WebLinkItem }[]
-  ) => void;
+  updateSelectedRow: (selectedRow: { key: number | string; content: WebLinkItem }[]) => void;
   setCurrentWeblink: (newWeblink: WebLinkItem | null) => void;
   setMessages: (val: Message[]) => void;
   resetState: () => void;
@@ -64,21 +62,16 @@ export const useWeblinkStore = create<WeblinkState>()(
         ...state,
         webLinkList: state.webLinkList.concat(newWebLinkList),
       })),
-    updateCurrentPage: (currentPage: number) =>
-      set((state) => ({ ...state, currentPage })),
-    updateHasMore: (hasMore: boolean) =>
-      set((state) => ({ ...state, hasMore })),
-    updateIsRequest: (isRequest: boolean) =>
-      set((state) => ({ ...state, isRequest })),
+    updateCurrentPage: (currentPage: number) => set((state) => ({ ...state, currentPage })),
+    updateHasMore: (hasMore: boolean) => set((state) => ({ ...state, hasMore })),
+    updateIsRequest: (isRequest: boolean) => set((state) => ({ ...state, isRequest })),
     updateIsWebLinkListVisible: (isWebLinkListVisible: boolean) =>
       set((state) => ({ ...state, isWebLinkListVisible })),
-    updateSelectedRow: (
-      selectedRow: { key: number | string; content: WebLinkItem }[]
-    ) => set((state) => ({ ...state, selectedRow })),
+    updateSelectedRow: (selectedRow: { key: number | string; content: WebLinkItem }[]) =>
+      set((state) => ({ ...state, selectedRow })),
     setCurrentWeblink: (newWeblink: WebLinkItem | null) =>
       set((state) => ({ ...state, currentWeblink: newWeblink })),
-    setMessages: (val: Message[]) =>
-      set((state) => ({ ...state, messages: val })),
+    setMessages: (val: Message[]) => set((state) => ({ ...state, messages: val })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
-  }))
+  })),
 );

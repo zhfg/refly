@@ -116,7 +116,12 @@ export const InstanceDropdownMenu = (props: InstanceDropdownMenuProps) => {
     setPopupVisible(!popupVisible);
   };
 
-  const droplist = DropList({ handleCancel, handlUpdateInstance, handleDeleteInstance, getPopupContainer });
+  const droplist = DropList({
+    handleCancel,
+    handlUpdateInstance,
+    handleDeleteInstance,
+    getPopupContainer,
+  });
 
   return (
     <Dropdown

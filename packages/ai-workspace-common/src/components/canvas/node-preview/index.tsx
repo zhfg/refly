@@ -37,7 +37,8 @@ const PreviewComponent = memo(
   },
   (prevProps, nextProps) => {
     return (
-      prevProps.node?.type === nextProps.node?.type && prevProps.node?.data?.entityId === nextProps.node?.data?.entityId
+      prevProps.node?.type === nextProps.node?.type &&
+      prevProps.node?.data?.entityId === nextProps.node?.data?.entityId
     );
   },
 );
@@ -62,7 +63,9 @@ export const NodePreview = memo(
         top: isMaximized ? 0 : null,
         right: isMaximized ? 0 : null,
         zIndex: isMaximized ? 50 : 10,
-        transition: isMaximized ? 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)' : 'all 50ms cubic-bezier(0.4, 0, 0.2, 1)',
+        transition: isMaximized
+          ? 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)'
+          : 'all 50ms cubic-bezier(0.4, 0, 0.2, 1)',
       }),
       [isMaximized],
     );

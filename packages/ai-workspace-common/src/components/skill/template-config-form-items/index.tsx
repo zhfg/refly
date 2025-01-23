@@ -5,7 +5,6 @@ import {
   DynamicConfigValue,
   SkillTemplateConfig,
   SkillTemplateConfigDefinition,
-  ConfigScope,
 } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { FormHeader } from '@refly-packages/ai-workspace-common/components/skill/form-header';
@@ -69,7 +68,9 @@ const ConfigItem = (props: {
       <TextArea
         placeholder={placeholder}
         defaultValue={
-          (typeof item?.defaultValue === 'string' ? item?.defaultValue : String(configValue?.value || '')) || ''
+          (typeof item?.defaultValue === 'string'
+            ? item?.defaultValue
+            : String(configValue?.value || '')) || ''
         }
         rows={4}
         autoSize={{
@@ -116,7 +117,9 @@ const ConfigItem = (props: {
           value: option.value,
         }))}
         // getPopupContainer={getPopupContainer}
-        defaultValue={item?.defaultValue || configValue?.value || (item.inputMode === 'multiSelect' ? [] : '')}
+        defaultValue={
+          item?.defaultValue || configValue?.value || (item.inputMode === 'multiSelect' ? [] : '')
+        }
         placeholder={placeholder}
         onChange={(val) =>
           form.setFieldValue(field, {
@@ -189,7 +192,11 @@ export const TemplateConfigFormItems = (props: {
                 rules={[
                   {
                     validator(value, cb) {
-                      if (!value?.value && item?.required?.value && item?.required?.configScope.includes(configScope)) {
+                      if (
+                        !value?.value &&
+                        item?.required?.value &&
+                        item?.required?.configScope.includes(configScope)
+                      ) {
                         return cb(t('common.emptyInput'));
                       }
 

@@ -13,9 +13,13 @@ export const AccountSetting = () => {
   const userStore = useUserStore();
   const { t } = useTranslation();
 
-  const [nameStatus, setNameStatus] = useState<'error' | 'success' | 'warning' | 'validating'>('success');
+  const [nameStatus, setNameStatus] = useState<'error' | 'success' | 'warning' | 'validating'>(
+    'success',
+  );
   const [nameMessage, setNameMessage] = useState('');
-  const [emailStatus, setEmailStatus] = useState<'error' | 'success' | 'warning' | 'validating'>('success');
+  const [emailStatus, setEmailStatus] = useState<'error' | 'success' | 'warning' | 'validating'>(
+    'success',
+  );
   const [emailMessage, setEmailMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +30,9 @@ export const AccountSetting = () => {
 
   const checkUsername = async (name: string) => {
     try {
-      const { data } = await getClient().checkSettingsField({ query: { field: 'name', value: name } });
+      const { data } = await getClient().checkSettingsField({
+        query: { field: 'name', value: name },
+      });
       return data?.data?.available;
     } catch (error) {
       return false;
@@ -100,7 +106,12 @@ export const AccountSetting = () => {
     <div className="w-full">
       <div className="max-w-[600px] mx-auto">
         <Form form={form} layout="vertical">
-          <Form.Item label={t('settings.account.avatar')} name="avatar" valuePropName="fileList" initialValue={[]}>
+          <Form.Item
+            label={t('settings.account.avatar')}
+            name="avatar"
+            valuePropName="fileList"
+            initialValue={[]}
+          >
             <Upload
               listType="picture-circle"
               disabled
@@ -151,7 +162,11 @@ export const AccountSetting = () => {
             required
             rules={[{ required: true, message: t('settings.account.nicknamePlaceholder') }]}
           >
-            <Input maxLength={30} showCount placeholder={t('settings.account.nicknamePlaceholder')} />
+            <Input
+              maxLength={30}
+              showCount
+              placeholder={t('settings.account.nicknamePlaceholder')}
+            />
           </Form.Item>
 
           <Form.Item

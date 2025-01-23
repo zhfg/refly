@@ -763,7 +763,7 @@ export class SkillService {
         version,
         type: 'idle',
       },
-      { delay: parseInt(this.config.get('skill.idleTimeout')) },
+      { delay: Number.parseInt(this.config.get('skill.idleTimeout')) },
     );
 
     const throttledResetIdleTimeout = throttle(

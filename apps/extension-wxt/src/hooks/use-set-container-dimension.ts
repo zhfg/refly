@@ -1,4 +1,4 @@
-import React, { type Dispatch, useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 // stores
 import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
 
@@ -11,7 +11,8 @@ export const useSetContainerDimension = () => {
     html.style.position = 'relative';
     html.style.minHeight = '100vh';
     if (copilotStore.isCopilotOpen) {
-      const { clientWidth = 0 } = document.querySelector('refly-main-app')?.shadowRoot?.querySelector('.main') || {};
+      const { clientWidth = 0 } =
+        document.querySelector('refly-main-app')?.shadowRoot?.querySelector('.main') || {};
       html.style.width = `calc(100vw - ${clientWidth}px)`;
     } else {
       html.style.width = '100vw';

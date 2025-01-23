@@ -1,6 +1,5 @@
 import { Button } from '@arco-design/web-react';
-import React, { useEffect, useRef } from 'react';
-import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
+import { useEffect, useRef } from 'react';
 
 // stores
 import { useUserStore } from '@/stores/user';
@@ -57,7 +56,10 @@ export const Login = () => {
     <div className="login-container">
       <ChatHeader onlyShowClose />
       <div className="login-brand">
-        <div className="login-branch-content" onClick={() => window.open(getClientOrigin(), '_blank')}>
+        <div
+          className="login-branch-content"
+          onClick={() => window.open(getClientOrigin(), '_blank')}
+        >
           <img src={Logo} alt="Refly" style={{ width: 38, height: 38 }} />
           <span
             style={{
@@ -76,7 +78,9 @@ export const Login = () => {
           style={{ width: 260, height: 44, marginTop: 32 }}
           loading={userStore.isLogin}
         >
-          {userStore.isLogin ? t('extension.loginPage.loggingStatus') : t('extension.loginPage.loginBtn')}
+          {userStore.isLogin
+            ? t('extension.loginPage.loggingStatus')
+            : t('extension.loginPage.loginBtn')}
         </Button>
       </div>
     </div>

@@ -21,7 +21,10 @@ interface EditDocumentModule {
   }) => (context: string, needPrepareContext: boolean) => string;
 }
 
-const getModules = (documentContext: { document: Document; selectedContent: HighlightSelection }) => {
+const getModules = (documentContext: {
+  document: Document;
+  selectedContent: HighlightSelection;
+}) => {
   return {
     block: {
       buildSystemPrompt: buildBlockEditDocumentSystemPrompt,

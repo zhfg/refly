@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Node, useNodes, useViewport } from '@xyflow/react';
+import { useCallback, useState } from 'react';
+import { Node, useViewport } from '@xyflow/react';
 import { calculateNodesBoundingBox } from '../../components/canvas/multi-selection-menu/utils';
 
 export interface MenuPosition {

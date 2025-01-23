@@ -12,7 +12,9 @@ export const rewriteQueryOutputSchema = z
 
     queries: z
       .object({
-        rewrittenQueries: z.array(z.string()).describe('Original query rewritten into focused aspects'),
+        rewrittenQueries: z
+          .array(z.string())
+          .describe('Original query rewritten into focused aspects'),
       })
       .describe('Generated queries for search execution'),
   })

@@ -4,7 +4,10 @@ import { CanvasNodeType } from '@refly/openapi-schema';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { genUniqueId } from '@refly-packages/utils/id';
-import { useCanvasStore, useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import {
+  useCanvasStore,
+  useCanvasStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/canvas';
 import {
   CanvasNodeData,
   getNodeDefaultMetadata,
@@ -53,10 +56,14 @@ export const useAddNode = () => {
       requestAnimationFrame(() => {
         const renderedNode = getNode(nodeId);
         if (renderedNode) {
-          setCenter(renderedNode.position.x + zoomAdjustedPadding, renderedNode.position.y + zoomAdjustedPadding, {
-            duration: 300,
-            zoom: currentZoom,
-          });
+          setCenter(
+            renderedNode.position.x + zoomAdjustedPadding,
+            renderedNode.position.y + zoomAdjustedPadding,
+            {
+              duration: 300,
+              zoom: currentZoom,
+            },
+          );
         }
       });
     },
@@ -80,8 +87,8 @@ export const useAddNode = () => {
     (
       node: { type: CanvasNodeType; data: CanvasNodeData<any>; position?: XYPosition },
       connectTo?: CanvasNodeFilter[],
-      shouldPreview: boolean = true,
-      needSetCenter: boolean = true,
+      shouldPreview = true,
+      needSetCenter = true,
     ) => {
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
@@ -93,7 +100,9 @@ export const useAddNode = () => {
       }
 
       // Check for existing node
-      const existingNode = nodes.find((n) => n.type === node.type && n.data?.entityId === node.data?.entityId);
+      const existingNode = nodes.find(
+        (n) => n.type === node.type && n.data?.entityId === node.data?.entityId,
+      );
       if (existingNode) {
         if (existingNode.type !== 'skillResponse') {
           message.warning(t('canvas.action.nodeAlreadyExists', { type: t(`common.${node.type}`) }));
@@ -105,7 +114,9 @@ export const useAddNode = () => {
 
       // Find source nodes
       const sourceNodes = connectTo
-        ?.map((filter) => nodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId))
+        ?.map((filter) =>
+          nodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId),
+        )
         .filter(Boolean);
 
       // Calculate new node position using the utility function
@@ -134,7 +145,10 @@ export const useAddNode = () => {
       });
 
       // Create updated nodes array with the new node
-      const updatedNodes = deduplicateNodes([...nodes.map((n) => ({ ...n, selected: false })), newNode]);
+      const updatedNodes = deduplicateNodes([
+        ...nodes.map((n) => ({ ...n, selected: false })),
+        newNode,
+      ]);
 
       // Create new edges if connecting to source nodes
       let updatedEdges = edges;

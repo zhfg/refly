@@ -1,23 +1,21 @@
-import { useEffect, useTransition } from 'react';
-import { useMatch, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
+import { useEffect } from 'react';
+import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
 
 // request
-import { LocalSettings, defaultLocalSettings, useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
-import { safeParseJSON, safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
+import { LocalSettings, useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 
 import { LOCALE } from '@refly/common-types';
 import { useTranslation } from 'react-i18next';
-import { Message as message } from '@arco-design/web-react';
 import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
 import { mapDefaultLocale } from '@/utils/locale';
 import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
 import { useStorage } from './use-storage';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { useExtensionMessage } from './use-extension-message';
 // import { checkBrowserArc } from '@/utils/browser';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { GetUserSettingsResponse, UserSettings } from '@refly/openapi-schema';
+import { UserSettings } from '@refly/openapi-schema';
 import { browser } from 'wxt/browser';
 import debounce from 'lodash.debounce';
 

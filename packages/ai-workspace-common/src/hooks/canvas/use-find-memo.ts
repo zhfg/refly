@@ -11,7 +11,9 @@ export const useFindMemo = () => {
 
       if (!startNode) {
         const nodes = getNodes();
-        startNode = nodes.find((node) => node.data?.entityId === resultId) as CanvasNode<typeof MemoNode>;
+        startNode = nodes.find((node) => node.data?.entityId === resultId) as CanvasNode<
+          typeof MemoNode
+        >;
       }
 
       if (!startNode || startNode.type !== 'memo') return [];

@@ -41,7 +41,9 @@ const getNodeIcon = (node: CanvasNode<any>) => {
     case 'document':
       return IconDocument;
     case 'resource':
-      return node.data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
+      return node.data?.metadata?.resourceType === 'weblink'
+        ? HiOutlineSquare3Stack3D
+        : HiOutlineSquare3Stack3D;
     case 'skillResponse':
       return IconResponse;
     case 'toolResponse':
@@ -71,7 +73,9 @@ const getNodeTitle = (node: CanvasNode<any>, t: TFunction) => {
     case 'document':
       return t('canvas.nodeTypes.document');
     case 'resource':
-      return node.data?.metadata?.resourceType === 'weblink' ? t('resourceType.weblink') : t('resourceType.pastedText');
+      return node.data?.metadata?.resourceType === 'weblink'
+        ? t('resourceType.weblink')
+        : t('resourceType.pastedText');
     case 'skillResponse':
       return t('canvas.nodeTypes.skillResponse');
     case 'toolResponse':
@@ -92,7 +96,12 @@ interface NodePreviewHeaderProps {
   isMaximized?: boolean;
 }
 
-export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, onMaximize, isMaximized = false }) => {
+export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
+  node,
+  onClose,
+  onMaximize,
+  isMaximized = false,
+}) => {
   const { t } = useTranslation();
   const IconComponent = getNodeIcon(node);
   const nodeColor = NODE_COLORS[node.type];
@@ -116,7 +125,9 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({ node, onClose, o
       okButtonProps: { danger: true },
       cancelButtonProps: { className: 'hover:!border-[#00968F] hover:!text-[#00968F] ' },
       onOk: () => {
-        node.type === 'document' ? deleteDocument(node.data?.entityId) : deleteResource(node.data?.entityId);
+        node.type === 'document'
+          ? deleteDocument(node.data?.entityId)
+          : deleteResource(node.data?.entityId);
         deleteNode(node);
       },
     });

@@ -1,22 +1,12 @@
-import React from "react"
-
 function Newsletter() {
   return (
     <section>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* CTA box */}
-        <div
-          className="relative bg-green-600 py-10 px-8 md:py-16 md:px-12"
-          data-aos="fade-up">
+        <div className="relative bg-green-600 py-10 px-8 md:py-16 md:px-12" data-aos="fade-up">
           {/* Background illustration */}
-          <div
-            className="absolute right-0 top-0 -ml-40 pointer-events-none"
-            aria-hidden="true">
-            <svg
-              width="238"
-              height="110"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg">
+          <div className="absolute right-0 top-0 -ml-40 pointer-events-none" aria-hidden="true">
+            <svg width="238" height="110" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient
                   id="illustration-04"
@@ -24,7 +14,8 @@ function Newsletter() {
                   y1="-84.633"
                   x2="139.954"
                   y2="-199.798"
-                  gradientUnits="userSpaceOnUse">
+                  gradientUnits="userSpaceOnUse"
+                >
                   <stop stopColor="#fff" stopOpacity=".01" />
                   <stop offset="1" stopColor="#fff" stopOpacity=".24" />
                 </linearGradient>
@@ -56,9 +47,7 @@ function Newsletter() {
                   placeholder="Your best email…"
                   aria-label="Your best email…"
                 />
-                <a
-                  className="btn text-purple-600 bg-purple-100 hover:bg-white shadow"
-                  href="#0">
+                <a className="btn text-purple-600 bg-purple-100 hover:bg-white shadow" href="#0">
                   Subscribe
                 </a>
               </div>
@@ -69,7 +58,7 @@ function Newsletter() {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
-export default Newsletter
+export default Newsletter;

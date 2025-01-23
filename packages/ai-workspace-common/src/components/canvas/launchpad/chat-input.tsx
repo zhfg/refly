@@ -1,4 +1,4 @@
-import { AutoComplete, AutoCompleteProps, DropdownProps, Input } from 'antd';
+import { AutoComplete, AutoCompleteProps, Input } from 'antd';
 import { memo, useRef, useMemo, useState, useCallback, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
@@ -64,7 +64,9 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
           <div className="flex items-center gap-2 h-6">
             {getSkillIcon(skill.name)}
             <span className="text-sm font-medium">{t(`${skill.name}.name`, { ns: 'skill' })}</span>
-            <span className="text-sm text-gray-500">{t(`${skill.name}.description`, { ns: 'skill' })}</span>
+            <span className="text-sm text-gray-500">
+              {t(`${skill.name}.description`, { ns: 'skill' })}
+            </span>
           </div>
         ),
         textLabel: t(`${skill.name}.name`, { ns: 'skill' }),
@@ -171,7 +173,8 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
           value={query ?? ''}
           filterOption={(inputValue, option) => {
             const lastSlashIndex = inputValue.lastIndexOf('/');
-            const searchText = lastSlashIndex !== -1 ? inputValue.slice(lastSlashIndex + 1) : inputValue;
+            const searchText =
+              lastSlashIndex !== -1 ? inputValue.slice(lastSlashIndex + 1) : inputValue;
             const searchVal = searchText.toLowerCase();
             return (
               !searchVal ||

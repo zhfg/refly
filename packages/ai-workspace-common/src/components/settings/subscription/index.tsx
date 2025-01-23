@@ -143,7 +143,9 @@ export const Subscription = () => {
     if (subscription?.cancelAt) {
       return (
         <Tag className="interval" color="orange">
-          {t('settings.subscription.subscribe.cancelAt', { date: formatDate(subscription?.cancelAt) })}
+          {t('settings.subscription.subscribe.cancelAt', {
+            date: formatDate(subscription?.cancelAt),
+          })}
         </Tag>
       );
     }
@@ -159,7 +161,9 @@ export const Subscription = () => {
       <div className="subscription">
         <div className={`subscription-plan ${planType === 'free' ? 'free' : ''}`}>
           <div className="subscription-plan-info">
-            <div className="subscription-plan-info-title">{t('settings.subscription.currentPlan')}</div>
+            <div className="subscription-plan-info-title">
+              {t('settings.subscription.currentPlan')}
+            </div>
             <div className="subscription-plan-info-status">
               {t(`settings.subscription.subscriptionStatus.${planType}`)}
               {hintTag}

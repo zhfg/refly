@@ -51,7 +51,10 @@ export function timestampFormat(timestamp: number = new Date().getTime(), langua
   }
 }
 
-export const time = (date: string | number | Date | dayjsConfig.Dayjs, locale: LOCALE = LOCALE.EN) => {
+export const time = (
+  date: string | number | Date | dayjsConfig.Dayjs,
+  locale: LOCALE = LOCALE.EN,
+) => {
   return dayjsConfig(date, { locale });
 };
 

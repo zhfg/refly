@@ -95,7 +95,12 @@ const ActionDropdown = ({ doc, afterDelete }: { doc: Document; afterDelete: () =
   };
 
   return (
-    <Dropdown trigger={['click']} open={popupVisible} onOpenChange={handleOpenChange} menu={{ items }}>
+    <Dropdown
+      trigger={['click']}
+      open={popupVisible}
+      onOpenChange={handleOpenChange}
+      menu={{ items }}
+    >
       <Button type="text" icon={<IconMoreHorizontal />} />
     </Dropdown>
   );
@@ -118,7 +123,9 @@ const DocumentCard = ({ item, onDelete }: { item: Document; onDelete: () => void
         <div className="flex items-center gap-3 mb-2">
           <IconDocumentFilled color={NODE_COLORS['document']} size={24} />
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-medium max-w-48 truncate">{item.title || t('common.untitled')}</h3>
+            <h3 className="text-sm font-medium max-w-48 truncate">
+              {item.title || t('common.untitled')}
+            </h3>
             <p className="text-xs text-gray-500">
               {time(item.updatedAt, language as LOCALE)
                 .utc()

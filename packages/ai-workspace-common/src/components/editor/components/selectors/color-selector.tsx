@@ -98,7 +98,9 @@ export const ColorSelector = ({ open, onOpenChange, triggerEditor }: ColorSelect
 
   if (!editor) return null;
   const activeColorItem = TEXT_COLORS.find(({ color }) => editor?.isActive('textStyle', { color }));
-  const activeHighlightItem = HIGHLIGHT_COLORS.find(({ color }) => editor?.isActive('highlight', { color }));
+  const activeHighlightItem = HIGHLIGHT_COLORS.find(({ color }) =>
+    editor?.isActive('highlight', { color }),
+  );
 
   const content = (
     <div className="flex max-h-80 w-38 flex-col overflow-hidden overflow-y-auto">
@@ -141,7 +143,10 @@ export const ColorSelector = ({ open, onOpenChange, triggerEditor }: ColorSelect
             className="flex cursor-pointer items-center justify-between px-2 py-1 text-sm hover:bg-accent"
           >
             <div className="flex items-center gap-2 text-xs">
-              <div className="rounded-sm border px-2 py-px font-medium" style={{ backgroundColor: color }}>
+              <div
+                className="rounded-sm border px-2 py-px font-medium"
+                style={{ backgroundColor: color }}
+              >
                 A
               </div>
               <span>{name}</span>

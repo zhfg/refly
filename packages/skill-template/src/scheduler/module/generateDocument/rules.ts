@@ -19,4 +19,3 @@ export const commonImportantNotes = () => `
 ## Important Notes
  1. The <response> tags in examples are for demonstration purposes only
  2. Keep minimum content length of 2000 words`;
-

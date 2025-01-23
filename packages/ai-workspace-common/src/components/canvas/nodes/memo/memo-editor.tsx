@@ -5,7 +5,6 @@ import { Color } from 'antd/es/color-picker';
 import { NodeSelector } from '@refly-packages/ai-workspace-common/components/editor/components/selectors/node-selector';
 import { TextButtons } from '@refly-packages/ai-workspace-common/components/editor/components/selectors/text-buttons';
 import { LinkSelector } from '@refly-packages/ai-workspace-common/components/editor/components/selectors/link-selector';
-import { ColorSelector } from '@refly-packages/ai-workspace-common/components/editor/components/selectors/color-selector';
 import './memo-editor.scss';
 type MemoEditorProps = {
   editor: EditorInstance;

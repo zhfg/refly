@@ -35,12 +35,13 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const currentUiLocale = i18n.language as 'en' | 'zh-CN';
-  const { results, selectedItems, toggleSelectedItem, isSearching } = useMultilingualSearchStoreShallow((state) => ({
-    results: state.results,
-    selectedItems: state.selectedItems,
-    toggleSelectedItem: state.toggleSelectedItem,
-    isSearching: state.isSearching,
-  }));
+  const { results, selectedItems, toggleSelectedItem, isSearching } =
+    useMultilingualSearchStoreShallow((state) => ({
+      results: state.results,
+      selectedItems: state.selectedItems,
+      toggleSelectedItem: state.toggleSelectedItem,
+      isSearching: state.isSearching,
+    }));
 
   const renderPopoverContent = (item: Source) => {
     const domain = safeParseURL(item.url);
@@ -52,7 +53,11 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           <h4 className="font-medium text-base m-0 break-words">
             <TranslationWrapper
               content={item.title || ''}
-              targetLanguage={outputLocale.code === 'auto' ? item.metadata?.translatedDisplayLocale : outputLocale.code}
+              targetLanguage={
+                outputLocale.code === 'auto'
+                  ? item.metadata?.translatedDisplayLocale
+                  : outputLocale.code
+              }
               originalLocale={item.metadata?.originalLocale}
               enableTranslation={config.enableTranslation}
             />
@@ -75,7 +80,11 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
         <div className="content-body pt-0">
           <TranslationWrapper
             content={item.pageContent}
-            targetLanguage={outputLocale.code === 'auto' ? item.metadata?.translatedDisplayLocale : outputLocale.code}
+            targetLanguage={
+              outputLocale.code === 'auto'
+                ? item.metadata?.translatedDisplayLocale
+                : outputLocale.code
+            }
             originalLocale={item.metadata?.originalLocale}
             enableTranslation={config.enableTranslation}
           />
@@ -117,7 +126,9 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           <div className="search-results-empty">
             <Empty
               image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={<span className="text-gray-500">{t('resource.multilingualSearch.noResults')}</span>}
+              description={
+                <span className="text-gray-500">{t('resource.multilingualSearch.noResults')}</span>
+              }
             />
           </div>
         ) : (
@@ -160,7 +171,12 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                                   alt=""
                                 />
                                 <div className="site-meta">
-                                  <a className="site-url" href={item.url} target="_blank" rel="noreferrer">
+                                  <a
+                                    className="site-url"
+                                    href={item.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
                                     {item.url}
                                   </a>
                                 </div>
@@ -173,7 +189,8 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                                 </span>{' '}
                                 →{' '}
                                 <span>
-                                  <AiOutlineTranslation /> {getLocaleName(item.metadata.translatedDisplayLocale)}
+                                  <AiOutlineTranslation />{' '}
+                                  {getLocaleName(item.metadata.translatedDisplayLocale)}
                                 </span>
                               </Tag>
                             )}

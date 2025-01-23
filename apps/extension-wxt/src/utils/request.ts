@@ -83,7 +83,11 @@ export async function extRequest<T>(
   }
 
   // 如果 data 不为 formData 时，才做 JSON stringify
-  if (['POST', 'PUT'].includes(opt.method) && typeof opt.body === 'object' && !(opt.body instanceof FormData)) {
+  if (
+    ['POST', 'PUT'].includes(opt.method) &&
+    typeof opt.body === 'object' &&
+    !(opt.body instanceof FormData)
+  ) {
     opt.headers = {
       ...DEFAULT_HEADER,
       ...(opt.headers || {}),

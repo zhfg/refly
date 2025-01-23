@@ -2,9 +2,16 @@ import { Button, Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { FC, useCallback, useMemo } from 'react';
 import { useReactFlow, useStore } from '@xyflow/react';
-import { IconDelete, IconAskAI, IconLoading } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconDelete,
+  IconAskAI,
+  IconLoading,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
-import { CanvasNode, SkillNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import {
+  CanvasNode,
+  SkillNodeMeta,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { MessageSquareDiff, Group, Target, Layout } from 'lucide-react';
 import { genActionResultID, genSkillID } from '@refly-packages/utils/id';
 import { CanvasNodeType } from '@refly/openapi-schema';
@@ -59,7 +66,9 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
 
   const handleAskAI = useCallback(() => {
     // Get all selected nodes except skills
-    const selectedNodes = getNodes().filter((node) => node.selected && !['skill'].includes(node.type)) as CanvasNode[];
+    const selectedNodes = getNodes().filter(
+      (node) => node.selected && !['skill'].includes(node.type),
+    ) as CanvasNode[];
 
     const connectTo = selectedNodes.map((node) => ({
       type: node.type as CanvasNodeType,
@@ -221,7 +230,8 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
             hoverContent: {
               title: t('canvas.nodeActions.askAI'),
               description: t('canvas.nodeActions.askAIDescription'),
-              videoUrl: 'https://static.refly.ai/onboarding/selection-node-action/selection-nodeAction-askAI.webm',
+              videoUrl:
+                'https://static.refly.ai/onboarding/selection-node-action/selection-nodeAction-askAI.webm',
             },
           },
       hasSkill
@@ -235,7 +245,8 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
             hoverContent: {
               title: t('canvas.nodeActions.batchRun'),
               description: t('canvas.nodeActions.batchRunDescription'),
-              videoUrl: 'https://static.refly.ai/onboarding/selection-node-action/selection-node-action-batchRun.webm',
+              videoUrl:
+                'https://static.refly.ai/onboarding/selection-node-action/selection-node-action-batchRun.webm',
             },
           }
         : null,
@@ -249,7 +260,8 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
         hoverContent: {
           title: t('canvas.nodeActions.addToContext'),
           description: t('canvas.nodeActions.addToContextDescription'),
-          videoUrl: 'https://static.refly.ai/onboarding/selection-node-action/selection-nodeAction-addToContext.webm',
+          videoUrl:
+            'https://static.refly.ai/onboarding/selection-node-action/selection-nodeAction-addToContext.webm',
         },
       },
       { key: 'divider-2', type: 'divider' } as MenuItem,
@@ -262,7 +274,8 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
         hoverContent: {
           title: t('canvas.nodeActions.group'),
           description: t('canvas.nodeActions.groupDescription'),
-          videoUrl: 'https://static.refly.ai/onboarding/selection-node-action/selection-nodeAction-group.webm',
+          videoUrl:
+            'https://static.refly.ai/onboarding/selection-node-action/selection-nodeAction-group.webm',
         },
       },
       { key: 'divider-3', type: 'divider' } as MenuItem,

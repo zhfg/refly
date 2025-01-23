@@ -1,13 +1,21 @@
 import { Document } from '@langchain/core/documents';
-import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { BaseMessage, HumanMessage } from '@langchain/core/messages';
 
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+} from '@refly-packages/openapi-schema';
 // utils
-import { languageNameToLocale, localeToLanguageName, zhCNLocale } from '@refly-packages/common-types';
+import {
+  languageNameToLocale,
+  localeToLanguageName,
+  zhCNLocale,
+} from '@refly-packages/common-types';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -78,7 +86,12 @@ export class TranslateSkill extends BaseSkill {
   async generate(state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
-    const { locale = 'en', contentList = [], chatHistory = [], tplConfig = {} } = config?.configurable || {};
+    const {
+      locale = 'en',
+      contentList = [],
+      chatHistory = [],
+      tplConfig = {},
+    } = config?.configurable || {};
     const query = state.query || '';
     const targetLanguage = (tplConfig?.targetLanguage?.value || locale) as string;
 

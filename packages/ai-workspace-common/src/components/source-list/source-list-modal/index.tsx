@@ -39,7 +39,8 @@ export const SourceListModal = (props: SourceListModalProps) => {
     () => ({
       code: currentUiLocale,
       name:
-        defaultLocalesMap[currentUiLocale].find((locale) => locale.code === currentUiLocale)?.name || currentUiLocale,
+        defaultLocalesMap[currentUiLocale].find((locale) => locale.code === currentUiLocale)
+          ?.name || currentUiLocale,
     }),
     [currentUiLocale],
   );
@@ -87,7 +88,12 @@ export const SourceListModal = (props: SourceListModalProps) => {
       setResults([]);
       setIsSearching(false);
     }
-  }, [knowledgeBaseStore.sourceListDrawer.visible, groupedSources.webSearch, groupedSources.library, activeTab]);
+  }, [
+    knowledgeBaseStore.sourceListDrawer.visible,
+    groupedSources.webSearch,
+    groupedSources.library,
+    activeTab,
+  ]);
 
   return (
     <Drawer
@@ -121,7 +127,9 @@ export const SourceListModal = (props: SourceListModalProps) => {
               </div>
             </div>
           </div>
-          <div className="source-list-modal-header-title-message">{knowledgeBaseStore?.sourceListDrawer?.query}</div>
+          <div className="source-list-modal-header-title-message">
+            {knowledgeBaseStore?.sourceListDrawer?.query}
+          </div>
         </div>
       }
       visible={knowledgeBaseStore.sourceListDrawer.visible}
@@ -148,7 +156,8 @@ export const SourceListModal = (props: SourceListModalProps) => {
                     key: 'webSearch',
                     label: (
                       <span>
-                        {t('copilot.sourceListModal.webSearchTab')} ({groupedSources.webSearch.length})
+                        {t('copilot.sourceListModal.webSearchTab')} (
+                        {groupedSources.webSearch.length})
                       </span>
                     ),
                     children: (
@@ -205,7 +214,11 @@ export const SourceListModal = (props: SourceListModalProps) => {
         />
         <div className="source-list-modal-action-menu-container">
           <ActionMenu
-            importActionMode={activeTab === 'webSearch' ? ImportActionMode.CREATE_RESOURCE : ImportActionMode.ADD_NODE}
+            importActionMode={
+              activeTab === 'webSearch'
+                ? ImportActionMode.CREATE_RESOURCE
+                : ImportActionMode.ADD_NODE
+            }
             getTarget={() => document.querySelector('.source-list-modal-tabs') as HTMLElement}
             sourceType="sourceListModal"
           />

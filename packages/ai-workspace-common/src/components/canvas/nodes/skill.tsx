@@ -2,7 +2,7 @@ import { NodeProps, Position, useReactFlow } from '@xyflow/react';
 import { CanvasNode, CanvasNodeData, SkillNodeMeta } from './shared/types';
 import { Node } from '@xyflow/react';
 import { Button } from 'antd';
-import { Form, FormInstance } from '@arco-design/web-react';
+import { Form } from '@arco-design/web-react';
 import { CustomHandle } from './shared/custom-handle';
 import { useState, useCallback, useEffect, useMemo, memo, useRef } from 'react';
 
@@ -59,7 +59,9 @@ const NodeHeader = memo(
             {getSkillIcon(selectedSkillName, 'w-4 h-4 text-white')}
           </div>
           <span className="text-sm font-medium leading-normal text-[rgba(0,0,0,0.8)] truncate">
-            {selectedSkillName ? t(`${selectedSkillName}.name`, { ns: 'skill' }) : t('canvas.skill.askAI')}
+            {selectedSkillName
+              ? t(`${selectedSkillName}.name`, { ns: 'skill' })
+              : t('canvas.skill.askAI')}
           </span>
         </div>
         {selectedSkillName && (
@@ -352,7 +354,11 @@ export const SkillNode = memo(
                 setSelectedSkill={setSelectedSkill}
               />
 
-              <ContextManager className="px-0.5" contextItems={contextItems} setContextItems={setContextItems} />
+              <ContextManager
+                className="px-0.5"
+                contextItems={contextItems}
+                setContextItems={setContextItems}
+              />
 
               <ChatInput
                 ref={chatInputRef}

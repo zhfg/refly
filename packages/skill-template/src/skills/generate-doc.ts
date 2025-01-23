@@ -55,18 +55,28 @@ export class GenerateDoc extends BaseSkill {
     ...baseStateGraphArgs,
   };
 
-  commonPreprocess = async (state: GraphState, config: SkillRunnableConfig, module: SkillPromptModule) => {
+  commonPreprocess = async (
+    state: GraphState,
+    config: SkillRunnableConfig,
+    module: SkillPromptModule,
+  ) => {
     const { messages = [] } = state;
     const { locale = 'en', modelInfo } = config.configurable;
     const { tplConfig } = config?.configurable || {};
 
     // Use shared query processor
-    const { optimizedQuery, query, usedChatHistory, hasContext, remainingTokens, mentionedContext } =
-      await processQuery({
-        config,
-        ctxThis: this,
-        state,
-      });
+    const {
+      optimizedQuery,
+      query,
+      usedChatHistory,
+      hasContext,
+      remainingTokens,
+      mentionedContext,
+    } = await processQuery({
+      config,
+      ctxThis: this,
+      state,
+    });
 
     let context = '';
     let sources: Source[] = [];
@@ -199,7 +209,10 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
     }
   };
 
-  callGenerateDoc = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+  callGenerateDoc = async (
+    state: GraphState,
+    config: SkillRunnableConfig,
+  ): Promise<Partial<GraphState>> => {
     const { currentSkill, user } = config.configurable;
 
     const model = this.engine.chatModel({ temperature: 0.1 });
@@ -210,11 +223,8 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
       buildContextUserPrompt: generateDocument.buildGenerateDocumentContextUserPrompt,
     };
 
-    const { optimizedQuery, requestMessages, context, usedChatHistory } = await this.commonPreprocess(
-      state,
-      config,
-      module,
-    );
+    const { optimizedQuery, requestMessages, context, usedChatHistory } =
+      await this.commonPreprocess(state, config, module);
 
     // Generate title first
     config.metadata.step = { name: 'generateTitle' };
@@ -224,7 +234,10 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
       chatHistory: usedChatHistory,
     });
     if (documentTitle) {
-      this.emitEvent({ log: { key: 'generateTitle', descriptionArgs: { title: documentTitle } } }, config);
+      this.emitEvent(
+        { log: { key: 'generateTitle', descriptionArgs: { title: documentTitle } } },
+        config,
+      );
     } else {
       this.emitEvent({ log: { key: 'generateTitleFailed' } }, config);
     }

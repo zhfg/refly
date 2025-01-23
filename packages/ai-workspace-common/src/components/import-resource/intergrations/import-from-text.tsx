@@ -124,7 +124,9 @@ export const ImportFromText = () => {
               maxLength={100000}
               value={importResourceStore.copiedTextPayload?.content}
               allowClear
-              onChange={(e) => importResourceStore.setCopiedTextPayload({ content: e.target.value })}
+              onChange={(e) =>
+                importResourceStore.setCopiedTextPayload({ content: e.target.value })
+              }
             />
           </FormItem>
         </Form>
@@ -136,8 +138,15 @@ export const ImportFromText = () => {
           <StorageLimit resourceCount={1} />
         </div>
         <div className="flex items-center gap-x-[8px] flex-shrink-0">
-          <Button onClick={() => importResourceStore.setImportResourceModalVisible(false)}>{t('common.cancel')}</Button>
-          <Button type="primary" loading={saveLoading} disabled={disableSave()} onClick={handleSave}>
+          <Button onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
+            {t('common.cancel')}
+          </Button>
+          <Button
+            type="primary"
+            loading={saveLoading}
+            disabled={disableSave()}
+            onClick={handleSave}
+          >
             {t('common.saveToCanvas')}
           </Button>
         </div>

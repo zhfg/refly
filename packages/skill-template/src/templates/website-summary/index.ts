@@ -1,14 +1,16 @@
 import { Document } from '@langchain/core/documents';
-import { WebPDFLoader } from '@langchain/community/document_loaders/web/pdf';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+} from '@refly-packages/openapi-schema';
 import { TokenTextSplitter } from 'langchain/text_splitter';
-import { loadSummarizationChain } from 'langchain/chains';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { LLMChain } from 'langchain/chains';
 
@@ -131,10 +133,15 @@ export class WebsiteSummarySkill extends BaseSkill {
     });
     if (response.status !== 200) {
       this.emitEvent({ event: 'log', content: '获取网页内容失败' }, config);
-      throw new Error(`call remote reader failed: ${response.status} ${response.statusText} ${response.text}`);
+      throw new Error(
+        `call remote reader failed: ${response.status} ${response.statusText} ${response.text}`,
+      );
     }
 
-    const data = (await response.json()) as { data: { title: string; content: string; url: string }; code: number };
+    const data = (await response.json()) as {
+      data: { title: string; content: string; url: string };
+      code: number;
+    };
     if (!data) {
       this.emitEvent({ event: 'log', content: '获取网页内容失败' }, config);
       throw new Error(`invalid data from remote reader: ${response.text}`);
@@ -205,7 +212,9 @@ Remember to use ${locale} for the summary and explanations, but keep technical t
         .object({
           summary: z.string(),
         })
-        .describe(`Generate the summary based on these requirements and offer suggestions for the next steps.`),
+        .describe(
+          `Generate the summary based on these requirements and offer suggestions for the next steps.`,
+        ),
     );
 
     const combineChain = new LLMChain({ llm, prompt: combinePrompt });

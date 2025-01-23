@@ -3,7 +3,7 @@ import { AppRouter } from '@/routes/index';
 
 import '@/styles/style.css';
 import './App.scss';
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useEffect } from 'react';
 
 // i18n
 // 加载国际化

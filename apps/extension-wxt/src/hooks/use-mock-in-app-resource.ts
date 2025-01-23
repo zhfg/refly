@@ -1,10 +1,13 @@
-import { useMatch, useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
+import { useMatch, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { useEffect, useRef } from 'react';
-import { onMessage, sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import {
+  onMessage,
+  sendMessage,
+} from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { BackgroundMessage, CopilotMsgName } from '@refly/common-types';
+import { BackgroundMessage } from '@refly/common-types';
 import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
 
 export const useMockInAppResource = () => {

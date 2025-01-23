@@ -4,7 +4,10 @@ export const getPopupContainer = (e?: HTMLElement): HTMLElement => {
   return elem as HTMLElement;
 };
 
-export const calcPopupPosition = (rect: DOMRect, barDimesion: { barWidth: number; barHeight: number }) => {
+export const calcPopupPosition = (
+  rect: DOMRect,
+  barDimesion: { barWidth: number; barHeight: number },
+) => {
   const { barHeight, barWidth } = barDimesion;
   let top = 0;
   let left = 0;

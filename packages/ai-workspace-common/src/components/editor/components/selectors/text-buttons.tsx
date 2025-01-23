@@ -1,6 +1,13 @@
 import { Button } from 'antd';
 import { cn } from '../utils';
-import { BoldIcon, CodeIcon, ItalicIcon, StrikethroughIcon, UnderlineIcon, type LucideIcon } from 'lucide-react';
+import {
+  BoldIcon,
+  CodeIcon,
+  ItalicIcon,
+  StrikethroughIcon,
+  UnderlineIcon,
+  type LucideIcon,
+} from 'lucide-react';
 import { EditorBubbleItem, EditorInstance, useEditor } from '../../core/components';
 
 type SelectorItem = {

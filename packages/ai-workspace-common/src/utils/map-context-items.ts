@@ -11,7 +11,10 @@ import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context
 import { getClientOrigin } from '@refly-packages/utils/url';
 import { CanvasNodeFilter } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 
-export const convertResultContextToItems = (context: SkillContext, history: ActionResult[]): IContextItem[] => {
+export const convertResultContextToItems = (
+  context: SkillContext,
+  history: ActionResult[],
+): IContextItem[] => {
   if (!context) return [];
 
   const items: IContextItem[] = [];
@@ -154,7 +157,9 @@ export const convertContextItemsToInvokeParams = (
   const resultHistory = items
     ?.filter((item) => item.type === 'skillResponse')
     .flatMap((item) => {
-      return item.metadata?.withHistory ? getHistory(item) : [{ title: item.title, resultId: item.entityId }];
+      return item.metadata?.withHistory
+        ? getHistory(item)
+        : [{ title: item.title, resultId: item.entityId }];
     });
 
   return { context, resultHistory };

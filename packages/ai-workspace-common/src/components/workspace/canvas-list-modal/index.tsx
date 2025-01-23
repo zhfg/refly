@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
@@ -73,14 +73,18 @@ export const CanvasListModal = (props: CanvasListProps) => {
             icon={<IconPlay />}
             onClick={() => handleClickCanvas(canvas)}
           >
-            <span className="text-xs hover:font-medium">{t('workspace.canvasListModal.continue')}</span>
+            <span className="text-xs hover:font-medium">
+              {t('workspace.canvasListModal.continue')}
+            </span>
           </Button>
           <CanvasActionDropdown
             canvasId={canvas.canvasId}
             canvasName={canvas.title}
             afterDelete={() => setDataList(dataList.filter((n) => n.canvasId !== canvas.canvasId))}
             afterRename={(newTitle, canvasId) => {
-              setDataList(dataList.map((n) => (n.canvasId === canvasId ? { ...n, title: newTitle } : n)));
+              setDataList(
+                dataList.map((n) => (n.canvasId === canvasId ? { ...n, title: newTitle } : n)),
+              );
             }}
           />
         </div>

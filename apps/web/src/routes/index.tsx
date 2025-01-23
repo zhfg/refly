@@ -1,92 +1,80 @@
-import { lazy, Suspense } from "react"
-import { Route, Routes, useMatch } from "react-router-dom"
-import { useEffect } from "react"
-import { safeParseJSON } from "@refly-packages/ai-workspace-common/utils/parse"
-import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
-import { useTranslation } from "react-i18next"
-import { useGetUserSettings } from "@refly-packages/ai-workspace-common/hooks/use-get-user-settings"
-import { LOCALE } from "@refly/common-types"
+import { lazy, Suspense } from 'react';
+import { Route, Routes, useMatch } from 'react-router-dom';
+import { useEffect } from 'react';
+import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { useTranslation } from 'react-i18next';
+import { useGetUserSettings } from '@refly-packages/ai-workspace-common/hooks/use-get-user-settings';
+import { LOCALE } from '@refly/common-types';
 import {
   BetaProtectedRoute,
   RequestAccessRoute,
-} from "@refly-packages/ai-workspace-common/components/request-access/protected-route"
-import { useHandleUrlParamsCallback } from "@refly-packages/ai-workspace-common/hooks/use-handle-url-params-callback"
-import { SuspenseLoading } from "@refly-packages/ai-workspace-common/components/common/loading"
-import { HomeRedirect } from "@refly-packages/ai-workspace-common/components/home-redirect"
+} from '@refly-packages/ai-workspace-common/components/request-access/protected-route';
+import { useHandleUrlParamsCallback } from '@refly-packages/ai-workspace-common/hooks/use-handle-url-params-callback';
+import { SuspenseLoading } from '@refly-packages/ai-workspace-common/components/common/loading';
+import { HomeRedirect } from '@refly-packages/ai-workspace-common/components/home-redirect';
 // Lazy load components
-const Home = lazy(() => import("@/pages/home"))
-const Canvas = lazy(() => import("@/pages/canvas"))
-const Pricing = lazy(() => import("@/pages/pricing"))
+const Home = lazy(() => import('@/pages/home'));
+const Canvas = lazy(() => import('@/pages/canvas'));
+const Pricing = lazy(() => import('@/pages/pricing'));
 
 const prefetchRoutes = () => {
   // Prefetch common routes
-  import("@refly-packages/ai-workspace-common/components/request-access")
-}
+  import('@refly-packages/ai-workspace-common/components/request-access');
+};
 
 export const AppRouter = (props: { layout?: any }) => {
-  const { layout: Layout } = props
-  const userStore = useUserStoreShallow(state => ({
+  const { layout: Layout } = props;
+  const userStore = useUserStoreShallow((state) => ({
     isLogin: state.isLogin,
     userProfile: state.userProfile,
     localSettings: state.localSettings,
     isCheckingLoginStatus: state.isCheckingLoginStatus,
-  }))
+  }));
 
   // Get storage user profile
-  const storageUserProfile = safeParseJSON(
-    localStorage.getItem("refly-user-profile"),
-  )
-  const notShowLoginBtn = storageUserProfile?.uid || userStore?.userProfile?.uid
+  const storageUserProfile = safeParseJSON(localStorage.getItem('refly-user-profile'));
+  const notShowLoginBtn = storageUserProfile?.uid || userStore?.userProfile?.uid;
 
   // Get locale settings
-  const storageLocalSettings = safeParseJSON(
-    localStorage.getItem("refly-local-settings"),
-  )
+  const storageLocalSettings = safeParseJSON(localStorage.getItem('refly-local-settings'));
 
-  const locale =
-    storageLocalSettings?.uiLocale ||
-    userStore?.localSettings?.uiLocale ||
-    LOCALE.EN
+  const locale = storageLocalSettings?.uiLocale || userStore?.localSettings?.uiLocale || LOCALE.EN;
 
   useEffect(() => {
-    prefetchRoutes()
-  }, [])
+    prefetchRoutes();
+  }, []);
 
   // Check user login status
-  useGetUserSettings()
+  useGetUserSettings();
 
   // Change locale if not matched
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation();
   useEffect(() => {
     if (locale && i18n.languages?.[0] !== locale) {
-      i18n.changeLanguage(locale)
+      i18n.changeLanguage(locale);
     }
-  }, [i18n, locale])
+  }, [i18n, locale]);
 
   // Handle payment callback
-  useHandleUrlParamsCallback()
+  useHandleUrlParamsCallback();
 
-  const routeLogin = useMatch("/")
+  const routeLogin = useMatch('/');
 
-  const isShareContent = useMatch("/share/:shareCode")
-  const isPricing = useMatch("/pricing")
+  const isShareContent = useMatch('/share/:shareCode');
+  const isPricing = useMatch('/pricing');
 
   if (!isShareContent && !isPricing) {
-    if (
-      !userStore.isCheckingLoginStatus === undefined ||
-      userStore.isCheckingLoginStatus
-    ) {
-      return <SuspenseLoading />
+    if (!userStore.isCheckingLoginStatus === undefined || userStore.isCheckingLoginStatus) {
+      return <SuspenseLoading />;
     }
 
     if (!notShowLoginBtn && !routeLogin) {
-      return <SuspenseLoading />
+      return <SuspenseLoading />;
     }
   }
 
-  const hasBetaAccess = userStore?.isLogin
-    ? userStore?.userProfile?.hasBetaAccess || false
-    : true
+  const hasBetaAccess = userStore?.isLogin ? userStore?.userProfile?.hasBetaAccess || false : true;
 
   return (
     <Suspense fallback={<SuspenseLoading />}>
@@ -97,12 +85,7 @@ export const AppRouter = (props: { layout?: any }) => {
 
           <Route
             path="/canvas/:canvasId"
-            element={
-              <BetaProtectedRoute
-                component={Canvas}
-                hasBetaAccess={hasBetaAccess}
-              />
-            }
+            element={<BetaProtectedRoute component={Canvas} hasBetaAccess={hasBetaAccess} />}
           />
           <Route
             path="/request-access"
@@ -112,5 +95,5 @@ export const AppRouter = (props: { layout?: any }) => {
         </Routes>
       </Layout>
     </Suspense>
-  )
-}
+  );
+};

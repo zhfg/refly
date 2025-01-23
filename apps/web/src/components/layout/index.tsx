@@ -1,46 +1,44 @@
-import { Layout } from "@arco-design/web-react"
-import { useMatch } from "react-router-dom"
-import { SiderLayout } from "./sider"
-import { useBindCommands } from "@refly-packages/ai-workspace-common/hooks/use-bind-commands"
-import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user"
+import { Layout } from '@arco-design/web-react';
+import { useMatch } from 'react-router-dom';
+import { SiderLayout } from './sider';
+import { useBindCommands } from '@refly-packages/ai-workspace-common/hooks/use-bind-commands';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
-import { LoginModal } from "@/components/login-modal"
-import { SubscribeModal } from "@refly-packages/ai-workspace-common/components/settings/subscribe-modal"
-import { ErrorBoundary } from "@sentry/react"
-import { VerificationModal } from "@/components/verification-modal"
-import { useAuthStoreShallow } from "@refly-packages/ai-workspace-common/stores/auth"
-import { ResetPasswordModal } from "@/components/reset-password-modal"
+import { LoginModal } from '@/components/login-modal';
+import { SubscribeModal } from '@refly-packages/ai-workspace-common/components/settings/subscribe-modal';
+import { ErrorBoundary } from '@sentry/react';
+import { VerificationModal } from '@/components/verification-modal';
+import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
+import { ResetPasswordModal } from '@/components/reset-password-modal';
 
-import "./index.scss"
+import './index.scss';
 
-const Content = Layout.Content
+const Content = Layout.Content;
 
 interface AppLayoutProps {
-  children?: any
+  children?: any;
 }
 
 export const AppLayout = (props: AppLayoutProps) => {
   // stores
-  const userStore = useUserStoreShallow(state => ({
+  const userStore = useUserStoreShallow((state) => ({
     userProfile: state.userProfile,
     isLogin: state.isLogin,
-  }))
-  const authStore = useAuthStoreShallow(state => ({
+  }));
+  const authStore = useAuthStoreShallow((state) => ({
     loginModalOpen: state.loginModalOpen,
     verificationModalOpen: state.verificationModalOpen,
     resetPasswordModalOpen: state.resetPasswordModalOpen,
-  }))
+  }));
 
-  const matchShare = useMatch("/share/:shareCode")
-  const matchPricing = useMatch("/pricing")
+  const matchShare = useMatch('/share/:shareCode');
+  const matchPricing = useMatch('/pricing');
 
-  useBindCommands()
+  useBindCommands();
 
-  const hasBetaAccess = userStore.isLogin
-    ? userStore.userProfile?.hasBetaAccess || false
-    : true
+  const hasBetaAccess = userStore.isLogin ? userStore.userProfile?.hasBetaAccess || false : true;
 
-  const showSider = !matchShare && !!userStore.userProfile && !matchPricing
+  const showSider = !matchShare && !!userStore.userProfile && !matchPricing;
 
   return (
     <ErrorBoundary>
@@ -49,13 +47,12 @@ export const AppLayout = (props: AppLayoutProps) => {
         <Layout
           className="content-layout"
           style={{
-            height: "calc(100vh)",
+            height: 'calc(100vh)',
             flexGrow: 1,
-            overflowY: "auto",
-            width: showSider
-              ? `calc(100% - 200px - 16px)`
-              : `calc(100% - 16px)`,
-          }}>
+            overflowY: 'auto',
+            width: showSider ? `calc(100% - 200px - 16px)` : `calc(100% - 16px)`,
+          }}
+        >
           <Content>{props.children}</Content>
         </Layout>
         {authStore.loginModalOpen && <LoginModal />}
@@ -64,5 +61,5 @@ export const AppLayout = (props: AppLayoutProps) => {
         <SubscribeModal />
       </Layout>
     </ErrorBoundary>
-  )
-}
+  );
+};

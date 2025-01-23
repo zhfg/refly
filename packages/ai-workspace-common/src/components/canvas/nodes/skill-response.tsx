@@ -3,7 +3,12 @@ import { useTranslation } from 'react-i18next';
 import Moveable from 'react-moveable';
 import classNames from 'classnames';
 import { Divider, message } from 'antd';
-import { CanvasNodeData, ResponseNodeMeta, CanvasNode, SkillResponseNodeProps } from './shared/types';
+import {
+  CanvasNodeData,
+  ResponseNodeMeta,
+  CanvasNode,
+  SkillResponseNodeProps,
+} from './shared/types';
 import { Node } from '@xyflow/react';
 import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
 import { CustomHandle } from './shared/custom-handle';
@@ -32,9 +37,12 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { SelectedSkillHeader } from '@refly-packages/ai-workspace-common/components/canvas/launchpad/selected-skill-header';
 import { ModelProviderIcons } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
-import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
+import {
+  createNodeEventName,
+  cleanupNodeEvents,
+} from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { usePatchNodeData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-patch-node-data';
-import { CanvasNodeType, Source } from '@refly/openapi-schema';
+import { CanvasNodeType } from '@refly/openapi-schema';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
@@ -50,27 +58,32 @@ const POLLING_WAIT_TIME = 15000;
 
 type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
-const NodeHeader = memo(({ query, skillName, skill }: { query: string; skillName: string; skill: any }) => {
-  return (
-    <>
-      <div className="flex-shrink-0 mb-3">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-[#F79009] shadow-lg flex items-center justify-center flex-shrink-0">
-            <IconResponse className="w-4 h-4 text-white" />
+const NodeHeader = memo(
+  ({ query, skillName, skill }: { query: string; skillName: string; skill: any }) => {
+    return (
+      <>
+        <div className="flex-shrink-0 mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-[#F79009] shadow-lg flex items-center justify-center flex-shrink-0">
+              <IconResponse className="w-4 h-4 text-white" />
+            </div>
+            <span
+              className="text-sm font-medium leading-normal truncate block cursor-pointer"
+              title={query}
+            >
+              {query}
+            </span>
           </div>
-          <span className="text-sm font-medium leading-normal truncate block cursor-pointer" title={query}>
-            {query}
-          </span>
         </div>
-      </div>
-      {skillName && skillName !== 'commonQnA' && (
-        <div className="flex-shrink-0 mb-2">
-          <SelectedSkillHeader readonly skill={skill} className="rounded-sm" />
-        </div>
-      )}
-    </>
-  );
-});
+        {skillName && skillName !== 'commonQnA' && (
+          <div className="flex-shrink-0 mb-2">
+            <SelectedSkillHeader readonly skill={skill} className="rounded-sm" />
+          </div>
+        )}
+      </>
+    );
+  },
+);
 
 const ModelIcon = memo(({ provider }: { provider: string }) => {
   return <img className="w-3 h-3" src={ModelProviderIcons[provider]} alt={provider} />;
@@ -190,7 +203,11 @@ export const SkillResponseNode = memo(
     const { startPolling } = useActionPolling();
 
     useEffect(() => {
-      if (createdAt && Date.now() - new Date(createdAt).getTime() >= POLLING_WAIT_TIME && status === 'executing') {
+      if (
+        createdAt &&
+        Date.now() - new Date(createdAt).getTime() >= POLLING_WAIT_TIME &&
+        status === 'executing'
+      ) {
         startPolling(entityId, version);
       }
     }, [createdAt, status, startPolling, entityId, version]);
@@ -450,9 +467,13 @@ export const SkillResponseNode = memo(
           onMouseLeave={handleMouseLeave}
           onClick={onNodeClick}
         >
-          {!isPreview && !hideActions && <ActionButtons type="skillResponse" nodeId={id} isNodeHovered={isHovered} />}
+          {!isPreview && !hideActions && (
+            <ActionButtons type="skillResponse" nodeId={id} isNodeHovered={isHovered} />
+          )}
 
-          <div className={`relative h-full flex flex-col ${getNodeCommonStyles({ selected, isHovered })}`}>
+          <div
+            className={`relative h-full flex flex-col ${getNodeCommonStyles({ selected, isHovered })}`}
+          >
             {!isPreview && !hideHandles && (
               <>
                 <CustomHandle

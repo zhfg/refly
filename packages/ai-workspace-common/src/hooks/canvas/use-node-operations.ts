@@ -69,7 +69,7 @@ export const useNodeOperations = () => {
           // Store original width if switching to compact mode
           if (mode === 'compact') {
             newNode.data.metadata.originalWidth =
-              newNode.measured?.width || parseInt(newNode.style?.width as string) || 288;
+              newNode.measured?.width || Number.parseInt(newNode.style?.width as string) || 288;
 
             newNode.style = {
               ...newNode.style,
@@ -117,7 +117,7 @@ export const useNodeOperations = () => {
 
         if (mode === 'compact') {
           newNode.data.metadata.originalWidth =
-            newNode.measured?.width || parseInt(newNode.style?.width as string) || 288;
+            newNode.measured?.width || Number.parseInt(newNode.style?.width as string) || 288;
 
           newNode.style = {
             ...newNode.style,

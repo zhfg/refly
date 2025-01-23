@@ -1,14 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import pTimeout from 'p-timeout';
 import { checkPageUnsupported } from '@refly-packages/ai-workspace-common/utils/extension/check';
 import { checkBrowserArc } from '@/utils/browser';
-import { SidePanelAction, ToggleCopilotStatus } from '@/types/sidePanel';
-import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
-import { useCopilotTypeStore, copilotTypeEnums } from '@/modules/toggle-copilot/stores/use-copilot-type';
+import { ToggleCopilotStatus } from '@/types/sidePanel';
+import { useCopilotTypeStore } from '@/modules/toggle-copilot/stores/use-copilot-type';
 
-let toggleCopilotStatus = {} as ToggleCopilotStatus;
+const toggleCopilotStatus = {} as ToggleCopilotStatus;
 
 export const useToggleCopilot = () => {
   const { copilotType } = useCopilotTypeStore((state) => ({
@@ -19,7 +18,7 @@ export const useToggleCopilot = () => {
   const isCopilotOpenRef = useRef<boolean>();
   const isArcBrowserRef = useRef<boolean>();
 
-  const handleToggleCopilot = async (isOpen: boolean = false) => {
+  const handleToggleCopilot = async (isOpen = false) => {
     // with action, always open, toggle selector, and notify toggle status
     const isCopilotOpen = isCopilotOpenRef.current;
     isCopilotOpenRef.current = !isCopilotOpen;
@@ -108,7 +107,11 @@ export const useToggleCopilot = () => {
     //
 
     // Initial check if the page is already visible
-    if (isDomVisibilityRef.current === 'visible' && !copilotType && !checkPageUnsupported(window.location.href)) {
+    if (
+      isDomVisibilityRef.current === 'visible' &&
+      !copilotType &&
+      !checkPageUnsupported(window.location.href)
+    ) {
       handleCheckArcBrowser();
       handleCheckSidePanelOpenStatus();
     }

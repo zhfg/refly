@@ -34,7 +34,6 @@ export const buildQueryProcessAndChatHistoryInstructions = () => {
   `;
 };
 
-
 export const CHAT_HISTORY_EXAMPLES = `
 ### Example Conversations (For Training Only):
 1. Translation Pattern:

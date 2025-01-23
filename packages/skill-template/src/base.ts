@@ -30,7 +30,7 @@ export abstract class BaseSkill extends StructuredTool {
   /**
    * Skill placeholder
    */
-  placeholder: string = '🔧';
+  placeholder = '🔧';
   /**
    * Skill template config schema
    */
@@ -44,7 +44,10 @@ export abstract class BaseSkill extends StructuredTool {
    */
   abstract graphState: StateGraphArgs<BaseSkillState>['channels'];
 
-  constructor(public engine: SkillEngine, protected params?: BaseToolParams) {
+  constructor(
+    public engine: SkillEngine,
+    protected params?: BaseToolParams,
+  ) {
     super(params);
   }
 

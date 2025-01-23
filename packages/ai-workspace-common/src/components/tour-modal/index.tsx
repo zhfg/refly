@@ -133,15 +133,14 @@ const TourContent = ({ description, videoUrl, videoType }: TourContentProps) => 
 
 export const TourModal = () => {
   const { t } = useTranslation();
-  const { showTourModal, setShowTourModal, userProfile, setUserProfile, setHelpModalVisible } = useUserStoreShallow(
-    (state) => ({
+  const { showTourModal, setShowTourModal, userProfile, setUserProfile, setHelpModalVisible } =
+    useUserStoreShallow((state) => ({
       showTourModal: state.showTourModal,
       setShowTourModal: state.setShowTourModal,
       userProfile: state.userProfile,
       setUserProfile: state.setUserProfile,
       setHelpModalVisible: state.setHelpModalVisible,
-    }),
-  );
+    }));
 
   const [currentStep, setCurrentStep] = useState(0);
   const [finishedOnboardingTour, setFinishedOnboardingTour] = useState<boolean>(
@@ -196,7 +195,13 @@ export const TourModal = () => {
     t(`tour.onboardingModal.highlight.${currentStepData.key}`);
 
   return (
-    <Modal centered width={800} open={showTourModal} onCancel={() => handleClose('skipped')} footer={null}>
+    <Modal
+      centered
+      width={800}
+      open={showTourModal}
+      onCancel={() => handleClose('skipped')}
+      footer={null}
+    >
       <div className="mb-6">
         <h2 className="mb-4 flex items-center gap-1 text-lg font-bold text-gray-900">
           <LuLightbulb /> <span>{title}</span>

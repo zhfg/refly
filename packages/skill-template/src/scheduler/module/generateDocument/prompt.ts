@@ -1,4 +1,8 @@
-import { buildChatHistoryRules, buildQueryProcessAndChatHistoryInstructions, chatHistoryReminder } from '../common/chat-history';
+import {
+  buildChatHistoryRules,
+  buildQueryProcessAndChatHistoryInstructions,
+  chatHistoryReminder,
+} from '../common/chat-history';
 import { commonQueryAndContextPriorityRules, commonImportantNotes } from './rules';
 import { buildContextFormat } from './context';
 import { noContextExamples, contextualExamples } from './examples';
@@ -155,7 +159,10 @@ export const buildGenerateDocumentUserPrompt = ({
  `;
 };
 
-export const buildGenerateDocumentContextUserPrompt = (context: string, needPrepareContext: boolean) => {
+export const buildGenerateDocumentContextUserPrompt = (
+  context: string,
+  needPrepareContext: boolean,
+) => {
   if (!needPrepareContext) {
     return '';
   }

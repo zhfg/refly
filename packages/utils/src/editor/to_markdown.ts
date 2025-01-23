@@ -4,10 +4,14 @@ type MarkSerializerSpec = {
   /// The string that should appear before a piece of content marked
   /// by this mark, either directly or as a function that returns an
   /// appropriate string.
-  open: string | ((state: MarkdownSerializerState, mark: Mark, parent: Node, index: number) => string);
+  open:
+    | string
+    | ((state: MarkdownSerializerState, mark: Mark, parent: Node, index: number) => string);
   /// The string that should appear after a piece of content marked by
   /// this mark.
-  close: string | ((state: MarkdownSerializerState, mark: Mark, parent: Node, index: number) => string);
+  close:
+    | string
+    | ((state: MarkdownSerializerState, mark: Mark, parent: Node, index: number) => string);
   /// When `true`, this indicates that the order in which the mark's
   /// opening and closing syntax appears relative to other mixable
   /// marks can be varied. (For example, you can say `**a *b***` and
@@ -36,7 +40,12 @@ export class MarkdownSerializer {
   constructor(
     /// The node serializer functions for this serializer.
     readonly nodes: {
-      [node: string]: (state: MarkdownSerializerState, node: Node, parent: Node, index: number) => void;
+      [node: string]: (
+        state: MarkdownSerializerState,
+        node: Node,
+        parent: Node,
+        index: number,
+      ) => void;
     },
     /// The mark serializer info.
     readonly marks: { [mark: string]: MarkSerializerSpec },
@@ -68,7 +77,7 @@ export class MarkdownSerializer {
     } = {},
   ) {
     options = Object.assign({}, this.options, options);
-    let state = new MarkdownSerializerState(this.nodes, this.marks, options);
+    const state = new MarkdownSerializerState(this.nodes, this.marks, options);
     state.renderContent(content);
     return state.out;
   }
@@ -105,11 +114,11 @@ export const defaultMarkdownSerializer = new MarkdownSerializer(
       state.renderList(node, '  ', () => (node.attrs.bullet || '*') + ' ');
     },
     orderedList(state, node) {
-      let start = node.attrs.order || 1;
-      let maxW = String(start + node.childCount - 1).length;
-      let space = state.repeat(' ', maxW + 2);
+      const start = node.attrs.order || 1;
+      const maxW = String(start + node.childCount - 1).length;
+      const space = state.repeat(' ', maxW + 2);
       state.renderList(node, space, (i) => {
-        let nStr = String(start + i);
+        const nStr = String(start + i);
         return state.repeat(' ', maxW - nStr.length) + nStr + '. ';
       });
     },
@@ -130,7 +139,8 @@ export const defaultMarkdownSerializer = new MarkdownSerializer(
     },
 
     image(state, node) {
-      const src = typeof node.attrs?.src === 'string' ? node.attrs.src : String(node.attrs?.src ?? '');
+      const src =
+        typeof node.attrs?.src === 'string' ? node.attrs.src : String(node.attrs?.src ?? '');
       state.write(
         '![' +
           state.esc(node.attrs?.alt ?? '') +
@@ -176,14 +186,19 @@ export const defaultMarkdownSerializer = new MarkdownSerializer(
         return state.inAutolink ? '<' : '[';
       },
       close(state, mark, parent, index) {
-        let { inAutolink } = state;
+        const { inAutolink } = state;
         state.inAutolink = undefined;
-        const href = typeof mark.attrs.href === 'string' ? mark.attrs.href : String(mark.attrs.href);
-        const title = typeof mark.attrs.title === 'string' ? mark.attrs.title : String(mark.attrs.title);
+        const href =
+          typeof mark.attrs.href === 'string' ? mark.attrs.href : String(mark.attrs.href);
+        const title =
+          typeof mark.attrs.title === 'string' ? mark.attrs.title : String(mark.attrs.title);
 
         return inAutolink
           ? '>'
-          : '](' + href.replace(/[\(\)"]/g, '\\$&') + (title ? ` "${title.replace(/"/g, '\\"')}"` : '') + ')';
+          : '](' +
+              href.replace(/[\(\)"]/g, '\\$&') +
+              (title ? ` "${title.replace(/"/g, '\\"')}"` : '') +
+              ')';
       },
       mixable: true,
     },
@@ -212,8 +227,12 @@ function backticksFor(node: Node, side: number) {
 
 function isPlainURL(link: Mark, parent: Node, index: number) {
   if (link.attrs.title || !/^\w+:/.test(link.attrs.href)) return false;
-  let content = parent.child(index);
-  if (!content.isText || content.text != link.attrs.href || content.marks[content.marks.length - 1] != link)
+  const content = parent.child(index);
+  if (
+    !content.isText ||
+    content.text != link.attrs.href ||
+    content.marks[content.marks.length - 1] != link
+  )
     return false;
   return index == parent.childCount - 1 || !link.isInSet(parent.child(index + 1).marks);
 }
@@ -223,23 +242,28 @@ function isPlainURL(link: Mark, parent: Node, index: number) {
 /// node and mark serialization methods (see `toMarkdown`).
 export class MarkdownSerializerState {
   /// @internal
-  delim: string = '';
+  delim = '';
   /// @internal
-  out: string = '';
+  out = '';
   /// @internal
   closed: Node | null = null;
   /// @internal
   inAutolink: boolean | undefined = undefined;
   /// @internal
-  atBlockStart: boolean = false;
+  atBlockStart = false;
   /// @internal
-  inTightList: boolean = false;
+  inTightList = false;
 
   /// @internal
   constructor(
     /// @internal
     readonly nodes: {
-      [node: string]: (state: MarkdownSerializerState, node: Node, parent: Node, index: number) => void;
+      [node: string]: (
+        state: MarkdownSerializerState,
+        node: Node,
+        parent: Node,
+        index: number,
+      ) => void;
     },
     /// @internal
     readonly marks: { [mark: string]: MarkSerializerSpec },
@@ -252,16 +276,17 @@ export class MarkdownSerializerState {
     },
   ) {
     if (typeof this.options.tightLists == 'undefined') this.options.tightLists = false;
-    if (typeof this.options.hardBreakNodeName == 'undefined') this.options.hardBreakNodeName = 'hard_break';
+    if (typeof this.options.hardBreakNodeName == 'undefined')
+      this.options.hardBreakNodeName = 'hard_break';
   }
 
   /// @internal
-  flushClose(size: number = 2) {
+  flushClose(size = 2) {
     if (this.closed) {
       if (!this.atBlank()) this.out += '\n';
       if (size > 1) {
         let delimMin = this.delim;
-        let trim = /\s+$/.exec(delimMin);
+        const trim = /\s+$/.exec(delimMin);
         if (trim) delimMin = delimMin.slice(0, delimMin.length - trim[0].length);
         for (let i = 1; i < size; i++) this.out += delimMin + '\n';
       }
@@ -273,7 +298,8 @@ export class MarkdownSerializerState {
   getMark(name: string) {
     let info = this.marks[name];
     if (!info) {
-      if (this.options.strict !== false) throw new Error(`Mark type \`${name}\` not supported by Markdown renderer`);
+      if (this.options.strict !== false)
+        throw new Error(`Mark type \`${name}\` not supported by Markdown renderer`);
       info = blankMark;
     }
     return info;
@@ -284,7 +310,7 @@ export class MarkdownSerializerState {
   /// the end of the block, and `f` is a function that renders the
   /// content of the block.
   wrapBlock(delim: string, firstDelim: string | null, node: Node, f: () => void) {
-    let old = this.delim;
+    const old = this.delim;
     this.write(firstDelim != null ? firstDelim : delim);
     this.delim += delim;
     f();
@@ -319,7 +345,7 @@ export class MarkdownSerializerState {
   /// Add the given text to the document. When escape is not `false`,
   /// it will be escaped.
   text(text: string, escape = true) {
-    let lines = text.split('\n');
+    const lines = text.split('\n');
     for (let i = 0; i < lines.length; i++) {
       this.write();
       // Escape exclamation marks in front of links
@@ -355,7 +381,7 @@ export class MarkdownSerializerState {
     this.atBlockStart = fromBlockStart;
     let active: Mark[] = [],
       trailing = '';
-    let progress = (node: Node | null, offset: number, index: number) => {
+    const progress = (node: Node | null, offset: number, index: number) => {
       let marks = node ? node.marks : [];
 
       // Remove marks from `hard_break` that are the last node inside
@@ -364,7 +390,7 @@ export class MarkdownSerializerState {
       if (node && node.type.name === this.options.hardBreakNodeName)
         marks = marks.filter((m) => {
           if (index + 1 == parent.childCount) return false;
-          let next = parent.child(index + 1);
+          const next = parent.child(index + 1);
           return m.isInSet(next.marks) && (!next.isText || /\S/.test(next.text!));
         });
 
@@ -376,11 +402,11 @@ export class MarkdownSerializerState {
         node &&
         node.isText &&
         marks.some((mark) => {
-          let info = this.getMark(mark.type.name);
+          const info = this.getMark(mark.type.name);
           return info && info.expelEnclosingWhitespace && !mark.isInSet(active);
         })
       ) {
-        let [_, lead, rest] = /^(\s*)(.*)$/m.exec(node.text!)!;
+        const [_, lead, rest] = /^(\s*)(.*)$/m.exec(node.text!)!;
         if (lead) {
           leading += lead;
           node = rest ? (node as any).withText(rest) : null;
@@ -391,7 +417,7 @@ export class MarkdownSerializerState {
         node &&
         node.isText &&
         marks.some((mark) => {
-          let info = this.getMark(mark.type.name);
+          const info = this.getMark(mark.type.name);
           return (
             info &&
             info.expelEnclosingWhitespace &&
@@ -399,26 +425,26 @@ export class MarkdownSerializerState {
           );
         })
       ) {
-        let [_, rest, trail] = /^(.*?)(\s*)$/m.exec(node.text!)!;
+        const [_, rest, trail] = /^(.*?)(\s*)$/m.exec(node.text!)!;
         if (trail) {
           trailing = trail;
           node = rest ? (node as any).withText(rest) : null;
           if (!node) marks = active;
         }
       }
-      let inner = marks.length ? marks[marks.length - 1] : null;
-      let noEsc = inner && this.getMark(inner.type.name).escape === false;
-      let len = marks.length - (noEsc ? 1 : 0);
+      const inner = marks.length ? marks[marks.length - 1] : null;
+      const noEsc = inner && this.getMark(inner.type.name).escape === false;
+      const len = marks.length - (noEsc ? 1 : 0);
 
       // Try to reorder 'mixable' marks, such as em and strong, which
       // in Markdown may be opened and closed in different order, so
       // that order of the marks for the token matches the order in
       // active.
       outer: for (let i = 0; i < len; i++) {
-        let mark = marks[i];
+        const mark = marks[i];
         if (!this.getMark(mark.type.name).mixable) break;
         for (let j = 0; j < active.length; j++) {
-          let other = active[j];
+          const other = active[j];
           if (!this.getMark(other.type.name).mixable) break;
           if (mark.eq(other)) {
             if (i > j)
@@ -443,7 +469,8 @@ export class MarkdownSerializerState {
       while (keep < Math.min(active.length, len) && marks[keep].eq(active[keep])) ++keep;
 
       // Close the marks that need to be closed
-      while (keep < active.length) this.text(this.markString(active.pop()!, false, parent, index), false);
+      while (keep < active.length)
+        this.text(this.markString(active.pop()!, false, parent, index), false);
 
       // Output any previously expelled trailing whitespace outside the marks
       if (leading) this.text(leading);
@@ -451,7 +478,7 @@ export class MarkdownSerializerState {
       // Open the marks that need to be opened
       if (node) {
         while (active.length < len) {
-          let add = marks[active.length];
+          const add = marks[active.length];
           active.push(add);
           this.text(this.markString(add, true, parent, index), false);
           this.atBlockStart = false;
@@ -493,8 +520,9 @@ export class MarkdownSerializerState {
     if (this.closed && this.closed.type == node.type) this.flushClose(3);
     else if (this.inTightList) this.flushClose(1);
 
-    let isTight = typeof node.attrs.tight != 'undefined' ? node.attrs.tight : this.options.tightLists;
-    let prevTight = this.inTightList;
+    const isTight =
+      typeof node.attrs.tight != 'undefined' ? node.attrs.tight : this.options.tightLists;
+    const prevTight = this.inTightList;
     this.inTightList = isTight;
     node.forEach((child, _, i) => {
       if (i && isTight) this.flushClose(1);
@@ -508,20 +536,23 @@ export class MarkdownSerializerState {
   /// have special meaning only at the start of the line.
   esc(str: string, startOfLine = false) {
     str = str.replace(/[`*\\~\[\]_]/g, (m, i) =>
-      m == '_' && i > 0 && i + 1 < str.length && str[i - 1].match(/\w/) && str[i + 1].match(/\w/) ? m : '\\' + m,
+      m == '_' && i > 0 && i + 1 < str.length && str[i - 1].match(/\w/) && str[i + 1].match(/\w/)
+        ? m
+        : '\\' + m,
     );
     if (startOfLine)
       str = str
         .replace(/^(\+[ ]|[\-*>])/, '\\$&')
         .replace(/^(\s*)(#{1,6})(\s|$)/, '$1\\$2$3')
         .replace(/^(\s*\d+)\.\s/, '$1\\. ');
-    if (this.options.escapeExtraCharacters) str = str.replace(this.options.escapeExtraCharacters, '\\$&');
+    if (this.options.escapeExtraCharacters)
+      str = str.replace(this.options.escapeExtraCharacters, '\\$&');
     return str;
   }
 
   /// @internal
   quote(str: string) {
-    let wrap = str.indexOf('"') == -1 ? '""' : str.indexOf("'") == -1 ? "''" : '()';
+    const wrap = str.indexOf('"') == -1 ? '""' : str.indexOf("'") == -1 ? "''" : '()';
     return wrap[0] + str + wrap[1];
   }
 
@@ -534,8 +565,8 @@ export class MarkdownSerializerState {
 
   /// Get the markdown string for a given opening or closing mark.
   markString(mark: Mark, open: boolean, parent: Node, index: number) {
-    let info = this.getMark(mark.type.name);
-    let value = open ? info.open : info.close;
+    const info = this.getMark(mark.type.name);
+    const value = open ? info.open : info.close;
     return typeof value == 'string' ? value : value(this, mark, parent, index);
   }
 

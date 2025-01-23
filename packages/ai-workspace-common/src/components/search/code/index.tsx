@@ -1,4 +1,3 @@
-import React from 'react';
 import copy from 'copy-to-clipboard';
 import Highlight, { defaultProps } from 'prism-react-renderer';
 import styles from './code.module.scss';

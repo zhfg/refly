@@ -1,4 +1,3 @@
-import { getLastActiveTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
 import throttle from 'lodash.throttle';
 import { BackgroundMessage, IRuntime } from '@refly/common-types';
 
@@ -73,8 +72,8 @@ export const sendToWebpageMainWorld = async (
 // from webpage/background/side panel/content script to content script
 export const sendToContentScript = sendToWebpageMainWorld;
 
-export const sendMessage: (message: BackgroundMessage, needResponse?: boolean) => Promise<any> = throttle(
-  async (message: BackgroundMessage, needResponse = true) => {
+export const sendMessage: (message: BackgroundMessage, needResponse?: boolean) => Promise<any> =
+  throttle(async (message: BackgroundMessage, needResponse = true) => {
     const fromRuntime = message?.source;
     let browser;
     try {
@@ -144,13 +143,11 @@ export const sendMessage: (message: BackgroundMessage, needResponse?: boolean) =
     } catch (err) {
       console.log('sendMessage error', err);
     }
-  },
-  300,
-);
+  }, 300);
 
 export const onMessage = async (_callback: (message: any) => void, fromRuntime: IRuntime) => {
-  let callback = _callback;
-  let windowCallback = (event: MessageEvent) => {
+  const callback = _callback;
+  const windowCallback = (event: MessageEvent) => {
     callback(event?.data);
   };
   let browser;

@@ -1,7 +1,10 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { message } from 'antd';
-import { IContextItem, useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import {
+  IContextItem,
+  useContextPanelStore,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 export const useAddToContext = () => {

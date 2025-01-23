@@ -54,7 +54,9 @@ export const ContextItem = ({
         return;
       }
 
-      const sourceNode = nodes.find((node) => node.data?.entityId === sourceEntityId && node.type === sourceEntityType);
+      const sourceNode = nodes.find(
+        (node) => node.data?.entityId === sourceEntityId && node.type === sourceEntityType,
+      );
 
       if (!sourceNode) {
         Message.warning({
@@ -76,7 +78,10 @@ export const ContextItem = ({
 
   const contextTypeDesc = useMemo(() => {
     if (type !== 'skillResponse') {
-      return (isCurrentContext ? t('copilot.contextItem.current') : '') + t(`copilot.contextItem.${sourceType}`);
+      return (
+        (isCurrentContext ? t('copilot.contextItem.current') : '') +
+        t(`copilot.contextItem.${sourceType}`)
+      );
     }
     if (metadata?.withHistory) {
       return t('copilot.contextItem.threadHistory');

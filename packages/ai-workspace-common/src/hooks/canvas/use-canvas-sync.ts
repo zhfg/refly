@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useCanvasContext } from '../../context/canvas';
 import { useThrottledCallback } from 'use-debounce';
 import { Edge } from '@xyflow/react';

@@ -2,11 +2,16 @@ import { useCallback } from 'react';
 import { ActionResult, SkillEvent } from '@refly/openapi-schema';
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
-import { CanvasNodeData, ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import {
+  CanvasNodeData,
+  ResponseNodeMeta,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { aggregateTokenUsage } from '@refly-packages/utils/models';
 import { useSetNodeDataByEntity } from './use-set-node-data-by-entity';
 
-const generateFullNodeDataUpdates = (payload: ActionResult): Partial<CanvasNodeData<ResponseNodeMeta>> => {
+const generateFullNodeDataUpdates = (
+  payload: ActionResult,
+): Partial<CanvasNodeData<ResponseNodeMeta>> => {
   return {
     title: payload.title,
     entityId: payload.resultId,
@@ -89,7 +94,10 @@ export const useUpdateActionResult = () => {
         if (event) {
           nodeData = generatePartialNodeDataUpdates(payload, event);
         }
-        setNodeDataByEntity<ResponseNodeMeta>({ type: 'skillResponse', entityId: resultId }, nodeData);
+        setNodeDataByEntity<ResponseNodeMeta>(
+          { type: 'skillResponse', entityId: resultId },
+          nodeData,
+        );
       }
     },
     [updateActionResult, setNodeDataByEntity],

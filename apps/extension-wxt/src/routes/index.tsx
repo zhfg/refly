@@ -64,7 +64,15 @@ export const AppRouter = () => {
   // initial display loading
   if (userStore.isCheckingLoginStatus === undefined || userStore.isCheckingLoginStatus) {
     return (
-      <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <Spin />
       </div>
     );
@@ -81,13 +89,19 @@ export const AppRouter = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<BetaProtectedRoute component={KnowledgeBase} hasBetaAccess={hasBetaAccess} />} />
+        <Route
+          path="/"
+          element={<BetaProtectedRoute component={KnowledgeBase} hasBetaAccess={hasBetaAccess} />}
+        />
         <Route
           path="/knowledge-base"
           element={<BetaProtectedRoute component={KnowledgeBase} hasBetaAccess={hasBetaAccess} />}
         />
         <Route path="/login" element={<Login />} />
-        <Route path="/request-access" element={<RequestAccessRoute hasBetaAccess={hasBetaAccess} />} />
+        <Route
+          path="/request-access"
+          element={<RequestAccessRoute hasBetaAccess={hasBetaAccess} />}
+        />
       </Routes>
       {importResourceStore.importResourceModalVisible ? <ImportResourceModal /> : null}
     </>

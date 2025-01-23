@@ -17,25 +17,32 @@ interface DocumentContextType {
 
 const DocumentContext = createContext<DocumentContextType | null>(null);
 
-const providerCache = new Map<string, { remote: HocuspocusProvider; local: IndexeddbPersistence }>();
+const providerCache = new Map<
+  string,
+  { remote: HocuspocusProvider; local: IndexeddbPersistence }
+>();
 
 const getTitleFromYDoc = (ydoc: Y.Doc) => {
   const title = ydoc.getText('title');
   return title.toJSON();
 };
 
-export const DocumentProvider = ({ docId, children }: { docId: string; children: React.ReactNode }) => {
+export const DocumentProvider = ({
+  docId,
+  children,
+}: { docId: string; children: React.ReactNode }) => {
   const { token, refreshToken } = useCollabToken();
   const [isLoading, setIsLoading] = useState(true);
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const MAX_RETRIES = 3;
   const RETRY_DELAY = 2000;
 
-  const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt, updateDocument } = useDocumentStoreShallow((state) => ({
-    setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
-    setDocumentRemoteSyncedAt: state.setDocumentRemoteSyncedAt,
-    updateDocument: state.updateDocument,
-  }));
+  const { setDocumentLocalSyncedAt, setDocumentRemoteSyncedAt, updateDocument } =
+    useDocumentStoreShallow((state) => ({
+      setDocumentLocalSyncedAt: state.setDocumentLocalSyncedAt,
+      setDocumentRemoteSyncedAt: state.setDocumentRemoteSyncedAt,
+      updateDocument: state.updateDocument,
+    }));
 
   const updateDocumentData = useCallback(
     (ydoc: Y.Doc) => {

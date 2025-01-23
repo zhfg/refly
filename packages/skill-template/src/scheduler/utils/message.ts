@@ -30,7 +30,7 @@ export const buildFinalRequestMessages = ({
   messages: BaseMessage[];
   needPrepareContext: boolean;
   context: string;
-  originalQuery: string; 
+  originalQuery: string;
   rewrittenQuery: string;
 }) => {
   const systemPrompt = module.buildSystemPrompt(locale, needPrepareContext);
@@ -38,7 +38,7 @@ export const buildFinalRequestMessages = ({
   const userPrompt = module.buildUserPrompt({ originalQuery, rewrittenQuery, locale });
 
   const contextMessages = contextUserPrompt ? [new HumanMessage(contextUserPrompt)] : [];
- 
+
   const requestMessages = [
     new SystemMessage(systemPrompt),
     ...chatHistory,

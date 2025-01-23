@@ -11,7 +11,8 @@ export const UILocaleList = React.memo(
   (props: { children: React.ReactNode; width?: number; onChange?: (lng: LOCALE) => void }) => {
     const { t, i18n } = useTranslation();
     const location = useLocation();
-    const isLandingPage = !location.pathname || location.pathname === '/' || location.pathname === '/pricing';
+    const isLandingPage =
+      !location.pathname || location.pathname === '/' || location.pathname === '/pricing';
 
     const userStore = useUserStoreShallow((state) => ({
       isLogin: state.isLogin,
@@ -30,7 +31,10 @@ export const UILocaleList = React.memo(
       if (!isLandingPage || userStore.isLogin) {
         userStore.setLocalSettings({ ...localSettings, uiLocale: lng });
         userStore.setUserProfile({ ...userProfile, uiLocale: lng });
-        localStorage.setItem('refly-local-settings', safeStringifyJSON({ ...localSettings, uiLocale: lng }));
+        localStorage.setItem(
+          'refly-local-settings',
+          safeStringifyJSON({ ...localSettings, uiLocale: lng }),
+        );
 
         if (userStore.isLogin) {
           const { data: res, error } = await getClient().updateSettings({
@@ -63,7 +67,11 @@ export const UILocaleList = React.memo(
     return (
       <div>
         <Dropdown
-          menu={{ selectedKeys: [i18n.languages?.[0]], items: dropList, style: { width: props?.width } }}
+          menu={{
+            selectedKeys: [i18n.languages?.[0]],
+            items: dropList,
+            style: { width: props?.width },
+          }}
           trigger={['click']}
         >
           {props.children}

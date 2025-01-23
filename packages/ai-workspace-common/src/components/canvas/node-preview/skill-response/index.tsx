@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { useActionResultStoreShallow } from '@refly-packages/ai-workspace-common/stores/action-result';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { ActionResult, ActionStep } from '@refly/openapi-schema';
-import { CanvasNode, ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import {
+  CanvasNode,
+  ResponseNodeMeta,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 import { actionEmitter } from '@refly-packages/ai-workspace-common/events/action';
 import { ActionStepCard } from './action-step';
@@ -28,24 +31,30 @@ interface SkillResponseNodePreviewProps {
   resultId: string;
 }
 
-const StepsList = memo(({ steps, result, title }: { steps: ActionStep[]; result: ActionResult; title: string }) => {
-  return (
-    <>
-      {steps.map((step, index) => (
-        <div key={index}>
-          <Divider className="my-2" />
-          <ActionStepCard
-            result={result}
-            step={step}
-            stepStatus={result.status === 'executing' && index === steps?.length - 1 ? 'executing' : 'finish'}
-            index={index + 1}
-            query={title}
-          />
-        </div>
-      ))}
-    </>
-  );
-});
+const StepsList = memo(
+  ({ steps, result, title }: { steps: ActionStep[]; result: ActionResult; title: string }) => {
+    return (
+      <>
+        {steps.map((step, index) => (
+          <div key={index}>
+            <Divider className="my-2" />
+            <ActionStepCard
+              result={result}
+              step={step}
+              stepStatus={
+                result.status === 'executing' && index === steps?.length - 1
+                  ? 'executing'
+                  : 'finish'
+              }
+              index={index + 1}
+              query={title}
+            />
+          </div>
+        ))}
+      </>
+    );
+  },
+);
 
 const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNodePreviewProps) => {
   const { result, updateActionResult } = useActionResultStoreShallow((state) => ({
@@ -236,7 +245,10 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
               status="500"
               subTitle={t('canvas.skillResponse.executionFailed')}
               extra={
-                <Button icon={<IconRerun className="text-sm flex items-center justify-center" />} onClick={handleRetry}>
+                <Button
+                  icon={<IconRerun className="text-sm flex items-center justify-center" />}
+                  onClick={handleRetry}
+                >
                   {t('canvas.nodeActions.rerun')}
                 </Button>
               }
@@ -244,17 +256,24 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
           </div>
         ) : (
           <>
-            {steps.length === 0 && isPending && <Skeleton className="mt-1" active paragraph={{ rows: 5 }} />}
+            {steps.length === 0 && isPending && (
+              <Skeleton className="mt-1" active paragraph={{ rows: 5 }} />
+            )}
             <StepsList steps={steps} result={result} title={title} />
           </>
         )}
       </div>
 
-      {knowledgeBaseStore?.sourceListDrawerVisible ? <SourceListModal classNames="source-list-modal" /> : null}
+      {knowledgeBaseStore?.sourceListDrawerVisible ? (
+        <SourceListModal classNames="source-list-modal" />
+      ) : null}
     </div>
   );
 };
 
-export const SkillResponseNodePreview = memo(SkillResponseNodePreviewComponent, (prevProps, nextProps) => {
-  return prevProps.node.id === nextProps.node.id && prevProps.resultId === nextProps.resultId;
-});
+export const SkillResponseNodePreview = memo(
+  SkillResponseNodePreviewComponent,
+  (prevProps, nextProps) => {
+    return prevProps.node.id === nextProps.node.id && prevProps.resultId === nextProps.resultId;
+  },
+);

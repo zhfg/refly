@@ -1,12 +1,3 @@
-import { FormInstance } from '@arco-design/web-react';
-import { useRef, useState } from 'react';
-import type { RefTextAreaType } from '@arco-design/web-react/es/Input/textarea';
-import { useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { List, Divider } from '@arco-design/web-react';
-import { Button, Input } from 'antd';
-import { IconDown, IconSearch, IconSend, IconUser } from '@arco-design/web-react/icon';
-import cn from 'classnames';
-
 import { useTranslation } from 'react-i18next';
 import { SearchBox } from './search-box';
 

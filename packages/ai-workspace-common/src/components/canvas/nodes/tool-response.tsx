@@ -1,4 +1,4 @@
-import { Position, NodeProps, useEdges, useReactFlow } from '@xyflow/react';
+import { Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { CanvasNodeData, ResponseNodeMeta } from './shared/types';
 import { Node } from '@xyflow/react';
 import { MessageSquare, MoreHorizontal } from 'lucide-react';

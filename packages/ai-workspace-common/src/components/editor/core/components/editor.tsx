@@ -1,4 +1,4 @@
-import { useMemo, useRef, forwardRef } from 'react';
+import { useRef, forwardRef } from 'react';
 import { EditorProvider } from '@tiptap/react';
 import { Provider } from 'jotai';
 import tunnel from 'tunnel-rat';
@@ -22,7 +22,9 @@ export const EditorRoot: FC<EditorRootProps> = ({ children }) => {
 
   return (
     <Provider store={novelStore}>
-      <EditorCommandTunnelContext.Provider value={tunnelInstance}>{children}</EditorCommandTunnelContext.Provider>
+      <EditorCommandTunnelContext.Provider value={tunnelInstance}>
+        {children}
+      </EditorCommandTunnelContext.Provider>
     </Provider>
   );
 };

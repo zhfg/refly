@@ -1,5 +1,9 @@
 import { buildContextFormat } from './context';
-import { buildChatHistoryRules, chatHistoryReminder, buildQueryProcessAndChatHistoryInstructions } from '../common/chat-history';
+import {
+  buildChatHistoryRules,
+  chatHistoryReminder,
+  buildQueryProcessAndChatHistoryInstructions,
+} from '../common/chat-history';
 import { buildQueryPriorityInstruction, buildSpecificQueryInstruction } from '../common/query';
 import { buildContextDisplayInstruction } from '../common/context';
 import { buildCommonQnAExamples, buildCommonQnAChatHistoryExamples } from './examples';
@@ -34,7 +38,6 @@ Your goal is to provide clear, accurate, and helpful responses to the user's que
 ${buildSpecificQueryInstruction()}
 `;
 };
-
 
 export const buildContextualCommonQnASystemPrompt = () => {
   const systemPrompt = `You are an advanced AI assistant developed by Refly, specializing in knowledge management, reading comprehension, and answering questions based on context. Your core mission is to help users effectively understand and utilize information.

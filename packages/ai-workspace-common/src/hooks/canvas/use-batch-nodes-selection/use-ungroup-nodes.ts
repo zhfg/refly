@@ -1,14 +1,9 @@
-import { useCallback, useState } from 'react';
-import { useCanvasStore, useCanvasStoreShallow } from '../../../stores/canvas';
-import { CanvasNode, prepareNodeData } from '../../../components/canvas/nodes';
-import { useCanvasData } from '../use-canvas-data';
-import { CanvasNodeType } from '@refly/openapi-schema';
+import { useCallback } from 'react';
+import { useCanvasStore } from '../../../stores/canvas';
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
-import { useAddNode } from '../use-add-node';
-import { genUniqueId } from '@refly-packages/utils/id';
-import { CoordinateExtent, Node } from '@xyflow/react';
+import { Node } from '@xyflow/react';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
-import { PADDING, shouldDestroyTemporaryGroup, sortNodes } from './utils';
+import { PADDING, sortNodes } from './utils';
 
 export const useUngroupNodes = () => {
   const canvasId = useCanvasId();

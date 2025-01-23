@@ -1,4 +1,4 @@
-import { Node, useReactFlow, XYPosition } from '@xyflow/react';
+import { Node, XYPosition } from '@xyflow/react';
 import { CanvasNodeFilter } from '../use-node-selection';
 
 export interface NodeData extends Record<string, unknown> {

@@ -14,7 +14,9 @@ import { getReadabilityHtml } from '@refly/utils/html2md';
 
 export const useStoreWeblink = () => {
   // 网页索引状态
-  const [uploadingStatus, setUploadingStatus] = useState<'normal' | 'loading' | 'failed' | 'success'>('normal');
+  const [uploadingStatus, setUploadingStatus] = useState<
+    'normal' | 'loading' | 'failed' | 'success'
+  >('normal');
   const { t } = useTranslation();
 
   const handleClientUploadHtml = async (url: string) => {
@@ -85,7 +87,8 @@ export const useStoreWeblink = () => {
 
   const preCheckForUploadWebsite = async (url: string) => {
     const { currentWeblink } = useWeblinkStore.getState();
-    const isProcessingParse = !currentWeblink || ['init', 'processing'].includes(currentWeblink?.parseStatus!);
+    const isProcessingParse =
+      !currentWeblink || ['init', 'processing'].includes(currentWeblink?.parseStatus!);
     const isFailedToServerCrawl = currentWeblink?.parseStatus === 'failed';
 
     // 直接遇到服务端爬取失败，则弹框提示用户
@@ -119,7 +122,9 @@ export const useStoreWeblink = () => {
     }
 
     // 如果还在上传中，直接报错，进行重试，并重试 5 秒/10 次
-    const isCurrentWeblinkStatusNotComplete = ['init', 'processing'].includes(pingData?.parseStatus!);
+    const isCurrentWeblinkStatusNotComplete = ['init', 'processing'].includes(
+      pingData?.parseStatus!,
+    );
     if (isCurrentWeblinkStatusNotComplete) {
       throw new Error('Weblink is processing...');
     }

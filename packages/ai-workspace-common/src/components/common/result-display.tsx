@@ -1,6 +1,9 @@
-import { ActionStep, Artifact } from '@refly/openapi-schema';
+import { Artifact } from '@refly/openapi-schema';
 import { CanvasNodeData } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/types';
-import { IconCanvas, IconDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconCanvas,
+  IconDocument,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
 import { ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/types';
 
@@ -13,7 +16,10 @@ export const getArtifactIcon = (artifact: Artifact, className?: string) => {
   }
 };
 
-export const getResultDisplayContent = (data: CanvasNodeData<ResponseNodeMeta>, className?: string) => {
+export const getResultDisplayContent = (
+  data: CanvasNodeData<ResponseNodeMeta>,
+  className?: string,
+) => {
   if (data.contentPreview) return <span className={className}>{data.contentPreview}</span>;
 
   // If content is empty, find the first artifact

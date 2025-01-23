@@ -1,5 +1,4 @@
 import {
-  HiOutlineDocumentText,
   HiOutlineSquare3Stack3D,
   HiOutlineSparkles,
   HiMiniPlayCircle,
@@ -57,7 +56,6 @@ import { AiOutlineShrink } from 'react-icons/ai';
 import { RiExpandDiagonalLine } from 'react-icons/ri';
 import { TbWorldSearch } from 'react-icons/tb';
 import { GrCircleQuestion } from 'react-icons/gr';
-import { FaNoteSticky, FaRegNoteSticky, FaX } from 'react-icons/fa6';
 import { TbInputSpark } from 'react-icons/tb';
 
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';

@@ -1,8 +1,8 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { Button, message } from 'antd';
 import { MessageSquareDiff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useReactFlow, Node } from '@xyflow/react';
+import { useReactFlow } from '@xyflow/react';
 import { SelectionBubble } from './selection-bubble';
 import { useSelectionContext } from './use-selection-context';
 import { CanvasNode } from '../../components/canvas/nodes/shared/types';
@@ -118,7 +118,9 @@ export const CanvasSelectionContext: React.FC<CanvasSelectionContextProps> = ({
           onClick={() => handleAddToContext(selectedText)}
           icon={<MessageSquareDiff size={12} className="text-[#00968F]" />}
         >
-          <span className="font-medium text-xs text-[#00968F]">{t('knowledgeBase.context.addToContext')}</span>
+          <span className="font-medium text-xs text-[#00968F]">
+            {t('knowledgeBase.context.addToContext')}
+          </span>
         </Button>
       </div>
     </SelectionBubble>

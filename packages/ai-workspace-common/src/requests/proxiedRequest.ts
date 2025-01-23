@@ -79,7 +79,7 @@ const wrapFunctions = (module: any) => {
 
     const runtime = getRuntime() || '';
     if (runtime.includes('extension') && typeof origMethod === 'function') {
-      wrappedModule[key] = async function (...args: unknown[]) {
+      wrappedModule[key] = async (...args: unknown[]) => {
         console.log(`Calling function ${String(key)} with arguments: ${safeStringifyJSON(args)}`);
 
         try {

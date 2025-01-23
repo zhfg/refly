@@ -22,7 +22,8 @@ export const SpaceAICommand = Extension.create({
           const parentNode = doc.resolve(from).parent;
 
           // 检查是否在空的段落中
-          const isEmptyParagraph = parentNode.type.name === 'paragraph' && parentNode.content.size === 0 && empty;
+          const isEmptyParagraph =
+            parentNode.type.name === 'paragraph' && parentNode.content.size === 0 && empty;
 
           if (isEmptyParagraph) {
             // 阻止默认的空格输入

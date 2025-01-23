@@ -66,7 +66,8 @@ export const translation = {
             status: {
               contentHandling: 'Processing content...',
               createFailed: 'Failed to create a new session!',
-              contentHandleSuccessNotify: 'Processing successful, redirecting to the session page...',
+              contentHandleSuccessNotify:
+                'Processing successful, redirecting to the session page...',
               contentHandleFailedNotify: 'Processing failed!',
             },
           },

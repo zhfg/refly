@@ -3,7 +3,11 @@ import { Button, Dropdown, MenuProps, Modal, DropdownProps, Checkbox } from 'ant
 import type { CheckboxProps } from 'antd';
 
 import { useTranslation } from 'react-i18next';
-import { IconDelete, IconMoreHorizontal, IconEdit } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconDelete,
+  IconMoreHorizontal,
+  IconEdit,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useDeleteCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-canvas';
 import { CanvasRename } from './canvas-rename';
 import { useUpdateCanvas } from '@refly-packages/ai-workspace-common/queries';
@@ -83,11 +87,14 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({ canvasId, canvas
     [],
   );
 
-  const handleOpenChange = useCallback<DropdownProps['onOpenChange']>((open: boolean, info: any) => {
-    if (info.source === 'trigger') {
-      setPopupVisible(open);
-    }
-  }, []);
+  const handleOpenChange = useCallback<DropdownProps['onOpenChange']>(
+    (open: boolean, info: any) => {
+      if (info.source === 'trigger') {
+        setPopupVisible(open);
+      }
+    },
+    [],
+  );
 
   return (
     <>
@@ -100,7 +107,11 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({ canvasId, canvas
       >
         <div className="flex items-center gap-2">
           <div className="flex items-center h-9 bg-[#ffffff] rounded-lg px-2 border border-solid border-1 border-[#EAECF0] box-shadow-[0px_2px_6px_0px_rgba(0,0,0,0.1)]">
-            <Button type="text" icon={<IconMoreHorizontal />} className="w-8 h-6 flex items-center justify-center" />
+            <Button
+              type="text"
+              icon={<IconMoreHorizontal />}
+              className="w-8 h-6 flex items-center justify-center"
+            />
           </div>
         </div>
       </Dropdown>

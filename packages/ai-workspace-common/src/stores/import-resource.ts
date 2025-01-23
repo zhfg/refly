@@ -14,7 +14,10 @@ export interface LinkMeta {
   isError?: boolean; // 处理失败
 }
 
-export type ImportResourceMenuItem = 'import-from-weblink' | 'import-from-paste-text' | 'import-from-web-search';
+export type ImportResourceMenuItem =
+  | 'import-from-weblink'
+  | 'import-from-paste-text'
+  | 'import-from-web-search';
 
 interface ImportResourceState {
   importResourceModalVisible: boolean;
@@ -27,7 +30,9 @@ interface ImportResourceState {
 
   setImportResourceModalVisible: (visible: boolean) => void;
   setScrapeLinks: (links: LinkMeta[]) => void;
-  setCopiedTextPayload: (payload: Partial<{ content: string; title: string; url?: string }>) => void;
+  setCopiedTextPayload: (
+    payload: Partial<{ content: string; title: string; url?: string }>,
+  ) => void;
   resetState: () => void;
   setSelectedMenuItem: (menuItem: ImportResourceMenuItem) => void;
   setInsertNodePosition: (position: XYPosition) => void;
@@ -53,7 +58,8 @@ export const useImportResourceStore = create<ImportResourceState>()(
     resetState: () => set((state) => ({ ...state, ...defaultState })),
     setSelectedMenuItem: (menuItem: ImportResourceMenuItem) =>
       set((state) => ({ ...state, selectedMenuItem: menuItem })),
-    setInsertNodePosition: (position: XYPosition) => set((state) => ({ ...state, insertNodePosition: position })),
+    setInsertNodePosition: (position: XYPosition) =>
+      set((state) => ({ ...state, insertNodePosition: position })),
   })),
 );
 

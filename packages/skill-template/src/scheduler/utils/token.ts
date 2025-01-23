@@ -17,7 +17,7 @@ const enc_cl100k_base = get_encoding('cl100k_base');
 // https://github.com/niieani/gpt-tokenizer
 // type TokenizerType = 'chat' | 'text-only' | 'code' | 'edit' | 'embeddings' | 'turbo' | 'gpt3' | 'codex';
 
-export const countToken = (text: string = '') => {
+export const countToken = (text = '') => {
   return enc_cl100k_base.encode(text || '').length;
 };
 
@@ -46,7 +46,11 @@ export const countContextTokens = (context: IContext) => {
 };
 
 export const checkHasContext = (context: IContext) => {
-  return context?.contentList?.length > 0 || context?.resources?.length > 0 || context?.documents?.length > 0;
+  return (
+    context?.contentList?.length > 0 ||
+    context?.resources?.length > 0 ||
+    context?.documents?.length > 0
+  );
 };
 
 export const countMessagesTokens = (messages: BaseMessage[] = []) => {

@@ -102,12 +102,18 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
       })),
     updateCurrentPage: (currentPage: number) => set((state) => ({ ...state, currentPage })),
     updateHasMore: (hasMore: boolean) => set((state) => ({ ...state, hasMore })),
-    updateConvModalVisible: (convModalVisible: boolean) => set((state) => ({ ...state, convModalVisible })),
-    updateKbModalVisible: (kbModalVisible: boolean) => set((state) => ({ ...state, kbModalVisible })),
+    updateConvModalVisible: (convModalVisible: boolean) =>
+      set((state) => ({ ...state, convModalVisible })),
+    updateKbModalVisible: (kbModalVisible: boolean) =>
+      set((state) => ({ ...state, kbModalVisible })),
     updateIsRequesting: (isRequesting: boolean) => set((state) => ({ ...state, isRequesting })),
-    updateActionSource: (actionSource: ActionSource) => set((state) => ({ ...state, actionSource })),
+    updateActionSource: (actionSource: ActionSource) =>
+      set((state) => ({ ...state, actionSource })),
     updateSourceListDrawer: (sourceListDrawer: Partial<SourceListDrawer>) =>
-      set((state) => ({ ...state, sourceListDrawer: { ...state.sourceListDrawer, ...sourceListDrawer } })),
+      set((state) => ({
+        ...state,
+        sourceListDrawer: { ...state.sourceListDrawer, ...sourceListDrawer },
+      })),
 
     updateTabs: (tabs: KnowledgeBaseTab[]) => set((state) => ({ ...state, tabs })),
     updateActiveTab: (key: string) => set((state) => ({ ...state, activeTab: key })),
@@ -128,8 +134,10 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>()(
       })),
 
     // tabs
-    updateResourcePanelVisible: (visible: boolean) => set((state) => ({ ...state, resourcePanelVisible: visible })),
-    updateNotePanelVisible: (visible: boolean) => set((state) => ({ ...state, notePanelVisible: visible })),
+    updateResourcePanelVisible: (visible: boolean) =>
+      set((state) => ({ ...state, resourcePanelVisible: visible })),
+    updateNotePanelVisible: (visible: boolean) =>
+      set((state) => ({ ...state, notePanelVisible: visible })),
   })),
 );
 

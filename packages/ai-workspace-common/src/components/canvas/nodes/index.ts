@@ -134,7 +134,10 @@ export const getNodeDefaultMetadata = (nodeType: CanvasNodeType) => {
 };
 
 // Add this helper function to share common styles
-export const getNodeCommonStyles = ({ selected, isHovered }: { selected: boolean; isHovered: boolean }) => `
+export const getNodeCommonStyles = ({
+  selected,
+  isHovered,
+}: { selected: boolean; isHovered: boolean }) => `
   bg-white 
   rounded-xl
   box-border

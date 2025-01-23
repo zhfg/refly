@@ -49,7 +49,13 @@ export const ToolButton: FC<ToolButtonProps> = memo(
   }) => {
     const button =
       contextCnt > 0 && tool.value === 'handleLaunchpad' ? (
-        <Badge size="small" color="#00968F" offset={[-2, 2]} count={contextCnt} overflowCount={9999}>
+        <Badge
+          size="small"
+          color="#00968F"
+          offset={[-2, 2]}
+          count={contextCnt}
+          overflowCount={9999}
+        >
           <Button
             type="text"
             onClick={(event) => handleToolSelect(event, tool.value as string)}

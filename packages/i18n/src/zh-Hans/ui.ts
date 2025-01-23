@@ -5,7 +5,8 @@ const translations = {
   subscription: {
     storageExceeded: {
       title: '存储空间已满',
-      description: '您的存储空间已达到上限。升级您的订阅计划以获得更大的存储空间，继续使用我们的服务。',
+      description:
+        '您的存储空间已达到上限。升级您的订阅计划以获得更大的存储空间，继续使用我们的服务。',
       upgrade: '立即升级',
     },
   },
@@ -113,7 +114,8 @@ const translations = {
   landingPage: {
     slogan: 'AI Native 创作引擎',
     simplySlogan: '创作引擎',
-    description: '基于自由画布的创作平台，通过多线程对话、知识库整合、上下文记忆和智能搜索，轻松将想法转化为优质内容。',
+    description:
+      '基于自由画布的创作平台，通过多线程对话、知识库整合、上下文记忆和智能搜索，轻松将想法转化为优质内容。',
     anotherDescription:
       '基于自由画布的创作平台，通过多线程对话、知识库整合、上下文记忆和智能搜索，轻松将想法转化为优质内容。',
     simplyDescription: {
@@ -593,7 +595,8 @@ const translations = {
       disablePointerMode: '关闭框选模式',
       deleteCanvas: '删除画布',
       importResource: '导入资源',
-      importResourceDescription: '通过在线搜索、手动添加网页链接或文本的方式批量添加写作素材在画布中阅读或消费。',
+      importResourceDescription:
+        '通过在线搜索、手动添加网页链接或文本的方式批量添加写作素材在画布中阅读或消费。',
       addResource: '添加资源',
       addResourceDescription:
         '从外部导入或上传的任意内容（例如网页、文件、图片等），可在任意多个画布中被按需消费与使用',
@@ -601,7 +604,8 @@ const translations = {
       addTool: '添加工具',
       autoLayout: '自动布局',
       askAI: '问问 AI',
-      askAIDescription: '通过 AI 提问，可以选择上下文、切换技能或模型，以获取写作灵感、内容创作、知识问答等。',
+      askAIDescription:
+        '通过 AI 提问，可以选择上下文、切换技能或模型，以获取写作灵感、内容创作、知识问答等。',
       createMemo: '创建备忘录',
       createMemoDescription: '创建备忘录，用于记录灵感、想法、灵感等。',
       addMemo: '添加备忘录',
@@ -699,7 +703,8 @@ const translations = {
       copy: '复制节点内容',
       copyDescription: '将节点内容以 Markdown 格式复制到剪贴板',
       askAI: '问问 AI',
-      askAIDescription: '向 AI 提问，选择上下文或切换技能后输入需求，获取写作、阅读理解或问题解答等帮助',
+      askAIDescription:
+        '向 AI 提问，选择上下文或切换技能后输入需求，获取写作、阅读理解或问题解答等帮助',
       cloneAskAI: '克隆 AI 提问',
       cloneAskAIDescription: '复制现有 AI 回答节点的所有参数创建新的技能节点，便于对比实验',
       batchRun: '批量运行',
@@ -743,10 +748,12 @@ const translations = {
       duplicateDocumentDescription: '创建选中的节点文档副本',
       deleteResource: '删除资源',
       deleteResourceDescription: '从知识库以及所有画布中删除该资源',
-      resourceDeleteConfirm: '确认要删除资源 {{title}} 吗？该操作将从知识库以及所有画布中移除此资源。',
+      resourceDeleteConfirm:
+        '确认要删除资源 {{title}} 吗？该操作将从知识库以及所有画布中移除此资源。',
       deleteDocument: '删除文档',
       deleteDocumentDescription: '从知识库以及所有画布中删除该文档',
-      documentDeleteConfirm: '确认要删除文档 {{title}} 吗？该操作将从知识库以及所有画布中移除此文档。',
+      documentDeleteConfirm:
+        '确认要删除文档 {{title}} 吗？该操作将从知识库以及所有画布中移除此文档。',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',
@@ -942,7 +949,8 @@ const translations = {
       canvasDescription:
         '创建、编辑和查看画布, 不同于传统的 Chatbot 应用，Refly 通过无限延伸的二维画布来完成对话思考、内容消费和创作的全流程。',
       libraryTitle: '知识库',
-      libraryDescription: '创建、编辑和查看知识库，包含所有导入的资源以及创建的文档，支持 AI 语义搜索和回答。',
+      libraryDescription:
+        '创建、编辑和查看知识库，包含所有导入的资源以及创建的文档，支持 AI 语义搜索和回答。',
       subscription: '订阅',
       canvas: '画布',
       newCanvas: '新建画布',
@@ -989,7 +997,8 @@ const translations = {
       title: '{{year}} 年 {{month}} 月 {{day}} 日浏览内容',
     },
     empty: {
-      timelineTitle: '{{year}} 年 {{month}} 月 {{day}} 日还未阅读新内容，赶快下载插件去阅读新内容吧',
+      timelineTitle:
+        '{{year}} 年 {{month}} 月 {{day}} 日还未阅读新内容，赶快下载插件去阅读新内容吧',
       archiveTitle: '还未阅读任何内容，赶快下载插件去阅读新内容吧~',
       download: '下载插件',
       seeOther: '查看其他日期内容',
@@ -1171,9 +1180,11 @@ const translations = {
       manage: '管理订阅',
       currentPlan: '当前套餐',
       t1Requests: '高级模型请求',
-      t1RequestsDescription: '高级模型包括 GPT-4o, Claude 3.5 Sonnet 等模型。每个成功的技能调用计为一次请求。',
+      t1RequestsDescription:
+        '高级模型包括 GPT-4o, Claude 3.5 Sonnet 等模型。每个成功的技能调用计为一次请求。',
       t2Requests: '标准模型请求',
-      t2RequestsDescription: '标准模型包括 GPT-4o Mini, DeepSeek V3 等模型。每个成功的技能调用计为一次请求。',
+      t2RequestsDescription:
+        '标准模型包括 GPT-4o Mini, DeepSeek V3 等模型。每个成功的技能调用计为一次请求。',
       requestsRefresh: '免费用户每天会重置次数。',
       fileCount: '知识库文件数',
       fileCountDescription: '知识库中每个资源和文档计为一个文件。',

@@ -82,14 +82,16 @@ export const useUserStore = create<UserState>()(
   devtools((set) => ({
     ...defaultState,
 
-    setIsCheckingLoginStatus: (val: boolean) => set((state) => ({ ...state, isCheckingLoginStatus: val })),
+    setIsCheckingLoginStatus: (val: boolean) =>
+      set((state) => ({ ...state, isCheckingLoginStatus: val })),
     setIsLogin: (val: boolean) => set((state) => ({ ...state, isLogin: val })),
     setUserProfile: (val?: UserSettings) => set((state) => ({ ...state, userProfile: val })),
     setLocalSettings: (val: LocalSettings) => set((state) => ({ ...state, localSettings: val })),
     setRuntime: (val: IRuntime) => set((state) => ({ ...state, runtime: val })),
     resetState: () => set((state) => ({ ...state, ...defaultExtraState })),
     setShowTourModal: (val: boolean) => set((state) => ({ ...state, showTourModal: val })),
-    setShowSettingsGuideModal: (val: boolean) => set((state) => ({ ...state, showSettingsGuideModal: val })),
+    setShowSettingsGuideModal: (val: boolean) =>
+      set((state) => ({ ...state, showSettingsGuideModal: val })),
     setHelpModalVisible: (val: boolean) => set((state) => ({ ...state, helpModalVisible: val })),
   })),
 );

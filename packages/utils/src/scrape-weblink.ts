@@ -11,7 +11,8 @@ export const scrapeWeblink = async (url: string) => {
 
   // Get OG description
   const description =
-    $('meta[property="og:description"]').attr('content') || $('meta[name="description"]').attr('content');
+    $('meta[property="og:description"]').attr('content') ||
+    $('meta[name="description"]').attr('content');
 
   // Get OG image or first suitable image
   let image = $('meta[property="og:image"]').attr('content');

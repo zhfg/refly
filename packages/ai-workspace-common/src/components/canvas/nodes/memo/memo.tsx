@@ -98,7 +98,9 @@ export const MemoNode = ({
   const handleAddToContext = useCallback(() => {
     addToContext({
       type: 'memo',
-      title: data?.contentPreview ? `${data.title} - ${data.contentPreview?.slice(0, 10)}` : data.title,
+      title: data?.contentPreview
+        ? `${data.title} - ${data.contentPreview?.slice(0, 10)}`
+        : data.title,
       entityId: data.entityId,
       metadata: data.metadata,
     });
@@ -132,7 +134,9 @@ export const MemoNode = ({
             contextItems: [
               {
                 type: 'memo',
-                title: data?.contentPreview ? `${data.title} - ${data.contentPreview?.slice(0, 10)}` : data.title,
+                title: data?.contentPreview
+                  ? `${data.title} - ${data.contentPreview?.slice(0, 10)}`
+                  : data.title,
                 entityId: data.entityId,
                 metadata: data.metadata,
               },
@@ -296,7 +300,9 @@ export const MemoNode = ({
         {!isPreview && selected && (
           <MemoEditor editor={editor} bgColor={bgColor} onChangeBackground={onUpdateBgColor} />
         )}
-        {!isPreview && !hideActions && <ActionButtons type="memo" nodeId={id} isNodeHovered={isHovered} />}
+        {!isPreview && !hideActions && (
+          <ActionButtons type="memo" nodeId={id} isNodeHovered={isHovered} />
+        )}
 
         <div
           style={{ backgroundColor: bgColor }}
@@ -328,7 +334,10 @@ export const MemoNode = ({
             <div className="relative flex-grow overflow-y-auto pr-2 -mr-2">
               {!isPreview ? (
                 <div className="editor-wrapper" style={{ userSelect: 'text', cursor: 'text' }}>
-                  <EditorContent editor={editor} className={classNames('text-xs memo-node-editor h-full w-full')} />
+                  <EditorContent
+                    editor={editor}
+                    className={classNames('text-xs memo-node-editor h-full w-full')}
+                  />
                 </div>
               ) : (
                 <MarkdownPreview className="text-xs" content={data?.contentPreview ?? ''} />
@@ -365,10 +374,14 @@ export const MemoNode = ({
             let newTop = (target as HTMLElement).offsetTop;
 
             if (direction[0] === -1) {
-              newLeft = (target as HTMLElement).offsetLeft - (newWidth - (target as HTMLElement).offsetWidth);
+              newLeft =
+                (target as HTMLElement).offsetLeft -
+                (newWidth - (target as HTMLElement).offsetWidth);
             }
             if (direction[1] === -1) {
-              newTop = (target as HTMLElement).offsetTop - (newHeight - (target as HTMLElement).offsetHeight);
+              newTop =
+                (target as HTMLElement).offsetTop -
+                (newHeight - (target as HTMLElement).offsetHeight);
             }
 
             target.style.width = `${newWidth}px`;
