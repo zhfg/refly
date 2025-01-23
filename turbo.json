@@ -1,6 +1,5 @@
 {
   "$schema": "https://turborepo.org/schema.json",
-  "ui": "tui",
   "tasks": {
     "dev": {
       "cache": false,
@@ -16,8 +15,6 @@
       "outputs": ["dist/**"],
       "env": ["*"]
     },
-    "lint:ci": {},
-    "lint": {},
     "codegen": {},
     "clean": {
       "cache": false,
