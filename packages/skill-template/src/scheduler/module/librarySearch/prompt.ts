@@ -87,7 +87,10 @@ ${buildLocaleFollowInstruction(locale)}
 `;
 };
 
-export const buildLibrarySearchContextUserPrompt = (context: string, needPrepareContext: boolean) => {
+export const buildLibrarySearchContextUserPrompt = (
+  context: string,
+  needPrepareContext: boolean,
+) => {
   if (!needPrepareContext) {
     return '';
   }

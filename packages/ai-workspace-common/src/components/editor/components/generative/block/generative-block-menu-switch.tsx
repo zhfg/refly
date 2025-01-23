@@ -1,4 +1,8 @@
-import { Editor, useEditor, EditorBubble } from '@refly-packages/ai-workspace-common/components/editor/core/components';
+import {
+  Editor,
+  useEditor,
+  EditorBubble,
+} from '@refly-packages/ai-workspace-common/components/editor/core/components';
 import { removeAIHighlight } from '@refly-packages/ai-workspace-common/components/editor/core/extensions';
 import { useEffect, useRef } from 'react';
 import { AISelector } from '../common/ai-selector';

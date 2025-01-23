@@ -1,11 +1,18 @@
 import { SkillRunnableConfig, BaseSkill } from '../../../base';
 import { GraphState } from '../../types';
-import { deduplicateSourcesByTitle, TimeTracker, translateText, batchTranslateText } from '@refly-packages/utils';
-import { SystemMessage, HumanMessage } from '@langchain/core/messages';
+import { deduplicateSourcesByTitle, TimeTracker, batchTranslateText } from '@refly-packages/utils';
 import { Source } from '@refly-packages/openapi-schema';
 
-import { buildRewriteQuerySystemPrompt, buildRewriteQueryUserPrompt, rewriteQueryOutputSchema } from './rewriteQuery';
-import { mergeSearchResults, searchResultsToSources, sourcesToSearchResults } from '@refly-packages/utils';
+import {
+  buildRewriteQuerySystemPrompt,
+  buildRewriteQueryUserPrompt,
+  rewriteQueryOutputSchema,
+} from './rewriteQuery';
+import {
+  mergeSearchResults,
+  searchResultsToSources,
+  sourcesToSearchResults,
+} from '@refly-packages/utils';
 import { translateResults } from './translateResult';
 import { performConcurrentWebSearch } from './webSearch';
 import { getOptimizedSearchLocales, normalizeLocale } from './locale';
@@ -154,7 +161,9 @@ export const callMultiLingualWebSearch = async (
             );
             queryMap[targetLocale] = translatedQueries;
           } catch (localeError) {
-            engine.logger.error(`Error translating for locale ${targetLocale}: ${localeError.stack}`);
+            engine.logger.error(
+              `Error translating for locale ${targetLocale}: ${localeError.stack}`,
+            );
             // Fallback to original queries for this locale
             queryMap[targetLocale] = queries;
           }

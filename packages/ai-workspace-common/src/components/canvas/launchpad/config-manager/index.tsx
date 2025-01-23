@@ -2,7 +2,16 @@ import { useEffect, useState } from 'react';
 // 自定义样式
 import './index.scss';
 
-import { Button, Checkbox, Radio, InputNumber, Input, Form, FormInstance, Switch } from '@arco-design/web-react';
+import {
+  Button,
+  Checkbox,
+  Radio,
+  InputNumber,
+  Input,
+  Form,
+  FormInstance,
+  Switch,
+} from '@arco-design/web-react';
 import { IconFile, IconRefresh } from '@arco-design/web-react/icon';
 import { GrDocumentConfig } from 'react-icons/gr';
 import { PiEyeSlash } from 'react-icons/pi';
@@ -109,7 +118,8 @@ const ConfigItem = (props: {
     );
 
     const defaultValue =
-      configValue?.value || (item.inputMode === 'multiSelect' ? [item.options[0]?.value] : item.options[0]?.value);
+      configValue?.value ||
+      (item.inputMode === 'multiSelect' ? [item.options[0]?.value] : item.options[0]?.value);
 
     if (item.inputMode === 'multiSelect') {
       return (
@@ -124,7 +134,9 @@ const ConfigItem = (props: {
             console.log('val', val);
             onValueChange(
               val,
-              Array.isArray(val) ? val.map((v) => optionValToDisplay.get(v)).join(',') : optionValToDisplay.get(val),
+              Array.isArray(val)
+                ? val.map((v) => optionValToDisplay.get(v)).join(',')
+                : optionValToDisplay.get(val),
             );
           }}
         />
@@ -283,12 +295,17 @@ export const ConfigManager = (props: ConfigManagerProps) => {
             <IconFile className="config-manager__item-icon" />
 
             {form.getFieldValue(getFormField(fieldPrefix, item.key))?.displayValue && (
-              <div className="content">{form.getFieldValue(getFormField(fieldPrefix, item.key))?.displayValue}</div>
+              <div className="content">
+                {form.getFieldValue(getFormField(fieldPrefix, item.key))?.displayValue}
+              </div>
             )}
 
             <div
               className="item-key"
-              style={{ color: getItemError(item.key) && !(activeConfig?.key === item.key) ? '#f00' : '#000' }}
+              style={{
+                color:
+                  getItemError(item.key) && !(activeConfig?.key === item.key) ? '#f00' : '#000',
+              }}
             >
               {getDictValue(item.labelDict, locale)}
             </div>
@@ -300,9 +317,10 @@ export const ConfigManager = (props: ConfigManagerProps) => {
         <div className={`config-manager__input ${getItemError(activeConfig.key) ? 'error' : ''}`}>
           <div className="config-manager__input-top">
             <div>
-              {activeConfig.required?.value && activeConfig?.required?.configScope.includes(configScope) && (
-                <span style={{ color: 'red' }}>* </span>
-              )}
+              {activeConfig.required?.value &&
+                activeConfig?.required?.configScope.includes(configScope) && (
+                  <span style={{ color: 'red' }}>* </span>
+                )}
               {getDictValue(activeConfig.labelDict, locale)}
             </div>
             <div>
@@ -337,7 +355,8 @@ export const ConfigManager = (props: ConfigManagerProps) => {
                       layout="vertical"
                       field={field}
                       required={
-                        activeConfig.required?.value && activeConfig?.required?.configScope.includes(configScope)
+                        activeConfig.required?.value &&
+                        activeConfig?.required?.configScope.includes(configScope)
                       }
                       validateStatus={formErrors[field] ? 'error' : undefined}
                       help={formErrors[field]}

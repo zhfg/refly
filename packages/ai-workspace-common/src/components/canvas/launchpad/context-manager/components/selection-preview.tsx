@@ -37,7 +37,9 @@ export const SelectionPreview: React.FC<SelectionPreviewProps> = ({ item }) => {
         <div className="w-6 h-6 rounded bg-gray-700 shadow-lg flex items-center justify-center flex-shrink-0">
           <IconQuote className="w-4 h-4 text-white" />
         </div>
-        <span className="text-sm font-medium leading-normal truncate">{t('copilot.contextItem.quote')}</span>
+        <span className="text-sm font-medium leading-normal truncate">
+          {t('copilot.contextItem.quote')}
+        </span>
       </div>
       <div
         className="

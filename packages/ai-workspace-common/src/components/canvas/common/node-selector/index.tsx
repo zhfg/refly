@@ -69,7 +69,11 @@ export const NodeSelector = (props: NodeSelectorProps) => {
   }));
 
   const processedItems = useMemo(() => {
-    return sortedItems?.filter((item) => item?.title?.toLowerCase().includes(searchValue.toLowerCase())) ?? [];
+    return (
+      sortedItems?.filter((item) =>
+        item?.title?.toLowerCase().includes(searchValue.toLowerCase()),
+      ) ?? []
+    );
   }, [sortedItems, searchValue]);
 
   const sortedRenderData = useMemo(() => {

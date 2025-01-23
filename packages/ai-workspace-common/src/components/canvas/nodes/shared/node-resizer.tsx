@@ -1,6 +1,5 @@
 import React from 'react';
 import Moveable from 'react-moveable';
-import classNames from 'classnames';
 
 interface NodeResizerProps {
   moveableRef?: React.RefObject<Moveable>;

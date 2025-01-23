@@ -40,7 +40,7 @@ export function isJSON(variable: any): boolean {
   }
 }
 
-const getParsedCitation = (markdown: string = '') => {
+const getParsedCitation = (markdown = '') => {
   return markdown
     ?.replace(/\[\s*([cC])itation/g, '[citation')
     .replace(/\[\[([cC])itation/g, '[citation')
@@ -102,7 +102,7 @@ export function parseMarkdownWithCitations(content: string, sources: Source[]): 
   const usedSources = new Set<number>();
 
   parsedContent = parsedContent.replace(citationRegex, (_, num) => {
-    const index = parseInt(num, 10) - 1;
+    const index = Number.parseInt(num, 10) - 1;
     const source = sources[index];
     if (source) {
       usedSources.add(index + 1);

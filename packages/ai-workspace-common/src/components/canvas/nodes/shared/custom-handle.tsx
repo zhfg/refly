@@ -1,5 +1,4 @@
-import { Handle, Position, Connection, HandleType } from '@xyflow/react';
-import { Plus } from 'lucide-react';
+import { Handle, Position, HandleType } from '@xyflow/react';
 
 interface CustomHandleProps {
   type: HandleType;
@@ -17,7 +16,13 @@ const canShowPlusHandle = (nodeType: string) => {
   return ['document', 'resource', 'response'].includes(nodeType);
 };
 
-export const CustomHandle = ({ type, position, isConnected, isNodeHovered, nodeType }: CustomHandleProps) => {
+export const CustomHandle = ({
+  type,
+  position,
+  isConnected,
+  isNodeHovered,
+  nodeType,
+}: CustomHandleProps) => {
   const baseHandleStyle = {
     width: '2px',
     height: '8px',

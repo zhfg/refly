@@ -14,31 +14,36 @@ export const useNodeCluster = () => {
   const { updateNodesWithSync } = useNodeOperations();
 
   // Helper function to get all target nodes recursively
-  const getTargetNodesCluster = useCallback((canvasId: string, nodeIds: string | string[]): Node[] => {
-    const { data } = useCanvasStore.getState();
-    const nodes = data[canvasId]?.nodes ?? [];
-    const edges = data[canvasId]?.edges ?? [];
-    const visited = new Set<string>();
-    const cluster: Node[] = [];
+  const getTargetNodesCluster = useCallback(
+    (canvasId: string, nodeIds: string | string[]): Node[] => {
+      const { data } = useCanvasStore.getState();
+      const nodes = data[canvasId]?.nodes ?? [];
+      const edges = data[canvasId]?.edges ?? [];
+      const visited = new Set<string>();
+      const cluster: Node[] = [];
 
-    const traverse = (currentId: string) => {
-      if (visited.has(currentId)) return;
-      visited.add(currentId);
+      const traverse = (currentId: string) => {
+        if (visited.has(currentId)) return;
+        visited.add(currentId);
 
-      const node = nodes.find((n) => n.id === currentId);
-      if (node) {
-        cluster.push(node);
-        // Find all target nodes
-        edges.filter((edge) => edge.source === currentId).forEach((edge) => traverse(edge.target));
-      }
-    };
+        const node = nodes.find((n) => n.id === currentId);
+        if (node) {
+          cluster.push(node);
+          // Find all target nodes
+          edges
+            .filter((edge) => edge.source === currentId)
+            .forEach((edge) => traverse(edge.target));
+        }
+      };
 
-    // Support both single nodeId and array of nodeIds
-    const sourceNodeIds = Array.isArray(nodeIds) ? nodeIds : [nodeIds];
-    sourceNodeIds.forEach((nodeId) => traverse(nodeId));
+      // Support both single nodeId and array of nodeIds
+      const sourceNodeIds = Array.isArray(nodeIds) ? nodeIds : [nodeIds];
+      sourceNodeIds.forEach((nodeId) => traverse(nodeId));
 
-    return cluster;
-  }, []);
+      return cluster;
+    },
+    [],
+  );
 
   // Select all target nodes in the cluster
   const selectNodeCluster = useCallback(

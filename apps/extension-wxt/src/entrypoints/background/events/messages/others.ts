@@ -1,8 +1,5 @@
 import { handleGetOpenedTabs } from '@/entrypoints/background/events/messages/getOpenedTabs';
-import { tempTabState } from '@/entrypoints/background/index';
 import { getCurrentTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
-import { safeParseJSON } from '@refly-packages/ai-workspace-common/utils/parse';
-import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
 import { browser } from 'wxt/browser';
 import { BackgroundMessage } from '@refly/common-types';
 

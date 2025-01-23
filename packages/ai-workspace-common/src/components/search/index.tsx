@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Command } from 'cmdk';
-import { useSearchStore, useSearchStoreShallow } from '@refly-packages/ai-workspace-common/stores/search';
+import {
+  useSearchStore,
+  useSearchStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/search';
 import { useDebouncedCallback } from 'use-debounce';
 
 import './index.scss';
@@ -16,7 +19,11 @@ import classNames from 'classnames';
 
 import { useTranslation } from 'react-i18next';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
-import { IconCanvas, IconDocument, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconCanvas,
+  IconDocument,
+  IconResource,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 
 export interface SearchProps extends React.ComponentProps<'div'> {

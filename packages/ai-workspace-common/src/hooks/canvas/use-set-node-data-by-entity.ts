@@ -21,11 +21,17 @@ export const useSetNodeDataByEntity = () => {
   const { syncNodesToYDoc } = useCanvasSync();
 
   return useCallback(
-    <T = any>(filter: CanvasNodeFilter, nodeData: Partial<CanvasNodeData<T>>, selectedCanvasId?: string) => {
+    <T = any>(
+      filter: CanvasNodeFilter,
+      nodeData: Partial<CanvasNodeData<T>>,
+      selectedCanvasId?: string,
+    ) => {
       const { data } = useCanvasStore.getState();
       const canvasId = selectedCanvasId ?? contextCanvasId ?? routeCanvasId;
       const currentNodes = data[canvasId]?.nodes ?? [];
-      const node = currentNodes.find((n) => n.type === filter.type && n.data?.entityId === filter.entityId);
+      const node = currentNodes.find(
+        (n) => n.type === filter.type && n.data?.entityId === filter.entityId,
+      );
 
       if (node) {
         const updatedNodes = currentNodes.map((n) => ({

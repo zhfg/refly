@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 
 // components
 import { useTranslation } from 'react-i18next';
@@ -20,7 +20,7 @@ import { IconDelete, IconSchedule, IconThunderbolt, IconTool } from '@arco-desig
 const Row = Grid.Row;
 const Col = Grid.Col;
 
-interface SkillTriggersProps {}
+type SkillTriggersProps = {};
 
 export const SkillTriggers = (props: SkillTriggersProps) => {
   const { t } = useTranslation();
@@ -47,7 +47,8 @@ export const SkillTriggers = (props: SkillTriggersProps) => {
     let eventMessage = t(`skill.newTriggerModal.${simpleEventName}`);
     if (timerConfig) {
       eventType = 'timer';
-      eventMessage = timerConfig.datetime + `（${t(`skill.newTriggerModal.${timerConfig.repeatInterval}`)}）`;
+      eventMessage =
+        timerConfig.datetime + `（${t(`skill.newTriggerModal.${timerConfig.repeatInterval}`)}）`;
     }
     const updateTriggerStatus = async (val: boolean) => {
       const error = await createTrigger.updateTriggerStatus(trigger, val);
@@ -153,7 +154,9 @@ export const SkillTriggers = (props: SkillTriggersProps) => {
       pagination={false}
       dataSource={dataList}
       loading={isRequesting}
-      scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
+      scrollLoading={
+        <ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />
+      }
       render={(item: SkillTrigger, key) => (
         <List.Item
           key={item?.triggerId + key}

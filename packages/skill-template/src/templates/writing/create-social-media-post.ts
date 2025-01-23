@@ -192,7 +192,12 @@ export class CreateSocialMediaPostSkill extends BaseSkill {
     this.engine.logger.log('---GENERATE---');
 
     const { query } = state;
-    const { locale = 'en', contentList = [], chatHistory = [], tplConfig } = config?.configurable || {};
+    const {
+      locale = 'en',
+      contentList = [],
+      chatHistory = [],
+      tplConfig,
+    } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,
@@ -236,10 +241,16 @@ LANGUAGE: {language}
     const getContentListString = (contentList: IContent[]) => {
       let contentString = '';
 
-      const cursorSelectionRelatedContent = contentList.filter((item) => item?.metadata?.domain?.includes('Cursor'));
-      const otherContent = contentList.filter((item) => !item?.metadata?.domain?.includes('Cursor'));
+      const cursorSelectionRelatedContent = contentList.filter((item) =>
+        item?.metadata?.domain?.includes('Cursor'),
+      );
+      const otherContent = contentList.filter(
+        (item) => !item?.metadata?.domain?.includes('Cursor'),
+      );
 
-      const cursorSelectionDomains = cursorSelectionRelatedContent.map((item) => item?.metadata?.domain);
+      const cursorSelectionDomains = cursorSelectionRelatedContent.map(
+        (item) => item?.metadata?.domain,
+      );
       if (cursorSelectionDomains?.includes('documentBeforeCursorSelection')) {
         const documentBeforeCursorSelectionContent = cursorSelectionRelatedContent.find(
           (item) => item?.metadata?.domain === 'documentBeforeCursorSelection',

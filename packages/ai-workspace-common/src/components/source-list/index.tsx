@@ -114,7 +114,9 @@ const ViewMoreItem = ({
   const { t } = useTranslation();
 
   // Ensure we have a valid array and safely get the last items
-  const extraSources = Array.isArray(sources) ? sources.slice(Math.max(sources.length - extraCnt, 0)) : [];
+  const extraSources = Array.isArray(sources)
+    ? sources.slice(Math.max(sources.length - extraCnt, 0))
+    : [];
 
   return (
     <div
@@ -169,7 +171,12 @@ export const SourceList = (props: SourceListProps) => {
           <SourceItem key={index} index={index} source={item} />
         ))}
         {sources.length > 3 && (
-          <ViewMoreItem onClick={handleViewMore} key="view-more" sources={sources} extraCnt={sources.slice(3).length} />
+          <ViewMoreItem
+            onClick={handleViewMore}
+            key="view-more"
+            sources={sources}
+            extraCnt={sources.slice(3).length}
+          />
         )}
       </div>
     </div>

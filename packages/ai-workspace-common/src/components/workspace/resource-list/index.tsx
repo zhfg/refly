@@ -24,7 +24,10 @@ import { Markdown } from '@refly-packages/ai-workspace-common/components/markdow
 import { LuPlus } from 'react-icons/lu';
 import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-resource';
 
-const ActionDropdown = ({ resource, afterDelete }: { resource: Resource; afterDelete: () => void }) => {
+const ActionDropdown = ({
+  resource,
+  afterDelete,
+}: { resource: Resource; afterDelete: () => void }) => {
   const { t } = useTranslation();
   const [popupVisible, setPopupVisible] = useState(false);
   const { refetchUsage } = useSubscriptionUsage();
@@ -97,7 +100,12 @@ const ActionDropdown = ({ resource, afterDelete }: { resource: Resource; afterDe
   };
 
   return (
-    <Dropdown trigger={['click']} open={popupVisible} onOpenChange={handleOpenChange} menu={{ items }}>
+    <Dropdown
+      trigger={['click']}
+      open={popupVisible}
+      onOpenChange={handleOpenChange}
+      menu={{ items }}
+    >
       <Button type="text" icon={<IconMoreHorizontal />} />
     </Dropdown>
   );
@@ -120,7 +128,9 @@ const ResourceCard = ({ item, onDelete }: { item: Resource; onDelete: () => void
         <div className="flex items-center gap-3 mb-2">
           <IconResourceFilled color={NODE_COLORS['resource']} size={24} />
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-medium max-w-48 truncate">{item.title || t('common.untitled')}</h3>
+            <h3 className="text-sm font-medium max-w-48 truncate">
+              {item.title || t('common.untitled')}
+            </h3>
             <p className="text-xs text-gray-500">
               {time(item.updatedAt, language as LOCALE)
                 .utc()
@@ -166,7 +176,9 @@ export const ResourceList = () => {
                 <ResourceCard
                   key={item.resourceId}
                   item={item}
-                  onDelete={() => setDataList(dataList.filter((n) => n.resourceId !== item.resourceId))}
+                  onDelete={() =>
+                    setDataList(dataList.filter((n) => n.resourceId !== item.resourceId))
+                  }
                 />
               ))}
             </div>

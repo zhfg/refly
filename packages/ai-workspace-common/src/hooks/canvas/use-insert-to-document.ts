@@ -52,7 +52,10 @@ export const useInsertToDocument = (resultId: string) => {
           typeof answerQuestionStep?.structuredData?.['sources'] === 'string'
             ? safeParseJSON(answerQuestionStep?.structuredData?.['sources'])
             : (answerQuestionStep?.structuredData?.['sources'] as Source[]);
-        parsedContent = parseMarkdownCitationsAndCanvasTags(answerQuestionStep?.content || '', sources);
+        parsedContent = parseMarkdownCitationsAndCanvasTags(
+          answerQuestionStep?.content || '',
+          sources,
+        );
       }
 
       editorEmitter.emit(operation, parsedContent);

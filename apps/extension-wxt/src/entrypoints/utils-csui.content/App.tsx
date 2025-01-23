@@ -5,7 +5,7 @@ import './App.scss';
 
 // hooks
 // 设置 runtime 环境
-import { getEnv, setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { useSyncWeblinkResourceMeta } from '@/hooks/content-scripts/use-get-weblink-resource-meta';
 import { checkPageUnsupported } from '@refly-packages/ai-workspace-common/utils/extension/check';
 

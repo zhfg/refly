@@ -37,21 +37,24 @@ export function timestampFormat(timestamp: number = new Date().getTime(), langua
       return zeroize(m) + language === 'en'
         ? 'month'
         : '月' + zeroize(d) + language === 'en'
-        ? 'day'
-        : '日' + zeroize(H) + ':' + zeroize(i);
+          ? 'day'
+          : '日' + zeroize(H) + ':' + zeroize(i);
     } else {
       return Y + language === 'en'
         ? 'year'
         : '年 ' + zeroize(m) + language === 'en'
-        ? 'month'
-        : '月' + zeroize(d) + language === 'en'
-        ? 'day'
-        : '日 ' + zeroize(H) + ':' + zeroize(i);
+          ? 'month'
+          : '月' + zeroize(d) + language === 'en'
+            ? 'day'
+            : '日 ' + zeroize(H) + ':' + zeroize(i);
     }
   }
 }
 
-export const time = (date: string | number | Date | dayjsConfig.Dayjs, locale: LOCALE = LOCALE.EN) => {
+export const time = (
+  date: string | number | Date | dayjsConfig.Dayjs,
+  locale: LOCALE = LOCALE.EN,
+) => {
   return dayjsConfig(date, { locale });
 };
 

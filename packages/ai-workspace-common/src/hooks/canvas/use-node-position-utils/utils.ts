@@ -1,10 +1,10 @@
-import { Node, useReactFlow, XYPosition } from '@xyflow/react';
+import { Node, XYPosition } from '@xyflow/react';
 import { LayoutBranchOptions } from './types';
 import Dagre from '@dagrejs/dagre';
 import { SPACING } from './constants';
 
 export const getAbsolutePosition = (node: Node, nodes: Node[]) => {
-  let position = { x: node.position.x, y: node.position.y };
+  const position = { x: node.position.x, y: node.position.y };
   let parent = nodes.find((n) => n.id === node.parentId);
 
   while (parent) {
@@ -16,9 +16,17 @@ export const getAbsolutePosition = (node: Node, nodes: Node[]) => {
 };
 
 // Get the level of a node from root
-export const getNodeLevel = (nodeId: string, nodes: Node[], edges: any[], rootNodes: Node[]): number => {
+export const getNodeLevel = (
+  nodeId: string,
+  nodes: Node[],
+  edges: any[],
+  rootNodes: Node[],
+): number => {
   const visited = new Set<string>();
-  const queue: Array<{ id: string; level: number }> = rootNodes.map((node) => ({ id: node.id, level: 0 }));
+  const queue: Array<{ id: string; level: number }> = rootNodes.map((node) => ({
+    id: node.id,
+    level: 0,
+  }));
 
   while (queue.length > 0) {
     const { id, level } = queue.shift()!;
@@ -27,7 +35,9 @@ export const getNodeLevel = (nodeId: string, nodes: Node[], edges: any[], rootNo
     if (visited.has(id)) continue;
     visited.add(id);
 
-    const nextIds = edges.filter((edge) => edge.source === id).map((edge) => ({ id: edge.target, level: level + 1 }));
+    const nextIds = edges
+      .filter((edge) => edge.source === id)
+      .map((edge) => ({ id: edge.target, level: level + 1 }));
 
     queue.push(...nextIds);
   }
@@ -139,13 +149,18 @@ const layoutBranch = (
 
   // Add edges
   edges.forEach((edge) => {
-    if (branchNodes.some((n) => n.id === edge.source) && branchNodes.some((n) => n.id === edge.target)) {
+    if (
+      branchNodes.some((n) => n.id === edge.source) &&
+      branchNodes.some((n) => n.id === edge.target)
+    ) {
       g.setEdge(edge.source, edge.target);
     }
   });
 
   // Get the maximum level in the branch
-  const maxLevel = Math.max(...branchNodes.map((node) => getNodeLevel(node.id, branchNodes, edges, rootNodes)));
+  const maxLevel = Math.max(
+    ...branchNodes.map((node) => getNodeLevel(node.id, branchNodes, edges, rootNodes)),
+  );
 
   // Fix positions based on mode
   branchNodes.forEach((node) => {
@@ -186,7 +201,8 @@ const layoutBranch = (
         .filter((n): n is Node => n !== undefined);
 
       if (sourceNodes.length > 0) {
-        const avgSourceY = sourceNodes.reduce((sum, n) => sum + n.position.y, 0) / sourceNodes.length;
+        const avgSourceY =
+          sourceNodes.reduce((sum, n) => sum + n.position.y, 0) / sourceNodes.length;
         const nodeWidth = getNodeWidth(node);
         return {
           ...node,
@@ -283,7 +299,11 @@ export const getRootNodes = (nodes: Node[], edges: any[]): Node[] => {
 };
 
 // Get the rightmost position for a new node
-export const getRightmostPosition = (sourceNodes: Node[], nodes: Node[], edges: any[]): XYPosition => {
+export const getRightmostPosition = (
+  sourceNodes: Node[],
+  nodes: Node[],
+  edges: any[],
+): XYPosition => {
   // Convert source nodes to absolute positions if they are in groups
   const sourceNodesAbsolute = sourceNodes.map((node) => ({
     ...node,
@@ -308,7 +328,8 @@ export const getRightmostPosition = (sourceNodes: Node[], nodes: Node[], edges: 
     .sort((a, b) => a.position.y - b.position.y);
 
   // Calculate average Y of source nodes
-  const avgSourceY = sourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) / sourceNodesAbsolute.length;
+  const avgSourceY =
+    sourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) / sourceNodesAbsolute.length;
 
   // If no nodes at this level, place at average Y of source nodes
   if (nodesAtTargetLevel.length === 0) {
@@ -323,7 +344,7 @@ export const getRightmostPosition = (sourceNodes: Node[], nodes: Node[], edges: 
 
   // Calculate position for new node
   let bestY = avgSourceY;
-  let minOverlap = Infinity;
+  let minOverlap = Number.POSITIVE_INFINITY;
 
   // Try different Y positions around the average source Y
   const range = Math.max(fixedSpacing * 3, getNodeHeight(nodesAtTargetLevel[0]));
@@ -348,7 +369,10 @@ export const getRightmostPosition = (sourceNodes: Node[], nodes: Node[], edges: 
       if (!(newNodeBottom < nodeTop - fixedSpacing || newNodeTop > nodeBottom + fixedSpacing)) {
         hasOverlap = true;
         // Calculate the amount of overlap
-        const overlap = Math.min(Math.abs(newNodeBottom - nodeTop), Math.abs(newNodeTop - nodeBottom));
+        const overlap = Math.min(
+          Math.abs(newNodeBottom - nodeTop),
+          Math.abs(newNodeTop - nodeBottom),
+        );
         totalOverlap += overlap;
       }
     }
@@ -400,7 +424,7 @@ export const getRightmostPosition = (sourceNodes: Node[], nodes: Node[], edges: 
     });
 
     // Find the best gap
-    let bestGap = { start: 0, end: 0, size: 0, distanceToAvg: Infinity };
+    let bestGap = { start: 0, end: 0, size: 0, distanceToAvg: Number.POSITIVE_INFINITY };
     gaps.forEach((gap) => {
       const size = gap.end - gap.start;
       if (size >= fixedSpacing + 320) {
@@ -473,7 +497,8 @@ export const getLeftmostBottomPosition = (nodes: Node[], spacing = SPACING): XYP
   for (let i = 0; i < leftmostNodes.length - 1; i++) {
     const currentNode = leftmostNodes[i];
     const nextNode = leftmostNodes[i + 1];
-    const currentNodeBottom = currentNode.position.y + (currentNode.measured?.height ?? nodeHeight) / 2;
+    const currentNodeBottom =
+      currentNode.position.y + (currentNode.measured?.height ?? nodeHeight) / 2;
     const nextNodeTop = nextNode.position.y - (nextNode.measured?.height ?? nodeHeight) / 2;
 
     if (nextNodeTop - currentNodeBottom >= fixedSpacing + nodeHeight) {

@@ -30,10 +30,13 @@ export const SkillTemplateList = () => {
   });
   // support search by displayName
   const [searchVal, setSearchVal] = useState('');
-  const [skillList, setSkillList, filter] = useSearchableList<SkillTemplate>('displayName' as keyof SkillTemplate, {
-    debounce: true,
-    delay: 300,
-  });
+  const [skillList, setSkillList, filter] = useSearchableList<SkillTemplate>(
+    'displayName' as keyof SkillTemplate,
+    {
+      debounce: true,
+      delay: 300,
+    },
+  );
 
   const handleChange = (val: string) => {
     filter(val);
@@ -88,7 +91,9 @@ export const SkillTemplateList = () => {
           bordered={false}
           pagination={false}
           dataSource={skillList}
-          scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
+          scrollLoading={
+            <ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />
+          }
           render={(item: SkillTemplate, key) => (
             <List.Item
               key={key}

@@ -117,13 +117,20 @@ const PlanItem = (props: {
           {t(`settings.subscription.subscriptionStatus.${title}`)}
         </div>
 
-        <div className="description">{t(`settings.subscription.subscribe.${title}.description`)}</div>
+        <div className="description">
+          {t(`settings.subscription.subscribe.${title}.description`)}
+        </div>
 
         <div className="h-16">
           <div className="subscribe-content-plans-item-price">
             <span className="price text-3xl">
               {title !== 'free' ? (
-                <>${interval === 'monthly' ? getPrice(title) : Math.round((getPrice(title) / 12) * 10) / 10}</>
+                <>
+                  $
+                  {interval === 'monthly'
+                    ? getPrice(title)
+                    : Math.round((getPrice(title) / 12) * 10) / 10}
+                </>
               ) : (
                 t('settings.subscription.subscribe.forFree')
               )}
@@ -134,7 +141,9 @@ const PlanItem = (props: {
               {title === 'free' ? (
                 t('settings.subscription.subscribe.period')
               ) : (
-                <span className="whitespace-nowrap">{t(`settings.subscription.subscribe.month`)}</span>
+                <span className="whitespace-nowrap">
+                  {t(`settings.subscription.subscribe.month`)}
+                </span>
               )}
             </span>
           </div>
@@ -149,7 +158,10 @@ const PlanItem = (props: {
               </span>
               <span className="period !text-xs">
                 {' '}
-                / <span className="whitespace-nowrap">{t(`settings.subscription.subscribe.${'firstYear'}`)}</span>
+                /{' '}
+                <span className="whitespace-nowrap">
+                  {t(`settings.subscription.subscribe.${'firstYear'}`)}
+                </span>
                 {'*'}
               </span>
             </div>
@@ -208,7 +220,9 @@ const PlanItem = (props: {
                   </Tooltip>
                 )}
               </div>
-              {feature.count && <div className="ml-4 text-sm text-black font-medium">{feature.count}</div>}
+              {feature.count && (
+                <div className="ml-4 text-sm text-black font-medium">{feature.count}</div>
+              )}
               <div className="ml-4 text-xs text-gray-400">{feature.details}</div>
             </div>
           ))}
@@ -262,7 +276,13 @@ export const PriceContent = (props: { source: PriceSource }) => {
   const createFeatures = (plan: 'free' | 'plus' | 'pro' | 'max'): ModelFeatures[] => {
     const configs = {
       free: { t1Count: 3, t2Count: 30, fileLimit: 10, t1Period: 'daily', t2Period: 'daily' },
-      plus: { t1Count: 100, t2Count: 1500, fileLimit: 200, t1Period: 'monthly', t2Period: 'monthly' },
+      plus: {
+        t1Count: 100,
+        t2Count: 1500,
+        fileLimit: 200,
+        t1Period: 'monthly',
+        t2Period: 'monthly',
+      },
       pro: { t1Count: 300, t2Count: -1, fileLimit: 500, t1Period: 'monthly', t2Period: 'monthly' },
       max: { t1Count: -1, t2Count: -1, fileLimit: 2000, t1Period: 'monthly', t2Period: 'monthly' },
     };
@@ -276,7 +296,9 @@ export const PriceContent = (props: { source: PriceSource }) => {
               count:
                 config.t1Count === -1
                   ? unlimited
-                  : t(`settings.subscription.subscribe.${config.t1Period}Counts`, { count: config.t1Count }),
+                  : t(`settings.subscription.subscribe.${config.t1Period}Counts`, {
+                      count: config.t1Count,
+                    }),
               details: premiumModels,
               tooltip: t1ModalTooltipContent,
             },
@@ -287,7 +309,9 @@ export const PriceContent = (props: { source: PriceSource }) => {
         count:
           config.t2Count === -1
             ? unlimited
-            : t(`settings.subscription.subscribe.${config.t2Period}Counts`, { count: config.t2Count }),
+            : t(`settings.subscription.subscribe.${config.t2Period}Counts`, {
+                count: config.t2Count,
+              }),
         details: basicModels,
         tooltip: t2ModalTooltipContent,
       },
@@ -308,8 +332,12 @@ export const PriceContent = (props: { source: PriceSource }) => {
   const proFeatures = createFeatures('pro');
   const maxFeatures = createFeatures('max');
 
-  const freeCapabilities = t('priceContent.freeCapabilities', { returnObjects: true }) as Capability[];
-  const premiumCapabilities = t('priceContent.premiumCapabilities', { returnObjects: true }) as Capability[];
+  const freeCapabilities = t('priceContent.freeCapabilities', {
+    returnObjects: true,
+  }) as Capability[];
+  const premiumCapabilities = t('priceContent.premiumCapabilities', {
+    returnObjects: true,
+  }) as Capability[];
 
   const createCheckoutSession = async (plan: SubscriptionPlanType) => {
     if (loadingInfo.isLoading) return;

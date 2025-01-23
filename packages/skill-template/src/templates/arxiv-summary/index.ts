@@ -1,5 +1,4 @@
 import { Document } from '@langchain/core/documents';
-import { WebPDFLoader } from '@langchain/community/document_loaders/web/pdf';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
@@ -8,14 +7,12 @@ import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } fr
 import { z } from 'zod';
 import {
   Icon,
-  SearchResponse,
   SkillInvocationConfig,
   SkillTemplateConfigDefinition,
 } from '@refly-packages/openapi-schema';
 import { TokenTextSplitter } from 'langchain/text_splitter';
-import { LLMChain, loadSummarizationChain } from 'langchain/chains';
+import { LLMChain } from 'langchain/chains';
 import { PromptTemplate } from '@langchain/core/prompts';
-import { scrapeWeblink } from '@refly-packages/utils';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -138,10 +135,15 @@ export class ArxivSummarySkill extends BaseSkill {
     });
     if (response.status !== 200) {
       this.emitEvent({ event: 'log', content: '获取 pdf 内容失败' }, config);
-      throw new Error(`call remote reader failed: ${response.status} ${response.statusText} ${response.text}`);
+      throw new Error(
+        `call remote reader failed: ${response.status} ${response.statusText} ${response.text}`,
+      );
     }
 
-    const data = (await response.json()) as { data: { title: string; content: string; url: string }; code: number };
+    const data = (await response.json()) as {
+      data: { title: string; content: string; url: string };
+      code: number;
+    };
     if (!data) {
       this.emitEvent({ event: 'log', content: '获取 pdf 内容失败' }, config);
       throw new Error(`invalid data from remote reader: ${response.text}`);
@@ -235,7 +237,9 @@ Please provide a summary that meets the above requirements with ${locale} langua
         .object({
           summary: z.string(),
         })
-        .describe(`Generate the summary based on these requirements and offer suggestions for the next steps.`),
+        .describe(
+          `Generate the summary based on these requirements and offer suggestions for the next steps.`,
+        ),
     );
 
     this.emitEvent({ event: 'log', content: '语义处理 pdf 中...' }, config);

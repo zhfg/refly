@@ -25,8 +25,8 @@ import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
-import { ToolButton, ToolValue } from './tool-button';
-import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
+import { ToolButton } from './tool-button';
+import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { genMemoID, genSkillID } from '@refly-packages/utils/id';
 
 interface ToolbarProps {
@@ -40,7 +40,9 @@ const useToolbarConfig = () => {
     showEdges: state.showEdges,
   }));
 
-  const sourceListDrawerVisible = useKnowledgeBaseStoreShallow((state) => state.sourceListDrawer.visible);
+  const sourceListDrawerVisible = useKnowledgeBaseStoreShallow(
+    (state) => state.sourceListDrawer.visible,
+  );
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
 
@@ -81,7 +83,8 @@ const useToolbarConfig = () => {
           hoverContent: {
             title: t('canvas.toolbar.importResource'),
             description: t('canvas.toolbar.importResourceDescription'),
-            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
+            videoUrl:
+              'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
           },
         },
         {
@@ -100,7 +103,8 @@ const useToolbarConfig = () => {
           hoverContent: {
             title: t('canvas.toolbar.createDocument'),
             description: t('canvas.toolbar.createDocumentDescription'),
-            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-create-document.webm',
+            videoUrl:
+              'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-create-document.webm',
           },
         },
         {
@@ -121,7 +125,8 @@ const useToolbarConfig = () => {
           tooltip: t(`canvas.toolbar.${showLaunchpad ? 'hideLaunchpad' : 'showLaunchpad'}`),
           hoverContent: {
             title: t('canvas.toolbar.toggleLaunchpadTitle'),
-            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.webm',
+            videoUrl:
+              'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.webm',
           },
         },
         {
@@ -132,7 +137,8 @@ const useToolbarConfig = () => {
           tooltip: t(`canvas.toolbar.${showEdges ? 'hideEdges' : 'showEdges'}`),
           hoverContent: {
             title: t('canvas.toolbar.toggleEdgeTitle'),
-            videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm',
+            videoUrl:
+              'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm',
           },
         },
       ] as ToolbarItem[],
@@ -145,7 +151,10 @@ const useToolbarConfig = () => {
 };
 
 const SearchListWrapper = memo(
-  ({ tool, handleConfirm }: { tool: ToolbarItem; handleConfirm: (items: ContextItem[]) => void }) => {
+  ({
+    tool,
+    handleConfirm,
+  }: { tool: ToolbarItem; handleConfirm: (items: ContextItem[]) => void }) => {
     const handleToolSelect = useCallback((event: React.MouseEvent) => {
       event.preventDefault();
     }, []);
@@ -207,10 +216,11 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
     showEdges: state.showEdges,
   }));
 
-  const { importResourceModalVisible, setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
-    importResourceModalVisible: state.importResourceModalVisible,
-    setImportResourceModalVisible: state.setImportResourceModalVisible,
-  }));
+  const { importResourceModalVisible, setImportResourceModalVisible } =
+    useImportResourceStoreShallow((state) => ({
+      importResourceModalVisible: state.importResourceModalVisible,
+      setImportResourceModalVisible: state.setImportResourceModalVisible,
+    }));
 
   const contextItems = useContextPanelStoreShallow((state) => state.contextItems);
   const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();

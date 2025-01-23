@@ -1,11 +1,4 @@
-import { useCallback, useState } from 'react';
-import { useCanvasStore, useCanvasStoreShallow } from '../../../stores/canvas';
-import { CanvasNode, prepareNodeData } from '../nodes';
-import { CanvasNodeType } from '@refly/openapi-schema';
-import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
-import { genUniqueId } from '@refly-packages/utils/id';
-import { CoordinateExtent, Node } from '@xyflow/react';
-import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
+import { Node } from '@xyflow/react';
 
 // 计算新组的尺寸和位置
 export const getNodeDimensions = (node: Node, latestNodes: Node[]) => {

@@ -281,7 +281,14 @@ export type LabelInstance = {
 /**
  * Data input mode
  */
-export type InputMode = 'input' | 'inputNumber' | 'inputTextArea' | 'select' | 'multiSelect' | 'radio' | 'switch';
+export type InputMode =
+  | 'input'
+  | 'inputNumber'
+  | 'inputTextArea'
+  | 'select'
+  | 'multiSelect'
+  | 'radio'
+  | 'switch';
 
 /**
  * Config scope
@@ -961,7 +968,13 @@ export type ActionResult = {
 /**
  * Resource index status
  */
-export type IndexStatus = 'init' | 'wait_parse' | 'wait_index' | 'finish' | 'parse_failed' | 'index_failed';
+export type IndexStatus =
+  | 'init'
+  | 'wait_parse'
+  | 'wait_index'
+  | 'finish'
+  | 'parse_failed'
+  | 'index_failed';
 
 /**
  * Payment recurring interval

@@ -1,4 +1,9 @@
-import { EditorCommand, EditorCommandEmpty, EditorCommandItem, EditorCommandList } from '../core/components';
+import {
+  EditorCommand,
+  EditorCommandEmpty,
+  EditorCommandItem,
+  EditorCommandList,
+} from '../core/components';
 import { useState } from 'react';
 import { Divider } from 'antd';
 import { ColorSelector } from './selectors/color-selector';
@@ -61,7 +66,10 @@ export const CollabGenAIMenuSwitch: React.FC<CollabGenAIMenuSwitchProps> = (prop
   return (
     <GenerativeMenuSwitch open={openAI} onOpenChange={setOpenAI}>
       <AIBtnSelector open={openAI} onOpenChange={setOpenAI} />
-      <ContentSelectorButtons text={contentSelector?.text} handleClick={contentSelector?.handleClick} />
+      <ContentSelectorButtons
+        text={contentSelector?.text}
+        handleClick={contentSelector?.handleClick}
+      />
       <CreateMemoSelector text={contentSelector?.text} handleClick={contentSelector?.createMemo} />
       <Divider className="mx-0 h-8" type="vertical" />
       <NodeSelector open={openNode} onOpenChange={setOpenNode} />
@@ -77,5 +85,7 @@ export const CollabGenAIMenuSwitch: React.FC<CollabGenAIMenuSwitchProps> = (prop
 export const CollabGenAIBlockMenu = () => {
   const [openAI, setOpenAI] = useState(false);
 
-  return <GenerativeBlockMenuSwitch open={openAI} onOpenChange={setOpenAI}></GenerativeBlockMenuSwitch>;
+  return (
+    <GenerativeBlockMenuSwitch open={openAI} onOpenChange={setOpenAI}></GenerativeBlockMenuSwitch>
+  );
 };

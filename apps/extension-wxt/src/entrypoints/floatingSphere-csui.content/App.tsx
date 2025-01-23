@@ -27,12 +27,15 @@ export const App = () => {
   const { saveResource } = useSaveCurrentWeblinkAsResource();
   const { handleSaveResourceAndNotify } = useSaveResourceNotify();
   const { handleToggleCopilot } = useToggleCopilot();
-  const { handleStopContentSelectorListener, handleInitContentSelectorListener } = useSelectedMark();
+  const { handleStopContentSelectorListener, handleInitContentSelectorListener } =
+    useSelectedMark();
   const { t } = useTranslation();
   const [isContentSelectorOpen, setIsContentSelectorOpen] = useState(false);
 
   // 加载快捷键
-  const [shortcut, setShortcut] = useState<string>(reflyEnv.getOsType() === 'OSX' ? '⌘ J' : 'Ctrl J');
+  const [shortcut, setShortcut] = useState<string>(
+    reflyEnv.getOsType() === 'OSX' ? '⌘ J' : 'Ctrl J',
+  );
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ y: 0 });
   const sphereRef = useRef<HTMLDivElement>(null);
@@ -188,11 +191,13 @@ export const App = () => {
   useEffect(() => {
     // 设置初始位置
     bottomDistanceRef.current = window.innerHeight * 0.25; // 距离底部 25% 的位置
-    const initialY = window.innerHeight - bottomDistanceRef.current - (sphereRef.current?.offsetHeight || 0);
+    const initialY =
+      window.innerHeight - bottomDistanceRef.current - (sphereRef.current?.offsetHeight || 0);
     updateSpherePosition(initialY);
 
     const handleResize = () => {
-      const newY = window.innerHeight - bottomDistanceRef.current - (sphereRef.current?.offsetHeight || 0);
+      const newY =
+        window.innerHeight - bottomDistanceRef.current - (sphereRef.current?.offsetHeight || 0);
       updateSpherePosition(newY);
       updateDropdownPosition();
     };
@@ -281,7 +286,11 @@ export const App = () => {
                 onClick={(e) => handleClose(e as any as React.MouseEvent)}
               />
             </Tooltip>
-            <img src={Logo} alt={t('extension.floatingSphere.toggleCopilot')} style={{ width: 25, height: 25 }} />
+            <img
+              src={Logo}
+              alt={t('extension.floatingSphere.toggleCopilot')}
+              style={{ width: 25, height: 25 }}
+            />
             <span className="refly-floating-sphere-entry-shortcut">{shortcut}</span>
           </div>
 

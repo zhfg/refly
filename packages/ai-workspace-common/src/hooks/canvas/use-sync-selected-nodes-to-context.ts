@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
-import { IContextItem, useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import {
+  IContextItem,
+  useContextPanelStore,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export const useSyncSelectedNodesToContext = () => {
   const { nodes } = useCanvasData();
@@ -8,7 +11,8 @@ export const useSyncSelectedNodesToContext = () => {
     (node) => node.selected && ['resource', 'document', 'skillResponse'].includes(node.type),
   );
 
-  const selectedEntityIds = selectedContextNodes?.map((node) => node.data?.entityId)?.filter(Boolean) ?? [];
+  const selectedEntityIds =
+    selectedContextNodes?.map((node) => node.data?.entityId)?.filter(Boolean) ?? [];
 
   useEffect(() => {
     const { contextItems, setContextItems } = useContextPanelStore.getState();

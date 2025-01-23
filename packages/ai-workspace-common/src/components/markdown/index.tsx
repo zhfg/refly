@@ -1,5 +1,5 @@
 import { IconLoading } from '@arco-design/web-react/icon';
-import { memo, useEffect, useRef, useState, lazy, Suspense, useMemo } from 'react';
+import { memo, useEffect, useRef, useState, Suspense } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import RemarkBreaks from 'remark-breaks';
@@ -64,29 +64,32 @@ export const Markdown = memo(
           <IconLoading />
         ) : (
           <Suspense fallback={<div>{t('common.loading')}</div>}>
-            {isKatexLoaded && plugins.RemarkMath && plugins.RehypeKatex && plugins.RehypeHighlight && (
-              <ReactMarkdown
-                remarkPlugins={[RemarkGfm, RemarkBreaks, plugins.RemarkMath]}
-                rehypePlugins={[
-                  plugins.RehypeKatex,
-                  [
-                    plugins.RehypeHighlight,
-                    {
-                      detect: false,
-                      ignoreMissing: true,
-                    },
-                  ],
-                ]}
-                components={{
-                  // ...canvasComponents,
-                  pre: CodeElement.Component,
-                  a: (args) => LinkElement.Component(args, props?.sources || []),
-                }}
-                linkTarget={'_blank'}
-              >
-                {parsedContent}
-              </ReactMarkdown>
-            )}
+            {isKatexLoaded &&
+              plugins.RemarkMath &&
+              plugins.RehypeKatex &&
+              plugins.RehypeHighlight && (
+                <ReactMarkdown
+                  remarkPlugins={[RemarkGfm, RemarkBreaks, plugins.RemarkMath]}
+                  rehypePlugins={[
+                    plugins.RehypeKatex,
+                    [
+                      plugins.RehypeHighlight,
+                      {
+                        detect: false,
+                        ignoreMissing: true,
+                      },
+                    ],
+                  ]}
+                  components={{
+                    // ...canvasComponents,
+                    pre: CodeElement.Component,
+                    a: (args) => LinkElement.Component(args, props?.sources || []),
+                  }}
+                  linkTarget={'_blank'}
+                >
+                  {parsedContent}
+                </ReactMarkdown>
+              )}
           </Suspense>
         )}
       </div>

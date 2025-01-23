@@ -42,8 +42,10 @@ export const useAuthStore = create<AuthState>()(
       setLoginInProgress: (val: boolean) => set((state) => ({ ...state, loginInProgress: val })),
       setLoginProvider: (val: string) => set((state) => ({ ...state, loginProvider: val })),
       setLoginModalOpen: (val: boolean) => set((state) => ({ ...state, loginModalOpen: val })),
-      setVerificationModalOpen: (val: boolean) => set((state) => ({ ...state, verificationModalOpen: val })),
-      setResetPasswordModalOpen: (val: boolean) => set((state) => ({ ...state, resetPasswordModalOpen: val })),
+      setVerificationModalOpen: (val: boolean) =>
+        set((state) => ({ ...state, verificationModalOpen: val })),
+      setResetPasswordModalOpen: (val: boolean) =>
+        set((state) => ({ ...state, resetPasswordModalOpen: val })),
       reset: () => set({ ...defaultState }),
     }),
     {

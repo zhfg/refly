@@ -2,7 +2,7 @@ import { IENV, getEnv } from './env';
 
 const overrideLocalDev = false;
 
-export let SENTRY_DSN =
+export const SENTRY_DSN =
   'https://3a105c6104e4c4de3ead00dc11f16623@o4507205453414400.ingest.us.sentry.io/4507209639133184';
 
 export const SERVER_PROD_DOMAIN = 'https://api.refly.ai';
@@ -32,7 +32,9 @@ export const getExtensionId = () => {
     return 'lecbjbapfkinmikhadakbclblnemmjpd';
   }
 
-  return getEnv() === IENV.DEVELOPMENT ? 'lecbjbapfkinmikhadakbclblnemmjpd' : 'lecbjbapfkinmikhadakbclblnemmjpd';
+  return getEnv() === IENV.DEVELOPMENT
+    ? 'lecbjbapfkinmikhadakbclblnemmjpd'
+    : 'lecbjbapfkinmikhadakbclblnemmjpd';
 };
 
 export const getServerOrigin = () => {

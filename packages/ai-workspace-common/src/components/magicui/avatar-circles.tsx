@@ -1,8 +1,6 @@
-"use client";
+'use client';
 
-import React from "react";
-
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 interface AvatarCirclesProps {
   className?: string;
@@ -10,13 +8,9 @@ interface AvatarCirclesProps {
   avatarUrls: string[];
 }
 
-const AvatarCircles = ({
-  numPeople,
-  className,
-  avatarUrls,
-}: AvatarCirclesProps) => {
+const AvatarCircles = ({ numPeople, className, avatarUrls }: AvatarCirclesProps) => {
   return (
-    <div className={cn("z-10 flex -space-x-4 rtl:space-x-reverse", className)}>
+    <div className={cn('z-10 flex -space-x-4 rtl:space-x-reverse', className)}>
       {avatarUrls.map((url, index) => (
         <img
           key={index}

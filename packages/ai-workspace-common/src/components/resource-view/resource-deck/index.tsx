@@ -1,9 +1,12 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tabs, Skeleton, Empty } from 'antd';
 import type { TabsProps } from 'antd';
 import { useReferencesStoreShallow } from '@refly-packages/ai-workspace-common/stores/references';
-import { IconResource, IconCanvas } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconResource,
+  IconCanvas,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import './index.scss';
 import { Reference } from '@refly/openapi-schema';
 
@@ -15,28 +18,31 @@ interface ResourceDeckProps {
 const ResourceDeck = (props: ResourceDeckProps) => {
   const { domain, id } = props;
   const { t } = useTranslation();
-  const { references, referencedBy, fetchReferences, fetchReferencedBy, setDomain, setId } = useReferencesStoreShallow(
-    (state) => ({
+  const { references, referencedBy, fetchReferences, fetchReferencedBy, setDomain, setId } =
+    useReferencesStoreShallow((state) => ({
       references: state.references,
       referencedBy: state.referencedBy,
       fetchReferences: state.fetchReferences,
       fetchReferencedBy: state.fetchReferencedBy,
       setDomain: state.setDomain,
       setId: state.setId,
-    }),
-  );
+    }));
 
-  const ReferenceList = (props: { list: Reference[]; type: 'source' | 'target'; loading: boolean }) => {
+  const ReferenceList = (props: {
+    list: Reference[];
+    type: 'source' | 'target';
+    loading: boolean;
+  }) => {
     const { list, type, loading } = props;
 
     const handleClick = (reference: Reference) => {
       if (type === 'target') {
         const meta = reference.targetMeta;
-        let url = meta?.url;
+        const url = meta?.url;
         window.open(url, '_blank');
       } else {
         const meta = reference.sourceMeta;
-        let url = meta?.url;
+        const url = meta?.url;
         window.open(url, '_blank');
       }
     };
@@ -78,7 +84,9 @@ const ResourceDeck = (props: ResourceDeckProps) => {
     {
       key: 'referencedBy',
       label: t('deck.referencedBy'),
-      children: <ReferenceList list={referencedBy.data} type="source" loading={referencedBy.loading} />,
+      children: (
+        <ReferenceList list={referencedBy.data} type="source" loading={referencedBy.loading} />
+      ),
     },
   ];
 

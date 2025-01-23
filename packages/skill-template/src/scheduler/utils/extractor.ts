@@ -2,7 +2,7 @@ import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { SkillRunnableConfig } from '../../base';
 import { z } from 'zod';
 import { checkIsSupportedModel } from './model';
-import { AIMessage, AIMessageChunk, BaseMessage, MessageContentComplex } from '@langchain/core/messages';
+import { AIMessage, AIMessageChunk } from '@langchain/core/messages';
 import { ToolCall } from '@langchain/core/messages/tool';
 import { ModelInfo } from '@refly-packages/openapi-schema';
 
@@ -77,7 +77,7 @@ export async function extractStructuredData<T extends z.ZodType>(
   schema: T,
   prompt: string,
   config: SkillRunnableConfig,
-  maxRetries: number = 3,
+  maxRetries = 3,
   modelInfo: ModelInfo,
 ): Promise<z.infer<T>> {
   let lastError = '';
@@ -164,7 +164,10 @@ export async function extractStructuredData<T extends z.ZodType>(
         } catch (structuredError) {
           console.error('Structured output failed:', structuredError);
           structuredOutputFailed = true;
-          lastError = structuredError instanceof Error ? structuredError.message : 'Unknown structured output error';
+          lastError =
+            structuredError instanceof Error
+              ? structuredError.message
+              : 'Unknown structured output error';
         }
       }
 
@@ -201,10 +204,14 @@ export async function extractStructuredData<T extends z.ZodType>(
       console.error(`Attempt ${i + 1}/${maxRetries} failed:`, lastError);
 
       if (i === maxRetries - 1) {
-        throw new Error(`Failed to extract structured data after ${maxRetries} attempts. Last error: ${lastError}`);
+        throw new Error(
+          `Failed to extract structured data after ${maxRetries} attempts. Last error: ${lastError}`,
+        );
       }
     }
   }
 
-  throw new Error(`Failed to extract structured data after ${maxRetries} attempts. Last error: ${lastError}`);
+  throw new Error(
+    `Failed to extract structured data after ${maxRetries} attempts. Last error: ${lastError}`,
+  );
 }

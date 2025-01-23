@@ -40,7 +40,10 @@ export const denormalizeLocale = (locale: string): string => {
   return locale;
 };
 
-export const getOptimizedSearchLocales = (baseLocale: string, maxSearchLocaleLen: number): string[] => {
+export const getOptimizedSearchLocales = (
+  baseLocale: string,
+  maxSearchLocaleLen: number,
+): string[] => {
   // Normalize the input locale for comparison
   const normalizedBaseLocale = normalizeLocale(baseLocale);
 
@@ -55,7 +58,9 @@ export const getOptimizedSearchLocales = (baseLocale: string, maxSearchLocaleLen
   // Keep adding locales until we reach maxSearchLocaleLen
   if (locales.size < maxSearchLocaleLen) {
     // Get remaining priority locales that haven't been added yet
-    const remainingLocales = LOCALE_PRIORITY.map(normalizeLocale).filter((locale) => !locales.has(locale));
+    const remainingLocales = LOCALE_PRIORITY.map(normalizeLocale).filter(
+      (locale) => !locales.has(locale),
+    );
 
     // Add additional locales until we reach the desired length
     for (const locale of remainingLocales) {

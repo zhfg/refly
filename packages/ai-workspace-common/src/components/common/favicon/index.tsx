@@ -1,5 +1,5 @@
 import { safeParseURL } from '@refly-packages/utils/url';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo } from 'react';
 
 export const Favicon = (props: { url: string; size?: number }) => {
   const { size = 12, url } = props;

@@ -1,7 +1,5 @@
 import { useCallback } from 'react';
-import { Node } from '@xyflow/react';
 import { useCanvasStore } from '../../../stores/canvas';
-import { CanvasNodeType } from '@refly/openapi-schema';
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 import { calculateGroupBoundaries, sortNodes, getAbsolutePosition } from './utils';
@@ -52,7 +50,9 @@ export const useGroupNodes = () => {
 
         // Check if current group will become empty
         if (node.parentId) {
-          const selectedSiblingsCount = selectedNodes.filter((n) => n.parentId === node.parentId).length;
+          const selectedSiblingsCount = selectedNodes.filter(
+            (n) => n.parentId === node.parentId,
+          ).length;
 
           if (selectedSiblingsCount === groupChildCounts.get(node.parentId)) {
             emptyGroups.add(node.parentId);

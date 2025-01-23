@@ -5,12 +5,19 @@ import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canva
 import './index.scss';
 import { Input, Spin } from '@arco-design/web-react';
 import { Button, message, Tooltip } from 'antd';
-import { IconCopy, IconLock, IconUnlock } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconCopy,
+  IconLock,
+  IconUnlock,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useTranslation } from 'react-i18next';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 
 import { CollaborativeEditor } from './collab-editor';
-import { DocumentProvider, useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
+import {
+  DocumentProvider,
+  useDocumentContext,
+} from '@refly-packages/ai-workspace-common/context/document';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { ydoc2Markdown } from '@refly-packages/utils/editor';
@@ -81,7 +88,9 @@ const StatusBar = memo(
 
       setDocumentReadOnly(docId, !readOnly);
 
-      readOnly ? message.success(t('knowledgeBase.note.edit')) : message.warning(t('knowledgeBase.note.readOnly'));
+      readOnly
+        ? message.success(t('knowledgeBase.note.edit'))
+        : message.warning(t('knowledgeBase.note.readOnly'));
     };
 
     const handleCopy = () => {
@@ -109,10 +118,19 @@ const StatusBar = memo(
         </div>
 
         <div className="flex items-center gap-1">
-          <Tooltip placement="bottom" title={readOnly ? t('document.enableEdit') : t('document.setReadOnly')}>
+          <Tooltip
+            placement="bottom"
+            title={readOnly ? t('document.enableEdit') : t('document.setReadOnly')}
+          >
             <Button
               type="text"
-              icon={readOnly ? <IconLock className="text-green-500" /> : <IconUnlock className="text-gray-500" />}
+              icon={
+                readOnly ? (
+                  <IconLock className="text-green-500" />
+                ) : (
+                  <IconUnlock className="text-gray-500" />
+                )
+              }
               onClick={() => toggleReadOnly()}
             />
           </Tooltip>
@@ -209,7 +227,12 @@ const DocumentBody = memo(
 );
 
 export const DocumentEditor = memo(
-  (props: { docId: string; deckSize: number; setDeckSize: (size: number) => void; node?: CanvasNode }) => {
+  (props: {
+    docId: string;
+    deckSize: number;
+    setDeckSize: (size: number) => void;
+    node?: CanvasNode;
+  }) => {
     const { docId, deckSize, setDeckSize, node } = props;
 
     const { resetState } = useDocumentStoreShallow((state) => ({

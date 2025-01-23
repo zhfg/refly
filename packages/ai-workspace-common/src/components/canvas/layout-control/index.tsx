@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, memo, useMemo, useRef } from 'react';
-import { Button, Dropdown, Space, Divider, Tooltip, Modal } from 'antd';
+import { Button, Dropdown, Space, Divider, Tooltip } from 'antd';
 import { LuCompass, LuLayoutDashboard, LuLightbulb, LuShipWheel } from 'react-icons/lu';
 import { RiFullscreenFill } from 'react-icons/ri';
 import { FiHelpCircle } from 'react-icons/fi';
@@ -22,7 +22,6 @@ import { IconExpand, IconShrink } from '@refly-packages/ai-workspace-common/comp
 
 import './index.scss';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
-import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 
 interface LayoutControlProps {
   mode: 'mouse' | 'touchpad';
@@ -78,29 +77,43 @@ const TooltipButton = memo(({ tooltip, children, ...buttonProps }: TooltipButton
 ));
 
 // Update component definitions
-const ActionButtons = memo(({ onFitView, onLayout, onToggleSizeMode, nodeSizeMode, t }: ActionButtonsProps) => (
-  <>
-    <TooltipButton tooltip={t('canvas.toolbar.tooltip.fitView')} onClick={onFitView} className={buttonClass}>
-      <RiFullscreenFill className={iconClass} size={16} />
-    </TooltipButton>
+const ActionButtons = memo(
+  ({ onFitView, onLayout, onToggleSizeMode, nodeSizeMode, t }: ActionButtonsProps) => (
+    <>
+      <TooltipButton
+        tooltip={t('canvas.toolbar.tooltip.fitView')}
+        onClick={onFitView}
+        className={buttonClass}
+      >
+        <RiFullscreenFill className={iconClass} size={16} />
+      </TooltipButton>
 
-    <TooltipButton tooltip={t('canvas.toolbar.tooltip.layout')} onClick={() => onLayout('LR')} className={buttonClass}>
-      <LuLayoutDashboard className={iconClass} size={16} />
-    </TooltipButton>
+      <TooltipButton
+        tooltip={t('canvas.toolbar.tooltip.layout')}
+        onClick={() => onLayout('LR')}
+        className={buttonClass}
+      >
+        <LuLayoutDashboard className={iconClass} size={16} />
+      </TooltipButton>
 
-    <TooltipButton
-      tooltip={nodeSizeMode === 'compact' ? t('canvas.contextMenu.adaptiveMode') : t('canvas.contextMenu.compactMode')}
-      onClick={onToggleSizeMode}
-      className={buttonClass}
-    >
-      {nodeSizeMode === 'compact' ? (
-        <IconExpand className={iconClass} size={16} />
-      ) : (
-        <IconShrink className={iconClass} size={16} />
-      )}
-    </TooltipButton>
-  </>
-));
+      <TooltipButton
+        tooltip={
+          nodeSizeMode === 'compact'
+            ? t('canvas.contextMenu.adaptiveMode')
+            : t('canvas.contextMenu.compactMode')
+        }
+        onClick={onToggleSizeMode}
+        className={buttonClass}
+      >
+        {nodeSizeMode === 'compact' ? (
+          <IconExpand className={iconClass} size={16} />
+        ) : (
+          <IconShrink className={iconClass} size={16} />
+        )}
+      </TooltipButton>
+    </>
+  ),
+);
 
 const ModeSelector = memo(({ mode, open, setOpen, items, onModeChange, t }: ModeSelectorProps) => (
   <Dropdown
@@ -118,7 +131,11 @@ const ModeSelector = memo(({ mode, open, setOpen, items, onModeChange, t }: Mode
         type="text"
         className="!p-0 h-[30px] w-[48px] flex items-center justify-center hover:bg-gray-100 transition-colors duration-200 group"
       >
-        {mode === 'mouse' ? <IconMouse className={iconClass} /> : <IconTouchpad className={iconClass} />}
+        {mode === 'mouse' ? (
+          <IconMouse className={iconClass} />
+        ) : (
+          <IconTouchpad className={iconClass} />
+        )}
         <IconDown className={`ml-[-6px] ${iconClass} ${open ? 'rotate-180' : ''}`} />
       </Button>
     </Tooltip>
@@ -127,31 +144,36 @@ const ModeSelector = memo(({ mode, open, setOpen, items, onModeChange, t }: Mode
 ModeSelector.displayName = 'ModeSelector';
 
 // Create a memoized zoom controls component
-const ZoomControls = memo(({ currentZoom, onZoomIn, onZoomOut, canZoomIn, canZoomOut, t }: ZoomControlsProps) => (
-  <>
-    <TooltipButton
-      tooltip={t('canvas.toolbar.tooltip.zoomOut')}
-      onClick={onZoomOut}
-      disabled={!canZoomOut}
-      className={`${buttonClass} ${!canZoomOut ? 'opacity-50 cursor-not-allowed' : ''}`}
-    >
-      <LuZoomOut className={iconClass} size={16} />
-    </TooltipButton>
+const ZoomControls = memo(
+  ({ currentZoom, onZoomIn, onZoomOut, canZoomIn, canZoomOut, t }: ZoomControlsProps) => (
+    <>
+      <TooltipButton
+        tooltip={t('canvas.toolbar.tooltip.zoomOut')}
+        onClick={onZoomOut}
+        disabled={!canZoomOut}
+        className={`${buttonClass} ${!canZoomOut ? 'opacity-50 cursor-not-allowed' : ''}`}
+      >
+        <LuZoomOut className={iconClass} size={16} />
+      </TooltipButton>
 
-    <TooltipButton tooltip={t('canvas.toolbar.tooltip.zoom')} className={`${buttonClass} pointer-events-none mx-1.5`}>
-      <div className="text-xs">{Math.round(currentZoom * 100)}%</div>
-    </TooltipButton>
+      <TooltipButton
+        tooltip={t('canvas.toolbar.tooltip.zoom')}
+        className={`${buttonClass} pointer-events-none mx-1.5`}
+      >
+        <div className="text-xs">{Math.round(currentZoom * 100)}%</div>
+      </TooltipButton>
 
-    <TooltipButton
-      tooltip={t('canvas.toolbar.tooltip.zoomIn')}
-      onClick={onZoomIn}
-      disabled={!canZoomIn}
-      className={`${buttonClass} ${!canZoomIn ? 'opacity-50 cursor-not-allowed' : ''}`}
-    >
-      <LuZoomIn className={iconClass} size={16} />
-    </TooltipButton>
-  </>
-));
+      <TooltipButton
+        tooltip={t('canvas.toolbar.tooltip.zoomIn')}
+        onClick={onZoomIn}
+        disabled={!canZoomIn}
+        className={`${buttonClass} ${!canZoomIn ? 'opacity-50 cursor-not-allowed' : ''}`}
+      >
+        <LuZoomIn className={iconClass} size={16} />
+      </TooltipButton>
+    </>
+  ),
+);
 ZoomControls.displayName = 'ZoomControls';
 
 export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeMode }) => {
@@ -162,14 +184,13 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
   const [currentZoom, setCurrentZoom] = useState(reactFlowInstance?.getZoom() ?? 1);
   const minZoom = 0.1;
   const maxZoom = 2;
-  const { helpModalVisible, setShowTourModal, setShowSettingsGuideModal, setHelpModalVisible } = useUserStoreShallow(
-    (state) => ({
+  const { helpModalVisible, setShowTourModal, setShowSettingsGuideModal, setHelpModalVisible } =
+    useUserStoreShallow((state) => ({
       helpModalVisible: state.helpModalVisible,
       setShowTourModal: state.setShowTourModal,
       setShowSettingsGuideModal: state.setShowSettingsGuideModal,
       setHelpModalVisible: state.setHelpModalVisible,
-    }),
-  );
+    }));
 
   // Use ref to avoid recreating the timeout on each render
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -311,7 +332,14 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
           t={t}
         />
 
-        <ModeSelector mode={mode} open={open} setOpen={setOpen} items={items} onModeChange={changeMode} t={t} />
+        <ModeSelector
+          mode={mode}
+          open={open}
+          setOpen={setOpen}
+          items={items}
+          onModeChange={changeMode}
+          t={t}
+        />
 
         <Divider type="vertical" className="h-full mx-0.5" />
 
@@ -323,7 +351,9 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
           </Tooltip>
         </Dropdown>
       </div>
-      {helpModalVisible ? <HelpModal visible={helpModalVisible} onClose={() => setHelpModalVisible(false)} /> : null}
+      {helpModalVisible ? (
+        <HelpModal visible={helpModalVisible} onClose={() => setHelpModalVisible(false)} />
+      ) : null}
     </>
   );
 });

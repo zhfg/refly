@@ -38,7 +38,10 @@ import { REFRESH_TOKEN_COOKIE } from '@refly-packages/utils';
 export class AuthController {
   private logger = new Logger(AuthController.name);
 
-  constructor(private authService: AuthService, private configService: ConfigService) {}
+  constructor(
+    private authService: AuthService,
+    private configService: ConfigService,
+  ) {}
 
   @Get('config')
   getAuthConfig(): AuthConfigResponse {

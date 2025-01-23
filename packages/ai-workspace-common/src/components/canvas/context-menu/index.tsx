@@ -3,10 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { FC, useEffect, useRef, useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
-import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import {
-  IconAskAI,
   IconPreview,
   IconExpand,
   IconShrink,
@@ -14,7 +12,6 @@ import {
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
-import { MdOutlineCompareArrows } from 'react-icons/md';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 import { RiLayoutLine } from 'react-icons/ri';
 import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
@@ -37,7 +34,13 @@ interface MenuItem {
   videoUrl?: string;
 }
 
-export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isSelection, onCreateGroup }) => {
+export const ContextMenu: FC<ContextMenuProps> = ({
+  open,
+  position,
+  setOpen,
+  isSelection,
+  onCreateGroup,
+}) => {
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuHeight, setMenuHeight] = useState<number>(0);
@@ -73,9 +76,12 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       icon: IconAskAIInput,
       type: 'button',
       active: showLaunchpad,
-      title: showLaunchpad ? t('canvas.contextMenu.hideLaunchpad') : t('canvas.contextMenu.showLaunchpad'),
+      title: showLaunchpad
+        ? t('canvas.contextMenu.hideLaunchpad')
+        : t('canvas.contextMenu.showLaunchpad'),
       description: t('canvas.contextMenu.toggleLaunchpadDescription'),
-      videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.webm',
+      videoUrl:
+        'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.webm',
     },
     {
       key: 'toggleEdges',
@@ -91,7 +97,9 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       icon: IconPreview,
       type: 'button',
       active: clickToPreview,
-      title: clickToPreview ? t('canvas.contextMenu.disableClickPreview') : t('canvas.contextMenu.enableClickPreview'),
+      title: clickToPreview
+        ? t('canvas.contextMenu.disableClickPreview')
+        : t('canvas.contextMenu.enableClickPreview'),
       description: t('canvas.contextMenu.toggleClickPreviewDescription'),
       videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleClickView.webm',
     },
@@ -100,7 +108,10 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       icon: nodeSizeMode === 'compact' ? IconExpand : IconShrink,
       type: 'button',
       active: nodeSizeMode === 'compact',
-      title: nodeSizeMode === 'compact' ? t('canvas.contextMenu.adaptiveMode') : t('canvas.contextMenu.compactMode'),
+      title:
+        nodeSizeMode === 'compact'
+          ? t('canvas.contextMenu.adaptiveMode')
+          : t('canvas.contextMenu.compactMode'),
       description: t('canvas.contextMenu.toggleNodeSizeModeDescription'),
       videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAdaptive.webm',
     },
@@ -109,7 +120,9 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen, isS
       icon: RiLayoutLine,
       type: 'button',
       active: autoLayout,
-      title: autoLayout ? t('canvas.contextMenu.disableAutoLayout') : t('canvas.contextMenu.enableAutoLayout'),
+      title: autoLayout
+        ? t('canvas.contextMenu.disableAutoLayout')
+        : t('canvas.contextMenu.enableAutoLayout'),
       description: t('canvas.contextMenu.toggleAutoLayoutDescription'),
       videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAutoLayout.webm',
     },

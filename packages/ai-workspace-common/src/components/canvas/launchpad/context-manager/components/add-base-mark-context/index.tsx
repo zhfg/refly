@@ -36,14 +36,25 @@ export const AddBaseMarkContext = ({ contextItems, setContextItems }: AddBaseMar
   };
 
   return (
-    <Badge count={(contextItems || []).length} size="small" color="#00968F" style={{ zIndex: 1000 }}>
+    <Badge
+      count={(contextItems || []).length}
+      size="small"
+      color="#00968F"
+      style={{ zIndex: 1000 }}
+    >
       <Popover
         placement="bottom"
         trigger="click"
         overlayInnerStyle={{ padding: 0, boxShadow: 'none' }}
         open={popoverVisible}
         onOpenChange={handleVisibleChange}
-        content={<BaseMarkContextSelector onClose={handleClose} onSelect={handleSelect} selectedItems={contextItems} />}
+        content={
+          <BaseMarkContextSelector
+            onClose={handleClose}
+            onSelect={handleSelect}
+            selectedItems={contextItems}
+          />
+        }
       >
         <Tooltip
           title={contextItems?.length > 0 ? t('knowledgeBase.context.addContext') : ''}

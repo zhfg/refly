@@ -1,52 +1,52 @@
-import { Button, Modal, Input, Form } from "antd"
+import { Button, Modal, Input, Form } from 'antd';
 
-import { useTranslation } from "react-i18next"
-import getClient from "@refly-packages/ai-workspace-common/requests/proxiedRequest"
-import { useAuthStoreShallow } from "@refly-packages/ai-workspace-common/stores/auth"
-import { useState } from "react"
+import { useTranslation } from 'react-i18next';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
+import { useState } from 'react';
 
 interface FormValues {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export const ResetPasswordModal = (props: {
-  visible?: boolean
-  from?: string
+  visible?: boolean;
+  from?: string;
 }) => {
-  const [form] = Form.useForm<FormValues>()
-  const [loading, setLoading] = useState(false)
+  const [form] = Form.useForm<FormValues>();
+  const [loading, setLoading] = useState(false);
 
-  const authStore = useAuthStoreShallow(state => ({
+  const authStore = useAuthStoreShallow((state) => ({
     resetPasswordModalOpen: state.resetPasswordModalOpen,
     setVerificationModalOpen: state.setVerificationModalOpen,
     setResetPasswordModalOpen: state.setResetPasswordModalOpen,
     setSessionId: state.setSessionId,
     setEmail: state.setEmail,
-  }))
+  }));
 
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   const handleResetPassword = async () => {
-    const values = await form.validateFields()
+    const values = await form.validateFields();
 
-    setLoading(true)
+    setLoading(true);
     const { data } = await getClient().createVerification({
       body: {
         email: values.email,
-        purpose: "resetPassword",
+        purpose: 'resetPassword',
         password: values.password,
       },
-    })
-    setLoading(false)
+    });
+    setLoading(false);
 
     if (data?.success) {
-      authStore.setResetPasswordModalOpen(false)
-      authStore.setVerificationModalOpen(true)
-      authStore.setEmail(values.email)
-      authStore.setSessionId(data.data?.sessionId ?? null)
+      authStore.setResetPasswordModalOpen(false);
+      authStore.setVerificationModalOpen(true);
+      authStore.setEmail(values.email);
+      authStore.setSessionId(data.data?.sessionId ?? null);
     }
-  }
+  };
 
   return (
     <Modal
@@ -54,17 +54,19 @@ export const ResetPasswordModal = (props: {
       centered
       footer={null}
       width={410}
-      onCancel={() => authStore.setResetPasswordModalOpen(false)}>
+      onCancel={() => authStore.setResetPasswordModalOpen(false)}
+    >
       <div className="relative flex h-full w-full flex-col items-center justify-center gap-3">
         <div className="flex flex-row items-center">
           <span
             style={{
               fontSize: 20,
-              fontWeight: "bold",
-              display: "inline-block",
+              fontWeight: 'bold',
+              display: 'inline-block',
               marginLeft: 8,
-            }}>
-            {t("landingPage.resetPasswordModal.title")}
+            }}
+          >
+            {t('landingPage.resetPasswordModal.title')}
           </span>
         </div>
 
@@ -72,29 +74,29 @@ export const ResetPasswordModal = (props: {
           form={form}
           layout="vertical"
           className="mt-2 w-full max-w-sm px-4"
-          requiredMark={false}>
+          requiredMark={false}
+        >
           <Form.Item
             name="email"
             label={
-              <span className="font-medium">
-                {t("landingPage.resetPasswordModal.emailLabel")}
-              </span>
+              <span className="font-medium">{t('landingPage.resetPasswordModal.emailLabel')}</span>
             }
-            validateTrigger={["onBlur"]}
+            validateTrigger={['onBlur']}
             hasFeedback
             rules={[
               {
                 required: true,
-                message: t("verifyRules.emailRequired"),
+                message: t('verifyRules.emailRequired'),
               },
               {
-                type: "email",
-                message: t("verifyRules.emailInvalid"),
+                type: 'email',
+                message: t('verifyRules.emailInvalid'),
               },
-            ]}>
+            ]}
+          >
             <Input
               type="email"
-              placeholder={t("landingPage.resetPasswordModal.emailPlaceholder")}
+              placeholder={t('landingPage.resetPasswordModal.emailPlaceholder')}
               className="h-8"
             />
           </Form.Item>
@@ -103,25 +105,24 @@ export const ResetPasswordModal = (props: {
             name="password"
             label={
               <span className="font-medium">
-                {t("landingPage.resetPasswordModal.passwordLabel")}
+                {t('landingPage.resetPasswordModal.passwordLabel')}
               </span>
             }
-            validateTrigger={["onBlur"]}
+            validateTrigger={['onBlur']}
             hasFeedback
             rules={[
               {
                 required: true,
-                message: t("verifyRules.passwordRequired"),
+                message: t('verifyRules.passwordRequired'),
               },
               {
                 min: 8,
-                message: t("verifyRules.passwordMin"),
+                message: t('verifyRules.passwordMin'),
               },
-            ]}>
+            ]}
+          >
             <Input.Password
-              placeholder={t(
-                "landingPage.resetPasswordModal.passwordPlaceholder",
-              )}
+              placeholder={t('landingPage.resetPasswordModal.passwordPlaceholder')}
               className="h-8"
             />
           </Form.Item>
@@ -130,31 +131,28 @@ export const ResetPasswordModal = (props: {
             name="passwordConfirm"
             label={
               <span className="font-medium">
-                {t("landingPage.resetPasswordModal.passwordConfirmLabel")}
+                {t('landingPage.resetPasswordModal.passwordConfirmLabel')}
               </span>
             }
-            validateTrigger={["onBlur"]}
+            validateTrigger={['onBlur']}
             hasFeedback
             rules={[
               {
                 required: true,
-                message: t("verifyRules.passwordRequired"),
+                message: t('verifyRules.passwordRequired'),
               },
               {
                 validator: (_, value) => {
-                  if (value !== form.getFieldValue("password")) {
-                    return Promise.reject(
-                      t("verifyRules.passwordConfirmNotMatch"),
-                    )
+                  if (value !== form.getFieldValue('password')) {
+                    return Promise.reject(t('verifyRules.passwordConfirmNotMatch'));
                   }
-                  return Promise.resolve()
+                  return Promise.resolve();
                 },
               },
-            ]}>
+            ]}
+          >
             <Input.Password
-              placeholder={t(
-                "landingPage.resetPasswordModal.passwordConfirmPlaceholder",
-              )}
+              placeholder={t('landingPage.resetPasswordModal.passwordConfirmPlaceholder')}
               className="h-8"
             />
           </Form.Item>
@@ -164,12 +162,13 @@ export const ResetPasswordModal = (props: {
               type="primary"
               loading={loading}
               onClick={handleResetPassword}
-              className="h-10 w-full text-base">
-              {t("landingPage.resetPasswordModal.continue")}
+              className="h-10 w-full text-base"
+            >
+              {t('landingPage.resetPasswordModal.continue')}
             </Button>
           </Form.Item>
         </Form>
       </div>
     </Modal>
-  )
-}
+  );
+};

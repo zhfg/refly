@@ -5,7 +5,11 @@ import { ResourceList } from '../resource-list';
 
 import { Modal, Tabs } from 'antd';
 import './index.scss';
-import { IconDocument, IconLibrary, IconResource } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconDocument,
+  IconLibrary,
+  IconResource,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 
 interface LibraryModalProps {
   visible: boolean;

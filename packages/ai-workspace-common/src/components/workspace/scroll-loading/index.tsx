@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Button, Skeleton } from 'antd';
+import { Button } from 'antd';
 
 export interface ScrollLoadingProps {
   isRequesting: boolean;

@@ -30,10 +30,12 @@ export const LaunchPad = memo(
 
     const { canvasId } = useCanvasContext();
 
-    const { recommendQuestionsOpen, setRecommendQuestionsOpen } = useLaunchpadStoreShallow((state) => ({
-      recommendQuestionsOpen: state.recommendQuestionsOpen,
-      setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
-    }));
+    const { recommendQuestionsOpen, setRecommendQuestionsOpen } = useLaunchpadStoreShallow(
+      (state) => ({
+        recommendQuestionsOpen: state.recommendQuestionsOpen,
+        setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
+      }),
+    );
 
     // Add new method to clear state
     const clearLaunchpadState = () => {
@@ -56,7 +58,10 @@ export const LaunchPad = memo(
       <div className="ai-copilot-operation-container">
         <div className="ai-copilot-operation-body">
           <SkillDisplay />
-          <RecommendQuestionsPanel isOpen={recommendQuestionsOpen} onClose={() => setRecommendQuestionsOpen(false)} />
+          <RecommendQuestionsPanel
+            isOpen={recommendQuestionsOpen}
+            onClose={() => setRecommendQuestionsOpen(false)}
+          />
           <ChatPanel />
         </div>
       </div>

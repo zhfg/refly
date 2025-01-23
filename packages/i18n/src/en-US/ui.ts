@@ -107,7 +107,8 @@ const translations = {
     anotherDescription:
       'A free-form canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, easily transforms ideas into quality content.',
     simplyDescription: {
-      first: 'Powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, ',
+      first:
+        'Powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, ',
       second: 'Refly is the best way to transform ideas into quality content.',
     },
     messageText: 'Experience AI Free-form Canvas and ignite your creativity!',
@@ -123,7 +124,8 @@ const translations = {
       title: "An Overview of Refly's Primary Features",
       featureOne: {
         tag: 'Planning',
-        title: 'Transform chaos into clarity with our free-form canvas for professional content creation',
+        title:
+          'Transform chaos into clarity with our free-form canvas for professional content creation',
         bulletPoints: [
           'Coverage of 20+ professional templates for academic research, technical documentation, and more',
           'AI-powered topic analysis and intelligent research framework generation',
@@ -132,7 +134,8 @@ const translations = {
       },
       featureTwo: {
         tag: 'Explore & Import',
-        title: 'Break down knowledge barriers, turning fragmented information into creative resources',
+        title:
+          'Break down knowledge barriers, turning fragmented information into creative resources',
         bulletPoints: [
           'One-click import of papers, web pages, and various professional materials',
           'AI-powered search for swift identification of key references',
@@ -150,7 +153,8 @@ const translations = {
       },
       featureFour: {
         tag: 'Thinking & Creation',
-        title: 'From ideation to completion, elevate your professional content with deeper insights',
+        title:
+          'From ideation to completion, elevate your professional content with deeper insights',
         bulletPoints: [
           'Customize your writing environment with flexible context selection',
           'N+ professional writing tools to enhance academic/technical writing efficiency',
@@ -161,7 +165,8 @@ const translations = {
     pricing: {
       title: 'Plans and Pricing',
       subtitle: 'Embark on your AI content creation journey with Refly',
-      description: 'Sign up and enjoy a unlimited trial with 20 standard model calls per day. No credit card required.',
+      description:
+        'Sign up and enjoy a unlimited trial with 20 standard model calls per day. No credit card required.',
       limitedOffer: 'Save 50% on your first year  - Limited time offer',
     },
     footer: {
@@ -272,7 +277,8 @@ const translations = {
         after: ': Generate documents, recommend questions, web search, and library search.',
       },
       {
-        before: 'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
+        before:
+          'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
         highlight: 'limited size',
         after: '.',
       },
@@ -294,7 +300,8 @@ const translations = {
         after: ': Generate documents, recommend questions, web search, and library search.',
       },
       {
-        before: 'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
+        before:
+          'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
         highlight: 'large capacity',
         after: '.',
       },
@@ -411,7 +418,8 @@ const translations = {
       unbindSuccessful: 'Unbind successfully!',
       failed: 'Failed to delete',
       deleteConfirmForDocument: 'Are you sure you want to delete this document?',
-      deleteConfirmForCanvas: 'Canvas {{canvas}} will be deleted permanently, are you sure to continue?',
+      deleteConfirmForCanvas:
+        'Canvas {{canvas}} will be deleted permanently, are you sure to continue?',
       deleteConfirmForResource: 'Are you sure you want to delete this resource?',
       deleteConfirmForResourceProject: 'Are you sure to remove this resource from the project?',
       delete: 'Delete',
@@ -465,7 +473,8 @@ const translations = {
       },
       leavePageModal: {
         title: 'Are you sure to leave the current canvas?',
-        content: 'AI is still writing, and you will lose the content if leaving the page. Are you sure to leave?',
+        content:
+          'AI is still writing, and you will lose the content if leaving the page. Are you sure to leave?',
       },
     },
     context: {
@@ -566,7 +575,8 @@ const translations = {
       createGroup: 'Create Group',
       enableClickPreview: 'Enable Click Preview',
       disableClickPreview: 'Disable Click Preview',
-      toggleClickPreviewDescription: 'Whether to display the preview card when clicking on a node in the canvas.',
+      toggleClickPreviewDescription:
+        'Whether to display the preview card when clicking on a node in the canvas.',
       hideLaunchpad: 'Hide Ask AI',
       showLaunchpad: 'Show Ask AI',
       toggleLaunchpadDescription: 'Whether to display the AI input box.',
@@ -696,18 +706,21 @@ const translations = {
     },
     nodeActions: {
       createMemo: 'Create Empty Memo',
-      createMemoDescription: 'Create an empty memo for quick recording ideas, supporting Markdown format',
+      createMemoDescription:
+        'Create an empty memo for quick recording ideas, supporting Markdown format',
       copy: 'Copy Node Content',
       copyDescription: 'Copy the content of the selected node to the clipboard in Markdown format',
       askAI: 'Ask AI',
       askAIDescription:
         'Ask AI, select context or switch skill, input requirements, get help with writing, reading comprehension, or question answering',
       cloneAskAI: 'Clone Ask AI',
-      cloneAskAIDescription: 'Clone the existing AI answer node and create a new skill node for comparison experiments',
+      cloneAskAIDescription:
+        'Clone the existing AI answer node and create a new skill node for comparison experiments',
       batchRun: 'Batch Run',
       batchRunDescription: 'Run multiple selected skill nodes at the same time',
       addToContext: 'Add to Context',
-      addToContextDescription: 'Add temporary knowledge support for single queries to improve AI answer accuracy',
+      addToContextDescription:
+        'Add temporary knowledge support for single queries to improve AI answer accuracy',
       processingVector: 'Processing Vector',
       run: 'Run',
       runDescription: 'Run the selected skill node',
@@ -717,7 +730,8 @@ const translations = {
       previewDescription:
         'Display the complete content of the node in the preview panel on the right side of the canvas',
       insertToDoc: 'Insert to Document',
-      insertToDocDescription: 'Integrate the node content into the document, supporting iterative writing',
+      insertToDocDescription:
+        'Integrate the node content into the document, supporting iterative writing',
       askFollowUp: 'Ask Follow-up',
       askFollowUpDescription: 'Continue to ask based on the current node content',
       moreOptions: 'More Options',
@@ -732,7 +746,8 @@ const translations = {
       compactMode: 'Compact Mode',
       compactModeDescription: 'Compact mode, smaller node spacing',
       adaptiveMode: 'Adaptive Mode',
-      adaptiveModeDescription: 'Adaptive mode, node spacing automatically adjusts according to the canvas size',
+      adaptiveModeDescription:
+        'Adaptive mode, node spacing automatically adjusts according to the canvas size',
       selectCluster: 'Select Sub Nodes',
       selectClusterDescription: 'Select all sub-nodes of the selected node',
       groupCluster: 'Group Sub Nodes',
@@ -896,7 +911,8 @@ const translations = {
       document: 'Documents',
       newDocument: 'Create New Document',
       placeholderForHome: 'Search for canvases, documents, or resources...',
-      placeholderForSkillExecute: 'Enter the question you want to ask and execute the skill based on this question',
+      placeholderForSkillExecute:
+        'Enter the question you want to ask and execute the skill based on this question',
       placeholderForWeblink: 'Search {{domain}}...',
       home: {
         heading: 'Suggestions',
@@ -993,7 +1009,8 @@ const translations = {
     empty: {
       timelineTitle:
         'No new content read on {{year}}/{{month}}/{{day}}. Download the plugin to start exploring new content.',
-      archiveTitle: "You haven't read any content yet. Download the plugin to start exploring new material!",
+      archiveTitle:
+        "You haven't read any content yet. Download the plugin to start exploring new material!",
       download: 'Download Plugin',
       seeOther: 'View Knowledge from Other Dates',
     },
@@ -1009,7 +1026,8 @@ const translations = {
       messageCount: '{{count}} messages',
     },
     empty: {
-      title: 'No conversations at the moment. Download the plugin or visit the home page to ask a question!',
+      title:
+        'No conversations at the moment. Download the plugin or visit the home page to ask a question!',
       download: 'Download Plugin',
       goHome: 'Go to Home Page to Search or Ask a Question',
     },
@@ -1128,7 +1146,8 @@ const translations = {
       messageCount: '{{count}} messages',
     },
     empty: {
-      title: 'No conversations at the moment. Download the plugin or visit the home page to ask a question!',
+      title:
+        'No conversations at the moment. Download the plugin or visit the home page to ask a question!',
       download: 'Download Plugin',
       goHome: 'Go to Home Page to Search or Ask a Question',
     },
@@ -1204,7 +1223,8 @@ const translations = {
       },
       subscribe: {
         title: 'Choose the plan that suits you best',
-        subtitle: 'Subscribe to the annual plan to save 20%, and subscribe now to enjoy an additional 50% discount!',
+        subtitle:
+          'Subscribe to the annual plan to save 20%, and subscribe now to enjoy an additional 50% discount!',
         monthly: 'Monthly',
         yearly: 'Yearly',
         monthlyPlan: 'Monthly Auto-Renewal',
@@ -1478,7 +1498,8 @@ const translations = {
           title: 'Change Tone',
         },
         simplifyLanguage: {
-          prompt: 'Simplify the content while maintaining the same meaning in a way that a first grader can understand',
+          prompt:
+            'Simplify the content while maintaining the same meaning in a way that a first grader can understand',
           title: 'Simplify Language',
         },
         summary: {

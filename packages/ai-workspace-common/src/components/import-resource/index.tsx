@@ -15,7 +15,7 @@ import { useEffect } from 'react';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import MultilingualSearch from '@refly-packages/ai-workspace-common/modules/multilingual-search';
-import { TbClipboard, TbPlugConnected, TbWorldSearch } from 'react-icons/tb';
+import { TbClipboard, TbWorldSearch } from 'react-icons/tb';
 import { IconImportResource } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 const MenuItem = Menu.Item;
@@ -48,7 +48,14 @@ export const ImportResourceModal = () => {
       }}
       getPopupContainer={getPopupContainer}
       className="import-resource-modal"
-      style={{ height: '70%', minHeight: 500, maxHeight: 660, width: '65%', minWidth: '300px', maxWidth: '1050px' }}
+      style={{
+        height: '70%',
+        minHeight: 500,
+        maxHeight: 660,
+        width: '65%',
+        minWidth: '300px',
+        maxWidth: '1050px',
+      }}
     >
       <div className="import-resource-container">
         <Splitter>
@@ -58,7 +65,9 @@ export const ImportResourceModal = () => {
                 <div className="left-panel-header">
                   <div className="left-panel-header-title">
                     <IconImportResource className="text-2xl" />
-                    <span className="left-panel-header-title-text">{t('resource.import.title')}</span>
+                    <span className="left-panel-header-title-text">
+                      {t('resource.import.title')}
+                    </span>
                   </div>
                   <Divider style={{ margin: '12px 0' }} />
                   <Menu
@@ -92,9 +101,15 @@ export const ImportResourceModal = () => {
           </Splitter.Panel>
           <Splitter.Panel collapsible={false} resizable={false}>
             <div className="import-resource-right-panel">
-              {importResourceStore.selectedMenuItem === 'import-from-weblink' ? <ImportFromWeblink /> : null}
-              {importResourceStore.selectedMenuItem === 'import-from-paste-text' ? <ImportFromText /> : null}
-              {importResourceStore.selectedMenuItem === 'import-from-web-search' ? <MultilingualSearch /> : null}
+              {importResourceStore.selectedMenuItem === 'import-from-weblink' ? (
+                <ImportFromWeblink />
+              ) : null}
+              {importResourceStore.selectedMenuItem === 'import-from-paste-text' ? (
+                <ImportFromText />
+              ) : null}
+              {importResourceStore.selectedMenuItem === 'import-from-web-search' ? (
+                <MultilingualSearch />
+              ) : null}
             </div>
           </Splitter.Panel>
         </Splitter>

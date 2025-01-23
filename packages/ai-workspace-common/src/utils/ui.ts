@@ -1,6 +1,9 @@
 import { getRuntime } from './env';
 
-export const calcPopupPosition = (rect: DOMRect, barDimesion: { barWidth: number; barHeight: number }) => {
+export const calcPopupPosition = (
+  rect: DOMRect,
+  barDimesion: { barWidth: number; barHeight: number },
+) => {
   const { barHeight, barWidth } = barDimesion;
   let top = 0;
   let left = 0;
@@ -64,5 +67,7 @@ export const getExtensionPopupContainer = () => {
 };
 
 export const getPopupContainer = () => {
-  return ['web', 'extension-sidepanel'].includes(getRuntime()) ? getWebPopupContainer() : getExtensionPopupContainer();
+  return ['web', 'extension-sidepanel'].includes(getRuntime())
+    ? getWebPopupContainer()
+    : getExtensionPopupContainer();
 };

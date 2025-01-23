@@ -1,8 +1,8 @@
-export const enum IENV {
-  PRODUCTION = "production",
-  STAGING = "staging",
-  TEST = "test",
-  DEVELOPMENT = "development",
+export enum IENV {
+  PRODUCTION = 'production',
+  STAGING = 'staging',
+  TEST = 'test',
+  DEVELOPMENT = 'development',
 }
 
 export const getEnv = () => {
@@ -17,48 +17,44 @@ export class ReflyEnv {
   }
   async tryGetTab(t) {
     try {
-      return await browser.tabs.get(parseInt(t));
+      return await browser.tabs.get(Number.parseInt(t));
     } catch {
       return null;
     }
   }
   getOsType() {
-    let t = navigator.userAgent,
+    const t = navigator.userAgent,
       n = navigator.platform,
-      a = ["Macintosh", "MacIntel", "MacPPC", "Mac68K", "macOS"],
-      i = ["Win32", "Win64", "Windows", "WinCE"],
-      s = ["iPhone", "iPad", "iPod"];
+      a = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K', 'macOS'],
+      i = ['Win32', 'Win64', 'Windows', 'WinCE'],
+      s = ['iPhone', 'iPad', 'iPod'];
     return a.indexOf(n) !== -1
-      ? "OSX"
+      ? 'OSX'
       : s.indexOf(n) !== -1
-      ? "IOS"
-      : i.indexOf(n) !== -1
-      ? "Windows"
-      : /Android/.test(t)
-      ? "Android"
-      : /Linux/.test(n)
-      ? "Linux"
-      : (console.error(
-          "unable to detect os type, use Windows as default",
-          n,
-          t
-        ),
-        "Windows");
+        ? 'IOS'
+        : i.indexOf(n) !== -1
+          ? 'Windows'
+          : /Android/.test(t)
+            ? 'Android'
+            : /Linux/.test(n)
+              ? 'Linux'
+              : (console.error('unable to detect os type, use Windows as default', n, t),
+                'Windows');
   }
   isChrome() {
-    let t = navigator.userAgent,
-      n = t.includes("Chrome") && t.includes("Safari"),
-      a = t.includes("Edg"),
-      i = t.includes("OPR");
+    const t = navigator.userAgent,
+      n = t.includes('Chrome') && t.includes('Safari'),
+      a = t.includes('Edg'),
+      i = t.includes('OPR');
     return n && !a && !i;
   }
 
   getDefaultShortcutKey() {
-    return "b";
+    return 'b';
   }
 
   getDefaultSendShortcutKey() {
-    return "enter";
+    return 'enter';
   }
 }
 

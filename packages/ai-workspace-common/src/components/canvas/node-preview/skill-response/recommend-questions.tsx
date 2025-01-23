@@ -24,7 +24,9 @@ const RecommendQuestionsComponent = ({ relatedQuestions }: RecommendQuestionsPro
   return (
     <div className="mt-4">
       <div>
-        <p className="text-xs font-medium text-black/50 mb-1">{t('copilot.message.relatedQuestion')}</p>
+        <p className="text-xs font-medium text-black/50 mb-1">
+          {t('copilot.message.relatedQuestion')}
+        </p>
       </div>
       <div className="flex flex-col gap-1">
         {relatedQuestions.map((item, index) => (
@@ -33,7 +35,9 @@ const RecommendQuestionsComponent = ({ relatedQuestions }: RecommendQuestionsPro
             className="flex flex-row items-center justify-between rounded-lg transition-colors duration-200 hover:cursor-pointer group"
             onClick={() => handleQuestionClick(item)}
           >
-            <p className="text-xs text-teal-600 group-hover:text-teal-600 transition-colors duration-200">{item}</p>
+            <p className="text-xs text-teal-600 group-hover:text-teal-600 transition-colors duration-200">
+              {item}
+            </p>
           </div>
         ))}
       </div>

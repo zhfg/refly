@@ -67,7 +67,10 @@ const LogBox = memo(
         })}
       >
         {collapsed ? (
-          <div className="text-gray-500 text-sm flex items-center justify-between" onClick={() => onCollapse(false)}>
+          <div
+            className="text-gray-500 text-sm flex items-center justify-between"
+            onClick={() => onCollapse(false)}
+          >
             <div>
               <IconCheckCircle /> {t('canvas.skillResponse.stepCompleted')}
             </div>
@@ -254,7 +257,8 @@ export const ActionStepCard = memo(
             <IconCheck className="h-4 w-4 text-green-500" />
           )}
           {t('canvas.skillResponse.stepTitle', { index })}{' '}
-          {' · ' + t(`${skillName}.steps.${step.name}.name`, { ns: 'skill', defaultValue: step.name })}
+          {' · ' +
+            t(`${skillName}.steps.${step.name}.name`, { ns: 'skill', defaultValue: step.name })}
         </div>
 
         {logs?.length > 0 && (
@@ -281,7 +285,11 @@ export const ActionStepCard = memo(
         )}
 
         {step.artifacts?.map((artifact) => (
-          <ArtifactItem key={artifact.entityId} artifact={artifact} onSelect={() => handleArtifactSelect(artifact)} />
+          <ArtifactItem
+            key={artifact.entityId}
+            artifact={artifact}
+            onSelect={() => handleArtifactSelect(artifact)}
+          />
         ))}
 
         <RecommendQuestions relatedQuestions={parsedData.recommendedQuestions?.questions || []} />

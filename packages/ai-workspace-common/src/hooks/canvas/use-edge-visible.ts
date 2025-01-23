@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
+import { useCanvasStoreShallow } from '../../stores/canvas';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
 
 export const useEdgeVisible = () => {

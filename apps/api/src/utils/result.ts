@@ -26,7 +26,7 @@ export class ResultAggregator {
   /**
    * Whether the skill invocation is aborted
    */
-  private aborted: boolean = false;
+  private aborted = false;
 
   private getOrInitData(step: string): StepData {
     if (!step) {

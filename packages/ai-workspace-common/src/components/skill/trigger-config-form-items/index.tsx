@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 // components
 import { useTranslation } from 'react-i18next';
 
-import { Collapse, Modal, Form, Input, Message, Select, DatePicker } from '@arco-design/web-react';
+import { Form, Input, Select, DatePicker } from '@arco-design/web-react';
 import { FormHeader } from '@refly-packages/ai-workspace-common/components/skill/form-header';
 
 const FormItem = Form.Item;
@@ -23,7 +23,12 @@ export const TriggerConfigFormItems = (props: {
 
   return (
     <>
-      <FormHeader title={headerTitle} enableCollapse collapsed={collapsed} onCollapseChange={setCollapsed} />
+      <FormHeader
+        title={headerTitle}
+        enableCollapse
+        collapsed={collapsed}
+        onCollapseChange={setCollapsed}
+      />
       {!collapsed && (
         <>
           <FormItem
@@ -33,7 +38,11 @@ export const TriggerConfigFormItems = (props: {
             field="displayName"
             rules={[{ required: true, message: t('skill.newTriggerModal.namePlaceholder') }]}
           >
-            <Input placeholder={t('skill.newTriggerModal.namePlaceholder')} maxLength={50} showWordLimit />
+            <Input
+              placeholder={t('skill.newTriggerModal.namePlaceholder')}
+              maxLength={50}
+              showWordLimit
+            />
           </FormItem>
 
           <FormItem
@@ -67,7 +76,9 @@ export const TriggerConfigFormItems = (props: {
                 label={t('skill.newTriggerModal.timerConfig')}
                 required
                 field="timerConfig.datetime"
-                rules={[{ required: true, message: t('skill.newTriggerModal.timerConfigPlaceholder') }]}
+                rules={[
+                  { required: true, message: t('skill.newTriggerModal.timerConfigPlaceholder') },
+                ]}
               >
                 <DatePicker
                   showTime={{
@@ -83,7 +94,11 @@ export const TriggerConfigFormItems = (props: {
                 label={t('skill.newTriggerModal.repeatInterval')}
                 field="timerConfig.repeatInterval"
               >
-                <Select allowClear size="large" placeholder={t('skill.newTriggerModal.repeatIntervalPlaceholder')}>
+                <Select
+                  allowClear
+                  size="large"
+                  placeholder={t('skill.newTriggerModal.repeatIntervalPlaceholder')}
+                >
                   {repeatInterval.map((item) => {
                     return (
                       <Option key={item} value={item}>

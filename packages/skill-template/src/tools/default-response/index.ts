@@ -1,4 +1,4 @@
-import { StructuredTool, Tool } from '@langchain/core/tools';
+import { StructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
 
 import { BaseToolParams } from '../../base';

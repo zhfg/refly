@@ -6,11 +6,13 @@ import classNames from 'classnames';
 import { Command } from 'cmdk';
 
 import { Home } from './home';
-import { RenderItem } from './type';
 import { getContextItemIcon } from '../../utils/icon';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { IconRefresh } from '@arco-design/web-react/icon';
-import { IContextItem, useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import {
+  IContextItem,
+  useContextPanelStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 
 import './index.scss';
@@ -29,7 +31,14 @@ export interface BaseMarkContextSelectorProps
     CustomProps {}
 
 export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => {
-  const { onClickOutside, onSearchValueChange, onClose, onSelect, selectedItems = [], ...divProps } = props;
+  const {
+    onClickOutside,
+    onSearchValueChange,
+    onClose,
+    onSelect,
+    selectedItems = [],
+    ...divProps
+  } = props;
 
   const [searchValue, setSearchValue] = useState('');
   const [activeValue, setActiveValue] = useState('');
@@ -72,7 +81,9 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
   const sortedItems: IContextItem[] = [
     ...(selectedItems || []),
     ...(
-      targetNodes?.filter((node) => !selectedItems.some((selected) => selected.entityId === node.data?.entityId)) || []
+      targetNodes?.filter(
+        (node) => !selectedItems.some((selected) => selected.entityId === node.data?.entityId),
+      ) || []
     ).map((node) => ({
       title:
         node?.type === 'memo'
@@ -89,12 +100,15 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
   // Memoize the filtered and sorted nodes to prevent unnecessary recalculations
   const processedNodes = useMemo(() => {
     const filteredItems =
-      sortedItems?.filter((item) => item?.title?.toLowerCase().includes(searchValue.toLowerCase())) ?? [];
+      sortedItems?.filter((item) =>
+        item?.title?.toLowerCase().includes(searchValue.toLowerCase()),
+      ) ?? [];
 
     return [
       ...(selectedItems ?? []),
-      ...(filteredItems?.filter((item) => !selectedItems?.some((selected) => selected?.entityId === item?.entityId)) ??
-        []),
+      ...(filteredItems?.filter(
+        (item) => !selectedItems?.some((selected) => selected?.entityId === item?.entityId),
+      ) ?? []),
     ];
   }, [sortedItems, searchValue, selectedItems]);
 

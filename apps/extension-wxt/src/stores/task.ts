@@ -1,8 +1,8 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-import type {} from "@redux-devtools/extension";
-import { TASK_TYPE, type Conversation, type Task } from "@/types";
-import { ConversationOperation } from "@/types";
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type {} from '@redux-devtools/extension';
+import { type Conversation, type Task } from '@/types';
+import { ConversationOperation } from '@/types';
 
 interface TaskState {
   // state
@@ -15,7 +15,7 @@ interface TaskState {
   setConversationList: (conversationList: Conversation[]) => void;
   updateConversation: (
     operationType: ConversationOperation,
-    payload: Partial<Conversation>
+    payload: Partial<Conversation>,
   ) => void;
   setTask: (task: Task) => void;
 }
@@ -25,21 +25,17 @@ export const useTaskStore = create<TaskState>()(
     conversationList: [],
     task: null,
 
-    setConversationList: (val: Conversation[]) =>
-      set({ conversationList: val }),
-    updateConversation: (
-      operationType: ConversationOperation,
-      payload: Partial<Conversation>
-    ) =>
+    setConversationList: (val: Conversation[]) => set({ conversationList: val }),
+    updateConversation: (operationType: ConversationOperation, payload: Partial<Conversation>) =>
       set((state) => {
         const conversationList = state.conversationList;
         let newConversationList = conversationList;
 
         switch (operationType) {
           case ConversationOperation.CREATE: {
-            const { title = "新会话", origin, originPageTitle } = payload;
+            const { title = '新会话', origin, originPageTitle } = payload;
             const newConversation = {
-              title: title ?? "新会话",
+              title: title ?? '新会话',
               origin,
               originPageTitle,
               createdAt: new Date().getTime() as number,
@@ -55,9 +51,7 @@ export const useTaskStore = create<TaskState>()(
 
           case ConversationOperation.DELETE: {
             const { convId } = payload;
-            const newConversationList = conversationList.filter(
-              (item) => item.convId !== convId
-            );
+            const newConversationList = conversationList.filter((item) => item.convId !== convId);
 
             break;
           }
@@ -82,5 +76,5 @@ export const useTaskStore = create<TaskState>()(
         };
       }),
     setTask: (val: Task) => set((state) => ({ ...state, task: val })),
-  }))
+  })),
 );

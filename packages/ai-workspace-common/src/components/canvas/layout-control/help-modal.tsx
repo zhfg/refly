@@ -1,5 +1,5 @@
-import React, { memo, useEffect, useState } from 'react';
-import { Modal, Button, Space } from 'antd';
+import { memo, useEffect, useState } from 'react';
+import { Modal, Button } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
@@ -81,7 +81,9 @@ export const HelpModal = memo(({ visible, onClose }: HelpModalProps) => {
           {isLoading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 z-50 rounded-[20px]">
               <Spin className="w-6 h-6" />
-              <div className="text-gray-600 text-sm mt-2">{t('canvas.toolbar.interativeTutorialLoading')}</div>
+              <div className="text-gray-600 text-sm mt-2">
+                {t('canvas.toolbar.interativeTutorialLoading')}
+              </div>
             </div>
           )}
           <div
@@ -114,7 +116,10 @@ export const HelpModal = memo(({ visible, onClose }: HelpModalProps) => {
       </div>
 
       <div className="flex justify-end gap-2 mt-auto">
-        <Button icon={isFullscreen ? <RiFullscreenExitFill /> : <RiFullscreenFill />} onClick={toggleFullscreen}>
+        <Button
+          icon={isFullscreen ? <RiFullscreenExitFill /> : <RiFullscreenFill />}
+          onClick={toggleFullscreen}
+        >
           {t(isFullscreen ? 'canvas.toolbar.exitFullscreen' : 'canvas.toolbar.enterFullscreen')}
         </Button>
         <Button type="primary" onClick={handleComplete}>

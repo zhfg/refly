@@ -5,7 +5,11 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+} from '@refly-packages/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -28,7 +32,9 @@ export class BrainstormIdeasSkill extends BaseSkill {
 
   invocationConfig: SkillInvocationConfig = {
     context: {
-      rules: [{ key: 'contentList', limit: 1, preferredSelectionKeys: ['documentCursorSelection'] }],
+      rules: [
+        { key: 'contentList', limit: 1, preferredSelectionKeys: ['documentCursorSelection'] },
+      ],
     },
   };
 
@@ -89,7 +95,9 @@ Please analyze the language of the provided context and ensure that your respons
 `;
 
     const contextString =
-      contentList.length > 0 ? contentList.map((item) => item?.content).join('\n') : 'No additional context provided.';
+      contentList.length > 0
+        ? contentList.map((item) => item?.content).join('\n')
+        : 'No additional context provided.';
 
     const prompt = systemPrompt.replace('{context}', contextString);
 

@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Typography, Radio, Space, Button, Steps } from 'antd';
+import { Modal, Typography, Radio, Button, Steps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { UILocaleList } from '../ui-locale-list';
 import { OutputLocaleList } from '../output-locale-list';
 import { IconDown } from '@arco-design/web-react/icon';
 import { localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
-import { IconMouse, IconTouchpad } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconMouse,
+  IconTouchpad,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { LuShipWheel } from 'react-icons/lu';
 import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { LOCALE } from '@refly/common-types';
@@ -42,13 +45,18 @@ export const SettingsGuideModal = React.memo(() => {
     }
   };
 
-  const [canvasMode, setCanvasMode] = useState<'mouse' | 'touchpad'>(localSettings?.canvasMode || 'mouse');
+  const [canvasMode, setCanvasMode] = useState<'mouse' | 'touchpad'>(
+    localSettings?.canvasMode || 'mouse',
+  );
   const [finishedOnboardingSettings, setFinishedOnboardingSettings] = useState<boolean>(false);
   const [shouldShowTourModal, setShouldShowTourModal] = useState<boolean>(false);
 
   const { mutate: updateUserSettings } = useUpdateSettings();
 
-  const handleSetOnboardingSettingStatus = (status: 'skipped' | 'completed', operationMode?: 'mouse' | 'touchpad') => {
+  const handleSetOnboardingSettingStatus = (
+    status: 'skipped' | 'completed',
+    operationMode?: 'mouse' | 'touchpad',
+  ) => {
     const settings = finishedOnboardingSettings ? userProfile?.onboarding?.settings : status;
     const preferences =
       status === 'skipped'
@@ -100,7 +108,9 @@ export const SettingsGuideModal = React.memo(() => {
   };
 
   useEffect(() => {
-    setFinishedOnboardingSettings(['skipped', 'completed'].includes(userProfile?.onboarding?.settings));
+    setFinishedOnboardingSettings(
+      ['skipped', 'completed'].includes(userProfile?.onboarding?.settings),
+    );
   }, [userProfile?.onboarding?.settings]);
 
   useEffect(() => {
@@ -109,7 +119,8 @@ export const SettingsGuideModal = React.memo(() => {
 
   useEffect(() => {
     setShouldShowTourModal(
-      !finishedOnboardingSettings && !['skipped', 'completed'].includes(userProfile?.onboarding?.tour),
+      !finishedOnboardingSettings &&
+        !['skipped', 'completed'].includes(userProfile?.onboarding?.tour),
     );
   }, [finishedOnboardingSettings, userProfile?.onboarding?.tour]);
 
@@ -148,7 +159,11 @@ export const SettingsGuideModal = React.memo(() => {
       title: t('canvas.operationMode.title'),
       description: (
         <div className="mt-2">
-          <Radio.Group value={canvasMode} onChange={(e) => setCanvasMode(e.target.value)} className="w-full flex gap-4">
+          <Radio.Group
+            value={canvasMode}
+            onChange={(e) => setCanvasMode(e.target.value)}
+            className="w-full flex gap-4"
+          >
             <Radio.Button
               value="mouse"
               onClick={() => setStepTo(3)}
@@ -157,8 +172,12 @@ export const SettingsGuideModal = React.memo(() => {
               <div className="flex items-start gap-3">
                 <IconMouse className="text-2xl pt-1" />
                 <div className="flex-1">
-                  <div className="text-base font-medium mb-1">{t('canvas.operationMode.mouse')}</div>
-                  <div className="text-sm text-gray-500 leading-5">{t('canvas.operationMode.mouseDesc')}</div>
+                  <div className="text-base font-medium mb-1">
+                    {t('canvas.operationMode.mouse')}
+                  </div>
+                  <div className="text-sm text-gray-500 leading-5">
+                    {t('canvas.operationMode.mouseDesc')}
+                  </div>
                 </div>
               </div>
             </Radio.Button>
@@ -170,8 +189,12 @@ export const SettingsGuideModal = React.memo(() => {
               <div className="flex items-start gap-3">
                 <IconTouchpad className="text-2xl pt-1" />
                 <div className="flex-1">
-                  <div className="text-base font-medium mb-1">{t('canvas.operationMode.touchpad')}</div>
-                  <div className="text-sm text-gray-500 leading-5">{t('canvas.operationMode.touchpadDesc')}</div>
+                  <div className="text-base font-medium mb-1">
+                    {t('canvas.operationMode.touchpad')}
+                  </div>
+                  <div className="text-sm text-gray-500 leading-5">
+                    {t('canvas.operationMode.touchpadDesc')}
+                  </div>
                 </div>
               </div>
             </Radio.Button>

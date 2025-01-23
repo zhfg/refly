@@ -1,8 +1,8 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-import type {} from "@redux-devtools/extension";
-import type { Mode } from "@/types";
-import { modeList } from "@/utils/quick-action";
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type {} from '@redux-devtools/extension';
+import type { Mode } from '@/types';
+import { modeList } from '@/utils/quick-action';
 
 interface BarPosition {
   top?: number;
@@ -31,7 +31,7 @@ interface QuickActionState {
 }
 
 const defaultState = {
-  selectedText: "",
+  selectedText: '',
   toolbarVisible: false,
   currentMode: modeList[0],
   defaultMode: modeList[0],
@@ -55,5 +55,5 @@ export const useQuickActionStore = create<QuickActionState>()(
     setCurrentMode: (val: Mode) => set({ currentMode: val }),
     setDefaultMode: (val: Mode) => set({ defaultMode: val }),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
-  }))
+  })),
 );

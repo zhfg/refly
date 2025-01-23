@@ -21,7 +21,12 @@ function ATag({ ...props }, sources: Source[]) {
     }
 
     return (
-      <a href={props.href} target="_blank" rel="noopener noreferrer" className="no-underline text-[#00968F]">
+      <a
+        href={props.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="no-underline text-[#00968F]"
+      >
         {props.children}
       </a>
     );
@@ -42,7 +47,9 @@ function ATag({ ...props }, sources: Source[]) {
           style={{ backgroundColor: '#fff' }}
           className="flex flex-col gap-2 max-w-screen-md text-xs ring-4 shadow-transparent ring-zinc-50"
         >
-          <div className="overflow-hidden font-medium whitespace-normal break-words">{source.title}</div>
+          <div className="overflow-hidden font-medium whitespace-normal break-words">
+            {source.title}
+          </div>
           <div className="flex gap-4">
             <div className="flex-1 w-full">
               <div className="break-words line-clamp-4 text-zinc-500 whitespace-normal text-wrap overflow-y-auto">
@@ -54,7 +61,13 @@ function ATag({ ...props }, sources: Source[]) {
           <div className="flex gap-2 items-center">
             <div className="overflow-hidden flex-1">
               <div className="overflow-hidden text-blue-500 whitespace-normal break-words">
-                <a title={source?.title} href={source?.url} target="_blank" className="no-underline text-[#00968F]">
+                <a
+                  title={source?.title}
+                  href={source?.url}
+                  target="_blank"
+                  className="no-underline text-[#00968F]"
+                  rel="noreferrer"
+                >
                   {source?.url}
                 </a>
               </div>

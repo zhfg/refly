@@ -36,8 +36,6 @@ Regular exercise provides numerous health benefits, including improved cardiovas
   `;
 };
 
-
-
 export const buildWebSearchChatHistoryExamples = () => {
   return `
   ## Examples with Chat History
@@ -140,4 +138,3 @@ export const buildWebSearchChatHistoryExamples = () => {
   - Custom rate limits available for premium clients
   `;
 };
-  

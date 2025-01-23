@@ -1,8 +1,8 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-import type {} from "@redux-devtools/extension";
-import type { Conversation } from "@/types";
-import { ConversationOperation } from "@/types";
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import type {} from '@redux-devtools/extension';
+import type { Conversation } from '@/types';
+import { ConversationOperation } from '@/types';
 
 interface ConversationState {
   // state
@@ -14,7 +14,7 @@ interface ConversationState {
   setCurrentConversation: (val: Conversation) => void;
   updateConversation: (
     operationType: ConversationOperation,
-    payload: Partial<Conversation>
+    payload: Partial<Conversation>,
   ) => void;
 }
 
@@ -23,23 +23,18 @@ export const useConversationStore = create<ConversationState>()(
     currentConversation: null,
     conversationList: [],
 
-    setConversationList: (val: Conversation[]) =>
-      set({ conversationList: val }),
-    setCurrentConversation: (val: Conversation) =>
-      set({ currentConversation: val }),
-    updateConversation: (
-      operationType: ConversationOperation,
-      payload: Partial<Conversation>
-    ) =>
+    setConversationList: (val: Conversation[]) => set({ conversationList: val }),
+    setCurrentConversation: (val: Conversation) => set({ currentConversation: val }),
+    updateConversation: (operationType: ConversationOperation, payload: Partial<Conversation>) =>
       set((state) => {
         const conversationList = state.conversationList;
         let newConversationList = conversationList;
 
         switch (operationType) {
           case ConversationOperation.CREATE: {
-            const { title = "新会话", origin, originPageTitle } = payload;
+            const { title = '新会话', origin, originPageTitle } = payload;
             const newConversation = {
-              title: title ?? "新会话",
+              title: title ?? '新会话',
               origin,
               originPageTitle,
               createdAt: new Date().getTime() as number,
@@ -55,9 +50,7 @@ export const useConversationStore = create<ConversationState>()(
 
           case ConversationOperation.DELETE: {
             const { convId } = payload;
-            const newConversationList = conversationList.filter(
-              (item) => item.convId !== convId
-            );
+            const newConversationList = conversationList.filter((item) => item.convId !== convId);
 
             break;
           }
@@ -81,5 +74,5 @@ export const useConversationStore = create<ConversationState>()(
           conversationList: newConversationList,
         };
       }),
-  }))
+  })),
 );

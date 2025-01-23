@@ -85,18 +85,20 @@ export const SearchList = (props: SearchListProps) => {
     ...selectProps
   } = props;
 
-  const { loadMore, dataList, isRequesting, handleValueChange, resetState, hasMore } = useFetchOrSearchList({
-    domain,
-    fetchData,
-    pageSize: 20,
-  });
+  const { loadMore, dataList, isRequesting, handleValueChange, resetState, hasMore } =
+    useFetchOrSearchList({
+      domain,
+      fetchData,
+      pageSize: 20,
+    });
 
   const [value, setValue] = useState<any>(defaultValue);
   const [selectedItems, setSelectedItems] = useState<ContextItem[]>([]);
 
   const sortedItems: ContextItem[] = [
     ...selectedItems,
-    ...(dataList?.filter((item) => !selectedItems.some((selected) => selected.id === item.id)) || []),
+    ...(dataList?.filter((item) => !selectedItems.some((selected) => selected.id === item.id)) ||
+      []),
   ].map((item) => ({
     ...item,
     isSelected: selectedItems.some((selected) => selected.id === item.id),
@@ -148,7 +150,10 @@ export const SearchList = (props: SearchListProps) => {
   };
 
   const renderItemIcon = (option: ContextItem) => {
-    const IconComponent = getDomainIcon(domain as SearchDomain, option.metadata) as React.ComponentType<{
+    const IconComponent = getDomainIcon(
+      domain as SearchDomain,
+      option.metadata,
+    ) as React.ComponentType<{
       className?: string;
     }>;
     const backgroundColor = DOMAIN_COLORS[domain as SearchDomain];
@@ -187,7 +192,10 @@ export const SearchList = (props: SearchListProps) => {
             placeholder={t('canvas.contextList.placeholder', { domain: t(`common.${domain}`) })}
             onChange={(e) => handleSearchValueChange(e.target.value)}
           />
-          <div className="flex flex-col w-[260px] h-[200px] overflow-y-auto" onScroll={handlePopupScroll}>
+          <div
+            className="flex flex-col w-[260px] h-[200px] overflow-y-auto"
+            onScroll={handlePopupScroll}
+          >
             {sortedItems?.map((option) => (
               <div
                 key={option.id}

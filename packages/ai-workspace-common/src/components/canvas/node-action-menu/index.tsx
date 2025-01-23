@@ -22,14 +22,16 @@ import {
   FilePlus,
   Ungroup,
   Group,
-  MoveVertical,
   Target,
   Layout,
   Edit,
 } from 'lucide-react';
 import { GrClone } from 'react-icons/gr';
 import { locateToNodePreviewEmitter } from '@refly-packages/ai-workspace-common/events/locateToNodePreview';
-import { nodeActionEmitter, createNodeEventName } from '@refly-packages/ai-workspace-common/events/nodeActions';
+import {
+  nodeActionEmitter,
+  createNodeEventName,
+} from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
@@ -82,7 +84,9 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
 
   const node = useMemo(() => getNode(nodeId) as CanvasNode, [nodeId, getNode]);
   const nodeData = useMemo(() => node?.data, [node]);
-  const [localSizeMode, setLocalSizeMode] = useState(() => nodeData?.metadata?.sizeMode || 'adaptive');
+  const [localSizeMode, setLocalSizeMode] = useState(
+    () => nodeData?.metadata?.sizeMode || 'adaptive',
+  );
 
   const [cloneAskAIRunning, setCloneAskAIRunning] = useState(false);
 
@@ -319,7 +323,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
               hoverContent: {
                 title: t('canvas.nodeActions.cloneAskAI'),
                 description: t('canvas.nodeActions.cloneAskAIDescription'),
-                videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-cloneAskAI.webm',
+                videoUrl:
+                  'https://static.refly.ai/onboarding/nodeAction/nodeAction-cloneAskAI.webm',
               },
             },
             {
@@ -379,12 +384,17 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
       {
         key: 'toggleSizeMode',
         icon: localSizeMode === 'compact' ? IconExpand : IconShrink,
-        label: localSizeMode === 'compact' ? t('canvas.nodeActions.adaptiveMode') : t('canvas.nodeActions.compactMode'),
+        label:
+          localSizeMode === 'compact'
+            ? t('canvas.nodeActions.adaptiveMode')
+            : t('canvas.nodeActions.compactMode'),
         onClick: handleToggleSizeMode,
         type: 'button' as const,
         hoverContent: {
           title:
-            localSizeMode === 'compact' ? t('canvas.nodeActions.adaptiveMode') : t('canvas.nodeActions.compactMode'),
+            localSizeMode === 'compact'
+              ? t('canvas.nodeActions.adaptiveMode')
+              : t('canvas.nodeActions.compactMode'),
           description:
             localSizeMode === 'compact'
               ? t('canvas.nodeActions.adaptiveModeDescription')
@@ -408,7 +418,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           hoverContent: {
             title: t('canvas.nodeActions.insertToDoc'),
             description: t('canvas.nodeActions.insertToDocDescription'),
-            videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-insertDocument.webm',
+            videoUrl:
+              'https://static.refly.ai/onboarding/nodeAction/nodeAction-insertDocument.webm',
           },
         },
       ],
@@ -422,7 +433,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           hoverContent: {
             title: t('canvas.nodeActions.ungroup'),
             description: t('canvas.nodeActions.ungroupDescription'),
-            videoUrl: 'https://static.refly.ai/onboarding/selection-node-action/selection-nodeAction-ungroup.webm',
+            videoUrl:
+              'https://static.refly.ai/onboarding/selection-node-action/selection-nodeAction-ungroup.webm',
           },
         },
       ],
@@ -451,7 +463,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           hoverContent: {
             title: t('canvas.nodeActions.insertToDoc'),
             description: t('canvas.nodeActions.insertToDocDescription'),
-            videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-insertDocument.webm',
+            videoUrl:
+              'https://static.refly.ai/onboarding/nodeAction/nodeAction-insertDocument.webm',
           },
         },
         nodeData?.contentPreview
@@ -464,7 +477,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
               hoverContent: {
                 title: t('canvas.nodeStatus.createDocument'),
                 description: t('canvas.nodeActions.createDocumentDescription'),
-                videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-createDocument.webm',
+                videoUrl:
+                  'https://static.refly.ai/onboarding/nodeAction/nodeAction-createDocument.webm',
               },
             }
           : null,
@@ -485,7 +499,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
                     hoverContent: {
                       title: t('canvas.nodeActions.duplicateDocument'),
                       description: t('canvas.nodeActions.duplicateDocumentDescription'),
-                      videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-duplicateDocument.webm',
+                      videoUrl:
+                        'https://static.refly.ai/onboarding/nodeAction/nodeAction-duplicateDocument.webm',
                     },
                   },
                 ]
@@ -499,7 +514,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
               hoverContent: {
                 title: t('canvas.nodeActions.createMemo'),
                 description: t('canvas.nodeActions.createMemoDescription'),
-                videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-createEmptyMemo.webm',
+                videoUrl:
+                  'https://static.refly.ai/onboarding/nodeAction/nodeAction-createEmptyMemo.webm',
               },
             },
             {
@@ -511,7 +527,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
               hoverContent: {
                 title: t('canvas.nodeActions.copy'),
                 description: t('canvas.nodeActions.copyDescription'),
-                videoUrl: 'https://static.refly.ai/onboarding/nodeAction/nodeAction-copyContent.webm',
+                videoUrl:
+                  'https://static.refly.ai/onboarding/nodeAction/nodeAction-copyContent.webm',
               },
             },
             { type: 'divider' },
@@ -608,7 +625,9 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
 
     return [
       ...(nodeType !== 'skill' ? commonItems : []),
-      ...(nodeType !== 'memo' && nodeType !== 'skill' && nodeType !== 'group' ? operationItems : []),
+      ...(nodeType !== 'memo' && nodeType !== 'skill' && nodeType !== 'group'
+        ? operationItems
+        : []),
       ...(nodeTypeItems[nodeType] || []),
       ...(nodeType !== 'memo' && nodeType !== 'skill' ? clusterItems : []),
       { key: 'divider-2', type: 'divider' } as MenuItem,

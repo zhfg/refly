@@ -1,15 +1,4 @@
-import {
-  CheckSquare,
-  Code,
-  Heading1,
-  Heading2,
-  Heading3,
-  ImageIcon,
-  List,
-  ListOrdered,
-  Text,
-  TextQuote,
-} from 'lucide-react';
+import { CheckSquare, Code, Heading1, ImageIcon, List, Text, TextQuote } from 'lucide-react';
 import { createSuggestionItems, Command, renderItems } from '../core/extensions';
 import { createUploadFn } from './image-upload';
 import Magic from './ui/icons/magic';

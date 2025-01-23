@@ -9,7 +9,10 @@ import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hook
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/utils/notification';
 import { useActionResultStore } from '@refly-packages/ai-workspace-common/stores/action-result';
 import { aggregateTokenUsage, genActionResultID } from '@refly-packages/utils/index';
-import { CanvasNodeData, SkillNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import {
+  CanvasNodeData,
+  SkillNodeMeta,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { convertContextItemsToInvokeParams } from '@refly-packages/ai-workspace-common/utils/map-context-items';
 import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 import { useActionPolling } from './use-action-polling';
@@ -148,8 +151,12 @@ export const useInvokeAction = () => {
     }
 
     const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
-    const existingArtifacts = Array.isArray(updatedStep.artifacts) ? [...updatedStep.artifacts] : [];
-    const artifactIndex = existingArtifacts.findIndex((item) => item?.entityId === artifact?.entityId);
+    const existingArtifacts = Array.isArray(updatedStep.artifacts)
+      ? [...updatedStep.artifacts]
+      : [];
+    const artifactIndex = existingArtifacts.findIndex(
+      (item) => item?.entityId === artifact?.entityId,
+    );
 
     updatedStep.artifacts =
       artifactIndex !== -1
@@ -278,7 +285,15 @@ export const useInvokeAction = () => {
     payload.resultId ||= genActionResultID();
     payload.selectedSkill ||= { name: 'commonQnA' };
 
-    const { query, modelInfo, contextItems, selectedSkill, resultId, version = 0, tplConfig = {} } = payload;
+    const {
+      query,
+      modelInfo,
+      contextItems,
+      selectedSkill,
+      resultId,
+      version = 0,
+      tplConfig = {},
+    } = payload;
     const { context, resultHistory } = convertContextItemsToInvokeParams(
       contextItems,
       (item) =>

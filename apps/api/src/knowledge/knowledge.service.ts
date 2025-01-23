@@ -145,7 +145,7 @@ export class KnowledgeService {
     param.resourceId = genResourceID();
 
     let storageKey: string;
-    let storageSize: number = 0;
+    let storageSize = 0;
     let identifier: string;
     let indexStatus: IndexStatus = 'wait_parse';
 
@@ -249,8 +249,8 @@ export class KnowledgeService {
     const { resourceId, meta } = resource;
     const { url } = JSON.parse(meta) as ResourceMeta;
 
-    let content: string = '';
-    let title: string = '';
+    let content = '';
+    let title = '';
 
     if (url) {
       const { data } = await this.ragService.crawlFromRemoteReader(url);

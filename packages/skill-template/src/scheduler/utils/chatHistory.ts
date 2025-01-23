@@ -6,7 +6,11 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { SkillEngine } from '../../engine';
 
 // TODO: human/assistant message 在保存时需要生成一个 summary，用于之后的感知上下文历史的持续对话时保留核心含义
-export const getContextualQuestion = async (state: GraphState, config: SkillRunnableConfig, engine: SkillEngine) => {
+export const getContextualQuestion = async (
+  state: GraphState,
+  config: SkillRunnableConfig,
+  engine: SkillEngine,
+) => {
   const { query, messages } = state;
   const { locale = 'en' } = config?.configurable || {};
 

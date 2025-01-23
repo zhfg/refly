@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Divider, Layout } from 'antd';
+import { useEffect } from 'react';
+import { Layout } from 'antd';
 import { SearchBox } from './components/search-box';
 import { SearchProgress } from './components/search-progress';
 import { SearchResults } from './components/search-results';
@@ -15,16 +15,15 @@ const { Header, Content } = Layout;
 
 function MultilingualSearch() {
   const { t } = useTranslation();
-  const { isSearching, results, outputLocale, pageState, resetAll, setPageState } = useMultilingualSearchStoreShallow(
-    (state) => ({
+  const { isSearching, results, outputLocale, pageState, resetAll, setPageState } =
+    useMultilingualSearchStoreShallow((state) => ({
       isSearching: state.isSearching,
       results: state.results,
       outputLocale: state.outputLocale,
       pageState: state.pageState,
       resetAll: state.resetAll,
       setPageState: state.setPageState,
-    }),
-  );
+    }));
 
   // Cleanup on unmount
   useEffect(() => {
@@ -48,11 +47,15 @@ function MultilingualSearch() {
                 <span className="menu-item-icon">
                   <IconSearch />
                 </span>
-                <span className="intergration-header-title">{t('resource.import.fromWebSearch')}</span>
+                <span className="intergration-header-title">
+                  {t('resource.import.fromWebSearch')}
+                </span>
               </div>
               <span className="breadcrumb-separator">/</span>
               <div className="breadcrumb-item">
-                <span className="intergration-header-title">{t('resource.multilingualSearch.searchResults')}</span>
+                <span className="intergration-header-title">
+                  {t('resource.multilingualSearch.searchResults')}
+                </span>
               </div>
             </>
           ) : (
@@ -60,7 +63,9 @@ function MultilingualSearch() {
               <span className="menu-item-icon flex items-center justify-center">
                 <TbWorldSearch className="text-lg" />
               </span>
-              <span className="intergration-header-title">{t('resource.import.fromWebSearch')}</span>
+              <span className="intergration-header-title">
+                {t('resource.import.fromWebSearch')}
+              </span>
             </>
           )}
         </div>

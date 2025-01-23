@@ -1,13 +1,14 @@
-import React, { useMemo, useEffect } from 'react';
-import { Input, Select, Space, Divider } from 'antd';
-import { Search } from 'lucide-react';
+import { useMemo, useEffect } from 'react';
+import { Select, Space } from 'antd';
 import { useMultilingualSearchStoreShallow } from '../stores/multilingual-search';
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
-import { languageNameToLocale, localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
+import {
+  languageNameToLocale,
+  localeToLanguageName,
+} from '@refly-packages/ai-workspace-common/utils/i18n';
 
 import './search-options.scss';
-import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
 export const SearchOptions = () => {
   const { i18n, t } = useTranslation();
@@ -33,7 +34,8 @@ export const SearchOptions = () => {
 
   // 构建语言选项
   const languageOptions = useMemo(() => {
-    const languageMap = currentUiLocale === LOCALE.EN ? languageNameToLocale.en : languageNameToLocale['zh-CN'];
+    const languageMap =
+      currentUiLocale === LOCALE.EN ? languageNameToLocale.en : languageNameToLocale['zh-CN'];
 
     return Object.entries(languageMap).map(([label, code]) => ({
       label,
@@ -48,7 +50,8 @@ export const SearchOptions = () => {
 
   // 获取当前语言的显示名称
   const getLocaleName = (locale: string) => {
-    const names = currentUiLocale === LOCALE.EN ? localeToLanguageName.en : localeToLanguageName['zh-CN'];
+    const names =
+      currentUiLocale === LOCALE.EN ? localeToLanguageName.en : localeToLanguageName['zh-CN'];
     return names[locale] || locale;
   };
 
@@ -82,7 +85,9 @@ export const SearchOptions = () => {
           maxTagTextLength={10}
           maxTagPlaceholder={(omittedValues) => `+${omittedValues.length} more`}
           popupClassName="search-language-dropdown"
-          filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+          filterOption={(input, option) =>
+            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+          }
         />
       </div>
       <div className="select-group">
@@ -96,12 +101,19 @@ export const SearchOptions = () => {
           onChange={(value) => {
             multilingualSearchStore.setOutputLocale({
               code: value,
-              name: value === 'auto' ? (currentUiLocale === LOCALE.EN ? 'Auto' : '自动') : getLocaleName(value),
+              name:
+                value === 'auto'
+                  ? currentUiLocale === LOCALE.EN
+                    ? 'Auto'
+                    : '自动'
+                  : getLocaleName(value),
             });
           }}
           options={outputLanguageOptions}
           popupClassName="display-language-dropdown"
-          filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+          filterOption={(input, option) =>
+            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+          }
         />
       </div>
     </Space>

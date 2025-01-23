@@ -11,10 +11,12 @@ import { useContextFilterErrorTip } from './context-manager/hooks/use-context-fi
 import { genActionResultID } from '@refly-packages/utils/id';
 import { useLaunchpadStoreShallow } from '@refly-packages/ai-workspace-common/stores/launchpad';
 import { useChatStore, useChatStoreShallow } from '@refly-packages/ai-workspace-common/stores/chat';
-import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 
 import { SelectedSkillHeader } from './selected-skill-header';
-import { useSkillStore, useSkillStoreShallow } from '@refly-packages/ai-workspace-common/stores/skill';
+import {
+  useSkillStore,
+  useSkillStoreShallow,
+} from '@refly-packages/ai-workspace-common/stores/skill';
 import { ContextManager } from './context-manager';
 import { ConfigManager } from './config-manager';
 import { ChatActions, CustomAction } from './chat-actions';
@@ -35,7 +37,9 @@ const PremiumBanner = () => {
     showPremiumBanner: state.showPremiumBanner,
     setShowPremiumBanner: state.setShowPremiumBanner,
   }));
-  const setSubscribeModalVisible = useSubscriptionStoreShallow((state) => state.setSubscribeModalVisible);
+  const setSubscribeModalVisible = useSubscriptionStoreShallow(
+    (state) => state.setSubscribeModalVisible,
+  );
 
   if (!showPremiumBanner) return null;
 
@@ -46,9 +50,16 @@ const PremiumBanner = () => {
   return (
     <div className="flex items-center justify-between px-3 py-0.5 bg-gray-100 border-b">
       <div className="flex items-center justify-between gap-2 w-full">
-        <span className="text-xs text-gray-600 flex-1 whitespace-nowrap">{t('copilot.premiumBanner.message')}</span>
+        <span className="text-xs text-gray-600 flex-1 whitespace-nowrap">
+          {t('copilot.premiumBanner.message')}
+        </span>
         <div className="flex items-center gap-0.5">
-          <Button type="text" size="small" className="text-xs text-green-600 px-2" onClick={handleUpgrade}>
+          <Button
+            type="text"
+            size="small"
+            className="text-xs text-green-600 px-2"
+            onClick={handleUpgrade}
+          >
             {t('copilot.premiumBanner.upgrade')}
           </Button>
           <Button
@@ -77,11 +88,13 @@ export const ChatPanel = () => {
     selectedSkill: state.selectedSkill,
     setSelectedSkill: state.setSelectedSkill,
   }));
-  const { contextItems, setContextItems, filterErrorInfo } = useContextPanelStoreShallow((state) => ({
-    contextItems: state.contextItems,
-    setContextItems: state.setContextItems,
-    filterErrorInfo: state.filterErrorInfo,
-  }));
+  const { contextItems, setContextItems, filterErrorInfo } = useContextPanelStoreShallow(
+    (state) => ({
+      contextItems: state.contextItems,
+      setContextItems: state.setContextItems,
+      filterErrorInfo: state.filterErrorInfo,
+    }),
+  );
   const skillStore = useSkillStoreShallow((state) => ({
     selectedSkill: state.selectedSkill,
     setSelectedSkill: state.setSelectedSkill,
@@ -192,10 +205,12 @@ export const ChatPanel = () => {
     abortAction();
   };
 
-  const { setRecommendQuestionsOpen, recommendQuestionsOpen } = useLaunchpadStoreShallow((state) => ({
-    setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
-    recommendQuestionsOpen: state.recommendQuestionsOpen,
-  }));
+  const { setRecommendQuestionsOpen, recommendQuestionsOpen } = useLaunchpadStoreShallow(
+    (state) => ({
+      setRecommendQuestionsOpen: state.setRecommendQuestionsOpen,
+      recommendQuestionsOpen: state.recommendQuestionsOpen,
+    }),
+  );
 
   const handleRecommendQuestionsToggle = useCallback(() => {
     setRecommendQuestionsOpen(!recommendQuestionsOpen);

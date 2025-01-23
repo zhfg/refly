@@ -65,7 +65,8 @@ export const useUserStore = create<UserState>()(
   devtools((set) => ({
     ...defaultState,
 
-    setIsCheckingLoginStatus: (val: boolean) => set((state) => ({ ...state, isCheckingLoginStatus: val })),
+    setIsCheckingLoginStatus: (val: boolean) =>
+      set((state) => ({ ...state, isCheckingLoginStatus: val })),
     setIsLogin: (val: boolean) => set((state) => ({ ...state, isLogin: val })),
     setUserProfile: (val?: User) => set((state) => ({ ...state, userProfile: val })),
     setToken: (val?: string) => set((state) => ({ ...state, token: val })),

@@ -29,7 +29,10 @@ const PreviewChatInputComponent = (props: PreviewChatInputProps) => {
   }
 
   return (
-    <div className={cn('border border-solid border-gray-200 rounded-lg')} onClick={() => setEditMode(true)}>
+    <div
+      className={cn('border border-solid border-gray-200 rounded-lg')}
+      onClick={() => setEditMode(true)}
+    >
       {!hideSelectedSkillHeader && (
         <SelectedSkillHeader
           readonly={readonly}

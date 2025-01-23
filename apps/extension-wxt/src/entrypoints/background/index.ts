@@ -6,10 +6,9 @@ import { browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/sandbox';
 import { onDetached } from './events/detached';
 import { handleToggleCopilotSidePanel } from './events/messages/toggleCopilot';
-import { Runtime } from 'wxt/browser';
 
 export const tempTabState: { [key: string]: string } = {};
-export let token = '';
+export const token = '';
 
 let lastUniqueId = '';
 export const getLastUniqueId = () => {
@@ -18,7 +17,7 @@ export const getLastUniqueId = () => {
 export const setLastUniqueId = (uniqueId: string) => {
   lastUniqueId = uniqueId;
 };
-export let abortControllerMap = new Map<string, AbortController>();
+export const abortControllerMap = new Map<string, AbortController>();
 export const setAbortController = (controller: AbortController, uniqueId: string) => {
   abortControllerMap.set(uniqueId, controller);
 

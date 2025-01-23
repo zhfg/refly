@@ -70,7 +70,8 @@ export const SelectionContext: React.FC<SelectionContextProps> = ({
 
   const buttons = [
     {
-      className: 'w-full px-2 py-0 font-medium text-sm justify-start !text-[#00968F] hover:!text-[#00968F]/80',
+      className:
+        'w-full px-2 py-0 font-medium text-sm justify-start !text-[#00968F] hover:!text-[#00968F]/80',
       icon: <IconQuote size={14} />,
       label: t('knowledgeBase.context.addToContext'),
       onClick: () => handleAddToContext(selectedText),

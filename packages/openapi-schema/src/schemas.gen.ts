@@ -620,7 +620,15 @@ export const TimerTriggerConfigSchema = {
 export const SkillTriggerSchema = {
   type: 'object',
   description: 'Skill triggers',
-  required: ['skillId', 'displayName', 'triggerId', 'triggerType', 'enabled', 'createdAt', 'updatedAt'],
+  required: [
+    'skillId',
+    'displayName',
+    'triggerId',
+    'triggerType',
+    'enabled',
+    'createdAt',
+    'updatedAt',
+  ],
   properties: {
     skillId: {
       type: 'string',
@@ -1189,7 +1197,16 @@ export const SubscriptionPlanTypeSchema = {
 export const SubscriptionStatusSchema = {
   type: 'string',
   description: 'Subscription status',
-  enum: ['active', 'canceled', 'incomplete', 'incomplete_expired', 'past_due', 'paused', 'trialing', 'unpaid'],
+  enum: [
+    'active',
+    'canceled',
+    'incomplete',
+    'incomplete_expired',
+    'past_due',
+    'paused',
+    'trialing',
+    'unpaid',
+  ],
 } as const;
 
 export const SubscriptionSchema = {
@@ -1224,7 +1241,15 @@ export const SubscriptionSchema = {
 
 export const TokenUsageMeterSchema = {
   type: 'object',
-  required: ['meterId', 'uid', 'startAt', 't1TokenQuota', 't1TokenUsed', 't2TokenQuota', 't2TokenUsed'],
+  required: [
+    'meterId',
+    'uid',
+    'startAt',
+    't1TokenQuota',
+    't1TokenUsed',
+    't2TokenQuota',
+    't2TokenUsed',
+  ],
   properties: {
     meterId: {
       type: 'string',
@@ -2193,7 +2218,17 @@ export const DeleteReferencesRequestSchema = {
 export const SkillEventTypeSchema = {
   type: 'string',
   description: 'Skill event type',
-  enum: ['start', 'end', 'stream', 'log', 'artifact', 'structured_data', 'token_usage', 'create_node', 'error'],
+  enum: [
+    'start',
+    'end',
+    'stream',
+    'log',
+    'artifact',
+    'structured_data',
+    'token_usage',
+    'create_node',
+    'error',
+  ],
 } as const;
 
 export const SkillEventSchema = {

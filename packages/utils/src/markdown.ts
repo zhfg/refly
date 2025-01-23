@@ -8,12 +8,15 @@ export type FormatMode =
 
 export function tidyMarkdown(markdown: string): string {
   // Step 1: Handle complex broken links with text and optional images spread across multiple lines
-  let normalizedMarkdown = markdown.replace(/\[\s*([^\]\n]+?)\s*\]\s*\(\s*([^)]+)\s*\)/g, (match, text, url) => {
-    // Remove internal new lines and excessive spaces within the text
-    text = text.replace(/\s+/g, ' ').trim();
-    url = url.replace(/\s+/g, '').trim();
-    return `[${text}](${url})`;
-  });
+  let normalizedMarkdown = markdown.replace(
+    /\[\s*([^\]\n]+?)\s*\]\s*\(\s*([^)]+)\s*\)/g,
+    (match, text, url) => {
+      // Remove internal new lines and excessive spaces within the text
+      text = text.replace(/\s+/g, ' ').trim();
+      url = url.replace(/\s+/g, '').trim();
+      return `[${text}](${url})`;
+    },
+  );
 
   normalizedMarkdown = normalizedMarkdown.replace(
     /\[\s*([^\]\n!]*?)\s*\n*(?:!\[([^\]]*)\]\((.*?)\))?\s*\n*\]\s*\(\s*([^)]+)\s*\)/g,
@@ -32,11 +35,14 @@ export function tidyMarkdown(markdown: string): string {
   );
 
   // Step 2: Normalize regular links that may be broken across lines
-  normalizedMarkdown = normalizedMarkdown.replace(/\[\s*([^\]]+)\]\s*\(\s*([^)]+)\)/g, (match, text, url) => {
-    text = text.replace(/\s+/g, ' ').trim();
-    url = url.replace(/\s+/g, '').trim();
-    return `[${text}](${url})`;
-  });
+  normalizedMarkdown = normalizedMarkdown.replace(
+    /\[\s*([^\]]+)\]\s*\(\s*([^)]+)\)/g,
+    (match, text, url) => {
+      text = text.replace(/\s+/g, ' ').trim();
+      url = url.replace(/\s+/g, '').trim();
+      return `[${text}](${url})`;
+    },
+  );
 
   // Step 3: Remove leading spaces from each line
   normalizedMarkdown = normalizedMarkdown.replace(/^[ \t]+/gm, '');
@@ -108,7 +114,10 @@ export const convertHTMLToMarkdown = (mode: FormatMode, html: string): string =>
     }
   }
 
-  if (!contentText || (contentText.startsWith('<') && contentText.endsWith('>') && toBeTurnedToMd !== html)) {
+  if (
+    !contentText ||
+    (contentText.startsWith('<') && contentText.endsWith('>') && toBeTurnedToMd !== html)
+  ) {
     try {
       contentText = turnDownService.turndown(html);
     } catch (err) {

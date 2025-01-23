@@ -12,10 +12,16 @@ export const useNodeHoverEffect = (nodeId: string) => {
       const newZIndex = isHovered ? 1000 : 0;
       const newEdgeStyle = isHovered ? edgeStyles.hover : edgeStyles.default;
 
-      setNodes((nodes) => nodes.map((node) => (node.id === nodeId ? { ...node, zIndex: newZIndex } : node)));
+      setNodes((nodes) =>
+        nodes.map((node) => (node.id === nodeId ? { ...node, zIndex: newZIndex } : node)),
+      );
 
       setEdges((eds) =>
-        eds.map((edge) => (edge.source === nodeId || edge.target === nodeId ? { ...edge, style: newEdgeStyle } : edge)),
+        eds.map((edge) =>
+          edge.source === nodeId || edge.target === nodeId
+            ? { ...edge, style: newEdgeStyle }
+            : edge,
+        ),
       );
     },
     [nodeId, setEdges, setNodes, edgeStyles],

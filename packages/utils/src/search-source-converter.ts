@@ -26,7 +26,8 @@ export const mergeSearchResults = (results: Source[]): Source[] => {
           ...source.metadata,
           // Preserve translation information
           originalQuery: source.metadata.originalQuery || existingSource.metadata.originalQuery,
-          translatedQuery: source.metadata.translatedQuery || existingSource.metadata.translatedQuery,
+          translatedQuery:
+            source.metadata.translatedQuery || existingSource.metadata.translatedQuery,
           isTranslated: source.metadata.isTranslated || existingSource.metadata.isTranslated,
         };
       }
@@ -37,7 +38,10 @@ export const mergeSearchResults = (results: Source[]): Source[] => {
       }
 
       // Keep higher score if exists
-      if (source.score !== undefined && (existingSource.score === undefined || source.score > existingSource.score)) {
+      if (
+        source.score !== undefined &&
+        (existingSource.score === undefined || source.score > existingSource.score)
+      ) {
         existingSource.score = source.score;
       }
     }
@@ -104,7 +108,10 @@ export const deduplicateSourcesByTitle = (sources: Source[]): Source[] => {
     if (!normalizedTitle) return;
 
     // If title exists, only replace if current source has higher score
-    if (!titleMap.has(normalizedTitle) || (source.score || 0) > (titleMap.get(normalizedTitle)!.score || 0)) {
+    if (
+      !titleMap.has(normalizedTitle) ||
+      (source.score || 0) > (titleMap.get(normalizedTitle)!.score || 0)
+    ) {
       titleMap.set(normalizedTitle, source);
     }
   });

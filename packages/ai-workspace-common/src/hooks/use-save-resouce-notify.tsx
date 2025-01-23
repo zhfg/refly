@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 
 export const useSaveResourceNotify = () => {
   const { t } = useTranslation();
-  const handleSaveResourceAndNotify = async (saveResource: () => Promise<{ success: boolean; url: string }>) => {
+  const handleSaveResourceAndNotify = async (
+    saveResource: () => Promise<{ success: boolean; url: string }>,
+  ) => {
     const close = Message.loading({
       content: t('resource.import.isSaving'),
       duration: 0,

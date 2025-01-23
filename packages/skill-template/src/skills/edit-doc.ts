@@ -7,7 +7,12 @@ import { z } from 'zod';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { CanvasEditConfig, safeStringifyJSON } from '@refly-packages/utils';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition, Source } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+  Source,
+} from '@refly-packages/openapi-schema';
 // types
 import { GraphState, IContext } from '../scheduler/types';
 // utils
@@ -58,15 +63,26 @@ export class EditDoc extends BaseSkill {
     },
   };
 
-  commonPreprocess = async (state: GraphState, config: SkillRunnableConfig, module: SkillPromptModule) => {
+  commonPreprocess = async (
+    state: GraphState,
+    config: SkillRunnableConfig,
+    module: SkillPromptModule,
+  ) => {
     const { messages = [], query: originalQuery } = state;
-    const { locale = 'en', chatHistory = [], modelInfo, resources, documents, contentList } = config.configurable;
+    const {
+      locale = 'en',
+      chatHistory = [],
+      modelInfo,
+      resources,
+      documents,
+      contentList,
+    } = config.configurable;
 
     const { tplConfig } = config?.configurable || {};
 
     let optimizedQuery = '';
     let mentionedContext: IContext;
-    let context: string = '';
+    let context = '';
     let sources: Source[] = [];
 
     // preprocess query, ensure query is not too long
@@ -108,7 +124,9 @@ export class EditDoc extends BaseSkill {
       (hasContext || chatHistoryTokens > 0); // 保持原有的上下文相关判断
 
     const needPrepareContext = hasContext && remainingTokens > 0;
-    this.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`);
+    this.engine.logger.log(
+      `needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`,
+    );
 
     if (needRewriteQuery) {
       config.metadata.step = { name: 'analyzeContext' };
@@ -175,7 +193,10 @@ export class EditDoc extends BaseSkill {
    * 1. 口头模糊指明（可能涉及处理多个）：直接口头指明模糊更新的内容（需要模型扫描并给出待操作的模块和对应的 startIndex 和 endIndex），则只需要优化这些内容，其他保持原样，并且发送给前端流式写入
    * 2. 前端明确选中（目前只支持一个）：明确具备选中的 startIndex 和 endIndex（使用的是 tiptap editor），则只需要优化这块内容，其他保持原样，并且发送给前端流式写入
    */
-  callEditDoc = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+  callEditDoc = async (
+    state: GraphState,
+    config: SkillRunnableConfig,
+  ): Promise<Partial<GraphState>> => {
     const { currentSkill, documents, tplConfig } = config.configurable;
 
     const currentDoc = documents?.find((doc) => doc?.metadata?.isCurrentContext || doc?.isCurrent);
@@ -188,7 +209,9 @@ export class EditDoc extends BaseSkill {
     // Filter out documents with isCurrent before proceeding
     if (config?.configurable?.documents) {
       config.configurable.documents =
-        config.configurable.documents.filter((doc) => !(doc?.metadata?.isCurrentContext || doc?.isCurrent)) || [];
+        config.configurable.documents.filter(
+          (doc) => !(doc?.metadata?.isCurrentContext || doc?.isCurrent),
+        ) || [];
     }
 
     // Get selected range and edit type from metadata

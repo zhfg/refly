@@ -5,7 +5,11 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+} from '@refly-packages/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -131,7 +135,12 @@ export class ChangeToneSkill extends BaseSkill {
     this.engine.logger.log('---GENERATE---');
 
     const { query } = state;
-    const { locale = 'en', contentList = [], chatHistory = [], tplConfig = {} } = config?.configurable || {};
+    const {
+      locale = 'en',
+      contentList = [],
+      chatHistory = [],
+      tplConfig = {},
+    } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,
@@ -166,14 +175,20 @@ TARGET TONE: {targetTone}
 `;
 
     const contextString =
-      contentList.length > 0 ? contentList.map((item) => item?.content).join('\n') : 'No additional context provided.';
+      contentList.length > 0
+        ? contentList.map((item) => item?.content).join('\n')
+        : 'No additional context provided.';
 
     const targetTone = tplConfig?.targetTone?.value as string;
-    const prompt = systemPrompt.replace('{context}', contextString).replace('{targetTone}', targetTone);
+    const prompt = systemPrompt
+      .replace('{context}', contextString)
+      .replace('{targetTone}', targetTone);
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
-      new HumanMessage(`The context is provided above, please adjust the tone to the specified tone`),
+      new HumanMessage(
+        `The context is provided above, please adjust the tone to the specified tone`,
+      ),
     ]);
 
     return { messages: [responseMessage] };

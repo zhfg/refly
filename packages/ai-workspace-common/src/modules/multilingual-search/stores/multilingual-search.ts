@@ -2,8 +2,6 @@ import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
 import { Source, SearchStep } from '@refly/openapi-schema';
 
-import { mockSearchSteps, mockResults } from '../mock-data/search-data';
-
 export const defaultLocalesMap = {
   en: [
     { code: 'en', name: 'English' },
@@ -108,7 +106,9 @@ export const useMultilingualSearchStore = create<SearchState>((set) => ({
   setSelectedItems: (items) => set({ selectedItems: items }),
   toggleSelectedItem: (item, checked) =>
     set((state) => ({
-      selectedItems: checked ? [...state.selectedItems, item] : state.selectedItems.filter((i) => i !== item),
+      selectedItems: checked
+        ? [...state.selectedItems, item]
+        : state.selectedItems.filter((i) => i !== item),
     })),
   clearSelectedItems: () => set({ selectedItems: [] }),
 
@@ -152,7 +152,9 @@ export const useMultilingualSearchStore = create<SearchState>((set) => ({
   resetAll: () =>
     set({
       query: '',
-      searchLocales: defaultLocales.filter((locale) => defaultSelectedLocales.includes(locale.code)),
+      searchLocales: defaultLocales.filter((locale) =>
+        defaultSelectedLocales.includes(locale.code),
+      ),
       outputLocale: { code: '', name: '' },
       isSearching: false,
       searchProgress: 0,

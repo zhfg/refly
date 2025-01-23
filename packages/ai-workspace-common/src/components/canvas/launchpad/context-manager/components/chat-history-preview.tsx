@@ -11,7 +11,10 @@ import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context
 import { getResultDisplayContent } from '@refly-packages/ai-workspace-common/components/common/result-display';
 import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
-import { CanvasNode, ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import {
+  CanvasNode,
+  ResponseNodeMeta,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useFindThreadHistory } from '@refly-packages/ai-workspace-common/hooks/canvas/use-find-thread-history';
 
 // Define props interface
@@ -37,7 +40,10 @@ const ChatHistoryItem = ({ node }: { node: CanvasNode<ResponseNodeMeta> }) => {
   return (
     <div
       key={`${node.id}`}
-      className={cn('m-1 py-0.5 px-2 rounded-lg cursor-pointer border-gray-100 hover:bg-gray-100', {})}
+      className={cn(
+        'm-1 py-0.5 px-2 rounded-lg cursor-pointer border-gray-100 hover:bg-gray-100',
+        {},
+      )}
       onClick={(e) => handleItemClick(node, e)}
     >
       <div className="text-gray-800 font-medium flex items-center justify-between text-[13px] whitespace-nowrap overflow-hidden">
@@ -65,7 +71,9 @@ export const ChatHistoryPreview: React.FC<ChatHistoryProps> = ({ item }) => {
         <div className="w-6 h-6 rounded bg-slate-500 shadow-lg flex items-center justify-center flex-shrink-0">
           <IconThreadHistory className="w-4 h-4 text-white" />
         </div>
-        <span className="text-sm font-medium leading-normal truncate">{t('copilot.contextItem.threadHistory')}</span>
+        <span className="text-sm font-medium leading-normal truncate">
+          {t('copilot.contextItem.threadHistory')}
+        </span>
       </div>
       <div className="ml-1 mt-5">
         <Timeline

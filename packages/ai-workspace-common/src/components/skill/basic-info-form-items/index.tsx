@@ -1,14 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 // components
 import { useTranslation } from 'react-i18next';
-// store
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-import { SkillInstance, SkillTemplate } from '@refly/openapi-schema';
-
-import { Collapse, Modal, Form, Input, Message } from '@arco-design/web-react';
-import { TemplateConfigFormItems } from '@refly-packages/ai-workspace-common/components/skill/template-config-form-items';
+import { Collapse, Form, Input } from '@arco-design/web-react';
 import { FormHeader } from '@refly-packages/ai-workspace-common/components/skill/form-header';
 
 const CollapseItem = Collapse.Item;
@@ -36,7 +31,11 @@ export const BasicInfoFormItems = () => {
             field="displayName"
             rules={[{ required: true, message: t('skill.newSkillModal.namePlaceholder') }]}
           >
-            <Input placeholder={t('skill.newSkillModal.namePlaceholder')} maxLength={50} showWordLimit />
+            <Input
+              placeholder={t('skill.newSkillModal.namePlaceholder')}
+              maxLength={50}
+              showWordLimit
+            />
           </FormItem>
           <FormItem
             label={t('skill.newSkillModal.description')}

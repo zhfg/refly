@@ -9,7 +9,10 @@ import { SkillTrigger } from '@prisma/client';
 export class EventService {
   private logger = new Logger(EventService.name);
 
-  constructor(private prisma: PrismaService, private skillService: SkillService) {}
+  constructor(
+    private prisma: PrismaService,
+    private skillService: SkillService,
+  ) {}
 
   async handleSimpleEvent(data: SimpleEventData) {
     const { uid, entityType, entityId, name } = data;

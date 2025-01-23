@@ -23,18 +23,26 @@ interface NodePreviewControl {
   handleNodePreview: (node: CanvasNode) => boolean;
 }
 
-export const useNodePreviewControl = ({ canvasId }: UseNodePreviewControlOptions): NodePreviewControl => {
+export const useNodePreviewControl = ({
+  canvasId,
+}: UseNodePreviewControlOptions): NodePreviewControl => {
   const { getNodes } = useReactFlow();
   const { provider } = useCanvasContext();
-  const { clickToPreview, setClickToPreview, addNodePreview, setNodePreview, removeNodePreview, nodePreviews } =
-    useCanvasStoreShallow((state) => ({
-      clickToPreview: state.clickToPreview,
-      setClickToPreview: state.setClickToPreview,
-      addNodePreview: state.addNodePreview,
-      setNodePreview: state.setNodePreview,
-      removeNodePreview: state.removeNodePreview,
-      nodePreviews: state.config[canvasId]?.nodePreviews || [],
-    }));
+  const {
+    clickToPreview,
+    setClickToPreview,
+    addNodePreview,
+    setNodePreview,
+    removeNodePreview,
+    nodePreviews,
+  } = useCanvasStoreShallow((state) => ({
+    clickToPreview: state.clickToPreview,
+    setClickToPreview: state.setClickToPreview,
+    addNodePreview: state.addNodePreview,
+    setNodePreview: state.setNodePreview,
+    removeNodePreview: state.removeNodePreview,
+    nodePreviews: state.config[canvasId]?.nodePreviews || [],
+  }));
 
   // Cleanup non-existent node previews
   useEffect(() => {

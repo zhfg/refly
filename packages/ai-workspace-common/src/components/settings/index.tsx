@@ -11,7 +11,10 @@ import { RiAccountBoxLine } from 'react-icons/ri';
 import { HiOutlineLanguage } from 'react-icons/hi2';
 
 import './index.scss';
-import { IconSettings, IconSubscription } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconSettings,
+  IconSubscription,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 
 const iconStyle = { fontSize: 16, transform: 'translateY(3px)' };
 

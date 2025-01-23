@@ -6,7 +6,11 @@ import {
   SkillResponseNode,
   SkillResponseNodeProps,
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
-import { DocumentNode, ResourceNode, MemoNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import {
+  DocumentNode,
+  ResourceNode,
+  MemoNode,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { ChatHistoryPreview } from './components/chat-history-preview';

@@ -27,6 +27,8 @@ export const useImportNewTriggerModal = create<ImportNewTriggerModal>()(
   })),
 );
 
-export const useImportNewTriggerModalShallow = <T>(selector: (state: ImportNewTriggerModal) => T) => {
+export const useImportNewTriggerModalShallow = <T>(
+  selector: (state: ImportNewTriggerModal) => T,
+) => {
   return useImportNewTriggerModal(useShallow(selector));
 };

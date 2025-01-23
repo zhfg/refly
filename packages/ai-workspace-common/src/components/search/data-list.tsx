@@ -43,7 +43,9 @@ export function DataList({
 
   const searchStore = useSearchStore();
 
-  const fetchNewData = async (queryPayload: any): Promise<{ success: boolean; data?: SearchResult[] }> => {
+  const fetchNewData = async (
+    queryPayload: any,
+  ): Promise<{ success: boolean; data?: SearchResult[] }> => {
     if (domain === 'skill') {
       return { success: true, data: [] };
     } else if (domain === 'canvas') {
@@ -151,7 +153,10 @@ export function DataList({
           >
             {icon}
             <div className="search-res-container">
-              <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.highlightedTitle }}></p>
+              <p
+                className="search-res-title"
+                dangerouslySetInnerHTML={{ __html: item?.highlightedTitle }}
+              ></p>
               {item?.snippets?.length > 0 && (
                 <p
                   className="search-res-desc"

@@ -2,7 +2,11 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { z } from 'zod';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../base';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+} from '@refly-packages/openapi-schema';
 import { GraphState } from '../scheduler/types';
 import { safeStringifyJSON } from '@refly-packages/utils';
 
@@ -35,7 +39,10 @@ export class LibrarySearch extends BaseSkill {
     ...baseStateGraphArgs,
   };
 
-  callLibrarySearch = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+  callLibrarySearch = async (
+    state: GraphState,
+    config: SkillRunnableConfig,
+  ): Promise<Partial<GraphState>> => {
     const { messages = [] } = state;
     const { locale = 'en', currentSkill } = config.configurable;
 
@@ -46,7 +53,11 @@ export class LibrarySearch extends BaseSkill {
     config.configurable.tplConfig = {
       ...config.configurable.tplConfig,
       enableWebSearch: { value: false, label: 'Web Search', displayValue: 'false' },
-      enableKnowledgeBaseSearch: { value: true, label: 'Knowledge Base Search', displayValue: 'true' },
+      enableKnowledgeBaseSearch: {
+        value: true,
+        label: 'Knowledge Base Search',
+        displayValue: 'true',
+      },
       enableSearchWholeSpace: { value: true, label: 'Search Whole Space', displayValue: 'true' },
     };
 

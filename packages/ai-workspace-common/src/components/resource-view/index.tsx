@@ -23,21 +23,23 @@ interface ResourceViewProps {
   setDeckSize: (size: number) => void;
 }
 
-const TopBar = memo(({ deckSize, setDeckSize }: { deckSize: number; setDeckSize: (size: number) => void }) => {
-  return (
-    <div className="w-[90%] pt-2 pb-2 mx-auto flex justify-end items-center">
-      <Button
-        type="text"
-        size="small"
-        style={{ color: deckSize ? 'rgb(var(--primary-6))' : '#000' }}
-        icon={<IconQuote />}
-        onClick={() => {
-          setDeckSize(deckSize ? 0 : 200);
-        }}
-      />
-    </div>
-  );
-});
+const TopBar = memo(
+  ({ deckSize, setDeckSize }: { deckSize: number; setDeckSize: (size: number) => void }) => {
+    return (
+      <div className="w-[90%] pt-2 pb-2 mx-auto flex justify-end items-center">
+        <Button
+          type="text"
+          size="small"
+          style={{ color: deckSize ? 'rgb(var(--primary-6))' : '#000' }}
+          icon={<IconQuote />}
+          onClick={() => {
+            setDeckSize(deckSize ? 0 : 200);
+          }}
+        />
+      </div>
+    );
+  },
+);
 
 const ResourceMeta = memo(
   ({
@@ -53,13 +55,23 @@ const ResourceMeta = memo(
 
     return (
       <div className="knowledge-base-resource-meta">
-        {['wait_parse', 'parse_failed', 'wait_index', 'index_failed'].includes(resourceDetail?.indexStatus) && (
+        {['wait_parse', 'parse_failed', 'wait_index', 'index_failed'].includes(
+          resourceDetail?.indexStatus,
+        ) && (
           <Alert
             className="py-[8px] px-[15px] !items-center"
             style={{ marginBottom: 16 }}
-            type={['wait_index', 'wait_parse'].includes(resourceDetail?.indexStatus) ? 'warning' : 'error'}
+            type={
+              ['wait_index', 'wait_parse'].includes(resourceDetail?.indexStatus)
+                ? 'warning'
+                : 'error'
+            }
             showIcon
-            icon={['wait_index', 'wait_parse'].includes(resourceDetail?.indexStatus) ? <IconLoading /> : null}
+            icon={
+              ['wait_index', 'wait_parse'].includes(resourceDetail?.indexStatus) ? (
+                <IconLoading />
+              ) : null
+            }
             description={
               t(`resource.${resourceDetail?.indexStatus}`) +
               (['wait_index', 'index_failed'].includes(resourceDetail?.indexStatus)
@@ -84,7 +96,11 @@ const ResourceMeta = memo(
 
         <div className="knowledge-base-directory-site-intro">
           <div className="site-intro-icon">
-            <ResourceIcon url={resourceDetail?.data?.url} resourceType={resourceDetail?.resourceType} size={24} />
+            <ResourceIcon
+              url={resourceDetail?.data?.url}
+              resourceType={resourceDetail?.resourceType}
+              size={24}
+            />
           </div>
           <div className="site-intro-content">
             <p className="site-intro-site-name">{resourceDetail?.data?.title}</p>
@@ -92,6 +108,7 @@ const ResourceMeta = memo(
               className="site-intro-site-url no-underline text-[#00968F]"
               href={resourceDetail?.data?.url}
               target="_blank"
+              rel="noreferrer"
             >
               {resourceDetail?.data?.url}
             </a>

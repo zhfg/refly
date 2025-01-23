@@ -5,7 +5,11 @@ import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/par
 import { LOCALE } from '@refly/common-types';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { OutputLocale, enLocale, localeToLanguageName } from '@refly-packages/ai-workspace-common/utils/i18n';
+import {
+  OutputLocale,
+  enLocale,
+  localeToLanguageName,
+} from '@refly-packages/ai-workspace-common/utils/i18n';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { IconDown, IconTranslate } from '@arco-design/web-react/icon';
 import classNames from 'classnames';
@@ -29,7 +33,10 @@ export const OutputLocaleList = (props: {
 
     userStore.setLocalSettings({ ...localSettings, outputLocale: lng });
     userStore.setUserProfile({ ...userProfile, outputLocale: lng });
-    localStorage.setItem('refly-local-settings', safeStringifyJSON({ ...localSettings, outputLocale: lng }));
+    localStorage.setItem(
+      'refly-local-settings',
+      safeStringifyJSON({ ...localSettings, outputLocale: lng }),
+    );
 
     const { data: res, error } = await getClient().updateSettings({
       body: { outputLocale: lng, uiLocale: localSettings.uiLocale },
@@ -56,13 +63,18 @@ export const OutputLocaleList = (props: {
 
   return (
     <Dropdown
-      menu={{ items: dropList, selectedKeys: [outputLocale], style: { width: props?.width, maxHeight: 250 } }}
+      menu={{
+        items: dropList,
+        selectedKeys: [outputLocale],
+        style: { width: props?.width, maxHeight: 250 },
+      }}
       trigger={['click']}
       getPopupContainer={getPopupContainer}
     >
       {props.children || (
         <span className={classNames('output-locale-list-btn', 'chat-action-item')}>
-          <IconDown /> {displayLocale} {outputLocale === 'auto' && <IconTranslate style={{ marginLeft: 4 }} />}
+          <IconDown /> {displayLocale}{' '}
+          {outputLocale === 'auto' && <IconTranslate style={{ marginLeft: 4 }} />}
         </span>
       )}
     </Dropdown>

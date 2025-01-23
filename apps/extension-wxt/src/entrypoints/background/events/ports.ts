@@ -1,4 +1,4 @@
-import { Runtime, browser } from 'wxt/browser';
+import { Runtime } from 'wxt/browser';
 import { TASK_STATUS, SkillEvent } from '@refly/common-types';
 import { getCookie } from '@/utils/cookie';
 import { ssePost } from '@refly-packages/ai-workspace-common/utils/sse-post';

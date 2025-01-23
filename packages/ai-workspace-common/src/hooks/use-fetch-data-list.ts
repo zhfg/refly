@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Message as message } from '@arco-design/web-react';
 
 export const useFetchDataList = <T = any>({
   fetchData,
   pageSize = 10,
 }: {
-  fetchData: (payload: { pageSize: number; page: number }) => Promise<{ success: boolean; data?: T[] }>;
+  fetchData: (payload: { pageSize: number; page: number }) => Promise<{
+    success: boolean;
+    data?: T[];
+  }>;
   pageSize?: number;
 }) => {
   // fetch

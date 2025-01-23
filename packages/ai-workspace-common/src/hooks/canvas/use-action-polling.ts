@@ -167,7 +167,14 @@ export const useActionPolling = () => {
         },
       };
     },
-    [startTimeout, updateLastEventTime, startPolling, onUpdateResult, clearTimeoutState, stopPolling],
+    [
+      startTimeout,
+      updateLastEventTime,
+      startPolling,
+      onUpdateResult,
+      clearTimeoutState,
+      stopPolling,
+    ],
   );
 
   return {

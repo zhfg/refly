@@ -36,7 +36,12 @@ export async function prepareContext(
     enableMentionedContext: boolean;
     enableLowerPriorityContext: boolean;
   },
-  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+  ctx: {
+    config: SkillRunnableConfig;
+    ctxThis: BaseSkill;
+    state: GraphState;
+    tplConfig: SkillTemplateConfig;
+  },
 ): Promise<{ contextStr: string; sources: Source[] }> {
   const enableWebSearch = ctx.tplConfig?.enableWebSearch?.value;
   const enableKnowledgeBaseSearch = ctx.tplConfig?.enableKnowledgeBaseSearch?.value;
@@ -68,7 +73,9 @@ export async function prepareContext(
     );
     processedWebSearchContext = preparedRes.processedWebSearchContext;
   }
-  const webSearchContextTokens = countWebSearchContextTokens(processedWebSearchContext.webSearchSources);
+  const webSearchContextTokens = countWebSearchContextTokens(
+    processedWebSearchContext.webSearchSources,
+  );
   remainingTokens = maxContextTokens - webSearchContextTokens;
 
   // 2. mentioned context
@@ -139,7 +146,9 @@ export async function prepareContext(
     webSearchSources: processedWebSearchContext.webSearchSources,
   };
 
-  ctx.ctxThis.engine.logger.log(`Prepared Lower Priority after deduplication! ${safeStringifyJSON(mergedContext)}`);
+  ctx.ctxThis.engine.logger.log(
+    `Prepared Lower Priority after deduplication! ${safeStringifyJSON(mergedContext)}`,
+  );
 
   const hasMentionedContext = checkHasContext(processedMentionedContext);
   const hasLowerPriorityContext = checkHasContext(deduplicatedLowerPriorityContext);
@@ -147,7 +156,10 @@ export async function prepareContext(
   // may optimize web search sources by context
   const LIMIT_WEB_SEARCH_SOURCES_COUNT = 10;
   if (hasMentionedContext || hasLowerPriorityContext) {
-    mergedContext.webSearchSources = mergedContext.webSearchSources.slice(0, LIMIT_WEB_SEARCH_SOURCES_COUNT);
+    mergedContext.webSearchSources = mergedContext.webSearchSources.slice(
+      0,
+      LIMIT_WEB_SEARCH_SOURCES_COUNT,
+    );
   }
 
   // TODO: need add rerank here
@@ -159,7 +171,9 @@ export async function prepareContext(
      - sources: ${safeStringifyJSON(sources)}`,
   );
 
-  ctx.ctxThis.engine.logger.log(`Prepared context successfully! ${safeStringifyJSON(mergedContext)}`);
+  ctx.ctxThis.engine.logger.log(
+    `Prepared context successfully! ${safeStringifyJSON(mergedContext)}`,
+  );
 
   return { contextStr, sources };
 }
@@ -176,20 +190,26 @@ export async function prepareWebSearchContext(
     enableTranslateQuery?: boolean;
     enableTranslateResult?: boolean;
   },
-  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+  ctx: {
+    config: SkillRunnableConfig;
+    ctxThis: BaseSkill;
+    state: GraphState;
+    tplConfig: SkillTemplateConfig;
+  },
 ): Promise<{
   processedWebSearchContext: IContext;
 }> {
   ctx.ctxThis.engine.logger.log(`Prepare Web Search Context...`);
 
   // two searchMode
-  const enableDeepReasonWebSearch = (ctx.tplConfig?.enableDeepReasonWebSearch?.value as boolean) || false;
+  const enableDeepReasonWebSearch =
+    (ctx.tplConfig?.enableDeepReasonWebSearch?.value as boolean) || false;
   const { locale = 'en' } = ctx?.config?.configurable || {};
 
   let searchLimit = 10;
   let searchLocaleListLen = 2;
-  let enableRerank = true;
-  let searchLocaleList: string[] = ['en'];
+  const enableRerank = true;
+  const searchLocaleList: string[] = ['en'];
   let rerankRelevanceThreshold = 0.2;
 
   if (enableDeepReasonWebSearch) {
@@ -230,7 +250,9 @@ export async function prepareWebSearchContext(
   );
 
   // Take only first 10 sources
-  const isModelContextLenSupport = checkModelContextLenSupport(ctx?.config?.configurable?.modelInfo);
+  const isModelContextLenSupport = checkModelContextLenSupport(
+    ctx?.config?.configurable?.modelInfo,
+  );
   let webSearchSources = searchResult.sources || [];
   if (!isModelContextLenSupport) {
     webSearchSources = webSearchSources.slice(0, 10);
@@ -305,7 +327,10 @@ export async function prepareMentionedContext(
     mentionedContextTokens = countContextTokens(processedMentionedContext);
 
     if (mentionedContextTokens > maxMentionedContextTokens) {
-      processedMentionedContext = truncateContext(processedMentionedContext, maxMentionedContextTokens);
+      processedMentionedContext = truncateContext(
+        processedMentionedContext,
+        maxMentionedContextTokens,
+      );
       mentionedContextTokens = countContextTokens(processedMentionedContext);
     }
   }
@@ -332,7 +357,12 @@ export async function prepareLowerPriorityContext(
     context: IContext;
     processedMentionedContext: IContext;
   },
-  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+  ctx: {
+    config: SkillRunnableConfig;
+    ctxThis: BaseSkill;
+    state: GraphState;
+    tplConfig: SkillTemplateConfig;
+  },
 ): Promise<IContext> {
   ctx.ctxThis.engine.logger.log(`Prepare Lower Priority Context..., ${safeStringifyJSON(context)}`);
 
@@ -368,7 +398,9 @@ export async function prepareLowerPriorityContext(
     ctx,
   );
 
-  ctx.ctxThis.engine.logger.log(`Prepared Lower Priority Context successfully! ${safeStringifyJSON(finalContext)}`);
+  ctx.ctxThis.engine.logger.log(
+    `Prepared Lower Priority Context successfully! ${safeStringifyJSON(finalContext)}`,
+  );
 
   return finalContext;
 }
@@ -384,7 +416,7 @@ export async function prepareRelevantContext(
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<IContext> {
   const { contentList = [], resources = [], documents = [] } = context;
-  let relevantContexts: IContext = {
+  const relevantContexts: IContext = {
     contentList: [],
     resources: [],
     documents: [],
@@ -394,17 +426,30 @@ export async function prepareRelevantContext(
 
   // 1. selected content context
   relevantContexts.contentList =
-    contentList.length > 0 ? await processSelectedContentWithSimilarity(query, contentList, Infinity, ctx) : [];
+    contentList.length > 0
+      ? await processSelectedContentWithSimilarity(
+          query,
+          contentList,
+          Number.POSITIVE_INFINITY,
+          ctx,
+        )
+      : [];
 
   // 2. documents context
   relevantContexts.documents =
-    documents.length > 0 ? await processDocumentsWithSimilarity(query, documents, Infinity, ctx) : [];
+    documents.length > 0
+      ? await processDocumentsWithSimilarity(query, documents, Number.POSITIVE_INFINITY, ctx)
+      : [];
 
   // 3. resources context
   relevantContexts.resources =
-    resources.length > 0 ? await processResourcesWithSimilarity(query, resources, Infinity, ctx) : [];
+    resources.length > 0
+      ? await processResourcesWithSimilarity(query, resources, Number.POSITIVE_INFINITY, ctx)
+      : [];
 
-  ctx.ctxThis.engine.logger.log(`Prepared Relevant Context successfully! ${safeStringifyJSON(relevantContexts)}`);
+  ctx.ctxThis.engine.logger.log(
+    `Prepared Relevant Context successfully! ${safeStringifyJSON(relevantContexts)}`,
+  );
 
   return relevantContexts;
 }
@@ -417,7 +462,12 @@ export async function prepareContainerLevelContext(
     query: string;
     context: IContext;
   },
-  ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState; tplConfig: SkillTemplateConfig },
+  ctx: {
+    config: SkillRunnableConfig;
+    ctxThis: BaseSkill;
+    state: GraphState;
+    tplConfig: SkillTemplateConfig;
+  },
 ): Promise<IContext> {
   const enableKnowledgeBaseSearch = ctx.tplConfig?.enableKnowledgeBaseSearch?.value;
   const enableSearchWholeSpace = enableKnowledgeBaseSearch;
@@ -480,7 +530,10 @@ export function deduplicateContexts(context: IContext): IContext {
   };
 }
 
-export function removeOverlappingContextItems(context: IContext, originalContext: IContext): IContext {
+export function removeOverlappingContextItems(
+  context: IContext,
+  originalContext: IContext,
+): IContext {
   const deduplicatedContext: IContext = {
     contentList: [],
     resources: [],
@@ -520,10 +573,15 @@ export function removeOverlappingContextItems(context: IContext, originalContext
   return deduplicatedContext;
 }
 
-export const mutateContextMetadata = (mentionedContext: IContext, originalContext: IContext): IContext => {
+export const mutateContextMetadata = (
+  mentionedContext: IContext,
+  originalContext: IContext,
+): IContext => {
   // Process documents
   mentionedContext.documents.forEach((mentionedDocument) => {
-    const index = originalContext.documents.findIndex((n) => n.document.docId === mentionedDocument.document.docId);
+    const index = originalContext.documents.findIndex(
+      (n) => n.document.docId === mentionedDocument.document.docId,
+    );
     if (index !== -1) {
       originalContext.documents[index] = {
         ...originalContext.documents[index],

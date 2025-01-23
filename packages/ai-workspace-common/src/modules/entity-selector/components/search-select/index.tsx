@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Divider, Input, message, Select, SelectProps, Tooltip } from 'antd';
+import { Button, Divider, Input, Select, SelectProps, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { SearchDomain } from '@refly/openapi-schema';
 import { DataFetcher } from '@refly-packages/ai-workspace-common/modules/entity-selector/utils';
@@ -17,12 +17,21 @@ interface SearchSelectProps extends SelectProps {
 
 export const SearchSelect = (props: SearchSelectProps) => {
   const { t } = useTranslation();
-  const { domain, fetchData, allowCreateNewEntity = false, defaultValue, onChange, onSelect, ...selectProps } = props;
-
-  const { loadMore, dataList, setDataList, isRequesting, handleValueChange, resetState } = useFetchOrSearchList({
+  const {
     domain,
     fetchData,
-  });
+    allowCreateNewEntity = false,
+    defaultValue,
+    onChange,
+    onSelect,
+    ...selectProps
+  } = props;
+
+  const { loadMore, dataList, setDataList, isRequesting, handleValueChange, resetState } =
+    useFetchOrSearchList({
+      domain,
+      fetchData,
+    });
 
   const [newEntityName, setNewEntityName] = useState('');
 
@@ -111,7 +120,12 @@ export const SearchSelect = (props: SearchSelectProps) => {
                   onChange={(e) => setNewEntityName(e.target.value)}
                   onPressEnter={handleCreateNewEntity}
                 />
-                <Button className="text-sm py-1" type="text" size="small" onClick={handleCreateNewEntity}>
+                <Button
+                  className="text-sm py-1"
+                  type="text"
+                  size="small"
+                  onClick={handleCreateNewEntity}
+                >
                   {createLoading ? (
                     <AiOutlineLoading3Quarters />
                   ) : (

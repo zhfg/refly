@@ -1,9 +1,7 @@
-import { useRef } from 'react';
 import { useContentSelectorStore } from '../stores/content-selector';
 import { sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import type { SyncMarkEvent, SyncStatusEvent } from '@refly/common-types';
-import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useTranslation } from 'react-i18next';
 
 // stores

@@ -47,7 +47,8 @@ export const useSelectionBubble = ({
 
       // 优先使用 ref，如果没有则使用 class 选择器
       const targetContainer =
-        containerRef?.current || (containerClass ? document.querySelector(`.${containerClass}`) : document.body);
+        containerRef?.current ||
+        (containerClass ? document.querySelector(`.${containerClass}`) : document.body);
 
       if (!targetContainer) return;
 

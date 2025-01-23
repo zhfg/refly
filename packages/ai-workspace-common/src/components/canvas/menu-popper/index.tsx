@@ -52,11 +52,13 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
   const [showSearchResourceList, setShowSearchResourceList] = useState(false);
   const [showSearchDocumentList, setShowSearchDocumentList] = useState(false);
 
-  const { setImportResourceModalVisible, setInsertNodePosition } = useImportResourceStoreShallow((state) => ({
-    importResourceModalVisible: state.importResourceModalVisible,
-    setImportResourceModalVisible: state.setImportResourceModalVisible,
-    setInsertNodePosition: state.setInsertNodePosition,
-  }));
+  const { setImportResourceModalVisible, setInsertNodePosition } = useImportResourceStoreShallow(
+    (state) => ({
+      importResourceModalVisible: state.importResourceModalVisible,
+      setImportResourceModalVisible: state.setImportResourceModalVisible,
+      setInsertNodePosition: state.setInsertNodePosition,
+    }),
+  );
 
   const menuItems: ToolbarItem[] = [
     {
@@ -115,7 +117,8 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       hoverContent: {
         title: t('canvas.toolbar.importResource'),
         description: t('canvas.toolbar.importResourceDescription'),
-        videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
+        videoUrl:
+          'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
       },
     },
   ];
@@ -131,7 +134,11 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
         const contentPreview = item?.snippets?.map((snippet) => snippet?.text || '').join('\n');
         addNode({
           type: domain as CanvasNodeType,
-          data: { title: item.title, entityId: item.id, contentPreview: item?.contentPreview || contentPreview },
+          data: {
+            title: item.title,
+            entityId: item.id,
+            contentPreview: item?.contentPreview || contentPreview,
+          },
           position: nodePosition,
         });
       });

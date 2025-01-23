@@ -17,7 +17,10 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
 import classNames from 'classnames';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
-import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
+import {
+  createNodeEventName,
+  cleanupNodeEvents,
+} from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
@@ -39,7 +42,10 @@ export const ResourceNode = memo(
     const { edges } = useCanvasData();
     const setNodeDataByEntity = useSetNodeDataByEntity();
     const { getNode, setEdges } = useReactFlow();
-    const ResourceIcon = data?.metadata?.resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
+    const ResourceIcon =
+      data?.metadata?.resourceType === 'weblink'
+        ? HiOutlineSquare3Stack3D
+        : HiOutlineSquare3Stack3D;
 
     const { i18n, t } = useTranslation();
     const language = i18n.languages?.[0];
@@ -239,7 +245,9 @@ export const ResourceNode = memo(
             'nodrag nopan select-text': isOperating,
           })}
         >
-          {!isPreview && !hideActions && <ActionButtons type="resource" nodeId={id} isNodeHovered={isHovered} />}
+          {!isPreview && !hideActions && (
+            <ActionButtons type="resource" nodeId={id} isNodeHovered={isHovered} />
+          )}
 
           <div
             className={`
@@ -265,7 +273,9 @@ export const ResourceNode = memo(
                   }}
                 >
                   <ContentPreview
-                    content={data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
+                    content={
+                      data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')
+                    }
                     sizeMode={sizeMode}
                     isOperating={isOperating}
                     isLoading={remoteResult?.indexStatus === 'wait_parse'}

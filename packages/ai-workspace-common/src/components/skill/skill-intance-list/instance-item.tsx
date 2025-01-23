@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { Button, Typography, Message as message, Tooltip } from '@arco-design/web-react';
 import { InstanceDropdownMenu } from '@refly-packages/ai-workspace-common/components/skill/instance-dropdown-menu';
 import { NewSkillInstanceModal } from '@refly-packages/ai-workspace-common/components/skill/new-instance-modal';
-
-import { HiOutlinePlay } from 'react-icons/hi2';
 import { BsPinAngle, BsPinAngleFill } from 'react-icons/bs';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
@@ -132,13 +130,25 @@ export const InstanceItem = (props: InstanceItemProps) => {
           {source === 'skill-management-modal' && (
             <Tooltip
               getPopupContainer={getPopupContainer}
-              content={data.pinnedAt ? t('skill.skillManagement.removeFromTop') : t('skill.skillManagement.addToTop')}
+              content={
+                data.pinnedAt
+                  ? t('skill.skillManagement.removeFromTop')
+                  : t('skill.skillManagement.addToTop')
+              }
             >
               <Button
                 className="instance-item__action-icon"
                 type="text"
                 disabled={isRequesting}
-                icon={isRequesting ? <IconLoading /> : data.pinnedAt ? <BsPinAngleFill /> : <BsPinAngle />}
+                icon={
+                  isRequesting ? (
+                    <IconLoading />
+                  ) : data.pinnedAt ? (
+                    <BsPinAngleFill />
+                  ) : (
+                    <BsPinAngle />
+                  )
+                }
                 onClick={(e) => handleTopSkill(e)}
               />
             </Tooltip>
@@ -159,7 +169,11 @@ export const InstanceItem = (props: InstanceItemProps) => {
         setVisible={(val) => setVisible(val)}
         postConfirmCallback={refreshList}
       />
-      <InstanceInvokeModal visible={invokeModalVisible} setVisible={(val) => setInvokeModalVisible(val)} data={data} />
+      <InstanceInvokeModal
+        visible={invokeModalVisible}
+        setVisible={(val) => setInvokeModalVisible(val)}
+        data={data}
+      />
     </div>
   );
 };

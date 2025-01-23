@@ -13,11 +13,13 @@ export const useCreateCanvas = () => {
   const [isCreating, setIsCreating] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { setCanvasLocalSynced, setCanvasRemoteSynced, setTitle } = useCanvasStoreShallow((state) => ({
-    setCanvasLocalSynced: state.setCanvasLocalSynced,
-    setCanvasRemoteSynced: state.setCanvasRemoteSynced,
-    setTitle: state.setTitle,
-  }));
+  const { setCanvasLocalSynced, setCanvasRemoteSynced, setTitle } = useCanvasStoreShallow(
+    (state) => ({
+      setCanvasLocalSynced: state.setCanvasLocalSynced,
+      setCanvasRemoteSynced: state.setCanvasRemoteSynced,
+      setTitle: state.setTitle,
+    }),
+  );
 
   const debouncedCreateCanvas = useDebouncedCallback(
     async () => {
@@ -27,7 +29,12 @@ export const useCreateCanvas = () => {
 
       setCanvasList(
         [
-          { id: canvasId, name: canvasTitle, updatedAt: new Date().toJSON(), type: 'canvas' as const },
+          {
+            id: canvasId,
+            name: canvasTitle,
+            updatedAt: new Date().toJSON(),
+            type: 'canvas' as const,
+          },
           ...canvasList,
         ].slice(0, 10),
       );

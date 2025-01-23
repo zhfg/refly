@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Dropdown, Menu, Typography, Message as message } from '@arco-design/web-react';
 import { useUserStore } from '@/stores/user';
-import { safeStringifyJSON } from '@refly-packages/ai-workspace-common/utils/parse';
 import { LOCALE } from '@refly/common-types';
 // request
 import { type OutputLocale, enLocale, localeToLanguageName } from '@refly/utils';

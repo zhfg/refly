@@ -12,7 +12,10 @@ import type {
   MarkType,
 } from '@refly/common-types';
 import { safeStringifyJSON } from '@refly-packages/utils/parse';
-import { sendMessage, onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import {
+  sendMessage,
+  onMessage,
+} from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { BackgroundMessage } from '@refly/common-types';
 import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
 import { SelectedTextDomain } from '@refly/common-types';
@@ -22,7 +25,7 @@ import { getMarkdown } from '@refly/utils/html2md';
 import { BLOCK_SELECTED_MARK_ID, INLINE_SELECTED_MARK_ID } from '../utils/index';
 
 // utils
-import { highlightSelection, getSelectionNodesMarkdown } from '../utils/highlight-selection';
+import { getSelectionNodesMarkdown } from '../utils/highlight-selection';
 import { ElementType } from '../utils';
 import HoverMenu from '@refly-packages/ai-workspace-common/modules/content-selector/components/hover-menu';
 import { getPopupContainer } from '../utils/get-popup-container';
@@ -35,7 +38,11 @@ export const getContainerElem = (selector: string | null) => {
   return selector ? container.querySelector(`.${selector}`) : container;
 };
 
-export const useContentSelector = (selector: string | null, domain: SelectedTextDomain, metadata?: { url: string }) => {
+export const useContentSelector = (
+  selector: string | null,
+  domain: SelectedTextDomain,
+  metadata?: { url: string },
+) => {
   const statusRef = useRef(true);
   const markRef = useRef<HTMLDivElement | null>(null);
   const targetList = useRef<Element[]>([]);
@@ -297,7 +304,9 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     const xPath = markXPath || target.getAttribute(INLINE_SELECTED_MARK_ID);
     const mark = markListRef.current?.find((item) => item?.xPath === xPath);
     markListRef.current = markListRef.current.filter((item) => item.xPath !== xPath);
-    targetList.current = targetList.current.filter((item) => item.getAttribute(INLINE_SELECTED_MARK_ID) !== xPath);
+    targetList.current = targetList.current.filter(
+      (item) => item.getAttribute(INLINE_SELECTED_MARK_ID) !== xPath,
+    );
 
     // 执行清理函数
     mark?.cleanup?.();
@@ -314,7 +323,9 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
     markListRef.current = markListRef.current.filter((item) => item.xPath !== xPath);
 
     (target as Element)?.removeAttribute(BLOCK_SELECTED_MARK_ID);
-    targetList.current = targetList.current.filter((item) => item.getAttribute(BLOCK_SELECTED_MARK_ID) !== xPath);
+    targetList.current = targetList.current.filter(
+      (item) => item.getAttribute(BLOCK_SELECTED_MARK_ID) !== xPath,
+    );
 
     // 执行清理函数
     mark?.cleanup?.();
@@ -606,7 +617,10 @@ export const useContentSelector = (selector: string | null, domain: SelectedText
             height: 0,
             pointerEvents: 'none',
           }}
-          className={classNames('refly-content-selector-mark', 'refly-content-selector-mark--active')}
+          className={classNames(
+            'refly-content-selector-mark',
+            'refly-content-selector-mark--active',
+          )}
         ></div>
       </div>
     );

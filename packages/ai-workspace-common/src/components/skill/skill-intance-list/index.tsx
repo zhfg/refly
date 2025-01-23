@@ -54,10 +54,13 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
 
   // support search by displayName
   const [searchVal, setSearchVal] = useState('');
-  const [skillList, setSkillList, filter] = useSearchableList<SkillInstance>('displayName' as keyof SkillInstance, {
-    debounce: true,
-    delay: 300,
-  });
+  const [skillList, setSkillList, filter] = useSearchableList<SkillInstance>(
+    'displayName' as keyof SkillInstance,
+    {
+      debounce: true,
+      delay: 300,
+    },
+  );
 
   const goSkillList = () => {
     setSkillManagerModalVisible(false);
@@ -99,7 +102,11 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
             onChange={handleChange}
           />
         </div>
-        <Button type="primary" style={{ borderRadius: 8, height: 32, marginLeft: 8 }} onClick={goSkillList}>
+        <Button
+          type="primary"
+          style={{ borderRadius: 8, height: 32, marginLeft: 8 }}
+          onClick={goSkillList}
+        >
           <HiMiniArrowUturnRight />
           {t('skill.tab.skillTemplate')}
         </Button>
@@ -120,7 +127,9 @@ export const SkillInstanceList = (props: SkillInstanceListProps) => {
           bordered={false}
           pagination={false}
           dataSource={skillList}
-          scrollLoading={<ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />}
+          scrollLoading={
+            <ScrollLoading isRequesting={isRequesting} hasMore={hasMore} loadMore={loadMore} />
+          }
           render={(item: SkillInstance, key) => (
             <List.Item
               key={key}

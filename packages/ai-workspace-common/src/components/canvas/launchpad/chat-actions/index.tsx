@@ -31,7 +31,8 @@ interface ChatActionsProps {
 
 export const ChatActions = memo(
   (props: ChatActionsProps) => {
-    const { query, model, setModel, handleSendMessage, handleAbort, customActions, className } = props;
+    const { query, model, setModel, handleSendMessage, handleAbort, customActions, className } =
+      props;
     const { t } = useTranslation();
 
     const handleSendClick = useCallback(() => {
@@ -87,7 +88,8 @@ export const ChatActions = memo(
   (prevProps, nextProps) => {
     // Custom comparison for memo
     return (
-      prevProps.handleSendMessage === nextProps.handleSendMessage && prevProps.handleAbort === nextProps.handleAbort
+      prevProps.handleSendMessage === nextProps.handleSendMessage &&
+      prevProps.handleAbort === nextProps.handleAbort
     );
   },
 );

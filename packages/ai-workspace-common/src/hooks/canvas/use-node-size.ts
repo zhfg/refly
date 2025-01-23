@@ -36,9 +36,13 @@ export const useNodeSize = ({
   // Initialize size from node measurements or defaults
   const initialSize = useMemo(
     (): NodeSize => ({
-      width: node?.style?.width ? parseInt(node.style.width as string) : (node?.measured?.width ?? defaultWidth),
+      width: node?.style?.width
+        ? Number.parseInt(node.style.width as string)
+        : (node?.measured?.width ?? defaultWidth),
       height: node?.style?.height === 'auto' ? 'auto' : (node?.measured?.height ?? defaultHeight),
-      maxHeight: node?.style?.maxHeight ? parseInt(node.style.maxHeight as string) : undefined,
+      maxHeight: node?.style?.maxHeight
+        ? Number.parseInt(node.style.maxHeight as string)
+        : undefined,
     }),
     [node?.measured?.width, node?.measured?.height, node?.style, defaultWidth, defaultHeight],
   );
@@ -54,12 +58,17 @@ export const useNodeSize = ({
   useEffect(() => {
     if (node?.style) {
       setSize({
-        width: node.style.width ? parseInt(node.style.width as string) : (node?.measured?.width ?? defaultWidth),
+        width: node.style.width
+          ? Number.parseInt(node.style.width as string)
+          : (node?.measured?.width ?? defaultWidth),
         height:
           node.style.height === 'auto'
             ? 'auto'
-            : parseInt(node.style.height as string) || (node?.measured?.height ?? defaultHeight),
-        maxHeight: node.style.maxHeight ? parseInt(node.style.maxHeight as string) : undefined,
+            : Number.parseInt(node.style.height as string) ||
+              (node?.measured?.height ?? defaultHeight),
+        maxHeight: node.style.maxHeight
+          ? Number.parseInt(node.style.maxHeight as string)
+          : undefined,
       });
     }
   }, [

@@ -5,12 +5,14 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 const DATA_NUM = 10;
 
 export const useHandleSiderData = (initData?: boolean) => {
-  const { canvasList, libraryList, updateCanvasList, updateLibraryList } = useSiderStoreShallow((state) => ({
-    canvasList: state.canvasList,
-    libraryList: state.libraryList,
-    updateCanvasList: state.setCanvasList,
-    updateLibraryList: state.setLibraryList,
-  }));
+  const { canvasList, libraryList, updateCanvasList, updateLibraryList } = useSiderStoreShallow(
+    (state) => ({
+      canvasList: state.canvasList,
+      libraryList: state.libraryList,
+      updateCanvasList: state.setCanvasList,
+      updateLibraryList: state.setLibraryList,
+    }),
+  );
 
   const [isLoadingCanvas, setIsLoadingCanvas] = useState(false);
 

@@ -88,7 +88,6 @@ export const editDocumentCommonRules = `
    - Update outdated information
 `;
 
-
 export const editDocumentContextRules = `
 ## Context Handling Rules
 

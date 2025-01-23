@@ -29,12 +29,17 @@ const PreviewContextManagerComponent = (props: PreviewContextManagerProps) => {
   return (
     <div className="flex flex-col pt-2 pb-0 px-3 launchpad-context-manager">
       <div className="flex flex-col context-content">
-        <div className="flex flex-wrap content-start gap-1 w-full context-items-container">{renderedContextItems}</div>
+        <div className="flex flex-wrap content-start gap-1 w-full context-items-container">
+          {renderedContextItems}
+        </div>
       </div>
     </div>
   );
 };
 
-export const PreviewContextManager = memo(PreviewContextManagerComponent, (prevProps, nextProps) => {
-  return prevProps.contextItems === nextProps.contextItems;
-});
+export const PreviewContextManager = memo(
+  PreviewContextManagerComponent,
+  (prevProps, nextProps) => {
+    return prevProps.contextItems === nextProps.contextItems;
+  },
+);

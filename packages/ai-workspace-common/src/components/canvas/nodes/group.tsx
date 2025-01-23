@@ -1,13 +1,15 @@
 import { memo, useCallback, useState, useEffect, useRef, useMemo } from 'react';
-import { Position, NodeProps, NodeResizer, NodeResizeControl, useReactFlow } from '@xyflow/react';
+import { Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { CustomHandle } from './shared/custom-handle';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
-import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './shared/action-buttons';
 import { CanvasNode, CommonNodeProps } from './shared/types';
 import { GroupActionButtons } from '../group-action-menu/group-action-buttons';
 import { nodeActionEmitter } from '@refly-packages/ai-workspace-common/events/nodeActions';
-import { createNodeEventName, cleanupNodeEvents } from '@refly-packages/ai-workspace-common/events/nodeActions';
+import {
+  createNodeEventName,
+  cleanupNodeEvents,
+} from '@refly-packages/ai-workspace-common/events/nodeActions';
 import { useUngroupNodes } from '@refly-packages/ai-workspace-common/hooks/canvas/use-batch-nodes-selection/use-ungroup-nodes';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
@@ -316,7 +318,11 @@ export const GroupNode = memo(
             {!isPreview && !hideActions && (
               <>
                 <ActionButtons type="group" nodeId={id} isNodeHovered={isHovered} />
-                <GroupActionButtons nodeId={id} isTemporary={data.metadata?.isTemporary} isNodeHovered={isHovered} />
+                <GroupActionButtons
+                  nodeId={id}
+                  isTemporary={data.metadata?.isTemporary}
+                  isNodeHovered={isHovered}
+                />
               </>
             )}
           </div>
@@ -343,10 +349,14 @@ export const GroupNode = memo(
               let newTop = (target as HTMLElement).offsetTop;
 
               if (direction[0] === -1) {
-                newLeft = (target as HTMLElement).offsetLeft - (newWidth - (target as HTMLElement).offsetWidth);
+                newLeft =
+                  (target as HTMLElement).offsetLeft -
+                  (newWidth - (target as HTMLElement).offsetWidth);
               }
               if (direction[1] === -1) {
-                newTop = (target as HTMLElement).offsetTop - (newHeight - (target as HTMLElement).offsetHeight);
+                newTop =
+                  (target as HTMLElement).offsetTop -
+                  (newHeight - (target as HTMLElement).offsetHeight);
               }
 
               target.style.width = `${newWidth}px`;

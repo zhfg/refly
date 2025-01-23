@@ -9,7 +9,12 @@ import { HumanMessage } from '@langchain/core/messages';
 import { Runnable, RunnableConfig } from '@langchain/core/runnables';
 import { BaseSkill, SkillRunnableConfig, baseStateGraphArgs } from '../base';
 import { safeStringifyJSON } from '@refly-packages/utils';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition, Source } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+  Source,
+} from '@refly-packages/openapi-schema';
 // types
 import { GraphState, IContext } from '../scheduler/types';
 // utils
@@ -48,9 +53,20 @@ export class RewriteDoc extends BaseSkill {
     },
   };
 
-  commonPreprocess = async (state: GraphState, config: SkillRunnableConfig, module: SkillPromptModule) => {
+  commonPreprocess = async (
+    state: GraphState,
+    config: SkillRunnableConfig,
+    module: SkillPromptModule,
+  ) => {
     const { messages = [], query: originalQuery } = state;
-    const { locale = 'en', chatHistory = [], modelInfo, resources, documents, contentList } = config.configurable;
+    const {
+      locale = 'en',
+      chatHistory = [],
+      modelInfo,
+      resources,
+      documents,
+      contentList,
+    } = config.configurable;
 
     const { tplConfig } = config?.configurable || {};
     const enableWebSearch = tplConfig?.enableWebSearch?.value as boolean;
@@ -58,7 +74,7 @@ export class RewriteDoc extends BaseSkill {
 
     let optimizedQuery = '';
     let mentionedContext: IContext;
-    let context: string = '';
+    let context = '';
     let sources: Source[] = [];
     // preprocess query, ensure query is not too long
     const query = preprocessQuery(originalQuery, {
@@ -97,8 +113,11 @@ export class RewriteDoc extends BaseSkill {
       queryTokens < LONG_QUERY_TOKENS_THRESHOLD && // 只有短查询才需要重写
       (hasContext || chatHistoryTokens > 0); // 保持原有的上下文相关判断
 
-    const needPrepareContext = (hasContext && remainingTokens > 0) || enableWebSearch || enableKnowledgeBaseSearch;
-    this.engine.logger.log(`needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`);
+    const needPrepareContext =
+      (hasContext && remainingTokens > 0) || enableWebSearch || enableKnowledgeBaseSearch;
+    this.engine.logger.log(
+      `needRewriteQuery: ${needRewriteQuery}, needPrepareContext: ${needPrepareContext}`,
+    );
 
     if (needRewriteQuery) {
       const analyedRes = await analyzeQueryAndContext(query, {
@@ -156,7 +175,10 @@ export class RewriteDoc extends BaseSkill {
     return { requestMessages };
   };
 
-  callRewriteCanvas = async (state: GraphState, config: SkillRunnableConfig): Promise<Partial<GraphState>> => {
+  callRewriteCanvas = async (
+    state: GraphState,
+    config: SkillRunnableConfig,
+  ): Promise<Partial<GraphState>> => {
     const { messages = [], query: originalQuery } = state;
 
     const { chatHistory = [], currentSkill, documents } = config.configurable;

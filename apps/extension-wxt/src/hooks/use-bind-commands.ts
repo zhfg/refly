@@ -1,10 +1,5 @@
-import React, { type Dispatch, useEffect, useRef, useState } from 'react';
-import { reflyEnv } from '@/utils/env';
+import { useEffect, useRef } from 'react';
 import hotKeys from 'hotkeys-js';
-import { Source } from '@refly/openapi-schema';
-import { useWeblinkStore } from '@/stores/weblink';
-import { useUserStore } from '@/stores/user';
-import { apiRequest } from '@/requests/apiRequest';
 import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
 
 export const useBindCommands = () => {

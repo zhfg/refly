@@ -8,7 +8,11 @@ interface UseSelectionContextProps {
   enabled?: boolean;
 }
 
-export const useSelectionContext = ({ containerClass, containerRef, enabled = true }: UseSelectionContextProps) => {
+export const useSelectionContext = ({
+  containerClass,
+  containerRef,
+  enabled = true,
+}: UseSelectionContextProps) => {
   const [selectedText, setSelectedText] = useState<string>('');
   const [isSelecting, setIsSelecting] = useState(false);
   const { addContextItem } = useContextPanelStoreShallow((state) => ({
@@ -37,7 +41,8 @@ export const useSelectionContext = ({ containerClass, containerRef, enabled = tr
 
       // Prefer containerRef to check container
       const container =
-        containerRef?.current || (containerClass ? document.querySelector(`.${containerClass}`) : document.body);
+        containerRef?.current ||
+        (containerClass ? document.querySelector(`.${containerClass}`) : document.body);
 
       if (!container || !container.contains(range.commonAncestorContainer)) {
         setIsSelecting(false);

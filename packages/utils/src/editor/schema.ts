@@ -88,7 +88,9 @@ export const schema = new Schema({
           tag: 'ol',
           getAttrs(dom) {
             return {
-              order: (dom as HTMLElement).hasAttribute('start') ? +(dom as HTMLElement).getAttribute('start')! : 1,
+              order: (dom as HTMLElement).hasAttribute('start')
+                ? +(dom as HTMLElement).getAttribute('start')!
+                : 1,
               tight: (dom as HTMLElement).hasAttribute('data-tight'),
             };
           },

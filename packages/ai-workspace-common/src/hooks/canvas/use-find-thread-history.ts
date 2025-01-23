@@ -1,6 +1,9 @@
 import { useCallback } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { CanvasNode, ResponseNodeMeta } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
+import {
+  CanvasNode,
+  ResponseNodeMeta,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 export const useFindThreadHistory = () => {
   const { getNode, getNodes, getEdges } = useReactFlow();
@@ -11,7 +14,9 @@ export const useFindThreadHistory = () => {
 
       if (!startNode) {
         const nodes = getNodes();
-        startNode = nodes.find((node) => node.data?.entityId === resultId) as CanvasNode<ResponseNodeMeta>;
+        startNode = nodes.find(
+          (node) => node.data?.entityId === resultId,
+        ) as CanvasNode<ResponseNodeMeta>;
       }
 
       if (!startNode || startNode.type !== 'skillResponse') return [];

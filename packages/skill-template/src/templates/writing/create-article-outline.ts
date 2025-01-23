@@ -5,7 +5,11 @@ import { START, END, StateGraphArgs, StateGraph } from '@langchain/langgraph';
 import { BaseSkill, BaseSkillState, SkillRunnableConfig, baseStateGraphArgs } from '../../base';
 // schema
 import { z } from 'zod';
-import { Icon, SkillInvocationConfig, SkillTemplateConfigDefinition } from '@refly-packages/openapi-schema';
+import {
+  Icon,
+  SkillInvocationConfig,
+  SkillTemplateConfigDefinition,
+} from '@refly-packages/openapi-schema';
 
 interface GraphState extends BaseSkillState {
   documents: Document[];
@@ -66,7 +70,12 @@ export class CreateArticleOutlineSkill extends BaseSkill {
     this.engine.logger.log('---GENERATE---');
 
     const { query } = state;
-    const { locale = 'en', contentList = [], resources = [], chatHistory = [] } = config?.configurable || {};
+    const {
+      locale = 'en',
+      contentList = [],
+      resources = [],
+      chatHistory = [],
+    } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,

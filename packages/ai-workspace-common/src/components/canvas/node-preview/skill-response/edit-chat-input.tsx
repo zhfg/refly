@@ -33,7 +33,17 @@ interface EditChatInputProps {
 }
 
 const EditChatInputComponent = (props: EditChatInputProps) => {
-  const { enabled, resultId, version, contextItems, query, modelInfo, actionMeta, setEditMode, readonly } = props;
+  const {
+    enabled,
+    resultId,
+    version,
+    contextItems,
+    query,
+    modelInfo,
+    actionMeta,
+    setEditMode,
+    readonly,
+  } = props;
 
   const { getEdges, getNodes, deleteElements, addEdges } = useReactFlow();
   const [editQuery, setEditQuery] = useState<string>(query);
@@ -76,7 +86,12 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
     }
 
     const edges = getEdges();
-    const { edgesToAdd, edgesToDelete } = convertContextItemsToEdges(resultId, editContextItems, nodes, edges);
+    const { edgesToAdd, edgesToDelete } = convertContextItemsToEdges(
+      resultId,
+      editContextItems,
+      nodes,
+      edges,
+    );
     addEdges(edgesToAdd);
     deleteElements({ edges: edgesToDelete });
 
@@ -140,7 +155,11 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
             }}
           />
         )}
-        <ContextManager className="p-2 px-3" contextItems={editContextItems} setContextItems={setEditContextItems} />
+        <ContextManager
+          className="p-2 px-3"
+          contextItems={editContextItems}
+          setContextItems={setEditContextItems}
+        />
         <ChatInput
           ref={textareaRef}
           query={editQuery}

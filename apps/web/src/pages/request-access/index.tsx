@@ -1,3 +1,3 @@
-import RequestAccess from "@refly-packages/ai-workspace-common/components/request-access/index"
+import RequestAccess from '@refly-packages/ai-workspace-common/components/request-access/index';
 
-export default RequestAccess
+export default RequestAccess;

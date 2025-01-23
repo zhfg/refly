@@ -39,7 +39,7 @@ export const concatMergedContextToStr = (mergedContext: {
 }) => {
   const { mentionedContext, lowerPriorityContext, webSearchSources } = mergedContext || {};
   let contextStr = '';
-  let currentIndex = 1; // Start index
+  const currentIndex = 1; // Start index
 
   // Handle web search sources
   const webSearchContexConcatRes = concatContextToStr({ webSearchSources }, currentIndex);
@@ -90,7 +90,10 @@ export const flattenMergedContextToSources = (mergedContext: {
   const uniqueSources = sources.filter(
     (source, index, self) =>
       index ===
-      self.findIndex((s) => s.url === source.url && s.title === source.title && s.pageContent === source.pageContent),
+      self.findIndex(
+        (s) =>
+          s.url === source.url && s.title === source.title && s.pageContent === source.pageContent,
+      ),
   );
 
   return uniqueSources;
@@ -98,7 +101,7 @@ export const flattenMergedContextToSources = (mergedContext: {
 
 // TODO: should replace id with `type-index` for better llm extraction
 // citationIndex for each context item is used for LLM to cite the context item in the final answer
-export const concatContextToStr = (context: Partial<IContext>, startIndex: number = 1) => {
+export const concatContextToStr = (context: Partial<IContext>, startIndex = 1) => {
   const { contentList = [], resources = [], documents = [], webSearchSources = [] } = context || {};
 
   let contextStr = '';
@@ -110,7 +113,9 @@ export const concatContextToStr = (context: Partial<IContext>, startIndex: numbe
       return `<ContextItem citationIndex='[[citation:${index++}]]' type='webSearchSource' url='${url}' title='${title}'>${content}</WebSearchSource>`;
     };
 
-    contextStr += webSearchSources.map((s) => concatWebSearchSource(s.url, s.title, s.pageContent)).join('\n');
+    contextStr += webSearchSources
+      .map((s) => concatWebSearchSource(s.url, s.title, s.pageContent))
+      .join('\n');
     contextStr += '\n\n';
   }
 
@@ -119,7 +124,13 @@ export const concatContextToStr = (context: Partial<IContext>, startIndex: numbe
 
   if (contentList.length > 0) {
     // contextStr += 'Following are the user selected content: \n';
-    const concatContent = (content: string, from: SelectedContentDomain, title: string, id?: string, url?: string) => {
+    const concatContent = (
+      content: string,
+      from: SelectedContentDomain,
+      title: string,
+      id?: string,
+      url?: string,
+    ) => {
       return `<ContextItem citationIndex='[[citation:${index++}]]' type='selectedContent' from='${from}' ${
         id ? `entityId='${id}'` : ''
       } title='${title}' ${url ? `weblinkUrl='${url}'` : ''}>${content}</ContextItem>`;
@@ -157,7 +168,12 @@ export const concatContextToStr = (context: Partial<IContext>, startIndex: numbe
 
     const resourceStr = resources
       .map((r) =>
-        concatResource(r.resource?.resourceId!, r.resource?.resourceType!, r.resource?.title!, r.resource?.content!),
+        concatResource(
+          r.resource?.resourceId!,
+          r.resource?.resourceType!,
+          r.resource?.title!,
+          r.resource?.content!,
+        ),
       )
       .join('\n');
 

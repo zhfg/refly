@@ -243,16 +243,15 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
     };
   }, [provider, handleUnsyncedChanges]);
 
-  const { data, config, showPreview, setShowPreview, showMaxRatio, setShowMaxRatio } = useCanvasStoreShallow(
-    (state) => ({
+  const { data, config, showPreview, setShowPreview, showMaxRatio, setShowMaxRatio } =
+    useCanvasStoreShallow((state) => ({
       data: state.data[canvasId],
       config: state.config[canvasId],
       showPreview: state.showPreview,
       setShowPreview: state.setShowPreview,
       showMaxRatio: state.showMaxRatio,
       setShowMaxRatio: state.setShowMaxRatio,
-    }),
-  );
+    }));
 
   const [connectionTimeout, setConnectionTimeout] = useState(false);
 

@@ -1,7 +1,7 @@
-import React, { type Dispatch, useEffect, useRef, useState } from "react";
-import { useQuickActionStore } from "../stores/quick-action";
-import { usePopupStore } from "../stores/popup";
-import { calcPopupPosition } from "@/utils/ui";
+import { useEffect } from 'react';
+import { useQuickActionStore } from '../stores/quick-action';
+import { usePopupStore } from '../stores/popup';
+import { calcPopupPosition } from '@/utils/ui';
 
 export const useRegisterMouseEvent = () => {
   const quickActionStore = useQuickActionStore();
@@ -11,7 +11,7 @@ export const useRegisterMouseEvent = () => {
     const { target } = event;
     const nodeName = (target as any).nodeName;
 
-    if (nodeName === "PLASMO-CSUI") {
+    if (nodeName === 'PLASMO-CSUI') {
       // 点击的是 Bar 上的按钮，返回
       return;
     }
@@ -38,7 +38,7 @@ export const useRegisterMouseEvent = () => {
     const { target } = event;
     const nodeName = (target as any).nodeName;
 
-    if (nodeName === "PLASMO-CSUI") {
+    if (nodeName === 'PLASMO-CSUI') {
       // 点击的是 Bar 上的按钮，返回
       return;
     }
@@ -52,23 +52,23 @@ export const useRegisterMouseEvent = () => {
       text === quickActionStore.selectedText
     ) {
       window.getSelection().empty();
-      quickActionStore.setSelectedText("");
+      quickActionStore.setSelectedText('');
       quickActionStore.setToolbarVisible(false);
       popupStore.setPopupVisible(false);
     }
   };
 
   const bindMouseEvent = () => {
-    window.addEventListener("mouseup", handleMouseUp);
-    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousedown', handleMouseDown);
   };
 
   useEffect(() => {
     bindMouseEvent();
 
     return () => {
-      window.removeEventListener("mouseup", handleMouseUp, { capture: true });
-      window.removeEventListener("mousedown", handleMouseDown, {
+      window.removeEventListener('mouseup', handleMouseUp, { capture: true });
+      window.removeEventListener('mousedown', handleMouseDown, {
         capture: true,
       });
     };

@@ -48,7 +48,10 @@ export function Home({
               >
                 {renderItem?.icon}
                 <div className="search-res-container">
-                  <p className="search-res-title" dangerouslySetInnerHTML={{ __html: item?.highlightedTitle }}></p>
+                  <p
+                    className="search-res-title"
+                    dangerouslySetInnerHTML={{ __html: item?.highlightedTitle }}
+                  ></p>
                   {item?.snippets?.length > 0 &&
                     item.snippets.map((snippet, index) => (
                       <p
