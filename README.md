@@ -91,8 +91,6 @@ Deploy ReflyAI to Azure with one click using terraform.
 
 ## Stay Updated
 
-> Star Us
-
 Star Refly on GitHub to receive instant notifications about new version releases.
 
 ![stay-tuned](https://github.com/user-attachments/assets/877dfeb7-1088-41f1-9176-468d877ded0a)

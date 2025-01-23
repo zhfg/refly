@@ -94,8 +94,6 @@ Bash
 
 ## 保持关注
 
-> Star 我们
-
 在 GitHub 上给 Refly 星标，即可即时接收新版本发布的通知。
 
 ![stay-tuned](https://github.com/user-attachments/assets/877dfeb7-1088-41f1-9176-468d877ded0a)
