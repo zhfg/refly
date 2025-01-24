@@ -1,5 +1,3 @@
-![refly-cover](https://github.com/user-attachments/assets/2930c555-09a7-4ea2-a18a-2b1d8a7ef4ae)
-
 <div align="center">
 
 <h1 align="center" style="border-bottom: none">
@@ -8,6 +6,10 @@
     </b>
     ⭐️  The AI Native Creation Engine ⭐️ <br>
 </h1>
+
+![refly-cover](https://github.com/user-attachments/assets/2930c555-09a7-4ea2-a18a-2b1d8a7ef4ae)
+
+Refly is an open-source AI-native creation engine. It's intuitive free-form canvas interface combines multi-threaded conversations, knowledge base RAG integration, contextual memory, intelligent search, WYSIWYG AI editor and more, empowering you to effortlessly transform ideas into production-ready content.
 
 [🚀 Refly v0.2.3 Released! Featuring Enhanced Product Onboarding!](https://docs.refly.ai/changelog/v0.2.3)
 
@@ -28,8 +30,6 @@
   <a href=""><img alt="README in English" src="https://img.shields.io/badge/English-d9d9d9"></a>
   <a href="README_CN.md"><img alt="简体中文版自述文件" src="https://img.shields.io/badge/简体中文-d9d9d9"></a>
 </p>
-
-Refly is an open-source AI-native creation engine. It's intuitive free-form canvas interface combines multi-threaded conversations, knowledge base RAG integration, contextual memory, intelligent search, WYSIWYG AI editor and more, empowering you to effortlessly transform ideas into production-ready content.
 
 </div>
 

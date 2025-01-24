@@ -1,5 +1,3 @@
-![refly-cover](https://github.com/user-attachments/assets/2930c555-09a7-4ea2-a18a-2b1d8a7ef4ae)
-
 <div align="center">
 
 <h1 align="center" style="border-bottom: none">
@@ -8,6 +6,10 @@
     </b>
     ⭐️  AI Native 内容创作引擎 ⭐️ <br>
 </h1>
+
+![refly-cover](https://github.com/user-attachments/assets/2930c555-09a7-4ea2-a18a-2b1d8a7ef4ae)
+
+Refly 是一个开源的 AI 原生创作引擎。Refly 直观的自由画布界面集成了多线程对话、RAG 检索流程、上下文记忆、智能搜索和 AI 文档编辑等功能，让您轻松地将创意转化为完整作品。
 
 [🚀 Refly v0.2.3 正式发布！全新升级产品引导体验！](https://docs.refly.ai/changelog/v0.2.3)
 
@@ -30,8 +32,6 @@
   <a href="./README.md"><img alt="README in English" src="https://img.shields.io/badge/English-d9d9d9"></a>
   <a href="./README_CN.md"><img alt="简体中文版自述文件" src="https://img.shields.io/badge/简体中文-d9d9d9"></a>
 </p>
-
-Refly 是一个开源的 AI 原生创作引擎。Refly 直观的自由画布界面集成了多线程对话、RAG 检索流程、上下文记忆、智能搜索和 AI 文档编辑等功能，让您轻松地将创意转化为完整作品。
 
 </div>
 
