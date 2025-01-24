@@ -72,7 +72,7 @@ Deploy ReflyAI to Azure with one click using terraform.
 
 - [Azure Terraform by @nikawang](https://github.com/douban/charts/tree/master/charts/dify)
 
-## Features
+## Key Features
 
 1. **Multi-threaded dialogues:** Refly implements an innovative multi-threaded dialogues mechanism that allows you to freely switch between multiple independent conversation topics. This enables more fluid and natural thought expansion and in-depth discussions, effectively breaking through the limitations of traditional conversations. It helps build complex and effective **Agentic Workflows** in **human-AI collaboration**.
 

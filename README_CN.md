@@ -75,7 +75,7 @@ Bash
 
 - [@nikawang 提供的 Azure Terraform](https://github.com/douban/charts/tree/master/charts/dify)
 
-## 特性
+## 关键特性
 
 1. **多线程对话：**Refly 采用创新的多线程对话机制，让您能够自由切换多个独立对话主题，实现更流畅自然的思维发散与深入探讨，有效突破传统对话的局限性，在人机协作过程中构建复杂且有效的 Agentic Workflow。
 
