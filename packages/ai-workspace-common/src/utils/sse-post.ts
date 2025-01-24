@@ -1,16 +1,16 @@
-import { getServerOrigin } from '@refly/utils/url';
 import { InvokeSkillRequest, SkillEvent } from '@refly/openapi-schema';
 import { scrollToBottom } from '@refly-packages/ai-workspace-common/utils/ui';
 import { extractBaseResp } from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { ConnectionError, AuthenticationExpiredError } from '@refly/errors';
 import { refreshToken } from './auth';
+import { serverOrigin } from './env';
 
 const makeSSERequest = async (
   payload: InvokeSkillRequest,
   controller: AbortController,
   isRetry = false,
 ): Promise<Response> => {
-  const response = await fetch(`${getServerOrigin()}/v1/skill/streamInvoke`, {
+  const response = await fetch(`${serverOrigin}/v1/skill/streamInvoke`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

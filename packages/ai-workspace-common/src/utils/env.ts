@@ -13,6 +13,9 @@ export const getEnv = () => {
   return env;
 };
 
+export const serverOrigin = import.meta.env.VITE_API_URL;
+export const wsServerOrigin = import.meta.env.VITE_COLLAB_URL;
+
 let runtime: IRuntime;
 
 export const getRuntime = () => {

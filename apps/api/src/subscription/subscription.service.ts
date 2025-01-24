@@ -220,8 +220,12 @@ export class SubscriptionService implements OnModuleInit {
           subscriptionId: sub.subscriptionId,
           startAt: startOfDay(now),
           endAt,
+          t1CountQuota: plan?.t1CountQuota ?? this.config.get('quota.request.t1'),
+          t1CountUsed: 0,
           t1TokenQuota: plan?.t1TokenQuota ?? this.config.get('quota.token.t1'),
           t1TokenUsed: 0,
+          t2CountQuota: plan?.t2CountQuota ?? this.config.get('quota.request.t2'),
+          t2CountUsed: 0,
           t2TokenQuota: plan?.t2TokenQuota ?? this.config.get('quota.token.t2'),
           t2TokenUsed: 0,
         },
@@ -236,6 +240,7 @@ export class SubscriptionService implements OnModuleInit {
         },
         data: {
           subscriptionId: sub.subscriptionId,
+          fileCountQuota: plan?.fileCountQuota ?? this.config.get('quota.storage.file'),
           objectStorageQuota: plan?.objectStorageQuota ?? this.config.get('quota.storage.object'),
           vectorStorageQuota: plan?.vectorStorageQuota ?? this.config.get('quota.storage.vector'),
         },
@@ -296,6 +301,7 @@ export class SubscriptionService implements OnModuleInit {
         },
         data: {
           subscriptionId: null,
+          fileCountQuota: freePlan?.fileCountQuota ?? this.config.get('quota.storage.file'),
           objectStorageQuota:
             freePlan?.objectStorageQuota ?? this.config.get('quota.storage.object'),
           vectorStorageQuota:
@@ -504,8 +510,13 @@ export class SubscriptionService implements OnModuleInit {
       }
 
       // Otherwise, create a new meter
-      const startAt = lastMeter?.endAt ?? startOfDay(now);
+      let startAt: Date;
       const planType = sub?.planType || 'free';
+      if (planType === 'free') {
+        startAt = startOfDay(now);
+      } else {
+        startAt = lastMeter?.endAt ?? startOfDay(now);
+      }
 
       // For free plan, the meter ends at the next day
       // For paid plan, the meter ends at the next month
