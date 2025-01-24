@@ -30,7 +30,6 @@ export const SearchOptions = () => {
     }
   }, [currentUiLocale]);
 
-  // 构建语言选项
   const languageOptions = useMemo(() => {
     const languageMap =
       currentUiLocale === LOCALE.EN ? languageNameToLocale.en : languageNameToLocale['zh-CN'];
@@ -41,12 +40,10 @@ export const SearchOptions = () => {
     }));
   }, [currentUiLocale]);
 
-  // 构建输出语言选项，增加 Auto 选项
   const outputLanguageOptions = useMemo(() => {
     return [...languageOptions];
   }, [languageOptions, currentUiLocale]);
 
-  // 获取当前语言的显示名称
   const getLocaleName = (locale: string) => {
     const names =
       currentUiLocale === LOCALE.EN ? localeToLanguageName.en : localeToLanguageName['zh-CN'];
@@ -66,8 +63,11 @@ export const SearchOptions = () => {
   return (
     <Space className="search-options">
       <div className="select-group">
-        <label className="select-label">{t('resource.multilingualSearch.searchLabel')}</label>
+        <label htmlFor="search-language-select" className="select-label">
+          {t('resource.multilingualSearch.searchLabel')}
+        </label>
         <Select
+          id="search-language-select"
           mode="multiple"
           showSearch
           variant="filled"
@@ -86,8 +86,11 @@ export const SearchOptions = () => {
         />
       </div>
       <div className="select-group">
-        <label className="select-label">{t('resource.multilingualSearch.displayLabel')}</label>
+        <label htmlFor="display-language-select" className="select-label">
+          {t('resource.multilingualSearch.displayLabel')}
+        </label>
         <Select
+          id="display-language-select"
           showSearch
           variant="filled"
           style={{ minWidth: 200 }}
