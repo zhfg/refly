@@ -2,19 +2,27 @@
 
 Refly is licensed under the Apache License 2.0, with the following additional conditions:
 
-1. Refly may be utilized commercially, including as an AI-native creation engine, content creation platform, or as a development platform for enterprises. Should the conditions below be met, a commercial license must be obtained from the producer:
+1. Usage Terms:
 
-a. Multi-tenant service: Unless explicitly authorized by Refly in writing, you may not use the Refly source code to operate a multi-tenant environment. 
-    - Tenant Definition: Within the context of Refly, one tenant corresponds to one workspace. The workspace provides a separated area for each tenant's data, configurations, and AI-powered features including but not limited to multi-threaded dialogues, knowledge base, and canvas content.
+a. Personal Use: Refly is free for personal, non-commercial use.
+
+b. Commercial Use: Any commercial use of Refly requires obtaining a commercial license from the producer. Commercial use includes but is not limited to:
+   - Using Refly in a business environment
+   - Using Refly to generate content for commercial purposes
+   - Integrating Refly into commercial products or services
+   - Operating Refly as a service for others
+   - Any revenue-generating activities involving Refly
+
+Please contact support@refly.ai by email to inquire about commercial licensing.
+
+2. Additional Restrictions:
     
-b. LOGO and copyright information: In the process of using Refly's frontend, you may not remove or modify the LOGO or copyright information in the Refly console or applications. This restriction is inapplicable to uses of Refly that do not involve its frontend.
-    - Frontend Definition: For the purposes of this license, the "frontend" of Refly includes all components located in the `apps/web/` directory when running Refly from the raw source code, or the "web" image when running Refly with Docker, including the free-form canvas interface, knowledge base interface, and all AI-powered features.
+a. LOGO and copyright information: In the process of using Refly's frontend, you may not remove or modify the LOGO or copyright information in the Refly console or applications. This restriction is inapplicable to uses of Refly that do not involve its frontend.
+    - Frontend Definition: For the purposes of this license, the "frontend" of Refly includes all components located in the `apps/web/` and `packages/ai-workspace-common` directory when running Refly from the raw source code, or the "web" image when running Refly with Docker, including the free-form canvas interface, knowledge base interface, and all AI-powered features.
 
-c. AI Model Integration: While Refly provides integration with various AI models and features (including but not limited to GPT-4o-mini, GPT-4o, and Claude-3.5-Sonnet), users must obtain their own API keys and comply with the respective model providers' terms of service.
+b. AI Model Integration: While Refly provides integration with various AI models and features (including but not limited to GPT-4o-mini, GPT-4o, and Claude-3.5-Sonnet), users must obtain their own API keys and comply with the respective model providers' terms of service.
 
-Please contact support@refly.ai by email to inquire about licensing matters.
-
-2. As a contributor, you should agree that:
+3. As a contributor, you should agree that:
 
 a. The producer can adjust the open-source agreement to be more strict or relaxed as deemed necessary.
 b. Your contributed code may be used for commercial purposes, including but not limited to its cloud business operations and AI-powered features.
@@ -23,7 +31,7 @@ Apart from the specific conditions mentioned above, all other rights and restric
 
 The interactive design of this product, including the free-form canvas interface and AI-powered features, is protected by appearance patent.
 
-© 2024 Powerformer, Inc.
+© 2025 Powerformer, Inc.
 
 
 ----------
