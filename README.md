@@ -35,54 +35,29 @@ Refly is an open-source AI-native creation engine. It's intuitive free-form canv
 
 ## Quick Start
 
-### Local Development
-
 > Before installing ReflyAI, ensure your machine meets these minimum system requirements:
 >
 > CPU >= 2 cores
 >
 > Memory >= 4GB
 
-The easiest way to start the ReflyAI server is to run our docker-compose.yml file. Before running the installation commands, make sure Docker and Docker Compose are installed on your machine:
+### Self-deploy with Docker
 
-```bash
-cd docker
-cp .env.example .env
-docker compose up -d
-```
-
-After running, you can access http://localhost/install in your browser to enter the ReflyAI control panel and begin the initialization process.
-
-> If you want to contribute code to ReflyAI or perform additional development, please refer to our source code deployment guide.
-
-**Next Steps**
-
-For custom configurations, refer to the comments in the [.env.example](https://www.refly.ai/) file and update the corresponding values in your .env file. Additionally, you may need to adjust the docker-compose.yaml file itself according to specific deployment environments and requirements, such as changing image versions, port mappings, or volume mounts. After making any changes, please re-run docker compose up -d. You can find a complete list of all available environment variables [here](https://www.refly.ai/).
-
-### Private Deployment
-
-If you want to configure high-availability setups, there are community-contributed Helm Charts and YAML files that allow deployment of ReflyAI on Kubernetes.
-
-### Deploy with Docker
-
-Deploy your own feature-rich, unlimited version of ReflyAI using Docker. Our team is working hard to keep up with the latest versions. For more information on self-hosting ReflyAI, please refer to our [documentation]().
+Deploy your own feature-rich, unlimited version of ReflyAI using Docker. Our team is working hard to keep up with the latest versions.
 
 To start deployment:
 
 ```bash
-docker pull ghcr.io/reflyai/reflyai:latest
-docker run -d -p 3000:3000 ghcr.io/reflyai/reflyai:latest
+cd deploy/docker
+cp .env.example .env # make sure all required envs are properly set
+docker-compose up -d
 ```
 
-Visit [http://localhost:3000](http://localhost:3000/) to start using ReflyAI.
+Visit [http://localhost:5700](http://localhost:5700/) to start using ReflyAI.
 
-### **Deploy with Terraform**
+### Local Development
 
-**Azure Global**
-
-Deploy ReflyAI to Azure with one click using terraform.
-
-- [Azure Terraform]()
+View details in [CONTRIBUTING](./CONTRIBUTING.md).
 
 ## Key Features
 
