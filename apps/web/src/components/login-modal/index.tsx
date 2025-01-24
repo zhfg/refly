@@ -6,10 +6,10 @@ import Logo from '@/assets/logo.svg';
 import Google from '@/assets/google.svg';
 import GitHub from '@/assets/github-mark.svg';
 
-import { getServerOrigin } from '@refly/utils/url';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
+import { serverOrigin } from '@refly-packages/ai-workspace-common/utils/env';
 
 interface FormValues {
   email: string;
@@ -45,7 +45,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
   const handleLogin = (provider: 'github' | 'google') => {
     authStore.setLoginInProgress(true);
     authStore.setLoginProvider(provider);
-    location.href = `${getServerOrigin()}/v1/auth/${provider}`;
+    location.href = `${serverOrigin}/v1/auth/${provider}`;
   };
 
   const handleEmailAuth = async () => {

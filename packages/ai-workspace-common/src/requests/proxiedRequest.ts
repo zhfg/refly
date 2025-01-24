@@ -1,8 +1,7 @@
 import { client, BaseResponse } from '@refly/openapi-schema';
 import * as requestModule from '@refly/openapi-schema';
 
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
-import { getServerOrigin } from '@refly/utils/url';
+import { getRuntime, serverOrigin } from '@refly-packages/ai-workspace-common/utils/env';
 import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { MessageName } from '@refly/common-types';
 import { ConnectionError, OperationTooFrequent, UnknownError } from '@refly/errors';
@@ -28,7 +27,7 @@ const getAndClearCachedRequest = (originalRequest: Request): Request | undefined
   return cachedRequest;
 };
 
-client.setConfig({ baseUrl: getServerOrigin() + '/v1', credentials: 'include' });
+client.setConfig({ baseUrl: `${serverOrigin}/v1`, credentials: 'include' });
 
 export interface CheckResponseResult {
   isError: boolean;

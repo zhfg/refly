@@ -2,10 +2,10 @@ import React, { createContext, useContext, useEffect, useMemo, useState, useCall
 import * as Y from 'yjs';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { IndexeddbPersistence } from 'y-indexeddb';
-import { getWsServerOrigin } from '@refly-packages/utils/url';
 import { editorEmitter } from '@refly-packages/utils/event-emitter/editor';
 import { useDocumentStoreShallow } from '@refly-packages/ai-workspace-common/stores/document';
 import { useCollabToken } from '@refly-packages/ai-workspace-common/hooks/use-collab-token';
+import { wsServerOrigin } from '@refly-packages/ai-workspace-common/utils/env';
 
 interface DocumentContextType {
   docId: string;
@@ -65,7 +65,7 @@ export const DocumentProvider = ({
     const doc = new Y.Doc();
 
     const remoteProvider = new HocuspocusProvider({
-      url: getWsServerOrigin(),
+      url: wsServerOrigin,
       name: docId,
       token,
       document: doc,
