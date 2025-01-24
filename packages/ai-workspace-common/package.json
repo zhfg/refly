@@ -137,7 +137,6 @@
     "postcss": "^8.4.21",
     "sass": "1.71.1",
     "tailwindcss": "^3.2.6",
-    "vite": "^5.2.0",
-    "wxt": "workspace:*"
+    "vite": "^5.2.0"
   }
 }
