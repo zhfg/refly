@@ -1,8 +1,10 @@
 import { ExecutionContext, Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { SkipThrottle, ThrottlerGuard, ThrottlerModule, seconds } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import api from '@opentelemetry/api';
 
 import { CommonModule } from '@/common/common.module';
@@ -25,7 +27,6 @@ import { CanvasModule } from './canvas/canvas.module';
 import { CollabModule } from './collab/collab.module';
 import { ActionModule } from './action/action.module';
 import { RedisService } from '@/common/redis.service';
-import { APP_GUARD } from '@nestjs/core';
 
 class CustomThrottlerGuard extends ThrottlerGuard {
   protected async shouldSkip(context: ExecutionContext): Promise<boolean> {
@@ -60,7 +61,7 @@ class CustomThrottlerGuard extends ThrottlerGuard {
           },
         ],
         getTracker: (req) => (req.ips?.length ? req.ips[0] : req.ip),
-        // storage: new ThrottlerStorageRedisService(redis),
+        storage: new ThrottlerStorageRedisService(redis),
       }),
     }),
     LoggerModule.forRoot({
