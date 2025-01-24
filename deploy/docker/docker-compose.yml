@@ -26,5 +26,5 @@ services:
     build: reflyai/refly-web:latest
     container_name: refly_web
     ports:
-      - 3000:3000
+      - 5700:80
     restart: always

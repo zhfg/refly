@@ -37,27 +37,5 @@ jobs:
         run: pnpm build
         env:
           NODE_OPTIONS: '--max_old_space_size=8192'
-          SENTRY_AUTH_TOKEN: ${{ inputs.environment != 'ci' && secrets.SENTRY_AUTH_TOKEN || '' }}
           TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-
-      - name: Create Sentry release
-        if: inputs.environment == 'production'
-        uses: getsentry/action-release@v1.7.0
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: refly-ai
-          SENTRY_PROJECT: web
-        with:
-          environment: ${{ inputs.environment }}
-
-      - name: Deploy web to Cloudflare Pages
-        if: inputs.web_deploy_project != ''
-        uses: cloudflare/pages-action@v1.5.0
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: ${{ inputs.web_deploy_project }}
-          branch: main
-          workingDirectory: apps/web
-          directory: dist
