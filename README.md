@@ -9,11 +9,11 @@
 
 ![refly-cover](https://github.com/user-attachments/assets/2930c555-09a7-4ea2-a18a-2b1d8a7ef4ae)
 
-Refly is an open-source AI-native creation engine. Refly's intuitive free-form canvas interface combines multi-threaded conversations, knowledge base RAG integration, contextual memory, intelligent search, WYSIWYG AI editor and more, empowering you to effortlessly transform ideas into production-ready content.
+Refly is an open-source AI-native creation engine. It's intuitive free-form canvas interface combines multi-threaded conversations, knowledge base RAG integration, contextual memory, intelligent search, WYSIWYG AI editor and more, empowering you to effortlessly transform ideas into production-ready content.
 
 [🚀 Refly v0.2.3 Released! Featuring Enhanced Product Onboarding!](https://docs.refly.ai/changelog/v0.2.3)
 
-[Refly Cloud](https://refly.ai/) · [Self-hosting](https://refly.ai/) · [Forum](https://github.com/refly-ai/refly/discussions) · [Discord](https://discord.gg/bWjffrb89h) · [Twitter](https://x.com/reflyai) · [Documentation](https://x.com/reflyai)
+[Refly Cloud](https://refly.ai/) 丨 [Self-hosting](https://refly.ai/) 丨 [Forum](https://github.com/refly-ai/refly/discussions) 丨 [Discord](https://discord.gg/bWjffrb89h) 丨 [Twitter](https://x.com/reflyai) 丨 [Documentation](https://docs.refly.ai/)
 
 </div>
 
@@ -101,10 +101,11 @@ https://github.com/user-attachments/assets/9f11b8eb-dd9d-4691-aca1-d3f11ff801ab
 ## How to Use?
 
 - **Cloud**
-  - We've deployed a Refly Cloud version that allows zero-configuration usage, offering all capabilities of the self-hosted version, including free access to GPT-4o-mini and limited trials of GPT-4o and Claude-3.5-Sonnet
+  - We've deployed a Refly Cloud version that allows zero-configuration usage, offering all capabilities of the self-hosted version, including free access to GPT-4o-mini and limited trials of GPT-4o and Claude-3.5-Sonnet. Visit [https://refly.ai/](https://refly.ai/) to get started.
 - **Self-hosting Refly Community Edition**
-  - Get started quickly with our [Getting Started Guide](https://docs.refly.ai/) to run Refly in your environment. For more detailed references and in-depth instructions, please refer to our documentation.
+  - Get started quickly with our [Getting Started Guide](./CONTRIBUTING.md) to run Refly in your environment. For more detailed references and in-depth instructions, please refer to our documentation.
 - **Refly for enterprise / organizations**
+  Please contact us at [support@refly.ai](mailto:support@refly.ai) for private deployment solutions.
 
 ## Stay Updated
 
@@ -114,22 +115,16 @@ Star Refly on GitHub to receive instant notifications about new version releases
 
 ## Contributing Guidelines
 
-| Bug Reports                                      | Feature Requests                                      | Issues/Discussions                                     | ReflyAI Community                                        |
-| ------------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------- |
-| [Create Bug Report](https://udify.app/chat/link) | [Submit Feature Request](https://udify.app/chat/link) | [View GitHub Discussions](https://udify.app/chat/link) | [Visit ReflyAI Community](https://udify.app/chat/link)   |
-| Something isn't working as expected              | Ideas for new features or improvements                | Discuss and raise questions                            | A place to ask questions, learn, and connect with others |
+| Bug Reports                                                              | Feature Requests                                                  | Issues/Discussions                                                       | ReflyAI Community                                                     |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| [Create Bug Report](https://github.com/refly-ai/refly/issues/new/choose) | [Submit Feature Request](https://github.com/refly-ai/refly/pulls) | [View GitHub Discussions](https://github.com/refly-ai/refly/discussions) | [Visit ReflyAI Community](https://docs.refly.ai/community/contact-us) |
+| Something isn't working as expected                                      | Ideas for new features or improvements                            | Discuss and raise questions                                              | A place to ask questions, learn, and connect with others              |
 
-We welcome all developers, testers, technical writers, and more! We welcome various types of contributions, and you can learn more in [docs/types-of-contributions.md](https://github.com/toeverything/AFFiNE/blob/canary/docs/types-of-contributions.md). If you're interested in contributing code, please read our [docs/CONTRIBUTING.md](https://github.com/toeverything/AFFiNE/blob/canary/docs/CONTRIBUTING.md) and feel free to check out our GitHub issues to show us what you can do.
+We welcome all developers, testers, technical writers, and more! We welcome various types of contributions. Please check our [CONTRIBUTING.md](./CONTRIBUTING.md) and feel free to browse our [GitHub issues](https://github.com/refly-ai/refly/issues) to show us what you can do.
 
-Before starting to contribute, please ensure you've read and accepted our [Contributor License Agreement](https://github.com/toeverything/affine/edit/canary/.github/CLA.md). To indicate agreement, simply edit this file and submit a pull request.
+For bug reports, feature requests, and other suggestions, you can also [create a new issue](https://github.com/refly-ai/refly/issues/new/choose) and choose the most appropriate template to provide feedback.
 
-For bug reports, feature requests, and other suggestions, you can also [create a new issue](https://github.com/toeverything/AFFiNE/issues/new/choose) and choose the most appropriate template to provide feedback.
-
-For translations and language support, you can visit our [i18n General Space](https://community.affine.pro/c/i18n-general).
-
-Looking for other ways to contribute and don't know where to start? Check out the [ReflyAI Ambassador Program](https://community.affine.pro/c/start-here/affine-ambassador), where we work closely with passionate community members and provide extensive support and resources.
-
-If you have any questions, feel free to reach out to us. One of the best places to get more information and learn is the [ReflyAI Community](https://community.affine.pro/home), where you can connect with other like-minded individuals.
+If you have any questions, feel free to reach out to us. One of the best places to get more information and learn is the [ReflyAI Community](https://docs.refly.ai/community/contact-us), where you can connect with other like-minded individuals.
 
 ## Community and Contact
 
@@ -138,10 +133,33 @@ If you have any questions, feel free to reach out to us. One of the best places 
 - [Discord](https://discord.gg/bWjffrb89h): Best for sharing your applications and interacting with the community.
 - [Twitter](https://x.com/reflyai): Best for sharing your applications and staying connected with the community.
 
+## Upstream Projects
+
+We would also like to thank the following open-source projects that make ReflyAI possible:
+
+1. [LangChain](https://github.com/langchain-ai/langchainjs) - Library for building AI applications.
+2. [ReactFlow](https://github.com/xyflow/xyflow) - Library for building visual workflows.
+3. [Tiptap](https://github.com/ueberdosis/tiptap) - Library for building collaborative editors.
+4. [Ant Design](https://github.com/ant-design/ant-design) - UI library.
+5. [yjs](https://github.com/yjs/yjs) - Provides CRDT foundation for our state management and data sync implementation.
+6. [React](https://github.com/facebook/react) - Library for web and native user interfaces.
+7. [NestJS](https://github.com/nestjs/nest) - Library for building Node.js servers.
+8. [Zustand](https://github.com/pmndrs/zustand) - Primitive and flexible state management for React.
+9. [Vite](https://github.com/vitejs/vite) - Next generation frontend tooling.
+10. [TailwindCSS](https://github.com/tailwindcss/tailwindcss) - CSS library for writing beautiful styles.
+11. [Tanstack Query](https://github.com/tanstack/query) - Library for frontend request handling.
+12. [Radix-UI](https://github.com/radix-ui) - Library for building accessible React UI.
+13. [Elasticsearch](https://github.com/elastic/elasticsearch) - Library for building search functionality.
+14. [QDrant](https://github.com/qdrant/qdrant) - Library for building vector search functionality.
+15. [Resend](https://github.com/resend/react-email) - Library for building email sending functionality.
+16. Other upstream dependencies.
+
+We are deeply grateful to the community for providing such powerful yet simple libraries that allow us to focus more on implementing product logic. We hope that our project will also provide an easier-to-use AI Native content creation engine for everyone in the future.
+
 ## Security Issues
 
 To protect your privacy, please avoid posting security-related issues on GitHub. Instead, send your questions to [support@refly.ai](mailto:support@refly.ai), and we will provide you with a more detailed response.
 
 ## License
 
-This repository is licensed under the [ReflyAI Open Source License](https://github.com/langgenius/dify/blob/main/LICENSE), which is essentially the Apache 2.0 License with some additional restrictions.
+This repository is licensed under the [ReflyAI Open Source License](./LICENSE), which is essentially the Apache 2.0 License with some additional restrictions.

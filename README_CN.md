@@ -13,7 +13,7 @@ Refly 是一个开源的 AI 原生创作引擎。Refly 直观的自由画布界�
 
 [🚀 Refly v0.2.3 正式发布！全新升级产品引导体验！](<[https://x.com/reflyai](https://docs.refly.ai/changelog/v0.2.3)>)
 
-[Refly Cloud](https://refly.ai/) · [Self-hosting](https://refly.ai/) · [Forum](https://github.com/refly-ai/refly/discussions) · [Discord](https://discord.gg/bWjffrb89h) · [Twitter](https://x.com/reflyai) · [Documentation](https://x.com/reflyai)
+[Refly Cloud](https://refly.ai/) 丨 [Self-hosting](https://refly.ai/) 丨 [Forum](https://github.com/refly-ai/refly/discussions) 丨 [Discord](https://discord.gg/bWjffrb89h) 丨 [Twitter](https://x.com/reflyai) 丨 [Documentation](https://docs.refly.ai/)
 
 </div>
 
@@ -104,10 +104,10 @@ https://github.com/user-attachments/assets/9f11b8eb-dd9d-4691-aca1-d3f11ff801ab
 ## 如何使用 ？
 
 - **Cloud**
-  - 我们部署了一个 Refly Cloud 版本，允许你 0 配置使用，它提供了和私有化部署版本的全部能力，包括免费使用的 GPT-4o-mini 和限量体验的 GPT-4o 和 Claude-3.5-Sonnet
+  - 我们部署了一个 Refly Cloud 版本，允许你 0 配置使用，它提供了和私有化部署版本的全部能力，包括免费使用的 GPT-4o-mini 和限量体验的 GPT-4o 和 Claude-3.5-Sonnet，访问使用 [https://refly.ai/](https://refly.ai/)
 - **Self-hosting Refly Community Edition**
-  - 通过这份[入门指南](https://docs.refly.ai/)，快速在您的环境中运行 Refly。更详细的参考和深入说明，请查阅我们的文档。
-- ## **Refly for enterprise / organizations**
+  - 通过这份[入门指南](./CONTRIBUTING_CN.md)，快速在您的环境中运行 Refly。更详细的参考和深入说明，请查阅我们的文档。
+- **Refly for enterprise / organizations**，请联系我们邮箱 [support@refly.ai](mailto:support@refly.ai)，我们提供私有化部署的解决方案。
 
 ## 保持关注
 
@@ -117,23 +117,16 @@ https://github.com/user-attachments/assets/9f11b8eb-dd9d-4691-aca1-d3f11ff801ab
 
 ## 贡献指南
 
-表格 还在加载中，请等待加载完成后再尝试复制
+| 错误报告                                                            | 功能请求                                                | 问题/讨论                                                         | ReflyAI 社区                                                       |
+| ------------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------ |
+| [创建错误报告](https://github.com/refly-ai/refly/issues/new/choose) | [提交功能请求](https://github.com/refly-ai/refly/pulls) | [查看 GitHub 讨论](https://github.com/refly-ai/refly/discussions) | [访问 ReflyAI 社区](https://docs.refly.ai/zh/community/contact-us) |
+| 有些事情不如预期那样工作                                            | 新功能或改进的想法                                      | 讨论和提出问题                                                    | 一个提问、学习和与他人连接的地方                                   |
 
-欢迎所有开发者、测试人员、技术写作者等加入！我们欢迎各种类型的贡献，您可以在 [docs/types-of-contributions.md](https://github.com/toeverything/AFFiNE/blob/canary/docs/types-of-contributions.md) 中了解更多信息。如果您有兴趣贡献代码，请阅读我们的 [docs/CONTRIBUTING.md](https://github.com/toeverything/AFFiNE/blob/canary/docs/CONTRIBUTING.md)，并随时查看我们的 GitHub issues，大展身手，向我们展示您的才能。
+欢迎所有开发者、测试人员、技术写作者等加入！我们欢迎各种类型的贡献，您可以查看我们的 [CONTRIBUTING.md](./CONTRIBUTING.md)，并随时查看我们的 [GitHub issues](https://github.com/refly-ai/refly/issues)，大展身手，向我们展示您的才能。
 
-在开始贡献之前，请确保您已阅读并接受我们的[贡献者许可协议](https://github.com/toeverything/affine/edit/canary/.github/CLA.md)。要表示同意，只需编辑此文件并提交拉取请求即可。
+对于错误报告、功能请求和其他建议，您也可以[创建新的 issue](https://github.com/refly-ai/refly/issues/new/choose) 并选择最合适的模板来提供反馈。
 
-对于错误报告、功能请求和其他建议，您也可以[创建新的 issue](https://github.com/toeverything/AFFiNE/issues/new/choose) 并选择最合适的模板来提供反馈。
-
-关于翻译和语言支持，您可以访问我们的 [i18n 通用空间](https://community.affine.pro/c/i18n-general)。
-
-寻找其他贡献方式并不知从何开始？查看 [ReflyAI 大使计划](https://community.affine.pro/c/start-here/affine-ambassador)，我们与热情的社区成员密切合作，并为他们提供广泛的支持和资源。
-
-如果您有任何问题，欢迎与我们联系。获取更多信息和学习的最佳场所之一是 [ReflyAI 社区](https://community.affine.pro/home)，您可以在那里与其他志同道合的人交流。
-
-### 贡献者
-
-暂不需要...
+如果您有任何问题，欢迎与我们联系。获取更多信息和学习的最佳场所之一是 [ReflyAI 社区](https://docs.refly.ai/zh/community/contact-us)，您可以在那里与其他志同道合的人交流。
 
 ## 社区和联系
 
@@ -141,41 +134,30 @@ https://github.com/user-attachments/assets/9f11b8eb-dd9d-4691-aca1-d3f11ff801ab
 - [GitHub Issues](https://github.com/refly-ai/refly/issues)：最适合报告使用 ReflyAI 时遇到的 bug 和提出功能建议。请参阅我们的贡献指南。
 - [Discord](https://discord.gg/bWjffrb89h)：最适合分享您的应用程序并与社区互动。
 - [Twitter](https://x.com/reflyai)：最适合分享您的应用程序并与社区保持联系。
+- [微信或飞书群聊](https://docs.refly.ai/zh/community/contact-us)：最适合与社区成员交流。
 
-## Star 历史
-
-暂不需要...
-
-## Upstreams
+## 上游项目
 
 我们还要感谢以下使 ReflyAI 成为可能的开源项目：
 
-1. Blocksuite - 💠 ReflyAI 背后的开源协作编辑器项目。
-2. OctoBase - 🐙 ReflyAI 背后的开源数据库，本地优先 yet 协作。用 Rust 编写的轻量级、可扩展的数据引擎。
-3. yjs - 为我们的状态管理和数据同步实现提供 CRDTs 的基础支持。
-4. electron - 使用 JavaScript、HTML 和 CSS 构建跨平台桌面应用。
-5. React - 用于 Web 和原生用户界面的库。
-6. napi-rs - 通过 Node-API 用 Rust 构建编译的 Node.js 插件的框架。
-7. Jotai - React 的原始且灵活的状态管理。
-8. async-call-rpc - 轻量级 JSON RPC 客户端和服务器。
-9. Vite - 下一代前端工具。
-10. 其他上游依赖。
+1. [LangChain](https://github.com/langchain-ai/langchainjs) - 用于构建 AI 应用的库。
+2. [ReactFlow](https://github.com/xyflow/xyflow) - 用于构建可视化工作流的库。
+3. [Tiptap](https://github.com/ueberdosis/tiptap) - 用于构建协作编辑器的库。
+4. [Ant Design](https://github.com/ant-design/ant-design) - 用于构建 UI 库。
+5. [yjs](https://github.com/yjs/yjs) - 为我们的状态管理和数据同步实现提供 CRDTs 的基础支持。
+6. [React](https://github.com/facebook/react) - 用于 Web 和原生用户界面的库。
+7. [NestJS](https://github.com/nestjs/nest) - 用于构建 Node.js 服务器的库。
+8. [Zustand](https://github.com/pmndrs/zustand) - React 的原始且灵活的状态管理。
+9. [Vite](https://github.com/vitejs/vite) - 下一代前端工具。
+10. [TailwindCSS](https://github.com/tailwindcss/tailwindcss) - 用于撰写精美样式的 CSS 库。
+11. [Tanstack Query](https://github.com/tanstack/query) - 用于前端请求处理的库。
+12. [Radix-UI](https://github.com/radix-ui) - 用于构建可访问的 React UI 库。
+13. [Elasticsearch](https://github.com/elastic/elasticsearch) - 用于构建搜索功能的库。
+14. [QDrant](https://github.com/qdrant/qdrant) - 用于构建向量搜索功能的库。
+15. [Resend](https://github.com/resend/react-email) - 用于构建邮件发送功能的库。
+16. 其他上游依赖。
 
-非常感谢社区提供如此强大而简单的库，使我们能够更专注于产品逻辑的实现。我们希望将来我们的项目也能为大家提供更易用的知识库。
-
-## 致谢
-
-"我们塑造工具，而后工具塑造我们"。在我们的发展过程中，许多先驱者给予了我们启发，例如：
-
-- Quip 和 Notion 的"一切皆为块"的伟大理念
-- Trello 的看板系统
-- Airtable 和 Miro 的无代码可编程数据表
-- Miro 和 Whimsical 的无边界可视化白板
-- Remote 和 Capacities 的基于对象的标签系统
-
-这些应用程序之间的原子"构建块"有很大的重叠。它们不是开源的，也没有像 VSCode 那样的插件系统供贡献者自定义。我们希望创造一个包含我们喜爱的所有功能，并更进一步的工具。
-
-感谢您关注 ReflyAI，我们真诚地希望 ReflyAI 能引起您的共鸣！🎵 请访问 https://refly.ai/ 了解更多详情。
+非常感谢社区提供如此强大而简单的库，使我们能够更专注于产品逻辑的实现。我们希望将来我们的项目也能为大家提供更易用的 AI Native 内容创作引擎。
 
 ## 安全问题
 
@@ -183,4 +165,4 @@ https://github.com/user-attachments/assets/9f11b8eb-dd9d-4691-aca1-d3f11ff801ab
 
 ## 协议
 
-本代码库采用 [ReflyAI 开源许可证](https://github.com/langgenius/dify/blob/main/LICENSE)，该许可证本质上是 Apache 2.0 许可证加上一些额外限制。
+本代码库采用 [ReflyAI 开源许可证](./LICENSE)，该许可证本质上是 Apache 2.0 许可证加上一些额外限制。
