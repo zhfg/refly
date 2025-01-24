@@ -7,7 +7,7 @@
     ⭐️  AI Native 内容创作引擎 ⭐️ <br>
 </h1>
 
-![refly-cover](https://github.com/user-attachments/assets/4f9df3f3-42a4-4953-a0da-a09c32e51c06)
+![refly-cover](https://github.com/user-attachments/assets/2930c555-09a7-4ea2-a18a-2b1d8a7ef4ae)
 
 Refly 是一个开源的 AI 原生创作引擎。Refly 直观的自由画布界面集成了多线程对话、RAG 检索流程、上下文记忆、智能搜索和 AI 文档编辑等功能，让您轻松地将创意转化为完整作品。
 

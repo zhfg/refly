@@ -7,7 +7,7 @@
     ⭐️  The AI Native Creation Engine ⭐️ <br>
 </h1>
 
-![refly-cover](https://github.com/user-attachments/assets/4f9df3f3-42a4-4953-a0da-a09c32e51c06)
+![refly-cover](https://github.com/user-attachments/assets/2930c555-09a7-4ea2-a18a-2b1d8a7ef4ae)
 
 Refly is an open-source AI-native creation engine. Refly's intuitive free-form canvas interface combines multi-threaded conversations, knowledge base RAG integration, contextual memory, intelligent search, WYSIWYG AI editor and more, empowering you to effortlessly transform ideas into production-ready content.
 
