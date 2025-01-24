@@ -23,10 +23,9 @@ export const StorageLimit: FC<StorageLimitProps> = memo(({ resourceCount }) => {
   const storageLimitTip = () => {
     if (canImportCount <= 0) {
       return t('resource.import.storageLimited');
-    } else {
-      if (resourceCount > 0 && canImportCount < resourceCount) {
-        return t('resource.import.storagePartialLimited', { count: canImportCount });
-      }
+    }
+    if (resourceCount > 0 && canImportCount < resourceCount) {
+      return t('resource.import.storagePartialLimited', { count: canImportCount });
     }
   };
   return storageLimitTip() ? (

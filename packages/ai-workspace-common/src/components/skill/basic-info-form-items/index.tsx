@@ -3,10 +3,9 @@ import { useState } from 'react';
 // components
 import { useTranslation } from 'react-i18next';
 
-import { Collapse, Form, Input } from '@arco-design/web-react';
+import { Form, Input } from '@arco-design/web-react';
 import { FormHeader } from '@refly-packages/ai-workspace-common/components/skill/form-header';
 
-const CollapseItem = Collapse.Item;
 const FormItem = Form.Item;
 const TextArea = Input.TextArea;
 

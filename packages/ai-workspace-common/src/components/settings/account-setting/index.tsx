@@ -20,7 +20,7 @@ export const AccountSetting = () => {
   const [emailStatus, setEmailStatus] = useState<'error' | 'success' | 'warning' | 'validating'>(
     'success',
   );
-  const [emailMessage, setEmailMessage] = useState('');
+  const [_emailMessage, setEmailMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   const statusMap = {
@@ -34,7 +34,7 @@ export const AccountSetting = () => {
         query: { field: 'name', value: name },
       });
       return data?.data?.available;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   };

@@ -45,12 +45,8 @@ export const SkillDisplay = () => {
     [skillStore.setSelectedSkill],
   );
 
-  const handleSkillManagerOpen = useCallback(() => {
-    skillStore.setSkillManagerModalVisible(true);
-  }, [skillStore.setSkillManagerModalVisible]);
-
-  const displayedSkills = useMemo(() => skills.slice(0, containCnt), [skills, containCnt]);
-  const remainingSkills = useMemo(() => skills.slice(containCnt), [skills, containCnt]);
+  const displayedSkills = useMemo(() => skills.slice(0, containCnt), [skills]);
+  const remainingSkills = useMemo(() => skills.slice(containCnt), [skills]);
 
   const skillItems = useMemo(() => {
     return displayedSkills?.map((item, index) => {
@@ -98,7 +94,7 @@ export const SkillDisplay = () => {
         </div>
       </Dropdown>
     ),
-    [dropdownItems, handleSkillManagerOpen, open],
+    [dropdownItems, open, t],
   );
 
   if (skillStore.selectedSkill) {

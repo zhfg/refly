@@ -29,35 +29,14 @@ const LogBox = memo(
     collapsed,
     onCollapse,
     t,
-    status,
-    log,
   }: {
     logs: any[];
     collapsed: boolean;
     onCollapse: (collapsed: boolean) => void;
     t: any;
-    status: string;
     log?: { key: string; titleArgs?: any; descriptionArgs?: any };
   }) => {
     if (!logs?.length) return null;
-
-    console.log('logs', logs);
-
-    const logTitle = log
-      ? t(`${log.key}.title`, {
-          ...log.titleArgs,
-          ns: 'skillLog',
-          defaultValue: log.key,
-        })
-      : '';
-
-    const logDescription = log
-      ? t(`${log.key}.description`, {
-          ...log.descriptionArgs,
-          ns: 'skillLog',
-          defaultValue: '',
-        })
-      : '';
 
     return (
       <div
@@ -257,8 +236,7 @@ export const ActionStepCard = memo(
             <IconCheck className="h-4 w-4 text-green-500" />
           )}
           {t('canvas.skillResponse.stepTitle', { index })}{' '}
-          {' · ' +
-            t(`${skillName}.steps.${step.name}.name`, { ns: 'skill', defaultValue: step.name })}
+          {` · ${t(`${skillName}.steps.${step.name}.name`, { ns: 'skill', defaultValue: step.name })}`}
         </div>
 
         {logs?.length > 0 && (
@@ -267,7 +245,6 @@ export const ActionStepCard = memo(
             collapsed={logBoxCollapsed}
             onCollapse={setLogBoxCollapsed}
             t={t}
-            status={stepStatus}
             log={step?.logs?.[step.logs.length - 1]}
           />
         )}

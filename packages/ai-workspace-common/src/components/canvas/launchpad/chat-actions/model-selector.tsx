@@ -64,7 +64,7 @@ const UsageProgress = memo(
             size={14}
             format={() =>
               used >= quota
-                ? t(`copilot.modelSelector.quotaExceeded`)
+                ? t('copilot.modelSelector.quotaExceeded')
                 : t('copilot.modelSelector.tokenUsed', {
                     used: formattedUsed,
                     quota: formattedQuota,
@@ -83,7 +83,7 @@ const UsageProgress = memo(
 UsageProgress.displayName = 'UsageProgress';
 
 // Memoize model option items
-const ModelOption = memo(({ provider, label }: { provider: string; label: string }) => (
+const ModelOption = memo(({ provider }: { provider: string }) => (
   <img className="w-4 h-4 mr-2" src={ModelProviderIcons[provider]} alt={provider} />
 ));
 
@@ -122,7 +122,7 @@ const GroupHeader = memo(
                 setSubscribeModalVisible(true);
               }}
             >
-              {t(`copilot.modelSelector.upgrade`)}
+              {t('copilot.modelSelector.upgrade')}
             </Button>
           ) : (
             <UsageProgress
@@ -190,7 +190,6 @@ export const ModelSelector = memo(
     model,
     setModel,
   }: ModelSelectorProps) => {
-    const { t } = useTranslation();
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const { userProfile } = useUserStoreShallow((state) => ({
@@ -232,7 +231,7 @@ export const ModelSelector = memo(
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((model) => ({
             key: model.name,
-            icon: <ModelOption provider={model.provider} label={model.label} />,
+            icon: <ModelOption provider={model.provider} />,
             label: <span className="text-xs">{model.label}</span>,
             disabled: t1Disabled,
           })),
@@ -246,7 +245,7 @@ export const ModelSelector = memo(
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((model) => ({
             key: model.name,
-            icon: <ModelOption provider={model.provider} label={model.label} />,
+            icon: <ModelOption provider={model.provider} />,
             label: <span className="text-xs">{model.label}</span>,
             disabled: t2Disabled,
           })),
@@ -260,7 +259,7 @@ export const ModelSelector = memo(
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((model) => ({
             key: model.name,
-            icon: <ModelOption provider={model.provider} label={model.label} />,
+            icon: <ModelOption provider={model.provider} />,
             label: <span className="text-xs">{model.label}</span>,
           })),
       [modelList],
@@ -322,21 +321,14 @@ export const ModelSelector = memo(
       }
 
       return items;
-    }, [
-      t1Models,
-      t2Models,
-      freeModels,
-      tokenUsage,
-      planTier,
-      setDropdownOpen,
-      setSubscribeModalVisible,
-    ]);
+    }, [t1Models, t2Models, freeModels, tokenUsage, planTier, setSubscribeModalVisible]);
 
     const isModelDisabled = useCallback((meter: TokenUsageMeter, model: ModelInfo) => {
       if (meter && model) {
         if (model.tier === 't1') {
           return meter.t1CountUsed >= meter.t1CountQuota && meter.t1CountQuota >= 0;
-        } else if (model.tier === 't2') {
+        }
+        if (model.tier === 't2') {
           return meter.t2CountUsed >= meter.t2CountQuota && meter.t2CountQuota >= 0;
         }
       }

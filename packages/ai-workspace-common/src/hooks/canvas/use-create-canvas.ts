@@ -10,7 +10,7 @@ import { IndexeddbPersistence } from 'y-indexeddb';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 
 export const useCreateCanvas = () => {
-  const [isCreating, setIsCreating] = useState(false);
+  const [isCreating, _setIsCreating] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { setCanvasLocalSynced, setCanvasRemoteSynced, setTitle } = useCanvasStoreShallow(

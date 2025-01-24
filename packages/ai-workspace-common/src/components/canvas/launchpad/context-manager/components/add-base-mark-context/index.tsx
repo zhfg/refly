@@ -31,7 +31,7 @@ export const AddBaseMarkContext = ({ contextItems, setContextItems }: AddBaseMar
       setContextItems([...contextItems, item]);
     } else {
       // Removing node
-      setContextItems(contextItems.filter((item) => item.entityId !== item.entityId));
+      setContextItems(contextItems.filter((contextItem) => contextItem.entityId !== item.entityId));
     }
   };
 

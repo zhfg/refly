@@ -22,27 +22,19 @@ export const SubscriptionHint = memo(() => {
     <div className="w-full rounded-md bg-[#f3f4f8] p-2">
       <div className="mb-1 text-sm font-medium">
         {t('settings.subscription.currentPlan')}:{' '}
-        {t(`settings.subscription.subscriptionStatus.free`)}
+        {t('settings.subscription.subscriptionStatus.free')}
       </div>
 
       <UsageProgress
         label={t('settings.subscription.t1Requests')}
-        tooltip={
-          t('settings.subscription.t1RequestsDescription') +
-          ' ' +
-          t('settings.subscription.requestsRefresh')
-        }
+        tooltip={`${t('settings.subscription.t1RequestsDescription')} ${t('settings.subscription.requestsRefresh')}`}
         used={tokenUsage?.t1CountUsed ?? 0}
         quota={tokenUsage?.t1CountQuota ?? 0}
       />
 
       <UsageProgress
         label={t('settings.subscription.t2Requests')}
-        tooltip={
-          t('settings.subscription.t2RequestsDescription') +
-          ' ' +
-          t('settings.subscription.requestsRefresh')
-        }
+        tooltip={`${t('settings.subscription.t2RequestsDescription')} ${t('settings.subscription.requestsRefresh')}`}
         used={tokenUsage?.t2CountUsed ?? 0}
         quota={tokenUsage?.t2CountQuota ?? 0}
       />

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Node, useReactFlow } from '@xyflow/react';
+import { Node } from '@xyflow/react';
 import { useCanvasStore } from '../../stores/canvas';
 import { useGroupNodes } from './use-batch-nodes-selection/use-group-nodes';
 import { useNodePosition } from './use-node-position';
@@ -8,7 +8,6 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 
 export const useNodeCluster = () => {
   const { canvasId } = useCanvasContext();
-  const { getNode } = useReactFlow();
   const { createGroupFromSelectedNodes } = useGroupNodes();
   const { layoutBranchAndUpdatePositions } = useNodePosition();
   const { updateNodesWithSync } = useNodeOperations();
@@ -30,15 +29,19 @@ export const useNodeCluster = () => {
         if (node) {
           cluster.push(node);
           // Find all target nodes
-          edges
-            .filter((edge) => edge.source === currentId)
-            .forEach((edge) => traverse(edge.target));
+          for (const edge of edges) {
+            if (edge.source === currentId) {
+              traverse(edge.target);
+            }
+          }
         }
       };
 
       // Support both single nodeId and array of nodeIds
       const sourceNodeIds = Array.isArray(nodeIds) ? nodeIds : [nodeIds];
-      sourceNodeIds.forEach((nodeId) => traverse(nodeId));
+      for (const nodeId of sourceNodeIds) {
+        traverse(nodeId);
+      }
 
       return cluster;
     },

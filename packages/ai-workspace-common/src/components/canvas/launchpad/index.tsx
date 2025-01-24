@@ -1,4 +1,4 @@
-import { useEffect, memo } from 'react';
+import { useEffect, memo, useCallback } from 'react';
 
 import { ChatPanel } from './chat-panel';
 import { SkillDisplay } from './skill-display';
@@ -38,17 +38,17 @@ export const LaunchPad = memo(
     );
 
     // Add new method to clear state
-    const clearLaunchpadState = () => {
+    const clearLaunchpadState = useCallback(() => {
       chatStore.resetState();
       contextPanelStore.resetState();
-    };
+    }, [chatStore, contextPanelStore]);
 
     // Handle canvas ID changes
     useEffect(() => {
       if (canvasId) {
         clearLaunchpadState();
       }
-    }, [canvasId]);
+    }, [canvasId, clearLaunchpadState]);
 
     if (!visible) {
       return null;

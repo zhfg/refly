@@ -307,7 +307,7 @@ export const LayoutControl: React.FC<LayoutControlProps> = memo(({ mode, changeM
         onClick: () => window.open('https://docs.refly.ai', '_blank'),
       },
     ],
-    [t],
+    [t, setShowSettingsGuideModal, setShowTourModal, setHelpModalVisible],
   );
 
   return (

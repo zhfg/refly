@@ -121,7 +121,7 @@ const DocumentCard = ({ item, onDelete }: { item: Document; onDelete: () => void
       <Divider className="m-0 text-gray-200" />
       <div className="px-3 pt-2 pb-1 flex justify-between items-center bg-gray-50">
         <div className="flex items-center gap-3 mb-2">
-          <IconDocumentFilled color={NODE_COLORS['document']} size={24} />
+          <IconDocumentFilled color={NODE_COLORS.document} size={24} />
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-medium max-w-48 truncate">
               {item.title || t('common.untitled')}

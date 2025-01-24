@@ -13,7 +13,7 @@ export const useDeleteCanvas = () => {
   const [isRemoving, setIsRemoving] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { getCanvasList, canvasList } = useHandleSiderData();
+  const { getCanvasList } = useHandleSiderData();
 
   const deleteCanvas = async (canvasId: string, deleteAllFiles = false) => {
     if (isRemoving) return;

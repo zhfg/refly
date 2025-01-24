@@ -123,21 +123,21 @@ export const ChatPanel = () => {
     } else {
       // Create default config from schema if no config exists
       const defaultConfig = {};
-      selectedSkill?.configSchema?.items?.forEach((item) => {
+      for (const item of selectedSkill?.configSchema?.items || []) {
         if (item.defaultValue !== undefined) {
           defaultConfig[item.key] = {
             value: item.defaultValue,
-            label: item.labelDict?.['en'] ?? item.key,
+            label: item.labelDict?.en ?? item.key,
             displayValue: String(item.defaultValue),
           };
         }
-      });
+      }
 
       // Use existing config or fallback to default config
       const initialConfig = selectedSkill?.tplConfig ?? defaultConfig;
       form.setFieldValue('tplConfig', initialConfig);
     }
-  }, [selectedSkill?.name]);
+  }, [selectedSkill]);
 
   const handleSendMessage = (userInput?: string) => {
     const error = handleFilterErrorTip();

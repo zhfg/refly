@@ -137,11 +137,11 @@ export const ModelProviderIcons = {
 const iconCache = new Map<string, string>();
 
 export const preloadModelIcons = () => {
-  Object.entries(ModelProviderIcons).forEach(([provider, icon]) => {
+  for (const [provider, icon] of Object.entries(ModelProviderIcons)) {
     if (!iconCache.has(provider)) {
       iconCache.set(provider, icon);
     }
-  });
+  }
 };
 
 export const getSkillIcon = (skillName: string, className?: string) => {

@@ -1,6 +1,5 @@
 import { Position, useReactFlow } from '@xyflow/react';
-import { CanvasNode, CanvasNodeData, MemoNodeProps } from '../shared/types';
-import { Node } from '@xyflow/react';
+import { CanvasNode, MemoNodeProps } from '../shared/types';
 import { CustomHandle } from '../shared/custom-handle';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
@@ -42,8 +41,6 @@ import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-
-type MemoNode = Node<CanvasNodeData, 'memo'>;
 
 export const MemoNode = ({
   data,
@@ -121,7 +118,7 @@ export const MemoNode = ({
   const handleInsertToDoc = useCallback(async () => {
     if (!data?.contentPreview) return;
     await insertToDoc('insertBelow', data?.contentPreview);
-  }, [insertToDoc, data.entityId, data]);
+  }, [insertToDoc, data]);
 
   const handleAskAI = useCallback(() => {
     addNode(
@@ -218,14 +215,14 @@ export const MemoNode = ({
         class: classNames('max-w-none', 'focus:outline-none'),
       },
       handleDOMEvents: {
-        mousedown: (view, event) => {
+        mousedown: (_view, event) => {
           if (selected) {
             event.stopPropagation();
           }
           onNodeClick?.();
           return false;
         },
-        click: (view, event) => {
+        click: (_view, event) => {
           if (selected) {
             event.stopPropagation();
           }

@@ -1,17 +1,17 @@
 import mitt from 'mitt';
 
 export type NodeActionEvents = {
-  [key: `node:${string}:rerun`]: void;
-  [key: `node:${string}:delete`]: void;
-  [key: `node:${string}:addToContext`]: void;
-  [key: `node:${string}:createDocument`]: void;
-  [key: `node:${string}:ungroup`]: void;
+  [key: `node:${string}:rerun`]: undefined;
+  [key: `node:${string}:delete`]: undefined;
+  [key: `node:${string}:addToContext`]: undefined;
+  [key: `node:${string}:createDocument`]: undefined;
+  [key: `node:${string}:ungroup`]: undefined;
   [key: `node:${string}:insertToDoc`]: {
     content?: string;
   };
-  [key: `node:${string}:askAI`]: void;
-  [key: `node:${string}:cloneAskAI`]: void;
-  [key: `node:${string}:cloneAskAI.completed`]: void;
+  [key: `node:${string}:askAI`]: undefined;
+  [key: `node:${string}:cloneAskAI`]: undefined;
+  [key: `node:${string}:cloneAskAI.completed`]: undefined;
 };
 
 export const nodeActionEmitter = mitt<NodeActionEvents>();
@@ -32,7 +32,7 @@ export const cleanupNodeEvents = (nodeId: string) => {
     'cloneAskAI',
     'cloneAskAI.completed',
   ];
-  eventTypes.forEach((type) => {
+  for (const type of eventTypes) {
     nodeActionEmitter.all.delete(createNodeEventName(nodeId, type));
-  });
+  }
 };

@@ -25,7 +25,7 @@ import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useContextPanelStoreShallow } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
-import { ToolButton } from './tool-button';
+import { ToolButton, type ToolbarItem } from './tool-button';
 import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { genMemoID, genSkillID } from '@refly-packages/utils/id';
 
@@ -116,6 +116,7 @@ const useToolbarConfig = () => {
         },
         {
           type: 'divider',
+          value: 'divider1',
         },
         {
           icon: IconAskAIInput,
@@ -216,11 +217,9 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
     showEdges: state.showEdges,
   }));
 
-  const { importResourceModalVisible, setImportResourceModalVisible } =
-    useImportResourceStoreShallow((state) => ({
-      importResourceModalVisible: state.importResourceModalVisible,
-      setImportResourceModalVisible: state.setImportResourceModalVisible,
-    }));
+  const { setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
+    setImportResourceModalVisible: state.setImportResourceModalVisible,
+  }));
 
   const contextItems = useContextPanelStoreShallow((state) => state.contextItems);
   const { createSingleDocumentInCanvas, isCreating } = useCreateDocument();
@@ -260,7 +259,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
   }, [addNode, t]);
 
   const handleToolSelect = useCallback(
-    (event: React.MouseEvent, tool: string) => {
+    (_event: React.MouseEvent, tool: string) => {
       switch (tool) {
         case 'importResource':
           setImportResourceModalVisible(true);
@@ -287,6 +286,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
       setImportResourceModalVisible,
       createSingleDocumentInCanvas,
       setShowLaunchpad,
+      showLaunchpad,
       toggleEdgeVisible,
       createSkillNode,
       createMemo,
@@ -296,7 +296,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
 
   const handleConfirm = useCallback(
     (selectedItems: ContextItem[]) => {
-      selectedItems.forEach((item) => {
+      for (const item of selectedItems) {
         const contentPreview = item?.snippets?.map((snippet) => snippet?.text || '').join('\n');
         addNode(
           {
@@ -311,7 +311,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
           false,
           true,
         );
-      });
+      }
     },
     [addNode],
   );
@@ -326,15 +326,15 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
         }
       }
     >
-      {tools.map((tool, index) => {
+      {tools.map((tool) => {
         if (tool.type === 'divider') {
-          return <Divider key={index} className="m-0" />;
+          return <Divider key={tool.value} className="m-0" />;
         }
 
         if (tool.type === 'button') {
           return (
             <ToolButton
-              key={index}
+              key={tool.value}
               tool={tool}
               contextCnt={contextItems?.length}
               handleToolSelect={handleToolSelect}
@@ -344,7 +344,7 @@ export const CanvasToolbar = memo<ToolbarProps>(({ onToolSelect }) => {
           );
         }
 
-        return <SearchListWrapper key={index} tool={tool} handleConfirm={handleConfirm} />;
+        return <SearchListWrapper key={tool.value} tool={tool} handleConfirm={handleConfirm} />;
       })}
 
       <ImportResourceModal />

@@ -83,7 +83,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
         message.success(t('common.putSuccess'));
         setSelectedItems([]);
 
-        const resources = (Array.isArray(data?.data) ? data?.data : []).map((resource, index) => {
+        const resources = (Array.isArray(data?.data) ? data.data : []).map((resource, index) => {
           const selectedItem = selectedItems[index];
           return {
             id: resource.resourceId,
@@ -115,7 +115,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
         });
       }
     } else if (props.importActionMode === ImportActionMode.ADD_NODE) {
-      selectedItems.forEach((item) => {
+      for (const item of selectedItems) {
         addNode({
           type: 'resource',
           data: {
@@ -127,7 +127,7 @@ export const ActionMenu: React.FC<ActionMenuProps> = (props) => {
             },
           },
         });
-      });
+      }
       message.success(t('common.putSuccess'));
       setSelectedItems([]);
     }

@@ -88,6 +88,7 @@ export const ToolNode = ({ data, selected, id }: NodeProps<ToolNode>) => {
         "
       >
         <button
+          type="button"
           className="
             p-1.5
             rounded-md 

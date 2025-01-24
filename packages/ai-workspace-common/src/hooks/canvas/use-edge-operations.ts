@@ -6,7 +6,7 @@ import { useEdgeStyles, getEdgeStyles } from '../../components/canvas/constants'
 import { useCanvasSync } from './use-canvas-sync';
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
 
-export const useEdgeOperations = (selectedCanvasId?: string) => {
+export const useEdgeOperations = (_selectedCanvasId?: string) => {
   const canvasId = useCanvasId();
   const { setEdges } = useCanvasStoreShallow((state) => ({
     setEdges: state.setEdges,

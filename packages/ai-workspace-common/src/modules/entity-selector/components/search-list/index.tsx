@@ -8,8 +8,7 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 import throttle from 'lodash.throttle';
 import { IconCheck } from '@arco-design/web-react/icon';
-import { FileText, Link2, Wrench, Cpu, Code2, Globe } from 'lucide-react';
-import { SkillAvatar } from '@refly-packages/ai-workspace-common/components/skill/skill-avatar';
+import { FileText, Link2 } from 'lucide-react';
 
 interface SearchListProps {
   domain: SearchDomain;
@@ -30,8 +29,6 @@ interface SearchListProps {
 const DOMAIN_COLORS: Record<SearchDomain, string> = {
   document: '#00968F',
   resource: '#17B26A',
-  skill: 'rgba(0, 0, 0, 0.1)',
-  tool: '#2E90FA',
   canvas: '#00968F',
 };
 
@@ -42,29 +39,7 @@ const getDomainIcon = (domain: SearchDomain, metadata?: any) => {
       return FileText;
     case 'resource':
       return metadata?.resourceType === 'weblink' ? Link2 : FileText;
-    case 'skill':
-      switch (metadata?.skillType) {
-        case 'prompt':
-        case 'prompt-struct':
-          return Cpu;
-        case 'code':
-          return Code2;
-        case 'http':
-          return Globe;
-        default:
-          const skill = metadata?.originalItem;
-          return (
-            <SkillAvatar
-              noBorder
-              size={20}
-              icon={skill?.icon}
-              displayName={skill?.displayName}
-              background="transparent"
-            />
-          );
-      }
-    case 'tool':
-      return Wrench;
+
     default:
       return FileText;
   }
@@ -75,14 +50,12 @@ export const SearchList = (props: SearchListProps) => {
   const {
     domain,
     fetchData,
-    defaultValue,
     children,
     handleConfirm,
     mode = 'multiple',
     offset,
     open,
     setOpen,
-    ...selectProps
   } = props;
 
   const { loadMore, dataList, isRequesting, handleValueChange, resetState, hasMore } =
@@ -92,7 +65,6 @@ export const SearchList = (props: SearchListProps) => {
       pageSize: 20,
     });
 
-  const [value, setValue] = useState<any>(defaultValue);
   const [selectedItems, setSelectedItems] = useState<ContextItem[]>([]);
 
   const sortedItems: ContextItem[] = [
@@ -106,7 +78,6 @@ export const SearchList = (props: SearchListProps) => {
 
   const handlePopupScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { currentTarget } = e;
-    // 检查是否滚动到底部附近(距离底部20px内)
     if (currentTarget.scrollTop + currentTarget.clientHeight >= currentTarget.scrollHeight - 20) {
       loadMore();
     }
@@ -120,7 +91,6 @@ export const SearchList = (props: SearchListProps) => {
   );
 
   const handleSearchValueChange = (value: string) => {
-    setValue(value);
     throttledValueChange(value);
   };
 
@@ -133,9 +103,8 @@ export const SearchList = (props: SearchListProps) => {
         const isSelected = prev.some((selected) => selected.id === item.id);
         if (isSelected) {
           return prev.filter((selected) => selected.id !== item.id);
-        } else {
-          return [item, ...prev];
         }
+        return [item, ...prev];
       });
     }
   };
@@ -177,7 +146,6 @@ export const SearchList = (props: SearchListProps) => {
       loadMore();
       return () => {
         setSelectedItems([]);
-        setValue('');
         resetState();
       };
     }

@@ -144,7 +144,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
     // Get all selected skill nodes
     const selectedSkillNodes = getNodes().filter((node) => node.selected && node.type === 'skill');
 
-    selectedSkillNodes.forEach((node) => {
+    for (const node of selectedSkillNodes) {
       const { metadata } = node.data as CanvasNodeData<SkillNodeMeta>;
       const { query, modelInfo, selectedSkill, contextItems = [] } = metadata;
 
@@ -190,10 +190,10 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
           position: node.position,
         },
       ]);
-    });
+    }
 
     onClose?.();
-  }, [getNodes, invokeAction, canvasId, deleteNodes, onClose]);
+  }, [getNodes, invokeAction, canvasId, deleteNodes, onClose, addNode]);
 
   const handleSelectCluster = useCallback(() => {
     const selectedNodes = getNodes().filter((node) => node.selected);
@@ -216,7 +216,7 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
     }
   }, [getNodes, layoutNodeCluster]);
 
-  const getMenuItems = (): MenuItem[] => {
+  const getMenuItems = useCallback((): MenuItem[] => {
     return [
       allSelectedNodesAreSkill
         ? null
@@ -330,9 +330,21 @@ export const SelectionActionMenu: FC<SelectionActionMenuProps> = ({ onClose }) =
         },
       },
     ].filter(Boolean);
-  };
+  }, [
+    t,
+    handleAskAI,
+    handleBatchAskAI,
+    handleAddToContext,
+    handleGroup,
+    handleSelectCluster,
+    handleGroupCluster,
+    handleLayoutCluster,
+    handleDelete,
+    allSelectedNodesAreSkill,
+    hasSkill,
+  ]);
 
-  const menuItems = useMemo(() => getMenuItems(), []);
+  const menuItems = useMemo(() => getMenuItems(), [getMenuItems]);
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-2 w-[200px] border border-[rgba(0,0,0,0.06)]">

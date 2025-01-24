@@ -1,6 +1,6 @@
 import { EditorBubble, useEditor } from '../../../core/components';
 import { removeAIHighlight } from '../../../core/extensions';
-import { Fragment, type ReactNode, useEffect, useRef } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import type { Instance } from 'tippy.js';
 
 import { AISelector } from '../common/ai-selector';
@@ -17,15 +17,8 @@ const GenerativeMenuSwitch = ({ children, open, onOpenChange }: GenerativeMenuSw
   const containerRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<Instance | null>(null);
 
-  // useEffect(() => {
-  //   if (!open) removeAIHighlight(editor);
-  // }, [open]);
-
   const handleBubbleClose = () => {
     if (bubbleRef.current) {
-      // bubbleRef.current?.hide();
-      // bubbleRef.current.popperInstance?.update();
-
       handleBubbleHide();
 
       requestAnimationFrame(() => {
@@ -83,7 +76,7 @@ const GenerativeMenuSwitch = ({ children, open, onOpenChange }: GenerativeMenuSw
             inPlaceEditType="inline"
           />
         )}
-        {!open && <Fragment>{children}</Fragment>}
+        {!open && children}
       </EditorBubble>
     </div>
   );

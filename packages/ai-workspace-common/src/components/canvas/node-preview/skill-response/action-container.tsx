@@ -30,9 +30,9 @@ const ActionContainerComponent = ({ result, step }: ActionContainerProps) => {
 
   const sources = useMemo(
     () =>
-      typeof step?.structuredData?.['sources'] === 'string'
-        ? safeParseJSON(step?.structuredData?.['sources'])
-        : (step?.structuredData?.['sources'] as Source[]),
+      typeof step?.structuredData?.sources === 'string'
+        ? safeParseJSON(step?.structuredData?.sources)
+        : (step?.structuredData?.sources as Source[]),
     [step?.structuredData],
   );
 
@@ -61,9 +61,9 @@ const ActionContainerComponent = ({ result, step }: ActionContainerProps) => {
 
   useEffect(() => {
     let total = 0;
-    (step?.tokenUsage || []).forEach((item) => {
+    for (const item of step?.tokenUsage || []) {
       total += (item?.inputTokens || 0) + (item?.outputTokens || 0);
-    });
+    }
     setTokenUsage(total);
   }, [step?.tokenUsage]);
 
@@ -80,7 +80,7 @@ const ActionContainerComponent = ({ result, step }: ActionContainerProps) => {
         });
       }
     },
-    [sources, title, result.resultId, debouncedCreateDocument, t],
+    [sources, title, result.resultId, debouncedCreateDocument],
   );
 
   const handleCopyToClipboard = useCallback(
@@ -95,8 +95,8 @@ const ActionContainerComponent = ({ result, step }: ActionContainerProps) => {
   const tokenUsageDropdownList = useMemo(
     () => (
       <Menu>
-        {step?.tokenUsage?.map((item: any, index: number) => (
-          <Menu.Item key={'token-usage-' + index}>
+        {step?.tokenUsage?.map((item: any) => (
+          <Menu.Item key={item?.modelName}>
             <div className="flex items-center">
               <span>
                 {item?.modelName}:{' '}

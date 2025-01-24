@@ -4,7 +4,7 @@ import {
   EditorBubble,
 } from '@refly-packages/ai-workspace-common/components/editor/core/components';
 import { removeAIHighlight } from '@refly-packages/ai-workspace-common/components/editor/core/extensions';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { AISelector } from '../common/ai-selector';
 import { editorEmitter } from '@refly/utils/event-emitter/editor';
 import type { Instance } from 'tippy.js';
@@ -34,7 +34,7 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
 
   useEffect(() => {
     if (!open) removeAIHighlight(editor);
-  }, [open]);
+  }, [open, editor]);
 
   const handleBubbleClose = () => {
     if (bubbleRef.current) {
@@ -51,48 +51,42 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
 
   const handleBubbleHide = () => {
     onOpenChange(false);
-    editor.chain().unsetHighlight().run();
+    editor?.chain().unsetHighlight().run();
     removeAIHighlight(editor);
   };
 
-  const handleAskAI = ({ value, docId: eventDocId }: { value: boolean; docId?: string }) => {
-    if (eventDocId && eventDocId !== docId) {
-      return;
-    }
+  const handleAskAI = useCallback(
+    ({ value, docId: eventDocId }: { value: boolean; docId?: string }) => {
+      if (eventDocId && eventDocId !== docId) {
+        return;
+      }
 
-    onOpenChange(value);
+      onOpenChange(value);
 
-    if (!value) {
-      bubbleRef.current?.hide();
-    } else {
-      const editor = editorRef.current;
-      const pos = editor.state.selection.from;
+      if (!value) {
+        bubbleRef.current?.hide();
+      } else {
+        const editor = editorRef.current;
+        const pos = editor.state.selection.from;
+        editor.commands.setTextSelection(pos);
 
-      // 2. 设置选区并等待 DOM 更新
-      editor.commands.setTextSelection(pos);
+        requestAnimationFrame(() => {
+          if (bubbleRef.current) {
+            const { state, view } = editor;
+            const { from, to } = state.selection;
 
-      // 3. 等待 DOM 更新后再显示气泡
-      requestAnimationFrame(() => {
-        if (bubbleRef.current) {
-          // 强制更新参考元素位置
-          const { state } = editor;
-          const { view } = editor;
-          const { selection } = state;
-          const { from, to } = selection;
+            bubbleRef.current.setProps({
+              getReferenceClientRect: () => posToDOMRect(view, from, to),
+            });
 
-          bubbleRef.current.setProps({
-            getReferenceClientRect: () => posToDOMRect(view, from, to),
-          });
-
-          // 更新位置后再显示
-          bubbleRef.current.show();
-
-          // 强制更新弹出位置
-          bubbleRef.current.popperInstance?.update();
-        }
-      });
-    }
-  };
+            bubbleRef.current.show();
+            bubbleRef.current.popperInstance?.update();
+          }
+        });
+      }
+    },
+    [docId, onOpenChange],
+  );
 
   useEffect(() => {
     editorEmitter.on('activeAskAI', handleAskAI);
@@ -117,7 +111,7 @@ const GenerativeBlockMenuSwitch = ({ open, onOpenChange }: GenerativeBlockMenuSw
     return () => {
       document.removeEventListener('keydown', handleEsc);
     };
-  }, [onOpenChange, editor]);
+  }, [onOpenChange, editor, docId]);
 
   useEffect(() => {
     if (editor) {

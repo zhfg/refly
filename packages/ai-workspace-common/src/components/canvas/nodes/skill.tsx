@@ -43,11 +43,9 @@ type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
 // Memoized Header Component
 const NodeHeader = memo(
   ({
-    query,
     selectedSkillName,
     setSelectedSkill,
   }: {
-    query: string;
     selectedSkillName?: string;
     setSelectedSkill: (skill: Skill | null) => void;
   }) => {
@@ -224,15 +222,15 @@ export const SkillNode = memo(
         // Reset form when skill changes
         if (selectedSkill?.configSchema?.items?.length) {
           const defaultConfig = {};
-          selectedSkill.configSchema.items.forEach((item) => {
+          for (const item of selectedSkill.configSchema.items) {
             if (item.defaultValue !== undefined) {
               defaultConfig[item.key] = {
                 value: item.defaultValue,
-                label: item.labelDict?.['en'] ?? item.key,
+                label: item.labelDict?.en ?? item.key,
                 displayValue: String(item.defaultValue),
               };
             }
-          });
+          }
           form.setFieldValue('tplConfig', defaultConfig);
         } else {
           form.setFieldValue('tplConfig', undefined);
@@ -349,7 +347,6 @@ export const SkillNode = memo(
 
             <div className="flex flex-col gap-3 h-full">
               <NodeHeader
-                query={localQuery}
                 selectedSkillName={selectedSkill?.name}
                 setSelectedSkill={setSelectedSkill}
               />

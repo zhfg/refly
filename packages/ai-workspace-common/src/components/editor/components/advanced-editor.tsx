@@ -85,7 +85,5 @@ export const CollabGenAIMenuSwitch: React.FC<CollabGenAIMenuSwitchProps> = (prop
 export const CollabGenAIBlockMenu = () => {
   const [openAI, setOpenAI] = useState(false);
 
-  return (
-    <GenerativeBlockMenuSwitch open={openAI} onOpenChange={setOpenAI}></GenerativeBlockMenuSwitch>
-  );
+  return <GenerativeBlockMenuSwitch open={openAI} onOpenChange={setOpenAI} />;
 };

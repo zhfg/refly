@@ -45,7 +45,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
 
   const renderPopoverContent = (item: Source) => {
     const domain = safeParseURL(item.url);
-    const source = item;
     return (
       <div className="search-result-popover-content">
         {/* Title section */}

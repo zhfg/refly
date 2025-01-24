@@ -9,20 +9,20 @@ export function highlightSelection(xPath: string) {
     const range = selection.getRangeAt(0);
     const selectedTextNodes = getTextNodesInRange(range);
 
-    selectedTextNodes.forEach(({ node, text, startOffset, endOffset }) => {
+    for (const { node, text, startOffset, endOffset } of selectedTextNodes) {
       const span = document.createElement('span');
       span.setAttribute(INLINE_SELECTED_MARK_ID, xPath);
-      span.textContent = text; // 将选中的文本内容放入 span 中
+      span.textContent = text; // put the selected text into the span
 
       const newNode = node.splitText(startOffset);
       newNode.splitText(endOffset - startOffset);
-      newNode.parentNode.replaceChild(span, newNode); // 替换选中的文本节点
+      newNode.parentNode.replaceChild(span, newNode); // replace the selected text node
 
-      range.setStartAfter(span); // 更新范围
+      range.setStartAfter(span); // update the range
       selectedNodes.push(span);
-    });
+    }
 
-    // 清除选区
+    // clear the selection
     selection.removeAllRanges();
   }
 
@@ -34,7 +34,7 @@ function getTextNodesInRange(range) {
   const startContainer = range.startContainer;
   const endContainer = range.endContainer;
 
-  // 获取范围内的所有文本节点
+  // get all text nodes in the range
   function traverseNodes(node) {
     if (node.nodeType === Node.TEXT_NODE) {
       if (range.intersectsNode(node)) {
@@ -60,7 +60,7 @@ function getTextNodesInRange(range) {
     }
   }
 
-  // 使用 range.commonAncestorContainer 来遍历所有相关节点
+  // traverse all related nodes using range.commonAncestorContainer
   traverseNodes(range.commonAncestorContainer);
 
   return Array.from(new Set(textNodes));
@@ -69,17 +69,17 @@ function getTextNodesInRange(range) {
 export function removeHighlight(xPath: string) {
   const highlightedSpans = document.querySelectorAll(`span[${INLINE_SELECTED_MARK_ID}="${xPath}"]`);
 
-  highlightedSpans.forEach((span) => {
+  for (const span of highlightedSpans) {
     const parent = span.parentNode;
     const textContent = span.textContent;
 
-    // 创建一个新的文本节点来替换 span
+    // create a new text node to replace the span
     const textNode = document.createTextNode(textContent);
     parent.replaceChild(textNode, span);
 
-    // 尝试合并相邻的文本节点
+    // try to merge adjacent text nodes
     parent.normalize();
-  });
+  }
 }
 
 export function getSelectionNodesMarkdown() {

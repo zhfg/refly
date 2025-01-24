@@ -6,11 +6,9 @@ import { Check, TextQuote, TrashIcon } from 'lucide-react';
 const AICompletionCommands = ({
   completion,
   onDiscard,
-  onOpenChange,
 }: {
   completion: string;
   onDiscard: () => void;
-  onOpenChange: (open: boolean) => void;
 }) => {
   const { editor } = useEditor();
   const docId = editor?.options?.editorProps?.attributes?.['data-doc-id'];
@@ -59,12 +57,10 @@ const AICompletionCommands = ({
                 editor
                   .chain()
                   .focus()
-                  // .unsetAIHighlight()
                   .insertContentAt(selection.to + 1, completion)
                   .run();
 
                 editorEmitter.emit('activeAskAI', { value: false, docId });
-                // onOpenChange(false)
               }
             }}
           >

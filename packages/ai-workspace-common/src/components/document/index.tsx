@@ -1,6 +1,5 @@
 import { useEffect, useState, memo, useCallback } from 'react';
 import { useDebounce } from 'use-debounce';
-import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 import './index.scss';
 import { Input, Spin } from '@arco-design/web-react';
@@ -26,17 +25,7 @@ import { LOCALE } from '@refly/common-types';
 import { useDocumentSync } from '@refly-packages/ai-workspace-common/hooks/use-document-sync';
 
 const StatusBar = memo(
-  ({
-    deckSize,
-    setDeckSize,
-    docId,
-    node,
-  }: {
-    deckSize: number;
-    setDeckSize: (size: number) => void;
-    docId: string;
-    node?: CanvasNode;
-  }) => {
+  ({ docId }: { docId: string }) => {
     const { provider, ydoc } = useDocumentContext();
     const yReadOnly = ydoc?.getText('readOnly');
     const { t, i18n } = useTranslation();
@@ -147,11 +136,7 @@ const StatusBar = memo(
     );
   },
   (prevProps, nextProps) => {
-    return (
-      prevProps.docId === nextProps.docId &&
-      prevProps.deckSize === nextProps.deckSize &&
-      prevProps.node?.id === nextProps.node?.id
-    );
+    return prevProps.docId === nextProps.docId;
   },
 );
 
@@ -227,14 +212,7 @@ const DocumentBody = memo(
 );
 
 export const DocumentEditor = memo(
-  (props: {
-    docId: string;
-    deckSize: number;
-    setDeckSize: (size: number) => void;
-    node?: CanvasNode;
-  }) => {
-    const { docId, deckSize, setDeckSize, node } = props;
-
+  ({ docId }: { docId: string }) => {
     const { resetState } = useDocumentStoreShallow((state) => ({
       resetState: state.resetState,
     }));
@@ -248,17 +226,13 @@ export const DocumentEditor = memo(
     return (
       <DocumentProvider docId={docId}>
         <div className="flex flex-col ai-note-container">
-          <StatusBar deckSize={deckSize} setDeckSize={setDeckSize} docId={docId} node={node} />
+          <StatusBar docId={docId} />
           <DocumentBody docId={docId} />
         </div>
       </DocumentProvider>
     );
   },
   (prevProps, nextProps) => {
-    return (
-      prevProps.docId === nextProps.docId &&
-      prevProps.deckSize === nextProps.deckSize &&
-      prevProps.node?.id === nextProps.node?.id
-    );
+    return prevProps.docId === nextProps.docId;
   },
 );

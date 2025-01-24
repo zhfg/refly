@@ -22,7 +22,6 @@ export const NodeSelector = (props: NodeSelectorProps) => {
   const {
     onClickOutside,
     onSearchValueChange,
-    onClose,
     onSelect,
     selectedItems = [],
     showFooterActions = true,
@@ -35,8 +34,6 @@ export const NodeSelector = (props: NodeSelectorProps) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isComposing, setIsComposing] = useState(false);
   const { t } = useTranslation();
-
-  const [displayMode, setDisplayMode] = useState<'list' | 'search'>('list');
 
   const handleSearchValueChange = (val: string) => {
     if (onSearchValueChange) {
@@ -121,11 +118,9 @@ export const NodeSelector = (props: NodeSelectorProps) => {
           <Home
             showItemDetail={false}
             key={'search'}
-            displayMode={displayMode}
             data={sortedRenderData}
             activeValue={activeValue}
             setValue={setActiveValue}
-            searchValue={searchValue}
           />
         </Command.List>
         {showFooterActions && (

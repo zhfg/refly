@@ -259,31 +259,28 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
     hoverContent?: HoverContent;
   }
 
-  const siderSections: SiderCenterProps[][] = [
-    [],
-    [
-      {
-        key: 'Canvas',
-        name: 'canvas',
-        icon: <IconCanvas key="canvas" className="arco-icon" style={{ fontSize: 20 }} />,
-        hoverContent: {
-          title: t('loggedHomePage.siderMenu.canvasTitle'),
-          description: t('loggedHomePage.siderMenu.canvasDescription'),
-          videoUrl: 'https://static.refly.ai/onboarding/siderMenu/siderMenu-canvas.webm',
-          placement: 'rightBottom',
-        },
+  const siderSections: SiderCenterProps[] = [
+    {
+      key: 'Canvas',
+      name: 'canvas',
+      icon: <IconCanvas key="canvas" className="arco-icon" style={{ fontSize: 20 }} />,
+      hoverContent: {
+        title: t('loggedHomePage.siderMenu.canvasTitle'),
+        description: t('loggedHomePage.siderMenu.canvasDescription'),
+        videoUrl: 'https://static.refly.ai/onboarding/siderMenu/siderMenu-canvas.webm',
+        placement: 'rightBottom',
       },
-      {
-        key: 'Library',
-        name: 'library',
-        icon: <IconLibrary key="library" className="arco-icon" style={{ fontSize: 20 }} />,
-        hoverContent: {
-          title: t('loggedHomePage.siderMenu.libraryTitle'),
-          description: t('loggedHomePage.siderMenu.libraryDescription'),
-          videoUrl: 'https://static.refly.ai/onboarding/siderMenu/siderMenu-knowledgebase.webm',
-        },
+    },
+    {
+      key: 'Library',
+      name: 'library',
+      icon: <IconLibrary key="library" className="arco-icon" style={{ fontSize: 20 }} />,
+      hoverContent: {
+        title: t('loggedHomePage.siderMenu.libraryTitle'),
+        description: t('loggedHomePage.siderMenu.libraryDescription'),
+        videoUrl: 'https://static.refly.ai/onboarding/siderMenu/siderMenu-knowledgebase.webm',
       },
-    ],
+    },
   ];
 
   return (
@@ -307,67 +304,65 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
         >
           <div className="flex h-full flex-col justify-between">
             <div className="flex-1 overflow-y-auto">
-              {siderSections.map((section, index) => (
-                <div key={`section-${index}`} className="sider-section">
-                  {section.map((item, itemIndex) => (
-                    <React.Fragment key={item.key}>
-                      <SubMenu
-                        key={item.key}
-                        className="[&_.arco-menu-icon-suffix_.arco-icon-down]:z-[1] [&_.arco-menu-icon-suffix_.arco-icon-down]:rotate-90 [&_.arco-menu-inline-header]:pr-0"
-                        title={
-                          <MenuItemContent
-                            type={item.key}
-                            icon={item.icon}
-                            title={t(`loggedHomePage.siderMenu.${item.name}`)}
-                            hoverContent={item.hoverContent}
-                          />
-                        }
-                      >
-                        {item.key === 'Canvas' && (
-                          <>
-                            <NewCanvasItem />
-
-                            {isLoadingCanvas ? (
-                              <>
-                                <Skeleton.Input
-                                  key="skeleton-1"
-                                  active
-                                  size="small"
-                                  style={{ width: 204 }}
-                                />
-                                <Skeleton.Input
-                                  key="skeleton-2"
-                                  active
-                                  size="small"
-                                  style={{ marginTop: 8, width: 204 }}
-                                />
-                                <Skeleton.Input
-                                  key="skeleton-3"
-                                  active
-                                  size="small"
-                                  style={{ marginTop: 8, width: 204 }}
-                                />
-                              </>
-                            ) : (
-                              canvasList.map((canvas) => (
-                                <CanvasListItem key={canvas.id} canvas={canvas} />
-                              ))
-                            )}
-                          </>
-                        )}
-                      </SubMenu>
-                      {itemIndex < siderSections.length - 1 && (
-                        <Divider
-                          key={`divider-${itemIndex}`}
-                          style={{
-                            margin: '8px 0',
-                          }}
+              <div className="sider-section">
+                {siderSections.map((item, itemIndex) => (
+                  <React.Fragment key={item.key}>
+                    <SubMenu
+                      key={item.key}
+                      className="[&_.arco-menu-icon-suffix_.arco-icon-down]:z-[1] [&_.arco-menu-icon-suffix_.arco-icon-down]:rotate-90 [&_.arco-menu-inline-header]:pr-0"
+                      title={
+                        <MenuItemContent
+                          type={item.key}
+                          icon={item.icon}
+                          title={t(`loggedHomePage.siderMenu.${item.name}`)}
+                          hoverContent={item.hoverContent}
                         />
+                      }
+                    >
+                      {item.key === 'Canvas' && (
+                        <>
+                          <NewCanvasItem />
+
+                          {isLoadingCanvas ? (
+                            <>
+                              <Skeleton.Input
+                                key="skeleton-1"
+                                active
+                                size="small"
+                                style={{ width: 204 }}
+                              />
+                              <Skeleton.Input
+                                key="skeleton-2"
+                                active
+                                size="small"
+                                style={{ marginTop: 8, width: 204 }}
+                              />
+                              <Skeleton.Input
+                                key="skeleton-3"
+                                active
+                                size="small"
+                                style={{ marginTop: 8, width: 204 }}
+                              />
+                            </>
+                          ) : (
+                            canvasList.map((canvas) => (
+                              <CanvasListItem key={canvas.id} canvas={canvas} />
+                            ))
+                          )}
+                        </>
                       )}
-                    </React.Fragment>
-                  ))}
-                </div>
-              ))}
+                    </SubMenu>
+                    {itemIndex < siderSections.length - 1 && (
+                      <Divider
+                        key={`divider-${item.key}`}
+                        style={{
+                          margin: '8px 0',
+                        }}
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
             </div>
 
             <div className="mt-auto">

@@ -1,10 +1,8 @@
 import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Position, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
-import { CanvasNodeData, ResourceNodeMeta, CanvasNode, ResourceNodeProps } from './shared/types';
-import { Node } from '@xyflow/react';
+import { CanvasNode, ResourceNodeProps } from './shared/types';
 import { CustomHandle } from './shared/custom-handle';
-import { useEdgeStyles } from '../constants';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './shared/action-buttons';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
@@ -12,7 +10,6 @@ import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
-import { useThrottledCallback } from 'use-debounce';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
 import classNames from 'classnames';
@@ -33,15 +30,13 @@ import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/us
 import { NodeHeader } from './shared/node-header';
 import { ContentPreview } from './shared/content-preview';
 
-type ResourceNode = Node<CanvasNodeData<ResourceNodeMeta>, 'resource'>;
-
 export const ResourceNode = memo(
   ({ id, data, isPreview, selected, hideActions, hideHandles, onNodeClick }: ResourceNodeProps) => {
     const [isHovered, setIsHovered] = useState(false);
     const [shouldPoll, setShouldPoll] = useState(false);
     const { edges } = useCanvasData();
     const setNodeDataByEntity = useSetNodeDataByEntity();
-    const { getNode, setEdges } = useReactFlow();
+    const { getNode } = useReactFlow();
     const ResourceIcon =
       data?.metadata?.resourceType === 'weblink'
         ? HiOutlineSquare3Stack3D
@@ -58,7 +53,7 @@ export const ResourceNode = memo(
 
     const isOperating = operatingNodeId === id;
     const sizeMode = data?.metadata?.sizeMode || 'adaptive';
-    const node = useMemo(() => getNode(id), [id, data?.metadata?.sizeMode, getNode]);
+    const node = useMemo(() => getNode(id), [id, getNode]);
 
     const { containerStyle, handleResize } = useNodeSize({
       id,
@@ -75,27 +70,6 @@ export const ResourceNode = memo(
     // Check if node has any connections
     const isTargetConnected = edges?.some((edge) => edge.target === id);
     const isSourceConnected = edges?.some((edge) => edge.source === id);
-
-    const edgeStyles = useEdgeStyles();
-
-    // Update hover state and edge styles
-    const updateEdgeStyles = useThrottledCallback(
-      (hoveredState: boolean) => {
-        setEdges((eds) =>
-          eds.map((edge) => {
-            if (edge.source === id || edge.target === id) {
-              return {
-                ...edge,
-                style: hoveredState ? edgeStyles.hover : edgeStyles.default,
-              };
-            }
-            return edge;
-          }),
-        );
-      },
-      500,
-      { leading: true, trailing: false },
-    );
 
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
 
@@ -205,7 +179,7 @@ export const ResourceNode = memo(
       } else {
         setShouldPoll(false);
       }
-    }, [data.contentPreview, remoteResult]);
+    }, [data.entityId, data.contentPreview, remoteResult, setNodeDataByEntity]);
 
     // Add event handling
     useEffect(() => {

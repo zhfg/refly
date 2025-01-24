@@ -136,7 +136,7 @@ export const InstanceDropdownMenu = (props: InstanceDropdownMenuProps) => {
         type="text"
         onClick={(e) => handleIconClick(e)}
         className="text-gray-500"
-      ></Button>
+      />
     </Dropdown>
   );
 };

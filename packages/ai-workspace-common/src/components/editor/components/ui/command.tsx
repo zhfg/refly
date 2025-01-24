@@ -33,16 +33,14 @@ const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
   );
 };
 
-const CommandInput = ({ className, onValueChange, ...props }) => (
+const CommandInput = ({ className }) => (
   <div className="flex items-center px-4 border-b" cmdk-input-wrapper="">
     <Magic className="mr-2 w-4 h-4 text-primary-600 shrink-0" />
     <CommandPrimitive.Input
-      // ref={ref}
       className={cn(
         'flex py-3 w-full h-11 text-sm bg-transparent rounded-md border-none outline-none calc-width-50px important-outline-none important-box-shadow-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}
-      // {...props}
     />
   </div>
 );

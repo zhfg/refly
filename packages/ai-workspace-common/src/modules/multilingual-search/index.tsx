@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { Layout } from 'antd';
 import { SearchBox } from './components/search-box';
 import { SearchProgress } from './components/search-progress';
 import { SearchResults } from './components/search-results';
@@ -10,8 +9,6 @@ import './index.scss';
 import { IconSearch } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 import { TbWorldSearch } from 'react-icons/tb';
-
-const { Header, Content } = Layout;
 
 function MultilingualSearch() {
   const { t } = useTranslation();

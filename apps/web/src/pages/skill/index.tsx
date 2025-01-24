@@ -4,7 +4,6 @@ import { Helmet } from 'react-helmet';
 // components
 import { useTranslation } from 'react-i18next';
 import { SkillInstanceList } from '@refly-packages/ai-workspace-common/components/skill/skill-intance-list';
-import { SkillTemplateList } from '@refly-packages/ai-workspace-common/components/skill/skill-template-list';
 
 import { useNavigate, useSearchParams } from '@refly-packages/ai-workspace-common/utils/router';
 import './index.scss';
@@ -69,11 +68,7 @@ const Skill = () => {
         val={val}
       />
       <div className="skill-list__content">
-        {val === 'instance' ? (
-          <SkillInstanceList canGoDetail={true} source="instance" />
-        ) : (
-          <SkillTemplateList />
-        )}
+        {val === 'instance' ? <SkillInstanceList canGoDetail={true} source="instance" /> : null}
       </div>
     </div>
   );

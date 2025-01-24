@@ -36,7 +36,7 @@ const StepsList = memo(
     return (
       <>
         {steps.map((step, index) => (
-          <div key={index}>
+          <div key={step.name}>
             <Divider className="my-2" />
             <ActionStepCard
               result={result}
@@ -111,7 +111,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
     } else {
       setLoading(false);
     }
-  }, [resultId]);
+  }, [resultId, result]);
 
   const scrollToBottom = useCallback(
     (event: { resultId: string; payload: ActionResult }) => {
@@ -176,7 +176,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
         entityType: 'canvas',
       },
     );
-  }, [resultId, title]);
+  }, [resultId, title, canvasId, invokeAction]);
 
   useEffect(() => {
     const handleLocateToPreview = (event: { id: string; type?: 'editResponse' }) => {

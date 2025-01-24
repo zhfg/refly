@@ -39,12 +39,12 @@ export const useNodeOperations = () => {
       const deletedNodes = changes.filter((change) => change.type === 'remove');
 
       if (deletedNodes.length > 0) {
-        deletedNodes.forEach((change) => {
+        for (const change of deletedNodes) {
           const nodeId = change.id;
           // Remove from context items and node previews
           removeContextItem(nodeId);
           removeNodePreview(canvasId, nodeId);
-        });
+        }
       }
 
       const updatedNodes = applyNodeChanges(changes, mutableNodes);

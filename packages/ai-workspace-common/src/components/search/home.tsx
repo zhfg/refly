@@ -14,7 +14,6 @@ export function Home({
   displayMode,
   data,
   activeValue,
-  searchValue,
   setValue,
 }: {
   data: RenderItem[];
@@ -22,7 +21,6 @@ export function Home({
   setPages: (pages: string[]) => void;
   displayMode: 'list' | 'search';
   activeValue: string;
-  searchValue: string;
   setValue: (val: string) => void;
 }) {
   const { t } = useTranslation();
@@ -50,15 +48,17 @@ export function Home({
                 <div className="search-res-container">
                   <p
                     className="search-res-title"
+                    // biome-ignore lint/security/noDangerouslySetInnerHtml: trust server highlights
                     dangerouslySetInnerHTML={{ __html: item?.highlightedTitle }}
-                  ></p>
+                  />
                   {item?.snippets?.length > 0 &&
                     item.snippets.map((snippet, index) => (
                       <p
                         className="search-res-desc"
                         key={index}
+                        // biome-ignore lint/security/noDangerouslySetInnerHtml: trust server highlights
                         dangerouslySetInnerHTML={{ __html: snippet.highlightedText }}
-                      ></p>
+                      />
                     ))}
                 </div>
               </Item>

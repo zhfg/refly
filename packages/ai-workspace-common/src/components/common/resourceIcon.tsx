@@ -12,7 +12,6 @@ export const ResourceIcon = (props: { url: string; resourceType: ResourceType; s
         alt={url}
       />
     );
-  } else {
-    return resourceType === 'text' ? <IconText size={size} /> : <BsFileRichtext size={size} />;
   }
+  return resourceType === 'text' ? <IconText size={size} /> : <BsFileRichtext size={size} />;
 };

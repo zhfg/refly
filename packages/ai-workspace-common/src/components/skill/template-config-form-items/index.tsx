@@ -13,7 +13,7 @@ const FormItem = Form.Item;
 const TextArea = Input.TextArea;
 
 const getFormField = (fieldPrefix: string, key: string) => {
-  return `${fieldPrefix ? fieldPrefix + '.' : ''}${key}`;
+  return `${fieldPrefix ? `${fieldPrefix}.` : ''}${key}`;
 };
 
 const getDictValue = (dict: { [key: string]: string }, locale: string) => {
@@ -63,7 +63,7 @@ const ConfigItem = (props: {
   }
 
   if (item.inputMode === 'inputTextArea') {
-    console.log(`item.defaultValue`, item.defaultValue, configValue?.value);
+    console.log('item.defaultValue', item.defaultValue, configValue?.value);
     return (
       <TextArea
         placeholder={placeholder}
@@ -116,7 +116,6 @@ const ConfigItem = (props: {
           label: getDictValue(option.labelDict, locale),
           value: option.value,
         }))}
-        // getPopupContainer={getPopupContainer}
         defaultValue={
           item?.defaultValue || configValue?.value || (item.inputMode === 'multiSelect' ? [] : '')
         }

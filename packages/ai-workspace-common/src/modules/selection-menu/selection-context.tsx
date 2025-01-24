@@ -21,7 +21,7 @@ export const SelectionContext: React.FC<SelectionContextProps> = ({
   getSourceNode,
 }) => {
   const { t } = useTranslation();
-  const { selectedText, isSelecting, addToContext, removeSelection } = useSelectionContext({
+  const { selectedText, addToContext, removeSelection } = useSelectionContext({
     containerClass,
   });
   const { getNodes } = useReactFlow();

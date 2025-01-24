@@ -18,9 +18,8 @@ export const HomeRedirect = ({ defaultNode }: { defaultNode: ReactNode }) => {
 
       if (currentCanvasId) {
         return <Navigate to={`/canvas/${currentCanvasId}`} replace />;
-      } else {
-        return <Navigate to={`/canvas/empty`} replace />;
       }
+      return <Navigate to={'/canvas/empty'} replace />;
     }
     return defaultNode;
   };

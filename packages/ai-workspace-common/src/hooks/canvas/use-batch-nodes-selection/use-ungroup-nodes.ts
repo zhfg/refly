@@ -7,7 +7,7 @@ import { PADDING, sortNodes } from './utils';
 
 export const useUngroupNodes = () => {
   const canvasId = useCanvasId();
-  const { updateNodesWithSync } = useNodeOperations(canvasId);
+  const { updateNodesWithSync } = useNodeOperations();
 
   const ungroupNodes = useCallback(
     (groupId: string) => {
@@ -67,9 +67,9 @@ export const useUngroupNodes = () => {
 
   const ungroupMultipleNodes = useCallback(
     (groupIds: string[]) => {
-      groupIds.forEach((groupId) => {
+      for (const groupId of groupIds) {
         ungroupNodes(groupId);
-      });
+      }
     },
     [ungroupNodes],
   );

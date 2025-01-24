@@ -23,7 +23,7 @@ interface ResourceViewProps {
   setDeckSize: (size: number) => void;
 }
 
-const TopBar = memo(
+const _TopBar = memo(
   ({ deckSize, setDeckSize }: { deckSize: number; setDeckSize: (size: number) => void }) => {
     return (
       <div className="w-[90%] pt-2 pb-2 mx-auto flex justify-end items-center">
@@ -75,7 +75,7 @@ const ResourceMeta = memo(
             description={
               t(`resource.${resourceDetail?.indexStatus}`) +
               (['wait_index', 'index_failed'].includes(resourceDetail?.indexStatus)
-                ? ': ' + t(`resource.${resourceDetail?.indexStatus}_tip`)
+                ? `: ${t(`resource.${resourceDetail?.indexStatus}_tip`)}`
                 : '')
             }
             action={
@@ -192,7 +192,7 @@ const ResourceContent = memo(
 
 export const ResourceView = memo(
   (props: ResourceViewProps) => {
-    const { resourceId, deckSize, setDeckSize } = props;
+    const { resourceId } = props;
     const { t } = useTranslation();
     const [isReindexing, setIsReindexing] = useState(false);
 

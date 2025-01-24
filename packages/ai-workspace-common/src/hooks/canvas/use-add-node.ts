@@ -21,13 +21,17 @@ import { useNodePosition } from './use-node-position';
 
 const deduplicateNodes = (nodes: any[]) => {
   const uniqueNodesMap = new Map();
-  nodes.forEach((node) => uniqueNodesMap.set(node.id, node));
+  for (const node of nodes) {
+    uniqueNodesMap.set(node.id, node);
+  }
   return Array.from(uniqueNodesMap.values());
 };
 
 const deduplicateEdges = (edges: any[]) => {
   const uniqueEdgesMap = new Map();
-  edges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
+  for (const edge of edges) {
+    uniqueEdgesMap.set(edge.id, edge);
+  }
   return Array.from(uniqueEdgesMap.values());
 };
 

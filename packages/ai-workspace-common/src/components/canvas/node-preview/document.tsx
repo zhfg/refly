@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { memo } from 'react';
 import { DocumentEditor } from '@refly-packages/ai-workspace-common/components/document';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
@@ -12,9 +12,6 @@ interface DocumentNodePreviewProps {
 
 export const DocumentNodePreview = memo(
   ({ nodeData }: DocumentNodePreviewProps) => {
-    // Get deck size from references store
-    const [deckSize, setDeckSize] = useState<number>(0);
-
     // Early return if no node data
     if (!nodeData?.entityId || !nodeData?.entityType) {
       return (
@@ -24,16 +21,11 @@ export const DocumentNodePreview = memo(
       );
     }
 
-    const { entityId, entityType, node } = nodeData;
+    const { entityId } = nodeData;
 
     return (
       <div className="h-full overflow-hidden">
-        <DocumentEditor
-          docId={entityId}
-          deckSize={deckSize}
-          setDeckSize={setDeckSize}
-          node={node}
-        />
+        <DocumentEditor docId={entityId} />
       </div>
     );
   },

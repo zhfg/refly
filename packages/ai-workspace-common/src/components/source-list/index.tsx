@@ -16,7 +16,6 @@ interface SourceListProps {
 
 const SourceItem = ({ source, index }: { source: Source; index: number }) => {
   const domain = safeParseURL(source?.url || '');
-  const { i18n } = useTranslation();
   const runtime = getRuntime();
   const isWeb = runtime === 'web';
 

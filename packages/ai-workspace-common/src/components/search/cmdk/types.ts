@@ -46,9 +46,3 @@ export type CommandProps = Children &
      */
     vimBindings?: boolean;
   };
-
-type State = {
-  search: string;
-  value: string;
-  filtered: { count: number; items: Map<string, number>; groups: Set<string> };
-};

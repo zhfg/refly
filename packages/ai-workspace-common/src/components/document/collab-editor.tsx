@@ -15,7 +15,6 @@ import {
 } from '@refly-packages/ai-workspace-common/components/editor/core/components';
 
 import {
-  configureHighlightJs,
   ImageResizer,
   handleCommandNavigation,
 } from '@refly-packages/ai-workspace-common/components/editor/core/extensions';
@@ -199,18 +198,6 @@ export const CollaborativeEditor = memo(
       [docId],
     );
 
-    // Apply Codeblock Highlighting on the HTML from editor.getHTML()
-    const highlightCodeblocks = async (content: string) => {
-      const hljs = await configureHighlightJs();
-      const doc = new DOMParser().parseFromString(content, 'text/html');
-      doc.querySelectorAll('pre code').forEach((el) => {
-        // @ts-ignore
-        // https://highlightjs.readthedocs.io/en/latest/api.html?highlight=highlightElement#highlightelement
-        hljs.highlightElement(el);
-      });
-      return new XMLSerializer().serializeToString(doc);
-    };
-
     useEffect(() => {
       return () => {
         if (editorRef.current) {
@@ -245,23 +232,6 @@ export const CollaborativeEditor = memo(
         editor.off('focus', updateSelection);
       };
     }, [editorRef.current]);
-
-    useEffect(() => {
-      if (editorRef.current && !readOnly) {
-        const editor = editorRef.current;
-
-        const handleBlur = () => {
-          lastCursorPosRef.current = editor?.view?.state?.selection?.$head?.pos;
-          documentActions.updateLastCursorPosRef(docId, lastCursorPosRef.current);
-        };
-
-        editor.on('blur', handleBlur);
-
-        return () => {
-          editor.off('blur', handleBlur);
-        };
-      }
-    }, [readOnly, docId, documentActions, editorRef.current]);
 
     useEffect(() => {
       const insertBelow = (content: string) => {
@@ -322,36 +292,15 @@ export const CollaborativeEditor = memo(
       }
     }, [readOnly, provider]);
 
-    // Handle editor focus/blur to manage active document
-    useEffect(() => {
-      if (!editorRef.current) {
-        return;
-      }
+    const handleBlur = () => {
+      const editor = editorRef?.current;
+      lastCursorPosRef.current = editor?.view?.state?.selection?.$head?.pos;
+      documentActions.updateLastCursorPosRef(docId, lastCursorPosRef.current);
+    };
 
-      const editor = editorRef.current;
-
-      const handleFocus = () => {
-        documentActions.setActiveDocumentId(docId);
-      };
-
-      const handleBlur = () => {
-        // Don't clear activeDocumentId on blur to maintain last active state
-        // Only update if user switches to another document
-      };
-
-      editor.on('focus', handleFocus);
-      editor.on('blur', handleBlur);
-
-      // Set initial active document if editor is focused
-      if (editor.isFocused) {
-        documentActions.setActiveDocumentId(docId);
-      }
-
-      return () => {
-        editor.off('focus', handleFocus);
-        editor.off('blur', handleBlur);
-      };
-    }, [docId, documentActions.setActiveDocumentId, editorRef.current, readOnly]);
+    const handleFocus = () => {
+      documentActions.setActiveDocumentId(docId);
+    };
 
     // Handle component unmount
     useEffect(() => {
@@ -381,7 +330,7 @@ export const CollaborativeEditor = memo(
             const tocExtension = editorRef.current.extensionManager.extensions.find(
               (ext) => ext.name === 'tableOfContents',
             );
-            if (tocExtension && tocExtension.options.onUpdate) {
+            if (tocExtension?.options.onUpdate) {
               const { state } = editorRef.current;
               // Let the extension handle the TOC update internally
               tocExtension.options.onUpdate(state.doc.content);
@@ -409,7 +358,9 @@ export const CollaborativeEditor = memo(
         if (status === 'connected') {
           // Force sync when connection is established
           provider.forceSync();
-          handleEditorUpdate(editorRef.current!);
+          if (editorRef.current) {
+            handleEditorUpdate(editorRef.current);
+          }
         }
       };
 
@@ -455,6 +406,8 @@ export const CollaborativeEditor = memo(
                   'data-doc-id': docId,
                 },
               }}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
               onUpdate={({ editor }) => {
                 debouncedUpdates(editor);
               }}

@@ -67,20 +67,6 @@ export const Search = (props: SearchProps) => {
     setPages(x);
   }, []);
 
-  const onKeyDown = React.useCallback(
-    (e: KeyboardEvent) => {
-      if (isHome || searchValue.length) {
-        return;
-      }
-
-      if (e.key === 'Backspace') {
-        e.preventDefault();
-        popPage();
-      }
-    },
-    [searchValue.length, isHome, popPage],
-  );
-
   function bounce() {
     if (ref.current) {
       ref.current.style.transform = 'scale(0.96)';
@@ -246,12 +232,12 @@ export const Search = (props: SearchProps) => {
   const getInputPlaceholder = (domain: string) => {
     if (domain === 'home') {
       return t('loggedHomePage.quickSearch.placeholderForHome');
-    } else if (domain === 'skill-execute') {
-      return t('loggedHomePage.quickSearch.placeholderForSkillExecute');
-    } else {
-      const data = getRenderData(domain);
-      return t('loggedHomePage.quickSearch.placeholderForWeblink', { domain: data?.heading });
     }
+    if (domain === 'skill-execute') {
+      return t('loggedHomePage.quickSearch.placeholderForSkillExecute');
+    }
+    const data = getRenderData(domain);
+    return t('loggedHomePage.quickSearch.placeholderForWeblink', { domain: data?.heading });
   };
 
   return (
@@ -316,7 +302,6 @@ export const Search = (props: SearchProps) => {
                   data={renderData}
                   activeValue={value}
                   setValue={setValue}
-                  searchValue={searchValue}
                 />
               )}
               {activePage !== 'home' && activePage !== 'skill-execute' ? (
@@ -325,7 +310,6 @@ export const Search = (props: SearchProps) => {
                   displayMode={displayMode}
                   {...getRenderData(activePage)}
                   activeValue={value}
-                  searchValue={searchValue}
                   setValue={setValue}
                 />
               ) : null}

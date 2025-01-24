@@ -52,11 +52,11 @@ export const useNodePreviewControl = ({
     setTimeout(() => {
       const nodes = getNodes();
       const canvasNodeIds = new Set(nodes.map((node) => node.id));
-      nodePreviews.forEach((preview) => {
+      for (const preview of nodePreviews) {
         if (!canvasNodeIds.has(preview.id)) {
           removeNodePreview(canvasId, preview.id);
         }
-      });
+      }
     }, 1000);
   }, [canvasId, provider, nodePreviews, removeNodePreview]);
 
@@ -127,9 +127,9 @@ export const useNodePreviewControl = ({
    * Clear all pinned nodes
    */
   const clearPinnedNodes = useCallback(() => {
-    nodePreviews.forEach((node) => {
+    for (const node of nodePreviews) {
       removeNodePreview(canvasId, node.id);
-    });
+    }
   }, [canvasId, nodePreviews, removeNodePreview]);
 
   /**

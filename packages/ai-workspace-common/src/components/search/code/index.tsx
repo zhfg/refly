@@ -1,5 +1,5 @@
 import copy from 'copy-to-clipboard';
-import Highlight, { defaultProps } from 'prism-react-renderer';
+import { Highlight, type Language } from 'prism-react-renderer';
 import styles from './code.module.scss';
 import { CopyIcon } from '../icons';
 
@@ -39,10 +39,11 @@ const theme = {
 
 export function Code({ children }: { children: string }) {
   return (
-    <Highlight {...defaultProps} theme={theme} code={children} language="jsx">
+    <Highlight theme={theme} code={children} language={'jsx' as Language}>
       {({ className, style, tokens, getLineProps, getTokenProps }) => (
         <pre className={`${className} ${styles.root}`} style={style}>
           <button
+            type="button"
             aria-label="Copy Code"
             onClick={() => {
               copy(children);
@@ -54,7 +55,7 @@ export function Code({ children }: { children: string }) {
           {tokens.map((line, i) => (
             <div key={i} {...getLineProps({ line, key: i })}>
               {line.map((token, key) => (
-                <span key={i} {...getTokenProps({ token, key })} />
+                <span key={key} {...getTokenProps({ token, key })} />
               ))}
             </div>
           ))}

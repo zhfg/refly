@@ -61,7 +61,7 @@ const RequestAccess = () => {
               </Button>
             </>
           }
-        ></Result>
+        />
       </div>
       {contextHolder}
     </Modal>

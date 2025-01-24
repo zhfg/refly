@@ -31,8 +31,7 @@ interface ChatActionsProps {
 
 export const ChatActions = memo(
   (props: ChatActionsProps) => {
-    const { query, model, setModel, handleSendMessage, handleAbort, customActions, className } =
-      props;
+    const { query, model, setModel, handleSendMessage, customActions, className } = props;
     const { t } = useTranslation();
 
     const handleSendClick = useCallback(() => {
