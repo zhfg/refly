@@ -37,57 +37,29 @@ Refly 是一个开源的 AI 原生创作引擎。Refly 直观的自由画布界�
 
 ## 快速开始
 
-### 本地开发
-
 > 在安装 ReflyAI 之前，请确保您的机器满足以下最低系统要求：
 >
 > CPU >= 2 核
 >
 > 内存 >= 4GB
 
-启动 ReflyAI 服务器最简单的方法是运行我们的 docker-compose.yml 文件。在运行安装命令之前，请确保您的机器上已安装 Docker 和 Docker Compose：
+### 使用 Docker 自行部署
 
-```
-cd docker
-cp .env.example .env
-docker compose up -d
-
-```
-
-运行后，您可以在浏览器中访问 http://localhost/install 进入 ReflyAI 控制面板并开始初始化过程。
-
-> 如果您想为 ReflyAI 贡献代码或进行额外的开发，请参考我们的源代码部署指南。
-
-**后续步骤**
-
-如需自定义配置，请参考 [.env.example](https://www.refly.ai/) 文件中的注释，并在您的 .env 文件中更新相应的值。此外，您可能需要根据特定的部署环境和要求调整 docker-compose.yaml 文件本身，如更改镜像版本、端口映射或卷挂载。做出任何更改后，请重新运行 docker compose up -d。您可以在[这里](https://www.refly.ai/)找到所有可用环境变量的完整列表。
-
-### 私有化部署
-
-如果您想配置高可用性设置，有社区贡献的 Helm Charts 和 YAML 文件，允许在 Kubernetes 上部署 ReflyAI。
-
-### 使用 Docker 部署
-
-使用 Docker 部署您自己的功能丰富、无限制版本的 ReflyAI。我们的团队正在努力更新到最新版本。有关如何自托管 ReflyAI 的更多信息，请参阅我们的[文档](https://docs.affine.pro/docs/self-host-affine)。
+使用 Docker 部署您自己的功能丰富、无限制版本的 ReflyAI。我们的团队正在努力更新到最新版本。
 
 开始部署：
 
-```
-Bash
-1docker pull ghcr.io/reflyai/reflyai:latest
-2docker run -d -p 3000:3000 ghcr.io/reflyai/reflyai:latest
-
+```bash
+cd deploy/docker
+cp .env.example .env # 确保所有必须的环境变量均已设置
+docker-compose up -d
 ```
 
 访问 [http://localhost:3000](http://localhost:3000/) 开始使用 ReflyAI。
 
-### **使用 Terraform 进行部署**
+### 本地开发
 
-**Azure 全球**
-
-使用 terraform 一键将 ReflyAI 部署到 Azure。
-
-- [@nikawang 提供的 Azure Terraform]()
+查看 [CONTRIBUTING](./CONTRIBUTING_CN.md) 了解更多信息。
 
 ## 关键特性
 

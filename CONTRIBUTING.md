@@ -71,37 +71,47 @@ Refly requires the following dependencies to build:
 
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
-- [Node.js v18.x (LTS)](http://nodejs.org)
-- [npm](https://www.npmjs.com/) version 8.x.x or [Yarn](https://yarnpkg.com/)
-- [Python](https://www.python.org/) version 3.11.x or 3.12.x
+- [Node.js v20.x (LTS)](http://nodejs.org)
 
 ### 4. Installation
 
 Refly consists of multiple packages managed in a monorepo structure. The main components are:
 
 1. Web Application (`apps/web/`): The main web interface
-2. AI Workspace Common (`packages/ai-workspace-common/`): Shared AI workspace components
-3. i18n (`packages/i18n/`): Internationalization support
+2. API Server (`apps/api/`): The backend server
+3. AI Workspace Common (`packages/ai-workspace-common/`): Shared AI workspace UI components
+4. i18n (`packages/i18n/`): Internationalization support
 
 Follow these steps to install:
 
-1. Install dependencies:
+1. Spin up all the middlewares:
 
 ```bash
-yarn install
+cd deploy/docker
+docker-compose -f docker-compose.middleware.yml up -d
 ```
 
-2. Set up environment variables:
+2. Install dependencies:
 
 ```bash
-cp .env.example .env
+corepack enable
+pnpm install
 ```
 
-3. Start the development server:
+3. Set up environment variables for both API and web:
 
 ```bash
-yarn dev
+cp apps/web/.env.example apps/web/.env
+cp apps/api/.env.example apps/api/.env
 ```
+
+4. Start developing:
+
+```bash
+pnpm dev
+```
+
+You can visit [http://localhost:5173](http://localhost:5173/) to start developing Refly.
 
 ## Developing
 
@@ -134,7 +144,7 @@ To help you quickly navigate where your contribution fits, here's a brief outlin
         └── types/     // Common TypeScript types
 ```
 
-The backend is built with Node.js and TypeScript, focusing on:
+The backend is built with Nest.js and TypeScript, focusing on:
 
 - AI feature implementation including LLM integration, RAG pipelines, and context memory
 - Canvas state management and real-time collaboration

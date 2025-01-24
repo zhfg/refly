@@ -5,17 +5,10 @@
 .github
 .vscode
 
-# Rush temp files
-common/deploy/
-common/temp/
-common/autoinstallers/*/.npmrc
-**/.rush/temp/
-*.lock
 *.log
 *.chunks.jsonl
 
 # Build dependencies
-dist
 node_modules
 coverage
 

@@ -65,9 +65,15 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
 
       if (data?.success) {
         authStore.setLoginModalOpen(false);
-        authStore.setEmail(values.email);
-        authStore.setSessionId(data.data?.sessionId ?? null);
-        authStore.setVerificationModalOpen(true);
+
+        if (data.data?.skipVerification) {
+          authStore.reset();
+          window.location.replace('/');
+        } else {
+          authStore.setEmail(values.email);
+          authStore.setSessionId(data.data?.sessionId ?? null);
+          authStore.setVerificationModalOpen(true);
+        }
       }
     } else {
       const { data } = await getClient().emailLogin({

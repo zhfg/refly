@@ -13,8 +13,17 @@ export const getEnv = () => {
   return env;
 };
 
-export const serverOrigin = import.meta.env.VITE_API_URL;
-export const wsServerOrigin = import.meta.env.VITE_COLLAB_URL;
+declare global {
+  interface Window {
+    ENV?: {
+      API_URL: string;
+      COLLAB_URL: string;
+    };
+  }
+}
+
+export const serverOrigin = import.meta.env.VITE_API_URL || window.ENV?.API_URL;
+export const wsServerOrigin = import.meta.env.VITE_COLLAB_URL || window.ENV?.COLLAB_URL;
 
 let runtime: IRuntime;
 
