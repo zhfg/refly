@@ -50,9 +50,14 @@ export class AuthController {
 
   @Throttle({ default: { limit: 5, ttl: hours(1) } })
   @Post('email/signup')
-  async emailSignup(@Body() { email, password }: EmailSignupRequest): Promise<EmailSignupResponse> {
-    const { sessionId } = await this.authService.emailSignup(email, password);
-    return buildSuccessResponse({ sessionId });
+  async emailSignup(@Body() { email, password }: EmailSignupRequest, @Res() res: Response) {
+    const { sessionId, tokenData } = await this.authService.emailSignup(email, password);
+    if (tokenData) {
+      return this.authService
+        .setAuthCookie(res, tokenData)
+        .json(buildSuccessResponse({ skipVerification: true }));
+    }
+    return res.status(200).json(buildSuccessResponse({ sessionId }));
   }
 
   @Throttle({ default: { limit: 5, ttl: minutes(10) } })

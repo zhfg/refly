@@ -1556,13 +1556,13 @@ export const EmailSignupRequestSchema = {
 export const EmailSignupDataSchema = {
   type: 'object',
   properties: {
-    accessToken: {
-      type: 'string',
-      description: 'Access token (only returned if the email verification is turned off)',
-    },
     sessionId: {
       type: 'string',
       description: 'Verification session ID',
+    },
+    skipVerification: {
+      type: 'boolean',
+      description: 'Whether email verification is skipped',
     },
   },
 } as const;

@@ -1255,13 +1255,13 @@ export type EmailSignupRequest = {
 
 export type EmailSignupData = {
   /**
-   * Access token (only returned if the email verification is turned off)
-   */
-  accessToken?: string;
-  /**
    * Verification session ID
    */
   sessionId?: string;
+  /**
+   * Whether email verification is skipped
+   */
+  skipVerification?: boolean;
 };
 
 export type EmailSignupResponse = BaseResponse & {

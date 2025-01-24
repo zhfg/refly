@@ -303,13 +303,47 @@ export class AuthService {
     return newUser;
   }
 
-  async emailSignup(email: string, password: string) {
+  async emailSignup(
+    email: string,
+    password: string,
+  ): Promise<{ tokenData?: TokenData; sessionId?: string }> {
     const existingUser = await this.prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       throw new EmailAlreadyRegistered();
     }
 
-    return this.createVerification({ email, purpose: 'signup', password });
+    const skipVerification = this.configService.get('auth.skipVerification');
+    if (skipVerification) {
+      const uid = genUID();
+      const name = await this.genUniqueUsername(email.split('@')[0]);
+      const hashedPassword = await argon2.hash(password);
+
+      const [newUser] = await this.prisma.$transaction([
+        this.prisma.user.create({
+          data: {
+            email,
+            password: hashedPassword,
+            uid,
+            name,
+            nickname: name,
+            emailVerified: new Date(),
+            outputLocale: 'auto',
+          },
+        }),
+        this.prisma.account.create({
+          data: {
+            type: 'email',
+            uid,
+            provider: 'email',
+            providerAccountId: email,
+          },
+        }),
+      ]);
+      return { tokenData: await this.login(newUser) };
+    }
+
+    const { sessionId } = await this.createVerification({ email, purpose: 'signup', password });
+    return { sessionId };
   }
 
   async emailLogin(email: string, password: string) {

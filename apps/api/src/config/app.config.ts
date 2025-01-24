@@ -47,6 +47,7 @@ export default () => ({
     password: process.env.ELASTICSEARCH_PASSWORD,
   },
   auth: {
+    skipVerification: process.env.AUTH_SKIP_VERIFICATION === 'true' || false,
     cookieDomain: process.env.REFLY_COOKIE_DOMAIN || '.refly.ai',
     redirectUrl: process.env.LOGIN_REDIRECT_URL,
     jwt: {
