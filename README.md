@@ -15,6 +15,22 @@ Refly is an open-source AI-native creation engine. It's intuitive free-form canv
 
 [Refly Cloud](https://refly.ai/) · [Self-hosting](https://refly.ai/) · [Forum](https://github.com/refly-ai/refly/discussions) · [Discord](https://discord.gg/bWjffrb89h) · [Twitter](https://x.com/reflyai) · [Documentation](https://docs.refly.ai/)
 
+<p align="center">
+    <a href="https://refly.ai" target="_blank">
+        <img alt="Static Badge" src="https://img.shields.io/badge/Product-F04438"></a>
+    <a href="https://refly.ai/pricing" target="_blank">
+        <img alt="Static Badge" src="https://img.shields.io/badge/free-pricing?logo=free&color=%20%23155EEF&label=pricing&labelColor=%20%23528bff"></a>
+    <a href="https://discord.gg/bWjffrb89h" target="_blank">
+        <img alt="Discord Chat" src="https://img.shields.io/discord/1323513432686989362?label=chat&logo=discord&logoColor=white&style=flat&color=5865F2"></a>
+    <a href="https://x.com/reflyai" target="_blank">
+        <img alt="Static Badge" src="https://img.shields.io/twitter/follow/reflyai"></a>
+</p>
+
+<p align="center">
+  <a href=""><img alt="README in English" src="https://img.shields.io/badge/English-d9d9d9"></a>
+  <a href="README_CN.md"><img alt="简体中文版自述文件" src="https://img.shields.io/badge/简体中文-d9d9d9"></a>
+</p>
+
 </div>
 
 ## Quick Start
