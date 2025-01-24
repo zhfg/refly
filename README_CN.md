@@ -66,10 +66,6 @@ docker compose up -d
 
 如果您想配置高可用性设置，有社区贡献的 Helm Charts 和 YAML 文件，允许在 Kubernetes 上部署 ReflyAI。
 
-- [@LeoQuote](https://github.com/douban/charts/tree/master/charts/dify) 提供的 Helm Chart
-- [@BorisPolonsky](https://github.com/douban/charts/tree/master/charts/dify) 提供的 Helm Chart
-- [@Winson-030](https://github.com/douban/charts/tree/master/charts/dify) 提供的 YAML 文件
-
 ### 使用 Docker 部署
 
 使用 Docker 部署您自己的功能丰富、无限制版本的 ReflyAI。我们的团队正在努力更新到最新版本。有关如何自托管 ReflyAI 的更多信息，请参阅我们的[文档](https://docs.affine.pro/docs/self-host-affine)。
@@ -91,7 +87,7 @@ Bash
 
 使用 terraform 一键将 ReflyAI 部署到 Azure。
 
-- [@nikawang 提供的 Azure Terraform](https://github.com/douban/charts/tree/master/charts/dify)
+- [@nikawang 提供的 Azure Terraform]()
 
 ## 关键特性
 

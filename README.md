@@ -63,13 +63,9 @@ For custom configurations, refer to the comments in the [.env.example](https://w
 
 If you want to configure high-availability setups, there are community-contributed Helm Charts and YAML files that allow deployment of ReflyAI on Kubernetes.
 
-- Helm Chart by [@LeoQuote](https://github.com/douban/charts/tree/master/charts/dify)
-- Helm Chart by [@BorisPolonsky](https://github.com/douban/charts/tree/master/charts/dify)
-- YAML files by [@Winson-030](https://github.com/douban/charts/tree/master/charts/dify)
-
 ### Deploy with Docker
 
-Deploy your own feature-rich, unlimited version of ReflyAI using Docker. Our team is working hard to keep up with the latest versions. For more information on self-hosting ReflyAI, please refer to our [documentation](https://docs.affine.pro/docs/self-host-affine).
+Deploy your own feature-rich, unlimited version of ReflyAI using Docker. Our team is working hard to keep up with the latest versions. For more information on self-hosting ReflyAI, please refer to our [documentation]().
 
 To start deployment:
 
@@ -86,7 +82,7 @@ Visit [http://localhost:3000](http://localhost:3000/) to start using ReflyAI.
 
 Deploy ReflyAI to Azure with one click using terraform.
 
-- [Azure Terraform by @nikawang](https://github.com/douban/charts/tree/master/charts/dify)
+- [Azure Terraform]()
 
 ## Key Features
 
