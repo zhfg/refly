@@ -17,7 +17,7 @@ export type User = {
 /**
  * List order
  */
-export type ListOrder = "creationAsc" | "creationDesc";
+export type ListOrder = 'creationAsc' | 'creationDesc';
 
 /**
  * Reference metadata
@@ -114,7 +114,7 @@ export type ResourceMeta = {
 /**
  * Resource type
  */
-export type ResourceType = "weblink" | "text";
+export type ResourceType = 'weblink' | 'text';
 
 export type Resource = {
   /**
@@ -166,7 +166,7 @@ export type Resource = {
 /**
  * Reference type
  */
-export type ReferenceType = "document" | "resource";
+export type ReferenceType = 'document' | 'resource';
 
 export type Document = {
   /**
@@ -206,7 +206,7 @@ export type Document = {
 /**
  * Entity type
  */
-export type EntityType = "document" | "resource" | "canvas";
+export type EntityType = 'document' | 'resource' | 'canvas';
 
 /**
  * Entity
@@ -282,18 +282,18 @@ export type LabelInstance = {
  * Data input mode
  */
 export type InputMode =
-  | "input"
-  | "inputNumber"
-  | "inputTextArea"
-  | "select"
-  | "multiSelect"
-  | "radio"
-  | "switch";
+  | 'input'
+  | 'inputNumber'
+  | 'inputTextArea'
+  | 'select'
+  | 'multiSelect'
+  | 'radio'
+  | 'switch';
 
 /**
  * Config scope
  */
-export type ConfigScope = Array<"runtime" | "template">;
+export type ConfigScope = Array<'runtime' | 'template'>;
 
 /**
  * Select option
@@ -404,7 +404,7 @@ export type SkillTemplateConfigDefinition = {
 /**
  * Icon type
  */
-export type IconType = "emoji" | "image";
+export type IconType = 'emoji' | 'image';
 
 /**
  * Icon
@@ -445,12 +445,12 @@ export type Skill = {
 /**
  * Skill trigger type
  */
-export type SkillTriggerType = "timer" | "simpleEvent";
+export type SkillTriggerType = 'timer' | 'simpleEvent';
 
 /**
  * Simple event name
  */
-export type SimpleEventName = "onResourceReady";
+export type SimpleEventName = 'onResourceReady';
 
 export type SimpleEvent = {
   /**
@@ -472,7 +472,7 @@ export type SimpleEvent = {
 /**
  * Timer interval
  */
-export type TimerInterval = "hour" | "day" | "week" | "month" | "year";
+export type TimerInterval = 'hour' | 'day' | 'week' | 'month' | 'year';
 
 export type TimerTriggerConfig = {
   /**
@@ -672,13 +672,13 @@ export type SourceMeta = {
   /**
    * Source type
    */
-  sourceType?: "webSearch" | "library";
+  sourceType?: 'webSearch' | 'library';
 };
 
 /**
  * Source type
  */
-export type sourceType = "webSearch" | "library";
+export type sourceType = 'webSearch' | 'library';
 
 /**
  * Source selection
@@ -696,13 +696,13 @@ export type SourceSelection = {
   /**
    * Selection type
    */
-  type: "text" | "table" | "link" | "image" | "video" | "audio";
+  type: 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
 };
 
 /**
  * Selection type
  */
-export type type = "text" | "table" | "link" | "image" | "video" | "audio";
+export type type = 'text' | 'table' | 'link' | 'image' | 'video' | 'audio';
 
 /**
  * Source of the message
@@ -757,12 +757,12 @@ export type SearchStep = {
 /**
  * Chat message type
  */
-export type MessageType = "ai" | "human" | "system";
+export type MessageType = 'ai' | 'human' | 'system';
 
 /**
  * Model tier
  */
-export type ModelTier = "t1" | "t2" | "free";
+export type ModelTier = 't1' | 't2' | 'free';
 
 /**
  * Token usage item
@@ -793,17 +793,17 @@ export type TokenUsageItem = {
 /**
  * Action status
  */
-export type ActionStatus = "waiting" | "executing" | "finish" | "failed";
+export type ActionStatus = 'waiting' | 'executing' | 'finish' | 'failed';
 
 /**
  * Artifact type
  */
-export type ArtifactType = "document";
+export type ArtifactType = 'document';
 
 /**
  * Artifact status
  */
-export type ArtifactStatus = "waiting" | "generating" | "finish" | "failed";
+export type ArtifactStatus = 'waiting' | 'generating' | 'finish' | 'failed';
 
 /**
  * Artifact
@@ -969,35 +969,35 @@ export type ActionResult = {
  * Resource index status
  */
 export type IndexStatus =
-  | "init"
-  | "wait_parse"
-  | "wait_index"
-  | "finish"
-  | "parse_failed"
-  | "index_failed";
+  | 'init'
+  | 'wait_parse'
+  | 'wait_index'
+  | 'finish'
+  | 'parse_failed'
+  | 'index_failed';
 
 /**
  * Payment recurring interval
  */
-export type SubscriptionInterval = "monthly" | "yearly";
+export type SubscriptionInterval = 'monthly' | 'yearly';
 
 /**
  * Subscription plan type
  */
-export type SubscriptionPlanType = "free" | "plus" | "pro" | "max" | "ultra";
+export type SubscriptionPlanType = 'free' | 'plus' | 'pro' | 'max' | 'ultra';
 
 /**
  * Subscription status
  */
 export type SubscriptionStatus =
-  | "active"
-  | "canceled"
-  | "incomplete"
-  | "incomplete_expired"
-  | "past_due"
-  | "paused"
-  | "trialing"
-  | "unpaid";
+  | 'active'
+  | 'canceled'
+  | 'incomplete'
+  | 'incomplete_expired'
+  | 'past_due'
+  | 'paused'
+  | 'trialing'
+  | 'unpaid';
 
 export type Subscription = {
   /**
@@ -1137,7 +1137,7 @@ export type StorageUsageMeter = {
 /**
  * Operation mode
  */
-export type OperationMode = "mouse" | "touchpad";
+export type OperationMode = 'mouse' | 'touchpad';
 
 /**
  * User preferences
@@ -1152,7 +1152,7 @@ export type UserPreferences = {
 /**
  * Onboarding status
  */
-export type OnboardingStatus = "not_started" | "skipped" | "completed";
+export type OnboardingStatus = 'not_started' | 'skipped' | 'completed';
 
 export type OnboardingConfig = {
   /**
@@ -1223,7 +1223,7 @@ export type UserSettings = {
 /**
  * Auth provider
  */
-export type AuthProvider = "email" | "google" | "github";
+export type AuthProvider = 'email' | 'google' | 'github';
 
 export type AuthConfigItem = {
   /**
@@ -1271,7 +1271,7 @@ export type EmailSignupResponse = BaseResponse & {
 /**
  * Verification purpose
  */
-export type VerificationPurpose = "signup" | "resetPassword";
+export type VerificationPurpose = 'signup' | 'resetPassword';
 
 /**
  * Create verification session request
@@ -1601,15 +1601,15 @@ export type DeleteReferencesRequest = {
  * Skill event type
  */
 export type SkillEventType =
-  | "start"
-  | "end"
-  | "stream"
-  | "log"
-  | "artifact"
-  | "structured_data"
-  | "token_usage"
-  | "create_node"
-  | "error";
+  | 'start'
+  | 'end'
+  | 'stream'
+  | 'log'
+  | 'artifact'
+  | 'structured_data'
+  | 'token_usage'
+  | 'create_node'
+  | 'error';
 
 export type SkillEvent = {
   /**
@@ -2077,20 +2077,16 @@ export type SkillContext = {
   urls?: Array<SkillContextUrlItem>;
 };
 
-export type SkillContextKey =
-  | "resources"
-  | "documents"
-  | "contentList"
-  | "urls";
+export type SkillContextKey = 'resources' | 'documents' | 'contentList' | 'urls';
 
 export type SelectionKey =
-  | "documentSelection"
-  | "resourceSelection"
-  | "skillResponseSelection"
-  | "extensionWeblinkSelection"
-  | "documentCursorSelection"
-  | "documentBeforeCursorSelection"
-  | "documentAfterCursorSelection";
+  | 'documentSelection'
+  | 'resourceSelection'
+  | 'skillResponseSelection'
+  | 'extensionWeblinkSelection'
+  | 'documentCursorSelection'
+  | 'documentBeforeCursorSelection'
+  | 'documentAfterCursorSelection';
 
 export type SkillContextRule = {
   /**
@@ -2111,7 +2107,7 @@ export type SkillContextRule = {
   preferredSelectionKeys?: Array<SelectionKey>;
 };
 
-export type ContextRuleGroupRelation = "regular" | "mutuallyExclusive";
+export type ContextRuleGroupRelation = 'regular' | 'mutuallyExclusive';
 
 export type SkillContextRuleGroup = {
   /**
@@ -2135,9 +2131,9 @@ export type SkillInvocationConfig = {
   context?: SkillContextRuleGroup;
 };
 
-export type ActionType = "skill" | "tool";
+export type ActionType = 'skill' | 'tool';
 
-export type ActionContextType = "resource" | "document";
+export type ActionContextType = 'resource' | 'document';
 
 export type ActionContextEntity = {
   /**
@@ -2608,9 +2604,9 @@ export type SearchOptions = {
   enableReranker?: boolean;
 };
 
-export type SearchDomain = "resource" | "document" | "canvas";
+export type SearchDomain = 'resource' | 'document' | 'canvas';
 
-export type SearchMode = "keyword" | "vector" | "hybrid";
+export type SearchMode = 'keyword' | 'vector' | 'hybrid';
 
 export type SearchRequest = {
   /**
@@ -2825,14 +2821,14 @@ export type InMemorySearchResponse = BaseResponse & {
 };
 
 export type CanvasNodeType =
-  | "document"
-  | "resource"
-  | "skill"
-  | "tool"
-  | "skillResponse"
-  | "toolResponse"
-  | "memo"
-  | "group";
+  | 'document'
+  | 'resource'
+  | 'skill'
+  | 'tool'
+  | 'skillResponse'
+  | 'toolResponse'
+  | 'memo'
+  | 'group';
 
 export type CanvasNodeData = {
   /**
@@ -3498,7 +3494,7 @@ export type CheckSettingsFieldData = {
     /**
      * Settings field
      */
-    field: "name" | "email";
+    field: 'name' | 'email';
     /**
      * Field value
      */

@@ -5,7 +5,7 @@ import {
   createConfig,
   type Options,
   formDataBodySerializer,
-} from "@hey-api/client-fetch";
+} from '@hey-api/client-fetch';
 import type {
   GetAuthConfigError,
   GetAuthConfigResponse,
@@ -205,7 +205,7 @@ import type {
   UploadResponse2,
   ServeStaticError,
   ServeStaticResponse,
-} from "./types.gen";
+} from './types.gen';
 
 export const client = createClient(createConfig());
 
@@ -216,13 +216,9 @@ export const client = createClient(createConfig());
 export const getAuthConfig = <ThrowOnError extends boolean = false>(
   options?: Options<unknown, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).get<
-    GetAuthConfigResponse,
-    GetAuthConfigError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).get<GetAuthConfigResponse, GetAuthConfigError, ThrowOnError>({
     ...options,
-    url: "/auth/config",
+    url: '/auth/config',
   });
 };
 
@@ -233,13 +229,9 @@ export const getAuthConfig = <ThrowOnError extends boolean = false>(
 export const refreshToken = <ThrowOnError extends boolean = false>(
   options?: Options<unknown, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    RefreshTokenResponse,
-    RefreshTokenError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<RefreshTokenResponse, RefreshTokenError, ThrowOnError>({
     ...options,
-    url: "/auth/refreshToken",
+    url: '/auth/refreshToken',
   });
 };
 
@@ -250,13 +242,9 @@ export const refreshToken = <ThrowOnError extends boolean = false>(
 export const emailSignup = <ThrowOnError extends boolean = false>(
   options: Options<EmailSignupData2, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    EmailSignupResponse2,
-    EmailSignupError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<EmailSignupResponse2, EmailSignupError, ThrowOnError>({
     ...options,
-    url: "/auth/email/signup",
+    url: '/auth/email/signup',
   });
 };
 
@@ -267,13 +255,9 @@ export const emailSignup = <ThrowOnError extends boolean = false>(
 export const emailLogin = <ThrowOnError extends boolean = false>(
   options: Options<EmailLoginData2, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    EmailLoginResponse2,
-    EmailLoginError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<EmailLoginResponse2, EmailLoginError, ThrowOnError>({
     ...options,
-    url: "/auth/email/login",
+    url: '/auth/email/login',
   });
 };
 
@@ -290,7 +274,7 @@ export const createVerification = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/auth/verification/create",
+    url: '/auth/verification/create',
   });
 };
 
@@ -307,7 +291,7 @@ export const resendVerification = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/auth/verification/resend",
+    url: '/auth/verification/resend',
   });
 };
 
@@ -324,7 +308,7 @@ export const checkVerification = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/auth/verification/check",
+    url: '/auth/verification/check',
   });
 };
 
@@ -335,13 +319,9 @@ export const checkVerification = <ThrowOnError extends boolean = false>(
 export const logout = <ThrowOnError extends boolean = false>(
   options?: Options<unknown, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    LogoutResponse,
-    LogoutError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<LogoutResponse, LogoutError, ThrowOnError>({
     ...options,
-    url: "/auth/logout",
+    url: '/auth/logout',
   });
 };
 
@@ -358,7 +338,7 @@ export const getCollabToken = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/collab/getToken",
+    url: '/collab/getToken',
   });
 };
 
@@ -369,13 +349,9 @@ export const getCollabToken = <ThrowOnError extends boolean = false>(
 export const listCanvases = <ThrowOnError extends boolean = false>(
   options?: Options<ListCanvasesData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).get<
-    ListCanvasesResponse,
-    ListCanvasesError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).get<ListCanvasesResponse, ListCanvasesError, ThrowOnError>({
     ...options,
-    url: "/canvas/list",
+    url: '/canvas/list',
   });
 };
 
@@ -386,13 +362,9 @@ export const listCanvases = <ThrowOnError extends boolean = false>(
 export const createCanvas = <ThrowOnError extends boolean = false>(
   options: Options<CreateCanvasData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    CreateCanvasResponse,
-    CreateCanvasError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<CreateCanvasResponse, CreateCanvasError, ThrowOnError>({
     ...options,
-    url: "/canvas/create",
+    url: '/canvas/create',
   });
 };
 
@@ -403,13 +375,9 @@ export const createCanvas = <ThrowOnError extends boolean = false>(
 export const updateCanvas = <ThrowOnError extends boolean = false>(
   options: Options<UpdateCanvasData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    UpdateCanvasResponse,
-    UpdateCanvasError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<UpdateCanvasResponse, UpdateCanvasError, ThrowOnError>({
     ...options,
-    url: "/canvas/update",
+    url: '/canvas/update',
   });
 };
 
@@ -420,13 +388,9 @@ export const updateCanvas = <ThrowOnError extends boolean = false>(
 export const deleteCanvas = <ThrowOnError extends boolean = false>(
   options: Options<DeleteCanvasData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    DeleteCanvasResponse,
-    DeleteCanvasError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<DeleteCanvasResponse, DeleteCanvasError, ThrowOnError>({
     ...options,
-    url: "/canvas/delete",
+    url: '/canvas/delete',
   });
 };
 
@@ -437,13 +401,9 @@ export const deleteCanvas = <ThrowOnError extends boolean = false>(
 export const listResources = <ThrowOnError extends boolean = false>(
   options?: Options<ListResourcesData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).get<
-    ListResourcesResponse,
-    ListResourcesError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).get<ListResourcesResponse, ListResourcesError, ThrowOnError>({
     ...options,
-    url: "/knowledge/resource/list",
+    url: '/knowledge/resource/list',
   });
 };
 
@@ -460,7 +420,7 @@ export const getResourceDetail = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/knowledge/resource/detail",
+    url: '/knowledge/resource/detail',
   });
 };
 
@@ -477,7 +437,7 @@ export const updateResource = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/knowledge/resource/update",
+    url: '/knowledge/resource/update',
   });
 };
 
@@ -494,7 +454,7 @@ export const createResource = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/knowledge/resource/create",
+    url: '/knowledge/resource/create',
   });
 };
 
@@ -511,7 +471,7 @@ export const batchCreateResource = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/knowledge/resource/batchCreate",
+    url: '/knowledge/resource/batchCreate',
   });
 };
 
@@ -528,7 +488,7 @@ export const reindexResource = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/knowledge/resource/reindex",
+    url: '/knowledge/resource/reindex',
   });
 };
 
@@ -545,7 +505,7 @@ export const deleteResource = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/knowledge/resource/delete",
+    url: '/knowledge/resource/delete',
   });
 };
 
@@ -556,13 +516,9 @@ export const deleteResource = <ThrowOnError extends boolean = false>(
 export const listDocuments = <ThrowOnError extends boolean = false>(
   options?: Options<ListDocumentsData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).get<
-    ListDocumentsResponse,
-    ListDocumentsError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).get<ListDocumentsResponse, ListDocumentsError, ThrowOnError>({
     ...options,
-    url: "/knowledge/document/list",
+    url: '/knowledge/document/list',
   });
 };
 
@@ -579,7 +535,7 @@ export const getDocumentDetail = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/knowledge/document/detail",
+    url: '/knowledge/document/detail',
   });
 };
 
@@ -596,7 +552,7 @@ export const updateDocument = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/knowledge/document/update",
+    url: '/knowledge/document/update',
   });
 };
 
@@ -613,7 +569,7 @@ export const createDocument = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/knowledge/document/create",
+    url: '/knowledge/document/create',
   });
 };
 
@@ -630,7 +586,7 @@ export const deleteDocument = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/knowledge/document/delete",
+    url: '/knowledge/document/delete',
   });
 };
 
@@ -647,7 +603,7 @@ export const batchUpdateDocument = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/knowledge/document/batchUpdate",
+    url: '/knowledge/document/batchUpdate',
   });
 };
 
@@ -664,7 +620,7 @@ export const queryReferences = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/knowledge/reference/query",
+    url: '/knowledge/reference/query',
   });
 };
 
@@ -675,14 +631,12 @@ export const queryReferences = <ThrowOnError extends boolean = false>(
 export const addReferences = <ThrowOnError extends boolean = false>(
   options: Options<AddReferencesData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    AddReferencesResponse2,
-    AddReferencesError,
-    ThrowOnError
-  >({
-    ...options,
-    url: "/knowledge/reference/add",
-  });
+  return (options?.client ?? client).post<AddReferencesResponse2, AddReferencesError, ThrowOnError>(
+    {
+      ...options,
+      url: '/knowledge/reference/add',
+    },
+  );
 };
 
 /**
@@ -698,7 +652,7 @@ export const deleteReferences = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/knowledge/reference/delete",
+    url: '/knowledge/reference/delete',
   });
 };
 
@@ -709,13 +663,9 @@ export const deleteReferences = <ThrowOnError extends boolean = false>(
 export const createShare = <ThrowOnError extends boolean = false>(
   options: Options<CreateShareData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    CreateShareResponse2,
-    CreateShareError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<CreateShareResponse2, CreateShareError, ThrowOnError>({
     ...options,
-    url: "/share/new",
+    url: '/share/new',
   });
 };
 
@@ -726,13 +676,9 @@ export const createShare = <ThrowOnError extends boolean = false>(
 export const deleteShare = <ThrowOnError extends boolean = false>(
   options: Options<DeleteShareData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    DeleteShareResponse,
-    DeleteShareError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<DeleteShareResponse, DeleteShareError, ThrowOnError>({
     ...options,
-    url: "/share/delete",
+    url: '/share/delete',
   });
 };
 
@@ -749,7 +695,7 @@ export const getShareContent = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/share/content",
+    url: '/share/content',
   });
 };
 
@@ -766,7 +712,7 @@ export const listLabelClasses = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/label/class/list",
+    url: '/label/class/list',
   });
 };
 
@@ -783,7 +729,7 @@ export const createLabelClass = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/label/class/new",
+    url: '/label/class/new',
   });
 };
 
@@ -800,7 +746,7 @@ export const updateLabelClass = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/label/class/update",
+    url: '/label/class/update',
   });
 };
 
@@ -817,7 +763,7 @@ export const deleteLabelClass = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/label/class/delete",
+    url: '/label/class/delete',
   });
 };
 
@@ -834,7 +780,7 @@ export const listLabelInstances = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/label/instance/list",
+    url: '/label/instance/list',
   });
 };
 
@@ -851,7 +797,7 @@ export const createLabelInstance = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/label/instance/new",
+    url: '/label/instance/new',
   });
 };
 
@@ -868,7 +814,7 @@ export const updateLabelInstance = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/label/instance/update",
+    url: '/label/instance/update',
   });
 };
 
@@ -885,7 +831,7 @@ export const deleteLabelInstance = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/label/instance/delete",
+    url: '/label/instance/delete',
   });
 };
 
@@ -896,13 +842,9 @@ export const deleteLabelInstance = <ThrowOnError extends boolean = false>(
 export const listActions = <ThrowOnError extends boolean = false>(
   options?: Options<unknown, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).get<
-    ListActionsResponse,
-    ListActionsError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).get<ListActionsResponse, ListActionsError, ThrowOnError>({
     ...options,
-    url: "/action/list",
+    url: '/action/list',
   });
 };
 
@@ -913,13 +855,9 @@ export const listActions = <ThrowOnError extends boolean = false>(
 export const invokeAction = <ThrowOnError extends boolean = false>(
   options: Options<InvokeActionData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    InvokeActionResponse2,
-    InvokeActionError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<InvokeActionResponse2, InvokeActionError, ThrowOnError>({
     ...options,
-    url: "/action/invoke",
+    url: '/action/invoke',
   });
 };
 
@@ -936,7 +874,7 @@ export const streamInvokeAction = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/action/streamInvoke",
+    url: '/action/streamInvoke',
   });
 };
 
@@ -953,7 +891,7 @@ export const getActionResult = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/action/result",
+    url: '/action/result',
   });
 };
 
@@ -964,13 +902,9 @@ export const getActionResult = <ThrowOnError extends boolean = false>(
 export const listSkills = <ThrowOnError extends boolean = false>(
   options?: Options<unknown, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).get<
-    ListSkillsResponse,
-    ListSkillsError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).get<ListSkillsResponse, ListSkillsError, ThrowOnError>({
     ...options,
-    url: "/skill/list",
+    url: '/skill/list',
   });
 };
 
@@ -981,13 +915,9 @@ export const listSkills = <ThrowOnError extends boolean = false>(
 export const invokeSkill = <ThrowOnError extends boolean = false>(
   options: Options<InvokeSkillData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    InvokeSkillResponse2,
-    InvokeSkillError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<InvokeSkillResponse2, InvokeSkillError, ThrowOnError>({
     ...options,
-    url: "/skill/invoke",
+    url: '/skill/invoke',
   });
 };
 
@@ -1004,7 +934,7 @@ export const streamInvokeSkill = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/skill/streamInvoke",
+    url: '/skill/streamInvoke',
   });
 };
 
@@ -1021,7 +951,7 @@ export const listSkillInstances = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/skill/instance/list",
+    url: '/skill/instance/list',
   });
 };
 
@@ -1038,7 +968,7 @@ export const createSkillInstance = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/skill/instance/new",
+    url: '/skill/instance/new',
   });
 };
 
@@ -1055,7 +985,7 @@ export const updateSkillInstance = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/skill/instance/update",
+    url: '/skill/instance/update',
   });
 };
 
@@ -1072,7 +1002,7 @@ export const pinSkillInstance = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/skill/instance/pin",
+    url: '/skill/instance/pin',
   });
 };
 
@@ -1089,7 +1019,7 @@ export const unpinSkillInstance = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/skill/instance/unpin",
+    url: '/skill/instance/unpin',
   });
 };
 
@@ -1106,7 +1036,7 @@ export const deleteSkillInstance = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/skill/instance/delete",
+    url: '/skill/instance/delete',
   });
 };
 
@@ -1123,7 +1053,7 @@ export const listSkillTriggers = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/skill/trigger/list",
+    url: '/skill/trigger/list',
   });
 };
 
@@ -1140,7 +1070,7 @@ export const createSkillTrigger = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/skill/trigger/new",
+    url: '/skill/trigger/new',
   });
 };
 
@@ -1157,7 +1087,7 @@ export const updateSkillTrigger = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/skill/trigger/update",
+    url: '/skill/trigger/update',
   });
 };
 
@@ -1174,7 +1104,7 @@ export const deleteSkillTrigger = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/skill/trigger/delete",
+    url: '/skill/trigger/delete',
   });
 };
 
@@ -1185,13 +1115,9 @@ export const deleteSkillTrigger = <ThrowOnError extends boolean = false>(
 export const getSettings = <ThrowOnError extends boolean = false>(
   options?: Options<unknown, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).get<
-    GetSettingsResponse,
-    GetSettingsError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).get<GetSettingsResponse, GetSettingsError, ThrowOnError>({
     ...options,
-    url: "/user/settings",
+    url: '/user/settings',
   });
 };
 
@@ -1202,14 +1128,12 @@ export const getSettings = <ThrowOnError extends boolean = false>(
 export const updateSettings = <ThrowOnError extends boolean = false>(
   options: Options<UpdateSettingsData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).put<
-    UpdateSettingsResponse,
-    UpdateSettingsError,
-    ThrowOnError
-  >({
-    ...options,
-    url: "/user/settings",
-  });
+  return (options?.client ?? client).put<UpdateSettingsResponse, UpdateSettingsError, ThrowOnError>(
+    {
+      ...options,
+      url: '/user/settings',
+    },
+  );
 };
 
 /**
@@ -1225,7 +1149,7 @@ export const checkSettingsField = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/user/checkSettingsField",
+    url: '/user/checkSettingsField',
   });
 };
 
@@ -1242,7 +1166,7 @@ export const getSubscriptionPlans = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/subscription/plans",
+    url: '/subscription/plans',
   });
 };
 
@@ -1259,7 +1183,7 @@ export const getSubscriptionUsage = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/subscription/usage",
+    url: '/subscription/usage',
   });
 };
 
@@ -1270,13 +1194,9 @@ export const getSubscriptionUsage = <ThrowOnError extends boolean = false>(
 export const listModels = <ThrowOnError extends boolean = false>(
   options?: Options<unknown, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).get<
-    ListModelsResponse2,
-    ListModelsError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).get<ListModelsResponse2, ListModelsError, ThrowOnError>({
     ...options,
-    url: "/subscription/modelList",
+    url: '/subscription/modelList',
   });
 };
 
@@ -1293,7 +1213,7 @@ export const createCheckoutSession = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/subscription/createCheckoutSession",
+    url: '/subscription/createCheckoutSession',
   });
 };
 
@@ -1310,7 +1230,7 @@ export const createPortalSession = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/subscription/createPortalSession",
+    url: '/subscription/createPortalSession',
   });
 };
 
@@ -1321,13 +1241,9 @@ export const createPortalSession = <ThrowOnError extends boolean = false>(
 export const search = <ThrowOnError extends boolean = false>(
   options: Options<SearchData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    SearchResponse2,
-    SearchError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<SearchResponse2, SearchError, ThrowOnError>({
     ...options,
-    url: "/search",
+    url: '/search',
   });
 };
 
@@ -1344,7 +1260,7 @@ export const multiLingualWebSearch = <ThrowOnError extends boolean = false>(
     ThrowOnError
   >({
     ...options,
-    url: "/search/multilingualSearch",
+    url: '/search/multilingualSearch',
   });
 };
 
@@ -1355,13 +1271,9 @@ export const multiLingualWebSearch = <ThrowOnError extends boolean = false>(
 export const scrape = <ThrowOnError extends boolean = false>(
   options: Options<ScrapeData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    ScrapeResponse,
-    ScrapeError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<ScrapeResponse, ScrapeError, ThrowOnError>({
     ...options,
-    url: "/misc/scrape",
+    url: '/misc/scrape',
   });
 };
 
@@ -1372,18 +1284,14 @@ export const scrape = <ThrowOnError extends boolean = false>(
 export const upload = <ThrowOnError extends boolean = false>(
   options: Options<UploadData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).post<
-    UploadResponse2,
-    UploadError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).post<UploadResponse2, UploadError, ThrowOnError>({
     ...options,
     ...formDataBodySerializer,
     headers: {
-      "Content-Type": null,
+      'Content-Type': null,
       ...options?.headers,
     },
-    url: "/misc/upload",
+    url: '/misc/upload',
   });
 };
 
@@ -1394,12 +1302,8 @@ export const upload = <ThrowOnError extends boolean = false>(
 export const serveStatic = <ThrowOnError extends boolean = false>(
   options?: Options<unknown, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).get<
-    ServeStaticResponse,
-    ServeStaticError,
-    ThrowOnError
-  >({
+  return (options?.client ?? client).get<ServeStaticResponse, ServeStaticError, ThrowOnError>({
     ...options,
-    url: "/misc/static/{fileName}",
+    url: '/misc/static/{fileName}',
   });
 };
