@@ -13,7 +13,7 @@ Refly is an open-source AI-native creation engine. It's intuitive free-form canv
 
 [🚀 Refly v0.2.3 Released! Featuring Enhanced Product Onboarding!](https://docs.refly.ai/changelog/v0.2.3)
 
-[Refly Cloud](https://refly.ai/) 丨 [Self-hosting](https://refly.ai/) 丨 [Forum](https://github.com/refly-ai/refly/discussions) 丨 [Discord](https://discord.gg/bWjffrb89h) 丨 [Twitter](https://x.com/reflyai) 丨 [Documentation](https://docs.refly.ai/)
+[Refly Cloud](https://refly.ai/)·[Self-hosting](https://refly.ai/)[Forum](https://github.com/refly-ai/refly/discussions)·[Discord](https://discord.gg/bWjffrb89h)·[Twitter](https://x.com/reflyai)·[Documentation](https://docs.refly.ai/)
 
 </div>
 
