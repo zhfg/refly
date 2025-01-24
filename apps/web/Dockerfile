@@ -1,5 +1,5 @@
 # Nginx stage
-FROM nginx:alpine
+FROM nginx:1.27.3-alpine
 
 # Install envsubst and bash for environment variable substitution
 RUN apk add --no-cache bash
@@ -9,7 +9,7 @@ COPY deploy/docker/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy static files
 WORKDIR /usr/share/nginx/html
-COPY ./dist .
+COPY apps/web/dist .
 
 # Create config.js template
 RUN echo "window.ENV = { \
@@ -18,9 +18,7 @@ RUN echo "window.ENV = { \
 };" > config.template.js
 
 # Create entrypoint script
-RUN echo '#!/bin/bash\n\
-envsubst < config.template.js > config.js\n\
-exec nginx -g "daemon off;"' > /docker-entrypoint.sh
+RUN printf '#!/bin/bash\nenvsubst < config.template.js > config.js\nexec nginx -g "daemon off;"\n' > /docker-entrypoint.sh
 
 RUN chmod +x /docker-entrypoint.sh
 
