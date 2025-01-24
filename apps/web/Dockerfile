@@ -5,6 +5,7 @@ WORKDIR /app
 
 RUN corepack enable
 
+ENV NODE_OPTIONS=--max_old_space_size=8192
 ENV VITE_API_URL=http://localhost:5800
 ENV VITE_COLLAB_URL=http://localhost:5801
 
