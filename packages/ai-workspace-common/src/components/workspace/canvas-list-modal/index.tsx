@@ -119,7 +119,7 @@ export const CanvasListModal = (props: CanvasListProps) => {
             ) : null
           }
           renderItem={(item: Canvas) => <CanvasItem canvas={item} />}
-        ></List>
+        />
       ) : (
         <div className="h-full flex items-center justify-center">
           <Empty description={t('common.empty')} />

@@ -47,8 +47,6 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
   const [isComposing, setIsComposing] = useState(false);
   const { t } = useTranslation();
 
-  const [displayMode, setDisplayMode] = useState<'list' | 'search'>('list');
-
   const contextPanelStore = useContextPanelStoreShallow((state) => ({
     clearContextItems: state.clearContextItems,
   }));
@@ -75,30 +73,29 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
   }, []);
 
   const { nodes } = useCanvasData();
-
   const targetNodes = nodes.filter((node) => !['skill', 'group'].includes(node?.type));
-  console.log('targetNodes', targetNodes);
-  const sortedItems: IContextItem[] = [
-    ...(selectedItems || []),
-    ...(
-      targetNodes?.filter(
-        (node) => !selectedItems.some((selected) => selected.entityId === node.data?.entityId),
-      ) || []
-    ).map((node) => ({
-      title:
-        node?.type === 'memo'
-          ? node.data?.contentPreview
-            ? `${node.data?.title} - ${node.data?.contentPreview?.slice(0, 10)}`
-            : node.data?.title
-          : node.data?.title,
-      entityId: node.data?.entityId,
-      type: node.type,
-      metadata: node.data?.metadata,
-    })),
-  ];
 
   // Memoize the filtered and sorted nodes to prevent unnecessary recalculations
   const processedNodes = useMemo(() => {
+    const sortedItems: IContextItem[] = [
+      ...(selectedItems || []),
+      ...(
+        targetNodes?.filter(
+          (node) => !selectedItems.some((selected) => selected.entityId === node.data?.entityId),
+        ) || []
+      ).map((node) => ({
+        title:
+          node?.type === 'memo'
+            ? node.data?.contentPreview
+              ? `${node.data?.title} - ${node.data?.contentPreview?.slice(0, 10)}`
+              : node.data?.title
+            : node.data?.title,
+        entityId: node.data?.entityId,
+        type: node.type,
+        metadata: node.data?.metadata,
+      })),
+    ];
+
     const filteredItems =
       sortedItems?.filter((item) =>
         item?.title?.toLowerCase().includes(searchValue.toLowerCase()),
@@ -110,7 +107,7 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
         (item) => !selectedItems?.some((selected) => selected?.entityId === item?.entityId),
       ) ?? []),
     ];
-  }, [sortedItems, searchValue, selectedItems]);
+  }, [targetNodes, searchValue, selectedItems]);
 
   // Memoize the render data transformation
   const sortedRenderData = useMemo(() => {
@@ -133,9 +130,6 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
         ref={ref}
         filter={() => 1}
         className={'search-active'}
-        onCompositionStart={(e) => console.log('composition start')}
-        onCompositionUpdate={(e) => console.log('composition update')}
-        onCompositionEnd={(e) => console.log('composition end')}
         onKeyDownCapture={(e: React.KeyboardEvent) => {
           if (e.key === 'Enter' && !isComposing) {
             console.log('keydown', searchValue);
@@ -148,11 +142,10 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
             ref={inputRef}
             value={searchValue}
             placeholder={t('canvas.contextSelector.placeholder')}
-            onCompositionStart={(e) => {
+            onCompositionStart={() => {
               setIsComposing(true);
             }}
-            onCompositionUpdate={(e) => console.log('composition update')}
-            onCompositionEnd={(e) => {
+            onCompositionEnd={() => {
               setIsComposing(false);
             }}
             onValueChange={handleSearchValueChange}
@@ -163,11 +156,9 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
           <Home
             showItemDetail={false}
             key={'search'}
-            displayMode={displayMode}
             data={sortedRenderData}
             activeValue={activeValue}
             setValue={setActiveValue}
-            searchValue={searchValue}
           />
         </Command.List>
         <div cmdk-footer="">

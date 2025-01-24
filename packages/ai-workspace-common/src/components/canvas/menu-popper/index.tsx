@@ -258,13 +258,13 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       document.removeEventListener('click', handleClickOutside);
       setActiveKey(null);
     };
-  }, [open]);
+  }, [open, setOpen]);
 
   const renderButton = (item: ToolbarItem) => {
     const button = (
       <Button
         loading={getIsLoading(item.key)}
-        className={cn(`w-full px-2 justify-start`, {
+        className={cn('w-full px-2 justify-start', {
           'bg-gray-100': activeKey === item.key,
           'text-primary-600': item.primary,
           'text-red-600': item.danger,

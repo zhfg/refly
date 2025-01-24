@@ -87,9 +87,8 @@ const PlanItem = (props: {
         default:
           return t('settings.subscription.getStarted');
       }
-    } else {
-      return t('settings.subscription.getStarted');
     }
+    return t('settings.subscription.getStarted');
   };
 
   const handleButtonClick = () => {
@@ -142,7 +141,7 @@ const PlanItem = (props: {
                 t('settings.subscription.subscribe.period')
               ) : (
                 <span className="whitespace-nowrap">
-                  {t(`settings.subscription.subscribe.month`)}
+                  {t('settings.subscription.subscribe.month')}
                 </span>
               )}
             </span>

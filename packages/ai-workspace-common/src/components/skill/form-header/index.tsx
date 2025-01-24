@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Typography, Select, Tooltip } from '@arco-design/web-react';
 import { IconDown, IconUp } from '@arco-design/web-react/icon';
-import { useTranslation } from 'react-i18next';
 
 // styles
 import './index.scss';
@@ -38,7 +37,6 @@ export const FormHeader: React.FC<FormHeaderProps> = ({
   selectTooltipTitle,
 }) => {
   const [isMultiSelect, setIsMultiSelect] = useState(enableMultiSelect);
-  const { t } = useTranslation();
 
   const handleSelectChange = (value: string | string[]) => {
     if (onSelectChange) {
@@ -52,7 +50,7 @@ export const FormHeader: React.FC<FormHeaderProps> = ({
     }
   };
 
-  const handleSwitchChange = (checked: boolean) => {
+  const _handleSwitchChange = (checked: boolean) => {
     setIsMultiSelect(checked);
     // Reset selection when switching between single and multi-select
     if (onSelectChange) {

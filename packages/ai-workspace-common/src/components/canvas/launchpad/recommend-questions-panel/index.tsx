@@ -118,9 +118,9 @@ export const RecommendQuestionsPanel: React.FC<RecommendQuestionsPanelProps> = (
       );
     }
 
-    return questions.map((question, index) => (
+    return questions.map((question) => (
       <div
-        key={index}
+        key={question}
         className={cn(
           'group relative flex items-center justify-between',
           'rounded-lg border border-solid border-black/10 m-1 py-2 px-3 mb-2',

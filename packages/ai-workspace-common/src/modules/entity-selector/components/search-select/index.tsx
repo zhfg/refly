@@ -27,11 +27,10 @@ export const SearchSelect = (props: SearchSelectProps) => {
     ...selectProps
   } = props;
 
-  const { loadMore, dataList, setDataList, isRequesting, handleValueChange, resetState } =
-    useFetchOrSearchList({
-      domain,
-      fetchData,
-    });
+  const { loadMore, dataList, isRequesting, handleValueChange, resetState } = useFetchOrSearchList({
+    domain,
+    fetchData,
+  });
 
   const [newEntityName, setNewEntityName] = useState('');
 
@@ -49,13 +48,12 @@ export const SearchSelect = (props: SearchSelectProps) => {
 
   const [value, setValue] = useState<any>(defaultValue);
   const [popupVisible, setPopupVisible] = useState(false);
-  const [createLoading, setCreateLoading] = useState(false);
+  const [createLoading, _setCreateLoading] = useState(false);
 
   const handleCreateNewEntity = async () => {};
 
   const handlePopupScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { currentTarget } = e;
-    // 检查是否滚动到底部附近(距离底部20px内)
     if (currentTarget.scrollTop + currentTarget.clientHeight >= currentTarget.scrollHeight - 20) {
       loadMore();
     }

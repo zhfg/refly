@@ -30,7 +30,9 @@ const getNodesFromYDoc = (ydoc: Y.Doc) => {
   const nodesArray = ydoc.getArray<CanvasNode>('nodes');
   const nodes = nodesArray.toJSON();
   const uniqueNodesMap = new Map();
-  nodes.forEach((node) => uniqueNodesMap.set(node.id, node));
+  for (const node of nodes) {
+    uniqueNodesMap.set(node.id, node);
+  }
   return Array.from(uniqueNodesMap.values());
 };
 
@@ -38,7 +40,9 @@ const getEdgesFromYDoc = (ydoc: Y.Doc) => {
   const edgesArray = ydoc.getArray<Edge>('edges');
   const edges = edgesArray.toJSON();
   const uniqueEdgesMap = new Map();
-  edges.forEach((edge) => uniqueEdgesMap.set(edge.id, edge));
+  for (const edge of edges) {
+    uniqueEdgesMap.set(edge.id, edge);
+  }
   return Array.from(uniqueEdgesMap.values());
 };
 

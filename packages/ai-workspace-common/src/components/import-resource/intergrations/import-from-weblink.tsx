@@ -61,7 +61,7 @@ export const ImportFromWeblink = () => {
       });
       setScrapeLinks(newLinks);
     } catch (err) {
-      console.log('fetch url error, silent ignore');
+      console.log('fetch url error, silent ignore', err);
       const newLinks = scrapeLinks.map((link) => {
         if (link?.key === key) {
           link.isError = true;
@@ -136,12 +136,15 @@ export const ImportFromWeblink = () => {
     setImportResourceModalVisible(false);
     setLinkStr('');
 
-    const resources = (Array.isArray(data?.data) ? data?.data : []).map((resource) => ({
-      id: resource.resourceId,
-      title: resource.title,
-      domain: 'resource',
-      contentPreview: resource.contentPreview,
-    }));
+    const resources =
+      data && Array.isArray(data.data)
+        ? data.data.map((resource) => ({
+            id: resource.resourceId,
+            title: resource.title,
+            domain: 'resource',
+            contentPreview: resource.contentPreview,
+          }))
+        : [];
     resources.forEach((resource, index) => {
       const nodePosition = insertNodePosition
         ? {
@@ -253,6 +256,7 @@ const RenderItem = (props: { item: LinkMeta }) => {
       <List.Item
         actions={[
           <Button
+            key={item.key}
             type="text"
             className="assist-action-item"
             onClick={() => {
@@ -262,6 +266,7 @@ const RenderItem = (props: { item: LinkMeta }) => {
             <HiLink />
           </Button>,
           <Button
+            key={item.key}
             type="text"
             className="assist-action-item"
             onClick={() => {

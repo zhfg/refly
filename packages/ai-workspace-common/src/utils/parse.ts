@@ -4,9 +4,8 @@ export const safeParseJSON = (value: any, errorCallback?: (e: unknown) => any): 
   } catch (e) {
     if (errorCallback) {
       return errorCallback(e);
-    } else {
-      return undefined;
     }
+    return undefined;
   }
 };
 
@@ -16,9 +15,8 @@ export const safeStringifyJSON = (value: any, errorCallback?: (e: unknown) => st
   } catch (e) {
     if (errorCallback) {
       return errorCallback(e);
-    } else {
-      return '';
     }
+    return '';
   }
 };
 
@@ -33,7 +31,7 @@ export function isJSON(variable: any): boolean {
   try {
     JSON.parse(variable);
     return true;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }

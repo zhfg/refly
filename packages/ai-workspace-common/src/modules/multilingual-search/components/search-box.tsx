@@ -47,14 +47,14 @@ export const SearchBox: React.FC = () => {
 
       // Update search steps and results from response
       if (data?.data?.searchSteps) {
-        data.data.searchSteps.forEach((step) => {
+        for (const step of data.data.searchSteps) {
           if (step.step === 'finish') {
             multilingualSearchStore.addSearchStep(step);
           } else {
             multilingualSearchStore.addSearchStep(step);
             multilingualSearchStore.setProcessingStep();
           }
-        });
+        }
       }
 
       if (data?.data?.sources) {

@@ -14,8 +14,6 @@ export const SearchOptions = () => {
   const { i18n, t } = useTranslation();
   const currentUiLocale = i18n.language as LOCALE;
 
-  console.log('currentUiLocale', currentUiLocale);
-
   const multilingualSearchStore = useMultilingualSearchStoreShallow((state) => ({
     searchLocales: state.searchLocales,
     outputLocale: state.outputLocale,
@@ -56,12 +54,9 @@ export const SearchOptions = () => {
   };
 
   const handleSearchLocalesChange = (values: string[]) => {
-    if (values.length > 3) {
-      // Remove the oldest selected language and add the new one
-      values = [...values.slice(-3)];
-    }
+    const limitedValues = values.length > 3 ? [...values.slice(-3)] : values;
 
-    const newLocales = values.map((code) => ({
+    const newLocales = limitedValues.map((code) => ({
       code,
       name: getLocaleName(code),
     }));

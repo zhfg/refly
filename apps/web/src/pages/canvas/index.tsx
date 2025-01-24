@@ -38,17 +38,15 @@ const CanvasPage = () => {
     <div className="flex h-full w-full flex-col">
       <div className="box-border flex h-16 items-center justify-between px-4 py-2">
         {collapse && (
-          <>
-            <SiderPopover>
-              <Button
-                type="text"
-                icon={<AiOutlineMenuUnfold size={16} className="text-gray-500" />}
-                onClick={() => {
-                  setCollapse(!collapse);
-                }}
-              />
-            </SiderPopover>
-          </>
+          <SiderPopover>
+            <Button
+              type="text"
+              icon={<AiOutlineMenuUnfold size={16} className="text-gray-500" />}
+              onClick={() => {
+                setCollapse(!collapse);
+              }}
+            />
+          </SiderPopover>
         )}
       </div>
       <Empty

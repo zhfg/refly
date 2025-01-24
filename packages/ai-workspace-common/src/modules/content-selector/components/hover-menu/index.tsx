@@ -9,7 +9,7 @@ interface HoverMenuProps {
   selected: boolean;
 }
 
-const HoverMenu: React.FC<HoverMenuProps> = ({ onClick, onMouseEnter, onMouseLeave, selected }) => {
+const HoverMenu: React.FC<HoverMenuProps> = ({ onClick, onMouseEnter, onMouseLeave }) => {
   const { t } = useTranslation();
 
   return (

@@ -52,7 +52,7 @@ export const SiderMenuSettingList = (props: { children: React.ReactNode }) => {
 
   const handleMenuClick = (key: string) => {
     if (key === 'contactUs') {
-      window.open(`https://docs.refly.ai/community/contact-us`, '_blank');
+      window.open('https://docs.refly.ai/community/contact-us', '_blank');
     } else if (key === 'settings') {
       setShowSettingModal(true);
     } else if (key === 'logout') {

@@ -40,7 +40,7 @@ const createLocalDocument = async (
 };
 
 export const useCreateDocument = () => {
-  const [isCreating, setIsCreating] = useState(false);
+  const [isCreating, _setIsCreating] = useState(false);
   const { canvasId } = useCanvasContext();
   const { t } = useTranslation();
   const { addNode } = useAddNode();

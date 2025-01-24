@@ -1,21 +1,16 @@
 import { FC, useEffect, useRef } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { SelectionActionMenu } from '../multi-selection-menu/selection-action-menu';
-import { CanvasNodeType } from '@refly/openapi-schema';
 
 interface SelectionContextMenuProps {
   open: boolean;
   position: { x: number; y: number };
-  nodeId: string;
-  nodeType: CanvasNodeType;
   setOpen: (open: boolean) => void;
 }
 
 export const SelectionContextMenu: FC<SelectionContextMenuProps> = ({
   open,
   position,
-  nodeId,
-  nodeType,
   setOpen,
 }) => {
   const reactFlowInstance = useReactFlow();

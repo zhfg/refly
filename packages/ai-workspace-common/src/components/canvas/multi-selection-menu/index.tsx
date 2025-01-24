@@ -1,12 +1,10 @@
-import { FC, useState } from 'react';
+import { useState } from 'react';
 import { useStore, useReactFlow } from '@xyflow/react';
 import { GroupActionMenu } from '../group-action-menu';
 import { SelectionActionMenu } from './selection-action-menu';
 import { calculateGroupBoundaries } from './utils';
 
-type MultiSelectionMenusProps = {};
-
-export const MultiSelectionMenus: FC<MultiSelectionMenusProps> = () => {
+export const MultiSelectionMenus = () => {
   const [isTopMenuHovered, setIsTopMenuHovered] = useState(false);
   const [isRightMenuHovered, setIsRightMenuHovered] = useState(false);
 

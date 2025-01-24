@@ -12,7 +12,7 @@ function ATag({ ...props }, sources: Source[]) {
         // console.log('source not found', props);
         return <></>;
       }
-    } catch (err) {}
+    } catch (_err) {}
 
     // Add security check for href
     const href = props.href.toLowerCase();

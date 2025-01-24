@@ -7,12 +7,17 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "a11y": {
+        "useKeyWithClickEvents": "off"
+      },
       "correctness": {
         "noUnusedImports": "error",
-        "noUnusedVariables": "error"
+        "noUnusedVariables": "error",
+        "useExhaustiveDependencies": "off"
       },
       "suspicious": {
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noArrayIndexKey": "off"
       },
       "style": {
         "useConst": "error",

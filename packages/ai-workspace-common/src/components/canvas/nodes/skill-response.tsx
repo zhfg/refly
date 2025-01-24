@@ -3,13 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Moveable from 'react-moveable';
 import classNames from 'classnames';
 import { Divider, message } from 'antd';
-import {
-  CanvasNodeData,
-  ResponseNodeMeta,
-  CanvasNode,
-  SkillResponseNodeProps,
-} from './shared/types';
-import { Node } from '@xyflow/react';
+import { CanvasNode, SkillResponseNodeProps } from './shared/types';
 import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
 import { CustomHandle } from './shared/custom-handle';
 import { LuChevronRight } from 'react-icons/lu';
@@ -55,8 +49,6 @@ import { ContentPreview } from './shared/content-preview';
 import { useActionPolling } from '@refly-packages/ai-workspace-common/hooks/canvas/use-action-polling';
 
 const POLLING_WAIT_TIME = 15000;
-
-type SkillResponseNode = Node<CanvasNodeData<ResponseNodeMeta>, 'skillResponse'>;
 
 const NodeHeader = memo(
   ({ query, skillName, skill }: { query: string; skillName: string; skill: any }) => {
@@ -174,7 +166,7 @@ export const SkillResponseNode = memo(
 
     const isOperating = operatingNodeId === id;
     const sizeMode = data?.metadata?.sizeMode || 'adaptive';
-    const node = useMemo(() => getNode(id), [id, data?.metadata?.sizeMode, getNode]);
+    const node = useMemo(() => getNode(id), [id, getNode]);
 
     const { containerStyle, handleResize, updateSize } = useNodeSize({
       id,
@@ -284,12 +276,12 @@ export const SkillResponseNode = memo(
           entityId: canvasId,
         },
       );
-    }, [data, entityId, invokeAction, patchNodeData]);
+    }, [data, entityId, canvasId, id, title, t, updateSize, invokeAction, patchNodeData]);
 
     const insertToDoc = useInsertToDocument(entityId);
     const handleInsertToDoc = useCallback(async () => {
       await insertToDoc('insertBelow', content);
-    }, [insertToDoc, entityId, content]);
+    }, [insertToDoc, content]);
 
     const { deleteNode } = useDeleteNode();
 
@@ -320,7 +312,7 @@ export const SkillResponseNode = memo(
         entityId: entityId,
         metadata: data?.metadata,
       });
-    }, [id, data, addToContext]);
+    }, [data, entityId, title, addToContext]);
 
     const knowledgeBaseStore = useKnowledgeBaseStoreShallow((state) => ({
       updateSourceListDrawer: state.updateSourceListDrawer,
@@ -332,7 +324,7 @@ export const SkillResponseNode = memo(
         sources: sources,
         query: query,
       });
-    }, [sources, query]);
+    }, [sources, query, knowledgeBaseStore]);
 
     const resizeMoveable = useCallback((width: number, height: number) => {
       moveableRef.current?.request('resizable', { width, height });
@@ -366,7 +358,7 @@ export const SkillResponseNode = memo(
         false,
         true,
       );
-    }, [id, data.entityId, addNode]); // Add new handler for compare run
+    }, [data, addNode]); // Add new handler for compare run
 
     const handleCloneAskAI = useCallback(async () => {
       // Fetch action result to get context
@@ -449,7 +441,16 @@ export const SkillResponseNode = memo(
         // Clean up all node events
         cleanupNodeEvents(id);
       };
-    }, [id, handleRerun, handleAddToContext, handleInsertToDoc, handleCreateDocument, deleteNode]);
+    }, [
+      id,
+      handleRerun,
+      handleAddToContext,
+      handleInsertToDoc,
+      handleCreateDocument,
+      handleDelete,
+      handleAskAI,
+      handleCloneAskAI,
+    ]);
 
     useEffect(() => {
       preloadModelIcons();
@@ -498,7 +499,7 @@ export const SkillResponseNode = memo(
             <div className="flex flex-col h-full">
               <NodeHeader query={query} skillName={skillName} skill={skill} />
 
-              <div className={`flex-grow overflow-y-auto pr-2 -mr-2`}>
+              <div className={'flex-grow overflow-y-auto pr-2 -mr-2'}>
                 <div className="flex flex-col gap-3">
                   {status === 'failed' && (
                     <div
@@ -518,7 +519,7 @@ export const SkillResponseNode = memo(
                       <span className="text-xs text-gray-500 max-w-48 truncate">
                         {log ? (
                           <>
-                            <span className="text-green-500 font-medium">{logTitle + ' '}</span>
+                            <span className="text-green-500 font-medium">{`${logTitle} `}</span>
                             <span className="text-gray-500">{logDescription}</span>
                           </>
                         ) : (

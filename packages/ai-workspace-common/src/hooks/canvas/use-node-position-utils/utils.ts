@@ -18,7 +18,7 @@ export const getAbsolutePosition = (node: Node, nodes: Node[]) => {
 // Get the level of a node from root
 export const getNodeLevel = (
   nodeId: string,
-  nodes: Node[],
+  _nodes: Node[],
   edges: any[],
   rootNodes: Node[],
 ): number => {
@@ -29,10 +29,11 @@ export const getNodeLevel = (
   }));
 
   while (queue.length > 0) {
-    const { id, level } = queue.shift()!;
+    const item = queue.shift() ?? { id: '', level: -1 };
+    const { id, level } = item;
 
-    if (id === nodeId) return level;
-    if (visited.has(id)) continue;
+    if (id && id === nodeId) return level;
+    if (visited.has(id) || !id) continue;
     visited.add(id);
 
     const nextIds = edges
@@ -56,7 +57,7 @@ export const getNodeWidth = (node: Node): number => {
 };
 
 // Helper function to get all nodes in a branch starting from specific nodes
-const getBranchNodes = (
+const _getBranchNodes = (
   startNodeIds: string[],
   nodes: Node[],
   edges: any[],
@@ -66,8 +67,8 @@ const getBranchNodes = (
   const queue = [...startNodeIds];
 
   while (queue.length > 0) {
-    const currentId = queue.shift()!;
-    if (visited.has(currentId)) continue;
+    const currentId = queue.shift() ?? '';
+    if (visited.has(currentId) || !currentId) continue;
     visited.add(currentId);
 
     const node = nodes.find((n) => n.id === currentId);
@@ -85,15 +86,21 @@ const getBranchNodes = (
 };
 
 // Get nodes at specific level
-const getNodesAtLevel = (nodes: Node[], edges: any[], level: number, rootNodes: Node[]): Node[] => {
+const _getNodesAtLevel = (
+  nodes: Node[],
+  edges: any[],
+  level: number,
+  rootNodes: Node[],
+): Node[] => {
   const result: Node[] = [];
   const visited = new Set<string>();
   const queue: Array<{ node: Node; level: number }> = rootNodes.map((node) => ({ node, level: 0 }));
 
   while (queue.length > 0) {
-    const { node, level: currentLevel } = queue.shift()!;
+    const item = queue.shift() ?? { node: null, level: -1 };
+    const { node, level: currentLevel } = item;
 
-    if (visited.has(node.id)) continue;
+    if (visited.has(node.id) || !node) continue;
     visited.add(node.id);
 
     if (currentLevel === level) {
@@ -115,7 +122,7 @@ const getNodesAtLevel = (nodes: Node[], edges: any[], level: number, rootNodes: 
 };
 
 // Layout a branch using Dagre while preserving root positions
-const layoutBranch = (
+const _layoutBranch = (
   branchNodes: Node[],
   edges: any[],
   rootNodes: Node[],
@@ -134,7 +141,7 @@ const layoutBranch = (
   });
 
   // Add all nodes to the graph with their actual dimensions
-  branchNodes.forEach((node) => {
+  for (const node of branchNodes) {
     const nodeWidth = getNodeWidth(node);
     const nodeHeight = getNodeHeight(node);
     g.setNode(node.id, {
@@ -145,17 +152,17 @@ const layoutBranch = (
       originalWidth: nodeWidth,
       originalHeight: nodeHeight,
     });
-  });
+  }
 
   // Add edges
-  edges.forEach((edge) => {
+  for (const edge of edges) {
     if (
       branchNodes.some((n) => n.id === edge.source) &&
       branchNodes.some((n) => n.id === edge.target)
     ) {
       g.setEdge(edge.source, edge.target);
     }
-  });
+  }
 
   // Get the maximum level in the branch
   const maxLevel = Math.max(
@@ -163,7 +170,7 @@ const layoutBranch = (
   );
 
   // Fix positions based on mode
-  branchNodes.forEach((node) => {
+  for (const node of branchNodes) {
     const level = getNodeLevel(node.id, branchNodes, edges, rootNodes);
     const isRoot = rootNodes.some((root) => root.id === node.id);
     const shouldFixPosition = options.fromRoot ? isRoot : level < maxLevel;
@@ -177,7 +184,7 @@ const layoutBranch = (
         fixed: true,
       });
     }
-  });
+  }
 
   // Apply layout
   Dagre.layout(g);
@@ -227,15 +234,15 @@ const layoutBranch = (
 };
 
 // Get the branch cluster that a node belongs to
-const getBranchCluster = (nodeId: string, nodes: Node[], edges: any[]): Node[] => {
+const _getBranchCluster = (nodeId: string, nodes: Node[], edges: any[]): Node[] => {
   const visited = new Set<string>();
   const cluster = new Set<string>();
   const queue = [nodeId];
 
   // First traverse upwards to find root
   while (queue.length > 0) {
-    const currentId = queue.shift()!;
-    if (visited.has(currentId)) continue;
+    const currentId = queue.shift() ?? '';
+    if (visited.has(currentId) || !currentId) continue;
     visited.add(currentId);
     cluster.add(currentId);
 
@@ -249,28 +256,30 @@ const getBranchCluster = (nodeId: string, nodes: Node[], edges: any[]): Node[] =
   visited.clear();
 
   while (downQueue.length > 0) {
-    const currentId = downQueue.shift()!;
-    if (visited.has(currentId)) continue;
+    const currentId = downQueue.shift() ?? '';
+    if (visited.has(currentId) || !currentId) continue;
     visited.add(currentId);
 
     // Add child nodes
     const childIds = edges.filter((edge) => edge.source === currentId).map((edge) => edge.target);
     downQueue.push(...childIds);
-    childIds.forEach((id) => cluster.add(id));
+    for (const id of childIds) {
+      cluster.add(id);
+    }
   }
 
   return nodes.filter((node) => cluster.has(node.id));
 };
 
 // Get all connected nodes to the right of a given node
-const getRightwardNodes = (nodeId: string, nodes: Node[], edges: any[]): Node[] => {
+const _getRightwardNodes = (nodeId: string, nodes: Node[], edges: any[]): Node[] => {
   const visited = new Set<string>();
   const rightwardNodes: Node[] = [];
   const queue = [nodeId];
 
   while (queue.length > 0) {
-    const currentId = queue.shift()!;
-    if (visited.has(currentId)) continue;
+    const currentId = queue.shift() ?? '';
+    if (visited.has(currentId) || !currentId) continue;
     visited.add(currentId);
 
     const currentNode = nodes.find((n) => n.id === currentId);
@@ -302,7 +311,7 @@ export const getRootNodes = (nodes: Node[], edges: any[]): Node[] => {
 export const getRightmostPosition = (
   sourceNodes: Node[],
   nodes: Node[],
-  edges: any[],
+  _edges: any[],
 ): XYPosition => {
   // Convert source nodes to absolute positions if they are in groups
   const sourceNodesAbsolute = sourceNodes.map((node) => ({
@@ -425,7 +434,7 @@ export const getRightmostPosition = (
 
     // Find the best gap
     let bestGap = { start: 0, end: 0, size: 0, distanceToAvg: Number.POSITIVE_INFINITY };
-    gaps.forEach((gap) => {
+    for (const gap of gaps) {
       const size = gap.end - gap.start;
       if (size >= fixedSpacing + 320) {
         // Consider minimum space needed for new node
@@ -435,7 +444,7 @@ export const getRightmostPosition = (
           bestGap = { ...gap, size, distanceToAvg };
         }
       }
-    });
+    }
 
     if (bestGap.size > 0) {
       bestY = (bestGap.start + bestGap.end) / 2;

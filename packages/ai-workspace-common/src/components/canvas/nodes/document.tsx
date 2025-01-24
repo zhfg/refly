@@ -1,6 +1,5 @@
 import { Position, useReactFlow } from '@xyflow/react';
-import { CanvasNodeData, DocumentNodeMeta, DocumentNodeProps } from './shared/types';
-import { Node } from '@xyflow/react';
+import { DocumentNodeProps } from './shared/types';
 import { CustomHandle } from './shared/custom-handle';
 import { useState, useCallback, useRef, useEffect, memo, useMemo } from 'react';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
@@ -29,8 +28,6 @@ import { ContentPreview } from './shared/content-preview';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
 import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-document';
 
-type DocumentNode = Node<CanvasNodeData<DocumentNodeMeta>, 'document'>;
-
 export const DocumentNode = memo(
   ({
     data = { title: '', entityId: '' },
@@ -55,7 +52,7 @@ export const DocumentNode = memo(
 
     const isOperating = operatingNodeId === id;
     const sizeMode = data?.metadata?.sizeMode || 'adaptive';
-    const node = useMemo(() => getNode(id), [id, data?.metadata?.sizeMode, getNode]);
+    const node = useMemo(() => getNode(id), [id, getNode]);
 
     const { containerStyle, handleResize } = useNodeSize({
       id,
@@ -140,7 +137,7 @@ export const DocumentNode = memo(
         false,
         true,
       );
-    }, [id, data.entityId, addNode]);
+    }, [id, data, addNode]);
 
     const { duplicateDocument } = useCreateDocument();
 

@@ -29,7 +29,7 @@ export const SourceDetailItem = memo((props: SourceDetailItemProps) => {
 
   return (
     <div
-      className={`source-detail-item`}
+      className={'source-detail-item'}
       style={
         small
           ? {
@@ -59,34 +59,18 @@ export const SourceDetailItem = memo((props: SourceDetailItemProps) => {
           </div>
         </Tooltip>
         {!small && (
-          <>
-            <div className="site-intro-content">
-              <p className="site-intro-site-name">{item.title}</p>
-              <a className="site-intro-site-url" href={item.url} target="_blank" rel="noreferrer">
-                {item.url}
-              </a>
-            </div>
-          </>
+          <div className="site-intro-content">
+            <p className="site-intro-site-name">{item.title}</p>
+            <a className="site-intro-site-url" href={item.url} target="_blank" rel="noreferrer">
+              {item.url}
+            </a>
+          </div>
         )}
       </div>
       {!small && (
         <>
           <div className="knowledge-base-directory-title">{item.title}</div>
-          {/* <div className="knowledge-base-directory-action">
-              {showBtn?.externalOrigin ? (
-                <div
-                  className={classNames('action-external-origin-website', {
-                    active: btnProps?.defaultActiveKeys?.includes('summary'),
-                  })}
-                >
-                  <IconCompass
-                    onClick={() => {
-                      window.open(item?.data?.url, '_blank');
-                    }}
-                  />
-                </div>
-              ) : null}
-            </div> */}
+
           {showDesc ? (
             <div style={{ maxHeight: 200, overflowY: 'scroll' }}>
               <Markdown content={item?.pageContent || ''} />
@@ -116,7 +100,7 @@ export const SourceDetailItemWrapper = memo((props: SourceDetailItemProps) => {
       trigger="hover"
       align={isWeb ? { offset: [-15, 0] } : {}}
       mouseEnterDelay={0.5}
-      getPopupContainer={(node: Element) => {
+      getPopupContainer={(_node: Element) => {
         const container = getPopupContainer();
         return (
           !isWeb ? (container.querySelector('.ai-copilot-container') as Element) : container

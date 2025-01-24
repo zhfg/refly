@@ -29,9 +29,9 @@ const RecommendQuestionsComponent = ({ relatedQuestions }: RecommendQuestionsPro
         </p>
       </div>
       <div className="flex flex-col gap-1">
-        {relatedQuestions.map((item, index) => (
+        {relatedQuestions.map((item) => (
           <div
-            key={index}
+            key={item}
             className="flex flex-row items-center justify-between rounded-lg transition-colors duration-200 hover:cursor-pointer group"
             onClick={() => handleQuestionClick(item)}
           >

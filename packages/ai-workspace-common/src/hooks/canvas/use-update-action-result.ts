@@ -25,7 +25,10 @@ const generateFullNodeDataUpdates = (
       modelInfo: payload.modelInfo,
       version: payload.version,
       artifacts: payload.steps.flatMap((s) => s.artifacts),
-      structuredData: payload.steps.reduce((acc, step) => ({ ...acc, ...step.structuredData }), {}),
+      structuredData: payload.steps.reduce(
+        (acc, step) => Object.assign(acc, step.structuredData),
+        {},
+      ),
       tokenUsage: aggregateTokenUsage(payload.steps.flatMap((s) => s.tokenUsage).filter(Boolean)),
     },
   };
@@ -62,7 +65,7 @@ const generatePartialNodeDataUpdates = (payload: ActionResult, event?: SkillEven
       currentLog: log,
     };
   } else if (eventType === 'structured_data') {
-    const structuredData = steps.reduce((acc, step) => ({ ...acc, ...step.structuredData }), {});
+    const structuredData = steps.reduce((acc, step) => Object.assign(acc, step.structuredData), {});
     nodeData.metadata = {
       status: payload.status,
       structuredData: structuredData,

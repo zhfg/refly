@@ -6,9 +6,9 @@ import getClient from '@refly-packages/ai-workspace-common/requests/proxiedReque
 const deleteIndexedDB = async () => {
   try {
     const databases = await window.indexedDB.databases?.();
-    databases?.forEach((db) => {
+    for (const db of databases) {
       window.indexedDB.deleteDatabase(db.name ?? '');
-    });
+    }
   } catch (error) {
     console.error('Failed to clear IndexedDB:', error);
   }

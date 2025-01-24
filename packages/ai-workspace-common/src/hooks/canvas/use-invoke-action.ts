@@ -32,7 +32,7 @@ export const useInvokeAction = () => {
   const { createTimeoutHandler } = useActionPolling();
   const onUpdateResult = useUpdateActionResult();
 
-  const onSkillStart = (skillEvent: SkillEvent) => {};
+  const onSkillStart = (_skillEvent: SkillEvent) => {};
 
   const onSkillLog = (skillEvent: SkillEvent) => {
     const { resultId, step, log } = skillEvent;
@@ -210,7 +210,7 @@ export const useInvokeAction = () => {
 
     const artifacts = result.steps?.flatMap((s) => s.artifacts);
     if (artifacts?.length) {
-      artifacts.forEach((artifact) => {
+      for (const artifact of artifacts) {
         setNodeDataByEntity(
           {
             type: artifact.type,
@@ -222,7 +222,7 @@ export const useInvokeAction = () => {
             },
           },
         );
-      });
+      }
     }
 
     refetchUsage();
@@ -265,7 +265,7 @@ export const useInvokeAction = () => {
   };
 
   const abortAction = useCallback(
-    (msg?: string) => {
+    (_msg?: string) => {
       try {
         globalAbortControllerRef.current?.abort();
         globalIsAbortedRef.current = true;
@@ -345,7 +345,7 @@ export const useInvokeAction = () => {
 
     // Wrap event handlers to reset timeout
     const wrapEventHandler =
-      (handler: Function) =>
+      (handler: (...args: any[]) => void) =>
       (...args: any[]) => {
         resetTimeout();
         handler(...args);

@@ -13,7 +13,7 @@ export const useCreateTrigger = () => {
       body: { ...trigger, enabled: val },
     });
     if (error) {
-      return;
+      return error;
     }
     Message.success({ content: t('common.putSuccess') });
   };
@@ -42,7 +42,9 @@ export const useCreateTrigger = () => {
     });
     if (!error && data?.success) {
       Message.success({ content: t('common.putSuccess') });
+      return;
     }
+    return error;
   };
 
   return {

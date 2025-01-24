@@ -57,7 +57,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
 
   const hideSelectedSkillHeader = useMemo(
     () => !localActionMeta || localActionMeta?.name === 'commonQnA' || !localActionMeta?.name,
-    [localActionMeta?.name],
+    [localActionMeta],
   );
 
   const { canvasId } = useCanvasContext();
@@ -110,7 +110,22 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
       },
     );
     setEditMode(false);
-  }, [resultId, editQuery, editModelInfo, editContextItems, localActionMeta]);
+  }, [
+    resultId,
+    editQuery,
+    editModelInfo,
+    editContextItems,
+    localActionMeta,
+    skill,
+    version,
+    canvasId,
+    getNodes,
+    getEdges,
+    addEdges,
+    deleteElements,
+    invokeAction,
+    setEditMode,
+  ]);
 
   const customActions: CustomAction[] = useMemo(
     () => [
@@ -125,7 +140,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
         },
       },
     ],
-    [setEditMode],
+    [setEditMode, contextItems, query, modelInfo, t],
   );
 
   const handleSelectSkill = useCallback((skill: Skill) => {

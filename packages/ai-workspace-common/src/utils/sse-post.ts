@@ -38,7 +38,6 @@ const makeSSERequest = async (
 export const ssePost = async ({
   controller,
   payload,
-  onStart,
   onSkillLog,
   onSkillStart,
   onSkillStream,
@@ -75,7 +74,7 @@ export const ssePost = async ({
       return;
     }
 
-    reader = response.body!.getReader();
+    reader = response.body?.getReader();
     const decoder = new TextDecoder('utf-8');
     let isSkillFirstMessage = true;
     let bufferStr = '';
@@ -83,7 +82,10 @@ export const ssePost = async ({
     const read = async () => {
       let hasError = false;
       try {
-        const { done, value } = await reader?.read();
+        if (!reader) {
+          throw new Error('Reader is not initialized');
+        }
+        const { done, value } = await reader.read();
 
         if (done) {
           onCompleted?.();
@@ -96,7 +98,7 @@ export const ssePost = async ({
         let skillEvent: SkillEvent;
 
         try {
-          lines?.forEach((message) => {
+          for (const message of lines ?? []) {
             if (message.startsWith('data: ')) {
               try {
                 skillEvent = JSON.parse(message.substring(6)) as SkillEvent;
@@ -135,7 +137,7 @@ export const ssePost = async ({
                 scrollToBottom();
               });
             }
-          });
+          }
 
           bufferStr = lines[lines.length - 1];
         } catch (err) {

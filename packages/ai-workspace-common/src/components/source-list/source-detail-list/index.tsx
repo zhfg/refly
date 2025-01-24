@@ -22,9 +22,9 @@ interface SourceDetailListProps {
 }
 
 export const SourceDetailList = (props: SourceDetailListProps) => {
-  const { searchKey = 'title', showAdd, small } = props;
-  const [searchVal, setSearchVal] = useState('');
-  const [visible, setVisible] = useState(false);
+  const { showAdd, small } = props;
+  const [searchVal, _setSearchVal] = useState('');
+  const [_visible, setVisible] = useState(false);
 
   const AddResourceBtn = (props: { style?: React.CSSProperties }) => {
     return (
@@ -63,9 +63,9 @@ export const SourceDetailList = (props: SourceDetailListProps) => {
       <div className="source-detail-inner-list" style={small ? { minWidth: 72, width: 72 } : {}}>
         {props?.isFetching ? (
           <div style={{ margin: '8px auto' }}>
-            <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
-            <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
-            <Skeleton animation style={{ marginTop: 24 }}></Skeleton>
+            <Skeleton animation style={{ marginTop: 24 }} />
+            <Skeleton animation style={{ marginTop: 24 }} />
+            <Skeleton animation style={{ marginTop: 24 }} />
           </div>
         ) : (
           (props?.sources || []).map((item, index) => (

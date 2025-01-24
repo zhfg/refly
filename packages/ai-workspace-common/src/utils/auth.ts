@@ -26,7 +26,7 @@ const RETRY_DELAY = 100;
 
 export const refreshToken = async (): Promise<RefreshResult> => {
   if (isRefreshing) {
-    return refreshPromise!;
+    return refreshPromise;
   }
 
   isRefreshing = true;
@@ -87,7 +87,7 @@ export const refreshTokenAndRetry = async (failedRequest: Request): Promise<Resp
   if (!isRefreshed || error) {
     // Clear queue and reject all pending requests
     while (requestQueue.length > 0) {
-      const { reject } = requestQueue.shift()!;
+      const { reject } = requestQueue.shift();
       reject(new AuthenticationExpiredError());
     }
 
@@ -105,7 +105,15 @@ export const refreshTokenAndRetry = async (failedRequest: Request): Promise<Resp
 
   // Retry all queued requests
   while (requestQueue.length > 0) {
-    const { resolve, reject, failedRequest: queuedRequest } = requestQueue.shift()!;
+    const {
+      resolve,
+      reject,
+      failedRequest: queuedRequest,
+    } = requestQueue.shift() ?? {
+      resolve: () => {},
+      reject: () => {},
+      failedRequest: new Request(''),
+    };
     try {
       const retriedResponse = await fetch(queuedRequest);
       resolve(retriedResponse);

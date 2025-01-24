@@ -18,7 +18,6 @@ export function DataList({
   icon,
   data,
   activeValue,
-  searchValue,
   displayMode,
   setValue,
   onItemClick,
@@ -29,7 +28,6 @@ export function DataList({
   data: SearchResult[];
   icon: React.ReactNode;
   activeValue: string;
-  searchValue: string;
   displayMode: 'list' | 'search';
   setValue: (val: string) => void;
   onItemClick?: (item: SearchResult) => void;
@@ -48,7 +46,8 @@ export function DataList({
   ): Promise<{ success: boolean; data?: SearchResult[] }> => {
     if (domain === 'skill') {
       return { success: true, data: [] };
-    } else if (domain === 'canvas') {
+    }
+    if (domain === 'canvas') {
       const res = await getClient().listCanvases({
         query: {
           ...queryPayload,
@@ -65,7 +64,8 @@ export function DataList({
       });
 
       return { success: true, data };
-    } else if (domain === 'readResources') {
+    }
+    if (domain === 'readResources') {
       const res = await getClient().listResources({
         query: {
           ...queryPayload,
@@ -78,7 +78,7 @@ export function DataList({
           id: item?.resourceId,
           title: item?.title,
           domain: 'resource',
-          snippets: [{ text: item?.content?.slice(0, 30) + '...' }],
+          snippets: [{ text: `${item?.content?.slice(0, 30)}...` }],
           metadata: {
             resourceType: 'weblink',
           },
@@ -155,13 +155,15 @@ export function DataList({
             <div className="search-res-container">
               <p
                 className="search-res-title"
+                // biome-ignore lint/security/noDangerouslySetInnerHtml: trust server highlights
                 dangerouslySetInnerHTML={{ __html: item?.highlightedTitle }}
-              ></p>
+              />
               {item?.snippets?.length > 0 && (
                 <p
                   className="search-res-desc"
+                  // biome-ignore lint/security/noDangerouslySetInnerHtml: trust server highlights
                   dangerouslySetInnerHTML={{ __html: item?.snippets?.[0]?.highlightedText || '' }}
-                ></p>
+                />
               )}
             </div>
           </Item>

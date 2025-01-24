@@ -6,7 +6,7 @@ import { getContextItemIcon } from './utils/icon';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import cn from 'classnames';
 import { ContextPreview } from './context-preview';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { Message } from '@arco-design/web-react';
 import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
@@ -29,7 +29,7 @@ export const ContextItem = ({
   onRemove?: (item: IContextItem) => void;
 }) => {
   const { t } = useTranslation();
-  const { title, entityId, type, selection, metadata, isCurrentContext } = item ?? {};
+  const { title, entityId, selection, metadata } = item ?? {};
   const icon = getContextItemIcon(item.type, null, { withHistory: metadata?.withHistory });
   const { setSelectedNode } = useNodeSelection();
   const { nodes } = useCanvasData();
@@ -73,22 +73,6 @@ export const ContextItem = ({
 
   const content = <ContextPreview item={item} />;
 
-  const isSelection = metadata?.sourceType?.toLowerCase()?.includes('selection');
-  const sourceType = isSelection ? 'selection' : type;
-
-  const contextTypeDesc = useMemo(() => {
-    if (type !== 'skillResponse') {
-      return (
-        (isCurrentContext ? t('copilot.contextItem.current') : '') +
-        t(`copilot.contextItem.${sourceType}`)
-      );
-    }
-    if (metadata?.withHistory) {
-      return t('copilot.contextItem.threadHistory');
-    }
-    return t('copilot.contextItem.skillResponse');
-  }, [type, metadata?.withHistory, isCurrentContext, t]);
-
   return (
     <Popover
       arrow={false}
@@ -124,7 +108,6 @@ export const ContextItem = ({
           >
             {title}
           </span>
-          {/* <span className="item-type text-gray-500 mr-1">{contextTypeDesc}</span> */}
           {!canNotRemove && (
             <IconClose
               className={cn('flex-shrink-0 text-xs cursor-pointer', {

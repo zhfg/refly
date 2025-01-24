@@ -9,7 +9,7 @@ import './index.scss';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useTranslation } from 'react-i18next';
 
-export const SkillManagementModal = (props: any) => {
+export const SkillManagementModal = (_props: any) => {
   const { t } = useTranslation();
   const skillStore = useSkillStore();
 

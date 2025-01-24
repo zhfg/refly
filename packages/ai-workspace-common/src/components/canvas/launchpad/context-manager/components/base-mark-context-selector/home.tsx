@@ -10,21 +10,19 @@ export function Home({
   setValue,
 }: {
   data: RenderItem[];
-  displayMode: 'list' | 'search';
   activeValue: string;
-  searchValue: string;
   setValue: (val: string) => void;
   showItemDetail: boolean;
 }) {
   useEffect(() => {
     setValue('refly-built-in-ask-ai');
-  }, []);
+  }, [setValue]);
 
   return (
     <>
-      {data?.map((item, index) => (
+      {data?.map((item) => (
         <Item
-          key={index}
+          key={item.data.entityId}
           className={classNames(item?.isSelected ? 'selected' : '', 'search-res-item')}
           value={`${item?.data?.title}__${item?.data?.entityId}`}
           activeValue={activeValue}
@@ -36,9 +34,10 @@ export function Home({
           <div className="search-res-container">
             <p
               className="search-res-title"
+              // biome-ignore lint/security/noDangerouslySetInnerHtml: trust server highlights
               dangerouslySetInnerHTML={{ __html: item?.data?.title }}
               title={item?.data?.title.replace(/<[^>]*>/g, '')}
-            ></p>
+            />
           </div>
         </Item>
       ))}

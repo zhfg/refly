@@ -21,14 +21,16 @@ const getLayoutedElements = (
     marginy: 50,
   });
 
-  edges.forEach((edge) => g.setEdge(edge.source, edge.target));
-  nodes.forEach((node) =>
+  for (const edge of edges) {
+    g.setEdge(edge.source, edge.target);
+  }
+  for (const node of nodes) {
     g.setNode(node.id, {
       ...node,
       width: node.measured?.width ?? 288,
       height: node.measured?.height ?? 320,
-    }),
-  );
+    });
+  }
 
   Dagre.layout(g);
 

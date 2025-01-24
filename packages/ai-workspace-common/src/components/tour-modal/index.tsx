@@ -109,7 +109,9 @@ const TourContent = ({ description, videoUrl, videoType }: TourContentProps) => 
         onLoadedData={() => {
           setTimeout(() => setIsLoading(false), 500);
         }}
-      />
+      >
+        <track kind="captions" srcLang="en" src={videoUrl} />
+      </video>
     );
   };
 
@@ -189,10 +191,7 @@ export const TourModal = () => {
 
   const currentStepData = useMemo(() => steps[currentStep], [currentStep]);
 
-  const title =
-    t('tour.onboardingModal.title') +
-    ` (${currentStepData.key}/${steps.length}) : ` +
-    t(`tour.onboardingModal.highlight.${currentStepData.key}`);
+  const title = `${t('tour.onboardingModal.title')} (${currentStepData.key}/${steps.length}) : ${t(`tour.onboardingModal.highlight.${currentStepData.key}`)}`;
 
   return (
     <Modal

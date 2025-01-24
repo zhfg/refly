@@ -24,8 +24,10 @@ export const HelpModal = memo(({ visible, onClose }: HelpModalProps) => {
 
   const { mutate: updateSettings } = useUpdateSettings();
 
-  const enVersion = `https://app.tango.us/app/embed/c73a9215-4556-481d-9232-5852c34c6477?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false`;
-  const zhVersion = `https://app.tango.us/app/embed/765107d0-5edc-4f8c-8621-0676601587d2?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false`;
+  const enVersion =
+    'https://app.tango.us/app/embed/c73a9215-4556-481d-9232-5852c34c6477?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false';
+  const zhVersion =
+    'https://app.tango.us/app/embed/765107d0-5edc-4f8c-8621-0676601587d2?skipCover=false&defaultListView=false&skipBranding=false&makeViewOnly=true&hideAuthorAndDetails=false';
 
   const handleComplete = () => {
     setUserProfile({

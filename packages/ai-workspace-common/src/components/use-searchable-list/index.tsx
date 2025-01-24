@@ -48,9 +48,8 @@ export const useSearchableList = <T extends SearchableListItem>(
         }, delay);
 
         return () => clearTimeout(delayTimeout);
-      } else {
-        applyFilter();
       }
+      applyFilter();
     } else {
       setState(origin);
       setInitialized(true);

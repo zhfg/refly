@@ -25,7 +25,7 @@ export const ContentPreview = memo(
   }: ContentPreviewProps) => {
     const previewContent = useMemo(() => {
       if (sizeMode === 'compact') {
-        return content?.slice(0, maxCompactLength) + '...' || '';
+        return `${content?.slice(0, maxCompactLength)}...` || '';
       }
       return content || '';
     }, [content, sizeMode, maxCompactLength]);

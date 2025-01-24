@@ -22,7 +22,7 @@ export const sendToBackground = async (message: BackgroundMessage, needResponse 
       const res = await waitForResponse;
       return res;
     }
-  } catch (err) {
+  } catch (_err) {
     // console.log('sendToBackground error', err);
   }
 };
@@ -75,7 +75,7 @@ export const sendToContentScript = sendToWebpageMainWorld;
 export const sendMessage: (message: BackgroundMessage, needResponse?: boolean) => Promise<any> =
   throttle(async (message: BackgroundMessage, needResponse = true) => {
     const fromRuntime = message?.source;
-    let browser;
+    let browser: any;
     try {
       if (fromRuntime !== 'web') {
         const { browser: _browser } = await import('wxt/browser');
@@ -91,7 +91,7 @@ export const sendMessage: (message: BackgroundMessage, needResponse?: boolean) =
             }
 
             if (fromRuntime !== 'extension-background') {
-              if (window && window?.addEventListener) {
+              if (window?.addEventListener) {
                 window.removeEventListener('message', listener);
               }
             }
@@ -105,7 +105,7 @@ export const sendMessage: (message: BackgroundMessage, needResponse?: boolean) =
         }
 
         if (fromRuntime !== 'extension-background') {
-          if (window && window?.addEventListener) {
+          if (window?.addEventListener) {
             window.addEventListener('message', listener);
           }
         }
@@ -123,7 +123,7 @@ export const sendMessage: (message: BackgroundMessage, needResponse?: boolean) =
           // await browser.runtime.sendMessage(message);
         }
       } else if (fromRuntime === 'extension-csui') {
-        if (window && window?.postMessage) {
+        if (window?.postMessage) {
           window.postMessage(message, '*');
         }
 
@@ -131,7 +131,7 @@ export const sendMessage: (message: BackgroundMessage, needResponse?: boolean) =
           // await browser.runtime.sendMessage(message);
         }
       } else if (fromRuntime === 'web') {
-        if (window && window?.postMessage) {
+        if (window?.postMessage) {
           window.postMessage(message, '*');
         }
       }
@@ -150,7 +150,7 @@ export const onMessage = async (_callback: (message: any) => void, fromRuntime: 
   const windowCallback = (event: MessageEvent) => {
     callback(event?.data);
   };
-  let browser;
+  let browser: any;
   if (fromRuntime !== 'web') {
     const { browser: _browser } = await import('wxt/browser');
     browser = _browser;
@@ -160,7 +160,7 @@ export const onMessage = async (_callback: (message: any) => void, fromRuntime: 
     browser.runtime.onMessage.addListener(callback);
   } else if (fromRuntime === 'extension-csui') {
     // 1. csui -> csui 2. background/sidepanel -> csui
-    if (window && window?.addEventListener) {
+    if (window?.addEventListener) {
       window.addEventListener('message', windowCallback);
     }
 
@@ -168,7 +168,7 @@ export const onMessage = async (_callback: (message: any) => void, fromRuntime: 
       browser.runtime.onMessage.addListener(callback);
     }
   } else if (fromRuntime === 'web') {
-    if (window && window?.addEventListener) {
+    if (window?.addEventListener) {
       window.addEventListener('message', windowCallback);
     }
   }
@@ -177,7 +177,7 @@ export const onMessage = async (_callback: (message: any) => void, fromRuntime: 
     if (['extension-sidepanel', 'extension-background'].includes(fromRuntime)) {
       browser.runtime.onMessage.removeListener(callback);
     } else if (fromRuntime === 'extension-csui') {
-      if (window && window?.removeEventListener) {
+      if (window?.removeEventListener) {
         window.removeEventListener('message', windowCallback);
       }
 
@@ -185,7 +185,7 @@ export const onMessage = async (_callback: (message: any) => void, fromRuntime: 
         browser.runtime.onMessage.removeListener(callback);
       }
     } else if (fromRuntime === 'web') {
-      if (window && window?.removeEventListener) {
+      if (window?.removeEventListener) {
         window.removeEventListener('message', windowCallback);
       }
     }

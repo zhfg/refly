@@ -28,7 +28,7 @@ const getAndClearCachedRequest = (originalRequest: Request): Request | undefined
   return cachedRequest;
 };
 
-client.setConfig({ baseUrl: getServerOrigin() + '/v1', credentials: 'include' });
+client.setConfig({ baseUrl: `${getServerOrigin()}/v1`, credentials: 'include' });
 
 export interface CheckResponseResult {
   isError: boolean;

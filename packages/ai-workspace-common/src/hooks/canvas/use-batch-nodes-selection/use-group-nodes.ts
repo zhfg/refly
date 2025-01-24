@@ -3,14 +3,12 @@ import { useCanvasStore } from '../../../stores/canvas';
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 import { calculateGroupBoundaries, sortNodes, getAbsolutePosition } from './utils';
-import { useUngroupNodes } from './use-ungroup-nodes';
 import { prepareNodeData } from '../../../components/canvas/nodes';
 import { genUniqueId } from '@refly-packages/utils/id';
 
 export const useGroupNodes = () => {
   const canvasId = useCanvasId();
-  const { updateNodesWithSync } = useNodeOperations(canvasId);
-  const { ungroupNodes } = useUngroupNodes();
+  const { updateNodesWithSync } = useNodeOperations();
 
   const createGroupFromSelectedNodes = useCallback(() => {
     const { data } = useCanvasStore.getState();
@@ -36,11 +34,11 @@ export const useGroupNodes = () => {
     const groupChildCounts = new Map<string, number>();
 
     // Count children in each group
-    beforeNodes.forEach((node) => {
+    for (const node of beforeNodes) {
       if (node.parentId) {
-        groupChildCounts.set(node.parentId, (groupChildCounts.get(node.parentId) || 0) + 1);
+        groupChildCounts.set(node.parentId, (groupChildCounts.get(node.parentId) ?? 0) + 1);
       }
-    });
+    }
 
     // Update nodes
     let updatedNodes = beforeNodes.map((node) => {

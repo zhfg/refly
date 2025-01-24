@@ -63,9 +63,7 @@ export const ContentPanel = () => {
   const ref = useRef();
   const [val, setVal] = useState('canvas');
   const [hitTop, setHitTop] = useState(false);
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { t } = useTranslation();
 
   useEffect(() => {
     const tab = searchParams.get('tab') as string;

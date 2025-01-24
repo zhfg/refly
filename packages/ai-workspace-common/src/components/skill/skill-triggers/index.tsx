@@ -20,9 +20,7 @@ import { IconDelete, IconSchedule, IconThunderbolt, IconTool } from '@arco-desig
 const Row = Grid.Row;
 const Col = Grid.Col;
 
-type SkillTriggersProps = {};
-
-export const SkillTriggers = (props: SkillTriggersProps) => {
+export const SkillTriggers = () => {
   const { t } = useTranslation();
   const createTrigger = useCreateTrigger();
   const importNewTriggerModal = useImportNewTriggerModal();
@@ -47,8 +45,7 @@ export const SkillTriggers = (props: SkillTriggersProps) => {
     let eventMessage = t(`skill.newTriggerModal.${simpleEventName}`);
     if (timerConfig) {
       eventType = 'timer';
-      eventMessage =
-        timerConfig.datetime + `（${t(`skill.newTriggerModal.${timerConfig.repeatInterval}`)}）`;
+      eventMessage = `${timerConfig.datetime}（${t(`skill.newTriggerModal.${timerConfig.repeatInterval}`)}）`;
     }
     const updateTriggerStatus = async (val: boolean) => {
       const error = await createTrigger.updateTriggerStatus(trigger, val);

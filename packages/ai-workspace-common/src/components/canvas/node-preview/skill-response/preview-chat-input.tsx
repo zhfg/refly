@@ -21,7 +21,7 @@ const PreviewChatInputComponent = (props: PreviewChatInputProps) => {
 
   const hideSelectedSkillHeader = useMemo(
     () => !actionMeta || actionMeta?.name === 'commonQnA' || !actionMeta?.name,
-    [actionMeta?.name],
+    [actionMeta],
   );
 
   if (!enabled) {

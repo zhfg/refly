@@ -119,7 +119,8 @@ const PasteRuleExtension = Extension.create({
               tr.insert(from, doc.content);
               view.dispatch(tr);
               return true;
-            } else if (text) {
+            }
+            if (text) {
               // Fallback to plain text handling
               const { tr } = view.state;
               const { from, to } = view.state.selection;
@@ -167,7 +168,7 @@ const tiptapImage = UpdatedImage.extend({
   },
 });
 
-const updatedImage = UpdatedImage.configure({
+const _updatedImage = UpdatedImage.configure({
   HTMLAttributes: {
     class: cx('rounded-lg border border-muted'),
   },
@@ -232,7 +233,7 @@ const starterKit = StarterKit.configure({
   history: false,
 });
 
-const codeBlockLowlight = CodeBlockLowlight.configure({
+const _codeBlockLowlight = CodeBlockLowlight.configure({
   // configure lowlight: common /  all / use highlightJS in case there is a need to specify certain language grammars only
   // common: covers 37 language grammars which should be good enough in most cases
   lowlight: createLowlight(common),

@@ -557,7 +557,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         {showPreview && (
           <div
             ref={previewContainerRef}
-            className={`absolute top-[64px] bottom-0 right-2 overflow-x-auto preview-container`}
+            className="absolute top-[64px] bottom-0 right-2 overflow-x-auto preview-container"
             style={{
               maxWidth: showMaxRatio ? '900px' : '440px',
             }}
@@ -605,8 +605,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
           <SelectionContextMenu
             open={contextMenu.open}
             position={contextMenu.position}
-            nodeId={contextMenu.nodeId}
-            nodeType={contextMenu.nodeType}
             setOpen={(open) => setContextMenu((prev) => ({ ...prev, open }))}
           />
         )}

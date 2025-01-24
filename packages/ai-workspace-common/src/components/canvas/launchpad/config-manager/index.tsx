@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 // 自定义样式
 import './index.scss';
 
@@ -25,11 +25,10 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useContextPanelStore } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
-const FormItem = Form.Item;
 const TextArea = Input.TextArea;
 
 const getFormField = (fieldPrefix: string, key: string) => {
-  return `${fieldPrefix ? fieldPrefix + '.' : ''}${key}`;
+  return `${fieldPrefix ? `${fieldPrefix}.` : ''}${key}`;
 };
 
 const getDictValue = (dict: { [key: string]: string }, locale: string) => {
@@ -87,7 +86,7 @@ const ConfigItem = (props: {
   }
 
   if (item.inputMode === 'inputTextArea') {
-    console.log(`item.defaultValue`, item.defaultValue, configValue?.value);
+    console.log('item.defaultValue', item.defaultValue, configValue?.value);
     return (
       <TextArea
         placeholder={placeholder}
@@ -198,9 +197,12 @@ export const ConfigManager = (props: ConfigManagerProps) => {
   const [showConfig, setShowConfig] = useState<boolean>(false);
   const [resetCounter, setResetCounter] = useState<number>(0);
 
-  const isConfigItemRequired = (schemaItem: DynamicConfigItem) => {
-    return schemaItem?.required?.value && schemaItem?.required?.configScope.includes(configScope);
-  };
+  const isConfigItemRequired = useCallback(
+    (schemaItem: DynamicConfigItem) => {
+      return schemaItem?.required?.value && schemaItem?.required?.configScope.includes(configScope);
+    },
+    [configScope],
+  );
 
   const validateField = (field: string, value: any) => {
     const { formErrors: prevFormErrors } = useContextPanelStore.getState();
@@ -219,7 +221,7 @@ export const ConfigManager = (props: ConfigManagerProps) => {
 
   const validateTplConfig = (tplConfig: SkillTemplateConfig) => {
     const errors = {};
-    Object.keys(tplConfig).forEach((key) => {
+    for (const key of Object.keys(tplConfig)) {
       const schemaItem = (schema.items || []).find((item) => item.key === key);
       if (isConfigItemRequired(schemaItem)) {
         const value_ = tplConfig[key].value;
@@ -227,7 +229,7 @@ export const ConfigManager = (props: ConfigManagerProps) => {
           errors[getFormField(fieldPrefix, key)] = t('common.emptyInput');
         }
       }
-    });
+    }
     return errors;
   };
 
@@ -284,9 +286,9 @@ export const ConfigManager = (props: ConfigManagerProps) => {
           <GrDocumentConfig className="config-manager__item-icon" />
           {t('copilot.configManager.title')}
         </div>
-        {(schema.items || []).map((item, index) => (
+        {(schema.items || []).map((item) => (
           <div
-            key={item.key + index}
+            key={item.key}
             className={`config-manager__item config-item ${activeConfig?.key === item.key ? 'active' : ''} ${getItemError(item.key) ? 'error' : ''}`}
             onClick={() => {
               handleConfigItemClick(item);
@@ -340,10 +342,10 @@ export const ConfigManager = (props: ConfigManagerProps) => {
           </div>
           <Form
             form={form}
-            onValuesChange={(changedValues, allValues) => {
-              Object.keys(changedValues).forEach((field) => {
+            onValuesChange={(changedValues, _allValues) => {
+              for (const field of Object.keys(changedValues)) {
                 validateField(field, changedValues[field]);
-              });
+              }
             }}
           >
             {(() => {

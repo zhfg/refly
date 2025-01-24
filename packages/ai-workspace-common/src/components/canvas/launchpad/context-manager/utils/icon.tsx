@@ -25,7 +25,7 @@ export const getContextItemIcon = (
       return <IconMemo style={{ color, ...style }} />;
     case 'skillResponse':
       return options?.withHistory ? (
-        <IconThreadHistoryFilled style={{ color: NODE_COLORS['threadHistory'], ...style }} />
+        <IconThreadHistoryFilled style={{ color: NODE_COLORS.threadHistory, ...style }} />
       ) : (
         <IconResponseFilled style={{ color, ...style }} />
       );

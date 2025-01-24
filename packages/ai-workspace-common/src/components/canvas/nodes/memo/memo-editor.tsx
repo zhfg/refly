@@ -15,8 +15,8 @@ type MemoEditorProps = {
 export const MemoEditor: FC<MemoEditorProps> = ({ editor, bgColor, onChangeBackground }) => {
   const [open, setOpen] = useState(false);
   const [openLink, setOpenLink] = useState(false);
-  const [openColor, setOpenColor] = useState(false);
-  const colorChange = (color: Color, css: string) => {
+  const [_openColor, _setOpenColor] = useState(false);
+  const colorChange = (_color: Color, css: string) => {
     onChangeBackground?.(css);
   };
   return (

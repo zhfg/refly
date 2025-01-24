@@ -34,13 +34,7 @@ interface MenuItem {
   videoUrl?: string;
 }
 
-export const ContextMenu: FC<ContextMenuProps> = ({
-  open,
-  position,
-  setOpen,
-  isSelection,
-  onCreateGroup,
-}) => {
+export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) => {
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuHeight, setMenuHeight] = useState<number>(0);
@@ -67,7 +61,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({
     autoLayout: state.autoLayout,
     setAutoLayout: state.setAutoLayout,
   }));
-  const { showEdges: edgeVisible, toggleEdgeVisible } = useEdgeVisible();
+  const { toggleEdgeVisible } = useEdgeVisible();
   const { updateAllNodesSizeMode } = useNodeOperations();
 
   const menuItems: MenuItem[] = [
@@ -167,11 +161,12 @@ export const ContextMenu: FC<ContextMenuProps> = ({
       case 'toggleClickPreview':
         setClickToPreview(!clickToPreview);
         break;
-      case 'toggleNodeSizeMode':
+      case 'toggleNodeSizeMode': {
         const newMode = nodeSizeMode === 'compact' ? 'adaptive' : 'compact';
         setNodeSizeMode(newMode);
         updateAllNodesSizeMode(newMode);
         break;
+      }
       case 'toggleAutoLayout':
         setAutoLayout(!autoLayout);
         break;

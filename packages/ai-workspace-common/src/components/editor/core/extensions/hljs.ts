@@ -45,9 +45,9 @@ export const configureHighlightJs = async () => {
     ruby,
   };
 
-  Object.entries(languages).forEach(([name, language]) => {
+  for (const [name, language] of Object.entries(languages)) {
     hljs.registerLanguage(name, language);
-  });
+  }
 
   configuredHljs = hljs;
   return configuredHljs;

@@ -1,11 +1,4 @@
-import {
-  ActionResult,
-  CanvasNodeType,
-  SkillContext,
-  SkillContextContentItem,
-  SkillContextDocumentItem,
-  SkillContextResourceItem,
-} from '@refly/openapi-schema';
+import { ActionResult, CanvasNodeType, SkillContext } from '@refly/openapi-schema';
 import { Node, Edge } from '@xyflow/react';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { getClientOrigin } from '@refly-packages/utils/url';
@@ -19,16 +12,16 @@ export const convertResultContextToItems = (
 
   const items: IContextItem[] = [];
 
-  history?.forEach((item) => {
+  for (const item of history ?? []) {
     items.push({
       type: 'skillResponse',
       entityId: item.resultId,
       title: item.title,
     });
-  });
+  }
 
   // Convert contentList
-  context?.contentList?.forEach((content: SkillContextContentItem) => {
+  for (const content of context?.contentList ?? []) {
     const metadata = content.metadata as any;
     items.push({
       type: metadata?.domain?.includes('resource')
@@ -47,31 +40,31 @@ export const convertResultContextToItems = (
         ...(metadata?.url && { url: metadata.url }),
       },
     });
-  });
+  }
 
   // Convert resources
-  context?.resources?.forEach((resource: SkillContextResourceItem) => {
+  for (const resource of context?.resources ?? []) {
     items.push({
       type: 'resource',
       entityId: resource.resourceId ?? '',
       title: resource.resource?.title ?? 'Resource',
       metadata: resource.metadata ?? {},
-      isPreview: resource.isCurrent ? true : false,
+      isPreview: !!resource.isCurrent,
       isCurrentContext: resource.isCurrent,
     });
-  });
+  }
 
   // Convert documents
-  context?.documents?.forEach((doc: SkillContextDocumentItem) => {
+  for (const doc of context?.documents ?? []) {
     items.push({
       type: 'document',
       entityId: doc.docId ?? '',
       title: doc.document?.title ?? 'Document',
       metadata: doc.metadata ?? {},
-      isPreview: doc.isCurrent ? true : false,
+      isPreview: !!doc.isCurrent,
       isCurrentContext: doc.isCurrent,
     });
-  });
+  }
 
   return items;
 };
@@ -79,7 +72,7 @@ export const convertResultContextToItems = (
 export const convertContextItemsToNodeFilters = (items: IContextItem[]): CanvasNodeFilter[] => {
   const uniqueItems = new Map<string, CanvasNodeFilter>();
 
-  items.forEach((item) => {
+  for (const item of items ?? []) {
     const type = item.selection?.sourceEntityType ?? (item.type as CanvasNodeType);
     const entityId = item.selection?.sourceEntityId ?? item.entityId;
 
@@ -87,7 +80,7 @@ export const convertContextItemsToNodeFilters = (items: IContextItem[]): CanvasN
     if (!uniqueItems.has(key)) {
       uniqueItems.set(key, { type, entityId });
     }
-  });
+  }
 
   return Array.from(uniqueItems.values());
 };
@@ -190,11 +183,11 @@ export const convertContextItemsToEdges = (
 
   // Create a map of source entity IDs to their corresponding node IDs
   const entityNodeMap = new Map<string, string>();
-  nodes?.forEach((node) => {
+  for (const node of nodes ?? []) {
     if (node.data?.entityId) {
       entityNodeMap.set(node.data.entityId as string, node.id);
     }
-  });
+  }
 
   const itemNodeIds = items.map((item) => entityNodeMap.get(item.entityId as string));
   const itemNodeIdSet = new Set(itemNodeIds);
@@ -203,7 +196,7 @@ export const convertContextItemsToEdges = (
   const edgeSourceIdSet = new Set(edgeSourceIds);
 
   // Process each item to create edges based on relationships
-  items.forEach((item) => {
+  for (const item of items ?? []) {
     const itemNodeId = entityNodeMap.get(item.entityId as string);
     if (!edgeSourceIdSet.has(itemNodeId)) {
       const newEdge: Edge = {
@@ -213,14 +206,14 @@ export const convertContextItemsToEdges = (
       };
       edgesToAdd.push(newEdge);
     }
-  });
+  }
 
   // Delete edges that are no longer part of the context items
-  relatedEdges.forEach((edge) => {
+  for (const edge of relatedEdges ?? []) {
     if (!itemNodeIdSet.has(edge.source)) {
       edgesToDelete.push(edge);
     }
-  });
+  }
 
   return {
     edgesToAdd,

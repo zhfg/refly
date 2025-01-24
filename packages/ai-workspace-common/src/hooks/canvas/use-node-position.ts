@@ -16,7 +16,6 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 export const calculateNodePosition = ({
   nodes,
   sourceNodes,
-  connectTo,
   defaultPosition,
   edges = [],
 }: CalculateNodePositionParams): XYPosition => {
@@ -53,17 +52,17 @@ export const calculateNodePosition = ({
       // For each source node, find all its connected target nodes
       const connectedNodes = new Set<Node>();
 
-      sourceNodes.forEach((sourceNode) => {
+      for (const sourceNode of sourceNodes) {
         // Find all direct target nodes of this source node
-        edges.forEach((edge) => {
+        for (const edge of edges) {
           if (edge.source === sourceNode.id) {
             const targetNode = nodes.find((n) => n.id === edge.target);
             if (targetNode) {
               connectedNodes.add(targetNode);
             }
           }
-        });
-      });
+        }
+      }
 
       // Calculate X position considering node width
       const rightmostSourceX = Math.max(
@@ -93,16 +92,14 @@ export const calculateNodePosition = ({
           x: targetX,
           y: bottomY + SPACING.Y + 320 / 2,
         };
-      } else {
-        // If no connected nodes, place at average Y of source nodes
-        const avgSourceY =
-          sourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) /
-          sourceNodesAbsolute.length;
-        return {
-          x: targetX,
-          y: avgSourceY,
-        };
       }
+      // If no connected nodes, place at average Y of source nodes
+      const avgSourceY =
+        sourceNodesAbsolute.reduce((sum, n) => sum + n.position.y, 0) / sourceNodesAbsolute.length;
+      return {
+        x: targetX,
+        y: avgSourceY,
+      };
     }
 
     // If auto-layout is enabled or no branch nodes found, use original positioning logic
@@ -214,7 +211,7 @@ export const useNodePosition = () => {
       sourceNodes: Node[],
       allNodes: Node[],
       edges: any[],
-      options: LayoutBranchOptions = {},
+      _options: LayoutBranchOptions = {},
       needSetCenter: { targetNodeId: string; needSetCenter: boolean } = {
         targetNodeId: '',
         needSetCenter: true,
@@ -235,16 +232,16 @@ export const useNodePosition = () => {
 
       // Find all connected nodes in the branch
       while (queue.length > 0) {
-        const currentId = queue.shift()!;
-        if (visited.has(currentId)) continue;
+        const currentId = queue.shift() ?? '';
+        if (!currentId || visited.has(currentId)) continue;
         visited.add(currentId);
 
-        edges.forEach((edge) => {
+        for (const edge of edges) {
           if (edge.source === currentId && !sourceNodes.some((n) => n.id === edge.target)) {
             targetNodeIds.add(edge.target);
             queue.push(edge.target);
           }
-        });
+        }
       }
 
       // Get target nodes that need to be laid out
@@ -268,25 +265,29 @@ export const useNodePosition = () => {
         }
 
         // Process children
-        edges
-          .filter((edge) => edge.source === nodeId)
-          .forEach((edge) => calculateLevels(edge.target, level + 1));
+        for (const edge of edges) {
+          if (edge.source === nodeId) {
+            calculateLevels(edge.target, level + 1);
+          }
+        }
       };
 
       // Start level calculation from source nodes
-      sourceNodesAbsolute.forEach((node) => calculateLevels(node.id, 0));
+      for (const node of sourceNodesAbsolute) {
+        calculateLevels(node.id, 0);
+      }
 
       // Sort nodes within each level by their Y position
-      nodeLevels.forEach((nodes) => {
+      for (const nodes of nodeLevels.values()) {
         nodes.sort((a, b) => a.position.y - b.position.y);
-      });
+      }
 
       // First pass: Calculate initial positions
       const nodePositions = new Map<string, { x: number; y: number }>();
       const fixedSpacing = SPACING.Y;
 
       // Process each level
-      Array.from(nodeLevels.entries()).forEach(([level, nodes]) => {
+      for (const [level, nodes] of Array.from(nodeLevels.entries())) {
         // Calculate X position consistently with calculatePosition
         const levelX =
           level === 0
@@ -314,7 +315,6 @@ export const useNodePosition = () => {
         // Calculate center positions for nodes in this level
         nodes.forEach((node, index) => {
           const nodeHeight = getNodeHeight(node);
-          const nodeWidth = getNodeWidth(node);
 
           // Get direct source nodes for this node
           const directSourceNodes = edges
@@ -343,7 +343,7 @@ export const useNodePosition = () => {
 
           currentY += nodeHeight + fixedSpacing;
         });
-      });
+      }
 
       // Second pass: Adjust positions to prevent overlaps
       const adjustOverlaps = () => {
@@ -356,14 +356,16 @@ export const useNodePosition = () => {
           iteration++;
 
           // Check each pair of nodes for overlaps
-          Array.from(nodePositions.entries()).forEach(([nodeId, pos1]) => {
-            const node1 = allNodes.find((n) => n.id === nodeId)!;
+          for (const [nodeId, pos1] of Array.from(nodePositions.entries())) {
+            const node1 = allNodes.find((n) => n.id === nodeId);
+            if (!node1) continue;
             const height1 = getNodeHeight(node1);
 
-            Array.from(nodePositions.entries()).forEach(([otherId, pos2]) => {
+            for (const [otherId, pos2] of Array.from(nodePositions.entries())) {
               if (nodeId === otherId) return;
 
-              const node2 = allNodes.find((n) => n.id === otherId)!;
+              const node2 = allNodes.find((n) => n.id === otherId);
+              if (!node2) continue;
               const height2 = getNodeHeight(node2);
 
               // Calculate the vertical overlap between the two nodes
@@ -386,8 +388,8 @@ export const useNodePosition = () => {
                   });
                 }
               }
-            });
-          });
+            }
+          }
         }
       };
 

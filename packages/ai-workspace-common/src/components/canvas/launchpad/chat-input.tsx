@@ -36,8 +36,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
     },
     ref,
   ) => {
-    const { t, i18n } = useTranslation();
-    const language = i18n.language;
+    const { t } = useTranslation();
 
     const inputRef = useRef<RefTextAreaType>(null);
     const searchStore = useSearchStoreShallow((state) => ({
@@ -71,7 +70,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
         ),
         textLabel: t(`${skill.name}.name`, { ns: 'skill' }),
       }));
-    }, [data, language]);
+    }, [t, skills]);
 
     const [options, setOptions] = useState<AutoCompleteProps['options']>([]);
 
@@ -97,7 +96,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
           e.preventDefault();
           if (e.target instanceof HTMLTextAreaElement) {
             const cursorPos = e.target.selectionStart ?? 0;
-            const newValue = query.slice(0, cursorPos) + '\n' + query.slice(cursorPos);
+            const newValue = `${query.slice(0, cursorPos)}\n${query.slice(cursorPos)}`;
             setQuery(newValue);
             setTimeout(() => {
               if (e.target instanceof HTMLTextAreaElement) {
@@ -158,7 +157,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
           setSelectedSkill(skill);
         }
       },
-      [skills, setSelectedSkill, handleSelectSkill, query],
+      [skills, setSelectedSkill, handleSelectSkill, query, setQuery],
     );
 
     return (
@@ -204,9 +203,9 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
               selectedSkillName
                 ? t(`${selectedSkillName}.placeholder`, {
                     ns: 'skill',
-                    defaultValue: t(`commonQnA.placeholder`, { ns: 'skill' }),
+                    defaultValue: t('commonQnA.placeholder', { ns: 'skill' }),
                   })
-                : t(`commonQnA.placeholder`, { ns: 'skill' })
+                : t('commonQnA.placeholder', { ns: 'skill' })
             }
             autoSize={{
               minRows: 1,

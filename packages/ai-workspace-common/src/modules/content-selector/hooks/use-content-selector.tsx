@@ -172,7 +172,7 @@ export const useContentSelector = (
 
   const removeAllInlineHightlightNodes = (xPath: string) => {
     const allNodes = document.querySelectorAll(`[${INLINE_SELECTED_MARK_ID}="${xPath}"]`);
-    allNodes.forEach((node) => {
+    for (const node of allNodes) {
       const nodeCleanup = (node as any).__hoverMenuCleanup;
       if (typeof nodeCleanup === 'function') {
         nodeCleanup();
@@ -182,12 +182,10 @@ export const useContentSelector = (
       const textNode = document.createTextNode(node.textContent);
       parent.replaceChild(textNode, node);
       parent.normalize();
-    });
+    }
   };
 
-  const addHoverMenuToNode = (node: HTMLElement, xPath: string) => {
-    let cleanup: () => void;
-
+  const _addHoverMenuToNode = (node: HTMLElement, xPath: string) => {
     const removeHighlight = (xPath?: string) => {
       removeAllInlineHightlightNodes(xPath);
 
@@ -195,7 +193,7 @@ export const useContentSelector = (
       syncRemoveMarkEvent(mark);
     };
 
-    cleanup = addHoverMenu(
+    const cleanup = addHoverMenu(
       { target: node },
       {
         onClick: () => removeHighlight(xPath),
@@ -341,7 +339,7 @@ export const useContentSelector = (
     syncMarkEvent(msg);
   };
 
-  const syncAddMarkEvent = (mark: Mark) => {
+  const _syncAddMarkEvent = (mark: Mark) => {
     const markEvent = { type: 'add' as SyncMarkEventType, mark };
     const msg: Partial<SyncMarkEvent> = {
       body: markEvent,
@@ -390,22 +388,22 @@ export const useContentSelector = (
   const resetStyle = () => {
     resetMarkStyle();
     // selected list style
-    targetList.current.forEach((item) => {
+    for (const item of targetList.current) {
       if (item.getAttribute(BLOCK_SELECTED_MARK_ID)) {
         removeBlockMark(item as HTMLElement);
       } else if (item.getAttribute(INLINE_SELECTED_MARK_ID)) {
         removeInlineMark(item as HTMLElement);
       }
-    });
+    }
     targetList.current = [];
     markListRef.current = [];
   };
 
   const isMouseOutsideContainer = (ev: MouseEvent) => {
     const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
-    const containerRect = containerElem.getBoundingClientRect();
-    const x = ev.clientX;
-    const y = ev.clientY;
+    const _containerRect = containerElem.getBoundingClientRect();
+    const _x = ev.clientX;
+    const _y = ev.clientY;
 
     return false;
   };
@@ -442,11 +440,11 @@ export const useContentSelector = (
       const containerLeft = selector ? containerRect.left || 0 : 0;
 
       // console.log('top', window.scrollY + rect.top);
-      mark.style.top = top - containerTop + 'px';
-      mark.style.left = left - containerLeft + 'px';
-      mark.style.width = width + 'px';
-      mark.style.height = height + 'px';
-      mark.style.background = `#ffd40024 !important`;
+      mark.style.top = `${top - containerTop}px`;
+      mark.style.left = `${left - containerLeft}px`;
+      mark.style.width = `${width}px`;
+      mark.style.height = `${height}px`;
+      mark.style.background = '#ffd40024 !important';
       mark.style.zIndex = '99999999';
     }
   };
@@ -540,7 +538,7 @@ export const useContentSelector = (
   const onStatusHandler = (event: MessageEvent<any>) => {
     const data = event as any as BackgroundMessage;
     if ((data as SyncStatusEvent)?.name === 'syncMarkStatusEvent') {
-      const { type, scope } = (data as SyncStatusEvent)?.body;
+      const { type, scope } = (data as SyncStatusEvent)?.body ?? { type: '', scope: '' };
 
       if (type === 'start') {
         selectorScopeRef.current = scope; // 每次开启都动态的处理 scope
@@ -573,7 +571,7 @@ export const useContentSelector = (
     }
 
     if ((data as SyncMarkEvent)?.name === 'syncMarkEventBack') {
-      const { mark, type } = (data as SyncMarkEvent)?.body;
+      const { mark, type } = (data as SyncMarkEvent)?.body ?? { mark: null, type: '' };
 
       if (type === 'remove') {
         const xPath = mark?.xPath || '';
@@ -621,7 +619,7 @@ export const useContentSelector = (
             'refly-content-selector-mark',
             'refly-content-selector-mark--active',
           )}
-        ></div>
+        />
       </div>
     );
   };

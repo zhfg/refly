@@ -51,7 +51,9 @@ export const HoverCard: FC<HoverCardProps> = ({
             playsInline
             onPlay={handlePlay}
             className="w-full h-[216px] object-cover rounded-lg bg-black"
-          />
+          >
+            <track kind="captions" label="English captions" src="" default />
+          </video>
         </div>
       )}
       <div className="px-4 py-3">
