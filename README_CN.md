@@ -13,7 +13,7 @@ Refly 是一个开源的 AI 原生创作引擎。Refly 直观的自由画布界�
 
 [🚀 Refly v0.2.3 正式发布！全新升级产品引导体验！](<[https://x.com/reflyai](https://docs.refly.ai/changelog/v0.2.3)>)
 
-[Refly Cloud](https://refly.ai/)·[Self-hosting](https://refly.ai/)·[Forum](https://github.com/refly-ai/refly/discussions)·[Discord](https://discord.gg/bWjffrb89h)·[Twitter](https://x.com/reflyai)·[Documentation](https://docs.refly.ai/)
+[Refly Cloud](https://refly.ai/) · [Self-hosting](https://refly.ai/) · [Forum](https://github.com/refly-ai/refly/discussions) · [Discord](https://discord.gg/bWjffrb89h) · [Twitter](https://x.com/reflyai) · [Documentation](https://docs.refly.ai/)
 
 </div>
 
@@ -107,7 +107,8 @@ https://github.com/user-attachments/assets/9f11b8eb-dd9d-4691-aca1-d3f11ff801ab
   - 我们部署了一个 Refly Cloud 版本，允许你 0 配置使用，它提供了和私有化部署版本的全部能力，包括免费使用的 GPT-4o-mini 和限量体验的 GPT-4o 和 Claude-3.5-Sonnet，访问使用 [https://refly.ai/](https://refly.ai/)
 - **Self-hosting Refly Community Edition**
   - 通过这份[入门指南](./CONTRIBUTING_CN.md)，快速在您的环境中运行 Refly。更详细的参考和深入说明，请查阅我们的文档。
-- **Refly for enterprise / organizations**，请联系我们邮箱 [support@refly.ai](mailto:support@refly.ai)，我们提供私有化部署的解决方案。
+- **Refly for enterprise / organizations**
+  - 请联系我们邮箱 [support@refly.ai](mailto:support@refly.ai)，我们提供私有化部署的解决方案。
 
 ## 保持关注
 
@@ -133,7 +134,7 @@ https://github.com/user-attachments/assets/9f11b8eb-dd9d-4691-aca1-d3f11ff801ab
 - [GitHub Discussion](https://github.com/refly-ai/refly/discussions)：最适合分享反馈和提出问题。
 - [GitHub Issues](https://github.com/refly-ai/refly/issues)：最适合报告使用 ReflyAI 时遇到的 bug 和提出功能建议。请参阅我们的贡献指南。
 - [Discord](https://discord.gg/bWjffrb89h)：最适合分享您的应用程序并与社区互动。
-- [Twitter](https://x.com/reflyai)：最适合分享您的应用程序并与社区保持联系。
+- [X(Twitter)](https://x.com/reflyai)：最适合分享您的应用程序并与社区保持联系。
 - [微信或飞书群聊](https://docs.refly.ai/zh/community/contact-us)：最适合与社区成员交流。
 
 ## 上游项目

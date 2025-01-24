@@ -13,7 +13,7 @@ Refly is an open-source AI-native creation engine. It's intuitive free-form canv
 
 [🚀 Refly v0.2.3 Released! Featuring Enhanced Product Onboarding!](https://docs.refly.ai/changelog/v0.2.3)
 
-[Refly Cloud](https://refly.ai/)·[Self-hosting](https://refly.ai/)[Forum](https://github.com/refly-ai/refly/discussions)·[Discord](https://discord.gg/bWjffrb89h)·[Twitter](https://x.com/reflyai)·[Documentation](https://docs.refly.ai/)
+[Refly Cloud](https://refly.ai/) · [Self-hosting](https://refly.ai/) · [Forum](https://github.com/refly-ai/refly/discussions) · [Discord](https://discord.gg/bWjffrb89h) · [Twitter](https://x.com/reflyai) · [Documentation](https://docs.refly.ai/)
 
 </div>
 
@@ -105,7 +105,7 @@ https://github.com/user-attachments/assets/9f11b8eb-dd9d-4691-aca1-d3f11ff801ab
 - **Self-hosting Refly Community Edition**
   - Get started quickly with our [Getting Started Guide](./CONTRIBUTING.md) to run Refly in your environment. For more detailed references and in-depth instructions, please refer to our documentation.
 - **Refly for enterprise / organizations**
-  Please contact us at [support@refly.ai](mailto:support@refly.ai) for private deployment solutions.
+  - Please contact us at [support@refly.ai](mailto:support@refly.ai) for private deployment solutions.
 
 ## Stay Updated
 
@@ -120,7 +120,7 @@ Star Refly on GitHub to receive instant notifications about new version releases
 | [Create Bug Report](https://github.com/refly-ai/refly/issues/new/choose) | [Submit Feature Request](https://github.com/refly-ai/refly/pulls) | [View GitHub Discussions](https://github.com/refly-ai/refly/discussions) | [Visit ReflyAI Community](https://docs.refly.ai/community/contact-us) |
 | Something isn't working as expected                                      | Ideas for new features or improvements                            | Discuss and raise questions                                              | A place to ask questions, learn, and connect with others              |
 
-We welcome all developers, testers, technical writers, and more! We welcome various types of contributions. Please check our [CONTRIBUTING.md](./CONTRIBUTING.md) and feel free to browse our [GitHub issues](https://github.com/refly-ai/refly/issues) to show us what you can do.
+Calling all developers, testers, tech writers and more! Contributions of all types are more than welcome, please check our [CONTRIBUTING.md](./CONTRIBUTING.md) and feel free to browse our [GitHub issues](https://github.com/refly-ai/refly/issues) to show us what you can do.
 
 For bug reports, feature requests, and other suggestions, you can also [create a new issue](https://github.com/refly-ai/refly/issues/new/choose) and choose the most appropriate template to provide feedback.
 
@@ -131,7 +131,7 @@ If you have any questions, feel free to reach out to us. One of the best places 
 - [GitHub Discussion](https://github.com/refly-ai/refly/discussions): Best for sharing feedback and asking questions.
 - [GitHub Issues](https://github.com/refly-ai/refly/issues): Best for reporting bugs and suggesting features when using ReflyAI. Please refer to our contribution guidelines.
 - [Discord](https://discord.gg/bWjffrb89h): Best for sharing your applications and interacting with the community.
-- [Twitter](https://x.com/reflyai): Best for sharing your applications and staying connected with the community.
+- [X(Twitter)](https://x.com/reflyai): Best for sharing your applications and staying connected with the community.
 
 ## Upstream Projects
 
