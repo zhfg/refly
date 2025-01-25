@@ -52,9 +52,7 @@ services:
       - xpack.security.enabled=false
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
-      - ./elasticsearch-entrypoint.sh:/elasticsearch-entrypoint.sh
     restart: always
-    entrypoint: ['/elasticsearch-entrypoint.sh']
     healthcheck:
       test: ['CMD-SHELL', 'curl -s http://localhost:9200 >/dev/null || exit 1']
       interval: 30s
