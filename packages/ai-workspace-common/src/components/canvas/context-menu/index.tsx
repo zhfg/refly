@@ -61,13 +61,13 @@ export const ContextMenu: FC<ContextMenuProps> = ({
     showLaunchpad: state.showLaunchpad,
     clickToPreview: state.clickToPreview,
     nodeSizeMode: state.nodeSizeMode,
-    hoverCardEnabled: state.hoverCardEnabled,
     setShowEdges: state.setShowEdges,
     setShowLaunchpad: state.setShowLaunchpad,
     setClickToPreview: state.setClickToPreview,
     setNodeSizeMode: state.setNodeSizeMode,
     autoLayout: state.autoLayout,
     setAutoLayout: state.setAutoLayout,
+    hoverCardEnabled: state.hoverCardEnabled,
     setHoverCardEnabled: state.setHoverCardEnabled,
   }));
   const { toggleEdgeVisible } = useEdgeVisible();
@@ -261,7 +261,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({
           </Button>
         );
 
-        if (item.description) {
+        if (item.description && hoverCardEnabled) {
           return (
             <HoverCard
               key={item.key}

@@ -1,21 +1,25 @@
-import { memo, FC } from 'react';
-import { Button, Badge } from 'antd';
-import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
-import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
+import { memo, FC } from "react";
+import { Button, Badge } from "antd";
+import TooltipWrapper from "@refly-packages/ai-workspace-common/components/common/tooltip-button";
+import {
+  HoverCard,
+  HoverContent,
+} from "@refly-packages/ai-workspace-common/components/hover-card";
+import { useCanvasStoreShallow } from "@refly-packages/ai-workspace-common/stores/canvas";
 
 export type ToolValue =
-  | 'askAI'
-  | 'createMemo'
-  | 'importResource'
-  | 'addResource'
-  | 'createDocument'
-  | 'addDocument'
-  | 'handleLaunchpad'
-  | 'showEdges';
+  | "askAI"
+  | "createMemo"
+  | "importResource"
+  | "addResource"
+  | "createDocument"
+  | "addDocument"
+  | "handleLaunchpad"
+  | "showEdges";
 
 // Define toolbar item interface
 export interface ToolbarItem {
-  type: 'button' | 'popover' | 'divider';
+  type: "button" | "popover" | "divider";
   icon?: React.ElementType;
   value?: ToolValue;
   domain?: string;
@@ -47,8 +51,12 @@ export const ToolButton: FC<ToolButtonProps> = memo(
     getIconColor: (tool: string) => string;
     getIsLoading: (tool: string) => boolean;
   }) => {
+    const hoverCardEnabled = useCanvasStoreShallow(
+      (state) => state.hoverCardEnabled
+    );
+
     const button =
-      contextCnt > 0 && tool.value === 'handleLaunchpad' ? (
+      contextCnt > 0 && tool.value === "handleLaunchpad" ? (
         <Badge
           size="small"
           color="#00968F"
@@ -65,11 +73,11 @@ export const ToolButton: FC<ToolButtonProps> = memo(
               hover:bg-gray-100 rounded-lg 
               transition-colors duration-200 
               group
-              ${tool.active ? 'bg-gray-100' : ''}
+              ${tool.active ? "bg-gray-100" : ""}
             `}
             icon={
               <tool.icon
-                className={`h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900 ${tool.isPrimary ? 'text-primary-600' : ''}`}
+                className={`h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900 ${tool.isPrimary ? "text-primary-600" : ""}`}
                 style={{ color: getIconColor(tool.value as string) }}
               />
             }
@@ -86,11 +94,11 @@ export const ToolButton: FC<ToolButtonProps> = memo(
             hover:bg-gray-100 rounded-lg 
             transition-colors duration-200 
             group
-            ${tool.active ? 'bg-gray-100' : ''}
+            ${tool.active ? "bg-gray-100" : ""}
           `}
           icon={
             <tool.icon
-              className={`h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900 ${tool.isPrimary ? 'text-primary-600' : ''}`}
+              className={`h-[18px] w-[18px] text-gray-600 group-hover:text-gray-900 ${tool.isPrimary ? "text-primary-600" : ""}`}
               style={{ color: getIconColor(tool.value as string) }}
             />
           }
@@ -98,19 +106,21 @@ export const ToolButton: FC<ToolButtonProps> = memo(
         />
       );
 
-    return tool.hoverContent ? (
-      <HoverCard
-        title={tool.hoverContent.title}
-        description={tool.hoverContent.description}
-        videoUrl={tool.hoverContent.videoUrl}
-        placement="right"
-        overlayStyle={{ marginLeft: '12px' }}
-        align={{ offset: [12, 0] }}
-      >
-        {button}
-      </HoverCard>
-    ) : (
-      <TooltipWrapper tooltip={tool.tooltip}>{button}</TooltipWrapper>
-    );
-  },
+    if (tool.hoverContent && hoverCardEnabled) {
+      return (
+        <HoverCard
+          title={tool.hoverContent.title}
+          description={tool.hoverContent.description}
+          videoUrl={tool.hoverContent.videoUrl}
+          placement="right"
+          overlayStyle={{ marginLeft: "12px" }}
+          align={{ offset: [12, 0] }}
+        >
+          {button}
+        </HoverCard>
+      );
+    }
+
+    return <TooltipWrapper tooltip={tool.tooltip}>{button}</TooltipWrapper>;
+  }
 );
