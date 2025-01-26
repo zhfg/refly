@@ -6,9 +6,9 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "prisma generate && tsc --build --verbose",
+    "build": "prisma generate && tsc --build --verbose && cp -r prisma dist",
     "prisma:generate": "prisma format && prisma generate",
-    "sync-db-schema": "prisma format && prisma generate &&node -r ts-node/register --env-file=.env scripts/sync-db-schema.ts",
+    "sync-db-schema": "prisma format && prisma generate && node -r ts-node/register --env-file=.env src/scripts/sync-db-schema.ts",
     "dev": "nodemon",
     "start:debug": "nodemon --inspect",
     "start:prod": "node dist/main",
