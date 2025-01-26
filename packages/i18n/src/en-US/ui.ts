@@ -167,7 +167,7 @@ const translations = {
       subtitle: 'Embark on your AI content creation journey with Refly',
       description:
         'Sign up and enjoy a unlimited trial with 20 standard model calls per day. No credit card required.',
-      limitedOffer: 'Save 50% on your first year  - Limited time offer',
+      limitedOffer: 'Save 50% forever with annual subscription - Limited time offer',
     },
     footer: {
       cta: {
