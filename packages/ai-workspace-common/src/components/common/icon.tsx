@@ -8,10 +8,10 @@ import {
   HiPlus,
   HiMinus,
   HiSparkles,
-} from "react-icons/hi2";
-import { IoIosMore } from "react-icons/io";
-import { IoLanguage } from "react-icons/io5";
-import { HiOutlineReply } from "react-icons/hi";
+} from 'react-icons/hi2';
+import { IoIosMore } from 'react-icons/io';
+import { IoLanguage } from 'react-icons/io5';
+import { HiOutlineReply } from 'react-icons/hi';
 import {
   LuSearch,
   LuSettings,
@@ -33,40 +33,40 @@ import {
   LuFilePlus,
   LuLockOpen,
   LuLock,
-} from "react-icons/lu";
+} from 'react-icons/lu';
 import {
   RiErrorWarningLine,
   RiDoubleQuotesL,
   RiChatHistoryLine,
   RiChatHistoryFill,
   RiUploadCloud2Line,
-} from "react-icons/ri";
-import { TiDocumentDelete } from "react-icons/ti";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { BiText } from "react-icons/bi";
-import { BsDiscord, BsTwitterX, BsGithub, BsEnvelope } from "react-icons/bs";
-import { PiNotePencil } from "react-icons/pi";
-import { TfiBlackboard } from "react-icons/tfi";
+} from 'react-icons/ri';
+import { TiDocumentDelete } from 'react-icons/ti';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { BiText } from 'react-icons/bi';
+import { BsDiscord, BsTwitterX, BsGithub, BsEnvelope } from 'react-icons/bs';
+import { PiNotePencil } from 'react-icons/pi';
+import { TfiBlackboard } from 'react-icons/tfi';
 
-import { IoLibraryOutline } from "react-icons/io5";
-import { HiOutlineChevronDown } from "react-icons/hi";
-import { RxExit } from "react-icons/rx";
+import { IoLibraryOutline } from 'react-icons/io5';
+import { HiOutlineChevronDown } from 'react-icons/hi';
+import { RxExit } from 'react-icons/rx';
 
-import { AiOutlineShrink } from "react-icons/ai";
-import { RiExpandDiagonalLine } from "react-icons/ri";
-import { TbWorldSearch } from "react-icons/tb";
-import { GrCircleQuestion } from "react-icons/gr";
-import { TbInputSpark } from "react-icons/tb";
-import { RiGuideLine } from "react-icons/ri";
+import { AiOutlineShrink } from 'react-icons/ai';
+import { RiExpandDiagonalLine } from 'react-icons/ri';
+import { TbWorldSearch } from 'react-icons/tb';
+import { GrCircleQuestion } from 'react-icons/gr';
+import { TbInputSpark } from 'react-icons/tb';
+import { RiGuideLine } from 'react-icons/ri';
 
-import OpenAIIcon from "@refly-packages/ai-workspace-common/assets/openai.svg";
-import ClaudeIcon from "@refly-packages/ai-workspace-common/assets/claude.svg";
-import GeminiIcon from "@refly-packages/ai-workspace-common/assets/gemini.svg";
-import QwenIcon from "@refly-packages/ai-workspace-common/assets/qwen.svg";
-import MetaLlamaIcon from "@refly-packages/ai-workspace-common/assets/meta.svg";
-import DeepSeekIcon from "@refly-packages/ai-workspace-common/assets/deepseek.svg";
-import MistralIcon from "@refly-packages/ai-workspace-common/assets/mistral.svg";
-import { MdOutlineMouse } from "react-icons/md";
+import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
+import ClaudeIcon from '@refly-packages/ai-workspace-common/assets/claude.svg';
+import GeminiIcon from '@refly-packages/ai-workspace-common/assets/gemini.svg';
+import QwenIcon from '@refly-packages/ai-workspace-common/assets/qwen.svg';
+import MetaLlamaIcon from '@refly-packages/ai-workspace-common/assets/meta.svg';
+import DeepSeekIcon from '@refly-packages/ai-workspace-common/assets/deepseek.svg';
+import MistralIcon from '@refly-packages/ai-workspace-common/assets/mistral.svg';
+import { MdOutlineMouse } from 'react-icons/md';
 
 export const IconCanvas = TfiBlackboard;
 export const IconAskAI = LuSparkles;
@@ -130,7 +130,7 @@ export const ModelProviderIcons = {
   anthropic: ClaudeIcon,
   google: GeminiIcon,
   qwen: QwenIcon,
-  "meta-llama": MetaLlamaIcon,
+  'meta-llama': MetaLlamaIcon,
   deepseek: DeepSeekIcon,
   mistral: MistralIcon,
 } as const;
@@ -147,15 +147,15 @@ export const preloadModelIcons = () => {
 
 export const getSkillIcon = (skillName: string, className?: string) => {
   switch (skillName) {
-    case "commonQnA":
+    case 'commonQnA':
       return <IconAskAI className={className} />;
-    case "webSearch":
+    case 'webSearch':
       return <TbWorldSearch className={className} />;
-    case "generateDoc":
+    case 'generateDoc':
       return <IconDocument className={className} />;
-    case "librarySearch":
+    case 'librarySearch':
       return <IconSearch className={className} />;
-    case "recommendQuestions":
+    case 'recommendQuestions':
       return <GrCircleQuestion className={className} />;
     default:
       return <IconAskAI className={className} />;

@@ -22,7 +22,6 @@ import {
   EmailLoginRequest,
   CreateVerificationRequest,
   CheckVerificationRequest,
-  EmailSignupResponse,
   ResendVerificationRequest,
   AuthConfigResponse,
   CreateVerificationResponse,

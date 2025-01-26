@@ -35,13 +35,42 @@ export class UserService {
   }
 
   async updateSettings(user: User, data: UpdateUserSettingsRequest) {
-    return this.prisma.user.update({
-      where: { uid: user.uid },
-      data: {
-        ...pick(data, ['name', 'nickname', 'uiLocale', 'outputLocale']),
-        preferences: JSON.stringify(data.preferences),
-        onboarding: JSON.stringify(data.onboarding),
-      },
+    return this.prisma.$transaction(async (tx) => {
+      // Get current user data
+      const currentUser = await tx.user.findUnique({
+        where: { uid: user.uid },
+        select: {
+          preferences: true,
+          onboarding: true,
+        },
+      });
+
+      // Parse existing data with fallbacks
+      const existingPreferences = currentUser?.preferences
+        ? JSON.parse(currentUser.preferences)
+        : {};
+      const existingOnboarding = currentUser?.onboarding ? JSON.parse(currentUser.onboarding) : {};
+
+      // Merge data
+      const mergedPreferences = {
+        ...existingPreferences,
+        ...data.preferences,
+      };
+
+      const mergedOnboarding = {
+        ...existingOnboarding,
+        ...data.onboarding,
+      };
+
+      // Update user with merged data
+      return tx.user.update({
+        where: { uid: user.uid },
+        data: {
+          ...pick(data, ['name', 'nickname', 'uiLocale', 'outputLocale']),
+          preferences: JSON.stringify(mergedPreferences),
+          onboarding: JSON.stringify(mergedOnboarding),
+        },
+      });
     });
   }
 
