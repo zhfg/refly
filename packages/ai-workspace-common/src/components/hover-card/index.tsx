@@ -1,8 +1,9 @@
-import React, { FC, ReactNode } from 'react';
-import { Popover } from 'antd';
-import type { TooltipPlacement } from 'antd/es/tooltip';
-import { useVideo } from '../../hooks/use-video';
-import './index.scss';
+import React, { FC, ReactNode } from "react";
+import { Popover } from "antd";
+import type { TooltipPlacement } from "antd/es/tooltip";
+import { useVideo } from "../../hooks/use-video";
+import { useCanvasStoreShallow } from "../../stores/canvas";
+import "./index.scss";
 
 export interface HoverContent {
   title: string;
@@ -29,12 +30,15 @@ export const HoverCard: FC<HoverCardProps> = ({
   title,
   description,
   videoUrl,
-  placement = 'right',
+  placement = "right",
   onOpenChange,
-  overlayStyle = { marginLeft: '8px', marginTop: '8px' },
+  overlayStyle = { marginLeft: "8px", marginTop: "8px" },
   align = { offset: [8, 8] },
 }) => {
   const { videoRef, handlePlay } = useVideo();
+  const hoverCardEnabled = useCanvasStoreShallow(
+    (state) => state.hoverCardEnabled
+  );
 
   const renderContent = () => (
     <div className="w-[325px] bg-white rounded-lg overflow-hidden">
@@ -57,11 +61,17 @@ export const HoverCard: FC<HoverCardProps> = ({
         </div>
       )}
       <div className="px-4 py-3">
-        <h3 className="m-0 mb-2 text-base font-medium text-gray-800 leading-[1.4]">{title}</h3>
+        <h3 className="m-0 mb-2 text-base font-medium text-gray-800 leading-[1.4]">
+          {title}
+        </h3>
         <p className="m-0 text-sm text-gray-500 leading-[1.5]">{description}</p>
       </div>
     </div>
   );
+
+  if (!hoverCardEnabled) {
+    return children;
+  }
 
   return (
     <Popover

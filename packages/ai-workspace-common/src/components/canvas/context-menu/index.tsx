@@ -1,20 +1,21 @@
-import { Button, Divider } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { FC, useEffect, useRef, useState } from 'react';
-import { useReactFlow } from '@xyflow/react';
-import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
-import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { Button, Divider } from "antd";
+import { useTranslation } from "react-i18next";
+import { FC, useEffect, useRef, useState } from "react";
+import { useReactFlow } from "@xyflow/react";
+import { useCreateDocument } from "@refly-packages/ai-workspace-common/hooks/canvas/use-create-document";
+import { useCanvasStoreShallow } from "@refly-packages/ai-workspace-common/stores/canvas";
 import {
   IconPreview,
   IconExpand,
   IconShrink,
   IconAskAIInput,
-} from '@refly-packages/ai-workspace-common/components/common/icon';
-import { IoAnalyticsOutline } from 'react-icons/io5';
-import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
-import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
-import { RiLayoutLine } from 'react-icons/ri';
-import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
+} from "@refly-packages/ai-workspace-common/components/common/icon";
+import { IoAnalyticsOutline } from "react-icons/io5";
+import { useEdgeVisible } from "@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible";
+import { useNodeOperations } from "@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations";
+import { RiLayoutLine } from "react-icons/ri";
+import { HoverCard } from "@refly-packages/ai-workspace-common/components/hover-card";
+import { IoInformationCircleOutline } from "react-icons/io5";
 
 interface ContextMenuProps {
   open: boolean;
@@ -27,14 +28,18 @@ interface ContextMenuProps {
 interface MenuItem {
   key: string;
   icon?: React.ElementType;
-  type: 'button' | 'divider';
+  type: "button" | "divider";
   active?: boolean;
   title?: string;
   description?: string;
   videoUrl?: string;
 }
 
-export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) => {
+export const ContextMenu: FC<ContextMenuProps> = ({
+  open,
+  position,
+  setOpen,
+}) => {
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuHeight, setMenuHeight] = useState<number>(0);
@@ -44,81 +49,103 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
     showLaunchpad,
     clickToPreview,
     nodeSizeMode,
+    hoverCardEnabled,
     setShowLaunchpad,
     setClickToPreview,
     setNodeSizeMode,
     autoLayout,
     setAutoLayout,
+    setHoverCardEnabled,
   } = useCanvasStoreShallow((state) => ({
     showEdges: state.showEdges,
     showLaunchpad: state.showLaunchpad,
     clickToPreview: state.clickToPreview,
     nodeSizeMode: state.nodeSizeMode,
+    hoverCardEnabled: state.hoverCardEnabled,
     setShowEdges: state.setShowEdges,
     setShowLaunchpad: state.setShowLaunchpad,
     setClickToPreview: state.setClickToPreview,
     setNodeSizeMode: state.setNodeSizeMode,
     autoLayout: state.autoLayout,
     setAutoLayout: state.setAutoLayout,
+    setHoverCardEnabled: state.setHoverCardEnabled,
   }));
   const { toggleEdgeVisible } = useEdgeVisible();
   const { updateAllNodesSizeMode } = useNodeOperations();
 
   const menuItems: MenuItem[] = [
     {
-      key: 'toggleLaunchpad',
+      key: "toggleLaunchpad",
       icon: IconAskAIInput,
-      type: 'button',
+      type: "button",
       active: showLaunchpad,
       title: showLaunchpad
-        ? t('canvas.contextMenu.hideLaunchpad')
-        : t('canvas.contextMenu.showLaunchpad'),
-      description: t('canvas.contextMenu.toggleLaunchpadDescription'),
+        ? t("canvas.contextMenu.hideLaunchpad")
+        : t("canvas.contextMenu.showLaunchpad"),
+      description: t("canvas.contextMenu.toggleLaunchpadDescription"),
       videoUrl:
-        'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.webm',
+        "https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-ask-ai.webm",
     },
     {
-      key: 'toggleEdges',
+      key: "toggleEdges",
       icon: IoAnalyticsOutline,
-      type: 'button',
+      type: "button",
       active: showEdges,
-      title: showEdges ? t('canvas.contextMenu.hideEdges') : t('canvas.contextMenu.showEdges'),
-      description: t('canvas.contextMenu.toggleEdgeDescription'),
-      videoUrl: 'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm',
+      title: showEdges
+        ? t("canvas.contextMenu.hideEdges")
+        : t("canvas.contextMenu.showEdges"),
+      description: t("canvas.contextMenu.toggleEdgeDescription"),
+      videoUrl:
+        "https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-toggle-edge.webm",
     },
     {
-      key: 'toggleClickPreview',
+      key: "toggleClickPreview",
       icon: IconPreview,
-      type: 'button',
+      type: "button",
       active: clickToPreview,
       title: clickToPreview
-        ? t('canvas.contextMenu.disableClickPreview')
-        : t('canvas.contextMenu.enableClickPreview'),
-      description: t('canvas.contextMenu.toggleClickPreviewDescription'),
-      videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleClickView.webm',
+        ? t("canvas.contextMenu.disableClickPreview")
+        : t("canvas.contextMenu.enableClickPreview"),
+      description: t("canvas.contextMenu.toggleClickPreviewDescription"),
+      videoUrl:
+        "https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleClickView.webm",
     },
     {
-      key: 'toggleNodeSizeMode',
-      icon: nodeSizeMode === 'compact' ? IconExpand : IconShrink,
-      type: 'button',
-      active: nodeSizeMode === 'compact',
+      key: "toggleNodeSizeMode",
+      icon: nodeSizeMode === "compact" ? IconExpand : IconShrink,
+      type: "button",
+      active: nodeSizeMode === "compact",
       title:
-        nodeSizeMode === 'compact'
-          ? t('canvas.contextMenu.adaptiveMode')
-          : t('canvas.contextMenu.compactMode'),
-      description: t('canvas.contextMenu.toggleNodeSizeModeDescription'),
-      videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAdaptive.webm',
+        nodeSizeMode === "compact"
+          ? t("canvas.contextMenu.adaptiveMode")
+          : t("canvas.contextMenu.compactMode"),
+      description: t("canvas.contextMenu.toggleNodeSizeModeDescription"),
+      videoUrl:
+        "https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAdaptive.webm",
     },
     {
-      key: 'toggleAutoLayout',
+      key: "toggleAutoLayout",
       icon: RiLayoutLine,
-      type: 'button',
+      type: "button",
       active: autoLayout,
       title: autoLayout
-        ? t('canvas.contextMenu.disableAutoLayout')
-        : t('canvas.contextMenu.enableAutoLayout'),
-      description: t('canvas.contextMenu.toggleAutoLayoutDescription'),
-      videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAutoLayout.webm',
+        ? t("canvas.contextMenu.disableAutoLayout")
+        : t("canvas.contextMenu.enableAutoLayout"),
+      description: t("canvas.contextMenu.toggleAutoLayoutDescription"),
+      videoUrl:
+        "https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAutoLayout.webm",
+    },
+    {
+      key: "toggleHoverCard",
+      icon: IoInformationCircleOutline,
+      type: "button",
+      active: hoverCardEnabled,
+      title: hoverCardEnabled
+        ? t("canvas.contextMenu.disableHoverCard")
+        : t("canvas.contextMenu.enableHoverCard"),
+      description: t("canvas.contextMenu.toggleHoverCardDescription"),
+      videoUrl:
+        "https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleHoverCard.webm",
     },
   ];
 
@@ -152,23 +179,26 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
 
   const handleMenuClick = async (key: string) => {
     switch (key) {
-      case 'toggleLaunchpad':
+      case "toggleLaunchpad":
         setShowLaunchpad(!showLaunchpad);
         break;
-      case 'toggleEdges':
+      case "toggleEdges":
         toggleEdgeVisible();
         break;
-      case 'toggleClickPreview':
+      case "toggleClickPreview":
         setClickToPreview(!clickToPreview);
         break;
-      case 'toggleNodeSizeMode': {
-        const newMode = nodeSizeMode === 'compact' ? 'adaptive' : 'compact';
+      case "toggleNodeSizeMode": {
+        const newMode = nodeSizeMode === "compact" ? "adaptive" : "compact";
         setNodeSizeMode(newMode);
         updateAllNodesSizeMode(newMode);
         break;
       }
-      case 'toggleAutoLayout':
+      case "toggleAutoLayout":
         setAutoLayout(!autoLayout);
+        break;
+      case "toggleHoverCard":
+        setHoverCardEnabled(!hoverCardEnabled);
         break;
     }
     setOpen(false);
@@ -189,11 +219,11 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
     };
 
     if (open) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [open]);
 
@@ -209,18 +239,22 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
       }}
     >
       {menuItems.map((item) => {
-        if (item.type === 'divider') {
-          return <Divider key={item.key} className="my-1 h-[1px] bg-gray-100" />;
+        if (item.type === "divider") {
+          return (
+            <Divider key={item.key} className="my-1 h-[1px] bg-gray-100" />
+          );
         }
 
-        const isLoading = item.key === 'createDocument' && isCreating;
+        const isLoading = item.key === "createDocument" && isCreating;
         const button = (
           <Button
             key={item.key}
             className="w-full h-8 flex items-center gap-2 px-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition-colors"
             type="text"
             loading={isLoading}
-            icon={item.icon && <item.icon className="flex items-center w-4 h-4" />}
+            icon={
+              item.icon && <item.icon className="flex items-center w-4 h-4" />
+            }
             onClick={() => handleMenuClick(item.key)}
           >
             <span className="flex-1 text-left truncate">{item.title}</span>
@@ -235,7 +269,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
               description={item.description}
               videoUrl={item.videoUrl}
               placement="right"
-              overlayStyle={{ marginLeft: '12px' }}
+              overlayStyle={{ marginLeft: "12px" }}
               align={{ offset: [12, 0] }}
             >
               {button}

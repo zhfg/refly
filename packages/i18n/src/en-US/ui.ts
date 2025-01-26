@@ -591,6 +591,10 @@ const translations = {
       enableAutoLayout: 'Enable Auto Layout',
       disableAutoLayout: 'Disable Auto Layout',
       toggleAutoLayoutDescription: 'Whether to enable auto layout when creating a new node.',
+      enableHoverCard: 'Enable Hover Card',
+      disableHoverCard: 'Disable Hover Card',
+      toggleHoverCardDescription:
+        'Toggle hover card feature that shows additional information and tutorials when hovering over items',
     },
     toolbar: {
       searchNode: 'Search Node',

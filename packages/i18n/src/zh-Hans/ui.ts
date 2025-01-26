@@ -587,6 +587,9 @@ const translations = {
       enableAutoLayout: '启用自动布局',
       disableAutoLayout: '禁用自动布局',
       toggleAutoLayoutDescription: '创建新节点时，是否启用自动布局。',
+      enableHoverCard: '启用悬浮卡片',
+      disableHoverCard: '禁用悬浮卡片',
+      toggleHoverCardDescription: '切换悬浮卡片功能，在悬停时显示额外信息和教程',
     },
     toolbar: {
       searchNode: '搜索节点',
