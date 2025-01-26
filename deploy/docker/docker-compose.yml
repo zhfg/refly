@@ -25,6 +25,12 @@ services:
       - DATABASE_URL=postgresql://refly:test@db:5432/refly?schema=refly
       - QDRANT_HOST=qdrant
       - ELASTICSEARCH_URL=http://elasticsearch:9200
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5800"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
   web:
     image: reflyai/refly-web:latest
     container_name: refly_web
