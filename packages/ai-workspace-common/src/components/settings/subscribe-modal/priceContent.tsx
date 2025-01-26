@@ -159,9 +159,8 @@ const PlanItem = (props: {
                 {' '}
                 /{' '}
                 <span className="whitespace-nowrap">
-                  {t(`settings.subscription.subscribe.${'firstYear'}`)}
+                  {t('settings.subscription.subscribe.year')}
                 </span>
-                {'*'}
               </span>
             </div>
           )}
@@ -440,10 +439,6 @@ export const PriceContent = (props: { source: PriceSource }) => {
           />
         </Col>
       </Row>
-
-      <div className="px-4 text-center text-gray-600 mt-4">
-        * {t('settings.subscription.subscribe.firstYearOffCountDescription')}
-      </div>
 
       {isLogin && (
         <div className="subscribe-content-description">
