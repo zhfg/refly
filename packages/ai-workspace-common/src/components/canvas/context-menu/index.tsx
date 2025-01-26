@@ -9,6 +9,7 @@ import {
   IconExpand,
   IconShrink,
   IconAskAIInput,
+  IconGuideLine,
 } from "@refly-packages/ai-workspace-common/components/common/icon";
 import { IoAnalyticsOutline } from "react-icons/io5";
 import { useEdgeVisible } from "@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible";
@@ -137,7 +138,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({
     },
     {
       key: "toggleHoverCard",
-      icon: IoInformationCircleOutline,
+      icon: IconGuideLine,
       type: "button",
       active: hoverCardEnabled,
       title: hoverCardEnabled
