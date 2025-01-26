@@ -1,7 +1,9 @@
 import React, { FC, ReactNode } from 'react';
-import { Popover } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { Button, Popover } from 'antd';
 import type { TooltipPlacement } from 'antd/es/tooltip';
 import { useVideo } from '../../hooks/use-video';
+import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 import './index.scss';
 
 export interface HoverContent {
@@ -34,7 +36,9 @@ export const HoverCard: FC<HoverCardProps> = ({
   overlayStyle = { marginLeft: '8px', marginTop: '8px' },
   align = { offset: [8, 8] },
 }) => {
+  const { t } = useTranslation();
   const { videoRef, handlePlay } = useVideo();
+  const { hoverCardEnabled, toggleHoverCard } = useHoverCard();
 
   const renderContent = () => (
     <div className="w-[325px] bg-white rounded-lg overflow-hidden">
@@ -60,8 +64,20 @@ export const HoverCard: FC<HoverCardProps> = ({
         <h3 className="m-0 mb-2 text-base font-medium text-gray-800 leading-[1.4]">{title}</h3>
         <p className="m-0 text-sm text-gray-500 leading-[1.5]">{description}</p>
       </div>
+      <Button
+        type="link"
+        size="small"
+        className="mb-4 px-4 text-sm"
+        onClick={() => toggleHoverCard(false)}
+      >
+        {t('common.dontShow')}
+      </Button>
     </div>
   );
+
+  if (!hoverCardEnabled) {
+    return children;
+  }
 
   return (
     <Popover

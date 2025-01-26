@@ -28,6 +28,7 @@ import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas
 import { ToolButton, type ToolbarItem } from './tool-button';
 import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { genMemoID, genSkillID } from '@refly-packages/utils/id';
+import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 
 interface ToolbarProps {
   onToolSelect?: (tool: string) => void;
@@ -155,12 +156,16 @@ const SearchListWrapper = memo(
   ({
     tool,
     handleConfirm,
-  }: { tool: ToolbarItem; handleConfirm: (items: ContextItem[]) => void }) => {
+  }: {
+    tool: ToolbarItem;
+    handleConfirm: (items: ContextItem[]) => void;
+  }) => {
     const handleToolSelect = useCallback((event: React.MouseEvent) => {
       event.preventDefault();
     }, []);
 
     const [open, setOpen] = useState(false);
+    const { hoverCardEnabled } = useHoverCard();
 
     const button = (
       <Button
@@ -187,7 +192,7 @@ const SearchListWrapper = memo(
         open={open}
         setOpen={setOpen}
       >
-        {tool.hoverContent ? (
+        {tool.hoverContent && hoverCardEnabled ? (
           <HoverCard
             title={tool.hoverContent.title}
             description={tool.hoverContent.description}

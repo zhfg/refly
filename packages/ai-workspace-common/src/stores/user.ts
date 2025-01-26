@@ -11,6 +11,7 @@ export interface LocalSettings {
   outputLocale: OutputLocale;
   isLocaleInitialized: boolean;
   canvasMode: 'mouse' | 'touchpad'; // Canvas operation mode
+  disableHoverCard: boolean;
 }
 
 export interface UserState {

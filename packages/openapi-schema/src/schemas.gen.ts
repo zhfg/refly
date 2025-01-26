@@ -1409,6 +1409,11 @@ export const UserPreferencesSchema = {
       description: 'Operation mode',
       $ref: '#/components/schemas/OperationMode',
     },
+    disableHoverCard: {
+      type: 'boolean',
+      description: 'Whether to disable hover tutorial',
+      default: false,
+    },
   },
 } as const;
 

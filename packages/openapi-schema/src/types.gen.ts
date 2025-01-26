@@ -1147,6 +1147,10 @@ export type UserPreferences = {
    * Operation mode
    */
   operationMode?: OperationMode;
+  /**
+   * Whether to disable hover tutorial
+   */
+  disableHoverCard?: boolean;
 };
 
 /**

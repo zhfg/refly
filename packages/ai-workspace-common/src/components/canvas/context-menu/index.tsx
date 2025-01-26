@@ -9,12 +9,14 @@ import {
   IconExpand,
   IconShrink,
   IconAskAIInput,
+  IconGuideLine,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { IoAnalyticsOutline } from 'react-icons/io5';
 import { useEdgeVisible } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-visible';
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 import { RiLayoutLine } from 'react-icons/ri';
 import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
+import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 
 interface ContextMenuProps {
   open: boolean;
@@ -61,6 +63,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
     autoLayout: state.autoLayout,
     setAutoLayout: state.setAutoLayout,
   }));
+  const { hoverCardEnabled, toggleHoverCard } = useHoverCard();
   const { toggleEdgeVisible } = useEdgeVisible();
   const { updateAllNodesSizeMode } = useNodeOperations();
 
@@ -120,6 +123,17 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
       description: t('canvas.contextMenu.toggleAutoLayoutDescription'),
       videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleAutoLayout.webm',
     },
+    {
+      key: 'toggleHoverCard',
+      icon: IconGuideLine,
+      type: 'button',
+      active: hoverCardEnabled,
+      title: hoverCardEnabled
+        ? t('canvas.contextMenu.disableHoverCard')
+        : t('canvas.contextMenu.enableHoverCard'),
+      description: t('canvas.contextMenu.toggleHoverCardDescription'),
+      videoUrl: 'https://static.refly.ai/onboarding/contextMenu/contextMenu-toggleHoverCard.webm',
+    },
   ];
 
   const adjustPosition = (x: number, y: number) => {
@@ -169,6 +183,9 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
       }
       case 'toggleAutoLayout':
         setAutoLayout(!autoLayout);
+        break;
+      case 'toggleHoverCard':
+        toggleHoverCard(!hoverCardEnabled);
         break;
     }
     setOpen(false);
@@ -227,7 +244,7 @@ export const ContextMenu: FC<ContextMenuProps> = ({ open, position, setOpen }) =
           </Button>
         );
 
-        if (item.description) {
+        if (item.description && hoverCardEnabled) {
           return (
             <HoverCard
               key={item.key}

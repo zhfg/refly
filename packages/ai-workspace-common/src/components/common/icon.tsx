@@ -57,6 +57,7 @@ import { RiExpandDiagonalLine } from 'react-icons/ri';
 import { TbWorldSearch } from 'react-icons/tb';
 import { GrCircleQuestion } from 'react-icons/gr';
 import { TbInputSpark } from 'react-icons/tb';
+import { RiGuideLine } from 'react-icons/ri';
 
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
 import ClaudeIcon from '@refly-packages/ai-workspace-common/assets/claude.svg';
@@ -120,7 +121,7 @@ export const IconX = BsTwitterX;
 export const IconGithub = BsGithub;
 export const IconDiscord = BsDiscord;
 export const IconEmail = BsEnvelope;
-
+export const IconGuideLine = RiGuideLine;
 export const IconLanguage = IoLanguage;
 export const IconDeleteFile = TiDocumentDelete;
 

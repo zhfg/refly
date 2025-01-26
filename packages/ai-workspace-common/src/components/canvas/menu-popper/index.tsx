@@ -20,6 +20,7 @@ import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/can
 import { useReactFlow } from '@xyflow/react';
 import { cn } from '@refly-packages/utils/cn';
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
+import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 
 // Define toolbar item interface
 interface ToolbarItem {
@@ -48,6 +49,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
   const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } = useCreateDocument();
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const { addNode } = useAddNode();
+  const { hoverCardEnabled } = useHoverCard();
 
   const [showSearchResourceList, setShowSearchResourceList] = useState(false);
   const [showSearchDocumentList, setShowSearchDocumentList] = useState(false);
@@ -277,7 +279,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
       </Button>
     );
 
-    if (item.hoverContent) {
+    if (item.hoverContent && hoverCardEnabled) {
       return (
         <HoverCard
           title={item.hoverContent.title}

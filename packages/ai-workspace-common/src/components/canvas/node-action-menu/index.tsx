@@ -41,6 +41,7 @@ import { useNodeCluster } from '@refly-packages/ai-workspace-common/hooks/canvas
 import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
 import { useCreateMemo } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-memo';
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
+import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 
 interface MenuItem {
   key?: string;
@@ -135,7 +136,9 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           title: nodeData?.title || t('common.untitled'),
         }),
         okText: t('common.delete'),
-        cancelButtonProps: { className: 'hover:!border-[#00968F] hover:!text-[#00968F] ' },
+        cancelButtonProps: {
+          className: 'hover:!border-[#00968F] hover:!text-[#00968F] ',
+        },
         cancelText: t('common.cancel'),
         okButtonProps: { danger: true },
         onOk: () => {
@@ -166,7 +169,10 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
 
   const handlePreview = useCallback(() => {
     addNodePreview(canvasId, node);
-    locateToNodePreviewEmitter.emit('locateToNodePreview', { id: nodeId, canvasId });
+    locateToNodePreviewEmitter.emit('locateToNodePreview', {
+      id: nodeId,
+      canvasId,
+    });
     onClose?.();
   }, [node, nodeId, canvasId, onClose, addNodePreview]);
 
@@ -673,6 +679,8 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
 
   const menuItems = useMemo(() => getMenuItems(activeDocumentId), [activeDocumentId, getMenuItems]);
 
+  const { hoverCardEnabled } = useHoverCard();
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-2 w-[200px] border border-[rgba(0,0,0,0.06)]">
       {menuItems.map((item) => {
@@ -708,20 +716,22 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
           </Button>
         );
 
-        return item.hoverContent ? (
-          <HoverCard
-            key={item.key}
-            title={item.hoverContent.title}
-            description={item.hoverContent.description}
-            videoUrl={item.hoverContent.videoUrl}
-            placement="right"
-            onOpenChange={(open) => onHoverCardStateChange?.(open)}
-          >
-            {button}
-          </HoverCard>
-        ) : (
-          button
-        );
+        if (item.hoverContent && hoverCardEnabled) {
+          return (
+            <HoverCard
+              key={item.key}
+              title={item.hoverContent.title}
+              description={item.hoverContent.description}
+              videoUrl={item.hoverContent.videoUrl}
+              placement="right"
+              onOpenChange={(open) => onHoverCardStateChange?.(open)}
+            >
+              {button}
+            </HoverCard>
+          );
+        }
+
+        return button;
       })}
     </div>
   );

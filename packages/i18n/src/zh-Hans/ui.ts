@@ -31,6 +31,7 @@ const translations = {
     untitled: '未命名',
     loading: '加载中...',
     loadMore: '加载更多',
+    dontShow: '不再展示',
     appStarting: '应用启动中',
     more: '更多',
     putErr: '操作失败，请尝试重试！',
@@ -587,6 +588,9 @@ const translations = {
       enableAutoLayout: '启用自动布局',
       disableAutoLayout: '禁用自动布局',
       toggleAutoLayoutDescription: '创建新节点时，是否启用自动布局。',
+      enableHoverCard: '启用悬浮引导',
+      disableHoverCard: '禁用悬浮引导',
+      toggleHoverCardDescription: '切换悬浮引导功能，在悬停时显示额外信息和教程',
     },
     toolbar: {
       searchNode: '搜索节点',

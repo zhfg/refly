@@ -22,6 +22,7 @@ import { useReactFlow } from '@xyflow/react';
 import { CanvasRename } from './canvas-rename';
 import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
+import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -74,7 +75,9 @@ const CanvasTitle = memo(
             title={
               debouncedUnsyncedChanges > 0
                 ? t('canvas.toolbar.syncingChanges')
-                : t('canvas.toolbar.synced', { time: time(new Date(), language)?.utc()?.fromNow() })
+                : t('canvas.toolbar.synced', {
+                    time: time(new Date(), language)?.utc()?.fromNow(),
+                  })
             }
           >
             <div
@@ -120,6 +123,7 @@ const ToolbarButtons = memo(
     const [searchOpen, setSearchOpen] = useState(false);
     const { setNodeCenter } = useNodePosition();
     const { getNodes } = useReactFlow();
+    const { hoverCardEnabled } = useHoverCard();
 
     const handleNodeSelect = useCallback(
       (item: IContextItem) => {
@@ -132,6 +136,20 @@ const ToolbarButtons = memo(
       },
       [getNodes, setNodeCenter],
     );
+
+    const previewButtonConfig = {
+      title: t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`),
+      description: t('canvas.toolbar.togglePreviewDescription'),
+      videoUrl: 'https://static.refly.ai/onboarding/top-toolbar/topToolbar-togglePreview.webm',
+      placement: 'bottom' as const,
+    };
+
+    const maxRatioButtonConfig = {
+      title: t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`),
+      description: t('canvas.toolbar.toggleMaxRatioDescription'),
+      videoUrl: 'https://static.refly.ai/onboarding/top-toolbar/topToolbar-toogleMaxRatio.webm',
+      placement: 'bottom' as const,
+    };
 
     const previewButton = (
       <Button
@@ -177,23 +195,17 @@ const ToolbarButtons = memo(
           </Tooltip>
         </Popover>
 
-        <HoverCard
-          title={t(`canvas.toolbar.${showPreview ? 'hidePreview' : 'showPreview'}`)}
-          description={t('canvas.toolbar.togglePreviewDescription')}
-          videoUrl="https://static.refly.ai/onboarding/top-toolbar/topToolbar-togglePreview.webm"
-          placement="bottom"
-        >
-          {previewButton}
-        </HoverCard>
+        {hoverCardEnabled ? (
+          <HoverCard {...previewButtonConfig}>{previewButton}</HoverCard>
+        ) : (
+          <Tooltip title={previewButtonConfig.title}>{previewButton}</Tooltip>
+        )}
 
-        <HoverCard
-          title={t(`canvas.toolbar.${showMaxRatio ? 'hideMaxRatio' : 'showMaxRatio'}`)}
-          description={t('canvas.toolbar.toggleMaxRatioDescription')}
-          videoUrl="https://static.refly.ai/onboarding/top-toolbar/topToolbar-toogleMaxRatio.webm"
-          placement="bottom"
-        >
-          {maxRatioButton}
-        </HoverCard>
+        {hoverCardEnabled ? (
+          <HoverCard {...maxRatioButtonConfig}>{maxRatioButton}</HoverCard>
+        ) : (
+          <Tooltip title={maxRatioButtonConfig.title}>{maxRatioButton}</Tooltip>
+        )}
       </div>
     );
   },

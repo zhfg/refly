@@ -2,6 +2,7 @@ import { memo, FC } from 'react';
 import { Button, Badge } from 'antd';
 import TooltipWrapper from '@refly-packages/ai-workspace-common/components/common/tooltip-button';
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
+import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 
 export type ToolValue =
   | 'askAI'
@@ -47,6 +48,8 @@ export const ToolButton: FC<ToolButtonProps> = memo(
     getIconColor: (tool: string) => string;
     getIsLoading: (tool: string) => boolean;
   }) => {
+    const { hoverCardEnabled } = useHoverCard();
+
     const button =
       contextCnt > 0 && tool.value === 'handleLaunchpad' ? (
         <Badge
@@ -98,19 +101,21 @@ export const ToolButton: FC<ToolButtonProps> = memo(
         />
       );
 
-    return tool.hoverContent ? (
-      <HoverCard
-        title={tool.hoverContent.title}
-        description={tool.hoverContent.description}
-        videoUrl={tool.hoverContent.videoUrl}
-        placement="right"
-        overlayStyle={{ marginLeft: '12px' }}
-        align={{ offset: [12, 0] }}
-      >
-        {button}
-      </HoverCard>
-    ) : (
-      <TooltipWrapper tooltip={tool.tooltip}>{button}</TooltipWrapper>
-    );
+    if (tool.hoverContent && hoverCardEnabled) {
+      return (
+        <HoverCard
+          title={tool.hoverContent.title}
+          description={tool.hoverContent.description}
+          videoUrl={tool.hoverContent.videoUrl}
+          placement="right"
+          overlayStyle={{ marginLeft: '12px' }}
+          align={{ offset: [12, 0] }}
+        >
+          {button}
+        </HoverCard>
+      );
+    }
+
+    return <TooltipWrapper tooltip={tool.tooltip}>{button}</TooltipWrapper>;
   },
 );

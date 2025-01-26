@@ -26,6 +26,7 @@ import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/compon
 import { AiOutlineMenuFold, AiOutlineUser } from 'react-icons/ai';
 import { SubscriptionHint } from '@refly-packages/ai-workspace-common/components/subscription/hint';
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
+import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 
 const Sider = Layout.Sider;
 const MenuItem = Menu.Item;
@@ -102,6 +103,7 @@ const MenuItemContent = (props: {
   hoverContent?: HoverContent;
 }) => {
   const { position = 'left', type, hoverContent } = props;
+  const { hoverCardEnabled } = useHoverCard();
 
   const { setShowLibraryModal, setShowCanvasListModal } = useSiderStoreShallow((state) => ({
     setShowLibraryModal: state.setShowLibraryModal,
@@ -132,7 +134,7 @@ const MenuItemContent = (props: {
     </div>
   );
 
-  if (hoverContent) {
+  if (hoverContent && hoverCardEnabled) {
     return (
       <HoverCard
         title={hoverContent?.title}

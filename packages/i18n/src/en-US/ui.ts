@@ -23,6 +23,7 @@ const translations = {
     untitled: 'Untitled',
     loading: 'Loading...',
     loadMore: 'Load More',
+    dontShow: "Don't show again",
     appStarting: 'Application is starting',
     more: 'More',
     putErr: 'Failed to perform operation. Please try again!',
@@ -591,6 +592,10 @@ const translations = {
       enableAutoLayout: 'Enable Auto Layout',
       disableAutoLayout: 'Disable Auto Layout',
       toggleAutoLayoutDescription: 'Whether to enable auto layout when creating a new node.',
+      enableHoverCard: 'Enable Hover Guide',
+      disableHoverCard: 'Disable Hover Guide',
+      toggleHoverCardDescription:
+        'Toggle hover guide feature that shows additional information and tutorials when hovering over items',
     },
     toolbar: {
       searchNode: 'Search Node',

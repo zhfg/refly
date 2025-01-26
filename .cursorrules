@@ -5,6 +5,9 @@ Always use nullish coalescing (??) or default values for potentially undefined v
 Always check array existence before using array methods.
 Always validate object properties before destructuring.
 
+// JavaScript/TypeScript Code Style Rules
+Always use single quotes for string literals in JavaScript/TypeScript code.
+
 // React Performance Optimization Rules
 Always wrap pure components with React.memo to prevent unnecessary re-renders.
 Always use useMemo for expensive computations or complex object creation.
