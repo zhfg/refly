@@ -34,7 +34,6 @@ export interface CanvasState {
   clickToPreview: boolean;
   nodeSizeMode: 'compact' | 'adaptive';
   autoLayout: boolean;
-  hoverCardEnabled: boolean;
 
   setNodes: (canvasId: string, nodes: CanvasNode<any>[]) => void;
   setEdges: (canvasId: string, edges: Edge[]) => void;
@@ -55,7 +54,6 @@ export interface CanvasState {
   setClickToPreview: (enabled: boolean) => void;
   setNodeSizeMode: (mode: 'compact' | 'adaptive') => void;
   setAutoLayout: (enabled: boolean) => void;
-  setHoverCardEnabled: (enabled: boolean) => void;
 
   clearState: () => void;
 }
@@ -83,7 +81,6 @@ const defaultCanvasState = () => ({
   clickToPreview: true,
   nodeSizeMode: 'adaptive' as const,
   autoLayout: true,
-  hoverCardEnabled: true,
 });
 
 export const useCanvasStore = create<CanvasState>()(
@@ -219,10 +216,6 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => {
           state.autoLayout = enabled;
         }),
-      setHoverCardEnabled: (enabled) =>
-        set((state) => {
-          state.hoverCardEnabled = enabled;
-        }),
       clearState: () => set(defaultCanvasState()),
     })),
     {
@@ -235,7 +228,6 @@ export const useCanvasStore = create<CanvasState>()(
         clickToPreview: state.clickToPreview,
         nodeSizeMode: state.nodeSizeMode,
         autoLayout: state.autoLayout,
-        hoverCardEnabled: state.hoverCardEnabled,
       }),
     },
   ),

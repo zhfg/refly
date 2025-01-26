@@ -86,6 +86,7 @@ export const useGetUserSettings = () => {
       outputLocale,
       isLocaleInitialized: true,
       canvasMode: res?.data?.preferences?.operationMode || 'mouse',
+      disableHoverCard: res?.data?.preferences?.disableHoverCard || false,
     };
 
     // This indicates it's the first time registering and using, so there's no locale set. We need to write it back.

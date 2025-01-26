@@ -1,12 +1,11 @@
-import { Button, Divider } from "antd";
-import { useTranslation } from "react-i18next";
-import { FC, useEffect, useRef, useState } from "react";
-import { SearchList } from "@refly-packages/ai-workspace-common/modules/entity-selector/components";
+import { Button, Divider } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { FC, useEffect, useRef, useState } from 'react';
+import { SearchList } from '@refly-packages/ai-workspace-common/modules/entity-selector/components';
 
-import { useImportResourceStoreShallow } from "@refly-packages/ai-workspace-common/stores/import-resource";
-import { useCanvasStoreShallow } from "@refly-packages/ai-workspace-common/stores/canvas";
-import { CanvasNodeType, SearchDomain } from "@refly/openapi-schema";
-import { ContextItem } from "@refly-packages/ai-workspace-common/types/context";
+import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
+import { CanvasNodeType, SearchDomain } from '@refly/openapi-schema';
+import { ContextItem } from '@refly-packages/ai-workspace-common/types/context';
 import {
   IconAskAI,
   IconCreateDocument,
@@ -14,21 +13,18 @@ import {
   IconImportResource,
   IconMemo,
   IconResource,
-} from "@refly-packages/ai-workspace-common/components/common/icon";
-import { genMemoID, genSkillID } from "@refly-packages/utils/id";
-import { useAddNode } from "@refly-packages/ai-workspace-common/hooks/canvas/use-add-node";
-import { useCreateDocument } from "@refly-packages/ai-workspace-common/hooks/canvas/use-create-document";
-import { useReactFlow } from "@xyflow/react";
-import { cn } from "@refly-packages/utils/cn";
-import {
-  HoverCard,
-  HoverContent,
-} from "@refly-packages/ai-workspace-common/components/hover-card";
-import TooltipWrapper from "@refly-packages/ai-workspace-common/components/common/tooltip-button";
+} from '@refly-packages/ai-workspace-common/components/common/icon';
+import { genMemoID, genSkillID } from '@refly-packages/utils/id';
+import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
+import { useReactFlow } from '@xyflow/react';
+import { cn } from '@refly-packages/utils/cn';
+import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
+import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 
 // Define toolbar item interface
 interface ToolbarItem {
-  type: "button" | "popover" | "divider";
+  type: 'button' | 'popover' | 'divider';
   icon?: React.ElementType;
   key?: string;
   domain?: string;
@@ -46,94 +42,85 @@ interface MenuPopperProps {
   setOpen: (open: boolean) => void;
 }
 
-export const MenuPopper: FC<MenuPopperProps> = ({
-  open,
-  position,
-  setOpen,
-}) => {
+export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => {
   const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuHeight, setMenuHeight] = useState<number>(0);
-  const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } =
-    useCreateDocument();
+  const { createSingleDocumentInCanvas, isCreating: isCreatingDocument } = useCreateDocument();
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const { addNode } = useAddNode();
-  const hoverCardEnabled = useCanvasStoreShallow(
-    (state) => state.hoverCardEnabled
-  );
+  const { hoverCardEnabled } = useHoverCard();
 
   const [showSearchResourceList, setShowSearchResourceList] = useState(false);
   const [showSearchDocumentList, setShowSearchDocumentList] = useState(false);
 
-  const { setImportResourceModalVisible, setInsertNodePosition } =
-    useImportResourceStoreShallow((state) => ({
+  const { setImportResourceModalVisible, setInsertNodePosition } = useImportResourceStoreShallow(
+    (state) => ({
       importResourceModalVisible: state.importResourceModalVisible,
       setImportResourceModalVisible: state.setImportResourceModalVisible,
       setInsertNodePosition: state.setInsertNodePosition,
-    }));
+    }),
+  );
 
   const menuItems: ToolbarItem[] = [
     {
-      key: "askAI",
+      key: 'askAI',
       icon: IconAskAI,
-      type: "button",
+      type: 'button',
       primary: true,
       hoverContent: {
-        title: t("canvas.toolbar.askAI"),
-        description: t("canvas.toolbar.askAIDescription"),
-        videoUrl:
-          "https://static.refly.ai/onboarding/menuPopper/menuPopper-askAI.webm",
+        title: t('canvas.toolbar.askAI'),
+        description: t('canvas.toolbar.askAIDescription'),
+        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-askAI.webm',
       },
     },
-    { key: "divider-1", type: "divider" },
+    { key: 'divider-1', type: 'divider' },
     {
-      key: "createDocument",
+      key: 'createDocument',
       icon: IconCreateDocument,
-      type: "button",
+      type: 'button',
       hoverContent: {
-        title: t("canvas.toolbar.createDocument"),
-        description: t("canvas.toolbar.createDocumentDescription"),
-        videoUrl:
-          "https://static.refly.ai/onboarding/menuPopper/menuPopper-createDocument.webm",
+        title: t('canvas.toolbar.createDocument'),
+        description: t('canvas.toolbar.createDocumentDescription'),
+        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-createDocument.webm',
       },
     },
     {
-      key: "createMemo",
+      key: 'createMemo',
       icon: IconMemo,
-      type: "button",
+      type: 'button',
       hoverContent: {
-        title: t("canvas.toolbar.createMemo"),
-        description: t("canvas.toolbar.createMemoDescription"),
-        videoUrl:
-          "https://static.refly.ai/onboarding/menuPopper/menuPopper-createMemo.webm",
+        title: t('canvas.toolbar.createMemo'),
+        description: t('canvas.toolbar.createMemoDescription'),
+        videoUrl: 'https://static.refly.ai/onboarding/menuPopper/menuPopper-createMemo.webm',
       },
     },
     {
-      key: "addResource",
+      key: 'addResource',
       icon: IconResource,
-      type: "popover",
-      domain: "resource",
+      type: 'popover',
+      domain: 'resource',
       showSearchList: showSearchResourceList,
       setShowSearchList: setShowSearchResourceList,
     },
     {
-      key: "addDocument",
+      key: 'addDocument',
       icon: IconDocument,
-      type: "popover",
-      domain: "document",
+      type: 'popover',
+      domain: 'document',
       showSearchList: showSearchDocumentList,
       setShowSearchList: setShowSearchDocumentList,
     },
-    { key: "divider-2", type: "divider" },
+    { key: 'divider-2', type: 'divider' },
     {
-      key: "importResource",
+      key: 'importResource',
       icon: IconImportResource,
-      type: "button",
+      type: 'button',
       hoverContent: {
-        title: t("canvas.toolbar.importResource"),
-        description: t("canvas.toolbar.importResourceDescription"),
+        title: t('canvas.toolbar.importResource'),
+        description: t('canvas.toolbar.importResourceDescription'),
         videoUrl:
-          "https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm",
+          'https://static.refly.ai/onboarding/canvas-toolbar/canvas-toolbar-import-resource.webm',
       },
     },
   ];
@@ -146,9 +133,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({
           x: position.x + index * 300,
           y: position.y,
         };
-        const contentPreview = item?.snippets
-          ?.map((snippet) => snippet?.text || "")
-          .join("\n");
+        const contentPreview = item?.snippets?.map((snippet) => snippet?.text || '').join('\n');
         addNode({
           type: domain as CanvasNodeType,
           data: {
@@ -194,8 +179,8 @@ export const MenuPopper: FC<MenuPopperProps> = ({
 
   const createSkillNode = (position: { x: number; y: number }) => {
     addNode({
-      type: "skill",
-      data: { title: "Skill", entityId: genSkillID() },
+      type: 'skill',
+      data: { title: 'Skill', entityId: genSkillID() },
       position: position,
     });
   };
@@ -203,8 +188,8 @@ export const MenuPopper: FC<MenuPopperProps> = ({
   const createMemo = (position: { x: number; y: number }) => {
     const memoId = genMemoID();
     addNode({
-      type: "memo",
-      data: { title: t("canvas.nodeTypes.memo"), entityId: memoId },
+      type: 'memo',
+      data: { title: t('canvas.nodeTypes.memo'), entityId: memoId },
       position: position,
     });
   };
@@ -212,27 +197,27 @@ export const MenuPopper: FC<MenuPopperProps> = ({
   const handleMenuClick = async ({ key }: { key: string }) => {
     setActiveKey(key);
     switch (key) {
-      case "askAI":
+      case 'askAI':
         createSkillNode(position);
         setOpen(false);
         break;
-      case "createDocument":
+      case 'createDocument':
         await createSingleDocumentInCanvas(position);
         setOpen(false);
         break;
-      case "createMemo":
+      case 'createMemo':
         createMemo(position);
         setOpen(false);
         break;
-      case "addResource":
+      case 'addResource':
         break;
-      case "addDocument":
+      case 'addDocument':
         break;
-      case "addMemo":
+      case 'addMemo':
         break;
-      case "addHighlight":
+      case 'addHighlight':
         break;
-      case "importResource":
+      case 'importResource':
         setInsertNodePosition(position);
         setImportResourceModalVisible(true);
         setOpen(false);
@@ -241,7 +226,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({
   };
 
   const getIsLoading = (tool: string) => {
-    if (tool === "createDocument" && isCreatingDocument) {
+    if (tool === 'createDocument' && isCreatingDocument) {
       return true;
     }
     return false;
@@ -258,7 +243,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const isInsideMenuPopper = menuRef.current?.contains(target);
-      const isInsidePopover = target.closest(".canvas-search-list");
+      const isInsidePopover = target.closest('.canvas-search-list');
 
       if (open && !isInsideMenuPopper && !isInsidePopover) {
         setOpen(false);
@@ -267,12 +252,12 @@ export const MenuPopper: FC<MenuPopperProps> = ({
 
     if (open) {
       setTimeout(() => {
-        document.addEventListener("click", handleClickOutside);
+        document.addEventListener('click', handleClickOutside);
       }, 0);
     }
 
     return () => {
-      document.removeEventListener("click", handleClickOutside);
+      document.removeEventListener('click', handleClickOutside);
       setActiveKey(null);
     };
   }, [open, setOpen]);
@@ -281,10 +266,10 @@ export const MenuPopper: FC<MenuPopperProps> = ({
     const button = (
       <Button
         loading={getIsLoading(item.key)}
-        className={cn("w-full px-2 justify-start", {
-          "bg-gray-100": activeKey === item.key,
-          "text-primary-600": item.primary,
-          "text-red-600": item.danger,
+        className={cn('w-full px-2 justify-start', {
+          'bg-gray-100': activeKey === item.key,
+          'text-primary-600': item.primary,
+          'text-red-600': item.danger,
         })}
         type="text"
         icon={<item.icon className="text-base flex items-center" />}
@@ -301,7 +286,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({
           description={item.hoverContent.description}
           videoUrl={item.hoverContent.videoUrl}
           placement="right"
-          overlayStyle={{ marginLeft: "12px" }}
+          overlayStyle={{ marginLeft: '12px' }}
           align={{ offset: [12, 0] }}
         >
           {button}
@@ -323,7 +308,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({
         }}
       >
         {menuItems.map((item) => {
-          if (item.type === "button") {
+          if (item.type === 'button') {
             return (
               <div key={item.key} className="flex items-center w-full">
                 {renderButton(item)}
@@ -331,7 +316,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({
             );
           }
 
-          if (item.type === "popover") {
+          if (item.type === 'popover') {
             return (
               <SearchList
                 className="canvas-search-list"
@@ -350,7 +335,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({
             );
           }
 
-          if (item.type === "divider") {
+          if (item.type === 'divider') {
             return <Divider key={item.key} className="my-1 w-full" />;
           }
         })}
