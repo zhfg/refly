@@ -55,7 +55,7 @@ cp .env.example .env # 确保所有必须的环境变量均已设置
 docker-compose up -d
 ```
 
-访问 [http://localhost:3000](http://localhost:3000/) 开始使用 ReflyAI。
+访问 [http://localhost:5700](http://localhost:5700/) 开始使用 ReflyAI。
 
 ### 本地开发
 
