@@ -72,11 +72,7 @@ export class RecommendQuestions extends BaseSkill {
     const isRefresh = tplConfig?.refresh?.value;
 
     // Process query and context using shared utilities
-    const { hasContext, remainingTokens, mentionedContext } = await processQuery({
-      config,
-      ctxThis: this,
-      state,
-    });
+    const remainingTokens = modelInfo.contextLimit;
 
     // Truncate chat history with larger window for better context
     const usedChatHistory = truncateMessages(chatHistory, 10, 800, 4000);
@@ -84,20 +80,21 @@ export class RecommendQuestions extends BaseSkill {
     let context = '';
     let sources: Source[] = [];
 
-    const needPrepareContext = hasContext && remainingTokens > 0;
-    const isModelContextLenSupport = checkModelContextLenSupport(modelInfo);
-
-    this.engine.logger.log(`mentionedContext: ${safeStringifyJSON(mentionedContext)}`);
+    const needPrepareContext = remainingTokens > 0;
 
     if (needPrepareContext) {
       config.metadata.step = { name: 'analyzeContext' };
       const preparedRes = await prepareContext(
         {
           query: query,
-          mentionedContext,
+          mentionedContext: {
+            contentList: [],
+            resources: [],
+            documents: [],
+          },
           maxTokens: remainingTokens,
-          enableMentionedContext: hasContext,
-          enableLowerPriorityContext: hasContext,
+          enableMentionedContext: true,
+          enableLowerPriorityContext: true,
         },
         {
           config,
