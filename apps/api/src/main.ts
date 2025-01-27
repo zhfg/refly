@@ -29,7 +29,7 @@ Sentry.init({
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
-    bufferLogs: true,
+    bufferLogs: false,
   });
   app.useLogger(app.get(Logger));
 
