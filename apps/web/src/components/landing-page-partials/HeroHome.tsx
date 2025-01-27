@@ -1,16 +1,16 @@
-import { useTranslation } from "react-i18next";
-import "./hero-home.scss";
-import "../../styles/fonts.scss";
-import { cn } from "@refly-packages/ai-workspace-common/utils/cn";
-import AnimatedShinyText from "@refly-packages/ai-workspace-common/components/magicui/animated-shiny-text";
-import { ArrowRightIcon } from "lucide-react";
-import { MdOutlinePlayCircleFilled } from "react-icons/md";
-import { FaGithub } from "react-icons/fa6";
+import { useTranslation } from 'react-i18next';
+import './hero-home.scss';
+import '../../styles/fonts.scss';
+import { cn } from '@refly-packages/ai-workspace-common/utils/cn';
+import AnimatedShinyText from '@refly-packages/ai-workspace-common/components/magicui/animated-shiny-text';
+import { ArrowRightIcon } from 'lucide-react';
+import { MdOutlinePlayCircleFilled } from 'react-icons/md';
+import { FaGithub } from 'react-icons/fa6';
 
-import { Button, Modal } from "antd";
-import BlurImage from "@/components/common/BlurImage";
-import { useAuthStoreShallow } from "@refly-packages/ai-workspace-common/stores/auth";
-import { useState } from "react";
+import { Button, Modal } from 'antd';
+import BlurImage from '@/components/common/BlurImage';
+import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
+import { useState } from 'react';
 
 function HeroHome() {
   const { t, i18n } = useTranslation();
@@ -19,7 +19,7 @@ function HeroHome() {
   }));
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
-  const isZhCN = i18n.language === "zh-CN";
+  const isZhCN = i18n.language === 'zh-CN';
 
   return (
     <section className="bg-gradient-to-b from-[#D2EAE1] via-[#FCFCFC] to-[#FFFFFF]">
@@ -71,14 +71,14 @@ function HeroHome() {
                   <div
                     onClick={() => setLoginModalOpen(true)}
                     className={cn(
-                      "group inline-flex items-center justify-center rounded-lg border border-black/5 bg-white text-base hover:cursor-pointer hover:bg-neutral-50 dark:border-white/5",
-                      "px-4",
-                      "py-2"
+                      'group inline-flex items-center justify-center rounded-lg border border-black/5 bg-white text-base hover:cursor-pointer hover:bg-neutral-50 dark:border-white/5',
+                      'px-4',
+                      'py-2',
                     )}
                   >
                     <AnimatedShinyText className="inline-flex items-center justify-center transition ease-out">
                       <span className="whitespace-nowrap text-[#00968F]">
-                        🚀 {t("landingPage.messageText")}
+                        🚀 {t('landingPage.messageText')}
                       </span>
                     </AnimatedShinyText>
                     <ArrowRightIcon className="ml-2 h-4 w-4 text-[#00968F] transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
@@ -89,22 +89,19 @@ function HeroHome() {
               <h1
                 className={cn(
                   "mb-5 flex max-w-7xl flex-col font-['Alibaba_PuHuiTi_Bold',system-ui,-apple-system,sans-serif]",
-                  "text-[3rem] !tracking-[-0.2rem] sm:mb-6 sm:text-[5rem]",
-                  isZhCN ? "leading-[1.2]" : "leading-[0.9]"
+                  'text-[3rem] !tracking-[-0.2rem] sm:mb-6 sm:text-[5rem]',
+                  isZhCN ? 'leading-[1.2]' : 'leading-[0.9]',
                 )}
               >
                 {/* First line */}
-                <span
-                  className={cn("span-wrap-styles", isZhCN ? "mb-1" : "mb-0")}
-                >
+                <span className={cn('span-wrap-styles', isZhCN ? 'mb-1' : 'mb-0')}>
                   {isZhCN ? (
                     // Chinese first line
                     <span
                       className="relative inline-block bg-gradient-to-r from-[#2D36FF] to-[#DC55DF] bg-clip-text text-transparent"
                       style={{
-                        backgroundImage:
-                          "linear-gradient(55deg, #2D36FF 8%, #DC55DF 114%)",
-                        paddingRight: "4px",
+                        backgroundImage: 'linear-gradient(55deg, #2D36FF 8%, #DC55DF 114%)',
+                        paddingRight: '4px',
                       }}
                     >
                       AI Native
@@ -112,8 +109,8 @@ function HeroHome() {
                       <div
                         className="absolute -right-10 -top-5 flex gap-1"
                         style={{
-                          transform: "rotate(30deg)",
-                          transformOrigin: "bottom left",
+                          transform: 'rotate(30deg)',
+                          transformOrigin: 'bottom left',
                         }}
                       >
                         {[45, 90, 135].map((rotation, index) => (
@@ -122,11 +119,10 @@ function HeroHome() {
                             className="animate-decorative-line h-[6px] w-[18px]"
                             style={
                               {
-                                background:
-                                  "linear-gradient(55deg, #2D36FF 8%, #DC55DF 114%)",
-                                transformOrigin: "center",
+                                background: 'linear-gradient(55deg, #2D36FF 8%, #DC55DF 114%)',
+                                transformOrigin: 'center',
                                 animationDelay: `${index * 0.2}s`,
-                                "--rotation": `${rotation}deg`,
+                                '--rotation': `${rotation}deg`,
                               } as React.CSSProperties
                             }
                           />
@@ -136,22 +132,21 @@ function HeroHome() {
                   ) : (
                     // English first line
                     <>
-                      The{" "}
+                      The{' '}
                       <span
                         className="relative inline-block bg-gradient-to-r from-[#2D36FF] to-[#DC55DF] bg-clip-text text-transparent"
                         style={{
-                          backgroundImage:
-                            "linear-gradient(55deg, #2D36FF 8%, #DC55DF 114%)",
-                          paddingRight: "4px",
+                          backgroundImage: 'linear-gradient(55deg, #2D36FF 8%, #DC55DF 114%)',
+                          paddingRight: '4px',
                         }}
                       >
-                        {i18n.language === "zh-CN" ? "AI 原生" : "AI Native"}
+                        {i18n.language === 'zh-CN' ? 'AI 原生' : 'AI Native'}
                         {/* Decorative lines */}
                         <div
                           className="absolute -right-10 -top-5 flex gap-1"
                           style={{
-                            transform: "rotate(30deg)",
-                            transformOrigin: "bottom left",
+                            transform: 'rotate(30deg)',
+                            transformOrigin: 'bottom left',
                           }}
                         >
                           {[45, 90, 135].map((rotation, index) => (
@@ -160,11 +155,10 @@ function HeroHome() {
                               className="animate-decorative-line h-[6px] w-[18px]"
                               style={
                                 {
-                                  background:
-                                    "linear-gradient(55deg, #2D36FF 8%, #DC55DF 114%)",
-                                  transformOrigin: "center",
+                                  background: 'linear-gradient(55deg, #2D36FF 8%, #DC55DF 114%)',
+                                  transformOrigin: 'center',
                                   animationDelay: `${index * 0.2}s`,
-                                  "--rotation": `${rotation}deg`,
+                                  '--rotation': `${rotation}deg`,
                                 } as React.CSSProperties
                               }
                             />
@@ -180,13 +174,13 @@ function HeroHome() {
                   className="span-wrap-styles relative"
                   style={{
                     marginTop: isZhCN ? 0 : 12,
-                    fontSize: isZhCN ? "0.95em" : "1em",
+                    fontSize: isZhCN ? '0.95em' : '1em',
                   }}
                 >
-                  <span>{isZhCN ? "创作引擎" : "Creation Engine"}</span>
+                  <span>{isZhCN ? '创作引擎' : 'Creation Engine'}</span>
                   <svg
                     className="absolute bottom-[-8px] left-0 w-full"
-                    height={isZhCN ? "20" : "16"}
+                    height={isZhCN ? '20' : '16'}
                     viewBox="0 0 100 16"
                     preserveAspectRatio="none"
                   >
@@ -202,10 +196,10 @@ function HeroHome() {
               </h1>
               <p className="flex max-w-[18rem] flex-col items-center gap-0.5 font-['Alibaba_PuHuiTi_Light',system-ui,-apple-system,sans-serif] text-base !leading-[1.3] !tracking-[-0.02rem] sm:max-w-xl sm:text-lg">
                 <span className="span-wrap-styles text-[rgba(0, 0, 0, .5)]">
-                  {t("landingPage.simplyDescription.first")}
+                  {t('landingPage.simplyDescription.first')}
                 </span>
                 <span className="span-wrap-styles text-[rgba(0, 0, 0, .5)]">
-                  {t("landingPage.simplyDescription.second")}
+                  {t('landingPage.simplyDescription.second')}
                 </span>
               </p>
             </div>
@@ -218,20 +212,16 @@ function HeroHome() {
                 type="primary"
                 className="cursor-pointer"
               >
-                {t("landingPage.tryForFree")}
+                {t('landingPage.tryForFree')}
               </Button>
 
               <Button
-                onClick={() =>
-                  window.open("https://github.com/refly-ai/refly", "_blank")
-                }
+                onClick={() => window.open('https://github.com/refly-ai/refly', '_blank')}
                 size="large"
-                icon={
-                  <FaGithub className="flex h-5 w-5 items-center justify-center" />
-                }
+                icon={<FaGithub className="flex h-5 w-5 items-center justify-center" />}
                 className="cursor-pointer"
               >
-                {isZhCN ? "GitHub" : "GitHub"}
+                {isZhCN ? 'GitHub' : 'GitHub'}
               </Button>
             </div>
           </div>
@@ -256,11 +246,11 @@ function HeroHome() {
             <div
               onClick={() => setIsVideoModalOpen(true)}
               className={cn(
-                "group relative mx-auto w-[100%] cursor-pointer rounded-[12px] border border-solid border-black/5",
-                "bg-[rgba(242,246,253,0.92)] p-1 sm:p-2",
-                "will-change-transform",
-                "scale-100 transition-[transform] duration-200 ease-out",
-                "hover:scale-[0.95]"
+                'group relative mx-auto w-[100%] cursor-pointer rounded-[12px] border border-solid border-black/5',
+                'bg-[rgba(242,246,253,0.92)] p-1 sm:p-2',
+                'will-change-transform',
+                'scale-100 transition-[transform] duration-200 ease-out',
+                'hover:scale-[0.95]',
               )}
             >
               <div className="absolute inset-0 z-10 rounded-md bg-black/30 opacity-0 transition-opacity duration-200 group-hover:opacity-50" />
