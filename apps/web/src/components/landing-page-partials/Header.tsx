@@ -7,7 +7,7 @@ import { IconDown, IconLanguage } from '@refly-packages/ai-workspace-common/comp
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from '@refly-packages/ai-workspace-common/utils/router';
 import './header.scss';
-import { FaDiscord } from 'react-icons/fa6';
+import { FaDiscord, FaGithub } from 'react-icons/fa6';
 
 function Header() {
   const navigate = useNavigate();
@@ -18,6 +18,8 @@ function Header() {
   }));
 
   const [value, setValue] = useState('product');
+  const [starCount, setStarCount] = useState('614');
+
   const tabOptions = [
     {
       label: t('landingPage.tab.product'),
@@ -48,6 +50,19 @@ function Header() {
   useEffect(() => {
     setValue(location.pathname.split('/')[1] || 'product');
   }, [location.pathname]);
+
+  useEffect(() => {
+    // Fetch GitHub star count
+    fetch('https://api.github.com/repos/refly-ai/refly')
+      .then((res) => res.json())
+      .then((data) => {
+        const stars = data.stargazers_count;
+        setStarCount(stars >= 1000 ? `${(stars / 1000).toFixed(1)}k` : stars.toString());
+      })
+      .catch(() => {
+        // Keep default value if fetch fails
+      });
+  }, []);
 
   return (
     <div className="fixed top-0 z-20 flex w-full !justify-center px-6 backdrop-blur-lg sm:px-6 md:px-6 lg:px-0">
@@ -97,6 +112,17 @@ function Header() {
               <IconDown className="ml-1 transition-transform duration-200 group-hover:rotate-180" />
             </Button>
           </UILocaleList>
+
+          <Button
+            type="text"
+            size="middle"
+            icon={<FaGithub className="h-4 w-4" />}
+            onClick={() => window.open('https://github.com/refly-ai/refly', '_blank')}
+            className="flex items-center gap-1 px-2 text-gray-600 hover:text-[#00968f]"
+          >
+            {starCount}
+          </Button>
+
           <Button type="primary" onClick={() => setLoginModalOpen(true)}>
             {t('landingPage.tryForFree')}
           </Button>
