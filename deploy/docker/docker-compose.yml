@@ -20,7 +20,8 @@ services:
     env_file:
       - .env
     environment:
-      - MINIO_ENDPOINT=http://minio
+      - MINIO_INTERNAL_ENDPOINT=minio
+      - MINIO_EXTERNAL_ENDPOINT=minio
       - REDIS_HOST=redis
       - DATABASE_URL=postgresql://refly:test@db:5432/refly?schema=refly
       - QDRANT_HOST=qdrant
