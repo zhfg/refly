@@ -1,39 +1,52 @@
-import React, { useState, useMemo } from 'react';
-import { Menu } from '@arco-design/web-react';
-import { Avatar, Button, Layout, Skeleton, Divider } from 'antd';
-import { useLocation, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
+import React, { useState, useMemo, useEffect } from "react";
+import { Menu } from "@arco-design/web-react";
+import { Avatar, Button, Layout, Skeleton, Divider } from "antd";
+import {
+  useLocation,
+  useNavigate,
+} from "@refly-packages/ai-workspace-common/utils/router";
 
-import { IconCanvas, IconPlus } from '@refly-packages/ai-workspace-common/components/common/icon';
-import cn from 'classnames';
+import {
+  IconCanvas,
+  IconPlus,
+} from "@refly-packages/ai-workspace-common/components/common/icon";
+import cn from "classnames";
 
-import Logo from '@/assets/logo.svg';
-import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import Logo from "@/assets/logo.svg";
+import { useUserStoreShallow } from "@refly-packages/ai-workspace-common/stores/user";
 // components
-import { SearchQuickOpenBtn } from '@refly-packages/ai-workspace-common/components/search-quick-open-btn';
-import { useTranslation } from 'react-i18next';
-import { SiderMenuSettingList } from '@refly-packages/ai-workspace-common/components/sider-menu-setting-list';
-import { SettingModal } from '@refly-packages/ai-workspace-common/components/settings';
-import { TourModal } from '@refly-packages/ai-workspace-common/components/tour-modal';
-import { SettingsGuideModal } from '@refly-packages/ai-workspace-common/components/settings-guide';
-import { StorageExceededModal } from '@refly-packages/ai-workspace-common/components/subscription/storage-exceeded-modal';
+import { SearchQuickOpenBtn } from "@refly-packages/ai-workspace-common/components/search-quick-open-btn";
+import { useTranslation } from "react-i18next";
+import { SiderMenuSettingList } from "@refly-packages/ai-workspace-common/components/sider-menu-setting-list";
+import { SettingModal } from "@refly-packages/ai-workspace-common/components/settings";
+import { TourModal } from "@refly-packages/ai-workspace-common/components/tour-modal";
+import { SettingsGuideModal } from "@refly-packages/ai-workspace-common/components/settings-guide";
+import { StorageExceededModal } from "@refly-packages/ai-workspace-common/components/subscription/storage-exceeded-modal";
 // hooks
-import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
-import { SiderData, useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
-import { useCreateCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-canvas';
+import { useHandleSiderData } from "@refly-packages/ai-workspace-common/hooks/use-handle-sider-data";
+import {
+  SiderData,
+  useSiderStoreShallow,
+} from "@refly-packages/ai-workspace-common/stores/sider";
+import { useCreateCanvas } from "@refly-packages/ai-workspace-common/hooks/canvas/use-create-canvas";
 // icons
-import { IconLibrary } from '@refly-packages/ai-workspace-common/components/common/icon';
-import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
-import { AiOutlineMenuFold, AiOutlineUser } from 'react-icons/ai';
-import { SubscriptionHint } from '@refly-packages/ai-workspace-common/components/subscription/hint';
-import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
-import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
+import { IconLibrary } from "@refly-packages/ai-workspace-common/components/common/icon";
+import { CanvasActionDropdown } from "@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown";
+import { AiOutlineMenuFold, AiOutlineUser } from "react-icons/ai";
+import { SubscriptionHint } from "@refly-packages/ai-workspace-common/components/subscription/hint";
+import {
+  HoverCard,
+  HoverContent,
+} from "@refly-packages/ai-workspace-common/components/hover-card";
+import { useHoverCard } from "@refly-packages/ai-workspace-common/hooks/use-hover-card";
+import { FaGithub } from "react-icons/fa6";
 
 const Sider = Layout.Sider;
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
 
 const SiderLogo = (props: {
-  source: 'sider' | 'popover';
+  source: "sider" | "popover";
   navigate: (path: string) => void;
   setCollapse: (collapse: boolean) => void;
 }) => {
@@ -42,14 +55,14 @@ const SiderLogo = (props: {
     <div className="flex items-center justify-between p-3">
       <div
         className="flex cursor-pointer flex-row items-center gap-2"
-        onClick={() => navigate('/')}
+        onClick={() => navigate("/")}
       >
         <img src={Logo} alt="Refly" className="h-8 w-8" />
         <span className="text-xl font-bold text-black" translate="no">
           Refly
         </span>
       </div>
-      {source === 'sider' && (
+      {source === "sider" && (
         <div>
           <Button
             type="text"
@@ -70,7 +83,7 @@ const SettingItem = () => {
   const { userProfile } = useUserStoreShallow((state) => ({
     userProfile: state.userProfile,
   }));
-  const planType = userProfile?.subscription?.planType || 'free';
+  const planType = userProfile?.subscription?.planType || "free";
 
   const { t } = useTranslation();
 
@@ -79,7 +92,11 @@ const SettingItem = () => {
       <SiderMenuSettingList>
         <div className="flex flex-1 items-center justify-between">
           <div className="flex items-center">
-            <Avatar size={32} src={userProfile?.avatar} icon={<AiOutlineUser />} />
+            <Avatar
+              size={32}
+              src={userProfile?.avatar}
+              icon={<AiOutlineUser />}
+            />
             <span className="ml-2 max-w-[80px] truncate font-semibold text-gray-600">
               {userProfile?.nickname}
             </span>
@@ -99,21 +116,23 @@ const MenuItemContent = (props: {
   title?: string;
   type: string;
   collapse?: boolean;
-  position?: 'left' | 'right';
+  position?: "left" | "right";
   hoverContent?: HoverContent;
 }) => {
-  const { position = 'left', type, hoverContent } = props;
+  const { position = "left", type, hoverContent } = props;
   const { hoverCardEnabled } = useHoverCard();
 
-  const { setShowLibraryModal, setShowCanvasListModal } = useSiderStoreShallow((state) => ({
-    setShowLibraryModal: state.setShowLibraryModal,
-    setShowCanvasListModal: state.setShowCanvasListModal,
-  }));
+  const { setShowLibraryModal, setShowCanvasListModal } = useSiderStoreShallow(
+    (state) => ({
+      setShowLibraryModal: state.setShowLibraryModal,
+      setShowCanvasListModal: state.setShowCanvasListModal,
+    })
+  );
 
   const handleNavClick = () => {
-    if (type === 'Canvas') {
+    if (type === "Canvas") {
       setShowCanvasListModal(true);
-    } else if (type === 'Library') {
+    } else if (type === "Library") {
       setShowLibraryModal(true);
     }
   };
@@ -127,9 +146,9 @@ const MenuItemContent = (props: {
       onClick={() => handleNavClick()}
     >
       <div className="flex flex-1 flex-nowrap items-center">
-        {position === 'left' && props.icon}
+        {position === "left" && props.icon}
         <span className="sider-menu-title">{props.title}</span>
-        {position === 'right' && props.icon}
+        {position === "right" && props.icon}
       </div>
     </div>
   );
@@ -140,7 +159,7 @@ const MenuItemContent = (props: {
         title={hoverContent?.title}
         description={hoverContent?.description}
         videoUrl={hoverContent?.videoUrl}
-        placement={hoverContent?.placement || 'right'}
+        placement={hoverContent?.placement || "right"}
       >
         {content}
       </HoverCard>
@@ -152,7 +171,8 @@ const MenuItemContent = (props: {
 
 const NewCanvasItem = () => {
   const { t } = useTranslation();
-  const { debouncedCreateCanvas, isCreating: createCanvasLoading } = useCreateCanvas();
+  const { debouncedCreateCanvas, isCreating: createCanvasLoading } =
+    useCreateCanvas();
 
   return (
     <MenuItem
@@ -166,7 +186,9 @@ const NewCanvasItem = () => {
         icon={<IconPlus className="text-green-600" />}
       />
 
-      <span className="text-green-600">{t('loggedHomePage.siderMenu.newCanvas')}</span>
+      <span className="text-green-600">
+        {t("loggedHomePage.siderMenu.newCanvas")}
+      </span>
     </MenuItem>
   );
 };
@@ -174,33 +196,45 @@ const NewCanvasItem = () => {
 const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [showCanvasIdActionDropdown, setShowCanvasIdActionDropdown] = useState<string | null>(null);
+  const [showCanvasIdActionDropdown, setShowCanvasIdActionDropdown] = useState<
+    string | null
+  >(null);
 
   const location = useLocation();
-  const selectedKey = useMemo(() => getSelectedKey(location.pathname), [location.pathname]);
+  const selectedKey = useMemo(
+    () => getSelectedKey(location.pathname),
+    [location.pathname]
+  );
 
   return (
     <MenuItem
       key={canvas.id}
-      className={cn('group relative ml-4 h-8 rounded text-sm leading-8 hover:bg-gray-50', {
-        '!bg-gray-100 font-medium !text-green-600': selectedKey === canvas.id,
-      })}
+      className={cn(
+        "group relative ml-4 h-8 rounded text-sm leading-8 hover:bg-gray-50",
+        {
+          "!bg-gray-100 font-medium !text-green-600": selectedKey === canvas.id,
+        }
+      )}
       onClick={() => {
         navigate(`/canvas/${canvas.id}`);
       }}
     >
       <div className="flex h-8 w-40 items-center justify-between">
         <div className="flex items-center gap-3">
-          <IconCanvas className={cn({ 'text-green-600': selectedKey === canvas.id })} />
-          <div className="w-28 truncate">{canvas?.name || t('common.untitled')}</div>
+          <IconCanvas
+            className={cn({ "text-green-600": selectedKey === canvas.id })}
+          />
+          <div className="w-28 truncate">
+            {canvas?.name || t("common.untitled")}
+          </div>
         </div>
 
         <div
           className={cn(
-            'flex items-center transition-opacity duration-200',
+            "flex items-center transition-opacity duration-200",
             showCanvasIdActionDropdown === canvas.id
-              ? 'opacity-100'
-              : 'opacity-0 group-hover:opacity-100',
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100"
           )}
         >
           <CanvasActionDropdown
@@ -218,29 +252,51 @@ const CanvasListItem = ({ canvas }: { canvas: SiderData }) => {
 };
 
 const getSelectedKey = (pathname: string) => {
-  if (pathname.startsWith('/canvas')) {
-    const arr = pathname?.split('?')[0]?.split('/');
-    return arr[arr.length - 1] ?? '';
+  if (pathname.startsWith("/canvas")) {
+    const arr = pathname?.split("?")[0]?.split("/");
+    return arr[arr.length - 1] ?? "";
   }
-  return '';
+  return "";
 };
 
-export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
-  const { source = 'sider' } = props;
-  const { collapse, canvasList, setCollapse, showSettingModal, setShowSettingModal } =
-    useSiderStoreShallow((state) => ({
-      showSettingModal: state.showSettingModal,
-      collapse: state.collapse,
-      canvasList: state.canvasList,
-      setCollapse: state.setCollapse,
-      setShowSettingModal: state.setShowSettingModal,
-    }));
+export const SiderLayout = (props: { source: "sider" | "popover" }) => {
+  const { source = "sider" } = props;
+  const {
+    collapse,
+    canvasList,
+    setCollapse,
+    showSettingModal,
+    setShowSettingModal,
+  } = useSiderStoreShallow((state) => ({
+    showSettingModal: state.showSettingModal,
+    collapse: state.collapse,
+    canvasList: state.canvasList,
+    setCollapse: state.setCollapse,
+    setShowSettingModal: state.setShowSettingModal,
+  }));
+
+  const [starCount, setStarCount] = useState("60.1k");
+
+  useEffect(() => {
+    // Fetch GitHub star count
+    fetch("https://api.github.com/repos/refly-ai/refly")
+      .then((res) => res.json())
+      .then((data) => {
+        const stars = data.stargazers_count;
+        setStarCount(
+          stars >= 1000 ? `${(stars / 1000).toFixed(1)}k` : stars.toString()
+        );
+      })
+      .catch(() => {
+        // Keep default value if fetch fails
+      });
+  }, []);
 
   const navigate = useNavigate();
   const { userProfile } = useUserStoreShallow((state) => ({
     userProfile: state.userProfile,
   }));
-  const planType = userProfile?.subscription?.planType || 'free';
+  const planType = userProfile?.subscription?.planType || "free";
 
   const { isLoadingCanvas } = useHandleSiderData(true);
 
@@ -248,9 +304,12 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
 
   const location = useLocation();
 
-  const selectedKey = useMemo(() => getSelectedKey(location.pathname), [location.pathname]);
+  const selectedKey = useMemo(
+    () => getSelectedKey(location.pathname),
+    [location.pathname]
+  );
 
-  const defaultOpenKeys = useMemo(() => ['Canvas', 'Library'], []);
+  const defaultOpenKeys = useMemo(() => ["Canvas", "Library"], []);
 
   interface SiderCenterProps {
     key: string;
@@ -263,38 +322,58 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
 
   const siderSections: SiderCenterProps[] = [
     {
-      key: 'Canvas',
-      name: 'canvas',
-      icon: <IconCanvas key="canvas" className="arco-icon" style={{ fontSize: 20 }} />,
+      key: "Canvas",
+      name: "canvas",
+      icon: (
+        <IconCanvas
+          key="canvas"
+          className="arco-icon"
+          style={{ fontSize: 20 }}
+        />
+      ),
       hoverContent: {
-        title: t('loggedHomePage.siderMenu.canvasTitle'),
-        description: t('loggedHomePage.siderMenu.canvasDescription'),
-        videoUrl: 'https://static.refly.ai/onboarding/siderMenu/siderMenu-canvas.webm',
-        placement: 'rightBottom',
+        title: t("loggedHomePage.siderMenu.canvasTitle"),
+        description: t("loggedHomePage.siderMenu.canvasDescription"),
+        videoUrl:
+          "https://static.refly.ai/onboarding/siderMenu/siderMenu-canvas.webm",
+        placement: "rightBottom",
       },
     },
     {
-      key: 'Library',
-      name: 'library',
-      icon: <IconLibrary key="library" className="arco-icon" style={{ fontSize: 20 }} />,
+      key: "Library",
+      name: "library",
+      icon: (
+        <IconLibrary
+          key="library"
+          className="arco-icon"
+          style={{ fontSize: 20 }}
+        />
+      ),
       hoverContent: {
-        title: t('loggedHomePage.siderMenu.libraryTitle'),
-        description: t('loggedHomePage.siderMenu.libraryDescription'),
-        videoUrl: 'https://static.refly.ai/onboarding/siderMenu/siderMenu-knowledgebase.webm',
+        title: t("loggedHomePage.siderMenu.libraryTitle"),
+        description: t("loggedHomePage.siderMenu.libraryDescription"),
+        videoUrl:
+          "https://static.refly.ai/onboarding/siderMenu/siderMenu-knowledgebase.webm",
       },
     },
   ];
 
   return (
     <Sider
-      width={source === 'sider' ? (collapse ? 0 : 220) : 220}
+      width={source === "sider" ? (collapse ? 0 : 220) : 220}
       className={cn(
-        'border border-solid border-gray-100 bg-white shadow-sm',
-        source === 'sider' ? 'h-[calc(100vh)]' : 'h-[calc(100vh-100px)] rounded-r-lg',
+        "border border-solid border-gray-100 bg-white shadow-sm",
+        source === "sider"
+          ? "h-[calc(100vh)]"
+          : "h-[calc(100vh-100px)] rounded-r-lg"
       )}
     >
       <div className="flex h-full flex-col overflow-y-auto">
-        <SiderLogo source={source} navigate={(path) => navigate(path)} setCollapse={setCollapse} />
+        <SiderLogo
+          source={source}
+          navigate={(path) => navigate(path)}
+          setCollapse={setCollapse}
+        />
 
         <SearchQuickOpenBtn />
 
@@ -321,7 +400,7 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
                         />
                       }
                     >
-                      {item.key === 'Canvas' && (
+                      {item.key === "Canvas" && (
                         <>
                           <NewCanvasItem />
 
@@ -358,7 +437,7 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
                       <Divider
                         key={`divider-${item.key}`}
                         style={{
-                          margin: '8px 0',
+                          margin: "8px 0",
                         }}
                       />
                     )}
@@ -369,42 +448,31 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
 
             <div className="mt-auto">
               <div className="mb-2 flex flex-col gap-2">
-                {/* <a
-                  href="https://www.producthunt.com/posts/refly-3?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-refly&#0045;3"
+                <a
+                  href="https://github.com/refly-ai/refly"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block transition-opacity hover:opacity-80">
-                  <img
-                    src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=785558&theme=light&t=1736929638628"
-                    alt="Refly - The AI Native Content Creation Engine | Product Hunt"
-                    className="w-[200px]"
-                    loading="lazy"
-                  />
-                </a> */}
+                  className="flex items-center w-full h-10 cursor-pointer leading-[18px] border border-solid border-gray-200 rounded-md text-xs text-gray-700 font-semibold overflow-hidden"
+                >
+                  <div className="flex items-center px-4 py-1 bg-gray-100 h-full cursor-pointer">
+                    <FaGithub className="h-4 w-4" />
+                    <span className="ml-1">Star</span>
+                  </div>
+                  <div className="px-2 py-1 flex-1 flex items-center justify-center bg-white border-l border-gray-200 h-full cursor-pointer">
+                    {starCount}
+                  </div>
+                </a>
 
-                {/* <Alert
-                  message={
-                    <div className="flex cursor-pointer items-center justify-center">
-                      <a href="https://docs.refly.ai" target="_blank">
-                        📖{"    "}
-                        <span>
-                          {t("loggedHomePage.siderMenu.viewTutorial")}
-                        </span>
-                      </a>
-                    </div>
-                  }
-                  type="info"
-                  closable
-                /> */}
-
-                {planType === 'free' && <SubscriptionHint />}
+                {planType === "free" && <SubscriptionHint />}
               </div>
               {!!userProfile?.uid && (
                 <MenuItem
                   key="Settings"
                   className="flex h-12 items-center justify-between"
                   renderItemInTooltip={() => (
-                    <MenuItemTooltipContent title={t('loggedHomePage.siderMenu.settings')} />
+                    <MenuItemTooltipContent
+                      title={t("loggedHomePage.siderMenu.settings")}
+                    />
                   )}
                 >
                   <SettingItem />
@@ -414,7 +482,10 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
           </div>
         </Menu>
 
-        <SettingModal visible={showSettingModal} setVisible={setShowSettingModal} />
+        <SettingModal
+          visible={showSettingModal}
+          setVisible={setShowSettingModal}
+        />
 
         <SettingsGuideModal />
         <TourModal />

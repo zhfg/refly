@@ -112,7 +112,7 @@ const translations = {
         'Powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, ',
       second: 'Refly is the best way to transform ideas into quality content.',
     },
-    messageText: 'Experience AI Free-form Canvas and ignite your creativity!',
+    messageText: 'New DeepSeek R1 inference model released! ⚡️ ',
     tryForFree: 'Get Started',
     contactUs: 'Contact Us',
     watchVideo: 'Watch Video',
