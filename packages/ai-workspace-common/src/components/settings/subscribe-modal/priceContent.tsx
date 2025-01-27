@@ -208,7 +208,7 @@ const PlanItem = (props: {
 
         <div className="plane-features">
           <Divider className="mt-2 mb-4" />
-          {features.map((feature, index) => (
+          {(features || [])?.map((feature, index) => (
             <div className="plane-features-item" key={index}>
               <div className="text-gray-500">
                 <IconCheck style={{ color: 'green', strokeWidth: 6 }} /> {feature.name}
@@ -226,7 +226,7 @@ const PlanItem = (props: {
           ))}
 
           <Divider className="my-4" />
-          {capabilities.map((capability, index) => (
+          {(capabilities || [])?.map((capability, index) => (
             <div className="py-2 text-gray-600" key={index}>
               <FaLightbulb className="text-yellow-500 mr-1" size={12} />
               <span>{capability.before}</span>
