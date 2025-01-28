@@ -1,5 +1,5 @@
 import { defineContentScript } from 'wxt/sandbox';
-import { setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { setRuntime } from '@refly/utils/env';
 
 export default defineContentScript({
   matches: ['<all_urls>'],

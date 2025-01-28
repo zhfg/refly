@@ -6,7 +6,7 @@ import {
   sendMessage,
 } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { useJumpNewPath } from '@refly-packages/ai-workspace-common/hooks/use-jump-new-path';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 import { BackgroundMessage } from '@refly/common-types';
 import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
 

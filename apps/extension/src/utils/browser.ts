@@ -1,4 +1,4 @@
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 
 let isArc: boolean | undefined = undefined;

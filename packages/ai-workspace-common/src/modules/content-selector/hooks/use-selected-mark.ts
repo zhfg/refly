@@ -1,6 +1,6 @@
 import { useContentSelectorStore } from '../stores/content-selector';
 import { sendMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 import type { SyncMarkEvent, SyncStatusEvent } from '@refly/common-types';
 
 export const useSelectedMark = () => {

@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import './index.scss';
 import { useEffect } from 'react';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 import MultilingualSearch from '@refly-packages/ai-workspace-common/modules/multilingual-search';
 import { TbClipboard, TbWorldSearch } from 'react-icons/tb';
 import { IconImportResource } from '@refly-packages/ai-workspace-common/components/common/icon';

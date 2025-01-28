@@ -15,7 +15,7 @@ import { useUserStore } from '@/stores/user';
 import { useHomeStateStore } from '@/stores/home-state';
 import { useTranslation } from 'react-i18next';
 import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 
 export const ChatHeader = (props: { onlyShowClose?: boolean }) => {
   const { onlyShowClose = false } = props;

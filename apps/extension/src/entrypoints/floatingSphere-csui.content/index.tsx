@@ -3,7 +3,7 @@ import { defineContentScript } from 'wxt/sandbox';
 import { createShadowRootUi } from 'wxt/client';
 import { App } from './App';
 
-import { setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { setRuntime } from '@refly/utils/env';
 
 export default defineContentScript({
   matches: ['<all_urls>'],

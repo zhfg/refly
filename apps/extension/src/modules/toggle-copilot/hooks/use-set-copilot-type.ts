@@ -1,5 +1,5 @@
 import { storage } from '@refly-packages/ai-workspace-common/utils/storage';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 import { useEffect } from 'react';
 import {
   useCopilotTypeStore,

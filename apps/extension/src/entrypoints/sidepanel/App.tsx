@@ -9,7 +9,7 @@ import { Suspense, useEffect } from 'react';
 // 加载国际化
 import '@/i18n/config';
 // 加载 runtime 设置
-import { setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { setRuntime } from '@refly/utils/env';
 import { useCopilotStore } from '@refly-packages/ai-workspace-common/stores/copilot';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useMockInAppResource } from '@/hooks/use-mock-in-app-resource';

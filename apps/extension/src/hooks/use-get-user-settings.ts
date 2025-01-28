@@ -14,7 +14,7 @@ import { useStorage } from './use-storage';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 // import { checkBrowserArc } from '@/utils/browser';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 import { UserSettings } from '@refly/openapi-schema';
 import { browser } from 'wxt/browser';
 import debounce from 'lodash.debounce';

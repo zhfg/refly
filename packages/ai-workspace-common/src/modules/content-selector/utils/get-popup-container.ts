@@ -1,4 +1,4 @@
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 import { getWebPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 export const getExtensionPopupContainer = () => {

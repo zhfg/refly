@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 import { onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 
 // utils

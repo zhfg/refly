@@ -29,8 +29,10 @@ export const App = () => {
   const { handleToggleCopilot } = useToggleCopilot();
   const { handleStopContentSelectorListener, handleInitContentSelectorListener } =
     useSelectedMark();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isContentSelectorOpen, setIsContentSelectorOpen] = useState(false);
+
+  console.log('i18n', i18n?.languages);
 
   // 加载快捷键
   const [shortcut, setShortcut] = useState<string>(

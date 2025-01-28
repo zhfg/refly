@@ -17,7 +17,7 @@ import {
   onMessage,
 } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { BackgroundMessage } from '@refly/common-types';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 import { SelectedTextDomain } from '@refly/common-types';
 import { getElementType } from '../utils';
 import { genContentSelectorID } from '@refly-packages/utils/id';

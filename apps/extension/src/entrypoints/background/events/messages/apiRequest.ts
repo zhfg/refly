@@ -3,11 +3,11 @@ import { getLastActiveTab } from '@refly-packages/ai-workspace-common/utils/exte
 import * as requestModule from '@refly/openapi-schema';
 import { BackgroundMessage } from '@refly/common-types';
 import { createClient } from '@hey-api/client-fetch';
-import { getServerOrigin } from '@refly/utils/url';
+import { getExtensionServerOrigin } from '@refly/utils/url';
 import { getCookie } from '@/utils/cookie';
 import { getToken } from '../../index';
 
-const client = createClient({ baseUrl: getServerOrigin() + '/v1' });
+const client = createClient({ baseUrl: `${getExtensionServerOrigin()}/v1` });
 
 client.interceptors.request.use(async (request) => {
   const token = (await getCookie()) || getToken();

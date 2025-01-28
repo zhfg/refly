@@ -2,7 +2,7 @@ import { CreateResourceData } from '@refly/openapi-schema';
 import { getMarkdown, getReadabilityMarkdown } from '@refly/utils/html2md';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getClientOrigin } from '@refly/utils/url';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 
 export const useSaveCurrentWeblinkAsResource = () => {
   const saveResource = async () => {

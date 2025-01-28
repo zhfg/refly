@@ -1,7 +1,7 @@
 import { defineContentScript } from 'wxt/sandbox';
 import ReactDOM from 'react-dom/client';
 
-import { setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { setRuntime } from '@refly/utils/env';
 import { createShadowRootUi } from 'wxt/client';
 import App from './App';
 
