@@ -116,23 +116,30 @@ export class ElasticsearchService implements OnModuleInit {
   }
 
   async onModuleInit() {
-    await Promise.all(Object.values(indexConfig).map((config) => this.ensureIndexExists(config)));
+    for (const config of Object.values(indexConfig)) {
+      await this.ensureIndexExists(config);
+    }
   }
 
   private async ensureIndexExists(indexConfig: IndexConfigValue) {
     const { body: indexExists } = await this.client.indices.exists({ index: indexConfig.index });
+    this.logger.log(`Index exists for ${indexConfig.index}: ${indexExists}`);
 
     if (!indexExists) {
-      const { body } = await this.client.indices.create({
-        index: indexConfig.index,
-        body: {
-          settings: indexConfig.settings,
-          mappings: {
-            properties: indexConfig.properties,
+      try {
+        const { body } = await this.client.indices.create({
+          index: indexConfig.index,
+          body: {
+            settings: indexConfig.settings,
+            mappings: {
+              properties: indexConfig.properties,
+            },
           },
-        },
-      });
-      this.logger.log(`Index created successfully: ${JSON.stringify(body)}`);
+        });
+        this.logger.log(`Index created successfully: ${JSON.stringify(body)}`);
+      } catch (error) {
+        this.logger.error(`Error creating index ${indexConfig.index}: ${error}`);
+      }
     } else {
       this.logger.log(`Index already exists: ${indexConfig.index}`);
     }

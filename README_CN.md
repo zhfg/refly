@@ -52,7 +52,7 @@ Refly 是一个开源的 AI 原生创作引擎。Refly 直观的自由画布界�
 ```bash
 cd deploy/docker
 cp .env.example .env # 确保所有必须的环境变量均已设置
-docker-compose up -d
+docker compose up -d
 ```
 
 访问 [http://localhost:5700](http://localhost:5700/) 开始使用 ReflyAI。

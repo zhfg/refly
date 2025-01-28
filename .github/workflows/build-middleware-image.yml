@@ -1,11 +1,11 @@
-name: Build Elasticsearch Image
+name: Build Middleware Image
 
 on:
   workflow_dispatch:
 
 jobs:
   build-and-push:
-    name: Build Elasticsearch Image
+    name: Build Middleware Image
     runs-on: ubuntu-latest
     if: github.repository == 'refly-ai/refly'
     steps:
@@ -24,7 +24,7 @@ jobs:
           username: reflyai
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and push Elasticsearch image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -33,3 +33,13 @@ jobs:
           push: true
           tags: |
             reflyai/elasticsearch:7.10.2
+
+      - name: Build and push Qdrant Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./deploy/docker/qdrant/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            reflyai/qdrant:v1.13.1
