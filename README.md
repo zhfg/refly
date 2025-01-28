@@ -50,7 +50,7 @@ To start deployment:
 ```bash
 cd deploy/docker
 cp .env.example .env # make sure all required envs are properly set
-docker-compose up -d
+docker compose up -d
 ```
 
 Visit [http://localhost:5700](http://localhost:5700/) to start using ReflyAI.
