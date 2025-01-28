@@ -3,6 +3,9 @@ import * as requestModule from '@refly/openapi-schema';
 
 import { getRuntime, serverOrigin } from '@refly-packages/ai-workspace-common/utils/env';
 import { ConnectionError, OperationTooFrequent, UnknownError } from '@refly/errors';
+import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { MessageName } from '@refly/common-types';
+import { safeStringifyJSON } from '@refly-packages/utils/parse';
 import { responseInterceptorWithTokenRefresh } from '@refly-packages/ai-workspace-common/utils/auth';
 import { getLocale } from '@refly-packages/ai-workspace-common/utils/locale';
 import { showErrorNotification } from '@refly-packages/ai-workspace-common/utils/notification';
@@ -75,7 +78,26 @@ const wrapFunctions = (module: any) => {
 
     const runtime = getRuntime() || '';
     if (runtime.includes('extension') && typeof origMethod === 'function') {
-      // By pass
+      wrappedModule[key] = async (...args: unknown[]) => {
+        console.log(`Calling function ${String(key)} with arguments: ${safeStringifyJSON(args)}`);
+
+        try {
+          return await sendToBackground({
+            name: String(key) as MessageName,
+            type: 'apiRequest',
+            source: getRuntime(),
+            target: module,
+            args,
+          });
+        } catch (err) {
+          const errResp = {
+            success: false,
+            errCode: new ConnectionError(err).code,
+          };
+          showErrorNotification(errResp, getLocale());
+          return errResp;
+        }
+      };
     } else {
       wrappedModule[key] = async (...args: unknown[]) => {
         try {

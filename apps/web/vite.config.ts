@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
       tsconfigPaths(),
       vitePluginForArco({
         theme: '@arco-themes/react-refly-ai',
-        filePatterns: ['apps/web/src', 'packages/ai-workspace-common/src'],
+        filePatterns: ['apps/web/src', 'packages/ai-workspace-common/src', 'apps/extension/src'],
       }),
       codeInspectorPlugin({
         bundler: 'vite',
