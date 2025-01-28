@@ -400,7 +400,7 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
                   </div>
                 </a>
 
-                <a
+                {/* <a
                   href="https://www.producthunt.com/posts/refly-3?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-refly&#0045;3"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -412,7 +412,7 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
                     className="w-[200px]"
                     loading="lazy"
                   />
-                </a>
+                </a> */}
 
                 {/* <Alert
                   message={

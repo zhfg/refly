@@ -226,7 +226,7 @@ function HeroHome() {
             </div>
           </div>
 
-          <div className="flex justify-center">
+          {/* <div className="flex justify-center">
             <a
               href="https://www.producthunt.com/posts/refly-3?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-refly&#0045;3"
               target="_blank"
@@ -240,7 +240,7 @@ function HeroHome() {
                 loading="lazy"
               />
             </a>
-          </div>
+          </div> */}
 
           {/* Hero image */}
           <div className="relative mt-6 flex justify-center overflow-hidden sm:mt-10">
