@@ -4,9 +4,6 @@
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx", // path
     "useDefineForClassFields": true,
-    "moduleResolution": "bundler",
-    "module": "esnext",
-    "noEmit": true,
     "paths": {
       "@/*": ["./src/*"],
       "@refly-packages/ai-workspace-common/*": ["../../packages/ai-workspace-common/src/*"],

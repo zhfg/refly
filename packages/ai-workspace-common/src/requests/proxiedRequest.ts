@@ -1,7 +1,8 @@
 import { client, BaseResponse } from '@refly/openapi-schema';
 import * as requestModule from '@refly/openapi-schema';
 
-import { getRuntime, serverOrigin } from '@refly-packages/ai-workspace-common/utils/env';
+import { serverOrigin } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 import { ConnectionError, OperationTooFrequent, UnknownError } from '@refly/errors';
 import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { MessageName } from '@refly/common-types';

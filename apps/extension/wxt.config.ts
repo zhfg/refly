@@ -43,6 +43,12 @@ export default defineConfig({
       css: {
         postcss: postcssConfig,
       },
+      build: {
+        sourcemap: false,
+      },
+      optimizeDeps: {
+        include: ['antd'],
+      },
       resolve: {
         alias: {
           '@': path.resolve(__dirname, './src'),
