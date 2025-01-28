@@ -1,11 +1,11 @@
-name: Build Elasticsearch Image
+name: Build Middleware Image
 
 on:
   workflow_dispatch:
 
 jobs:
   build-and-push:
-    name: Build Elasticsearch Image
+    name: Build Middleware Image
     runs-on: ubuntu-latest
     if: github.repository == 'refly-ai/refly'
     steps:
