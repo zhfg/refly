@@ -5,11 +5,16 @@ services:
     image: reflyai/refly-api:latest
     container_name: refly_api
     depends_on:
-      - db
-      - minio
-      - redis
-      - qdrant
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
     working_dir: /app/apps/api/dist
     command: >
       sh -c "node scripts/sync-db-schema.js && node main.js"
