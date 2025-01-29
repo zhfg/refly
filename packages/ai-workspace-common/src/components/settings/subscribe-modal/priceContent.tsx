@@ -17,7 +17,7 @@ import { SubscriptionPlanType } from '@refly/openapi-schema';
 export type SubscriptionInterval = 'monthly' | 'yearly';
 export type PriceSource = 'page' | 'modal';
 
-const premiumModels = 'GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro and more';
+const premiumModels = 'DeepSeek R1, GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro and more';
 const basicModels = 'GPT-4o Mini, DeepSeek V3, Llama 3.1 70B, Qwen 2.5 72B and more';
 
 const gridSpan = {

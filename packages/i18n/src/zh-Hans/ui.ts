@@ -1185,7 +1185,7 @@ const translations = {
       currentPlan: '当前套餐',
       t1Requests: '高级模型请求',
       t1RequestsDescription:
-        '高级模型包括 GPT-4o, Claude 3.5 Sonnet 等模型。每个成功的技能调用计为一次请求。',
+        '高级模型包括 DeepSeek R1, GPT-4o, Claude 3.5 Sonnet 等模型。每个成功的技能调用计为一次请求。',
       t2Requests: '标准模型请求',
       t2RequestsDescription:
         '标准模型包括 GPT-4o Mini, DeepSeek V3 等模型。每个成功的技能调用计为一次请求。',
