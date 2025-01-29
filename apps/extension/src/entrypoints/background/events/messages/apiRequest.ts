@@ -31,7 +31,7 @@ export const handleRequestReflect = async (msg: BackgroundMessage) => {
       name: msg?.name,
       body: res,
     });
-  } else if (msg?.source === 'extension-sidepanel') {
+  } else if (msg?.source === 'extension-sidepanel' || msg?.source === 'extension-popup') {
     try {
       await browser.runtime.sendMessage({
         name: msg?.name,

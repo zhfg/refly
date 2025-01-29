@@ -21,7 +21,7 @@ const App = () => {
   useEffect(() => {
     // Initial check if the page is already visible
     if (isDomVisibilityRef.current === 'visible' && !checkPageUnsupported(location.href)) {
-      checkBrowserArc();
+      // checkBrowserArc();
     }
   }, []);
 

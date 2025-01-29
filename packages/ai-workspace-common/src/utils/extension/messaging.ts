@@ -111,7 +111,9 @@ export const sendMessage: (message: BackgroundMessage, needResponse?: boolean) =
         }
       });
 
-      if (['extension-sidepanel', 'extension-background'].includes(fromRuntime)) {
+      if (
+        ['extension-sidepanel', 'extension-background', 'extension-popup'].includes(fromRuntime)
+      ) {
         const tabs = await browser.tabs.query({ active: true, currentWindow: true });
         const activeTabId = tabs?.[0]?.id;
         if (activeTabId) {
@@ -156,7 +158,7 @@ export const onMessage = async (_callback: (message: any) => void, fromRuntime: 
     browser = _browser;
   }
 
-  if (['extension-sidepanel', 'extension-background'].includes(fromRuntime)) {
+  if (['extension-sidepanel', 'extension-background', 'extension-popup'].includes(fromRuntime)) {
     browser.runtime.onMessage.addListener(callback);
   } else if (fromRuntime === 'extension-csui') {
     // 1. csui -> csui 2. background/sidepanel -> csui
@@ -174,7 +176,7 @@ export const onMessage = async (_callback: (message: any) => void, fromRuntime: 
   }
 
   return () => {
-    if (['extension-sidepanel', 'extension-background'].includes(fromRuntime)) {
+    if (['extension-sidepanel', 'extension-background', 'extension-popup'].includes(fromRuntime)) {
       browser.runtime.onMessage.removeListener(callback);
     } else if (fromRuntime === 'extension-csui') {
       if (window && window?.removeEventListener) {
