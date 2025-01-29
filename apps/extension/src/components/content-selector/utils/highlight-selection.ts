@@ -1,4 +1,4 @@
-import { INLINE_SELECTED_MARK_ID } from '@refly-packages/ai-workspace-common/modules/content-selector/utils';
+import { INLINE_SELECTED_MARK_ID } from '@/components/content-selector/utils';
 import { getMarkdown } from '@refly-packages/utils/html2md';
 
 export function highlightSelection(xPath: string) {
@@ -80,15 +80,4 @@ export function removeHighlight(xPath: string) {
     // try to merge adjacent text nodes
     parent.normalize();
   }
-}
-
-export function getSelectionNodesMarkdown() {
-  const selection = window.getSelection();
-  const range = selection.getRangeAt(0);
-  const text = selection?.toString();
-
-  const fragment = range.cloneRange().cloneContents();
-  const mdText = getMarkdown(fragment);
-
-  return mdText || text; // compatible with empty markdown text
 }

@@ -15,8 +15,7 @@
     "tailwind.config.ts",
     "./node_modules/@refly-packages/ai-workspace-common/src/components/workspace/content-panel",
     "../../packages/ai-workspace-common/src/components/workspace/knowledge-keyword-list",
-    "../../packages/ai-workspace-common/src/components/workspace/left-assist-panel",
-    "../../packages/ai-workspace-common/src/modules/content-selector/use-content-selector.tsx"
+    "../../packages/ai-workspace-common/src/components/workspace/left-assist-panel"
   ],
   "exclude": ["node_modules", "dist"],
   "references": [

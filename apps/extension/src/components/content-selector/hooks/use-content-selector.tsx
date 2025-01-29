@@ -25,9 +25,9 @@ import { getMarkdown } from '@refly/utils/html2md';
 import { BLOCK_SELECTED_MARK_ID, INLINE_SELECTED_MARK_ID } from '../utils/index';
 
 // utils
-import { getSelectionNodesMarkdown } from '../utils/highlight-selection';
+import { getSelectionNodesMarkdown } from '@refly/utils/html2md';
 import { ElementType } from '../utils';
-import HoverMenu from '@refly-packages/ai-workspace-common/modules/content-selector/components/hover-menu';
+import HoverMenu from '../components/hover-menu/index';
 import { getPopupContainer } from '../utils/get-popup-container';
 import { t } from 'i18next';
 import { useParams } from 'react-router-dom';

@@ -1,8 +1,8 @@
-import { useContentSelector } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-content-selector';
+import { useContentSelector } from '@/components/content-selector/hooks/use-content-selector';
 import { useEffect } from 'react';
 
 import '@/i18n/config';
-import { getPopupContainer } from '@refly-packages/ai-workspace-common/modules/content-selector/utils/get-popup-container';
+import { getPopupContainer } from '@/components/content-selector/utils/get-popup-container';
 import { Message } from '@arco-design/web-react';
 
 export const App = () => {

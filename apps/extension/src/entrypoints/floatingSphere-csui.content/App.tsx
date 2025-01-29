@@ -12,7 +12,7 @@ import { useToggleCopilot } from '@/modules/toggle-copilot/hooks/use-toggle-copi
 import { useSaveResourceNotify } from '@refly-packages/ai-workspace-common/hooks/use-save-resouce-notify';
 import { useListenToCopilotType } from '@/modules/toggle-copilot/hooks/use-listen-to-copilot-type';
 import { useTranslation } from 'react-i18next';
-import { useSelectedMark } from '@refly-packages/ai-workspace-common/modules/content-selector/hooks/use-selected-mark';
+import { useSelectedMark } from '@/components/content-selector/hooks/use-selected-mark';
 
 const getPopupContainer = () => {
   const elem = document
