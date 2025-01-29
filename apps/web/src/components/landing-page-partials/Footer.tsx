@@ -13,6 +13,7 @@ import {
   IconEmail,
   IconLanguage,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { FaGithub } from 'react-icons/fa6';
 
 const resources = [
   {
@@ -75,15 +76,12 @@ function Footer() {
               <Button
                 size="large"
                 onClick={() => {
-                  // Add your contact logic here
-                  window.open(
-                    'https://powerformer.feishu.cn/wiki/Syrsw7DJxiaExSkoSiXcTF1inBg?from=landingPage',
-                    '_blank',
-                  );
+                  window.open('https://github.com/refly-ai/refly', '_blank');
                 }}
+                icon={<FaGithub className="flex h-5 w-5 items-center justify-center" />}
                 className="cursor-pointer"
               >
-                {t('landingPage.contactUs')}
+                Github
               </Button>
             </div>
           </div>
