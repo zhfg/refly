@@ -9,7 +9,9 @@ export const useSaveCurrentWeblinkAsResource = () => {
     try {
       const runtime = getRuntime();
       const isWeb = runtime === 'web';
-      const pageContent = isWeb ? getMarkdown(document?.body) : getReadabilityMarkdown(document);
+      const pageContent = isWeb
+        ? getMarkdown(document?.body)
+        : getReadabilityMarkdown(document?.body ? document?.body : document);
       const resource = {
         resourceId: 'tempResId',
         title: document?.title || '',
