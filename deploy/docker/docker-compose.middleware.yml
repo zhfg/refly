@@ -38,7 +38,7 @@ services:
       start_period: 10s
   redis:
     container_name: refly_redis
-    image: redis/redis-stack:6.2.6-v18
+    image: redis/redis-stack:latest
     restart: always
     ports:
       - 6379:6379

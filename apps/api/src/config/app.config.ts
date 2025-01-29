@@ -48,7 +48,7 @@ export default () => ({
   },
   auth: {
     skipVerification: process.env.AUTH_SKIP_VERIFICATION === 'true' || false,
-    cookieDomain: process.env.REFLY_COOKIE_DOMAIN || '.refly.ai',
+    cookieDomain: process.env.REFLY_COOKIE_DOMAIN || 'localhost',
     redirectUrl: process.env.LOGIN_REDIRECT_URL,
     jwt: {
       secret: process.env.JWT_SECRET || 'test',
