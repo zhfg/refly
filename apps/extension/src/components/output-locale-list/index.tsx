@@ -3,7 +3,11 @@ import { Dropdown, Menu, Typography, Message as message } from '@arco-design/web
 import { useUserStore } from '@/stores/user';
 import { LOCALE } from '@refly/common-types';
 // request
-import { type OutputLocale, enLocale, localeToLanguageName } from '@refly/utils';
+import {
+  OutputLocale,
+  enLocale,
+  localeToLanguageName,
+} from '@refly-packages/ai-workspace-common/utils/i18n';
 // styles
 import './index.scss';
 import { apiRequest } from '../../requests/apiRequest';

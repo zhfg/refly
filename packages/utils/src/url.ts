@@ -88,7 +88,8 @@ export const getWsServerOrigin = () => {
   return getEnv() === IENV.DEVELOPMENT ? WS_SERVER_DEV_DOMAIN : WS_SERVER_PROD_DOMAIN;
 };
 
-export const getClientOrigin = () => {
+export const getClientOrigin = (isLandingPage?: boolean) => {
+  console.log('isLandingPage', isLandingPage);
   // Check if we're in extension background
   const runtime = getRuntime();
   if (runtime === 'extension-background') {

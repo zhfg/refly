@@ -26,7 +26,7 @@ import '@/styles/style.css';
 import './App.scss';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 // 设置 runtime 环境
-import { getEnv, setRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getEnv, setRuntime } from '@refly/utils/env';
 const Sentry = _Sentry;
 
 if (process.env.NODE_ENV !== 'development') {
