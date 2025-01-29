@@ -1211,7 +1211,7 @@ const translations = {
       currentPlan: 'Current Plan',
       t1Requests: 'Pro Requests',
       t1RequestsDescription:
-        'Pro models include GPT-4o, Claude 3.5 Sonnet and others. Each successful skill call to pro models counts as one request.',
+        'Pro models include DeepSeek R1, GPT-4o, Claude 3.5 Sonnet and others. Each successful skill call to pro models counts as one request.',
       t2Requests: 'Standard Requests',
       t2RequestsDescription:
         'Standard models include GPT-4o Mini, DeepSeek V3 and others. Each successful skill call to standard models counts as one request.',

@@ -11,9 +11,11 @@ import { Button, Modal } from 'antd';
 import BlurImage from '@/components/common/BlurImage';
 import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function HeroHome() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { setLoginModalOpen } = useAuthStoreShallow((state) => ({
     setLoginModalOpen: state.setLoginModalOpen,
   }));
@@ -69,7 +71,9 @@ function HeroHome() {
               <div className="mb-5">
                 <div className="z-10 flex items-center justify-center">
                   <div
-                    onClick={() => setLoginModalOpen(true)}
+                    onClick={() => {
+                      navigate('/pricing');
+                    }}
                     className={cn(
                       'group inline-flex items-center justify-center rounded-lg border border-black/5 bg-white text-base hover:cursor-pointer hover:bg-neutral-50 dark:border-white/5',
                       'px-4',
