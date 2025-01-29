@@ -44,7 +44,6 @@ export default defineConfig({
         postcss: postcssConfig,
       },
       build: {
-        sourcemap: true,
         rollupOptions: {
           onLog(level, log, handler) {
             if (
