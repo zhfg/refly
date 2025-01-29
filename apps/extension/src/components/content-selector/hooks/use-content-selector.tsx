@@ -11,7 +11,7 @@ import type {
   SyncStatusEvent,
   MarkType,
 } from '@refly/common-types';
-import { safeStringifyJSON } from '@refly-packages/utils/parse';
+import { safeStringifyJSON } from '@refly/utils/parse';
 import {
   sendMessage,
   onMessage,
@@ -20,7 +20,7 @@ import { BackgroundMessage } from '@refly/common-types';
 import { getRuntime } from '@refly/utils/env';
 import { SelectedTextDomain } from '@refly/common-types';
 import { getElementType } from '../utils';
-import { genContentSelectorID } from '@refly-packages/utils/id';
+import { genContentSelectorID } from '@refly/utils/id';
 import { getMarkdown } from '@refly/utils/html2md';
 import { BLOCK_SELECTED_MARK_ID, INLINE_SELECTED_MARK_ID } from '../utils/index';
 

@@ -35,7 +35,6 @@ import {
   useDocumentStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/document';
 
-import { useContentSelectorStore } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { useSelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/use-selection-context';
 import { useDocumentContext } from '@refly-packages/ai-workspace-common/context/document';
@@ -65,11 +64,6 @@ export const CollaborativeEditor = memo(
 
     const { readOnly } = useDocumentStoreShallow((state) => ({
       readOnly: state.config[docId]?.readOnly,
-    }));
-
-    const { showContentSelector, scope } = useContentSelectorStore((state) => ({
-      showContentSelector: state.showContentSelector,
-      scope: state.scope,
     }));
 
     const setNodeDataByEntity = useSetNodeDataByEntity();
@@ -372,13 +366,7 @@ export const CollaborativeEditor = memo(
     }, [provider, handleEditorUpdate]);
 
     return (
-      <div
-        className={classNames('w-full', 'ai-note-editor-content-container', {
-          'refly-selector-mode-active': showContentSelector,
-          'refly-block-selector-mode': scope === 'block',
-          'refly-inline-selector-mode': scope === 'inline',
-        })}
-      >
+      <div className={classNames('w-full', 'ai-note-editor-content-container')}>
         <div className="w-full h-full">
           <EditorRoot key={forceUpdateRef.current}>
             <EditorContent

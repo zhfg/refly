@@ -1,11 +1,12 @@
 import { INLINE_SELECTED_MARK_ID } from '@/components/content-selector/utils';
-import { getMarkdown } from '@refly-packages/utils/html2md';
 
 export function highlightSelection(xPath: string) {
-  const selection = window.getSelection();
+  const selection = window.getSelection() as Selection;
   const selectedNodes = [];
 
-  if (selection.rangeCount > 0) {
+  if (!selection) return [];
+
+  if (selection?.rangeCount > 0) {
     const range = selection.getRangeAt(0);
     const selectedTextNodes = getTextNodesInRange(range);
 
