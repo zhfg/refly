@@ -12,6 +12,7 @@ import { useResizePanel } from '@refly-packages/ai-workspace-common/hooks/use-re
 import { ErrorBoundary } from '@sentry/react';
 import { useKnowledgeBaseStore } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 import { MessageIntentSource } from '@refly-packages/ai-workspace-common/types/copilot';
+import { ContentClipper } from '@/components/content-clipper';
 
 // 用于快速选择
 export const quickActionList = ['summary'];
@@ -56,7 +57,7 @@ const KnowledgeLibraryLayout = () => {
         <div className="workspace-inner-container">
           <div className="workspace-panel-container">
             <div className="workspace-content-panel">
-              <div>hello world</div>
+              <ContentClipper />
             </div>
           </div>
         </div>

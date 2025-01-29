@@ -50,7 +50,7 @@ export const useMockInAppResource = () => {
   // 初始状态，直接构造虚构的 kbId 和 resId
   useEffect(() => {
     if (!resId && !kbId && isHomepage && knowledgeBaseStore?.currentResource) {
-      handleFakeKBRouteJump();
+      // handleFakeKBRouteJump();
     }
   }, [resId, kbId, knowledgeBaseStore.currentResource]);
 

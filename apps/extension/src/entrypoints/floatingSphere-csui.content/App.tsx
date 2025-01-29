@@ -13,10 +13,14 @@ import { useSaveResourceNotify } from '@refly-packages/ai-workspace-common/hooks
 import { useListenToCopilotType } from '@/modules/toggle-copilot/hooks/use-listen-to-copilot-type';
 import { useTranslation } from 'react-i18next';
 import { useSelectedMark } from '@/components/content-selector/hooks/use-selected-mark';
-import { onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import {
+  onMessage,
+  sendMessage,
+} from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly/utils/env';
 import { useSaveSelectedContent } from '@/hooks/use-save-selected-content';
 import { BackgroundMessage, SyncMarkEvent } from '@refly/common-types';
+import { getMarkdown } from '@refly/utils/html2md';
 
 const getPopupContainer = () => {
   const elem = document
@@ -57,7 +61,7 @@ export const App = () => {
 
   // Listen to mark sync events
   useEffect(() => {
-    const clearEvent = onMessage((event: MessageEvent<any>) => {
+    onMessage((event: MessageEvent<any>) => {
       const data = event as any as BackgroundMessage;
       if ((data as SyncMarkEvent)?.name === 'syncMarkEvent') {
         const { type, content } = (data as SyncMarkEvent)?.body ?? { type: '', content: '' };
@@ -66,11 +70,24 @@ export const App = () => {
           handleSaveResourceAndNotify(boundSaveSelectedContent);
         }
       }
-    }, getRuntime());
 
-    return () => {
-      clearEvent?.();
-    };
+      // Handle get page content request
+      if (data?.name === 'getPageContent') {
+        // Get page content using readability
+        const content = getMarkdown(document?.body);
+        // Send response back with complete page information
+        const response = {
+          source: getRuntime(),
+          name: 'getPageContentResponse',
+          body: {
+            title: document?.title || '',
+            url: window?.location?.href || '',
+            content,
+          },
+        };
+        sendMessage(response);
+      }
+    }, getRuntime());
   }, []);
 
   const updateSpherePosition = (newY: number) => {
@@ -184,7 +201,7 @@ export const App = () => {
                 handleToggleContentSelectorPanel(isContentSelectorOpen);
               }}
               className={`refly-floating-sphere-dropdown-item assist-action-item ${isContentSelectorOpen ? 'active' : ''}`}
-            ></Button>
+            />
           </Tooltip>
           <Tooltip
             content={t('extension.floatingSphere.saveResource')}
@@ -201,7 +218,7 @@ export const App = () => {
                 handleSaveResourceAndNotify(saveResource);
               }}
               className="refly-floating-sphere-dropdown-item assist-action-item"
-            ></Button>
+            />
           </Tooltip>
         </div>
       </div>

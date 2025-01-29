@@ -1,18 +1,18 @@
 import { UpsertResourceRequest } from '@refly/openapi-schema';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import { getMarkdown } from '@refly/utils/html2md';
 import { getClientOrigin } from '@refly/utils/url';
 
-export const useSaveSelectedContent = () => {
-  const saveSelectedContent = async (targetOrContent: HTMLElement | string) => {
-    try {
-      // Get the content either from HTMLElement or use the string directly
-      const content =
-        typeof targetOrContent === 'string' ? targetOrContent : getMarkdown(targetOrContent);
+interface SaveContentMetadata {
+  title?: string;
+  url?: string;
+}
 
-      // Get the current page title and URL
-      const title = document?.title || 'Untitled';
-      const url = document?.location?.href || 'https://www.refly.ai';
+export const useSaveSelectedContent = () => {
+  const saveSelectedContent = async (content: string, metadata?: SaveContentMetadata) => {
+    try {
+      // Get the current page title and URL or use provided metadata
+      const title = metadata?.title || document?.title || 'Untitled';
+      const url = metadata?.url || document?.location?.href || 'https://www.refly.ai';
 
       const createResourceData: UpsertResourceRequest = {
         resourceType: 'text',

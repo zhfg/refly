@@ -117,5 +117,23 @@ export const translation = {
       toggleCopilotClose: 'The floating sphere is closed, you can refresh the page to redisplay',
       toggleCopilotTooltip: 'Close the floating sphere, you can refresh the page to redisplay',
     },
+    webClipper: {
+      placeholder: {
+        enterOrClipContent: 'Enter content or click clip button to get current page content...',
+      },
+      action: {
+        clip: 'Clip',
+        clear: 'Clear',
+        save: 'Save',
+      },
+      error: {
+        clipContentFailed: 'Failed to clip content',
+        contentRequired: 'Content is required',
+        saveFailed: 'Failed to save content',
+      },
+      success: {
+        saved: 'Content saved successfully',
+      },
+    },
   },
 };

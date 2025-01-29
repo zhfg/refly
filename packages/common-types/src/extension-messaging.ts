@@ -16,13 +16,15 @@ export type CopilotMsgName =
   | 'toggleCopilotFromPopup'
   | 'checkSidePanelOpenStatus';
 export type SidePanelMsgName = 'registerSidePanel' | 'unregisterSidePanel';
+export type SyncPageContentName = 'reflyStatusCheck' | 'getPageContentResponse';
 export type MessageName =
   | 'getOpenedTabs'
   | 'getCurrentMockResourceByTabId'
   | 'getTabId'
   | 'currentMockResource'
   | 'sidePanelHeartBeat'
-  | 'reflyStatusCheck'
+  | SyncPageContentName
+  | 'getPageContent'
   | CopilotMsgName
   | SyncMarkEventName
   | SidePanelMsgName;

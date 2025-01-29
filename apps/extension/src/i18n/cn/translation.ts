@@ -116,5 +116,23 @@ export const translation = {
       toggleCopilotClose: '悬浮球已关闭，可以刷新页面重新展示',
       toggleCopilotTooltip: '关闭悬浮球，可以刷新页面重新展示',
     },
+    webClipper: {
+      placeholder: {
+        enterOrClipContent: '输入内容或点击剪藏按钮获取当前页面内容...',
+      },
+      action: {
+        clip: '剪藏',
+        clear: '清空',
+        save: '保存',
+      },
+      error: {
+        clipContentFailed: '剪藏内容失败',
+        contentRequired: '内容不能为空',
+        saveFailed: '保存内容失败',
+      },
+      success: {
+        saved: '内容保存成功',
+      },
+    },
   },
 };
