@@ -107,6 +107,8 @@ export const translation = {
     },
     floatingSphere: {
       saveResource: 'Save to Refly',
+      saveSelectedContent: 'Save',
+      saveSelectedContentTooltip: 'Save selected content to knowledge base',
       selectContentToAsk: 'Select content to ask',
       enableSelectContentToAskNotify: 'Enable select content to ask',
       disableSelectContentToAskNotify: 'Disable select content to ask',

@@ -13,6 +13,10 @@ import { useSaveResourceNotify } from '@refly-packages/ai-workspace-common/hooks
 import { useListenToCopilotType } from '@/modules/toggle-copilot/hooks/use-listen-to-copilot-type';
 import { useTranslation } from 'react-i18next';
 import { useSelectedMark } from '@/components/content-selector/hooks/use-selected-mark';
+import { onMessage } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
+import { getRuntime } from '@refly/utils/env';
+import { useSaveSelectedContent } from '@/hooks/use-save-selected-content';
+import { BackgroundMessage, SyncMarkEvent } from '@refly/common-types';
 
 const getPopupContainer = () => {
   const elem = document
@@ -29,6 +33,7 @@ export const App = () => {
   const { handleToggleCopilot } = useToggleCopilot();
   const { handleStopContentSelectorListener, handleInitContentSelectorListener } =
     useSelectedMark();
+  const { saveSelectedContent } = useSaveSelectedContent();
   const { t, i18n } = useTranslation();
   const [isContentSelectorOpen, setIsContentSelectorOpen] = useState(false);
 
@@ -49,6 +54,24 @@ export const App = () => {
 
   // listen to copilotType
   useListenToCopilotType();
+
+  // Listen to mark sync events
+  useEffect(() => {
+    const clearEvent = onMessage((event: MessageEvent<any>) => {
+      const data = event as any as BackgroundMessage;
+      if ((data as SyncMarkEvent)?.name === 'syncMarkEvent') {
+        const { type, content } = (data as SyncMarkEvent)?.body ?? { type: '', content: '' };
+        if (type === 'add' && content) {
+          const boundSaveSelectedContent = () => saveSelectedContent(content);
+          handleSaveResourceAndNotify(boundSaveSelectedContent);
+        }
+      }
+    }, getRuntime());
+
+    return () => {
+      clearEvent?.();
+    };
+  }, []);
 
   const updateSpherePosition = (newY: number) => {
     if (sphereRef.current) {

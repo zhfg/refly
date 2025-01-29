@@ -1,6 +1,7 @@
 import React from 'react';
-import { Button } from '@arco-design/web-react';
+import { Button, Tooltip } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
+import { getPopupContainer } from '@/utils/ui';
 
 interface HoverMenuProps {
   onClick: () => void;
@@ -32,7 +33,7 @@ const HoverMenu: React.FC<HoverMenuProps> = ({ onClick, onMouseEnter, onMouseLea
         onMouseLeave={onMouseLeave}
         size="mini"
       >
-        <span className="font-medium">{t('knowledgeBase.context.addToContext')}</span>
+        <span className="font-medium">{t('extension.floatingSphere.saveSelectedContent')}</span>
       </Button>
     </div>
   );

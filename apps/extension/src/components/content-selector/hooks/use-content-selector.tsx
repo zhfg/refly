@@ -137,7 +137,12 @@ export const useContentSelector = (
       hideTimeout = setTimeout(() => {
         root.unmount();
         // 从 document.body 中移除
-        document.body.removeChild(menuContainer);
+
+        try {
+          document.body.removeChild(menuContainer);
+        } catch (err) {
+          console.log('remove err', err);
+        }
       }, 300);
     };
 
@@ -245,13 +250,18 @@ export const useContentSelector = (
 
       const textType = 'text' as ElementType;
       const mark = buildMark(textType, content, xPath);
-      addMark({ ...mark, cleanup }, []);
 
-      const markEvent = { type: 'add' as SyncMarkEventType, mark };
-      const msg: Partial<SyncMarkEvent> = {
-        body: markEvent,
+      // Send sync event for saving content
+      const msg: BackgroundMessage<{ type: SyncMarkEventType; mark: Mark; content: string }> = {
+        source: getRuntime(),
+        name: 'syncMarkEvent',
+        body: {
+          type: 'add',
+          mark,
+          content,
+        },
       };
-      syncMarkEvent(msg);
+      sendMessage(msg);
 
       cleanup();
     };
@@ -449,35 +459,39 @@ export const useContentSelector = (
     }
   };
 
-  const onContentClick = (ev: MouseEvent) => {
+  const onContentClick = async (ev: MouseEvent) => {
     ev.stopImmediatePropagation();
     ev.preventDefault();
     ev.stopPropagation();
-    let markEvent: { type: 'remove' | 'add'; mark: Mark };
 
     if (isMouseOutsideContainer(ev)) {
       return;
     }
 
     if (statusRef.current && markRef.current && showContentSelectorRef.current) {
-      const { target } = ev;
+      const target = ev.target as HTMLElement;
+      if (!target) return;
 
-      console.log('onContentClick');
-
-      if ((target as Element)?.getAttribute(BLOCK_SELECTED_MARK_ID)) {
+      if (target.getAttribute(BLOCK_SELECTED_MARK_ID)) {
         //
-      } else if ((target as Element)?.getAttribute(INLINE_SELECTED_MARK_ID)) {
+      } else if (target.getAttribute(INLINE_SELECTED_MARK_ID)) {
         //
       } else {
-        const mark = addBlockMark(target as HTMLElement);
-        markEvent = { type: 'add', mark };
-      }
+        const mark = addBlockMark(target);
+        const content = getMarkdown(target);
 
-      // 发送给 refly-main-app
-      const msg: Partial<SyncMarkEvent> = {
-        body: markEvent,
-      };
-      syncMarkEvent(msg);
+        // Send sync event for saving content
+        const msg: BackgroundMessage<{ type: SyncMarkEventType; mark: Mark; content: string }> = {
+          source: getRuntime(),
+          name: 'syncMarkEvent',
+          body: {
+            type: 'add',
+            mark,
+            content,
+          },
+        };
+        sendMessage(msg);
+      }
     }
   };
 
@@ -504,6 +518,8 @@ export const useContentSelector = (
 
   const initBlockDomEventListener = () => {
     const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
+
+    if (!containerElem) return;
 
     containerElem.addEventListener('mousemove', onMouseMove);
     containerElem.addEventListener('click', onContentClick, {

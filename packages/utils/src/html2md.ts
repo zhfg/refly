@@ -56,5 +56,5 @@ export function getSelectionNodesMarkdown() {
   const fragment = range.cloneRange().cloneContents();
   const mdText = getMarkdown(fragment);
 
-  return mdText || text; // compatible with empty markdown text
+  return mdText || text || ''; // compatible with empty markdown text
 }

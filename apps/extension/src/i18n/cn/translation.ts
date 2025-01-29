@@ -106,6 +106,8 @@ export const translation = {
     },
     floatingSphere: {
       saveResource: '保存到 Refly',
+      saveSelectedContent: '保存',
+      saveSelectedContentTooltip: '保存选中内容到知识库',
       selectContentToAsk: '选择内容提问',
       enableSelectContentToAskNotify: '启用选择内容提问',
       disableSelectContentToAskNotify: '禁用选择内容提问',
