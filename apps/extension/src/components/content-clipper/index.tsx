@@ -140,7 +140,7 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
           value={pageInfo.content}
           onChange={handleContentChange}
           onKeyDown={handleKeyDown}
-          autoSize={{ minRows: 10, maxRows: 16 }}
+          autoSize={{ minRows: 10, maxRows: 10 }}
           className="w-full resize-none"
         />
         <div className="flex flex-row justify-end gap-2">
