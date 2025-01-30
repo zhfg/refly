@@ -10,6 +10,7 @@ import {
   IconLibrary,
   IconResource,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 
 interface LibraryModalProps {
   visible: boolean;
@@ -34,6 +35,8 @@ export const LibraryModal = (props: LibraryModalProps) => {
     },
   ];
 
+  const activeKey = useKnowledgeBaseStoreShallow((state) => state.libraryModalActiveKey);
+
   return (
     <Modal
       className="library-modal"
@@ -49,7 +52,7 @@ export const LibraryModal = (props: LibraryModalProps) => {
       onCancel={() => setVisible(false)}
       focusTriggerAfterClose={false}
     >
-      <Tabs items={tabs} />
+      <Tabs defaultActiveKey={activeKey} items={tabs} />
     </Modal>
   );
 };

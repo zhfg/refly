@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Button, Input, Message } from '@arco-design/web-react';
-import { IconCopy, IconDelete } from '@arco-design/web-react/icon';
+import { Button, Input, message } from 'antd';
+import { IconCopy, IconDelete, IconSave } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 import { useSaveSelectedContent } from '@/hooks/use-save-selected-content';
 import { useSaveResourceNotify } from '@refly-packages/ai-workspace-common/hooks/use-save-resouce-notify';
@@ -59,14 +59,14 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
       sendMessage(msg);
     } catch (err) {
       console.error('Failed to clip content:', err);
-      Message.error(t('extension.webClipper.error.clipContentFailed'));
+      message.error(t('extension.webClipper.error.clipContentFailed'));
     }
   }, [t]);
 
   // Handle save content
   const handleSave = useCallback(async () => {
     if (!pageInfo.content?.trim()) {
-      Message.warning(t('extension.webClipper.error.contentRequired'));
+      message.warning(t('extension.webClipper.error.contentRequired'));
       return;
     }
 
@@ -86,7 +86,7 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
       });
     } catch (err) {
       console.error('Failed to save content:', err);
-      Message.error(t('extension.webClipper.error.saveFailed'));
+      message.error(t('extension.webClipper.error.saveFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -110,12 +110,12 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
   );
 
   // Handle content change
-  const handleContentChange = useCallback((value: string) => {
-    setPageInfo((prev) => ({ ...prev, content: value }));
+  const handleContentChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPageInfo((prev) => ({ ...prev, content: e.target.value }));
   }, []);
 
   return (
-    <div className={`flex flex-col gap-4 p-4 ${className}`}>
+    <div className={`flex flex-col gap-4 p-0 ${className}`}>
       <div className="flex flex-col gap-2">
         <TextArea
           placeholder={t('extension.webClipper.placeholder.enterOrClipContent')}
@@ -125,26 +125,33 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
           autoSize={{ minRows: 4, maxRows: 8 }}
           className="w-full resize-none"
         />
-        <Button type="outline" icon={<IconCopy />} onClick={handleClipContent} className="self-end">
-          {t('extension.webClipper.action.clip')}
-        </Button>
-      </div>
-
-      <div className="flex justify-end gap-2">
-        {pageInfo.content && (
-          <Button icon={<IconDelete />} onClick={handleClear}>
-            {t('extension.webClipper.action.clear')}
+        <div className="flex flex-row justify-end gap-2">
+          {pageInfo.content && (
+            <Button size="small" icon={<IconDelete />} onClick={handleClear}>
+              {t('extension.webClipper.action.clear')}
+            </Button>
+          )}
+          <Button
+            type="primary"
+            size="small"
+            icon={<IconSave />}
+            loading={isSaving}
+            disabled={!pageInfo.content?.trim()}
+            onClick={handleSave}
+          >
+            {t('extension.webClipper.action.save')}
           </Button>
-        )}
-        <Button
-          type="primary"
-          loading={isSaving}
-          disabled={!pageInfo.content?.trim()}
-          onClick={handleSave}
-        >
-          {t('extension.webClipper.action.save')}
-        </Button>
+        </div>
       </div>
+      <Button
+        type="primary"
+        size="large"
+        icon={<IconCopy />}
+        onClick={handleClipContent}
+        className="self-end w-full"
+      >
+        {t('extension.webClipper.action.clip')}
+      </Button>
     </div>
   );
 };

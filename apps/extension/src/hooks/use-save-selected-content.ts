@@ -28,8 +28,9 @@ export const useSaveSelectedContent = () => {
         body: createResourceData,
       });
 
-      const resourceId = data?.data?.resourceId;
-      const resourceUrl = `${getClientOrigin(false)}/resource/${resourceId}`;
+      // const resourceId = data?.data?.resourceId;
+      // const resourceUrl = `${getClientOrigin(false)}/resource/${resourceId}`;
+      const resourceUrl = `${getClientOrigin(false)}`;
 
       return {
         success: !!data?.success,

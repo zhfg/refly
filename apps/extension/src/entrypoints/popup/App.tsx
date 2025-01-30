@@ -1,4 +1,4 @@
-import { Button } from '@arco-design/web-react';
+import { Button, ConfigProvider } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 
 import { reflyEnv } from '@/utils/env';
@@ -7,7 +7,7 @@ import '@/styles/style.css';
 import './App.scss';
 import '@/i18n/config';
 
-import { IconRefresh, IconBulb } from '@arco-design/web-react/icon';
+import { IconRefresh, IconBulb, IconHome } from '@arco-design/web-react/icon';
 
 import Logo from '@/assets/logo.svg';
 import { browser } from 'wxt/browser';
@@ -16,6 +16,7 @@ import { checkPageUnsupported } from '@refly-packages/ai-workspace-common/utils/
 import { ContentClipper } from '@/components/content-clipper';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { setRuntime } from '@refly/utils/env';
+import { IconDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
 
 /**
  * 打开 popup 页面的规则
@@ -26,7 +27,7 @@ import { setRuntime } from '@refly/utils/env';
  */
 const App = () => {
   const osType = reflyEnv.getOsType();
-  const openSidePanelBtnRef = useRef<HTMLButtonElement>();
+  const openSidePanelBtnRef = useRef<HTMLButtonElement | null>(null);
   const currentTabUrlRef = useRef('');
   const [loading, setLoading] = useState(true);
   const [pageUnsupported, setPageUnsupported] = useState(false);
@@ -68,141 +69,89 @@ const App = () => {
 
   if (loading) return null;
 
-  if (!isLoggedIn) {
-    return (
-      <div className="popup-page">
-        <header>
-          <div className="logo">
-            <img className="logo-img" src={Logo} alt="" />
-            <span className="title">Refly</span>
-          </div>
-          <div className="guide-box">
-            <Button
-              type="outline"
-              onClick={() => {
-                browser.tabs.create({ url: 'https://refly.ai' });
-              }}
-            >
-              教程
-            </Button>
-          </div>
-        </header>
-        <div>
-          <p className="content-title">欢迎使用 Refly！</p>
-          <p className="state">请先登录以使用完整功能</p>
-          <Button
-            long
-            type="primary"
-            onClick={() => {
-              browser.tabs.create({ url: 'https://refly.ai/login' });
-            }}
-          >
-            登录/注册
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (pageUnsupported) {
-    return (
-      <div className="popup-page">
-        <header>
-          <div className="logo">
-            <img className="logo-img" src={Logo} alt="" />
-            <span className="title">Refly</span>
-          </div>
-          <div className="guide-box">
-            <Button
-              type="outline"
-              onClick={() => {
-                browser.tabs.create({ url: 'https://refly.ai' });
-              }}
-            >
-              教程
-            </Button>
-          </div>
-        </header>
-        <div>
-          <p className="content-title">感谢使用 Refly！</p>
-          <p className="state">😵 由于浏览器安全限制，Refly 无法在以下页面工作：</p>
-          <ul>
-            <li>Chrome Web 商店页面</li>
-            <li>Chrome 页面</li>
-            <li>新标签页</li>
-          </ul>
-          <p className="page-unsupported-hint">
-            您可以在另一个页面（
-            <a href="https://zh.wikipedia.org/wiki/ChatGPT" target="_blank" rel="noreferrer">
-              例如此页面
-            </a>
-            ）上尝试 Refly。
-          </p>
-          <Button
-            ref={openSidePanelBtnRef}
-            long
-            type="primary"
-            style={{ marginTop: 16 }}
-            icon={<IconBulb />}
-            onClick={() => openSidePanel()}
-          >
-            打开侧边栏提问
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="popup-page">
-      <header>
-        <div className="logo">
-          <img className="logo-img" src={Logo} alt="" />
-          <span className="title">Refly</span>
-        </div>
-        <div className="guide-box">
-          <Button
-            type="outline"
-            onClick={() => {
-              browser.tabs.create({ url: 'https://refly.ai' });
-            }}
-          >
-            教程
-          </Button>
-        </div>
-      </header>
-      <div className="content">
-        <ContentClipper onSaveSuccess={() => {}} />
-        <div className="footer">
-          <Button
-            ref={openSidePanelBtnRef}
-            long
-            type="primary"
-            icon={<IconBulb />}
-            onClick={() => openSidePanel()}
-          >
-            打开侧边栏提问
-          </Button>
-          <p className="shortcut-hint">
-            提示：按下
-            <span className="key">{osType === 'OSX' ? 'Command+J' : 'Ctrl+J'}</span>
-            以更快地激活 Refly。键盘快捷键可以在
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#00968F',
+          borderRadius: 6,
+          controlItemBgActive: '#f1f1f0',
+          controlItemBgActiveHover: '#e0e0e0',
+        },
+      }}
+    >
+      <div className="popup-page">
+        <header>
+          <div className="logo">
+            <img className="logo-img" src={Logo} alt="" />
+            <span className="title">Refly</span>
+          </div>
+          <div className="guide-box">
             <Button
-              type="text"
-              className="shortcut-link"
+              className="mr-2"
+              icon={<IconHome />}
               onClick={() => {
-                browser.tabs.create({
-                  url: 'chrome://extensions/shortcuts',
-                });
+                browser.tabs.create({ url: 'https://refly.ai' });
+              }}
+            />
+            <Button
+              icon={<IconDocument />}
+              onClick={() => {
+                browser.tabs.create({ url: 'https://docs.refly.ai' });
+              }}
+            />
+          </div>
+        </header>
+        {!isLoggedIn ? (
+          <div>
+            <p className="content-title">欢迎使用 Refly！</p>
+            <p className="state">请先登录以使用完整功能</p>
+            <Button
+              block
+              type="primary"
+              onClick={() => {
+                browser.tabs.create({ url: 'https://refly.ai/login' });
               }}
             >
-              此处
+              登录/注册
             </Button>
-            更改。
-          </p>
-        </div>
+          </div>
+        ) : pageUnsupported ? (
+          <div>
+            <p className="content-title">感谢使用 Refly！</p>
+            <p className="state">😵 由于浏览器安全限制，Refly 无法在以下页面工作：</p>
+            <ul>
+              <li>Chrome Web 商店页面</li>
+              <li>Chrome 页面</li>
+              <li>新标签页</li>
+            </ul>
+            <p className="page-unsupported-hint">
+              您可以在另一个页面（
+              <a href="https://zh.wikipedia.org/wiki/ChatGPT" target="_blank" rel="noreferrer">
+                例如此页面
+              </a>
+              ）上尝试 Refly。
+            </p>
+            <Button
+              ref={openSidePanelBtnRef}
+              block
+              type="primary"
+              style={{ marginTop: 16 }}
+              icon={<IconBulb />}
+              onClick={() => openSidePanel()}
+            >
+              打开侧边栏提问
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="content">
+              <ContentClipper onSaveSuccess={() => {}} />
+            </div>
+          </>
+        )}
       </div>
-    </div>
+    </ConfigProvider>
   );
 };
 

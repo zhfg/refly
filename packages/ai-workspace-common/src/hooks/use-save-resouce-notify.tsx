@@ -27,7 +27,12 @@ export const useSaveResourceNotify = () => {
         content: (
           <span>
             {t('resource.import.saveResourceSuccess.prefix')}{' '}
-            <Link href={url} target="_blank" style={{ borderRadius: 4 }} hoverable>
+            <Link
+              href={`${url}?openLibrary=true`}
+              target="_blank"
+              style={{ borderRadius: 4 }}
+              hoverable
+            >
               {t('resource.import.saveResourceSuccess.link')}
             </Link>{' '}
             {t('resource.import.saveResourceSuccess.suffix')}
