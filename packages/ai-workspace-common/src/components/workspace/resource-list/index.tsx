@@ -60,6 +60,7 @@ const ActionDropdown = ({
       },
     });
     setShowLibraryModal(false);
+    setPopupVisible(false);
   };
 
   const handleOpenWebpage: MenuProps['onClick'] = ({ domEvent }) => {

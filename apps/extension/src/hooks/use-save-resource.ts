@@ -36,10 +36,10 @@ export const useSaveCurrentWeblinkAsResource = () => {
       };
 
       const { data } = await getClient().createResource(createResourceData);
-      const resourceId = data?.data?.resourceId;
-      const url = `${getClientOrigin(false)}/resource/${resourceId}`;
-
-      return { success: true, url };
+      // const resourceId = data?.data?.resourceId;
+      // const url = `${getClientOrigin(false)}/resource/${resourceId}`;
+      const url = `${getClientOrigin(false)}`;
+      return { success: !!data?.success, url };
     } catch (err) {
       console.error(err);
       return { success: false, url: '' };

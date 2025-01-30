@@ -19,7 +19,7 @@ import {
 } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { getRuntime } from '@refly/utils/env';
 import { useSaveSelectedContent } from '@/hooks/use-save-selected-content';
-import { BackgroundMessage, SyncMarkEvent } from '@refly/common-types';
+import { BackgroundMessage, SyncMarkEvent, type MessageName } from '@refly/common-types';
 import { getMarkdown } from '@refly/utils/html2md';
 
 const getPopupContainer = () => {
@@ -78,7 +78,7 @@ export const App = () => {
         // Send response back with complete page information
         const response = {
           source: getRuntime(),
-          name: 'getPageContentResponse',
+          name: 'getPageContentResponse' as MessageName,
           body: {
             title: document?.title || '',
             url: window?.location?.href || '',
