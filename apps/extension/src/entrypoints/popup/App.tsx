@@ -1,4 +1,4 @@
-import { Button, ConfigProvider, Spin } from 'antd';
+import { Button, ConfigProvider, Spin, Tooltip } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,6 +17,7 @@ import { checkPageUnsupported } from '@refly-packages/ai-workspace-common/utils/
 import { ContentClipper } from '@/components/content-clipper';
 import { setRuntime } from '@refly/utils/env';
 import { IconDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IoSettingsOutline } from 'react-icons/io5';
 
 /**
  * 打开 popup 页面的规则
@@ -106,6 +107,17 @@ const App = () => {
             <span className="title">Refly</span>
           </div>
           <div className="guide-box">
+            <Tooltip title={t('extension.popup.languageSettings')}>
+              <Button
+                className="mr-2"
+                icon={<IoSettingsOutline />}
+                onClick={() => {
+                  browser.tabs.create({
+                    url: `${getClientOrigin()}?openSettings=true&settingsTab=language`,
+                  });
+                }}
+              />
+            </Tooltip>
             <Button
               className="mr-2"
               icon={<IconHome />}

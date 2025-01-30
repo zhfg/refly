@@ -158,6 +158,12 @@ export const translation = {
       docs: '文档',
       examplePage: '例如此页面',
       loading: '加载中...',
+      languageSettings: '语言设置',
+      settings: {
+        title: '设置',
+        language: '语言设置',
+        description: '更改界面语言',
+      },
     },
   },
 };

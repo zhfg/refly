@@ -1,8 +1,11 @@
 import { Tabs, Modal } from 'antd';
+import { useTranslation } from 'react-i18next';
+import {
+  useSiderStoreShallow,
+  type SettingsModalActiveTab,
+} from '@refly-packages/ai-workspace-common/stores/sider';
 
 // components
-import { useTranslation } from 'react-i18next';
-
 import { AccountSetting } from '@refly-packages/ai-workspace-common/components/settings/account-setting';
 import { LanguageSetting } from '@refly-packages/ai-workspace-common/components/settings/language-setting';
 import { Subscription } from '@refly-packages/ai-workspace-common/components/settings/subscription';
@@ -22,9 +25,14 @@ interface SettingModalProps {
   visible: boolean;
   setVisible: (visible: boolean) => void;
 }
+
 export const SettingModal = (props: SettingModalProps) => {
   const { visible, setVisible } = props;
   const { t, i18n } = useTranslation();
+  const { settingsModalActiveTab, setSettingsModalActiveTab } = useSiderStoreShallow((state) => ({
+    settingsModalActiveTab: state.settingsModalActiveTab,
+    setSettingsModalActiveTab: state.setSettingsModalActiveTab,
+  }));
 
   const tabs = [
     {
@@ -61,7 +69,14 @@ export const SettingModal = (props: SettingModalProps) => {
       open={visible}
       onCancel={() => setVisible(false)}
     >
-      <Tabs size="small" className="pt-2" tabPosition="left" items={tabs} />
+      <Tabs
+        size="small"
+        className="pt-2"
+        tabPosition="left"
+        items={tabs}
+        activeKey={settingsModalActiveTab}
+        onChange={(key) => setSettingsModalActiveTab(key as SettingsModalActiveTab)}
+      />
     </Modal>
   );
 };

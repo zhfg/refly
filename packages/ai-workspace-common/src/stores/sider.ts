@@ -9,6 +9,12 @@ export interface SiderData {
   type: 'canvas' | 'document' | 'resource';
 }
 
+export enum SettingsModalActiveTab {
+  Language = 'language',
+  Subscription = 'subscription',
+  Account = 'account',
+}
+
 interface SiderState {
   // state
   collapse: boolean;
@@ -18,6 +24,7 @@ interface SiderState {
   showCanvasListModal: boolean;
   showLibraryModal: boolean;
   showSettingModal: boolean;
+  settingsModalActiveTab: SettingsModalActiveTab;
 
   // method
   setCollapse: (val: boolean) => void;
@@ -27,6 +34,7 @@ interface SiderState {
   setShowCanvasListModal: (val: boolean) => void;
   setShowLibraryModal: (val: boolean) => void;
   setShowSettingModal: (val: boolean) => void;
+  setSettingsModalActiveTab: (val: SettingsModalActiveTab) => void;
   updateCanvasTitle: (canvasId: string, title: string) => void;
 }
 
@@ -39,6 +47,7 @@ export const useSiderStore = create<SiderState>()(
     showLibraryModal: false,
     showCanvasListModal: false,
     showSettingModal: false,
+    settingsModalActiveTab: SettingsModalActiveTab.Subscription,
 
     setCollapse: (val: boolean) => set({ collapse: val }),
     setShowSiderDrawer: (val: boolean) => set({ showSiderDrawer: val }),
@@ -47,6 +56,8 @@ export const useSiderStore = create<SiderState>()(
     setShowCanvasListModal: (val: boolean) => set({ showCanvasListModal: val }),
     setShowLibraryModal: (val: boolean) => set({ showLibraryModal: val }),
     setShowSettingModal: (val: boolean) => set({ showSettingModal: val }),
+    setSettingsModalActiveTab: (val: SettingsModalActiveTab) =>
+      set({ settingsModalActiveTab: val }),
     updateCanvasTitle: (canvasId: string, title: string) => {
       set((state) => {
         const canvasList = state.canvasList.map((canvas) =>

@@ -22,7 +22,11 @@ import { SettingsGuideModal } from '@refly-packages/ai-workspace-common/componen
 import { StorageExceededModal } from '@refly-packages/ai-workspace-common/components/subscription/storage-exceeded-modal';
 // hooks
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
-import { SiderData, useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+import {
+  SiderData,
+  useSiderStoreShallow,
+  type SettingsModalActiveTab,
+} from '@refly-packages/ai-workspace-common/stores/sider';
 import { useCreateCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-canvas';
 // icons
 import { IconLibrary } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -240,6 +244,10 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
     updateLibraryModalActiveKey: state.updateLibraryModalActiveKey,
   }));
 
+  const { setSettingsModalActiveTab } = useSiderStoreShallow((state) => ({
+    setSettingsModalActiveTab: state.setSettingsModalActiveTab,
+  }));
+
   const { userProfile } = useUserStoreShallow((state) => ({
     userProfile: state.userProfile,
   }));
@@ -320,6 +328,9 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
   // Handle library modal opening from URL parameter
   useEffect(() => {
     const shouldOpenLibrary = searchParams.get('openLibrary');
+    const shouldOpenSettings = searchParams.get('openSettings');
+    const settingsTab = searchParams.get('settingsTab');
+
     if (shouldOpenLibrary === 'true' && userProfile?.uid) {
       setShowLibraryModal(true);
       // Remove the parameter from URL
@@ -330,7 +341,27 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
 
       updateLibraryModalActiveKey('resource');
     }
-  }, [searchParams, userProfile?.uid, setShowLibraryModal]);
+
+    if (shouldOpenSettings === 'true' && userProfile?.uid) {
+      setShowSettingModal(true);
+      // Remove the parameter from URL
+      searchParams.delete('openSettings');
+      searchParams.delete('settingsTab');
+      const newSearch = searchParams.toString();
+      const newUrl = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`;
+      window.history.replaceState({}, '', newUrl);
+
+      if (settingsTab) {
+        setSettingsModalActiveTab(settingsTab as SettingsModalActiveTab);
+      }
+    }
+  }, [
+    searchParams,
+    userProfile?.uid,
+    setShowLibraryModal,
+    setShowSettingModal,
+    setSettingsModalActiveTab,
+  ]);
 
   return (
     <Sider

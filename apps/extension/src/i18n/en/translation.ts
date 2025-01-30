@@ -160,6 +160,12 @@ export const translation = {
       docs: 'Documentation',
       examplePage: 'For example, this page',
       loading: 'Loading...',
+      languageSettings: 'Language Settings',
+      settings: {
+        title: 'Settings',
+        language: 'Language Settings',
+        description: 'Change interface language',
+      },
     },
   },
 };
