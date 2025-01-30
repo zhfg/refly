@@ -3,9 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { getClientOrigin } from '@refly/utils/url';
 
-import '@/styles/style.css';
-import './App.scss';
-import '@/i18n/config';
+import './index.scss';
 
 import { IconHome } from '@arco-design/web-react/icon';
 
@@ -13,13 +11,13 @@ import Logo from '@/assets/logo.svg';
 import { browser } from 'wxt/browser';
 import { IconDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { IoSettingsOutline } from 'react-icons/io5';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
+import { useUserStore } from '@/stores/user';
 
-export const LoginHeader = () => {
+export const CommonHeader = () => {
   const { t } = useTranslation();
-  const userStore = useUserStore();
+  const { userProfile } = useUserStore();
 
-  const isLogin = !!userStore.userProfile?.uid;
+  const isLogin = !!userProfile?.uid;
   return (
     <header>
       <div
