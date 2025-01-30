@@ -13,7 +13,7 @@ export const useSaveResourceNotify = () => {
       duration: 0,
       style: {
         borderRadius: 8,
-        background: '#fcfcf9',
+        background: '#FFFFFF',
       },
     });
     const { success, url } = await saveResource();
@@ -41,7 +41,7 @@ export const useSaveResourceNotify = () => {
         duration: 5000,
         style: {
           borderRadius: 8,
-          background: '#fcfcf9',
+          background: '#fff',
         },
         closable: true,
       });

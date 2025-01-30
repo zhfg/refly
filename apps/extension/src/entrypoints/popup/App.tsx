@@ -1,4 +1,4 @@
-import { Button, ConfigProvider } from 'antd';
+import { Button, ConfigProvider, Spin } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -67,7 +67,23 @@ const App = () => {
     setRuntime('extension-sidepanel');
   }, []);
 
-  if (loading) return null;
+  if (loading)
+    return (
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: '#00968F',
+          },
+        }}
+      >
+        <div className="popup-page loading-page">
+          <div className="loading-content">
+            <Spin size="large" />
+            <p>{t('extension.popup.loading')}</p>
+          </div>
+        </div>
+      </ConfigProvider>
+    );
 
   return (
     <ConfigProvider

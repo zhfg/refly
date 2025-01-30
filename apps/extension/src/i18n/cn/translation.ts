@@ -151,6 +151,7 @@ export const translation = {
       home: '主页',
       docs: '文档',
       examplePage: '例如此页面',
+      loading: '加载中...',
     },
   },
 };

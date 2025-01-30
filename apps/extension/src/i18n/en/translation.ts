@@ -153,6 +153,7 @@ export const translation = {
       home: 'Home',
       docs: 'Documentation',
       examplePage: 'For example, this page',
+      loading: 'Loading...',
     },
   },
 };

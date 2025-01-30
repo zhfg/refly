@@ -79,8 +79,10 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
           url: pageInfo.url,
         });
         if (result?.success) {
-          setPageInfo({ title: '', url: '', content: '' });
-          onSaveSuccess?.();
+          setTimeout(() => {
+            setPageInfo({ title: '', url: '', content: '' });
+            onSaveSuccess?.();
+          }, 100);
         }
         return result;
       });
@@ -122,7 +124,7 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
           value={pageInfo.content}
           onChange={handleContentChange}
           onKeyDown={handleKeyDown}
-          autoSize={{ minRows: 4, maxRows: 8 }}
+          autoSize={{ minRows: 10, maxRows: 16 }}
           className="w-full resize-none"
         />
         <div className="flex flex-row justify-end gap-2">
