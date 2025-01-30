@@ -1,4 +1,5 @@
 import { Route, Routes } from '@refly-packages/ai-workspace-common/utils/router';
+import KnowledgeBase from '@/pages/knowledge-base';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { LOCALE } from '@refly/common-types';
 import { useEffect } from 'react';
@@ -10,8 +11,9 @@ import { Login } from '@/pages/login';
 
 // Hooks
 import { useGetUserSettings } from '@/hooks/use-get-user-settings';
+import { App } from '@/entrypoints/contentSelector-csui.content/App';
 
-export const AppRouter = (props: { children: React.ReactNode }) => {
+export const AppRouter = () => {
   const userStore = useUserStore((state) => ({
     localSettings: state.localSettings,
     userProfile: state.userProfile,
@@ -58,5 +60,11 @@ export const AppRouter = (props: { children: React.ReactNode }) => {
     );
   }
 
-  return <Routes>{props.children}</Routes>;
+  return (
+    <Routes>
+      <Route path="/" element={<App />} />
+      <Route path="/knowledge-base" element={<KnowledgeBase />} />
+      <Route path="/login" element={<Login />} />
+    </Routes>
+  );
 };

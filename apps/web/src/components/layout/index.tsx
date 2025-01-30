@@ -33,12 +33,13 @@ export const AppLayout = (props: AppLayoutProps) => {
 
   const matchShare = useMatch('/share/:shareCode');
   const matchPricing = useMatch('/pricing');
+  const matchLogin = useMatch('/login');
 
   useBindCommands();
 
   const hasBetaAccess = userStore.isLogin ? userStore.userProfile?.hasBetaAccess || false : true;
 
-  const showSider = !matchShare && !!userStore.userProfile && !matchPricing;
+  const showSider = !matchShare && !!userStore.userProfile && !matchPricing && !matchLogin;
 
   return (
     <ErrorBoundary>

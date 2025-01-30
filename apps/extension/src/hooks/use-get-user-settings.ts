@@ -145,10 +145,8 @@ export const useGetUserSettings = () => {
 
   // 监听打开关闭
   useEffect(() => {
-    if (copilotStore?.isCopilotOpen) {
-      debounceLogin();
-    }
-  }, [copilotStore?.isCopilotOpen]);
+    debounceLogin();
+  }, []);
 
   // 收到消息之后，关闭窗口，保活检查
   const handleExtensionMessage = (request: any) => {

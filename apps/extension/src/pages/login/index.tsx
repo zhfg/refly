@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import './index.scss';
 import { safeParseJSON } from '@refly/utils/parse';
 import { useStorage } from '@/hooks/use-storage';
+import { browser } from 'wxt/browser';
 
 export const Login = () => {
   const userStore = useUserStore((state) => ({
@@ -32,17 +33,25 @@ export const Login = () => {
    */
   const handleLogin = () => {
     // 提示正在登录
-    userStore.setIsLogin(true);
+    // userStore.setIsLogin(true);
 
-    const left = (screen.width - 1200) / 2;
-    const top = (screen.height - 730) / 2;
-    loginWindowRef.current = window.open(
-      `${getClientOrigin()}/login?from=refly-extension-login`,
-      '_blank',
-      `location=no,toolbar=no,menubar=no,width=800,height=730,left=${left} / 2,top=${top} / 2`,
-    );
+    // const left = (screen.width - 1200) / 2;
+    // const top = (screen.height - 730) / 2;
+    // loginWindowRef.current = window.open(
+    //   `${getClientOrigin()}/login?from=refly-extension-login`,
+    //   '_blank',
+    //   `location=no,toolbar=no,menubar=no,width=800,height=730,left=${left} / 2,top=${top} / 2`,
+    // );
 
-    userStore.setIsLogin(true);
+    // userStore.setIsLogin(true);
+
+    browser.tabs.create({
+      url: `${getClientOrigin()}/login?openLogin=true`,
+    });
+
+    setTimeout(() => {
+      window.close();
+    }, 100);
   };
 
   useEffect(() => {
@@ -60,22 +69,13 @@ export const Login = () => {
           className="login-branch-content"
           onClick={() => window.open(getClientOrigin(), '_blank')}
         >
-          <img src={Logo} alt="Refly" style={{ width: 38, height: 38 }} />
-          <span
-            style={{
-              fontSize: 20,
-              fontWeight: 'bold',
-              display: 'inline-block',
-              marginLeft: 8,
-            }}
-          >
-            Refly
-          </span>
+          <img src={Logo} alt="Refly" className="w-[38px] h-[38px]" />
+          <span className="text-xl font-bold ml-2">Refly</span>
         </div>
         <Button
           type="primary"
           onClick={() => handleLogin()}
-          style={{ width: 260, height: 44, marginTop: 32 }}
+          className="w-[260px] h-[44px] mt-8"
           loading={userStore.isLogin}
         >
           {userStore.isLogin
