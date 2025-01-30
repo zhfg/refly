@@ -154,12 +154,16 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
               <Button
                 type="primary"
                 size="small"
-                icon={<IconSave />}
                 loading={isSaving}
                 disabled={!pageInfo.content?.trim()}
                 onClick={handleSave}
               >
-                {t('extension.webClipper.action.save')}
+                <div className="flex items-center justify-center rounded px-[1px] h-[12px] text-[10px] font-medium leading-none">
+                  <span className="text-[10px] font-medium leading-none mr-2">⇧+↵</span>
+                  <span className="text-[10px] font-medium leading-none translate-y-[0.5px]">
+                    {t('extension.webClipper.action.save')}
+                  </span>
+                </div>
               </Button>
             </Tooltip>
           </div>
