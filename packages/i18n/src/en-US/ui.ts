@@ -360,6 +360,7 @@ const translations = {
   },
   workspace: {
     addToCanvas: 'Add to Canvas',
+    openWebpage: 'Open Original Webpage',
     canvasListModal: {
       continue: 'Continue Conversation',
     },

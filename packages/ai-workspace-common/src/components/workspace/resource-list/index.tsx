@@ -6,6 +6,7 @@ import {
   IconDelete,
   IconResourceFilled,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { LuPlus, LuExternalLink } from 'react-icons/lu';
 
 import { useEffect, useState } from 'react';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -21,7 +22,6 @@ import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/colors';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { LuPlus } from 'react-icons/lu';
 import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-resource';
 
 const ActionDropdown = ({
@@ -37,17 +37,20 @@ const ActionDropdown = ({
   }));
   const { deleteResource } = useDeleteResource();
 
-  const handleDelete = async () => {
-    const success = await deleteResource(resource.resourceId);
-    if (success) {
-      message.success(t('common.putSuccess'));
-      setPopupVisible(false);
-      refetchUsage();
-      afterDelete?.();
-    }
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    deleteResource(resource.resourceId).then((success) => {
+      if (success) {
+        message.success(t('common.putSuccess'));
+        setPopupVisible(false);
+        refetchUsage();
+        afterDelete?.();
+      }
+    });
   };
 
-  const handleAddToCanvas = () => {
+  const handleAddToCanvas: MenuProps['onClick'] = ({ domEvent }) => {
+    domEvent.stopPropagation();
     addNode({
       type: 'resource',
       data: {
@@ -59,6 +62,14 @@ const ActionDropdown = ({
     setShowLibraryModal(false);
   };
 
+  const handleOpenWebpage: MenuProps['onClick'] = ({ domEvent }) => {
+    domEvent.stopPropagation();
+    if (resource.data?.url) {
+      window.open(resource.data.url, '_blank');
+      setPopupVisible(false);
+    }
+  };
+
   const items: MenuProps['items'] = [
     {
       label: (
@@ -68,7 +79,18 @@ const ActionDropdown = ({
         </div>
       ),
       key: 'addToCanvas',
-      onClick: () => handleAddToCanvas(),
+      onClick: handleAddToCanvas,
+    },
+    {
+      label: (
+        <div className="flex items-center">
+          <LuExternalLink size={16} className="mr-2" />
+          {t('workspace.openWebpage')}
+        </div>
+      ),
+      key: 'openWebpage',
+      onClick: handleOpenWebpage,
+      disabled: !resource.data?.url,
     },
     {
       label: (
@@ -78,7 +100,10 @@ const ActionDropdown = ({
             title: resource.title || t('common.untitled'),
           })}
           onConfirm={handleDelete}
-          onCancel={() => setPopupVisible(false)}
+          onCancel={(e?: React.MouseEvent) => {
+            e?.stopPropagation();
+            setPopupVisible(false);
+          }}
           okText={t('common.confirm')}
           cancelText={t('common.cancel')}
           overlayStyle={{ maxWidth: '300px' }}
@@ -106,7 +131,7 @@ const ActionDropdown = ({
       onOpenChange={handleOpenChange}
       menu={{ items }}
     >
-      <Button type="text" icon={<IconMoreHorizontal />} />
+      <Button type="text" icon={<IconMoreHorizontal />} onClick={(e) => e.stopPropagation()} />
     </Dropdown>
   );
 };
@@ -115,8 +140,17 @@ const ResourceCard = ({ item, onDelete }: { item: Resource; onDelete: () => void
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
 
+  const handleCardClick = () => {
+    if (item.data?.url) {
+      window.open(item.data.url, '_blank');
+    }
+  };
+
   return (
-    <div className="bg-white rounded-lg overflow-hidden border border-solid cursor-pointer border-gray-200 hover:border-green-500 transition-colors duration-200">
+    <div
+      className="bg-white rounded-lg overflow-hidden border border-solid cursor-pointer border-gray-200 hover:border-green-500 transition-colors duration-200"
+      onClick={handleCardClick}
+    >
       <div className="h-36 px-4 py-3 overflow-hidden">
         <Markdown
           content={item.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}

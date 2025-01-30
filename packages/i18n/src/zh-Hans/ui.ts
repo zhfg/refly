@@ -359,6 +359,7 @@ const translations = {
   },
   workspace: {
     addToCanvas: '添加到画布',
+    openWebpage: '打开原网页',
     canvasListModal: {
       continue: '继续对话',
     },
