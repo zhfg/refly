@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Button, Input, message, Tooltip } from 'antd';
+import { Button, Divider, Input, message, Tooltip } from 'antd';
 import { IconDelete, IconSave, IconPaste } from '@arco-design/web-react/icon';
 import { HiOutlineDocumentDownload } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
@@ -169,6 +169,7 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
           </div>
         </div>
       </div>
+      <Divider className="m-0" />
       <div className="flex flex-row gap-2">
         <Button
           type="primary"
