@@ -134,5 +134,23 @@ export const translation = {
         saved: '内容保存成功',
       },
     },
+    popup: {
+      welcome: '欢迎使用 Refly！',
+      pleaseLogin: '请先登录以使用完整功能',
+      loginRegister: '登录/注册',
+      unsupportedTitle: '感谢使用 Refly！',
+      unsupportedDesc: '😵 由于浏览器安全限制，Refly 无法在以下页面工作：',
+      unsupportedPages: {
+        chromeStore: 'Chrome Web 商店页面',
+        chromePages: 'Chrome 页面',
+        newTab: '新标签页',
+      },
+      unsupportedHint: '您可以在另一个页面上尝试 Refly。',
+      openSidebar: '打开侧边栏提问',
+      refresh: '刷新页面',
+      home: '主页',
+      docs: '文档',
+      examplePage: '例如此页面',
+    },
   },
 };

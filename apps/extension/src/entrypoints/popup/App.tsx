@@ -1,20 +1,20 @@
 import { Button, ConfigProvider } from 'antd';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { reflyEnv } from '@/utils/env';
+import { getClientOrigin } from '@refly/utils/url';
 
 import '@/styles/style.css';
 import './App.scss';
 import '@/i18n/config';
 
-import { IconRefresh, IconBulb, IconHome } from '@arco-design/web-react/icon';
+import { IconBulb, IconHome } from '@arco-design/web-react/icon';
 
 import Logo from '@/assets/logo.svg';
 import { browser } from 'wxt/browser';
 import { getCurrentTab } from '@refly-packages/ai-workspace-common/utils/extension/tabs';
 import { checkPageUnsupported } from '@refly-packages/ai-workspace-common/utils/extension/check';
 import { ContentClipper } from '@/components/content-clipper';
-import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { setRuntime } from '@refly/utils/env';
 import { IconDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
 
@@ -26,7 +26,7 @@ import { IconDocument } from '@refly-packages/ai-workspace-common/components/com
  *   2.2 如果页面支持，显示 ContentClipper
  */
 const App = () => {
-  const osType = reflyEnv.getOsType();
+  const { t } = useTranslation();
   const openSidePanelBtnRef = useRef<HTMLButtonElement | null>(null);
   const currentTabUrlRef = useRef('');
   const [loading, setLoading] = useState(true);
@@ -82,8 +82,11 @@ const App = () => {
     >
       <div className="popup-page">
         <header>
-          <div className="logo">
-            <img className="logo-img" src={Logo} alt="" />
+          <div
+            className="logo cursor-pointer"
+            onClick={() => browser.tabs.create({ url: getClientOrigin() })}
+          >
+            <img className="logo-img" src={Logo} alt="Refly" />
             <span className="title">Refly</span>
           </div>
           <div className="guide-box">
@@ -91,7 +94,7 @@ const App = () => {
               className="mr-2"
               icon={<IconHome />}
               onClick={() => {
-                browser.tabs.create({ url: 'https://refly.ai' });
+                browser.tabs.create({ url: getClientOrigin() });
               }}
             />
             <Button
@@ -104,44 +107,35 @@ const App = () => {
         </header>
         {!isLoggedIn ? (
           <div>
-            <p className="content-title">欢迎使用 Refly！</p>
-            <p className="state">请先登录以使用完整功能</p>
+            <p className="content-title">{t('extension.popup.welcome')}</p>
+            <p className="state">{t('extension.popup.pleaseLogin')}</p>
             <Button
               block
               type="primary"
               onClick={() => {
-                browser.tabs.create({ url: 'https://refly.ai/login' });
+                browser.tabs.create({
+                  url: `${getClientOrigin()}/login?from=refly-extension-login`,
+                });
               }}
             >
-              登录/注册
+              {t('extension.popup.loginRegister')}
             </Button>
           </div>
         ) : pageUnsupported ? (
           <div>
-            <p className="content-title">感谢使用 Refly！</p>
-            <p className="state">😵 由于浏览器安全限制，Refly 无法在以下页面工作：</p>
+            <p className="content-title">{t('extension.popup.unsupportedTitle')}</p>
+            <p className="state">{t('extension.popup.unsupportedDesc')}</p>
             <ul>
-              <li>Chrome Web 商店页面</li>
-              <li>Chrome 页面</li>
-              <li>新标签页</li>
+              <li>{t('extension.popup.unsupportedPages.chromeStore')}</li>
+              <li>{t('extension.popup.unsupportedPages.chromePages')}</li>
+              <li>{t('extension.popup.unsupportedPages.newTab')}</li>
             </ul>
             <p className="page-unsupported-hint">
-              您可以在另一个页面（
+              {t('extension.popup.unsupportedHint')} <span> 👉 </span>
               <a href="https://zh.wikipedia.org/wiki/ChatGPT" target="_blank" rel="noreferrer">
-                例如此页面
+                {t('extension.popup.examplePage')}
               </a>
-              ）上尝试 Refly。
             </p>
-            <Button
-              ref={openSidePanelBtnRef}
-              block
-              type="primary"
-              style={{ marginTop: 16 }}
-              icon={<IconBulb />}
-              onClick={() => openSidePanel()}
-            >
-              打开侧边栏提问
-            </Button>
           </div>
         ) : (
           <>

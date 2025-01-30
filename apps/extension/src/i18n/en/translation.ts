@@ -135,5 +135,24 @@ export const translation = {
         saved: 'Content saved successfully',
       },
     },
+    popup: {
+      welcome: 'Welcome to Refly!',
+      pleaseLogin: 'Please login to use all features',
+      loginRegister: 'Login/Register',
+      unsupportedTitle: 'Thanks for using Refly!',
+      unsupportedDesc:
+        '😵 Due to browser security restrictions, Refly cannot work on the following pages:',
+      unsupportedPages: {
+        chromeStore: 'Chrome Web Store pages',
+        chromePages: 'Chrome pages',
+        newTab: 'New tab',
+      },
+      unsupportedHint: 'You can try Refly on another page.',
+      openSidebar: 'Open sidebar to ask',
+      refresh: 'Refresh page',
+      home: 'Home',
+      docs: 'Documentation',
+      examplePage: 'For example, this page',
+    },
   },
 };
