@@ -118,19 +118,24 @@ const App = () => {
                 }}
               />
             </Tooltip>
-            <Button
-              className="mr-2"
-              icon={<IconHome />}
-              onClick={() => {
-                browser.tabs.create({ url: getClientOrigin() });
-              }}
-            />
-            <Button
-              icon={<IconDocument />}
-              onClick={() => {
-                browser.tabs.create({ url: 'https://docs.refly.ai' });
-              }}
-            />
+            <Tooltip title={t('extension.popup.home')}>
+              <Button
+                className="mr-2"
+                icon={<IconHome />}
+                onClick={() => {
+                  browser.tabs.create({ url: getClientOrigin() });
+                }}
+              />
+            </Tooltip>
+
+            <Tooltip title={t('extension.popup.docs')}>
+              <Button
+                icon={<IconDocument />}
+                onClick={() => {
+                  browser.tabs.create({ url: 'https://docs.refly.ai' });
+                }}
+              />
+            </Tooltip>
           </div>
         </header>
         {!isLoggedIn ? (
