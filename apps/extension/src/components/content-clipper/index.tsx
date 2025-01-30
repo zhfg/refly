@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Button, Input, message } from 'antd';
-import { IconCopy, IconDelete, IconSave } from '@arco-design/web-react/icon';
+import { Button, Input, message, Tooltip } from 'antd';
+import { IconDelete, IconSave, IconPaste } from '@arco-design/web-react/icon';
+import { HiOutlineDocumentDownload } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
 import { useSaveSelectedContent } from '@/hooks/use-save-selected-content';
 import { useSaveResourceNotify } from '@refly-packages/ai-workspace-common/hooks/use-save-resouce-notify';
@@ -60,6 +61,21 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
     } catch (err) {
       console.error('Failed to clip content:', err);
       message.error(t('extension.webClipper.error.clipContentFailed'));
+    }
+  }, [t]);
+
+  // Handle get clipboard content
+  const handleGetClipboard = useCallback(async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        setPageInfo((prev) => ({ ...prev, content: text }));
+      } else {
+        message.warning(t('extension.webClipper.error.clipboardEmpty'));
+      }
+    } catch (err) {
+      console.error('Failed to read clipboard:', err);
+      message.error(t('extension.webClipper.error.clipboardReadFailed'));
     }
   }, [t]);
 
@@ -128,32 +144,41 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
           className="w-full resize-none"
         />
         <div className="flex flex-row justify-end gap-2">
-          {pageInfo.content && (
-            <Button size="small" icon={<IconDelete />} onClick={handleClear}>
-              {t('extension.webClipper.action.clear')}
-            </Button>
-          )}
-          <Button
-            type="primary"
-            size="small"
-            icon={<IconSave />}
-            loading={isSaving}
-            disabled={!pageInfo.content?.trim()}
-            onClick={handleSave}
-          >
-            {t('extension.webClipper.action.save')}
-          </Button>
+          <div className="flex flex-row gap-2">
+            {pageInfo.content && (
+              <Button size="small" icon={<IconDelete />} onClick={handleClear}>
+                {t('extension.webClipper.action.clear')}
+              </Button>
+            )}
+            <Tooltip title={t('extension.webClipper.info.saveToLibrary')}>
+              <Button
+                type="primary"
+                size="small"
+                icon={<IconSave />}
+                loading={isSaving}
+                disabled={!pageInfo.content?.trim()}
+                onClick={handleSave}
+              >
+                {t('extension.webClipper.action.save')}
+              </Button>
+            </Tooltip>
+          </div>
         </div>
       </div>
-      <Button
-        type="primary"
-        size="large"
-        icon={<IconCopy />}
-        onClick={handleClipContent}
-        className="self-end w-full"
-      >
-        {t('extension.webClipper.action.clip')}
-      </Button>
+      <div className="flex flex-row gap-2">
+        <Button
+          type="primary"
+          size="large"
+          icon={<HiOutlineDocumentDownload />}
+          onClick={handleClipContent}
+          className="flex-1"
+        >
+          {t('extension.webClipper.action.clip')}
+        </Button>
+        <Tooltip title={t('extension.webClipper.action.fromClipboard')}>
+          <Button size="large" icon={<IconPaste />} onClick={handleGetClipboard} />
+        </Tooltip>
+      </div>
     </div>
   );
 };

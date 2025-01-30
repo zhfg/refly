@@ -122,14 +122,20 @@ export const translation = {
         enterOrClipContent: 'Enter content or click clip button to get current page content...',
       },
       action: {
-        clip: 'Clip',
+        clip: 'Clip Current Page',
         clear: 'Clear',
         save: 'Save',
+        fromClipboard: 'Paste from Clipboard',
+      },
+      info: {
+        saveToLibrary: 'Save to Knowledge Base',
       },
       error: {
         clipContentFailed: 'Failed to clip content',
         contentRequired: 'Content is required',
         saveFailed: 'Failed to save content',
+        clipboardEmpty: 'Clipboard is empty',
+        clipboardReadFailed: 'Failed to read from clipboard',
       },
       success: {
         saved: 'Content saved successfully',

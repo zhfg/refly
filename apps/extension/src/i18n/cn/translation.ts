@@ -121,14 +121,20 @@ export const translation = {
         enterOrClipContent: '输入内容或点击剪藏按钮获取当前页面内容...',
       },
       action: {
-        clip: '剪藏',
+        clip: '剪藏当前页面',
         clear: '清空',
         save: '保存',
+        fromClipboard: '从剪贴板粘贴',
+      },
+      info: {
+        saveToLibrary: '保存到知识库',
       },
       error: {
         clipContentFailed: '剪藏内容失败',
         contentRequired: '内容不能为空',
         saveFailed: '保存内容失败',
+        clipboardEmpty: '剪贴板为空',
+        clipboardReadFailed: '读取剪贴板失败',
       },
       success: {
         saved: '内容保存成功',

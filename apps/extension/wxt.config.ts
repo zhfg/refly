@@ -101,7 +101,16 @@ export default defineConfig({
       ],
     },
     homepage_url: 'https://refly.ai',
-    permissions: ['storage', 'scripting', 'history', 'activeTab', 'tabs', 'cookies'],
+    permissions: [
+      'storage',
+      'scripting',
+      'history',
+      'activeTab',
+      'tabs',
+      'cookies',
+      'clipboardRead',
+      'clipboardWrite',
+    ],
   },
   runner: {
     startUrls: ['https://google.com/'],
