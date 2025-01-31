@@ -41,7 +41,7 @@ export const LaunchPad = memo(
     const clearLaunchpadState = useCallback(() => {
       chatStore.resetState();
       contextPanelStore.resetState();
-    }, [chatStore, contextPanelStore]);
+    }, [chatStore.resetState, contextPanelStore.resetState]);
 
     // Handle canvas ID changes
     useEffect(() => {
