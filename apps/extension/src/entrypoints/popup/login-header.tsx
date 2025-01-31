@@ -11,7 +11,7 @@ import { IconHome } from '@arco-design/web-react/icon';
 
 import Logo from '@/assets/logo.svg';
 import { browser } from 'wxt/browser';
-import { IconDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { IconDocumentation } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
@@ -29,7 +29,7 @@ export const LoginHeader = () => {
         <img className="logo-img" src={Logo} alt="Refly" />
         <span className="title">Refly</span>
       </div>
-      <div className="guide-box">
+      <div className="flex items-center">
         {isLogin ? (
           <Tooltip title={t('extension.popup.languageSettings')}>
             <Button
@@ -55,7 +55,7 @@ export const LoginHeader = () => {
 
         <Tooltip title={t('extension.popup.docs')}>
           <Button
-            icon={<IconDocument />}
+            icon={<IconDocumentation />}
             onClick={() => {
               browser.tabs.create({ url: 'https://docs.refly.ai' });
             }}

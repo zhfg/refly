@@ -20,7 +20,7 @@ import {
 import { getRuntime } from '@refly/utils/env';
 import { useSaveSelectedContent } from '@/hooks/use-save-selected-content';
 import { BackgroundMessage, SyncMarkEvent, type MessageName } from '@refly/common-types';
-import { getMarkdown } from '@refly/utils/html2md';
+import { getReadabilityMarkdown } from '@refly/utils/html2md';
 
 const getPopupContainer = () => {
   const elem = document
@@ -74,7 +74,7 @@ export const App = () => {
       // Handle get page content request
       if (data?.name === 'getPageContent') {
         // Get page content using readability
-        const content = getMarkdown(document?.body);
+        const content = getReadabilityMarkdown(document?.body || document);
         // Send response back with complete page information
         const response = {
           source: getRuntime(),
