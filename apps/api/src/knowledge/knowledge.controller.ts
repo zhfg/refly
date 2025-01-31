@@ -45,7 +45,6 @@ export class KnowledgeController {
   @Get('resource/list')
   async listResources(
     @LoginedUser() user: User,
-    @Query('projectId') projectId: string,
     @Query('resourceId') resourceId: string,
     @Query('resourceType') resourceType: ResourceType,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,

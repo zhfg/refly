@@ -18,7 +18,7 @@ export const scrapeWeblink = async (url: string) => {
   let image = $('meta[property="og:image"]').attr('content');
   if (!image) {
     // If no og:image exists, pick the first image starts with http or https
-    $('img').each((index, element) => {
+    $('img').each((_index, element) => {
       const src = $(element).attr('src');
       if (src && (src.startsWith('http://') || src.startsWith('https://'))) {
         image = src;

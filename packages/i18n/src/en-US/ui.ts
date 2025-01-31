@@ -455,10 +455,10 @@ const translations = {
       noteCharsCount: '{{count}} characters',
       autoSaved: 'Saved',
       saving: 'Saving...',
-      readOnly: 'Canvas is set to read-only mode',
-      edit: 'Canvas is set to edit mode',
+      readOnly: 'Document is set to read-only mode',
+      edit: 'Document is set to edit mode',
       serviceDisconnected: 'Service Disconnected',
-      createNoteFailed: 'Failed to create canvas, please try again!',
+      createNoteFailed: 'Failed to create document, please try again!',
       defaultTitle: 'Untitled',
     },
     canvas: {

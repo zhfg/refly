@@ -147,14 +147,14 @@ export async function sortResourcesBySimilarity(
 
 export async function processSelectedContentWithSimilarity(
   query: string,
-  contentList: SkillContextContentItem[] = [],
+  contentList: SkillContextContentItem[],
   maxTokens: number,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextContentItem[]> {
   const MAX_RAG_RELEVANT_CONTENT_MAX_TOKENS = Math.floor(
     maxTokens * MAX_RAG_RELEVANT_CONTENT_RATIO,
   );
-  const MAX_SHORT_CONTENT_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_CONTENT_RATIO);
+  const _MAX_SHORT_CONTENT_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_CONTENT_RATIO);
 
   if (contentList.length === 0) {
     return [];
@@ -240,14 +240,14 @@ export async function processSelectedContentWithSimilarity(
 
 export async function processDocumentsWithSimilarity(
   query: string,
-  comingDocuments: SkillContextDocumentItem[] = [],
+  comingDocuments: SkillContextDocumentItem[],
   maxTokens: number,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextDocumentItem[]> {
   const MAX_RAG_RELEVANT_DOCUMENTS_MAX_TOKENS = Math.floor(
     maxTokens * MAX_RAG_RELEVANT_DOCUMENTS_RATIO,
   );
-  const MAX_SHORT_DOCUMENTS_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_DOCUMENTS_RATIO);
+  const _MAX_SHORT_DOCUMENTS_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_DOCUMENTS_RATIO);
 
   if (comingDocuments.length === 0) {
     return [];
@@ -304,7 +304,7 @@ export async function processDocumentsWithSimilarity(
       }
 
       const relevantContent = assembleChunks(relevantChunks);
-      result.push({ ...document, document: { ...document.document!, content: relevantContent } });
+      result.push({ ...document, document: { ...document.document, content: relevantContent } });
       usedTokens += countToken(relevantContent);
     } else if (usedTokens + documentTokens <= MAX_RAG_RELEVANT_DOCUMENTS_MAX_TOKENS) {
       // 1.2 小内容，直接添加
@@ -363,7 +363,7 @@ export async function processDocumentsWithSimilarity(
       const relevantContent = assembleChunks(relevantChunks);
       result.push({
         ...remainingDocument,
-        document: { ...remainingDocument.document!, content: relevantContent },
+        document: { ...remainingDocument.document, content: relevantContent },
       });
       usedTokens += countToken(relevantContent);
     }
@@ -374,14 +374,14 @@ export async function processDocumentsWithSimilarity(
 
 export async function processResourcesWithSimilarity(
   query: string,
-  resources: SkillContextResourceItem[] = [],
+  resources: SkillContextResourceItem[],
   maxTokens: number,
   ctx: { config: SkillRunnableConfig; ctxThis: BaseSkill; state: GraphState },
 ): Promise<SkillContextResourceItem[]> {
   const MAX_RAG_RELEVANT_RESOURCES_MAX_TOKENS = Math.floor(
     maxTokens * MAX_RAG_RELEVANT_RESOURCES_RATIO,
   );
-  const MAX_SHORT_RESOURCES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_RESOURCES_RATIO);
+  const _MAX_SHORT_RESOURCES_MAX_TOKENS = Math.floor(maxTokens * MAX_SHORT_RESOURCES_RATIO);
 
   if (resources.length === 0) {
     return [];
@@ -434,7 +434,7 @@ export async function processResourcesWithSimilarity(
       }
 
       const relevantContent = assembleChunks(relevantChunks);
-      result.push({ ...resource, resource: { ...resource.resource!, content: relevantContent } });
+      result.push({ ...resource, resource: { ...resource.resource, content: relevantContent } });
       usedTokens += countToken(relevantContent);
     } else if (usedTokens + resourceTokens <= MAX_RAG_RELEVANT_RESOURCES_MAX_TOKENS) {
       // 2.2 小内容，直接添加
@@ -494,7 +494,7 @@ export async function processResourcesWithSimilarity(
       const relevantContent = assembleChunks(relevantChunks);
       result.push({
         ...remainingResource,
-        resource: { ...remainingResource.resource!, content: relevantContent },
+        resource: { ...remainingResource.resource, content: relevantContent },
       });
       usedTokens += countToken(relevantContent);
     }
@@ -577,17 +577,17 @@ export async function processWholeSpaceWithSimilarity(
     return [];
   }
 
-  // 2. 按照 domain 和 id 进行分类
+  // 2. Group chunks by domain and id
   const groupedChunks: { [key: string]: DocumentInterface[] } = {};
-  relevantChunks.forEach((chunk) => {
+  for (const chunk of relevantChunks) {
     const key = `${chunk.metadata.domain}_${chunk.id}`;
     if (!groupedChunks[key]) {
       groupedChunks[key] = [];
     }
     groupedChunks[key].push(chunk);
-  });
+  }
 
-  // 3. 组装结果
+  // 3. Concatenate results
   const result: (SkillContextResourceItem | SkillContextDocumentItem)[] = [];
   for (const key in groupedChunks) {
     const [domain, id] = key.split('_');
@@ -602,7 +602,6 @@ export async function processWholeSpaceWithSimilarity(
           data: {
             url: groupedChunks[key][0]?.metadata?.url,
           },
-          // 其他必要的字段需要根据实际情况填充
         },
       } as SkillContextResourceItem);
     } else if (domain === 'document') {
@@ -614,11 +613,9 @@ export async function processWholeSpaceWithSimilarity(
           data: {
             url: groupedChunks[key][0]?.metadata?.url,
           },
-          // 其他必要的字段需要根据实际情况填充
         },
       } as SkillContextDocumentItem);
     }
-    // 如果还有其他类型，可以在这里继续添加
   }
 
   return result;

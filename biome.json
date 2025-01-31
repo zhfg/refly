@@ -8,7 +8,10 @@
     "rules": {
       "recommended": true,
       "a11y": {
-        "useKeyWithClickEvents": "off"
+        "useKeyWithClickEvents": "off",
+        "useAltText": "off",
+        "useValidAnchor": "off",
+        "noSvgWithoutTitle": "off"
       },
       "correctness": {
         "noUnusedImports": "error",
@@ -22,7 +25,8 @@
       "style": {
         "useConst": "error",
         "useTemplate": "error",
-        "useImportType": "off"
+        "useImportType": "off",
+        "noNonNullAssertion": "off"
       },
       "complexity": {
         "useOptionalChain": "error"

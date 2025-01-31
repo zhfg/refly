@@ -28,13 +28,11 @@ export async function prepareContext(
     mentionedContext,
     maxTokens,
     enableMentionedContext,
-    enableLowerPriorityContext,
   }: {
     query: string;
     mentionedContext: IContext;
     maxTokens: number;
     enableMentionedContext: boolean;
-    enableLowerPriorityContext: boolean;
   },
   ctx: {
     config: SkillRunnableConfig;
@@ -199,7 +197,7 @@ export async function prepareWebSearchContext(
 ): Promise<{
   processedWebSearchContext: IContext;
 }> {
-  ctx.ctxThis.engine.logger.log(`Prepare Web Search Context...`);
+  ctx.ctxThis.engine.logger.log('Prepare Web Search Context...');
 
   // two searchMode
   const enableDeepReasonWebSearch =
@@ -207,14 +205,12 @@ export async function prepareWebSearchContext(
   const { locale = 'en' } = ctx?.config?.configurable || {};
 
   let searchLimit = 10;
-  let searchLocaleListLen = 2;
   const enableRerank = true;
   const searchLocaleList: string[] = ['en'];
   let rerankRelevanceThreshold = 0.2;
 
   if (enableDeepReasonWebSearch) {
     searchLimit = 20;
-    searchLocaleListLen = 3;
     enableTranslateQuery = true;
     rerankRelevanceThreshold = 0.4;
   }
@@ -284,7 +280,7 @@ export async function prepareMentionedContext(
   mentionedContextTokens: number;
   processedMentionedContext: IContext;
 }> {
-  ctx.ctxThis.engine.logger.log(`Prepare Mentioned Context...`);
+  ctx.ctxThis.engine.logger.log('Prepare Mentioned Context...');
 
   let processedMentionedContext: IContext = {
     contentList: [],
@@ -301,23 +297,22 @@ export async function prepareMentionedContext(
       mentionedContextTokens: 0,
       processedMentionedContext: mentionedContext,
     };
-  } else {
-    // if mentioned context is not empty, we need to mutate the metadata of the mentioned context
-    const { contentList = [], resources = [], documents = [] } = ctx.config.configurable;
-    const context: IContext = {
-      contentList,
-      resources,
-      documents,
-    };
-
-    ctx.ctxThis.engine.logger.log(`Mutate Context Metadata...`);
-    mutateContextMetadata(mentionedContext, context);
   }
+  // if mentioned context is not empty, we need to mutate the metadata of the mentioned context
+  const { contentList = [], resources = [], documents = [] } = ctx.config.configurable;
+  const context: IContext = {
+    contentList,
+    resources,
+    documents,
+  };
+
+  ctx.ctxThis.engine.logger.log('Mutate Context Metadata...');
+  mutateContextMetadata(mentionedContext, context);
 
   let mentionedContextTokens = allMentionedContextTokens;
 
   if (allMentionedContextTokens > maxMentionedContextTokens) {
-    ctx.ctxThis.engine.logger.log(`Process Mentioned Context With Similarity...`);
+    ctx.ctxThis.engine.logger.log('Process Mentioned Context With Similarity...');
     processedMentionedContext = await processMentionedContextWithSimilarity(
       query,
       mentionedContext,
@@ -541,7 +536,7 @@ export function removeOverlappingContextItems(
   };
 
   // Helper function to check if an item exists in the context
-  const itemExistsInContext = (item: any, contextArray: any[] = [], idField: string) => {
+  const itemExistsInContext = (item: any, contextArray: any[], idField: string) => {
     return contextArray.some((contextItem) => contextItem[idField] === item[idField]);
   };
 
@@ -578,7 +573,7 @@ export const mutateContextMetadata = (
   originalContext: IContext,
 ): IContext => {
   // Process documents
-  mentionedContext.documents.forEach((mentionedDocument) => {
+  for (const mentionedDocument of mentionedContext.documents) {
     const index = originalContext.documents.findIndex(
       (n) => n.document.docId === mentionedDocument.document.docId,
     );
@@ -591,10 +586,10 @@ export const mutateContextMetadata = (
         },
       };
     }
-  });
+  }
 
   // Process resources
-  mentionedContext.resources.forEach((mentionedResource) => {
+  for (const mentionedResource of mentionedContext.resources) {
     const index = originalContext.resources.findIndex(
       (r) => r.resource.resourceId === mentionedResource.resource.resourceId,
     );
@@ -607,10 +602,10 @@ export const mutateContextMetadata = (
         },
       };
     }
-  });
+  }
 
   // Process contentList
-  mentionedContext.contentList.forEach((mentionedContent) => {
+  for (const mentionedContent of mentionedContext.contentList) {
     const index = originalContext.contentList.findIndex(
       (c) => c.metadata.entityId === mentionedContent.metadata.entityId,
     );
@@ -623,7 +618,7 @@ export const mutateContextMetadata = (
         },
       };
     }
-  });
+  }
 
   return originalContext;
 };

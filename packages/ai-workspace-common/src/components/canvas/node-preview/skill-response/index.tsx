@@ -136,7 +136,7 @@ const SkillResponseNodePreviewComponent = ({ node, resultId }: SkillResponseNode
     return () => {
       actionEmitter.off('updateResult', scrollToBottom);
     };
-  }, []);
+  }, [scrollToBottom]);
 
   const { data } = node;
 

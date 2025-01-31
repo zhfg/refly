@@ -27,7 +27,7 @@ import { useDocumentSync } from '@refly-packages/ai-workspace-common/hooks/use-d
 const StatusBar = memo(
   ({ docId }: { docId: string }) => {
     const { provider, ydoc } = useDocumentContext();
-    const yReadOnly = ydoc?.getText('readOnly');
+
     const { t, i18n } = useTranslation();
     const language = i18n.language as LOCALE;
 
@@ -53,6 +53,7 @@ const StatusBar = memo(
 
     useEffect(() => {
       if (ydoc) {
+        const yReadOnly = ydoc?.getText('readOnly');
         setDocumentReadOnly(docId, yReadOnly?.toJSON() === 'true');
 
         const observer = () => {
@@ -66,7 +67,7 @@ const StatusBar = memo(
           yReadOnly?.unobserve(observer);
         };
       }
-    }, [ydoc]);
+    }, [ydoc, docId, setDocumentReadOnly, provider.status]);
 
     const toggleReadOnly = () => {
       ydoc?.transact(() => {

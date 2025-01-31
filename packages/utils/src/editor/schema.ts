@@ -54,7 +54,7 @@ export const schema = new Schema({
         { tag: 'h6', attrs: { level: 6 } },
       ],
       toDOM(node) {
-        return ['h' + node.attrs.level, 0];
+        return [`h${node.attrs.level}`, 0];
       },
     },
 
@@ -100,7 +100,7 @@ export const schema = new Schema({
         return [
           'ol',
           {
-            start: node.attrs.order == 1 ? null : node.attrs.order,
+            start: node.attrs.order === 1 ? null : node.attrs.order,
             'data-tight': node.attrs.tight ? 'true' : null,
           },
           0,
@@ -207,7 +207,7 @@ export const schema = new Schema({
         { tag: 'i' },
         { tag: 'em' },
         { style: 'font-style=italic' },
-        { style: 'font-style=normal', clearMark: (m) => m.type.name == 'em' },
+        { style: 'font-style=normal', clearMark: (m) => m.type.name === 'em' },
       ],
       toDOM() {
         return ['em'];
@@ -219,9 +219,9 @@ export const schema = new Schema({
         { tag: 'strong' },
         {
           tag: 'b',
-          getAttrs: (node) => node.style.fontWeight != 'normal' && null,
+          getAttrs: (node) => node.style.fontWeight !== 'normal' && null,
         },
-        { style: 'font-weight=400', clearMark: (m) => m.type.name == 'strong' },
+        { style: 'font-weight=400', clearMark: (m) => m.type.name === 'strong' },
         {
           style: 'font-weight',
           getAttrs: (value) => /^(bold(er)?|[5-9]\d{2,})$/.test(value) && null,

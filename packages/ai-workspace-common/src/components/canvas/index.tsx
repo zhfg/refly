@@ -144,7 +144,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     return () => {
       setInitialFitViewCompleted(canvasId, false);
     };
-  }, [canvasId]);
+  }, [canvasId, setInitialFitViewCompleted]);
 
   useEffect(() => {
     // Only run fitView if we have nodes and this is the initial render
@@ -215,7 +215,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
       setLastClickTime(currentTime);
     },
-    [lastClickTime, setOperatingNodeId, canvasId],
+    [lastClickTime, setOperatingNodeId, reactFlowInstance],
   );
 
   const handleToolSelect = (tool: string) => {
@@ -414,10 +414,10 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       // Handle preview if enabled
       handleNodePreview(node);
     },
-    [operatingNodeId, handleNodePreview, setOperatingNodeId, setSelectedNode, canvasId],
+    [handleNodePreview, setOperatingNodeId, setSelectedNode],
   );
 
-  // 缓存节点数据
+  // Memoize nodes and edges
   const memoizedNodes = useMemo(() => nodes, [nodes]);
   const memoizedEdges = useMemo(() => edges, [edges]);
 
@@ -484,7 +484,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         nodeType: 'group',
       });
     },
-    [reactFlowInstance, nodes],
+    [reactFlowInstance],
   );
 
   return (
@@ -625,7 +625,7 @@ export const Canvas = (props: { canvasId: string }) => {
     } else {
       setCurrentCanvasId(null);
     }
-  }, [canvasId]);
+  }, [canvasId, setCurrentCanvasId]);
 
   return (
     <EditorPerformanceProvider>

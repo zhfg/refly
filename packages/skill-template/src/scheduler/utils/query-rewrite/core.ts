@@ -45,11 +45,11 @@ export const postprocessContext = (
     contentList: [],
   };
 
-  mentionedContextList.forEach((item) => {
+  for (const item of mentionedContextList) {
     if (item.type === 'document') {
       // Find original document from originalContext by entityId
       const originalDocument = originalContext.documents.find(
-        (c, index) => `document-${index}` === item.entityId,
+        (_c, index) => `document-${index}` === item.entityId,
       );
       if (originalDocument) {
         context.documents.push({
@@ -60,7 +60,7 @@ export const postprocessContext = (
     } else if (item.type === 'resource') {
       // Find original resource from originalContext by entityId
       const originalResource = originalContext.resources.find(
-        (r, index) => `resource-${index}` === item.entityId,
+        (_r, index) => `resource-${index}` === item.entityId,
       );
       if (originalResource) {
         context.resources.push({
@@ -71,7 +71,7 @@ export const postprocessContext = (
     } else if (item.type === 'selectedContent') {
       // Find original selectedContent from originalContext by entityId
       const originalSelectedContent = originalContext.contentList.find(
-        (c, index) => `content-${index}` === item.entityId,
+        (_c, index) => `content-${index}` === item.entityId,
       );
       if (originalSelectedContent) {
         context.contentList.push({
@@ -80,7 +80,7 @@ export const postprocessContext = (
         });
       }
     }
-  });
+  }
 
   return context;
 };
@@ -192,7 +192,7 @@ Please analyze the query, focusing primarily on the current query and available 
     const result = await extractStructuredData(
       model,
       queryAnalysisSchema,
-      systemPrompt + '\n\n' + userMessage,
+      `${systemPrompt}\n\n${userMessage}`,
       ctx.config,
       3, // maxRetries
       ctx?.config?.configurable?.modelInfo,

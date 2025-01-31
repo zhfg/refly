@@ -2,7 +2,7 @@ import './register-aliases';
 
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
+import { join } from 'node:path';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 

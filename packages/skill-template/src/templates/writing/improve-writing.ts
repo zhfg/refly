@@ -59,7 +59,7 @@ export class ImproveWritingSkill extends BaseSkill {
     this.engine.logger.log('---GENERATE---');
 
     const { query } = state;
-    const { locale = 'en', contentList = [], chatHistory = [] } = config?.configurable || {};
+    const { locale = 'en', contentList = [] } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,

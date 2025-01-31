@@ -8,10 +8,10 @@ export abstract class BaseError extends Error {
   }
 
   toString() {
-    return `[${this.code}] ${this.messageDict?.['en'] ?? 'Unknown error occurred'}`;
+    return `[${this.code}] ${this.messageDict?.en ?? 'Unknown error occurred'}`;
   }
 
   getMessage(locale: string) {
-    return this.messageDict[locale] || this.messageDict['en'];
+    return this.messageDict[locale] || this.messageDict.en;
   }
 }

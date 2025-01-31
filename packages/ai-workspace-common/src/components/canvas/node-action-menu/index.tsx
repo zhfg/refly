@@ -250,7 +250,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
       },
     });
     onClose?.();
-  }, [nodeData, node?.position, nodeType, createMemo, onClose]);
+  }, [nodeData, nodeType, createMemo, onClose]);
 
   const handleDuplicateDocument = useCallback(() => {
     nodeActionEmitter.emit(createNodeEventName(nodeId, 'duplicateDocument'));
@@ -648,7 +648,6 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
       ].filter(Boolean);
     },
     [
-      activeDocumentId,
       cloneAskAIRunning,
       nodeType,
       nodeData?.contentPreview,

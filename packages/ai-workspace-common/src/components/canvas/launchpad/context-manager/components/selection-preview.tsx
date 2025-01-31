@@ -29,7 +29,7 @@ export const SelectionPreview: React.FC<SelectionPreviewProps> = ({ item }) => {
 
     setNodeCenter(node.id);
     setSelectedNode(node as CanvasNode<any>);
-  }, [selection, setNodeCenter, setSelectedNode]);
+  }, [selection, getNodes, setNodeCenter, setSelectedNode]);
 
   return (
     <div className="w-64 p-3 rounded-lg max-h-[400px] overflow-y-auto flex flex-col gap-3">

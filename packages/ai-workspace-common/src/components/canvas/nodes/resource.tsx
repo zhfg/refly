@@ -96,7 +96,7 @@ export const ResourceNode = memo(
         entityId: data.entityId,
         metadata: data.metadata,
       });
-    }, [id, data, addToContext]);
+    }, [data, addToContext]);
 
     const { deleteNode } = useDeleteNode();
 
@@ -141,7 +141,7 @@ export const ResourceNode = memo(
         false,
         true,
       );
-    }, [id, data, addNode]);
+    }, [data, addNode]);
 
     const { data: result } = useGetResourceDetail(
       {

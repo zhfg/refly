@@ -1,8 +1,6 @@
 import { StructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
 
-import { BaseToolParams } from '../../base';
-
 export class ReflyDefaultResponse extends StructuredTool {
   name = 'default_response';
 
@@ -11,10 +9,6 @@ export class ReflyDefaultResponse extends StructuredTool {
   schema = z.object({
     reason: z.string().describe('The reason why should call default_response tool'),
   });
-
-  constructor(params?: BaseToolParams) {
-    super(params);
-  }
 
   static lc_name() {
     return 'ReflyDefaultResponse';

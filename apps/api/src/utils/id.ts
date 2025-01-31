@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { v5 as uuidv5 } from 'uuid';
 
 export function sha256Hash(str: string): string {

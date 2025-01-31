@@ -111,7 +111,10 @@ ${importantRemindersPrompt}
 ${buildSpecificQueryInstruction()}
 `;
 
-export const buildBlockEditDocumentSystemPrompt = (locale: string, needPrepareContext: boolean) => {
+export const buildBlockEditDocumentSystemPrompt = (
+  _locale: string,
+  needPrepareContext: boolean,
+) => {
   if (needPrepareContext) {
     return buildContextualBlockEditDocumentPrompt();
   }

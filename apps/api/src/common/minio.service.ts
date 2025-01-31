@@ -36,7 +36,7 @@ export class MinioService implements OnModuleInit {
           return (...args: any[]) => {
             try {
               return value.call(target, this.config.bucket, ...args);
-            } catch (error) {
+            } catch (_error) {
               return value.call(target, ...args);
             }
           };

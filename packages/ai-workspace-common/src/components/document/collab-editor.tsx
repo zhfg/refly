@@ -231,7 +231,7 @@ export const CollaborativeEditor = memo(
         editor.off('blur', updateSelection);
         editor.off('focus', updateSelection);
       };
-    }, [editorRef.current]);
+    }, [editorRef.current, documentActions.setHasEditorSelection]);
 
     useEffect(() => {
       const insertBelow = (content: string) => {
@@ -278,7 +278,7 @@ export const CollaborativeEditor = memo(
         editorEmitter.off('insertBelow', insertBelow);
         documentActions.setActiveDocumentId(null);
       };
-    }, [docId]);
+    }, [docId, documentActions.setActiveDocumentId]);
 
     useEffect(() => {
       if (editorRef.current) {

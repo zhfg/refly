@@ -90,7 +90,6 @@ export class CommonQnA extends BaseSkill {
           mentionedContext,
           maxTokens: remainingTokens,
           enableMentionedContext: hasContext,
-          enableLowerPriorityContext: hasContext,
         },
         {
           config,

@@ -234,7 +234,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
         <div className="mt-6 text-sm">
           {isSignUpMode ? (
             <span>
-              {t('landingPage.loginModal.signinHint') + ' '}
+              {`${t('landingPage.loginModal.signinHint')} `}
               <Button
                 type="link"
                 className="p-0 text-green-600"
@@ -245,7 +245,7 @@ export const LoginModal = (props: { visible?: boolean; from?: string }) => {
             </span>
           ) : (
             <span>
-              {t('landingPage.loginModal.signupHint') + ' '}
+              {`${t('landingPage.loginModal.signupHint')} `}
               <Button
                 type="link"
                 className="p-0 text-green-600"

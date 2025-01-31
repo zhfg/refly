@@ -28,7 +28,8 @@ export class ResultAggregator {
    */
   private aborted = false;
 
-  private getOrInitData(step: string): StepData {
+  private getOrInitData(_step: string): StepData {
+    let step = _step;
     if (!step) {
       step = 'default';
     }

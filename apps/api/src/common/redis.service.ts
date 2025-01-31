@@ -28,9 +28,8 @@ export class RedisService extends Redis implements OnModuleInit {
 
       if (success) {
         return async () => await this.releaseLock(key, token);
-      } else {
-        return null;
       }
+      return null;
     } catch (err) {
       this.logger.warn('Error acquiring lock:', err);
       return null;
@@ -51,9 +50,8 @@ export class RedisService extends Redis implements OnModuleInit {
 
       if (success === 1) {
         return true;
-      } else {
-        return false;
       }
+      return false;
     } catch (err) {
       this.logger.error('Error releasing lock:', err);
       throw false;

@@ -90,7 +90,6 @@ export class WebSearch extends BaseSkill {
         mentionedContext,
         maxTokens: remainingTokens,
         enableMentionedContext: true,
-        enableLowerPriorityContext: true,
       },
       {
         config,
@@ -110,7 +109,7 @@ export class WebSearch extends BaseSkill {
       buildUserPrompt: webSearch.buildWebSearchUserPrompt,
     };
 
-    this.engine.logger.log(`Prepared context successfully!`);
+    this.engine.logger.log('Prepared context successfully!');
 
     if (sources.length > 0) {
       this.emitEvent({ structuredData: { sources: truncateSource(sources) } }, config);

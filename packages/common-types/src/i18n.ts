@@ -105,21 +105,3 @@ export const enLocale = Object.keys(localeToLanguageName.en) as OutputLocale[];
 export const zhCNLocale = Object.keys(localeToLanguageName['zh-CN']);
 
 export type OutputLocale = keyof typeof localeToLanguageName.en;
-
-// TODO: 国际化后续要改造
-export const getOutputLocale = (uiLocale: LOCALE) => {
-  if (uiLocale === LOCALE.EN) {
-    return enLocale;
-  } else {
-    return zhCNLocale;
-  }
-};
-
-// TODO: 国际化后续要改造
-export const getOutputLanguage = (uiLocale: LOCALE) => {
-  if (uiLocale === LOCALE.EN) {
-    return enLanguageName;
-  } else {
-    return zhCNLanguageName;
-  }
-};

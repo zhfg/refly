@@ -111,7 +111,7 @@ ${buildGenerateDocumentCommonPrompt(contextualExamples())}
 ${buildSpecificQueryInstruction()}
 `;
 
-export const buildGenerateDocumentSystemPrompt = (locale: string, needPrepareContext: boolean) => {
+export const buildGenerateDocumentSystemPrompt = (_locale: string, needPrepareContext: boolean) => {
   if (needPrepareContext) {
     return buildContextualGenerateDocumentPrompt();
   }
@@ -175,7 +175,7 @@ ${context}
 };
 
 // Add title generation prompt
-export const getTitlePrompt = (locale: string, uiLocale: string) => `
+export const getTitlePrompt = (locale: string, _uiLocale: string) => `
 ## Role
 You are a document title generation expert who creates clear, concise, and descriptive titles.
 

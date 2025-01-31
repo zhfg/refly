@@ -27,7 +27,7 @@ export function Home({
 
   useEffect(() => {
     setValue('refly-built-in-ask-ai');
-  }, []);
+  }, [setValue]);
 
   return (
     <>

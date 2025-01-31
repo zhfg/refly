@@ -197,7 +197,7 @@ function FeaturesBlocks() {
                 <div className="mt-2">
                   <span className="relative text-[#F17B2C]">
                     主要功能总览
-                    <span className="absolute bottom-0 left-0 h-1 w-full bg-[#F17B2C]"></span>
+                    <span className="absolute bottom-0 left-0 h-1 w-full bg-[#F17B2C]" />
                   </span>
                 </div>
               </>
@@ -207,7 +207,7 @@ function FeaturesBlocks() {
                 <div className="mt-2">
                   <span className="relative text-[#F17B2C]">
                     Primary Features
-                    <span className="absolute bottom-0 left-0 h-1 w-full bg-[#F17B2C]"></span>
+                    <span className="absolute bottom-0 left-0 h-1 w-full bg-[#F17B2C]" />
                   </span>
                 </div>
               </>

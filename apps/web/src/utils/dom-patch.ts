@@ -1,4 +1,3 @@
-/* eslint-disable */
 // @ts-nocheck - Disable all type checking for this file
 
 // Workaround for removeChild and insertBefore errors when google translate is enabled
@@ -12,6 +11,7 @@ if (typeof Node === 'function' && Node.prototype) {
       }
       return child;
     }
+    // biome-ignore lint/style/noArguments: using arguments is simpler
     return originalRemoveChild.apply(this, arguments);
   };
 
@@ -27,6 +27,7 @@ if (typeof Node === 'function' && Node.prototype) {
       }
       return newNode;
     }
+    // biome-ignore lint/style/noArguments: using arguments is simpler
     return originalInsertBefore.apply(this, arguments);
   };
 }

@@ -105,7 +105,7 @@ export class FindRelatedContent extends BaseSkill {
    * @param config - The configuration for the runnable.
    * @returns - The updated state with the new message added to the list of messages.
    */
-  retrieve = async (state: GraphState, config: SkillRunnableConfig) => {
+  retrieve = async (_state: GraphState, config: SkillRunnableConfig) => {
     const { user } = config.configurable;
 
     const {
@@ -147,7 +147,7 @@ export class FindRelatedContent extends BaseSkill {
     }
 
     const sources: Source[] = searchResp.data?.map((result) => ({
-      url: (result.metadata?.['resourceMeta']?.['url'] as string) || '',
+      url: ((result.metadata?.resourceMeta as any)?.url as string) || '',
       title: result.title,
       pageContent: result.snippets.map((s) => s.text).join('\n\n'),
       metadata: {
@@ -175,7 +175,7 @@ export class FindRelatedContent extends BaseSkill {
     config?: SkillRunnableConfig,
   ): Promise<Partial<GraphState>> => {
     const { sources } = state;
-    const { locale = 'en', chatHistory = [] } = config?.configurable || {};
+    const { locale = 'en' } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.1,

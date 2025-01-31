@@ -131,16 +131,10 @@ export class ChangeToneSkill extends BaseSkill {
     },
   };
 
-  async generate(state: GraphState, config?: SkillRunnableConfig) {
+  async generate(_: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
-    const { query } = state;
-    const {
-      locale = 'en',
-      contentList = [],
-      chatHistory = [],
-      tplConfig = {},
-    } = config?.configurable || {};
+    const { contentList = [], tplConfig = {} } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,
@@ -187,7 +181,7 @@ TARGET TONE: {targetTone}
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
       new HumanMessage(
-        `The context is provided above, please adjust the tone to the specified tone`,
+        'The context is provided above, please adjust the tone to the specified tone',
       ),
     ]);
 

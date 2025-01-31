@@ -55,10 +55,10 @@ export class FixSpellingAndGrammarIssuesSkill extends BaseSkill {
     },
   };
 
-  async generate(state: GraphState, config?: SkillRunnableConfig) {
+  async generate(_state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
-    const { locale = 'en', contentList = [], chatHistory = [] } = config?.configurable || {};
+    const { contentList = [], chatHistory = [] } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,
@@ -96,7 +96,7 @@ INPUT:
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
       ...chatHistory,
-      new HumanMessage(`Please provide professional language correction for the given INPUT`),
+      new HumanMessage('Please provide professional language correction for the given INPUT'),
     ]);
 
     return { messages: [responseMessage] };

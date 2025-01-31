@@ -241,7 +241,7 @@ export class SearchService {
       domain: 'resource',
       title: hit._source.title,
       highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
-      contentPreview: hit._source.content?.slice(0, 500) + '...',
+      contentPreview: `${hit._source.content?.slice(0, 500)}...`,
       snippets: [
         {
           text: hit._source.content,
@@ -286,7 +286,7 @@ export class SearchService {
       domain: 'resource',
       title: node.title,
       highlightedTitle: node.title,
-      contentPreview: node.content?.slice(0, 500) + '...',
+      contentPreview: `${node.content?.slice(0, 500)}...`,
       snippets: [{ text: node.content, highlightedText: node.content }],
       metadata: {
         url: node?.url,
@@ -354,7 +354,7 @@ export class SearchService {
       domain: 'document',
       title: hit._source.title,
       highlightedTitle: hit.highlight?.title?.[0] || hit._source.title,
-      contentPreview: hit._source.content?.slice(0, 500) + '...',
+      contentPreview: `${hit._source.content?.slice(0, 500)}...`,
       snippets: [
         {
           text: hit._source.content,
@@ -384,7 +384,7 @@ export class SearchService {
       domain: 'document',
       title: node.title,
       highlightedTitle: node.title,
-      contentPreview: node.content?.slice(0, 500) + '...',
+      contentPreview: `${node.content?.slice(0, 500)}...`,
       snippets: [{ text: node.content, highlightedText: node.content }],
     }));
   }
@@ -455,7 +455,7 @@ export class SearchService {
   }
 
   async webSearch(
-    user: User,
+    _user: User,
     req: WebSearchRequest | BatchWebSearchRequest,
   ): Promise<WebSearchResult[]> {
     const limit = req?.limit || 10;

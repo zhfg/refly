@@ -15,10 +15,10 @@ export class RagController {
   @Get('parse/:url(*)')
   @Render('parse')
   async parse(@Param('url') url: string) {
-    const cacheFile = path.join(await fs.realpath(os.tmpdir()), sha256Hash(url) + '.json');
-    this.logger.log('looking for cache file ' + cacheFile);
+    const cacheFile = path.join(await fs.realpath(os.tmpdir()), `${sha256Hash(url)}.json`);
+    this.logger.log(`looking for cache file ${cacheFile}`);
 
-    let snapshot;
+    let snapshot: any;
 
     // check cacheFile exists
     const cacheExists = await fs.access(cacheFile).then(
@@ -32,7 +32,7 @@ export class RagController {
     } else {
       snapshot = await this.ragService.crawlFromRemoteReader(url);
       await fs.writeFile(cacheFile, JSON.stringify(snapshot));
-      this.logger.log('save cache to ' + cacheFile);
+      this.logger.log(`save cache to ${cacheFile}`);
     }
 
     const content = snapshot.parsed?.content || snapshot.html;

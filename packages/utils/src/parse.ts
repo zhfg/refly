@@ -6,9 +6,8 @@ export const safeParseJSON = (value: any, errorCallback?: (e: unknown) => any): 
   } catch (e) {
     if (errorCallback) {
       return errorCallback(e);
-    } else {
-      return undefined;
     }
+    return undefined;
   }
 };
 
@@ -18,9 +17,8 @@ export const safeStringifyJSON = (value: any, errorCallback?: (e: unknown) => st
   } catch (e) {
     if (errorCallback) {
       return errorCallback(e);
-    } else {
-      return '';
     }
+    return '';
   }
 };
 
@@ -35,7 +33,7 @@ export function isJSON(variable: any): boolean {
   try {
     JSON.parse(variable);
     return true;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }
@@ -45,10 +43,10 @@ const getParsedCitation = (markdown = '') => {
     ?.replace(/\[\s*([cC])itation/g, '[citation')
     .replace(/\[\[([cC])itation/g, '[citation')
     .replace(/[cC]itation:(\d+)]]/g, 'citation:$1]')
-    .replace(/\[\[([cC]itation:\d+)]](?!])/g, `[$1]`)
+    .replace(/\[\[([cC]itation:\d+)]](?!])/g, '[$1]')
     .replace(/\[[cC]itation:(\d+)]/g, '[citation]($1)')
     .replace(/[cC]itation\s*:\s*(\d+)\s*]]/g, 'citation:$1]')
-    .replace(/\[\s*([cC]itation\s*:\s*\d+)\s*]](?!])/g, `[$1]`)
+    .replace(/\[\s*([cC]itation\s*:\s*\d+)\s*]](?!])/g, '[$1]')
     .replace(/\[\s*[cC]itation\s*:\s*(\d+)\s*]/g, '[citation]($1)')
     .replace(/【\s*[cC]itation\s*:\s*(\d+)\s*】/g, '[citation]($1)')
     .replace(/\[\[\s*[cC]itation\s*:\s*(\d+)\s*]]/g, '[citation]($1)');
@@ -62,7 +60,7 @@ export const markdownCitationParse = (markdown: string) => {
   return getParsedCitation(markdown);
 };
 
-export function parseMarkdownCitationsAndCanvasTags(content: string, sources: Source[]): string {
+export function parseMarkdownCitationsAndCanvasTags(content: string, _sources: Source[]): string {
   // Remove citation references
   const citationRegex = /\[\s*citation\s*]\s*\(\s*(\d+)\s*\)|\[\s*citation\s*:\s*(\d+)\s*]/g;
   let parsedContent = getParsedCitation(content).replace(citationRegex, '');
@@ -114,14 +112,13 @@ export function parseMarkdownWithCitations(content: string, sources: Source[]): 
   // 添加引用来源
   if (usedSources.size > 0) {
     parsedContent += '\n\n引用来源：\n';
-    Array.from(usedSources)
-      .sort((a, b) => a - b)
-      .forEach((num) => {
-        const source = sources[num - 1];
-        if (source) {
-          parsedContent += `-  ${num}\: [${source.title}](${source.url})\n\n`;
-        }
-      });
+    const sortedSources = Array.from(usedSources).sort((a, b) => a - b);
+    for (const num of sortedSources) {
+      const source = sources[num - 1];
+      if (source) {
+        parsedContent += `-  ${num}\: [${source.title}](${source.url})\n\n`;
+      }
+    }
   }
 
   return parsedContent;

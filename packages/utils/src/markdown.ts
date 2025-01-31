@@ -10,37 +10,34 @@ export function tidyMarkdown(markdown: string): string {
   // Step 1: Handle complex broken links with text and optional images spread across multiple lines
   let normalizedMarkdown = markdown.replace(
     /\[\s*([^\]\n]+?)\s*\]\s*\(\s*([^)]+)\s*\)/g,
-    (match, text, url) => {
-      // Remove internal new lines and excessive spaces within the text
-      text = text.replace(/\s+/g, ' ').trim();
-      url = url.replace(/\s+/g, '').trim();
-      return `[${text}](${url})`;
+    (_match, text, url) => {
+      const cleanText = text.replace(/\s+/g, ' ').trim();
+      const cleanUrl = url.replace(/\s+/g, '').trim();
+      return `[${cleanText}](${cleanUrl})`;
     },
   );
 
   normalizedMarkdown = normalizedMarkdown.replace(
     /\[\s*([^\]\n!]*?)\s*\n*(?:!\[([^\]]*)\]\((.*?)\))?\s*\n*\]\s*\(\s*([^)]+)\s*\)/g,
-    (match, text, alt, imgUrl, linkUrl) => {
-      // Normalize by removing excessive spaces and new lines
-      text = text.replace(/\s+/g, ' ').trim();
-      alt = alt ? alt.replace(/\s+/g, ' ').trim() : '';
-      imgUrl = imgUrl ? imgUrl.replace(/\s+/g, '').trim() : '';
-      linkUrl = linkUrl.replace(/\s+/g, '').trim();
-      if (imgUrl) {
-        return `[${text} ![${alt}](${imgUrl})](${linkUrl})`;
-      } else {
-        return `[${text}](${linkUrl})`;
+    (_match, text, alt, imgUrl, linkUrl) => {
+      const cleanText = text.replace(/\s+/g, ' ').trim();
+      const cleanAlt = alt ? alt.replace(/\s+/g, ' ').trim() : '';
+      const cleanImgUrl = imgUrl ? imgUrl.replace(/\s+/g, '').trim() : '';
+      const cleanLinkUrl = linkUrl.replace(/\s+/g, '').trim();
+      if (cleanImgUrl) {
+        return `[${cleanText} ![${cleanAlt}](${cleanImgUrl})](${cleanLinkUrl})`;
       }
+      return `[${cleanText}](${cleanLinkUrl})`;
     },
   );
 
   // Step 2: Normalize regular links that may be broken across lines
   normalizedMarkdown = normalizedMarkdown.replace(
     /\[\s*([^\]]+)\]\s*\(\s*([^)]+)\)/g,
-    (match, text, url) => {
-      text = text.replace(/\s+/g, ' ').trim();
-      url = url.replace(/\s+/g, '').trim();
-      return `[${text}](${url})`;
+    (_match, text, url) => {
+      const cleanText = text.replace(/\s+/g, ' ').trim();
+      const cleanUrl = url.replace(/\s+/g, '').trim();
+      return `[${cleanText}](${cleanUrl})`;
     },
   );
 
@@ -84,7 +81,7 @@ const getTurndown = (mode: FormatMode) => {
     });
     turnDownService.addRule('unlink', {
       filter: ['a'],
-      replacement: (content, node) => node.textContent,
+      replacement: (_content, node) => node.textContent,
     });
   }
 
@@ -121,12 +118,12 @@ export const convertHTMLToMarkdown = (mode: FormatMode, html: string): string =>
     try {
       contentText = turnDownService.turndown(html);
     } catch (err) {
-      console.warn(`Turndown failed to run, retrying without plugins`, { err });
+      console.warn('Turndown failed to run, retrying without plugins', { err });
       const vanillaTurnDownService = getTurndown('vanilla');
       try {
         contentText = vanillaTurnDownService.turndown(html);
       } catch (err2) {
-        console.warn(`Turndown failed to run, giving up`, { err: err2 });
+        console.warn('Turndown failed to run, giving up', { err: err2 });
       }
     }
   }

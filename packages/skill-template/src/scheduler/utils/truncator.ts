@@ -100,15 +100,15 @@ export const truncateContext = (context: IContext, maxTokens: number): IContext 
   // Truncate resources
   truncatedContext.resources = truncateItems<SkillContextResourceItem>(
     context.resources,
-    (item) => item.resource?.content || '',
-    (item, content) => ({ ...item, resource: { ...item.resource!, content } }),
+    (item) => item.resource?.content ?? '',
+    (item, content) => ({ ...item, resource: { ...item.resource, content } }),
   );
 
   // Truncate documents
   truncatedContext.documents = truncateItems<SkillContextDocumentItem>(
     context.documents,
-    (item) => item.document?.content || '',
-    (item, content) => ({ ...item, document: { ...item.document!, content } }),
+    (item) => item.document?.content ?? '',
+    (item, content) => ({ ...item, document: { ...item.document, content } }),
   );
 
   // Truncate contentList
@@ -154,10 +154,10 @@ export async function mergeAndTruncateContexts(
     new Set(
       combinedItems.map((item) => {
         const id =
-          (item as SkillContextResourceItem).resource?.resourceId ||
+          (item as SkillContextResourceItem).resource?.resourceId ??
           (item as SkillContextDocumentItem).document?.docId;
         const content =
-          (item as SkillContextResourceItem).resource?.content ||
+          (item as SkillContextResourceItem).resource?.content ??
           (item as SkillContextDocumentItem).document?.content;
         return `${id}:${content}`;
       }),
@@ -166,24 +166,24 @@ export async function mergeAndTruncateContexts(
     (key) =>
       combinedItems.find((item) => {
         const id =
-          (item as SkillContextResourceItem).resource?.resourceId ||
+          (item as SkillContextResourceItem).resource?.resourceId ??
           (item as SkillContextDocumentItem).document?.docId;
         const content =
-          (item as SkillContextResourceItem).resource?.content ||
+          (item as SkillContextResourceItem).resource?.content ??
           (item as SkillContextDocumentItem).document?.content;
         return `${id}:${content}` === key;
-      })!,
+      }) ?? combinedItems[0],
   );
 
   // 4. Sort by similarity
   const itemsForSorting = uniqueCombinedItems.map((item) => ({
     content:
-      (item as SkillContextResourceItem).resource?.content ||
+      (item as SkillContextResourceItem).resource?.content ??
       (item as SkillContextDocumentItem).document?.content,
     metadata: {
       type: 'resource' in item ? 'resource' : 'document',
       id:
-        (item as SkillContextResourceItem).resource?.resourceId ||
+        (item as SkillContextResourceItem).resource?.resourceId ??
         (item as SkillContextDocumentItem).document?.docId,
     },
   }));
@@ -201,9 +201,9 @@ export async function mergeAndTruncateContexts(
       uniqueCombinedItems.find(
         (item) =>
           ('resource' in item ? 'resource' : 'document') === sortedItem.metadata.type &&
-          ((item as SkillContextResourceItem).resource?.resourceId ||
+          ((item as SkillContextResourceItem).resource?.resourceId ??
             (item as SkillContextDocumentItem).document?.docId) === sortedItem.metadata.id,
-      )!,
+      ) ?? uniqueCombinedItems[0],
   );
 
   // 5. Truncate
@@ -268,27 +268,29 @@ function truncateContextWithPriority(
 function truncateTextWithWord(text: string, maxChars = 170, maxWords = 30): string {
   // First check word count
   const words = text.split(/\s+/);
+  let truncatedText = text;
+
   if (words.length > maxWords) {
-    text = words.slice(0, maxWords).join(' ');
+    truncatedText = words.slice(0, maxWords).join(' ');
   }
 
   // Then check character count
-  if (text.length > maxChars) {
-    text = text.slice(0, maxChars);
+  if (truncatedText.length > maxChars) {
+    truncatedText = truncatedText.slice(0, maxChars);
     // Ensure we don't cut in the middle of a word
-    const lastSpace = text.lastIndexOf(' ');
+    const lastSpace = truncatedText.lastIndexOf(' ');
     if (lastSpace > maxChars * 0.8) {
       // Only trim to last space if it's not too far back
-      text = text.slice(0, lastSpace);
+      truncatedText = truncatedText.slice(0, lastSpace);
     }
   }
 
   // Add ellipsis if text was truncated
-  if (text.length < text.length) {
-    text = text.trim() + '...';
+  if (truncatedText.length < text.length) {
+    truncatedText = `${truncatedText.trim()}...`;
   }
 
-  return text;
+  return truncatedText;
 }
 
 /**

@@ -203,7 +203,7 @@ export const useNodePosition = () => {
         }
       });
     },
-    [setCenter, getNode, getZoom, setNodes],
+    [canvasId, setCenter, getNode, getZoom, setNodes],
   );
 
   const layoutBranchAndUpdatePositions = useCallback(

@@ -152,7 +152,7 @@ export class CanvasService {
       }));
       this.logger.log(`Entities to be deleted: ${JSON.stringify(entities)}`);
 
-      entities.forEach((entity) => {
+      for (const entity of entities) {
         cleanups.push(
           this.deleteKnowledgeQueue.add(
             'deleteKnowledgeEntity',
@@ -169,7 +169,7 @@ export class CanvasService {
             },
           ),
         );
-      });
+      }
     }
 
     const files = await this.prisma.staticFile.findMany({
@@ -314,9 +314,10 @@ export class CanvasService {
             });
 
             // Remove nodes in reverse order to maintain correct indices
-            toRemove.reverse().forEach((index) => {
+            toRemove.reverse();
+            for (const index of toRemove) {
               nodes.delete(index, 1);
-            });
+            }
           });
 
           await connection.disconnect();

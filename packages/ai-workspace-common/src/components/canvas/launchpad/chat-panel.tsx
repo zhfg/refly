@@ -137,7 +137,7 @@ export const ChatPanel = () => {
       const initialConfig = selectedSkill?.tplConfig ?? defaultConfig;
       form.setFieldValue('tplConfig', initialConfig);
     }
-  }, [selectedSkill]);
+  }, [selectedSkill, form.setFieldValue]);
 
   const handleSendMessage = (userInput?: string) => {
     const error = handleFilterErrorTip();
@@ -226,7 +226,7 @@ export const ChatPanel = () => {
         },
       },
     ],
-    [handleRecommendQuestionsToggle],
+    [handleRecommendQuestionsToggle, t],
   );
 
   return (

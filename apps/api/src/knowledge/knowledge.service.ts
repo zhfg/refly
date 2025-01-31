@@ -250,12 +250,12 @@ export class KnowledgeService {
     const { url } = JSON.parse(meta) as ResourceMeta;
 
     let content = '';
-    let title = '';
+    let _title = '';
 
     if (url) {
       const { data } = await this.ragService.crawlFromRemoteReader(url);
       content = data.content?.replace(/x00/g, '') ?? '';
-      title ||= data.title;
+      _title ||= data.title;
     }
 
     const storageKey = `resources/${resourceId}.txt`;
@@ -690,12 +690,12 @@ export class KnowledgeService {
     // Collect all document IDs and resource IDs from both source and target
     const docIds = new Set<string>();
     const resourceIds = new Set<string>();
-    references.forEach((ref) => {
+    for (const ref of references) {
       if (ref.sourceType === 'document') docIds.add(ref.sourceId);
       if (ref.targetType === 'document') docIds.add(ref.targetId);
       if (ref.sourceType === 'resource') resourceIds.add(ref.sourceId);
       if (ref.targetType === 'resource') resourceIds.add(ref.targetId);
-    });
+    }
 
     // Fetch document mappings if there are any documents
     const docsMap: Record<string, DocumentModel> = {};
@@ -703,9 +703,9 @@ export class KnowledgeService {
       const docs = await this.prisma.document.findMany({
         where: { docId: { in: Array.from(docIds) }, deletedAt: null },
       });
-      docs.forEach((doc) => {
+      for (const doc of docs) {
         docsMap[doc.docId] = doc;
-      });
+      }
     }
 
     // Fetch resource mappings if there are any resources
@@ -714,9 +714,9 @@ export class KnowledgeService {
       const resources = await this.prisma.resource.findMany({
         where: { resourceId: { in: Array.from(resourceIds) }, deletedAt: null },
       });
-      resources.forEach((resource) => {
+      for (const resource of resources) {
         resourceMap[resource.resourceId] = resource;
-      });
+      }
     }
 
     const genReferenceMeta = (sourceType: string, sourceId: string) => {
@@ -766,7 +766,7 @@ export class KnowledgeService {
     const resourceIds: Set<string> = new Set();
     const docIds: Set<string> = new Set();
 
-    deduplicatedRefs.forEach((ref) => {
+    for (const ref of deduplicatedRefs) {
       if (!validRefTypes.includes(ref.sourceType)) {
         throw new ParamsError(`Invalid source type: ${ref.sourceType}`);
       }
@@ -791,7 +791,7 @@ export class KnowledgeService {
       } else if (ref.targetType === 'document') {
         docIds.add(ref.targetId);
       }
-    });
+    }
 
     const [resources, docs] = await Promise.all([
       this.prisma.resource.findMany({

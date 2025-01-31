@@ -3,10 +3,7 @@ import { Button, Input, message } from 'antd';
 import { useEffect, useState } from 'react';
 
 // utils
-import {
-  useImportResourceStore,
-  useImportResourceStoreShallow,
-} from '@refly-packages/ai-workspace-common/stores/import-resource';
+import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 // request
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { UpsertResourceRequest } from '@refly/openapi-schema';
@@ -22,8 +19,12 @@ const FormItem = Form.Item;
 
 export const ImportFromText = () => {
   const { t } = useTranslation();
-  const importResourceStore = useImportResourceStore();
-  const { copiedTextPayload } = useImportResourceStore.getState();
+  const { copiedTextPayload, setImportResourceModalVisible, setCopiedTextPayload } =
+    useImportResourceStoreShallow((state) => ({
+      copiedTextPayload: state.copiedTextPayload,
+      setImportResourceModalVisible: state.setImportResourceModalVisible,
+      setCopiedTextPayload: state.setCopiedTextPayload,
+    }));
   const { addNode } = useAddNode();
   const { refetchUsage, storageUsage } = useSubscriptionUsage();
   const { insertNodePosition } = useImportResourceStoreShallow((state) => ({
@@ -49,7 +50,7 @@ export const ImportFromText = () => {
       title: copiedTextPayload?.title || 'Untitled',
       content: copiedTextPayload?.content || '',
       data: {
-        url: copiedTextPayload?.url || 'https://www.refly.ai',
+        url: copiedTextPayload?.url || 'https://refly.ai',
         title: copiedTextPayload?.title || 'Untitled',
       },
     };
@@ -59,8 +60,8 @@ export const ImportFromText = () => {
     });
 
     setSaveLoading(false);
-    importResourceStore.setCopiedTextPayload({ title: '', content: '' });
-    importResourceStore.setImportResourceModalVisible(false);
+    setCopiedTextPayload({ title: '', content: '' });
+    setImportResourceModalVisible(false);
 
     if (data?.success) {
       refetchUsage();
@@ -78,16 +79,16 @@ export const ImportFromText = () => {
   };
 
   useEffect(() => {
-    const { title, content, url } = importResourceStore.copiedTextPayload;
-    if (title) importResourceStore.setCopiedTextPayload({ title });
-    if (content) importResourceStore.setCopiedTextPayload({ content });
-    if (url) importResourceStore.setCopiedTextPayload({ url });
+    const { title, content, url } = copiedTextPayload;
+    if (title) setCopiedTextPayload({ title });
+    if (content) setCopiedTextPayload({ content });
+    if (url) setCopiedTextPayload({ url });
 
     return () => {
       /* reset and copiedTextPayload after modal hide */
-      importResourceStore.setCopiedTextPayload({ title: '', content: '', url: '' });
+      setCopiedTextPayload({ title: '', content: '', url: '' });
     };
-  }, []);
+  }, [copiedTextPayload, setCopiedTextPayload]);
 
   return (
     <div className="h-full flex flex-col min-w-[500px] box-border intergation-import-from-weblink">
@@ -104,14 +105,14 @@ export const ImportFromText = () => {
         <Form>
           <FormItem layout="vertical" label={t('resource.import.textTitlePlaceholder')}>
             <Input
-              value={importResourceStore.copiedTextPayload?.title}
-              onChange={(e) => importResourceStore.setCopiedTextPayload({ title: e.target.value })}
+              value={copiedTextPayload?.title}
+              onChange={(e) => setCopiedTextPayload({ title: e.target.value })}
             />
           </FormItem>
           <FormItem layout="vertical" label={t('resource.import.textUrlPlaceholder')}>
             <Input
-              value={importResourceStore.copiedTextPayload?.url}
-              onChange={(e) => importResourceStore.setCopiedTextPayload({ url: e.target.value })}
+              value={copiedTextPayload?.url}
+              onChange={(e) => setCopiedTextPayload({ url: e.target.value })}
             />
           </FormItem>
           <FormItem required layout="vertical" label={t('resource.import.textContentPlaceholder')}>
@@ -122,11 +123,9 @@ export const ImportFromText = () => {
                 maxRows: 7,
               }}
               maxLength={100000}
-              value={importResourceStore.copiedTextPayload?.content}
+              value={copiedTextPayload?.content}
               allowClear
-              onChange={(e) =>
-                importResourceStore.setCopiedTextPayload({ content: e.target.value })
-              }
+              onChange={(e) => setCopiedTextPayload({ content: e.target.value })}
             />
           </FormItem>
         </Form>
@@ -138,9 +137,7 @@ export const ImportFromText = () => {
           <StorageLimit resourceCount={1} />
         </div>
         <div className="flex items-center gap-x-[8px] flex-shrink-0">
-          <Button onClick={() => importResourceStore.setImportResourceModalVisible(false)}>
-            {t('common.cancel')}
-          </Button>
+          <Button onClick={() => setImportResourceModalVisible(false)}>{t('common.cancel')}</Button>
           <Button
             type="primary"
             loading={saveLoading}

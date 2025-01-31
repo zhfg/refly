@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { Node } from '@xyflow/react';
 import { useCanvasStore, useCanvasStoreShallow } from '../../stores/canvas';
 import { CanvasNode } from '../../components/canvas/nodes';
 import { CanvasNodeType } from '@refly/openapi-schema';
@@ -17,7 +18,7 @@ export const useNodeSelection = () => {
   }));
 
   const setSelectedNode = useCallback(
-    (node: CanvasNode<any> | null) => {
+    (node: Node) => {
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
       const updatedNodes = nodes.map((n) => ({
@@ -30,7 +31,7 @@ export const useNodeSelection = () => {
   );
 
   const addSelectedNode = useCallback(
-    (node: CanvasNode<any> | null) => {
+    (node: Node) => {
       const { data } = useCanvasStore.getState();
       const nodes = data[canvasId]?.nodes ?? [];
       const updatedNodes = nodes.map((n) => ({

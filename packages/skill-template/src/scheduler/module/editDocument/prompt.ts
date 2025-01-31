@@ -12,15 +12,6 @@ import {
   buildContextualInlineEditDocumentContextUserPrompt,
 } from './inline';
 
-interface EditDocumentModule {
-  buildSystemPrompt: (locale: string, needPrepareContext: boolean) => string;
-  buildUserPrompt: (params: { originalQuery: string; rewrittenQuery: string }) => string;
-  buildContextUserPrompt: (documentContext: {
-    document: Document;
-    selectedContent: HighlightSelection;
-  }) => (context: string, needPrepareContext: boolean) => string;
-}
-
 const getModules = (documentContext: {
   document: Document;
   selectedContent: HighlightSelection;

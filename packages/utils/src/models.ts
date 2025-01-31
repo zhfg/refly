@@ -103,15 +103,15 @@ export const aggregateTokenUsage = (usageItems: TokenUsageItem[]): TokenUsageIte
     }
   > = {};
 
-  usageItems.forEach((item) => {
-    if (!item) return;
+  for (const item of usageItems) {
+    if (!item) continue;
     const key = `${item.tier}:${item.modelName}`;
     if (!aggregatedUsage[key]) {
       aggregatedUsage[key] = { inputTokens: 0, outputTokens: 0, modelProvider: item.modelProvider };
     }
     aggregatedUsage[key].inputTokens += item.inputTokens;
     aggregatedUsage[key].outputTokens += item.outputTokens;
-  });
+  }
 
   return Object.entries(aggregatedUsage)
     .map(([key, value]) => {

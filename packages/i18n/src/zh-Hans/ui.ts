@@ -454,10 +454,10 @@ const translations = {
       noteCharsCount: '共 {{count}} 字',
       autoSaved: '已自动保存',
       saving: '保存中...',
-      readOnly: '画布已设为只读状态',
-      edit: '画布已设为可编辑状态',
+      readOnly: '文档已设为只读状态',
+      edit: '文档已设为可编辑状态',
       serviceDisconnected: '服务已断开',
-      createNoteFailed: '创建画布失败，请重试！',
+      createNoteFailed: '创建文档失败，请重试！',
       defaultTitle: '未命名',
     },
     canvas: {

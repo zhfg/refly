@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma.service';
+import { Prisma } from '@prisma/client';
 import {
   CreateLabelClassRequest,
   CreateLabelInstanceRequest,
@@ -92,21 +93,21 @@ export class LabelService {
   async listLabelInstances(user: User, param: ListLabelInstancesData['query']) {
     const { uid } = user;
     const { classId, entityId, entityType, page, pageSize, value } = param;
-    const where = {
+    const where: Prisma.LabelInstanceWhereInput = {
       uid,
       deletedAt: null,
     };
     if (classId) {
-      where['labelClassId'] = classId;
+      where.labelClassId = classId;
     }
     if (entityId) {
-      where['entityId'] = entityId;
+      where.entityId = entityId;
     }
     if (entityType) {
-      where['entityType'] = entityType;
+      where.entityType = entityType;
     }
     if (value) {
-      where['value'] = value;
+      where.value = value;
     }
     return this.prisma.labelInstance.findMany({
       where,

@@ -56,10 +56,10 @@ export class ContinueWritingSkill extends BaseSkill {
     },
   };
 
-  async generate(state: GraphState, config?: SkillRunnableConfig) {
+  async generate(_state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
-    const { locale = 'en', contentList = [], chatHistory = [] } = config?.configurable || {};
+    const { contentList = [] } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,
@@ -99,7 +99,7 @@ Context as following (with three "---" as separator, **only include the content 
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
-      new HumanMessage(`The context is provided above, please continue the writing.`),
+      new HumanMessage('The context is provided above, please continue the writing.'),
     ]);
 
     return { messages: [responseMessage] };

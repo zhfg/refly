@@ -132,7 +132,7 @@ export const Subscription = () => {
 
   useEffect(() => {
     setPlanType(subscription?.planType || 'free');
-  }, [subscription?.planType]);
+  }, [subscription?.planType, setPlanType]);
 
   useEffect(() => {
     getSubscriptionStatus();

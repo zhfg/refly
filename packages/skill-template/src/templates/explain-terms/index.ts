@@ -59,7 +59,7 @@ export class ExplainTermsSkill extends BaseSkill {
     this.engine.logger.log('---GENERATE---');
 
     const { locale = 'en', contentList = [], chatHistory = [] } = config?.configurable || {};
-    const query = state.query || '';
+    const _query = state.query || '';
 
     const llm = this.engine.chatModel({
       temperature: 0.2,

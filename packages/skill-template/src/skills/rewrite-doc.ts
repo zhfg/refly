@@ -140,7 +140,6 @@ export class RewriteDoc extends BaseSkill {
           mentionedContext,
           maxTokens: remainingTokens,
           enableMentionedContext: hasContext,
-          enableLowerPriorityContext: hasContext,
         },
         {
           config: config,
@@ -179,7 +178,7 @@ export class RewriteDoc extends BaseSkill {
     state: GraphState,
     config: SkillRunnableConfig,
   ): Promise<Partial<GraphState>> => {
-    const { messages = [], query: originalQuery } = state;
+    const { query: originalQuery } = state;
 
     const { chatHistory = [], currentSkill, documents } = config.configurable;
 

@@ -54,7 +54,7 @@ const ConfigItem = (props: {
         displayValue: String(item.defaultValue),
       });
     }
-  }, [item?.defaultValue]);
+  }, [item?.defaultValue, item?.labelDict, field, form, locale]);
 
   if (!item) {
     return null;
@@ -219,19 +219,22 @@ export const ConfigManager = (props: ConfigManagerProps) => {
     }
   };
 
-  const validateTplConfig = (tplConfig: SkillTemplateConfig) => {
-    const errors = {};
-    for (const key of Object.keys(tplConfig)) {
-      const schemaItem = (schema.items || []).find((item) => item.key === key);
-      if (isConfigItemRequired(schemaItem)) {
-        const value_ = tplConfig[key].value;
-        if ((!value_ && value_ !== 0) || (Array.isArray(value_) && !value_.length)) {
-          errors[getFormField(fieldPrefix, key)] = t('common.emptyInput');
+  const validateTplConfig = useCallback(
+    (tplConfig: SkillTemplateConfig) => {
+      const errors = {};
+      for (const key of Object.keys(tplConfig)) {
+        const schemaItem = (schema.items || []).find((item) => item.key === key);
+        if (isConfigItemRequired(schemaItem)) {
+          const value_ = tplConfig[key].value;
+          if ((!value_ && value_ !== 0) || (Array.isArray(value_) && !value_.length)) {
+            errors[getFormField(fieldPrefix, key)] = t('common.emptyInput');
+          }
         }
       }
-    }
-    return errors;
-  };
+      return errors;
+    },
+    [fieldPrefix, t, schema.items, isConfigItemRequired],
+  );
 
   const getItemError = (key: string) => {
     const field = getFormField(fieldPrefix, key);
@@ -250,7 +253,7 @@ export const ConfigManager = (props: ConfigManagerProps) => {
       const errors = validateTplConfig(initialConfig);
       setFormErrors(errors);
     }
-  }, [JSON.stringify(tplConfig)]);
+  }, [tplConfig, fieldPrefix, form.setFieldValue, setFormErrors, validateTplConfig]);
 
   const handleConfigItemClick = (item: DynamicConfigItem) => {
     if (activeConfig?.key === item.key) {
