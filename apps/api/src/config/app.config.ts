@@ -112,9 +112,9 @@ export default () => ({
       t2: Number.parseInt(process.env.QUOTA_T2_REQUEST) || -1,
     },
     storage: {
-      file: Number.parseInt(process.env.QUOTA_STORAGE_FILE) || -1,
-      object: Number.parseInt(process.env.QUOTA_STORAGE_OBJECT) || -1,
-      vector: Number.parseInt(process.env.QUOTA_STORAGE_VECTOR) || -1,
+      file: Number.parseInt(process.env.QUOTA_STORAGE_FILE) || 10000,
+      object: Number.parseInt(process.env.QUOTA_STORAGE_OBJECT) || 1000000000,
+      vector: Number.parseInt(process.env.QUOTA_STORAGE_VECTOR) || 1000000000,
     },
   },
   credentials: {
