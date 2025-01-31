@@ -1,14 +1,14 @@
 {
   "name": {
-    "message": "Refly - 你的首款一站式的 AI 写作 IDE",
+    "message": "Refly - AI Native 创作引擎",
     "description": "Name of the extension."
   },
   "description": {
-    "message": "将 ChatGPT Canvas 和 Cursor 整合到一个强大的写作集成环境中。掌控端到端 AI 写作流程的每个阶段——从构思和研究，到起草、编辑和发布。",
+    "message": "基于自由画布的创作平台，通过多线程对话、知识库整合、上下文记忆、智能搜索和 AI 文档编辑器，轻松将想法转化为优质内容。",
     "description": "Description of the extension."
   },
   "displayName": {
-    "message": "Refly - 你的首款一站式的 AI 写作 IDE",
+    "message": "Refly - AI Native 创作引擎",
     "description": "Display name of the extension."
   }
 }

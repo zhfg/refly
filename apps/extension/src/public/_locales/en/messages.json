@@ -1,14 +1,14 @@
 {
   "name": {
-    "message": "Refly: Your All-in-One AI Writing IDE",
+    "message": "Refly: The AI Native Creation Engine",
     "description": "Name of the extension."
   },
   "description": {
-    "message": "Merge ChatGPT Canvas and Cursor in one Writing IDE. Master the entire writing process—ideation to publishing—in a unified workspace.",
+    "message": "A free-form canvas creation platform powered by multi-threaded dialogue, knowledge integration, context memory, intelligent search and WYSIWYG AI editor, easily transforms ideas into quality content.",
     "description": "Description of the extension."
   },
   "displayName": {
-    "message": "Refly: Your All-in-One AI Writing IDE",
+    "message": "Refly: The AI Native Creation Engine",
     "description": "Display name of the extension."
   }
 }
