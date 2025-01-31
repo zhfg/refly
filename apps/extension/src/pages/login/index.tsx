@@ -46,7 +46,7 @@ export const Login = () => {
     // userStore.setIsLogin(true);
 
     browser.tabs.create({
-      url: `${getClientOrigin()}/login?openLogin=true`,
+      url: `${getClientOrigin()}?openLogin=true`,
     });
 
     setTimeout(() => {
