@@ -21,6 +21,8 @@ import { getRuntime } from '@refly/utils/env';
 import { useSaveSelectedContent } from '@/hooks/use-save-selected-content';
 import { BackgroundMessage, SyncMarkEvent, type MessageName } from '@refly/common-types';
 import { getReadabilityMarkdown } from '@refly/utils/html2md';
+import { useGetUserSettings } from '@/hooks/use-get-user-settings';
+import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
 const getPopupContainer = () => {
   const elem = document
@@ -41,12 +43,22 @@ export const App = () => {
   const { t, i18n } = useTranslation();
   const [isContentSelectorOpen, setIsContentSelectorOpen] = useState(false);
 
+  // Add user settings check
+  const { getLoginStatus } = useGetUserSettings();
+  const userStore = useUserStore((state) => ({
+    userProfile: state.userProfile,
+    isCheckingLoginStatus: state.isCheckingLoginStatus,
+  }));
+
+  // Check login status on mount
+  useEffect(() => {
+    getLoginStatus();
+  }, []);
+
   console.log('i18n', i18n?.languages);
 
   // 加载快捷键
-  const [shortcut, setShortcut] = useState<string>(
-    reflyEnv.getOsType() === 'OSX' ? '⌘ J' : 'Ctrl J',
-  );
+  const [shortcut] = useState<string>(reflyEnv.getOsType() === 'OSX' ? '⌘ J' : 'Ctrl J');
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ y: 0 });
   const sphereRef = useRef<HTMLDivElement>(null);
@@ -282,6 +294,11 @@ export const App = () => {
     e.stopPropagation();
     setIsVisible(false);
   };
+
+  // If checking login status or not logged in, don't show the floating sphere
+  if (userStore.isCheckingLoginStatus || !userStore.userProfile?.uid) {
+    return null;
+  }
 
   if (!isVisible) {
     return null;
