@@ -45,15 +45,6 @@ export const useSaveResourceNotify = () => {
         },
         closable: true,
       });
-    } else {
-      Message.error({
-        content: t('resource.import.saveResourceFailed'),
-        duration: 3000,
-        style: {
-          borderRadius: 8,
-          background: '#fcfcf9',
-        },
-      });
     }
   };
 

@@ -36,7 +36,7 @@ export const App = () => {
   const [selectedText, setSelectedText] = useState<string>('');
   const { saveResource } = useSaveCurrentWeblinkAsResource();
   const { handleSaveResourceAndNotify } = useSaveResourceNotify();
-  const { handleToggleCopilot } = useToggleCopilot();
+  // const { handleToggleCopilot } = useToggleCopilot();
   const { handleStopContentSelectorListener, handleInitContentSelectorListener } =
     useSelectedMark();
   const { saveSelectedContent } = useSaveSelectedContent();
@@ -164,7 +164,7 @@ export const App = () => {
       setIsContentSelectorOpen(true);
       handleInitContentSelectorListener();
       Message.info(t('extension.floatingSphere.enableSelectContentToAskNotify'));
-      handleToggleCopilot(true);
+      // handleToggleCopilot(true);
     } else {
       handleStopContentSelectorListener();
       setIsContentSelectorOpen(false);
@@ -324,7 +324,7 @@ export const App = () => {
             onMouseDown={handleDragStart}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            onClick={(_) => handleToggleCopilot()}
+            onClick={(_) => {}}
           >
             <Tooltip
               position="left"
@@ -350,7 +350,7 @@ export const App = () => {
               alt={t('extension.floatingSphere.toggleCopilot')}
               style={{ width: 25, height: 25 }}
             />
-            <span className="refly-floating-sphere-entry-shortcut">{shortcut}</span>
+            <span className="refly-floating-sphere-entry-shortcut">Refly</span>
           </div>
 
           {isDropdownVisible && <Dropdown />}

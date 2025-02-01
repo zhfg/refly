@@ -15,12 +15,12 @@ import { showErrorNotification } from '@refly-packages/ai-workspace-common/utils
 const requestCache = new WeakMap<Request, Request>();
 
 // Function to cache a cloned request
-const cacheClonedRequest = (originalRequest: Request, clonedRequest: Request) => {
+export const cacheClonedRequest = (originalRequest: Request, clonedRequest: Request) => {
   requestCache.set(originalRequest, clonedRequest);
 };
 
 // Function to get and clear cached request
-const getAndClearCachedRequest = (originalRequest: Request): Request | undefined => {
+export const getAndClearCachedRequest = (originalRequest: Request): Request | undefined => {
   const cachedRequest = requestCache.get(originalRequest);
   if (cachedRequest) {
     requestCache.delete(originalRequest);
@@ -35,7 +35,7 @@ export interface CheckResponseResult {
   baseResponse?: BaseResponse;
 }
 
-export const extractBaseResp = async (response: Response): Promise<BaseResponse> => {
+export const extractBaseResp = async (response: Response, data: any): Promise<BaseResponse> => {
   if (!response.ok) {
     return response.status === 429
       ? {
@@ -49,8 +49,7 @@ export const extractBaseResp = async (response: Response): Promise<BaseResponse>
   }
 
   if (response.headers.get('Content-Type')?.includes('application/json')) {
-    const clonedResponse = response.clone();
-    return await clonedResponse.json();
+    return data;
   }
 
   return { success: true };
@@ -68,7 +67,7 @@ client.interceptors.request.use(async (request) => {
 client.interceptors.response.use(async (response, request) => {
   // Get the cached request and clear it from cache
   const cachedRequest = getAndClearCachedRequest(request);
-  return responseInterceptorWithTokenRefresh(response, cachedRequest ?? request);
+  return await responseInterceptorWithTokenRefresh(response, cachedRequest ?? request);
 });
 
 const wrapFunctions = (module: any) => {
@@ -83,13 +82,22 @@ const wrapFunctions = (module: any) => {
         console.log(`Calling function ${String(key)} with arguments: ${safeStringifyJSON(args)}`);
 
         try {
-          return await sendToBackground({
+          const res = (await sendToBackground({
             name: String(key) as MessageName,
             type: 'apiRequest',
             source: getRuntime(),
             target: module,
             args,
-          });
+          })) as { response: Response; data: any; error: { errCode: string; success: boolean } };
+
+          if (res?.response && runtime !== 'extension-csui') {
+            const error = res?.error;
+            if (!error.success) {
+              showErrorNotification(error, getLocale());
+            }
+          }
+
+          return res;
         } catch (err) {
           const errResp = {
             success: false,
@@ -102,7 +110,18 @@ const wrapFunctions = (module: any) => {
     } else {
       wrappedModule[key] = async (...args: unknown[]) => {
         try {
-          return await origMethod(...args);
+          const response = await origMethod(...args);
+
+          console.log('response', response);
+
+          if (response) {
+            const error = await extractBaseResp(response?.response as Response, response?.data);
+            if (!error.success) {
+              showErrorNotification(error, getLocale());
+            }
+          }
+
+          return response;
         } catch (err) {
           const errResp = {
             success: false,

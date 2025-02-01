@@ -58,18 +58,18 @@ export const useGetUserSettings = () => {
 
       console.log('loginStatus', res);
 
-      if (res?.error || !res) {
+      if (!res?.error || !res) {
         userStore.resetState();
         // await storage.removeItem('local:refly-user-profile');
         // await storage.removeItem('local:refly-local-settings');
         userStore.setIsCheckingLoginStatus(false);
         navigate('/login');
       } else {
-        const data = res?.data?.data! as UserSettings;
+        const data = res?.data?.data as UserSettings;
         userStore.setUserProfile(data);
 
         // 增加 localSettings
-        let uiLocale = mapDefaultLocale(data?.uiLocale!) as LOCALE;
+        let uiLocale = mapDefaultLocale(data?.uiLocale as string) as LOCALE;
         let outputLocale = data?.outputLocale as LOCALE;
 
         // 先写回

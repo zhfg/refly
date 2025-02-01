@@ -142,9 +142,5 @@ export const responseInterceptorWithTokenRefresh = async (response: Response, re
     }
   }
 
-  const error = await extractBaseResp(response);
-  if (!error.success) {
-    showErrorNotification(error, getLocale());
-  }
   return response;
 };

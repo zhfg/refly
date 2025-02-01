@@ -6,17 +6,64 @@ import { createClient } from '@hey-api/client-fetch';
 import { getExtensionServerOrigin } from '@refly/utils/url';
 import { getCookie } from '@/utils/cookie';
 import { getToken } from '../../index';
+import { OperationTooFrequent, UnknownError } from '@refly/errors';
+import { responseInterceptorWithTokenRefresh } from '@refly-packages/ai-workspace-common/utils/auth';
+import {
+  cacheClonedRequest,
+  getAndClearCachedRequest,
+} from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
-const client = createClient({ baseUrl: `${getExtensionServerOrigin()}/v1` });
-
-client.interceptors.request.use(async (request) => {
-  const token = (await getCookie()) || getToken();
-  console.log('token', token);
-  if (token) {
-    request.headers.set('Authorization', `Bearer ${token}`);
-  }
-  return request;
+const client = createClient({
+  baseUrl: `${getExtensionServerOrigin()}/v1`,
+  credentials: 'include',
 });
+
+interface ProcessedResponse {
+  response: {
+    ok: boolean;
+    status: number;
+    statusText: string;
+    headers: Record<string, string>;
+  };
+  error: { errCode: string; success: boolean; traceId?: string };
+}
+
+// Helper function to process response before sending through messaging
+const processResponse = async (response: Response, data: any): Promise<ProcessedResponse> => {
+  // Clone response early to avoid body already read issues
+
+  let parsedBody: any;
+
+  // Handle non-ok responses
+  if (!response.ok) {
+    parsedBody =
+      response.status === 429
+        ? {
+            success: false,
+            errCode: new OperationTooFrequent().code,
+          }
+        : {
+            success: false,
+            errCode: new UnknownError().code,
+          };
+  } else if (response.headers.get('Content-Type')?.includes('application/json')) {
+    // Use the cloned response for JSON parsing
+    parsedBody = data;
+  } else {
+    parsedBody = { success: true };
+  }
+
+  // Return both original response properties and parsed body
+  return {
+    response: {
+      ok: response.ok,
+      status: response.status,
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers.entries()),
+    },
+    error: parsedBody,
+  };
+};
 
 export const handleRequestReflect = async (msg: BackgroundMessage) => {
   // @ts-ignore
@@ -24,18 +71,32 @@ export const handleRequestReflect = async (msg: BackgroundMessage) => {
     ...msg.args?.[0],
     client,
   });
+
+  // Process the response before sending through messaging
+  const processedResponse = await processResponse(res?.response, res?.data);
   const lastActiveTab = await getLastActiveTab();
+
+  const messageBody = {
+    url: res?.url,
+    redirected: res?.redirected,
+    type: res?.type,
+    response: processedResponse?.response,
+    data: res?.data,
+    error: processedResponse?.error,
+  };
+
+  console.log('messageBody', messageBody);
 
   if (msg?.source === 'extension-csui') {
     await browser.tabs.sendMessage(lastActiveTab?.id as number, {
       name: msg?.name,
-      body: res,
+      body: messageBody,
     });
   } else if (msg?.source === 'extension-sidepanel' || msg?.source === 'extension-popup') {
     try {
       await browser.runtime.sendMessage({
         name: msg?.name,
-        body: res,
+        body: messageBody,
       });
     } catch (err) {
       console.log('handleRequestReflect send message error', err);

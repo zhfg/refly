@@ -5,7 +5,7 @@ export async function getCookie() {
   try {
     const promise = new Promise(async (resolve, reject) => {
       const res = await browser.cookies?.get({
-        name: '_refly_ai_sid',
+        name: '_rf_access',
         url: getClientOrigin(),
       });
 
