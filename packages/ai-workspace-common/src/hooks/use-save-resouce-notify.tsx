@@ -1,12 +1,20 @@
 import { Message, Link } from '@arco-design/web-react';
+import { StorageExceededModal } from '@refly-packages/ai-workspace-common/components/subscription/storage-exceeded-modal';
+import { getLocale } from '@refly-packages/ai-workspace-common/utils/locale';
+import { showErrorNotification } from '@refly-packages/ai-workspace-common/utils/notification';
+import type { LOCALE } from '@refly/common-types';
+import { OperationTooFrequent, StorageQuotaExceeded } from '@refly/errors';
+import type { BaseResponse } from '@refly/openapi-schema';
 
 import { delay } from '@refly/utils';
 import { useTranslation } from 'react-i18next';
 
 export const useSaveResourceNotify = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.languages?.[0] || 'en';
+
   const handleSaveResourceAndNotify = async (
-    saveResource: () => Promise<{ success: boolean; url: string }>,
+    saveResource: () => Promise<{ res: BaseResponse; url: string }>,
   ) => {
     const close = Message.loading({
       content: t('resource.import.isSaving'),
@@ -16,13 +24,13 @@ export const useSaveResourceNotify = () => {
         background: '#FFFFFF',
       },
     });
-    const { success, url } = await saveResource();
+    const { res, url } = await saveResource();
 
     await delay(2000);
     close();
     await delay(200);
 
-    if (success) {
+    if (res?.success) {
       Message.success({
         content: (
           <span>
@@ -45,6 +53,10 @@ export const useSaveResourceNotify = () => {
         },
         closable: true,
       });
+    } else {
+      if (res?.errCode === new StorageQuotaExceeded().code) {
+        showErrorNotification(res, locale as LOCALE);
+      }
     }
   };
 

@@ -3,7 +3,12 @@ import * as requestModule from '@refly/openapi-schema';
 
 import { serverOrigin } from '@refly-packages/ai-workspace-common/utils/env';
 import { getRuntime } from '@refly/utils/env';
-import { ConnectionError, OperationTooFrequent, UnknownError } from '@refly/errors';
+import {
+  AuthenticationExpiredError,
+  ConnectionError,
+  OperationTooFrequent,
+  UnknownError,
+} from '@refly/errors';
 import { sendToBackground } from '@refly-packages/ai-workspace-common/utils/extension/messaging';
 import { MessageName } from '@refly/common-types';
 import { safeStringifyJSON } from '@refly-packages/utils/parse';
@@ -37,15 +42,25 @@ export interface CheckResponseResult {
 
 export const extractBaseResp = async (response: Response, data: any): Promise<BaseResponse> => {
   if (!response.ok) {
-    return response.status === 429
-      ? {
+    switch (response.status) {
+      case 429:
+        return {
           success: false,
           errCode: new OperationTooFrequent().code,
-        }
-      : {
+        };
+
+      case 401:
+        return {
+          success: false,
+          errCode: new AuthenticationExpiredError().code,
+        };
+
+      default:
+        return {
           success: false,
           errCode: new UnknownError().code,
         };
+    }
   }
 
   if (response.headers.get('Content-Type')?.includes('application/json')) {
@@ -104,7 +119,9 @@ const wrapFunctions = (module: any) => {
             errCode: new ConnectionError(err).code,
           };
           showErrorNotification(errResp, getLocale());
-          return errResp;
+          return {
+            error: errResp,
+          };
         }
       };
     } else {
@@ -128,7 +145,9 @@ const wrapFunctions = (module: any) => {
             errCode: new ConnectionError(err).code,
           };
           showErrorNotification(errResp, getLocale());
-          return errResp;
+          return {
+            error: errResp,
+          };
         }
       };
     }

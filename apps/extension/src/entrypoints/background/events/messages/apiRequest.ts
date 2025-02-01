@@ -6,7 +6,7 @@ import { createClient } from '@hey-api/client-fetch';
 import { getExtensionServerOrigin } from '@refly/utils/url';
 import { getCookie } from '@/utils/cookie';
 import { getToken } from '../../index';
-import { OperationTooFrequent, UnknownError } from '@refly/errors';
+import { AuthenticationExpiredError, OperationTooFrequent, UnknownError } from '@refly/errors';
 import { responseInterceptorWithTokenRefresh } from '@refly-packages/ai-workspace-common/utils/auth';
 import {
   cacheClonedRequest,
@@ -36,16 +36,28 @@ const processResponse = async (response: Response, data: any): Promise<Processed
 
   // Handle non-ok responses
   if (!response.ok) {
-    parsedBody =
-      response.status === 429
-        ? {
-            success: false,
-            errCode: new OperationTooFrequent().code,
-          }
-        : {
-            success: false,
-            errCode: new UnknownError().code,
-          };
+    switch (response.status) {
+      case 429:
+        parsedBody = {
+          success: false,
+          errCode: new OperationTooFrequent().code,
+        };
+        break;
+
+      case 401:
+        parsedBody = {
+          success: false,
+          errCode: new AuthenticationExpiredError().code,
+        };
+        break;
+
+      default:
+        parsedBody = {
+          success: false,
+          errCode: new UnknownError().code,
+        };
+        break;
+    }
   } else if (response.headers.get('Content-Type')?.includes('application/json')) {
     // Use the cloned response for JSON parsing
     parsedBody = data;

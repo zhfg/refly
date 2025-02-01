@@ -1,8 +1,11 @@
 import { CreateResourceData } from '@refly/openapi-schema';
 import { getMarkdown, getReadabilityMarkdown } from '@refly/utils/html2md';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient, {
+  extractBaseResp,
+} from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getClientOrigin } from '@refly/utils/url';
 import { getRuntime } from '@refly/utils/env';
+import { ConnectionError } from '@refly/errors';
 
 export const useSaveCurrentWeblinkAsResource = () => {
   const saveResource = async () => {
@@ -35,14 +38,21 @@ export const useSaveCurrentWeblinkAsResource = () => {
         },
       };
 
-      const { data } = await getClient().createResource(createResourceData);
+      const { error } = await getClient().createResource(createResourceData);
       // const resourceId = data?.data?.resourceId;
       // const url = `${getClientOrigin(false)}/resource/${resourceId}`;
       const url = `${getClientOrigin(false)}`;
-      return { success: !!data?.success, url };
-    } catch (err) {
+
+      return { url, res: error };
+    } catch (err: any) {
       console.error(err);
-      return { success: false, url: '' };
+
+      return {
+        url: '',
+        res: {
+          errCode: new ConnectionError(err).code,
+        },
+      };
     }
   };
 

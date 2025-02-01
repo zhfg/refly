@@ -1,6 +1,9 @@
 import { UpsertResourceRequest } from '@refly/openapi-schema';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient, {
+  extractBaseResp,
+} from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getClientOrigin } from '@refly/utils/url';
+import { ConnectionError } from '@refly/errors';
 
 interface SaveContentMetadata {
   title?: string;
@@ -24,7 +27,7 @@ export const useSaveSelectedContent = () => {
         },
       };
 
-      const { data } = await getClient().createResource({
+      const { error } = await getClient().createResource({
         body: createResourceData,
       });
 
@@ -33,14 +36,16 @@ export const useSaveSelectedContent = () => {
       const resourceUrl = `${getClientOrigin(false)}`;
 
       return {
-        success: !!data?.success,
         url: resourceUrl,
+        res: error,
       };
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save selected content:', err);
       return {
-        success: false,
         url: '',
+        res: {
+          errCode: new ConnectionError(err)?.code,
+        },
       };
     }
   };
