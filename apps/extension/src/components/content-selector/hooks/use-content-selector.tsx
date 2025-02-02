@@ -95,6 +95,14 @@ export const useContentSelector = (
   ) => {
     const containerElem = getContainerElem(selector);
 
+    // Check if menu already exists
+    const existingMenu = containerElem?.querySelector(
+      '[data-id="refly-content-selector-hover-menu"]',
+    );
+    if (existingMenu) {
+      return () => {}; // Return empty cleanup if menu already exists
+    }
+
     // Create a container for styles
     const styleContainer = document.createElement('div');
     styleContainer.setAttribute('id', 'refly-content-selector-styles');
@@ -111,6 +119,18 @@ export const useContentSelector = (
     const root = createRoot(menuContainer);
 
     let hideTimeout: NodeJS.Timeout;
+
+    const removeHoverMenu = () => {
+      hideTimeout = setTimeout(() => {
+        root.unmount();
+        try {
+          containerElem?.removeChild(menuContainer);
+          document.head.removeChild(styleContainer);
+        } catch (err) {
+          console.log('remove err', err);
+        }
+      }, 300);
+    };
 
     const renderMenu = () => {
       if (rect) {
@@ -129,24 +149,12 @@ export const useContentSelector = (
           onClick={onClick}
           selected={selected}
           onMouseEnter={() => clearTimeout(hideTimeout)}
-          onCopy={() => {}} // Add empty onCopy handler
+          onRemove={removeHoverMenu}
         />,
       );
     };
 
     renderMenu();
-
-    const removeHoverMenu = () => {
-      hideTimeout = setTimeout(() => {
-        root.unmount();
-        try {
-          containerElem?.removeChild(menuContainer);
-          document.head.removeChild(styleContainer);
-        } catch (err) {
-          console.log('remove err', err);
-        }
-      }, 300);
-    };
 
     if (rect) {
       renderMenu();
