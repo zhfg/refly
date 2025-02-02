@@ -2,6 +2,9 @@ import React from 'react';
 import { Button } from '@arco-design/web-react';
 import { useTranslation } from 'react-i18next';
 import { IconCopy, IconSave } from '@arco-design/web-react/icon';
+import { Message } from '@arco-design/web-react';
+import { copyToClipboard } from '@refly-packages/ai-workspace-common/utils';
+import { getSelectionNodesMarkdown } from '@refly/utils/html2md';
 
 interface HoverMenuProps {
   onClick: () => void;
@@ -12,6 +15,20 @@ interface HoverMenuProps {
 
 const HoverMenu: React.FC<HoverMenuProps> = React.memo(({ onClick, onCopy, onMouseEnter }) => {
   const { t } = useTranslation();
+
+  const handleCopyToClipboard = () => {
+    try {
+      const selectedContent = getSelectionNodesMarkdown();
+      if (selectedContent) {
+        copyToClipboard(selectedContent);
+        Message.success(t('extension.floatingSphere.copySuccess'));
+        onCopy?.();
+      }
+    } catch (err) {
+      console.error('Failed to copy content:', err);
+      Message.error(t('extension.floatingSphere.copyError'));
+    }
+  };
 
   return (
     <div
@@ -31,7 +48,7 @@ const HoverMenu: React.FC<HoverMenuProps> = React.memo(({ onClick, onCopy, onMou
         <Button type="text" onClick={onClick} icon={<IconSave />}>
           <span className="font-medium">{t('extension.floatingSphere.clipSelectedContent')}</span>
         </Button>
-        <Button type="text" onClick={onCopy} icon={<IconCopy />}>
+        <Button type="text" onClick={handleCopyToClipboard} icon={<IconCopy />}>
           <span className="font-medium">{t('extension.floatingSphere.copySelectedContent')}</span>
         </Button>
       </div>

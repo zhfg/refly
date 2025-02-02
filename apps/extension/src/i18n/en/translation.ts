@@ -120,6 +120,8 @@ export const translation = {
       toggleCopilot: 'Toggle Copilot',
       toggleCopilotClose: 'The floating sphere is closed, you can refresh the page to redisplay',
       toggleCopilotTooltip: 'Close the floating sphere, you can refresh the page to redisplay',
+      copySuccess: 'Content copied to clipboard',
+      copyError: 'Failed to copy content',
     },
     webClipper: {
       placeholder: {

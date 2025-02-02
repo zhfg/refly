@@ -119,6 +119,8 @@ export const translation = {
       toggleCopilot: '唤起 Refly',
       toggleCopilotClose: '悬浮球已关闭，可以刷新页面重新展示',
       toggleCopilotTooltip: '关闭悬浮球，可以刷新页面重新展示',
+      copySuccess: '内容已复制到剪切板',
+      copyError: '复制内容失败',
     },
     webClipper: {
       placeholder: {
