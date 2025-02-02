@@ -12,7 +12,10 @@ import { Login } from '@/pages/login';
 import { useGetUserSettings } from '@/hooks/use-get-user-settings';
 import { SuspenseLoading } from '@refly-packages/ai-workspace-common/components/common/loading';
 
-export const AppRouter = (props: { children: React.ReactNode }) => {
+export const AppRouter = (props: {
+  children: React.ReactNode;
+  loadingElement?: React.ReactNode;
+}) => {
   const userStore = useUserStore((state) => ({
     localSettings: state.localSettings,
     userProfile: state.userProfile,
@@ -35,7 +38,7 @@ export const AppRouter = (props: { children: React.ReactNode }) => {
 
   // Show loading while checking login status
   if (userStore.isCheckingLoginStatus === undefined || userStore.isCheckingLoginStatus) {
-    return <SuspenseLoading />;
+    return props?.loadingElement || <SuspenseLoading />;
   }
 
   // Show login page if not logged in

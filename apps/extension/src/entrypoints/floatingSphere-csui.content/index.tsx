@@ -45,7 +45,7 @@ export default defineContentScript({
             }}
           >
             <MemoryRouter>
-              <AppRouter>
+              <AppRouter loadingElement={<div />}>
                 <Route path="/" element={<App />} />
                 <Route path="/login" element={<App />} />
               </AppRouter>
