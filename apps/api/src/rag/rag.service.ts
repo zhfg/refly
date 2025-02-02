@@ -1,4 +1,4 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LRUCache } from 'lru-cache';
 import { Document, DocumentInterface } from '@langchain/core/documents';
@@ -10,7 +10,6 @@ import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { cleanMarkdownForIngest } from '@refly-packages/utils';
 
 import { SearchResult, User } from '@refly-packages/openapi-schema';
-import { MINIO_INTERNAL, MinioService } from '@/common/minio.service';
 import { HybridSearchParam, ContentPayload, ReaderResult, NodeMeta } from './rag.dto';
 import { QdrantService } from '@/common/qdrant.service';
 import { Condition, PointStruct } from '@/common/qdrant.dto';
@@ -36,7 +35,6 @@ export class RAGService {
   constructor(
     private config: ConfigService,
     private qdrant: QdrantService,
-    @Inject(MINIO_INTERNAL) private minio: MinioService,
   ) {
     const provider = this.config.get('embeddings.provider');
     if (provider === 'fireworks') {
