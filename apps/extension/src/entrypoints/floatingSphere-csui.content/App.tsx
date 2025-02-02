@@ -60,13 +60,15 @@ export const App = () => {
   // 加载快捷键
   const [shortcut] = useState<string>(reflyEnv.getOsType() === 'OSX' ? '⌘ J' : 'Ctrl J');
   const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false);
   const [position, setPosition] = useState({ y: 0 });
   const sphereRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dragStartPos = useRef({ y: 0, offsetY: 0 });
   const [dropdownPosition, setDropdownPosition] = useState<'top' | 'bottom'>('top');
-  const [isHovered, setIsHovered] = useState(false);
   const bottomDistanceRef = useRef(0);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // listen to copilotType
   useListenToCopilotType();
@@ -133,17 +135,18 @@ export const App = () => {
     }
   };
 
-  const handleDragStart = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    dragStartPos.current = {
-      y: e.clientY,
-      offsetY: position.y,
-    };
-    e.preventDefault();
-  };
-
-  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const handleDragStart = useCallback(
+    (e: React.MouseEvent) => {
+      isDraggingRef.current = true;
+      setIsDragging(true);
+      dragStartPos.current = {
+        y: e.clientY,
+        offsetY: position.y,
+      };
+      e.preventDefault();
+    },
+    [position.y],
+  );
 
   const handleMouseEnter = useCallback(() => {
     if (timeoutRef.current) {
@@ -262,7 +265,7 @@ export const App = () => {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging && sphereRef.current) {
+      if (isDraggingRef.current && sphereRef.current) {
         const dy = e.clientY - dragStartPos.current.y;
         const newY = dragStartPos.current.offsetY + dy;
         updateSpherePosition(newY);
@@ -271,17 +274,23 @@ export const App = () => {
     };
 
     const handleMouseUp = () => {
+      console.log('handleMouseUp');
       setIsDragging(false);
+      isDraggingRef.current = false;
     };
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mouseleave', handleMouseUp);
+    document.addEventListener('mouseout', handleMouseUp);
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mouseleave', handleMouseUp);
+      document.removeEventListener('mouseout', handleMouseUp);
     };
-  }, [isDragging]);
+  }, []);
 
   const [isVisible, setIsVisible] = useState(true);
 
