@@ -1,8 +1,6 @@
-import { CreateResourceData } from '@refly/openapi-schema';
+import { CreateResourceData, type BaseResponse } from '@refly/openapi-schema';
 import { getMarkdown, getReadabilityMarkdown } from '@refly/utils/html2md';
-import getClient, {
-  extractBaseResp,
-} from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getClientOrigin } from '@refly/utils/url';
 import { getRuntime } from '@refly/utils/env';
 import { ConnectionError } from '@refly/errors';
@@ -43,7 +41,7 @@ export const useSaveCurrentWeblinkAsResource = () => {
       // const url = `${getClientOrigin(false)}/resource/${resourceId}`;
       const url = `${getClientOrigin(false)}`;
 
-      return { url, res: error };
+      return { url, res: error as BaseResponse };
     } catch (err: any) {
       console.error(err);
 
@@ -51,7 +49,7 @@ export const useSaveCurrentWeblinkAsResource = () => {
         url: '',
         res: {
           errCode: new ConnectionError(err).code,
-        },
+        } as BaseResponse,
       };
     }
   };

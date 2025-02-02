@@ -1,17 +1,19 @@
-import { UpsertResourceRequest } from '@refly/openapi-schema';
-import getClient, {
-  extractBaseResp,
-} from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
+import { UpsertResourceRequest, type BaseResponse } from '@refly/openapi-schema';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getClientOrigin } from '@refly/utils/url';
 import { ConnectionError } from '@refly/errors';
 
 interface SaveContentMetadata {
   title?: string;
   url?: string;
+  res: BaseResponse;
 }
 
 export const useSaveSelectedContent = () => {
-  const saveSelectedContent = async (content: string, metadata?: SaveContentMetadata) => {
+  const saveSelectedContent = async (
+    content: string,
+    metadata?: SaveContentMetadata,
+  ): Promise<{ url: string; res: BaseResponse }> => {
     try {
       // Get the current page title and URL or use provided metadata
       const title = metadata?.title || document?.title || 'Untitled';
@@ -37,7 +39,7 @@ export const useSaveSelectedContent = () => {
 
       return {
         url: resourceUrl,
-        res: error,
+        res: error as BaseResponse,
       };
     } catch (err: any) {
       console.error('Failed to save selected content:', err);
@@ -45,7 +47,7 @@ export const useSaveSelectedContent = () => {
         url: '',
         res: {
           errCode: new ConnectionError(err)?.code,
-        },
+        } as BaseResponse,
       };
     }
   };
