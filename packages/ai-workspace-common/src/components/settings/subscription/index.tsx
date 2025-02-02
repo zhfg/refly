@@ -140,6 +140,15 @@ export const Subscription = () => {
 
   const hintTag = useMemo(() => {
     if (planType === 'free') return null;
+    if (subscription?.isTrial) {
+      return (
+        <Tag className="interval" color="blue">
+          {t('settings.subscription.subscribe.trialExpireAt', {
+            date: formatDate(subscription?.cancelAt),
+          })}
+        </Tag>
+      );
+    }
     if (subscription?.cancelAt) {
       return (
         <Tag className="interval" color="orange">
@@ -169,10 +178,9 @@ export const Subscription = () => {
               {hintTag}
             </div>
           </div>
-          {planType === 'free' ? (
+          {planType === 'free' || subscription?.isTrial ? (
             <Button
-              type="primary"
-              className="subscribe-btn"
+              type={subscription?.isTrial ? 'default' : 'primary'}
               icon={<IconSubscription className="flex items-center justify-center text-base" />}
               onClick={() => {
                 setShowSettingModal(false);

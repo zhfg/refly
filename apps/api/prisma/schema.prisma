@@ -563,6 +563,8 @@ model Subscription {
   uid            String    @map("uid")
   /// Stripe subscription status
   status         String    @map("status")
+  /// Whether this is a trial subscription
+  isTrial        Boolean   @default(false) @map("is_trial")
   /// Cancel timestamp
   cancelAt       DateTime? @map("cancel_at") @db.Timestamptz()
   /// Create timestamp

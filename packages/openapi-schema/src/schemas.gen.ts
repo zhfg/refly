@@ -1235,6 +1235,10 @@ export const SubscriptionSchema = {
       description: 'Subscription status',
       $ref: '#/components/schemas/SubscriptionStatus',
     },
+    isTrial: {
+      type: 'boolean',
+      description: 'Whether the subscription is a trial',
+    },
     cancelAt: {
       type: 'string',
       format: 'date-time',
