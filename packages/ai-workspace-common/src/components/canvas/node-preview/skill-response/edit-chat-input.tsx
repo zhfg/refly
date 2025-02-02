@@ -115,7 +115,6 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
     editQuery,
     editModelInfo,
     editContextItems,
-    localActionMeta,
     skill,
     version,
     canvasId,

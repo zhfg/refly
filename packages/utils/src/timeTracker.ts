@@ -83,9 +83,9 @@ export class TimeTracker {
     const summary = this.getSummary();
     const lines = ['Search Process Timing:'];
 
-    Object.entries(summary.steps).forEach(([stepName, duration]) => {
+    for (const [stepName, duration] of Object.entries(summary.steps)) {
       lines.push(`  ${stepName}: ${duration}ms`);
-    });
+    }
 
     lines.push('');
     lines.push(`Total Process Time: ${summary.totalDuration}ms`);

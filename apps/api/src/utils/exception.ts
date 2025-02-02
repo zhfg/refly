@@ -16,7 +16,7 @@ export const genBaseRespDataFromError = (exception: any) => {
   return {
     success: false,
     errCode: err.code,
-    errMsg: err.messageDict?.['en'],
+    errMsg: err.messageDict?.en,
     traceId: activeSpan?.spanContext().traceId,
     stack: process.env.NODE_ENV === 'production' ? undefined : err.stack,
   };

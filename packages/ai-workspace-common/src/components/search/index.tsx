@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Command } from 'cmdk';
 import {
@@ -60,12 +60,12 @@ export const Search = (props: SearchProps) => {
   const activePage = pages[pages.length - 1];
   const isHome = activePage === 'home';
 
-  const popPage = React.useCallback(() => {
+  const popPage = useCallback(() => {
     const { pages } = useSearchStore.getState();
     const x = [...pages];
     x.splice(-1, 1);
     setPages(x);
-  }, []);
+  }, [setPages]);
 
   function bounce() {
     if (ref.current) {

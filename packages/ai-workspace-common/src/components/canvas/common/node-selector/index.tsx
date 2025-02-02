@@ -53,7 +53,7 @@ export const NodeSelector = (props: NodeSelectorProps) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [onClickOutside]);
 
   const { nodes } = useCanvasData();
 

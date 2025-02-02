@@ -96,7 +96,7 @@ export const callMultiLingualWebSearch = async (
         const rewriteResult = await extractStructuredData(
           model,
           rewriteQueryOutputSchema,
-          buildRewriteQuerySystemPrompt() + '\n\n' + buildRewriteQueryUserPrompt({ query }),
+          `${buildRewriteQuerySystemPrompt()}\n\n${buildRewriteQueryUserPrompt({ query })}`,
           config,
           3,
           ctx?.config?.configurable?.modelInfo,
@@ -142,7 +142,7 @@ export const callMultiLingualWebSearch = async (
       timeTracker.startStep('translateQuery');
       try {
         // 构建翻译结果对象
-        const translations: Record<string, string[]> = {};
+        const _translations: Record<string, string[]> = {};
 
         // 为每个目标语言进行翻译
         for (const targetLocale of searchLocaleList) {

@@ -34,7 +34,7 @@ const ContextManagerComponent = ({
     return new Map(
       contextItems.map((item) => [item.entityId, entityIdNodeMap.get(item.entityId)?.selected]),
     );
-  }, [contextItems]);
+  }, [contextItems, getNodes]);
 
   const handleRemoveItem = (item: IContextItem) => {
     setContextItems(contextItems.filter((contextItem) => contextItem.entityId !== item.entityId));

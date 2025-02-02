@@ -95,7 +95,7 @@ const ResourceDeck = (props: ResourceDeckProps) => {
     setId(id);
     fetchReferences({ sourceId: id, sourceType: domain });
     fetchReferencedBy({ targetId: id, targetType: domain });
-  }, [domain, id]);
+  }, [domain, id, setDomain, setId, fetchReferences, fetchReferencedBy]);
 
   return (
     <div className="deck h-full w-full box-border px-6">

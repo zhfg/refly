@@ -93,7 +93,6 @@ export class GenerateDoc extends BaseSkill {
           mentionedContext,
           maxTokens: remainingTokens,
           enableMentionedContext: hasContext,
-          enableLowerPriorityContext: hasContext,
         },
         {
           config,

@@ -407,7 +407,7 @@ export const SkillResponseNode = memo(
 
       const { offsetWidth, offsetHeight } = targetRef.current;
       resizeMoveable(offsetWidth, offsetHeight);
-    }, [targetRef?.current?.offsetHeight, resizeMoveable, status]);
+    }, [resizeMoveable, status]);
 
     // Update event handling
     useEffect(() => {

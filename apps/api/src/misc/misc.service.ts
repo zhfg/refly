@@ -10,7 +10,7 @@ import {
 } from '@refly-packages/openapi-schema';
 import { PrismaService } from '@/common/prisma.service';
 import { MINIO_EXTERNAL, MinioService } from '@/common/minio.service';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { scrapeWeblink } from '@refly-packages/utils';
 import { QUEUE_SYNC_STORAGE_USAGE } from '@/utils';

@@ -32,8 +32,8 @@ export type Events = {
     content: string;
   };
   activeAskAI: { value: boolean; docId?: string };
-  editorSynced: void;
-  exitFullScreen: void;
+  editorSynced: undefined;
+  exitFullScreen: undefined;
 };
 
 export type EditorOperation =

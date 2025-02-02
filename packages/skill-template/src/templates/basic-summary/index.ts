@@ -65,24 +65,15 @@ export class BasicSummarySkill extends BaseSkill {
     },
   };
 
-  async generate(state: GraphState, config?: SkillRunnableConfig) {
+  async generate(_: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
-    const { documents } = state;
     const {
       locale = 'en',
       documents: contextDocuments = [],
       resources = [],
       contentList = [],
     } = config?.configurable || {};
-
-    // 1. build context text
-    const contextToCitationText = documents.reduce((total, cur) => {
-      (total += `\n\n下面是网页 [${cur?.metadata?.title}](${cur?.metadata?.source}) 的内容\n\n`),
-        (total += `\n===\n${cur?.pageContent}\n===\n\n`);
-
-      return total;
-    }, '');
 
     let contentListText = '';
     if (resources?.length > 0) {
@@ -161,7 +152,7 @@ The content to be summarized is as follows:(with three "---" as separator, **onl
 
     const contextString = contentListText || '';
 
-    const prompt = systemPrompt.replace(`{context}`, contextString);
+    const prompt = systemPrompt.replace('{context}', contextString);
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
       new HumanMessage(`Please generate a summary based on the **CONTEXT** in ${locale} language:`),

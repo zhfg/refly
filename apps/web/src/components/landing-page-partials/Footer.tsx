@@ -145,7 +145,7 @@ function Footer() {
                   </div>
 
                   {/* Divider */}
-                  <div className="h-4 w-[1px] bg-gray-200"></div>
+                  <div className="h-4 w-[1px] bg-gray-200" />
 
                   {/* Language Selector */}
                   <div className="flex cursor-pointer items-center text-gray-600 hover:text-[#00968f]">
@@ -262,7 +262,7 @@ function Footer() {
                       </li>
                       <li key="mail" className="mb-1">
                         <Link
-                          to={`mailto:support@refly.ai`}
+                          to={'mailto:support@refly.ai'}
                           className="text-gray-500 no-underline transition duration-150 ease-in-out hover:text-gray-700"
                         >
                           {t('landingPage.footer.contactUs.mail')}

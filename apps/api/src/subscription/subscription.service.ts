@@ -472,7 +472,7 @@ export class SubscriptionService implements OnModuleInit {
     return { available: meter.fileCountQuota - meter.fileCountUsed };
   }
 
-  async getOrCreateTokenUsageMeter(user: User, sub?: SubscriptionModel) {
+  async getOrCreateTokenUsageMeter(user: User, _sub?: SubscriptionModel) {
     const { uid } = user;
     const userPo = await this.prisma.user.findUnique({
       select: { subscriptionId: true },
@@ -483,6 +483,8 @@ export class SubscriptionService implements OnModuleInit {
       this.logger.error(`No user found for uid ${uid}`);
       return null;
     }
+
+    let sub: SubscriptionModel | null = _sub;
 
     if (userPo.subscriptionId && !sub) {
       sub = await this.prisma.subscription.findUnique({
@@ -547,7 +549,7 @@ export class SubscriptionService implements OnModuleInit {
     });
   }
 
-  async getOrCreateStorageUsageMeter(user: User, sub?: SubscriptionModel) {
+  async getOrCreateStorageUsageMeter(user: User, _sub?: SubscriptionModel) {
     const { uid } = user;
     const userPo = await this.prisma.user.findUnique({
       select: { subscriptionId: true },
@@ -558,6 +560,8 @@ export class SubscriptionService implements OnModuleInit {
       this.logger.error(`No user found for uid ${uid}`);
       return null;
     }
+
+    let sub: SubscriptionModel | null = _sub;
 
     if (userPo.subscriptionId && !sub) {
       sub = await this.prisma.subscription.findUnique({
@@ -595,7 +599,7 @@ export class SubscriptionService implements OnModuleInit {
     });
   }
 
-  async getOrCreateUsageMeter(user: User, sub?: SubscriptionModel) {
+  async getOrCreateUsageMeter(user: User, _sub?: SubscriptionModel) {
     const { uid } = user;
     const userPo = await this.prisma.user.findUnique({
       select: { subscriptionId: true },
@@ -606,6 +610,8 @@ export class SubscriptionService implements OnModuleInit {
       this.logger.error(`No user found for uid ${uid}`);
       return null;
     }
+
+    let sub: SubscriptionModel | null = _sub;
 
     if (userPo.subscriptionId && !sub) {
       sub = await this.prisma.subscription.findUnique({

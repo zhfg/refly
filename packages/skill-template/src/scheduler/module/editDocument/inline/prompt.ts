@@ -108,7 +108,7 @@ ${buildSpecificQueryInstruction()}
 `;
 
 export const buildInlineEditDocumentSystemPrompt = (
-  locale: string,
+  _locale: string,
   needPrepareContext: boolean,
 ) => {
   if (needPrepareContext) {

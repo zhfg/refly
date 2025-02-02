@@ -56,10 +56,10 @@ export class BrainstormIdeasSkill extends BaseSkill {
     },
   };
 
-  async generate(state: GraphState, config?: SkillRunnableConfig) {
+  async generate(_state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
-    const { locale = 'en', contentList = [], chatHistory = [] } = config?.configurable || {};
+    const { contentList = [] } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,
@@ -103,7 +103,7 @@ Please analyze the language of the provided context and ensure that your respons
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
-      new HumanMessage(`The context is provided above, please brainstorm ideas`),
+      new HumanMessage('The context is provided above, please brainstorm ideas'),
     ]);
 
     return { messages: [responseMessage] };

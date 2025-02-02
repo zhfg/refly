@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import * as Y from 'yjs';
 import { Request } from 'express';
 import { WebSocket } from 'ws';
@@ -83,7 +83,7 @@ export class CollabService {
       where: { uid },
     });
     if (!user) {
-      throw new Error(`user not found`);
+      throw new Error('user not found');
     }
 
     let context: CollabContext;
@@ -320,12 +320,12 @@ export class CollabService {
 
     if (isDocumentContext(context)) {
       return this.storeDocumentEntity({ state, document, context });
-    } else if (isCanvasContext(context)) {
-      return this.storeCanvasEntity({ state, document, context });
-    } else {
-      this.logger.warn(`unknown context entity type: ${JSON.stringify(context)}`);
-      return null;
     }
+    if (isCanvasContext(context)) {
+      return this.storeCanvasEntity({ state, document, context });
+    }
+    this.logger.warn(`unknown context entity type: ${JSON.stringify(context)}`);
+    return null;
   }
 
   async openDirectConnection(documentName: string, context?: CollabContext) {

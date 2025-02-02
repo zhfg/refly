@@ -70,12 +70,7 @@ export class CreateArticleOutlineSkill extends BaseSkill {
     this.engine.logger.log('---GENERATE---');
 
     const { query } = state;
-    const {
-      locale = 'en',
-      contentList = [],
-      resources = [],
-      chatHistory = [],
-    } = config?.configurable || {};
+    const { contentList = [], resources = [] } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,
@@ -162,7 +157,7 @@ Please analyze the language of the provided context and ensure that your respons
 
     const responseMessage = await llm.invoke([
       new SystemMessage(prompt),
-      new HumanMessage(`The context is provided above, please create the article outline`),
+      new HumanMessage('The context is provided above, please create the article outline'),
     ]);
 
     return { messages: [responseMessage] };

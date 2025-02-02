@@ -387,9 +387,9 @@ export class RAGService {
       options?.relevanceThreshold || this.config.get('reranker.relevanceThreshold');
 
     const contentMap = new Map<string, SearchResult>();
-    results.forEach((r) => {
+    for (const r of results) {
       contentMap.set(r.snippets.map((s) => s.text).join('\n\n'), r);
-    });
+    }
 
     const payload = JSON.stringify({
       query,

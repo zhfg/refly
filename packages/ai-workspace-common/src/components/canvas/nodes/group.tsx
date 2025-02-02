@@ -127,7 +127,7 @@ export const GroupNode = memo(
 
         addContextItems(contextItems);
       }
-    }, [id, data, getNodes, addContextItems]);
+    }, [id, getNodes, addContextItems]);
 
     const handleAskAI = useCallback(() => {
       const childNodes = getChildNodes(id, getNodes() as CanvasNode[]);

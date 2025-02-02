@@ -70,7 +70,7 @@ export const BaseMarkContextSelector = (props: BaseMarkContextSelectorProps) => 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [onClickOutside]);
 
   const { nodes } = useCanvasData();
   const targetNodes = nodes.filter((node) => !['skill', 'group'].includes(node?.type));

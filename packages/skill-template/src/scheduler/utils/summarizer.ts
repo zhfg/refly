@@ -1,11 +1,5 @@
 import { IContext, SelectedContentDomain, SkillContextContentItemMetadata } from '../types';
-import {
-  SkillContextContentItem,
-  SkillContextResourceItem,
-  Source,
-  ResourceType,
-  SkillContextDocumentItem,
-} from '@refly-packages/openapi-schema';
+import { Source, ResourceType } from '@refly-packages/openapi-schema';
 import { truncateContext, truncateMessages } from './truncator';
 import { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { getClientOrigin } from '@refly-packages/utils';
@@ -154,7 +148,7 @@ export const concatContextToStr = (context: Partial<IContext>, startIndex = 1) =
     };
 
     const documentStr = documents
-      .map((n) => concatDocument(n.document?.docId!, n.document?.title!, n.document?.content!))
+      .map((n) => concatDocument(n.document?.docId, n.document?.title, n.document?.content))
       .join('\n\n');
 
     contextStr += `\n\n<KnowledgeBaseDocuments>\n${documentStr}\n</KnowledgeBaseDocuments>\n\n`;
@@ -162,17 +156,17 @@ export const concatContextToStr = (context: Partial<IContext>, startIndex = 1) =
 
   if (resources.length > 0) {
     // contextStr += 'Following are the knowledge base resources: \n';
-    const concatResource = (id: string, type: ResourceType, title: string, content: string) => {
+    const concatResource = (id: string, _type: ResourceType, title: string, content: string) => {
       return `<ContextItem citationIndex='[[citation:${index++}]]' type='resource' entityId='${id}' title='${title}'>${content}</ContextItem>`;
     };
 
     const resourceStr = resources
       .map((r) =>
         concatResource(
-          r.resource?.resourceId!,
-          r.resource?.resourceType!,
-          r.resource?.title!,
-          r.resource?.content!,
+          r.resource?.resourceId,
+          r.resource?.resourceType,
+          r.resource?.title,
+          r.resource?.content,
         ),
       )
       .join('\n');
@@ -188,13 +182,13 @@ export const summarizeContext = (context: IContext, maxContextTokens: number): s
   const previewedContext: IContext = {
     resources: resources.map((r) => ({
       ...r,
-      content: r?.resource?.contentPreview || r.resource?.content?.slice(0, 50) + '...',
+      content: r?.resource?.contentPreview || `${r.resource?.content?.slice(0, 50)}...`,
     })),
     documents: documents.map((n) => ({
       ...n,
-      content: n?.document?.contentPreview || n.document?.content?.slice(0, 50) + '...',
+      content: n?.document?.contentPreview || `${n.document?.content?.slice(0, 50)}...`,
     })),
-    contentList: contentList.map((c) => ({ ...c, content: c.content?.slice(0, 50) + '...' })),
+    contentList: contentList.map((c) => ({ ...c, content: `${c.content?.slice(0, 50)}...` })),
   };
   const truncatedContext = truncateContext(previewedContext, maxContextTokens);
 
@@ -214,7 +208,7 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
   const sources: Source[] = [];
 
   // Web search sources
-  webSearchSources.forEach((source) => {
+  for (const source of webSearchSources) {
     sources.push({
       url: source.url,
       title: source.title,
@@ -226,12 +220,12 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
         sourceType: 'webSearch', // Add source type for web search results
       },
     });
-  });
+  }
 
-  const baseUrl = getClientOrigin();
+  const _baseUrl = getClientOrigin();
 
   // User selected content
-  contentList.forEach((content: SkillContextContentItem) => {
+  for (const content of contentList) {
     const metadata = content.metadata as unknown as SkillContextContentItemMetadata;
     sources.push({
       url: metadata?.url,
@@ -246,10 +240,10 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
         sourceType: 'library', // Add source type for knowledge base content
       },
     });
-  });
+  }
 
   // Knowledge base documents
-  documents.forEach((document: SkillContextDocumentItem) => {
+  for (const document of documents) {
     sources.push({
       url: '', // TODO: fix this
       title: document.document?.title,
@@ -262,10 +256,10 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
         sourceType: 'library', // Add source type for knowledge base documents
       },
     });
-  });
+  }
 
   // Knowledge base resources
-  resources.forEach((resource: SkillContextResourceItem) => {
+  for (const resource of resources) {
     sources.push({
       url: resource?.resource?.data?.url, // TODO: fix this
       title: resource.resource?.title,
@@ -278,7 +272,7 @@ export function flattenContextToSources(context: Partial<IContext>): Source[] {
         sourceType: 'library', // Add source type for knowledge base resources
       },
     });
-  });
+  }
 
   return sources;
 }

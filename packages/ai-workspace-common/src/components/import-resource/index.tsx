@@ -3,7 +3,7 @@ import { Menu, Divider, Splitter } from 'antd';
 import { HiLink } from 'react-icons/hi';
 import {
   ImportResourceMenuItem,
-  useImportResourceStore,
+  useImportResourceStoreShallow,
 } from '@refly-packages/ai-workspace-common/stores/import-resource';
 
 import { ImportFromWeblink } from './intergrations/import-from-weblink';
@@ -22,7 +22,13 @@ const MenuItem = Menu.Item;
 
 export const ImportResourceModal = () => {
   const { t } = useTranslation();
-  const importResourceStore = useImportResourceStore((state) => ({
+  const {
+    importResourceModalVisible,
+    setImportResourceModalVisible,
+    selectedMenuItem,
+    setSelectedMenuItem,
+    setInsertNodePosition,
+  } = useImportResourceStoreShallow((state) => ({
     importResourceModalVisible: state.importResourceModalVisible,
     setImportResourceModalVisible: state.setImportResourceModalVisible,
     selectedMenuItem: state.selectedMenuItem,
@@ -35,16 +41,16 @@ export const ImportResourceModal = () => {
 
   useEffect(() => {
     return () => {
-      importResourceStore.setInsertNodePosition(null);
+      setInsertNodePosition(null);
     };
-  }, []);
+  }, [setInsertNodePosition]);
 
   return (
     <Modal
-      visible={importResourceStore.importResourceModalVisible}
+      visible={importResourceModalVisible}
       footer={null}
       onCancel={() => {
-        importResourceStore.setImportResourceModalVisible(false);
+        setImportResourceModalVisible(false);
       }}
       getPopupContainer={getPopupContainer}
       className="import-resource-modal"
@@ -71,9 +77,9 @@ export const ImportResourceModal = () => {
                   </div>
                   <Divider style={{ margin: '12px 0' }} />
                   <Menu
-                    selectedKeys={[importResourceStore.selectedMenuItem]}
+                    selectedKeys={[selectedMenuItem]}
                     onClick={(info) => {
-                      importResourceStore.setSelectedMenuItem(info.key as ImportResourceMenuItem);
+                      setSelectedMenuItem(info.key as ImportResourceMenuItem);
                     }}
                   >
                     <MenuItem key="import-from-web-search">
@@ -101,15 +107,9 @@ export const ImportResourceModal = () => {
           </Splitter.Panel>
           <Splitter.Panel collapsible={false} resizable={false}>
             <div className="import-resource-right-panel">
-              {importResourceStore.selectedMenuItem === 'import-from-weblink' ? (
-                <ImportFromWeblink />
-              ) : null}
-              {importResourceStore.selectedMenuItem === 'import-from-paste-text' ? (
-                <ImportFromText />
-              ) : null}
-              {importResourceStore.selectedMenuItem === 'import-from-web-search' ? (
-                <MultilingualSearch />
-              ) : null}
+              {selectedMenuItem === 'import-from-weblink' ? <ImportFromWeblink /> : null}
+              {selectedMenuItem === 'import-from-paste-text' ? <ImportFromText /> : null}
+              {selectedMenuItem === 'import-from-web-search' ? <MultilingualSearch /> : null}
             </div>
           </Splitter.Panel>
         </Splitter>

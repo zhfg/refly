@@ -440,6 +440,10 @@ export type Skill = {
    * Skill config schema
    */
   configSchema?: SkillTemplateConfigDefinition;
+  /**
+   * Skill template config
+   */
+  tplConfig?: SkillTemplateConfig;
 };
 
 /**

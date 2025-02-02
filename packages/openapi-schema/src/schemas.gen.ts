@@ -557,6 +557,10 @@ export const SkillSchema = {
       description: 'Skill config schema',
       $ref: '#/components/schemas/SkillTemplateConfigDefinition',
     },
+    tplConfig: {
+      description: 'Skill template config',
+      $ref: '#/components/schemas/SkillTemplateConfig',
+    },
   },
 } as const;
 

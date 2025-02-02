@@ -9,7 +9,7 @@ export const mergeSearchResults = (results: Source[]): Source[] => {
   // Use Map to store unique sources, with composite key
   const sourceMap = new Map<string, Source>();
 
-  results.forEach((source) => {
+  for (const source of results) {
     const key = getSourceKey(source);
 
     if (!sourceMap.has(key)) {
@@ -17,7 +17,7 @@ export const mergeSearchResults = (results: Source[]): Source[] => {
       sourceMap.set(key, source);
     } else {
       // If source exists, merge metadata and selections if present
-      const existingSource = sourceMap.get(key)!;
+      const existingSource = sourceMap.get(key) as Source;
 
       // Merge metadata with translation information
       if (source.metadata && existingSource.metadata) {
@@ -45,7 +45,7 @@ export const mergeSearchResults = (results: Source[]): Source[] => {
         existingSource.score = source.score;
       }
     }
-  });
+  }
 
   // Convert Map back to array and sort by score if available
   return Array.from(sourceMap.values()).sort((a, b) => {
@@ -86,7 +86,7 @@ export const sourcesToSearchResults = (sources: Source[]): SearchResult[] => {
 // Helper function to convert SearchResult[] back to Source[]
 export const searchResultsToSources = (results: SearchResult[]): Source[] => {
   return results.map((result) => ({
-    url: (result.metadata?.['url'] as string) || '',
+    url: (result.metadata?.url as string) || '',
     title: result.title,
     pageContent: result.snippets?.[0]?.text || '',
     score: result.relevanceScore, // Map relevanceScore to score
@@ -101,20 +101,20 @@ export const searchResultsToSources = (results: SearchResult[]): Source[] => {
 export const deduplicateSourcesByTitle = (sources: Source[]): Source[] => {
   const titleMap = new Map<string, Source>();
 
-  sources.forEach((source) => {
+  for (const source of sources) {
     const normalizedTitle = source.title?.trim().toLowerCase() || '';
 
     // Skip empty titles
-    if (!normalizedTitle) return;
+    if (!normalizedTitle) continue;
 
     // If title exists, only replace if current source has higher score
     if (
       !titleMap.has(normalizedTitle) ||
-      (source.score || 0) > (titleMap.get(normalizedTitle)!.score || 0)
+      (source.score || 0) > (titleMap.get(normalizedTitle)?.score || 0)
     ) {
       titleMap.set(normalizedTitle, source);
     }
-  });
+  }
 
   // Keep sources with unique titles and any sources without titles
   return sources.filter((source) => {

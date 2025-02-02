@@ -69,8 +69,8 @@ export async function predictFollowUpQuery(prompt: string, model: any) {
       name: 'report_result',
     },
   });
-  return JSON.parse(resp.additional_kwargs.function_call?.arguments || '{}')
-    .is_dependent_on_previous_conversation === false
-    ? false
-    : true;
+  return (
+    JSON.parse(resp.additional_kwargs.function_call?.arguments || '{}')
+      .is_dependent_on_previous_conversation !== false
+  );
 }

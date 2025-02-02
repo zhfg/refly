@@ -137,7 +137,7 @@ export const DocumentNode = memo(
         false,
         true,
       );
-    }, [id, data, addNode]);
+    }, [data, addNode]);
 
     const { duplicateDocument } = useCreateDocument();
 

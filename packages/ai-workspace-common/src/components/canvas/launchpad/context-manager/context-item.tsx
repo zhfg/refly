@@ -8,7 +8,6 @@ import cn from 'classnames';
 import { ContextPreview } from './context-preview';
 import { useCallback } from 'react';
 import { Message } from '@arco-design/web-react';
-import { useCanvasData } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-data';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { useNodePosition } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-position';
 import { CanvasNode } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
@@ -32,12 +31,12 @@ export const ContextItem = ({
   const { title, entityId, selection, metadata } = item ?? {};
   const icon = getContextItemIcon(item.type, null, { withHistory: metadata?.withHistory });
   const { setSelectedNode } = useNodeSelection();
-  const { nodes } = useCanvasData();
   const { getNodes } = useReactFlow();
   const { setNodeCenter } = useNodePosition();
 
   const handleItemClick = useCallback(async () => {
-    const node = getNodes().find((node) => node.data?.entityId === entityId);
+    const nodes = getNodes();
+    const node = nodes.find((node) => node.data?.entityId === entityId);
 
     if (!node) {
       return;
@@ -69,7 +68,7 @@ export const ContextItem = ({
     } else {
       setSelectedNode(node as CanvasNode<any>);
     }
-  }, [entityId, selection, setSelectedNode, t]);
+  }, [entityId, selection, setSelectedNode, setNodeCenter, getNodes, t]);
 
   const content = <ContextPreview item={item} />;
 

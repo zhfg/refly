@@ -32,7 +32,7 @@ export interface IContent extends SkillContextContentItem {
 const zhLocaleDict = languageNameToLocale?.['zh-CN'] || {};
 const localeOptionList = Object.values(zhLocaleDict).map((val: keyof typeof zhCNLocale) => ({
   labelDict: {
-    en: localeToLanguageName?.['en']?.[val],
+    en: localeToLanguageName?.en?.[val],
     'zh-CN': localeToLanguageName?.['zh-CN']?.[val],
   },
   value: val as string,
@@ -188,16 +188,10 @@ export class CreateSocialMediaPostSkill extends BaseSkill {
     },
   };
 
-  async generate(state: GraphState, config?: SkillRunnableConfig) {
+  async generate(_: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
-    const { query } = state;
-    const {
-      locale = 'en',
-      contentList = [],
-      chatHistory = [],
-      tplConfig,
-    } = config?.configurable || {};
+    const { contentList = [], chatHistory = [], tplConfig } = config?.configurable || {};
 
     const llm = this.engine.chatModel({
       temperature: 0.2,
@@ -301,7 +295,7 @@ ${otherContentString}
       new SystemMessage(prompt),
       ...chatHistory,
       new HumanMessage(
-        `The context and requirements are provided above, please write a social media post for the target platform`,
+        'The context and requirements are provided above, please write a social media post for the target platform',
       ),
     ]);
 

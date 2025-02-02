@@ -26,7 +26,7 @@ interface GraphState extends BaseSkillState {
 const zhLocaleDict = languageNameToLocale?.['zh-CN'] || {};
 const localeOptionList = Object.values(zhLocaleDict).map((val: keyof typeof zhCNLocale) => ({
   labelDict: {
-    en: localeToLanguageName?.['en']?.[val],
+    en: localeToLanguageName?.en?.[val],
     'zh-CN': localeToLanguageName?.['zh-CN']?.[val],
   },
   value: val as string,
@@ -86,12 +86,7 @@ export class TranslateSkill extends BaseSkill {
   async generate(state: GraphState, config?: SkillRunnableConfig) {
     this.engine.logger.log('---GENERATE---');
 
-    const {
-      locale = 'en',
-      contentList = [],
-      chatHistory = [],
-      tplConfig = {},
-    } = config?.configurable || {};
+    const { locale = 'en', contentList = [], tplConfig = {} } = config?.configurable || {};
     const query = state.query || '';
     const targetLanguage = (tplConfig?.targetLanguage?.value || locale) as string;
 

@@ -104,7 +104,7 @@ export const buildContextualCommonQnASystemPrompt = () => {
   return systemPrompt;
 };
 
-export const buildCommonQnASystemPrompt = (locale: string, needPrepareContext: boolean) => {
+export const buildCommonQnASystemPrompt = (_locale: string, needPrepareContext: boolean) => {
   if (!needPrepareContext) {
     return buildNoContextCommonQnASystemPrompt();
   }

@@ -89,7 +89,7 @@ export abstract class BaseSkill extends StructuredTool {
 
   async _call(
     input: typeof this.graphState,
-    runManager?: CallbackManagerForToolRun,
+    _runManager?: CallbackManagerForToolRun,
     config?: SkillRunnableConfig,
   ): Promise<string> {
     if (!config) {

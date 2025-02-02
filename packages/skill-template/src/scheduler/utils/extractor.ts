@@ -27,17 +27,14 @@ function extractJsonFromMarkdown(content: string): any {
       try {
         const trimmed = match[1].trim();
         return JSON.parse(trimmed);
-      } catch (e) {
-        // Continue to next pattern if parsing fails
-        continue;
-      }
+      } catch (_e) {}
     }
   }
 
   // If all patterns fail, try to parse the entire content
   try {
     return JSON.parse(normalizedContent);
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Failed to parse JSON from response');
   }
 }
@@ -77,7 +74,7 @@ export async function extractStructuredData<T extends z.ZodType>(
   schema: T,
   prompt: string,
   config: SkillRunnableConfig,
-  maxRetries = 3,
+  maxRetries,
   modelInfo: ModelInfo,
 ): Promise<z.infer<T>> {
   let lastError = '';
@@ -90,7 +87,7 @@ export async function extractStructuredData<T extends z.ZodType>(
     try {
       const extractedJson = extractJsonFromMarkdown(content);
       return await schema.parseAsync(extractedJson);
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   };

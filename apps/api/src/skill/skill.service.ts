@@ -95,7 +95,7 @@ export function createLangchainMessage(result: ActionResult, steps: ActionStep[]
   return [
     new HumanMessage({ content: query }),
     ...(steps?.length > 0
-      ? steps?.map(
+      ? steps.map(
           (step) =>
             new AIMessage({
               content: step.content, // TODO: dump artifact content to message
@@ -267,7 +267,7 @@ export class SkillService {
     const { instanceList } = param;
     const tplConfigMap = new Map<string, BaseSkill>();
 
-    instanceList.forEach((instance) => {
+    for (const instance of instanceList) {
       if (!instance.displayName) {
         throw new ParamsError('skill display name is required');
       }
@@ -276,7 +276,7 @@ export class SkillService {
         throw new ParamsError(`skill ${instance.tplName} not found`);
       }
       tplConfigMap.set(instance.tplName, tpl);
-    });
+    }
 
     const instances = await this.prisma.skillInstance.createManyAndReturn({
       data: instanceList.map((instance) => ({
@@ -431,8 +431,16 @@ export class SkillService {
     const purgeContext = (context: SkillContext) => {
       // remove actual content from context to save storage
       const contextCopy: SkillContext = JSON.parse(JSON.stringify(context ?? {}));
-      contextCopy.resources?.forEach(({ resource }) => (resource.content = ''));
-      contextCopy.documents?.forEach(({ document }) => (document.content = ''));
+      if (contextCopy.resources) {
+        for (const { resource } of contextCopy.resources) {
+          resource.content = '';
+        }
+      }
+      if (contextCopy.documents) {
+        for (const { document } of contextCopy.documents) {
+          document.content = '';
+        }
+      }
       return contextCopy;
     };
 
@@ -528,11 +536,13 @@ export class SkillService {
         ),
       );
       const resourceMap = new Map<string, Resource>();
-      resources.forEach((r) => resourceMap.set(r.resourceId, resourcePO2DTO(r)));
+      for (const r of resources) {
+        resourceMap.set(r.resourceId, resourcePO2DTO(r));
+      }
 
-      context.resources.forEach((item) => {
+      for (const item of context.resources) {
         item.resource = resourceMap.get(item.resourceId);
-      });
+      }
     }
 
     // Populate documents
@@ -543,11 +553,13 @@ export class SkillService {
         docIds.map((id) => limit(() => this.knowledge.getDocumentDetail(user, { docId: id }))),
       );
       const docMap = new Map<string, Document>();
-      docs.forEach((d) => docMap.set(d.docId, documentPO2DTO(d)));
+      for (const d of docs) {
+        docMap.set(d.docId, documentPO2DTO(d));
+      }
 
-      context.documents.forEach((item) => {
+      for (const item of context.documents) {
         item.document = docMap.get(item.docId);
-      });
+      }
     }
 
     return context;
@@ -572,18 +584,18 @@ export class SkillService {
     const stepsMap = new Map<string, ActionStep[]>();
 
     // Group steps by resultId
-    steps.forEach((step) => {
+    for (const step of steps) {
       const resultSteps = stepsMap.get(step.resultId) ?? [];
       resultSteps.push(actionStepPO2DTO(step));
       stepsMap.set(step.resultId, resultSteps);
-    });
+    }
 
     // Convert results and add steps
-    results.forEach((r) => {
+    for (const r of results) {
       const resultDTO = actionResultPO2DTO(r);
       resultDTO.steps = stepsMap.get(r.resultId);
       resultMap.set(r.resultId, resultDTO);
-    });
+    }
 
     return resultHistory
       .map((r) => resultMap.get(r.resultId))
@@ -703,7 +715,7 @@ export class SkillService {
       this.logger.error(`invoke skill error: ${err.stack}`);
     } finally {
       if (res) {
-        res.end(``);
+        res.end('');
       }
     }
   }
@@ -900,7 +912,7 @@ export class SkillService {
         const chunk: AIMessageChunk = event.data?.chunk ?? event.data?.output;
 
         switch (event.event) {
-          case 'on_chat_model_stream':
+          case 'on_chat_model_stream': {
             const content = chunk.content.toString();
             if (content && res && !runMeta?.suppressOutput) {
               if (runMeta?.artifact) {
@@ -935,6 +947,7 @@ export class SkillService {
               }
             }
             break;
+          }
           case 'on_chat_model_end':
             if (runMeta && chunk) {
               const modelInfo = await this.subscription.getModelInfo(String(runMeta.ls_model_name));
@@ -981,9 +994,9 @@ export class SkillService {
       }
       result.errors.push(err.message);
     } finally {
-      Object.values(artifactMap).forEach((artifact) => {
+      for (const artifact of Object.values(artifactMap)) {
         artifact.connection?.disconnect();
-      });
+      }
 
       const steps = resultAggregator.getSteps({ resultId, version });
 
@@ -1009,7 +1022,7 @@ export class SkillService {
   }
 
   async listSkillTriggers(user: User, param: ListSkillTriggersData['query']) {
-    const { skillId, page = 1, pageSize = 10 } = param!;
+    const { skillId, page = 1, pageSize = 10 } = param;
 
     return this.prisma.skillTrigger.findMany({
       where: { uid: user.uid, skillId, deletedAt: null },
@@ -1069,7 +1082,7 @@ export class SkillService {
     });
   }
 
-  async stopTimerTrigger(user: User, trigger: SkillTriggerModel) {
+  async stopTimerTrigger(_user: User, trigger: SkillTriggerModel) {
     if (!trigger.bullJobId) {
       this.logger.warn(`No bull job found for trigger: ${trigger.triggerId}, cannot stop it`);
       return;
@@ -1093,7 +1106,9 @@ export class SkillService {
       throw new ParamsError('trigger list is empty');
     }
 
-    param.triggerList.forEach((trigger) => validateSkillTriggerCreateParam(trigger));
+    for (const trigger of param.triggerList) {
+      validateSkillTriggerCreateParam(trigger);
+    }
 
     const triggers = await this.prisma.skillTrigger.createManyAndReturn({
       data: param.triggerList.map((trigger) => ({
@@ -1111,11 +1126,11 @@ export class SkillService {
       })),
     });
 
-    triggers.forEach(async (trigger) => {
+    for (const trigger of triggers) {
       if (trigger.triggerType === 'timer' && trigger.enabled) {
         await this.startTimerTrigger(user, trigger);
       }
-    });
+    }
 
     return triggers;
   }

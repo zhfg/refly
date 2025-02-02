@@ -151,7 +151,6 @@ export class EditDoc extends BaseSkill {
           mentionedContext,
           maxTokens: remainingTokens,
           enableMentionedContext: hasContext,
-          enableLowerPriorityContext: hasContext,
         },
         {
           config: config,

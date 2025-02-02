@@ -34,7 +34,7 @@ export async function processQuery(options: QueryProcessorOptions): Promise<Quer
   const { tplConfig } = config?.configurable || {};
 
   let optimizedQuery = '';
-  let mentionedContext;
+  let mentionedContext: any;
 
   // Preprocess query
   const query = preprocessQuery(originalQuery, {

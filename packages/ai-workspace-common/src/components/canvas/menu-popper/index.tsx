@@ -237,7 +237,7 @@ export const MenuPopper: FC<MenuPopperProps> = ({ open, position, setOpen }) => 
     if (open && menuRef.current) {
       setMenuHeight(menuRef.current.offsetHeight);
     }
-  }, [open, menuItems]);
+  }, [open]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

@@ -8,7 +8,7 @@ export class CustomWsAdapter extends WsAdapter {
     super(app);
   }
 
-  create(port: number, options?: any): any {
+  create(_port: number, options?: any): any {
     const server = super.create(this.port, {
       cors: { origin: '*' },
       ...options,

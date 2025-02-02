@@ -108,7 +108,7 @@ export function safeParseURL(url: string) {
     const urlObj = new URL(url);
 
     return urlObj?.origin;
-  } catch (err) {
+  } catch (_err) {
     return url || '';
   }
 }

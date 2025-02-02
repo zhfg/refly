@@ -195,7 +195,7 @@ export const SkillNode = memo(
           deleteElements({ edges: edgesToRemove });
         }
       },
-      [id, canvasId, patchNodeData, addEdges, deleteElements, edgeStyles.hover],
+      [id, patchNodeData, addEdges, getNodes, getEdges, deleteElements, edgeStyles.hover],
     );
 
     const resizeMoveable = useCallback((width: number, height: number) => {
@@ -207,7 +207,7 @@ export const SkillNode = memo(
 
       const { offsetWidth, offsetHeight } = targetRef.current;
       resizeMoveable(offsetWidth, offsetHeight);
-    }, [targetRef?.current?.offsetHeight, resizeMoveable]);
+    }, [resizeMoveable]);
 
     useEffect(() => {
       if (skillSelectedModel && !modelInfo) {

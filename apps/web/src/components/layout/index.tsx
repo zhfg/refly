@@ -51,7 +51,7 @@ export const AppLayout = (props: AppLayoutProps) => {
             height: 'calc(100vh)',
             flexGrow: 1,
             overflowY: 'auto',
-            width: showSider ? `calc(100% - 200px - 16px)` : `calc(100% - 16px)`,
+            width: showSider ? 'calc(100% - 200px - 16px)' : 'calc(100% - 16px)',
           }}
         >
           <Content>{props.children}</Content>

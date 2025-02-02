@@ -5,7 +5,8 @@ import { MarkdownParser } from 'prosemirror-markdown';
 import { schema } from './schema';
 
 function listIsTight(tokens: readonly Token[], i: number) {
-  while (++i < tokens.length) if (tokens[i].type != 'listItem_open') return tokens[i].hidden;
+  // biome-ignore lint/style/noParameterAssign: using param assign is cleaner
+  while (++i < tokens.length) if (tokens[i].type !== 'listItem_open') return tokens[i].hidden;
   return false;
 }
 
@@ -50,14 +51,14 @@ export const defaultMarkdownParser = new MarkdownParser(
       getAttrs: (tok) => ({
         src: tok.attrGet('src'),
         title: tok.attrGet('title') || null,
-        alt: (tok.children![0] && tok.children![0].content) || null,
+        alt: tok.children?.[0]?.content || null,
       }),
     },
     hardbreak: { node: 'hardBreak' },
 
     em: {
       mark: 'italic',
-      getAttrs: (tok) => {
+      getAttrs: (_tok) => {
         if (!schema.marks.italic) {
           console.error('Italic mark not found in schema');
           return null;
@@ -67,7 +68,7 @@ export const defaultMarkdownParser = new MarkdownParser(
     },
     strong: {
       mark: 'bold',
-      getAttrs: (tok) => {
+      getAttrs: (_tok) => {
         if (!schema.marks.bold) {
           console.error('Bold mark not found in schema');
           return null;
@@ -77,7 +78,7 @@ export const defaultMarkdownParser = new MarkdownParser(
     },
     strike: {
       mark: 'strike',
-      getAttrs: (tok) => {
+      getAttrs: (_tok) => {
         if (!schema.marks.strike) {
           console.error('Strike mark not found in schema');
           return null;
@@ -100,7 +101,7 @@ export const defaultMarkdownParser = new MarkdownParser(
     },
     code_inline: {
       mark: 'code',
-      getAttrs: (tok) => {
+      getAttrs: (_tok) => {
         if (!schema.marks.code) {
           console.error('Code mark not found in schema');
           return null;

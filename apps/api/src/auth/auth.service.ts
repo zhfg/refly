@@ -250,7 +250,7 @@ export class AuthService {
 
     // oauth profile returns no email, this is invalid
     if (emails?.length === 0) {
-      this.logger.warn(`emails is empty, invalid oauth`);
+      this.logger.warn('emails is empty, invalid oauth');
       throw new OAuthError();
     }
     const email = emails[0].value;
@@ -403,7 +403,8 @@ export class AuthService {
     await this.emailQueue.add('verifyEmail', { sessionId });
   }
 
-  async sendVerificationEmail(sessionId: string, session?: VerificationSession) {
+  async sendVerificationEmail(sessionId: string, _session?: VerificationSession) {
+    let session = _session;
     if (!session) {
       session = await this.prisma.verificationSession.findUnique({ where: { sessionId } });
     }

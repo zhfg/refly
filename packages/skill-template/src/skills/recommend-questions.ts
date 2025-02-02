@@ -11,10 +11,7 @@ import {
   SkillTemplateConfigDefinition,
   Source,
 } from '@refly-packages/openapi-schema';
-import { safeStringifyJSON } from '@refly-packages/utils';
 import { prepareContext } from '../scheduler/utils/context';
-import { processQuery } from '../scheduler/utils/queryProcessor';
-import { checkModelContextLenSupport } from '../scheduler/utils/model';
 
 // Schema for recommended questions with reasoning
 const recommendQuestionsSchema = z.object({
@@ -94,7 +91,6 @@ export class RecommendQuestions extends BaseSkill {
           },
           maxTokens: remainingTokens,
           enableMentionedContext: true,
-          enableLowerPriorityContext: true,
         },
         {
           config,

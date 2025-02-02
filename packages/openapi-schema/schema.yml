@@ -1978,6 +1978,9 @@ components:
         configSchema:
           description: Skill config schema
           $ref: '#/components/schemas/SkillTemplateConfigDefinition'
+        tplConfig:
+          description: Skill template config
+          $ref: '#/components/schemas/SkillTemplateConfig'
     SkillTriggerType:
       type: string
       description: Skill trigger type

@@ -21,24 +21,6 @@ interface GraphState extends BaseSkillState {
 
 const READER_URL = 'https://r.jina.ai/';
 
-// Define a new graph
-/**
- *
- * @param url
- * @returns
- *
- * 1. 判断 url 是否是 arxiv 的 url（同样适用于其他网页）
- * 2. 判断是否在库里存在，不存在入库
- * 3. 判断需求是 summary、还是 common question，还是知识库独特的内容
- * 4. 根据需求，调用不同的工具
- * 5. 总结同时支持总结 + 追问，支持发 url 在主站使用，或者在插件里面感知使用
- */
-async function fetchPDF(url) {
-  const response = await fetch(url);
-  const pdfBlob = await response.blob();
-  return pdfBlob;
-}
-
 export class WebsiteSummarySkill extends BaseSkill {
   name = 'website_summary';
   displayName = {
@@ -213,7 +195,7 @@ Remember to use ${locale} for the summary and explanations, but keep technical t
           summary: z.string(),
         })
         .describe(
-          `Generate the summary based on these requirements and offer suggestions for the next steps.`,
+          'Generate the summary based on these requirements and offer suggestions for the next steps.',
         ),
     );
 

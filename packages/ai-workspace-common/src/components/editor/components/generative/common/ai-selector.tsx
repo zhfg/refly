@@ -203,7 +203,7 @@ export const AISelector = memo(({ onOpenChange, inPlaceEditType }: AISelectorPro
         setResultContent(steps?.map((step) => step?.content).join('\n\n'));
       }
     },
-    [resultId],
+    [resultId, isLoading],
   );
 
   useEffect(() => {
@@ -212,7 +212,7 @@ export const AISelector = memo(({ onOpenChange, inPlaceEditType }: AISelectorPro
     return () => {
       actionEmitter.off('updateResult', updateResult);
     };
-  }, [resultId]);
+  }, [updateResult]);
 
   useEffect(() => {
     return () => {
