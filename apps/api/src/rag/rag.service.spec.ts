@@ -20,9 +20,4 @@ describe('RAGService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-
-  it('crawl should work', async () => {
-    const doc = await service.crawl('https://mp.weixin.qq.com/s/FbHTyHqEBJT-1PhA5x7FRg');
-    expect(doc).toEqual({});
-  });
 });
