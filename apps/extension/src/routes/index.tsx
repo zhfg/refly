@@ -15,6 +15,7 @@ import { SuspenseLoading } from '@refly-packages/ai-workspace-common/components/
 export const AppRouter = (props: {
   children: React.ReactNode;
   loadingElement?: React.ReactNode;
+  loginElement?: React.ReactNode;
 }) => {
   const userStore = useUserStore((state) => ({
     localSettings: state.localSettings,
@@ -45,7 +46,7 @@ export const AppRouter = (props: {
   if (!userStore.userProfile) {
     return (
       <Routes>
-        <Route path="*" element={<Login />} />
+        <Route path="*" element={props.loginElement || <Login />} />
       </Routes>
     );
   }
