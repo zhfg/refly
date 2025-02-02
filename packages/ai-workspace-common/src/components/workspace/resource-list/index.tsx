@@ -23,6 +23,7 @@ import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/
 import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canvas/nodes/shared/colors';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-resource';
+import { getClientOrigin } from '@refly-packages/utils/url';
 
 const ActionDropdown = ({
   resource,
@@ -140,6 +141,7 @@ const ActionDropdown = ({
 const ResourceCard = ({ item, onDelete }: { item: Resource; onDelete: () => void }) => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
+  const [showFallbackIcon, setShowFallbackIcon] = useState(false);
 
   const handleCardClick = () => {
     if (item.data?.url) {
@@ -161,7 +163,20 @@ const ResourceCard = ({ item, onDelete }: { item: Resource; onDelete: () => void
       <Divider className="m-0 text-gray-200" />
       <div className="px-3 pt-2 pb-1 flex justify-between items-center bg-gray-50">
         <div className="flex items-center gap-3 mb-2">
-          <IconResourceFilled color={NODE_COLORS.resource} size={24} />
+          {item.data?.url ? (
+            showFallbackIcon ? (
+              <IconResourceFilled color={NODE_COLORS.resource} size={24} />
+            ) : (
+              <img
+                src={`https://www.google.com/s2/favicons?domain=${new URL(item?.data?.url || getClientOrigin()).hostname}&sz=32`}
+                alt="Website favicon"
+                className="w-6 h-6"
+                onError={() => setShowFallbackIcon(true)}
+              />
+            )
+          ) : (
+            <IconResourceFilled color={NODE_COLORS.resource} size={24} />
+          )}
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-medium max-w-48 truncate">
               {item.title || t('common.untitled')}
