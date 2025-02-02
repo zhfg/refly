@@ -38,10 +38,17 @@ export const removeUnusedHtmlNode = () => {
   return html;
 };
 
+// Function to remove base64 images from HTML content
+const removeBase64Images = (html: string): string => {
+  // Remove img tags with base64 content
+  return html.replace(/<img[^>]+src="data:image\/[^>]+"[^>]*>/g, '');
+};
+
 export const getReadabilityHtml = (node: Document | HTMLElement | DocumentFragment) => {
   try {
     const parsed = new Readability(node.cloneNode(true) as Document).parse();
-    return parsed?.content;
+    // Clean base64 images before returning content
+    return parsed?.content ? removeBase64Images(parsed.content) : removeUnusedHtmlNode();
   } catch (_err) {
     return removeUnusedHtmlNode();
   }
@@ -56,7 +63,7 @@ export const getReadabilityMarkdown = (element: Document | HTMLElement | Documen
 export const getMarkdown = (element: Document | HTMLElement | DocumentFragment) => {
   const div = document.createElement('div');
   div.appendChild(element.cloneNode(true));
-  const html = div.innerHTML;
+  const html = removeBase64Images(div.innerHTML);
   const md = convertHTMLToMarkdown('render', html);
   return md;
 };
