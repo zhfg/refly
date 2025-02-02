@@ -141,6 +141,7 @@ const ActionDropdown = ({
 const ResourceCard = ({ item, onDelete }: { item: Resource; onDelete: () => void }) => {
   const { t, i18n } = useTranslation();
   const language = i18n.languages?.[0];
+  const [showFallbackIcon, setShowFallbackIcon] = useState(false);
 
   const handleCardClick = () => {
     if (item.data?.url) {
@@ -163,15 +164,16 @@ const ResourceCard = ({ item, onDelete }: { item: Resource; onDelete: () => void
       <div className="px-3 pt-2 pb-1 flex justify-between items-center bg-gray-50">
         <div className="flex items-center gap-3 mb-2">
           {item.data?.url ? (
-            <img
-              src={`https://www.google.com/s2/favicons?domain=${new URL(item?.data?.url || getClientOrigin()).hostname}&sz=32`}
-              alt="Website favicon"
-              className="w-6 h-6"
-              onError={(e) => {
-                e.currentTarget.src =
-                  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTkgM0g1QzMuOSAzIDMgMy45IDMgNVYxOUMzIDIwLjEgMy45IDIxIDUgMjFIMTlDMjAuMSAyMSAyMSAyMC4xIDIxIDE5VjVDMjEgMy45IDIwLjEgMyAxOSAzWk0xOSAxOUg1VjVIMTlWMTlaIiBmaWxsPSIjNjY2NjY2Ii8+PC9zdmc+';
-              }}
-            />
+            showFallbackIcon ? (
+              <IconResourceFilled color={NODE_COLORS.resource} size={24} />
+            ) : (
+              <img
+                src={`https://www.google.com/s2/favicons?domain=${new URL(item?.data?.url || getClientOrigin()).hostname}&sz=32`}
+                alt="Website favicon"
+                className="w-6 h-6"
+                onError={() => setShowFallbackIcon(true)}
+              />
+            )
           ) : (
             <IconResourceFilled color={NODE_COLORS.resource} size={24} />
           )}
