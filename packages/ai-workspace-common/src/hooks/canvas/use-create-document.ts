@@ -68,7 +68,11 @@ export const useCreateDocument = () => {
     async (
       title: string,
       content: string,
-      { sourceNodeId, addToCanvas }: { sourceNodeId?: string; addToCanvas?: boolean },
+      {
+        sourceNodeId,
+        addToCanvas,
+        sourceType,
+      }: { sourceNodeId?: string; addToCanvas?: boolean; sourceType?: string },
     ) => {
       if (!checkStorageUsage()) {
         return null;
@@ -88,9 +92,7 @@ export const useCreateDocument = () => {
 
       if (addToCanvas) {
         // Find the source node
-        const sourceNode = nodes.find(
-          (n) => n.type === 'skillResponse' && n.data?.entityId === sourceNodeId,
-        );
+        const sourceNode = nodes.find((n) => n.data?.entityId === sourceNodeId);
 
         if (!sourceNode) {
           console.warn('Source node not found');
@@ -108,7 +110,7 @@ export const useCreateDocument = () => {
 
         addNode(newNode, [
           {
-            type: 'skillResponse',
+            type: sourceType as CanvasNodeType,
             entityId: sourceNodeId,
           },
         ]);
@@ -123,9 +125,13 @@ export const useCreateDocument = () => {
     (
       title: string,
       content: string,
-      { sourceNodeId, addToCanvas }: { sourceNodeId?: string; addToCanvas?: boolean },
+      {
+        sourceNodeId,
+        addToCanvas,
+        sourceType,
+      }: { sourceNodeId?: string; addToCanvas?: boolean; sourceType?: string },
     ) => {
-      return createDocument(title, content, { sourceNodeId, addToCanvas });
+      return createDocument(title, content, { sourceNodeId, addToCanvas, sourceType });
     },
     300,
     { leading: true },

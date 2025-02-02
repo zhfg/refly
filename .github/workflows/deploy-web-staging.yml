@@ -6,6 +6,7 @@ on:
       - main
     paths-ignore:
       - 'apps/api/**'
+      - 'apps/extension/**'
       - 'packages/skill-template/**'
   workflow_dispatch:
 

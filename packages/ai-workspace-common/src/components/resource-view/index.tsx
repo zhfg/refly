@@ -9,7 +9,6 @@ import { IconLoading, IconRefresh } from '@arco-design/web-react/icon';
 import { IconQuote } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
 import { genUniqueId } from '@refly-packages/utils/id';
-import { useContentSelectorStoreShallow } from '@refly-packages/ai-workspace-common/modules/content-selector/stores/content-selector';
 import { SelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/selection-context';
 import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
 import { Resource } from '@refly/openapi-schema';
@@ -130,13 +129,9 @@ const ResourceContent = memo(
   ({
     resourceDetail,
     resourceId,
-    showContentSelector,
-    scope,
   }: {
     resourceDetail: Resource;
     resourceId: string;
-    showContentSelector: boolean;
-    scope: string;
   }) => {
     const buildContextItem = useCallback(
       (text: string) => {
@@ -163,13 +158,7 @@ const ResourceContent = memo(
     }, [resourceId]);
 
     return (
-      <div
-        className={classNames(`knowledge-base-resource-content resource-content-${resourceId}`, {
-          'refly-selector-mode-active': showContentSelector,
-          'refly-block-selector-mode': scope === 'block',
-          'refly-inline-selector-mode': scope === 'inline',
-        })}
-      >
+      <div className={classNames(`knowledge-base-resource-content resource-content-${resourceId}`)}>
         <div className="knowledge-base-resource-content-title">{resourceDetail?.title}</div>
         <Markdown content={resourceDetail?.content || ''} className="text-base" />
         <SelectionContext
@@ -183,9 +172,7 @@ const ResourceContent = memo(
   (prevProps, nextProps) => {
     return (
       prevProps.resourceDetail?.resourceId === nextProps.resourceDetail?.resourceId &&
-      prevProps.resourceDetail?.content === nextProps.resourceDetail?.content &&
-      prevProps.showContentSelector === nextProps.showContentSelector &&
-      prevProps.scope === nextProps.scope
+      prevProps.resourceDetail?.content === nextProps.resourceDetail?.content
     );
   },
 );
@@ -195,11 +182,6 @@ export const ResourceView = memo(
     const { resourceId } = props;
     const { t } = useTranslation();
     const [isReindexing, setIsReindexing] = useState(false);
-
-    const { showContentSelector, scope } = useContentSelectorStoreShallow((state) => ({
-      showContentSelector: state.showContentSelector,
-      scope: state.scope,
-    }));
 
     // console.log('resourceview', resourceId);
 
@@ -275,12 +257,7 @@ export const ResourceView = memo(
                 isReindexing={isReindexing}
                 onReindex={handleReindexResource}
               />
-              <ResourceContent
-                resourceDetail={resourceDetail}
-                resourceId={resourceId}
-                showContentSelector={showContentSelector}
-                scope={scope}
-              />
+              <ResourceContent resourceDetail={resourceDetail} resourceId={resourceId} />
             </>
           )}
         </div>

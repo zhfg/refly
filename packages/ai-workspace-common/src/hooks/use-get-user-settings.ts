@@ -1,7 +1,11 @@
 import { useEffect } from 'react';
 import { useCookie } from 'react-use';
 import { useTranslation } from 'react-i18next';
-import { useMatch, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
+import {
+  useMatch,
+  useNavigate,
+  useSearchParams,
+} from '@refly-packages/ai-workspace-common/utils/router';
 
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import {
@@ -27,6 +31,7 @@ export const useGetUserSettings = () => {
     isCheckingLoginStatus: state.isCheckingLoginStatus,
   }));
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [uid] = useCookie(UID_COOKIE);
 
@@ -56,7 +61,7 @@ export const useGetUserSettings = () => {
       userStore.setIsLogin(false);
 
       if (!isShareContent && !isPricing) {
-        navigate('/'); // Extension should navigate to home
+        navigate(`/?${searchParams.toString()}`); // Extension should navigate to home
       }
 
       return;

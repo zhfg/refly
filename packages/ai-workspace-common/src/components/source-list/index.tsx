@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import './index.scss';
 import { IconRight } from '@arco-design/web-react/icon';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 
 interface SourceListProps {
   sources: Source[];

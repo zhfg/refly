@@ -1,7 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Menu } from '@arco-design/web-react';
 import { Avatar, Button, Layout, Skeleton, Divider } from 'antd';
-import { useLocation, useNavigate } from '@refly-packages/ai-workspace-common/utils/router';
+import {
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from '@refly-packages/ai-workspace-common/utils/router';
 
 import { IconCanvas, IconPlus } from '@refly-packages/ai-workspace-common/components/common/icon';
 import cn from 'classnames';
@@ -18,7 +22,11 @@ import { SettingsGuideModal } from '@refly-packages/ai-workspace-common/componen
 import { StorageExceededModal } from '@refly-packages/ai-workspace-common/components/subscription/storage-exceeded-modal';
 // hooks
 import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
-import { SiderData, useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+import {
+  SiderData,
+  useSiderStoreShallow,
+  type SettingsModalActiveTab,
+} from '@refly-packages/ai-workspace-common/stores/sider';
 import { useCreateCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-canvas';
 // icons
 import { IconLibrary } from '@refly-packages/ai-workspace-common/components/common/icon';
@@ -28,6 +36,7 @@ import { SubscriptionHint } from '@refly-packages/ai-workspace-common/components
 import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 import { FaGithub } from 'react-icons/fa6';
+import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
 
 const Sider = Layout.Sider;
 const MenuItem = Menu.Item;
@@ -228,35 +237,37 @@ const getSelectedKey = (pathname: string) => {
 
 export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
   const { source = 'sider' } = props;
-  const { collapse, canvasList, setCollapse, showSettingModal, setShowSettingModal } =
-    useSiderStoreShallow((state) => ({
-      showSettingModal: state.showSettingModal,
-      collapse: state.collapse,
-      canvasList: state.canvasList,
-      setCollapse: state.setCollapse,
-      setShowSettingModal: state.setShowSettingModal,
-    }));
-
-  const [starCount, setStarCount] = useState('60.1k');
-
-  useEffect(() => {
-    // Fetch GitHub star count
-    fetch('https://api.github.com/repos/refly-ai/refly')
-      .then((res) => res.json())
-      .then((data) => {
-        const stars = data.stargazers_count;
-        setStarCount(stars >= 1000 ? `${(stars / 1000).toFixed(1)}k` : stars.toString());
-      })
-      .catch(() => {
-        // Keep default value if fetch fails
-      });
-  }, []);
-
+  const [starCount, setStarCount] = useState('851');
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { updateLibraryModalActiveKey } = useKnowledgeBaseStoreShallow((state) => ({
+    updateLibraryModalActiveKey: state.updateLibraryModalActiveKey,
+  }));
+
+  const { setSettingsModalActiveTab } = useSiderStoreShallow((state) => ({
+    setSettingsModalActiveTab: state.setSettingsModalActiveTab,
+  }));
+
   const { userProfile } = useUserStoreShallow((state) => ({
     userProfile: state.userProfile,
   }));
   const planType = userProfile?.subscription?.planType || 'free';
+
+  const {
+    collapse,
+    canvasList,
+    setCollapse,
+    showSettingModal,
+    setShowSettingModal,
+    setShowLibraryModal,
+  } = useSiderStoreShallow((state) => ({
+    showSettingModal: state.showSettingModal,
+    collapse: state.collapse,
+    canvasList: state.canvasList,
+    setCollapse: state.setCollapse,
+    setShowSettingModal: state.setShowSettingModal,
+    setShowLibraryModal: state.setShowLibraryModal,
+  }));
 
   const { isLoadingCanvas } = useHandleSiderData(true);
 
@@ -300,6 +311,57 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
       },
     },
   ];
+
+  useEffect(() => {
+    // Fetch GitHub star count
+    fetch('https://api.github.com/repos/refly-ai/refly')
+      .then((res) => res.json())
+      .then((data) => {
+        const stars = data.stargazers_count;
+        setStarCount(stars >= 1000 ? `${(stars / 1000).toFixed(1)}k` : stars.toString());
+      })
+      .catch(() => {
+        // Keep default value if fetch fails
+      });
+  }, []);
+
+  // Handle library modal opening from URL parameter
+  useEffect(() => {
+    const shouldOpenLibrary = searchParams.get('openLibrary');
+    const shouldOpenSettings = searchParams.get('openSettings');
+    const settingsTab = searchParams.get('settingsTab');
+
+    if (shouldOpenLibrary === 'true' && userProfile?.uid) {
+      setShowLibraryModal(true);
+      // Remove the parameter from URL
+      searchParams.delete('openLibrary');
+      const newSearch = searchParams.toString();
+      const newUrl = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`;
+      window.history.replaceState({}, '', newUrl);
+
+      updateLibraryModalActiveKey('resource');
+    }
+
+    if (shouldOpenSettings === 'true' && userProfile?.uid) {
+      setShowSettingModal(true);
+      // Remove the parameter from URL
+      searchParams.delete('openSettings');
+      searchParams.delete('settingsTab');
+      const newSearch = searchParams.toString();
+      const newUrl = `${window.location.pathname}${newSearch ? `?${newSearch}` : ''}`;
+      window.history.replaceState({}, '', newUrl);
+
+      if (settingsTab) {
+        setSettingsModalActiveTab(settingsTab as SettingsModalActiveTab);
+      }
+    }
+  }, [
+    searchParams,
+    userProfile?.uid,
+    setShowLibraryModal,
+    setShowSettingModal,
+    setSettingsModalActiveTab,
+  ]);
 
   return (
     <Sider

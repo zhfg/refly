@@ -8,7 +8,7 @@ import { safeParseURL } from '@refly/utils/url';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 
 import { memo } from 'react';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 
 interface SourceDetailItemProps {

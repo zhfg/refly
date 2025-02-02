@@ -5,7 +5,11 @@ import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/
 import { UILocaleList } from '@refly-packages/ai-workspace-common/components/ui-locale-list';
 import { IconDown, IconLanguage } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from '@refly-packages/ai-workspace-common/utils/router';
+import {
+  useNavigate,
+  useLocation,
+  useSearchParams,
+} from '@refly-packages/ai-workspace-common/utils/router';
 import './header.scss';
 import { FaDiscord, FaGithub } from 'react-icons/fa6';
 
@@ -13,6 +17,7 @@ function Header() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { setLoginModalOpen } = useAuthStoreShallow((state) => ({
     setLoginModalOpen: state.setLoginModalOpen,
   }));
@@ -63,6 +68,17 @@ function Header() {
         // Keep default value if fetch fails
       });
   }, []);
+
+  // Add effect to check for openLogin parameter
+  useEffect(() => {
+    const shouldOpenLogin = searchParams.get('openLogin');
+    if (shouldOpenLogin) {
+      setLoginModalOpen(true);
+      // Remove the openLogin parameter from URL
+      searchParams.delete('openLogin');
+      navigate({ search: searchParams.toString() });
+    }
+  }, [searchParams, setLoginModalOpen, navigate]);
 
   return (
     <div className="fixed top-0 z-20 flex w-full !justify-center px-6 backdrop-blur-lg sm:px-6 md:px-6 lg:px-0">

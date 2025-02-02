@@ -300,6 +300,7 @@ export const SkillResponseNode = memo(
       await debouncedCreateDocument(title ?? '', content, {
         sourceNodeId: entityId,
         addToCanvas: true,
+        sourceType: 'skillResponse',
       });
     }, [content, debouncedCreateDocument, entityId, title]);
 

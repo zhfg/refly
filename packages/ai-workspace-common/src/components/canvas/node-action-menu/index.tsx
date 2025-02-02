@@ -416,7 +416,21 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
 
       const nodeTypeItems: Record<string, MenuItem[]> = {
         document: [],
-        resource: [],
+        resource: [
+          {
+            key: 'createDocument',
+            icon: FilePlus,
+            label: t('canvas.nodeStatus.createDocument'),
+            onClick: handleCreateDocument,
+            type: 'button' as const,
+            hoverContent: {
+              title: t('canvas.nodeStatus.createDocument'),
+              description: t('canvas.nodeActions.createDocumentDescription'),
+              videoUrl:
+                'https://static.refly.ai/onboarding/nodeAction/nodeAction-createDocument.webm',
+            },
+          },
+        ],
         memo: [
           {
             key: 'insertToDoc',

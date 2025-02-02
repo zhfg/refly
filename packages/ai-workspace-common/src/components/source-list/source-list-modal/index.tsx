@@ -5,7 +5,7 @@ import { message, Tabs } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Source } from '@refly/openapi-schema';
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 import './index.scss';
 import { IconLink } from '@arco-design/web-react/icon';
 import { SearchResults } from '@refly-packages/ai-workspace-common/modules/multilingual-search/components/search-results';

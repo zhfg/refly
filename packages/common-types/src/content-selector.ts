@@ -84,6 +84,7 @@ export interface SyncMarkEvent {
   body: {
     type: SyncMarkEventType;
     mark?: Mark;
+    content?: string;
   };
 }
 

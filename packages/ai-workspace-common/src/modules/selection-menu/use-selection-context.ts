@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { IContextItem, useContextPanelStoreShallow } from '../../stores/context-panel';
-import { getSelectionNodesMarkdown } from '@refly-packages/ai-workspace-common/modules/content-selector/utils/highlight-selection';
+import { getSelectionNodesMarkdown } from '@refly/utils/html2md';
 
 interface UseSelectionContextProps {
   containerClass?: string;

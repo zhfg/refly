@@ -13,6 +13,7 @@ import {
 import { useHandleUrlParamsCallback } from '@refly-packages/ai-workspace-common/hooks/use-handle-url-params-callback';
 import { SuspenseLoading } from '@refly-packages/ai-workspace-common/components/common/loading';
 import { HomeRedirect } from '@refly-packages/ai-workspace-common/components/home-redirect';
+
 // Lazy load components
 const Home = lazy(() => import('@/pages/home'));
 const Canvas = lazy(() => import('@/pages/canvas'));

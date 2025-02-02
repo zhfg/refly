@@ -29,6 +29,9 @@ import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { NodeHeader } from './shared/node-header';
 import { ContentPreview } from './shared/content-preview';
+import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
+import { message } from 'antd';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 export const ResourceNode = memo(
   ({ id, data, isPreview, selected, hideActions, hideHandles, onNodeClick }: ResourceNodeProps) => {
@@ -143,6 +146,7 @@ export const ResourceNode = memo(
       );
     }, [id, data, addNode]);
 
+    const { debouncedCreateDocument } = useCreateDocument();
     const { data: result } = useGetResourceDetail(
       {
         query: { resourceId: data?.entityId },
@@ -159,6 +163,29 @@ export const ResourceNode = memo(
       },
     );
     const remoteResult = result?.data;
+
+    const handleCreateDocument = useCallback(async () => {
+      try {
+        const { data: remoteResult } = await getClient().getResourceDetail({
+          query: { resourceId: data.entityId },
+        });
+        const remoteData = remoteResult?.data;
+
+        if (!remoteData?.content) {
+          message.warning(t('knowledgeBase.context.noContent'));
+          return;
+        }
+
+        await debouncedCreateDocument(remoteData.title ?? '', remoteData.content, {
+          sourceNodeId: data.entityId,
+          addToCanvas: true,
+          sourceType: 'resource',
+        });
+      } catch (error) {
+        console.error(error);
+        message.error(t('knowledgeBase.context.noContent'));
+      }
+    }, [data.title, data.entityId, remoteResult?.content, debouncedCreateDocument, t]);
 
     useEffect(() => {
       if (!data.contentPreview) {
@@ -188,12 +215,14 @@ export const ResourceNode = memo(
       const handleNodeDelete = () => handleDelete();
       const handleNodeDeleteFile = () => handleDeleteFile();
       const handleNodeAskAI = () => handleAskAI();
+      const handleNodeCreateDocument = () => handleCreateDocument();
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
       nodeActionEmitter.on(createNodeEventName(id, 'deleteFile'), handleNodeDeleteFile);
       nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
+      nodeActionEmitter.on(createNodeEventName(id, 'createDocument'), handleNodeCreateDocument);
 
       return () => {
         // Cleanup events when component unmounts
@@ -201,11 +230,12 @@ export const ResourceNode = memo(
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
         nodeActionEmitter.off(createNodeEventName(id, 'deleteFile'), handleNodeDeleteFile);
         nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
+        nodeActionEmitter.off(createNodeEventName(id, 'createDocument'), handleNodeCreateDocument);
 
         // Clean up all node events
         cleanupNodeEvents(id);
       };
-    }, [id, handleAddToContext, handleDelete, handleDeleteFile, handleAskAI]);
+    }, [id, handleAddToContext, handleDelete, handleDeleteFile, handleAskAI, handleCreateDocument]);
 
     return (
       <div className={classNames({ nowheel: isOperating })}>

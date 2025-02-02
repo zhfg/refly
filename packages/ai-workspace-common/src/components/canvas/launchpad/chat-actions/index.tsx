@@ -7,7 +7,7 @@ import { IconSend } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 
-import { getRuntime } from '@refly-packages/ai-workspace-common/utils/env';
+import { getRuntime } from '@refly/utils/env';
 import { ModelSelector } from './model-selector';
 import { ModelInfo } from '@refly/openapi-schema';
 import { cn } from '@refly-packages/utils/index';

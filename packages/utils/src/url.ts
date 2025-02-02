@@ -1,4 +1,5 @@
 import { IENV, getEnv } from './env';
+import { getRuntime } from './env';
 
 const overrideLocalDev = false;
 
@@ -37,28 +38,64 @@ export const getExtensionId = () => {
     : 'lecbjbapfkinmikhadakbclblnemmjpd';
 };
 
-export const getServerOrigin = () => {
-  // return PROD_DOMAIN
+export const getExtensionServerOrigin = () => {
   if (overrideLocalDev) {
     return CLIENT_DEV_COOKIE_DOMAIN;
   }
-  if (window?.location?.hostname === 'staging.refly.ai') {
+
+  return getEnv() === IENV.DEVELOPMENT ? SERVER_DEV_DOMAIN : SERVER_PROD_DOMAIN;
+};
+
+export const getServerOrigin = () => {
+  // Check if we're in extension background
+  const runtime = getRuntime();
+  if (runtime === 'extension-background') {
+    return getEnv() === IENV.DEVELOPMENT ? SERVER_DEV_DOMAIN : SERVER_PROD_DOMAIN;
+  }
+
+  if (overrideLocalDev) {
+    return CLIENT_DEV_COOKIE_DOMAIN;
+  }
+
+  // Safely check window object
+  const isStaging =
+    typeof window !== 'undefined' && window?.location?.hostname === 'staging.refly.ai';
+
+  if (isStaging) {
     return SERVER_STAGING_DOMAIN;
   }
   return getEnv() === IENV.DEVELOPMENT ? SERVER_DEV_DOMAIN : SERVER_PROD_DOMAIN;
 };
 
 export const getWsServerOrigin = () => {
+  // Check if we're in extension background
+  const runtime = getRuntime();
+  if (runtime === 'extension-background') {
+    return getEnv() === IENV.DEVELOPMENT ? WS_SERVER_DEV_DOMAIN : WS_SERVER_PROD_DOMAIN;
+  }
+
   if (overrideLocalDev) {
     return WS_SERVER_DEV_DOMAIN;
   }
-  if (window?.location?.hostname === 'staging.refly.ai') {
+
+  // Safely check window object
+  const isStaging =
+    typeof window !== 'undefined' && window?.location?.hostname === 'staging.refly.ai';
+
+  if (isStaging) {
     return WS_SERVER_STAGING_DOMAIN;
   }
   return getEnv() === IENV.DEVELOPMENT ? WS_SERVER_DEV_DOMAIN : WS_SERVER_PROD_DOMAIN;
 };
 
-export const getClientOrigin = () => {
+export const getClientOrigin = (isLandingPage?: boolean) => {
+  console.log('isLandingPage', isLandingPage);
+  // Check if we're in extension background
+  const runtime = getRuntime();
+  if (runtime === 'extension-background') {
+    return getEnv() === IENV.DEVELOPMENT ? CLIENT_DEV_APP_DOMAIN : CLIENT_PROD_APP_DOMAIN;
+  }
+
   if (overrideLocalDev) {
     return CLIENT_DEV_APP_DOMAIN;
   }

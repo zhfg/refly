@@ -1,4 +1,4 @@
-import { getRuntime } from './env';
+import { getRuntime } from '@refly/utils/env';
 
 export const calcPopupPosition = (
   rect: DOMRect,

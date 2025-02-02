@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { reflyEnv } from '@refly-packages/ai-workspace-common/utils/env';
+import { reflyEnv } from '@refly/utils/env';
 import { bigSearchQuickOpenEmitter } from '@refly-packages/ai-workspace-common/utils/event-emitter/big-search-quick-open';
 import classNames from 'classnames';
 import { IconSearch } from '@refly-packages/ai-workspace-common/components/common/icon';
