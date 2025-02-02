@@ -71,7 +71,7 @@ export const useContentSelector = (
       scope: selectorScopeRef.current,
       domain,
       url: metadata?.url || document?.location?.href || (document as any as Location)?.href || '',
-      metadata: domain === 'documentSelection' ? { projectId } : null,
+      metadata: domain === 'documentSelection' ? ({ projectId } as Record<string, any>) : undefined,
     };
 
     return mark;
@@ -95,9 +95,14 @@ export const useContentSelector = (
   ) => {
     const containerElem = getContainerElem(selector);
 
+    // Create a container for styles
+    const styleContainer = document.createElement('div');
+    styleContainer.setAttribute('id', 'refly-content-selector-styles');
+    document.head.appendChild(styleContainer);
+
     const menuContainer = document.createElement('div');
     menuContainer.setAttribute('data-id', 'refly-content-selector-hover-menu');
-    menuContainer.style.position = 'absolute';
+    menuContainer.style.position = 'fixed';
     menuContainer.style.zIndex = '10000';
     menuContainer.style.opacity = '0';
     menuContainer.style.transition = 'opacity 0.3s ease-in-out';
@@ -109,13 +114,11 @@ export const useContentSelector = (
 
     const renderMenu = () => {
       if (rect) {
-        // 获取视口相对位置
-        menuContainer.style.top = `${rect.top - 30}px`;
+        menuContainer.style.top = `${rect.top - 46}px`;
         menuContainer.style.left = `${rect.left + rect.width / 2}px`;
         menuContainer.style.opacity = '1';
-      } else {
+      } else if (target) {
         const targetRect = target.getBoundingClientRect();
-        // 计算相对于视口的位置
         menuContainer.style.top = `${targetRect.top - 30}px`;
         menuContainer.style.left = `${targetRect.left + targetRect.width / 2}px`;
         menuContainer.style.opacity = '1';
@@ -126,7 +129,7 @@ export const useContentSelector = (
           onClick={onClick}
           selected={selected}
           onMouseEnter={() => clearTimeout(hideTimeout)}
-          onMouseLeave={() => removeHoverMenu()}
+          onCopy={() => {}} // Add empty onCopy handler
         />,
       );
     };
@@ -136,20 +139,18 @@ export const useContentSelector = (
     const removeHoverMenu = () => {
       hideTimeout = setTimeout(() => {
         root.unmount();
-        // 从 document.body 中移除
-
         try {
-          document.body.removeChild(menuContainer);
+          containerElem?.removeChild(menuContainer);
+          document.head.removeChild(styleContainer);
         } catch (err) {
           console.log('remove err', err);
         }
       }, 300);
     };
 
-    // 添加鼠标事件监听器
     if (rect) {
       renderMenu();
-    } else {
+    } else if (target) {
       target.addEventListener('mouseenter', renderMenu);
       target.addEventListener('mouseleave', removeHoverMenu);
     }
@@ -157,15 +158,16 @@ export const useContentSelector = (
     const cleanup = () => {
       removeHoverMenu();
 
-      if (!rect) {
-        target?.removeEventListener('mouseenter', renderMenu);
-        target?.removeEventListener('mouseleave', removeHoverMenu);
+      if (!rect && target) {
+        target.removeEventListener('mouseenter', renderMenu);
+        target.removeEventListener('mouseleave', removeHoverMenu);
       }
 
       if (menuContainer) {
-        ReactDOM.unmountComponentAtNode(menuContainer);
+        root.unmount();
         try {
           containerElem?.removeChild(menuContainer);
+          document.head.removeChild(styleContainer);
         } catch (err) {
           console.error('remove menuContainer error', err);
         }
@@ -184,18 +186,23 @@ export const useContentSelector = (
       }
 
       const parent = node.parentNode;
-      const textNode = document.createTextNode(node.textContent);
-      parent.replaceChild(textNode, node);
-      parent.normalize();
+      if (parent && node.textContent) {
+        const textNode = document.createTextNode(node.textContent);
+        parent.replaceChild(textNode, node);
+        parent.normalize();
+      }
     }
   };
 
   const _addHoverMenuToNode = (node: HTMLElement, xPath: string) => {
-    const removeHighlight = (xPath?: string) => {
-      removeAllInlineHightlightNodes(xPath);
-
-      const mark = removeInlineMark(node, xPath);
-      syncRemoveMarkEvent(mark);
+    const removeHighlight = (highlightXPath?: string) => {
+      if (highlightXPath) {
+        removeAllInlineHightlightNodes(highlightXPath);
+        const mark = removeInlineMark(node, highlightXPath);
+        if (mark) {
+          syncRemoveMarkEvent(mark);
+        }
+      }
     };
 
     const cleanup = addHoverMenu(
@@ -230,7 +237,7 @@ export const useContentSelector = (
 
   const addInlineMark = () => {
     const selection = window.getSelection();
-    if (!selection.rangeCount) return;
+    if (!selection?.rangeCount) return;
 
     const range = selection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
@@ -279,7 +286,7 @@ export const useContentSelector = (
     // add a listener to detect selection change
     const selectionChangeListener = () => {
       const newSelection = window.getSelection();
-      if (newSelection.toString().trim().length === 0) {
+      if (newSelection?.toString().trim().length === 0) {
         cleanup();
         document.removeEventListener('selectionchange', selectionChangeListener);
       }
@@ -358,6 +365,8 @@ export const useContentSelector = (
   };
 
   const syncMarkEvent = (event: Partial<SyncMarkEvent>) => {
+    if (!event.body) return;
+
     const { type, mark } = event.body;
     // 发送给 refly-main-app
     const msg: BackgroundMessage<{ type: SyncMarkEventType; mark: Mark }> = {
@@ -373,7 +382,7 @@ export const useContentSelector = (
           domain: mark?.domain,
           url: mark?.url,
           metadata: mark?.metadata,
-        },
+        } as Mark,
       },
     };
     console.log('contentSelectorClickHandler', safeStringifyJSON(msg));
@@ -521,16 +530,27 @@ export const useContentSelector = (
 
     if (!containerElem) return;
 
-    containerElem.addEventListener('mousemove', onMouseMove);
-    containerElem.addEventListener('click', onContentClick, {
-      capture: true,
-    });
+    containerElem.addEventListener('mousemove', ((ev: Event) => {
+      onMouseMove(ev as MouseEvent);
+    }) as EventListener);
+
+    containerElem.addEventListener(
+      'click',
+      ((ev: Event) => {
+        onContentClick(ev as MouseEvent);
+      }) as EventListener,
+      {
+        capture: true,
+      },
+    );
   };
 
   const initInlineDomEventListener = () => {
     const containerElem = selector ? document.querySelector(`.${selector}`) : document.body;
 
-    containerElem?.addEventListener('mouseup', onMouseDownUpEvent);
+    containerElem?.addEventListener('mouseup', ((ev: Event) => {
+      onMouseDownUpEvent(ev as MouseEvent);
+    }) as EventListener);
   };
 
   const initDomEventListener = () => {
@@ -546,9 +566,21 @@ export const useContentSelector = (
 
     if (!containerElem) return;
 
-    containerElem.removeEventListener('mousemove', onMouseMove);
-    containerElem.removeEventListener('click', onContentClick, { capture: true });
-    containerElem.removeEventListener('mouseup', onMouseDownUpEvent);
+    containerElem.removeEventListener('mousemove', ((ev: Event) => {
+      onMouseMove(ev as MouseEvent);
+    }) as EventListener);
+
+    containerElem.removeEventListener(
+      'click',
+      ((ev: Event) => {
+        onContentClick(ev as MouseEvent);
+      }) as EventListener,
+      { capture: true },
+    );
+
+    containerElem.removeEventListener('mouseup', ((ev: Event) => {
+      onMouseDownUpEvent(ev as MouseEvent);
+    }) as EventListener);
   };
 
   const onStatusHandler = (event: MessageEvent<any>) => {

@@ -54,9 +54,7 @@ export const useSaveResourceNotify = () => {
         closable: true,
       });
     } else {
-      if (res?.errCode === new StorageQuotaExceeded().code) {
-        showErrorNotification(res, locale as LOCALE);
-      }
+      showErrorNotification(res, locale as LOCALE);
     }
   };
 
