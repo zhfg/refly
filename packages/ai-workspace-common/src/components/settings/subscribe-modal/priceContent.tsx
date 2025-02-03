@@ -81,6 +81,7 @@ const PlanItem = (props: {
       switch (plan) {
         case 'max':
         case 'pro':
+        case 'plus':
           return t('settings.subscription.subscribe.upgrade');
         case 'free':
           return t('settings.subscription.subscribe.continueFree');

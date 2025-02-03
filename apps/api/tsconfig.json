@@ -26,10 +26,12 @@
       "@refly-packages/*": ["../../packages/*/src"]
     },
     "sourceRoot": "/",
-    "composite": true
+    "composite": true,
+    "types": ["jest", "node", "express", "multer"],
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "./src/**/*.spec.ts"],
+  "include": ["src/**/*", "*.json"],
+  "exclude": ["node_modules", "dist"],
   "references": [
     { "path": "../../packages/errors" },
     { "path": "../../packages/i18n" },

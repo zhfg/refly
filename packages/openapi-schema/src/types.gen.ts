@@ -1021,6 +1021,10 @@ export type Subscription = {
    */
   status: SubscriptionStatus;
   /**
+   * Whether the subscription is a trial
+   */
+  isTrial?: boolean;
+  /**
    * Subscription cancel time
    */
   cancelAt?: string;

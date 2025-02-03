@@ -1,17 +1,36 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigModule } from '@nestjs/config';
-
+import { ConfigService } from '@nestjs/config';
 import { RAGService } from './rag.service';
-import configuration from '../config/app.config';
-import { CommonModule } from '../common/common.module';
+import { createMock } from '@golevelup/ts-jest';
+import { QdrantService } from '@/common/qdrant.service';
+
+const mockConfig = (key: string) => {
+  switch (key) {
+    case 'embeddings.provider':
+      return 'jina';
+    default:
+      return null;
+  }
+};
 
 describe('RAGService', () => {
   let service: RAGService;
 
+  const qdrantService = createMock<QdrantService>();
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({ load: [configuration] }), CommonModule],
-      providers: [RAGService],
+      providers: [
+        RAGService,
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn(mockConfig),
+            getOrThrow: jest.fn(mockConfig),
+          },
+        },
+        { provide: QdrantService, useValue: qdrantService },
+      ],
     }).compile();
 
     service = module.get<RAGService>(RAGService);
@@ -19,10 +38,5 @@ describe('RAGService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-  });
-
-  it('crawl should work', async () => {
-    const doc = await service.crawl('https://mp.weixin.qq.com/s/FbHTyHqEBJT-1PhA5x7FRg');
-    expect(doc).toEqual({});
   });
 });

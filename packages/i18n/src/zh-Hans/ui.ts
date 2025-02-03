@@ -1209,6 +1209,7 @@ const translations = {
         monthlyPlan: '每月自动续费',
         yearlyPlan: '每年自动续费',
         cancelAt: '将于 {{date}} 取消',
+        trialExpireAt: '试用将于 {{date}} 结束',
         tooltip: {
           modelToken: 'Token 同时包括模型输入和输出',
           vectorStorage: '用于存储资源和画布的语义化向量数据',
@@ -1282,9 +1283,6 @@ const translations = {
         forFree: '免费',
         resetAt: '将于 {{date}} 重置',
       },
-      testTipTitle: '温馨提示',
-      testTip:
-        '产品当前在内测阶段，如有模型 Token 和存储使用额度不足的情况，请联系 Refly 团队为您扩充额度。我们会在后续版本中正式推出订阅计划，感谢您的使用。',
     },
     action: {
       putErrorNotify: '修改用户配置失败，请尝试重试！',

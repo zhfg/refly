@@ -1236,6 +1236,7 @@ const translations = {
         monthlyPlan: 'Monthly Auto-Renewal',
         yearlyPlan: 'Yearly Auto-Renewal',
         cancelAt: 'Will be canceled at {{date}}',
+        trialExpireAt: 'Trial will expire at {{date}}',
         tooltip: {
           modelToken: 'Usage includes both model input and output tokens',
           vectorStorage: 'Used for storing semantic embeddings of resources and canvases',
@@ -1312,9 +1313,6 @@ const translations = {
         forFree: 'Free',
         resetAt: 'reset at {{date}}',
       },
-      testTipTitle: 'Reminder',
-      testTip:
-        'Our product is still in testing phase. in the beta testing phase. If you encounter insufficient model token or storage quota, please contact the Refly team for quota expansion. We will officially launch subscription plans in future versions. Thank you for using our product.',
     },
 
     action: {
