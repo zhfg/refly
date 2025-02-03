@@ -268,6 +268,7 @@ const translations = {
       price: 'Pricing',
       docs: 'Docs',
       discord: 'Discord',
+      priceTag: '-50%',
     },
     faq: {
       title: 'Frequently Asked Questions',

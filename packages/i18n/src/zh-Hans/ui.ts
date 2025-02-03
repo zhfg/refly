@@ -268,6 +268,7 @@ const translations = {
       price: '价格',
       docs: '文档',
       discord: 'Discord',
+      priceTag: '五折',
     },
     faq: {
       title: '常见问题',
