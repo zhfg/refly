@@ -6,7 +6,7 @@ RUN apk add --no-cache curl
 
 WORKDIR /app
 
-RUN corepack enable
+RUN npm install -g pnpm@8.15.8
 
 COPY . .
 RUN pnpm install
