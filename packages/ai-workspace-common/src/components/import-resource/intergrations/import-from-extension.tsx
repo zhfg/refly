@@ -263,7 +263,8 @@ const PlatformButton = ({ platform }: { platform: (typeof SOCIAL_PLATFORMS)[0] }
 };
 
 export const ImportFromExtension = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n?.languages?.[0];
 
   return (
     <div className="h-full flex flex-col min-w-[500px] box-border">
@@ -307,7 +308,13 @@ export const ImportFromExtension = () => {
             <Button
               size="large"
               className="flex-1"
-              onClick={() => window.open('https://docs.refly.ai', '_blank')}
+              onClick={() => {
+                const docsUrl =
+                  locale === 'en'
+                    ? 'https://docs.refly.ai/guide/chrome-extension'
+                    : 'https://docs.refly.ai/zh/guide/chrome-extension';
+                window.open(docsUrl, '_blank');
+              }}
             >
               {t('resource.import.viewDocs')}
             </Button>
