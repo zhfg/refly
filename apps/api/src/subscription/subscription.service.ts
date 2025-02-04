@@ -252,15 +252,21 @@ export class SubscriptionService implements OnModuleInit {
 
   async cancelSubscription(sub: SubscriptionModel) {
     await this.prisma.$transaction(async (prisma) => {
+      // Mark the subscription as canceled
+      await prisma.subscription.update({
+        where: { subscriptionId: sub.subscriptionId },
+        data: { status: 'canceled' },
+      });
+
       const user = await prisma.user.findUnique({ where: { uid: sub.uid } });
       if (!user) {
         this.logger.error(`No user found for uid ${sub.uid}`);
         return;
       }
 
-      // Idempotency check
-      if (!user.subscriptionId) {
-        this.logger.error(`No subscription found for user ${sub.uid}`);
+      // Proceed only if the user's current subscription matches the one to be canceled
+      if (user.subscriptionId !== sub.subscriptionId) {
+        this.logger.warn(`Subscription ${sub.subscriptionId} not valid for user ${user.uid}`);
         return;
       }
 
@@ -268,12 +274,6 @@ export class SubscriptionService implements OnModuleInit {
       await prisma.user.update({
         where: { uid: sub.uid },
         data: { subscriptionId: null },
-      });
-
-      // Mark the subscription as canceled
-      await prisma.subscription.update({
-        where: { subscriptionId: sub.subscriptionId },
-        data: { status: 'canceled' },
       });
 
       const now = new Date();
