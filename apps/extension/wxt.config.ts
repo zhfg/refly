@@ -90,7 +90,6 @@ export default defineConfig({
     permissions: [
       'storage',
       'scripting',
-      'history',
       'activeTab',
       'tabs',
       'cookies',
