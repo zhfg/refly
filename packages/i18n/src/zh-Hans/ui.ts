@@ -123,7 +123,7 @@ const translations = {
       first: '由多线程对话、知识库集成、上下文记忆和智能搜索驱动，',
       second: 'Refly 是将创意转化为优质内容的最佳方式。',
     },
-    messageText: '全新推理模型 DeepSeek R1 上线！⚡️ ！',
+    messageText: 'v0.3.0 发布！支持 Chrome 插件剪存和保存网页内容⚡️ ！',
     tryForFree: '开始使用',
     addToChrome: '添加到 Chrome',
     contactUs: '联系我们',
