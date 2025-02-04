@@ -88,7 +88,7 @@ export const ImportFromText = () => {
       /* reset and copiedTextPayload after modal hide */
       setCopiedTextPayload({ title: '', content: '', url: '' });
     };
-  }, [copiedTextPayload, setCopiedTextPayload]);
+  }, []);
 
   return (
     <div className="h-full flex flex-col min-w-[500px] box-border intergation-import-from-weblink">

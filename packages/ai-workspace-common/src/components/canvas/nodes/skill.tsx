@@ -169,7 +169,7 @@ export const SkillNode = memo(
 
         const nodes = getNodes() as CanvasNode<any>[];
         const entityNodeMap = new Map(nodes.map((node) => [node.data?.entityId, node]));
-        const contextNodes = items.map((item) => entityNodeMap.get(item.entityId));
+        const contextNodes = items.map((item) => entityNodeMap.get(item.entityId)).filter(Boolean);
 
         const edges = getEdges();
         const existingEdges = edges?.filter((edge) => edge.target === id) ?? [];
