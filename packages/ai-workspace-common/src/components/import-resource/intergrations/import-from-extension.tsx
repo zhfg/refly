@@ -284,7 +284,7 @@ export const ImportFromExtension = () => {
             <video
               width="100%"
               height="300"
-              src="https://refly.ai/videos/extension-demo.mp4"
+              src="https://static.refly.ai/extension/clip_and_save.mp4"
               controls
               controlsList="nodownload"
               loop
