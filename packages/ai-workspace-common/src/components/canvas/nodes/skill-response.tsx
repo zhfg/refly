@@ -403,11 +403,11 @@ export const SkillResponseNode = memo(
 
     // Update size when content changes
     useEffect(() => {
-      if (!targetRef.current || status === 'finish') return;
+      if (!targetRef.current) return;
 
       const { offsetWidth, offsetHeight } = targetRef.current;
       resizeMoveable(offsetWidth, offsetHeight);
-    }, [resizeMoveable, status]);
+    }, [resizeMoveable, targetRef.current?.offsetHeight]);
 
     // Update event handling
     useEffect(() => {

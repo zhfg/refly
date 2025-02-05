@@ -207,7 +207,7 @@ export const SkillNode = memo(
 
       const { offsetWidth, offsetHeight } = targetRef.current;
       resizeMoveable(offsetWidth, offsetHeight);
-    }, [resizeMoveable]);
+    }, [resizeMoveable, targetRef.current?.offsetHeight]);
 
     useEffect(() => {
       if (skillSelectedModel && !modelInfo) {
