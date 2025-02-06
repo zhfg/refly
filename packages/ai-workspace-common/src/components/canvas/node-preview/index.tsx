@@ -31,16 +31,6 @@ const PreviewComponent = memo(
         return <ToolNodePreview />;
       case 'skillResponse':
         return <SkillResponseNodePreview node={node} resultId={node.data.entityId} />;
-      case 'image':
-        return (
-          <div className="w-full h-full flex items-center justify-center">
-            <img
-              src={node.data?.metadata?.imageUrl}
-              alt={node.data?.title || 'Image'}
-              className="max-w-full max-h-full object-contain"
-            />
-          </div>
-        );
       default:
         return null;
     }

@@ -13,6 +13,7 @@ import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/can
 import { useNodeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-operations';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
+import { genImageID } from '@refly-packages/utils/id';
 import {
   CanvasProvider,
   useCanvasContext,
@@ -407,7 +408,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       }
 
       // Memo nodes are not previewable
-      if (node.type === 'memo' || node.type === 'skill' || node.type === 'group') {
+      if (['memo', 'skill', 'group', 'image'].includes(node.type)) {
         return;
       }
 
@@ -516,7 +517,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             type: 'image',
             data: {
               title: imageFile.name,
-              entityId: `image-${Date.now()}`,
+              entityId: genImageID(),
               metadata: {
                 imageUrl,
                 sizeMode: 'adaptive',

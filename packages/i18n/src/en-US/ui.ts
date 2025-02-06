@@ -589,6 +589,7 @@ const translations = {
       skillResponse: 'Skill Response',
       memo: 'Memo',
       skill: 'Skill',
+      image: 'Image',
     },
     contextMenu: {
       createGroup: 'Create Group',

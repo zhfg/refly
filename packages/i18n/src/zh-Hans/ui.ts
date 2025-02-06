@@ -586,6 +586,7 @@ const translations = {
       skillResponse: '技能响应',
       memo: '备忘录',
       skill: '技能',
+      image: '图片',
     },
     contextMenu: {
       createGroup: '创建分组',

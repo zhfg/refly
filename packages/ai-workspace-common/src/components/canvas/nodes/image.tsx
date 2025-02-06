@@ -1,5 +1,6 @@
 import React, { memo, useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { NodeProps, useReactFlow, Position } from '@xyflow/react';
+import { Image } from 'antd';
 import { CanvasNode, CommonNodeProps } from './shared/types';
 import { ActionButtons } from './shared/action-buttons';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
@@ -21,6 +22,7 @@ import { genSkillID } from '@refly-packages/utils/id';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
+import Moveable from 'react-moveable';
 
 // Define image node metadata type
 export interface ImageNodeMeta {
@@ -38,6 +40,7 @@ export const ImageNode = memo(
     const { metadata } = data ?? {};
     const imageUrl = metadata?.imageUrl;
     const [isHovered, setIsHovered] = useState(false);
+    const [isPreviewModalVisible, setIsPreviewModalVisible] = useState(false);
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
     const targetRef = useRef<HTMLDivElement>(null);
     const { getNode } = useReactFlow();
@@ -62,7 +65,7 @@ export const ImageNode = memo(
       maxWidth: 800,
       minHeight: 80,
       defaultWidth: 288,
-      defaultHeight: 384,
+      defaultHeight: 'auto',
     });
 
     const handleMouseEnter = useCallback(() => {
@@ -118,28 +121,48 @@ export const ImageNode = memo(
       );
     }, [data, addNode]);
 
+    const handlePreview = useCallback(() => {
+      setIsPreviewModalVisible(true);
+    }, []);
+
     // Add event handling
     useEffect(() => {
       // Create node-specific event handlers
       const handleNodeAddToContext = () => handleAddToContext();
       const handleNodeDelete = () => handleDelete();
       const handleNodeAskAI = () => handleAskAI();
+      const handleNodePreview = () => handlePreview();
 
       // Register events with node ID
       nodeActionEmitter.on(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
       nodeActionEmitter.on(createNodeEventName(id, 'delete'), handleNodeDelete);
       nodeActionEmitter.on(createNodeEventName(id, 'askAI'), handleNodeAskAI);
+      nodeActionEmitter.on(createNodeEventName(id, 'preview'), handleNodePreview);
 
       return () => {
         // Cleanup events when component unmounts
         nodeActionEmitter.off(createNodeEventName(id, 'addToContext'), handleNodeAddToContext);
         nodeActionEmitter.off(createNodeEventName(id, 'delete'), handleNodeDelete);
         nodeActionEmitter.off(createNodeEventName(id, 'askAI'), handleNodeAskAI);
+        nodeActionEmitter.off(createNodeEventName(id, 'preview'), handleNodePreview);
 
         // Clean up all node events
         cleanupNodeEvents(id);
       };
-    }, [id, handleAddToContext, handleDelete, handleAskAI]);
+    }, [id, handleAddToContext, handleDelete, handleAskAI, handlePreview]);
+
+    const moveableRef = useRef<Moveable>(null);
+
+    const resizeMoveable = useCallback((width: number, height: number) => {
+      moveableRef.current?.request('resizable', { width, height });
+    }, []);
+
+    useEffect(() => {
+      if (!targetRef.current) return;
+
+      const { offsetWidth, offsetHeight } = targetRef.current;
+      resizeMoveable(offsetWidth, offsetHeight);
+    }, [resizeMoveable, targetRef.current?.offsetHeight]);
 
     if (!data || !imageUrl) {
       return null;
@@ -163,10 +186,10 @@ export const ImageNode = memo(
 
           <div
             className={`
-              relative
-              h-full
-              ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
-            `}
+                relative
+                h-full
+                ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
+              `}
           >
             {!isPreview && !hideHandles && (
               <>
@@ -196,6 +219,21 @@ export const ImageNode = memo(
                   alt={data.title || 'Image'}
                   className="w-full h-auto object-contain"
                 />
+
+                {/* only for preview image */}
+                {isPreviewModalVisible && (
+                  <Image
+                    className="w-0 h-0"
+                    preview={{
+                      visible: isPreviewModalVisible,
+                      src: imageUrl,
+                      destroyOnClose: true,
+                      onVisibleChange: (value) => {
+                        setIsPreviewModalVisible(value);
+                      },
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -203,6 +241,7 @@ export const ImageNode = memo(
 
         {!isPreview && selected && sizeMode === 'adaptive' && (
           <NodeResizerComponent
+            moveableRef={moveableRef}
             targetRef={targetRef}
             isSelected={selected}
             isHovered={isHovered}
