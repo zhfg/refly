@@ -4462,6 +4462,7 @@ components:
         - toolResponse
         - memo
         - group
+        - image
     CanvasNodeData:
       type: object
       required:

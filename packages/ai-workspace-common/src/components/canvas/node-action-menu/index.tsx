@@ -431,6 +431,7 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
             },
           },
         ],
+        image: [],
         memo: [
           {
             key: 'insertToDoc',

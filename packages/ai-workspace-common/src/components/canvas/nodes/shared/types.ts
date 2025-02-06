@@ -71,6 +71,10 @@ export type ResponseNodeMeta = {
   originalWidth?: number;
 };
 
+export type ImageNodeMeta = {
+  imageType: string;
+};
+
 // Type mapping for node metadata
 export type NodeMetadataMap = {
   document: DocumentNodeMeta;
@@ -78,6 +82,7 @@ export type NodeMetadataMap = {
   skill: SkillNodeMeta;
   tool: ToolNodeMeta;
   response: ResponseNodeMeta;
+  image: ImageNodeMeta;
 } & Record<string, Record<string, unknown>>;
 
 // Add new common props interface

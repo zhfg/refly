@@ -487,6 +487,50 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     [reactFlowInstance],
   );
 
+  // Add drag and drop handlers
+  const handleDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+  }, []);
+
+  const handleDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+
+      const files = Array.from(event.dataTransfer.files);
+      const imageFile = files.find((file) => file.type.startsWith('image/'));
+
+      if (imageFile) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const imageUrl = e.target?.result as string;
+
+          // Get drop position in flow coordinates
+          const flowPosition = reactFlowInstance.screenToFlowPosition({
+            x: event.clientX,
+            y: event.clientY,
+          });
+
+          // Add image node
+          addNode({
+            type: 'image',
+            data: {
+              title: imageFile.name,
+              entityId: `image-${Date.now()}`,
+              metadata: {
+                imageUrl,
+                sizeMode: 'adaptive',
+              },
+            },
+            position: flowPosition,
+          });
+        };
+        reader.readAsDataURL(imageFile);
+      }
+    },
+    [addNode, reactFlowInstance],
+  );
+
   return (
     <Spin
       className="w-full h-full"
@@ -522,11 +566,11 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onNodeDragStop={onNodeDragStop}
             nodeDragThreshold={10}
             nodesDraggable={!operatingNodeId}
-            // onlyRenderVisibleElements={true}
-            elevateNodesOnSelect={false}
             onSelectionContextMenu={onSelectionContextMenu}
             deleteKeyCode={['Backspace', 'Delete']}
             multiSelectionKeyCode={['Shift', 'Meta']}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
