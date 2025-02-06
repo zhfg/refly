@@ -88,6 +88,7 @@ import { ResultAggregator } from '@/utils/result';
 import { CollabContext } from '@/collab/collab.dto';
 import { DirectConnection } from '@hocuspocus/server';
 import { modelInfoPO2DTO } from '@/misc/misc.dto';
+import type { MiscService } from '@/misc/misc.service';
 
 export function createLangchainMessage(result: ActionResult, steps: ActionStep[]): BaseMessage[] {
   const query = result.title;
@@ -138,6 +139,7 @@ export class SkillService {
     private canvas: CanvasService,
     private subscription: SubscriptionService,
     private collabService: CollabService,
+    private misc: MiscService,
     @InjectQueue(QUEUE_SKILL) private skillQueue: Queue<InvokeSkillJobData>,
     @InjectQueue(QUEUE_SKILL_TIMEOUT_CHECK)
     private timeoutCheckQueue: Queue<SkillTimeoutCheckJobData>,
@@ -751,6 +753,10 @@ export class SkillService {
   private async _invokeSkill(user: User, data: InvokeSkillJobData, res?: Response) {
     const { input, result } = data;
     const { resultId, version, actionMeta, tier } = result;
+
+    if (input.images?.length > 0) {
+      input.images = await this.misc.generateImageUrls(input.images);
+    }
 
     await this.requestUsageQueue.add('syncRequestUsage', {
       uid: user.uid,

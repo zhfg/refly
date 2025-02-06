@@ -2837,6 +2837,13 @@ export const SkillInputSchema = {
       type: 'string',
       description: 'User query',
     },
+    images: {
+      type: 'array',
+      description: 'Image list (storage keys)',
+      items: {
+        type: 'string',
+      },
+    },
   },
 } as const;
 
@@ -3086,72 +3093,6 @@ export const ActionContextItemSchema = {
       description: 'Context metadata',
     },
   },
-} as const;
-
-export const InvokeActionRequestSchema = {
-  type: 'object',
-  properties: {
-    actionType: {
-      description: 'Action type',
-      $ref: '#/components/schemas/ActionType',
-    },
-    actionName: {
-      type: 'string',
-      description: 'Action name',
-    },
-    input: {
-      description: 'Action input',
-      $ref: '#/components/schemas/SkillInput',
-    },
-    context: {
-      type: 'array',
-      description: 'Action invocation context',
-      items: {
-        $ref: '#/components/schemas/ActionContextItem',
-      },
-    },
-    config: {
-      description: 'Action config',
-      $ref: '#/components/schemas/ActionConfig',
-    },
-    canvasId: {
-      description: 'Canvas ID',
-      type: 'string',
-    },
-    locale: {
-      type: 'string',
-      description: 'Selected output locale',
-    },
-    modelName: {
-      type: 'string',
-      description: 'Selected model',
-    },
-    jobId: {
-      description: 'Skill job ID (if not provided, a new job will be created)',
-      type: 'string',
-    },
-    triggerId: {
-      description: "Trigger ID (typically you don't need to provide this)",
-      type: 'string',
-    },
-  },
-} as const;
-
-export const InvokeActionResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        jobId: {
-          type: 'string',
-          description: 'Skill job ID',
-        },
-      },
-    },
-  ],
 } as const;
 
 export const InvokeSkillRequestSchema = {
@@ -3978,10 +3919,15 @@ export const UploadResponseSchema = {
         data: {
           type: 'object',
           description: 'File upload result',
+          required: ['url', 'storageKey'],
           properties: {
             url: {
               type: 'string',
               description: 'File URL',
+            },
+            storageKey: {
+              type: 'string',
+              description: 'Storage key',
             },
           },
         },
@@ -4101,7 +4047,17 @@ export const InMemorySearchResponseSchema = {
 
 export const CanvasNodeTypeSchema = {
   type: 'string',
-  enum: ['document', 'resource', 'skill', 'tool', 'skillResponse', 'toolResponse', 'memo', 'group'],
+  enum: [
+    'document',
+    'resource',
+    'skill',
+    'tool',
+    'skillResponse',
+    'toolResponse',
+    'memo',
+    'group',
+    'image',
+  ],
 } as const;
 
 export const CanvasNodeDataSchema = {

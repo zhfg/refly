@@ -137,6 +137,7 @@ export class MiscService {
     });
 
     return {
+      storageKey,
       url: `${this.config.get('staticEndpoint')}${storageKey}`,
     };
   }
@@ -225,5 +226,60 @@ export class MiscService {
   async getFileStream(objectKey: string): Promise<StreamableFile> {
     const data = await this.minio.client.getObject(`static/${objectKey}`);
     return new StreamableFile(data);
+  }
+
+  /**
+   * Generates image URLs based on storage keys and configured payload mode
+   * @param storageKeys - Array of storage keys for the images
+   * @returns Array of URLs (either base64 or regular URLs depending on config)
+   */
+  async generateImageUrls(storageKeys: string[]): Promise<string[]> {
+    if (!Array.isArray(storageKeys) || storageKeys.length === 0) {
+      return [];
+    }
+
+    let imageMode = this.config.get('imagePayloadMode');
+    if (imageMode === 'url' && !this.config.get('staticEndpoint')) {
+      this.logger.warn('Static endpoint is not configured, fallback to base64 mode');
+      imageMode = 'base64';
+    }
+
+    this.logger.log(`Generating image URLs in ${imageMode} mode for ${storageKeys.length} images`);
+
+    try {
+      if (imageMode === 'base64') {
+        const urls = await Promise.all(
+          storageKeys.map(async (key) => {
+            try {
+              const data = await this.minio.client.getObject(key);
+              const chunks: Buffer[] = [];
+
+              for await (const chunk of data) {
+                chunks.push(chunk);
+              }
+
+              const buffer = Buffer.concat(chunks);
+              const base64 = buffer.toString('base64');
+              const contentType = await this.minio.client
+                .statObject(`static/${key}`)
+                .then((stat) => stat.metaData?.['content-type'] ?? 'image/jpeg');
+
+              return `data:${contentType};base64,${base64}`;
+            } catch (error) {
+              this.logger.error(`Failed to generate base64 for key ${key}:`, error);
+              return '';
+            }
+          }),
+        );
+        return urls.filter(Boolean);
+      }
+
+      // URL mode
+      const staticEndpoint = this.config.get('staticEndpoint') ?? '';
+      return storageKeys.map((key) => `${staticEndpoint}static/${key}`);
+    } catch (error) {
+      this.logger.error('Error generating image URLs:', error);
+      return [];
+    }
   }
 }

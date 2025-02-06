@@ -39,7 +39,6 @@ import {
   getShareContent,
   getSubscriptionPlans,
   getSubscriptionUsage,
-  invokeAction,
   invokeSkill,
   listActions,
   listCanvases,
@@ -61,7 +60,6 @@ import {
   scrape,
   search,
   serveStatic,
-  streamInvokeAction,
   streamInvokeSkill,
   unpinSkillInstance,
   updateCanvas,
@@ -478,18 +476,6 @@ export type DeleteLabelInstanceMutationResult = Awaited<ReturnType<typeof delete
 export const useDeleteLabelInstanceKey = 'DeleteLabelInstance';
 export const UseDeleteLabelInstanceKeyFn = (mutationKey?: Array<unknown>) => [
   useDeleteLabelInstanceKey,
-  ...(mutationKey ?? []),
-];
-export type InvokeActionMutationResult = Awaited<ReturnType<typeof invokeAction>>;
-export const useInvokeActionKey = 'InvokeAction';
-export const UseInvokeActionKeyFn = (mutationKey?: Array<unknown>) => [
-  useInvokeActionKey,
-  ...(mutationKey ?? []),
-];
-export type StreamInvokeActionMutationResult = Awaited<ReturnType<typeof streamInvokeAction>>;
-export const useStreamInvokeActionKey = 'StreamInvokeAction';
-export const UseStreamInvokeActionKeyFn = (mutationKey?: Array<unknown>) => [
-  useStreamInvokeActionKey,
   ...(mutationKey ?? []),
 ];
 export type InvokeSkillMutationResult = Awaited<ReturnType<typeof invokeSkill>>;

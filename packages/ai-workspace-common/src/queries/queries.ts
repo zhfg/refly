@@ -39,7 +39,6 @@ import {
   getShareContent,
   getSubscriptionPlans,
   getSubscriptionUsage,
-  invokeAction,
   invokeSkill,
   listActions,
   listCanvases,
@@ -61,7 +60,6 @@ import {
   scrape,
   search,
   serveStatic,
-  streamInvokeAction,
   streamInvokeSkill,
   unpinSkillInstance,
   updateCanvas,
@@ -141,8 +139,6 @@ import {
   GetShareContentError,
   GetSubscriptionPlansError,
   GetSubscriptionUsageError,
-  InvokeActionData,
-  InvokeActionError,
   InvokeSkillData,
   InvokeSkillError,
   ListActionsError,
@@ -179,8 +175,6 @@ import {
   SearchData,
   SearchError,
   ServeStaticError,
-  StreamInvokeActionData,
-  StreamInvokeActionError,
   StreamInvokeSkillData,
   StreamInvokeSkillError,
   UnpinSkillInstanceData,
@@ -1032,40 +1026,6 @@ export const useDeleteLabelInstance = <
   useMutation<TData, TError, Options<DeleteLabelInstanceData, true>, TContext>({
     mutationKey: Common.UseDeleteLabelInstanceKeyFn(mutationKey),
     mutationFn: (clientOptions) => deleteLabelInstance(clientOptions) as unknown as Promise<TData>,
-    ...options,
-  });
-export const useInvokeAction = <
-  TData = Common.InvokeActionMutationResult,
-  TError = InvokeActionError,
-  TQueryKey extends Array<unknown> = unknown[],
-  TContext = unknown,
->(
-  mutationKey?: TQueryKey,
-  options?: Omit<
-    UseMutationOptions<TData, TError, Options<InvokeActionData, true>, TContext>,
-    'mutationKey' | 'mutationFn'
-  >,
-) =>
-  useMutation<TData, TError, Options<InvokeActionData, true>, TContext>({
-    mutationKey: Common.UseInvokeActionKeyFn(mutationKey),
-    mutationFn: (clientOptions) => invokeAction(clientOptions) as unknown as Promise<TData>,
-    ...options,
-  });
-export const useStreamInvokeAction = <
-  TData = Common.StreamInvokeActionMutationResult,
-  TError = StreamInvokeActionError,
-  TQueryKey extends Array<unknown> = unknown[],
-  TContext = unknown,
->(
-  mutationKey?: TQueryKey,
-  options?: Omit<
-    UseMutationOptions<TData, TError, Options<StreamInvokeActionData, true>, TContext>,
-    'mutationKey' | 'mutationFn'
-  >,
-) =>
-  useMutation<TData, TError, Options<StreamInvokeActionData, true>, TContext>({
-    mutationKey: Common.UseStreamInvokeActionKeyFn(mutationKey),
-    mutationFn: (clientOptions) => streamInvokeAction(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useInvokeSkill = <

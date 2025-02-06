@@ -17,6 +17,7 @@ import { LabelModule } from '@/label/label.module';
 import { SkillProcessor, SkillTimeoutCheckProcessor } from '@/skill/skill.processor';
 import { SubscriptionModule } from '@/subscription/subscription.module';
 import { CollabModule } from '@/collab/collab.module';
+import { MiscModule } from '@/misc/misc.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { CollabModule } from '@/collab/collab.module';
     RAGModule,
     SubscriptionModule,
     CollabModule,
+    MiscModule,
     BullModule.registerQueue({ name: QUEUE_SKILL }),
     BullModule.registerQueue({ name: QUEUE_SKILL_TIMEOUT_CHECK }),
     BullModule.registerQueue({ name: QUEUE_SYNC_TOKEN_USAGE }),

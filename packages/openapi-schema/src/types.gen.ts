@@ -1985,6 +1985,10 @@ export type SkillInput = {
    * User query
    */
   query?: string;
+  /**
+   * Image list (storage keys)
+   */
+  images?: Array<string>;
 };
 
 /**
@@ -2177,56 +2181,6 @@ export type ActionContextItem = {
   metadata?: {
     [key: string]: unknown;
   };
-};
-
-export type InvokeActionRequest = {
-  /**
-   * Action type
-   */
-  actionType?: ActionType;
-  /**
-   * Action name
-   */
-  actionName?: string;
-  /**
-   * Action input
-   */
-  input?: SkillInput;
-  /**
-   * Action invocation context
-   */
-  context?: Array<ActionContextItem>;
-  /**
-   * Action config
-   */
-  config?: ActionConfig;
-  /**
-   * Canvas ID
-   */
-  canvasId?: string;
-  /**
-   * Selected output locale
-   */
-  locale?: string;
-  /**
-   * Selected model
-   */
-  modelName?: string;
-  /**
-   * Skill job ID (if not provided, a new job will be created)
-   */
-  jobId?: string;
-  /**
-   * Trigger ID (typically you don't need to provide this)
-   */
-  triggerId?: string;
-};
-
-export type InvokeActionResponse = BaseResponse & {
-  /**
-   * Skill job ID
-   */
-  jobId?: string;
 };
 
 export type InvokeSkillRequest = {
@@ -2758,7 +2712,11 @@ export type UploadResponse = BaseResponse & {
     /**
      * File URL
      */
-    url?: string;
+    url: string;
+    /**
+     * Storage key
+     */
+    storageKey: string;
   };
 };
 
@@ -2840,7 +2798,8 @@ export type CanvasNodeType =
   | 'skillResponse'
   | 'toolResponse'
   | 'memo'
-  | 'group';
+  | 'group'
+  | 'image';
 
 export type CanvasNodeData = {
   /**
@@ -3301,28 +3260,6 @@ export type DeleteLabelInstanceError = unknown;
 export type ListActionsResponse = ListActionResponse;
 
 export type ListActionsError = unknown;
-
-export type InvokeActionData = {
-  /**
-   * Action invocation request
-   */
-  body: InvokeActionRequest;
-};
-
-export type InvokeActionResponse2 = InvokeActionResponse;
-
-export type InvokeActionError = unknown;
-
-export type StreamInvokeActionData = {
-  /**
-   * Skill invocation request
-   */
-  body: InvokeActionRequest;
-};
-
-export type StreamInvokeActionResponse = string;
-
-export type StreamInvokeActionError = unknown;
 
 export type GetActionResultData = {
   query: {

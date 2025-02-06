@@ -9,7 +9,7 @@
   },
   "scripts": {
     "preview": "vite preview",
-    "codegen": "openapi-rq -i ../openapi-schema/schema.yml -o src --noSchemas && biome check ./src/queries --apply"
+    "codegen": "openapi-rq -i ../openapi-schema/schema.yml -o src --noSchemas && biome check ./src --write"
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.2",

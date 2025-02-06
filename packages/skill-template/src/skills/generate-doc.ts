@@ -60,7 +60,7 @@ export class GenerateDoc extends BaseSkill {
     config: SkillRunnableConfig,
     module: SkillPromptModule,
   ) => {
-    const { messages = [] } = state;
+    const { messages = [], images = [] } = state;
     const { locale = 'en', modelInfo } = config.configurable;
     const { tplConfig } = config?.configurable || {};
 
@@ -119,6 +119,7 @@ export class GenerateDoc extends BaseSkill {
       messages,
       needPrepareContext: needPrepareContext && isModelContextLenSupport,
       context,
+      images,
       originalQuery: query,
       rewrittenQuery: optimizedQuery,
     });

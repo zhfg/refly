@@ -58,7 +58,7 @@ export class WebSearch extends BaseSkill {
     state: GraphState,
     config: SkillRunnableConfig,
   ): Promise<Partial<GraphState>> => {
-    const { messages = [] } = state;
+    const { messages = [], images = [] } = state;
     const { locale = 'en', currentSkill } = config.configurable;
 
     // Set current step
@@ -122,6 +122,7 @@ export class WebSearch extends BaseSkill {
       messages,
       needPrepareContext: true,
       context: contextStr,
+      images,
       originalQuery: query,
       rewrittenQuery: optimizedQuery,
     });

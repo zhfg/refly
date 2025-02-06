@@ -56,7 +56,7 @@ export class CommonQnA extends BaseSkill {
     config: SkillRunnableConfig,
     module: SkillPromptModule,
   ) => {
-    const { messages = [] } = state;
+    const { messages = [], images = [] } = state;
     const { locale = 'en', modelInfo } = config.configurable;
 
     // Use shared query processor
@@ -112,6 +112,7 @@ export class CommonQnA extends BaseSkill {
       messages,
       needPrepareContext: needPrepareContext && isModelContextLenSupport,
       context,
+      images,
       originalQuery: query,
       rewrittenQuery: optimizedQuery,
     });
