@@ -53,6 +53,7 @@ export class EditDoc extends BaseSkill {
 
   schema = z.object({
     query: z.string().optional().describe('The search query'),
+    images: z.array(z.string()).optional().describe('The images to be read by the skill'),
   });
 
   graphState: StateGraphArgs<GraphState>['channels'] = {
@@ -180,8 +181,6 @@ export class EditDoc extends BaseSkill {
       originalQuery: query,
       rewrittenQuery: optimizedQuery,
     });
-
-    this.engine.logger.log(`requestMessages: ${safeStringifyJSON(requestMessages)}`);
 
     return { requestMessages };
   };

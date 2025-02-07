@@ -49,6 +49,7 @@ export class GenerateDoc extends BaseSkill {
 
   schema = z.object({
     query: z.string().optional().describe('The search query'),
+    images: z.array(z.string()).optional().describe('The images to be read by the skill'),
   });
 
   graphState: StateGraphArgs<BaseSkillState>['channels'] = {
@@ -123,8 +124,6 @@ export class GenerateDoc extends BaseSkill {
       originalQuery: query,
       rewrittenQuery: optimizedQuery,
     });
-
-    this.engine.logger.log(`requestMessages: ${safeStringifyJSON(requestMessages)}`);
 
     return { optimizedQuery, requestMessages, context, sources, usedChatHistory };
   };
@@ -272,8 +271,6 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
         artifact,
       },
     });
-
-    this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
 
     this.emitEvent(
       {

@@ -38,6 +38,7 @@ export class CommonQnA extends BaseSkill {
 
   schema = z.object({
     query: z.string().optional().describe('The question to be answered'),
+    images: z.array(z.string()).optional().describe('The images to be read by the skill'),
   });
 
   graphState: StateGraphArgs<BaseSkillState>['channels'] = {
@@ -117,8 +118,6 @@ export class CommonQnA extends BaseSkill {
       rewrittenQuery: optimizedQuery,
     });
 
-    this.engine.logger.log(`requestMessages: ${safeStringifyJSON(requestMessages)}`);
-
     return { requestMessages, sources };
   };
 
@@ -151,8 +150,6 @@ export class CommonQnA extends BaseSkill {
         ...currentSkill,
       },
     });
-
-    this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
 
     return { messages: [responseMessage] };
   };

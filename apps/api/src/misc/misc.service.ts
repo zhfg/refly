@@ -261,12 +261,12 @@ export class MiscService {
               const buffer = Buffer.concat(chunks);
               const base64 = buffer.toString('base64');
               const contentType = await this.minio.client
-                .statObject(`static/${key}`)
+                .statObject(key)
                 .then((stat) => stat.metaData?.['content-type'] ?? 'image/jpeg');
 
               return `data:${contentType};base64,${base64}`;
             } catch (error) {
-              this.logger.error(`Failed to generate base64 for key ${key}:`, error);
+              this.logger.error(`Failed to generate base64 for key ${key}: ${error.stack}`);
               return '';
             }
           }),

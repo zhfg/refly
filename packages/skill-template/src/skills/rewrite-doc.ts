@@ -43,6 +43,7 @@ export class RewriteDoc extends BaseSkill {
 
   schema = z.object({
     query: z.string().optional().describe('The rewrite query'),
+    images: z.array(z.string()).optional().describe('The images to be read by the skill'),
   });
 
   graphState: StateGraphArgs<GraphState>['channels'] = {
@@ -169,8 +170,6 @@ export class RewriteDoc extends BaseSkill {
       rewrittenQuery: optimizedQuery,
     });
 
-    this.engine.logger.log(`requestMessages: ${safeStringifyJSON(requestMessages)}`);
-
     return { requestMessages };
   };
 
@@ -203,8 +202,6 @@ export class RewriteDoc extends BaseSkill {
         ...currentSkill,
       },
     });
-
-    this.engine.logger.log(`responseMessage: ${safeStringifyJSON(responseMessage)}`);
 
     return { messages: [responseMessage] };
   };

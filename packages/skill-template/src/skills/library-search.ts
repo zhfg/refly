@@ -8,7 +8,6 @@ import {
   SkillTemplateConfigDefinition,
 } from '@refly-packages/openapi-schema';
 import { GraphState } from '../scheduler/types';
-import { safeStringifyJSON } from '@refly-packages/utils';
 
 import { buildFinalRequestMessages } from '../scheduler/utils/message';
 
@@ -33,6 +32,7 @@ export class LibrarySearch extends BaseSkill {
 
   schema = z.object({
     query: z.string().optional().describe('The search query'),
+    images: z.array(z.string()).optional().describe('The images to be read by the skill'),
   });
 
   graphState: StateGraphArgs<BaseSkillState>['channels'] = {
@@ -115,8 +115,6 @@ export class LibrarySearch extends BaseSkill {
       originalQuery: query,
       rewrittenQuery: optimizedQuery,
     });
-
-    this.engine.logger.log(`requestMessages: ${safeStringifyJSON(requestMessages)}`);
 
     // Generate answer using the model
     const model = this.engine.chatModel({ temperature: 0.1 });

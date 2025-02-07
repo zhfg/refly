@@ -768,7 +768,6 @@ export class SkillService {
 
     if (res) {
       res.on('close', () => {
-        this.logger.log('skill invocation aborted due to client disconnect');
         aborted = true;
       });
     }
