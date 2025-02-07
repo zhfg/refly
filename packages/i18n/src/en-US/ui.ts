@@ -62,6 +62,9 @@ const translations = {
     login: 'Login',
     share: 'Share',
     noMoreText: 'No more~',
+    uploadImage: 'Upload Image',
+    uploadSuccess: 'Upload successful',
+    uploadFailed: 'Upload failed',
   },
   verifyRules: {
     emailRequired: 'Email cannot be empty',

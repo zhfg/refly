@@ -1,16 +1,16 @@
-import { Button, Tooltip } from 'antd';
+import { Button, Tooltip, Upload } from 'antd';
 import { FormInstance } from '@arco-design/web-react';
-import { useRef, useMemo, useCallback } from 'react';
-import { memo } from 'react';
-
+import { memo, useMemo, useRef } from 'react';
+import { IconImage } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { IconSend } from '@arco-design/web-react/icon';
 import { useTranslation } from 'react-i18next';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
-
 import { getRuntime } from '@refly/utils/env';
 import { ModelSelector } from './model-selector';
 import { ModelInfo } from '@refly/openapi-schema';
 import { cn } from '@refly-packages/utils/index';
+import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
+import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 
 export interface CustomAction {
   icon: React.ReactNode;
@@ -27,20 +27,32 @@ interface ChatActionsProps {
   handleSendMessage: () => void;
   handleAbort: () => void;
   customActions?: CustomAction[];
+  onUploadImage?: (file: File) => Promise<void>;
 }
 
 export const ChatActions = memo(
   (props: ChatActionsProps) => {
-    const { query, model, setModel, handleSendMessage, customActions, className } = props;
+    const { query, model, setModel, handleSendMessage, customActions, className, onUploadImage } =
+      props;
     const { t } = useTranslation();
+    const { canvasId } = useCanvasContext();
+    const { handleUploadImage } = useUploadImage();
 
-    const handleSendClick = useCallback(() => {
+    const handleSendClick = () => {
       handleSendMessage();
-    }, [handleSendMessage]);
+    };
+
+    const handleImageUpload = async (file: File) => {
+      if (onUploadImage) {
+        await onUploadImage(file);
+      } else {
+        await handleUploadImage(file, canvasId);
+      }
+      return false;
+    };
 
     // hooks
-    const runtime = getRuntime();
-    const isWeb = runtime === 'web';
+    const isWeb = getRuntime() === 'web';
 
     const userStore = useUserStoreShallow((state) => ({
       isLogin: state.isLogin,
@@ -68,6 +80,12 @@ export const ChatActions = memo(
             </Tooltip>
           ))}
 
+          <Upload accept="image/*" showUploadList={false} beforeUpload={handleImageUpload}>
+            <Tooltip title={t('common.uploadImage')}>
+              <Button size="small" icon={<IconImage />} />
+            </Tooltip>
+          </Upload>
+
           {!isWeb ? null : (
             <Button
               size="small"
@@ -85,7 +103,6 @@ export const ChatActions = memo(
     );
   },
   (prevProps, nextProps) => {
-    // Custom comparison for memo
     return (
       prevProps.handleSendMessage === nextProps.handleSendMessage &&
       prevProps.handleAbort === nextProps.handleAbort

@@ -70,6 +70,9 @@ const translations = {
     login: '登录',
     share: '分享',
     noMoreText: '已经到底啦~',
+    uploadImage: '上传图片',
+    uploadSuccess: '上传成功',
+    uploadFailed: '上传失败',
   },
   verifyRules: {
     emailRequired: '邮箱地址不能为空',

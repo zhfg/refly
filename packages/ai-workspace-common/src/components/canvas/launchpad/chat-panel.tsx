@@ -30,6 +30,7 @@ import { convertContextItemsToNodeFilters } from '@refly-packages/ai-workspace-c
 import { IoClose } from 'react-icons/io5';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
+import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 
 const PremiumBanner = () => {
   const { t } = useTranslation();
@@ -113,6 +114,7 @@ export const ChatPanel = () => {
   const { handleFilterErrorTip } = useContextFilterErrorTip();
   const { addNode } = useAddNode();
   const { invokeAction, abortAction } = useInvokeAction();
+  const { handleUploadImage } = useUploadImage();
 
   // automatically sync selected nodes to context
   useSyncSelectedNodesToContext();
@@ -229,6 +231,20 @@ export const ChatPanel = () => {
     [handleRecommendQuestionsToggle, t],
   );
 
+  const handleImageUpload = async (file: File) => {
+    const nodeData = await handleUploadImage(file, canvasId);
+    if (nodeData) {
+      setContextItems([
+        ...contextItems,
+        {
+          type: 'image',
+          entityId: nodeData.entityId,
+          title: nodeData.title,
+        },
+      ]);
+    }
+  };
+
   return (
     <div className="relative w-full">
       <div className="ai-copilot-chat-container">
@@ -279,6 +295,7 @@ export const ChatPanel = () => {
             handleSendMessage={handleSendMessage}
             handleAbort={handleAbort}
             customActions={customActions}
+            onUploadImage={handleImageUpload}
           />
         </div>
       </div>

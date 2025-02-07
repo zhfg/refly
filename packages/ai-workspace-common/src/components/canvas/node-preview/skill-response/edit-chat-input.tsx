@@ -16,6 +16,7 @@ import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/ca
 import { useReactFlow } from '@xyflow/react';
 import { GrRevert } from 'react-icons/gr';
 import { useFindSkill } from '@refly-packages/ai-workspace-common/hooks/use-find-skill';
+import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 
 interface EditChatInputProps {
   enabled: boolean;
@@ -63,6 +64,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
   const { canvasId } = useCanvasContext();
   const { invokeAction } = useInvokeAction();
   const skill = useFindSkill(localActionMeta?.name);
+  const { handleUploadImage } = useUploadImage();
 
   const textareaRef = useRef<HTMLDivElement>(null);
 
@@ -149,6 +151,20 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
     });
   }, []);
 
+  const handleImageUpload = async (file: File) => {
+    const nodeData = await handleUploadImage(file, canvasId);
+    if (nodeData) {
+      setEditContextItems([
+        ...editContextItems,
+        {
+          type: 'image',
+          entityId: nodeData.entityId,
+          title: nodeData.title,
+        },
+      ]);
+    }
+  };
+
   if (!enabled) {
     return null;
   }
@@ -193,6 +209,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
           handleSendMessage={handleSendMessage}
           handleAbort={() => {}}
           customActions={customActions}
+          onUploadImage={handleImageUpload}
         />
 
         {/* {skillStore.selectedSkill?.configSchema?.items?.length > 0 && (
