@@ -88,7 +88,7 @@ import { ResultAggregator } from '@/utils/result';
 import { CollabContext } from '@/collab/collab.dto';
 import { DirectConnection } from '@hocuspocus/server';
 import { modelInfoPO2DTO } from '@/misc/misc.dto';
-import type { MiscService } from '@/misc/misc.service';
+import { MiscService } from '@/misc/misc.service';
 
 export function createLangchainMessage(result: ActionResult, steps: ActionStep[]): BaseMessage[] {
   const query = result.title;
