@@ -82,7 +82,7 @@ export const ChatActions = memo(
 
           <Upload accept="image/*" showUploadList={false} beforeUpload={handleImageUpload}>
             <Tooltip title={t('common.uploadImage')}>
-              <Button size="small" icon={<IconImage />} />
+              <Button size="small" icon={<IconImage className="flex items-center" />} />
             </Tooltip>
           </Upload>
 

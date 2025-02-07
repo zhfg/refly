@@ -25,7 +25,7 @@ export const NodeHeader = memo(
           </div>
           {canEdit ? (
             <Input
-              className="border-transparent font-bold focus:!border-transparent focus:!bg-transparent"
+              className="!border-transparent font-bold focus:!bg-transparent px-0.5 py-0"
               value={editTitle}
               onChange={(e) => {
                 setEditTitle(e.target.value);

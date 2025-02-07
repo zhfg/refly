@@ -31,6 +31,7 @@ import { IoClose } from 'react-icons/io5';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
+import { omit } from '@refly-packages/utils/index';
 
 const PremiumBanner = () => {
   const { t } = useTranslation();
@@ -195,7 +196,7 @@ export const ChatPanel = () => {
           entityId: resultId,
           metadata: {
             status: 'executing',
-            contextItems,
+            contextItems: contextItems.map((item) => omit(item, ['isPreview'])),
           },
         },
       },
