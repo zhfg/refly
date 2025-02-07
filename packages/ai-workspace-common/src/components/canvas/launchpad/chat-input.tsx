@@ -39,6 +39,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
     ref,
   ) => {
     const { t } = useTranslation();
+    const [isDragging, setIsDragging] = useState(false);
 
     const inputRef = useRef<RefTextAreaType>(null);
     const searchStore = useSearchStoreShallow((state) => ({
@@ -191,9 +192,45 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
     return (
       <div
         ref={ref}
-        className="w-full h-full flex flex-col flex-grow overflow-y-auto"
+        className={cn(
+          'w-full h-full flex flex-col flex-grow overflow-y-auto relative',
+          isDragging && 'ring-2 ring-blue-500 ring-opacity-50',
+        )}
         onPaste={handlePaste}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragging(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragging(false);
+        }}
+        onDrop={async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsDragging(false);
+
+          if (!onUploadImage) return;
+
+          const files = Array.from(e.dataTransfer.files);
+          const imageFile = files.find((file) => file.type.startsWith('image/'));
+
+          if (imageFile) {
+            try {
+              await onUploadImage(imageFile);
+            } catch (error) {
+              console.error('Failed to upload image:', error);
+            }
+          }
+        }}
       >
+        {isDragging && (
+          <div className="absolute inset-0 bg-blue-50 bg-opacity-50 flex items-center justify-center pointer-events-none z-10">
+            <div className="text-blue-500 text-sm">{t('common.dropImageHere')}</div>
+          </div>
+        )}
         <AutoComplete
           className="h-full"
           autoFocus
@@ -217,6 +254,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
           onSearch={(value) => handleSearch(value)}
         >
           <TextArea
+            style={{ paddingLeft: 0, paddingRight: 0, height: '100%' }}
             ref={inputRef}
             autoFocus
             onBlur={() => {

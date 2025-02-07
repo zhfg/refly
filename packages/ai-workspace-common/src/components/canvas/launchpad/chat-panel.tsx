@@ -261,14 +261,16 @@ export const ChatPanel = () => {
             setContextItems={setContextItems}
             filterErrorInfo={filterErrorInfo}
           />
-          <ChatInput
-            query={chatStore.newQAText}
-            setQuery={chatStore.setNewQAText}
-            selectedSkillName={selectedSkill?.name}
-            autoCompletionPlacement={'topLeft'}
-            handleSendMessage={handleSendMessage}
-            onUploadImage={handleImageUpload}
-          />
+          <div className="px-3">
+            <ChatInput
+              query={chatStore.newQAText}
+              setQuery={chatStore.setNewQAText}
+              selectedSkillName={selectedSkill?.name}
+              autoCompletionPlacement={'topLeft'}
+              handleSendMessage={handleSendMessage}
+              onUploadImage={handleImageUpload}
+            />
+          </div>
 
           {selectedSkill?.configSchema?.items?.length > 0 && (
             <ConfigManager

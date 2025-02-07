@@ -190,18 +190,20 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
           contextItems={editContextItems}
           setContextItems={setEditContextItems}
         />
-        <ChatInput
-          ref={textareaRef}
-          query={editQuery}
-          setQuery={setEditQuery}
-          selectedSkillName={localActionMeta?.name}
-          handleSendMessage={handleSendMessage}
-          handleSelectSkill={(skill) => {
-            setEditQuery(editQuery?.slice(0, -1));
-            handleSelectSkill(skill);
-          }}
-          onUploadImage={handleImageUpload}
-        />
+        <div className="px-3">
+          <ChatInput
+            ref={textareaRef}
+            query={editQuery}
+            setQuery={setEditQuery}
+            selectedSkillName={localActionMeta?.name}
+            handleSendMessage={handleSendMessage}
+            handleSelectSkill={(skill) => {
+              setEditQuery(editQuery?.slice(0, -1));
+              handleSelectSkill(skill);
+            }}
+            onUploadImage={handleImageUpload}
+          />
+        </div>
         <ChatActions
           className="p-2 px-3"
           query={editQuery}

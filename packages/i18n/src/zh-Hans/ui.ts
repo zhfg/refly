@@ -73,6 +73,7 @@ const translations = {
     uploadImage: '上传图片',
     uploadSuccess: '上传成功',
     uploadFailed: '上传失败',
+    dropImageHere: '拖放图片到这里',
   },
   verifyRules: {
     emailRequired: '邮箱地址不能为空',
