@@ -1,7 +1,7 @@
-import React, { memo, useState, useCallback, useRef, useMemo, useEffect } from 'react';
-import { NodeProps, useReactFlow, Position } from '@xyflow/react';
+import { memo, useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import { useReactFlow, Position } from '@xyflow/react';
 import { Image } from 'antd';
-import { CanvasNode, CommonNodeProps } from './shared/types';
+import { CanvasNode, ImageNodeProps } from './shared/types';
 import { ActionButtons } from './shared/action-buttons';
 import { useNodeHoverEffect } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-hover';
 import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
@@ -24,17 +24,6 @@ import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canva
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import Moveable from 'react-moveable';
 
-// Define image node metadata type
-export interface ImageNodeMeta {
-  imageUrl: string;
-  sizeMode?: 'compact' | 'adaptive';
-  style?: React.CSSProperties;
-  originalWidth?: number;
-}
-
-// Define image node props type
-export type ImageNodeProps = NodeProps<CanvasNode<ImageNodeMeta>> & CommonNodeProps;
-
 export const ImageNode = memo(
   ({ id, data, isPreview, selected, hideActions, hideHandles, onNodeClick }: ImageNodeProps) => {
     const { metadata } = data ?? {};
@@ -53,13 +42,11 @@ export const ImageNode = memo(
     }));
 
     const isOperating = operatingNodeId === id;
-    const sizeMode = metadata?.sizeMode || 'adaptive';
     const node = useMemo(() => getNode(id), [id, getNode]);
 
     const { containerStyle, handleResize } = useNodeSize({
       id,
       node,
-      sizeMode,
       isOperating,
       minWidth: 100,
       maxWidth: 800,
@@ -159,9 +146,10 @@ export const ImageNode = memo(
 
     useEffect(() => {
       if (!targetRef.current) return;
-
-      const { offsetWidth, offsetHeight } = targetRef.current;
-      resizeMoveable(offsetWidth, offsetHeight);
+      setTimeout(() => {
+        const { offsetWidth, offsetHeight } = targetRef.current;
+        resizeMoveable(offsetWidth, offsetHeight);
+      }, 1);
     }, [resizeMoveable, targetRef.current?.offsetHeight]);
 
     if (!data || !imageUrl) {
@@ -221,7 +209,7 @@ export const ImageNode = memo(
                 />
 
                 {/* only for preview image */}
-                {isPreviewModalVisible && (
+                {isPreviewModalVisible && !isPreview && (
                   <Image
                     className="w-0 h-0"
                     preview={{
@@ -239,14 +227,13 @@ export const ImageNode = memo(
           </div>
         </div>
 
-        {!isPreview && selected && sizeMode === 'adaptive' && (
+        {!isPreview && selected && (
           <NodeResizerComponent
             moveableRef={moveableRef}
             targetRef={targetRef}
             isSelected={selected}
             isHovered={isHovered}
             isPreview={isPreview}
-            sizeMode={sizeMode}
             onResize={handleResize}
           />
         )}

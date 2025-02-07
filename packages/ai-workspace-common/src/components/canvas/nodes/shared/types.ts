@@ -73,6 +73,8 @@ export type ResponseNodeMeta = {
 
 export type ImageNodeMeta = {
   imageType: string;
+  imageUrl: string;
+  storageKey: string;
 };
 
 // Type mapping for node metadata
@@ -103,3 +105,5 @@ export type SkillResponseNodeProps = NodeProps<
 > &
   CommonNodeProps;
 export type MemoNodeProps = NodeProps<Node<CanvasNodeData, 'memo'>> & CommonNodeProps;
+export type ImageNodeProps = NodeProps<Node<CanvasNodeData<ImageNodeMeta>, 'image'>> &
+  CommonNodeProps;

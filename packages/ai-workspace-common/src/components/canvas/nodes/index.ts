@@ -29,7 +29,7 @@ export * from './tool';
 export * from './skill-response';
 export * from './memo/memo';
 export * from './group';
-
+export * from './image';
 // Node types mapping
 export const nodeTypes: NodeTypes = {
   document: DocumentNode,
