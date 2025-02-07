@@ -389,6 +389,7 @@ export const SkillNode = memo(
                   setQuery(localQuery?.slice(0, -1));
                   setSelectedSkill(skill);
                 }}
+                onUploadImage={handleImageUpload}
               />
 
               {selectedSkill?.configSchema?.items?.length > 0 && (

@@ -267,6 +267,7 @@ export const ChatPanel = () => {
             selectedSkillName={selectedSkill?.name}
             autoCompletionPlacement={'topLeft'}
             handleSendMessage={handleSendMessage}
+            onUploadImage={handleImageUpload}
           />
 
           {selectedSkill?.configSchema?.items?.length > 0 && (

@@ -23,6 +23,7 @@ import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import Moveable from 'react-moveable';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 
 export const ImageNode = memo(
   ({ id, data, isPreview, selected, hideActions, hideHandles, onNodeClick }: ImageNodeProps) => {
@@ -36,6 +37,7 @@ export const ImageNode = memo(
     const { addNode } = useAddNode();
     const { addToContext } = useAddToContext();
     const { deleteNode } = useDeleteNode();
+    const setNodeDataByEntity = useSetNodeDataByEntity();
 
     const { operatingNodeId } = useCanvasStoreShallow((state) => ({
       operatingNodeId: state.operatingNodeId,
@@ -112,6 +114,18 @@ export const ImageNode = memo(
       setIsPreviewModalVisible(true);
     }, []);
 
+    const onTitleChange = (newTitle: string) => {
+      setNodeDataByEntity(
+        {
+          entityId: data.entityId,
+          type: 'image',
+        },
+        {
+          title: newTitle,
+        },
+      );
+    };
+
     // Add event handling
     useEffect(() => {
       // Create node-specific event handlers
@@ -145,8 +159,8 @@ export const ImageNode = memo(
     }, []);
 
     useEffect(() => {
-      if (!targetRef.current) return;
       setTimeout(() => {
+        if (!targetRef.current) return;
         const { offsetWidth, offsetHeight } = targetRef.current;
         resizeMoveable(offsetWidth, offsetHeight);
       }, 1);
@@ -199,7 +213,13 @@ export const ImageNode = memo(
             )}
 
             <div className="flex flex-col h-full relative">
-              <NodeHeader title={data.title} Icon={IconImage} iconBgColor="#02b0c7" />
+              <NodeHeader
+                title={data.title}
+                Icon={IconImage}
+                iconBgColor="#02b0c7"
+                canEdit={true}
+                updateTitle={onTitleChange}
+              />
 
               <div className="w-full rounded-lg overflow-y-auto">
                 <img

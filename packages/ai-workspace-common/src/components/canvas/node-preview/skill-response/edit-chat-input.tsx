@@ -200,6 +200,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
             setEditQuery(editQuery?.slice(0, -1));
             handleSelectSkill(skill);
           }}
+          onUploadImage={handleImageUpload}
         />
         <ChatActions
           className="p-2 px-3"
