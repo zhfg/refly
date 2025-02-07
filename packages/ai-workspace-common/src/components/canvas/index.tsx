@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useEffect, useState, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow } from '@xyflow/react';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
 import { CanvasToolbar } from './canvas-toolbar';
@@ -47,6 +47,7 @@ import { SelectionContextMenu } from '@refly-packages/ai-workspace-common/compon
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { IconCreateDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -488,6 +489,17 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     [reactFlowInstance],
   );
 
+  const uploadImage = async (image: File) => {
+    const response = await getClient().upload({
+      body: {
+        file: image,
+        entityId: canvasId,
+        entityType: 'canvas',
+      },
+    });
+    return response.data;
+  };
+
   // Add drag and drop handlers
   const handleDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
@@ -495,38 +507,33 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   }, []);
 
   const handleDrop = useCallback(
-    (event: React.DragEvent) => {
+    async (event: React.DragEvent) => {
       event.preventDefault();
-
       const files = Array.from(event.dataTransfer.files);
       const imageFile = files.find((file) => file.type.startsWith('image/'));
 
       if (imageFile) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const imageUrl = e.target?.result as string;
-
-          // Get drop position in flow coordinates
+        const { data, success } = await uploadImage(imageFile);
+        if (success) {
           const flowPosition = reactFlowInstance.screenToFlowPosition({
             x: event.clientX,
             y: event.clientY,
           });
-
-          // Add image node
           addNode({
             type: 'image',
             data: {
               title: imageFile.name,
               entityId: genImageID(),
               metadata: {
-                imageUrl,
-                sizeMode: 'adaptive',
+                imageUrl: data.url,
+                storageKey: data.storageKey,
               },
             },
             position: flowPosition,
           });
-        };
-        reader.readAsDataURL(imageFile);
+        } else {
+          message.error(t('common.putErr'));
+        }
       }
     },
     [addNode, reactFlowInstance],

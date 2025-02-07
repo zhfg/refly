@@ -213,7 +213,7 @@ export const ImageNode = memo(
             <div className="flex flex-col h-full relative">
               <NodeHeader title={data.title} Icon={IconImage} iconBgColor="#02b0c7" />
 
-              <div className="w-full rounded-lg overflow-hidden">
+              <div className="w-full rounded-lg overflow-y-auto">
                 <img
                   src={imageUrl}
                   alt={data.title || 'Image'}
