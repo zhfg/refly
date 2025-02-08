@@ -114,7 +114,7 @@ export type ResourceMeta = {
 /**
  * Resource type
  */
-export type ResourceType = 'weblink' | 'text';
+export type ResourceType = 'weblink' | 'text' | 'file';
 
 export type Resource = {
   /**
@@ -1467,6 +1467,10 @@ export type UpsertResourceRequest = {
    */
   data?: ResourceMeta;
   /**
+   * Storage key
+   */
+  storageKey?: string;
+  /**
    * Resource content (this will be ignored if storageKey was set)
    */
   content?: string;
@@ -2701,11 +2705,11 @@ export type UploadRequest = {
   /**
    * Entity ID
    */
-  entityId: string;
+  entityId?: string;
   /**
    * Entity type
    */
-  entityType: EntityType;
+  entityType?: EntityType;
 };
 
 export type UploadResponse = BaseResponse & {

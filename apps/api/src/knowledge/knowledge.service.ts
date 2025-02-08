@@ -148,6 +148,7 @@ export class KnowledgeService {
     let storageSize = 0;
     let identifier: string;
     let indexStatus: IndexStatus = 'wait_parse';
+    let contentPreview: string;
 
     if (param.resourceType === 'weblink') {
       if (!param.data) {
@@ -169,6 +170,25 @@ export class KnowledgeService {
         .update(param.content ?? '')
         .digest('hex');
       identifier = `text://${md5Hash}`;
+
+      const cleanedContent = param.content?.replace(/x00/g, '') ?? '';
+
+      if (cleanedContent) {
+        // save text content to object storage
+        storageKey = `resources/${param.resourceId}.txt`;
+        await this.minio.client.putObject(storageKey, cleanedContent);
+        storageSize = (await this.minio.client.statObject(storageKey)).size;
+
+        // skip parse stage, since content is provided
+        indexStatus = 'wait_index';
+        contentPreview = cleanedContent.slice(0, 500);
+      }
+    } else if (param.resourceType === 'file') {
+      if (!param.storageKey) {
+        throw new ParamsError('storageKey is required for file resource');
+      }
+      storageKey = param.storageKey;
+      identifier = `file://${param.storageKey}`; // TODO: use shasum for file binary
     } else {
       throw new ParamsError('Invalid resource type');
     }
@@ -178,18 +198,6 @@ export class KnowledgeService {
     });
     param.resourceId = existingResource ? existingResource.resourceId : genResourceID();
 
-    const cleanedContent = param.content?.replace(/x00/g, '') ?? '';
-
-    if (cleanedContent) {
-      // save text content to object storage
-      storageKey = `resources/${param.resourceId}.txt`;
-      await this.minio.client.putObject(storageKey, cleanedContent);
-      storageSize = (await this.minio.client.statObject(storageKey)).size;
-
-      // skip parse stage, since content is provided
-      indexStatus = 'wait_index';
-    }
-
     const resource = await this.prisma.resource.upsert({
       where: { resourceId: param.resourceId },
       create: {
@@ -197,7 +205,7 @@ export class KnowledgeService {
         identifier,
         resourceType: param.resourceType,
         meta: JSON.stringify(param.data || {}),
-        contentPreview: cleanedContent?.slice(0, 500),
+        contentPreview,
         storageKey,
         storageSize,
         uid: user.uid,
@@ -206,7 +214,7 @@ export class KnowledgeService {
       },
       update: {
         meta: JSON.stringify(param.data || {}),
-        contentPreview: cleanedContent?.slice(0, 500),
+        contentPreview,
         storageKey,
         storageSize,
         title: param.title || 'Untitled',

@@ -110,11 +110,10 @@ export class MiscService {
       entityId?: string;
       entityType?: EntityType;
     },
-    options?: { checkEntity?: boolean },
   ): Promise<UploadResponse['data']> {
     const { file, entityId, entityType } = param;
 
-    if (options?.checkEntity) {
+    if (entityId && entityType) {
       await this.checkEntity(user, entityId, entityType);
     }
 

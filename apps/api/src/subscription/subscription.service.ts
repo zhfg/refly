@@ -469,7 +469,12 @@ export class SubscriptionService implements OnModuleInit {
 
     const meter = await this.getOrCreateStorageUsageMeter(userModel);
 
-    return { available: meter.fileCountQuota - meter.fileCountUsed };
+    return {
+      available:
+        meter.fileCountQuota < 0
+          ? Number.POSITIVE_INFINITY
+          : meter.fileCountQuota - meter.fileCountUsed,
+    };
   }
 
   async getOrCreateTokenUsageMeter(user: User, _sub?: SubscriptionModel) {
