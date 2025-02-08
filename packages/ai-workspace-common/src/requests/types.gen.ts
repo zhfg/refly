@@ -912,6 +912,10 @@ export type ActionResult = {
    */
   title?: string;
   /**
+   * Action input
+   */
+  input?: SkillInput;
+  /**
    * Model tier
    */
   tier?: ModelTier;

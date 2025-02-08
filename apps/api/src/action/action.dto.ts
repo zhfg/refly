@@ -31,6 +31,7 @@ export function actionResultPO2DTO(
     type: result.type as ActionType,
     tier: result.tier as ModelTier,
     targetType: result.targetType as EntityType,
+    input: JSON.parse(result.input || '{}'),
     actionMeta: JSON.parse(result.actionMeta || '{}'),
     context: JSON.parse(result.context || '{}'),
     tplConfig: JSON.parse(result.tplConfig || '{}'),

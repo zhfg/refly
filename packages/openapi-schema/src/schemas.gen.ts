@@ -1106,6 +1106,10 @@ export const ActionResultSchema = {
       type: 'string',
       description: 'Action result title',
     },
+    input: {
+      description: 'Action input',
+      $ref: '#/components/schemas/SkillInput',
+    },
     tier: {
       description: 'Model tier',
       $ref: '#/components/schemas/ModelTier',
