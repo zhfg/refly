@@ -131,7 +131,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
   const customActions: CustomAction[] = useMemo(
     () => [
       {
-        icon: <GrRevert />,
+        icon: <GrRevert className="flex items-center" />,
         title: t('copilot.chatActions.discard'),
         onClick: () => {
           setEditMode(false);

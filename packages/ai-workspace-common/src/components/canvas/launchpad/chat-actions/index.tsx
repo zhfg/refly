@@ -74,15 +74,17 @@ export const ChatActions = memo(
         <div className="flex flex-row items-center gap-2">
           {customActions?.map((action, index) => (
             <Tooltip title={action.title} key={index}>
-              <Button size="small" onClick={action.onClick} className="mr-0">
-                {action.icon}
-              </Button>
+              <Button size="small" icon={action.icon} onClick={action.onClick} className="mr-0" />
             </Tooltip>
           ))}
 
           <Upload accept="image/*" showUploadList={false} beforeUpload={handleImageUpload}>
             <Tooltip title={t('common.uploadImage')}>
-              <Button size="small" icon={<IconImage className="flex items-center" />} />
+              <Button
+                className="translate-y-[0.5px]"
+                size="small"
+                icon={<IconImage className="flex items-center" />}
+              />
             </Tooltip>
           </Upload>
 

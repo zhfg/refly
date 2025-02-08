@@ -222,7 +222,7 @@ export const ChatPanel = () => {
   const customActions: CustomAction[] = useMemo(
     () => [
       {
-        icon: <PiMagicWand />,
+        icon: <PiMagicWand className="flex items-center" />,
         title: t('copilot.chatActions.recommendQuestions'),
         onClick: () => {
           handleRecommendQuestionsToggle();
