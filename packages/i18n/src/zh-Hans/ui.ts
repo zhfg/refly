@@ -864,6 +864,7 @@ const translations = {
       fromWebSearch: '全网搜索',
       fromFile: '上传文件',
       dragOrClick: '点击或拖拽文件到此区域上传',
+      unsupportedFileType: '请上传指定类型的文件',
       supportedFiles: '支持文件: {{formats}}，每个文件最大 5MB',
       fromWeblink: '粘贴链接',
       selectAll: '全选',

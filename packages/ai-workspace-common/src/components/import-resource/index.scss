@@ -221,3 +221,14 @@
 .keyword {
   color: #00968f;
 }
+
+.file-upload-container {
+  overflow: hidden;
+  .ant-upload-drag {
+    height: 160px;
+  }
+  .ant-upload-list {
+    max-height: 180px;
+    overflow-y: auto;
+  }
+}

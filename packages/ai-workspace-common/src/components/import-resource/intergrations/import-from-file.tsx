@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, message, Upload, UploadProps } from 'antd';
 import { HiLink } from 'react-icons/hi';
 import { RiInboxArchiveLine } from 'react-icons/ri';
@@ -22,38 +22,55 @@ interface FileItem {
   status?: 'uploading' | 'done' | 'error';
 }
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+const ALLOWED_FILE_TYPES = [
+  'application/pdf', // PDF
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
+  'application/rtf', // RTF
+  'text/plain', // TXT
+  'text/markdown', // MD
+  'text/html', // HTML
+  'application/epub+zip', // EPUB
+];
+
+const ALLOWED_FILE_EXTENSIONS = ['.pdf', '.docx', '.rtf', '.txt', '.md', '.html', '.epub'];
+
 export const ImportFromFile = () => {
   const { t } = useTranslation();
-  const { setImportResourceModalVisible, insertNodePosition } = useImportResourceStoreShallow(
-    (state) => ({
-      setImportResourceModalVisible: state.setImportResourceModalVisible,
-      insertNodePosition: state.insertNodePosition,
-    }),
-  );
+  const {
+    setImportResourceModalVisible,
+    insertNodePosition,
+    fileList: storageFileList,
+    setFileList: setStorageFileList,
+  } = useImportResourceStoreShallow((state) => ({
+    setImportResourceModalVisible: state.setImportResourceModalVisible,
+    insertNodePosition: state.insertNodePosition,
+    setFileList: state.setFileList,
+    fileList: state.fileList,
+  }));
 
   const { addNode } = useAddNode();
   const { refetchUsage, storageUsage } = useSubscriptionUsage();
 
   const [saveLoading, setSaveLoading] = useState(false);
-  const [fileList, setFileList] = useState<FileItem[]>([]);
+  const [fileList, setFileList] = useState<FileItem[]>(storageFileList);
 
-  const uploadFile = async (file: File, resourceId: string) => {
+  const uploadFile = async (file: File, uid: string) => {
     const { data } = await getClient().upload({
       body: {
         file,
-        entityId: resourceId,
-        entityType: 'resource',
       },
     });
     if (data.success) {
-      return { ...data.data, resourceId };
+      return { ...data.data, uid };
     }
-    return { url: '', storageKey: '', resourceId };
+    return { url: '', storageKey: '', uid };
   };
 
   const props: UploadProps = {
     name: 'file',
     multiple: true,
+    accept: ALLOWED_FILE_EXTENSIONS.join(','),
     fileList: fileList.map((item) => ({
       uid: item.uid,
       name: item.title,
@@ -61,35 +78,51 @@ export const ImportFromFile = () => {
       url: item.url,
     })),
     beforeUpload: async (file: File) => {
-      const resourceId = genResourceID();
+      if (file.size > MAX_FILE_SIZE) {
+        message.error(t('resource.import.fileTooLarge', { size: '5MB' }));
+        return Upload.LIST_IGNORE;
+      }
+
+      const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
+      if (!ALLOWED_FILE_EXTENSIONS.includes(fileExtension)) {
+        message.error(t('resource.import.unsupportedFileType'));
+        return Upload.LIST_IGNORE;
+      }
+
+      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+        message.error(t('resource.import.unsupportedFileType'));
+        return Upload.LIST_IGNORE;
+      }
+
+      const tempUid = genResourceID();
       setFileList((prev) => [
         ...prev,
         {
           title: file.name,
           url: '',
           storageKey: '',
-          uid: resourceId,
+          uid: tempUid,
           status: 'uploading',
         },
       ]);
 
-      const data = await uploadFile(file, resourceId);
+      const data = await uploadFile(file, tempUid);
       if (data?.url && data?.storageKey) {
         setFileList((prev) =>
           prev.map((item) =>
-            item.uid === resourceId
+            item.uid === tempUid
               ? {
                   title: file.name,
                   url: data.url,
                   storageKey: data.storageKey,
-                  uid: data.resourceId,
+                  uid: data.uid,
                   status: 'done',
                 }
               : item,
           ),
         );
       } else {
-        setFileList((prev) => prev.filter((item) => item.uid !== resourceId));
+        setFileList((prev) => prev.filter((item) => item.uid !== tempUid));
         message.error(`${t('common.uploadFailed')}: ${file.name}`);
       }
 
@@ -112,12 +145,7 @@ export const ImportFromFile = () => {
       body: fileList.map((file) => ({
         resourceType: 'file',
         title: file.title,
-        resourceId: file.uid,
-        data: {
-          url: file.url,
-          title: file.title,
-          storageKey: file.storageKey,
-        },
+        storageKey: file.storageKey,
       })),
     });
 
@@ -127,6 +155,7 @@ export const ImportFromFile = () => {
       return;
     }
 
+    setFileList([]);
     refetchUsage();
     message.success(t('common.putSuccess'));
     setImportResourceModalVisible(false);
@@ -162,6 +191,10 @@ export const ImportFromFile = () => {
   const canImportCount = storageUsage?.fileCountQuota - (storageUsage?.fileCountUsed ?? 0);
   const disableSave = fileList.length === 0 || fileList.length > canImportCount;
 
+  useEffect(() => {
+    setStorageFileList(fileList);
+  }, [fileList, setStorageFileList]);
+
   return (
     <div className="h-full flex flex-col min-w-[500px] box-border intergation-import-from-weblink">
       {/* header */}
@@ -174,14 +207,13 @@ export const ImportFromFile = () => {
 
       {/* content */}
       <div className="flex-grow overflow-y-auto p-6 box-border flex flex-col justify-center">
-        <div className="w-full">
+        <div className="w-full file-upload-container">
           <Dragger {...props}>
-            <RiInboxArchiveLine className="text-2xl text-gray-400" />
+            <RiInboxArchiveLine className="text-3xl text-[#00968f]" />
             <p className="ant-upload-text mt-4 text-gray-600">{t('resource.import.dragOrClick')}</p>
             <p className="ant-upload-hint text-gray-400 mt-2">
               {t('resource.import.supportedFiles', {
-                formats:
-                  'PDF、DOCX、TXT、MARKDOWN、MDX、HTML、EPUB、RTF、ODT、CSV、XLSX、PPTX、Python、JavaScript',
+                formats: 'PDF、DOCX、RTF、TXT、MD、HTML、EPUB',
               })}
             </p>
           </Dragger>

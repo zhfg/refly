@@ -14,6 +14,14 @@ export interface LinkMeta {
   isError?: boolean; // 处理失败
 }
 
+export interface FileItem {
+  title: string;
+  url: string;
+  storageKey: string;
+  uid?: string;
+  status?: 'uploading' | 'done' | 'error';
+}
+
 export type ImportResourceMenuItem =
   | 'import-from-file'
   | 'import-from-weblink'
@@ -27,11 +35,13 @@ interface ImportResourceState {
 
   // scrape
   scrapeLinks: LinkMeta[];
+  fileList: FileItem[];
   copiedTextPayload: { content: string; title: string; url?: string };
   insertNodePosition: XYPosition | null;
 
   setImportResourceModalVisible: (visible: boolean) => void;
   setScrapeLinks: (links: LinkMeta[]) => void;
+  setFileList: (fileList: FileItem[]) => void;
   setCopiedTextPayload: (
     payload: Partial<{ content: string; title: string; url?: string }>,
   ) => void;
@@ -43,6 +53,7 @@ interface ImportResourceState {
 export const defaultState = {
   copiedTextPayload: { content: '', title: '', url: '' },
   scrapeLinks: [],
+  fileList: [],
   importResourceModalVisible: false,
   selectedMenuItem: 'import-from-web-search' as ImportResourceMenuItem,
   insertNodePosition: null,
@@ -58,6 +69,7 @@ export const useImportResourceStore = create<ImportResourceState>()(
     setCopiedTextPayload: (payload: Partial<{ content: string; title: string; url?: string }>) =>
       set((state) => ({ ...state, copiedTextPayload: { ...state.copiedTextPayload, ...payload } })),
     resetState: () => set((state) => ({ ...state, ...defaultState })),
+    setFileList: (fileList: FileItem[]) => set((state) => ({ ...state, fileList })),
     setSelectedMenuItem: (menuItem: ImportResourceMenuItem) =>
       set((state) => ({ ...state, selectedMenuItem: menuItem })),
     setInsertNodePosition: (position: XYPosition) =>

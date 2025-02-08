@@ -879,6 +879,7 @@ const translations = {
       fromWebSearch: 'Web Search',
       fromFile: 'Upload File',
       dragOrClick: 'Click or Drag files to this area to upload',
+      unsupportedFileType: 'Please upload the specified type of file',
       supportedFiles: 'Supported Files: {{formats}}. Max 5MB each.',
       fromWeblink: 'Paste Weblink',
       selectAll: 'Select All',
