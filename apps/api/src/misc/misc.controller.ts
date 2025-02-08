@@ -48,15 +48,11 @@ export class MiscController {
     if (!file) {
       throw new ParamsError('No file uploaded');
     }
-    const result = await this.miscService.uploadFile(
-      user,
-      {
-        file,
-        entityId: body.entityId,
-        entityType: body.entityType,
-      },
-      { checkEntity: true },
-    );
+    const result = await this.miscService.uploadFile(user, {
+      file,
+      entityId: body.entityId,
+      entityType: body.entityType,
+    });
     return buildSuccessResponse(result);
   }
 
