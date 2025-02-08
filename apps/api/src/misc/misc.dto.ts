@@ -2,6 +2,10 @@ import { ModelInfo, ModelTier, SubscriptionPlan } from '@refly-packages/openapi-
 import { ModelInfo as ModelInfoPO, SubscriptionPlan as SubscriptionPlanPO } from '@prisma/client';
 import { pick } from '@refly-packages/utils';
 
+export interface ImageProcessingJobData {
+  storageKey: string;
+}
+
 export function modelInfoPO2DTO(modelInfo: ModelInfoPO): ModelInfo {
   return {
     ...pick(modelInfo, ['name', 'label', 'provider', 'contextLimit', 'maxOutput']),

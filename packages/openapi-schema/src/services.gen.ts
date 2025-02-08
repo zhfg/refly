@@ -125,12 +125,6 @@ import type {
   DeleteLabelInstanceResponse,
   ListActionsError,
   ListActionsResponse,
-  InvokeActionData,
-  InvokeActionError,
-  InvokeActionResponse2,
-  StreamInvokeActionData,
-  StreamInvokeActionError,
-  StreamInvokeActionResponse,
   GetActionResultData,
   GetActionResultError,
   GetActionResultResponse2,
@@ -845,36 +839,6 @@ export const listActions = <ThrowOnError extends boolean = false>(
   return (options?.client ?? client).get<ListActionsResponse, ListActionsError, ThrowOnError>({
     ...options,
     url: '/action/list',
-  });
-};
-
-/**
- * Invoke action
- * Invoke an action asynchronously
- */
-export const invokeAction = <ThrowOnError extends boolean = false>(
-  options: Options<InvokeActionData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).post<InvokeActionResponse2, InvokeActionError, ThrowOnError>({
-    ...options,
-    url: '/action/invoke',
-  });
-};
-
-/**
- * Stream invoke action
- * Invoke an action and return SSE stream
- */
-export const streamInvokeAction = <ThrowOnError extends boolean = false>(
-  options: Options<StreamInvokeActionData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).post<
-    StreamInvokeActionResponse,
-    StreamInvokeActionError,
-    ThrowOnError
-  >({
-    ...options,
-    url: '/action/streamInvoke',
   });
 };
 

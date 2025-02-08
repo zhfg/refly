@@ -940,48 +940,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListActionResponse'
-  /action/invoke:
-    post:
-      tags:
-        - action
-      summary: Invoke action
-      description: Invoke an action asynchronously
-      operationId: invokeAction
-      requestBody:
-        description: Action invocation request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvokeActionRequest'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InvokeActionResponse'
-  /action/streamInvoke:
-    post:
-      tags:
-        - action
-      summary: Stream invoke action
-      description: Invoke an action and return SSE stream
-      operationId: streamInvokeAction
-      requestBody:
-        description: Skill invocation request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvokeActionRequest'
-        required: true
-      responses:
-        '200':
-          description: successful operation
-          content:
-            text/event-stream:
-              schema:
-                type: string
   /action/result:
     get:
       tags:
@@ -2424,6 +2382,9 @@ components:
         title:
           type: string
           description: Action result title
+        input:
+          description: Action input
+          $ref: '#/components/schemas/SkillInput'
         tier:
           description: Model tier
           $ref: '#/components/schemas/ModelTier'
@@ -3600,6 +3561,11 @@ components:
         query:
           type: string
           description: User query
+        images:
+          type: array
+          description: Image list (storage keys)
+          items:
+            type: string
     SkillContextResourceItem:
       type: object
       description: Skill context resource item
@@ -3784,49 +3750,6 @@ components:
         metadata:
           type: object
           description: Context metadata
-    InvokeActionRequest:
-      type: object
-      properties:
-        actionType:
-          description: Action type
-          $ref: '#/components/schemas/ActionType'
-        actionName:
-          type: string
-          description: Action name
-        input:
-          description: Action input
-          $ref: '#/components/schemas/SkillInput'
-        context:
-          type: array
-          description: Action invocation context
-          items:
-            $ref: '#/components/schemas/ActionContextItem'
-        config:
-          description: Action config
-          $ref: '#/components/schemas/ActionConfig'
-        canvasId:
-          description: Canvas ID
-          type: string
-        locale:
-          type: string
-          description: Selected output locale
-        modelName:
-          type: string
-          description: Selected model
-        jobId:
-          description: Skill job ID (if not provided, a new job will be created)
-          type: string
-        triggerId:
-          description: Trigger ID (typically you don't need to provide this)
-          type: string
-    InvokeActionResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            jobId:
-              type: string
-              description: Skill job ID
     InvokeSkillRequest:
       type: object
       properties:
@@ -4374,10 +4297,16 @@ components:
             data:
               type: object
               description: File upload result
+              required:
+                - url
+                - storageKey
               properties:
                 url:
                   type: string
                   description: File URL
+                storageKey:
+                  type: string
+                  description: Storage key
     ModelCapabilities:
       type: object
       properties:
@@ -4462,6 +4391,7 @@ components:
         - toolResponse
         - memo
         - group
+        - image
     CanvasNodeData:
       type: object
       required:

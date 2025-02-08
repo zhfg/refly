@@ -211,25 +211,29 @@ model TokenUsage {
 
 model StaticFile {
   /// Primary key
-  pk          BigInt    @id @default(autoincrement())
+  pk                BigInt    @id @default(autoincrement())
   /// UID
-  uid         String    @map("uid")
+  uid               String    @map("uid")
   /// Storage key
-  storageKey  String    @map("storage_key")
+  storageKey        String    @map("storage_key")
   /// Storage size (in bytes)
-  storageSize BigInt    @default(0) @map("storage_size")
+  storageSize       BigInt    @default(0) @map("storage_size")
+  /// Content type
+  contentType       String    @default("") @map("content_type")
+  /// Processed image storage key (only applicable to images)
+  processedImageKey String?   @map("processed_image_key")
   /// Entity id
-  entityId    String?   @map("entity_id")
+  entityId          String?   @map("entity_id")
   /// Entity type
-  entityType  String?   @map("entity_type")
+  entityType        String?   @map("entity_type")
   /// Expiration timestamp
-  expiredAt   DateTime? @map("expired_at") @db.Timestamptz()
+  expiredAt         DateTime? @map("expired_at") @db.Timestamptz()
   /// Create timestamp
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   /// Soft delete timestamp
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz()
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([uid, entityId, entityType])
   @@map("static_files")

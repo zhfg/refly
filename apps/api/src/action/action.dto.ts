@@ -1,5 +1,4 @@
 import {
-  InvokeActionRequest,
   ActionResult,
   ActionStep,
   ActionType,
@@ -13,11 +12,6 @@ import {
 } from '@prisma/client';
 import { pick } from '@/utils';
 import { modelInfoPO2DTO } from '@/misc/misc.dto';
-
-export interface InvokeActionJobData extends InvokeActionRequest {
-  uid: string;
-  rawParam: string;
-}
 
 export function actionStepPO2DTO(step: ActionStepModel): ActionStep {
   return {
@@ -37,6 +31,7 @@ export function actionResultPO2DTO(
     type: result.type as ActionType,
     tier: result.tier as ModelTier,
     targetType: result.targetType as EntityType,
+    input: JSON.parse(result.input || '{}'),
     actionMeta: JSON.parse(result.actionMeta || '{}'),
     context: JSON.parse(result.context || '{}'),
     tplConfig: JSON.parse(result.tplConfig || '{}'),

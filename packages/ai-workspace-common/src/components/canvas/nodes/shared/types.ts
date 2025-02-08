@@ -71,6 +71,12 @@ export type ResponseNodeMeta = {
   originalWidth?: number;
 };
 
+export type ImageNodeMeta = {
+  imageType: string;
+  imageUrl: string;
+  storageKey: string;
+};
+
 // Type mapping for node metadata
 export type NodeMetadataMap = {
   document: DocumentNodeMeta;
@@ -78,6 +84,7 @@ export type NodeMetadataMap = {
   skill: SkillNodeMeta;
   tool: ToolNodeMeta;
   response: ResponseNodeMeta;
+  image: ImageNodeMeta;
 } & Record<string, Record<string, unknown>>;
 
 // Add new common props interface
@@ -98,3 +105,5 @@ export type SkillResponseNodeProps = NodeProps<
 > &
   CommonNodeProps;
 export type MemoNodeProps = NodeProps<Node<CanvasNodeData, 'memo'>> & CommonNodeProps;
+export type ImageNodeProps = NodeProps<Node<CanvasNodeData<ImageNodeMeta>, 'image'>> &
+  CommonNodeProps;

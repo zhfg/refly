@@ -62,6 +62,10 @@ const translations = {
     login: 'Login',
     share: 'Share',
     noMoreText: 'No more~',
+    uploadImage: 'Upload Image',
+    uploadSuccess: 'Upload successful',
+    uploadFailed: 'Upload failed',
+    dropImageHere: 'Drop image here',
   },
   verifyRules: {
     emailRequired: 'Email cannot be empty',
@@ -589,6 +593,7 @@ const translations = {
       skillResponse: 'Skill Response',
       memo: 'Memo',
       skill: 'Skill',
+      image: 'Image',
     },
     contextMenu: {
       createGroup: 'Create Group',

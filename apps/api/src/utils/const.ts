@@ -12,3 +12,4 @@ export const QUEUE_DELETE_KNOWLEDGE_ENTITY = 'deleteKnowledgeEntity';
 export const QUEUE_SEND_VERIFICATION_EMAIL = 'sendVerificationEmail';
 export const QUEUE_CHECK_CANCELED_SUBSCRIPTIONS = 'checkCanceledSubscriptions';
 export const QUEUE_SYNC_REQUEST_USAGE = 'syncRequestUsage';
+export const QUEUE_IMAGE_PROCESSING = 'imageProcessing';

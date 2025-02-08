@@ -46,6 +46,7 @@ import { SelectionContextMenu } from '@refly-packages/ai-workspace-common/compon
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { IconCreateDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
+import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -407,7 +408,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
       }
 
       // Memo nodes are not previewable
-      if (node.type === 'memo' || node.type === 'skill' || node.type === 'group') {
+      if (['memo', 'skill', 'group', 'image'].includes(node.type)) {
         return;
       }
 
@@ -487,6 +488,27 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     [reactFlowInstance],
   );
 
+  const { handleUploadImage } = useUploadImage();
+
+  // Add drag and drop handlers
+  const handleDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+  }, []);
+
+  const handleDrop = useCallback(
+    async (event: React.DragEvent) => {
+      event.preventDefault();
+      const files = Array.from(event.dataTransfer.files);
+      const imageFile = files.find((file) => file.type.startsWith('image/'));
+
+      if (imageFile) {
+        handleUploadImage(imageFile, canvasId, event);
+      }
+    },
+    [addNode, reactFlowInstance],
+  );
+
   return (
     <Spin
       className="w-full h-full"
@@ -522,11 +544,11 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             onNodeDragStop={onNodeDragStop}
             nodeDragThreshold={10}
             nodesDraggable={!operatingNodeId}
-            // onlyRenderVisibleElements={true}
-            elevateNodesOnSelect={false}
             onSelectionContextMenu={onSelectionContextMenu}
             deleteKeyCode={['Backspace', 'Delete']}
             multiSelectionKeyCode={['Shift', 'Meta']}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">

@@ -270,6 +270,7 @@ export const SkillResponseNode = memo(
         {
           resultId: entityId,
           query: title,
+          contextItems: data?.metadata?.contextItems,
         },
         {
           entityType: 'canvas',

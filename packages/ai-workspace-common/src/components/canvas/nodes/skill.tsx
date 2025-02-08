@@ -37,6 +37,7 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import classNames from 'classnames';
 import Moveable from 'react-moveable';
+import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
 
@@ -146,6 +147,8 @@ export const SkillNode = memo(
 
     const { invokeAction, abortAction } = useInvokeAction();
     const { canvasId } = useCanvasContext();
+
+    const { handleUploadImage } = useUploadImage();
 
     const setQuery = useCallback(
       (query: string) => {
@@ -317,6 +320,19 @@ export const SkillNode = memo(
       };
     }, [id, handleSendMessage, handleDelete]);
 
+    const handleImageUpload = async (file: File) => {
+      const nodeData = await handleUploadImage(file, canvasId);
+      if (nodeData) {
+        setContextItems([
+          ...contextItems,
+          {
+            type: 'image',
+            ...nodeData,
+          },
+        ]);
+      }
+    };
+
     return (
       <div className={classNames({ nowheel: isOperating })}>
         <div
@@ -372,6 +388,7 @@ export const SkillNode = memo(
                   setQuery(localQuery?.slice(0, -1));
                   setSelectedSkill(skill);
                 }}
+                onUploadImage={handleImageUpload}
               />
 
               {selectedSkill?.configSchema?.items?.length > 0 && (
@@ -397,6 +414,7 @@ export const SkillNode = memo(
                 setModel={setModelInfo}
                 handleSendMessage={handleSendMessage}
                 handleAbort={abortAction}
+                onUploadImage={handleImageUpload}
               />
             </div>
           </div>

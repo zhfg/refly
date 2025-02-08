@@ -40,6 +40,8 @@ import {
   RiChatHistoryLine,
   RiChatHistoryFill,
   RiUploadCloud2Line,
+  RiImageAiFill,
+  RiImageAiLine,
 } from 'react-icons/ri';
 import { TiDocumentDelete } from 'react-icons/ti';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
@@ -73,6 +75,8 @@ import { memo } from 'react';
 export const IconCanvas = TfiBlackboard;
 export const IconAskAI = LuSparkles;
 export const IconAskAIInput = TbInputSpark;
+export const IconImage = RiImageAiLine;
+export const IconImageFilled = RiImageAiFill;
 export const IconDocument = LuFileText;
 export const IconDocumentFilled = HiDocumentText;
 export const IconCreateDocument = LuFilePlus;
