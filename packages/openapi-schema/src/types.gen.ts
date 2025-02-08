@@ -876,6 +876,10 @@ export type ActionStep = {
    */
   content?: string;
   /**
+   * Step reasoning content
+   */
+  reasoningContent?: string;
+  /**
    * Step artifacts
    */
   artifacts?: Array<Artifact>;
@@ -1645,9 +1649,13 @@ export type SkillEvent = {
    */
   version?: number;
   /**
-   * Event content. Only present when `event` is `stream`.
+   * Event content. Only present when `event` is `stream`
    */
   content?: string;
+  /**
+   * Reasoning content. Only present when `event` is `stream`
+   */
+  reasoningContent?: string;
   /**
    * Token usage data. Only present when `event` is `token_usage`.
    */

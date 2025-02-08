@@ -914,7 +914,9 @@ export class SkillService {
         switch (event.event) {
           case 'on_chat_model_stream': {
             const content = chunk.content.toString();
-            if (content && res && !runMeta?.suppressOutput) {
+            const reasoningContent = chunk?.additional_kwargs?.reasoning_content?.toString() || '';
+
+            if ((content || reasoningContent) && res && !runMeta?.suppressOutput) {
               if (runMeta?.artifact) {
                 const { entityId } = runMeta.artifact;
                 const artifact = artifactMap[entityId];
@@ -937,11 +939,12 @@ export class SkillService {
                 throttledMarkdownUpdate(artifact);
               } else {
                 // Update result content and forward stream events to client
-                resultAggregator.handleStreamContent(runMeta, content);
+                resultAggregator.handleStreamContent(runMeta, content, reasoningContent);
                 writeSSEResponse(res, {
                   event: 'stream',
                   resultId,
                   content,
+                  reasoningContent,
                   step: runMeta?.step,
                 });
               }

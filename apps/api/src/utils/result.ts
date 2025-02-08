@@ -6,6 +6,7 @@ import { aggregateTokenUsage } from '@refly-packages/utils';
 interface StepData {
   name: string;
   content: string;
+  reasoningContent: string;
   structuredData: Record<string, unknown>;
   artifacts: Record<string, Artifact>;
   logs: ActionLog[];
@@ -44,6 +45,7 @@ export class ResultAggregator {
     return {
       name: step,
       content: '',
+      reasoningContent: '',
       structuredData: {},
       artifacts: {},
       logs: [],
@@ -86,7 +88,7 @@ export class ResultAggregator {
     this.data[step.name] = step;
   }
 
-  handleStreamContent(meta: SkillRunnableMeta, content: string) {
+  handleStreamContent(meta: SkillRunnableMeta, content: string, reasoningContent?: string) {
     if (this.aborted) {
       return;
     }
@@ -94,6 +96,7 @@ export class ResultAggregator {
     const step = this.getOrInitData(meta.step?.name);
 
     step.content += content;
+    step.reasoningContent += reasoningContent;
 
     this.data[step.name] = step;
   }

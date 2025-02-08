@@ -1055,6 +1055,10 @@ export const ActionStepSchema = {
       type: 'string',
       description: 'Step content',
     },
+    reasoningContent: {
+      type: 'string',
+      description: 'Step reasoning content',
+    },
     artifacts: {
       type: 'array',
       description: 'Step artifacts',
@@ -2270,7 +2274,11 @@ export const SkillEventSchema = {
     },
     content: {
       type: 'string',
-      description: 'Event content. Only present when `event` is `stream`.',
+      description: 'Event content. Only present when `event` is `stream`',
+    },
+    reasoningContent: {
+      type: 'string',
+      description: 'Reasoning content. Only present when `event` is `stream`',
     },
     tokenUsage: {
       description: 'Token usage data. Only present when `event` is `token_usage`.',
