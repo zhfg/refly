@@ -15,6 +15,7 @@ export interface LinkMeta {
 }
 
 export type ImportResourceMenuItem =
+  | 'import-from-file'
   | 'import-from-weblink'
   | 'import-from-paste-text'
   | 'import-from-web-search'

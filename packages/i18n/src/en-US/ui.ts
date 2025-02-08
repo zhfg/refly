@@ -877,6 +877,9 @@ const translations = {
     import: {
       title: 'Resource Integration',
       fromWebSearch: 'Web Search',
+      fromFile: 'Upload File',
+      dragOrClick: 'Click or Drag files to this area to upload',
+      supportedFiles: 'Supported Files: {{formats}}. Max 5MB each.',
       fromWeblink: 'Paste Weblink',
       selectAll: 'Select All',
       webLinkPlaceholer: 'Enter or paste valid web links, one per line...',
@@ -885,6 +888,7 @@ const translations = {
       emptyLink: "You haven't added any links yet!",
       waitingList: 'Pending List',
       linkCount: 'Total {{count}} links',
+      fileCount: 'Total {{count}} files',
       saveTo: 'Save to',
       scrapeError: 'Scraping failed',
       integration: 'Integration',

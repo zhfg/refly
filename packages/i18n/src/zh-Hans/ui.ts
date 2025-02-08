@@ -862,6 +862,9 @@ const translations = {
     import: {
       title: '资源集成',
       fromWebSearch: '全网搜索',
+      fromFile: '上传文件',
+      dragOrClick: '点击或拖拽文件到此区域上传',
+      supportedFiles: '支持文件: {{formats}}，每个文件最大 5MB',
       fromWeblink: '粘贴链接',
       selectAll: '全选',
       webLinkPlaceholer: '输入或粘贴有效的网页链接，每行一个....',
@@ -870,6 +873,7 @@ const translations = {
       emptyLink: '你还未添加任何链接！',
       waitingList: '待处理列表',
       linkCount: '共 {{count}} 个',
+      fileCount: '共 {{count}} 个',
       saveTo: '保存至',
       scrapeError: '抓取失败',
       integration: '集成',
