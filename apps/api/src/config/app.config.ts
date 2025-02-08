@@ -17,7 +17,10 @@ export default () => ({
   },
   origin: process.env.ORIGIN || 'http://localhost:5700',
   staticEndpoint: process.env.STATIC_ENDPOINT || 'http://localhost:5800/v1/misc/',
-  imagePayloadMode: process.env.IMAGE_PAYLOAD_MODE || 'base64', // 'url' or 'base64'
+  image: {
+    maxArea: Number.parseInt(process.env.IMAGE_MAX_AREA) || 600 * 600,
+    payloadMode: process.env.IMAGE_PAYLOAD_MODE || 'base64', // 'url' or 'base64'
+  },
   minio: {
     internal: {
       endPoint: process.env.MINIO_INTERNAL_ENDPOINT || 'localhost',

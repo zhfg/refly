@@ -1,5 +1,6 @@
 import { Inject, Injectable, StreamableFile, Logger } from '@nestjs/common';
 import { Queue } from 'bullmq';
+import sharp from 'sharp';
 import { InjectQueue } from '@nestjs/bullmq';
 import {
   EntityType,
@@ -13,7 +14,7 @@ import { MINIO_EXTERNAL, MinioService } from '@/common/minio.service';
 import { randomUUID } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { scrapeWeblink } from '@refly-packages/utils';
-import { QUEUE_SYNC_STORAGE_USAGE } from '@/utils';
+import { QUEUE_IMAGE_PROCESSING, QUEUE_SYNC_STORAGE_USAGE, streamToBuffer } from '@/utils';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
 import {
   CanvasNotFoundError,
@@ -21,6 +22,8 @@ import {
   ResourceNotFoundError,
   DocumentNotFoundError,
 } from '@refly-packages/errors';
+import { ImageProcessingJobData } from '@/misc/misc.dto';
+import { createId } from '@paralleldrive/cuid2';
 
 @Injectable()
 export class MiscService {
@@ -31,6 +34,7 @@ export class MiscService {
     private prisma: PrismaService,
     @Inject(MINIO_EXTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
+    @InjectQueue(QUEUE_IMAGE_PROCESSING) private imageQueue: Queue<ImageProcessingJobData>,
   ) {}
 
   async scrapeWeblink(body: ScrapeWeblinkRequest): Promise<ScrapeWeblinkResult> {
@@ -136,10 +140,63 @@ export class MiscService {
       timestamp: new Date(),
     });
 
+    // Resize and convert to webp if it's an image
+    if (file.mimetype?.startsWith('image/')) {
+      await this.imageQueue.add('resizeAndConvert', { storageKey });
+    }
+
     return {
       storageKey,
       url: `${this.config.get('staticEndpoint')}${storageKey}`,
     };
+  }
+
+  /**
+   * Process an image by resizing it and converting to webp.
+   * @param storageKey - The storage key of the image to process.
+   */
+  async processImage(storageKey: string): Promise<void> {
+    if (!storageKey) {
+      this.logger.warn('Missing required job data');
+      return;
+    }
+
+    // Retrieve the original image from minio
+    const stream = await this.minio.client.getObject(storageKey);
+    const originalBuffer = await streamToBuffer(stream);
+
+    // Get image metadata to calculate dimensions
+    const metadata = await sharp(originalBuffer).metadata();
+    const originalWidth = metadata?.width ?? 0;
+    const originalHeight = metadata?.height ?? 0;
+
+    // Calculate the current area and scaling factor
+    const originalArea = originalWidth * originalHeight;
+    const maxArea = this.config.get('image.maxArea');
+    const scaleFactor = originalArea > maxArea ? Math.sqrt(maxArea / originalArea) : 1;
+
+    const processedBuffer = await sharp(originalBuffer)
+      .resize({
+        width: Math.round(originalWidth * scaleFactor),
+        height: Math.round(originalHeight * scaleFactor),
+        fit: 'fill', // Use fill since we're calculating exact dimensions
+      })
+      .toFormat('webp')
+      .toBuffer();
+
+    // Generate a new processed key for the image
+    const processedKey = `static-processed/${createId()}-${Date.now()}.webp`;
+
+    // Upload the processed image to minio
+    await this.minio.client.putObject(processedKey, processedBuffer, {
+      'Content-Type': 'image/webp',
+    });
+
+    // Update the staticFile record with the new processedImageKey
+    await this.prisma.staticFile.updateMany({
+      where: { storageKey: storageKey },
+      data: { processedImageKey: processedKey },
+    });
   }
 
   /**
@@ -233,12 +290,12 @@ export class MiscService {
    * @param storageKeys - Array of storage keys for the images
    * @returns Array of URLs (either base64 or regular URLs depending on config)
    */
-  async generateImageUrls(storageKeys: string[]): Promise<string[]> {
+  async generateImageUrls(user: User, storageKeys: string[]): Promise<string[]> {
     if (!Array.isArray(storageKeys) || storageKeys.length === 0) {
       return [];
     }
 
-    let imageMode = this.config.get('imagePayloadMode');
+    let imageMode = this.config.get('image.payloadMode');
     if (imageMode === 'url' && !this.config.get('staticEndpoint')) {
       this.logger.warn('Static endpoint is not configured, fallback to base64 mode');
       imageMode = 'base64';
@@ -246,12 +303,25 @@ export class MiscService {
 
     this.logger.log(`Generating image URLs in ${imageMode} mode for ${storageKeys.length} images`);
 
+    const files = await this.prisma.staticFile.findMany({
+      select: {
+        storageKey: true,
+        processedImageKey: true,
+      },
+      where: {
+        uid: user.uid,
+        storageKey: { in: storageKeys },
+      },
+    });
+
     try {
       if (imageMode === 'base64') {
         const urls = await Promise.all(
-          storageKeys.map(async (key) => {
+          files.map(async (file) => {
+            const storageKey = file.processedImageKey || file.storageKey;
+
             try {
-              const data = await this.minio.client.getObject(key);
+              const data = await this.minio.client.getObject(storageKey);
               const chunks: Buffer[] = [];
 
               for await (const chunk of data) {
@@ -261,12 +331,12 @@ export class MiscService {
               const buffer = Buffer.concat(chunks);
               const base64 = buffer.toString('base64');
               const contentType = await this.minio.client
-                .statObject(key)
+                .statObject(storageKey)
                 .then((stat) => stat.metaData?.['content-type'] ?? 'image/jpeg');
 
               return `data:${contentType};base64,${base64}`;
             } catch (error) {
-              this.logger.error(`Failed to generate base64 for key ${key}: ${error.stack}`);
+              this.logger.error(`Failed to generate base64 for key ${storageKey}: ${error.stack}`);
               return '';
             }
           }),
@@ -276,7 +346,10 @@ export class MiscService {
 
       // URL mode
       const staticEndpoint = this.config.get('staticEndpoint') ?? '';
-      return storageKeys.map((key) => `${staticEndpoint}static/${key}`);
+      return files.map((file) => {
+        const storageKey = file.processedImageKey || file.storageKey;
+        return `${staticEndpoint}static/${storageKey}`;
+      });
     } catch (error) {
       this.logger.error('Error generating image URLs:', error);
       return [];

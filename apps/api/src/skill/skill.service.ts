@@ -755,7 +755,7 @@ export class SkillService {
     const { resultId, version, actionMeta, tier } = result;
 
     if (input.images?.length > 0) {
-      input.images = await this.misc.generateImageUrls(input.images);
+      input.images = await this.misc.generateImageUrls(user, input.images);
     }
 
     await this.requestUsageQueue.add('syncRequestUsage', {
