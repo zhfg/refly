@@ -5,7 +5,11 @@ import { Queue } from 'bullmq';
 import * as Y from 'yjs';
 import { InjectQueue } from '@nestjs/bullmq';
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
-import { Prisma, SkillTrigger as SkillTriggerModel } from '@prisma/client';
+import {
+  Prisma,
+  SkillTrigger as SkillTriggerModel,
+  ActionResult as ActionResultModel,
+} from '@prisma/client';
 import { Response } from 'express';
 import { AIMessageChunk, BaseMessage, MessageContentComplex } from '@langchain/core/dist/messages';
 import {
@@ -81,7 +85,7 @@ import {
 import { genBaseRespDataFromError } from '@/utils/exception';
 import { CanvasService } from '@/canvas/canvas.service';
 import { canvasPO2DTO } from '@/canvas/canvas.dto';
-import { actionResultPO2DTO, actionStepPO2DTO } from '@/action/action.dto';
+import { actionResultPO2DTO } from '@/action/action.dto';
 import { CollabService } from '@/collab/collab.service';
 import { throttle } from 'lodash';
 import { ResultAggregator } from '@/utils/result';
@@ -550,38 +554,34 @@ export class SkillService {
    * Populate skill result history with actual result detail and steps.
    */
   async populateSkillResultHistory(user: User, resultHistory: ActionResult[]) {
-    // Get all results
+    // Fetch all results for the given resultIds
     const results = await this.prisma.actionResult.findMany({
       where: { resultId: { in: resultHistory.map((r) => r.resultId) }, uid: user.uid },
     });
 
-    // Get all steps for these results in a single query
-    const steps = await this.prisma.actionStep.findMany({
-      where: { resultId: { in: results.map((r) => r.resultId) } },
-    });
-
-    // Create maps for efficient lookups
-    const resultMap = new Map<string, ActionResult>();
-    const stepsMap = new Map<string, ActionStep[]>();
-
-    // Group steps by resultId
-    for (const step of steps) {
-      const resultSteps = stepsMap.get(step.resultId) ?? [];
-      resultSteps.push(actionStepPO2DTO(step));
-      stepsMap.set(step.resultId, resultSteps);
-    }
-
-    // Convert results and add steps
+    // Group results by resultId and pick the one with the highest version
+    const latestResultsMap = new Map<string, ActionResultModel>();
     for (const r of results) {
-      const resultDTO = actionResultPO2DTO(r);
-      resultDTO.steps = stepsMap.get(r.resultId);
-      resultMap.set(r.resultId, resultDTO);
+      const latestResult = latestResultsMap.get(r.resultId);
+      if (!latestResult || r.version > latestResult.version) {
+        latestResultsMap.set(r.resultId, r);
+      }
     }
 
-    return resultHistory
-      .map((r) => resultMap.get(r.resultId))
-      .filter(Boolean) // Remove any undefined results
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    const finalResults: ActionResult[] = await Promise.all(
+      Array.from(latestResultsMap.entries()).map(async ([resultId, result]) => {
+        const steps = await this.prisma.actionStep.findMany({
+          where: { resultId, version: result.version },
+          orderBy: { order: 'asc' },
+        });
+        return actionResultPO2DTO({ ...result, steps });
+      }),
+    );
+
+    // Sort the results by createdAt ascending
+    finalResults.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+    return finalResults;
   }
 
   async sendInvokeSkillTask(user: User, param: InvokeSkillRequest) {
