@@ -4,14 +4,23 @@ import { HiLink } from 'react-icons/hi';
 import { RiInboxArchiveLine } from 'react-icons/ri';
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
-import type { Resource, ResourceType } from '@refly/openapi-schema';
+import type { Resource } from '@refly/openapi-schema';
 import { useTranslation } from 'react-i18next';
 import { useAddNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-node';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 import { StorageLimit } from './storageLimit';
-import type { RcFile, UploadFile } from 'antd/es/upload/interface';
+import type { RcFile } from 'antd/es/upload/interface';
+import { genResourceID } from '@refly-packages/utils/id';
 
 const { Dragger } = Upload;
+
+interface FileItem {
+  title: string;
+  url: string;
+  storageKey: string;
+  uid?: string;
+  status?: 'uploading' | 'done' | 'error';
+}
 
 export const ImportFromFile = () => {
   const { t } = useTranslation();
@@ -26,17 +35,67 @@ export const ImportFromFile = () => {
   const { refetchUsage, storageUsage } = useSubscriptionUsage();
 
   const [saveLoading, setSaveLoading] = useState(false);
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [fileList, setFileList] = useState<FileItem[]>([]);
+
+  const uploadFile = async (file: File, resourceId: string) => {
+    const { data } = await getClient().upload({
+      body: {
+        file,
+        entityId: resourceId,
+        entityType: 'resource',
+      },
+    });
+    if (data.success) {
+      return { ...data.data, resourceId };
+    }
+    return { url: '', storageKey: '', resourceId };
+  };
 
   const props: UploadProps = {
     name: 'file',
     multiple: true,
-    fileList,
-    beforeUpload: (file: RcFile) => {
-      setFileList((prev) => [...prev, file]);
+    fileList: fileList.map((item) => ({
+      uid: item.uid,
+      name: item.title,
+      status: item.status,
+      url: item.url,
+    })),
+    beforeUpload: async (file: File) => {
+      const resourceId = genResourceID();
+      setFileList((prev) => [
+        ...prev,
+        {
+          title: file.name,
+          url: '',
+          storageKey: '',
+          uid: resourceId,
+          status: 'uploading',
+        },
+      ]);
+
+      const data = await uploadFile(file, resourceId);
+      if (data?.url && data?.storageKey) {
+        setFileList((prev) =>
+          prev.map((item) =>
+            item.uid === resourceId
+              ? {
+                  title: file.name,
+                  url: data.url,
+                  storageKey: data.storageKey,
+                  uid: data.resourceId,
+                  status: 'done',
+                }
+              : item,
+          ),
+        );
+      } else {
+        setFileList((prev) => prev.filter((item) => item.uid !== resourceId));
+        message.error(`${t('common.uploadFailed')}: ${file.name}`);
+      }
+
       return false;
     },
-    onRemove: (file) => {
+    onRemove: (file: RcFile) => {
       setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
     },
   };
@@ -51,16 +110,18 @@ export const ImportFromFile = () => {
 
     const { data } = await getClient().batchCreateResource({
       body: fileList.map((file) => ({
-        resourceType: 'file' as ResourceType,
-        title: file.name,
+        resourceType: 'file',
+        title: file.title,
+        resourceId: file.uid,
         data: {
-          file: file as RcFile,
-          title: file.name,
+          url: file.url,
+          title: file.title,
+          storageKey: file.storageKey,
         },
       })),
     });
-    setSaveLoading(false);
 
+    setSaveLoading(false);
     if (!data?.success) {
       message.error(t('common.putFailed'));
       return;
