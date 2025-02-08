@@ -7,7 +7,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { Prisma, SkillTrigger as SkillTriggerModel } from '@prisma/client';
 import { Response } from 'express';
-import { AIMessageChunk, BaseMessage } from '@langchain/core/dist/messages';
+import { AIMessageChunk, BaseMessage, MessageContentComplex } from '@langchain/core/dist/messages';
 import {
   CreateSkillInstanceRequest,
   CreateSkillTriggerRequest,
@@ -89,27 +89,6 @@ import { CollabContext } from '@/collab/collab.dto';
 import { DirectConnection } from '@hocuspocus/server';
 import { modelInfoPO2DTO } from '@/misc/misc.dto';
 import { MiscService } from '@/misc/misc.service';
-
-export function createLangchainMessage(result: ActionResult, steps: ActionStep[]): BaseMessage[] {
-  const query = result.title;
-
-  return [
-    new HumanMessage({ content: query }),
-    ...(steps?.length > 0
-      ? steps.map(
-          (step) =>
-            new AIMessage({
-              content: step.content, // TODO: dump artifact content to message
-              additional_kwargs: {
-                skillMeta: result.actionMeta,
-                structuredData: step.structuredData,
-                type: result.type,
-              },
-            }),
-        )
-      : []),
-  ];
-}
 
 function validateSkillTriggerCreateParam(param: SkillTriggerCreateParam) {
   if (param.triggerType === 'simpleEvent') {
@@ -629,6 +608,42 @@ export class SkillService {
     return this.streamInvokeSkill(user, jobData, res);
   }
 
+  async buildLangchainMessages(
+    user: User,
+    result: ActionResult,
+    steps: ActionStep[],
+  ): Promise<BaseMessage[]> {
+    const query = result.input?.query || result.title;
+
+    let imageUrls: string[] = [];
+    if (result.input?.images?.length > 0) {
+      imageUrls = await this.misc.generateImageUrls(user, result.input.images);
+    }
+    const imageContent: MessageContentComplex[] = imageUrls.map((url) => ({
+      type: 'image_url',
+      image_url: { url },
+    }));
+
+    return [
+      new HumanMessage({
+        content: [{ type: 'text', text: query }, ...imageContent],
+      }),
+      ...(steps?.length > 0
+        ? steps.map(
+            (step) =>
+              new AIMessage({
+                content: step.content, // TODO: dump artifact content to message
+                additional_kwargs: {
+                  skillMeta: result.actionMeta,
+                  structuredData: step.structuredData,
+                  type: result.type,
+                },
+              }),
+          )
+        : []),
+    ];
+  }
+
   async buildInvokeConfig(
     user: User,
     data: InvokeSkillJobData & {
@@ -660,9 +675,9 @@ export class SkillService {
     };
 
     if (resultHistory?.length > 0) {
-      config.configurable.chatHistory = resultHistory.flatMap((r) =>
-        createLangchainMessage(r, r.steps),
-      );
+      config.configurable.chatHistory = await Promise.all(
+        resultHistory.map((r) => this.buildLangchainMessages(user, r, r.steps)),
+      ).then((messages) => messages.flat());
     }
 
     if (eventListener) {
