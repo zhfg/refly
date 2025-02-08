@@ -733,6 +733,7 @@ const translations = {
         'Create an empty memo for quick recording ideas, supporting Markdown format',
       copy: 'Copy Node Content',
       copyDescription: 'Copy the content of the selected node to the clipboard in Markdown format',
+      createDocumentDescription: 'Create a document for writing',
       askAI: 'Ask AI',
       askAIDescription:
         'Ask AI, select context or switch skill, input requirements, get help with writing, reading comprehension, or question answering',
