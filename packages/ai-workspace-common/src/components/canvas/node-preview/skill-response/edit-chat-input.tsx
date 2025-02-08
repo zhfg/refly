@@ -158,8 +158,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
         ...editContextItems,
         {
           type: 'image',
-          entityId: nodeData.entityId,
-          title: nodeData.title,
+          ...nodeData,
         },
       ]);
     }

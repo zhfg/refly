@@ -239,8 +239,7 @@ export const ChatPanel = () => {
         ...contextItems,
         {
           type: 'image',
-          entityId: nodeData.entityId,
-          title: nodeData.title,
+          ...nodeData,
         },
       ]);
     }
