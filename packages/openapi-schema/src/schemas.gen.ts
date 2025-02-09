@@ -137,6 +137,11 @@ export const ResourceMetaSchema = {
       description: 'Weblink title',
       example: 'Google',
     },
+    contentType: {
+      type: 'string',
+      description: 'File content type (MIME type)',
+      example: 'application/pdf',
+    },
   },
 } as const;
 

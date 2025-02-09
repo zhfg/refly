@@ -36,6 +36,7 @@ import {
   streamToString,
   QUEUE_SYNC_STORAGE_USAGE,
   QUEUE_CLEAR_CANVAS_ENTITY,
+  streamToBuffer,
 } from '@/utils';
 import {
   genResourceID,
@@ -59,12 +60,16 @@ import {
   DocumentNotFoundError,
 } from '@refly-packages/errors';
 import { DeleteCanvasNodesJobData } from '@/canvas/canvas.dto';
+import { ParserFactory } from '@/knowledge/parsers/factory';
+import { ConfigService } from '@nestjs/config';
+import { ParseResult } from './parsers/base';
 
 @Injectable()
 export class KnowledgeService {
   private logger = new Logger(KnowledgeService.name);
 
   constructor(
+    private config: ConfigService,
     private prisma: PrismaService,
     private elasticsearch: ElasticsearchService,
     private ragService: RAGService,
@@ -145,6 +150,7 @@ export class KnowledgeService {
     param.resourceId = genResourceID();
 
     let storageKey: string;
+    let rawFileKey: string | null = null;
     let storageSize = 0;
     let identifier: string;
     let indexStatus: IndexStatus = 'wait_parse';
@@ -187,8 +193,18 @@ export class KnowledgeService {
       if (!param.storageKey) {
         throw new ParamsError('storageKey is required for file resource');
       }
-      storageKey = param.storageKey;
-      identifier = `file://${param.storageKey}`; // TODO: use shasum for file binary
+      rawFileKey = param.storageKey;
+
+      const shasum = crypto.createHash('sha256');
+      const fileStream = await this.minio.client.getObject(rawFileKey);
+      shasum.update(await streamToBuffer(fileStream));
+      identifier = `file:${shasum.digest('hex')}`;
+
+      const fileStat = await this.minio.client.statObject(rawFileKey);
+      param.data = {
+        ...param.data,
+        contentType: fileStat.metaData?.['content-type'],
+      };
     } else {
       throw new ParamsError('Invalid resource type');
     }
@@ -208,6 +224,7 @@ export class KnowledgeService {
         contentPreview,
         storageKey,
         storageSize,
+        rawFileKey,
         uid: user.uid,
         title: param.title || 'Untitled',
         indexStatus,
@@ -254,17 +271,29 @@ export class KnowledgeService {
       return resource;
     }
 
-    const { resourceId, meta } = resource;
-    const { url } = JSON.parse(meta) as ResourceMeta;
+    const { resourceId, resourceType, meta } = resource;
+    const { url, contentType } = JSON.parse(meta) as ResourceMeta;
 
-    let content = '';
-    let _title = '';
+    const parserFactory = new ParserFactory(this.config);
 
-    if (url) {
-      const { data } = await this.ragService.crawlFromRemoteReader(url);
-      content = data.content?.replace(/x00/g, '') ?? '';
-      _title ||= data.title;
+    let result: ParseResult;
+
+    if (resourceType === 'weblink') {
+      const parser = parserFactory.createParser('jina');
+      result = await parser.parse(url);
+    } else if (resource.rawFileKey) {
+      const parser = parserFactory.createParserByContentType(contentType);
+      const fileStream = await this.minio.client.getObject(resource.rawFileKey);
+      const fileBuffer = await streamToBuffer(fileStream);
+      result = await parser.parse(fileBuffer);
     }
+
+    if (result.error) {
+      throw new Error(`Parse resource ${resourceId} failed: ${result.error}`);
+    }
+
+    const content = result.content?.replace(/x00/g, '') ?? '';
+    const title = result.metadata?.title ?? resource.title;
 
     const storageKey = `resources/${resourceId}.txt`;
     await this.minio.client.putObject(storageKey, content);
@@ -275,12 +304,12 @@ export class KnowledgeService {
         storageKey,
         storageSize: (await this.minio.client.statObject(storageKey)).size,
         wordCount: readingTime(content).words,
-        title: resource.title,
+        title,
         indexStatus: 'wait_index',
         contentPreview: content?.slice(0, 500),
         meta: JSON.stringify({
           url,
-          title: resource.title,
+          title,
         } as ResourceMeta),
       },
     });

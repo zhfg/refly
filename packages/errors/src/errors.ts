@@ -104,6 +104,14 @@ export class AuthenticationExpiredError extends BaseError {
   };
 }
 
+export class UnsupportedFileTypeError extends BaseError {
+  code = 'E0012';
+  messageDict = {
+    en: 'This file type is temporarily not supported',
+    'zh-CN': '暂不支持该文件类型',
+  };
+}
+
 export class CanvasNotFoundError extends BaseError {
   code = 'E1000';
   messageDict = {
@@ -221,6 +229,7 @@ const errorMap = {
   E0009: IncorrectVerificationCode,
   E0010: OperationTooFrequent,
   E0011: AuthenticationExpiredError,
+  E0012: UnsupportedFileTypeError,
   E1000: CanvasNotFoundError,
   E1002: ResourceNotFoundError,
   E1003: DocumentNotFoundError,

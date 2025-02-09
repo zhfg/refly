@@ -306,6 +306,8 @@ model Resource {
   storageSize    BigInt    @default(0) @map("storage_size")
   /// Vector storage size (in bytes)
   vectorSize     BigInt    @default(0) @map("vector_size")
+  /// Raw file storage key
+  rawFileKey     String?   @map("raw_file_key")
   /// Index status
   indexStatus    String    @default("init") @map("index_status")
   /// Title
@@ -323,6 +325,29 @@ model Resource {
 
   @@index([uid, identifier, deletedAt, updatedAt])
   @@map("resources")
+}
+
+model FileParseRecord {
+  /// Primary key
+  pk         BigInt    @id @default(autoincrement())
+  /// Record id
+  recordId   String    @unique @map("record_id")
+  /// Resource id
+  resourceId String    @map("resource_id")
+  /// Resource identifier
+  identifier String    @map("identifier")
+  /// Which parse record this record is reused from (target record id)
+  reuseFrom  String?   @map("reuse_from")
+  /// File storage key
+  fileKey    String    @map("file_key")
+  /// Create timestamp
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz()
+
+  @@map("file_parse_records")
 }
 
 model Document {

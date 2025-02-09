@@ -413,7 +413,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpsertResourceResponse'
+                $ref: '#/components/schemas/BatchCreateResourceResponse'
       security:
         - api_key: []
   /knowledge/resource/reindex:
@@ -1605,6 +1605,10 @@ components:
           type: string
           description: Weblink title
           example: Google
+        contentType:
+          type: string
+          description: File content type (MIME type)
+          example: application/pdf
     ResourceType:
       type: string
       description: Resource type

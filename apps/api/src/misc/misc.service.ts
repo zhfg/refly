@@ -127,6 +127,7 @@ export class MiscService {
         storageSize: file.buffer.length,
         entityId,
         entityType,
+        contentType: file.mimetype,
       },
     });
 
