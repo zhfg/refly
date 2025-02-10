@@ -26,8 +26,8 @@ export const MemoEditor: FC<MemoEditorProps> = ({ editor, bgColor, onChangeBackg
     '#e2defc', // Purple
     '#d6ebfd', // Blue
     '#cff9fe', // Cyan
-    '#dcfae6', // Light Green
-    '#e8fad7', // Green
+    '#d1f9e8', // Light Green
+    '#e3fbcc', // Green
     '#fffee7', // Yellow
     '#fee1c7', // Orange
     '#ffede7', // Pink
