@@ -23,15 +23,6 @@ interface FileItem {
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
-const ALLOWED_FILE_TYPES = [
-  'application/pdf', // PDF
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
-  'application/rtf', // RTF
-  'text/plain', // TXT
-  'text/markdown', // MD
-  'text/html', // HTML
-  'application/epub+zip', // EPUB
-];
 
 const ALLOWED_FILE_EXTENSIONS = ['.pdf', '.docx', '.rtf', '.txt', '.md', '.html', '.epub'];
 
@@ -80,17 +71,6 @@ export const ImportFromFile = () => {
     beforeUpload: async (file: File) => {
       if (file.size > MAX_FILE_SIZE) {
         message.error(t('resource.import.fileTooLarge', { size: '5MB' }));
-        return Upload.LIST_IGNORE;
-      }
-
-      const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
-      if (!ALLOWED_FILE_EXTENSIONS.includes(fileExtension)) {
-        message.error(t('resource.import.unsupportedFileType'));
-        return Upload.LIST_IGNORE;
-      }
-
-      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-        message.error(t('resource.import.unsupportedFileType'));
         return Upload.LIST_IGNORE;
       }
 
