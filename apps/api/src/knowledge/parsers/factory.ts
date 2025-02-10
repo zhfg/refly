@@ -36,6 +36,7 @@ export class ParserFactory {
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types/Common_types
     switch (contentType) {
       case 'text/plain':
+      case 'text/markdown':
         return new PlainTextParser(this.config, { ...options });
       case 'text/html':
         return new PandocParser(this.config, { format: 'html', ...options });

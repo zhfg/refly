@@ -58,6 +58,7 @@ export class MiscService {
       file: {
         buffer: Buffer.from(buffer),
         mimetype: res.headers.get('Content-Type') || 'application/octet-stream',
+        originalname: path.basename(url),
       },
     });
   }
@@ -135,6 +136,11 @@ export class MiscService {
       'Content-Type': contentType,
     });
 
+    // Resize and convert to webp if it's an image
+    if (contentType?.startsWith('image/')) {
+      await this.imageQueue.add('resizeAndConvert', { storageKey });
+    }
+
     return {
       storageKey,
       url: `${this.config.get('staticEndpoint')}${storageKey}`,
@@ -144,7 +150,7 @@ export class MiscService {
   async uploadFile(
     user: User,
     param: {
-      file: Pick<Express.Multer.File, 'buffer' | 'mimetype'>;
+      file: Pick<Express.Multer.File, 'buffer' | 'mimetype' | 'originalname'>;
       entityId?: string;
       entityType?: EntityType;
     },
@@ -156,7 +162,9 @@ export class MiscService {
     }
 
     const objectKey = randomUUID();
-    const storageKey = `static/${objectKey}`;
+    const extension = path.extname(file.originalname);
+    const contentType = mime.getType(extension) ?? file.mimetype ?? 'application/octet-stream';
+    const storageKey = `static/${objectKey}${extension}`;
 
     await this.prisma.staticFile.create({
       data: {
@@ -165,21 +173,16 @@ export class MiscService {
         storageSize: file.buffer.length,
         entityId,
         entityType,
-        contentType: file.mimetype,
+        contentType,
       },
     });
 
     await this.minio.client.putObject(storageKey, file.buffer, {
-      'Content-Type': file.mimetype,
-    });
-
-    await this.ssuQueue.add('syncStorageUsage', {
-      uid: user.uid,
-      timestamp: new Date(),
+      'Content-Type': contentType,
     });
 
     // Resize and convert to webp if it's an image
-    if (file.mimetype?.startsWith('image/')) {
+    if (contentType?.startsWith('image/')) {
       await this.imageQueue.add('resizeAndConvert', { storageKey });
     }
 

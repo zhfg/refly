@@ -353,6 +353,7 @@ export class KnowledgeService {
         meta: JSON.stringify({
           url,
           title,
+          contentType,
         } as ResourceMeta),
       },
     });
@@ -534,15 +535,23 @@ export class KnowledgeService {
       }),
     ]);
 
-    await Promise.all([
-      this.minio.client.removeObject(resource.storageKey),
+    const cleanups: Promise<any>[] = [
       this.ragService.deleteResourceNodes(user, resourceId),
       this.elasticsearch.deleteResource(resourceId),
       this.syncStorageUsage(user),
       this.canvasQueue.add('deleteNodes', {
         entities: [{ entityId: resourceId, entityType: 'resource' }],
       }),
-    ]);
+    ];
+
+    if (resource.storageKey) {
+      cleanups.push(this.minio.client.removeObject(resource.storageKey));
+    }
+    if (resource.rawFileKey) {
+      cleanups.push(this.minio.client.removeObject(resource.rawFileKey));
+    }
+
+    await Promise.all(cleanups);
   }
 
   async listDocuments(user: User, param: ListDocumentsData['query']) {
