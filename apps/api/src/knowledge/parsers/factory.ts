@@ -19,13 +19,13 @@ export class ParserFactory {
 
     switch (type) {
       case 'pandoc':
-        return new PandocParser({ mockMode, ...options });
+        return new PandocParser(this.config, { mockMode, ...options });
       case 'marker':
-        return new MarkerParser({ mockMode, ...options });
+        return new MarkerParser(this.config, { mockMode, ...options });
       case 'jina':
         return new JinaParser(this.config, { mockMode, ...options });
       case 'plain-text':
-        return new PlainTextParser({ mockMode, ...options });
+        return new PlainTextParser(this.config, { mockMode, ...options });
       default:
         throw new Error(`Unknown parser type: ${type}`);
     }
@@ -36,15 +36,15 @@ export class ParserFactory {
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types/Common_types
     switch (contentType) {
       case 'text/plain':
-        return new PlainTextParser({ ...options });
+        return new PlainTextParser(this.config, { ...options });
       case 'text/html':
-        return new PandocParser({ format: 'html', ...options });
+        return new PandocParser(this.config, { format: 'html', ...options });
       case 'application/pdf':
-        return new MarkerParser({ ...options });
+        return new MarkerParser(this.config, { ...options });
       case 'application/epub+zip':
-        return new PandocParser({ format: 'epub', ...options });
+        return new PandocParser(this.config, { format: 'epub', ...options });
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        return new PandocParser({ format: 'docx', ...options });
+        return new PandocParser(this.config, { format: 'docx', ...options });
       default:
         throw new UnsupportedFileTypeError(`Unsupported contentType: ${contentType}`);
     }

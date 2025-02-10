@@ -259,6 +259,45 @@ export class KnowledgeService {
     return Promise.all(tasks);
   }
 
+  private async uploadImagesAndReplaceLinks(user: User, result: ParseResult, resourceId: string) {
+    const { content, images } = result;
+    if (!content || !images || Object.keys(images).length === 0) {
+      return content;
+    }
+
+    // Regular expression to find markdown image links
+    const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+    let modifiedContent = content;
+    const uploadedImages: Record<string, string> = {};
+
+    // First pass: Upload all images to Minio
+    for (const [imagePath, imageBuffer] of Object.entries(images)) {
+      try {
+        const { url } = await this.miscService.uploadBuffer(user, {
+          fpath: imagePath,
+          buf: imageBuffer,
+          entityId: resourceId,
+          entityType: 'resource',
+        });
+        uploadedImages[imagePath] = url;
+      } catch (error) {
+        this.logger.error(`Failed to upload image ${imagePath}: ${error?.stack}`);
+      }
+    }
+
+    // Second pass: Replace all image links in the markdown content
+    modifiedContent = modifiedContent.replace(imageRegex, (match, altText, imagePath) => {
+      // If we have an uploaded version of this image, use its URL
+      if (uploadedImages[imagePath]) {
+        return `![${altText}](${uploadedImages[imagePath]})`;
+      }
+      // If we don't have an uploaded version, keep the original
+      return match;
+    });
+
+    return modifiedContent;
+  }
+
   /**
    * Parse resource content from remote URL into markdown.
    * Currently only weblinks are supported.
@@ -290,6 +329,10 @@ export class KnowledgeService {
 
     if (result.error) {
       throw new Error(`Parse resource ${resourceId} failed: ${result.error}`);
+    }
+
+    if (Object.keys(result.images ?? {}).length > 0) {
+      result.content = await this.uploadImagesAndReplaceLinks(user, result, resourceId);
     }
 
     const content = result.content?.replace(/x00/g, '') ?? '';

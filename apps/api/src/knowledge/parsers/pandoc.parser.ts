@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { spawn } from 'node:child_process';
 import { BaseParser, ParserOptions, ParseResult } from './base';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PandocParser extends BaseParser {
-  constructor(options: ParserOptions = {}) {
+  constructor(
+    private readonly config: ConfigService,
+    options: ParserOptions = {},
+  ) {
     super({
       format: 'markdown',
       timeout: 30000,

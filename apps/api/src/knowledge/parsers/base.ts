@@ -8,6 +8,7 @@ export interface ParserOptions {
 
 export interface ParseResult {
   content: string;
+  images?: Record<string, Buffer>; // pathname to image buffer
   metadata?: Record<string, any>;
   error?: string;
 }

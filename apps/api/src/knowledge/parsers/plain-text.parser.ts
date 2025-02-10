@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { BaseParser, ParserOptions, ParseResult } from './base';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PlainTextParser extends BaseParser {
-  constructor(options: ParserOptions = {}) {
+  constructor(
+    private readonly config: ConfigService,
+    options: ParserOptions = {},
+  ) {
     super(options);
   }
 

@@ -1,6 +1,7 @@
 import { Inject, Injectable, StreamableFile, Logger } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import sharp from 'sharp';
+import mime from 'mime';
 import { InjectQueue } from '@nestjs/bullmq';
 import {
   EntityType,
@@ -12,6 +13,7 @@ import {
 import { PrismaService } from '@/common/prisma.service';
 import { MINIO_EXTERNAL, MinioService } from '@/common/minio.service';
 import { randomUUID } from 'node:crypto';
+import path from 'node:path';
 import { ConfigService } from '@nestjs/config';
 import { scrapeWeblink } from '@refly-packages/utils';
 import { QUEUE_IMAGE_PROCESSING, QUEUE_SYNC_STORAGE_USAGE, streamToBuffer } from '@/utils';
@@ -101,6 +103,42 @@ export class MiscService {
     } else {
       throw new ParamsError(`Invalid entity type: ${entityType}`);
     }
+  }
+
+  async uploadBuffer(
+    user: User,
+    param: {
+      fpath: string;
+      buf: Buffer;
+      entityId?: string;
+      entityType?: EntityType;
+    },
+  ): Promise<UploadResponse['data']> {
+    const { fpath, buf, entityId, entityType } = param;
+    const objectKey = randomUUID();
+    const fileExtension = path.extname(fpath);
+    const storageKey = `static/${objectKey}${fileExtension}`;
+    const contentType = mime.getType(fpath) ?? 'application/octet-stream';
+
+    await this.prisma.staticFile.create({
+      data: {
+        uid: user.uid,
+        storageKey,
+        storageSize: buf.length,
+        entityId,
+        entityType,
+        contentType,
+      },
+    });
+
+    await this.minio.client.putObject(storageKey, buf, {
+      'Content-Type': contentType,
+    });
+
+    return {
+      storageKey,
+      url: `${this.config.get('staticEndpoint')}${storageKey}`,
+    };
   }
 
   async uploadFile(
