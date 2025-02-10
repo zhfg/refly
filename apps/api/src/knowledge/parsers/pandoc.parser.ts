@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { spawn } from 'node:child_process';
 import { BaseParser, ParserOptions, ParseResult } from './base';
 import { ConfigService } from '@nestjs/config';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
 
 @Injectable()
 export class PandocParser extends BaseParser {
@@ -16,6 +19,37 @@ export class PandocParser extends BaseParser {
     });
   }
 
+  private async createTempDir(): Promise<string> {
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'pandoc-'));
+    return tempDir;
+  }
+
+  private async cleanupTempDir(tempDir: string): Promise<void> {
+    try {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    } catch {
+      // Ignore cleanup errors
+    }
+  }
+
+  private async readImagesFromDir(mediaDir: string): Promise<Record<string, Buffer>> {
+    const images: Record<string, Buffer> = {};
+    try {
+      const files = await fs.readdir(mediaDir);
+      for (const file of files) {
+        const filePath = path.join(mediaDir, file);
+        const stats = await fs.stat(filePath);
+        if (stats.isFile()) {
+          const buffer = await fs.readFile(filePath);
+          images[path.join(mediaDir, file)] = buffer;
+        }
+      }
+    } catch {
+      // If media directory doesn't exist or can't be read, return empty images object
+    }
+    return images;
+  }
+
   async parse(input: string | Buffer): Promise<ParseResult> {
     if (this.options.mockMode) {
       return {
@@ -24,8 +58,19 @@ export class PandocParser extends BaseParser {
       };
     }
 
+    const tempDir = await this.createTempDir();
+    const mediaDir = path.join(tempDir, 'media');
+
     try {
-      const pandoc = spawn('pandoc', ['-f', this.options.format, '-t', 'markdown']);
+      const pandoc = spawn('pandoc', [
+        '-f',
+        this.options.format,
+        '-t',
+        'commonmark-raw_html',
+        '--wrap=none',
+        '--extract-media',
+        tempDir,
+      ]);
 
       return new Promise((resolve, reject) => {
         let stdout = '';
@@ -39,24 +84,32 @@ export class PandocParser extends BaseParser {
           stderr += data.toString();
         });
 
-        pandoc.on('close', (code) => {
-          if (code === 0) {
-            resolve({
-              content: stdout,
-              metadata: { format: this.options.format },
-            });
-          } else {
-            reject(new Error(`Pandoc failed with code ${code}: ${stderr}`));
+        pandoc.on('close', async (code) => {
+          try {
+            if (code === 0) {
+              const images = await this.readImagesFromDir(mediaDir);
+              resolve({
+                content: stdout,
+                images,
+                metadata: { format: this.options.format },
+              });
+            } else {
+              reject(new Error(`Pandoc failed with code ${code}: ${stderr}`));
+            }
+          } finally {
+            await this.cleanupTempDir(tempDir);
           }
         });
 
-        pandoc.on('error', (error) => {
+        pandoc.on('error', async (error) => {
+          await this.cleanupTempDir(tempDir);
           reject(error);
         });
 
         // Handle timeout
-        const timeout = setTimeout(() => {
+        const timeout = setTimeout(async () => {
           pandoc.kill();
+          await this.cleanupTempDir(tempDir);
           reject(new Error(`Pandoc process timed out after ${this.options.timeout}ms`));
         }, this.options.timeout);
 
@@ -69,6 +122,7 @@ export class PandocParser extends BaseParser {
         pandoc.stdin.end();
       });
     } catch (error) {
+      await this.cleanupTempDir(tempDir);
       return this.handleError(error);
     }
   }

@@ -331,6 +331,10 @@ export class KnowledgeService {
       throw new Error(`Parse resource ${resourceId} failed: ${result.error}`);
     }
 
+    this.logger.log(
+      `Parse resource ${resourceId} success, images: ${Object.keys(result.images ?? {})}`,
+    );
+
     if (Object.keys(result.images ?? {}).length > 0) {
       result.content = await this.uploadImagesAndReplaceLinks(user, result, resourceId);
     }
