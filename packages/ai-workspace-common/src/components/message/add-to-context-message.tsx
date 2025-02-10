@@ -9,7 +9,7 @@ interface AddToContextMessageContentProps {
 const AddToContextMessageContent: React.FC<AddToContextMessageContentProps> = React.memo(
   ({ nodeType, title, action }) => (
     <div className="flex items-center gap-2">
-      <span>{nodeType}</span>「<span className="max-w-[200px] truncate">{title}</span>」
+      <span>{nodeType}</span>[<span className="max-w-[200px] truncate">{title}</span>]
       <span>{action}</span>
     </div>
   ),

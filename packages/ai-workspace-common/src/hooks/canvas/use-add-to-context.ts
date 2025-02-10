@@ -41,7 +41,7 @@ export const useAddToContext = () => {
       }
 
       if (isAlreadyAdded) {
-        void message.warning({
+        message.warning({
           content: React.createElement(AddToContextMessageContent, {
             title: nodeTitle,
             nodeType: t(`canvas.nodeTypes.${nodeType}`),
@@ -55,7 +55,7 @@ export const useAddToContext = () => {
       // Add to context
       contextStore.addContextItem(item);
 
-      void message.success({
+      message.success({
         content: React.createElement(AddToContextMessageContent, {
           title: nodeTitle || t('common.untitled'),
           nodeType: t(`canvas.nodeTypes.${nodeType}`),
