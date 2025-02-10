@@ -1677,6 +1677,7 @@ const translations = {
       tokenUsed: '已使用 {{used}} / {{quota}}',
       upgrade: '升级',
       quotaExceeded: '额度已用尽，点击升级订阅',
+      noVisionSupport: '该模型不支持消费图片',
     },
     contentSelector: {
       openForWeb: '开启选择内容提问, 画布已进入只读模式',

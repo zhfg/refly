@@ -1700,6 +1700,7 @@ const translations = {
       tokenUsed: 'Used {{used}} / {{quota}}',
       upgrade: 'Upgrade',
       quotaExceeded: 'Quota exceeded, click to upgrade subscription',
+      noVisionSupport: 'This model does not support image processing',
     },
     contentSelector: {
       openForWeb: 'Enable content selection for questions, and the canvas is now in read-only mode',
