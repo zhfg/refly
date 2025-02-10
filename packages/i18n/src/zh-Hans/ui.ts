@@ -74,6 +74,7 @@ const translations = {
     uploadSuccess: '上传成功',
     uploadFailed: '上传失败',
     dropImageHere: '拖放图片到这里',
+    presetColors: '预设颜色',
   },
   verifyRules: {
     emailRequired: '邮箱地址不能为空',

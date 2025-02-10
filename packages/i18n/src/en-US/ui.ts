@@ -66,6 +66,7 @@ const translations = {
     uploadSuccess: 'Upload successful',
     uploadFailed: 'Upload failed',
     dropImageHere: 'Drop image here',
+    presetColors: 'Preset Colors',
   },
   verifyRules: {
     emailRequired: 'Email cannot be empty',
