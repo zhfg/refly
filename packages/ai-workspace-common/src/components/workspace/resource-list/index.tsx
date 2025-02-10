@@ -5,6 +5,7 @@ import {
   IconMoreHorizontal,
   IconDelete,
   IconResourceFilled,
+  IconImportResource,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { LuPlus, LuExternalLink } from 'react-icons/lu';
 
@@ -24,6 +25,7 @@ import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canv
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-resource';
 import { getClientOrigin } from '@refly-packages/utils/url';
+import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
 
 const ActionDropdown = ({
   resource,
@@ -196,10 +198,13 @@ const ResourceCard = ({ item, onDelete }: { item: Resource; onDelete: () => void
 
 export const ResourceList = () => {
   const { t } = useTranslation();
-  const { showLibraryModal } = useSiderStoreShallow((state) => ({
+  const { showLibraryModal, setShowLibraryModal } = useSiderStoreShallow((state) => ({
     showLibraryModal: state.showLibraryModal,
+    setShowLibraryModal: state.setShowLibraryModal,
   }));
-
+  const { setImportResourceModalVisible } = useImportResourceStoreShallow((state) => ({
+    setImportResourceModalVisible: state.setImportResourceModalVisible,
+  }));
   const { dataList, loadMore, reload, hasMore, isRequesting, setDataList } = useFetchDataList({
     fetchData: async (queryPayload) => {
       const res = await getClient().listResources({
@@ -236,7 +241,18 @@ export const ResourceList = () => {
           </>
         ) : (
           <div className="h-full flex items-center justify-center">
-            <Empty description={t('common.empty')} />
+            <Empty description={t('common.empty')}>
+              <Button
+                className="text-[#00968F]"
+                icon={<IconImportResource className="-mr-1 flex items-center justify-center" />}
+                onClick={() => {
+                  setShowLibraryModal(false);
+                  setImportResourceModalVisible(true);
+                }}
+              >
+                {t('canvas.toolbar.importResource')}
+              </Button>
+            </Empty>
           </div>
         )}
       </div>
