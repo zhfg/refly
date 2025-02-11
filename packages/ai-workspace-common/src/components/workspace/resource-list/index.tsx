@@ -149,6 +149,13 @@ const ResourceCard = ({ item, onDelete }: { item: Resource; onDelete: () => void
     }
   };
 
+  let url = '';
+  try {
+    url = new URL(item?.data?.url || getClientOrigin()).hostname;
+  } catch (error) {
+    console.warn(`invalid url: ${item?.data?.url}, error: ${error}`);
+  }
+
   return (
     <div
       className="bg-white rounded-lg overflow-hidden border border-solid cursor-pointer border-gray-200 hover:border-green-500 transition-colors duration-200"
@@ -163,12 +170,12 @@ const ResourceCard = ({ item, onDelete }: { item: Resource; onDelete: () => void
       <Divider className="m-0 text-gray-200" />
       <div className="px-3 pt-2 pb-1 flex justify-between items-center bg-gray-50">
         <div className="flex items-center gap-3 mb-2">
-          {item.data?.url ? (
+          {url ? (
             showFallbackIcon ? (
               <IconResourceFilled color={NODE_COLORS.resource} size={24} />
             ) : (
               <img
-                src={`https://www.google.com/s2/favicons?domain=${new URL(item?.data?.url || getClientOrigin()).hostname}&sz=32`}
+                src={`https://www.google.com/s2/favicons?domain=${url}&sz=32`}
                 alt="Website favicon"
                 className="w-6 h-6"
                 onError={() => setShowFallbackIcon(true)}
