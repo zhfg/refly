@@ -5,7 +5,12 @@ import crypto from 'node:crypto';
 import { InjectQueue } from '@nestjs/bullmq';
 import normalizeUrl from 'normalize-url';
 import { readingTime } from 'reading-time-estimator';
-import { Prisma, Resource as ResourceModel, Document as DocumentModel } from '@prisma/client';
+import {
+  Prisma,
+  Resource as ResourceModel,
+  Document as DocumentModel,
+  StaticFile as StaticFileModel,
+} from '@prisma/client';
 import { RAGService } from '@/rag/rag.service';
 import { PrismaService } from '@/common/prisma.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
@@ -36,6 +41,7 @@ import {
   streamToString,
   QUEUE_SYNC_STORAGE_USAGE,
   QUEUE_CLEAR_CANVAS_ENTITY,
+  streamToBuffer,
 } from '@/utils';
 import {
   genResourceID,
@@ -57,14 +63,19 @@ import {
   ReferenceNotFoundError,
   ReferenceObjectMissingError,
   DocumentNotFoundError,
+  StaticFileNotFoundError,
 } from '@refly-packages/errors';
 import { DeleteCanvasNodesJobData } from '@/canvas/canvas.dto';
+import { ParserFactory } from '@/knowledge/parsers/factory';
+import { ConfigService } from '@nestjs/config';
+import { ParseResult } from './parsers/base';
 
 @Injectable()
 export class KnowledgeService {
   private logger = new Logger(KnowledgeService.name);
 
   constructor(
+    private config: ConfigService,
     private prisma: PrismaService,
     private elasticsearch: ElasticsearchService,
     private ragService: RAGService,
@@ -145,9 +156,11 @@ export class KnowledgeService {
     param.resourceId = genResourceID();
 
     let storageKey: string;
+    let staticFile: StaticFileModel | null = null;
     let storageSize = 0;
     let identifier: string;
     let indexStatus: IndexStatus = 'wait_parse';
+    let contentPreview: string;
 
     if (param.resourceType === 'weblink') {
       if (!param.data) {
@@ -169,6 +182,39 @@ export class KnowledgeService {
         .update(param.content ?? '')
         .digest('hex');
       identifier = `text://${md5Hash}`;
+
+      const cleanedContent = param.content?.replace(/x00/g, '') ?? '';
+
+      if (cleanedContent) {
+        // save text content to object storage
+        storageKey = `resources/${param.resourceId}.txt`;
+        await this.minio.client.putObject(storageKey, cleanedContent);
+        storageSize = (await this.minio.client.statObject(storageKey)).size;
+
+        // skip parse stage, since content is provided
+        indexStatus = 'wait_index';
+        contentPreview = cleanedContent.slice(0, 500);
+      }
+    } else if (param.resourceType === 'file') {
+      if (!param.storageKey) {
+        throw new ParamsError('storageKey is required for file resource');
+      }
+      staticFile = await this.prisma.staticFile.findFirst({
+        where: { storageKey: param.storageKey },
+      });
+      if (!staticFile) {
+        throw new StaticFileNotFoundError(`static file ${param.storageKey} not found`);
+      }
+
+      const shasum = crypto.createHash('sha256');
+      const fileStream = await this.minio.client.getObject(staticFile.storageKey);
+      shasum.update(await streamToBuffer(fileStream));
+      identifier = `file:${shasum.digest('hex')}`;
+
+      param.data = {
+        ...param.data,
+        contentType: staticFile.contentType,
+      };
     } else {
       throw new ParamsError('Invalid resource type');
     }
@@ -178,18 +224,6 @@ export class KnowledgeService {
     });
     param.resourceId = existingResource ? existingResource.resourceId : genResourceID();
 
-    const cleanedContent = param.content?.replace(/x00/g, '') ?? '';
-
-    if (cleanedContent) {
-      // save text content to object storage
-      storageKey = `resources/${param.resourceId}.txt`;
-      await this.minio.client.putObject(storageKey, cleanedContent);
-      storageSize = (await this.minio.client.statObject(storageKey)).size;
-
-      // skip parse stage, since content is provided
-      indexStatus = 'wait_index';
-    }
-
     const resource = await this.prisma.resource.upsert({
       where: { resourceId: param.resourceId },
       create: {
@@ -197,22 +231,32 @@ export class KnowledgeService {
         identifier,
         resourceType: param.resourceType,
         meta: JSON.stringify(param.data || {}),
-        contentPreview: cleanedContent?.slice(0, 500),
+        contentPreview,
         storageKey,
         storageSize,
+        rawFileKey: staticFile?.storageKey,
         uid: user.uid,
         title: param.title || 'Untitled',
         indexStatus,
       },
       update: {
         meta: JSON.stringify(param.data || {}),
-        contentPreview: cleanedContent?.slice(0, 500),
+        contentPreview,
         storageKey,
         storageSize,
+        rawFileKey: staticFile?.storageKey,
         title: param.title || 'Untitled',
         indexStatus,
       },
     });
+
+    // Update static file entity reference
+    if (staticFile) {
+      await this.prisma.staticFile.update({
+        where: { pk: staticFile.pk },
+        data: { entityId: resource.resourceId, entityType: 'resource' },
+      });
+    }
 
     // Add to queue to be processed by worker
     await this.queue.add('finalizeResource', {
@@ -234,6 +278,45 @@ export class KnowledgeService {
     return Promise.all(tasks);
   }
 
+  private async uploadImagesAndReplaceLinks(user: User, result: ParseResult, resourceId: string) {
+    const { content, images } = result;
+    if (!content || !images || Object.keys(images).length === 0) {
+      return content;
+    }
+
+    // Regular expression to find markdown image links
+    const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+    let modifiedContent = content;
+    const uploadedImages: Record<string, string> = {};
+
+    // First pass: Upload all images to Minio
+    for (const [imagePath, imageBuffer] of Object.entries(images)) {
+      try {
+        const { url } = await this.miscService.uploadBuffer(user, {
+          fpath: imagePath,
+          buf: imageBuffer,
+          entityId: resourceId,
+          entityType: 'resource',
+        });
+        uploadedImages[imagePath] = url;
+      } catch (error) {
+        this.logger.error(`Failed to upload image ${imagePath}: ${error?.stack}`);
+      }
+    }
+
+    // Second pass: Replace all image links in the markdown content
+    modifiedContent = modifiedContent.replace(imageRegex, (match, altText, imagePath) => {
+      // If we have an uploaded version of this image, use its URL
+      if (uploadedImages[imagePath]) {
+        return `![${altText}](${uploadedImages[imagePath]})`;
+      }
+      // If we don't have an uploaded version, keep the original
+      return match;
+    });
+
+    return modifiedContent;
+  }
+
   /**
    * Parse resource content from remote URL into markdown.
    * Currently only weblinks are supported.
@@ -246,17 +329,37 @@ export class KnowledgeService {
       return resource;
     }
 
-    const { resourceId, meta } = resource;
-    const { url } = JSON.parse(meta) as ResourceMeta;
+    const { resourceId, resourceType, meta } = resource;
+    const { url, contentType } = JSON.parse(meta) as ResourceMeta;
 
-    let content = '';
-    let _title = '';
+    const parserFactory = new ParserFactory(this.config);
 
-    if (url) {
-      const { data } = await this.ragService.crawlFromRemoteReader(url);
-      content = data.content?.replace(/x00/g, '') ?? '';
-      _title ||= data.title;
+    let result: ParseResult;
+
+    if (resourceType === 'weblink') {
+      const parser = parserFactory.createParser('jina');
+      result = await parser.parse(url);
+    } else if (resource.rawFileKey) {
+      const parser = parserFactory.createParserByContentType(contentType);
+      const fileStream = await this.minio.client.getObject(resource.rawFileKey);
+      const fileBuffer = await streamToBuffer(fileStream);
+      result = await parser.parse(fileBuffer);
     }
+
+    if (result.error) {
+      throw new Error(`Parse resource ${resourceId} failed: ${result.error}`);
+    }
+
+    this.logger.log(
+      `Parse resource ${resourceId} success, images: ${Object.keys(result.images ?? {})}`,
+    );
+
+    if (Object.keys(result.images ?? {}).length > 0) {
+      result.content = await this.uploadImagesAndReplaceLinks(user, result, resourceId);
+    }
+
+    const content = result.content?.replace(/x00/g, '') ?? '';
+    const title = result.metadata?.title ?? resource.title;
 
     const storageKey = `resources/${resourceId}.txt`;
     await this.minio.client.putObject(storageKey, content);
@@ -267,12 +370,13 @@ export class KnowledgeService {
         storageKey,
         storageSize: (await this.minio.client.statObject(storageKey)).size,
         wordCount: readingTime(content).words,
-        title: resource.title,
+        title,
         indexStatus: 'wait_index',
         contentPreview: content?.slice(0, 500),
         meta: JSON.stringify({
           url,
-          title: resource.title,
+          title,
+          contentType,
         } as ResourceMeta),
       },
     });
@@ -454,15 +558,23 @@ export class KnowledgeService {
       }),
     ]);
 
-    await Promise.all([
-      this.minio.client.removeObject(resource.storageKey),
+    const cleanups: Promise<any>[] = [
       this.ragService.deleteResourceNodes(user, resourceId),
       this.elasticsearch.deleteResource(resourceId),
       this.syncStorageUsage(user),
       this.canvasQueue.add('deleteNodes', {
         entities: [{ entityId: resourceId, entityType: 'resource' }],
       }),
-    ]);
+    ];
+
+    if (resource.storageKey) {
+      cleanups.push(this.minio.client.removeObject(resource.storageKey));
+    }
+    if (resource.rawFileKey) {
+      cleanups.push(this.minio.client.removeObject(resource.rawFileKey));
+    }
+
+    await Promise.all(cleanups);
   }
 
   async listDocuments(user: User, param: ListDocumentsData['query']) {

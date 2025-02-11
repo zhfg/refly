@@ -878,6 +878,10 @@ const translations = {
     import: {
       title: 'Resource Integration',
       fromWebSearch: 'Web Search',
+      fromFile: 'Upload File',
+      dragOrClick: 'Click or Drag files to this area to upload',
+      unsupportedFileType: 'Please upload the specified type of file',
+      supportedFiles: 'Supported Files: {{formats}}. Max 5MB each.',
       fromWeblink: 'Paste Weblink',
       selectAll: 'Select All',
       webLinkPlaceholer: 'Enter or paste valid web links, one per line...',
@@ -886,6 +890,7 @@ const translations = {
       emptyLink: "You haven't added any links yet!",
       waitingList: 'Pending List',
       linkCount: 'Total {{count}} links',
+      fileCount: 'Total {{count}} files',
       saveTo: 'Save to',
       scrapeError: 'Scraping failed',
       integration: 'Integration',
@@ -1696,6 +1701,7 @@ const translations = {
       tokenUsed: 'Used {{used}} / {{quota}}',
       upgrade: 'Upgrade',
       quotaExceeded: 'Quota exceeded, click to upgrade subscription',
+      noVisionSupport: 'This model does not support image processing',
     },
     contentSelector: {
       openForWeb: 'Enable content selection for questions, and the canvas is now in read-only mode',

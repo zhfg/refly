@@ -126,5 +126,6 @@ export default () => ({
     jina: process.env.JINA_API_KEY,
     fireworks: process.env.FIREWORKS_API_KEY,
     serper: process.env.SERPER_API_KEY,
+    marker: process.env.MARKER_API_KEY,
   },
 });

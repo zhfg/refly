@@ -1,6 +1,7 @@
-import { Inject, Injectable, StreamableFile, Logger } from '@nestjs/common';
+import { Inject, Injectable, StreamableFile, Logger, OnModuleInit } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import sharp from 'sharp';
+import mime from 'mime';
 import { InjectQueue } from '@nestjs/bullmq';
 import {
   EntityType,
@@ -12,9 +13,15 @@ import {
 import { PrismaService } from '@/common/prisma.service';
 import { MINIO_EXTERNAL, MinioService } from '@/common/minio.service';
 import { randomUUID } from 'node:crypto';
+import path from 'node:path';
 import { ConfigService } from '@nestjs/config';
 import { scrapeWeblink } from '@refly-packages/utils';
-import { QUEUE_IMAGE_PROCESSING, QUEUE_SYNC_STORAGE_USAGE, streamToBuffer } from '@/utils';
+import {
+  QUEUE_IMAGE_PROCESSING,
+  QUEUE_SYNC_STORAGE_USAGE,
+  QUEUE_CLEAN_STATIC_FILES,
+  streamToBuffer,
+} from '@/utils';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
 import {
   CanvasNotFoundError,
@@ -26,7 +33,7 @@ import { ImageProcessingJobData } from '@/misc/misc.dto';
 import { createId } from '@paralleldrive/cuid2';
 
 @Injectable()
-export class MiscService {
+export class MiscService implements OnModuleInit {
   private logger = new Logger(MiscService.name);
 
   constructor(
@@ -35,7 +42,32 @@ export class MiscService {
     @Inject(MINIO_EXTERNAL) private minio: MinioService,
     @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
     @InjectQueue(QUEUE_IMAGE_PROCESSING) private imageQueue: Queue<ImageProcessingJobData>,
+    @InjectQueue(QUEUE_CLEAN_STATIC_FILES) private cleanStaticFilesQueue: Queue,
   ) {}
+
+  async onModuleInit() {
+    await this.setupCleanStaticFilesCronjob();
+  }
+
+  private async setupCleanStaticFilesCronjob() {
+    const existingJobs = await this.cleanStaticFilesQueue.getJobSchedulers();
+    await Promise.all(
+      existingJobs.map((job) => this.cleanStaticFilesQueue.removeJobScheduler(job.id)),
+    );
+
+    // Set up the cronjob to run daily at midnight
+    await this.cleanStaticFilesQueue.add(
+      'cleanStaticFiles',
+      {},
+      {
+        repeat: {
+          pattern: '0 0 * * *', // Run at midnight every day
+        },
+      },
+    );
+
+    this.logger.log('Initialized clean static files cronjob');
+  }
 
   async scrapeWeblink(body: ScrapeWeblinkRequest): Promise<ScrapeWeblinkResult> {
     const { url } = body;
@@ -56,6 +88,7 @@ export class MiscService {
       file: {
         buffer: Buffer.from(buffer),
         mimetype: res.headers.get('Content-Type') || 'application/octet-stream',
+        originalname: path.basename(url),
       },
     });
   }
@@ -103,23 +136,65 @@ export class MiscService {
     }
   }
 
-  async uploadFile(
+  async uploadBuffer(
     user: User,
     param: {
-      file: Pick<Express.Multer.File, 'buffer' | 'mimetype'>;
+      fpath: string;
+      buf: Buffer;
       entityId?: string;
       entityType?: EntityType;
     },
-    options?: { checkEntity?: boolean },
+  ): Promise<UploadResponse['data']> {
+    const { fpath, buf, entityId, entityType } = param;
+    const objectKey = randomUUID();
+    const fileExtension = path.extname(fpath);
+    const storageKey = `static/${objectKey}${fileExtension}`;
+    const contentType = mime.getType(fpath) ?? 'application/octet-stream';
+
+    await this.prisma.staticFile.create({
+      data: {
+        uid: user.uid,
+        storageKey,
+        storageSize: buf.length,
+        entityId,
+        entityType,
+        contentType,
+      },
+    });
+
+    await this.minio.client.putObject(storageKey, buf, {
+      'Content-Type': contentType,
+    });
+
+    // Resize and convert to webp if it's an image
+    if (contentType?.startsWith('image/')) {
+      await this.imageQueue.add('resizeAndConvert', { storageKey });
+    }
+
+    return {
+      storageKey,
+      url: `${this.config.get('staticEndpoint')}${storageKey}`,
+    };
+  }
+
+  async uploadFile(
+    user: User,
+    param: {
+      file: Pick<Express.Multer.File, 'buffer' | 'mimetype' | 'originalname'>;
+      entityId?: string;
+      entityType?: EntityType;
+    },
   ): Promise<UploadResponse['data']> {
     const { file, entityId, entityType } = param;
 
-    if (options?.checkEntity) {
+    if (entityId && entityType) {
       await this.checkEntity(user, entityId, entityType);
     }
 
     const objectKey = randomUUID();
-    const storageKey = `static/${objectKey}`;
+    const extension = path.extname(file.originalname);
+    const contentType = mime.getType(extension) ?? file.mimetype ?? 'application/octet-stream';
+    const storageKey = `static/${objectKey}${extension}`;
 
     await this.prisma.staticFile.create({
       data: {
@@ -128,20 +203,16 @@ export class MiscService {
         storageSize: file.buffer.length,
         entityId,
         entityType,
+        contentType,
       },
     });
 
     await this.minio.client.putObject(storageKey, file.buffer, {
-      'Content-Type': file.mimetype,
-    });
-
-    await this.ssuQueue.add('syncStorageUsage', {
-      uid: user.uid,
-      timestamp: new Date(),
+      'Content-Type': contentType,
     });
 
     // Resize and convert to webp if it's an image
-    if (file.mimetype?.startsWith('image/')) {
+    if (contentType?.startsWith('image/')) {
       await this.imageQueue.add('resizeAndConvert', { storageKey });
     }
 
@@ -354,5 +425,57 @@ export class MiscService {
       this.logger.error('Error generating image URLs:', error);
       return [];
     }
+  }
+
+  /**
+   * Clean up orphaned static files that are older than one day and have no entity association
+   */
+  async cleanOrphanedStaticFiles(): Promise<void> {
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
+    // Find orphaned files
+    const orphanedFiles = await this.prisma.staticFile.findMany({
+      where: {
+        entityId: null,
+        entityType: null,
+        createdAt: {
+          lt: oneDayAgo,
+        },
+        deletedAt: null,
+      },
+      select: {
+        pk: true,
+        storageKey: true,
+        processedImageKey: true,
+      },
+    });
+
+    if (orphanedFiles.length === 0) {
+      this.logger.log('No orphaned files found to clean up');
+      return;
+    }
+
+    this.logger.log(`Found ${orphanedFiles.length} orphaned files to clean up`);
+
+    // Collect all storage keys to delete (including processed images)
+    const storageKeysToDelete = orphanedFiles.reduce<string[]>((acc, file) => {
+      acc.push(file.storageKey);
+      if (file.processedImageKey) {
+        acc.push(file.processedImageKey);
+      }
+      return acc;
+    }, []);
+
+    // Delete files from storage
+    await this.minio.client.removeObjects(storageKeysToDelete);
+
+    // Mark files as deleted in database
+    await this.prisma.staticFile.updateMany({
+      where: { pk: { in: orphanedFiles.map((file) => file.pk) } },
+      data: { deletedAt: new Date() },
+    });
+
+    this.logger.log(`Successfully cleaned up ${orphanedFiles.length} orphaned files`);
   }
 }

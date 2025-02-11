@@ -137,13 +137,18 @@ export const ResourceMetaSchema = {
       description: 'Weblink title',
       example: 'Google',
     },
+    contentType: {
+      type: 'string',
+      description: 'File content type (MIME type)',
+      example: 'application/pdf',
+    },
   },
 } as const;
 
 export const ResourceTypeSchema = {
   type: 'string',
   description: 'Resource type',
-  enum: ['weblink', 'text'],
+  enum: ['weblink', 'text', 'file'],
 } as const;
 
 export const ResourceSchema = {
@@ -1907,6 +1912,10 @@ export const UpsertResourceRequestSchema = {
     data: {
       description: 'Resource metadata',
       $ref: '#/components/schemas/ResourceMeta',
+    },
+    storageKey: {
+      type: 'string',
+      description: 'Storage key',
     },
     content: {
       type: 'string',
@@ -3894,7 +3903,7 @@ export const ScrapeWeblinkResponseSchema = {
 
 export const UploadRequestSchema = {
   type: 'object',
-  required: ['file', 'entityId', 'entityType'],
+  required: ['file'],
   properties: {
     file: {
       type: 'string',

@@ -413,7 +413,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpsertResourceResponse'
+                $ref: '#/components/schemas/BatchCreateResourceResponse'
       security:
         - api_key: []
   /knowledge/resource/reindex:
@@ -1605,12 +1605,17 @@ components:
           type: string
           description: Weblink title
           example: Google
+        contentType:
+          type: string
+          description: File content type (MIME type)
+          example: application/pdf
     ResourceType:
       type: string
       description: Resource type
       enum:
         - weblink
         - text
+        - file
     Resource:
       type: object
       required:
@@ -2972,6 +2977,9 @@ components:
         data:
           description: Resource metadata
           $ref: '#/components/schemas/ResourceMeta'
+        storageKey:
+          type: string
+          description: Storage key
         content:
           type: string
           description: Resource content (this will be ignored if storageKey was set)
@@ -4276,8 +4284,6 @@ components:
       type: object
       required:
         - file
-        - entityId
-        - entityType
       properties:
         file:
           type: string

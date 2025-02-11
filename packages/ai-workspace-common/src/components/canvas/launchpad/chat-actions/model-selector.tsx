@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo, useCallback, memo } from 'react';
 import { Button, Dropdown, DropdownProps, MenuProps, Progress, Skeleton, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { IconDown } from '@arco-design/web-react/icon';
+import { MdOutlineImageNotSupported } from 'react-icons/md';
+
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
@@ -182,6 +184,22 @@ const SelectedModelDisplay = memo(({ model }: { model: ModelInfo | null }) => {
 
 SelectedModelDisplay.displayName = 'SelectedModelDisplay';
 
+const ModelLabel = memo(({ model }: { model: ModelInfo }) => {
+  const { t } = useTranslation();
+  return (
+    <span className="text-xs flex items-center gap-1">
+      {model.label}
+      {!model.capabilities?.vision && (
+        <Tooltip title={t('copilot.modelSelector.noVisionSupport')}>
+          <MdOutlineImageNotSupported className="w-3.5 h-3.5 text-gray-400" />
+        </Tooltip>
+      )}
+    </span>
+  );
+});
+
+ModelLabel.displayName = 'ModelLabel';
+
 export const ModelSelector = memo(
   ({
     placement = 'bottomLeft',
@@ -191,6 +209,7 @@ export const ModelSelector = memo(
     setModel,
   }: ModelSelectorProps) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const { t } = useTranslation();
 
     const { userProfile } = useUserStoreShallow((state) => ({
       userProfile: state.userProfile,
@@ -232,8 +251,9 @@ export const ModelSelector = memo(
           .map((model) => ({
             key: model.name,
             icon: <ModelOption provider={model.provider} />,
-            label: <span className="text-xs">{model.label}</span>,
+            label: <ModelLabel model={model} />,
             disabled: t1Disabled,
+            capabilities: model.capabilities,
           })),
       [modelList, t1Disabled],
     );
@@ -246,8 +266,9 @@ export const ModelSelector = memo(
           .map((model) => ({
             key: model.name,
             icon: <ModelOption provider={model.provider} />,
-            label: <span className="text-xs">{model.label}</span>,
+            label: <ModelLabel model={model} />,
             disabled: t2Disabled,
+            capabilities: model.capabilities,
           })),
       [modelList, t2Disabled],
     );
@@ -260,7 +281,8 @@ export const ModelSelector = memo(
           .map((model) => ({
             key: model.name,
             icon: <ModelOption provider={model.provider} />,
-            label: <span className="text-xs">{model.label}</span>,
+            label: <ModelLabel model={model} />,
+            capabilities: model.capabilities,
           })),
       [modelList],
     );
@@ -376,6 +398,11 @@ export const ModelSelector = memo(
           <span className="text-xs flex items-center gap-1.5 text-gray-500 cursor-pointer transition-all duration-300 hover:text-gray-700">
             <SelectedModelDisplay model={model} />
             <IconDown />
+            {!model?.capabilities?.vision && (
+              <Tooltip title={t('copilot.modelSelector.noVisionSupport')}>
+                <MdOutlineImageNotSupported className="w-3.5 h-3.5 text-gray-400" />
+              </Tooltip>
+            )}
           </span>
         ) : (
           <IconModel className="w-3.5 h-3.5" />
