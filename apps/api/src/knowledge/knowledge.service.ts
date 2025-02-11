@@ -5,7 +5,12 @@ import crypto from 'node:crypto';
 import { InjectQueue } from '@nestjs/bullmq';
 import normalizeUrl from 'normalize-url';
 import { readingTime } from 'reading-time-estimator';
-import { Prisma, Resource as ResourceModel, Document as DocumentModel } from '@prisma/client';
+import {
+  Prisma,
+  Resource as ResourceModel,
+  Document as DocumentModel,
+  StaticFile as StaticFileModel,
+} from '@prisma/client';
 import { RAGService } from '@/rag/rag.service';
 import { PrismaService } from '@/common/prisma.service';
 import { ElasticsearchService } from '@/common/elasticsearch.service';
@@ -58,6 +63,7 @@ import {
   ReferenceNotFoundError,
   ReferenceObjectMissingError,
   DocumentNotFoundError,
+  StaticFileNotFoundError,
 } from '@refly-packages/errors';
 import { DeleteCanvasNodesJobData } from '@/canvas/canvas.dto';
 import { ParserFactory } from '@/knowledge/parsers/factory';
@@ -150,7 +156,7 @@ export class KnowledgeService {
     param.resourceId = genResourceID();
 
     let storageKey: string;
-    let rawFileKey: string | null = null;
+    let staticFile: StaticFileModel | null = null;
     let storageSize = 0;
     let identifier: string;
     let indexStatus: IndexStatus = 'wait_parse';
@@ -193,17 +199,21 @@ export class KnowledgeService {
       if (!param.storageKey) {
         throw new ParamsError('storageKey is required for file resource');
       }
-      rawFileKey = param.storageKey;
+      staticFile = await this.prisma.staticFile.findFirst({
+        where: { storageKey: param.storageKey },
+      });
+      if (!staticFile) {
+        throw new StaticFileNotFoundError(`static file ${param.storageKey} not found`);
+      }
 
       const shasum = crypto.createHash('sha256');
-      const fileStream = await this.minio.client.getObject(rawFileKey);
+      const fileStream = await this.minio.client.getObject(staticFile.storageKey);
       shasum.update(await streamToBuffer(fileStream));
       identifier = `file:${shasum.digest('hex')}`;
 
-      const fileStat = await this.minio.client.statObject(rawFileKey);
       param.data = {
         ...param.data,
-        contentType: fileStat.metaData?.['content-type'],
+        contentType: staticFile.contentType,
       };
     } else {
       throw new ParamsError('Invalid resource type');
@@ -224,7 +234,7 @@ export class KnowledgeService {
         contentPreview,
         storageKey,
         storageSize,
-        rawFileKey,
+        rawFileKey: staticFile?.storageKey,
         uid: user.uid,
         title: param.title || 'Untitled',
         indexStatus,
@@ -234,10 +244,19 @@ export class KnowledgeService {
         contentPreview,
         storageKey,
         storageSize,
+        rawFileKey: staticFile?.storageKey,
         title: param.title || 'Untitled',
         indexStatus,
       },
     });
+
+    // Update static file entity reference
+    if (staticFile) {
+      await this.prisma.staticFile.update({
+        where: { pk: staticFile.pk },
+        data: { entityId: resource.resourceId, entityType: 'resource' },
+      });
+    }
 
     // Add to queue to be processed by worker
     await this.queue.add('finalizeResource', {

@@ -192,6 +192,14 @@ export class ActionResultNotFoundError extends BaseError {
   };
 }
 
+export class StaticFileNotFoundError extends BaseError {
+  code = 'E1012';
+  messageDict = {
+    en: 'Upload file not found, please try again',
+    'zh-CN': '上传文件不存在，请重新尝试',
+  };
+}
+
 export class StorageQuotaExceeded extends BaseError {
   code = 'E2001';
   messageDict = {
@@ -240,6 +248,7 @@ const errorMap = {
   E1008: LabelInstanceNotFoundError,
   E1009: ShareNotFoundError,
   E1011: ActionResultNotFoundError,
+  E1012: StaticFileNotFoundError,
   E2001: StorageQuotaExceeded,
   E2002: ModelUsageQuotaExceeded,
   E2003: ModelNotSupportedError,

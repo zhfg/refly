@@ -235,7 +235,8 @@ model StaticFile {
   /// Soft delete timestamp
   deletedAt         DateTime? @map("deleted_at") @db.Timestamptz()
 
-  @@index([uid, entityId, entityType])
+  @@index([entityId, entityType])
+  @@index([storageKey])
   @@map("static_files")
 }
 
