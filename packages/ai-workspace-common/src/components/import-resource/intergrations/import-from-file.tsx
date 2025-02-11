@@ -186,14 +186,16 @@ export const ImportFromFile = () => {
       </div>
 
       {/* content */}
-      <div className="flex-grow overflow-y-auto p-6 box-border flex flex-col justify-center">
+      <div className="flex-grow overflow-y-auto px-10 py-6 box-border flex flex-col justify-center">
         <div className="w-full file-upload-container">
           <Dragger {...props}>
             <RiInboxArchiveLine className="text-3xl text-[#00968f]" />
             <p className="ant-upload-text mt-4 text-gray-600">{t('resource.import.dragOrClick')}</p>
             <p className="ant-upload-hint text-gray-400 mt-2">
               {t('resource.import.supportedFiles', {
-                formats: 'PDF、DOCX、RTF、TXT、MD、HTML、EPUB',
+                formats: ALLOWED_FILE_EXTENSIONS.map((ext) => ext.slice(1).toUpperCase()).join(
+                  ', ',
+                ),
               })}
             </p>
           </Dragger>

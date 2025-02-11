@@ -129,8 +129,6 @@ const wrapFunctions = (module: any) => {
         try {
           const response = await origMethod(...args);
 
-          console.log('response', response);
-
           if (response) {
             const error = await extractBaseResp(response?.response as Response, response?.data);
             if (!error.success) {
