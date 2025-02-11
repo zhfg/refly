@@ -559,6 +559,10 @@ export class KnowledgeService {
     ]);
 
     const cleanups: Promise<any>[] = [
+      this.miscService.removeFilesByEntity(user, {
+        entityId: resourceId,
+        entityType: 'resource',
+      }),
       this.ragService.deleteResourceNodes(user, resourceId),
       this.elasticsearch.deleteResource(resourceId),
       this.syncStorageUsage(user),
