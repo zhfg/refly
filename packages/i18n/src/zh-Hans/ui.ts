@@ -1452,7 +1452,8 @@ const translations = {
   },
   components: {
     markdown: {
-      copySuccess: '内容已复制到剪切板！',
+      copySuccess: '复制成功',
+      mermaidError: 'Mermaid 图表渲染失败',
     },
   },
   copilot: {

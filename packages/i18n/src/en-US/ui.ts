@@ -1474,7 +1474,8 @@ const translations = {
   },
   components: {
     markdown: {
-      copySuccess: 'Content Copied to Clipboard',
+      copySuccess: 'Copied successfully',
+      mermaidError: 'Failed to render Mermaid diagram',
     },
   },
   copilot: {

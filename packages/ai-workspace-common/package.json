@@ -81,6 +81,7 @@
     "lowlight": "~3.1.0",
     "lucide-react": "~0.454.0",
     "md5": "^2.3.0",
+    "mermaid": "^10.9.3",
     "mitt": "~3.0.1",
     "prism-react-renderer": "~2.3.1",
     "qs": "~6.12.3",
