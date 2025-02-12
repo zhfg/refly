@@ -1707,6 +1707,7 @@ components:
         - document
         - resource
         - canvas
+        - user
     Entity:
       type: object
       description: Entity

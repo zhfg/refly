@@ -278,18 +278,23 @@ export class KnowledgeService {
     return Promise.all(tasks);
   }
 
-  private async uploadImagesAndReplaceLinks(user: User, result: ParseResult, resourceId: string) {
-    const { content, images } = result;
-    if (!content || !images || Object.keys(images).length === 0) {
+  /**
+   * Process images in the markdown content and replace them with uploaded URLs.
+   * 1) if the imagePath is present in parse result, replace it with uploaded path
+   * 2) if the imagePath is a URL, download the image and upload it to Minio
+   * 3) if the imagePath is a base64 string, convert it to buffer and upload it to Minio
+   */
+  private async processContentImages(user: User, result: ParseResult, resourceId: string) {
+    const { content, images = {} } = result;
+    if (!content) {
       return content;
     }
 
     // Regular expression to find markdown image links
     const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
-    let modifiedContent = content;
     const uploadedImages: Record<string, string> = {};
 
-    // First pass: Upload all images to Minio
+    // Upload all images from parse result to Minio
     for (const [imagePath, imageBuffer] of Object.entries(images)) {
       try {
         const { url } = await this.miscService.uploadBuffer(user, {
@@ -304,15 +309,98 @@ export class KnowledgeService {
       }
     }
 
-    // Second pass: Replace all image links in the markdown content
-    modifiedContent = modifiedContent.replace(imageRegex, (match, altText, imagePath) => {
-      // If we have an uploaded version of this image, use its URL
-      if (uploadedImages[imagePath]) {
-        return `![${altText}](${uploadedImages[imagePath]})`;
+    // Find all image matches in the content
+    const matches = Array.from(content.matchAll(imageRegex));
+    this.logger.log(`Found ${matches.length} images in content`);
+
+    let lastIndex = 0;
+    let modifiedContent = '';
+
+    // Process each match sequentially
+    for (const match of matches) {
+      const [fullMatch, altText, imagePath] = match;
+      const matchIndex = match.index ?? 0;
+
+      // Add text between matches
+      modifiedContent += content.slice(lastIndex, matchIndex);
+      lastIndex = matchIndex + fullMatch.length;
+
+      try {
+        // If we already have an uploaded version of this image, use its URL
+        if (uploadedImages[imagePath]) {
+          modifiedContent += `![${altText}](${uploadedImages[imagePath]})`;
+          continue;
+        }
+
+        // Handle URL images
+        if (imagePath.startsWith('http')) {
+          try {
+            const { url } = await this.miscService.dumpFileFromURL(user, {
+              url: imagePath,
+              entityId: resourceId,
+              entityType: 'resource',
+            });
+            modifiedContent += `![${altText}](${url})`;
+          } catch (error) {
+            this.logger.error(`Failed to dump image from URL ${imagePath}: ${error?.stack}`);
+            modifiedContent += fullMatch;
+          }
+          continue;
+        }
+
+        // Handle base64 images
+        if (imagePath.startsWith('data:')) {
+          // Skip SVG images, since they tend to be icons for interactive elements
+          if (imagePath.includes('data:image/svg+xml')) {
+            modifiedContent += fullMatch;
+            continue;
+          }
+
+          try {
+            // Extract mime type and base64 data
+            const [mimeHeader, base64Data] = imagePath.split(',');
+            if (!base64Data) {
+              modifiedContent += fullMatch;
+              continue;
+            }
+
+            const mimeType = mimeHeader.match(/data:(.*?);/)?.[1];
+            if (!mimeType || !mimeType.startsWith('image/')) {
+              modifiedContent += fullMatch;
+              continue;
+            }
+
+            // Generate a unique filename based on mime type
+            const ext = mimeType.split('/')[1];
+            const filename = `${crypto.randomUUID()}.${ext}`;
+
+            // Convert base64 to buffer and upload
+            const imageBuffer = Buffer.from(base64Data, 'base64');
+            const { url } = await this.miscService.uploadBuffer(user, {
+              fpath: filename,
+              buf: imageBuffer,
+              entityId: resourceId,
+              entityType: 'resource',
+            });
+
+            modifiedContent += `![${altText}](${url})`;
+          } catch (error) {
+            this.logger.error(`Failed to process base64 image: ${error?.stack}`);
+            modifiedContent += fullMatch;
+          }
+          continue;
+        }
+
+        // If none of the above conditions match, keep the original
+        modifiedContent += fullMatch;
+      } catch (error) {
+        this.logger.error(`Failed to process image ${imagePath}: ${error?.stack}`);
+        modifiedContent += fullMatch;
       }
-      // If we don't have an uploaded version, keep the original
-      return match;
-    });
+    }
+
+    // Add any remaining content after the last match
+    modifiedContent += content.slice(lastIndex);
 
     return modifiedContent;
   }
@@ -354,12 +442,10 @@ export class KnowledgeService {
       `Parse resource ${resourceId} success, images: ${Object.keys(result.images ?? {})}`,
     );
 
-    if (Object.keys(result.images ?? {}).length > 0) {
-      result.content = await this.uploadImagesAndReplaceLinks(user, result, resourceId);
-    }
+    result.content = await this.processContentImages(user, result, resourceId);
 
-    const content = result.content?.replace(/x00/g, '') ?? '';
-    const title = result.metadata?.title ?? resource.title;
+    const content = result.content?.replace(/x00/g, '') || '';
+    const title = result.title || resource.title;
 
     const storageKey = `resources/${resourceId}.txt`;
     await this.minio.client.putObject(storageKey, content);

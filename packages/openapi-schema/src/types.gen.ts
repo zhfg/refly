@@ -210,7 +210,7 @@ export type Document = {
 /**
  * Entity type
  */
-export type EntityType = 'document' | 'resource' | 'canvas';
+export type EntityType = 'document' | 'resource' | 'canvas' | 'user';
 
 /**
  * Entity

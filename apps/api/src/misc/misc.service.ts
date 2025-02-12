@@ -82,7 +82,16 @@ export class MiscService implements OnModuleInit {
     };
   }
 
-  async dumpFileFromURL(user: User, url: string): Promise<UploadResponse['data']> {
+  async dumpFileFromURL(
+    user: User,
+    param: {
+      url: string;
+      entityId?: string;
+      entityType?: EntityType;
+      visibility?: FileVisibility;
+    },
+  ): Promise<UploadResponse['data']> {
+    const { url, entityId, entityType, visibility = 'private' } = param;
     const res = await fetch(url);
     const buffer = await res.arrayBuffer();
 
@@ -92,6 +101,9 @@ export class MiscService implements OnModuleInit {
         mimetype: res.headers.get('Content-Type') || 'application/octet-stream',
         originalname: path.basename(url),
       },
+      entityId,
+      entityType,
+      visibility,
     });
   }
 
