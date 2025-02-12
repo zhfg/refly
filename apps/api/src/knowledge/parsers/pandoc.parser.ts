@@ -17,6 +17,7 @@ export class PandocParser extends BaseParser {
     super({
       format: 'markdown',
       timeout: 30000,
+      extractMedia: true,
       ...options,
     });
   }
@@ -68,15 +69,14 @@ export class PandocParser extends BaseParser {
     const mediaDir = path.join(tempDir, 'media');
 
     try {
-      const pandoc = spawn('pandoc', [
-        '-f',
-        this.options.format,
-        '-t',
-        'commonmark-raw_html',
-        '--wrap=none',
-        '--extract-media',
-        tempDir,
-      ]);
+      const pandocArgs = ['-f', this.options.format, '-t', 'commonmark-raw_html', '--wrap=none'];
+
+      // Only add extract-media option if enabled
+      if (this.options.extractMedia) {
+        pandocArgs.push('--extract-media', tempDir);
+      }
+
+      const pandoc = spawn('pandoc', pandocArgs);
 
       return new Promise((resolve, reject) => {
         let stdout = '';
@@ -103,8 +103,9 @@ export class PandocParser extends BaseParser {
               }
             }
 
-            // Continue processing if we only had warnings or no issues
-            const images = await this.readImagesFromDir(mediaDir);
+            // Only process images if extractMedia is enabled
+            const images = this.options.extractMedia ? await this.readImagesFromDir(mediaDir) : {};
+
             resolve({
               content: stdout,
               images,

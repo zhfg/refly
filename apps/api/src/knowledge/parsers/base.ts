@@ -4,6 +4,7 @@ export interface ParserOptions {
   format?: string;
   mockMode?: boolean;
   timeout?: number;
+  extractMedia?: boolean;
 }
 
 export interface ParseResult {
