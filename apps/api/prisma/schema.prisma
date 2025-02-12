@@ -226,6 +226,8 @@ model StaticFile {
   entityId          String?   @map("entity_id")
   /// Entity type
   entityType        String?   @map("entity_type")
+  /// Visibility
+  visibility        String    @default("private") @map("visibility")
   /// Expiration timestamp
   expiredAt         DateTime? @map("expired_at") @db.Timestamptz()
   /// Create timestamp

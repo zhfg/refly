@@ -258,7 +258,7 @@ export const DocumentSchema = {
 export const EntityTypeSchema = {
   type: 'string',
   description: 'Entity type',
-  enum: ['document', 'resource', 'canvas'],
+  enum: ['document', 'resource', 'canvas', 'user'],
 } as const;
 
 export const EntitySchema = {
@@ -3901,6 +3901,11 @@ export const ScrapeWeblinkResponseSchema = {
   ],
 } as const;
 
+export const FileVisibilitySchema = {
+  type: 'string',
+  enum: ['public', 'private'],
+} as const;
+
 export const UploadRequestSchema = {
   type: 'object',
   required: ['file'],
@@ -3917,6 +3922,10 @@ export const UploadRequestSchema = {
     entityType: {
       description: 'Entity type',
       $ref: '#/components/schemas/EntityType',
+    },
+    visibility: {
+      description: 'File visibility (default is private)',
+      $ref: '#/components/schemas/FileVisibility',
     },
   },
 } as const;

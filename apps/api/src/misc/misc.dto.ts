@@ -1,9 +1,15 @@
-import { ModelInfo, ModelTier, SubscriptionPlan } from '@refly-packages/openapi-schema';
+import {
+  ModelInfo,
+  ModelTier,
+  SubscriptionPlan,
+  FileVisibility,
+} from '@refly-packages/openapi-schema';
 import { ModelInfo as ModelInfoPO, SubscriptionPlan as SubscriptionPlanPO } from '@prisma/client';
 import { pick } from '@refly-packages/utils';
 
-export interface ImageProcessingJobData {
+export interface FileObject {
   storageKey: string;
+  visibility: FileVisibility;
 }
 
 export function modelInfoPO2DTO(modelInfo: ModelInfoPO): ModelInfo {

@@ -1707,6 +1707,7 @@ components:
         - document
         - resource
         - canvas
+        - user
     Entity:
       type: object
       description: Entity
@@ -4280,6 +4281,11 @@ components:
             data:
               description: Weblink scrape result
               $ref: '#/components/schemas/ScrapeWeblinkResult'
+    FileVisibility:
+      type: string
+      enum:
+        - public
+        - private
     UploadRequest:
       type: object
       required:
@@ -4295,6 +4301,9 @@ components:
         entityType:
           description: Entity type
           $ref: '#/components/schemas/EntityType'
+        visibility:
+          description: File visibility (default is private)
+          $ref: '#/components/schemas/FileVisibility'
     UploadResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

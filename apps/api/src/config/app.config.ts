@@ -10,16 +10,18 @@ export interface MinioConfig {
 export default () => ({
   port: Number.parseInt(process.env.PORT) || 5800,
   wsPort: Number.parseInt(process.env.WS_PORT) || 5801,
+  endpoint: process.env.ENDPOINT || 'http://localhost:5800',
+  origin: process.env.ORIGIN || 'http://localhost:5700',
+  staticEndpoint: process.env.STATIC_ENDPOINT || 'http://localhost:5800/v1/misc',
+  image: {
+    maxArea: Number.parseInt(process.env.IMAGE_MAX_AREA) || 600 * 600,
+    payloadMode: process.env.IMAGE_PAYLOAD_MODE || 'base64', // 'url' or 'base64'
+    presignExpiry: Number.parseInt(process.env.IMAGE_PRESIGN_EXPIRY) || 15 * 60, // 15 minutes
+  },
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
     port: Number.parseInt(process.env.REDIS_PORT) || 6379,
     password: process.env.REDIS_PASSWORD || '',
-  },
-  origin: process.env.ORIGIN || 'http://localhost:5700',
-  staticEndpoint: process.env.STATIC_ENDPOINT || 'http://localhost:5800/v1/misc/',
-  image: {
-    maxArea: Number.parseInt(process.env.IMAGE_MAX_AREA) || 600 * 600,
-    payloadMode: process.env.IMAGE_PAYLOAD_MODE || 'base64', // 'url' or 'base64'
   },
   minio: {
     internal: {

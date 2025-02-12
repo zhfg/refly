@@ -210,7 +210,7 @@ export type Document = {
 /**
  * Entity type
  */
-export type EntityType = 'document' | 'resource' | 'canvas';
+export type EntityType = 'document' | 'resource' | 'canvas' | 'user';
 
 /**
  * Entity
@@ -2701,6 +2701,8 @@ export type ScrapeWeblinkResponse = BaseResponse & {
   data?: ScrapeWeblinkResult;
 };
 
+export type FileVisibility = 'public' | 'private';
+
 export type UploadRequest = {
   /**
    * File to upload
@@ -2714,6 +2716,10 @@ export type UploadRequest = {
    * Entity type
    */
   entityType?: EntityType;
+  /**
+   * File visibility (default is private)
+   */
+  visibility?: FileVisibility;
 };
 
 export type UploadResponse = BaseResponse & {

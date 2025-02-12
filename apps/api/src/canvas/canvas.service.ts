@@ -172,18 +172,6 @@ export class CanvasService {
       }
     }
 
-    const files = await this.prisma.staticFile.findMany({
-      where: { entityId: canvas.canvasId, entityType: 'canvas' },
-    });
-
-    if (files.length > 0) {
-      cleanups.push(
-        this.prisma.staticFile.deleteMany({
-          where: { entityId: canvas.canvasId, entityType: 'canvas' },
-        }),
-      );
-    }
-
     await Promise.all(cleanups);
   }
 
