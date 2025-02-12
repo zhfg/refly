@@ -57,7 +57,7 @@ class CustomThrottlerGuard extends ThrottlerGuard {
           {
             name: 'default',
             ttl: seconds(1),
-            limit: 10,
+            limit: 50,
           },
         ],
         getTracker: (req) => (req.ips?.length ? req.ips[0] : req.ip),
