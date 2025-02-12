@@ -3,7 +3,7 @@ import { Readability } from '@mozilla/readability';
 import { convertHTMLToMarkdown } from './markdown';
 
 // HTML preprocessing utilities
-const cleanHtml = (htmlContent: string): string => {
+export const cleanHtml = (htmlContent: string): string => {
   let cleanedHtml = htmlContent;
 
   // Remove all comments

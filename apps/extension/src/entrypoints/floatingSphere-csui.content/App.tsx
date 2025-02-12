@@ -19,7 +19,7 @@ import {
 import { getRuntime } from '@refly/utils/env';
 import { useSaveSelectedContent } from '@/hooks/use-save-selected-content';
 import { BackgroundMessage, SyncMarkEvent, type MessageName } from '@refly/common-types';
-import { getReadabilityMarkdown } from '@refly/utils/html2md';
+import { cleanHtml } from '@refly/utils/html2md';
 import { useGetUserSettings } from '@/hooks/use-get-user-settings';
 import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 
@@ -87,7 +87,8 @@ export const App = () => {
       // Handle get page content request
       if (data?.name === 'getPageContent') {
         // Get page content using readability
-        const content = getReadabilityMarkdown(document?.body || document);
+        const elem = document?.body || document;
+        const content = cleanHtml((elem as HTMLElement)?.innerHTML || '');
         // Send response back with complete page information
         const response = {
           source: getRuntime(),
