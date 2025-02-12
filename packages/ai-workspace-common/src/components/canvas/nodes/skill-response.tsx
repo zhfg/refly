@@ -48,7 +48,7 @@ import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/us
 import { ContentPreview } from './shared/content-preview';
 import { useActionPolling } from '@refly-packages/ai-workspace-common/hooks/canvas/use-action-polling';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
-
+import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 const POLLING_WAIT_TIME = 15000;
 
 const NodeHeader = memo(
@@ -161,6 +161,8 @@ export const SkillResponseNode = memo(
     onNodeClick,
   }: SkillResponseNodeProps) => {
     const [isHovered, setIsHovered] = useState(false);
+    const { draggingNodeId } = useEditorPerformance();
+    const isDragging = draggingNodeId === id;
 
     const { edges, operatingNodeId } = useCanvasStoreShallow((state) => ({
       edges: state.data[state.currentCanvasId]?.edges ?? [],
@@ -497,7 +499,7 @@ export const SkillResponseNode = memo(
           onMouseLeave={handleMouseLeave}
           onClick={onNodeClick}
         >
-          {!isPreview && !hideActions && (
+          {!isPreview && !hideActions && !isDragging && (
             <ActionButtons type="skillResponse" nodeId={id} isNodeHovered={isHovered} />
           )}
 

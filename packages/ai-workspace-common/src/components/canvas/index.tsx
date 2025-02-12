@@ -1,6 +1,13 @@
 import { useCallback, useMemo, useEffect, useState, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ReactFlow, Background, MiniMap, ReactFlowProvider, useReactFlow } from '@xyflow/react';
+import {
+  ReactFlow,
+  Background,
+  MiniMap,
+  ReactFlowProvider,
+  useReactFlow,
+  Node,
+} from '@xyflow/react';
 import { Button } from 'antd';
 import { nodeTypes, CanvasNode } from './nodes';
 import { LaunchPad } from './launchpad';
@@ -460,15 +467,21 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const memoizedNodeTypes = useMemo(() => nodeTypes, []);
 
   // Optimize node dragging performance
-  const { setIsNodeDragging } = useEditorPerformance();
+  const { setIsNodeDragging, setDraggingNodeId } = useEditorPerformance();
 
-  const onNodeDragStart = useCallback(() => {
-    setIsNodeDragging(true);
-  }, [setIsNodeDragging]);
+  const onNodeDragStart = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      console.log('onNodeDragStart', node.id);
+      setIsNodeDragging(true);
+      setDraggingNodeId(node.id);
+    },
+    [setIsNodeDragging, setDraggingNodeId],
+  );
 
   const onNodeDragStop = useCallback(() => {
     setIsNodeDragging(false);
-  }, [setIsNodeDragging]);
+    setDraggingNodeId(null);
+  }, [setIsNodeDragging, setDraggingNodeId]);
 
   const onSelectionContextMenu = useCallback(
     (event: React.MouseEvent) => {
