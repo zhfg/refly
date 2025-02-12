@@ -2,7 +2,7 @@ import { Position, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
 import Moveable from 'react-moveable';
 import classNames from 'classnames';
-import { Divider, message } from 'antd';
+import { Divider, Input, message } from 'antd';
 import { CanvasNode, SkillResponseNodeProps } from './shared/types';
 import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
 import { CustomHandle } from './shared/custom-handle';
@@ -47,11 +47,18 @@ import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-size';
 import { ContentPreview } from './shared/content-preview';
 import { useActionPolling } from '@refly-packages/ai-workspace-common/hooks/canvas/use-action-polling';
+import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
 
 const POLLING_WAIT_TIME = 15000;
 
 const NodeHeader = memo(
-  ({ query, skillName, skill }: { query: string; skillName: string; skill: any }) => {
+  ({
+    query,
+    skillName,
+    skill,
+    updateTitle,
+  }: { query: string; skillName: string; skill: any; updateTitle: (title: string) => void }) => {
+    const [editTitle, setEditTitle] = useState(query);
     return (
       <>
         <div className="flex-shrink-0 mb-3">
@@ -59,12 +66,20 @@ const NodeHeader = memo(
             <div className="w-6 h-6 rounded bg-[#F79009] shadow-lg flex items-center justify-center flex-shrink-0">
               <IconResponse className="w-4 h-4 text-white" />
             </div>
-            <span
+            <Input
+              className="!border-transparent font-bold focus:!bg-transparent px-0.5 py-0"
+              value={editTitle}
+              onChange={(e) => {
+                setEditTitle(e.target.value);
+                updateTitle?.(e.target.value);
+              }}
+            />
+            {/* <span
               className="text-sm font-medium leading-normal truncate block cursor-pointer"
               title={query}
             >
               {query}
-            </span>
+            </span> */}
           </div>
         </div>
         {skillName && skillName !== 'commonQnA' && (
@@ -151,7 +166,7 @@ export const SkillResponseNode = memo(
       edges: state.data[state.currentCanvasId]?.edges ?? [],
       operatingNodeId: state.operatingNodeId,
     }));
-
+    const setNodeDataByEntity = useSetNodeDataByEntity();
     const patchNodeData = usePatchNodeData();
     const { getNode } = useReactFlow();
     const { handleMouseEnter: onHoverStart, handleMouseLeave: onHoverEnd } = useNodeHoverEffect(id);
@@ -402,6 +417,18 @@ export const SkillResponseNode = memo(
       nodeActionEmitter.emit(createNodeEventName(id, 'cloneAskAI.completed'));
     }, [id, data?.entityId, addNode, t]);
 
+    const onTitleChange = (newTitle: string) => {
+      setNodeDataByEntity(
+        {
+          entityId: data.entityId,
+          type: 'skillResponse',
+        },
+        {
+          title: newTitle,
+        },
+      );
+    };
+
     // Update size when content changes
     useEffect(() => {
       if (!targetRef.current) return;
@@ -499,7 +526,12 @@ export const SkillResponseNode = memo(
             <div className="absolute bottom-0 left-0 right-0 h-[15%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
 
             <div className="flex flex-col h-full">
-              <NodeHeader query={query} skillName={skillName} skill={skill} />
+              <NodeHeader
+                query={query}
+                skillName={skillName}
+                skill={skill}
+                updateTitle={onTitleChange}
+              />
 
               <div className={'flex-grow overflow-y-auto pr-2 -mr-2'}>
                 <div className="flex flex-col gap-3">
