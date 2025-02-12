@@ -471,7 +471,6 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   const onNodeDragStart = useCallback(
     (_: React.MouseEvent, node: Node) => {
-      console.log('onNodeDragStart', node.id);
       setIsNodeDragging(true);
       setDraggingNodeId(node.id);
     },
