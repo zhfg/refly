@@ -1495,6 +1495,26 @@ paths:
       responses:
         '200':
           description: successful operation
+  /knowledge/parse/html-to-markdown:
+    post:
+      tags:
+        - knowledge
+      summary: Convert HTML to Markdown
+      description: Convert HTML content to Markdown format using Pandoc
+      operationId: parseHtmlToMarkdown
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ParseHtmlToMarkdownRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParseHtmlToMarkdownResponse'
 components:
   schemas:
     User:
@@ -4429,6 +4449,26 @@ components:
         data:
           type: object
           $ref: '#/components/schemas/CanvasNodeData'
+    ParseHtmlToMarkdownRequest:
+      type: object
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          format: binary
+          description: HTML content file to be converted
+    ParseHtmlToMarkdownResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: Converted markdown content
   securitySchemes:
     api_key:
       type: apiKey

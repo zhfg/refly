@@ -199,6 +199,9 @@ import type {
   UploadResponse2,
   ServeStaticError,
   ServeStaticResponse,
+  ParseHtmlToMarkdownData,
+  ParseHtmlToMarkdownError,
+  ParseHtmlToMarkdownResponse2,
 } from './types.gen';
 
 export const client = createClient(createConfig());
@@ -1269,5 +1272,27 @@ export const serveStatic = <ThrowOnError extends boolean = false>(
   return (options?.client ?? client).get<ServeStaticResponse, ServeStaticError, ThrowOnError>({
     ...options,
     url: '/misc/static/{fileName}',
+  });
+};
+
+/**
+ * Convert HTML to Markdown
+ * Convert HTML content to Markdown format using Pandoc
+ */
+export const parseHtmlToMarkdown = <ThrowOnError extends boolean = false>(
+  options: Options<ParseHtmlToMarkdownData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    ParseHtmlToMarkdownResponse2,
+    ParseHtmlToMarkdownError,
+    ThrowOnError
+  >({
+    ...options,
+    ...formDataBodySerializer,
+    headers: {
+      'Content-Type': null,
+      ...options?.headers,
+    },
+    url: '/knowledge/parse/html-to-markdown',
   });
 };

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { spawn } from 'node:child_process';
 import { BaseParser, ParserOptions, ParseResult } from './base';
 import { ConfigService } from '@nestjs/config';
@@ -8,6 +8,8 @@ import os from 'node:os';
 
 @Injectable()
 export class PandocParser extends BaseParser {
+  private readonly logger = new Logger(PandocParser.name);
+
   constructor(
     private readonly config: ConfigService,
     options: ParserOptions = {},
@@ -50,6 +52,10 @@ export class PandocParser extends BaseParser {
     return images;
   }
 
+  private isWarning(stderr: string): boolean {
+    return stderr.toLowerCase().includes('warning');
+  }
+
   async parse(input: string | Buffer): Promise<ParseResult> {
     if (this.options.mockMode) {
       return {
@@ -86,16 +92,24 @@ export class PandocParser extends BaseParser {
 
         pandoc.on('close', async (code) => {
           try {
-            if (code === 0) {
-              const images = await this.readImagesFromDir(mediaDir);
-              resolve({
-                content: stdout,
-                images,
-                metadata: { format: this.options.format },
-              });
-            } else {
-              reject(new Error(`Pandoc failed with code ${code}: ${stderr}`));
+            // Handle warnings in stderr
+            if (stderr) {
+              if (this.isWarning(stderr)) {
+                this.logger.warn(`Pandoc warning: ${stderr}`);
+              } else if (code !== 0) {
+                // Only reject if it's an actual error (not a warning) and the process failed
+                reject(new Error(`Pandoc failed with code ${code}: ${stderr}`));
+                return;
+              }
             }
+
+            // Continue processing if we only had warnings or no issues
+            const images = await this.readImagesFromDir(mediaDir);
+            resolve({
+              content: stdout,
+              images,
+              metadata: { format: this.options.format },
+            });
           } finally {
             await this.cleanupTempDir(tempDir);
           }

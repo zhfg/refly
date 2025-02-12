@@ -4111,3 +4111,37 @@ export const CanvasNodeSchema = {
     },
   },
 } as const;
+
+export const ParseHtmlToMarkdownRequestSchema = {
+  type: 'object',
+  required: ['file'],
+  properties: {
+    file: {
+      type: 'string',
+      format: 'binary',
+      description: 'HTML content file to be converted',
+    },
+  },
+} as const;
+
+export const ParseHtmlToMarkdownResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          properties: {
+            content: {
+              type: 'string',
+              description: 'Converted markdown content',
+            },
+          },
+        },
+      },
+    },
+  ],
+} as const;
