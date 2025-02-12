@@ -89,6 +89,7 @@ export const useInvokeAction = () => {
       : {
           ...stepMeta,
           content: '',
+          reasoningContent: '',
           artifacts: [],
           structuredData: {},
         };
@@ -102,7 +103,7 @@ export const useInvokeAction = () => {
   };
 
   const onSkillStream = (skillEvent: SkillEvent) => {
-    const { resultId, content, step } = skillEvent;
+    const { resultId, content, reasoningContent = '', step } = skillEvent;
     const { resultMap } = useActionResultStore.getState();
     const result = resultMap[resultId];
 
@@ -112,6 +113,12 @@ export const useInvokeAction = () => {
 
     const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
     updatedStep.content += content;
+
+    if (!updatedStep.reasoningContent) {
+      updatedStep.reasoningContent = reasoningContent;
+    } else {
+      updatedStep.reasoningContent += reasoningContent;
+    }
 
     onUpdateResult(
       resultId,

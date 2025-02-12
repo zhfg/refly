@@ -128,7 +128,7 @@ const translations = {
       first: '由多线程对话、知识库集成、上下文记忆和智能搜索驱动，',
       second: 'Refly 是将创意转化为优质内容的最佳方式。',
     },
-    messageText: 'v0.3.0 发布！支持 Chrome 插件剪存和保存网页内容⚡️ ！',
+    messageText: 'Refly 网页剪存 Chrome 插件发布! ⚡️! ',
     tryForFree: '开始使用',
     addToChrome: '添加到 Chrome',
     contactUs: '联系我们',
@@ -730,6 +730,7 @@ const translations = {
       createMemoDescription: '创建一个空备忘录，用于快速记录想法，支持 Markdown 格式',
       copy: '复制节点内容',
       copyDescription: '将节点内容以 Markdown 格式复制到剪贴板',
+      createDocumentDescription: '创建文档',
       askAI: '问问 AI',
       askAIDescription:
         '向 AI 提问，选择上下文或切换技能后输入需求，获取写作、阅读理解或问题解答等帮助',

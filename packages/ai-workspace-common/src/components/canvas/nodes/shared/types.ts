@@ -17,6 +17,7 @@ export type CanvasNodeData<T = Record<string, unknown>> = {
   entityId: string;
   createdAt?: string;
   contentPreview?: string;
+  reasoningContent?: string;
   metadata?: T;
   targetHandle?: string;
   sourceHandle?: string;
