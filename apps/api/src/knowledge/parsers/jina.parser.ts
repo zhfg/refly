@@ -13,7 +13,7 @@ export class JinaParser extends BaseParser {
   ) {
     super(options);
     this.apiKey = this.config.getOrThrow('credentials.jina');
-    this.apiUrl = options.apiUrl ?? 'https://api.jina.ai/parse';
+    this.apiUrl = options.apiUrl ?? 'https://r.jina.ai/';
   }
 
   async parse(input: string | Buffer): Promise<ParseResult> {
@@ -24,24 +24,26 @@ export class JinaParser extends BaseParser {
       };
     }
 
+    const url = input.toString();
+
     try {
-      const response = await fetch(this.apiUrl, {
-        method: 'POST',
+      const response = await fetch(this.apiUrl + url, {
+        method: 'GET',
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
+          Accept: 'application/json',
         },
-        body: JSON.stringify({ content: input.toString() }),
       });
 
       if (!response.ok) {
         throw new Error(`Jina API error: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const { data } = await response.json();
       return {
-        content: data.content,
-        metadata: { ...data.metadata, source: 'jina' },
+        title: data?.title,
+        content: data?.content,
+        metadata: { source: 'jina' },
       };
     } catch (error) {
       return this.handleError(error);
