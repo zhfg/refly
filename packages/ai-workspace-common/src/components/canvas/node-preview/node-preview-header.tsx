@@ -1,4 +1,4 @@
-import { FC, useCallback } from 'react';
+import { FC, useCallback, useMemo } from 'react';
 import { Button, Dropdown, Modal } from 'antd';
 import type { MenuProps } from 'antd';
 import { TFunction } from 'i18next';
@@ -27,6 +27,7 @@ import {
   IconResponse,
   IconUnpin,
   IconDeleteFile,
+  IconDownloadFile,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
 import { useTranslation } from 'react-i18next';
@@ -34,7 +35,7 @@ import { useNodePreviewControl } from '@refly-packages/ai-workspace-common/hooks
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useDeleteDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-document';
 import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-resource';
-
+import { useDownloadFile } from '@refly-packages/ai-workspace-common/hooks/use-download-file';
 // Get icon component based on node type and metadata
 const getNodeIcon = (node: CanvasNode<any>) => {
   switch (node.type) {
@@ -112,6 +113,7 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
   const { deleteNode } = useDeleteNode();
   const { deleteResource } = useDeleteResource();
   const { deleteDocument } = useDeleteDocument();
+  const { downloadFile } = useDownloadFile();
 
   const handleDeleteFile = useCallback(() => {
     Modal.confirm({
@@ -155,6 +157,15 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
   }, [isPinned, pinNode, unpinNode, node]);
 
   const { setNodeCenter } = useNodePosition();
+  const canExport = useMemo(() => {
+    const metadata = node.data?.metadata || {};
+    const { rawFileKey, resourceType } = metadata;
+    return node.type === 'resource' && rawFileKey && resourceType === 'file';
+  }, [node]);
+
+  const handleExport = useCallback(() => {
+    downloadFile(node.data?.metadata?.rawFileKey);
+  }, [node]);
 
   // Define dropdown menu items
   const menuItems: MenuProps['items'] = [
@@ -177,6 +188,16 @@ export const NodePreviewHeader: FC<NodePreviewHeaderProps> = ({
         </div>
       ),
       onClick: handleAddToContext,
+    },
+    canExport && {
+      key: 'export',
+      label: (
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <IconDownloadFile className="w-4 h-4 flex-shrink-0" />
+          {t('canvas.nodeActions.downloadFile')}
+        </div>
+      ),
+      onClick: handleExport,
     },
     {
       type: 'divider',

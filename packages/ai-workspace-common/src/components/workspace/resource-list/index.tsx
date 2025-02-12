@@ -6,6 +6,7 @@ import {
   IconDelete,
   IconResourceFilled,
   IconImportResource,
+  IconDownloadFile,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { LuPlus, LuExternalLink } from 'react-icons/lu';
 
@@ -26,7 +27,7 @@ import { Markdown } from '@refly-packages/ai-workspace-common/components/markdow
 import { useDeleteResource } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-resource';
 import { getClientOrigin } from '@refly-packages/utils/url';
 import { useImportResourceStoreShallow } from '@refly-packages/ai-workspace-common/stores/import-resource';
-
+import { useDownloadFile } from '@refly-packages/ai-workspace-common/hooks/use-download-file';
 const ActionDropdown = ({
   resource,
   afterDelete,
@@ -39,6 +40,7 @@ const ActionDropdown = ({
     setShowLibraryModal: state.setShowLibraryModal,
   }));
   const { deleteResource } = useDeleteResource();
+  const { downloadFile } = useDownloadFile();
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -74,6 +76,11 @@ const ActionDropdown = ({
     }
   };
 
+  const handleDownloadFile: MenuProps['onClick'] = ({ domEvent }) => {
+    domEvent.stopPropagation();
+    downloadFile(resource.rawFileKey);
+  };
+
   const items: MenuProps['items'] = [
     {
       label: (
@@ -96,6 +103,17 @@ const ActionDropdown = ({
       onClick: handleOpenWebpage,
       disabled: !resource.data?.url,
     },
+    resource.rawFileKey &&
+      resource.resourceType === 'file' && {
+        label: (
+          <div className="flex items-center">
+            <IconDownloadFile size={16} className="mr-2" />
+            {t('workspace.downloadFile')}
+          </div>
+        ),
+        key: 'downloadFile',
+        onClick: handleDownloadFile,
+      },
     {
       label: (
         <Popconfirm

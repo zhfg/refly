@@ -383,6 +383,7 @@ const translations = {
   workspace: {
     addToCanvas: 'Add to Canvas',
     openWebpage: 'Open Original Webpage',
+    downloadFile: 'Download File',
     canvasListModal: {
       continue: 'Continue Conversation',
     },
@@ -798,6 +799,7 @@ const translations = {
       deleteDocumentDescription: 'Delete the document from the library and all canvases',
       documentDeleteConfirm:
         'Confirm to delete document {{title}}? This action will remove this document from library and all canvases.',
+      downloadFile: 'Download File',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',

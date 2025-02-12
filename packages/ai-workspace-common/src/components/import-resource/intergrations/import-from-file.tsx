@@ -162,6 +162,9 @@ export const ImportFromFile = () => {
           title: resource.title,
           entityId: resource.id,
           contentPreview: resource.contentPreview,
+          metadata: {
+            resourceType: 'file',
+          },
         },
         position: nodePosition,
       });
