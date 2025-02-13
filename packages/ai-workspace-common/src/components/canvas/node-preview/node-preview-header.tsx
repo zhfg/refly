@@ -74,9 +74,7 @@ const getNodeTitle = (node: CanvasNode<any>, t: TFunction) => {
     case 'document':
       return t('canvas.nodeTypes.document');
     case 'resource':
-      return node.data?.metadata?.resourceType === 'weblink'
-        ? t('resourceType.weblink')
-        : t('resourceType.pastedText');
+      return t(`resourceType.${node.data?.metadata?.resourceType || 'weblink'}`);
     case 'skillResponse':
       return t('canvas.nodeTypes.skillResponse');
     case 'toolResponse':

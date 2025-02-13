@@ -586,6 +586,7 @@ const translations = {
   resourceType: {
     weblink: 'Web Link',
     pastedText: 'Pasted Text',
+    file: 'File',
   },
   canvas: {
     emptyText: 'Double-click to ask AI, or',

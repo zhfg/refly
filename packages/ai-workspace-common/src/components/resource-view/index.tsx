@@ -238,12 +238,6 @@ export const ResourceView = memo(
 
     useEffect(() => {
       if (resourceDetail?.resourceType === 'file' && resourceDetail?.rawFileKey) {
-        console.log('updateNodePreviewRawFileKey', {
-          canvasId,
-          nodeId,
-          resourceId,
-          rawFileKey: resourceDetail?.rawFileKey,
-        });
         updateNodePreviewRawFileKey(canvasId, nodeId, resourceDetail?.rawFileKey);
       }
     }, [resourceDetail, canvasId, nodeId, resourceId, updateNodePreviewRawFileKey]);

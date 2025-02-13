@@ -583,6 +583,7 @@ const translations = {
   resourceType: {
     weblink: '网页链接',
     pastedText: '粘贴文本',
+    file: '文件',
   },
   canvas: {
     emptyText: '双击向 AI 提问, 或',
