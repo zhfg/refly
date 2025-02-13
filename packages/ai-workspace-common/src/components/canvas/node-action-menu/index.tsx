@@ -222,50 +222,9 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
   }, [nodeId, nodeType, layoutNodeCluster, onClose]);
 
   const handleCopy = useCallback(() => {
-    if (nodeType === 'image' && nodeData?.metadata?.imageUrl) {
-      const copyImage = async () => {
-        try {
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-
-          await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
-            img.src = nodeData.metadata.imageUrl as string;
-          });
-
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0);
-
-          canvas.toBlob(async (blob) => {
-            if (blob) {
-              try {
-                await navigator.clipboard.write([
-                  new ClipboardItem({
-                    'image/png': blob,
-                  }),
-                ]);
-                message.success(t('copilot.message.copySuccess'));
-              } catch (error) {
-                console.error('Failed to copy image:', error);
-                message.error(t('copilot.message.copyFailed'));
-              }
-            }
-          }, 'image/png');
-        } catch (error) {
-          console.error('Failed to load image:', error);
-          message.error(t('copilot.message.copyFailed'));
-        }
-      };
-      copyImage();
-    } else {
-      const content = nodeData?.contentPreview;
-      copyToClipboard(content || '');
-      message.success(t('copilot.message.copySuccess'));
-    }
+    const content = nodeData?.contentPreview;
+    copyToClipboard(content || '');
+    message.success(t('copilot.message.copySuccess'));
     onClose?.();
   }, [nodeData?.contentPreview, nodeData?.metadata?.imageUrl, onClose, t, nodeType]);
 
@@ -587,19 +546,23 @@ export const NodeActionMenu: FC<NodeActionMenuProps> = ({
                     'https://static.refly.ai/onboarding/nodeAction/nodeAction-createEmptyMemo.webm',
                 },
               },
-              {
-                key: 'copy',
-                icon: IconCopy,
-                label: t('canvas.nodeActions.copy'),
-                onClick: handleCopy,
-                type: 'button' as const,
-                hoverContent: {
-                  title: t('canvas.nodeActions.copy'),
-                  description: t('canvas.nodeActions.copyDescription'),
-                  videoUrl:
-                    'https://static.refly.ai/onboarding/nodeAction/nodeAction-copyContent.webm',
-                },
-              },
+              ...(nodeType !== 'image'
+                ? [
+                    {
+                      key: 'copy',
+                      icon: IconCopy,
+                      label: t('canvas.nodeActions.copy'),
+                      onClick: handleCopy,
+                      type: 'button' as const,
+                      hoverContent: {
+                        title: t('canvas.nodeActions.copy'),
+                        description: t('canvas.nodeActions.copyDescription'),
+                        videoUrl:
+                          'https://static.refly.ai/onboarding/nodeAction/nodeAction-copyContent.webm',
+                      },
+                    },
+                  ]
+                : []),
               { key: 'divider-2', type: 'divider' as const },
             ]
           : []),

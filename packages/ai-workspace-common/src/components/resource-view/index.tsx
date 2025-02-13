@@ -15,9 +15,12 @@ import { Resource } from '@refly/openapi-schema';
 
 import './index.scss';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
+import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
 
 interface ResourceViewProps {
   resourceId: string;
+  nodeId: string;
   deckSize: number;
   setDeckSize: (size: number) => void;
 }
@@ -179,12 +182,13 @@ const ResourceContent = memo(
 
 export const ResourceView = memo(
   (props: ResourceViewProps) => {
-    const { resourceId } = props;
+    const { resourceId, nodeId } = props;
     const { t } = useTranslation();
     const [isReindexing, setIsReindexing] = useState(false);
-
-    // console.log('resourceview', resourceId);
-
+    const { updateNodePreviewRawFileKey } = useCanvasStoreShallow((state) => ({
+      updateNodePreviewRawFileKey: state.updateNodePreviewRawFileKey,
+    }));
+    const canvasId = useCanvasId();
     const {
       data,
       refetch: refetchResourceDetail,
@@ -231,6 +235,12 @@ export const ResourceView = memo(
         }
       };
     }, [resourceDetail?.indexStatus, refetchResourceDetail]);
+
+    useEffect(() => {
+      if (resourceDetail?.resourceType === 'file' && resourceDetail?.rawFileKey) {
+        updateNodePreviewRawFileKey(canvasId, nodeId, resourceDetail?.rawFileKey);
+      }
+    }, [resourceDetail, canvasId, nodeId, resourceId, updateNodePreviewRawFileKey]);
 
     if (!resourceId) {
       return (

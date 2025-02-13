@@ -382,6 +382,7 @@ const translations = {
   workspace: {
     addToCanvas: '添加到画布',
     openWebpage: '打开原网页',
+    downloadFile: '下载文件',
     canvasListModal: {
       continue: '继续对话',
     },
@@ -582,6 +583,7 @@ const translations = {
   resourceType: {
     weblink: '网页链接',
     pastedText: '粘贴文本',
+    file: '文件',
   },
   canvas: {
     emptyText: '双击向 AI 提问, 或',
@@ -783,6 +785,7 @@ const translations = {
       deleteDocumentDescription: '从知识库以及所有画布中删除该文档',
       documentDeleteConfirm:
         '确认要删除文档 {{title}} 吗？该操作将从知识库以及所有画布中移除此文档。',
+      downloadFile: '下载文件',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',

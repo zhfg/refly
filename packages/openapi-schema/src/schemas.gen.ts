@@ -185,6 +185,10 @@ export const ResourceSchema = {
       type: 'string',
       description: 'Resource vector storage size (in bytes)',
     },
+    rawFileKey: {
+      type: 'string',
+      description: 'Raw file storage key (used to download the file)',
+    },
     createdAt: {
       type: 'string',
       format: 'date-time',

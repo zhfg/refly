@@ -35,7 +35,7 @@ export const resourcePO2DTO = (
     return null;
   }
   return {
-    ...pick(resource, ['resourceId', 'title', 'content', 'contentPreview']),
+    ...pick(resource, ['resourceId', 'title', 'content', 'contentPreview', 'rawFileKey']),
     resourceType: resource.resourceType as ResourceType,
     indexStatus: resource.indexStatus as IndexStatus,
     storageSize: resource.storageSize.toString(),

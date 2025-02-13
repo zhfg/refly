@@ -150,6 +150,10 @@ export type Resource = {
    */
   vectorSize?: string;
   /**
+   * Raw file storage key (used to download the file)
+   */
+  rawFileKey?: string;
+  /**
    * Resource creation time
    */
   createdAt?: string;
