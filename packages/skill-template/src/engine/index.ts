@@ -1,5 +1,5 @@
 import { SkillRunnableConfig } from '../base';
-import { ChatOpenAI, OpenAIChatInput } from '@langchain/openai';
+import { ChatDeepSeek, ChatDeepSeekInput } from './chat-deepseek';
 import { Document } from '@langchain/core/documents';
 import {
   CreateLabelClassRequest,
@@ -157,8 +157,8 @@ export class SkillEngine {
     this.config = config;
   }
 
-  chatModel(params?: Partial<OpenAIChatInput>): ChatOpenAI {
-    return new ChatOpenAI({
+  chatModel(params?: Partial<ChatDeepSeekInput>): ChatDeepSeek {
+    return new ChatDeepSeek({
       model: this.config?.configurable?.modelInfo?.name || this.options.defaultModel,
       apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY,
       configuration: {
@@ -169,6 +169,7 @@ export class SkillEngine {
         },
       },
       ...params,
+      include_reasoning: true,
     });
   }
 }

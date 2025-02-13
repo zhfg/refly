@@ -210,7 +210,7 @@ export type Document = {
 /**
  * Entity type
  */
-export type EntityType = 'document' | 'resource' | 'canvas';
+export type EntityType = 'document' | 'resource' | 'canvas' | 'user';
 
 /**
  * Entity
@@ -879,6 +879,10 @@ export type ActionStep = {
    * Step content
    */
   content?: string;
+  /**
+   * Step reasoning content
+   */
+  reasoningContent?: string;
   /**
    * Step artifacts
    */
@@ -1657,9 +1661,13 @@ export type SkillEvent = {
    */
   version?: number;
   /**
-   * Event content. Only present when `event` is `stream`.
+   * Event content. Only present when `event` is `stream`
    */
   content?: string;
+  /**
+   * Reasoning content. Only present when `event` is `stream`
+   */
+  reasoningContent?: string;
   /**
    * Token usage data. Only present when `event` is `token_usage`.
    */
@@ -2701,6 +2709,8 @@ export type ScrapeWeblinkResponse = BaseResponse & {
   data?: ScrapeWeblinkResult;
 };
 
+export type FileVisibility = 'public' | 'private';
+
 export type UploadRequest = {
   /**
    * File to upload
@@ -2714,6 +2724,10 @@ export type UploadRequest = {
    * Entity type
    */
   entityType?: EntityType;
+  /**
+   * File visibility (default is private)
+   */
+  visibility?: FileVisibility;
 };
 
 export type UploadResponse = BaseResponse & {

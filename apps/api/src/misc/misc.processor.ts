@@ -3,7 +3,7 @@ import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import { QUEUE_IMAGE_PROCESSING, QUEUE_CLEAN_STATIC_FILES } from '@/utils/const';
 import { MiscService } from '@/misc/misc.service';
-import { ImageProcessingJobData } from '@/misc/misc.dto';
+import { FileObject } from '@/misc/misc.dto';
 
 @Processor(QUEUE_IMAGE_PROCESSING)
 export class ImageProcessor extends WorkerHost {
@@ -13,11 +13,10 @@ export class ImageProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<ImageProcessingJobData>): Promise<void> {
-    const { storageKey } = job.data;
+  async process(job: Job<FileObject>): Promise<void> {
     try {
-      await this.miscService.processImage(storageKey);
-      this.logger.log(`Successfully processed image for key ${storageKey}`);
+      await this.miscService.processImage(job.data);
+      this.logger.log(`Successfully processed image for key ${job.data?.storageKey}`);
     } catch (error) {
       this.logger.error(`Error processing image: ${error instanceof Error ? error.stack : error}`);
       throw error;

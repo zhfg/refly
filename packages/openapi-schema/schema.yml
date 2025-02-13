@@ -1727,6 +1727,7 @@ components:
         - document
         - resource
         - canvas
+        - user
     Entity:
       type: object
       description: Entity
@@ -2369,6 +2370,9 @@ components:
         content:
           type: string
           description: Step content
+        reasoningContent:
+          type: string
+          description: Step reasoning content
         artifacts:
           type: array
           description: Step artifacts
@@ -3218,7 +3222,10 @@ components:
           description: Result version
         content:
           type: string
-          description: Event content. Only present when `event` is `stream`.
+          description: Event content. Only present when `event` is `stream`
+        reasoningContent:
+          type: string
+          description: Reasoning content. Only present when `event` is `stream`
         tokenUsage:
           description: Token usage data. Only present when `event` is `token_usage`.
           $ref: '#/components/schemas/TokenUsageItem'
@@ -4300,6 +4307,11 @@ components:
             data:
               description: Weblink scrape result
               $ref: '#/components/schemas/ScrapeWeblinkResult'
+    FileVisibility:
+      type: string
+      enum:
+        - public
+        - private
     UploadRequest:
       type: object
       required:
@@ -4315,6 +4327,9 @@ components:
         entityType:
           description: Entity type
           $ref: '#/components/schemas/EntityType'
+        visibility:
+          description: File visibility (default is private)
+          $ref: '#/components/schemas/FileVisibility'
     UploadResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

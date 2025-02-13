@@ -38,6 +38,7 @@ import { NodeResizer as NodeResizerComponent } from './shared/node-resizer';
 import classNames from 'classnames';
 import Moveable from 'react-moveable';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
+import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 
 type SkillNode = Node<CanvasNodeData<SkillNodeMeta>, 'skill'>;
 
@@ -115,7 +116,9 @@ export const SkillNode = memo(
     const { operatingNodeId } = useCanvasStoreShallow((state) => ({
       operatingNodeId: state.operatingNodeId,
     }));
+    const { draggingNodeId } = useEditorPerformance();
     const isOperating = operatingNodeId === id;
+    const isDragging = draggingNodeId === id;
     const node = useMemo(() => getNode(id), [id, getNode]);
     const { containerStyle, handleResize, updateSize } = useNodeSize({
       id,
@@ -344,7 +347,7 @@ export const SkillNode = memo(
           onMouseLeave={handleMouseLeave}
           style={containerStyle}
         >
-          <ActionButtons type="skill" nodeId={id} isNodeHovered={isHovered} />
+          {!isDragging && <ActionButtons type="skill" nodeId={id} isNodeHovered={isHovered} />}
           <div className={`w-full h-full ${getNodeCommonStyles({ selected, isHovered })}`}>
             <CustomHandle
               type="target"

@@ -1,4 +1,11 @@
-import { Inject, Injectable, StreamableFile, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  StreamableFile,
+  Logger,
+  OnModuleInit,
+  NotFoundException,
+} from '@nestjs/common';
 import { Queue } from 'bullmq';
 import sharp from 'sharp';
 import mime from 'mime';
@@ -9,27 +16,22 @@ import {
   ScrapeWeblinkResult,
   UploadResponse,
   User,
+  FileVisibility,
 } from '@refly-packages/openapi-schema';
 import { PrismaService } from '@/common/prisma.service';
-import { MINIO_EXTERNAL, MinioService } from '@/common/minio.service';
+import { MINIO_EXTERNAL, MINIO_INTERNAL, MinioService } from '@/common/minio.service';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { ConfigService } from '@nestjs/config';
 import { scrapeWeblink } from '@refly-packages/utils';
-import {
-  QUEUE_IMAGE_PROCESSING,
-  QUEUE_SYNC_STORAGE_USAGE,
-  QUEUE_CLEAN_STATIC_FILES,
-  streamToBuffer,
-} from '@/utils';
-import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
+import { QUEUE_IMAGE_PROCESSING, QUEUE_CLEAN_STATIC_FILES, streamToBuffer } from '@/utils';
 import {
   CanvasNotFoundError,
   ParamsError,
   ResourceNotFoundError,
   DocumentNotFoundError,
 } from '@refly-packages/errors';
-import { ImageProcessingJobData } from '@/misc/misc.dto';
+import { FileObject } from '@/misc/misc.dto';
 import { createId } from '@paralleldrive/cuid2';
 import { ParserFactory } from '@/knowledge/parsers/factory';
 
@@ -40,9 +42,9 @@ export class MiscService implements OnModuleInit {
   constructor(
     private config: ConfigService,
     private prisma: PrismaService,
-    @Inject(MINIO_EXTERNAL) private minio: MinioService,
-    @InjectQueue(QUEUE_SYNC_STORAGE_USAGE) private ssuQueue: Queue<SyncStorageUsageJobData>,
-    @InjectQueue(QUEUE_IMAGE_PROCESSING) private imageQueue: Queue<ImageProcessingJobData>,
+    @Inject(MINIO_EXTERNAL) private externalMinio: MinioService,
+    @Inject(MINIO_INTERNAL) private internalMinio: MinioService,
+    @InjectQueue(QUEUE_IMAGE_PROCESSING) private imageQueue: Queue<FileObject>,
     @InjectQueue(QUEUE_CLEAN_STATIC_FILES) private cleanStaticFilesQueue: Queue,
   ) {}
 
@@ -81,7 +83,16 @@ export class MiscService implements OnModuleInit {
     };
   }
 
-  async dumpFileFromURL(user: User, url: string): Promise<UploadResponse['data']> {
+  async dumpFileFromURL(
+    user: User,
+    param: {
+      url: string;
+      entityId?: string;
+      entityType?: EntityType;
+      visibility?: FileVisibility;
+    },
+  ): Promise<UploadResponse['data']> {
+    const { url, entityId, entityType, visibility = 'private' } = param;
     const res = await fetch(url);
     const buffer = await res.arrayBuffer();
 
@@ -91,6 +102,9 @@ export class MiscService implements OnModuleInit {
         mimetype: res.headers.get('Content-Type') || 'application/octet-stream',
         originalname: path.basename(url),
       },
+      entityId,
+      entityType,
+      visibility,
     });
   }
 
@@ -137,6 +151,43 @@ export class MiscService implements OnModuleInit {
     }
   }
 
+  minioClient(visibility: FileVisibility) {
+    if (visibility === 'public') {
+      return this.externalMinio.client;
+    }
+    return this.internalMinio.client;
+  }
+
+  async batchRemoveObjects(objects: FileObject[]) {
+    const objectMap = new Map<FileVisibility, Set<string>>();
+    for (const fo of objects) {
+      const { visibility, storageKey } = fo;
+      if (!objectMap.has(visibility)) {
+        objectMap.set(visibility, new Set());
+      }
+      objectMap.get(visibility)?.add(storageKey);
+    }
+
+    await Promise.all(
+      Array.from(objectMap.entries()).map(([visibility, storageKeys]) =>
+        this.minioClient(visibility).removeObjects(Array.from(storageKeys)),
+      ),
+    );
+  }
+
+  generateFileURL(object: FileObject) {
+    const { visibility, storageKey } = object;
+
+    let endpoint = '';
+    if (visibility === 'public') {
+      endpoint = this.config.get<string>('staticEndpoint')?.replace(/\/$/, '');
+    } else {
+      endpoint = `${this.config.get<string>('endpoint')}/v1/misc`;
+    }
+
+    return `${endpoint}/${storageKey}`;
+  }
+
   async uploadBuffer(
     user: User,
     param: {
@@ -144,9 +195,10 @@ export class MiscService implements OnModuleInit {
       buf: Buffer;
       entityId?: string;
       entityType?: EntityType;
+      visibility?: FileVisibility;
     },
   ): Promise<UploadResponse['data']> {
-    const { fpath, buf, entityId, entityType } = param;
+    const { fpath, buf, entityId, entityType, visibility = 'private' } = param;
     const objectKey = randomUUID();
     const fileExtension = path.extname(fpath);
     const storageKey = `static/${objectKey}${fileExtension}`;
@@ -163,18 +215,18 @@ export class MiscService implements OnModuleInit {
       },
     });
 
-    await this.minio.client.putObject(storageKey, buf, {
+    await this.minioClient(visibility).putObject(storageKey, buf, {
       'Content-Type': contentType,
     });
 
     // Resize and convert to webp if it's an image
     if (contentType?.startsWith('image/')) {
-      await this.imageQueue.add('resizeAndConvert', { storageKey });
+      await this.imageQueue.add('resizeAndConvert', { storageKey, visibility });
     }
 
     return {
       storageKey,
-      url: `${this.config.get('staticEndpoint')}${storageKey}`,
+      url: this.generateFileURL({ visibility, storageKey }),
     };
   }
 
@@ -184,9 +236,10 @@ export class MiscService implements OnModuleInit {
       file: Pick<Express.Multer.File, 'buffer' | 'mimetype' | 'originalname'>;
       entityId?: string;
       entityType?: EntityType;
+      visibility?: FileVisibility;
     },
   ): Promise<UploadResponse['data']> {
-    const { file, entityId, entityType } = param;
+    const { file, entityId, entityType, visibility = 'private' } = param;
 
     if (entityId && entityType) {
       await this.checkEntity(user, entityId, entityType);
@@ -205,21 +258,22 @@ export class MiscService implements OnModuleInit {
         entityId,
         entityType,
         contentType,
+        visibility,
       },
     });
 
-    await this.minio.client.putObject(storageKey, file.buffer, {
+    await this.minioClient(visibility).putObject(storageKey, file.buffer, {
       'Content-Type': contentType,
     });
 
     // Resize and convert to webp if it's an image
     if (contentType?.startsWith('image/')) {
-      await this.imageQueue.add('resizeAndConvert', { storageKey });
+      await this.imageQueue.add('resizeAndConvert', { storageKey, visibility });
     }
 
     return {
       storageKey,
-      url: `${this.config.get('staticEndpoint')}${storageKey}`,
+      url: this.generateFileURL({ visibility, storageKey }),
     };
   }
 
@@ -227,14 +281,15 @@ export class MiscService implements OnModuleInit {
    * Process an image by resizing it and converting to webp.
    * @param storageKey - The storage key of the image to process.
    */
-  async processImage(storageKey: string): Promise<void> {
+  async processImage(jobData: FileObject): Promise<void> {
+    const { storageKey, visibility } = jobData;
     if (!storageKey) {
       this.logger.warn('Missing required job data');
       return;
     }
 
     // Retrieve the original image from minio
-    const stream = await this.minio.client.getObject(storageKey);
+    const stream = await this.minioClient(visibility).getObject(storageKey);
     const originalBuffer = await streamToBuffer(stream);
 
     // Get image metadata to calculate dimensions
@@ -260,7 +315,7 @@ export class MiscService implements OnModuleInit {
     const processedKey = `static-processed/${createId()}-${Date.now()}.webp`;
 
     // Upload the processed image to minio
-    await this.minio.client.putObject(processedKey, processedBuffer, {
+    await this.minioClient(visibility).putObject(processedKey, processedBuffer, {
       'Content-Type': 'image/webp',
     });
 
@@ -284,6 +339,7 @@ export class MiscService implements OnModuleInit {
     const files = await this.prisma.staticFile.findMany({
       select: {
         storageKey: true,
+        visibility: true,
       },
       where: {
         uid: user.uid,
@@ -297,7 +353,12 @@ export class MiscService implements OnModuleInit {
       this.logger.log(`Files to remove: ${files.map((file) => file.storageKey).join(',')}`);
 
       await Promise.all([
-        this.minio.client.removeObjects(files.map((file) => file.storageKey)),
+        this.batchRemoveObjects(
+          files.map((file) => ({
+            storageKey: file.storageKey,
+            visibility: file.visibility as FileVisibility,
+          })),
+        ),
         this.prisma.staticFile.updateMany({
           where: {
             uid: user.uid,
@@ -332,7 +393,9 @@ export class MiscService implements OnModuleInit {
     const currentStorageKeys = files.map((file) => file.storageKey);
     const storageKeysToRemove = currentStorageKeys.filter((key) => !storageKeys.includes(key));
 
-    await this.minio.client.removeObjects(storageKeysToRemove);
+    await this.batchRemoveObjects(
+      storageKeysToRemove.map((key) => ({ storageKey: key, visibility: 'private' })),
+    );
     this.logger.log(`Compare and remove files: ${storageKeysToRemove.join(',')}`);
 
     if (storageKeysToRemove.length > 0) {
@@ -352,8 +415,14 @@ export class MiscService implements OnModuleInit {
     }
   }
 
-  async getFileStream(objectKey: string): Promise<StreamableFile> {
-    const data = await this.minio.client.getObject(`static/${objectKey}`);
+  async getInternalFileStream(user: User, storageKey: string): Promise<StreamableFile> {
+    const file = await this.prisma.staticFile.findFirst({
+      where: { uid: user.uid, storageKey, deletedAt: null },
+    });
+    if (!file) {
+      throw new NotFoundException();
+    }
+    const data = await this.minioClient(file.visibility as FileVisibility).getObject(storageKey);
     return new StreamableFile(data);
   }
 
@@ -379,6 +448,7 @@ export class MiscService implements OnModuleInit {
       select: {
         storageKey: true,
         processedImageKey: true,
+        visibility: true,
       },
       where: {
         uid: user.uid,
@@ -390,10 +460,11 @@ export class MiscService implements OnModuleInit {
       if (imageMode === 'base64') {
         const urls = await Promise.all(
           files.map(async (file) => {
+            const visibility = file.visibility as FileVisibility;
             const storageKey = file.processedImageKey || file.storageKey;
 
             try {
-              const data = await this.minio.client.getObject(storageKey);
+              const data = await this.minioClient(visibility).getObject(storageKey);
               const chunks: Buffer[] = [];
 
               for await (const chunk of data) {
@@ -402,7 +473,7 @@ export class MiscService implements OnModuleInit {
 
               const buffer = Buffer.concat(chunks);
               const base64 = buffer.toString('base64');
-              const contentType = await this.minio.client
+              const contentType = await this.minioClient(visibility)
                 .statObject(storageKey)
                 .then((stat) => stat.metaData?.['content-type'] ?? 'image/jpeg');
 
@@ -417,11 +488,32 @@ export class MiscService implements OnModuleInit {
       }
 
       // URL mode
-      const staticEndpoint = this.config.get('staticEndpoint') ?? '';
-      return files.map((file) => {
-        const storageKey = file.processedImageKey || file.storageKey;
-        return `${staticEndpoint}static/${storageKey}`;
-      });
+      const staticEndpoint = this.config.get('staticEndpoint')?.replace(/\/$/, '') ?? '';
+      return await Promise.all(
+        files.map(async (file) => {
+          const visibility = file.visibility as FileVisibility;
+          const storageKey = file.processedImageKey || file.storageKey;
+
+          // For public files, use the static endpoint
+          if (visibility === 'public') {
+            return `${staticEndpoint}/${storageKey}`;
+          }
+
+          // For private files, generate a signed URL that expires in given time
+          try {
+            const signedUrl = await this.minioClient(visibility).presignedGetObject(
+              storageKey,
+              this.config.get('image.presignExpiry'),
+            );
+            return signedUrl;
+          } catch (error) {
+            this.logger.error(
+              `Failed to generate signed URL for key ${storageKey}: ${error.stack}`,
+            );
+            return '';
+          }
+        }),
+      );
     } catch (error) {
       this.logger.error('Error generating image URLs:', error);
       return [];
@@ -449,6 +541,7 @@ export class MiscService implements OnModuleInit {
         pk: true,
         storageKey: true,
         processedImageKey: true,
+        visibility: true,
       },
     });
 
@@ -460,16 +553,21 @@ export class MiscService implements OnModuleInit {
     this.logger.log(`Found ${orphanedFiles.length} orphaned files to clean up`);
 
     // Collect all storage keys to delete (including processed images)
-    const storageKeysToDelete = orphanedFiles.reduce<string[]>((acc, file) => {
-      acc.push(file.storageKey);
+    const storageKeysToDelete = orphanedFiles.reduce<
+      { storageKey: string; visibility: FileVisibility }[]
+    >((acc, file) => {
+      acc.push({ storageKey: file.storageKey, visibility: file.visibility as FileVisibility });
       if (file.processedImageKey) {
-        acc.push(file.processedImageKey);
+        acc.push({
+          storageKey: file.processedImageKey,
+          visibility: file.visibility as FileVisibility,
+        });
       }
       return acc;
     }, []);
 
     // Delete files from storage
-    await this.minio.client.removeObjects(storageKeysToDelete);
+    await this.batchRemoveObjects(storageKeysToDelete);
 
     // Mark files as deleted in database
     await this.prisma.staticFile.updateMany({

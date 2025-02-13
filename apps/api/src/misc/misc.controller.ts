@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
+import path from 'node:path';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
 import { MiscService } from '@/misc/misc.service';
 import {
@@ -84,14 +85,16 @@ export class MiscController {
   @Header('Access-Control-Allow-Origin', '*')
   @Header('Cross-Origin-Resource-Policy', 'cross-origin')
   async serveStatic(
+    @LoginedUser() user: User,
     @Param('objectKey') objectKey: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
-    const fileStream = await this.miscService.getFileStream(objectKey);
+    const fileStream = await this.miscService.getInternalFileStream(user, `static/${objectKey}`);
+    const filename = path.basename(objectKey);
 
     res.set({
       'Content-Type': 'application/octet-stream',
-      'Content-Disposition': `inline; filename="${objectKey}"`,
+      'Content-Disposition': `inline; filename="${filename}"`,
     });
 
     return fileStream;

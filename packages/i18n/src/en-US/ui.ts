@@ -117,7 +117,7 @@ const translations = {
         'Powered by multi-threaded dialogue, knowledge integration, context memory, and intelligent search, ',
       second: 'Refly is the best way to transform ideas into quality content.',
     },
-    messageText: 'v0.3.0 released! Supports Chrome Extension web clipper! ',
+    messageText: 'Refly Chrome Extension web clipper launched! ⚡️! ',
     tryForFree: 'Get Started',
     addToChrome: 'Add to Chrome',
     contactUs: 'Contact Us',
@@ -739,6 +739,7 @@ const translations = {
         'Create an empty memo for quick recording ideas, supporting Markdown format',
       copy: 'Copy Node Content',
       copyDescription: 'Copy the content of the selected node to the clipboard in Markdown format',
+      createDocumentDescription: 'Create a document for writing',
       askAI: 'Ask AI',
       askAIDescription:
         'Ask AI, select context or switch skill, input requirements, get help with writing, reading comprehension, or question answering',
@@ -1479,7 +1480,8 @@ const translations = {
   },
   components: {
     markdown: {
-      copySuccess: 'Content Copied to Clipboard',
+      copySuccess: 'Copied successfully',
+      mermaidError: 'Failed to render Mermaid diagram',
     },
   },
   copilot: {

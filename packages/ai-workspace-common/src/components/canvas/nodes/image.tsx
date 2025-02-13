@@ -24,6 +24,7 @@ import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canva
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import Moveable from 'react-moveable';
 import { useSetNodeDataByEntity } from '@refly-packages/ai-workspace-common/hooks/canvas/use-set-node-data-by-entity';
+import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
 
 export const ImageNode = memo(
   ({ id, data, isPreview, selected, hideActions, hideHandles, onNodeClick }: ImageNodeProps) => {
@@ -43,7 +44,9 @@ export const ImageNode = memo(
       operatingNodeId: state.operatingNodeId,
     }));
 
+    const { draggingNodeId } = useEditorPerformance();
     const isOperating = operatingNodeId === id;
+    const isDragging = draggingNodeId === id;
     const node = useMemo(() => getNode(id), [id, getNode]);
 
     const { containerStyle, handleResize } = useNodeSize({
@@ -182,7 +185,7 @@ export const ImageNode = memo(
             'nodrag nopan select-text': isOperating,
           })}
         >
-          {!isPreview && !hideActions && (
+          {!isPreview && !hideActions && !isDragging && (
             <ActionButtons type="image" nodeId={id} isNodeHovered={isHovered} />
           )}
 
