@@ -11,7 +11,7 @@ import { NODE_COLORS } from '@refly-packages/ai-workspace-common/components/canv
 
 const FileExtensionIcon = Object.keys(defaultStyles);
 const getExtensionIcon = (extension: string, size: number) => {
-  const fileExtension = FileExtensionIcon.includes(extension) ? extension : 'doc';
+  const fileExtension = FileExtensionIcon.includes(extension) ? extension : 'file';
   return <FileIcon width={size} extension={fileExtension} {...defaultStyles[fileExtension]} />;
 };
 

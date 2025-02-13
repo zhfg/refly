@@ -35,4 +35,7 @@ export default {
   html: {
     type: 'code',
   },
+  file: {
+    type: 'document',
+  },
 };
