@@ -262,7 +262,7 @@ export const DocumentSchema = {
 export const EntityTypeSchema = {
   type: 'string',
   description: 'Entity type',
-  enum: ['document', 'resource', 'canvas', 'user'],
+  enum: ['document', 'resource', 'canvas', 'user', 'skillResponse'],
 } as const;
 
 export const EntitySchema = {
@@ -1897,6 +1897,45 @@ export const DeleteCanvasRequestSchema = {
       default: false,
     },
   },
+} as const;
+
+export const AutoNameCanvasRequestSchema = {
+  type: 'object',
+  required: ['canvasId'],
+  properties: {
+    canvasId: {
+      type: 'string',
+      description: 'Canvas ID',
+    },
+    directUpdate: {
+      type: 'boolean',
+      description: 'Whether to directly update the canvas title',
+      default: false,
+    },
+  },
+} as const;
+
+export const AutoNameCanvasResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Auto name canvas result',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'New canvas title',
+            },
+          },
+        },
+      },
+    },
+  ],
 } as const;
 
 export const UpsertResourceRequestSchema = {

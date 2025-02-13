@@ -42,6 +42,9 @@ import type {
   DeleteCanvasData,
   DeleteCanvasError,
   DeleteCanvasResponse,
+  AutoNameCanvasData,
+  AutoNameCanvasError,
+  AutoNameCanvasResponse2,
   ListResourcesData,
   ListResourcesError,
   ListResourcesResponse,
@@ -388,6 +391,23 @@ export const deleteCanvas = <ThrowOnError extends boolean = false>(
   return (options?.client ?? client).post<DeleteCanvasResponse, DeleteCanvasError, ThrowOnError>({
     ...options,
     url: '/canvas/delete',
+  });
+};
+
+/**
+ * Auto name canvas
+ * Auto name a canvas
+ */
+export const autoNameCanvas = <ThrowOnError extends boolean = false>(
+  options: Options<AutoNameCanvasData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    AutoNameCanvasResponse2,
+    AutoNameCanvasError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/canvas/autoName',
   });
 };
 

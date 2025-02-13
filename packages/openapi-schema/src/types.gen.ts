@@ -214,7 +214,7 @@ export type Document = {
 /**
  * Entity type
  */
-export type EntityType = 'document' | 'resource' | 'canvas' | 'user';
+export type EntityType = 'document' | 'resource' | 'canvas' | 'user' | 'skillResponse';
 
 /**
  * Entity
@@ -1459,6 +1459,29 @@ export type DeleteCanvasRequest = {
    * Whether to delete all files in the canvas
    */
   deleteAllFiles?: boolean;
+};
+
+export type AutoNameCanvasRequest = {
+  /**
+   * Canvas ID
+   */
+  canvasId: string;
+  /**
+   * Whether to directly update the canvas title
+   */
+  directUpdate?: boolean;
+};
+
+export type AutoNameCanvasResponse = BaseResponse & {
+  /**
+   * Auto name canvas result
+   */
+  data?: {
+    /**
+     * New canvas title
+     */
+    title?: string;
+  };
 };
 
 export type UpsertResourceRequest = {
@@ -2984,6 +3007,14 @@ export type DeleteCanvasData = {
 export type DeleteCanvasResponse = BaseResponse;
 
 export type DeleteCanvasError = unknown;
+
+export type AutoNameCanvasData = {
+  body: AutoNameCanvasRequest;
+};
+
+export type AutoNameCanvasResponse2 = AutoNameCanvasResponse;
+
+export type AutoNameCanvasError = unknown;
 
 export type ListResourcesData = {
   query?: {

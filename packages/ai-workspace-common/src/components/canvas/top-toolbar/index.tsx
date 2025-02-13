@@ -97,6 +97,7 @@ const CanvasTitle = memo(
         </div>
 
         <CanvasRename
+          canvasId={canvasId}
           canvasTitle={canvasTitle}
           isModalOpen={isModalOpen}
           handleModalOk={handleModalOk}

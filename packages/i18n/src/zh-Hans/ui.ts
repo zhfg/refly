@@ -633,6 +633,7 @@ const translations = {
       addSkill: '添加技能',
       addTool: '添加工具',
       autoLayout: '自动布局',
+      autoName: '自动命名',
       askAI: '问问 AI',
       askAIDescription:
         '通过 AI 提问，可以选择上下文、切换技能或模型，以获取写作灵感、内容创作、知识问答等。',
