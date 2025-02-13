@@ -33,6 +33,7 @@ import {
 } from '@refly-packages/errors';
 import { FileObject } from '@/misc/misc.dto';
 import { createId } from '@paralleldrive/cuid2';
+import { ParserFactory } from '@/knowledge/parsers/factory';
 
 @Injectable()
 export class MiscService implements OnModuleInit {
@@ -575,5 +576,22 @@ export class MiscService implements OnModuleInit {
     });
 
     this.logger.log(`Successfully cleaned up ${orphanedFiles.length} orphaned files`);
+  }
+
+  async convert(param: { content: string; from: string; to: string }): Promise<string> {
+    const { content, from, to } = param;
+    const parserFactory = new ParserFactory(this.config);
+    const parser = parserFactory.createParser('pandoc', {
+      format: from,
+      extractMedia: false,
+    });
+
+    try {
+      const result = await parser.parse(content);
+      return result.content ?? '';
+    } catch (error) {
+      this.logger.error(`Convert from ${from} to ${to} failed: ${error?.stack}`);
+      throw error;
+    }
   }
 }

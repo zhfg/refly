@@ -8,6 +8,7 @@ import {
   batchUpdateDocument,
   checkSettingsField,
   checkVerification,
+  convert,
   createCanvas,
   createCheckoutSession,
   createDocument,
@@ -83,6 +84,8 @@ import {
   CheckSettingsFieldError,
   CheckVerificationData,
   CheckVerificationError,
+  ConvertData,
+  ConvertError,
   CreateCanvasData,
   CreateCanvasError,
   CreateCheckoutSessionData,
@@ -1300,6 +1303,23 @@ export const useUpload = <
   useMutation<TData, TError, Options<UploadData, true>, TContext>({
     mutationKey: Common.UseUploadKeyFn(mutationKey),
     mutationFn: (clientOptions) => upload(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useConvert = <
+  TData = Common.ConvertMutationResult,
+  TError = ConvertError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<ConvertData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<ConvertData, true>, TContext>({
+    mutationKey: Common.UseConvertKeyFn(mutationKey),
+    mutationFn: (clientOptions) => convert(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useUpdateSettings = <

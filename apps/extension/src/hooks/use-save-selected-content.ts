@@ -1,17 +1,12 @@
 import { UpsertResourceRequest, type BaseResponse } from '@refly/openapi-schema';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getClientOrigin } from '@refly/utils/url';
-import { ConnectionError, ContentTooLargeError, PayloadTooLargeError } from '@refly/errors';
-
-// Maximum content length (100k characters)
-const MAX_CONTENT_LENGTH = 100000;
-// Maximum payload size (100KB)
-const MAX_PAYLOAD_SIZE_BYTES = 100 * 1024;
+import { ConnectionError } from '@refly/errors';
 
 interface SaveContentMetadata {
   title?: string;
   url?: string;
-  res: BaseResponse;
+  res?: BaseResponse;
 }
 
 export const useSaveSelectedContent = () => {
@@ -24,16 +19,6 @@ export const useSaveSelectedContent = () => {
       const title = metadata?.title || document?.title || 'Untitled';
       const url = metadata?.url || document?.location?.href || 'https://www.refly.ai';
 
-      // Check content length
-      if (content?.length > MAX_CONTENT_LENGTH) {
-        return {
-          url: '',
-          res: {
-            errCode: new ContentTooLargeError().code,
-          } as BaseResponse,
-        };
-      }
-
       const createResourceData: UpsertResourceRequest = {
         resourceType: 'text',
         title,
@@ -43,17 +28,6 @@ export const useSaveSelectedContent = () => {
           title,
         },
       };
-
-      // Check payload size
-      const payloadSize = new Blob([JSON.stringify(createResourceData)]).size;
-      if (payloadSize > MAX_PAYLOAD_SIZE_BYTES) {
-        return {
-          url: '',
-          res: {
-            errCode: new PayloadTooLargeError().code,
-          } as BaseResponse,
-        };
-      }
 
       const { error } = await getClient().createResource({
         body: createResourceData,
@@ -72,7 +46,9 @@ export const useSaveSelectedContent = () => {
       return {
         url: '',
         res: {
+          success: false,
           errCode: new ConnectionError(err)?.code,
+          errMsg: err?.message,
         } as BaseResponse,
       };
     }

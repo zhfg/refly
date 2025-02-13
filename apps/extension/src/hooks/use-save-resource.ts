@@ -1,32 +1,46 @@
 import { CreateResourceData, type BaseResponse } from '@refly/openapi-schema';
-import { getMarkdown, getReadabilityMarkdown } from '@refly/utils/html2md';
+import { getMarkdown, preprocessHtmlContent } from '@refly/utils/html2md';
+import { convertHTMLToMarkdown } from '@refly/utils/markdown';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getClientOrigin } from '@refly/utils/url';
 import { getRuntime } from '@refly/utils/env';
-import { ConnectionError, ContentTooLargeError, PayloadTooLargeError } from '@refly/errors';
-
-// Maximum content length (100k characters)
-const MAX_CONTENT_LENGTH = 100000;
-// Maximum payload size (100KB)
-const MAX_PAYLOAD_SIZE_BYTES = 100 * 1024;
+import { ConnectionError } from '@refly/errors';
 
 export const useSaveCurrentWeblinkAsResource = () => {
   const saveResource = async () => {
     try {
       const runtime = getRuntime();
       const isWeb = runtime === 'web';
-      const pageContent = isWeb
-        ? getMarkdown(document?.body)
-        : getReadabilityMarkdown(document?.body ? document?.body : document);
 
-      // Check content length
-      if (pageContent?.length > MAX_CONTENT_LENGTH) {
-        return {
-          url: '',
-          res: {
-            errCode: new ContentTooLargeError().code,
-          } as BaseResponse,
-        };
+      // First preprocess the HTML content with minimal cleaning
+      const preprocessedHtml = preprocessHtmlContent(document?.body ?? document);
+
+      let pageContent = '';
+      try {
+        // Create a Blob from the HTML content
+        const htmlBlob = new Blob([preprocessedHtml], { type: 'text/html' });
+        const htmlFile = new File([htmlBlob], 'content.html', { type: 'text/html' });
+
+        // Use extract API to convert HTML to Markdown
+        const result = await getClient().convert({
+          body: {
+            from: 'html',
+            to: 'markdown',
+            file: htmlFile,
+          },
+        });
+
+        if (result?.data?.data?.content) {
+          pageContent = result.data.data.content;
+        } else {
+          throw new Error('Extract API returned no content');
+        }
+      } catch (err) {
+        console.error('Failed to convert HTML to Markdown using extract:', err);
+        // Fallback to direct conversion if extract fails
+        pageContent = isWeb
+          ? getMarkdown(document?.body ?? document)
+          : convertHTMLToMarkdown('render', preprocessedHtml);
       }
 
       const resource = {
@@ -51,17 +65,6 @@ export const useSaveCurrentWeblinkAsResource = () => {
           content: resource?.content,
         },
       };
-
-      // Check payload size
-      const payloadSize = new Blob([JSON.stringify(createResourceData)]).size;
-      if (payloadSize > MAX_PAYLOAD_SIZE_BYTES) {
-        return {
-          url: '',
-          res: {
-            errCode: new PayloadTooLargeError().code,
-          } as BaseResponse,
-        };
-      }
 
       const { error } = await getClient().createResource(createResourceData);
       // const resourceId = data?.data?.resourceId;

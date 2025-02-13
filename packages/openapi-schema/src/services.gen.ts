@@ -199,6 +199,9 @@ import type {
   UploadResponse2,
   ServeStaticError,
   ServeStaticResponse,
+  ConvertData,
+  ConvertError,
+  ConvertResponse2,
 } from './types.gen';
 
 export const client = createClient(createConfig());
@@ -1269,5 +1272,23 @@ export const serveStatic = <ThrowOnError extends boolean = false>(
   return (options?.client ?? client).get<ServeStaticResponse, ServeStaticError, ThrowOnError>({
     ...options,
     url: '/misc/static/{fileName}',
+  });
+};
+
+/**
+ * Convert between formats
+ * Convert content between different formats (e.g., HTML to Markdown)
+ */
+export const convert = <ThrowOnError extends boolean = false>(
+  options: Options<ConvertData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<ConvertResponse2, ConvertError, ThrowOnError>({
+    ...options,
+    ...formDataBodySerializer,
+    headers: {
+      'Content-Type': null,
+      ...options?.headers,
+    },
+    url: '/misc/convert',
   });
 };

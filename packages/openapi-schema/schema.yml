@@ -1495,6 +1495,26 @@ paths:
       responses:
         '200':
           description: successful operation
+  /misc/convert:
+    post:
+      tags:
+        - misc
+      summary: Convert between formats
+      description: Convert content between different formats (e.g., HTML to Markdown)
+      operationId: convert
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ConvertRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConvertResponse'
 components:
   schemas:
     User:
@@ -4328,6 +4348,34 @@ components:
                 storageKey:
                   type: string
                   description: Storage key
+    ConvertRequest:
+      type: object
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          format: binary
+          description: The file to convert
+        from:
+          type: string
+          description: Source format (e.g., html)
+          default: html
+        to:
+          type: string
+          description: Target format (e.g., markdown)
+          default: markdown
+    ConvertResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: Converted markdown content
     ModelCapabilities:
       type: object
       properties:

@@ -2746,6 +2746,30 @@ export type UploadResponse = BaseResponse & {
   };
 };
 
+export type ConvertRequest = {
+  /**
+   * The file to convert
+   */
+  file: Blob | File;
+  /**
+   * Source format (e.g., html)
+   */
+  from?: string;
+  /**
+   * Target format (e.g., markdown)
+   */
+  to?: string;
+};
+
+export type ConvertResponse = BaseResponse & {
+  data?: {
+    /**
+     * Converted markdown content
+     */
+    content?: string;
+  };
+};
+
 export type ModelCapabilities = {
   /**
    * Whether this model supports function calling
@@ -3540,3 +3564,11 @@ export type UploadError = unknown;
 export type ServeStaticResponse = unknown;
 
 export type ServeStaticError = unknown;
+
+export type ConvertData = {
+  body: ConvertRequest;
+};
+
+export type ConvertResponse2 = ConvertResponse;
+
+export type ConvertError = unknown;

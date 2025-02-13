@@ -8,6 +8,7 @@ import {
   batchUpdateDocument,
   checkSettingsField,
   checkVerification,
+  convert,
   createCanvas,
   createCheckoutSession,
   createDocument,
@@ -572,6 +573,12 @@ export type UploadMutationResult = Awaited<ReturnType<typeof upload>>;
 export const useUploadKey = 'Upload';
 export const UseUploadKeyFn = (mutationKey?: Array<unknown>) => [
   useUploadKey,
+  ...(mutationKey ?? []),
+];
+export type ConvertMutationResult = Awaited<ReturnType<typeof convert>>;
+export const useConvertKey = 'Convert';
+export const UseConvertKeyFn = (mutationKey?: Array<unknown>) => [
+  useConvertKey,
   ...(mutationKey ?? []),
 ];
 export type UpdateSettingsMutationResult = Awaited<ReturnType<typeof updateSettings>>;

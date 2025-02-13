@@ -5,6 +5,7 @@ import { HiOutlineDocumentDownload } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
 import { useSaveSelectedContent } from '@/hooks/use-save-selected-content';
 import { useSaveResourceNotify } from '@refly-packages/ai-workspace-common/hooks/use-save-resouce-notify';
+import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import {
   onMessage,
   sendMessage,
@@ -37,16 +38,53 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
   const { saveSelectedContent } = useSaveSelectedContent();
   const { handleSaveResourceAndNotify } = useSaveResourceNotify();
 
+  const setPageContentResponse = async (data: BackgroundMessage) => {
+    const response = data;
+    if (response?.body) {
+      try {
+        // Convert HTML content to Markdown if it exists
+        if (response.body.content) {
+          // Create a Blob from the HTML content
+          const htmlBlob = new Blob([response.body.content], { type: 'text/html' });
+          const htmlFile = new File([htmlBlob], 'content.html', { type: 'text/html' });
+
+          // Create FormData and append the file
+          const formData = new FormData();
+          formData.append('file', htmlFile);
+
+          const result = await getClient().convert({
+            body: {
+              from: 'html',
+              to: 'markdown',
+              file: htmlFile,
+            },
+          });
+
+          if (result?.data?.data?.content) {
+            setPageInfo({
+              ...response.body,
+              content: result.data.data.content,
+            });
+          } else {
+            setPageInfo(response.body);
+          }
+        } else {
+          setPageInfo(response.body);
+        }
+      } catch (err) {
+        console.error('Failed to convert HTML to Markdown:', err);
+        setPageInfo(response.body);
+      }
+    }
+    setIsClipping(false);
+  };
+
   // Listen for content from content script
   useEffect(() => {
     onMessage((event: MessageEvent<any>) => {
       const data = event as any as BackgroundMessage;
       if (data?.name === 'getPageContentResponse') {
-        const response = data;
-        if (response?.body) {
-          setPageInfo(response.body);
-        }
-        setIsClipping(false);
+        setPageContentResponse(data);
       }
     }, getRuntime());
   }, []);
@@ -64,7 +102,7 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
     } catch (err) {
       setIsClipping(false);
       console.error('Failed to clip content:', err);
-      message.error(t('extension.webClipper.error.clipContentFailed'));
+      message.error(t('translation:extension.webClipper.error.clipContentFailed'));
     }
   }, [t]);
 
@@ -75,18 +113,18 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
       if (text) {
         setPageInfo((prev) => ({ ...prev, content: text }));
       } else {
-        message.warning(t('extension.webClipper.error.clipboardEmpty'));
+        message.warning(t('translation:extension.webClipper.error.clipboardEmpty'));
       }
     } catch (err) {
       console.error('Failed to read clipboard:', err);
-      message.error(t('extension.webClipper.error.clipboardReadFailed'));
+      message.error(t('translation:extension.webClipper.error.clipboardReadFailed'));
     }
   }, [t]);
 
   // Handle save content
   const handleSave = useCallback(async () => {
     if (!pageInfo.content?.trim()) {
-      message.warning(t('extension.webClipper.error.contentRequired'));
+      message.warning(t('translation:extension.webClipper.error.contentRequired'));
       return;
     }
 
@@ -98,7 +136,7 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
           title: pageInfo.title,
           url: pageInfo.url,
         });
-        if (result?.success) {
+        if (result?.res?.success) {
           setTimeout(() => {
             setPageInfo({ title: '', url: '', content: '' });
             onSaveSuccess?.();
@@ -108,7 +146,7 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
       });
     } catch (err) {
       console.error('Failed to save content:', err);
-      message.error(t('extension.webClipper.error.saveFailed'));
+      message.error(t('translation:extension.webClipper.error.saveFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -140,7 +178,7 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
     <div className={`flex flex-col gap-4 p-0 ${className}`}>
       <div className="flex flex-col gap-2">
         <TextArea
-          placeholder={t('extension.webClipper.placeholder.enterOrClipContent')}
+          placeholder={t('translation:extension.webClipper.placeholder.enterOrClipContent')}
           value={pageInfo.content}
           onChange={handleContentChange}
           onKeyDown={handleKeyDown}
@@ -151,10 +189,10 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
           <div className="flex flex-row gap-2">
             {pageInfo.content && (
               <Button size="small" icon={<IconDelete />} onClick={handleClear}>
-                {t('extension.webClipper.action.clear')}
+                {t('translation:extension.webClipper.action.clear')}
               </Button>
             )}
-            <Tooltip title={t('extension.webClipper.info.saveToLibrary')}>
+            <Tooltip title={t('translation:extension.webClipper.info.saveToLibrary')}>
               <Button
                 type="primary"
                 size="small"
@@ -165,7 +203,7 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
                 <div className="flex items-center justify-center rounded px-[1px] h-[12px] text-[10px] font-medium leading-none">
                   <span className="text-[10px] font-medium leading-none mr-2">⇧+↵</span>
                   <span className="text-[10px] font-medium leading-none translate-y-[0.5px]">
-                    {t('extension.webClipper.action.save')}
+                    {t('translation:extension.webClipper.action.save')}
                   </span>
                 </div>
               </Button>
@@ -183,9 +221,9 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
           loading={isClipping}
           className="flex-1"
         >
-          {t('extension.webClipper.action.clip')}
+          {t('translation:extension.webClipper.action.clip')}
         </Button>
-        <Tooltip title={t('extension.webClipper.action.fromClipboard')}>
+        <Tooltip title={t('translation:extension.webClipper.action.fromClipboard')}>
           <Button size="large" icon={<IconPaste />} onClick={handleGetClipboard} />
         </Tooltip>
       </div>
