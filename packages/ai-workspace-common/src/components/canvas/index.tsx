@@ -54,6 +54,7 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { IconCreateDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
+import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
 
 const selectionStyles = `
   .react-flow__selection {
@@ -501,6 +502,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   );
 
   const { handleUploadImage } = useUploadImage();
+  const { undoManager } = useCanvasSync();
 
   // Add drag and drop handlers
   const handleDragOver = useCallback((event: React.DragEvent) => {
@@ -520,6 +522,41 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     },
     [addNode, reactFlowInstance],
   );
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    const target = e.target as HTMLElement;
+
+    // Ignore input, textarea and contentEditable elements
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.contentEditable === 'true'
+    ) {
+      return;
+    }
+
+    // Check for mod key (Command on Mac, Ctrl on Windows/Linux)
+    const isModKey = e.metaKey || e.ctrlKey;
+
+    if (isModKey && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        // Mod+Shift+Z for Redo
+        undoManager.redo();
+      } else {
+        // Mod+Z for Undo
+        undoManager.undo();
+      }
+    }
+  };
+
+  // Set up keyboard shortcuts for undo/redo
+  useEffect(() => {
+    if (!undoManager) return;
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undoManager]);
 
   return (
     <Spin

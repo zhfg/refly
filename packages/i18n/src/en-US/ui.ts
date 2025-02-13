@@ -672,6 +672,8 @@ const translations = {
       mouse: 'Mouse Mode',
       touchpad: 'Touchpad Mode',
       tooltip: {
+        undo: 'Undo',
+        redo: 'Redo',
         zoom: 'Zoom Percentage',
         zoomIn: 'Zoom In',
         zoomOut: 'Zoom Out',

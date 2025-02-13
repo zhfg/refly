@@ -665,6 +665,8 @@ const translations = {
       mouse: '鼠标模式',
       touchpad: '触控板模式',
       tooltip: {
+        undo: '撤销',
+        redo: '重做',
         zoom: '缩放百分比',
         zoomIn: '放大',
         zoomOut: '缩小',
