@@ -137,7 +137,7 @@ export class GenerateDoc extends BaseSkill {
     const { query = '' } = state;
     const { locale = 'en', uiLocale = 'en' } = config.configurable;
 
-    const model = this.engine.chatModel({ temperature: 0.1 });
+    const model = this.engine.chatModel({ temperature: 0.1 }, true);
 
     // Prepare context snippet if available
     let contextSnippet = '';
