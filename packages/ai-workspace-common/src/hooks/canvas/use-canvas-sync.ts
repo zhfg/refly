@@ -4,6 +4,7 @@ import { useThrottledCallback } from 'use-debounce';
 import { Edge } from '@xyflow/react';
 import { CanvasNode } from '../../components/canvas/nodes';
 import { UndoManager } from 'yjs';
+import { omit } from '@refly/utils';
 
 export const useCanvasSync = () => {
   const { provider } = useCanvasContext();
@@ -16,7 +17,7 @@ export const useCanvasSync = () => {
     return new UndoManager(
       [ydoc.getText('title'), ydoc.getArray('nodes'), ydoc.getArray('edges')],
       {
-        captureTimeout: 500, // Merge edits that are within 500ms together
+        captureTimeout: 1000,
       },
     );
   }, [ydoc]);
@@ -42,7 +43,7 @@ export const useCanvasSync = () => {
       ydoc?.transact(() => {
         const yEdges = ydoc?.getArray('edges');
         yEdges?.delete(0, yEdges?.length ?? 0);
-        yEdges?.push(edges);
+        yEdges?.push(edges.map((edge) => omit(edge, ['style'])));
       });
     };
 
