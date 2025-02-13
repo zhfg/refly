@@ -42,9 +42,7 @@ const getNodeIcon = (node: CanvasNode<any>) => {
     case 'document':
       return IconDocument;
     case 'resource':
-      return node.data?.metadata?.resourceType === 'weblink'
-        ? HiOutlineSquare3Stack3D
-        : HiOutlineSquare3Stack3D;
+      return HiOutlineSquare3Stack3D;
     case 'skillResponse':
       return IconResponse;
     case 'toolResponse':
