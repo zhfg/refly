@@ -17,6 +17,8 @@ import './index.scss';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
+import { time } from '@refly-packages/ai-workspace-common/utils/time';
+import { LOCALE } from '@refly/common-types';
 
 interface ResourceViewProps {
   resourceId: string;
@@ -53,7 +55,8 @@ const ResourceMeta = memo(
     isReindexing: boolean;
     onReindex: (resourceId: string) => void;
   }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const language = i18n.languages?.[0];
 
     return (
       <div className="knowledge-base-resource-meta">
@@ -97,23 +100,37 @@ const ResourceMeta = memo(
         )}
 
         <div className="knowledge-base-directory-site-intro">
-          <div className="site-intro-icon">
+          <div className="site-intro-icon flex justify-center items-center">
             <ResourceIcon
               url={resourceDetail?.data?.url}
               resourceType={resourceDetail?.resourceType}
+              extension={resourceDetail?.rawFileKey?.split('.').pop()}
               size={24}
             />
           </div>
-          <div className="site-intro-content">
-            <p className="site-intro-site-name">{resourceDetail?.data?.title}</p>
-            <a
-              className="site-intro-site-url no-underline text-[#00968F]"
-              href={resourceDetail?.data?.url}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {resourceDetail?.data?.url}
-            </a>
+          <div className="site-intro-content flex flex-col justify-center">
+            {resourceDetail?.resourceType === 'file' && resourceDetail?.data?.title && (
+              <p className="site-intro-site-name text-gray-700 font-medium">
+                {resourceDetail?.data?.title}
+              </p>
+            )}
+            {resourceDetail?.data?.url && (
+              <a
+                className="site-intro-site-url no-underline text-[#00968F]"
+                href={resourceDetail?.data?.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {resourceDetail?.data?.url}
+              </a>
+            )}
+            {resourceDetail?.createdAt && (
+              <p className="site-intro-site-name text-gray-400">
+                {time(resourceDetail?.createdAt, language as LOCALE)
+                  .utc()
+                  .fromNow()}
+              </p>
+            )}
           </div>
         </div>
       </div>
