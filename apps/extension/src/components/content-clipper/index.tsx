@@ -52,8 +52,10 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
           const formData = new FormData();
           formData.append('file', htmlFile);
 
-          const result = await getClient().parseHtmlToMarkdown({
+          const result = await getClient().convert({
             body: {
+              from: 'html',
+              to: 'markdown',
               file: htmlFile,
             },
           });
