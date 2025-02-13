@@ -18,7 +18,7 @@ interface ProcessedResponse {
     statusText: string;
     headers: Record<string, string>;
   };
-  error: { errCode: string; success: boolean; traceId?: string };
+  error: { errCode: string; success: boolean; traceId?: string; errMsg: string };
 }
 
 interface RequestArg {

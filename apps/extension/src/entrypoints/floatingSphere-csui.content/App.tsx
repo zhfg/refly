@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Button, Tooltip, Message } from '@arco-design/web-react';
 import { reflyEnv } from '@/utils/env';
+import { preprocessHtmlContent } from '@refly/utils/html2md';
 
 import '@/i18n/config';
 import Logo from '@/assets/logo.svg';
@@ -86,14 +87,8 @@ export const App = () => {
       // Handle get page content request
       if (data?.name === 'getPageContent') {
         const html = document?.documentElement?.outerHTML ?? '';
-        // Only do minimal cleaning to preserve HTML structure
-        const cleanedHtml = html
-          // Remove script tags
-          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-          // Remove style tags
-          .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
-          // Remove comments
-          .replace(/<!--[\s\S]*?-->/g, '');
+        // Use our new preprocessing method for better content extraction
+        const cleanedHtml = preprocessHtmlContent(html);
 
         const response = {
           source: getRuntime(),

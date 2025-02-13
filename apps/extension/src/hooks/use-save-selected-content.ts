@@ -39,11 +39,7 @@ export const useSaveSelectedContent = () => {
 
       return {
         url: resourceUrl,
-        res: {
-          success: !error,
-          errCode: (error as any)?.code,
-          errMsg: (error as any)?.message,
-        } as BaseResponse,
+        res: error as BaseResponse,
       };
     } catch (err: any) {
       console.error('Failed to save selected content:', err);
