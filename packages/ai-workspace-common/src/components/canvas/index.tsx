@@ -541,11 +541,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     if (isModKey && e.key.toLowerCase() === 'z') {
       e.preventDefault();
       if (e.shiftKey) {
-        console.log('Canvas Redo');
         // Mod+Shift+Z for Redo
         undoManager.redo();
       } else {
-        console.log('Canvas Undo');
         // Mod+Z for Undo
         undoManager.undo();
       }
