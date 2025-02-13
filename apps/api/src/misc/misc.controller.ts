@@ -81,6 +81,7 @@ export class MiscController {
     return buildSuccessResponse({ content: result });
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('static/:objectKey')
   @Header('Access-Control-Allow-Origin', '*')
   @Header('Cross-Origin-Resource-Policy', 'cross-origin')
