@@ -7,8 +7,6 @@ import {
   UseGuards,
   ParseIntPipe,
   DefaultValuePipe,
-  UseInterceptors,
-  UploadedFile,
 } from '@nestjs/common';
 import {
   User,
@@ -31,7 +29,6 @@ import {
   UpsertDocumentRequest,
   UpsertDocumentResponse,
   DeleteDocumentRequest,
-  UploadRequest,
 } from '@refly-packages/openapi-schema';
 import { KnowledgeService } from './knowledge.service';
 import { JwtAuthGuard } from '@/auth/guard/jwt-auth.guard';
@@ -39,7 +36,6 @@ import { buildSuccessResponse } from '@/utils';
 import { LoginedUser } from '@/utils/decorators/user.decorator';
 import { documentPO2DTO, resourcePO2DTO, referencePO2DTO } from './knowledge.dto';
 import { ParamsError } from '@refly-packages/errors';
-import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('v1/knowledge')
 export class KnowledgeController {
@@ -225,22 +221,5 @@ export class KnowledgeController {
   async deleteReferences(@LoginedUser() user: User, @Body() body: DeleteReferencesRequest) {
     await this.knowledgeService.deleteReferences(user, body);
     return buildSuccessResponse({});
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('parse/html-to-markdown')
-  @UseInterceptors(FileInterceptor('file'))
-  async parseHtmlToMarkdown(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() body: UploadRequest,
-  ): Promise<{ data: { content: string } }> {
-    console.log('body', body);
-    if (!file) {
-      throw new ParamsError('File is required');
-    }
-
-    const html = file.buffer.toString('utf-8');
-    const content = await this.knowledgeService.parseHtmlToMarkdown(html);
-    return buildSuccessResponse({ content });
   }
 }

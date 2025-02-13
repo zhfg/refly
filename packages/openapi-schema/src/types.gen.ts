@@ -2732,6 +2732,30 @@ export type UploadResponse = BaseResponse & {
   };
 };
 
+export type ConvertRequest = {
+  /**
+   * The file to convert
+   */
+  file: Blob | File;
+  /**
+   * Source format (e.g., html)
+   */
+  from?: string;
+  /**
+   * Target format (e.g., markdown)
+   */
+  to?: string;
+};
+
+export type ConvertResponse = BaseResponse & {
+  data?: {
+    /**
+     * Converted markdown content
+     */
+    content?: string;
+  };
+};
+
 export type ModelCapabilities = {
   /**
    * Whether this model supports function calling
@@ -2840,22 +2864,6 @@ export type CanvasNode = {
    */
   type: CanvasNodeType;
   data: CanvasNodeData;
-};
-
-export type ParseHtmlToMarkdownRequest = {
-  /**
-   * HTML content file to be converted
-   */
-  file: Blob | File;
-};
-
-export type ParseHtmlToMarkdownResponse = BaseResponse & {
-  data?: {
-    /**
-     * Converted markdown content
-     */
-    content?: string;
-  };
 };
 
 export type GetAuthConfigResponse = AuthConfigResponse;
@@ -3543,10 +3551,10 @@ export type ServeStaticResponse = unknown;
 
 export type ServeStaticError = unknown;
 
-export type ParseHtmlToMarkdownData = {
-  body: ParseHtmlToMarkdownRequest;
+export type ConvertData = {
+  body: ConvertRequest;
 };
 
-export type ParseHtmlToMarkdownResponse2 = ParseHtmlToMarkdownResponse;
+export type ConvertResponse2 = ConvertResponse;
 
-export type ParseHtmlToMarkdownError = unknown;
+export type ConvertError = unknown;

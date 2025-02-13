@@ -3949,6 +3949,50 @@ export const UploadResponseSchema = {
   ],
 } as const;
 
+export const ConvertRequestSchema = {
+  type: 'object',
+  required: ['file'],
+  properties: {
+    file: {
+      type: 'string',
+      format: 'binary',
+      description: 'The file to convert',
+    },
+    from: {
+      type: 'string',
+      description: 'Source format (e.g., html)',
+      default: 'html',
+    },
+    to: {
+      type: 'string',
+      description: 'Target format (e.g., markdown)',
+      default: 'markdown',
+    },
+  },
+} as const;
+
+export const ConvertResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          properties: {
+            content: {
+              type: 'string',
+              description: 'Converted markdown content',
+            },
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
 export const ModelCapabilitiesSchema = {
   type: 'object',
   properties: {
@@ -4110,38 +4154,4 @@ export const CanvasNodeSchema = {
       $ref: '#/components/schemas/CanvasNodeData',
     },
   },
-} as const;
-
-export const ParseHtmlToMarkdownRequestSchema = {
-  type: 'object',
-  required: ['file'],
-  properties: {
-    file: {
-      type: 'string',
-      format: 'binary',
-      description: 'HTML content file to be converted',
-    },
-  },
-} as const;
-
-export const ParseHtmlToMarkdownResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'object',
-          properties: {
-            content: {
-              type: 'string',
-              description: 'Converted markdown content',
-            },
-          },
-        },
-      },
-    },
-  ],
 } as const;

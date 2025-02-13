@@ -987,20 +987,4 @@ export class KnowledgeService {
       },
     });
   }
-
-  async parseHtmlToMarkdown(html: string): Promise<string> {
-    const parserFactory = new ParserFactory(this.config);
-    const parser = parserFactory.createParser('pandoc', {
-      format: 'html',
-      extractMedia: false,
-    });
-
-    try {
-      const result = await parser.parse(html);
-      return result.content ?? '';
-    } catch (error) {
-      this.logger.error(`Parse HTML to Markdown failed: ${error?.stack}`);
-      throw error;
-    }
-  }
 }

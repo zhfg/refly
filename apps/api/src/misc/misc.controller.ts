@@ -56,6 +56,30 @@ export class MiscController {
     return buildSuccessResponse(result);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('convert')
+  @UseInterceptors(FileInterceptor('file'))
+  async convert(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { from?: string; to?: string },
+  ): Promise<{ data: { content: string } }> {
+    if (!file) {
+      throw new ParamsError('File is required');
+    }
+
+    const from = body.from ?? 'html';
+    const to = body.to ?? 'markdown';
+    const content = file.buffer.toString('utf-8');
+
+    const result = await this.miscService.convert({
+      content,
+      from,
+      to,
+    });
+
+    return buildSuccessResponse({ content: result });
+  }
+
   @Get('static/:objectKey')
   @Header('Access-Control-Allow-Origin', '*')
   @Header('Cross-Origin-Resource-Policy', 'cross-origin')
