@@ -112,18 +112,8 @@ export interface ReflyService {
   ) => Promise<InMemorySearchResponse>;
 }
 
-export interface ModelInfo {
-  name: string;
-  label: string;
-  provider: string;
-  tier: string;
-  contextLimit: number;
-  maxOutput: number;
-}
-
 export interface SkillEngineOptions {
   defaultModel?: string;
-  defaultChatModel?: string;
 }
 
 export interface Logger {
@@ -159,7 +149,6 @@ export class SkillEngine {
   ) {
     this.options = {
       defaultModel: 'openai/gpt-4o-mini',
-      defaultChatModel: 'openai/gpt-4o-mini',
       ...options,
     };
   }
@@ -171,7 +160,7 @@ export class SkillEngine {
   chatModel(params?: Partial<ChatDeepSeekInput>, useDefaultChatModel = false): ChatDeepSeek {
     return new ChatDeepSeek({
       model: useDefaultChatModel
-        ? this.options.defaultChatModel
+        ? this.options.defaultModel
         : this.config?.configurable?.modelInfo?.name || this.options.defaultModel,
       apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY,
       configuration: {
