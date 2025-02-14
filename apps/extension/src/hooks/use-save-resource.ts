@@ -52,14 +52,13 @@ export const useSaveCurrentWeblinkAsResource = () => {
       const websiteUrl = options?.url?.trim() || location.href;
 
       const resource = {
-        resourceId: 'tempResId',
         title,
         data: {
           url: websiteUrl,
           title,
           source: 'extension',
         },
-        resourceType: 'text',
+        resourceType: 'weblink',
         isPublic: false,
         readOnly: true,
         collabEnabled: false,
@@ -70,7 +69,7 @@ export const useSaveCurrentWeblinkAsResource = () => {
 
       const createResourceData: UpsertResourceRequest = {
         title: resource?.title,
-        resourceType: 'text',
+        resourceType: 'weblink',
         data: resource?.data,
       };
 
