@@ -11,6 +11,7 @@ import { ModelInfo } from '@refly/openapi-schema';
 import { cn } from '@refly-packages/utils/index';
 import { useCanvasContext } from '@refly-packages/ai-workspace-common/context/canvas';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 
 export interface CustomAction {
   icon: React.ReactNode;
@@ -28,12 +29,21 @@ interface ChatActionsProps {
   handleAbort: () => void;
   customActions?: CustomAction[];
   onUploadImage?: (file: File) => Promise<void>;
+  contextItems: IContextItem[];
 }
 
 export const ChatActions = memo(
   (props: ChatActionsProps) => {
-    const { query, model, setModel, handleSendMessage, customActions, className, onUploadImage } =
-      props;
+    const {
+      query,
+      model,
+      setModel,
+      handleSendMessage,
+      customActions,
+      className,
+      onUploadImage,
+      contextItems,
+    } = props;
     const { t } = useTranslation();
     const { canvasId } = useCanvasContext();
     const { handleUploadImage } = useUploadImage();
@@ -69,7 +79,13 @@ export const ChatActions = memo(
     return (
       <div className={cn('flex justify-between items-center', className)} ref={containerRef}>
         <div className="flex gap-2.5">
-          <ModelSelector model={model} setModel={setModel} briefMode={false} trigger={['click']} />
+          <ModelSelector
+            model={model}
+            setModel={setModel}
+            briefMode={false}
+            trigger={['click']}
+            contextItems={contextItems}
+          />
         </div>
         <div className="flex flex-row items-center gap-2">
           {customActions?.map((action, index) => (
@@ -107,7 +123,8 @@ export const ChatActions = memo(
   (prevProps, nextProps) => {
     return (
       prevProps.handleSendMessage === nextProps.handleSendMessage &&
-      prevProps.handleAbort === nextProps.handleAbort
+      prevProps.handleAbort === nextProps.handleAbort &&
+      prevProps.contextItems === nextProps.contextItems
     );
   },
 );

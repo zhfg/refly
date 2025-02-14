@@ -21,14 +21,14 @@ import {
 import { LuInfinity } from 'react-icons/lu';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
-import useContextHasImage from '@refly-packages/ai-workspace-common/hooks/use-context-has-image';
-
+import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
 interface ModelSelectorProps {
   model: ModelInfo | null;
   setModel: (model: ModelInfo | null) => void;
   briefMode?: boolean;
   placement?: DropdownProps['placement'];
   trigger?: DropdownProps['trigger'];
+  contextItems?: IContextItem[];
 }
 
 const UsageProgress = memo(
@@ -187,21 +187,22 @@ const SelectedModelDisplay = memo(({ model }: { model: ModelInfo | null }) => {
 
 SelectedModelDisplay.displayName = 'SelectedModelDisplay';
 
-const ModelLabel = memo(({ model }: { model: ModelInfo }) => {
-  const { t } = useTranslation();
-  const isContextIncludeImage = useContextHasImage();
+const ModelLabel = memo(
+  ({ model, isContextIncludeImage }: { model: ModelInfo; isContextIncludeImage: boolean }) => {
+    const { t } = useTranslation();
 
-  return (
-    <span className="text-xs flex items-center gap-1">
-      {model.label}
-      {!model.capabilities?.vision && isContextIncludeImage && (
-        <Tooltip title={t('copilot.modelSelector.noVisionSupport')}>
-          <IconError className="w-3.5 h-3.5 text-[#faad14]" />
-        </Tooltip>
-      )}
-    </span>
-  );
-});
+    return (
+      <span className="text-xs flex items-center gap-1">
+        {model.label}
+        {!model.capabilities?.vision && isContextIncludeImage && (
+          <Tooltip title={t('copilot.modelSelector.noVisionSupport')}>
+            <IconError className="w-3.5 h-3.5 text-[#faad14]" />
+          </Tooltip>
+        )}
+      </span>
+    );
+  },
+);
 
 ModelLabel.displayName = 'ModelLabel';
 
@@ -212,6 +213,7 @@ export const ModelSelector = memo(
     briefMode = false,
     model,
     setModel,
+    contextItems,
   }: ModelSelectorProps) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const { t } = useTranslation();
@@ -222,7 +224,6 @@ export const ModelSelector = memo(
     const { setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
       setSubscribeModalVisible: state.setSubscribeModalVisible,
     }));
-    const isContextIncludeImage = useContextHasImage();
 
     const { data: modelListData, isLoading: isModelListLoading } = useListModels({}, [], {
       refetchOnWindowFocus: false,
@@ -249,6 +250,10 @@ export const ModelSelector = memo(
       [userProfile?.subscription?.planType],
     );
 
+    const isContextIncludeImage = useMemo(() => {
+      return contextItems?.some((item) => item.type === 'image');
+    }, [contextItems]);
+
     const t1Models = useMemo(
       () =>
         modelList
@@ -257,11 +262,11 @@ export const ModelSelector = memo(
           .map((model) => ({
             key: model.name,
             icon: <ModelOption provider={model.provider} />,
-            label: <ModelLabel model={model} />,
+            label: <ModelLabel model={model} isContextIncludeImage={isContextIncludeImage} />,
             disabled: t1Disabled,
             capabilities: model.capabilities,
           })),
-      [modelList, t1Disabled],
+      [modelList, t1Disabled, isContextIncludeImage],
     );
 
     const t2Models = useMemo(
@@ -272,11 +277,11 @@ export const ModelSelector = memo(
           .map((model) => ({
             key: model.name,
             icon: <ModelOption provider={model.provider} />,
-            label: <ModelLabel model={model} />,
+            label: <ModelLabel model={model} isContextIncludeImage={isContextIncludeImage} />,
             disabled: t2Disabled,
             capabilities: model.capabilities,
           })),
-      [modelList, t2Disabled],
+      [modelList, t2Disabled, isContextIncludeImage],
     );
 
     const freeModels = useMemo(
@@ -287,10 +292,10 @@ export const ModelSelector = memo(
           .map((model) => ({
             key: model.name,
             icon: <ModelOption provider={model.provider} />,
-            label: <ModelLabel model={model} />,
+            label: <ModelLabel model={model} isContextIncludeImage={isContextIncludeImage} />,
             capabilities: model.capabilities,
           })),
-      [modelList],
+      [modelList, isContextIncludeImage],
     );
 
     // Optimize droplist creation
@@ -421,6 +426,7 @@ export const ModelSelector = memo(
       prevProps.placement === nextProps.placement &&
       prevProps.briefMode === nextProps.briefMode &&
       prevProps.model === nextProps.model &&
+      prevProps.contextItems === nextProps.contextItems &&
       JSON.stringify(prevProps.trigger) === JSON.stringify(nextProps.trigger)
     );
   },

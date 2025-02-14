@@ -299,6 +299,7 @@ export const ChatPanel = () => {
             handleAbort={handleAbort}
             customActions={customActions}
             onUploadImage={handleImageUpload}
+            contextItems={contextItems}
           />
         </div>
       </div>
