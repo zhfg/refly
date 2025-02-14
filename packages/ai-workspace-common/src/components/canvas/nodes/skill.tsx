@@ -418,6 +418,7 @@ export const SkillNode = memo(
                 handleSendMessage={handleSendMessage}
                 handleAbort={abortAction}
                 onUploadImage={handleImageUpload}
+                contextItems={contextItems}
               />
             </div>
           </div>

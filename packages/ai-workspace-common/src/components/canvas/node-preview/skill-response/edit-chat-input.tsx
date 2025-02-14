@@ -212,6 +212,7 @@ const EditChatInputComponent = (props: EditChatInputProps) => {
           handleAbort={() => {}}
           customActions={customActions}
           onUploadImage={handleImageUpload}
+          contextItems={editContextItems}
         />
 
         {/* {skillStore.selectedSkill?.configSchema?.items?.length > 0 && (
