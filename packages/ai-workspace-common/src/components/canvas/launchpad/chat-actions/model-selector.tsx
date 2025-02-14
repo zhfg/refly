@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo, useCallback, memo } from 'react';
 import { Button, Dropdown, DropdownProps, MenuProps, Progress, Skeleton, Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { IconDown } from '@arco-design/web-react/icon';
-import { MdOutlineImageNotSupported } from 'react-icons/md';
 
 import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
@@ -15,10 +14,14 @@ import {
   ModelProviderIcons,
 } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useListModels } from '@refly-packages/ai-workspace-common/queries';
-import { IconSubscription } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconSubscription,
+  IconError,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { LuInfinity } from 'react-icons/lu';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
+import useContextHasImage from '@refly-packages/ai-workspace-common/hooks/use-context-has-image';
 
 interface ModelSelectorProps {
   model: ModelInfo | null;
@@ -186,12 +189,14 @@ SelectedModelDisplay.displayName = 'SelectedModelDisplay';
 
 const ModelLabel = memo(({ model }: { model: ModelInfo }) => {
   const { t } = useTranslation();
+  const isContextIncludeImage = useContextHasImage();
+
   return (
     <span className="text-xs flex items-center gap-1">
       {model.label}
-      {!model.capabilities?.vision && (
+      {!model.capabilities?.vision && isContextIncludeImage && (
         <Tooltip title={t('copilot.modelSelector.noVisionSupport')}>
-          <MdOutlineImageNotSupported className="w-3.5 h-3.5 text-gray-400" />
+          <IconError className="w-3.5 h-3.5 text-[#faad14]" />
         </Tooltip>
       )}
     </span>
@@ -217,6 +222,7 @@ export const ModelSelector = memo(
     const { setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
       setSubscribeModalVisible: state.setSubscribeModalVisible,
     }));
+    const isContextIncludeImage = useContextHasImage();
 
     const { data: modelListData, isLoading: isModelListLoading } = useListModels({}, [], {
       refetchOnWindowFocus: false,
@@ -398,9 +404,9 @@ export const ModelSelector = memo(
           <span className="text-xs flex items-center gap-1.5 text-gray-500 cursor-pointer transition-all duration-300 hover:text-gray-700">
             <SelectedModelDisplay model={model} />
             <IconDown />
-            {!model?.capabilities?.vision && (
+            {!model?.capabilities?.vision && isContextIncludeImage && (
               <Tooltip title={t('copilot.modelSelector.noVisionSupport')}>
-                <MdOutlineImageNotSupported className="w-3.5 h-3.5 text-gray-400" />
+                <IconError className="w-3.5 h-3.5 text-[#faad14]" />
               </Tooltip>
             )}
           </span>
