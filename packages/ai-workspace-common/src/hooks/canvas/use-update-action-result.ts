@@ -8,7 +8,7 @@ import {
 } from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 import { aggregateTokenUsage } from '@refly-packages/utils/models';
 import { useSetNodeDataByEntity } from './use-set-node-data-by-entity';
-import { getWholeParsedContent } from '@refly-packages/ai-workspace-common/utils/content-parser';
+import { getWholeParsedContent } from '@refly-packages/utils/content-parser';
 
 const generateFullNodeDataUpdates = (
   payload: ActionResult,

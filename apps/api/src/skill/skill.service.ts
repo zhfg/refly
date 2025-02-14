@@ -5,6 +5,7 @@ import { Queue } from 'bullmq';
 import * as Y from 'yjs';
 import { InjectQueue } from '@nestjs/bullmq';
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
+import { getWholeParsedContent } from '@refly-packages/utils';
 import {
   Prisma,
   SkillTrigger as SkillTriggerModel,
@@ -636,7 +637,7 @@ export class SkillService {
         ? steps.map(
             (step) =>
               new AIMessage({
-                content: step.content, // TODO: dump artifact content to message
+                content: getWholeParsedContent(step.reasoningContent, step.content), //  // TODO: dump artifact content to message
                 additional_kwargs: {
                   skillMeta: result.actionMeta,
                   structuredData: step.structuredData,

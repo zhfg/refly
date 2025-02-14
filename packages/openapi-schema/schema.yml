@@ -411,6 +411,51 @@ paths:
                 $ref: '#/components/schemas/UpsertResourceResponse'
       security:
         - api_key: []
+  /knowledge/resource/createWithFile:
+    post:
+      tags:
+        - knowledge
+      summary: Create new resource with file upload
+      description: Create a new resource with file upload in a single request
+      operationId: createResourceWithFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+                - title
+                - resourceType
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: File to upload
+                title:
+                  type: string
+                  description: Resource title
+                  example: My Resource
+                resourceType:
+                  description: Resource type
+                  $ref: '#/components/schemas/ResourceType'
+                resourceId:
+                  type: string
+                  description: Resource ID (only used for update)
+                  example: r-g30e1b80b5g1itbemc0g5jj3
+                data:
+                  description: Resource metadata
+                  $ref: '#/components/schemas/ResourceMeta'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertResourceResponse'
+      security:
+        - api_key: []
   /knowledge/resource/batchCreate:
     post:
       tags:

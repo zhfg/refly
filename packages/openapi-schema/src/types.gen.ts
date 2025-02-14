@@ -3080,6 +3080,35 @@ export type CreateResourceResponse = UpsertResourceResponse;
 
 export type CreateResourceError = unknown;
 
+export type CreateResourceWithFileData = {
+  body: {
+    /**
+     * File to upload
+     */
+    file: Blob | File;
+    /**
+     * Resource title
+     */
+    title: string;
+    /**
+     * Resource type
+     */
+    resourceType: ResourceType;
+    /**
+     * Resource ID (only used for update)
+     */
+    resourceId?: string;
+    /**
+     * Resource metadata
+     */
+    data?: ResourceMeta;
+  };
+};
+
+export type CreateResourceWithFileResponse = UpsertResourceResponse;
+
+export type CreateResourceWithFileError = unknown;
+
 export type BatchCreateResourceData = {
   /**
    * Resource creation request

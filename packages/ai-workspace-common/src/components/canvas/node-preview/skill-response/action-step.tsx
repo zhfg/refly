@@ -16,7 +16,7 @@ import { getArtifactIcon } from '@refly-packages/ai-workspace-common/components/
 import { RecommendQuestions } from '@refly-packages/ai-workspace-common/components/canvas/node-preview/skill-response/recommend-questions';
 import { useNodeSelection } from '@refly-packages/ai-workspace-common/hooks/canvas/use-node-selection';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
-import { getWholeParsedContent } from '@refly-packages/ai-workspace-common/utils/content-parser';
+import { getWholeParsedContent } from '@refly-packages/utils/content-parser';
 
 const parseStructuredData = (structuredData: Record<string, unknown>, field: string) => {
   return typeof structuredData[field] === 'string'

@@ -154,9 +154,11 @@ export class SkillEngine {
     this.config = config;
   }
 
-  chatModel(params?: Partial<ChatDeepSeekInput>): ChatDeepSeek {
+  chatModel(params?: Partial<ChatDeepSeekInput>, useDefaultChatModel = false): ChatDeepSeek {
     return new ChatDeepSeek({
-      model: this.config?.configurable?.modelInfo?.name || this.options.defaultModel,
+      model: useDefaultChatModel
+        ? this.options.defaultModel
+        : this.config?.configurable?.modelInfo?.name || this.options.defaultModel,
       apiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY,
       configuration: {
         baseURL: process.env.OPENROUTER_API_KEY && 'https://openrouter.ai/api/v1',

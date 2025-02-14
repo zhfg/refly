@@ -109,12 +109,14 @@ export class ResultAggregator {
     version: number;
   }): Prisma.ActionStepCreateManyInput[] {
     return this.stepNames.map((stepName, order) => {
-      const { name, content, structuredData, artifacts, usageItems, logs } = this.data[stepName];
+      const { name, content, structuredData, artifacts, usageItems, logs, reasoningContent } =
+        this.data[stepName];
       const aggregatedUsage = aggregateTokenUsage(usageItems);
 
       return {
         name,
         content,
+        reasoningContent,
         resultId,
         version,
         order,

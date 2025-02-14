@@ -17,6 +17,7 @@ import {
   createLabelInstance,
   createPortalSession,
   createResource,
+  createResourceWithFile,
   createShare,
   createSkillInstance,
   createSkillTrigger,
@@ -102,6 +103,8 @@ import {
   CreatePortalSessionError,
   CreateResourceData,
   CreateResourceError,
+  CreateResourceWithFileData,
+  CreateResourceWithFileError,
   CreateShareData,
   CreateShareError,
   CreateSkillInstanceData,
@@ -743,6 +746,24 @@ export const useCreateResource = <
   useMutation<TData, TError, Options<CreateResourceData, true>, TContext>({
     mutationKey: Common.UseCreateResourceKeyFn(mutationKey),
     mutationFn: (clientOptions) => createResource(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useCreateResourceWithFile = <
+  TData = Common.CreateResourceWithFileMutationResult,
+  TError = CreateResourceWithFileError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<CreateResourceWithFileData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<CreateResourceWithFileData, true>, TContext>({
+    mutationKey: Common.UseCreateResourceWithFileKeyFn(mutationKey),
+    mutationFn: (clientOptions) =>
+      createResourceWithFile(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useBatchCreateResource = <

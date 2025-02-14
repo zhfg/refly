@@ -7,7 +7,10 @@ import {
   UseGuards,
   ParseIntPipe,
   DefaultValuePipe,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   User,
   UpsertResourceRequest,
@@ -80,6 +83,37 @@ export class KnowledgeController {
     const resource = await this.knowledgeService.createResource(user, body, {
       checkStorageQuota: true,
     });
+    await this.knowledgeService.syncStorageUsage(user);
+    return buildSuccessResponse(resourcePO2DTO(resource));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('resource/createWithFile')
+  @UseInterceptors(FileInterceptor('file'))
+  async createResourceWithFile(
+    @LoginedUser() user: User,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: UpsertResourceRequest,
+  ): Promise<UpsertResourceResponse> {
+    if (!file) {
+      throw new ParamsError('File is required');
+    }
+
+    // Convert file content to string
+    const content = file.buffer.toString('utf-8');
+
+    // Create resource with file content
+    const resource = await this.knowledgeService.createResource(
+      user,
+      {
+        ...body,
+        content,
+      },
+      {
+        checkStorageQuota: true,
+      },
+    );
+
     await this.knowledgeService.syncStorageUsage(user);
     return buildSuccessResponse(resourcePO2DTO(resource));
   }

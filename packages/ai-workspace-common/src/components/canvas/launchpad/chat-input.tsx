@@ -194,7 +194,7 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
         ref={ref}
         className={cn(
           'w-full h-full flex flex-col flex-grow overflow-y-auto relative',
-          isDragging && 'ring-2 ring-blue-500 ring-opacity-50',
+          isDragging && 'ring-2 ring-green-500 ring-opacity-50 rounded-lg',
         )}
         onPaste={handlePaste}
         onDragOver={(e) => {
@@ -227,8 +227,8 @@ const ChatInputComponent = forwardRef<HTMLDivElement, ChatInputProps>(
         }}
       >
         {isDragging && (
-          <div className="absolute inset-0 bg-blue-50 bg-opacity-50 flex items-center justify-center pointer-events-none z-10">
-            <div className="text-blue-500 text-sm">{t('common.dropImageHere')}</div>
+          <div className="absolute inset-0 bg-green-50/50 flex items-center justify-center pointer-events-none z-10 rounded-lg border-2 border-green-500/30">
+            <div className="text-green-600 text-sm font-medium">{t('common.dropImageHere')}</div>
           </div>
         )}
         <AutoComplete

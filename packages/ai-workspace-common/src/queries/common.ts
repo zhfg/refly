@@ -17,6 +17,7 @@ import {
   createLabelInstance,
   createPortalSession,
   createResource,
+  createResourceWithFile,
   createShare,
   createSkillInstance,
   createSkillTrigger,
@@ -376,6 +377,14 @@ export type CreateResourceMutationResult = Awaited<ReturnType<typeof createResou
 export const useCreateResourceKey = 'CreateResource';
 export const UseCreateResourceKeyFn = (mutationKey?: Array<unknown>) => [
   useCreateResourceKey,
+  ...(mutationKey ?? []),
+];
+export type CreateResourceWithFileMutationResult = Awaited<
+  ReturnType<typeof createResourceWithFile>
+>;
+export const useCreateResourceWithFileKey = 'CreateResourceWithFile';
+export const UseCreateResourceWithFileKeyFn = (mutationKey?: Array<unknown>) => [
+  useCreateResourceWithFileKey,
   ...(mutationKey ?? []),
 ];
 export type BatchCreateResourceMutationResult = Awaited<ReturnType<typeof batchCreateResource>>;
