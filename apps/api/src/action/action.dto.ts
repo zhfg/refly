@@ -15,7 +15,7 @@ import { modelInfoPO2DTO } from '@/misc/misc.dto';
 
 export function actionStepPO2DTO(step: ActionStepModel): ActionStep {
   return {
-    ...pick(step, ['name', 'content']),
+    ...pick(step, ['name', 'content', 'reasoningContent']),
     logs: JSON.parse(step.logs || '[]'),
     artifacts: JSON.parse(step.artifacts || '[]'),
     structuredData: JSON.parse(step.structuredData || '{}'),
