@@ -26,6 +26,7 @@ import { ConfigService } from '@nestjs/config';
 import { ChatOpenAI } from '@langchain/openai';
 import { HumanMessage } from '@langchain/core/messages';
 import { SystemMessage } from '@langchain/core/messages';
+import { AutoNameCanvasJobData } from './canvas.dto';
 
 @Injectable()
 export class CanvasService {
@@ -341,65 +342,44 @@ export class CanvasService {
       throw new CanvasNotFoundError();
     }
 
-    // Get all entities associated with the canvas
-    const relations = await this.prisma.canvasEntityRelation.findMany({
-      where: { canvasId, deletedAt: null },
+    const results = await this.prisma.actionResult.findMany({
+      select: { title: true, input: true, version: true, resultId: true },
+      where: { targetId: canvasId, targetType: 'canvas' },
     });
 
-    // Collect content from all entities
-    const contentPromises = relations.map(async (relation) => {
-      switch (relation.entityType) {
-        case 'resource': {
-          const resource = await this.prisma.resource.findUnique({
-            select: {
-              title: true,
-              contentPreview: true,
-            },
-            where: { resourceId: relation.entityId },
-          });
-          return resource
-            ? `Title: ${resource?.title}\nContent Preview: ${resource?.contentPreview}`
-            : '';
-        }
-        case 'document': {
-          const document = await this.prisma.document.findUnique({
-            select: {
-              title: true,
-              contentPreview: true,
-            },
-            where: { docId: relation.entityId },
-          });
-          return document
-            ? `Title: ${document?.title}\nContent Preview: ${document?.contentPreview}`
-            : '';
-        }
-        case 'skillResponse': {
-          const result = await this.prisma.actionResult.findFirst({
-            select: { title: true, input: true, version: true },
-            where: { resultId: relation.entityId },
-          });
-          if (!result) {
-            return '';
-          }
-          const steps = await this.prisma.actionStep.findMany({
-            select: {
-              content: true,
-            },
-            where: { resultId: relation.entityId, version: result.version },
-            orderBy: { order: 'asc' },
-          });
-          const input = JSON.parse(result?.input ?? '{}');
-          const question = input?.query ?? result?.title;
+    const canvasContent = await Promise.all(
+      results.map(async (result) => {
+        const { resultId, version, input, title } = result;
+        const steps = await this.prisma.actionStep.findMany({
+          where: { resultId, version },
+        });
+        const parsedInput = JSON.parse(input ?? '{}');
+        const question = parsedInput?.query ?? title;
 
-          return `Question: ${question}\nAnswer: ${steps.map((s) => s.content.slice(0, 100)).join('\n')}`;
-        }
-        default:
-          return '';
-      }
-    });
+        return `Question: ${question}\nAnswer: ${steps.map((s) => s.content.slice(0, 100)).join('\n')}`;
+      }),
+    );
 
-    const contents = await Promise.all(contentPromises);
-    const combinedContent = contents.filter(Boolean).join('\n');
+    // If no action results, try to get all entities associated with the canvas
+    if (canvasContent.length === 0) {
+      const relations = await this.prisma.canvasEntityRelation.findMany({
+        where: { canvasId, entityType: { in: ['resource', 'document'] }, deletedAt: null },
+      });
+      const documents = await this.prisma.document.findMany({
+        select: { title: true, contentPreview: true },
+        where: { docId: { in: relations.map((r) => r.entityId) } },
+      });
+      const resources = await this.prisma.resource.findMany({
+        select: { title: true, contentPreview: true },
+        where: { resourceId: { in: relations.map((r) => r.entityId) } },
+      });
+      canvasContent.push(
+        ...documents.map((d) => `Title: ${d.title}\nContent Preview: ${d.contentPreview}`),
+        ...resources.map((r) => `Title: ${r.title}\nContent Preview: ${r.contentPreview}`),
+      );
+    }
+
+    const combinedContent = canvasContent.filter(Boolean).join('\n\n');
 
     if (!combinedContent) {
       return { title: '' };
@@ -433,5 +413,17 @@ export class CanvasService {
     }
 
     return { title: newTitle };
+  }
+
+  async autoNameCanvasFromQueue(jobData: AutoNameCanvasJobData) {
+    const { uid, canvasId } = jobData;
+    const user = await this.prisma.user.findFirst({ where: { uid } });
+    if (!user) {
+      this.logger.warn(`user not found for uid ${uid} when auto naming canvas: ${canvasId}`);
+      return;
+    }
+
+    const result = await this.autoNameCanvas(user, { canvasId, directUpdate: true });
+    this.logger.log(`Auto named canvas ${canvasId} with title: ${result.title}`);
   }
 }

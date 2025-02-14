@@ -12,6 +12,7 @@ import {
   QUEUE_SKILL,
   QUEUE_SKILL_TIMEOUT_CHECK,
   QUEUE_SYNC_REQUEST_USAGE,
+  QUEUE_AUTO_NAME_CANVAS,
 } from '@/utils';
 import { LabelModule } from '@/label/label.module';
 import { SkillProcessor, SkillTimeoutCheckProcessor } from '@/skill/skill.processor';
@@ -34,6 +35,7 @@ import { MiscModule } from '@/misc/misc.module';
     BullModule.registerQueue({ name: QUEUE_SKILL_TIMEOUT_CHECK }),
     BullModule.registerQueue({ name: QUEUE_SYNC_TOKEN_USAGE }),
     BullModule.registerQueue({ name: QUEUE_SYNC_REQUEST_USAGE }),
+    BullModule.registerQueue({ name: QUEUE_AUTO_NAME_CANVAS }),
   ],
   providers: [SkillService, SkillProcessor, SkillTimeoutCheckProcessor],
   controllers: [SkillController],
