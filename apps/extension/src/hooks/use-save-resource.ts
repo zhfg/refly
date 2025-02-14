@@ -6,8 +6,13 @@ import { getClientOrigin } from '@refly/utils/url';
 import { getRuntime } from '@refly/utils/env';
 import { ConnectionError } from '@refly/errors';
 
+interface SaveResourceOptions {
+  title?: string;
+  url?: string;
+}
+
 export const useSaveCurrentWeblinkAsResource = () => {
-  const saveResource = async () => {
+  const saveResource = async (options?: SaveResourceOptions) => {
     try {
       const runtime = getRuntime();
       const isWeb = runtime === 'web';
@@ -43,14 +48,18 @@ export const useSaveCurrentWeblinkAsResource = () => {
           : convertHTMLToMarkdown('render', preprocessedHtml);
       }
 
+      const title = options?.title?.trim() || document?.title || 'Untitled';
+      const websiteUrl = options?.url?.trim() || location.href;
+
       const resource = {
         resourceId: 'tempResId',
-        title: document?.title || '',
+        title,
         data: {
-          url: location.href,
-          title: document?.title || '',
+          url: websiteUrl,
+          title,
+          source: 'extension',
         },
-        resourceType: 'weblink',
+        resourceType: 'text',
         isPublic: false,
         readOnly: true,
         collabEnabled: false,
@@ -61,7 +70,7 @@ export const useSaveCurrentWeblinkAsResource = () => {
 
       const createResourceData: UpsertResourceRequest = {
         title: resource?.title,
-        resourceType: 'weblink',
+        resourceType: 'text',
         data: resource?.data,
       };
 
@@ -82,7 +91,9 @@ export const useSaveCurrentWeblinkAsResource = () => {
       return {
         url: '',
         res: {
+          success: false,
           errCode: new ConnectionError(err).code,
+          errMsg: err?.message,
         } as BaseResponse,
       };
     }

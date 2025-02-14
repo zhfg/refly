@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Button, Divider, Input, message, Tooltip } from 'antd';
+import { Button, Divider, Input, message, Tooltip, Form, Collapse } from 'antd';
 import { IconDelete, IconPaste } from '@arco-design/web-react/icon';
 import { HiOutlineDocumentDownload } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,7 @@ import { BackgroundMessage } from '@refly/common-types';
 import { getRuntime } from '@refly/utils/env';
 
 const { TextArea } = Input;
+const { Panel } = Collapse;
 
 interface ContentClipperProps {
   className?: string;
@@ -174,17 +175,55 @@ export const ContentClipper: React.FC<ContentClipperProps> = ({ className, onSav
     setPageInfo((prev) => ({ ...prev, content: e.target.value }));
   }, []);
 
+  // Handle title change
+  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPageInfo((prev) => ({ ...prev, title: e.target.value }));
+  }, []);
+
+  // Handle URL change
+  const handleUrlChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPageInfo((prev) => ({ ...prev, url: e.target.value }));
+  }, []);
+
   return (
     <div className={`flex flex-col gap-4 p-0 ${className}`}>
       <div className="flex flex-col gap-2">
-        <TextArea
-          placeholder={t('translation:extension.webClipper.placeholder.enterOrClipContent')}
-          value={pageInfo.content}
-          onChange={handleContentChange}
-          onKeyDown={handleKeyDown}
-          autoSize={{ minRows: 10, maxRows: 10 }}
-          className="w-full resize-none"
-        />
+        <Form layout="vertical" className="content-clipper-form">
+          <TextArea
+            placeholder={t('translation:extension.webClipper.placeholder.enterOrClipContent')}
+            value={pageInfo.content}
+            onChange={handleContentChange}
+            onKeyDown={handleKeyDown}
+            autoSize={{ minRows: 10, maxRows: 10 }}
+            className="w-full resize-none"
+          />
+          <Collapse ghost className="m-0 p-0 content-clipper-collapse">
+            <Panel
+              header={t('translation:extension.webClipper.placeholder.metadata')}
+              key="metadata"
+            >
+              <Form.Item label={t('translation:extension.webClipper.placeholder.title')}>
+                <TextArea
+                  value={pageInfo.title}
+                  onChange={handleTitleChange}
+                  className="content-clipper-input"
+                  rows={1}
+                  placeholder={t('translation:extension.webClipper.placeholder.enterTitle')}
+                />
+              </Form.Item>
+              <Form.Item label={t('translation:extension.webClipper.placeholder.url')}>
+                <TextArea
+                  value={pageInfo.url}
+                  onChange={handleUrlChange}
+                  className="content-clipper-input"
+                  rows={1}
+                  placeholder={t('translation:extension.webClipper.placeholder.enterUrl')}
+                />
+              </Form.Item>
+            </Panel>
+          </Collapse>
+        </Form>
+
         <div className="flex flex-row justify-end gap-2">
           <div className="flex flex-row gap-2">
             {pageInfo.content && (
