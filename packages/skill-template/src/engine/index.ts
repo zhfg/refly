@@ -147,10 +147,7 @@ export class SkillEngine {
     public service: ReflyService,
     private options?: SkillEngineOptions,
   ) {
-    this.options = {
-      defaultModel: 'openai/gpt-4o-mini',
-      ...options,
-    };
+    this.options = options;
   }
 
   configure(config: SkillRunnableConfig) {

@@ -4,6 +4,7 @@ import { type Options } from '@hey-api/client-fetch';
 import { useMutation, UseMutationOptions, useQuery, UseQueryOptions } from '@tanstack/react-query';
 import {
   addReferences,
+  autoNameCanvas,
   batchCreateResource,
   batchUpdateDocument,
   checkSettingsField,
@@ -76,6 +77,8 @@ import {
 import {
   AddReferencesData,
   AddReferencesError,
+  AutoNameCanvasData,
+  AutoNameCanvasError,
   BatchCreateResourceData,
   BatchCreateResourceError,
   BatchUpdateDocumentData,
@@ -689,6 +692,23 @@ export const useDeleteCanvas = <
   useMutation<TData, TError, Options<DeleteCanvasData, true>, TContext>({
     mutationKey: Common.UseDeleteCanvasKeyFn(mutationKey),
     mutationFn: (clientOptions) => deleteCanvas(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useAutoNameCanvas = <
+  TData = Common.AutoNameCanvasMutationResult,
+  TError = AutoNameCanvasError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<AutoNameCanvasData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<AutoNameCanvasData, true>, TContext>({
+    mutationKey: Common.UseAutoNameCanvasKeyFn(mutationKey),
+    mutationFn: (clientOptions) => autoNameCanvas(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useUpdateResource = <

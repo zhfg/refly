@@ -638,6 +638,7 @@ const translations = {
       addSkill: 'Add Skill',
       addTool: 'Add Tool',
       autoLayout: 'Auto Layout',
+      autoName: 'Auto Name',
       askAI: 'Ask AI',
       askAIDescription:
         'Ask AI, select context or switch skill, input requirements, get help with writing, reading comprehension, or question answering',

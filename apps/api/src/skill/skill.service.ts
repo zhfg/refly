@@ -65,6 +65,7 @@ import {
   QUEUE_SYNC_TOKEN_USAGE,
   QUEUE_SKILL_TIMEOUT_CHECK,
   QUEUE_SYNC_REQUEST_USAGE,
+  QUEUE_AUTO_NAME_CANVAS,
 } from '@/utils';
 import { InvokeSkillJobData, SkillTimeoutCheckJobData } from './skill.dto';
 import { KnowledgeService } from '@/knowledge/knowledge.service';
@@ -93,6 +94,7 @@ import { CollabContext } from '@/collab/collab.dto';
 import { DirectConnection } from '@hocuspocus/server';
 import { modelInfoPO2DTO } from '@/misc/misc.dto';
 import { MiscService } from '@/misc/misc.service';
+import { AutoNameCanvasJobData } from '@/canvas/canvas.dto';
 
 function validateSkillTriggerCreateParam(param: SkillTriggerCreateParam) {
   if (param.triggerType === 'simpleEvent') {
@@ -129,6 +131,8 @@ export class SkillService {
     @InjectQueue(QUEUE_SYNC_TOKEN_USAGE) private usageReportQueue: Queue<SyncTokenUsageJobData>,
     @InjectQueue(QUEUE_SYNC_REQUEST_USAGE)
     private requestUsageQueue: Queue<SyncRequestUsageJobData>,
+    @InjectQueue(QUEUE_AUTO_NAME_CANVAS)
+    private autoNameCanvasQueue: Queue<AutoNameCanvasJobData>,
   ) {
     this.skillEngine = new SkillEngine(this.logger, this.buildReflyService(), {
       defaultModel: this.config.get('skill.defaultModel'),
@@ -1035,6 +1039,19 @@ export class SkillService {
       ]);
 
       writeSSEResponse(res, { event: 'end', resultId, version });
+
+      // Check if we need to auto-name the target canvas
+      if (data.target?.entityType === 'canvas' && !result.errors.length) {
+        const canvas = await this.prisma.canvas.findFirst({
+          where: { canvasId: data.target.entityId, uid: user.uid },
+        });
+        if (canvas && !canvas.title) {
+          await this.autoNameCanvasQueue.add('autoNameCanvas', {
+            uid: user.uid,
+            canvasId: canvas.canvasId,
+          });
+        }
+      }
 
       await this.requestUsageQueue.add('syncRequestUsage', {
         uid: user.uid,

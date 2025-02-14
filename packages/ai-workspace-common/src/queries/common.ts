@@ -4,6 +4,7 @@ import { type Options } from '@hey-api/client-fetch';
 import { UseQueryResult } from '@tanstack/react-query';
 import {
   addReferences,
+  autoNameCanvas,
   batchCreateResource,
   batchUpdateDocument,
   checkSettingsField,
@@ -357,6 +358,12 @@ export type DeleteCanvasMutationResult = Awaited<ReturnType<typeof deleteCanvas>
 export const useDeleteCanvasKey = 'DeleteCanvas';
 export const UseDeleteCanvasKeyFn = (mutationKey?: Array<unknown>) => [
   useDeleteCanvasKey,
+  ...(mutationKey ?? []),
+];
+export type AutoNameCanvasMutationResult = Awaited<ReturnType<typeof autoNameCanvas>>;
+export const useAutoNameCanvasKey = 'AutoNameCanvas';
+export const UseAutoNameCanvasKeyFn = (mutationKey?: Array<unknown>) => [
+  useAutoNameCanvasKey,
   ...(mutationKey ?? []),
 ];
 export type UpdateResourceMutationResult = Awaited<ReturnType<typeof updateResource>>;
