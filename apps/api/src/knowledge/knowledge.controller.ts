@@ -39,6 +39,7 @@ import { buildSuccessResponse } from '@/utils';
 import { LoginedUser } from '@/utils/decorators/user.decorator';
 import { documentPO2DTO, resourcePO2DTO, referencePO2DTO } from './knowledge.dto';
 import { ParamsError } from '@refly-packages/errors';
+import { safeParseJSON } from '@refly-packages/utils';
 
 @Controller('v1/knowledge')
 export class KnowledgeController {
@@ -101,6 +102,7 @@ export class KnowledgeController {
 
     // Convert file content to string
     const content = file.buffer.toString('utf-8');
+    const data = typeof body.data === 'object' ? body.data : safeParseJSON(body.data);
 
     // Create resource with file content
     const resource = await this.knowledgeService.createResource(
@@ -108,6 +110,7 @@ export class KnowledgeController {
       {
         ...body,
         content,
+        data,
       },
       {
         checkStorageQuota: true,

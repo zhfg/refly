@@ -21,7 +21,6 @@ import {
   ListResourcesData,
   User,
   GetResourceDetailData,
-  IndexStatus,
   ReindexResourceRequest,
   ResourceType,
   QueryReferencesRequest,
@@ -50,7 +49,11 @@ import {
   genReferenceID,
   genDocumentID,
 } from '@refly-packages/utils';
-import { ExtendedReferenceModel, FinalizeResourceParam } from './knowledge.dto';
+import {
+  ExtendedReferenceModel,
+  FinalizeResourceParam,
+  ResourcePrepareResult,
+} from './knowledge.dto';
 import { pick } from '../utils';
 import { SimpleEventData } from '@/event/event.dto';
 import { SyncStorageUsageJobData } from '@/subscription/subscription.dto';
@@ -63,7 +66,6 @@ import {
   ReferenceNotFoundError,
   ReferenceObjectMissingError,
   DocumentNotFoundError,
-  StaticFileNotFoundError,
 } from '@refly-packages/errors';
 import { DeleteCanvasNodesJobData } from '@/canvas/canvas.dto';
 import { ParserFactory } from '@/knowledge/parsers/factory';
@@ -141,6 +143,84 @@ export class KnowledgeService {
     return { ...resource, content };
   }
 
+  async prepareResource(user: User, param: UpsertResourceRequest): Promise<ResourcePrepareResult> {
+    const { resourceType, content, data } = param;
+
+    let identifier: string;
+    let staticFile: StaticFileModel | null = null;
+
+    if (resourceType === 'text') {
+      if (!content) {
+        throw new ParamsError('content is required for text resource');
+      }
+      const sha = crypto.createHash('sha256').update(content).digest('hex');
+      identifier = `text://${sha}`;
+    } else if (resourceType === 'weblink') {
+      if (!data?.url) {
+        throw new ParamsError('URL is required for weblink resource');
+      }
+      identifier = normalizeUrl(param.data.url, { stripHash: true });
+    } else if (resourceType === 'file') {
+      if (!param.storageKey) {
+        throw new ParamsError('storageKey is required for file resource');
+      }
+      staticFile = await this.prisma.staticFile.findFirst({
+        where: {
+          storageKey: param.storageKey,
+          uid: user.uid,
+          deletedAt: null,
+        },
+      });
+      if (!staticFile) {
+        throw new ParamsError(`static file ${param.storageKey} not found`);
+      }
+      const sha = crypto.createHash('sha256');
+      const fileStream = await this.minio.client.getObject(staticFile.storageKey);
+      sha.update(await streamToBuffer(fileStream));
+
+      identifier = `file://${sha.digest('hex')}`;
+    } else {
+      throw new ParamsError('Invalid resource type');
+    }
+
+    if (content) {
+      // save content to object storage
+      const storageKey = `resources/${param.resourceId}.txt`;
+      await this.minio.client.putObject(storageKey, param.content);
+      const storageSize = (await this.minio.client.statObject(storageKey)).size;
+
+      return {
+        storageKey,
+        storageSize,
+        identifier,
+        indexStatus: 'wait_index', // skip parsing stage, since content is provided
+        contentPreview: param.content.slice(0, 500),
+      };
+    }
+
+    if (resourceType === 'weblink') {
+      return {
+        identifier,
+        indexStatus: 'wait_parse',
+        metadata: {
+          ...param.data,
+          url: identifier,
+        },
+      };
+    }
+
+    // must be file resource
+    return {
+      identifier,
+      indexStatus: 'wait_parse',
+      staticFile,
+      metadata: {
+        ...param.data,
+        contentType: staticFile.contentType,
+      },
+    };
+  }
+
   async createResource(
     user: User,
     param: UpsertResourceRequest,
@@ -154,73 +234,26 @@ export class KnowledgeService {
     }
 
     param.resourceId = genResourceID();
-
-    let storageKey: string;
-    let staticFile: StaticFileModel | null = null;
-    let storageSize = 0;
-    let identifier: string;
-    let indexStatus: IndexStatus = 'wait_parse';
-    let contentPreview: string;
-
-    if (param.resourceType === 'weblink') {
-      if (!param.data) {
-        throw new ParamsError('data is required');
-      }
-      const { url, title } = param.data;
-      if (!url) {
-        throw new ParamsError('url is required');
-      }
-      param.title ||= title;
-      param.data.url = normalizeUrl(url, { stripHash: true });
-      identifier = param.data.url;
-    } else if (param.resourceType === 'text') {
-      if (!param.content) {
-        throw new ParamsError('content is required for text resource');
-      }
-      const md5Hash = crypto
-        .createHash('md5')
-        .update(param.content ?? '')
-        .digest('hex');
-      identifier = `text://${md5Hash}`;
-
-      const cleanedContent = param.content?.replace(/x00/g, '') ?? '';
-
-      if (cleanedContent) {
-        // save text content to object storage
-        storageKey = `resources/${param.resourceId}.txt`;
-        await this.minio.client.putObject(storageKey, cleanedContent);
-        storageSize = (await this.minio.client.statObject(storageKey)).size;
-
-        // skip parse stage, since content is provided
-        indexStatus = 'wait_index';
-        contentPreview = cleanedContent.slice(0, 500);
-      }
-    } else if (param.resourceType === 'file') {
-      if (!param.storageKey) {
-        throw new ParamsError('storageKey is required for file resource');
-      }
-      staticFile = await this.prisma.staticFile.findFirst({
-        where: { storageKey: param.storageKey },
-      });
-      if (!staticFile) {
-        throw new StaticFileNotFoundError(`static file ${param.storageKey} not found`);
-      }
-
-      const shasum = crypto.createHash('sha256');
-      const fileStream = await this.minio.client.getObject(staticFile.storageKey);
-      shasum.update(await streamToBuffer(fileStream));
-      identifier = `file:${shasum.digest('hex')}`;
-
-      param.data = {
-        ...param.data,
-        contentType: staticFile.contentType,
-      };
-    } else {
-      throw new ParamsError('Invalid resource type');
+    if (param.content) {
+      param.content = param.content.replace(/x00/g, '');
     }
 
+    const {
+      identifier,
+      indexStatus,
+      contentPreview,
+      storageKey,
+      storageSize,
+      staticFile,
+      metadata,
+    } = await this.prepareResource(user, param);
+
     const existingResource = await this.prisma.resource.findFirst({
-      where: { uid: user.uid, identifier, deletedAt: null },
+      where: {
+        uid: user.uid,
+        identifier,
+        deletedAt: null,
+      },
     });
     param.resourceId = existingResource ? existingResource.resourceId : genResourceID();
 
@@ -230,22 +263,22 @@ export class KnowledgeService {
         resourceId: param.resourceId,
         identifier,
         resourceType: param.resourceType,
-        meta: JSON.stringify(param.data || {}),
+        meta: JSON.stringify({ ...param.data, ...metadata }),
         contentPreview,
         storageKey,
         storageSize,
         rawFileKey: staticFile?.storageKey,
         uid: user.uid,
-        title: param.title || 'Untitled',
+        title: param.title || '',
         indexStatus,
       },
       update: {
-        meta: JSON.stringify(param.data || {}),
+        meta: JSON.stringify({ ...param.data, ...metadata }),
         contentPreview,
         storageKey,
         storageSize,
         rawFileKey: staticFile?.storageKey,
-        title: param.title || 'Untitled',
+        title: param.title || '',
         indexStatus,
       },
     });
@@ -432,6 +465,8 @@ export class KnowledgeService {
       const fileStream = await this.minio.client.getObject(resource.rawFileKey);
       const fileBuffer = await streamToBuffer(fileStream);
       result = await parser.parse(fileBuffer);
+    } else {
+      throw new Error(`Cannot parse resource ${resourceId} with no content or rawFileKey`);
     }
 
     if (result.error) {
