@@ -1,5 +1,4 @@
-import { Modal } from '@arco-design/web-react';
-import { Menu, Divider, Splitter } from 'antd';
+import { Menu, Divider, Splitter, Modal } from 'antd';
 import { HiLink } from 'react-icons/hi';
 import {
   ImportResourceMenuItem,
@@ -13,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 
 import './index.scss';
 import { useEffect } from 'react';
-import { getPopupContainer } from '@refly-packages/ai-workspace-common/utils/ui';
 import { getRuntime } from '@refly/utils/env';
 import MultilingualSearch from '@refly-packages/ai-workspace-common/modules/multilingual-search';
 import { TbClipboard, TbWorldSearch, TbBrowserPlus, TbFile } from 'react-icons/tb';
@@ -49,18 +47,17 @@ export const ImportResourceModal = () => {
 
   return (
     <Modal
-      visible={importResourceModalVisible}
+      open={importResourceModalVisible}
       footer={null}
       onCancel={() => {
         setImportResourceModalVisible(false);
       }}
-      getPopupContainer={getPopupContainer}
       className="import-resource-modal"
+      height={'70%'}
+      width={'65%'}
       style={{
-        height: '70%',
         minHeight: 500,
         maxHeight: 660,
-        width: '65%',
         minWidth: '300px',
         maxWidth: '1050px',
       }}

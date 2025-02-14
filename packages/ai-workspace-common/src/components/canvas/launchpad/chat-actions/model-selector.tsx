@@ -236,6 +236,7 @@ export const ModelSelector = memo(
     const { tokenUsage, isUsageLoading } = useSubscriptionUsage();
 
     const modelList = useMemo(() => modelListData?.data, [modelListData?.data]);
+
     const t1Disabled = useMemo(
       () => tokenUsage?.t1CountUsed >= tokenUsage?.t1CountQuota && tokenUsage?.t1CountQuota >= 0,
       [tokenUsage?.t1CountUsed, tokenUsage?.t1CountQuota],
@@ -393,6 +394,8 @@ export const ModelSelector = memo(
       return <Skeleton className="w-28" active paragraph={false} />;
     }
 
+    const remoteModal = modelList?.find((m) => m.name === model?.name);
+
     return (
       <Dropdown
         menu={{
@@ -409,7 +412,7 @@ export const ModelSelector = memo(
           <span className="text-xs flex items-center gap-1.5 text-gray-500 cursor-pointer transition-all duration-300 hover:text-gray-700">
             <SelectedModelDisplay model={model} />
             <IconDown />
-            {!model?.capabilities?.vision && isContextIncludeImage && (
+            {!remoteModal?.capabilities?.vision && isContextIncludeImage && (
               <Tooltip title={t('copilot.modelSelector.noVisionSupport')}>
                 <IconError className="w-3.5 h-3.5 text-[#faad14]" />
               </Tooltip>
