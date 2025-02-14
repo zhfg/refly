@@ -33,6 +33,7 @@ import {
   LuFilePlus,
   LuLockOpen,
   LuLock,
+  LuDownload,
 } from 'react-icons/lu';
 import {
   RiErrorWarningLine,
@@ -40,6 +41,10 @@ import {
   RiChatHistoryLine,
   RiChatHistoryFill,
   RiUploadCloud2Line,
+  RiImageAiFill,
+  RiImageAiLine,
+  RiExpandDiagonalLine,
+  RiGuideLine,
 } from 'react-icons/ri';
 import { TiDocumentDelete } from 'react-icons/ti';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
@@ -53,11 +58,9 @@ import { HiOutlineChevronDown } from 'react-icons/hi';
 import { RxExit } from 'react-icons/rx';
 
 import { AiOutlineShrink } from 'react-icons/ai';
-import { RiExpandDiagonalLine } from 'react-icons/ri';
 import { TbWorldSearch } from 'react-icons/tb';
 import { GrCircleQuestion } from 'react-icons/gr';
 import { TbInputSpark } from 'react-icons/tb';
-import { RiGuideLine } from 'react-icons/ri';
 
 import OpenAIIcon from '@refly-packages/ai-workspace-common/assets/openai.svg';
 import ClaudeIcon from '@refly-packages/ai-workspace-common/assets/claude.svg';
@@ -73,6 +76,8 @@ import { memo } from 'react';
 export const IconCanvas = TfiBlackboard;
 export const IconAskAI = LuSparkles;
 export const IconAskAIInput = TbInputSpark;
+export const IconImage = RiImageAiLine;
+export const IconImageFilled = RiImageAiFill;
 export const IconDocument = LuFileText;
 export const IconDocumentFilled = HiDocumentText;
 export const IconCreateDocument = LuFilePlus;
@@ -126,6 +131,8 @@ export const IconEmail = BsEnvelope;
 export const IconGuideLine = RiGuideLine;
 export const IconLanguage = IoLanguage;
 export const IconDeleteFile = TiDocumentDelete;
+export const IconDownloadFile = LuDownload;
+
 export const IconChrome = ChromeIcon;
 export const ModelProviderIcons = {
   openai: OpenAIIcon,

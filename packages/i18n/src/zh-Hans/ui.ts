@@ -70,6 +70,11 @@ const translations = {
     login: '登录',
     share: '分享',
     noMoreText: '已经到底啦~',
+    uploadImage: '上传图片',
+    uploadSuccess: '上传成功',
+    uploadFailed: '上传失败',
+    dropImageHere: '拖放图片到这里',
+    presetColors: '预设颜色',
   },
   verifyRules: {
     emailRequired: '邮箱地址不能为空',
@@ -377,6 +382,7 @@ const translations = {
   workspace: {
     addToCanvas: '添加到画布',
     openWebpage: '打开原网页',
+    downloadFile: '下载文件',
     canvasListModal: {
       continue: '继续对话',
     },
@@ -543,11 +549,11 @@ const translations = {
         result: '结果',
         empty: '未命中过滤条件',
       },
-      alreadyAddedWithTitle: '{{type}}「{{title}}」已添加到上下文',
-      addSuccessWithTitle: '{{type}}「{{title}}」已成功添加到上下文',
+      alreadyAddedWithTitle: '已添加到上下文',
+      addSuccessWithTitle: '已成功添加到上下文',
       addToContextSuccess: '已成功添加到上下文',
       untitled: '未命名',
-      deleteSuccessWithTitle: '已成功删除{{type}}节点「{{title}}」',
+      deleteSuccessWithTitle: '已成功删除{{type}}节点',
       memoPlaceholder: '记录当下的灵感...',
       noContent: '没有可插入的内容',
       noEditor: '没有打开的文档',
@@ -577,6 +583,7 @@ const translations = {
   resourceType: {
     weblink: '网页链接',
     pastedText: '粘贴文本',
+    file: '文件',
   },
   canvas: {
     emptyText: '双击向 AI 提问, 或',
@@ -586,6 +593,7 @@ const translations = {
       skillResponse: '技能响应',
       memo: '备忘录',
       skill: '技能',
+      image: '图片',
     },
     contextMenu: {
       createGroup: '创建分组',
@@ -625,6 +633,7 @@ const translations = {
       addSkill: '添加技能',
       addTool: '添加工具',
       autoLayout: '自动布局',
+      autoName: '自动命名',
       askAI: '问问 AI',
       askAIDescription:
         '通过 AI 提问，可以选择上下文、切换技能或模型，以获取写作灵感、内容创作、知识问答等。',
@@ -657,6 +666,8 @@ const translations = {
       mouse: '鼠标模式',
       touchpad: '触控板模式',
       tooltip: {
+        undo: '撤销',
+        redo: '重做',
         zoom: '缩放百分比',
         zoomIn: '放大',
         zoomOut: '缩小',
@@ -724,6 +735,7 @@ const translations = {
       createMemoDescription: '创建一个空备忘录，用于快速记录想法，支持 Markdown 格式',
       copy: '复制节点内容',
       copyDescription: '将节点内容以 Markdown 格式复制到剪贴板',
+      createDocumentDescription: '创建文档',
       askAI: '问问 AI',
       askAIDescription:
         '向 AI 提问，选择上下文或切换技能后输入需求，获取写作、阅读理解或问题解答等帮助',
@@ -776,6 +788,7 @@ const translations = {
       deleteDocumentDescription: '从知识库以及所有画布中删除该文档',
       documentDeleteConfirm:
         '确认要删除文档 {{title}} 吗？该操作将从知识库以及所有画布中移除此文档。',
+      downloadFile: '下载文件',
     },
     nodeStatus: {
       isCreatingDocument: '创建中...',
@@ -857,6 +870,10 @@ const translations = {
     import: {
       title: '资源集成',
       fromWebSearch: '全网搜索',
+      fromFile: '上传文件',
+      dragOrClick: '点击或拖拽文件到此区域上传',
+      unsupportedFileType: '请上传指定类型的文件',
+      supportedFiles: '支持文件: {{formats}}，每个文件最大 5MB',
       fromWeblink: '粘贴链接',
       selectAll: '全选',
       webLinkPlaceholer: '输入或粘贴有效的网页链接，每行一个....',
@@ -865,6 +882,7 @@ const translations = {
       emptyLink: '你还未添加任何链接！',
       waitingList: '待处理列表',
       linkCount: '共 {{count}} 个',
+      fileCount: '共 {{count}} 个',
       saveTo: '保存至',
       scrapeError: '抓取失败',
       integration: '集成',
@@ -1446,7 +1464,8 @@ const translations = {
   },
   components: {
     markdown: {
-      copySuccess: '内容已复制到剪切板！',
+      copySuccess: '复制成功',
+      mermaidError: 'Mermaid 图表渲染失败',
     },
   },
   copilot: {
@@ -1667,6 +1686,7 @@ const translations = {
       tokenUsed: '已使用 {{used}} / {{quota}}',
       upgrade: '升级',
       quotaExceeded: '额度已用尽，点击升级订阅',
+      noVisionSupport: '该模型不支持消费图片',
     },
     contentSelector: {
       openForWeb: '开启选择内容提问, 画布已进入只读模式',

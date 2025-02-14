@@ -62,6 +62,11 @@ const translations = {
     login: 'Login',
     share: 'Share',
     noMoreText: 'No more~',
+    uploadImage: 'Upload Image',
+    uploadSuccess: 'Upload successful',
+    uploadFailed: 'Upload failed',
+    dropImageHere: 'Drop image here',
+    presetColors: 'Preset Colors',
   },
   verifyRules: {
     emailRequired: 'Email cannot be empty',
@@ -378,6 +383,7 @@ const translations = {
   workspace: {
     addToCanvas: 'Add to Canvas',
     openWebpage: 'Open Original Webpage',
+    downloadFile: 'Download File',
     canvasListModal: {
       continue: 'Continue Conversation',
     },
@@ -546,11 +552,11 @@ const translations = {
         result: 'Result',
         empty: 'No hit filter conditions',
       },
-      alreadyAddedWithTitle: '{{type}} [{{title}}] is already in context',
-      addSuccessWithTitle: '{{type}} [{{title}}] added to context',
+      alreadyAddedWithTitle: 'is already in context',
+      addSuccessWithTitle: 'added to context',
       addToContextSuccess: 'Successfully added to context',
       untitled: 'Untitled',
-      deleteSuccessWithTitle: 'Successfully deleted {{type}} node ["{{title}}"]',
+      deleteSuccessWithTitle: 'Successfully deleted {{type}} node',
       memoPlaceholder: 'Record your inspiration...',
       noContent: 'No content available to insert',
       noEditor: 'No opened document',
@@ -580,6 +586,7 @@ const translations = {
   resourceType: {
     weblink: 'Web Link',
     pastedText: 'Pasted Text',
+    file: 'File',
   },
   canvas: {
     emptyText: 'Double-click to ask AI, or',
@@ -589,6 +596,7 @@ const translations = {
       skillResponse: 'Skill Response',
       memo: 'Memo',
       skill: 'Skill',
+      image: 'Image',
     },
     contextMenu: {
       createGroup: 'Create Group',
@@ -630,6 +638,7 @@ const translations = {
       addSkill: 'Add Skill',
       addTool: 'Add Tool',
       autoLayout: 'Auto Layout',
+      autoName: 'Auto Name',
       askAI: 'Ask AI',
       askAIDescription:
         'Ask AI, select context or switch skill, input requirements, get help with writing, reading comprehension, or question answering',
@@ -664,6 +673,8 @@ const translations = {
       mouse: 'Mouse Mode',
       touchpad: 'Touchpad Mode',
       tooltip: {
+        undo: 'Undo',
+        redo: 'Redo',
         zoom: 'Zoom Percentage',
         zoomIn: 'Zoom In',
         zoomOut: 'Zoom Out',
@@ -733,6 +744,7 @@ const translations = {
         'Create an empty memo for quick recording ideas, supporting Markdown format',
       copy: 'Copy Node Content',
       copyDescription: 'Copy the content of the selected node to the clipboard in Markdown format',
+      createDocumentDescription: 'Create a document for writing',
       askAI: 'Ask AI',
       askAIDescription:
         'Ask AI, select context or switch skill, input requirements, get help with writing, reading comprehension, or question answering',
@@ -791,6 +803,7 @@ const translations = {
       deleteDocumentDescription: 'Delete the document from the library and all canvases',
       documentDeleteConfirm:
         'Confirm to delete document {{title}}? This action will remove this document from library and all canvases.',
+      downloadFile: 'Download File',
     },
     nodeStatus: {
       isCreatingDocument: 'Creating Document...',
@@ -872,6 +885,10 @@ const translations = {
     import: {
       title: 'Resource Integration',
       fromWebSearch: 'Web Search',
+      fromFile: 'Upload File',
+      dragOrClick: 'Click or Drag files to this area to upload',
+      unsupportedFileType: 'Please upload the specified type of file',
+      supportedFiles: 'Supported Files: {{formats}}. Max 5MB each.',
       fromWeblink: 'Paste Weblink',
       selectAll: 'Select All',
       webLinkPlaceholer: 'Enter or paste valid web links, one per line...',
@@ -880,6 +897,7 @@ const translations = {
       emptyLink: "You haven't added any links yet!",
       waitingList: 'Pending List',
       linkCount: 'Total {{count}} links',
+      fileCount: 'Total {{count}} files',
       saveTo: 'Save to',
       scrapeError: 'Scraping failed',
       integration: 'Integration',
@@ -1468,7 +1486,8 @@ const translations = {
   },
   components: {
     markdown: {
-      copySuccess: 'Content Copied to Clipboard',
+      copySuccess: 'Copied successfully',
+      mermaidError: 'Failed to render Mermaid diagram',
     },
   },
   copilot: {
@@ -1690,6 +1709,7 @@ const translations = {
       tokenUsed: 'Used {{used}} / {{quota}}',
       upgrade: 'Upgrade',
       quotaExceeded: 'Quota exceeded, click to upgrade subscription',
+      noVisionSupport: 'This model does not support image processing',
     },
     contentSelector: {
       openForWeb: 'Enable content selection for questions, and the canvas is now in read-only mode',

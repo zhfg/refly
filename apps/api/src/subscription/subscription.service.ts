@@ -81,11 +81,9 @@ export class SubscriptionService implements OnModuleInit {
 
   private async setupCanceledSubscriptionsCheck() {
     // Remove any existing recurring jobs
-    const existingJobs = await this.checkCanceledSubscriptionsQueue.getRepeatableJobs();
+    const existingJobs = await this.checkCanceledSubscriptionsQueue.getJobSchedulers();
     await Promise.all(
-      existingJobs.map((job) =>
-        this.checkCanceledSubscriptionsQueue.removeRepeatableByKey(job.key),
-      ),
+      existingJobs.map((job) => this.checkCanceledSubscriptionsQueue.removeJobScheduler(job.id)),
     );
 
     // Add the new recurring job with concurrency options
@@ -469,7 +467,12 @@ export class SubscriptionService implements OnModuleInit {
 
     const meter = await this.getOrCreateStorageUsageMeter(userModel);
 
-    return { available: meter.fileCountQuota - meter.fileCountUsed };
+    return {
+      available:
+        meter.fileCountQuota < 0
+          ? Number.POSITIVE_INFINITY
+          : meter.fileCountQuota - meter.fileCountUsed,
+    };
   }
 
   async getOrCreateTokenUsageMeter(user: User, _sub?: SubscriptionModel) {
