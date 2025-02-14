@@ -54,6 +54,9 @@ import type {
   CreateResourceData,
   CreateResourceError,
   CreateResourceResponse,
+  CreateResourceWithFileData,
+  CreateResourceWithFileError,
+  CreateResourceWithFileResponse,
   BatchCreateResourceData,
   BatchCreateResourceError,
   BatchCreateResourceResponse2,
@@ -452,6 +455,28 @@ export const createResource = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: '/knowledge/resource/create',
+  });
+};
+
+/**
+ * Create new resource with file upload
+ * Create a new resource with file upload in a single request
+ */
+export const createResourceWithFile = <ThrowOnError extends boolean = false>(
+  options: Options<CreateResourceWithFileData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    CreateResourceWithFileResponse,
+    CreateResourceWithFileError,
+    ThrowOnError
+  >({
+    ...options,
+    ...formDataBodySerializer,
+    headers: {
+      'Content-Type': null,
+      ...options?.headers,
+    },
+    url: '/knowledge/resource/createWithFile',
   });
 };
 

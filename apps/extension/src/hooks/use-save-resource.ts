@@ -1,4 +1,4 @@
-import { CreateResourceData, type BaseResponse } from '@refly/openapi-schema';
+import { UpsertResourceRequest, type BaseResponse } from '@refly/openapi-schema';
 import { getMarkdown, preprocessHtmlContent } from '@refly/utils/html2md';
 import { convertHTMLToMarkdown } from '@refly/utils/markdown';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
@@ -54,19 +54,23 @@ export const useSaveCurrentWeblinkAsResource = () => {
         isPublic: false,
         readOnly: true,
         collabEnabled: false,
-        content: pageContent || '',
       };
 
-      const createResourceData: CreateResourceData = {
+      const textBlob = new Blob([pageContent], { type: 'text/plain' });
+      const textFile = new File([textBlob], 'content.txt', { type: 'text/plain' });
+
+      const createResourceData: UpsertResourceRequest = {
+        title: resource?.title,
+        resourceType: 'weblink',
+        data: resource?.data,
+      };
+
+      const { error } = await getClient().createResourceWithFile({
         body: {
-          title: resource?.title,
-          resourceType: 'weblink',
-          data: resource?.data,
-          content: resource?.content,
+          ...createResourceData,
+          file: textFile,
         },
-      };
-
-      const { error } = await getClient().createResource(createResourceData);
+      });
       // const resourceId = data?.data?.resourceId;
       // const url = `${getClientOrigin(false)}/resource/${resourceId}`;
       const url = `${getClientOrigin(false)}`;
