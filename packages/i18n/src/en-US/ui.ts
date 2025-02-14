@@ -585,7 +585,7 @@ const translations = {
   },
   resourceType: {
     weblink: 'Web Link',
-    pastedText: 'Pasted Text',
+    text: 'Pasted Text',
     file: 'File',
   },
   canvas: {

@@ -73,7 +73,7 @@ export const ImportFromText = () => {
           entityId: data?.data?.resourceId,
           contentPreview: data?.data?.contentPreview,
           metadata: {
-            resourceType: 'pastedText',
+            resourceType: 'text',
           },
         },
         position: insertNodePosition,
