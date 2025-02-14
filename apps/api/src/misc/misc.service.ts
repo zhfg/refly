@@ -296,27 +296,31 @@ export class MiscService implements OnModuleInit {
     const metadata = await sharp(originalBuffer).metadata();
     const originalWidth = metadata?.width ?? 0;
     const originalHeight = metadata?.height ?? 0;
+    const isGif = metadata?.format === 'gif';
 
     // Calculate the current area and scaling factor
     const originalArea = originalWidth * originalHeight;
     const maxArea = this.config.get('image.maxArea');
     const scaleFactor = originalArea > maxArea ? Math.sqrt(maxArea / originalArea) : 1;
 
+    // For GIFs, only resize if needed but keep the original format
+    // For other images, resize and convert to webp
     const processedBuffer = await sharp(originalBuffer)
       .resize({
         width: Math.round(originalWidth * scaleFactor),
         height: Math.round(originalHeight * scaleFactor),
         fit: 'fill', // Use fill since we're calculating exact dimensions
       })
-      .toFormat('webp')
+      [isGif ? 'toFormat' : 'toFormat'](isGif ? 'gif' : 'webp')
       .toBuffer();
 
-    // Generate a new processed key for the image
-    const processedKey = `static-processed/${createId()}-${Date.now()}.webp`;
+    // Generate a new processed key for the image with appropriate extension
+    const extension = isGif ? 'gif' : 'webp';
+    const processedKey = `static-processed/${createId()}-${Date.now()}.${extension}`;
 
     // Upload the processed image to minio
     await this.minioClient(visibility).putObject(processedKey, processedBuffer, {
-      'Content-Type': 'image/webp',
+      'Content-Type': isGif ? 'image/gif' : 'image/webp',
     });
 
     // Update the staticFile record with the new processedImageKey
