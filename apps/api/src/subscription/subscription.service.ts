@@ -10,11 +10,7 @@ import {
   SubscriptionPlanType,
   User,
 } from '@refly-packages/openapi-schema';
-import {
-  genTokenUsageMeterID,
-  genStorageUsageMeterID,
-  defaultModelList,
-} from '@refly-packages/utils';
+import { genTokenUsageMeterID, genStorageUsageMeterID } from '@refly-packages/utils';
 import {
   CreateSubscriptionParam,
   SyncTokenUsageJobData,
@@ -29,7 +25,6 @@ import { pick } from '@/utils';
 import {
   Subscription as SubscriptionModel,
   ModelInfo as ModelInfoModel,
-  SubscriptionPlan as SubscriptionPlanModel,
   Prisma,
 } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
@@ -39,12 +34,11 @@ import { QUEUE_CHECK_CANCELED_SUBSCRIPTIONS } from '@/utils/const';
 @Injectable()
 export class SubscriptionService implements OnModuleInit {
   private logger = new Logger(SubscriptionService.name);
+  private readonly INIT_TIMEOUT = 10000; // 10 seconds timeout
 
   private modelList: ModelInfoModel[];
   private modelListSyncedAt: Date | null = null;
   private modelListPromise: Promise<ModelInfoModel[]> | null = null;
-
-  private subscriptionPlans: SubscriptionPlanModel[];
 
   constructor(
     protected readonly prisma: PrismaService,
@@ -55,31 +49,23 @@ export class SubscriptionService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    let modelInfos = await this.prisma.modelInfo.findMany({
-      where: { enabled: true },
+    const initPromise = this.setupSubscriptionCheckJobs();
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(`Subscription cronjob timed out after ${this.INIT_TIMEOUT}ms`);
+      }, this.INIT_TIMEOUT);
     });
-    if (modelInfos.length === 0) {
-      modelInfos = await this.prisma.modelInfo.createManyAndReturn({
-        data: defaultModelList.map((m) => ({
-          ...m,
-          capabilities: JSON.stringify(m.capabilities),
-        })),
-      });
-      this.logger.log(`Model info created: ${modelInfos.map((m) => m.name).join(',')}`);
-    } else {
-      this.logger.log(`Model info already configured: ${modelInfos.map((m) => m.name).join(',')}`);
+
+    try {
+      await Promise.race([initPromise, timeoutPromise]);
+      this.logger.log('Subscription cronjob scheduled successfully');
+    } catch (error) {
+      this.logger.error(`Failed to schedule subscription cronjob: ${error}`);
+      throw error;
     }
-
-    this.modelList = modelInfos;
-    this.modelListSyncedAt = new Date();
-
-    this.subscriptionPlans = await this.prisma.subscriptionPlan.findMany();
-
-    // Set up the recurring job for checking canceled subscriptions
-    await this.setupCanceledSubscriptionsCheck();
   }
 
-  private async setupCanceledSubscriptionsCheck() {
+  private async setupSubscriptionCheckJobs() {
     // Remove any existing recurring jobs
     const existingJobs = await this.checkCanceledSubscriptionsQueue.getJobSchedulers();
     await Promise.all(
@@ -112,9 +98,9 @@ export class SubscriptionService implements OnModuleInit {
   async createCheckoutSession(user: User, param: CreateCheckoutSessionRequest) {
     const { uid } = user;
     const { planType, interval } = param;
-    const plan = this.subscriptionPlans.find(
-      (p) => p.planType === planType && p.interval === interval,
-    );
+    const plan = await this.prisma.subscriptionPlan.findFirst({
+      where: { planType, interval },
+    });
     if (!plan) {
       throw new ParamsError(`No plan found for plan type: ${planType}`);
     }
@@ -203,7 +189,9 @@ export class SubscriptionService implements OnModuleInit {
         data: { subscriptionId: param.subscriptionId, customerId: param.customerId },
       });
 
-      const plan = this.subscriptionPlans.find((p) => p.planType === sub.planType);
+      const plan = await this.prisma.subscriptionPlan.findFirst({
+        where: { planType: sub.planType },
+      });
 
       const endAt =
         sub.planType === 'free'
@@ -288,7 +276,9 @@ export class SubscriptionService implements OnModuleInit {
         data: { deletedAt: now },
       });
 
-      const freePlan = this.subscriptionPlans.find((p) => p.planType === 'free');
+      const freePlan = await this.prisma.subscriptionPlan.findFirst({
+        where: { planType: 'free' },
+      });
 
       // Update storage usage meter
       await prisma.storageUsageMeter.updateMany({
@@ -363,7 +353,9 @@ export class SubscriptionService implements OnModuleInit {
       },
     });
 
-    const plan = this.subscriptionPlans.find((p) => p.lookupKey === checkoutSession.lookupKey);
+    const plan = await this.prisma.subscriptionPlan.findFirst({
+      where: { lookupKey: checkoutSession.lookupKey },
+    });
     if (!plan) {
       this.logger.error(`No plan found for lookup key: ${checkoutSession.lookupKey}`);
       return;
@@ -530,7 +522,9 @@ export class SubscriptionService implements OnModuleInit {
           ? new Date(startAt.getFullYear(), startAt.getMonth(), startAt.getDate() + 1)
           : new Date(startAt.getFullYear(), startAt.getMonth() + 1, startAt.getDate());
 
-      const plan = this.subscriptionPlans.find((p) => p.planType === planType);
+      const plan = await this.prisma.subscriptionPlan.findFirst({
+        where: { planType },
+      });
 
       return prisma.tokenUsageMeter.create({
         data: {
@@ -586,7 +580,9 @@ export class SubscriptionService implements OnModuleInit {
 
       // Find the storage quota for the plan
       const planType = sub?.planType || 'free';
-      const plan = this.subscriptionPlans.find((p) => p.planType === planType);
+      const plan = await this.prisma.subscriptionPlan.findFirst({
+        where: { planType },
+      });
 
       return prisma.storageUsageMeter.create({
         data: {
@@ -772,8 +768,8 @@ export class SubscriptionService implements OnModuleInit {
     // this.logger.log(`Storage usage for user ${uid} synced at ${timestamp}`);
   }
 
-  getSubscriptionPlans() {
-    return this.subscriptionPlans;
+  async getSubscriptionPlans() {
+    return this.prisma.subscriptionPlan.findMany();
   }
 
   async getModelList() {

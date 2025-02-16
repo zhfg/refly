@@ -61,7 +61,7 @@ const NodeHeader = memo(
     const [editTitle, setEditTitle] = useState(query);
     return (
       <>
-        <div className="flex-shrink-0 mb-3">
+        <div className="flex-shrink-0 mb-3" data-cy="skill-response-node-header">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded bg-[#F79009] shadow-lg flex items-center justify-center flex-shrink-0">
               <IconResponse className="w-4 h-4 text-white" />
@@ -69,6 +69,7 @@ const NodeHeader = memo(
             <Input
               className="!border-transparent font-bold focus:!bg-transparent px-0.5 py-0"
               value={editTitle}
+              data-cy="skill-response-node-header-input"
               onChange={(e) => {
                 setEditTitle(e.target.value);
                 updateTitle?.(e.target.value);
@@ -488,7 +489,7 @@ export const SkillResponseNode = memo(
     }, []);
 
     return (
-      <div className={classNames({ nowheel: isOperating })}>
+      <div className={classNames({ nowheel: isOperating })} data-cy="skill-response-node">
         <div
           ref={targetRef}
           className={classNames({

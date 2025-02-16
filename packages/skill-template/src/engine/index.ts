@@ -1,4 +1,5 @@
 import { SkillRunnableConfig } from '../base';
+import { FakeListChatModel } from '@langchain/core/utils/testing';
 import { ChatDeepSeek, ChatDeepSeekInput } from './chat-deepseek';
 import { Document } from '@langchain/core/documents';
 import {
@@ -42,6 +43,7 @@ import {
   DeleteDocumentResponse,
   DeleteDocumentRequest,
 } from '@refly-packages/openapi-schema';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 
 // TODO: unify with frontend
 export type ContentNodeType =
@@ -154,7 +156,14 @@ export class SkillEngine {
     this.config = config;
   }
 
-  chatModel(params?: Partial<ChatDeepSeekInput>, useDefaultChatModel = false): ChatDeepSeek {
+  chatModel(params?: Partial<ChatDeepSeekInput>, useDefaultChatModel = false): BaseChatModel {
+    if (process.env.MOCK_LLM_RESPONSE) {
+      return new FakeListChatModel({
+        responses: ['This is a test'],
+        sleep: 100,
+      });
+    }
+
     return new ChatDeepSeek({
       model: useDefaultChatModel
         ? this.options.defaultModel
