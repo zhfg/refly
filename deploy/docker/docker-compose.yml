@@ -23,7 +23,7 @@ services:
       - 5801:5801
     restart: always
     env_file:
-      - .env
+      - .env.api
     environment:
       - MINIO_INTERNAL_ENDPOINT=minio
       - MINIO_EXTERNAL_ENDPOINT=minio
@@ -43,6 +43,8 @@ services:
     ports:
       - 5700:80
     restart: always
+    env_file:
+      - .env.web
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s
