@@ -16,6 +16,7 @@
     "codegen": "turbo run codegen",
     "clean": "turbo run clean",
     "cy:open": "cypress open",
+    "cy:install": "cypress install",
     "lint": "biome lint .",
     "lint:fix": "biome lint . --write",
     "format": "biome format .",
