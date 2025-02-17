@@ -46,7 +46,6 @@ services:
     environment:
       - API_URL=/api
       - COLLAB_URL=/collab
-      - VERSION=${VERSION:-development}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s
