@@ -25,7 +25,7 @@ importers:
         specifier: ^4.2.4
         version: 4.3.1(@types/node@20.14.8)(typescript@5.3.3)
       cypress:
-        specifier: ^14.0.1
+        specifier: 14.0.1
         version: 14.0.1
       cz-conventional-changelog:
         specifier: ^3.3.0
@@ -2513,7 +2513,7 @@ packages:
       combined-stream: 1.0.8
       extend: 3.0.2
       forever-agent: 0.6.1
-      form-data: 4.0.0
+      form-data: 4.0.1
       http-signature: 1.4.0
       is-typedarray: 1.0.0
       isstream: 0.1.2
