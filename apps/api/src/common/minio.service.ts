@@ -57,24 +57,27 @@ export class MinioService implements OnModuleInit {
 
     try {
       await Promise.race([initPromise, timeoutPromise]);
-      this.logger.log('Minio buckets initialized successfully');
     } catch (error) {
-      this.logger.error(`Failed to initialize Minio buckets: ${error}`);
+      this.logger.error(`Failed to initialize Minio bucket ${this.config.bucket}: ${error}`);
       throw error;
     }
   }
 
   async initializeBuckets() {
     try {
-      await this._client.makeBucket(this.config.bucket);
-      this.logger.log(`Bucket ${this.config.bucket} created successfully`);
+      const exists = await this._client.bucketExists(this.config.bucket);
+      if (!exists) {
+        this.logger.log(`Bucket ${this.config.bucket} does not exist, try to create it`);
+        await this._client.makeBucket(this.config.bucket);
+      }
+      this.logger.log(`Bucket ${this.config.bucket} initialized`);
     } catch (error: any) {
       // If bucket already exists in any form, just log and continue
       if (error?.code === 'BucketAlreadyExists' || error?.code === 'BucketAlreadyOwnedByYou') {
         this.logger.log(`Bucket ${this.config.bucket} already exists`);
         return;
       }
-      this.logger.error(`Failed to create bucket: ${error?.message}`);
+      this.logger.error(`Failed to create bucket ${this.config.bucket}: ${error?.message}`);
       throw error;
     }
   }
