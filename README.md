@@ -49,8 +49,7 @@ To start deployment:
 
 ```bash
 cd deploy/docker
-cp ../../apps/api/.env.example .env.api # copy the example api env file
-cp ../../apps/web/.env.example .env.web # copy the example web env file
+cp ../../apps/api/.env.example .env # copy the example api env file
 docker compose up -d
 ```
 

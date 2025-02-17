@@ -13,8 +13,9 @@ COPY apps/web/dist .
 
 # Create config.js template
 RUN echo "window.ENV = { \
-  API_URL: '${API_URL:-http://localhost:5800}', \
-  COLLAB_URL: '${COLLAB_URL:-http://localhost:5801}' \
+  API_URL: '${API_URL}', \
+  COLLAB_URL: '${COLLAB_URL}', \
+  VERSION: '${VERSION:-development}' \
 };" > config.template.js
 
 # Create entrypoint script
