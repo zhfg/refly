@@ -48,6 +48,7 @@ export const ImportResourceModal = () => {
   return (
     <Modal
       open={importResourceModalVisible}
+      centered
       footer={null}
       onCancel={() => {
         setImportResourceModalVisible(false);
