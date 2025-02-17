@@ -4,7 +4,6 @@ import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores
 import { useTranslation } from 'react-i18next';
 import { LOCALE } from '@refly/common-types';
 import { useDebounce } from 'use-debounce';
-import { useDebouncedCallback } from 'use-debounce';
 import { MdOutlineImage, MdOutlineAspectRatio } from 'react-icons/md';
 import { AiOutlineMenuUnfold } from 'react-icons/ai';
 import { BiErrorCircle } from 'react-icons/bi';
@@ -23,7 +22,6 @@ import { CanvasRename } from './canvas-rename';
 import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
-import { useHandleSiderData } from '@refly-packages/ai-workspace-common/hooks/use-handle-sider-data';
 
 interface TopToolbarProps {
   canvasId: string;
@@ -58,7 +56,6 @@ const CanvasTitle = memo(
       (newTitle: string) => {
         if (newTitle?.trim()) {
           syncTitleToYDoc(newTitle);
-          updateCanvasTitle(canvasId, newTitle);
           setIsModalOpen(false);
         }
       },
@@ -69,14 +66,9 @@ const CanvasTitle = memo(
       setIsModalOpen(false);
     }, []);
 
-    const { getCanvasList } = useHandleSiderData();
-    const debouncedRefetchCanvasList = useDebouncedCallback(async () => {
-      await getCanvasList();
-    }, 500);
-
     // Refetch canvas list when canvas title changes
     useEffect(() => {
-      debouncedRefetchCanvasList();
+      updateCanvasTitle(canvasId, canvasTitle);
     }, [canvasTitle]);
 
     return (
