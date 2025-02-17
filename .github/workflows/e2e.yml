@@ -27,6 +27,22 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
+      - name: Get Cypress version
+        id: cypress-version
+        run: echo "version=$(node -p "require('./package.json').devDependencies.cypress")" >> $GITHUB_OUTPUT
+
+      - name: Cache Cypress Binary
+        uses: actions/cache@v4
+        id: cypress-binary-cache
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-binary-${{ runner.os }}-${{ steps.cypress-version.outputs.version }}
+          restore-keys: |
+            cypress-binary-${{ runner.os }}-
+
+      - name: Install Dependencies
+        run: pnpm install
+
       - name: Start Middleware Containers
         run: |
           docker compose -f deploy/docker/docker-compose.middleware.yml up -d
@@ -47,6 +63,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           browser: chrome
+          install: false
           record: true
           parallel: true
           build: pnpm copy-env build
