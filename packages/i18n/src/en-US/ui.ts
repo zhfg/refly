@@ -379,6 +379,15 @@ const translations = {
   shareContent: {
     title: 'Share',
     login: 'Start Writing with Refly',
+    copyLink: 'Copy Link',
+    publishTemplate: 'Publish Template',
+    linkShare: 'Link Share',
+    accessOptions: {
+      anyone: 'Anyone with the link',
+      anyoneDescription: 'Anyone with the link can view',
+      off: 'Not enabled',
+      offDescription: 'Not enabled access permission',
+    },
   },
   workspace: {
     addToCanvas: 'Add to Canvas',

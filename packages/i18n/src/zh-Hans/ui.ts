@@ -378,6 +378,15 @@ const translations = {
   shareContent: {
     title: '分享',
     login: '开始用 Refly 写作',
+    copyLink: '复制链接',
+    publishTemplate: '发布模板',
+    linkShare: '链接分享',
+    accessOptions: {
+      anyone: '互联网获得链接的人',
+      anyoneDescription: '互联网获得链接的人可以查看',
+      off: '未开启',
+      offDescription: '未开启访问权限',
+    },
   },
   workspace: {
     addToCanvas: '添加到画布',

@@ -22,7 +22,8 @@ import { CanvasRename } from './canvas-rename';
 import { HoverCard } from '@refly-packages/ai-workspace-common/components/hover-card';
 import { CanvasActionDropdown } from '@refly-packages/ai-workspace-common/components/workspace/canvas-list-modal/canvasActionDropdown';
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
-
+import ShareSettings from './share-settings';
+import './index.scss';
 interface TopToolbarProps {
   canvasId: string;
 }
@@ -339,6 +340,8 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             setShowPreview={setShowPreview}
             setShowMaxRatio={setShowMaxRatio}
           />
+
+          <ShareSettings />
 
           <CanvasActionDropdown canvasId={canvasId} canvasName={canvasTitle} btnSize="large" />
         </div>
