@@ -257,16 +257,15 @@ export const ResourceNode = memo(
 
           <div
             className={`
-            relative
             h-full
-            p-3
+            flex flex-col
             ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
           `}
           >
             {/* Gradient overlay for entire node */}
             <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
 
-            <div className="flex flex-col h-full relative">
+            <div className="flex flex-col h-full relative p-3 box-border">
               <NodeHeader title={data.title} Icon={ResourceIcon} iconBgColor="#17B26A" />
 
               <div className="relative flex-grow min-h-0">

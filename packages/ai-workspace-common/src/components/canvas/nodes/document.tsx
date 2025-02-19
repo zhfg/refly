@@ -208,9 +208,7 @@ export const DocumentNode = memo(
 
           <div
             className={`
-            relative
             h-full
-            p-3
             ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
           `}
           >
@@ -233,7 +231,7 @@ export const DocumentNode = memo(
                 />
               </>
             )}
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full p-3 box-border">
               <NodeHeader
                 title={data.title || t('common.untitled')}
                 Icon={HiOutlineDocumentText}

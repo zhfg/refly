@@ -7,6 +7,7 @@ import {
   ReactFlowProvider,
   useReactFlow,
   Node,
+  ConnectionMode,
 } from '@xyflow/react';
 import { Button } from 'antd';
 import { nodeTypes, CanvasNode } from './nodes';
@@ -598,6 +599,16 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             multiSelectionKeyCode={['Shift', 'Meta']}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
+            connectOnClick={false}
+            edgesFocusable={true}
+            nodesFocusable={true}
+            connectionMode={ConnectionMode.Loose}
+            defaultEdgeOptions={{
+              style: {
+                strokeWidth: 2,
+                stroke: '#00968F',
+              },
+            }}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">

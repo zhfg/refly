@@ -316,18 +316,18 @@ export const MemoNode = ({
                 position={Position.Left}
                 isConnected={isTargetConnected}
                 isNodeHovered={isHovered}
-                nodeType="document"
+                nodeType="memo"
               />
               <CustomHandle
                 type="source"
                 position={Position.Right}
                 isConnected={isSourceConnected}
                 isNodeHovered={isHovered}
-                nodeType="document"
+                nodeType="memo"
               />
             </>
           )}
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full p-3 box-border">
             <div className="relative flex-grow overflow-y-auto pr-2 -mr-2">
               {!isPreview ? (
                 <div className="editor-wrapper" style={{ userSelect: 'text', cursor: 'text' }}>
