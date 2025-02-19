@@ -8,7 +8,7 @@ VALUES
     ('anthropic/claude-3.5-haiku', 'Claude 3.5 Haiku', 'anthropic', 't2', 't', 'f', 200000, 8192, '{"vision":true}'),
 
     -- DeepSeek models
-    ('deepseek/deepseek-r1', 'DeepSeek R1', 'deepseek', 't1', 't', 'f', 64000, 8192, '{}'),
+    ('deepseek/deepseek-r1', 'DeepSeek R1', 'deepseek', 't1', 't', 'f', 64000, 8192, '{"reasoning":true}'),
     ('deepseek/deepseek-chat', 'DeepSeek V3', 'deepseek', 't2', 't', 'f', 64000, 8192, '{}'),
     ('deepseek/deepseek-r1-distill-qwen-32b', 'DeepSeek R1 Distill Qwen 32B', 'deepseek', 't2', 't', 'f', 131072, 131072, '{}'),
 
