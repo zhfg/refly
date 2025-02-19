@@ -7,7 +7,7 @@ import {
   ReactFlowProvider,
   useReactFlow,
   Node,
-  ConnectionMode,
+  Edge,
 } from '@xyflow/react';
 import { Button } from 'antd';
 import { nodeTypes, CanvasNode } from './nodes';
@@ -47,6 +47,7 @@ import {
 import { CanvasNodeType } from '@refly/openapi-schema';
 import { useEdgeOperations } from '@refly-packages/ai-workspace-common/hooks/canvas/use-edge-operations';
 import { MultiSelectionMenus } from './multi-selection-menu';
+import { CustomEdge } from './edges/custom-edge';
 
 import '@xyflow/react/dist/style.css';
 import './index.scss';
@@ -203,12 +204,18 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [lastClickTime, setLastClickTime] = useState(0);
 
   const handlePanelClick = useCallback(
     (event: React.MouseEvent) => {
       setOperatingNodeId(null);
       setContextMenu((prev) => ({ ...prev, open: false }));
+
+      // Reset edge selection when clicking on canvas
+      if (selectedEdgeId) {
+        setSelectedEdgeId(null);
+      }
 
       const currentTime = new Date().getTime();
       const timeDiff = currentTime - lastClickTime;
@@ -225,7 +232,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
       setLastClickTime(currentTime);
     },
-    [lastClickTime, setOperatingNodeId, reactFlowInstance],
+    [lastClickTime, setOperatingNodeId, reactFlowInstance, selectedEdgeId],
   );
 
   const handleToolSelect = (tool: string) => {
@@ -524,40 +531,86 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     [addNode, reactFlowInstance],
   );
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    const target = e.target as HTMLElement;
+  // Add edge types configuration
+  const edgeTypes = useMemo(
+    () => ({
+      default: CustomEdge,
+    }),
+    [],
+  );
 
-    // Ignore input, textarea and contentEditable elements
-    if (
-      target.tagName === 'INPUT' ||
-      target.tagName === 'TEXTAREA' ||
-      target.contentEditable === 'true'
-    ) {
+  // Update handleKeyDown to handle edge deletion
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+
+      // Ignore input, textarea and contentEditable elements
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.contentEditable === 'true'
+      ) {
+        return;
+      }
+
+      // Check for mod key (Command on Mac, Ctrl on Windows/Linux)
+      const isModKey = e.metaKey || e.ctrlKey;
+
+      if (isModKey && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          // Mod+Shift+Z for Redo
+          undoManager?.redo();
+        } else {
+          // Mod+Z for Undo
+          undoManager?.undo();
+        }
+      }
+
+      // Handle edge deletion
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedEdgeId) {
+        e.preventDefault();
+        const { setEdges } = reactFlowInstance;
+        setEdges((eds) => eds.filter((e) => e.id !== selectedEdgeId));
+        setSelectedEdgeId(null);
+      }
+    },
+    [selectedEdgeId, reactFlowInstance, undoManager],
+  );
+
+  // Add edge click handler for delete button
+  const handleEdgeClick = (event: React.MouseEvent, edge: Edge) => {
+    // Check if click is on delete button
+    if ((event.target as HTMLElement).closest('.edge-delete-button')) {
+      const { setEdges } = reactFlowInstance;
+      setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+      setSelectedEdgeId(null);
       return;
     }
 
-    // Check for mod key (Command on Mac, Ctrl on Windows/Linux)
-    const isModKey = e.metaKey || e.ctrlKey;
-
-    if (isModKey && e.key.toLowerCase() === 'z') {
-      e.preventDefault();
-      if (e.shiftKey) {
-        // Mod+Shift+Z for Redo
-        undoManager.redo();
-      } else {
-        // Mod+Z for Undo
-        undoManager.undo();
-      }
-    }
+    setSelectedEdgeId(edge.id);
   };
 
-  // Set up keyboard shortcuts for undo/redo
+  // Update useEffect for keyboard events
   useEffect(() => {
-    if (!undoManager) return;
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undoManager]);
+  }, [undoManager, handleKeyDown]);
+
+  useEffect(() => {
+    const { setEdges } = reactFlowInstance;
+    console.log('selectedEdgeId', selectedEdgeId);
+    setEdges((eds) =>
+      eds.map((e) => {
+        console.log('e', e.id === selectedEdgeId);
+        return {
+          ...e,
+          selected: e.id === selectedEdgeId,
+          style: e.id === selectedEdgeId ? edgeStyles.selected : edgeStyles.default,
+        };
+      }),
+    );
+  }, [selectedEdgeId]);
 
   return (
     <Spin
@@ -573,6 +626,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
           <style>{selectionStyles}</style>
           <ReactFlow
             {...flowConfig}
+            edgeTypes={edgeTypes}
             panOnScroll={interactionMode === 'touchpad'}
             panOnDrag={interactionMode === 'mouse'}
             zoomOnScroll={interactionMode === 'mouse'}
@@ -602,13 +656,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             connectOnClick={false}
             edgesFocusable={true}
             nodesFocusable={true}
-            connectionMode={ConnectionMode.Loose}
-            defaultEdgeOptions={{
-              style: {
-                strokeWidth: 2,
-                stroke: '#00968F',
-              },
-            }}
+            onEdgeClick={handleEdgeClick}
           >
             {nodes?.length === 0 && hasCanvasSynced && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
