@@ -524,8 +524,6 @@ export const SkillResponseNode = memo(
               </>
             )}
 
-            <div className="absolute bottom-0 left-0 right-0 h-[15%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
-
             <div className="flex flex-col h-full p-3 box-border">
               <NodeHeader
                 query={query}

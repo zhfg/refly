@@ -262,9 +262,6 @@ export const ResourceNode = memo(
             ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
           `}
           >
-            {/* Gradient overlay for entire node */}
-            <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
-
             <div className="flex flex-col h-full relative p-3 box-border">
               <NodeHeader title={data.title} Icon={ResourceIcon} iconBgColor="#17B26A" />
 
@@ -287,15 +284,12 @@ export const ResourceNode = memo(
                     maxCompactLength={10}
                   />
                 </div>
-
-                {/* Timestamp container */}
-                <div className="absolute bottom-0 left-0 right-0 z-[20]">
-                  <div className="flex justify-end items-center text-[10px] text-gray-400 mt-1 px-1">
-                    {time(data.createdAt, language as LOCALE)
-                      ?.utc()
-                      ?.fromNow()}
-                  </div>
-                </div>
+              </div>
+              {/* Timestamp container */}
+              <div className="flex justify-end items-center text-[10px] text-gray-400 mt-1 px-1">
+                {time(data.createdAt, language as LOCALE)
+                  ?.utc()
+                  ?.fromNow()}
               </div>
             </div>
 
