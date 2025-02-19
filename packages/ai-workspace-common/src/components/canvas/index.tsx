@@ -96,7 +96,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const { onNodesChange } = useNodeOperations();
   const { setSelectedNode } = useNodeSelection();
 
-  const { onEdgesChange, onConnect } = useEdgeOperations(canvasId);
+  const { onEdgesChange, onConnect } = useEdgeOperations();
   const edgeStyles = useEdgeStyles();
 
   const { nodePreviews, showPreview, showLaunchpad, showMaxRatio } = useCanvasStoreShallow(
@@ -579,17 +579,25 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   );
 
   // Add edge click handler for delete button
-  const handleEdgeClick = (event: React.MouseEvent, edge: Edge) => {
-    // Check if click is on delete button
-    if ((event.target as HTMLElement).closest('.edge-delete-button')) {
-      const { setEdges } = reactFlowInstance;
-      setEdges((eds) => eds.filter((e) => e.id !== edge.id));
-      setSelectedEdgeId(null);
-      return;
-    }
+  const handleEdgeClick = useCallback(
+    (event: React.MouseEvent, edge: Edge) => {
+      // Check if click is on delete button
+      if ((event.target as HTMLElement).closest('.edge-delete-button')) {
+        const { setEdges } = reactFlowInstance;
+        setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+        setSelectedEdgeId(null);
+        return;
+      }
 
-    setSelectedEdgeId(edge.id);
-  };
+      // Check if click is on edge label or edge label input
+      if ((event.target as HTMLElement).closest('.edge-label')) {
+        return;
+      }
+
+      setSelectedEdgeId(edge.id);
+    },
+    [reactFlowInstance],
+  );
 
   // Update useEffect for keyboard events
   useEffect(() => {
@@ -599,10 +607,8 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   useEffect(() => {
     const { setEdges } = reactFlowInstance;
-    console.log('selectedEdgeId', selectedEdgeId);
     setEdges((eds) =>
       eds.map((e) => {
-        console.log('e', e.id === selectedEdgeId);
         return {
           ...e,
           selected: e.id === selectedEdgeId,
@@ -610,7 +616,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         };
       }),
     );
-  }, [selectedEdgeId]);
+  }, [selectedEdgeId, reactFlowInstance, edgeStyles]);
 
   return (
     <Spin
