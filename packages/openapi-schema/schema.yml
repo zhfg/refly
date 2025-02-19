@@ -4478,6 +4478,9 @@ components:
         vision:
           type: boolean
           description: Whether this model can take images as input
+        reasoning:
+          type: boolean
+          description: Whether this model includes reasoning content
     ModelInfo:
       type: object
       required:

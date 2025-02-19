@@ -4064,6 +4064,10 @@ export const ModelCapabilitiesSchema = {
       type: 'boolean',
       description: 'Whether this model can take images as input',
     },
+    reasoning: {
+      type: 'boolean',
+      description: 'Whether this model includes reasoning content',
+    },
   },
 } as const;
 
