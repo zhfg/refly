@@ -214,6 +214,89 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListCanvasResponse'
+  /canvas/detail:
+    get:
+      tags:
+        - canvas
+      summary: Get canvas detail
+      description: Get canvas detail
+      operationId: getCanvasDetail
+      parameters:
+        - name: canvasId
+          in: query
+          description: Canvas ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Canvas'
+  /canvas/data:
+    get:
+      tags:
+        - canvas
+      summary: Get canvas data
+      description: Get public canvas data without checking user identity
+      operationId: getCanvasData
+      parameters:
+        - name: canvasId
+          in: query
+          description: Canvas ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportCanvasResponse'
+  /canvas/export:
+    get:
+      tags:
+        - canvas
+      summary: Export canvas
+      description: Export canvas
+      operationId: exportCanvas
+      parameters:
+        - name: canvasId
+          in: query
+          description: Canvas ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportCanvasResponse'
+  /canvas/import:
+    post:
+      tags:
+        - canvas
+      summary: Import canvas
+      description: Import canvas
+      operationId: importCanvas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RawCanvasData'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertCanvasResponse'
   /canvas/create:
     post:
       tags:
@@ -227,6 +310,26 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpsertCanvasRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertCanvasResponse'
+  /canvas/duplicate:
+    post:
+      tags:
+        - canvas
+      summary: Duplicate canvas
+      description: Duplicate an existing canvas
+      operationId: duplicateCanvas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DuplicateCanvasRequest'
       responses:
         '200':
           description: Successful operation
@@ -1631,6 +1734,13 @@ components:
         targetId:
           type: string
           description: Target entity ID
+    Permissions:
+      type: object
+      description: Entity permissions
+      properties:
+        public:
+          type: boolean
+          description: Whether the entity is publicly accessible
     Canvas:
       type: object
       required:
@@ -1653,6 +1763,9 @@ components:
         readOnly:
           type: boolean
           description: Whether this canvas is read-only
+        permissions:
+          description: Canvas permissions
+          $ref: '#/components/schemas/Permissions'
         createdAt:
           type: string
           format: date-time
@@ -3016,9 +3129,44 @@ components:
         - type: object
           properties:
             data:
+              $ref: '#/components/schemas/Canvas'
+    RawCanvasData:
+      type: object
+      description: Raw canvas data
+      properties:
+        title:
+          type: string
+          description: Canvas title
+        nodes:
+          type: array
+          description: Canvas nodes
+          items:
+            type: object
+        edges:
+          type: array
+          description: Canvas edges
+          items:
+            type: object
+    ExportCanvasResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
               type: object
               description: Canvas data
-              $ref: '#/components/schemas/Canvas'
+              $ref: '#/components/schemas/RawCanvasData'
+    DuplicateCanvasRequest:
+      type: object
+      required:
+        - canvasId
+      properties:
+        canvasId:
+          type: string
+          description: Canvas ID to duplicate
+        title:
+          type: string
+          description: Custom canvas title
     UpsertCanvasRequest:
       type: object
       properties:
@@ -3030,6 +3178,9 @@ components:
           type: string
           description: Canvas ID (only used for update)
           example: c-g30e1b80b5g1itbemc0g5jj3
+        permissions:
+          description: Canvas permissions
+          $ref: '#/components/schemas/Permissions'
     UpsertCanvasResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

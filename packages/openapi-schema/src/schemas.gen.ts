@@ -61,6 +61,17 @@ export const BaseReferenceSchema = {
   },
 } as const;
 
+export const PermissionsSchema = {
+  type: 'object',
+  description: 'Entity permissions',
+  properties: {
+    public: {
+      type: 'boolean',
+      description: 'Whether the entity is publicly accessible',
+    },
+  },
+} as const;
+
 export const CanvasSchema = {
   type: 'object',
   required: ['canvasId', 'title', 'createdAt', 'updatedAt'],
@@ -82,6 +93,10 @@ export const CanvasSchema = {
     readOnly: {
       type: 'boolean',
       description: 'Whether this canvas is read-only',
+    },
+    permissions: {
+      description: 'Canvas permissions',
+      $ref: '#/components/schemas/Permissions',
     },
     createdAt: {
       type: 'string',
@@ -1841,13 +1856,69 @@ export const GetCanvasDetailResponseSchema = {
       type: 'object',
       properties: {
         data: {
-          type: 'object',
-          description: 'Canvas data',
           $ref: '#/components/schemas/Canvas',
         },
       },
     },
   ],
+} as const;
+
+export const RawCanvasDataSchema = {
+  type: 'object',
+  description: 'Raw canvas data',
+  properties: {
+    title: {
+      type: 'string',
+      description: 'Canvas title',
+    },
+    nodes: {
+      type: 'array',
+      description: 'Canvas nodes',
+      items: {
+        type: 'object',
+      },
+    },
+    edges: {
+      type: 'array',
+      description: 'Canvas edges',
+      items: {
+        type: 'object',
+      },
+    },
+  },
+} as const;
+
+export const ExportCanvasResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'object',
+          description: 'Canvas data',
+          $ref: '#/components/schemas/RawCanvasData',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const DuplicateCanvasRequestSchema = {
+  type: 'object',
+  required: ['canvasId'],
+  properties: {
+    canvasId: {
+      type: 'string',
+      description: 'Canvas ID to duplicate',
+    },
+    title: {
+      type: 'string',
+      description: 'Custom canvas title',
+    },
+  },
 } as const;
 
 export const UpsertCanvasRequestSchema = {
@@ -1862,6 +1933,10 @@ export const UpsertCanvasRequestSchema = {
       type: 'string',
       description: 'Canvas ID (only used for update)',
       example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    permissions: {
+      description: 'Canvas permissions',
+      $ref: '#/components/schemas/Permissions',
     },
   },
 } as const;

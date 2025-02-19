@@ -19,6 +19,7 @@ import {
   DeleteCanvasRequest,
   AutoNameCanvasRequest,
   AutoNameCanvasResponse,
+  DuplicateCanvasRequest,
 } from '@refly-packages/openapi-schema';
 
 @Controller('v1/canvas')
@@ -34,6 +35,33 @@ export class CanvasController {
   ) {
     const canvases = await this.canvasService.listCanvases(user, { page, pageSize });
     return buildSuccessResponse(canvases.map(canvasPO2DTO));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('detail')
+  async getCanvasDetail(@LoginedUser() user: User, @Query('canvasId') canvasId: string) {
+    const canvas = await this.canvasService.getCanvasDetail(user, canvasId);
+    return buildSuccessResponse(canvasPO2DTO(canvas));
+  }
+
+  @Get('data')
+  async getCanvasData(@Query('canvasId') canvasId: string) {
+    const data = await this.canvasService.exportCanvas(null, canvasId);
+    return buildSuccessResponse(data);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('export')
+  async exportCanvas(@LoginedUser() user: User, @Query('canvasId') canvasId: string) {
+    const data = await this.canvasService.exportCanvas(user, canvasId);
+    return buildSuccessResponse(data);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('duplicate')
+  async duplicateCanvas(@LoginedUser() user: User, @Body() body: DuplicateCanvasRequest) {
+    const canvas = await this.canvasService.duplicateCanvas(user, body);
+    return buildSuccessResponse(canvasPO2DTO(canvas));
   }
 
   @UseGuards(JwtAuthGuard)

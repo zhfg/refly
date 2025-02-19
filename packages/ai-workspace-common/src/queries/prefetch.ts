@@ -4,8 +4,10 @@ import { type Options } from '@hey-api/client-fetch';
 import { type QueryClient } from '@tanstack/react-query';
 import {
   checkSettingsField,
+  exportCanvas,
   getActionResult,
   getAuthConfig,
+  getCanvasDetail,
   getCollabToken,
   getDocumentDetail,
   getResourceDetail,
@@ -27,7 +29,9 @@ import {
 } from '../requests/services.gen';
 import {
   CheckSettingsFieldData,
+  ExportCanvasData,
   GetActionResultData,
+  GetCanvasDetailData,
   GetDocumentDetailData,
   GetResourceDetailData,
   GetShareContentData,
@@ -63,6 +67,22 @@ export const prefetchUseListCanvases = (
   queryClient.prefetchQuery({
     queryKey: Common.UseListCanvasesKeyFn(clientOptions),
     queryFn: () => listCanvases({ ...clientOptions }).then((response) => response.data),
+  });
+export const prefetchUseGetCanvasDetail = (
+  queryClient: QueryClient,
+  clientOptions: Options<GetCanvasDetailData, true>,
+) =>
+  queryClient.prefetchQuery({
+    queryKey: Common.UseGetCanvasDetailKeyFn(clientOptions),
+    queryFn: () => getCanvasDetail({ ...clientOptions }).then((response) => response.data),
+  });
+export const prefetchUseExportCanvas = (
+  queryClient: QueryClient,
+  clientOptions: Options<ExportCanvasData, true>,
+) =>
+  queryClient.prefetchQuery({
+    queryKey: Common.UseExportCanvasKeyFn(clientOptions),
+    queryFn: () => exportCanvas({ ...clientOptions }).then((response) => response.data),
   });
 export const prefetchUseListResources = (
   queryClient: QueryClient,

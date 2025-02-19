@@ -8,7 +8,6 @@ import {
   SkillTemplateConfigDefinition,
 } from '@refly-packages/openapi-schema';
 import { GraphState } from '../scheduler/types';
-import { safeStringifyJSON } from '@refly-packages/utils';
 
 // utils
 import { buildFinalRequestMessages } from '../scheduler/utils/message';
@@ -128,7 +127,7 @@ export class WebSearch extends BaseSkill {
       rewrittenQuery: optimizedQuery,
     });
 
-    this.engine.logger.log(`Request messages: ${safeStringifyJSON(requestMessages)}`);
+    // this.engine.logger.log(`Request messages: ${safeStringifyJSON(requestMessages)}`);
 
     // Generate answer using the model
     const model = this.engine.chatModel({ temperature: 0.1 });
@@ -140,7 +139,7 @@ export class WebSearch extends BaseSkill {
       },
     });
 
-    this.engine.logger.log(`Response message: ${safeStringifyJSON(responseMessage)}`);
+    // this.engine.logger.log(`Response message: ${safeStringifyJSON(responseMessage)}`);
 
     return { messages: [responseMessage] };
   };

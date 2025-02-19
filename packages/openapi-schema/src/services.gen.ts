@@ -33,9 +33,24 @@ import type {
   ListCanvasesData,
   ListCanvasesError,
   ListCanvasesResponse,
+  GetCanvasDetailData,
+  GetCanvasDetailError,
+  GetCanvasDetailResponse2,
+  GetCanvasDataData,
+  GetCanvasDataError,
+  GetCanvasDataResponse,
+  ExportCanvasData,
+  ExportCanvasError,
+  ExportCanvasResponse2,
+  ImportCanvasData,
+  ImportCanvasError,
+  ImportCanvasResponse,
   CreateCanvasData,
   CreateCanvasError,
   CreateCanvasResponse,
+  DuplicateCanvasData,
+  DuplicateCanvasError,
+  DuplicateCanvasResponse,
   UpdateCanvasData,
   UpdateCanvasError,
   UpdateCanvasResponse,
@@ -359,6 +374,62 @@ export const listCanvases = <ThrowOnError extends boolean = false>(
 };
 
 /**
+ * Get canvas detail
+ * Get canvas detail
+ */
+export const getCanvasDetail = <ThrowOnError extends boolean = false>(
+  options: Options<GetCanvasDetailData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    GetCanvasDetailResponse2,
+    GetCanvasDetailError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/canvas/detail',
+  });
+};
+
+/**
+ * Get canvas data
+ * Get public canvas data without checking user identity
+ */
+export const getCanvasData = <ThrowOnError extends boolean = false>(
+  options: Options<GetCanvasDataData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<GetCanvasDataResponse, GetCanvasDataError, ThrowOnError>({
+    ...options,
+    url: '/canvas/data',
+  });
+};
+
+/**
+ * Export canvas
+ * Export canvas
+ */
+export const exportCanvas = <ThrowOnError extends boolean = false>(
+  options: Options<ExportCanvasData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<ExportCanvasResponse2, ExportCanvasError, ThrowOnError>({
+    ...options,
+    url: '/canvas/export',
+  });
+};
+
+/**
+ * Import canvas
+ * Import canvas
+ */
+export const importCanvas = <ThrowOnError extends boolean = false>(
+  options: Options<ImportCanvasData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<ImportCanvasResponse, ImportCanvasError, ThrowOnError>({
+    ...options,
+    url: '/canvas/import',
+  });
+};
+
+/**
  * Create canvas
  * Create a new canvas
  */
@@ -368,6 +439,23 @@ export const createCanvas = <ThrowOnError extends boolean = false>(
   return (options?.client ?? client).post<CreateCanvasResponse, CreateCanvasError, ThrowOnError>({
     ...options,
     url: '/canvas/create',
+  });
+};
+
+/**
+ * Duplicate canvas
+ * Duplicate an existing canvas
+ */
+export const duplicateCanvas = <ThrowOnError extends boolean = false>(
+  options: Options<DuplicateCanvasData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    DuplicateCanvasResponse,
+    DuplicateCanvasError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/canvas/duplicate',
   });
 };
 

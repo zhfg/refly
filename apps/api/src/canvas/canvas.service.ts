@@ -13,12 +13,16 @@ import { CanvasNotFoundError } from '@refly-packages/errors';
 import {
   AutoNameCanvasRequest,
   DeleteCanvasRequest,
+  DuplicateCanvasRequest,
   Entity,
   EntityType,
   ListCanvasesData,
+  RawCanvasData,
   UpsertCanvasRequest,
   User,
+  Permissions,
 } from '@refly-packages/openapi-schema';
+import { Prisma } from '@prisma/client';
 import { genCanvasID } from '@refly-packages/utils';
 import { DeleteKnowledgeEntityJobData } from '@/knowledge/knowledge.dto';
 import { QUEUE_DELETE_KNOWLEDGE_ENTITY } from '@/utils/const';
@@ -27,6 +31,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { HumanMessage } from '@langchain/core/messages';
 import { SystemMessage } from '@langchain/core/messages';
 import { AutoNameCanvasJobData } from './canvas.dto';
+import { streamToBuffer } from '@/utils';
 
 @Injectable()
 export class CanvasService {
@@ -57,6 +62,80 @@ export class CanvasService {
     });
   }
 
+  async getCanvasDetail(user: User, canvasId: string) {
+    const canvas = await this.prisma.canvas.findFirst({
+      where: { canvasId, uid: user.uid, deletedAt: null },
+    });
+
+    if (!canvas) {
+      throw new CanvasNotFoundError();
+    }
+
+    return canvas;
+  }
+
+  async exportCanvas(user: User | null, canvasId: string): Promise<RawCanvasData> {
+    const canvas = await this.prisma.canvas.findFirst({
+      select: {
+        title: true,
+        uid: true,
+        permissions: true,
+        stateStorageKey: true,
+      },
+      where: { canvasId, deletedAt: null },
+    });
+
+    if (!canvas) {
+      throw new CanvasNotFoundError();
+    }
+
+    const permissions: Permissions = JSON.parse(canvas.permissions);
+    if (!permissions.public && canvas.uid !== user?.uid) {
+      throw new CanvasNotFoundError();
+    }
+
+    const readable = await this.minio.client.getObject(canvas.stateStorageKey);
+    const state = await streamToBuffer(readable);
+
+    const doc = new Y.Doc();
+    Y.applyUpdate(doc, state);
+
+    return {
+      title: doc.getText('title').toJSON(),
+      nodes: doc.getArray('nodes').toJSON(),
+      edges: doc.getArray('edges').toJSON(),
+    };
+  }
+
+  async duplicateCanvas(user: User, param: DuplicateCanvasRequest) {
+    const { title, canvasId } = param;
+
+    const canvas = await this.prisma.canvas.findFirst({
+      where: { canvasId, deletedAt: null },
+    });
+
+    const permissions: Permissions = JSON.parse(canvas.permissions);
+    if (!permissions.public && canvas.uid !== user?.uid) {
+      throw new CanvasNotFoundError();
+    }
+
+    const newCanvasId = genCanvasID();
+    const stateStorageKey = `state/${newCanvasId}`;
+    const state = await this.minio.client.getObject(canvas.stateStorageKey);
+    await this.minio.client.putObject(stateStorageKey, state);
+
+    const newCanvas = await this.prisma.canvas.create({
+      data: {
+        uid: user.uid,
+        canvasId: newCanvasId,
+        stateStorageKey,
+        title: title || canvas.title,
+      },
+    });
+
+    return newCanvas;
+  }
+
   async createCanvas(user: User, param: UpsertCanvasRequest) {
     const canvasId = genCanvasID();
     const stateStorageKey = `state/${canvasId}`;
@@ -64,8 +143,9 @@ export class CanvasService {
       data: {
         uid: user.uid,
         canvasId,
+        title: param.title,
         stateStorageKey,
-        ...param,
+        permissions: JSON.stringify(param.permissions),
       },
     });
 
@@ -88,11 +168,20 @@ export class CanvasService {
   }
 
   async updateCanvas(user: User, param: UpsertCanvasRequest) {
-    const { canvasId, title = '' } = param;
+    const { canvasId, title = '', permissions = {} } = param;
+
+    const updates: Prisma.CanvasUpdateInput = {};
+
+    if (title) {
+      updates.title = title;
+    }
+    if (permissions) {
+      updates.permissions = JSON.stringify(permissions);
+    }
 
     const updatedCanvas = await this.prisma.canvas.update({
       where: { canvasId, uid: user.uid, deletedAt: null },
-      data: { title },
+      data: updates,
     });
 
     if (!updatedCanvas) {
@@ -183,8 +272,6 @@ export class CanvasService {
   }
 
   async syncCanvasEntityRelation(canvasId: string) {
-    this.logger.log(`syncCanvasEntityRelation called for ${canvasId}`);
-
     const canvas = await this.prisma.canvas.findUnique({
       where: { canvasId },
     });

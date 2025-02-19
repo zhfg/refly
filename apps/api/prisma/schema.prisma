@@ -261,6 +261,8 @@ model Canvas {
   shareCode       String?   @map("share_code")
   /// Whether this canvas is readonly
   readOnly        Boolean   @default(false) @map("read_only")
+  /// Canvas permissions (JSON of `Permissions`)
+  permissions     String    @default("{}") @map("permissions")
   /// Create timestamp
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   /// Update timestamp

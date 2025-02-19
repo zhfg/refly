@@ -31,10 +31,13 @@ import {
   deleteShare,
   deleteSkillInstance,
   deleteSkillTrigger,
+  duplicateCanvas,
   emailLogin,
   emailSignup,
+  exportCanvas,
   getActionResult,
   getAuthConfig,
+  getCanvasDetail,
   getCollabToken,
   getDocumentDetail,
   getResourceDetail,
@@ -42,6 +45,7 @@ import {
   getShareContent,
   getSubscriptionPlans,
   getSubscriptionUsage,
+  importCanvas,
   invokeSkill,
   listActions,
   listCanvases,
@@ -105,6 +109,26 @@ export const UseListCanvasesKeyFn = (
   clientOptions: Options<unknown, true> = {},
   queryKey?: Array<unknown>,
 ) => [useListCanvasesKey, ...(queryKey ?? [clientOptions])];
+export type GetCanvasDetailDefaultResponse = Awaited<ReturnType<typeof getCanvasDetail>>['data'];
+export type GetCanvasDetailQueryResult<
+  TData = GetCanvasDetailDefaultResponse,
+  TError = unknown,
+> = UseQueryResult<TData, TError>;
+export const useGetCanvasDetailKey = 'GetCanvasDetail';
+export const UseGetCanvasDetailKeyFn = (
+  clientOptions: Options<unknown, true>,
+  queryKey?: Array<unknown>,
+) => [useGetCanvasDetailKey, ...(queryKey ?? [clientOptions])];
+export type ExportCanvasDefaultResponse = Awaited<ReturnType<typeof exportCanvas>>['data'];
+export type ExportCanvasQueryResult<
+  TData = ExportCanvasDefaultResponse,
+  TError = unknown,
+> = UseQueryResult<TData, TError>;
+export const useExportCanvasKey = 'ExportCanvas';
+export const UseExportCanvasKeyFn = (
+  clientOptions: Options<unknown, true>,
+  queryKey?: Array<unknown>,
+) => [useExportCanvasKey, ...(queryKey ?? [clientOptions])];
 export type ListResourcesDefaultResponse = Awaited<ReturnType<typeof listResources>>['data'];
 export type ListResourcesQueryResult<
   TData = ListResourcesDefaultResponse,
@@ -343,10 +367,22 @@ export const UseLogoutKeyFn = (mutationKey?: Array<unknown>) => [
   useLogoutKey,
   ...(mutationKey ?? []),
 ];
+export type ImportCanvasMutationResult = Awaited<ReturnType<typeof importCanvas>>;
+export const useImportCanvasKey = 'ImportCanvas';
+export const UseImportCanvasKeyFn = (mutationKey?: Array<unknown>) => [
+  useImportCanvasKey,
+  ...(mutationKey ?? []),
+];
 export type CreateCanvasMutationResult = Awaited<ReturnType<typeof createCanvas>>;
 export const useCreateCanvasKey = 'CreateCanvas';
 export const UseCreateCanvasKeyFn = (mutationKey?: Array<unknown>) => [
   useCreateCanvasKey,
+  ...(mutationKey ?? []),
+];
+export type DuplicateCanvasMutationResult = Awaited<ReturnType<typeof duplicateCanvas>>;
+export const useDuplicateCanvasKey = 'DuplicateCanvas';
+export const UseDuplicateCanvasKeyFn = (mutationKey?: Array<unknown>) => [
+  useDuplicateCanvasKey,
   ...(mutationKey ?? []),
 ];
 export type UpdateCanvasMutationResult = Awaited<ReturnType<typeof updateCanvas>>;

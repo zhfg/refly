@@ -4,8 +4,10 @@ import { type Options } from '@hey-api/client-fetch';
 import { UseQueryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import {
   checkSettingsField,
+  exportCanvas,
   getActionResult,
   getAuthConfig,
+  getCanvasDetail,
   getCollabToken,
   getDocumentDetail,
   getResourceDetail,
@@ -28,9 +30,13 @@ import {
 import {
   CheckSettingsFieldData,
   CheckSettingsFieldError,
+  ExportCanvasData,
+  ExportCanvasError,
   GetActionResultData,
   GetActionResultError,
   GetAuthConfigError,
+  GetCanvasDetailData,
+  GetCanvasDetailError,
   GetCollabTokenError,
   GetDocumentDetailData,
   GetDocumentDetailError,
@@ -104,6 +110,36 @@ export const useListCanvasesSuspense = <
     queryKey: Common.UseListCanvasesKeyFn(clientOptions, queryKey),
     queryFn: () =>
       listCanvases({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useGetCanvasDetailSuspense = <
+  TData = Common.GetCanvasDetailDefaultResponse,
+  TError = GetCanvasDetailError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<GetCanvasDetailData, true>,
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useSuspenseQuery<TData, TError>({
+    queryKey: Common.UseGetCanvasDetailKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      getCanvasDetail({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useExportCanvasSuspense = <
+  TData = Common.ExportCanvasDefaultResponse,
+  TError = ExportCanvasError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<ExportCanvasData, true>,
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useSuspenseQuery<TData, TError>({
+    queryKey: Common.UseExportCanvasKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      exportCanvas({ ...clientOptions }).then((response) => response.data as TData) as TData,
     ...options,
   });
 export const useListResourcesSuspense = <

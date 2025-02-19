@@ -31,10 +31,13 @@ import {
   deleteShare,
   deleteSkillInstance,
   deleteSkillTrigger,
+  duplicateCanvas,
   emailLogin,
   emailSignup,
+  exportCanvas,
   getActionResult,
   getAuthConfig,
+  getCanvasDetail,
   getCollabToken,
   getDocumentDetail,
   getResourceDetail,
@@ -42,6 +45,7 @@ import {
   getShareContent,
   getSubscriptionPlans,
   getSubscriptionUsage,
+  importCanvas,
   invokeSkill,
   listActions,
   listCanvases,
@@ -131,13 +135,19 @@ import {
   DeleteSkillInstanceError,
   DeleteSkillTriggerData,
   DeleteSkillTriggerError,
+  DuplicateCanvasData,
+  DuplicateCanvasError,
   EmailLoginData,
   EmailLoginError,
   EmailSignupData,
   EmailSignupError,
+  ExportCanvasData,
+  ExportCanvasError,
   GetActionResultData,
   GetActionResultError,
   GetAuthConfigError,
+  GetCanvasDetailData,
+  GetCanvasDetailError,
   GetCollabTokenError,
   GetDocumentDetailData,
   GetDocumentDetailError,
@@ -148,6 +158,8 @@ import {
   GetShareContentError,
   GetSubscriptionPlansError,
   GetSubscriptionUsageError,
+  ImportCanvasData,
+  ImportCanvasError,
   InvokeSkillData,
   InvokeSkillError,
   ListActionsError,
@@ -251,6 +263,36 @@ export const useListCanvases = <
     queryKey: Common.UseListCanvasesKeyFn(clientOptions, queryKey),
     queryFn: () =>
       listCanvases({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useGetCanvasDetail = <
+  TData = Common.GetCanvasDetailDefaultResponse,
+  TError = GetCanvasDetailError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<GetCanvasDetailData, true>,
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useQuery<TData, TError>({
+    queryKey: Common.UseGetCanvasDetailKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      getCanvasDetail({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useExportCanvas = <
+  TData = Common.ExportCanvasDefaultResponse,
+  TError = ExportCanvasError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<ExportCanvasData, true>,
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useQuery<TData, TError>({
+    queryKey: Common.UseExportCanvasKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      exportCanvas({ ...clientOptions }).then((response) => response.data as TData) as TData,
     ...options,
   });
 export const useListResources = <
@@ -646,6 +688,23 @@ export const useLogout = <
     mutationFn: (clientOptions) => logout(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
+export const useImportCanvas = <
+  TData = Common.ImportCanvasMutationResult,
+  TError = ImportCanvasError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<ImportCanvasData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<ImportCanvasData, true>, TContext>({
+    mutationKey: Common.UseImportCanvasKeyFn(mutationKey),
+    mutationFn: (clientOptions) => importCanvas(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
 export const useCreateCanvas = <
   TData = Common.CreateCanvasMutationResult,
   TError = CreateCanvasError,
@@ -661,6 +720,23 @@ export const useCreateCanvas = <
   useMutation<TData, TError, Options<CreateCanvasData, true>, TContext>({
     mutationKey: Common.UseCreateCanvasKeyFn(mutationKey),
     mutationFn: (clientOptions) => createCanvas(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useDuplicateCanvas = <
+  TData = Common.DuplicateCanvasMutationResult,
+  TError = DuplicateCanvasError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<DuplicateCanvasData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<DuplicateCanvasData, true>, TContext>({
+    mutationKey: Common.UseDuplicateCanvasKeyFn(mutationKey),
+    mutationFn: (clientOptions) => duplicateCanvas(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useUpdateCanvas = <

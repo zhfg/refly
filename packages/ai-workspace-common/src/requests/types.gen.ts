@@ -55,6 +55,16 @@ export type BaseReference = {
   targetId: string;
 };
 
+/**
+ * Entity permissions
+ */
+export type Permissions = {
+  /**
+   * Whether the entity is publicly accessible
+   */
+  public?: boolean;
+};
+
 export type Canvas = {
   /**
    * Canvas ID
@@ -72,6 +82,10 @@ export type Canvas = {
    * Whether this canvas is read-only
    */
   readOnly?: boolean;
+  /**
+   * Canvas permissions
+   */
+  permissions?: Permissions;
   /**
    * Canvas creation time
    */
@@ -1429,10 +1443,43 @@ export type ListCanvasResponse = BaseResponse & {
 };
 
 export type GetCanvasDetailResponse = BaseResponse & {
+  data?: Canvas;
+};
+
+/**
+ * Raw canvas data
+ */
+export type RawCanvasData = {
+  /**
+   * Canvas title
+   */
+  title?: string;
+  /**
+   * Canvas nodes
+   */
+  nodes?: Array<{
+    [key: string]: unknown;
+  }>;
+  /**
+   * Canvas edges
+   */
+  edges?: Array<{
+    [key: string]: unknown;
+  }>;
+};
+
+export type ExportCanvasResponse = BaseResponse & {
   /**
    * Canvas data
    */
-  data?: Canvas;
+  data?: RawCanvasData;
+};
+
+export type DuplicateCanvasRequest = {
+  /**
+   * Canvas ID to duplicate
+   */
+  canvasId: string;
 };
 
 export type UpsertCanvasRequest = {
@@ -1444,6 +1491,10 @@ export type UpsertCanvasRequest = {
    * Canvas ID (only used for update)
    */
   canvasId?: string;
+  /**
+   * Canvas permissions
+   */
+  permissions?: Permissions;
 };
 
 export type UpsertCanvasResponse = BaseResponse & {
@@ -2984,6 +3035,40 @@ export type ListCanvasesResponse = ListCanvasResponse;
 
 export type ListCanvasesError = unknown;
 
+export type GetCanvasDetailData = {
+  query: {
+    /**
+     * Canvas ID
+     */
+    canvasId: string;
+  };
+};
+
+export type GetCanvasDetailResponse2 = Canvas;
+
+export type GetCanvasDetailError = unknown;
+
+export type ExportCanvasData = {
+  query: {
+    /**
+     * Canvas ID
+     */
+    canvasId: string;
+  };
+};
+
+export type ExportCanvasResponse2 = ExportCanvasResponse;
+
+export type ExportCanvasError = unknown;
+
+export type ImportCanvasData = {
+  body: RawCanvasData;
+};
+
+export type ImportCanvasResponse = UpsertCanvasResponse;
+
+export type ImportCanvasError = unknown;
+
 export type CreateCanvasData = {
   body: UpsertCanvasRequest;
 };
@@ -2991,6 +3076,14 @@ export type CreateCanvasData = {
 export type CreateCanvasResponse = UpsertCanvasResponse;
 
 export type CreateCanvasError = unknown;
+
+export type DuplicateCanvasData = {
+  body: DuplicateCanvasRequest;
+};
+
+export type DuplicateCanvasResponse = UpsertCanvasResponse;
+
+export type DuplicateCanvasError = unknown;
 
 export type UpdateCanvasData = {
   body: UpsertCanvasRequest;
