@@ -24,3 +24,6 @@ common/autoinstallers/*/.npmrc
 *.lock
 *.log
 *.chunks.jsonl
+
+# mise
+mise.toml

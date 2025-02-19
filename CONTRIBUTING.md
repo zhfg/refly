@@ -107,7 +107,9 @@ cp apps/api/.env.example apps/api/.env
 
 4. Start developing:
 
+
 ```bash
+pnpm build (just once)
 pnpm dev
 ```
 
