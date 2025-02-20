@@ -7,12 +7,12 @@ import {
   exportCanvas,
   getActionResult,
   getAuthConfig,
+  getCanvasData,
   getCanvasDetail,
   getCollabToken,
   getDocumentDetail,
   getResourceDetail,
   getSettings,
-  getShareContent,
   getSubscriptionPlans,
   getSubscriptionUsage,
   listActions,
@@ -35,6 +35,8 @@ import {
   GetActionResultData,
   GetActionResultError,
   GetAuthConfigError,
+  GetCanvasDataData,
+  GetCanvasDataError,
   GetCanvasDetailData,
   GetCanvasDetailError,
   GetCollabTokenError,
@@ -43,8 +45,6 @@ import {
   GetResourceDetailData,
   GetResourceDetailError,
   GetSettingsError,
-  GetShareContentData,
-  GetShareContentError,
   GetSubscriptionPlansError,
   GetSubscriptionUsageError,
   ListActionsError,
@@ -127,6 +127,21 @@ export const useGetCanvasDetailSuspense = <
       getCanvasDetail({ ...clientOptions }).then((response) => response.data as TData) as TData,
     ...options,
   });
+export const useGetCanvasDataSuspense = <
+  TData = Common.GetCanvasDataDefaultResponse,
+  TError = GetCanvasDataError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<GetCanvasDataData, true>,
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useSuspenseQuery<TData, TError>({
+    queryKey: Common.UseGetCanvasDataKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      getCanvasData({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
 export const useExportCanvasSuspense = <
   TData = Common.ExportCanvasDefaultResponse,
   TError = ExportCanvasError,
@@ -200,21 +215,6 @@ export const useGetDocumentDetailSuspense = <
     queryKey: Common.UseGetDocumentDetailKeyFn(clientOptions, queryKey),
     queryFn: () =>
       getDocumentDetail({ ...clientOptions }).then((response) => response.data as TData) as TData,
-    ...options,
-  });
-export const useGetShareContentSuspense = <
-  TData = Common.GetShareContentDefaultResponse,
-  TError = GetShareContentError,
-  TQueryKey extends Array<unknown> = unknown[],
->(
-  clientOptions: Options<GetShareContentData, true>,
-  queryKey?: TQueryKey,
-  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
-) =>
-  useSuspenseQuery<TData, TError>({
-    queryKey: Common.UseGetShareContentKeyFn(clientOptions, queryKey),
-    queryFn: () =>
-      getShareContent({ ...clientOptions }).then((response) => response.data as TData) as TData,
     ...options,
   });
 export const useListLabelClassesSuspense = <

@@ -75,10 +75,6 @@ export type Canvas = {
    */
   title: string;
   /**
-   * Share code
-   */
-  shareCode?: string;
-  /**
    * Whether this canvas is read-only
    */
   readOnly?: boolean;
@@ -207,10 +203,6 @@ export type Document = {
    * Full document content (only returned in detail api)
    */
   content?: string;
-  /**
-   * Share code
-   */
-  shareCode?: string;
   /**
    * Whether this document is read-only
    */
@@ -1778,69 +1770,6 @@ export type SkillEvent = {
   error?: BaseResponse;
 };
 
-export type CreateShareRequest = {
-  entityType: EntityType;
-  /**
-   * Entity ID
-   */
-  entityId: string;
-};
-
-export type CreateShareResult = {
-  /**
-   * Share code
-   */
-  shareCode: string;
-};
-
-export type CreateShareResponse = BaseResponse & {
-  data?: CreateShareResult;
-};
-
-export type DeleteShareRequest = {
-  /**
-   * Share code
-   */
-  shareCode: string;
-};
-
-export type ShareUser = {
-  /**
-   * User name
-   */
-  username?: string;
-  /**
-   * User nickname
-   */
-  nickname?: string;
-  /**
-   * User avatar
-   */
-  avatar?: string;
-};
-
-export type SharedContent = {
-  /**
-   * Shared canvas data
-   */
-  canvas?: Canvas;
-  /**
-   * Selected document detail
-   */
-  document?: Document;
-  /**
-   * Share users
-   */
-  users?: Array<ShareUser>;
-};
-
-export type GetShareContentResponse = BaseResponse & {
-  /**
-   * Shared content data
-   */
-  data?: SharedContent;
-};
-
 export type ListLabelClassesResponse = BaseResponse & {
   /**
    * Label class list
@@ -3341,35 +3270,6 @@ export type DeleteReferencesData = {
 export type DeleteReferencesResponse = unknown;
 
 export type DeleteReferencesError = unknown;
-
-export type CreateShareData = {
-  body: CreateShareRequest;
-};
-
-export type CreateShareResponse2 = CreateShareResponse;
-
-export type CreateShareError = unknown;
-
-export type DeleteShareData = {
-  body: DeleteShareRequest;
-};
-
-export type DeleteShareResponse = BaseResponse;
-
-export type DeleteShareError = unknown;
-
-export type GetShareContentData = {
-  query: {
-    /**
-     * Share code
-     */
-    shareCode: string;
-  };
-};
-
-export type GetShareContentResponse2 = GetShareContentResponse;
-
-export type GetShareContentError = unknown;
 
 export type ListLabelClassesData = {
   query?: {

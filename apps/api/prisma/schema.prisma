@@ -257,8 +257,6 @@ model Canvas {
   storageSize     BigInt    @default(0) @map("storage_size")
   /// Canvas yjs doc storage key
   stateStorageKey String?   @map("state_storage_key")
-  /// Share code
-  shareCode       String?   @map("share_code")
   /// Whether this canvas is readonly
   readOnly        Boolean   @default(false) @map("read_only")
   /// Canvas permissions (JSON of `Permissions`)
@@ -271,7 +269,6 @@ model Canvas {
   deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([uid, updatedAt])
-  @@index([shareCode])
   @@map("canvases")
 }
 
@@ -355,8 +352,6 @@ model Document {
   vectorSize      BigInt    @default(0) @map("vector_size")
   /// Yjs state storage key
   stateStorageKey String    @default("") @map("state_storage_key")
-  /// Share code
-  shareCode       String?   @map("share_code")
   /// Whether this document is readonly
   readOnly        Boolean   @default(false) @map("read_only")
   /// Create timestamp
@@ -367,7 +362,6 @@ model Document {
   deletedAt       DateTime? @map("deleted_at") @db.Timestamptz()
 
   @@index([uid, deletedAt, updatedAt])
-  @@index([shareCode])
   @@map("documents")
 }
 

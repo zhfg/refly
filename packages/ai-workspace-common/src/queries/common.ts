@@ -18,7 +18,6 @@ import {
   createPortalSession,
   createResource,
   createResourceWithFile,
-  createShare,
   createSkillInstance,
   createSkillTrigger,
   createVerification,
@@ -28,7 +27,6 @@ import {
   deleteLabelInstance,
   deleteReferences,
   deleteResource,
-  deleteShare,
   deleteSkillInstance,
   deleteSkillTrigger,
   duplicateCanvas,
@@ -37,12 +35,12 @@ import {
   exportCanvas,
   getActionResult,
   getAuthConfig,
+  getCanvasData,
   getCanvasDetail,
   getCollabToken,
   getDocumentDetail,
   getResourceDetail,
   getSettings,
-  getShareContent,
   getSubscriptionPlans,
   getSubscriptionUsage,
   importCanvas,
@@ -119,6 +117,16 @@ export const UseGetCanvasDetailKeyFn = (
   clientOptions: Options<unknown, true>,
   queryKey?: Array<unknown>,
 ) => [useGetCanvasDetailKey, ...(queryKey ?? [clientOptions])];
+export type GetCanvasDataDefaultResponse = Awaited<ReturnType<typeof getCanvasData>>['data'];
+export type GetCanvasDataQueryResult<
+  TData = GetCanvasDataDefaultResponse,
+  TError = unknown,
+> = UseQueryResult<TData, TError>;
+export const useGetCanvasDataKey = 'GetCanvasData';
+export const UseGetCanvasDataKeyFn = (
+  clientOptions: Options<unknown, true>,
+  queryKey?: Array<unknown>,
+) => [useGetCanvasDataKey, ...(queryKey ?? [clientOptions])];
 export type ExportCanvasDefaultResponse = Awaited<ReturnType<typeof exportCanvas>>['data'];
 export type ExportCanvasQueryResult<
   TData = ExportCanvasDefaultResponse,
@@ -173,16 +181,6 @@ export const UseGetDocumentDetailKeyFn = (
   clientOptions: Options<unknown, true>,
   queryKey?: Array<unknown>,
 ) => [useGetDocumentDetailKey, ...(queryKey ?? [clientOptions])];
-export type GetShareContentDefaultResponse = Awaited<ReturnType<typeof getShareContent>>['data'];
-export type GetShareContentQueryResult<
-  TData = GetShareContentDefaultResponse,
-  TError = unknown,
-> = UseQueryResult<TData, TError>;
-export const useGetShareContentKey = 'GetShareContent';
-export const UseGetShareContentKeyFn = (
-  clientOptions: Options<unknown, true>,
-  queryKey?: Array<unknown>,
-) => [useGetShareContentKey, ...(queryKey ?? [clientOptions])];
 export type ListLabelClassesDefaultResponse = Awaited<ReturnType<typeof listLabelClasses>>['data'];
 export type ListLabelClassesQueryResult<
   TData = ListLabelClassesDefaultResponse,
@@ -481,18 +479,6 @@ export type DeleteReferencesMutationResult = Awaited<ReturnType<typeof deleteRef
 export const useDeleteReferencesKey = 'DeleteReferences';
 export const UseDeleteReferencesKeyFn = (mutationKey?: Array<unknown>) => [
   useDeleteReferencesKey,
-  ...(mutationKey ?? []),
-];
-export type CreateShareMutationResult = Awaited<ReturnType<typeof createShare>>;
-export const useCreateShareKey = 'CreateShare';
-export const UseCreateShareKeyFn = (mutationKey?: Array<unknown>) => [
-  useCreateShareKey,
-  ...(mutationKey ?? []),
-];
-export type DeleteShareMutationResult = Awaited<ReturnType<typeof deleteShare>>;
-export const useDeleteShareKey = 'DeleteShare';
-export const UseDeleteShareKeyFn = (mutationKey?: Array<unknown>) => [
-  useDeleteShareKey,
   ...(mutationKey ?? []),
 ];
 export type CreateLabelClassMutationResult = Awaited<ReturnType<typeof createLabelClass>>;

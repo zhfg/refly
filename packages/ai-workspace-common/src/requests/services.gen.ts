@@ -36,6 +36,9 @@ import type {
   GetCanvasDetailData,
   GetCanvasDetailError,
   GetCanvasDetailResponse2,
+  GetCanvasDataData,
+  GetCanvasDataError,
+  GetCanvasDataResponse,
   ExportCanvasData,
   ExportCanvasError,
   ExportCanvasResponse2,
@@ -108,15 +111,6 @@ import type {
   DeleteReferencesData,
   DeleteReferencesError,
   DeleteReferencesResponse,
-  CreateShareData,
-  CreateShareError,
-  CreateShareResponse2,
-  DeleteShareData,
-  DeleteShareError,
-  DeleteShareResponse,
-  GetShareContentData,
-  GetShareContentError,
-  GetShareContentResponse2,
   ListLabelClassesData,
   ListLabelClassesError,
   ListLabelClassesResponse2,
@@ -384,6 +378,19 @@ export const getCanvasDetail = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: '/canvas/detail',
+  });
+};
+
+/**
+ * Get canvas data
+ * Get public canvas data without checking user identity
+ */
+export const getCanvasData = <ThrowOnError extends boolean = false>(
+  options: Options<GetCanvasDataData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<GetCanvasDataResponse, GetCanvasDataError, ThrowOnError>({
+    ...options,
+    url: '/canvas/data',
   });
 };
 
@@ -767,49 +774,6 @@ export const deleteReferences = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: '/knowledge/reference/delete',
-  });
-};
-
-/**
- * Create share
- * Create new share for canvas
- */
-export const createShare = <ThrowOnError extends boolean = false>(
-  options: Options<CreateShareData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).post<CreateShareResponse2, CreateShareError, ThrowOnError>({
-    ...options,
-    url: '/share/new',
-  });
-};
-
-/**
- * Delete share
- * Delete an existing share
- */
-export const deleteShare = <ThrowOnError extends boolean = false>(
-  options: Options<DeleteShareData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).post<DeleteShareResponse, DeleteShareError, ThrowOnError>({
-    ...options,
-    url: '/share/delete',
-  });
-};
-
-/**
- * Get share content
- * Get share content by share code
- */
-export const getShareContent = <ThrowOnError extends boolean = false>(
-  options: Options<GetShareContentData, ThrowOnError>,
-) => {
-  return (options?.client ?? client).get<
-    GetShareContentResponse2,
-    GetShareContentError,
-    ThrowOnError
-  >({
-    ...options,
-    url: '/share/content',
   });
 };
 

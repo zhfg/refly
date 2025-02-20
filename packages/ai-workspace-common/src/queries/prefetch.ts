@@ -7,12 +7,12 @@ import {
   exportCanvas,
   getActionResult,
   getAuthConfig,
+  getCanvasData,
   getCanvasDetail,
   getCollabToken,
   getDocumentDetail,
   getResourceDetail,
   getSettings,
-  getShareContent,
   getSubscriptionPlans,
   getSubscriptionUsage,
   listActions,
@@ -31,10 +31,10 @@ import {
   CheckSettingsFieldData,
   ExportCanvasData,
   GetActionResultData,
+  GetCanvasDataData,
   GetCanvasDetailData,
   GetDocumentDetailData,
   GetResourceDetailData,
-  GetShareContentData,
   ListCanvasesData,
   ListDocumentsData,
   ListLabelClassesData,
@@ -76,6 +76,14 @@ export const prefetchUseGetCanvasDetail = (
     queryKey: Common.UseGetCanvasDetailKeyFn(clientOptions),
     queryFn: () => getCanvasDetail({ ...clientOptions }).then((response) => response.data),
   });
+export const prefetchUseGetCanvasData = (
+  queryClient: QueryClient,
+  clientOptions: Options<GetCanvasDataData, true>,
+) =>
+  queryClient.prefetchQuery({
+    queryKey: Common.UseGetCanvasDataKeyFn(clientOptions),
+    queryFn: () => getCanvasData({ ...clientOptions }).then((response) => response.data),
+  });
 export const prefetchUseExportCanvas = (
   queryClient: QueryClient,
   clientOptions: Options<ExportCanvasData, true>,
@@ -115,14 +123,6 @@ export const prefetchUseGetDocumentDetail = (
   queryClient.prefetchQuery({
     queryKey: Common.UseGetDocumentDetailKeyFn(clientOptions),
     queryFn: () => getDocumentDetail({ ...clientOptions }).then((response) => response.data),
-  });
-export const prefetchUseGetShareContent = (
-  queryClient: QueryClient,
-  clientOptions: Options<GetShareContentData, true>,
-) =>
-  queryClient.prefetchQuery({
-    queryKey: Common.UseGetShareContentKeyFn(clientOptions),
-    queryFn: () => getShareContent({ ...clientOptions }).then((response) => response.data),
   });
 export const prefetchUseListLabelClasses = (
   queryClient: QueryClient,

@@ -86,10 +86,6 @@ export const CanvasSchema = {
       description: 'Canvas title',
       example: 'My canvas',
     },
-    shareCode: {
-      type: 'string',
-      description: 'Share code',
-    },
     readOnly: {
       type: 'boolean',
       description: 'Whether this canvas is read-only',
@@ -252,10 +248,6 @@ export const DocumentSchema = {
     content: {
       type: 'string',
       description: 'Full document content (only returned in detail api)',
-    },
-    shareCode: {
-      type: 'string',
-      description: 'Share code',
     },
     readOnly: {
       type: 'boolean',
@@ -2436,115 +2428,6 @@ export const SkillEventSchema = {
       $ref: '#/components/schemas/BaseResponse',
     },
   },
-} as const;
-
-export const CreateShareRequestSchema = {
-  type: 'object',
-  required: ['entityType', 'entityId'],
-  properties: {
-    entityType: {
-      $ref: '#/components/schemas/EntityType',
-    },
-    entityId: {
-      type: 'string',
-      description: 'Entity ID',
-    },
-  },
-} as const;
-
-export const CreateShareResultSchema = {
-  type: 'object',
-  required: ['shareCode'],
-  properties: {
-    shareCode: {
-      type: 'string',
-      description: 'Share code',
-    },
-  },
-} as const;
-
-export const CreateShareResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          $ref: '#/components/schemas/CreateShareResult',
-        },
-      },
-    },
-  ],
-} as const;
-
-export const DeleteShareRequestSchema = {
-  type: 'object',
-  required: ['shareCode'],
-  properties: {
-    shareCode: {
-      type: 'string',
-      description: 'Share code',
-    },
-  },
-} as const;
-
-export const ShareUserSchema = {
-  type: 'object',
-  properties: {
-    username: {
-      type: 'string',
-      description: 'User name',
-    },
-    nickname: {
-      type: 'string',
-      description: 'User nickname',
-    },
-    avatar: {
-      type: 'string',
-      description: 'User avatar',
-    },
-  },
-} as const;
-
-export const SharedContentSchema = {
-  type: 'object',
-  properties: {
-    canvas: {
-      description: 'Shared canvas data',
-      $ref: '#/components/schemas/Canvas',
-    },
-    document: {
-      description: 'Selected document detail',
-      $ref: '#/components/schemas/Document',
-    },
-    users: {
-      type: 'array',
-      description: 'Share users',
-      items: {
-        $ref: '#/components/schemas/ShareUser',
-      },
-    },
-  },
-} as const;
-
-export const GetShareContentResponseSchema = {
-  allOf: [
-    {
-      $ref: '#/components/schemas/BaseResponse',
-    },
-    {
-      type: 'object',
-      properties: {
-        data: {
-          type: 'object',
-          description: 'Shared content data',
-          $ref: '#/components/schemas/SharedContent',
-        },
-      },
-    },
-  ],
 } as const;
 
 export const ListLabelClassesResponseSchema = {

@@ -17,8 +17,6 @@ tags:
     description: Canvas management endpoints
   - name: knowledge
     description: Knowledge base management endpoints
-  - name: share
-    description: Share management endpoints
   - name: label
     description: Label management endpoints
   - name: action
@@ -829,67 +827,6 @@ paths:
       responses:
         '200':
           description: Successful operation
-  /share/new:
-    post:
-      tags:
-        - share
-      summary: Create share
-      description: Create new share for canvas
-      operationId: createShare
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateShareRequest'
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateShareResponse'
-  /share/delete:
-    post:
-      tags:
-        - share
-      summary: Delete share
-      description: Delete an existing share
-      operationId: deleteShare
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DeleteShareRequest'
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseResponse'
-  /share/content:
-    get:
-      tags:
-        - share
-      summary: Get share content
-      description: Get share content by share code
-      operationId: getShareContent
-      parameters:
-        - name: shareCode
-          in: query
-          description: Share code
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GetShareContentResponse'
   /label/class/list:
     get:
       tags:
@@ -1757,9 +1694,6 @@ components:
           type: string
           description: Canvas title
           example: My canvas
-        shareCode:
-          type: string
-          description: Share code
         readOnly:
           type: boolean
           description: Whether this canvas is read-only
@@ -1887,9 +1821,6 @@ components:
         content:
           type: string
           description: Full document content (only returned in detail api)
-        shareCode:
-          type: string
-          description: Share code
         readOnly:
           type: boolean
           description: Whether this document is read-only
@@ -3488,75 +3419,6 @@ components:
         error:
           description: Error data. Only present when `event` is `error`.
           $ref: '#/components/schemas/BaseResponse'
-    CreateShareRequest:
-      type: object
-      required:
-        - entityType
-        - entityId
-      properties:
-        entityType:
-          $ref: '#/components/schemas/EntityType'
-        entityId:
-          type: string
-          description: Entity ID
-    CreateShareResult:
-      type: object
-      required:
-        - shareCode
-      properties:
-        shareCode:
-          type: string
-          description: Share code
-    CreateShareResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              $ref: '#/components/schemas/CreateShareResult'
-    DeleteShareRequest:
-      type: object
-      required:
-        - shareCode
-      properties:
-        shareCode:
-          type: string
-          description: Share code
-    ShareUser:
-      type: object
-      properties:
-        username:
-          type: string
-          description: User name
-        nickname:
-          type: string
-          description: User nickname
-        avatar:
-          type: string
-          description: User avatar
-    SharedContent:
-      type: object
-      properties:
-        canvas:
-          description: Shared canvas data
-          $ref: '#/components/schemas/Canvas'
-        document:
-          description: Selected document detail
-          $ref: '#/components/schemas/Document'
-        users:
-          type: array
-          description: Share users
-          items:
-            $ref: '#/components/schemas/ShareUser'
-    GetShareContentResponse:
-      allOf:
-        - $ref: '#/components/schemas/BaseResponse'
-        - type: object
-          properties:
-            data:
-              type: object
-              description: Shared content data
-              $ref: '#/components/schemas/SharedContent'
     ListLabelClassesResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

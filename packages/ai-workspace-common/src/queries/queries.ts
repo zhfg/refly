@@ -18,7 +18,6 @@ import {
   createPortalSession,
   createResource,
   createResourceWithFile,
-  createShare,
   createSkillInstance,
   createSkillTrigger,
   createVerification,
@@ -28,7 +27,6 @@ import {
   deleteLabelInstance,
   deleteReferences,
   deleteResource,
-  deleteShare,
   deleteSkillInstance,
   deleteSkillTrigger,
   duplicateCanvas,
@@ -37,12 +35,12 @@ import {
   exportCanvas,
   getActionResult,
   getAuthConfig,
+  getCanvasData,
   getCanvasDetail,
   getCollabToken,
   getDocumentDetail,
   getResourceDetail,
   getSettings,
-  getShareContent,
   getSubscriptionPlans,
   getSubscriptionUsage,
   importCanvas,
@@ -109,8 +107,6 @@ import {
   CreateResourceError,
   CreateResourceWithFileData,
   CreateResourceWithFileError,
-  CreateShareData,
-  CreateShareError,
   CreateSkillInstanceData,
   CreateSkillInstanceError,
   CreateSkillTriggerData,
@@ -129,8 +125,6 @@ import {
   DeleteReferencesError,
   DeleteResourceData,
   DeleteResourceError,
-  DeleteShareData,
-  DeleteShareError,
   DeleteSkillInstanceData,
   DeleteSkillInstanceError,
   DeleteSkillTriggerData,
@@ -146,6 +140,8 @@ import {
   GetActionResultData,
   GetActionResultError,
   GetAuthConfigError,
+  GetCanvasDataData,
+  GetCanvasDataError,
   GetCanvasDetailData,
   GetCanvasDetailError,
   GetCollabTokenError,
@@ -154,8 +150,6 @@ import {
   GetResourceDetailData,
   GetResourceDetailError,
   GetSettingsError,
-  GetShareContentData,
-  GetShareContentError,
   GetSubscriptionPlansError,
   GetSubscriptionUsageError,
   ImportCanvasData,
@@ -280,6 +274,21 @@ export const useGetCanvasDetail = <
       getCanvasDetail({ ...clientOptions }).then((response) => response.data as TData) as TData,
     ...options,
   });
+export const useGetCanvasData = <
+  TData = Common.GetCanvasDataDefaultResponse,
+  TError = GetCanvasDataError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<GetCanvasDataData, true>,
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useQuery<TData, TError>({
+    queryKey: Common.UseGetCanvasDataKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      getCanvasData({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
 export const useExportCanvas = <
   TData = Common.ExportCanvasDefaultResponse,
   TError = ExportCanvasError,
@@ -353,21 +362,6 @@ export const useGetDocumentDetail = <
     queryKey: Common.UseGetDocumentDetailKeyFn(clientOptions, queryKey),
     queryFn: () =>
       getDocumentDetail({ ...clientOptions }).then((response) => response.data as TData) as TData,
-    ...options,
-  });
-export const useGetShareContent = <
-  TData = Common.GetShareContentDefaultResponse,
-  TError = GetShareContentError,
-  TQueryKey extends Array<unknown> = unknown[],
->(
-  clientOptions: Options<GetShareContentData, true>,
-  queryKey?: TQueryKey,
-  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
-) =>
-  useQuery<TData, TError>({
-    queryKey: Common.UseGetShareContentKeyFn(clientOptions, queryKey),
-    queryFn: () =>
-      getShareContent({ ...clientOptions }).then((response) => response.data as TData) as TData,
     ...options,
   });
 export const useListLabelClasses = <
@@ -1010,40 +1004,6 @@ export const useDeleteReferences = <
   useMutation<TData, TError, Options<DeleteReferencesData, true>, TContext>({
     mutationKey: Common.UseDeleteReferencesKeyFn(mutationKey),
     mutationFn: (clientOptions) => deleteReferences(clientOptions) as unknown as Promise<TData>,
-    ...options,
-  });
-export const useCreateShare = <
-  TData = Common.CreateShareMutationResult,
-  TError = CreateShareError,
-  TQueryKey extends Array<unknown> = unknown[],
-  TContext = unknown,
->(
-  mutationKey?: TQueryKey,
-  options?: Omit<
-    UseMutationOptions<TData, TError, Options<CreateShareData, true>, TContext>,
-    'mutationKey' | 'mutationFn'
-  >,
-) =>
-  useMutation<TData, TError, Options<CreateShareData, true>, TContext>({
-    mutationKey: Common.UseCreateShareKeyFn(mutationKey),
-    mutationFn: (clientOptions) => createShare(clientOptions) as unknown as Promise<TData>,
-    ...options,
-  });
-export const useDeleteShare = <
-  TData = Common.DeleteShareMutationResult,
-  TError = DeleteShareError,
-  TQueryKey extends Array<unknown> = unknown[],
-  TContext = unknown,
->(
-  mutationKey?: TQueryKey,
-  options?: Omit<
-    UseMutationOptions<TData, TError, Options<DeleteShareData, true>, TContext>,
-    'mutationKey' | 'mutationFn'
-  >,
-) =>
-  useMutation<TData, TError, Options<DeleteShareData, true>, TContext>({
-    mutationKey: Common.UseDeleteShareKeyFn(mutationKey),
-    mutationFn: (clientOptions) => deleteShare(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useCreateLabelClass = <
