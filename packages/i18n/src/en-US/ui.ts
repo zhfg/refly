@@ -382,6 +382,8 @@ const translations = {
     copyLink: 'Copy Link',
     publishTemplate: 'Publish Template',
     linkShare: 'Link Share',
+    updateCanvasPermissionSuccess: 'Update canvas permission successfully',
+    copyLinkSuccess: 'Share link copied to clipboard!',
     accessOptions: {
       anyone: 'Anyone with the link',
       anyoneDescription: 'Anyone with the link can view',

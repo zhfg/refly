@@ -381,6 +381,8 @@ const translations = {
     copyLink: '复制链接',
     publishTemplate: '发布模板',
     linkShare: '链接分享',
+    updateCanvasPermissionSuccess: '更新画布权限成功',
+    copyLinkSuccess: '分享链接已复制到剪切板！',
     accessOptions: {
       anyone: '互联网获得链接的人',
       anyoneDescription: '互联网获得链接的人可以查看',

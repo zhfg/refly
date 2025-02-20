@@ -341,7 +341,7 @@ export const TopToolbar: FC<TopToolbarProps> = memo(({ canvasId }) => {
             setShowMaxRatio={setShowMaxRatio}
           />
 
-          <ShareSettings />
+          <ShareSettings canvasId={canvasId} />
 
           <CanvasActionDropdown canvasId={canvasId} canvasName={canvasTitle} btnSize="large" />
         </div>
