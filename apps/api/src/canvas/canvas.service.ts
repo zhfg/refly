@@ -101,7 +101,7 @@ export class CanvasService {
     Y.applyUpdate(doc, state);
 
     return {
-      title: doc.getText('title').toJSON(),
+      title: canvas.title,
       nodes: doc.getArray('nodes').toJSON(),
       edges: doc.getArray('edges').toJSON(),
     };
@@ -168,14 +168,14 @@ export class CanvasService {
   }
 
   async updateCanvas(user: User, param: UpsertCanvasRequest) {
-    const { canvasId, title = '', permissions = {} } = param;
+    const { canvasId, title, permissions = {} } = param;
 
     const updates: Prisma.CanvasUpdateInput = {};
 
-    if (title) {
+    if (title !== undefined) {
       updates.title = title;
     }
-    if (permissions) {
+    if (permissions !== undefined) {
       updates.permissions = JSON.stringify(permissions);
     }
 
@@ -189,17 +189,19 @@ export class CanvasService {
     }
 
     // Update title in yjs document
-    const connection = await this.collabService.openDirectConnection(canvasId, {
-      user,
-      entity: updatedCanvas,
-      entityType: 'canvas',
-    });
-    connection.document.transact(() => {
-      const title = connection.document.getText('title');
-      title.delete(0, title.length);
-      title.insert(0, param.title);
-    });
-    await connection.disconnect();
+    if (title !== undefined) {
+      const connection = await this.collabService.openDirectConnection(canvasId, {
+        user,
+        entity: updatedCanvas,
+        entityType: 'canvas',
+      });
+      connection.document.transact(() => {
+        const title = connection.document.getText('title');
+        title.delete(0, title.length);
+        title.insert(0, param.title);
+      });
+      await connection.disconnect();
+    }
 
     await this.elasticsearch.upsertCanvas({
       id: updatedCanvas.canvasId,
