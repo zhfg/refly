@@ -1,5 +1,5 @@
 import { memo, useState, useCallback } from 'react';
-import { BaseEdge, EdgeProps, getBezierPath, useReactFlow } from '@xyflow/react';
+import { BaseEdge, EdgeProps, getBezierPath, useReactFlow, Position } from '@xyflow/react';
 import { IconDelete } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Input } from 'antd';
 
@@ -26,6 +26,9 @@ export const CustomEdge = memo(
       sourceY,
       targetX,
       targetY,
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
+      curvature: 0.35,
     });
 
     const [isEditing, setIsEditing] = useState(false);

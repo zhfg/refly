@@ -65,6 +65,7 @@ export const MemoNode = ({
     width: node?.measured?.width ?? 288,
     height: node?.measured?.height ?? 284,
   });
+  const [isFocused, setIsFocused] = useState(false);
   const { operatingNodeId } = useCanvasStoreShallow((state) => ({
     operatingNodeId: state.operatingNodeId,
   }));
@@ -210,6 +211,12 @@ export const MemoNode = ({
     onUpdate: ({ editor }) => {
       onMemoUpdates(editor);
     },
+    onFocus: () => {
+      setIsFocused(true);
+    },
+    onBlur: () => {
+      setIsFocused(false);
+    },
     editorProps: {
       attributes: {
         class: classNames('max-w-none', 'focus:outline-none'),
@@ -280,7 +287,7 @@ export const MemoNode = ({
   );
 
   return (
-    <div className={classNames({ nowheel: isOperating })}>
+    <div className={classNames({ nowheel: isFocused })}>
       <div
         ref={targetRef}
         className="relative"
@@ -304,7 +311,6 @@ export const MemoNode = ({
         <div
           style={{ backgroundColor: bgColor }}
           className={`
-            relative
             h-full
             ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
           `}
@@ -356,7 +362,7 @@ export const MemoNode = ({
           resizable={true}
           edge={false}
           throttleResize={1}
-          renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
+          renderDirections={['nw', 'ne', 'sw', 'se']}
           onResizeStart={({ setOrigin, dragStart }) => {
             setOrigin(['%', '%']);
             if (dragStart && dragStart instanceof MouseEvent) {
