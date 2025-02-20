@@ -109,7 +109,7 @@ cp apps/api/.env.example apps/api/.env
 
 
 ```bash
-pnpm build (just once)
+pnpm build
 pnpm dev
 ```
 
