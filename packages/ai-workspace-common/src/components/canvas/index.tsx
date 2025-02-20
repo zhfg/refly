@@ -55,7 +55,7 @@ import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { IconCreateDocument } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
-
+import { ShareCanvas } from './share-canvas';
 const selectionStyles = `
   .react-flow__selection {
     background: rgba(0, 150, 143, 0.03) !important;
@@ -687,11 +687,15 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   );
 });
 
-export const Canvas = (props: { canvasId: string }) => {
-  const { canvasId } = props;
+export const Canvas = (props: { canvasId: string; readonly?: boolean }) => {
+  const { canvasId, readonly } = props;
   const setCurrentCanvasId = useCanvasStoreShallow((state) => state.setCurrentCanvasId);
 
   useEffect(() => {
+    if (readonly) {
+      return;
+    }
+
     if (canvasId && canvasId !== 'empty') {
       setCurrentCanvasId(canvasId);
     } else {
@@ -703,7 +707,7 @@ export const Canvas = (props: { canvasId: string }) => {
     <EditorPerformanceProvider>
       <CanvasProvider canvasId={canvasId}>
         <ReactFlowProvider>
-          <Flow canvasId={canvasId} />
+          {readonly ? <ShareCanvas canvasId={canvasId} /> : <Flow canvasId={canvasId} />}
         </ReactFlowProvider>
       </CanvasProvider>
     </EditorPerformanceProvider>

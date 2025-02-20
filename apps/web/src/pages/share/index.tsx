@@ -4,7 +4,7 @@ import { Canvas } from '@refly-packages/ai-workspace-common/components/canvas';
 const ShareCanvasPage = () => {
   const { canvasId = '' } = useParams();
 
-  return <Canvas canvasId={canvasId} readOnly />;
+  return <Canvas canvasId={canvasId} readonly />;
 };
 
 export default ShareCanvasPage;
