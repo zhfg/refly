@@ -16,6 +16,30 @@ export const UserSchema = {
   },
 } as const;
 
+export const ShareUserSchema = {
+  type: 'object',
+  description: 'Refly user, used as JWT payload',
+  required: ['uid'],
+  properties: {
+    uid: {
+      type: 'string',
+      description: 'UID',
+    },
+    name: {
+      type: 'string',
+      description: 'User name',
+    },
+    nickname: {
+      type: 'string',
+      description: 'User nickname',
+    },
+    avatar: {
+      type: 'string',
+      description: 'User avatar',
+    },
+  },
+} as const;
+
 export const ListOrderSchema = {
   type: 'string',
   description: 'List order',
@@ -103,6 +127,86 @@ export const CanvasSchema = {
       type: 'string',
       format: 'date-time',
       description: 'Canvas update time',
+    },
+  },
+} as const;
+
+export const CanvasTemplateCategorySchema = {
+  type: 'object',
+  required: ['categoryId', 'name', 'labelDict', 'descriptionDict'],
+  properties: {
+    categoryId: {
+      type: 'string',
+      description: 'Category ID',
+    },
+    name: {
+      type: 'string',
+      description: 'Category name',
+    },
+    labelDict: {
+      type: 'object',
+      description: 'Category label dictionary',
+      additionalProperties: {
+        type: 'string',
+      },
+    },
+    descriptionDict: {
+      type: 'object',
+      description: 'Category description dictionary',
+      additionalProperties: {
+        type: 'string',
+      },
+    },
+  },
+} as const;
+
+export const CanvasTemplateSchema = {
+  type: 'object',
+  required: ['templateId', 'title', 'description', 'language', 'createdAt', 'updatedAt'],
+  properties: {
+    templateId: {
+      type: 'string',
+      description: 'Canvas template ID',
+      example: 'ct-g30e1b80b5g1itbemc0g5jj3',
+    },
+    originCanvasId: {
+      type: 'string',
+      description: 'Origin canvas ID',
+      example: 'c-g30e1b80b5g1itbemc0g5jj3',
+    },
+    shareUser: {
+      description: 'Share user',
+      $ref: '#/components/schemas/ShareUser',
+    },
+    version: {
+      type: 'integer',
+      description: 'Canvas template version',
+    },
+    category: {
+      description: 'Canvas template category',
+      $ref: '#/components/schemas/CanvasTemplateCategory',
+    },
+    title: {
+      type: 'string',
+      description: 'Canvas template title',
+    },
+    description: {
+      type: 'string',
+      description: 'Canvas template description',
+    },
+    language: {
+      type: 'string',
+      description: 'Canvas template language code',
+    },
+    createdAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Canvas template creation time',
+    },
+    updatedAt: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Canvas template update time',
     },
   },
 } as const;
@@ -1998,6 +2102,117 @@ export const AutoNameCanvasResponseSchema = {
               type: 'string',
               description: 'New canvas title',
             },
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const ListCanvasTemplateResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Canvas template list',
+          items: {
+            $ref: '#/components/schemas/CanvasTemplate',
+          },
+        },
+      },
+    },
+  ],
+} as const;
+
+export const CreateCanvasTemplateRequestSchema = {
+  type: 'object',
+  required: ['canvasId', 'title', 'description', 'language'],
+  properties: {
+    canvasId: {
+      type: 'string',
+      description: 'Canvas ID',
+    },
+    title: {
+      type: 'string',
+      description: 'Canvas template title',
+    },
+    description: {
+      type: 'string',
+      description: 'Canvas template description',
+    },
+    categoryId: {
+      type: 'string',
+      description: 'Canvas template category ID',
+    },
+    language: {
+      type: 'string',
+      description: 'Canvas template language code',
+    },
+  },
+} as const;
+
+export const UpdateCanvasTemplateRequestSchema = {
+  type: 'object',
+  required: ['templateId'],
+  properties: {
+    templateId: {
+      type: 'string',
+      description: 'Canvas template ID',
+    },
+    title: {
+      type: 'string',
+      description: 'Canvas template title',
+    },
+    description: {
+      type: 'string',
+      description: 'Canvas template description',
+    },
+    categoryId: {
+      type: 'string',
+      description: 'Canvas template category ID',
+    },
+    language: {
+      type: 'string',
+      description: 'Canvas template language code',
+    },
+  },
+} as const;
+
+export const UpsertCanvasTemplateResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          description: 'Canvas template',
+          $ref: '#/components/schemas/CanvasTemplate',
+        },
+      },
+    },
+  ],
+} as const;
+
+export const ListCanvasTemplateCategoryResponseSchema = {
+  allOf: [
+    {
+      $ref: '#/components/schemas/BaseResponse',
+    },
+    {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          description: 'Canvas template category list',
+          items: {
+            $ref: '#/components/schemas/CanvasTemplateCategory',
           },
         },
       },

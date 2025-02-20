@@ -17,13 +17,17 @@ import {
   Entity,
   EntityType,
   ListCanvasesData,
+  ListCanvasTemplatesData,
   RawCanvasData,
   UpsertCanvasRequest,
   User,
   Permissions,
+  ShareUser,
+  CreateCanvasTemplateRequest,
+  UpdateCanvasTemplateRequest,
 } from '@refly-packages/openapi-schema';
 import { Prisma } from '@prisma/client';
-import { genCanvasID } from '@refly-packages/utils';
+import { genCanvasID, genCanvasTemplateID } from '@refly-packages/utils';
 import { DeleteKnowledgeEntityJobData } from '@/knowledge/knowledge.dto';
 import { QUEUE_DELETE_KNOWLEDGE_ENTITY } from '@/utils/const';
 import { ChatOpenAI } from '@langchain/openai';
@@ -517,5 +521,73 @@ export class CanvasService {
 
     const result = await this.autoNameCanvas(user, { canvasId, directUpdate: true });
     this.logger.log(`Auto named canvas ${canvasId} with title: ${result.title}`);
+  }
+
+  async listCanvasTemplates(user: User, param: ListCanvasTemplatesData['query']) {
+    const { categoryId, scope, language, page, pageSize } = param;
+
+    const where: Prisma.CanvasTemplateWhereInput = {};
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+    if (language) {
+      where.language = language;
+    }
+    if (scope === 'private') {
+      where.uid = user.uid;
+    } else {
+      where.isPublic = true;
+    }
+
+    const templates = await this.prisma.canvasTemplate.findMany({
+      where,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: { category: true },
+    });
+
+    return templates;
+  }
+
+  async createCanvasTemplate(user: User, param: CreateCanvasTemplateRequest) {
+    const { categoryId, canvasId, title, description, language } = param;
+    const userPo = await this.prisma.user.findFirst({ where: { uid: user.uid } });
+    if (!userPo) {
+      this.logger.warn(`user not found for uid ${user.uid} when creating canvas template`);
+      return;
+    }
+
+    const shareUser: ShareUser = {
+      uid: userPo.uid,
+      name: userPo.name,
+      avatar: userPo.avatar,
+    };
+    const template = await this.prisma.canvasTemplate.create({
+      data: {
+        categoryId,
+        templateId: genCanvasTemplateID(),
+        originCanvasId: canvasId,
+        uid: userPo.uid,
+        shareUser: JSON.stringify(shareUser),
+        title,
+        description,
+        language,
+      },
+    });
+
+    return template;
+  }
+
+  async updateCanvasTemplate(user: User, param: UpdateCanvasTemplateRequest) {
+    const { templateId, title, description, language } = param;
+    const template = await this.prisma.canvasTemplate.update({
+      where: { templateId, uid: user.uid },
+      data: { title, description, language },
+    });
+    return template;
+  }
+
+  async listCanvasTemplateCategories() {
+    return this.prisma.canvasTemplateCategory.findMany();
   }
 }

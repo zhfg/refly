@@ -43,7 +43,7 @@ export class ClearCanvasEntityProcessor extends WorkerHost {
   }
 
   async process(job: Job<DeleteCanvasNodesJobData>) {
-    this.logger.log(`[${QUEUE_CLEAR_CANVAS_ENTITY}] job: ${JSON.stringify(job.data)}`);
+    // this.logger.log(`[${QUEUE_CLEAR_CANVAS_ENTITY}] job: ${JSON.stringify(job.data)}`);
     const { entities } = job.data;
 
     try {

@@ -17,6 +17,8 @@ import {
   getSubscriptionUsage,
   listActions,
   listCanvases,
+  listCanvasTemplateCategories,
+  listCanvasTemplates,
   listDocuments,
   listLabelClasses,
   listLabelInstances,
@@ -50,6 +52,9 @@ import {
   ListActionsError,
   ListCanvasesData,
   ListCanvasesError,
+  ListCanvasTemplateCategoriesError,
+  ListCanvasTemplatesData,
+  ListCanvasTemplatesError,
   ListDocumentsData,
   ListDocumentsError,
   ListLabelClassesData,
@@ -155,6 +160,38 @@ export const useExportCanvasSuspense = <
     queryKey: Common.UseExportCanvasKeyFn(clientOptions, queryKey),
     queryFn: () =>
       exportCanvas({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useListCanvasTemplatesSuspense = <
+  TData = Common.ListCanvasTemplatesDefaultResponse,
+  TError = ListCanvasTemplatesError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<ListCanvasTemplatesData, true> = {},
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useSuspenseQuery<TData, TError>({
+    queryKey: Common.UseListCanvasTemplatesKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      listCanvasTemplates({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useListCanvasTemplateCategoriesSuspense = <
+  TData = Common.ListCanvasTemplateCategoriesDefaultResponse,
+  TError = ListCanvasTemplateCategoriesError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<unknown, true> = {},
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useSuspenseQuery<TData, TError>({
+    queryKey: Common.UseListCanvasTemplateCategoriesKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      listCanvasTemplateCategories({ ...clientOptions }).then(
+        (response) => response.data as TData,
+      ) as TData,
     ...options,
   });
 export const useListResourcesSuspense = <

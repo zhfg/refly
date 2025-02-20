@@ -395,6 +395,109 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AutoNameCanvasResponse'
+  /canvas/template/list:
+    get:
+      tags:
+        - canvas
+      summary: List canvas templates
+      description: List all canvas templates
+      operationId: listCanvasTemplates
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: number
+            default: 1
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: number
+            default: 10
+        - name: language
+          in: query
+          description: Language code
+          example: en
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          description: Canvas template category ID
+          schema:
+            type: string
+        - name: scope
+          in: query
+          description: Scope
+          schema:
+            type: string
+            default: public
+            enum:
+              - public
+              - private
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCanvasTemplateResponse'
+  /canvas/template/create:
+    post:
+      tags:
+        - canvas
+      summary: Create canvas template
+      description: Create a new canvas template
+      operationId: createCanvasTemplate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCanvasTemplateRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertCanvasTemplateResponse'
+  /canvas/template/update:
+    post:
+      tags:
+        - canvas
+      summary: Update canvas template
+      description: Update an existing canvas template
+      operationId: updateCanvasTemplate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCanvasTemplateRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertCanvasTemplateResponse'
+  /canvas/template/category/list:
+    get:
+      tags:
+        - canvas
+      summary: List canvas template categories
+      description: List all canvas template categories
+      operationId: listCanvasTemplateCategories
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ListCanvasTemplateCategoryResponse'
   /knowledge/resource/list:
     get:
       tags:
@@ -1634,6 +1737,24 @@ components:
         email:
           type: string
           description: Email
+    ShareUser:
+      type: object
+      description: Refly user, used as JWT payload
+      required:
+        - uid
+      properties:
+        uid:
+          type: string
+          description: UID
+        name:
+          type: string
+          description: User name
+        nickname:
+          type: string
+          description: User nickname
+        avatar:
+          type: string
+          description: User avatar
     ListOrder:
       type: string
       description: List order
@@ -1708,6 +1829,74 @@ components:
           type: string
           format: date-time
           description: Canvas update time
+    CanvasTemplateCategory:
+      type: object
+      required:
+        - categoryId
+        - name
+        - labelDict
+        - descriptionDict
+      properties:
+        categoryId:
+          type: string
+          description: Category ID
+        name:
+          type: string
+          description: Category name
+        labelDict:
+          type: object
+          description: Category label dictionary
+          additionalProperties:
+            type: string
+        descriptionDict:
+          type: object
+          description: Category description dictionary
+          additionalProperties:
+            type: string
+    CanvasTemplate:
+      type: object
+      required:
+        - templateId
+        - title
+        - description
+        - language
+        - createdAt
+        - updatedAt
+      properties:
+        templateId:
+          type: string
+          description: Canvas template ID
+          example: ct-g30e1b80b5g1itbemc0g5jj3
+        originCanvasId:
+          type: string
+          description: Origin canvas ID
+          example: c-g30e1b80b5g1itbemc0g5jj3
+        shareUser:
+          description: Share user
+          $ref: '#/components/schemas/ShareUser'
+        version:
+          type: integer
+          description: Canvas template version
+        category:
+          description: Canvas template category
+          $ref: '#/components/schemas/CanvasTemplateCategory'
+        title:
+          type: string
+          description: Canvas template title
+        description:
+          type: string
+          description: Canvas template description
+        language:
+          type: string
+          description: Canvas template language code
+        createdAt:
+          type: string
+          format: date-time
+          description: Canvas template creation time
+        updatedAt:
+          type: string
+          format: date-time
+          description: Canvas template update time
     Reference:
       allOf:
         - $ref: '#/components/schemas/BaseReference'
@@ -3156,6 +3345,77 @@ components:
                 title:
                   type: string
                   description: New canvas title
+    ListCanvasTemplateResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Canvas template list
+              items:
+                $ref: '#/components/schemas/CanvasTemplate'
+    CreateCanvasTemplateRequest:
+      type: object
+      required:
+        - canvasId
+        - title
+        - description
+        - language
+      properties:
+        canvasId:
+          type: string
+          description: Canvas ID
+        title:
+          type: string
+          description: Canvas template title
+        description:
+          type: string
+          description: Canvas template description
+        categoryId:
+          type: string
+          description: Canvas template category ID
+        language:
+          type: string
+          description: Canvas template language code
+    UpdateCanvasTemplateRequest:
+      type: object
+      required:
+        - templateId
+      properties:
+        templateId:
+          type: string
+          description: Canvas template ID
+        title:
+          type: string
+          description: Canvas template title
+        description:
+          type: string
+          description: Canvas template description
+        categoryId:
+          type: string
+          description: Canvas template category ID
+        language:
+          type: string
+          description: Canvas template language code
+    UpsertCanvasTemplateResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              description: Canvas template
+              $ref: '#/components/schemas/CanvasTemplate'
+    ListCanvasTemplateCategoryResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: Canvas template category list
+              items:
+                $ref: '#/components/schemas/CanvasTemplateCategory'
     UpsertResourceRequest:
       type: object
       required:

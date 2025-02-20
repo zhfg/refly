@@ -15,6 +15,28 @@ export type User = {
 };
 
 /**
+ * Refly user, used as JWT payload
+ */
+export type ShareUser = {
+  /**
+   * UID
+   */
+  uid: string;
+  /**
+   * User name
+   */
+  name?: string;
+  /**
+   * User nickname
+   */
+  nickname?: string;
+  /**
+   * User avatar
+   */
+  avatar?: string;
+};
+
+/**
  * List order
  */
 export type ListOrder = 'creationAsc' | 'creationDesc';
@@ -88,6 +110,72 @@ export type Canvas = {
   createdAt: string;
   /**
    * Canvas update time
+   */
+  updatedAt: string;
+};
+
+export type CanvasTemplateCategory = {
+  /**
+   * Category ID
+   */
+  categoryId: string;
+  /**
+   * Category name
+   */
+  name: string;
+  /**
+   * Category label dictionary
+   */
+  labelDict: {
+    [key: string]: string;
+  };
+  /**
+   * Category description dictionary
+   */
+  descriptionDict: {
+    [key: string]: string;
+  };
+};
+
+export type CanvasTemplate = {
+  /**
+   * Canvas template ID
+   */
+  templateId: string;
+  /**
+   * Origin canvas ID
+   */
+  originCanvasId?: string;
+  /**
+   * Share user
+   */
+  shareUser?: ShareUser;
+  /**
+   * Canvas template version
+   */
+  version?: number;
+  /**
+   * Canvas template category
+   */
+  category?: CanvasTemplateCategory;
+  /**
+   * Canvas template name
+   */
+  name: string;
+  /**
+   * Canvas template description
+   */
+  description: string;
+  /**
+   * Canvas template language code
+   */
+  language: string;
+  /**
+   * Canvas template creation time
+   */
+  createdAt: string;
+  /**
+   * Canvas template update time
    */
   updatedAt: string;
 };
@@ -1529,6 +1617,46 @@ export type AutoNameCanvasResponse = BaseResponse & {
      */
     title?: string;
   };
+};
+
+export type ListCanvasTemplateResponse = BaseResponse & {
+  /**
+   * Canvas template list
+   */
+  data?: Array<CanvasTemplate>;
+};
+
+export type UpsertCanvasTemplateRequest = {
+  /**
+   * Canvas template ID
+   */
+  templateId: string;
+  /**
+   * Canvas template name
+   */
+  name: string;
+  /**
+   * Canvas template description
+   */
+  description: string;
+  /**
+   * Canvas template language code
+   */
+  language: string;
+};
+
+export type UpsertCanvasTemplateResponse = BaseResponse & {
+  /**
+   * Canvas template
+   */
+  data?: CanvasTemplate;
+};
+
+export type ListCanvasTemplateCategoryResponse = BaseResponse & {
+  /**
+   * Canvas template category list
+   */
+  data?: Array<CanvasTemplateCategory>;
 };
 
 export type UpsertResourceRequest = {
@@ -3054,6 +3182,55 @@ export type AutoNameCanvasData = {
 export type AutoNameCanvasResponse2 = AutoNameCanvasResponse;
 
 export type AutoNameCanvasError = unknown;
+
+export type ListCanvasTemplatesData = {
+  query?: {
+    /**
+     * Category ID
+     */
+    categoryId?: string;
+    /**
+     * Language code
+     */
+    languageCode?: string;
+    /**
+     * Page number
+     */
+    page?: number;
+    /**
+     * Page size
+     */
+    pageSize?: number;
+    /**
+     * Scope
+     */
+    scope?: 'public' | 'private';
+  };
+};
+
+export type ListCanvasTemplatesResponse = ListCanvasTemplateResponse;
+
+export type ListCanvasTemplatesError = unknown;
+
+export type CreateCanvasTemplateData = {
+  body: UpsertCanvasTemplateRequest;
+};
+
+export type CreateCanvasTemplateResponse = UpsertCanvasTemplateResponse;
+
+export type CreateCanvasTemplateError = unknown;
+
+export type UpdateCanvasTemplateData = {
+  body: UpsertCanvasTemplateRequest;
+};
+
+export type UpdateCanvasTemplateResponse = UpsertCanvasTemplateResponse;
+
+export type UpdateCanvasTemplateError = unknown;
+
+export type ListCanvasTemplateCategoriesResponse = Array<ListCanvasTemplateCategoryResponse>;
+
+export type ListCanvasTemplateCategoriesError = unknown;
 
 export type ListResourcesData = {
   query?: {

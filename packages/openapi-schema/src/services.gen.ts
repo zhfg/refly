@@ -60,6 +60,17 @@ import type {
   AutoNameCanvasData,
   AutoNameCanvasError,
   AutoNameCanvasResponse2,
+  ListCanvasTemplatesData,
+  ListCanvasTemplatesError,
+  ListCanvasTemplatesResponse,
+  CreateCanvasTemplateData,
+  CreateCanvasTemplateError,
+  CreateCanvasTemplateResponse,
+  UpdateCanvasTemplateData,
+  UpdateCanvasTemplateError,
+  UpdateCanvasTemplateResponse,
+  ListCanvasTemplateCategoriesError,
+  ListCanvasTemplateCategoriesResponse,
   ListResourcesData,
   ListResourcesError,
   ListResourcesResponse,
@@ -490,6 +501,74 @@ export const autoNameCanvas = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: '/canvas/autoName',
+  });
+};
+
+/**
+ * List canvas templates
+ * List all canvas templates
+ */
+export const listCanvasTemplates = <ThrowOnError extends boolean = false>(
+  options?: Options<ListCanvasTemplatesData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    ListCanvasTemplatesResponse,
+    ListCanvasTemplatesError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/canvas/template/list',
+  });
+};
+
+/**
+ * Create canvas template
+ * Create a new canvas template
+ */
+export const createCanvasTemplate = <ThrowOnError extends boolean = false>(
+  options: Options<CreateCanvasTemplateData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    CreateCanvasTemplateResponse,
+    CreateCanvasTemplateError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/canvas/template/create',
+  });
+};
+
+/**
+ * Update canvas template
+ * Update an existing canvas template
+ */
+export const updateCanvasTemplate = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateCanvasTemplateData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).post<
+    UpdateCanvasTemplateResponse,
+    UpdateCanvasTemplateError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/canvas/template/update',
+  });
+};
+
+/**
+ * List canvas template categories
+ * List all canvas template categories
+ */
+export const listCanvasTemplateCategories = <ThrowOnError extends boolean = false>(
+  options?: Options<unknown, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    ListCanvasTemplateCategoriesResponse,
+    ListCanvasTemplateCategoriesError,
+    ThrowOnError
+  >({
+    ...options,
+    url: '/canvas/template/category/list',
   });
 };
 

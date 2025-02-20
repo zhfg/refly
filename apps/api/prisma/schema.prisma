@@ -272,6 +272,65 @@ model Canvas {
   @@map("canvases")
 }
 
+model CanvasTemplate {
+  /// Primary key
+  pk             BigInt                  @id @default(autoincrement())
+  /// Canvas template id
+  templateId     String                  @unique @map("template_id")
+  /// Category id
+  categoryId     String?                 @map("category_id")
+  /// Origin canvas id
+  originCanvasId String                  @map("origin_canvas_id")
+  /// Version
+  version        Int                     @default(0) @map("version")
+  /// UID
+  uid            String                  @map("uid")
+  /// Share user (JSON of `ShareUser`)
+  shareUser      String                  @map("share_user")
+  /// Canvas template title
+  title          String                  @map("title")
+  /// Canvas template description
+  description    String                  @map("description")
+  /// Whether this canvas template is public
+  isPublic       Boolean                 @default(false) @map("is_public")
+  /// Language code
+  language       String                  @map("language")
+  /// Create timestamp
+  createdAt      DateTime                @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt      DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt      DateTime?               @map("deleted_at") @db.Timestamptz()
+  /// Category
+  category       CanvasTemplateCategory? @relation(fields: [categoryId], references: [categoryId])
+
+  @@index([uid, updatedAt])
+  @@map("canvas_templates")
+}
+
+model CanvasTemplateCategory {
+  /// Primary key
+  pk              BigInt           @id @default(autoincrement())
+  /// Category id
+  categoryId      String           @unique @map("category_id")
+  /// Category name
+  name            String           @map("name")
+  /// Label dictionary (JSON)
+  labelDict       String           @map("label_dict")
+  /// Description dictionary (JSON)
+  descriptionDict String           @map("description_dict")
+  /// Create timestamp
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz()
+  /// Update timestamp
+  updatedAt       DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  /// Soft delete timestamp
+  deletedAt       DateTime?        @map("deleted_at") @db.Timestamptz()
+  /// Templates
+  templates       CanvasTemplate[]
+
+  @@map("canvas_template_categories")
+}
+
 model CanvasEntityRelation {
   /// Primary key
   pk         BigInt    @id @default(autoincrement())

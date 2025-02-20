@@ -17,6 +17,8 @@ import {
   getSubscriptionUsage,
   listActions,
   listCanvases,
+  listCanvasTemplateCategories,
+  listCanvasTemplates,
   listDocuments,
   listLabelClasses,
   listLabelInstances,
@@ -36,6 +38,7 @@ import {
   GetDocumentDetailData,
   GetResourceDetailData,
   ListCanvasesData,
+  ListCanvasTemplatesData,
   ListDocumentsData,
   ListLabelClassesData,
   ListLabelInstancesData,
@@ -91,6 +94,23 @@ export const prefetchUseExportCanvas = (
   queryClient.prefetchQuery({
     queryKey: Common.UseExportCanvasKeyFn(clientOptions),
     queryFn: () => exportCanvas({ ...clientOptions }).then((response) => response.data),
+  });
+export const prefetchUseListCanvasTemplates = (
+  queryClient: QueryClient,
+  clientOptions: Options<ListCanvasTemplatesData, true> = {},
+) =>
+  queryClient.prefetchQuery({
+    queryKey: Common.UseListCanvasTemplatesKeyFn(clientOptions),
+    queryFn: () => listCanvasTemplates({ ...clientOptions }).then((response) => response.data),
+  });
+export const prefetchUseListCanvasTemplateCategories = (
+  queryClient: QueryClient,
+  clientOptions: Options<unknown, true> = {},
+) =>
+  queryClient.prefetchQuery({
+    queryKey: Common.UseListCanvasTemplateCategoriesKeyFn(clientOptions),
+    queryFn: () =>
+      listCanvasTemplateCategories({ ...clientOptions }).then((response) => response.data),
   });
 export const prefetchUseListResources = (
   queryClient: QueryClient,

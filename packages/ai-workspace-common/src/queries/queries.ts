@@ -11,6 +11,7 @@ import {
   checkVerification,
   convert,
   createCanvas,
+  createCanvasTemplate,
   createCheckoutSession,
   createDocument,
   createLabelClass,
@@ -47,6 +48,8 @@ import {
   invokeSkill,
   listActions,
   listCanvases,
+  listCanvasTemplateCategories,
+  listCanvasTemplates,
   listDocuments,
   listLabelClasses,
   listLabelInstances,
@@ -68,6 +71,7 @@ import {
   streamInvokeSkill,
   unpinSkillInstance,
   updateCanvas,
+  updateCanvasTemplate,
   updateDocument,
   updateLabelClass,
   updateLabelInstance,
@@ -94,6 +98,8 @@ import {
   ConvertError,
   CreateCanvasData,
   CreateCanvasError,
+  CreateCanvasTemplateData,
+  CreateCanvasTemplateError,
   CreateCheckoutSessionData,
   CreateCheckoutSessionError,
   CreateDocumentData,
@@ -159,6 +165,9 @@ import {
   ListActionsError,
   ListCanvasesData,
   ListCanvasesError,
+  ListCanvasTemplateCategoriesError,
+  ListCanvasTemplatesData,
+  ListCanvasTemplatesError,
   ListDocumentsData,
   ListDocumentsError,
   ListLabelClassesData,
@@ -196,6 +205,8 @@ import {
   UnpinSkillInstanceError,
   UpdateCanvasData,
   UpdateCanvasError,
+  UpdateCanvasTemplateData,
+  UpdateCanvasTemplateError,
   UpdateDocumentData,
   UpdateDocumentError,
   UpdateLabelClassData,
@@ -302,6 +313,38 @@ export const useExportCanvas = <
     queryKey: Common.UseExportCanvasKeyFn(clientOptions, queryKey),
     queryFn: () =>
       exportCanvas({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useListCanvasTemplates = <
+  TData = Common.ListCanvasTemplatesDefaultResponse,
+  TError = ListCanvasTemplatesError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<ListCanvasTemplatesData, true> = {},
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useQuery<TData, TError>({
+    queryKey: Common.UseListCanvasTemplatesKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      listCanvasTemplates({ ...clientOptions }).then((response) => response.data as TData) as TData,
+    ...options,
+  });
+export const useListCanvasTemplateCategories = <
+  TData = Common.ListCanvasTemplateCategoriesDefaultResponse,
+  TError = ListCanvasTemplateCategoriesError,
+  TQueryKey extends Array<unknown> = unknown[],
+>(
+  clientOptions: Options<unknown, true> = {},
+  queryKey?: TQueryKey,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'>,
+) =>
+  useQuery<TData, TError>({
+    queryKey: Common.UseListCanvasTemplateCategoriesKeyFn(clientOptions, queryKey),
+    queryFn: () =>
+      listCanvasTemplateCategories({ ...clientOptions }).then(
+        (response) => response.data as TData,
+      ) as TData,
     ...options,
   });
 export const useListResources = <
@@ -782,6 +825,40 @@ export const useAutoNameCanvas = <
   useMutation<TData, TError, Options<AutoNameCanvasData, true>, TContext>({
     mutationKey: Common.UseAutoNameCanvasKeyFn(mutationKey),
     mutationFn: (clientOptions) => autoNameCanvas(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useCreateCanvasTemplate = <
+  TData = Common.CreateCanvasTemplateMutationResult,
+  TError = CreateCanvasTemplateError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<CreateCanvasTemplateData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<CreateCanvasTemplateData, true>, TContext>({
+    mutationKey: Common.UseCreateCanvasTemplateKeyFn(mutationKey),
+    mutationFn: (clientOptions) => createCanvasTemplate(clientOptions) as unknown as Promise<TData>,
+    ...options,
+  });
+export const useUpdateCanvasTemplate = <
+  TData = Common.UpdateCanvasTemplateMutationResult,
+  TError = UpdateCanvasTemplateError,
+  TQueryKey extends Array<unknown> = unknown[],
+  TContext = unknown,
+>(
+  mutationKey?: TQueryKey,
+  options?: Omit<
+    UseMutationOptions<TData, TError, Options<UpdateCanvasTemplateData, true>, TContext>,
+    'mutationKey' | 'mutationFn'
+  >,
+) =>
+  useMutation<TData, TError, Options<UpdateCanvasTemplateData, true>, TContext>({
+    mutationKey: Common.UseUpdateCanvasTemplateKeyFn(mutationKey),
+    mutationFn: (clientOptions) => updateCanvasTemplate(clientOptions) as unknown as Promise<TData>,
     ...options,
   });
 export const useUpdateResource = <
