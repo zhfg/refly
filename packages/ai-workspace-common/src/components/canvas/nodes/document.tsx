@@ -208,13 +208,10 @@ export const DocumentNode = memo(
 
           <div
             className={`
-            relative
             h-full
-            p-3
             ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
           `}
           >
-            <div className="absolute bottom-0 left-0 right-0 h-[20%] bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
             {!isPreview && !hideHandles && (
               <>
                 <CustomHandle
@@ -233,7 +230,7 @@ export const DocumentNode = memo(
                 />
               </>
             )}
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full p-3 box-border">
               <NodeHeader
                 title={data.title || t('common.untitled')}
                 Icon={HiOutlineDocumentText}

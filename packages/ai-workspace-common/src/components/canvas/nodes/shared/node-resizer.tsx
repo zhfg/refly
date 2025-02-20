@@ -31,7 +31,7 @@ export const NodeResizer: React.FC<NodeResizerProps> = ({
       resizable={true}
       edge={false}
       throttleResize={1}
-      renderDirections={['n', 's', 'e', 'w', 'nw', 'ne', 'sw', 'se']}
+      renderDirections={['nw', 'ne', 'sw', 'se']}
       onResizeStart={({ setOrigin, dragStart }) => {
         setOrigin(['%', '%']);
         if (dragStart && dragStart instanceof MouseEvent) {

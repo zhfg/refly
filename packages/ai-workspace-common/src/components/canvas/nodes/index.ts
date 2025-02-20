@@ -149,7 +149,6 @@ export const getNodeCommonStyles = ({
   bg-white 
   rounded-xl
   box-border
-  p-3
   transition-all
   duration-200
   border-[2px]
