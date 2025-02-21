@@ -7,6 +7,8 @@ export class JinaParser extends BaseParser {
   private readonly apiKey: string;
   private readonly apiUrl: string;
 
+  name = 'jina';
+
   constructor(
     private readonly config: ConfigService,
     options: ParserOptions & { apiUrl?: string } = {},

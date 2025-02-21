@@ -48,6 +48,12 @@ export type CheckStorageUsageResult = {
   available: number;
 };
 
+export type CheckFileParseUsageResult = {
+  pageUsed: number;
+  pageLimit: number;
+  available: number;
+};
+
 export function subscriptionPO2DTO(sub: SubscriptionModel): Subscription {
   return {
     ...pick(sub, ['subscriptionId', 'lookupKey', 'isTrial']),

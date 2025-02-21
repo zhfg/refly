@@ -8,6 +8,7 @@ import {
   Resource,
   ResourceType,
   IndexStatus,
+  IndexError,
   Reference,
   ReferenceType,
   ReferenceMeta,
@@ -23,6 +24,7 @@ export interface ResourcePrepareResult {
   storageSize?: number;
   identifier?: string;
   indexStatus?: IndexStatus;
+  indexError?: IndexError;
   contentPreview?: string;
   metadata?: ResourceMeta;
 }

@@ -151,6 +151,22 @@ export const ResourceTypeSchema = {
   enum: ['weblink', 'text', 'file'],
 } as const;
 
+export const IndexErrorSchema = {
+  type: 'object',
+  description: 'Error message for resource indexing',
+  properties: {
+    type: {
+      type: 'string',
+      description: 'Error type',
+      enum: ['pageLimitExceeded', 'unknownError'],
+    },
+    metadata: {
+      type: 'object',
+      description: 'Error metadata',
+    },
+  },
+} as const;
+
 export const ResourceSchema = {
   type: 'object',
   required: ['resourceId', 'resourceType', 'title'],
@@ -176,6 +192,10 @@ export const ResourceSchema = {
     indexStatus: {
       description: 'Resource index status',
       $ref: '#/components/schemas/IndexStatus',
+    },
+    indexError: {
+      description: 'Error message for resource indexing',
+      $ref: '#/components/schemas/IndexError',
     },
     storageSize: {
       type: 'string',

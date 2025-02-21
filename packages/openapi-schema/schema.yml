@@ -1701,6 +1701,19 @@ components:
         - weblink
         - text
         - file
+    IndexError:
+      type: object
+      description: Error message for resource indexing
+      properties:
+        type:
+          type: string
+          description: Error type
+          enum:
+            - pageLimitExceeded
+            - unknownError
+        metadata:
+          type: object
+          description: Error metadata
     Resource:
       type: object
       required:
@@ -1725,6 +1738,9 @@ components:
         indexStatus:
           description: Resource index status
           $ref: '#/components/schemas/IndexStatus'
+        indexError:
+          description: Error message for resource indexing
+          $ref: '#/components/schemas/IndexError'
         storageSize:
           type: string
           description: Resource storage size (in bytes)

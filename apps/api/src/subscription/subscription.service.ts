@@ -20,6 +20,7 @@ import {
   CheckRequestUsageResult,
   CheckStorageUsageResult,
   SyncRequestUsageJobData,
+  CheckFileParseUsageResult,
 } from '@/subscription/subscription.dto';
 import { pick } from '@/utils';
 import {
@@ -464,6 +465,43 @@ export class SubscriptionService implements OnModuleInit {
         meter.fileCountQuota < 0
           ? Number.POSITIVE_INFINITY
           : meter.fileCountQuota - meter.fileCountUsed,
+    };
+  }
+
+  async checkFileParseUsage(user: User): Promise<CheckFileParseUsageResult> {
+    const userModel = await this.prisma.user.findUnique({ where: { uid: user.uid } });
+    if (!userModel) {
+      this.logger.error(`No user found for uid ${user.uid}`);
+      return { pageUsed: 0, pageLimit: 0, available: 0 };
+    }
+
+    const pageSum = await this.prisma.fileParseRecord.aggregate({
+      _sum: { numPages: true },
+      where: {
+        uid: user.uid,
+        createdAt: { gte: startOfDay(new Date()) },
+      },
+    });
+    const pageUsed = pageSum._sum.numPages ?? 0;
+
+    let sub: SubscriptionModel | null = null;
+    if (userModel.subscriptionId) {
+      sub = await this.prisma.subscription.findUnique({
+        where: { subscriptionId: userModel.subscriptionId },
+      });
+    }
+
+    const planType = sub?.planType || 'free';
+    const plan = await this.prisma.subscriptionPlan.findFirst({
+      select: { fileParsePageLimit: true },
+      where: { planType },
+    });
+    const pageLimit = plan?.fileParsePageLimit ?? this.config.get('quota.fileParse.page');
+
+    return {
+      pageUsed,
+      pageLimit,
+      available: pageLimit < 0 ? Number.POSITIVE_INFINITY : pageLimit - pageUsed,
     };
   }
 
