@@ -2846,6 +2846,10 @@ export type ModelCapabilities = {
    * Whether this model can take images as input
    */
   vision?: boolean;
+  /**
+   * Whether this model includes reasoning content
+   */
+  reasoning?: boolean;
 };
 
 export type ModelInfo = {
