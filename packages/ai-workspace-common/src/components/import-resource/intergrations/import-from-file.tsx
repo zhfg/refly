@@ -202,13 +202,15 @@ export const ImportFromFile = () => {
                 ),
               })}
             </p>
-            <div className="text-green-500 mt-2 text-xs font-medium flex items-center justify-center gap-1">
-              <LuInfo />
-              {t('resource.import.fileParsingUsage', {
-                used: fileParsingUsage?.pagesParsed,
-                limit: fileParsingUsage?.pagesLimit,
-              })}
-            </div>
+            {fileParsingUsage?.pagesLimit >= 0 && (
+              <div className="text-green-500 mt-2 text-xs font-medium flex items-center justify-center gap-1">
+                <LuInfo />
+                {t('resource.import.fileParsingUsage', {
+                  used: fileParsingUsage?.pagesParsed,
+                  limit: fileParsingUsage?.pagesLimit,
+                })}
+              </div>
+            )}
           </Dragger>
         </div>
       </div>
