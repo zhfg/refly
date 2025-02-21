@@ -72,7 +72,6 @@ export class ResultAggregator {
       case 'structured_data':
         if (event.structuredData) {
           const structuredData = event.structuredData;
-          console.log('structuredData', structuredData?.isPartial);
           if (structuredData?.isPartial !== undefined) {
             const existingData = step.structuredData || {};
             const existingSources = (existingData.sources || []) as any[];
