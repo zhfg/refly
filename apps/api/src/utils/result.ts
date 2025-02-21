@@ -71,7 +71,24 @@ export class ResultAggregator {
         break;
       case 'structured_data':
         if (event.structuredData) {
-          step.structuredData = { ...step.structuredData, ...event.structuredData };
+          const structuredData = event.structuredData;
+          console.log('structuredData', structuredData?.isPartial);
+          if (structuredData?.isPartial !== undefined) {
+            const existingData = step.structuredData || {};
+            const existingSources = (existingData.sources || []) as any[];
+            step.structuredData = {
+              ...existingData,
+              sources: [
+                ...existingSources,
+                ...(Array.isArray(structuredData.sources) ? structuredData.sources : []),
+              ],
+              isPartial: structuredData.isPartial,
+              chunkIndex: structuredData.chunkIndex,
+              totalChunks: structuredData.totalChunks,
+            };
+          } else {
+            step.structuredData = { ...step.structuredData, ...event.structuredData };
+          }
         }
         break;
       case 'log':
