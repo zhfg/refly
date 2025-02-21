@@ -12,7 +12,7 @@ export const useSubscriptionUsage = () => {
     staleTime: 60 * 1000, // Consider data fresh for 1 minute
     gcTime: 60 * 1000, // Cache for 1 minute
   });
-  const { token, storage } = data?.data ?? {};
+  const { token, storage, fileParsing } = data?.data ?? {};
 
   const refetchUsage = () =>
     setTimeout(async () => {
@@ -23,5 +23,11 @@ export const useSubscriptionUsage = () => {
       }
     }, 2000);
 
-  return { tokenUsage: token, storageUsage: storage, isUsageLoading, refetchUsage };
+  return {
+    tokenUsage: token,
+    storageUsage: storage,
+    fileParsingUsage: fileParsing,
+    isUsageLoading,
+    refetchUsage,
+  };
 };

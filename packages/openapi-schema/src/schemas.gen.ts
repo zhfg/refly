@@ -1439,6 +1439,21 @@ export const StorageUsageMeterSchema = {
   },
 } as const;
 
+export const FileParsingMeterSchema = {
+  type: 'object',
+  required: ['pagesParsed', 'pagesLimit'],
+  properties: {
+    pagesParsed: {
+      type: 'number',
+      description: 'File pages parsed',
+    },
+    pagesLimit: {
+      type: 'number',
+      description: 'File pages limit',
+    },
+  },
+} as const;
+
 export const OperationModeSchema = {
   type: 'string',
   description: 'Operation mode',
@@ -3587,6 +3602,10 @@ export const SubscriptionUsageDataSchema = {
     storage: {
       description: 'Storage usage meter',
       $ref: '#/components/schemas/StorageUsageMeter',
+    },
+    fileParsing: {
+      description: 'File parsing meter',
+      $ref: '#/components/schemas/FileParsingMeter',
     },
   },
 } as const;

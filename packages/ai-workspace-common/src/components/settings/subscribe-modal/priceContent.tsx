@@ -268,13 +268,12 @@ export const PriceContent = (props: { source: PriceSource }) => {
   const t2ModelName = t('settings.subscription.t2Requests');
   const t1ModalTooltipContent = t('settings.subscription.t1RequestsDescription');
   const t2ModalTooltipContent = t('settings.subscription.t2RequestsDescription');
-  const libraryTooltipContent = t('settings.subscription.fileCountDescription');
+  const libraryStorage = t('settings.subscription.libraryStorage');
+  const libraryTooltipContent = t('settings.subscription.libraryStorageDescription');
+  const advancedFileParsing = t('settings.subscription.advancedFileParsing');
+  const advancedFileParsingTooltip = t('settings.subscription.advancedFileParsingDescription');
+
   const unlimited = t('settings.subscription.subscribe.unlimited');
-  const libraryStorage = t('settings.subscription.subscribe.libraryStorage');
-  const advancedFileParsing = t('settings.subscription.subscribe.advancedFileParsing');
-  const advancedFileParsingTooltip = t(
-    'settings.subscription.subscribe.advancedFileParsingDescription',
-  );
 
   const createFeatures = (plan: 'free' | 'plus' | 'pro' | 'max'): ModelFeatures[] => {
     const configs = {

@@ -8,6 +8,7 @@ import {
   CreateCheckoutSessionRequest,
   SubscriptionInterval,
   SubscriptionPlanType,
+  SubscriptionUsageData,
   User,
 } from '@refly-packages/openapi-schema';
 import { genTokenUsageMeterID, genStorageUsageMeterID } from '@refly-packages/utils';
@@ -636,7 +637,10 @@ export class SubscriptionService implements OnModuleInit {
     });
   }
 
-  async getOrCreateUsageMeter(user: User, _sub?: SubscriptionModel) {
+  async getOrCreateUsageMeter(
+    user: User,
+    _sub?: SubscriptionModel,
+  ): Promise<SubscriptionUsageData> {
     const { uid } = user;
     const userPo = await this.prisma.user.findUnique({
       select: { subscriptionId: true },
@@ -656,14 +660,24 @@ export class SubscriptionService implements OnModuleInit {
       });
     }
 
-    const [tokenMeter, storageMeter] = await Promise.all([
+    const [tokenMeter, storageMeter, fileParseMeter] = await Promise.all([
       this.getOrCreateTokenUsageMeter(user, sub),
       this.getOrCreateStorageUsageMeter(user, sub),
+      this.getFileParseUsageMeter(user),
     ]);
 
     return {
       token: tokenUsageMeterPO2DTO(tokenMeter),
       storage: storageUsageMeterPO2DTO(storageMeter),
+      fileParsing: fileParseMeter,
+    };
+  }
+
+  async getFileParseUsageMeter(user: User) {
+    const usage = await this.checkFileParseUsage(user);
+    return {
+      pagesParsed: usage.pageUsed,
+      pagesLimit: usage.pageLimit,
     };
   }
 

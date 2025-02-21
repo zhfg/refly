@@ -2741,6 +2741,18 @@ components:
           description: Vector storage size used (in bytes)
           example: '1048576'
           deprecated: true
+    FileParsingMeter:
+      type: object
+      required:
+        - pagesParsed
+        - pagesLimit
+      properties:
+        pagesParsed:
+          type: number
+          description: File pages parsed
+        pagesLimit:
+          type: number
+          description: File pages limit
     OperationMode:
       type: string
       description: Operation mode
@@ -4159,6 +4171,9 @@ components:
         storage:
           description: Storage usage meter
           $ref: '#/components/schemas/StorageUsageMeter'
+        fileParsing:
+          description: File parsing meter
+          $ref: '#/components/schemas/FileParsingMeter'
     GetSubscriptionUsageResponse:
       allOf:
         - $ref: '#/components/schemas/BaseResponse'

@@ -1183,6 +1183,17 @@ export type StorageUsageMeter = {
   vectorStorageUsed: string;
 };
 
+export type FileParsingMeter = {
+  /**
+   * File pages parsed
+   */
+  pagesParsed: number;
+  /**
+   * File pages limit
+   */
+  pagesLimit: number;
+};
+
 /**
  * Operation mode
  */
@@ -2517,6 +2528,10 @@ export type SubscriptionUsageData = {
    * Storage usage meter
    */
   storage?: StorageUsageMeter;
+  /**
+   * File parsing meter
+   */
+  fileParsing?: FileParsingMeter;
 };
 
 export type GetSubscriptionUsageResponse = BaseResponse & {

@@ -891,6 +891,8 @@ const translations = {
       dragOrClick: 'Click or Drag files to this area to upload',
       unsupportedFileType: 'Please upload the specified type of file',
       supportedFiles: 'Supported Files: {{formats}}. Max 5MB each.',
+      fileParsingUsage:
+        'Advanced file parsing (including PDF): {{used}}/{{limit}} pages used today',
       fromWeblink: 'Paste Weblink',
       selectAll: 'Select All',
       webLinkPlaceholer: 'Enter or paste valid web links, one per line...',
@@ -1266,8 +1268,11 @@ const translations = {
       t2RequestsDescription:
         'Standard models include GPT-4o Mini, DeepSeek V3 and others. Each successful skill call to standard models counts as one request.',
       requestsRefresh: 'Request count will be reset every day for users on free plan.',
-      fileCount: 'Library Storage',
-      fileCountDescription: 'Each resource and document in your library counts as one file.',
+      libraryStorage: 'Library Storage',
+      libraryStorageDescription: 'Each resource and document in your library counts as one file.',
+      advancedFileParsing: 'Advanced File Parsing',
+      advancedFileParsingDescription:
+        'PDF parsing with support for extraction of tables, images and formulas. Usage is tracked by the number of parsed pages.',
       subscriptionManagement: 'Manage Billing and Subscriptions',
       subscriptionStatus: {
         free: 'FREE',
@@ -1299,19 +1304,10 @@ const translations = {
         t2Model: 'Standard Models',
         freeModel: 'Free Models',
         mediaCredit: 'Media Credit (Coming Soon)',
-        fileStorageType: {
-          note: 'Canvases',
-          resource: 'Resources',
-          file: 'Uploaded Files',
-        },
         upgrade: 'Upgrade Now',
         continueFree: 'Continue Free',
         oneTime: 'One-Time',
         unlimited: 'Unlimited',
-        libraryStorage: 'Library Storage',
-        advancedFileParsing: 'Advanced File Parsing',
-        advancedFileParsingDescription:
-          'PDF parsing with support for extraction of tables, images and formulas. Usage is tracked by the number of parsed pages.',
         fileCounts: '{{count}} files',
         dailyCounts: '{{count}} times/day',
         monthlyCounts: '{{count}} times/month',
