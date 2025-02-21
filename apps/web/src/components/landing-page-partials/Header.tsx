@@ -41,6 +41,7 @@ function Header() {
             fontSize: '10px',
             padding: '0 4px',
             opacity: 0.8,
+            boxShadow: 'none',
           }}
           offset={[0, -4]}
         >
