@@ -303,7 +303,7 @@ const translations = {
       },
       {
         before:
-          'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
+          'Import resources by web search, file upload, or pasting any link to build a personal knowledge base of a ',
         highlight: 'limited size',
         after: '.',
       },
@@ -326,7 +326,7 @@ const translations = {
       },
       {
         before:
-          'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
+          'Import resources by web search, file upload, or pasting any link to build a personal knowledge base of a ',
         highlight: 'large capacity',
         after: '.',
       },
@@ -1309,9 +1309,13 @@ const translations = {
         oneTime: 'One-Time',
         unlimited: 'Unlimited',
         libraryStorage: 'Library Storage',
+        advancedFileParsing: 'Advanced File Parsing',
+        advancedFileParsingDescription:
+          'PDF parsing with support for extraction of tables, images and formulas. Usage is tracked by the number of parsed pages.',
         fileCounts: '{{count}} files',
         dailyCounts: '{{count}} times/day',
         monthlyCounts: '{{count}} times/month',
+        dailyPagesCount: '{{count}} pages/day',
         free: {
           description: 'Everything you need to get started',
           serviceSupport: {

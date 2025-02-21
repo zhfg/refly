@@ -302,7 +302,7 @@ const translations = {
         after: '驱动的强大技能：生成文档、推荐问题、全网搜索、知识库搜索',
       },
       {
-        before: '通过全网搜索或任意粘贴链接导入资源，构建',
+        before: '通过全网搜索、文件上传或任意粘贴链接导入资源，构建',
         highlight: '有限大小',
         after: '的个人知识库',
       },
@@ -324,7 +324,7 @@ const translations = {
         after: '驱动的强大技能：生成文档、推荐问题、全网搜索、知识库搜索',
       },
       {
-        before: '通过全网搜索或任意粘贴链接导入资源，构建',
+        before: '通过全网搜索、文件上传或任意粘贴链接导入资源，构建',
         highlight: '庞大',
         after: '的个人知识库',
       },
@@ -1281,8 +1281,11 @@ const translations = {
         unlimited: '无限量',
         libraryStorage: '知识库容量',
         fileCounts: '{{count}} 个文件',
+        advancedFileParsing: '高级文件解析',
+        advancedFileParsingDescription: '支持表格、图片和公式提取的 PDF 解析，按解析页数计算用量。',
         dailyCounts: '{{count}} 次/每天',
         monthlyCounts: '{{count}} 次/每月',
+        dailyPagesCount: '{{count}} 页/每天',
         free: {
           description: '开启创意之旅的完美起点',
           serviceSupport: {
