@@ -15,6 +15,7 @@ import { prosemirrorToYXmlFragment } from 'y-prosemirror';
 import { useCanvasStore } from '@refly-packages/ai-workspace-common/stores/canvas';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
+import { getAvailableFileCount } from '@refly-packages/utils/quota';
 
 const createLocalDocument = async (
   docId: string,
@@ -57,7 +58,7 @@ export const useCreateDocument = () => {
   );
 
   const checkStorageUsage = useCallback(() => {
-    if (storageUsage?.fileCountUsed >= storageUsage?.fileCountQuota) {
+    if (getAvailableFileCount(storageUsage) <= 0) {
       setStorageExceededModalVisible(true);
       return false;
     }

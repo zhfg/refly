@@ -9,6 +9,13 @@ interface UsageProgressProps {
   quota: number;
 }
 
+const formatNumber = (num: number) => {
+  if (num < 0) {
+    return '∞';
+  }
+  return num?.toLocaleString() || '0';
+};
+
 export const UsageProgress = memo<UsageProgressProps>(({ label, tooltip, used, quota }) => {
   const percent = (used * 100) / (quota || 1);
 
@@ -23,7 +30,7 @@ export const UsageProgress = memo<UsageProgressProps>(({ label, tooltip, used, q
         </div>
         <div className="text-xs text-gray-500">
           <span className="text-gray-700">
-            {used}/{quota}
+            {formatNumber(used)}/{formatNumber(quota)}
           </span>
         </div>
       </div>
