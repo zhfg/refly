@@ -222,7 +222,7 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
       buildContextUserPrompt: generateDocument.buildGenerateDocumentContextUserPrompt,
     };
 
-    const { optimizedQuery, requestMessages, context, usedChatHistory } =
+    const { optimizedQuery, requestMessages, context, sources, usedChatHistory } =
       await this.commonPreprocess(state, config, module);
 
     // Generate title first
@@ -262,6 +262,24 @@ ${recentHistory.map((msg) => `${(msg as HumanMessage)?.getType?.()}: ${msg.conte
       },
       config,
     );
+
+    if (sources.length > 0) {
+      const truncatedSources = truncateSource(sources);
+      await this.emitLargeDataEvent(
+        {
+          data: truncatedSources,
+          buildEventData: (chunk, { isPartial, chunkIndex, totalChunks }) => ({
+            structuredData: {
+              sources: chunk,
+              isPartial,
+              chunkIndex,
+              totalChunks,
+            },
+          }),
+        },
+        config,
+      );
+    }
 
     const responseMessage = await model.invoke(requestMessages, {
       ...config,

@@ -108,7 +108,7 @@ export const CustomEdge = memo(
               />
             ) : (
               label && (
-                <div className="nowheel px-2 py-1 text-[10px] text-gray-700 bg-[#effcfa] rounded cursor-pointer break-all">
+                <div className="nowheel px-2 py-1 text-[10px] text-center text-gray-700 bg-opacity-0 rounded cursor-pointer break-all">
                   {label}
                 </div>
               )

@@ -13,7 +13,6 @@ import { safeStringifyJSON } from '@refly-packages/utils';
 // utils
 import { buildFinalRequestMessages } from '../scheduler/utils/message';
 import { prepareContext } from '../scheduler/utils/context';
-
 // prompts
 import * as webSearch from '../scheduler/module/webSearch/index';
 import { truncateSource } from '../scheduler/utils/truncator';
@@ -112,10 +111,27 @@ export class WebSearch extends BaseSkill {
 
     this.engine.logger.log('Prepared context successfully!');
 
-    if (sources.length > 0) {
-      this.emitEvent({ structuredData: { sources: truncateSource(sources) } }, config);
+    if (sources?.length > 0) {
+      // Split sources into smaller chunks based on size and emit them separately
+      const truncatedSources = truncateSource(sources);
+      await this.emitLargeDataEvent(
+        {
+          data: truncatedSources,
+          buildEventData: (chunk, { isPartial, chunkIndex, totalChunks }) => ({
+            structuredData: {
+              // Build your event data here
+              sources: chunk,
+              isPartial,
+              chunkIndex,
+              totalChunks,
+            },
+          }),
+        },
+        config,
+      );
     }
 
+    // Now proceed with building request messages after all chunks are sent
     const requestMessages = buildFinalRequestMessages({
       module,
       locale,
@@ -127,8 +143,6 @@ export class WebSearch extends BaseSkill {
       originalQuery: query,
       rewrittenQuery: optimizedQuery,
     });
-
-    this.engine.logger.log(`Request messages: ${safeStringifyJSON(requestMessages)}`);
 
     // Generate answer using the model
     const model = this.engine.chatModel({ temperature: 0.1 });
