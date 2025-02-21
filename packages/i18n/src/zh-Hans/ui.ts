@@ -62,6 +62,8 @@ const translations = {
     thread: '会话',
     meta: '元信息',
     project: '项目',
+    upgrade: '升级',
+    upgradeSubscription: '升级订阅',
     copy: {
       title: '复制',
       success: '内容已复制到剪切板！',
@@ -908,12 +910,16 @@ const translations = {
       recommendedPlatforms: '推荐平台',
     },
     wait_parse: '内容解析中',
-    parse_failed: '解析失败，点击重试',
+    parse_failed: '解析失败',
     wait_index: '模型记忆中',
     wait_index_tip: '该资源暂时不支持 AI 搜索，需等待模型记忆完成',
     index_failed: '模型记忆失败',
     index_failed_tip: '点击重试',
     finish: '已索引',
+    clickToPreview: '点击查看详情',
+    pageLimitExceeded:
+      '此文件有 {{numPages}} 页，超出高级文件解析的每日页数限制（今日已使用 {{used}}/{{limit}} 页）。',
+    unknownError: '未知错误，请稍后再试',
   },
   resourceDetail: {
     back: '所有资源',

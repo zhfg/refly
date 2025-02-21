@@ -1,12 +1,16 @@
 import { useState, memo } from 'react';
 import { ResourceView } from '@refly-packages/ai-workspace-common/components/resource-view';
+import {
+  CanvasNode,
+  ResourceNodeMeta,
+} from '@refly-packages/ai-workspace-common/components/canvas/nodes';
 
 interface ResourceNodePreviewProps {
-  resourceId?: string;
-  nodeId: string;
+  node: CanvasNode<ResourceNodeMeta>;
+  resourceId: string;
 }
 
-const ResourceNodePreviewComponent = ({ resourceId, nodeId }: ResourceNodePreviewProps) => {
+const ResourceNodePreviewComponent = ({ node, resourceId }: ResourceNodePreviewProps) => {
   const [deckSize, setDeckSize] = useState<number>(0);
 
   if (!resourceId) {
@@ -23,7 +27,7 @@ const ResourceNodePreviewComponent = ({ resourceId, nodeId }: ResourceNodePrevie
         resourceId={resourceId}
         deckSize={deckSize}
         setDeckSize={setDeckSize}
-        nodeId={nodeId}
+        nodeId={node.id}
       />
     </div>
   );

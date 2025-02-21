@@ -5,6 +5,8 @@ import {
   ActionStatus,
   Artifact,
   CanvasNodeType,
+  IndexError,
+  IndexStatus,
   ModelInfo,
   Skill,
   SkillTemplateConfig,
@@ -38,6 +40,8 @@ export interface DocumentNodeMeta {
 
 export interface ResourceNodeMeta {
   resourceType?: string;
+  indexStatus?: IndexStatus;
+  indexError?: IndexError;
   sizeMode?: 'compact' | 'adaptive';
   style?: React.CSSProperties;
   originalWidth?: number;

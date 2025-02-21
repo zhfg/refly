@@ -1,6 +1,5 @@
 import { memo, useMemo } from 'react';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
-import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { Source } from '@refly/openapi-schema';
 
 interface ContentPreviewProps {
@@ -8,7 +7,6 @@ interface ContentPreviewProps {
   sources?: Source[];
   sizeMode: 'compact' | 'adaptive';
   isOperating: boolean;
-  isLoading?: boolean;
   maxCompactLength?: number;
   className?: string;
 }
@@ -19,7 +17,6 @@ export const ContentPreview = memo(
     sources,
     sizeMode,
     isOperating,
-    isLoading,
     maxCompactLength = 10,
     className = '',
   }: ContentPreviewProps) => {
@@ -38,9 +35,7 @@ export const ContentPreview = memo(
     );
 
     return (
-      <Spin spinning={isLoading}>
-        <Markdown className={markdownClassName} content={previewContent} sources={sources || []} />
-      </Spin>
+      <Markdown className={markdownClassName} content={previewContent} sources={sources || []} />
     );
   },
   (prevProps, nextProps) => {
@@ -48,7 +43,6 @@ export const ContentPreview = memo(
       prevProps.content === nextProps.content &&
       prevProps.sizeMode === nextProps.sizeMode &&
       prevProps.isOperating === nextProps.isOperating &&
-      prevProps.isLoading === nextProps.isLoading &&
       prevProps.maxCompactLength === nextProps.maxCompactLength &&
       prevProps.className === nextProps.className &&
       JSON.stringify(prevProps.sources) === JSON.stringify(nextProps.sources)

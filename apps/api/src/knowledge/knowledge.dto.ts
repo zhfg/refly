@@ -17,6 +17,7 @@ import {
   ResourceMeta,
 } from '@refly-packages/openapi-schema';
 import { pick } from '@/utils';
+import { safeParseJSON } from '@refly-packages/utils';
 
 export interface ResourcePrepareResult {
   storageKey?: string;
@@ -52,9 +53,10 @@ export const resourcePO2DTO = (
     ...pick(resource, ['resourceId', 'title', 'content', 'contentPreview', 'rawFileKey']),
     resourceType: resource.resourceType as ResourceType,
     indexStatus: resource.indexStatus as IndexStatus,
+    indexError: resource.indexError ? safeParseJSON(resource.indexError) : undefined,
     storageSize: resource.storageSize.toString(),
     vectorSize: resource.vectorSize.toString(),
-    data: JSON.parse(resource.meta),
+    data: safeParseJSON(resource.meta),
     createdAt: resource.createdAt.toJSON(),
     updatedAt: resource.updatedAt.toJSON(),
   };

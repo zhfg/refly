@@ -14,7 +14,7 @@ const PreviewComponent = memo(
 
     switch (node.type) {
       case 'resource':
-        return <ResourceNodePreview resourceId={node.data.entityId} nodeId={node.id} />;
+        return <ResourceNodePreview node={node} resourceId={node.data.entityId} />;
       case 'document':
         return (
           <DocumentNodePreview

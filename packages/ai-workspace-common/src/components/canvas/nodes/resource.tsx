@@ -1,10 +1,11 @@
 import { memo, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { Position, useReactFlow } from '@xyflow/react';
 import { useTranslation } from 'react-i18next';
-import { CanvasNode, ResourceNodeProps } from './shared/types';
+import { CanvasNode, CanvasNodeData, ResourceNodeMeta, ResourceNodeProps } from './shared/types';
 import { CustomHandle } from './shared/custom-handle';
 import { getNodeCommonStyles } from './index';
 import { ActionButtons } from './shared/action-buttons';
+import { Spin } from '@refly-packages/ai-workspace-common/components/common/spin';
 import { useAddToContext } from '@refly-packages/ai-workspace-common/hooks/canvas/use-add-to-context';
 import { useDeleteNode } from '@refly-packages/ai-workspace-common/hooks/canvas/use-delete-node';
 import { HiOutlineSquare3Stack3D } from 'react-icons/hi2';
@@ -30,9 +31,46 @@ import { useNodeSize } from '@refly-packages/ai-workspace-common/hooks/canvas/us
 import { NodeHeader } from './shared/node-header';
 import { ContentPreview } from './shared/content-preview';
 import { useCreateDocument } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-document';
-import { message } from 'antd';
+import { message, Result } from 'antd';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { useEditorPerformance } from '@refly-packages/ai-workspace-common/context/editor-performance';
+
+const NodeContent = memo(
+  ({ data, isOperating }: { data: CanvasNodeData<ResourceNodeMeta>; isOperating: boolean }) => {
+    const { t } = useTranslation();
+    const { indexStatus, sizeMode } = data?.metadata ?? {};
+
+    if (indexStatus === 'wait_parse') {
+      return (
+        <div className="flex justify-center items-center h-full">
+          <Spin spinning={true} />
+        </div>
+      );
+    }
+
+    if (indexStatus === 'parse_failed') {
+      return (
+        <div className="flex justify-center items-center h-full">
+          <Result
+            status="warning"
+            title={t('resource.parse_failed')}
+            subTitle={t('resource.clickToPreview')}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <ContentPreview
+        content={data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')}
+        sizeMode={sizeMode}
+        isOperating={isOperating}
+        maxCompactLength={10}
+      />
+    );
+  },
+);
+
 export const ResourceNode = memo(
   ({ id, data, isPreview, selected, hideActions, hideHandles, onNodeClick }: ResourceNodeProps) => {
     const [isHovered, setIsHovered] = useState(false);
@@ -40,10 +78,10 @@ export const ResourceNode = memo(
     const { edges } = useCanvasData();
     const setNodeDataByEntity = useSetNodeDataByEntity();
     const { getNode } = useReactFlow();
+
+    const { resourceType, indexStatus, sizeMode = 'adaptive' } = data?.metadata ?? {};
     const ResourceIcon =
-      data?.metadata?.resourceType === 'weblink'
-        ? HiOutlineSquare3Stack3D
-        : HiOutlineSquare3Stack3D;
+      resourceType === 'weblink' ? HiOutlineSquare3Stack3D : HiOutlineSquare3Stack3D;
 
     const { i18n, t } = useTranslation();
     const language = i18n.languages?.[0];
@@ -57,7 +95,6 @@ export const ResourceNode = memo(
     const { draggingNodeId } = useEditorPerformance();
     const isOperating = operatingNodeId === id;
     const isDragging = draggingNodeId === id;
-    const sizeMode = data?.metadata?.sizeMode || 'adaptive';
     const node = useMemo(() => getNode(id), [id, getNode]);
 
     const { containerStyle, handleResize } = useNodeSize({
@@ -190,25 +227,33 @@ export const ResourceNode = memo(
     }, [data.title, data.entityId, remoteResult?.content, debouncedCreateDocument, t]);
 
     useEffect(() => {
-      if (!data.contentPreview) {
+      if (['wait_parse', 'wait_index'].includes(indexStatus) && !shouldPoll) {
+        setShouldPoll(true);
+      }
+      if (!['wait_parse', 'wait_index'].includes(indexStatus) && shouldPoll) {
+        setShouldPoll(false);
+      }
+    }, [indexStatus, shouldPoll]);
+
+    useEffect(() => {
+      if (remoteResult) {
+        const { contentPreview, indexStatus, indexError } = remoteResult;
+
         setNodeDataByEntity(
           {
             entityId: data.entityId,
             type: 'resource',
           },
           {
-            contentPreview: remoteResult?.contentPreview,
+            contentPreview,
+            metadata: {
+              indexStatus,
+              indexError,
+            },
           },
         );
-        if (remoteResult?.indexStatus === 'wait_parse') {
-          setShouldPoll(true);
-        } else {
-          setShouldPoll(false);
-        }
-      } else {
-        setShouldPoll(false);
       }
-    }, [data.entityId, data.contentPreview, remoteResult, setNodeDataByEntity]);
+    }, [data.entityId, remoteResult, setNodeDataByEntity]);
 
     // Add event handling
     useEffect(() => {
@@ -274,15 +319,7 @@ export const ResourceNode = memo(
                     paddingBottom: '40px',
                   }}
                 >
-                  <ContentPreview
-                    content={
-                      data.contentPreview || t('canvas.nodePreview.resource.noContentPreview')
-                    }
-                    sizeMode={sizeMode}
-                    isOperating={isOperating}
-                    isLoading={remoteResult?.indexStatus === 'wait_parse'}
-                    maxCompactLength={10}
-                  />
+                  <NodeContent data={data} isOperating={isOperating} />
                 </div>
               </div>
               {/* Timestamp container */}

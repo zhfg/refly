@@ -54,6 +54,8 @@ const translations = {
     thread: 'Thread',
     meta: 'Meta',
     project: 'Project',
+    upgrade: 'Upgrade',
+    upgradeSubscription: 'Upgrade Subscription',
     copy: {
       title: 'Copy',
       success: 'Content has been copied to the clipboard!',
@@ -924,13 +926,17 @@ const translations = {
       recommendedPlatforms: 'Recommended Platforms',
     },
     wait_parse: 'Parsing',
-    parse_failed: 'Parse Failed, click to retry',
+    parse_failed: 'Parse Failed',
     wait_index: 'Memorizing',
     wait_index_tip:
       'The resource is temporarily not ready for AI search and needs to wait for memorization to complete',
     index_failed: 'Memorization Failed',
     index_failed_tip: 'Click to retry',
     finish: 'Finished',
+    clickToPreview: 'Click to Preview Details',
+    pageLimitExceeded:
+      'This file has {{numPages}} pages, which exceeds the daily page limit for advanced file parsing ({{used}}/{{limit}} pages used today).',
+    unknownError: 'Unknown error, please try again later',
   },
   resourceDetail: {
     back: 'All Resources',
