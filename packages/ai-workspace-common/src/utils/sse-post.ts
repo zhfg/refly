@@ -141,7 +141,6 @@ export const ssePost = async ({
 
           bufferStr = lines[lines.length - 1];
         } catch (err) {
-          console.log('actual err', err);
           onSkillError(err);
           onCompleted?.(true);
           hasError = true;

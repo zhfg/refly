@@ -144,8 +144,6 @@ export class WebSearch extends BaseSkill {
       rewrittenQuery: optimizedQuery,
     });
 
-    // this.engine.logger.log(`Request messages: ${safeStringifyJSON(requestMessages)}`);
-
     // Generate answer using the model
     const model = this.engine.chatModel({ temperature: 0.1 });
     const responseMessage = await model.invoke(requestMessages, {
