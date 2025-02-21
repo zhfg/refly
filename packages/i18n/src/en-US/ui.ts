@@ -1831,6 +1831,16 @@ const translations = {
       upgrade: 'Upgrade Now',
     },
   },
+  template: {
+    templateLibrary: 'Template Library',
+    myTemplates: 'My Templates',
+    createTemplate: 'Create Template',
+    templateTitle: 'Template Name',
+    templateTitlePlaceholder: 'Please enter template name',
+    templateDescription: 'Template Description',
+    templateDescriptionPlaceholder: 'Please enter template description',
+    createSuccess: 'Template created successfully, please view in template library',
+  },
 };
 
 export default translations;

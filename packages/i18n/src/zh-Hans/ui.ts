@@ -1780,6 +1780,16 @@ const translations = {
       },
     },
   },
+  template: {
+    templateLibrary: '模板库',
+    myTemplates: '我的模板',
+    createTemplate: '发布模板',
+    templateTitle: '模板名称',
+    templateTitlePlaceholder: '请输入模板名称',
+    templateDescription: '模板描述',
+    templateDescriptionPlaceholder: '请输入模板描述',
+    createSuccess: '模板创建成功, 请在模板库中查看',
+  },
 };
 
 export default translations;

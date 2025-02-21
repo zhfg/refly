@@ -11,6 +11,7 @@ import { GrLanguage } from 'react-icons/gr';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { getClientOrigin } from '@refly/utils/url';
+import { CreateTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template/create-template-modal';
 
 type ShareAccess = 'off' | 'anyone';
 
@@ -59,9 +60,10 @@ const optionRender = (props: any) => {
 const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [createTemplateModalVisible, setCreateTemplateModalVisible] = useState(false);
   const [access, setAccess] = useState<ShareAccess>('off');
   const shareLink = `${getClientOrigin()}/share/canvas/${canvasId}`;
-
+  const [title, setTitle] = useState('');
   const accessOptions = useMemo(
     () => [
       {
@@ -91,7 +93,10 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
     {
       label: 'publishTemplate',
       icon: <MdOutlinePublish className="w-4 h-4 flex items-center justify-center" />,
-      onClick: () => {},
+      onClick: () => {
+        setCreateTemplateModalVisible(true);
+        setOpen(false);
+      },
       disabled: false,
     },
   ];
@@ -99,8 +104,9 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
   const getCanvasSettingInfo = useCallback(async () => {
     const { data } = await getClient().getCanvasDetail({ query: { canvasId } });
     if (data.data) {
-      const { permissions } = data.data;
+      const { permissions, title } = data.data;
       setAccess(permissions?.public ? 'anyone' : 'off');
+      setTitle(title || '');
     }
   }, [canvasId]);
 
@@ -125,7 +131,11 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
   );
 
   useEffect(() => {
-    getCanvasSettingInfo();
+    if (canvasId) {
+      setTimeout(() => {
+        getCanvasSettingInfo();
+      }, 1000);
+    }
   }, [canvasId]);
 
   // Memoize content to prevent unnecessary re-renders
@@ -177,17 +187,25 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
   );
 
   return (
-    <Popover
-      className="canvas-share-setting-popover"
-      open={open}
-      onOpenChange={setOpen}
-      trigger="click"
-      placement="bottomLeft"
-      overlayInnerStyle={{ padding: 0 }}
-      content={content}
-    >
-      <Button type="primary">{t('common.share')}</Button>
-    </Popover>
+    <div>
+      <CreateTemplateModal
+        canvasId={canvasId}
+        title={title}
+        visible={createTemplateModalVisible}
+        setVisible={setCreateTemplateModalVisible}
+      />
+      <Popover
+        className="canvas-share-setting-popover"
+        open={open}
+        onOpenChange={setOpen}
+        trigger="click"
+        placement="bottomLeft"
+        overlayInnerStyle={{ padding: 0 }}
+        content={content}
+      >
+        <Button type="primary">{t('common.share')}</Button>
+      </Popover>
+    </div>
   );
 });
 
