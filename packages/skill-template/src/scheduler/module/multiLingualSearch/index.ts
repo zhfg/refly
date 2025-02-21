@@ -335,7 +335,7 @@ export const callMultiLingualWebSearch = async (
       // Keep original results if deduplication fails
     }
 
-    ctxThis.emitEvent({ structuredData: { multiLingualSearchResult: finalResults } }, config);
+    // ctxThis.emitEvent({ structuredData: { multiLingualSearchResult: finalResults } }, config);
 
     // Return results with analysis
     return {

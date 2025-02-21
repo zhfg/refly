@@ -87,6 +87,76 @@ export abstract class BaseSkill extends StructuredTool {
     emitter.emit(eventData.event, eventData);
   }
 
+  /**
+   * Emit large data in chunks with delay to prevent overwhelming the event system
+   * @param data The data to emit
+   * @param config The skill runnable config
+   * @param options Options for chunking and delay
+   */
+  async emitLargeDataEvent<T>(
+    data: {
+      event?: string;
+      data: T[];
+      buildEventData: (
+        chunk: T[],
+        meta: { isPartial: boolean; chunkIndex: number; totalChunks: number },
+      ) => Partial<SkillEvent>;
+    },
+    config: SkillRunnableConfig,
+    options: {
+      maxChunkSize?: number;
+      delayBetweenChunks?: number;
+    } = {},
+  ): Promise<void> {
+    const { maxChunkSize = 500, delayBetweenChunks = 10 } = options;
+
+    // If no data or emitter, return early
+    if (!data.data?.length || !config?.configurable?.emitter) {
+      return;
+    }
+
+    // Split data into chunks based on size
+    const chunks: T[][] = [];
+    let currentChunk: T[] = [];
+    let currentSize = 0;
+
+    for (const item of data.data) {
+      const itemSize = JSON.stringify(item).length;
+
+      if (currentSize + itemSize > maxChunkSize && currentChunk.length > 0) {
+        chunks.push(currentChunk);
+        currentChunk = [];
+        currentSize = 0;
+      }
+
+      currentChunk.push(item);
+      currentSize += itemSize;
+    }
+
+    // Push the last chunk if not empty
+    if (currentChunk.length > 0) {
+      chunks.push(currentChunk);
+    }
+
+    // Emit chunks with delay
+    const emitPromises = chunks.map(
+      (chunk, i) =>
+        new Promise<void>((resolve) => {
+          setTimeout(() => {
+            const eventData = data.buildEventData(chunk, {
+              isPartial: i < chunks.length - 1,
+              chunkIndex: i,
+              totalChunks: chunks.length,
+            });
+            this.emitEvent(eventData, config);
+            resolve();
+          }, i * delayBetweenChunks);
+        }),
+    );
+
+    await Promise.all(emitPromises);
+  }
+
   async _call(
     input: typeof this.graphState,
     _runManager?: CallbackManagerForToolRun,

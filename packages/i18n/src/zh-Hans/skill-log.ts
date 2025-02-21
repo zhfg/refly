@@ -27,6 +27,10 @@ const translations = {
     title: '选择关联结果',
     description: '总共 {{totalResults}} 个结果, 耗时 {{duration}} 毫秒',
   },
+  generateAnswer: {
+    title: '生成答案',
+    description: '开始生成答案...',
+  },
 };
 
 export default translations;
