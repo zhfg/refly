@@ -62,6 +62,8 @@ const translations = {
     thread: '会话',
     meta: '元信息',
     project: '项目',
+    upgrade: '升级',
+    upgradeSubscription: '升级订阅',
     copy: {
       title: '复制',
       success: '内容已复制到剪切板！',
@@ -425,7 +427,7 @@ const translations = {
         after: '驱动的强大技能：生成文档、推荐问题、全网搜索、知识库搜索',
       },
       {
-        before: '通过全网搜索或任意粘贴链接导入资源，构建',
+        before: '通过全网搜索、文件上传或任意粘贴链接导入资源，构建',
         highlight: '有限大小',
         after: '的个人知识库',
       },
@@ -447,7 +449,7 @@ const translations = {
         after: '驱动的强大技能：生成文档、推荐问题、全网搜索、知识库搜索',
       },
       {
-        before: '通过全网搜索或任意粘贴链接导入资源，构建',
+        before: '通过全网搜索、文件上传或任意粘贴链接导入资源，构建',
         highlight: '庞大',
         after: '的个人知识库',
       },
@@ -999,6 +1001,7 @@ const translations = {
       dragOrClick: '点击或拖拽文件到此区域上传',
       unsupportedFileType: '请上传指定类型的文件',
       supportedFiles: '支持文件: {{formats}}，每个文件最大 5MB',
+      fileParsingUsage: '高级文件解析（包括 PDF）：今日已使用 {{used}}/{{limit}} 页',
       fromWeblink: '粘贴链接',
       selectAll: '全选',
       webLinkPlaceholer: '输入或粘贴有效的网页链接，每行一个....',
@@ -1033,12 +1036,16 @@ const translations = {
       recommendedPlatforms: '推荐平台',
     },
     wait_parse: '内容解析中',
-    parse_failed: '解析失败，点击重试',
+    parse_failed: '解析失败',
     wait_index: '模型记忆中',
     wait_index_tip: '该资源暂时不支持 AI 搜索，需等待模型记忆完成',
     index_failed: '模型记忆失败',
     index_failed_tip: '点击重试',
     finish: '已索引',
+    clickToPreview: '点击查看详情',
+    pageLimitExceeded:
+      '此文件有 {{numPages}} 页，超出高级文件解析的每日页数限制（今日已使用 {{used}}/{{limit}} 页）。',
+    unknownError: '未知错误，请稍后再试',
   },
   resourceDetail: {
     back: '所有资源',
@@ -1358,8 +1365,10 @@ const translations = {
       t2RequestsDescription:
         '标准模型包括 GPT-4o Mini, DeepSeek V3 等模型。每个成功的技能调用计为一次请求。',
       requestsRefresh: '免费用户每天会重置次数。',
-      fileCount: '知识库文件数',
-      fileCountDescription: '知识库中每个资源和文档计为一个文件。',
+      libraryStorage: '知识库文件数',
+      libraryStorageDescription: '知识库中每个资源和文档计为一个文件。',
+      advancedFileParsing: '高级文件解析',
+      advancedFileParsingDescription: '支持表格、图片和公式提取的 PDF 解析，按解析页数计算用量。',
       subscriptionManagement: '管理账单及订阅',
       subscriptionStatus: {
         free: 'FREE',
@@ -1389,11 +1398,6 @@ const translations = {
         t2Model: '基础模型',
         freeModel: '免费模型',
         mediaCredit: '多媒体积分（即将推出）',
-        fileStorageType: {
-          note: '画布',
-          resource: '资源',
-          file: '上传文件',
-        },
         upgrade: '立即升级',
         continueFree: '继续免费',
         oneTime: '一次性',
@@ -1402,6 +1406,7 @@ const translations = {
         fileCounts: '{{count}} 个文件',
         dailyCounts: '{{count}} 次/每天',
         monthlyCounts: '{{count}} 次/每月',
+        dailyPagesCount: '{{count}} 页/每天',
         free: {
           description: '开启创意之旅的完美起点',
           serviceSupport: {

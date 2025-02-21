@@ -5,6 +5,7 @@ export interface ParserOptions {
   mockMode?: boolean;
   timeout?: number;
   extractMedia?: boolean;
+  resourceId?: string;
 }
 
 export interface ParseResult {
@@ -18,6 +19,8 @@ export interface ParseResult {
 @Injectable()
 export abstract class BaseParser {
   protected constructor(protected readonly options: ParserOptions = {}) {}
+
+  abstract name: string;
 
   abstract parse(input: string | Buffer): Promise<ParseResult>;
 

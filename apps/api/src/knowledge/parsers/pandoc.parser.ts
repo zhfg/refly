@@ -10,6 +10,8 @@ import os from 'node:os';
 export class PandocParser extends BaseParser {
   private readonly logger = new Logger(PandocParser.name);
 
+  name = 'pandoc';
+
   constructor(
     private readonly config: ConfigService,
     options: ParserOptions = {},

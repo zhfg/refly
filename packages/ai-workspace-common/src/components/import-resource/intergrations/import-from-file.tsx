@@ -11,6 +11,7 @@ import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/
 import { StorageLimit } from './storageLimit';
 import type { RcFile } from 'antd/es/upload/interface';
 import { genResourceID } from '@refly-packages/utils/id';
+import { LuInfo } from 'react-icons/lu';
 
 const { Dragger } = Upload;
 
@@ -41,7 +42,7 @@ export const ImportFromFile = () => {
   }));
 
   const { addNode } = useAddNode();
-  const { refetchUsage, storageUsage } = useSubscriptionUsage();
+  const { refetchUsage, storageUsage, fileParsingUsage } = useSubscriptionUsage();
 
   const [saveLoading, setSaveLoading] = useState(false);
   const [fileList, setFileList] = useState<FileItem[]>(storageFileList);
@@ -201,6 +202,15 @@ export const ImportFromFile = () => {
                 ),
               })}
             </p>
+            {fileParsingUsage?.pagesLimit >= 0 && (
+              <div className="text-green-500 mt-2 text-xs font-medium flex items-center justify-center gap-1">
+                <LuInfo />
+                {t('resource.import.fileParsingUsage', {
+                  used: fileParsingUsage?.pagesParsed,
+                  limit: fileParsingUsage?.pagesLimit,
+                })}
+              </div>
+            )}
           </Dragger>
         </div>
       </div>

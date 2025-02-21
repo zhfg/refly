@@ -151,6 +151,22 @@ export const ResourceTypeSchema = {
   enum: ['weblink', 'text', 'file'],
 } as const;
 
+export const IndexErrorSchema = {
+  type: 'object',
+  description: 'Error message for resource indexing',
+  properties: {
+    type: {
+      type: 'string',
+      description: 'Error type',
+      enum: ['pageLimitExceeded', 'unknownError'],
+    },
+    metadata: {
+      type: 'object',
+      description: 'Error metadata',
+    },
+  },
+} as const;
+
 export const ResourceSchema = {
   type: 'object',
   required: ['resourceId', 'resourceType', 'title'],
@@ -176,6 +192,10 @@ export const ResourceSchema = {
     indexStatus: {
       description: 'Resource index status',
       $ref: '#/components/schemas/IndexStatus',
+    },
+    indexError: {
+      description: 'Error message for resource indexing',
+      $ref: '#/components/schemas/IndexError',
     },
     storageSize: {
       type: 'string',
@@ -1415,6 +1435,21 @@ export const StorageUsageMeterSchema = {
       description: 'Vector storage size used (in bytes)',
       example: '1048576',
       deprecated: true,
+    },
+  },
+} as const;
+
+export const FileParsingMeterSchema = {
+  type: 'object',
+  required: ['pagesParsed', 'pagesLimit'],
+  properties: {
+    pagesParsed: {
+      type: 'number',
+      description: 'File pages parsed',
+    },
+    pagesLimit: {
+      type: 'number',
+      description: 'File pages limit',
     },
   },
 } as const;
@@ -3567,6 +3602,10 @@ export const SubscriptionUsageDataSchema = {
     storage: {
       description: 'Storage usage meter',
       $ref: '#/components/schemas/StorageUsageMeter',
+    },
+    fileParsing: {
+      description: 'File parsing meter',
+      $ref: '#/components/schemas/FileParsingMeter',
     },
   },
 } as const;

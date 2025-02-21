@@ -54,6 +54,8 @@ const translations = {
     thread: 'Thread',
     meta: 'Meta',
     project: 'Project',
+    upgrade: 'Upgrade',
+    upgradeSubscription: 'Upgrade Subscription',
     copy: {
       title: 'Copy',
       success: 'Content has been copied to the clipboard!',
@@ -426,7 +428,7 @@ const translations = {
       },
       {
         before:
-          'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
+          'Import resources by web search, file upload, or pasting any link to build a personal knowledge base of a ',
         highlight: 'limited size',
         after: '.',
       },
@@ -449,7 +451,7 @@ const translations = {
       },
       {
         before:
-          'Import resources by web search or by pasting any link to build a personal knowledge base of a ',
+          'Import resources by web search, file upload, or pasting any link to build a personal knowledge base of a ',
         highlight: 'large capacity',
         after: '.',
       },
@@ -1014,6 +1016,8 @@ const translations = {
       dragOrClick: 'Click or Drag files to this area to upload',
       unsupportedFileType: 'Please upload the specified type of file',
       supportedFiles: 'Supported Files: {{formats}}. Max 5MB each.',
+      fileParsingUsage:
+        'Advanced file parsing (including PDF): {{used}}/{{limit}} pages used today',
       fromWeblink: 'Paste Weblink',
       selectAll: 'Select All',
       webLinkPlaceholer: 'Enter or paste valid web links, one per line...',
@@ -1049,13 +1053,17 @@ const translations = {
       recommendedPlatforms: 'Recommended Platforms',
     },
     wait_parse: 'Parsing',
-    parse_failed: 'Parse Failed, click to retry',
+    parse_failed: 'Parse Failed',
     wait_index: 'Memorizing',
     wait_index_tip:
       'The resource is temporarily not ready for AI search and needs to wait for memorization to complete',
     index_failed: 'Memorization Failed',
     index_failed_tip: 'Click to retry',
     finish: 'Finished',
+    clickToPreview: 'Click to Preview Details',
+    pageLimitExceeded:
+      'This file has {{numPages}} pages, which exceeds the daily page limit for advanced file parsing ({{used}}/{{limit}} pages used today).',
+    unknownError: 'Unknown error, please try again later',
   },
   resourceDetail: {
     back: 'All Resources',
@@ -1385,8 +1393,11 @@ const translations = {
       t2RequestsDescription:
         'Standard models include GPT-4o Mini, DeepSeek V3 and others. Each successful skill call to standard models counts as one request.',
       requestsRefresh: 'Request count will be reset every day for users on free plan.',
-      fileCount: 'Library Storage',
-      fileCountDescription: 'Each resource and document in your library counts as one file.',
+      libraryStorage: 'Library Storage',
+      libraryStorageDescription: 'Each resource and document in your library counts as one file.',
+      advancedFileParsing: 'Advanced File Parsing',
+      advancedFileParsingDescription:
+        'PDF parsing with support for extraction of tables, images and formulas. Usage is tracked by the number of parsed pages.',
       subscriptionManagement: 'Manage Billing and Subscriptions',
       subscriptionStatus: {
         free: 'FREE',
@@ -1418,19 +1429,14 @@ const translations = {
         t2Model: 'Standard Models',
         freeModel: 'Free Models',
         mediaCredit: 'Media Credit (Coming Soon)',
-        fileStorageType: {
-          note: 'Canvases',
-          resource: 'Resources',
-          file: 'Uploaded Files',
-        },
         upgrade: 'Upgrade Now',
         continueFree: 'Continue Free',
         oneTime: 'One-Time',
         unlimited: 'Unlimited',
-        libraryStorage: 'Library Storage',
         fileCounts: '{{count}} files',
         dailyCounts: '{{count}} times/day',
         monthlyCounts: '{{count}} times/month',
+        dailyPagesCount: '{{count}} pages/day',
         free: {
           description: 'Everything you need to get started',
           serviceSupport: {

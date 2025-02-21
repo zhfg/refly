@@ -48,17 +48,44 @@ const SiderLogo = (props: {
   setCollapse: (collapse: boolean) => void;
 }) => {
   const { navigate, setCollapse, source } = props;
+  const [starCount, setStarCount] = useState('913');
+
+  useEffect(() => {
+    // Fetch GitHub star count
+    fetch('https://api.github.com/repos/refly-ai/refly')
+      .then((res) => res.json())
+      .then((data) => {
+        const stars = data.stargazers_count;
+        setStarCount(stars >= 1000 ? `${(stars / 1000).toFixed(1)}k` : stars.toString());
+      })
+      .catch(() => {
+        // Keep default value if fetch fails
+      });
+  }, []);
+
   return (
     <div className="flex items-center justify-between p-3">
-      <div
-        className="flex cursor-pointer flex-row items-center gap-2"
-        onClick={() => navigate('/')}
-      >
-        <img src={Logo} alt="Refly" className="h-8 w-8" />
-        <span className="text-xl font-bold text-black" translate="no">
-          Refly
-        </span>
+      <div className="flex items-center gap-2">
+        <div
+          className="flex cursor-pointer flex-row items-center gap-1.5"
+          onClick={() => navigate('/')}
+        >
+          <img src={Logo} alt="Refly" className="h-8 w-8" />
+          <span className="text-xl font-bold text-black" translate="no">
+            Refly
+          </span>
+        </div>
+
+        <Button
+          type="default"
+          icon={<FaGithub className="h-3.5 w-3.5" />}
+          onClick={() => window.open('https://github.com/refly-ai/refly', '_blank')}
+          className="flex h-6 items-center gap-0.5 bg-white px-1.5 text-xs font-bold"
+        >
+          {starCount}
+        </Button>
       </div>
+
       {source === 'sider' && (
         <div>
           <Button
@@ -237,7 +264,6 @@ const getSelectedKey = (pathname: string) => {
 
 export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
   const { source = 'sider' } = props;
-  const [starCount, setStarCount] = useState('913');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { updateLibraryModalActiveKey } = useKnowledgeBaseStoreShallow((state) => ({
@@ -311,19 +337,6 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
       },
     },
   ];
-
-  useEffect(() => {
-    // Fetch GitHub star count
-    fetch('https://api.github.com/repos/refly-ai/refly')
-      .then((res) => res.json())
-      .then((data) => {
-        const stars = data.stargazers_count;
-        setStarCount(stars >= 1000 ? `${(stars / 1000).toFixed(1)}k` : stars.toString());
-      })
-      .catch(() => {
-        // Keep default value if fetch fails
-      });
-  }, []);
 
   // Handle library modal opening from URL parameter
   useEffect(() => {
@@ -447,50 +460,6 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
 
             <div className="mt-auto">
               <div className="mb-2 flex flex-col gap-2">
-                <a
-                  href="https://github.com/refly-ai/refly"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center w-full h-10 cursor-pointer leading-[18px] border border-solid border-gray-200 rounded-md text-xs text-gray-700 font-semibold overflow-hidden"
-                >
-                  <div className="flex items-center px-4 py-1 bg-gray-100 h-full cursor-pointer">
-                    <FaGithub className="h-4 w-4" />
-                    <span className="ml-1">Star</span>
-                  </div>
-                  <div className="px-2 py-1 flex-1 flex items-center justify-center bg-white border-l border-gray-200 h-full cursor-pointer">
-                    {starCount}
-                  </div>
-                </a>
-
-                {/* <a
-                  href="https://www.producthunt.com/posts/refly-3?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-refly&#0045;3"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block transition-opacity hover:opacity-80"
-                >
-                  <img
-                    src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=785558&theme=light&t=1736929638628"
-                    alt="Refly - The AI Native Content Creation Engine | Product Hunt"
-                    className="w-[200px]"
-                    loading="lazy"
-                  />
-                </a> */}
-
-                {/* <Alert
-                  message={
-                    <div className="flex cursor-pointer items-center justify-center">
-                      <a href="https://docs.refly.ai" target="_blank">
-                        📖{"    "}
-                        <span>
-                          {t("loggedHomePage.siderMenu.viewTutorial")}
-                        </span>
-                      </a>
-                    </div>
-                  }
-                  type="info"
-                  closable
-                /> */}
-
                 {planType === 'free' && <SubscriptionHint />}
               </div>
               {!!userProfile?.uid && (

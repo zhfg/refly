@@ -8,13 +8,14 @@ import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common
 
 // styles
 import './index.scss';
-import { useUserStore, useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
+import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 
 import { PiInvoiceBold } from 'react-icons/pi';
 import { IconSubscription } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
+import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 
 const formatDate = (date: string) => {
   return dayjs(date).format('YYYY-MM-DD');
@@ -80,44 +81,19 @@ export const Subscription = () => {
   }));
   const { subscription, customerId } = userProfile ?? {};
 
-  const {
-    isRequest,
-    setIsRequest,
-    setSubscribeModalVisible,
-    planType,
-    setPlanType,
-    tokenUsage,
-    setTokenUsage,
-    storageUsage,
-    setStorageUsage,
-  } = useSubscriptionStoreShallow((state) => ({
-    isRequest: state.isRequest,
-    setIsRequest: state.setIsRequest,
-    setSubscribeModalVisible: state.setSubscribeModalVisible,
-    planType: state.planType,
-    setPlanType: state.setPlanType,
-    tokenUsage: state.tokenUsage,
-    setTokenUsage: state.setTokenUsage,
-    storageUsage: state.storageUsage,
-    setStorageUsage: state.setStorageUsage,
-  }));
+  const { setSubscribeModalVisible, planType, setPlanType } = useSubscriptionStoreShallow(
+    (state) => ({
+      setSubscribeModalVisible: state.setSubscribeModalVisible,
+      planType: state.planType,
+      setPlanType: state.setPlanType,
+    }),
+  );
 
   const { setShowSettingModal } = useSiderStoreShallow((state) => ({
     setShowSettingModal: state.setShowSettingModal,
   }));
 
-  const getSubscriptionStatus = async () => {
-    const { userProfile } = useUserStore.getState();
-    if (!userProfile) return;
-
-    setIsRequest(true);
-    const { data } = await getClient().getSubscriptionUsage();
-    if (data?.data) {
-      setTokenUsage(data.data.token);
-      setStorageUsage(data.data.storage);
-    }
-    setIsRequest(false);
-  };
+  const { isUsageLoading, tokenUsage, storageUsage, fileParsingUsage } = useSubscriptionUsage();
 
   const [portalLoading, setPortalLoading] = useState(false);
   const createPortalSession = async () => {
@@ -133,10 +109,6 @@ export const Subscription = () => {
   useEffect(() => {
     setPlanType(subscription?.planType || 'free');
   }, [subscription?.planType, setPlanType]);
-
-  useEffect(() => {
-    getSubscriptionStatus();
-  }, []);
 
   const hintTag = useMemo(() => {
     if (planType === 'free') return null;
@@ -166,7 +138,7 @@ export const Subscription = () => {
   }, [t, planType, subscription?.interval, subscription?.cancelAt]);
 
   return (
-    <Spin spinning={isRequest}>
+    <Spin spinning={isUsageLoading}>
       <div className="subscription">
         <div className={`subscription-plan ${planType === 'free' ? 'free' : ''}`}>
           <div className="subscription-plan-info">
@@ -220,10 +192,17 @@ export const Subscription = () => {
             endAt={tokenUsage?.endAt}
           />
           <UsageItem
-            title={t('settings.subscription.fileCount')}
-            description={t('settings.subscription.fileCountDescription')}
+            title={t('settings.subscription.libraryStorage')}
+            description={t('settings.subscription.libraryStorageDescription')}
             used={storageUsage?.fileCountUsed}
             quota={storageUsage?.fileCountQuota}
+          />
+          <UsageItem
+            title={t('settings.subscription.advancedFileParsing')}
+            description={t('settings.subscription.advancedFileParsingDescription')}
+            used={fileParsingUsage?.pagesParsed}
+            quota={fileParsingUsage?.pagesLimit}
+            endAt={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}
           />
         </div>
       </div>

@@ -40,8 +40,8 @@ export const SubscriptionHint = memo(() => {
       />
 
       <UsageProgress
-        label={t('settings.subscription.fileCount')}
-        tooltip={t('settings.subscription.fileCountDescription')}
+        label={t('settings.subscription.libraryStorage')}
+        tooltip={t('settings.subscription.libraryStorageDescription')}
         used={storageUsage?.fileCountUsed ?? 0}
         quota={storageUsage?.fileCountQuota ?? 0}
       />

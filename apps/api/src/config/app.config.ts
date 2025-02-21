@@ -125,6 +125,9 @@ export default () => ({
       object: Number.parseInt(process.env.QUOTA_STORAGE_OBJECT) || 1000000000,
       vector: Number.parseInt(process.env.QUOTA_STORAGE_VECTOR) || 1000000000,
     },
+    fileParse: {
+      page: Number.parseInt(process.env.QUOTA_FILE_PARSE_PAGE) || -1,
+    },
   },
   credentials: {
     openai: process.env.OPENAI_API_KEY,

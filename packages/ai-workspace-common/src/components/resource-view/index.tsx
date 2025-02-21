@@ -1,4 +1,4 @@
-import { Button, Skeleton, Empty, Alert } from 'antd';
+import { Button, Skeleton, Empty, Alert, Result } from 'antd';
 import { useEffect, useState, memo, useCallback } from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
@@ -6,12 +6,15 @@ import { useTranslation } from 'react-i18next';
 import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { Markdown } from '@refly-packages/ai-workspace-common/components/markdown';
 import { IconLoading, IconRefresh } from '@arco-design/web-react/icon';
-import { IconQuote } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconQuote,
+  IconSubscription,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import { ResourceIcon } from '@refly-packages/ai-workspace-common/components/common/resourceIcon';
 import { genUniqueId } from '@refly-packages/utils/id';
 import { SelectionContext } from '@refly-packages/ai-workspace-common/modules/selection-menu/selection-context';
 import { useGetResourceDetail } from '@refly-packages/ai-workspace-common/queries';
-import { Resource } from '@refly/openapi-schema';
+import { IndexError, Resource } from '@refly/openapi-schema';
 
 import './index.scss';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
@@ -19,6 +22,8 @@ import { useCanvasStoreShallow } from '@refly-packages/ai-workspace-common/store
 import { useCanvasId } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-id';
 import { time } from '@refly-packages/ai-workspace-common/utils/time';
 import { LOCALE } from '@refly/common-types';
+import { TFunction } from 'i18next';
+import { useSubscriptionStoreShallow } from '@refly-packages/ai-workspace-common/stores/subscription';
 
 interface ResourceViewProps {
   resourceId: string;
@@ -60,9 +65,7 @@ const ResourceMeta = memo(
 
     return (
       <div className="knowledge-base-resource-meta">
-        {['wait_parse', 'parse_failed', 'wait_index', 'index_failed'].includes(
-          resourceDetail?.indexStatus,
-        ) && (
+        {['wait_parse', 'wait_index', 'index_failed'].includes(resourceDetail?.indexStatus) && (
           <Alert
             className="py-[8px] px-[15px] !items-center"
             style={{ marginBottom: 16 }}
@@ -84,7 +87,7 @@ const ResourceMeta = memo(
                 : '')
             }
             action={
-              ['index_failed', 'parse_failed'].includes(resourceDetail?.indexStatus) ? (
+              ['index_failed'].includes(resourceDetail?.indexStatus) ? (
                 <Button
                   size="small"
                   loading={isReindexing}
@@ -109,10 +112,8 @@ const ResourceMeta = memo(
             />
           </div>
           <div className="site-intro-content flex flex-col justify-center">
-            {resourceDetail?.resourceType === 'file' && resourceDetail?.data?.title && (
-              <p className="site-intro-site-name text-gray-700 font-medium">
-                {resourceDetail?.data?.title}
-              </p>
+            {resourceDetail?.resourceType === 'file' && resourceDetail?.title && (
+              <p className="text-gray-700 font-medium">{resourceDetail?.title}</p>
             )}
             {resourceDetail?.data?.url && (
               <a
@@ -125,7 +126,7 @@ const ResourceMeta = memo(
               </a>
             )}
             {resourceDetail?.createdAt && (
-              <p className="site-intro-site-name text-gray-400">
+              <p className="text-gray-400">
                 {time(resourceDetail?.createdAt, language as LOCALE)
                   .utc()
                   .fromNow()}
@@ -144,6 +145,17 @@ const ResourceMeta = memo(
     );
   },
 );
+
+const genIndexErrorSubTitle = (indexError: IndexError, t: TFunction) => {
+  if (indexError?.type === 'pageLimitExceeded') {
+    return t('resource.pageLimitExceeded', {
+      numPages: indexError.metadata.numPages,
+      used: indexError.metadata.pageUsed,
+      limit: indexError.metadata.pageLimit,
+    });
+  }
+  return t('resource.unknownError');
+};
 
 const ResourceContent = memo(
   ({
@@ -205,6 +217,10 @@ export const ResourceView = memo(
     const { updateNodePreviewRawFileKey } = useCanvasStoreShallow((state) => ({
       updateNodePreviewRawFileKey: state.updateNodePreviewRawFileKey,
     }));
+    const { setSubscribeModalVisible } = useSubscriptionStoreShallow((state) => ({
+      setSubscribeModalVisible: state.setSubscribeModalVisible,
+    }));
+
     const canvasId = useCanvasId();
     const {
       data,
@@ -269,7 +285,7 @@ export const ResourceView = memo(
 
     return (
       <div className="knowledge-base-resource-detail-container pt-[16px]">
-        <div className="knowledge-base-resource-detail-body">
+        <div className="h-full">
           {isLoading ? (
             <div className="knowledge-base-resource-skeleton">
               <Skeleton active style={{ marginTop: 24 }} />
@@ -284,7 +300,36 @@ export const ResourceView = memo(
                 isReindexing={isReindexing}
                 onReindex={handleReindexResource}
               />
-              <ResourceContent resourceDetail={resourceDetail} resourceId={resourceId} />
+              {resourceDetail?.indexStatus === 'parse_failed' ? (
+                <div className="w-full h-full flex justify-center items-center">
+                  <Result
+                    status="500"
+                    title={t('resource.parse_failed')}
+                    subTitle={genIndexErrorSubTitle(resourceDetail?.indexError, t)}
+                    extra={
+                      <div className="flex justify-center items-center gap-2">
+                        <Button
+                          icon={<IconRefresh />}
+                          onClick={() => handleReindexResource(resourceId)}
+                        >
+                          {t('common.retry')}
+                        </Button>
+                        {resourceDetail?.indexError?.type === 'pageLimitExceeded' && (
+                          <Button
+                            type="primary"
+                            icon={<IconSubscription />}
+                            onClick={() => setSubscribeModalVisible(true)}
+                          >
+                            {t('common.upgradeSubscription')}
+                          </Button>
+                        )}
+                      </div>
+                    }
+                  />
+                </div>
+              ) : (
+                <ResourceContent resourceDetail={resourceDetail} resourceId={resourceId} />
+              )}
             </>
           )}
         </div>
