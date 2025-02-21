@@ -1789,6 +1789,8 @@ const translations = {
     templateDescription: '模板描述',
     templateDescriptionPlaceholder: '请输入模板描述',
     createSuccess: '模板创建成功, 请在模板库中查看',
+    preview: '预览',
+    use: '使用',
   },
 };
 

@@ -1,18 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
 import { IconTemplate } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Modal, Input, Divider } from 'antd';
-import getClient from '@refly-packages/ai-workspace-common/requests/proxiedRequest';
 import { CanvasTemplateCategory } from '@refly/openapi-schema';
+
 import { cn } from '@refly-packages/utils/cn';
 import './index.scss';
 import { TemplateList } from './template-list';
+import { useListCanvasTemplateCategories } from '@refly-packages/ai-workspace-common/queries';
 const TitleRender = () => {
   const { t } = useTranslation();
   return (
     <div>
-      <div className="flex items-center justify-between gap-2 pl-4 pr-10 py-4">
+      <div className="flex items-center justify-between flex-wrap gap-2 pl-4 pr-10 py-4">
         <div className="flex items-center gap-2 text-lg font-medium">
           <IconTemplate /> {t('template.templateLibrary')}
         </div>
@@ -76,19 +77,8 @@ export const CanvasTemplateModal = () => {
     setVisible: state.setVisible,
   }));
   const [currentCategory, setCurrentCategory] = useState('my-templates');
-  const [categories, setCategories] = useState<CanvasTemplateCategory[]>([myTemp]);
 
-  const getCanvasTemplateCategoryList = async () => {
-    const { data } = await getClient().listCanvasTemplateCategories();
-    const list = data?.data || [];
-    setCategories([myTemp, ...list]);
-  };
-
-  useEffect(() => {
-    if (visible) {
-      getCanvasTemplateCategoryList();
-    }
-  }, [visible]);
+  const { data } = useListCanvasTemplateCategories();
 
   return (
     <Modal
@@ -103,7 +93,7 @@ export const CanvasTemplateModal = () => {
     >
       <div className="canvas-template-modal flex h-[80vh] overflow-hidden">
         <TemplateCategoryList
-          categories={categories}
+          categories={[myTemp, ...(data?.data ?? [])]}
           currentCategory={currentCategory}
           setCurrentCategory={setCurrentCategory}
         />

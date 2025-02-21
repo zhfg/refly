@@ -3132,7 +3132,7 @@ export type GetCanvasDetailData = {
   };
 };
 
-export type GetCanvasDetailResponse2 = Canvas;
+export type GetCanvasDetailResponse2 = GetCanvasDetailResponse;
 
 export type GetCanvasDetailError = unknown;
 
@@ -3255,7 +3255,7 @@ export type UpdateCanvasTemplateResponse = UpsertCanvasTemplateResponse;
 
 export type UpdateCanvasTemplateError = unknown;
 
-export type ListCanvasTemplateCategoriesResponse = Array<ListCanvasTemplateCategoryResponse>;
+export type ListCanvasTemplateCategoriesResponse = ListCanvasTemplateCategoryResponse;
 
 export type ListCanvasTemplateCategoriesError = unknown;
 

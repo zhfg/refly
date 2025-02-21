@@ -80,7 +80,11 @@ export const CreateTemplateModal = ({
           >
             <Input placeholder={t('template.templateTitlePlaceholder')} />
           </Form.Item>
-          <Form.Item label={t('template.templateDescription')} name="description">
+          <Form.Item
+            label={t('template.templateDescription')}
+            name="description"
+            rules={[{ required: true, message: t('common.required') }]}
+          >
             <Input.TextArea
               autoSize={{ minRows: 3, maxRows: 6 }}
               placeholder={t('template.templateDescriptionPlaceholder')}

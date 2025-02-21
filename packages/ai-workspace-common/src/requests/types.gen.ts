@@ -159,9 +159,9 @@ export type CanvasTemplate = {
    */
   category?: CanvasTemplateCategory;
   /**
-   * Canvas template name
+   * Canvas template title
    */
-  name: string;
+  title: string;
   /**
    * Canvas template description
    */
@@ -1626,23 +1626,50 @@ export type ListCanvasTemplateResponse = BaseResponse & {
   data?: Array<CanvasTemplate>;
 };
 
-export type UpsertCanvasTemplateRequest = {
+export type CreateCanvasTemplateRequest = {
   /**
-   * Canvas template ID
+   * Canvas ID
    */
-  templateId: string;
+  canvasId: string;
   /**
-   * Canvas template name
+   * Canvas template title
    */
-  name: string;
+  title: string;
   /**
    * Canvas template description
    */
   description: string;
   /**
+   * Canvas template category ID
+   */
+  categoryId?: string;
+  /**
    * Canvas template language code
    */
   language: string;
+};
+
+export type UpdateCanvasTemplateRequest = {
+  /**
+   * Canvas template ID
+   */
+  templateId: string;
+  /**
+   * Canvas template title
+   */
+  title?: string;
+  /**
+   * Canvas template description
+   */
+  description?: string;
+  /**
+   * Canvas template category ID
+   */
+  categoryId?: string;
+  /**
+   * Canvas template language code
+   */
+  language?: string;
 };
 
 export type UpsertCanvasTemplateResponse = BaseResponse & {
@@ -3105,7 +3132,7 @@ export type GetCanvasDetailData = {
   };
 };
 
-export type GetCanvasDetailResponse2 = Canvas;
+export type GetCanvasDetailResponse2 = GetCanvasDetailResponse;
 
 export type GetCanvasDetailError = unknown;
 
@@ -3186,13 +3213,13 @@ export type AutoNameCanvasError = unknown;
 export type ListCanvasTemplatesData = {
   query?: {
     /**
-     * Category ID
+     * Canvas template category ID
      */
     categoryId?: string;
     /**
      * Language code
      */
-    languageCode?: string;
+    language?: string;
     /**
      * Page number
      */
@@ -3213,7 +3240,7 @@ export type ListCanvasTemplatesResponse = ListCanvasTemplateResponse;
 export type ListCanvasTemplatesError = unknown;
 
 export type CreateCanvasTemplateData = {
-  body: UpsertCanvasTemplateRequest;
+  body: CreateCanvasTemplateRequest;
 };
 
 export type CreateCanvasTemplateResponse = UpsertCanvasTemplateResponse;
@@ -3221,14 +3248,14 @@ export type CreateCanvasTemplateResponse = UpsertCanvasTemplateResponse;
 export type CreateCanvasTemplateError = unknown;
 
 export type UpdateCanvasTemplateData = {
-  body: UpsertCanvasTemplateRequest;
+  body: UpdateCanvasTemplateRequest;
 };
 
 export type UpdateCanvasTemplateResponse = UpsertCanvasTemplateResponse;
 
 export type UpdateCanvasTemplateError = unknown;
 
-export type ListCanvasTemplateCategoriesResponse = Array<ListCanvasTemplateCategoryResponse>;
+export type ListCanvasTemplateCategoriesResponse = ListCanvasTemplateCategoryResponse;
 
 export type ListCanvasTemplateCategoriesError = unknown;
 

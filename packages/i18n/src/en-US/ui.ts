@@ -1840,6 +1840,8 @@ const translations = {
     templateDescription: 'Template Description',
     templateDescriptionPlaceholder: 'Please enter template description',
     createSuccess: 'Template created successfully, please view in template library',
+    preview: 'Preview',
+    use: 'Use',
   },
 };
 
