@@ -154,7 +154,21 @@ export class RewriteDoc extends BaseSkill {
       this.engine.logger.log(`context: ${safeStringifyJSON(context)}`);
 
       if (sources.length > 0) {
-        this.emitEvent({ structuredData: { sources: truncateSource(sources) } }, config);
+        const truncatedSources = truncateSource(sources);
+        await this.emitLargeDataEvent(
+          {
+            data: truncatedSources,
+            buildEventData: (chunk, { isPartial, chunkIndex, totalChunks }) => ({
+              structuredData: {
+                sources: chunk,
+                isPartial,
+                chunkIndex,
+                totalChunks,
+              },
+            }),
+          },
+          config,
+        );
       }
     }
 
