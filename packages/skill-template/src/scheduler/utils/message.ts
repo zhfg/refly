@@ -46,12 +46,16 @@ export const buildFinalRequestMessages = ({
     ...chatHistory,
     ...messages,
     ...contextMessages,
-    new HumanMessage({
-      content: [
-        { type: 'text', text: userPrompt },
-        ...(images?.map((image) => ({ type: 'image_url', image_url: { url: image } })) || []),
-      ],
-    }),
+    new HumanMessage(
+      images?.length
+        ? {
+            content: [
+              { type: 'text', text: userPrompt },
+              ...(images.map((image) => ({ type: 'image_url', image_url: { url: image } })) || []),
+            ],
+          }
+        : userPrompt,
+    ),
   ];
 
   return requestMessages;

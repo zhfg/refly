@@ -68,7 +68,7 @@ export const ssePost = async ({
   try {
     const response = await makeSSERequest(payload, controller);
 
-    const baseResp = await extractBaseResp(response);
+    const baseResp = await extractBaseResp(response, { success: true });
     if (!baseResp.success) {
       onSkillError?.({ error: baseResp, event: 'error' });
       return;
@@ -107,7 +107,7 @@ export const ssePost = async ({
                   message: message.substring(6),
                   error: err,
                 });
-                return;
+                // return;
               }
 
               if (skillEvent?.event === 'start') {

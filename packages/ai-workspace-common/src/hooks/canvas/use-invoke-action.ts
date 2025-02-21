@@ -141,10 +141,35 @@ export const useInvokeAction = () => {
     }
 
     const updatedStep: ActionStep = findOrCreateStep(result.steps ?? [], step);
-    updatedStep.structuredData = {
-      ...updatedStep.structuredData,
-      ...structuredData,
-    };
+
+    // Handle chunked sources data
+    if (structuredData.sources && Array.isArray(structuredData.sources)) {
+      const existingData = updatedStep.structuredData || {};
+      const existingSources = (existingData.sources || []) as any[];
+
+      // If this is a chunk of sources, merge it with existing sources
+      if (structuredData.isPartial !== undefined) {
+        updatedStep.structuredData = {
+          ...existingData,
+          sources: [...existingSources, ...structuredData.sources],
+          isPartial: structuredData.isPartial,
+          chunkIndex: structuredData.chunkIndex,
+          totalChunks: structuredData.totalChunks,
+        };
+      } else {
+        // Handle non-chunked data as before
+        updatedStep.structuredData = {
+          ...existingData,
+          ...structuredData,
+        };
+      }
+    } else {
+      // Handle non-sources structured data
+      updatedStep.structuredData = {
+        ...updatedStep.structuredData,
+        ...structuredData,
+      };
+    }
 
     const updatedResult = {
       ...result,
