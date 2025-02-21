@@ -16,6 +16,11 @@ export const useEdgeStyles = () => {
         strokeWidth: 2,
         transition: 'stroke 0.2s, stroke-width 0.2s',
       },
+      selected: {
+        stroke: '#00968F',
+        strokeWidth: 2,
+        transition: 'stroke 0.2s, stroke-width 0.2s',
+      },
     }),
     [showEdges],
   );

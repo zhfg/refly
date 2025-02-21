@@ -348,7 +348,7 @@ export const SkillNode = memo(
           style={containerStyle}
         >
           {!isDragging && <ActionButtons type="skill" nodeId={id} isNodeHovered={isHovered} />}
-          <div className={`w-full h-full ${getNodeCommonStyles({ selected, isHovered })}`}>
+          <div className={`w-full h-full  ${getNodeCommonStyles({ selected, isHovered })}`}>
             <CustomHandle
               type="target"
               position={Position.Left}
@@ -364,7 +364,7 @@ export const SkillNode = memo(
               nodeType="skill"
             />
 
-            <div className="flex flex-col gap-3 h-full">
+            <div className="flex flex-col gap-3 h-full p-3 box-border">
               <NodeHeader
                 selectedSkillName={selectedSkill?.name}
                 setSelectedSkill={setSelectedSkill}

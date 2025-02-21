@@ -211,7 +211,7 @@ export const ImageNode = memo(
 
           <div
             className={`
-                relative
+                w-full
                 h-full
                 ${getNodeCommonStyles({ selected: !isPreview && selected, isHovered })}
               `}
@@ -235,7 +235,7 @@ export const ImageNode = memo(
               </>
             )}
 
-            <div className="flex flex-col h-full relative">
+            <div className="flex flex-col h-full relative p-3 box-border">
               <NodeHeader
                 title={data.title}
                 Icon={IconImage}
