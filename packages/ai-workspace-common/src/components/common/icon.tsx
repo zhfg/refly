@@ -54,6 +54,8 @@ import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { BiText } from 'react-icons/bi';
 import { BsDiscord, BsTwitterX, BsGithub, BsEnvelope } from 'react-icons/bs';
 import { PiNotePencil } from 'react-icons/pi';
+import { VscBook } from 'react-icons/vsc';
+
 import { TfiBlackboard } from 'react-icons/tfi';
 
 import { IoLibraryOutline } from 'react-icons/io5';
@@ -77,6 +79,7 @@ import { MdOutlineMouse } from 'react-icons/md';
 import { memo } from 'react';
 
 export const IconCanvas = TfiBlackboard;
+export const IconTemplate = VscBook;
 export const IconAskAI = LuSparkles;
 export const IconAskAIInput = TbInputSpark;
 export const IconImage = RiImageAiLine;

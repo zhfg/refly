@@ -10,6 +10,7 @@ import { ErrorBoundary } from '@sentry/react';
 import { VerificationModal } from '@/components/verification-modal';
 import { useAuthStoreShallow } from '@refly-packages/ai-workspace-common/stores/auth';
 import { ResetPasswordModal } from '@/components/reset-password-modal';
+import { CanvasTemplateModal } from '@refly-packages/ai-workspace-common/components/canvas-template';
 
 import './index.scss';
 
@@ -59,6 +60,7 @@ export const AppLayout = (props: AppLayoutProps) => {
         {authStore.loginModalOpen && <LoginModal />}
         {authStore.verificationModalOpen && <VerificationModal />}
         {authStore.resetPasswordModalOpen && <ResetPasswordModal />}
+        <CanvasTemplateModal />
         <SubscribeModal />
       </Layout>
     </ErrorBoundary>

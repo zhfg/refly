@@ -7,7 +7,11 @@ import {
   useSearchParams,
 } from '@refly-packages/ai-workspace-common/utils/router';
 
-import { IconCanvas, IconPlus } from '@refly-packages/ai-workspace-common/components/common/icon';
+import {
+  IconCanvas,
+  IconPlus,
+  IconTemplate,
+} from '@refly-packages/ai-workspace-common/components/common/icon';
 import cn from 'classnames';
 
 import Logo from '@/assets/logo.svg';
@@ -37,7 +41,7 @@ import { HoverCard, HoverContent } from '@refly-packages/ai-workspace-common/com
 import { useHoverCard } from '@refly-packages/ai-workspace-common/hooks/use-hover-card';
 import { FaGithub } from 'react-icons/fa6';
 import { useKnowledgeBaseStoreShallow } from '@refly-packages/ai-workspace-common/stores/knowledge-base';
-
+import { useCanvasTemplateModal } from '@refly-packages/ai-workspace-common/stores/canvas-template-modal';
 const Sider = Layout.Sider;
 const MenuItem = Menu.Item;
 const SubMenu = Menu.SubMenu;
@@ -120,11 +124,17 @@ const MenuItemContent = (props: {
     setShowCanvasListModal: state.setShowCanvasListModal,
   }));
 
+  const { setVisible } = useCanvasTemplateModal((state) => ({
+    setVisible: state.setVisible,
+  }));
+
   const handleNavClick = () => {
     if (type === 'Canvas') {
       setShowCanvasListModal(true);
     } else if (type === 'Library') {
       setShowLibraryModal(true);
+    } else if (type === 'Template') {
+      setVisible(true);
     }
   };
 
@@ -277,7 +287,7 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
 
   const selectedKey = useMemo(() => getSelectedKey(location.pathname), [location.pathname]);
 
-  const defaultOpenKeys = useMemo(() => ['Canvas', 'Library'], []);
+  const defaultOpenKeys = useMemo(() => ['Canvas', 'Library', 'Template'], []);
 
   interface SiderCenterProps {
     key: string;
@@ -289,6 +299,11 @@ export const SiderLayout = (props: { source: 'sider' | 'popover' }) => {
   }
 
   const siderSections: SiderCenterProps[] = [
+    {
+      key: 'Template',
+      name: 'template',
+      icon: <IconTemplate key="template" className="arco-icon" style={{ fontSize: 20 }} />,
+    },
     {
       key: 'Canvas',
       name: 'canvas',

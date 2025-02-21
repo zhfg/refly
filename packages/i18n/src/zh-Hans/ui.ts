@@ -1031,6 +1031,7 @@ const translations = {
       viewMore: '查看更多',
       viewTutorial: '查看文档',
       tour: '查看教程',
+      template: '案例',
     },
   },
   knowledgeLibrary: {

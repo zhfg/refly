@@ -1043,6 +1043,7 @@ const translations = {
       viewMore: 'View More',
       viewTutorial: 'View Docs',
       tour: 'View Tutorial',
+      template: 'Template',
     },
   },
   knowledgeLibrary: {
