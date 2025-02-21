@@ -440,7 +440,7 @@ export class ChatDeepSeek extends ChatOpenAI<ChatDeepSeekCallOptions> {
         ...fields?.configuration,
       },
       modelKwargs: {
-        include_reasoning: fields?.include_reasoning,
+        include_reasoning: fields?.include_reasoning || undefined,
       },
     });
   }
