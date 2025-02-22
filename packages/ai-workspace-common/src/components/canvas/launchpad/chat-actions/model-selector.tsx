@@ -370,7 +370,11 @@ export const ModelSelector = memo(
     }, []);
 
     useEffect(() => {
-      if (!model || isModelDisabled(tokenUsage, model)) {
+      if (
+        !model ||
+        isModelDisabled(tokenUsage, model) ||
+        !modelList?.find((m) => m.name === model.name)
+      ) {
         const availableModel = modelList?.find((model) => !isModelDisabled(tokenUsage, model));
         if (availableModel) {
           setModel(availableModel);

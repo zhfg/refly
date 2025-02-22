@@ -53,22 +53,8 @@ export interface ChatState {
 }
 
 const defaultConfigurableState = {
-  selectedModel: {
-    label: 'GPT-4o Mini',
-    name: 'openai/gpt-4o-mini',
-    provider: 'openai',
-    tier: 't2' as const,
-    contextLimit: 128000,
-    maxOutput: 16384,
-  },
-  skillSelectedModel: {
-    label: 'GPT-4o Mini',
-    name: 'openai/gpt-4o-mini',
-    provider: 'openai',
-    tier: 't2' as const,
-    contextLimit: 128000,
-    maxOutput: 16384,
-  },
+  selectedModel: null,
+  skillSelectedModel: null,
   enableWebSearch: true,
   enableDeepReasonWebSearch: false,
   enableKnowledgeBaseSearch: true,
