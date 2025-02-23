@@ -16,17 +16,23 @@ const errTitle = {
 const ignoredErrorCodes = [new ActionResultNotFoundError().code];
 
 export const showErrorNotification = (res: BaseResponse, locale: LOCALE) => {
-  const { errCode, traceId } = res;
+  const { errCode, traceId, stack } = res;
   if (ignoredErrorCodes.includes(errCode)) {
     return;
   }
 
-  const errMsg = getErrorMessage(errCode || new UnknownError().code, locale);
+  const errMsg = stack || getErrorMessage(errCode || new UnknownError().code, locale);
 
   const description = React.createElement(
     'div',
     null,
-    React.createElement('div', null, errMsg),
+    React.createElement(
+      'div',
+      {
+        style: { fontSize: 12 },
+      },
+      errMsg,
+    ),
     traceId &&
       React.createElement(
         'div',
