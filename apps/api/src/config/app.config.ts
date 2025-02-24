@@ -92,6 +92,9 @@ export default () => ({
       callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'test',
     },
   },
+  parser: {
+    pdf: process.env.PARSER_PDF || 'pdfjs',
+  },
   embeddings: {
     provider: process.env.EMBEDDINGS_PROVIDER || 'jina',
     modelName: process.env.EMBEDDINGS_MODEL_NAME || 'jina-embeddings-v3',

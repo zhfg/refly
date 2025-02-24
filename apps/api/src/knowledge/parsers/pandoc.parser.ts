@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { spawn } from 'node:child_process';
 import { BaseParser, ParserOptions, ParseResult } from './base';
-import { ConfigService } from '@nestjs/config';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
@@ -12,10 +11,7 @@ export class PandocParser extends BaseParser {
 
   name = 'pandoc';
 
-  constructor(
-    private readonly config: ConfigService,
-    options: ParserOptions = {},
-  ) {
+  constructor(options: ParserOptions = {}) {
     super({
       format: 'markdown',
       timeout: 30000,
