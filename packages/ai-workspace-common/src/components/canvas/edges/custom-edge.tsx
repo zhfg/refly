@@ -2,7 +2,6 @@ import { memo, useState, useCallback } from 'react';
 import { BaseEdge, EdgeProps, getBezierPath, useReactFlow, Position } from '@xyflow/react';
 import { IconDelete } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { Input } from 'antd';
-
 const { TextArea } = Input;
 interface CustomEdgeData {
   label?: string;
@@ -30,15 +29,35 @@ export const CustomEdge = memo(
       targetPosition: Position.Left,
       curvature: 0.35,
     });
-
     const [isEditing, setIsEditing] = useState(false);
+
+    const selectedStyle = {
+      stroke: isEditing ? 'rgba(0, 150, 143, 0.2)' : '#00968F',
+      strokeWidth: 2,
+      transition: 'stroke 0.2s, stroke-width 0.2s',
+    };
+
     const [label, setLabel] = useState((data as CustomEdgeData)?.label ?? '');
     const reactFlowInstance = useReactFlow();
     const { setEdges } = reactFlowInstance;
-    const handleLabelClick = useCallback((e: React.MouseEvent) => {
-      e.stopPropagation();
-      setIsEditing(true);
-    }, []);
+    const handleLabelClick = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (label) {
+          setIsEditing(true);
+        }
+      },
+      [label],
+    );
+
+    const handleEdgeDoubleClick = useCallback(
+      (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsEditing(true);
+      },
+      [label],
+    );
 
     const handleLabelChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setLabel(e.target.value);
@@ -85,36 +104,54 @@ export const CustomEdge = memo(
 
     return (
       <>
-        <BaseEdge path={edgePath} style={style} />
+        {label || isEditing ? (
+          <foreignObject
+            width={120}
+            height={80}
+            x={labelX - 60}
+            y={labelY - 40}
+            className="edge-label"
+            requiredExtensions="http://www.w3.org/1999/xhtml"
+          >
+            <div
+              className={
+                'w-full h-full overflow-y-scroll [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'
+              }
+            >
+              {isEditing ? (
+                <TextArea
+                  value={label}
+                  onChange={handleLabelChange}
+                  onBlur={handleLabelBlur}
+                  onKeyDown={handleKeyDown}
+                  className="nowheel text-[10px] w-full h-full bg-white resize-none overflow-y-scroll"
+                  autoFocus
+                  autoSize={{ minRows: 1, maxRows: 4 }}
+                />
+              ) : (
+                label && (
+                  <div
+                    className="nowheel px-2 py-1 text-[10px] text-center text-gray-700 bg-opacity-0 rounded cursor-pointer break-all"
+                    onClick={handleLabelClick}
+                  >
+                    {label}
+                  </div>
+                )
+              )}
+            </div>
+          </foreignObject>
+        ) : null}
 
-        <foreignObject
-          width={150}
-          height={80}
-          x={labelX - 75}
-          y={labelY - 40}
-          className="edge-label"
-          requiredExtensions="http://www.w3.org/1999/xhtml"
-        >
-          <div className="w-full h-full overflow-y-scroll" onClick={handleLabelClick}>
-            {isEditing ? (
-              <TextArea
-                value={label}
-                onChange={handleLabelChange}
-                onBlur={handleLabelBlur}
-                onKeyDown={handleKeyDown}
-                className="nowheel text-[10px] w-full h-full bg-white resize-none overflow-y-scroll"
-                autoFocus
-                autoSize={{ minRows: 1, maxRows: 4 }}
-              />
-            ) : (
-              label && (
-                <div className="nowheel px-2 py-1 text-[10px] text-center text-gray-700 bg-opacity-0 rounded cursor-pointer break-all">
-                  {label}
-                </div>
-              )
-            )}
-          </div>
-        </foreignObject>
+        <g onDoubleClick={handleEdgeDoubleClick}>
+          <path
+            className="react-flow__edge-path-selector"
+            d={edgePath}
+            fill="none"
+            strokeWidth={20}
+            stroke="transparent"
+          />
+          <BaseEdge path={edgePath} style={selected ? selectedStyle : style} />
+        </g>
 
         {selected && (
           <foreignObject
