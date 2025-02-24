@@ -12,7 +12,11 @@ WORKDIR /usr/share/nginx/html
 COPY apps/web/dist .
 
 # Create config.js template
-RUN echo 'window.ENV = { API_URL: "$API_URL", COLLAB_URL: "$COLLAB_URL" };' > /usr/share/nginx/html/config.template.js
+RUN echo 'window.ENV = { \
+  API_URL: "$API_URL", \
+  COLLAB_URL: "$COLLAB_URL", \
+  SUBSCRIPTION_ENABLED: "$SUBSCRIPTION_ENABLED" \
+};' > /usr/share/nginx/html/config.template.js
 
 # Create entrypoint script
 RUN printf '#!/bin/bash\n\
