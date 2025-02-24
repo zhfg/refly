@@ -22,6 +22,8 @@ import { LuInfinity } from 'react-icons/lu';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
 import { useSubscriptionUsage } from '@refly-packages/ai-workspace-common/hooks/use-subscription-usage';
 import { IContextItem } from '@refly-packages/ai-workspace-common/stores/context-panel';
+import { subscriptionEnabled } from '@refly-packages/ai-workspace-common/utils/env';
+
 interface ModelSelectorProps {
   model: ModelInfo | null;
   setModel: (model: ModelInfo | null) => void;
@@ -115,27 +117,28 @@ const GroupHeader = memo(
       return (
         <div className="flex justify-between items-center">
           <span className="text-sm">{t('copilot.modelSelector.premium')}</span>
-          {planTier === 'free' && tokenUsage?.t1CountQuota === 0 ? (
-            <Button
-              type="text"
-              size="small"
-              className="text-xs !text-green-600 gap-1 translate-x-2"
-              icon={<IconSubscription />}
-              onClick={(e) => {
-                e.stopPropagation();
-                setDropdownOpen(false);
-                setSubscribeModalVisible(true);
-              }}
-            >
-              {t('copilot.modelSelector.upgrade')}
-            </Button>
-          ) : (
-            <UsageProgress
-              used={tokenUsage?.t1CountUsed}
-              quota={tokenUsage?.t1CountQuota}
-              setDropdownOpen={setDropdownOpen}
-            />
-          )}
+          {subscriptionEnabled &&
+            (planTier === 'free' && tokenUsage?.t1CountQuota === 0 ? (
+              <Button
+                type="text"
+                size="small"
+                className="text-xs !text-green-600 gap-1 translate-x-2"
+                icon={<IconSubscription />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDropdownOpen(false);
+                  setSubscribeModalVisible(true);
+                }}
+              >
+                {t('copilot.modelSelector.upgrade')}
+              </Button>
+            ) : (
+              <UsageProgress
+                used={tokenUsage?.t1CountUsed}
+                quota={tokenUsage?.t1CountQuota}
+                setDropdownOpen={setDropdownOpen}
+              />
+            ))}
         </div>
       );
     }
@@ -144,11 +147,13 @@ const GroupHeader = memo(
       return (
         <div className="flex justify-between items-center">
           <div className="text-sm">{t('copilot.modelSelector.standard')}</div>
-          <UsageProgress
-            used={tokenUsage?.t2CountUsed}
-            quota={tokenUsage?.t2CountQuota}
-            setDropdownOpen={setDropdownOpen}
-          />
+          {subscriptionEnabled && (
+            <UsageProgress
+              used={tokenUsage?.t2CountUsed}
+              quota={tokenUsage?.t2CountQuota}
+              setDropdownOpen={setDropdownOpen}
+            />
+          )}
         </div>
       );
     }
@@ -156,7 +161,9 @@ const GroupHeader = memo(
     return (
       <div className="flex justify-between items-center">
         <span className="text-sm">{t('copilot.modelSelector.free')}</span>
-        <UsageProgress used={-1} quota={-1} setDropdownOpen={setDropdownOpen} />
+        {subscriptionEnabled && (
+          <UsageProgress used={-1} quota={-1} setDropdownOpen={setDropdownOpen} />
+        )}
       </div>
     );
   },
