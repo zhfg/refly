@@ -29,13 +29,13 @@ const TemplateCategoryList = ({
   categories,
   currentCategory,
   setCurrentCategory,
+  uiLocale,
 }: {
   categories: CanvasTemplateCategory[];
   currentCategory: string;
   setCurrentCategory: (category: string) => void;
+  uiLocale: 'en' | 'zh-CN';
 }) => {
-  const { i18n } = useTranslation();
-  const currentUiLocale = i18n.language as 'en' | 'zh-CN';
   return (
     <div className="h-full w-[40%] max-w-[200px] overflow-y-auto p-4 box-border flex-shrink-0 flex flex-col gap-2">
       {categories.map((category) => (
@@ -47,7 +47,7 @@ const TemplateCategoryList = ({
             )}
             onClick={() => setCurrentCategory(category.categoryId)}
           >
-            {category.labelDict[currentUiLocale]}
+            {category.labelDict[uiLocale]}
           </div>
           {category.categoryId === 'my-templates' && categories.length > 1 && (
             <Divider className="mt-2 mb-0" />
@@ -61,12 +61,12 @@ const TemplateCategoryList = ({
 const myTemp: CanvasTemplateCategory = {
   categoryId: 'my-templates',
   labelDict: {
-    'en-US': 'My Templates',
+    en: 'My Templates',
     'zh-CN': '我的模板',
   },
   name: 'My Templates',
   descriptionDict: {
-    'en-US': 'My Templates',
+    en: 'My Templates',
     'zh-CN': '我的模板',
   },
 };
@@ -77,6 +77,8 @@ export const CanvasTemplateModal = () => {
     setVisible: state.setVisible,
   }));
   const [currentCategory, setCurrentCategory] = useState('my-templates');
+  const { i18n } = useTranslation();
+  const currentUiLocale = i18n.language as 'en' | 'zh-CN';
 
   const { data } = useListCanvasTemplateCategories();
 
@@ -93,6 +95,7 @@ export const CanvasTemplateModal = () => {
     >
       <div className="canvas-template-modal flex h-[80vh] overflow-hidden">
         <TemplateCategoryList
+          uiLocale={currentUiLocale}
           categories={[myTemp, ...(data?.data ?? [])]}
           currentCategory={currentCategory}
           setCurrentCategory={setCurrentCategory}

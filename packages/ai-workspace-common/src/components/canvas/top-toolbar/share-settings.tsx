@@ -77,7 +77,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
         title: t('shareContent.accessOptions.anyoneDescription'),
       },
     ],
-    [],
+    [t],
   );
 
   const buttons = [
@@ -183,7 +183,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
         </div>
       </div>
     ),
-    [accessOptions, access, setAccess],
+    [accessOptions, access, setAccess, t],
   );
 
   return (
