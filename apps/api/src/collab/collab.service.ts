@@ -243,17 +243,6 @@ export class CollabService {
       data: docUpdates,
     });
     context.entity = updatedDoc;
-
-    // Vacuum unused files
-    // const staticPrefix = this.config.get('staticEndpoint');
-    // const fileKeys = content
-    //   .match(new RegExp(`${staticPrefix}([^)]+)`, 'g'))
-    //   ?.map((match) => match.slice(staticPrefix.length));
-    // await this.miscService.compareAndRemoveFiles(user, {
-    //   entityId: note.noteId,
-    //   entityType: 'note',
-    //   objectKeys: fileKeys,
-    // });
   }
 
   private async storeCanvasEntity({

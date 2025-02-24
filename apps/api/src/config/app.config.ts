@@ -10,9 +10,15 @@ export interface MinioConfig {
 export default () => ({
   port: Number.parseInt(process.env.PORT) || 5800,
   wsPort: Number.parseInt(process.env.WS_PORT) || 5801,
-  endpoint: process.env.ENDPOINT || 'http://localhost:5800',
   origin: process.env.ORIGIN || 'http://localhost:5700',
-  staticEndpoint: process.env.STATIC_ENDPOINT || 'http://localhost:5800/v1/misc',
+  static: {
+    public: {
+      endpoint: process.env.STATIC_PUBLIC_ENDPOINT || 'http://localhost:5800/v1/misc',
+    },
+    private: {
+      endpoint: process.env.STATIC_PRIVATE_ENDPOINT || 'http://localhost:5800/v1/misc',
+    },
+  },
   image: {
     maxArea: Number.parseInt(process.env.IMAGE_MAX_AREA) || 600 * 600,
     payloadMode: process.env.IMAGE_PAYLOAD_MODE || 'base64', // 'url' or 'base64'

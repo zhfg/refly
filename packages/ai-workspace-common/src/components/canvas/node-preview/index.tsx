@@ -107,10 +107,6 @@ export const NodePreview = memo(
     );
   },
   (prevProps, nextProps) => {
-    return (
-      prevProps.node?.id === nextProps.node?.id &&
-      prevProps.canvasId === nextProps.canvasId &&
-      prevProps.node?.data?.metadata?.rawFileKey === nextProps.node?.data?.metadata?.rawFileKey
-    );
+    return prevProps.node?.id === nextProps.node?.id && prevProps.canvasId === nextProps.canvasId;
   },
 );

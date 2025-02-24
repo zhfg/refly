@@ -9,7 +9,7 @@ import { pick } from '@refly-packages/utils';
 
 export interface FileObject {
   storageKey: string;
-  visibility: FileVisibility;
+  visibility?: FileVisibility;
 }
 
 export function modelInfoPO2DTO(modelInfo: ModelInfoPO): ModelInfo {
