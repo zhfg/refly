@@ -83,7 +83,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
   const buttons = [
     {
       label: 'copyLink',
-      icon: <IconLink className="w-4 h-4 flex items-center justify-center" />,
+      icon: <IconLink className="w-3.5 h-3.5 flex items-center justify-center" />,
       onClick: () => {
         navigator.clipboard.writeText(shareLink);
         message.success(t('shareContent.copyLinkSuccess'));
@@ -155,7 +155,7 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
           />
         </div>
         <Divider className="my-0" />
-        <div className="p-3 pb-5 canvas-share-setting">
+        <div className="p-5 pt-3 pb-5 canvas-share-setting">
           <div className="text-base font-medium mb-2">{t('shareContent.linkShare')}</div>
           <div className="flex items-center justify-between gap-4">
             <Select
@@ -203,7 +203,9 @@ const ShareSettings = React.memo(({ canvasId }: ShareSettingsProps) => {
         overlayInnerStyle={{ padding: 0 }}
         content={content}
       >
-        <Button type="primary">{t('common.share')}</Button>
+        <Button type="primary" icon={<IconShare className="flex items-center justify-center" />}>
+          {t('common.share')}
+        </Button>
       </Popover>
     </div>
   );

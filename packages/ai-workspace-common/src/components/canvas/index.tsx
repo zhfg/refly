@@ -54,7 +54,6 @@ import { useUserStore } from '@refly-packages/ai-workspace-common/stores/user';
 import { useUpdateSettings } from '@refly-packages/ai-workspace-common/queries';
 import { useUploadImage } from '@refly-packages/ai-workspace-common/hooks/use-upload-image';
 import { useCanvasSync } from '@refly-packages/ai-workspace-common/hooks/canvas/use-canvas-sync';
-import { ShareCanvas } from './share-canvas';
 import { EmptyGuide } from './empty-guide';
 
 const selectionStyles = `
@@ -118,7 +117,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const reactFlowInstance = useReactFlow();
 
   const { pendingNode, clearPendingNode } = useCanvasNodesStore();
-  const { provider } = useCanvasContext();
+  const { provider, readonly } = useCanvasContext();
 
   const { config, operatingNodeId, setOperatingNodeId, setInitialFitViewCompleted } =
     useCanvasStoreShallow((state) => ({
@@ -439,10 +438,10 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   const memoizedLaunchPad = useMemo(
     () => (
       <div className="absolute bottom-[8px] left-1/2 -translate-x-1/2 w-[444px] z-50">
-        <LaunchPad visible={showLaunchpad} />
+        <LaunchPad visible={!readonly && showLaunchpad} />
       </div>
     ),
-    [showLaunchpad],
+    [readonly, showLaunchpad],
   );
 
   // Memoize MiniMap styles
@@ -471,6 +470,21 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
 
   // Memoize the node types configuration
   const memoizedNodeTypes = useMemo(() => nodeTypes, []);
+
+  // Create readonly versions of the node and edge operation handlers
+  const readonlyNodesChange = useCallback(() => {
+    // No-op function for readonly mode
+    return nodes;
+  }, [nodes]);
+
+  const readonlyEdgesChange = useCallback(() => {
+    // No-op function for readonly mode
+    return edges;
+  }, [edges]);
+
+  const readonlyConnect = useCallback(() => {
+    // No-op function for readonly mode
+  }, []);
 
   // Optimize node dragging performance
   const { setIsNodeDragging, setDraggingNodeId } = useEditorPerformance();
@@ -539,6 +553,9 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
   // Update handleKeyDown to handle edge deletion
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      // Skip all keyboard handling in readonly mode
+      if (readonly) return;
+
       const target = e.target as HTMLElement;
 
       // Ignore input, textarea and contentEditable elements
@@ -572,7 +589,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
         setSelectedEdgeId(null);
       }
     },
-    [selectedEdgeId, reactFlowInstance, undoManager],
+    [selectedEdgeId, reactFlowInstance, undoManager, readonly],
   );
 
   // Add edge click handler for delete button
@@ -619,7 +636,7 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
     <Spin
       className="w-full h-full"
       style={{ maxHeight: '100%' }}
-      spinning={!hasCanvasSynced && provider.status !== 'connected' && !connectionTimeout}
+      spinning={!hasCanvasSynced && provider?.status !== 'connected' && !connectionTimeout}
       tip={connectionTimeout ? t('common.connectionFailed') : t('common.loading')}
     >
       <div className="w-full h-screen relative flex flex-col overflow-hidden">
@@ -635,31 +652,33 @@ const Flow = memo(({ canvasId }: { canvasId: string }) => {
             zoomOnScroll={interactionMode === 'mouse'}
             zoomOnPinch={interactionMode === 'touchpad'}
             zoomOnDoubleClick={false}
-            selectNodesOnDrag={!operatingNodeId && interactionMode === 'mouse'}
-            selectionOnDrag={!operatingNodeId && interactionMode === 'touchpad'}
+            selectNodesOnDrag={!operatingNodeId && interactionMode === 'mouse' && !readonly}
+            selectionOnDrag={!operatingNodeId && interactionMode === 'touchpad' && !readonly}
             nodeTypes={memoizedNodeTypes}
             nodes={memoizedNodes}
             edges={memoizedEdges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
+            onNodesChange={readonly ? readonlyNodesChange : onNodesChange}
+            onEdgesChange={readonly ? readonlyEdgesChange : onEdgesChange}
+            onConnect={readonly ? readonlyConnect : onConnect}
             onNodeClick={handleNodeClick}
             onPaneClick={handlePanelClick}
-            onPaneContextMenu={onPaneContextMenu}
-            onNodeContextMenu={onNodeContextMenu}
-            onNodeDragStart={onNodeDragStart}
-            onNodeDragStop={onNodeDragStop}
+            onPaneContextMenu={readonly ? undefined : onPaneContextMenu}
+            onNodeContextMenu={readonly ? undefined : onNodeContextMenu}
+            onNodeDragStart={readonly ? undefined : onNodeDragStart}
+            onNodeDragStop={readonly ? undefined : onNodeDragStop}
             nodeDragThreshold={10}
-            nodesDraggable={!operatingNodeId}
-            onSelectionContextMenu={onSelectionContextMenu}
-            deleteKeyCode={['Backspace', 'Delete']}
-            multiSelectionKeyCode={['Shift', 'Meta']}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
+            nodesDraggable={!operatingNodeId && !readonly}
+            nodesConnectable={!readonly}
+            elementsSelectable={!readonly}
+            onSelectionContextMenu={readonly ? undefined : onSelectionContextMenu}
+            deleteKeyCode={readonly ? null : ['Backspace', 'Delete']}
+            multiSelectionKeyCode={readonly ? null : ['Shift', 'Meta']}
+            onDragOver={readonly ? undefined : handleDragOver}
+            onDrop={readonly ? undefined : handleDrop}
             connectOnClick={false}
-            edgesFocusable={true}
-            nodesFocusable={true}
-            onEdgeClick={handleEdgeClick}
+            edgesFocusable={!readonly}
+            nodesFocusable={!readonly}
+            onEdgeClick={readonly ? undefined : handleEdgeClick}
           >
             {nodes?.length === 0 && hasCanvasSynced && <EmptyGuide canvasId={canvasId} />}
 
@@ -751,9 +770,9 @@ export const Canvas = (props: { canvasId: string; readonly?: boolean }) => {
 
   return (
     <EditorPerformanceProvider>
-      <CanvasProvider canvasId={canvasId}>
+      <CanvasProvider readonly={readonly} canvasId={canvasId}>
         <ReactFlowProvider>
-          {readonly ? <ShareCanvas canvasId={canvasId} /> : <Flow canvasId={canvasId} />}
+          <Flow canvasId={canvasId} />
         </ReactFlowProvider>
       </CanvasProvider>
     </EditorPerformanceProvider>

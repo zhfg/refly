@@ -1,6 +1,6 @@
 import { Layout } from '@arco-design/web-react';
 import { useMatch } from 'react-router-dom';
-import { SiderLayout } from './sider';
+import { SiderLayout } from '@refly-packages/ai-workspace-common/components/sider/layout';
 import { useBindCommands } from '@refly-packages/ai-workspace-common/hooks/use-bind-commands';
 import { useUserStoreShallow } from '@refly-packages/ai-workspace-common/stores/user';
 

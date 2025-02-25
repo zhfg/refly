@@ -36,6 +36,7 @@ import {
   LuDownload,
   LuX,
   LuLink,
+  LuShare2,
 } from 'react-icons/lu';
 import {
   RiErrorWarningLine,
@@ -47,7 +48,6 @@ import {
   RiImageAiLine,
   RiExpandDiagonalLine,
   RiGuideLine,
-  RiShareForwardBoxFill,
 } from 'react-icons/ri';
 import { TiDocumentDelete } from 'react-icons/ti';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
@@ -142,7 +142,7 @@ export const IconLanguage = IoLanguage;
 export const IconDeleteFile = TiDocumentDelete;
 export const IconDownloadFile = LuDownload;
 
-export const IconShare = RiShareForwardBoxFill;
+export const IconShare = LuShare2;
 export const IconClose = LuX;
 export const IconLink = LuLink;
 

@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { IconPlus } from '@refly-packages/ai-workspace-common/components/common/icon';
 import { useCreateCanvas } from '@refly-packages/ai-workspace-common/hooks/canvas/use-create-canvas';
 import { useSiderStoreShallow } from '@refly-packages/ai-workspace-common/stores/sider';
-import SiderPopover from '@/pages/sider-popover';
+import { SiderPopover } from '@refly-packages/ai-workspace-common/components/sider/popover';
 import { AiOutlineMenuUnfold } from 'react-icons/ai';
 
 const CanvasPage = () => {

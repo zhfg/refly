@@ -39,9 +39,9 @@ const StatusBar = memo(
     }, []);
 
     useEffect(() => {
-      provider.on('unsyncedChanges', handleUnsyncedChanges);
+      provider?.on('unsyncedChanges', handleUnsyncedChanges);
       return () => {
-        provider.off('unsyncedChanges', handleUnsyncedChanges);
+        provider?.off('unsyncedChanges', handleUnsyncedChanges);
       };
     }, [provider, handleUnsyncedChanges]);
 
